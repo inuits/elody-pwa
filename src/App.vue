@@ -6,18 +6,19 @@
       <router-link
         :to="{ name: 'Home' }"
         class="logo text-base text-neutral-700 font-semibold"
-        >DAMS</router-link
       >
+        DAMS
+      </router-link>
     </nav>
-    <div class="pl-20">
+    <div class="pl-20 h-screen flex flex-col">
       <div
-        class="fixed w-full px-6 py-8 border-b border-neutral-30 bg-neutral-0 "
+        class="w-full px-6 py-8 border-b border-neutral-30 bg-neutral-0 z-10"
       >
         <h1 class="text-lg font-semibold text-neutral-800">
           {{ route.meta.title }}
         </h1>
       </div>
-      <div class="p-6 pt-28">
+      <div class="flex-grow">
         <router-view />
       </div>
     </div>

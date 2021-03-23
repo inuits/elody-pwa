@@ -12,16 +12,18 @@
           'bg-neutral-20 text-neutral-20': loading,
           'text-neutral-60': !loading,
         }"
-        >Asset name</span
       >
+        Asset name
+      </span>
       <span
         class="mt-0.5 rounded font-base text-sm"
         :class="{
           'bg-neutral-20 text-neutral-20': loading,
           'text-neutral-700': !loading,
         }"
-        >{{ title }}</span
       >
+        {{ title }}
+      </span>
     </div>
     <div class="flex flex-row">
       <BaseButton
@@ -49,7 +51,10 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    title: String,
+    title: {
+      type: String,
+      default: "",
+    },
   },
   setup: () => {
     return {
