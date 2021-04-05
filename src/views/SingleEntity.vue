@@ -1,75 +1,65 @@
 <template>
   <div class="h-full w-full flex relative">
-    <IIIFViewer
+    <i-i-i-f-viewer
       v-if="!loading && result.Entity.mediafiles && result.Entity.mediafiles[0]"
       :image-url="result.Entity.mediafiles[0].location"
     />
-    <div
+    <meta-view
       v-if="!loading && result.Entity.metadata"
-      class="w-2/6 p-6 bg-neutral-0"
-    >
-      <div
-        v-for="meta in result.Entity.metadata"
-        :key="meta.value"
-        class="flex flex-col mb-2 mt-2"
-      >
-        <span
-          class="rounded font-base text-xs"
-          :class="{
-            'bg-neutral-20 text-neutral-20': loading,
-            'text-neutral-60': !loading,
-          }"
-          >{{ meta.key }}</span
-        >
-        <span
-          class="mt-0.5 rounded font-base text-sm"
-          :class="{
-            'bg-neutral-20 text-neutral-20': loading,
-            'text-neutral-700': !loading,
-          }"
-          >{{ meta.value }}</span
-        >
-      </div>
-    </div>
+      :meta="result.Entity.metadata"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, watch } from "vue"
-import { useQuery } from "@vue/apollo-composable"
-import IIIFViewer from "../components/IIIFViewer.vue"
-import { useRoute } from "vue-router"
-import {
-  getEntity,
-  getEntityQueryType,
-  getEntityQueryVariableType,
-} from "@/queries/entities"
-import { getRouteParams } from "@/helpers"
+  import { defineComponent, watch, inject, onMounted } from 'vue'
+  import { useQuery } from '@vue/apollo-composable'
+  import IIIFViewer from '../components/IIIFViewer.vue'
+  import MetaView from '../components/MetaView.vue'
+  import { useRoute } from 'vue-router'
+  import {
+    getEntity,
+    getEntityQueryType,
+    getEntityQueryVariableType
+  } from '@/queries/entities'
+  import { getRouteParams } from '@/helpers'
+  import { updatePageTitleType } from '@/App.vue'
 
-export default defineComponent({
-  name: "SingleEntity",
-  components: {
-    IIIFViewer,
-  },
-  setup: () => {
-    const route = useRoute()
+  export default defineComponent({
+    name: 'SingleEntity',
+    components: {
+      IIIFViewer,
+      MetaView
+    },
+    setup: () => {
+      const route = useRoute()
+      const updatePageTitle: updatePageTitleType | undefined = inject(
+        'updatePageTitle'
+      )
 
-    const { result, loading } = useQuery<
-      getEntityQueryType,
-      getEntityQueryVariableType
-    >(getEntity, {
-      id: getRouteParams(route, "id"),
-    })
+      const { result, loading } = useQuery<
+        getEntityQueryType,
+        getEntityQueryVariableType
+      >(getEntity, {
+        id: getRouteParams(route, 'id')
+      })
 
-    watch(result, (value) => {
-      const title = value.Entity.title[0].value
-      route.meta.title = title
-    })
+      watch(result, value => {
+        const title = value.Entity.title[0].value
+        updatePageTitle && updatePageTitle(title)
+      })
 
-    return {
-      result,
-      loading,
+      onMounted(() => {
+        if (result.value) {
+          const title = result.value.Entity.title[0].value
+          updatePageTitle && updatePageTitle(title)
+        }
+      })
+
+      return {
+        result,
+        loading
+      }
     }
-  },
-})
+  })
 </script>

@@ -12,6 +12,7 @@
   "dependencies": {
     "@apollo/client": "^3.3.11",
     "@types/openseadragon": "^2.4.5",
+    "@types/tailwindcss": "^2.0.2",
     "@vue/apollo-composable": "^4.0.0-alpha.12",
     "core-js": "^3.6.5",
     "graphql": "^15.5.0",

@@ -1,4 +1,4 @@
-import gql from "graphql-tag"
+import gql from 'graphql-tag'
 
 export type metadata = {
   key: string
@@ -12,9 +12,7 @@ export type mediafiles = {
 export type damsEntityList = {
   id: string
   type: string
-  title: {
-    value: string
-  }[]
+  metadata: metadata[]
 }
 
 export type damsEntity = {
@@ -49,7 +47,8 @@ export const getEnteties = gql`
       results {
         id
         type
-        title: metadata(key: [title]) {
+        metadata(key: [title, type]) {
+          key
           value
         }
       }
