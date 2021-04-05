@@ -28,53 +28,58 @@
 </template>
 
 <script lang="ts">
-// @ts-nocheck
-import { defineComponent, onMounted, ref } from "vue"
-import { IncludedIcons } from "../main"
-import tailwindConfig from "../../tailwind.config"
+  import { defineComponent, onMounted, ref, PropType } from 'vue'
+  import { IncludedIcons } from '../enums'
+  // @ts-ignore
+  import tailwindConfig from '../../tailwind.config.js'
 
-export default defineComponent({
-  name: "ViewerToolbar",
-  props: {
-    zoomIn: {
-      type: Object as Proptype<HTMLDivElement | null>,
-      default: null,
+  export default defineComponent({
+    name: 'ViewerToolbar',
+    props: {
+      zoomIn: {
+        type: Object as PropType<HTMLDivElement | string | null>,
+        default: null
+      },
+      zoomOut: {
+        type: Object as PropType<HTMLDivElement | string | null>,
+        default: null
+      },
+      fullPage: {
+        type: Object as PropType<HTMLDivElement | string | null>,
+        default: null
+      },
+      home: {
+        type: Object as PropType<HTMLDivElement | string | null>,
+        default: null
+      }
     },
-    zoomOut: {
-      type: Object as Proptype<HTMLDivElement | null>,
-      default: null,
-    },
-    fullPage: {
-      type: Object as Proptype<HTMLDivElement | null>,
-      default: null,
-    },
-    home: {
-      type: Object as Proptype<HTMLDivElement | null>,
-      default: null,
-    },
-  },
-  emits: ["update:zoomIn", "update:zoomOut", "update:fullPage", "update:home"],
-  setup: (props, { emit }) => {
-    const zoomInRef = ref<HTMLDivElement>(null)
-    const zoomOutRef = ref<HTMLDivElement>(null)
-    const fullPageRef = ref<HTMLDivElement>(null)
-    const homeRef = ref<HTMLDivElement>(null)
+    emits: [
+      'update:zoomIn',
+      'update:zoomOut',
+      'update:fullPage',
+      'update:home'
+    ],
+    setup: (props, { emit }) => {
+      const zoomInRef = ref<HTMLDivElement | undefined>(undefined)
+      const zoomOutRef = ref<HTMLDivElement | undefined>(undefined)
+      const fullPageRef = ref<HTMLDivElement | undefined>(undefined)
+      const homeRef = ref<HTMLDivElement | undefined>(undefined)
 
-    onMounted(() => {
-      emit("update:zoomIn", zoomInRef.value)
-      emit("update:zoomOut", zoomOutRef.value)
-      emit("update:fullPage", fullPageRef.value)
-      emit("update:home", homeRef.value)
-    })
+      onMounted(() => {
+        emit('update:zoomIn', zoomInRef.value)
+        emit('update:zoomOut', zoomOutRef.value)
+        emit('update:fullPage', fullPageRef.value)
+        emit('update:home', homeRef.value)
+      })
 
-    return {
-      IncludedIcons,
-      tailwindConfig,
-      zoomInRef,
-      zoomOutRef,
-      fullPageRef,
-      homeRef,
+      return {
+        IncludedIcons,
+        tailwindConfig,
+        zoomInRef,
+        zoomOutRef,
+        fullPageRef,
+        homeRef
+      }
     }
-  },
-})
+  })
 </script>

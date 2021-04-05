@@ -1,11 +1,12 @@
 <template>
   <button
-    class="bg-neutral-20 flex justify-center  p-2.5 rounded  transition-colors duration-300"
-    :class="{
-      'pl-1.5': label,
-      'text-neutral-20': loading,
-      'text-neutral-700 hover:bg-neutral-70': !loading,
-    }"
+    :class="[
+      `bg-neutral-${bgColor} flex justify-center  p-2.5 rounded  transition-colors duration-300`,
+      loading
+        ? `text-neutral-${bgColor}`
+        : `text-neutral-${txtColor} hover:bg-neutral-${bgHoverColor}`,
+      label ? `pl-1.5` : ``
+    ]"
   >
     <unicon
       v-if="icon"
@@ -22,32 +23,46 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue"
-import { IncludedIcons } from "../../main"
-//@ts-ignore
-import tailwindConfig from "../../../tailwind.config.js"
+  import { defineComponent, PropType } from 'vue'
+  import { IncludedIcons } from '../../enums'
+  //@ts-ignore
+  import tailwindConfig from '../../../tailwind.config.js'
 
-export default defineComponent({
-  name: "BaseButton",
-  props: {
-    label: {
-      type: String,
-      required: false,
+  export default defineComponent({
+    name: 'BaseButton',
+    props: {
+      label: {
+        type: [String],
+        required: false,
+        default: undefined
+      },
+      loading: {
+        type: Boolean,
+        default: false
+      },
+      icon: {
+        type: String as PropType<IncludedIcons>,
+        required: false,
+        default: undefined
+      },
+      bgColor: {
+        type: String,
+        default: '20'
+      },
+      bgHoverColor: {
+        type: String,
+        default: '70'
+      },
+      txtColor: {
+        type: String,
+        default: '700'
+      }
     },
-    loading: {
-      type: Boolean,
-      default: false,
-    },
-    icon: {
-      type: String as PropType<IncludedIcons>,
-      required: false,
-    },
-  },
 
-  setup: () => {
-    return {
-      tailwindConfig,
+    setup: () => {
+      return {
+        tailwindConfig
+      }
     }
-  },
-})
+  })
 </script>
