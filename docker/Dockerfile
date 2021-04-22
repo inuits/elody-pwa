@@ -33,5 +33,5 @@ FROM nginx:1.19.5-alpine as production-stage
 
 RUN rm -rf /usr/share/nginx/html/*
 
-COPY --from=build-stage /dist /usr/share/nginx/html
+COPY --from=build-stage /app/dist /usr/share/nginx/html
 COPY ./docker/nginx.conf /etc/nginx/conf.d/default.conf
