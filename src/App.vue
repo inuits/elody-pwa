@@ -14,6 +14,7 @@
         bg-color="30"
         @click="router.push({ name: 'AssestLibrary' })"
       />
+      <BaseButton :icon="IncludedIcons.Eye" bg-color="30" @click="testLogin" />
     </nav>
     <div class="pl-20 h-screen flex flex-col">
       <div
@@ -64,8 +65,15 @@
       provide('updatePageTitle', updatePageTitle)
       provide('setRoutePageTitle', setRoutePageTitle)
 
+      const testLogin = () => {
+        fetch('http://localhost:8090/api/authenticate', {
+          method: 'GET'
+        })
+      }
+
       return {
         router,
+        testLogin,
         pageTitle,
         IncludedIcons
       }
