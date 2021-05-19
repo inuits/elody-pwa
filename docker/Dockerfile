@@ -10,8 +10,9 @@ WORKDIR /app
 COPY .npmrc package.json package-lock.json ./
 
 RUN npm install
+COPY . .
 CMD npm run serve
-EXPOSE 8080
+EXPOSE 80
 
 ### Build stage
 FROM node:lts-alpine as build-stage
