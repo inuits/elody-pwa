@@ -10,7 +10,6 @@ WORKDIR /app
 COPY .npmrc package.json package-lock.json ./
 
 RUN npm install
-COPY . .
 CMD npm run serve
 EXPOSE 80
 
