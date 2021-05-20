@@ -11,18 +11,26 @@
       </router-link>
       <BaseButton
         :icon="IncludedIcons.BookOpen"
-        bg-color="30"
+        bg-color="neutral-30"
         @click="router.push({ name: 'AssestLibrary' })"
       />
-      <BaseButton :icon="IncludedIcons.Eye" bg-color="30" @click="testLogin" />
+      <BaseButton :icon="IncludedIcons.Eye" bg-color="neutral-30" @click="testLogin" />
     </nav>
     <div class="pl-20 h-screen flex flex-col">
       <div
         class="w-full px-6 py-8 border-b border-neutral-30 bg-neutral-0 z-10"
       >
-        <h1 class="text-lg font-semibold text-neutral-800">
+        <h1 class="text-lg font-semibold text-neutral-800 float-left">
           {{ pageTitle }}
         </h1>
+        <div class="float-right">
+          <BaseButton
+            label="Log in"
+            bg-color="main-light"
+            txt-color="main-dark"
+            @click="router.push({ name: 'openIdConnectUnauthorizedRedirect' })"
+          />
+        </div>
       </div>
       <div class="flex-grow">
         <router-view />

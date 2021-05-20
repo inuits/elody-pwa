@@ -28,6 +28,10 @@ module.exports = {
         700: '#253858',
         800: '#172B4D',
         900: '#091E42'
+      },
+      main: {
+        light: '#DEEBFF',
+        dark: '#0052CC'
       }
     },
     extend: {}

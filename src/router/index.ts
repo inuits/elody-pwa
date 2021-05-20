@@ -6,7 +6,8 @@ const routes: Array<RouteRecordRaw> = [
     path: '/',
     name: 'AssestLibrary',
     meta: {
-      title: 'Asset Library'
+      title: 'Asset Library',
+      requiresOpenIdAuth: true,
     },
     component: AssetLibrary
   },
@@ -14,7 +15,8 @@ const routes: Array<RouteRecordRaw> = [
     path: '/entity/:id',
     name: 'SingleEntity',
     meta: {
-      title: 'Single Asset'
+      title: 'Single Asset',
+      requiresOpenIdAuth: true,
     },
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route

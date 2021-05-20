@@ -1,10 +1,10 @@
 <template>
   <button
     :class="[
-      `bg-neutral-${bgColor} flex justify-center  p-2.5 rounded  transition-colors duration-300`,
+      `bg-${bgColor} flex justify-center  p-2.5 rounded  transition-colors duration-300`,
       loading
-        ? `text-neutral-${bgColor}`
-        : `text-neutral-${txtColor} hover:bg-neutral-${bgHoverColor}`,
+        ? `text-${bgColor}`
+        : `text-${txtColor} hover:bg-${bgHoverColor}`,
       label ? `pl-1.5` : ``
     ]"
   >
@@ -47,15 +47,15 @@
       },
       bgColor: {
         type: String,
-        default: '20'
+        default: 'neutral-20'
       },
       bgHoverColor: {
         type: String,
-        default: '70'
+        default: 'neutral-70'
       },
       txtColor: {
         type: String,
-        default: '700'
+        default: 'neutral-700'
       }
     },
 
