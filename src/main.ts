@@ -5,6 +5,8 @@ import router from './router'
 import store from './store'
 import './index.css'
 import Unicon from 'vue-unicons'
+import Config from './models/ConfigModel'
+import { OpenIdConnectPlugin } from './OIDC/OpenIdConnectPlugin'
 
 import {
   uniEye,
@@ -28,8 +30,41 @@ Unicon.add([
   uniBookOpen
 ])
 
-createApp(App)
-  .use(store)
-  .use(router)
-  .use(Unicon)
-  .mount('#app')
+
+
+fetch("../config.json").then( resp => resp.json() ).then((configJson: any) => {
+    let config = Config.deserialize(configJson)
+    let OIDCconfig = {
+      baseUrl: config.OIDCbaseUrl,
+      serverBaseUrl: config.OIDCauthorizedRedirectRoute,
+      tokenEndpoint: config.OIDCserverTokenEndpoint
+        ? config.OIDCserverTokenEndpoint
+        : 'token',
+      authEndpoint: config.OIDCauthEndpoint
+        ? config.OIDCauthEndpoint
+        : 'auth',
+      logoutEndpoint: config.OIDClogoutEndpoint
+        ? config.OIDClogoutEndpoint
+        : 'logout',
+      clientId: config.OIDCclientId,
+      authorizedRedirectRoute: '/',
+      serverTokenEndpoint: 'token/',
+      serverRefreshEndpoint: 'refresh/',
+      InternalRedirectUrl: ''
+    }
+    
+    createApp(App)
+    .use(Unicon)
+    .use(OpenIdConnectPlugin, {
+      store: store,
+      router: router,
+      configuration: OIDCconfig
+    })
+    .use(store)
+    .use(router)
+    .mount('#app')
+})
+
+
+
+
