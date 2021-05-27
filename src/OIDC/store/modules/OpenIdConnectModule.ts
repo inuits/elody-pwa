@@ -10,15 +10,15 @@ const configuration: OpenIdConnectConfiguration = {
   logoutEndpoint: '',
   clientId: '',
   authorizedRedirectRoute: '',
-  InternalRedirectUrl: 'openid/redirect',
+  InternalRedirectUrl: '',
   encodeRedirectUrl: false
 }
 
 export default {
   state: () => ({
     openid: {
+      accessToken: undefined,
       configuration: configuration,
-      refreshTokenPromise: Promise,
       repository: new OpenIdConnectRepository(configuration)
     }
   }),
@@ -63,6 +63,7 @@ export default {
       if (finalRedirectRoute) {
         RedirectRouteStorageHelpers.setRedirectRoute(finalRedirectRoute)
       }
+      console.log('login ' + openIdConnectUrl)
       window.location.href = openIdConnectUrl
     },
     logout ({ commit, state }: any, data: any) {
@@ -85,11 +86,24 @@ export default {
       commit('clearTokens')
       const openIdConnectUrl = baseOpenIdConnectUrl + '?' + OpenIdUrlHelpers.buildOpenIdParameterString(openIdParameters, state.openid.configuration.encodeRedirectUrl)
       window.location.href = openIdConnectUrl
+    },
+    postCode ({ dispatch, state }: any, authCode: string) {
+      return state.openid.repository.postCode(authCode).then((response: any) => response.text()).then((result: string) => {
+        state.openid.accessToken = result
+        let redirectRoute = state.openid.configuration.authorizedRedirectRoute
+
+        // Overwrite redirect route if available in session storage
+        const storedRedirectRoute = RedirectRouteStorageHelpers.getRedirectRoute()
+        if (storedRedirectRoute) {
+          redirectRoute = storedRedirectRoute
+        }
+        return redirectRoute
+      })
     }
   },
   getters: {
     isLoggedIn (state: any): boolean {
-      return false //!!state.openid.accessToken
+      return !!state.openid.accessToken
     }
   }
 }
