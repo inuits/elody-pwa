@@ -14,8 +14,9 @@ export class OpenIdConnectModule extends VuexModule {
     logoutEndpoint: '',
     clientId: '',
     authorizedRedirectRoute: '',
-    InternalRedirectUrl: 'openid/redirect',
-    encodeRedirectUrl: false
+    InternalRedirectUrl: '',
+    encodeRedirectUrl: false,
+    apiCodeEndpoint: ''
   }
 
   repository: OpenIdConnectRepository = new OpenIdConnectRepository(this.configuration)
@@ -29,9 +30,9 @@ export class OpenIdConnectModule extends VuexModule {
         throw new Error('Configuration contains a serverBaseUrl but not all of the required server endpoints')
       }
     }
-    if (!configuration.InternalRedirectUrl) {
-      configuration.InternalRedirectUrl = 'openid/redirect'
-    }
+    /*if (!configuration.InternalRedirectUrl) {
+      configuration.InternalRedirectUrl = ''
+    }*/
     this.configuration = configuration
     this.repository = new OpenIdConnectRepository(configuration)
   }
@@ -87,6 +88,7 @@ export class OpenIdConnectModule extends VuexModule {
 
   // Getters
   get isLoggedIn (): boolean {
+    console.log(sessionStorage.getItem('token'))
     return false
   }
 }

@@ -37,8 +37,8 @@ fetch("../config.json").then( resp => resp.json() ).then((configJson: any) => {
     let OIDCconfig = {
       baseUrl: config.OIDCbaseUrl,
       serverBaseUrl: config.OIDCauthorizedRedirectRoute,
-      tokenEndpoint: config.OIDCserverTokenEndpoint
-        ? config.OIDCserverTokenEndpoint
+      tokenEndpoint: config.OIDCtokenEndpoint
+        ? config.OIDCtokenEndpoint
         : 'token',
       authEndpoint: config.OIDCauthEndpoint
         ? config.OIDCauthEndpoint
@@ -47,10 +47,17 @@ fetch("../config.json").then( resp => resp.json() ).then((configJson: any) => {
         ? config.OIDClogoutEndpoint
         : 'logout',
       clientId: config.OIDCclientId,
-      authorizedRedirectRoute: '/',
-      serverTokenEndpoint: 'token/',
-      serverRefreshEndpoint: 'refresh/',
-      InternalRedirectUrl: ''
+      authorizedRedirectRoute: config.OIDCauthorizedRedirectRoute
+        ? config.OIDCauthorizedRedirectRoute
+        : '/',
+      serverTokenEndpoint: config.OIDCserverTokenEndpoint
+        ? config.OIDCserverTokenEndpoint
+        : 'token/',
+      serverRefreshEndpoint: config.OIDCserverRefreshEndpoint
+        ? config.OIDCserverRefreshEndpoint
+        : 'refresh/',
+      InternalRedirectUrl: '',
+      apiCodeEndpoint: config.apiCodeEndpoint
     }
     
     createApp(App)

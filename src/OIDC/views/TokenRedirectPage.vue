@@ -24,17 +24,13 @@ export default defineComponent({
     const hasError = ref<boolean>(true)
     const accessCode = route.query.code
     console.log("accessCode: " + accessCode)
-    /*store.dispatch('fetchTokens', accessCode).then(
-      (redirectPath: any) => {
-        router.push({ path: redirectPath })
-      },
-      (error: any) => {
-        hasError.value = true
-      }
-    )
-    return {
-      hasError
-    }*/
+    store.dispatch('postCode', accessCode).then((redirectPath: any) => {
+      router.push({ path: redirectPath })
+    },
+    (error: any) => {
+      hasError.value = true
+    }
+  )
 
     return {
       hasError,

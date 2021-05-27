@@ -1,10 +1,11 @@
 {
   "oidcBaseUrl": "http://localhost:8080/auth/realms/dams",
-  "oidcTokenEndpoint": "protocol/openid-connect/authtoken",
+  "oidcTokenEndpoint": "protocol/openid-connect/token",
   "oidcAuthEndpoint": "protocol/openid-connect/auth",
   "oidcLogoutEndpoint": "protocol/openid-connect/logout",
   "oidcClientId": "dams-dashboard",
   "oidcAuthorizedRedirectRoute": "/",
   "oidcServerTokenEndpoint": "api/oidc/v1/token",
-  "oidcServerRefreshEndpoint": "api/oidc/v1/refresh"
+  "oidcServerRefreshEndpoint": "api/oidc/v1/refresh",
+  "apiCodeEndpoint": "/api/auth_code"
 }

@@ -9,17 +9,11 @@ export function OpenIdConnectPlugin<OpenIdConnectPluginOptions> (app: any, optio
 
   if (!options.configuration) throw new Error('Inuits-vuejs-oidc needs configuration')
 
-  console.log(options.configuration)
-
   options.store.registerModule('openid', OpenIdConnectModule)
   options.store.dispatch('initializeConfig', options.configuration)
 
-  let refreshRoute = false
   openIdConnectRoutes.forEach(route => {
     options.router.addRoute(route)
-    if(route.path === window.location.pathname) {
-      refreshRoute = true
-    }
   })
 
   // Add some auth guards to routes with specific meta tags
