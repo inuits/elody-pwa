@@ -14,7 +14,7 @@
         bg-color="neutral-30"
         @click="router.push({ name: 'AssestLibrary' })"
       />
-      <BaseButton :icon="IncludedIcons.Eye" bg-color="neutral-30" @click="testLogin" />
+      <BaseButton :icon="IncludedIcons.Eye" bg-color="neutral-30" />
     </nav>
     <div class="pl-20 h-screen flex flex-col">
       <div
@@ -25,11 +25,13 @@
         </h1>
         <div class="float-right">
           <BaseButton
+            v-if="!isLoggedIn"
             label="Log in"
             bg-color="main-light"
             txt-color="main-dark"
-            @click="router.push({ name: 'openIdConnectUnauthorizedRedirect' })"
+            @click="router.push({ name: 'openIdConnectTokenRedirect' })"
           />
+          <BaseButton v-if="isLoggedIn" :icon="IncludedIcons.User" bg-color="neutral-30" />
         </div>
       </div>
       <div class="flex-grow">
@@ -44,6 +46,7 @@
   import { DefaultApolloClient } from '@vue/apollo-composable'
   import { apolloClient } from './apolloClient'
   import { useRoute, useRouter } from 'vue-router'
+  import { mapGetters } from 'vuex'
   import { IncludedIcons } from './enums'
   import BaseButton from './components/base/BaseButton.vue'
 
@@ -52,6 +55,11 @@
 
   export default defineComponent({
     name: 'App',
+    computed: {
+      ...mapGetters([
+        'isLoggedIn'
+      ])
+    },
     components: {
       BaseButton
     },
@@ -73,15 +81,8 @@
       provide('updatePageTitle', updatePageTitle)
       provide('setRoutePageTitle', setRoutePageTitle)
 
-      const testLogin = () => {
-        fetch('http://localhost:8090/api/authenticate', {
-          method: 'GET'
-        })
-      }
-
       return {
         router,
-        testLogin,
         pageTitle,
         IncludedIcons
       }

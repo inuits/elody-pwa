@@ -5,6 +5,7 @@ import router from './router'
 import store from './store'
 import './index.css'
 import Unicon from 'vue-unicons'
+// import VueSession from 'vue-session'
 import Config from './models/ConfigModel'
 import { OpenIdConnectPlugin } from './OIDC/OpenIdConnectPlugin'
 
@@ -16,7 +17,8 @@ import {
   uniDesktop,
   uniAngleLeft,
   uniAngleRight,
-  uniBookOpen
+  uniBookOpen,
+  uniUser
 } from 'vue-unicons/dist/icons'
 
 Unicon.add([
@@ -27,7 +29,8 @@ Unicon.add([
   uniDesktop,
   uniAngleLeft,
   uniAngleRight,
-  uniBookOpen
+  uniBookOpen,
+  uniUser
 ])
 
 
@@ -69,6 +72,7 @@ fetch("../config.json").then( resp => resp.json() ).then((configJson: any) => {
     })
     .use(store)
     .use(router)
+    // .use(VueSession)
     .mount('#app')
 })
 

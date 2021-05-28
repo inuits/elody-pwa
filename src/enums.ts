@@ -6,5 +6,6 @@ export enum IncludedIcons {
   Desktop = 'desktop',
   AngleLeft = 'angle-left',
   AngleRight = 'angle-right',
-  BookOpen = 'book-open'
+  BookOpen = 'book-open',
+  User = 'user'
 }
