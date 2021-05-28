@@ -103,6 +103,8 @@ export default {
   },
   getters: {
     isLoggedIn (state: any): boolean {
+      // TODO CHECK SESSION
+      // console.log(this.$session.exists())
       return !!state.openid.accessToken
     }
   }
