@@ -1,6 +1,9 @@
 <template>
-  <div v-if="hasError">
-    access code: {{ accessCode }}
+  <div>
+    <p>Token Redirect page</p>
+    <div v-if="hasError">
+      access code: {{ accessCode }}
+    </div>
   </div>
 </template>
 
@@ -21,7 +24,7 @@ export default defineComponent({
     const store = useStore()
     const route = useRoute()
     const router = useRouter()
-    const hasError = ref<boolean>(true)
+    const hasError = ref<boolean>(false)
     const accessCode = route.query.code
     console.log("accessCode: " + accessCode)
     store.dispatch('postCode', accessCode).then((redirectPath: any) => {

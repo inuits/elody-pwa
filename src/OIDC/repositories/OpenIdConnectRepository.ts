@@ -30,4 +30,14 @@ export class OpenIdConnectRepository {
     })
   }
 
+  getLoggedIn (): Promise<any> {
+    return fetch('/api/me', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+  }
+
 }

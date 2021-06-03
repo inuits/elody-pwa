@@ -1,7 +1,7 @@
 <template>
   <div id="font-body">
     <nav
-      class="fixed left-0 top-0 w-20  h-screen flex flex-col justify-start align-center  pt-10 bg-neutral-20 px-5"
+      class="fixed left-0 top-0 w-20  h-screen flex flex-col justify-start align-center pt-10 bg-neutral-20 px-5"
     >
       <router-link
         :to="{ name: 'AssestLibrary' }"
@@ -31,7 +31,10 @@
             txt-color="main-dark"
             @click="router.push({ name: 'openIdConnectTokenRedirect' })"
           />
-          <BaseButton v-if="isLoggedIn" :icon="IncludedIcons.User" bg-color="neutral-30" />
+          <div v-if="isLoggedIn">
+            <p class='float-left p-2.5 leading-none'>Hey, {{getLoggedIn.preferred_username}}</p>
+            <BaseButton  :icon="IncludedIcons.User" bg-color="neutral-30" />
+          </div>
         </div>
       </div>
       <div class="flex-grow">
@@ -57,7 +60,8 @@
     name: 'App',
     computed: {
       ...mapGetters([
-        'isLoggedIn'
+        'isLoggedIn',
+        'getLoggedIn'
       ])
     },
     components: {
