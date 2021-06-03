@@ -1,4 +1,5 @@
 import { OpenIdConnectConfiguration } from '../../interfaces/OpenIdConnectConfiguration'
+import { OpenIdConnectUserInformation } from '../../interfaces/OpenIdConnectUserInformation'
 import { OpenIdConnectRepository } from '../../repositories/OpenIdConnectRepository'
 import { OpenIdUrlHelpers } from '../../utils/OpenIdUrlHelpers'
 import { RedirectRouteStorageHelpers } from '../../utils/RedirectRouteStorageHelpers'
@@ -17,7 +18,7 @@ const configuration: OpenIdConnectConfiguration = {
 export default {
   state: () => ({
     openid: {
-      accessToken: undefined,
+      loggedIn: undefined,
       configuration: configuration,
       repository: new OpenIdConnectRepository(configuration)
     }
@@ -35,6 +36,9 @@ export default {
       }
       state.openid.configuration = configuration
       state.openid.repository = new OpenIdConnectRepository(configuration)
+    },
+    SET_LOGGED_IN (state: any, isLoggedIn: boolean) {
+      state.openid.isLoggedIn = isLoggedIn
     }
   },
   actions: {
@@ -55,7 +59,6 @@ export default {
         response_type: 'code',
         redirect_uri: redirectUrl
       }
-
 
       const openIdConnectUrl = baseOpenIdConnectUrl + OpenIdUrlHelpers.buildOpenIdParameterString(openIdParameters, state.openid.configuration.encodeRedirectUrl)
 
@@ -88,24 +91,48 @@ export default {
       window.location.href = openIdConnectUrl
     },
     postCode ({ dispatch, state }: any, authCode: string) {
-      return state.openid.repository.postCode(authCode).then((response: any) => response.text()).then((result: string) => {
-        state.openid.accessToken = result
+      return state.openid.repository.postCode(authCode).then((result: any) => {
         let redirectRoute = state.openid.configuration.authorizedRedirectRoute
-
+        state.openid.loggedIn = true
         // Overwrite redirect route if available in session storage
         const storedRedirectRoute = RedirectRouteStorageHelpers.getRedirectRoute()
         if (storedRedirectRoute) {
           redirectRoute = storedRedirectRoute
         }
+        
         return redirectRoute
       })
+    },
+    async getLoggedIn ({ commit, state }: any) { 
+      const result = await state.openid.repository.getLoggedIn()
+      let loggedIn = false
+      if(result.status !== 401){
+        loggedIn = true //JSON.parse(result)
+      }
+      commit('SET_LOGGED_IN', loggedIn)
     }
   },
   getters: {
     isLoggedIn (state: any): boolean {
-      // TODO CHECK SESSION
-      // console.log(this.$session.exists())
-      return !!state.openid.accessToken
+      return state.openid.loggedIn
+      /* if(state.openid.loggedIn) {
+        return Promise.resolve(true)
+      } else {
+        return state.openid.repository.getLoggedIn().then((result: any) => {
+          if(result.status !== 401){
+            state.openid.loggedIn = JSON.parse(result)
+            console.log("true")
+            return true
+          }
+          console.log("false")
+          return false
+        }).catch((error: any) => {
+          return false
+        })
+      }*/
+    },
+    getLoggedIn (state: any): OpenIdConnectUserInformation {
+      return state.openid.loggedIn
     }
   }
 }

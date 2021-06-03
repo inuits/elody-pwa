@@ -1,5 +1,6 @@
 import OpenIdConnectModule from './store/modules/OpenIdConnectModule'
 import { openIdConnectRoutes } from './routes/OpenIdConnectRoutes'
+import { OpenIdConnectRepository } from './repositories/OpenIdConnectRepository'
 //import _Vue from 'vue'
 
 export function OpenIdConnectPlugin<OpenIdConnectPluginOptions> (app: any, options: any): void {
@@ -11,15 +12,29 @@ export function OpenIdConnectPlugin<OpenIdConnectPluginOptions> (app: any, optio
 
   options.store.registerModule('openid', OpenIdConnectModule)
   options.store.dispatch('initializeConfig', options.configuration)
+  // options.store.dispatch('getLoggedIn')
 
   openIdConnectRoutes.forEach(route => {
     options.router.addRoute(route)
   })
 
+  const repo = new OpenIdConnectRepository(options.configuration)
+
   // Add some auth guards to routes with specific meta tags
-  options.router.beforeEach((to: any, from: any, next: any) => {
+  options.router.beforeEach(async (to: any, from: any, next: any) => {
     if (to.matched.some((record: any) => record.meta.requiresOpenIdAuth)) {
-      if (!options.store.getters.isLoggedIn) {
+      let isLoggedIn = options.store.getters.isLoggedIn
+      if(isLoggedIn === undefined){
+        const result = await repo.getLoggedIn()
+        isLoggedIn = false
+        if(result.status !== 401){
+          isLoggedIn = true //JSON.parse(result)
+        }
+        // await options.store.dispatch('getLoggedIn')
+        //isLoggedIn = options.store.getters.isLoggedIn
+        console.log(isLoggedIn)
+      }
+      if(!isLoggedIn){
         if (options.configuration.unauthorizedRedirectRoute) {
           next({
             path: '/login',
