@@ -26,7 +26,6 @@ export default defineComponent({
     const router = useRouter()
     const hasError = ref<boolean>(false)
     const accessCode = route.query.code
-    console.log("accessCode: " + accessCode)
     store.dispatch('postCode', accessCode).then((redirectPath: any) => {
       router.push({ path: redirectPath })
     },

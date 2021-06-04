@@ -25,14 +25,13 @@
         </h1>
         <div class="float-right">
           <BaseButton
-            v-if="!isLoggedIn"
+            v-if="!auth.isLoggedIn"
             label="Log in"
             bg-color="main-light"
             txt-color="main-dark"
-            @click="router.push({ name: 'openIdConnectTokenRedirect' })"
+            @click="auth.login()"
           />
-          <div v-if="isLoggedIn">
-            <p class='float-left p-2.5 leading-none'>Hey, {{getLoggedIn.preferred_username}}</p>
+          <div v-if="auth.isLoggedIn">
             <BaseButton  :icon="IncludedIcons.User" bg-color="neutral-30" />
           </div>
         </div>
@@ -45,29 +44,26 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, provide, ref, onUpdated } from 'vue'
+  import { defineComponent, provide, ref, onUpdated, inject } from 'vue'
   import { DefaultApolloClient } from '@vue/apollo-composable'
   import { apolloClient } from './apolloClient'
   import { useRoute, useRouter } from 'vue-router'
   import { mapGetters } from 'vuex'
   import { IncludedIcons } from './enums'
   import BaseButton from './components/base/BaseButton.vue'
+  import { OIDCstate } from './OIDC/OpenIdConnectPlugin'
 
   export type updatePageTitleType = (_newTitle: string) => void
   export type setRoutePageTitleType = () => void
 
   export default defineComponent({
     name: 'App',
-    computed: {
-      ...mapGetters([
-        'isLoggedIn',
-        'getLoggedIn'
-      ])
-    },
+    inject: ['Auth'],
     components: {
       BaseButton
     },
     setup() {
+      const auth = inject<OIDCstate>('Auth')
       // Provide appolloClient for all childeren
       provide(DefaultApolloClient, apolloClient)
       const route = useRoute()
@@ -88,7 +84,8 @@
       return {
         router,
         pageTitle,
-        IncludedIcons
+        IncludedIcons,
+        auth
       }
     }
   })

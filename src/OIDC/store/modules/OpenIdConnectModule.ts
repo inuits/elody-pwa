@@ -66,7 +66,6 @@ export default {
       if (finalRedirectRoute) {
         RedirectRouteStorageHelpers.setRedirectRoute(finalRedirectRoute)
       }
-      console.log('login ' + openIdConnectUrl)
       window.location.href = openIdConnectUrl
     },
     logout ({ commit, state }: any, data: any) {
@@ -114,24 +113,6 @@ export default {
   },
   getters: {
     isLoggedIn (state: any): boolean {
-      return state.openid.loggedIn
-      /* if(state.openid.loggedIn) {
-        return Promise.resolve(true)
-      } else {
-        return state.openid.repository.getLoggedIn().then((result: any) => {
-          if(result.status !== 401){
-            state.openid.loggedIn = JSON.parse(result)
-            console.log("true")
-            return true
-          }
-          console.log("false")
-          return false
-        }).catch((error: any) => {
-          return false
-        })
-      }*/
-    },
-    getLoggedIn (state: any): OpenIdConnectUserInformation {
       return state.openid.loggedIn
     }
   }
