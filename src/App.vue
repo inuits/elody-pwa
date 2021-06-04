@@ -25,14 +25,14 @@
         </h1>
         <div class="float-right">
           <BaseButton
-            v-if="!auth.isLoggedIn"
+            v-if="auth && !auth.isAuthenticated"
             label="Log in"
             bg-color="main-light"
             txt-color="main-dark"
-            @click="auth.login()"
+            @click="auth && auth.login()"
           />
-          <div v-if="auth.isLoggedIn">
-            <BaseButton  :icon="IncludedIcons.User" bg-color="neutral-30" />
+          <div v-if="auth && auth.isAuthenticated">
+            <BaseButton :icon="IncludedIcons.User" bg-color="neutral-30" />
           </div>
         </div>
       </div>
@@ -48,22 +48,21 @@
   import { DefaultApolloClient } from '@vue/apollo-composable'
   import { apolloClient } from './apolloClient'
   import { useRoute, useRouter } from 'vue-router'
-  import { mapGetters } from 'vuex'
   import { IncludedIcons } from './enums'
   import BaseButton from './components/base/BaseButton.vue'
-  import { OIDCstate } from './OIDC/OpenIdConnectPlugin'
+  import { OIDCplugin } from './OIDC/OpenIdConnectPlugin'
 
   export type updatePageTitleType = (_newTitle: string) => void
   export type setRoutePageTitleType = () => void
 
   export default defineComponent({
     name: 'App',
-    inject: ['Auth'],
     components: {
       BaseButton
     },
+    inject: ['Auth'],
     setup() {
-      const auth = inject<OIDCstate>('Auth')
+      const auth = inject<OIDCplugin>('Auth')
       // Provide appolloClient for all childeren
       provide(DefaultApolloClient, apolloClient)
       const route = useRoute()

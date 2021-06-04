@@ -2,15 +2,14 @@ import { routeGuard } from '@/OIDC/OpenIdConnectPlugin'
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import AssetLibrary from '../views/AssetLibrary.vue'
 
-
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'AssestLibrary',
-    //beforeEnter: routeGuard,
+    beforeEnter: routeGuard,
     meta: {
       title: 'Asset Library',
-      requiresOpenIdAuth: true,
+      requiresOpenIdAuth: true
     },
     component: AssetLibrary
   },
@@ -20,7 +19,7 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: routeGuard,
     meta: {
       title: 'Single Asset',
-      requiresOpenIdAuth: true,
+      requiresOpenIdAuth: true
     },
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route

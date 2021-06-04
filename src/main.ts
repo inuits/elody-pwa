@@ -32,9 +32,9 @@ Unicon.add([
   uniUser
 ])
 
-
-
-fetch("../config.json").then( resp => resp.json() ).then(async (configJson: any) => {
+fetch('../config.json')
+  .then(resp => resp.json())
+  .then(async (configJson: any) => {
     let config = Config.deserialize(configJson)
     let OIDCconfig = {
       baseUrl: config.OIDCbaseUrl,
@@ -42,9 +42,7 @@ fetch("../config.json").then( resp => resp.json() ).then(async (configJson: any)
       tokenEndpoint: config.OIDCtokenEndpoint
         ? config.OIDCtokenEndpoint
         : 'token',
-      authEndpoint: config.OIDCauthEndpoint
-        ? config.OIDCauthEndpoint
-        : 'auth',
+      authEndpoint: config.OIDCauthEndpoint ? config.OIDCauthEndpoint : 'auth',
       logoutEndpoint: config.OIDClogoutEndpoint
         ? config.OIDClogoutEndpoint
         : 'logout',
@@ -62,16 +60,15 @@ fetch("../config.json").then( resp => resp.json() ).then(async (configJson: any)
       apiCodeEndpoint: config.apiCodeEndpoint
     }
 
-    const OIDCplugin = await OpenIdConnectPlugin({configuration: OIDCconfig})
-    
+    const OIDCplugin = await OpenIdConnectPlugin({
+      configuration: OIDCconfig,
+      router: router
+    })
+
     createApp(App)
-    .use(Unicon)
-    .use(OIDCplugin)
-    .use(store)
-    .use(router)
-    .mount('#app')
-})
-
-
-
-
+      .use(Unicon)
+      .use(OIDCplugin)
+      .use(store)
+      .use(router)
+      .mount('#app')
+  })

@@ -1,4 +1,3 @@
-
 import { App, reactive, Plugin, computed, watchEffect } from 'vue'
 import { useRouter, useRoute, NavigationGuardWithThis } from 'vue-router'
 import OpenIdConnectModule from './store/modules/OpenIdConnectModule'
@@ -9,7 +8,6 @@ import { RedirectRouteStorageHelpers } from './utils/RedirectRouteStorageHelpers
 import { OpenIdUrlHelpers } from './utils/OpenIdUrlHelpers'
 import { ComputedRef } from 'vue'
 
-
 export interface OIDCplugin {
   isAuthenticated: ComputedRef<boolean>
   loading: ComputedRef<boolean>
@@ -18,9 +16,9 @@ export interface OIDCplugin {
 
 export interface OIDCstate {
   OIDCconfig: OpenIdConnectConfiguration
-  isLoggedIn: boolean,
-  loading: boolean,
-  repository: OpenIdConnectRepository,
+  isLoggedIn: boolean
+  loading: boolean
+  repository: OpenIdConnectRepository
   error: any
 }
 
@@ -43,9 +41,10 @@ const state = reactive<OIDCstate>({
   error: undefined
 })
 
-
 const postCode = (authCode: string) => {
   return state.repository.postCode(authCode).then((result: any) => {
+    console.log(result)
+
     let redirectRoute = state.OIDCconfig.authorizedRedirectRoute
     const storedRedirectRoute = RedirectRouteStorageHelpers.getRedirectRoute()
     if (storedRedirectRoute) {
@@ -57,7 +56,7 @@ const postCode = (authCode: string) => {
 
 const checkLoggedIn = (): Promise<boolean> => {
   return state.repository.getLoggedIn().then((result: any) => {
-    if(result.status !== 401){
+    if (result.status !== 401) {
       return true
     }
     return false
@@ -65,11 +64,16 @@ const checkLoggedIn = (): Promise<boolean> => {
 }
 
 const login = (finalRedirectRoute?: string) => {
-
-  const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(state.OIDCconfig.InternalRedirectUrl, !state.OIDCconfig.encodeRedirectUrl)
+  const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(
+    state.OIDCconfig.InternalRedirectUrl,
+    !state.OIDCconfig.encodeRedirectUrl
+  )
   // Build openIdConnect url
 
-  const authEndpoint = OpenIdUrlHelpers.buildAuthEnpointWithReturnUrlEncoded(state.OIDCconfig.authEndpoint, state.OIDCconfig.encodeRedirectUrl)
+  const authEndpoint = OpenIdUrlHelpers.buildAuthEnpointWithReturnUrlEncoded(
+    state.OIDCconfig.authEndpoint,
+    state.OIDCconfig.encodeRedirectUrl
+  )
   const baseOpenIdConnectUrl = `${state.OIDCconfig.baseUrl}/${authEndpoint}`
 
   const openIdParameters = {
@@ -79,7 +83,12 @@ const login = (finalRedirectRoute?: string) => {
     redirect_uri: redirectUrl
   }
 
-  const openIdConnectUrl = baseOpenIdConnectUrl + OpenIdUrlHelpers.buildOpenIdParameterString(openIdParameters, state.OIDCconfig.encodeRedirectUrl)
+  const openIdConnectUrl =
+    baseOpenIdConnectUrl +
+    OpenIdUrlHelpers.buildOpenIdParameterString(
+      openIdParameters,
+      state.OIDCconfig.encodeRedirectUrl
+    )
 
   // Save final redirect route in session storage so it can be used at the end of the openid flow
   if (finalRedirectRoute) {
@@ -124,26 +133,29 @@ const OIDCplugin: OIDCplugin = {
   login: login
 }
 
-export async function OpenIdConnectPlugin<OpenIdConnectPluginOptions> (options: any): Promise<Plugin> {
-  //if (!options.router) throw new Error('Inuits-vuejs-oidc needs a router')
-  if (!options.configuration) throw new Error('Inuits-vuejs-oidc needs configuration')
+export async function OpenIdConnectPlugin<OpenIdConnectPluginOptions>(
+  options: any
+): Promise<Plugin> {
+  if (!options.router) throw new Error('Inuits-vuejs-oidc needs a router')
+  if (!options.configuration)
+    throw new Error('Inuits-vuejs-oidc needs configuration')
 
-  const route = useRoute()
-  const router = useRouter()
   state.OIDCconfig = options.configuration
   state.repository = new OpenIdConnectRepository(state.OIDCconfig)
 
   try {
-    const accessCode = route.query.code?.toString()
-    console.log("here")
-    if(accessCode) {
+    const queryString = window.location.search
+    const urlParams = new URLSearchParams(queryString)
+    const accessCode = urlParams.get('code')
+
+    if (accessCode) {
       state.loading = true
       postCode(accessCode).then((redirectPath: any) => {
         state.loading = false
-        router.push({ path: redirectPath })
+        options.router.push({ path: redirectPath })
       })
     }
-  } catch(e) {
+  } catch (e) {
     state.error = e
   } finally {
     state.isLoggedIn = await checkLoggedIn()
