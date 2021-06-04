@@ -1,10 +1,13 @@
+import { routeGuard } from '@/OIDC/OpenIdConnectPlugin'
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import AssetLibrary from '../views/AssetLibrary.vue'
+
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'AssestLibrary',
+    //beforeEnter: routeGuard,
     meta: {
       title: 'Asset Library',
       requiresOpenIdAuth: true,
@@ -14,6 +17,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/entity/:id',
     name: 'SingleEntity',
+    beforeEnter: routeGuard,
     meta: {
       title: 'Single Asset',
       requiresOpenIdAuth: true,

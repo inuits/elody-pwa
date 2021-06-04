@@ -34,7 +34,7 @@ Unicon.add([
 
 
 
-fetch("../config.json").then( resp => resp.json() ).then((configJson: any) => {
+fetch("../config.json").then( resp => resp.json() ).then(async (configJson: any) => {
     let config = Config.deserialize(configJson)
     let OIDCconfig = {
       baseUrl: config.OIDCbaseUrl,
@@ -61,14 +61,12 @@ fetch("../config.json").then( resp => resp.json() ).then((configJson: any) => {
       InternalRedirectUrl: '',
       apiCodeEndpoint: config.apiCodeEndpoint
     }
+
+    const OIDCplugin = await OpenIdConnectPlugin({configuration: OIDCconfig})
     
     createApp(App)
     .use(Unicon)
-    .use(OpenIdConnectPlugin, {
-      store: store,
-      router: router,
-      configuration: OIDCconfig
-    })
+    .use(OIDCplugin)
     .use(store)
     .use(router)
     .mount('#app')
