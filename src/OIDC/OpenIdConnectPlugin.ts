@@ -43,7 +43,6 @@ const state = reactive<OIDCstate>({
 
 const postCode = (authCode: string) => {
   return state.repository.postCode(authCode).then((result: any) => {
-    console.log(result)
 
     let redirectRoute = state.OIDCconfig.authorizedRedirectRoute
     const storedRedirectRoute = RedirectRouteStorageHelpers.getRedirectRoute()
@@ -137,8 +136,7 @@ export async function OpenIdConnectPlugin<OpenIdConnectPluginOptions>(
   options: any
 ): Promise<Plugin> {
   if (!options.router) throw new Error('Inuits-vuejs-oidc needs a router')
-  if (!options.configuration)
-    throw new Error('Inuits-vuejs-oidc needs configuration')
+  if (!options.configuration) throw new Error('Inuits-vuejs-oidc needs configuration')
 
   state.OIDCconfig = options.configuration
   state.repository = new OpenIdConnectRepository(state.OIDCconfig)
@@ -152,14 +150,16 @@ export async function OpenIdConnectPlugin<OpenIdConnectPluginOptions>(
       state.loading = true
       postCode(accessCode).then((redirectPath: any) => {
         state.loading = false
+        state.isLoggedIn = true
         options.router.push({ path: redirectPath })
       })
     }
   } catch (e) {
     state.error = e
   } finally {
-    state.isLoggedIn = await checkLoggedIn()
-    console.log(state.isLoggedIn)
+    if(!state.isLoggedIn){
+      state.isLoggedIn = await checkLoggedIn()
+    }
   }
 
   return {
