@@ -1,4 +1,4 @@
-import { routeGuard } from '@/OIDC/OpenIdConnectPlugin'
+import { routeGuard } from '@/OIDC/RouteGuard'
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import AssetLibrary from '../views/AssetLibrary.vue'
 
