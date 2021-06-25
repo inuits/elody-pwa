@@ -14,7 +14,6 @@
         bg-color="neutral-30"
         @click="router.push({ name: 'AssestLibrary' })"
       />
-      <BaseButton :icon="IncludedIcons.Eye" bg-color="neutral-30" />
     </nav>
     <div class="pl-20 h-screen flex flex-col">
       <div
