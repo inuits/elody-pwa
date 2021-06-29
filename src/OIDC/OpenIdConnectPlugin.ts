@@ -10,7 +10,10 @@ import { OpenIdConnectRepositoryInterface } from './interfaces/OpenIdConnectRepo
 export interface OIDCplugin {
   isAuthenticated: ComputedRef<boolean>
   loading: ComputedRef<boolean>
-  login: (openIdconnectconfiguration: OpenIdConnectConfiguration, finalRedirectRoute?: string) => void
+  login: (
+    openIdconnectconfiguration: OpenIdConnectConfiguration,
+    finalRedirectRoute?: string
+  ) => void
 }
 
 export interface OIDCstate {
@@ -54,7 +57,8 @@ export async function OpenIdConnectPlugin<OpenIdConnectPluginOptions>(
   options: any
 ): Promise<Plugin> {
   if (!options.router) throw new Error('Inuits-vuejs-oidc needs a router')
-  if (!options.configuration) throw new Error('Inuits-vuejs-oidc needs configuration')
+  if (!options.configuration)
+    throw new Error('Inuits-vuejs-oidc needs configuration')
 
   state.OIDCconfig = options.configuration
   state.repository = new OpenIdConnectRepository(state.OIDCconfig)
@@ -66,7 +70,11 @@ export async function OpenIdConnectPlugin<OpenIdConnectPluginOptions>(
 
     if (accessCode) {
       state.loading = true
-      postCode(accessCode, state.repository, state.OIDCconfig.authorizedRedirectRoute).then((redirectPath: any) => {
+      postCode(
+        accessCode,
+        state.repository,
+        state.OIDCconfig.authorizedRedirectRoute
+      ).then((redirectPath: any) => {
         state.loading = false
         state.isLoggedIn = true
         options.router.push({ path: redirectPath })
@@ -75,7 +83,7 @@ export async function OpenIdConnectPlugin<OpenIdConnectPluginOptions>(
   } catch (e) {
     state.error = e
   } finally {
-    if(!state.isLoggedIn){
+    if (!state.isLoggedIn) {
       state.isLoggedIn = await checkLoggedIn(state.repository)
     }
   }

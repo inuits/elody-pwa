@@ -1,9 +1,8 @@
 import { shallowMount } from '@vue/test-utils'
 import { metadata } from '@/queries/entities'
-import {postCode, checkLoggedIn} from '../utils/LoginHelpers'
+import { postCode, checkLoggedIn } from '../utils/LoginHelpers'
 
 const metaProp: metadata[] = []
-
 
 jest.mock('../repository/OpenIdConnectRepository', () => ({
   postCode: () => {
