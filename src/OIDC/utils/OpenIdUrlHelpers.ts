@@ -1,5 +1,8 @@
 export class OpenIdUrlHelpers {
-  public static buildInternalRedirectUrl (endpoint?: string, encoded = true): string {
+  public static buildInternalRedirectUrl(
+    endpoint?: string,
+    encoded = true
+  ): string {
     let port = ''
     if (location.port) {
       port = ':' + location.port
@@ -13,7 +16,10 @@ export class OpenIdUrlHelpers {
     }
   }
 
-  public static buildOpenIdParameterString (parameters: object, encodeRedirectUrl: boolean = false): string {
+  public static buildOpenIdParameterString(
+    parameters: object,
+    encodeRedirectUrl: boolean = false
+  ): string {
     const parameterArray = []
     for (const [key, param] of Object.entries(parameters)) {
       if (param) {
@@ -27,7 +33,7 @@ export class OpenIdUrlHelpers {
     return openIdParameterString
   }
 
-  public static buildFormUrlEncoded (object: object): string {
+  public static buildFormUrlEncoded(object: object): string {
     const bodyArray = []
 
     for (let [key, value] of Object.entries(object)) {
@@ -41,11 +47,15 @@ export class OpenIdUrlHelpers {
     return bodyArray.join('&')
   }
 
-  public static buildAuthEnpointWithReturnUrlEncoded (authEnpoint: string, encodeRedirectUrl: boolean = false): string {
+  public static buildAuthEnpointWithReturnUrlEncoded(
+    authEnpoint: string,
+    encodeRedirectUrl: boolean = false
+  ): string {
     let authEnpointWithReturnUrlEncoded = authEnpoint
     if (encodeRedirectUrl) {
       const returnUrl = authEnpoint.split('ReturnUrl=')
-      authEnpointWithReturnUrlEncoded = returnUrl[0] + 'ReturnUrl=' + encodeURIComponent(returnUrl[1])
+      authEnpointWithReturnUrlEncoded =
+        returnUrl[0] + 'ReturnUrl=' + encodeURIComponent(returnUrl[1])
     }
     return authEnpointWithReturnUrlEncoded
   }

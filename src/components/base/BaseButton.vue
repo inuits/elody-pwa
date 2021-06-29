@@ -2,9 +2,7 @@
   <button
     :class="[
       `bg-${bgColor} flex justify-center  p-2.5 rounded  transition-colors duration-300`,
-      loading
-        ? `text-${bgColor}`
-        : `text-${txtColor} hover:bg-${bgHoverColor}`,
+      loading ? `text-${bgColor}` : `text-${txtColor} hover:bg-${bgHoverColor}`,
       label ? `pl-1.5` : ``
     ]"
   >

@@ -4,12 +4,15 @@ import { OpenIdConnectConfiguration } from '../interfaces/OpenIdConnectConfigura
 export class OpenIdConnectRepository {
   private configuration: OpenIdConnectConfiguration
 
-  constructor (configuration: OpenIdConnectConfiguration) {
+  constructor(configuration: OpenIdConnectConfiguration) {
     this.configuration = configuration
   }
 
-  postCode (authCode: string): Promise<any> {
-    const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(this.configuration.InternalRedirectUrl, false)
+  postCode(authCode: string): Promise<any> {
+    const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(
+      this.configuration.InternalRedirectUrl,
+      false
+    )
     const serverTokenUrl = `${this.configuration.apiCodeEndpoint}`
 
     const body = {
@@ -23,21 +26,20 @@ export class OpenIdConnectRepository {
     return fetch(serverTokenUrl, {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(body)
     })
   }
 
-  getLoggedIn (): Promise<any> {
+  getLoggedIn(): Promise<any> {
     return fetch('/api/me', {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'Content-Type': 'application/json'
       }
     })
   }
-
 }

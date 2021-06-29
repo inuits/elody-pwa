@@ -1,4 +1,4 @@
-import { RouteLocationNormalizedLoaded } from "vue-router"
+import { RouteLocationNormalizedLoaded } from 'vue-router'
 
 export const getRouteParams = (
   route: RouteLocationNormalizedLoaded,
