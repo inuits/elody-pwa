@@ -4,7 +4,7 @@ module.exports = {
   darkMode: false, // or 'media' or 'class'
   theme: {
     fontFamily: {
-      body: ['Lato']
+      body: ['Lato'],
     },
     colors: {
       transparent: 'transparent',
@@ -27,17 +27,17 @@ module.exports = {
         600: '#344563',
         700: '#253858',
         800: '#172B4D',
-        900: '#091E42'
+        900: '#091E42',
       },
       main: {
         light: '#DEEBFF',
-        dark: '#0052CC'
-      }
+        dark: '#0052CC',
+      },
     },
-    extend: {}
+    extend: {},
   },
   variants: {
-    extend: {}
+    extend: {},
   },
-  plugins: []
-}
+  plugins: [],
+};

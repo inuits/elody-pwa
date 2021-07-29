@@ -1,20 +1,16 @@
 <template>
   <div
-    class="flex items-center "
+    class="flex items-center"
     :class="{
       'bg-neutral-20 text-neutral-20': loading,
-      'text-neutral-700': !loading
+      'text-neutral-700': !loading,
     }"
   >
     <unicon
       class="cursor-pointer"
-      :name="IncludedIcons.AngleLeft"
+      :name="Unicons.AngleLeft"
       height="16"
-      :fill="
-        loading
-          ? tailwindConfig.theme.colors.neutral[20]
-          : tailwindConfig.theme.colors.neutral[700]
-      "
+      :fill="loading ? 'var(--colors-neutral-20)' : 'var(--colors-neutral-700)'"
       @click="prev"
     />
     <div class="inline-block text-sm mx-3" data-test="page-count-label">
@@ -22,75 +18,66 @@
     </div>
     <unicon
       class="cursor-pointer"
-      :name="IncludedIcons.AngleRight"
+      :name="Unicons.AngleRight"
       height="16"
-      :fill="
-        loading
-          ? tailwindConfig.theme.colors.neutral[20]
-          : tailwindConfig.theme.colors.neutral[700]
-      "
+      :fill="loading ? 'var(--colors-neutral-20)' : 'var(--colors-neutral-700)'"
       @click="next"
     />
   </div>
 </template>
 
 <script lang="ts">
-  import { defineComponent, PropType, computed } from 'vue'
-  import { IncludedIcons } from '../../enums'
-  //@ts-ignore
-  import tailwindConfig from '../../../tailwind.config.js'
+  import { defineComponent, PropType, computed } from 'vue';
+  import { Unicons } from '../../enums';
 
   export type paginationInfoType = {
-    limit: number
-    skip: number
-  }
+    limit: number;
+    skip: number;
+  };
 
   export default defineComponent({
     name: 'Pagination',
     props: {
       loading: {
         type: Boolean,
-        default: false
+        default: false,
       },
       paginationInfo: {
         type: Object as PropType<paginationInfoType>,
-        default: 1,
-        required: true
+        default: () => ({ limit: 20, skip: 0 }),
+        required: true,
       },
       maxPage: {
         type: Number,
-        default: 1
-      }
+        default: 1,
+      },
     },
     emits: ['update:paginationInfo'],
     setup: (props, { emit }) => {
-      const currentPage = computed<number>(() => {
-        return props.paginationInfo.skip + 1
-      })
+      const currentPage = computed<number>(() => props.paginationInfo.skip + 1);
 
       const next = () => {
         currentPage.value < props.maxPage &&
           emit('update:paginationInfo', {
             limit: props.paginationInfo.limit,
-            skip: props.paginationInfo.skip + 1
-          })
-      }
+            skip: props.paginationInfo.skip + 1,
+          });
+      };
 
       const prev = () => {
         currentPage.value > 1 &&
           emit('update:paginationInfo', {
             limit: props.paginationInfo.limit,
-            skip: props.paginationInfo.skip - 1
-          })
-      }
+            skip: props.paginationInfo.skip - 1,
+          });
+      };
 
       return {
         next,
         prev,
         currentPage,
-        IncludedIcons,
-        tailwindConfig
-      }
-    }
-  })
+        Unicons,
+      };
+    },
+  });
 </script>

@@ -13,7 +13,8 @@ module.exports = {
     ecmaVersion: 2020
   },
   rules: {
-    semi: ['error', 'never'],
+    semi: ['error', 'always'],
+    'max-len': ['warn', { "code": 100 }],
     'vue/no-multiple-template-root': 0,
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off'

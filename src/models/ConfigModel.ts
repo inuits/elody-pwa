@@ -8,8 +8,8 @@ export default class Config {
     public OIDCauthorizedRedirectRoute: string,
     public OIDCserverTokenEndpoint: string,
     public OIDCserverRefreshEndpoint: string,
-    public apiCodeEndpoint: string
-  ) {}
+    public apiCodeEndpoint: string,
+  ) { }
 
   public static deserialize(input: any): Config {
     return new Config(
@@ -21,7 +21,7 @@ export default class Config {
       input.oidcAuthorizedRedirectRoute,
       input.oidcServerTokenEndpoint,
       input.oidcServerRefreshEndpoint,
-      input.apiCodeEndpoint
-    )
+      input.apiCodeEndpoint,
+    );
   }
 }

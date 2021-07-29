@@ -1,11 +1,23 @@
-export enum IncludedIcons {
-  Eye = 'eye',
-  Download = 'file-download',
-  SearchPlus = 'search-plus',
-  SearchMinus = 'search-minus',
-  Desktop = 'desktop',
-  AngleLeft = 'angle-left',
-  AngleRight = 'angle-right',
-  BookOpen = 'book-open',
-  User = 'user'
+import {
+  uniEye,
+  uniFileDownload,
+  uniSearchPlus,
+  uniSearchMinus,
+  uniDesktop,
+  uniAngleLeft,
+  uniAngleRight,
+  uniBookOpen,
+  uniUser,
+} from 'vue-unicons/dist/icons';
+
+export enum Unicons {
+  Eye = uniEye,
+  Download = uniFileDownload,
+  SearchPlus = uniSearchPlus,
+  SearchMinus = uniSearchMinus,
+  Desktop = uniDesktop,
+  AngleLeft = uniAngleLeft,
+  AngleRight = uniAngleRight,
+  BookOpen = uniBookOpen,
+  User = uniUser,
 }
