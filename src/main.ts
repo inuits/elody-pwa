@@ -32,43 +32,27 @@ Unicon.add([
   uniUser
 ])
 
-fetch('../config.json')
-  .then(resp => resp.json())
-  .then(async (configJson: any) => {
-    let config = Config.deserialize(configJson)
-    let OIDCconfig = {
-      baseUrl: config.OIDCbaseUrl,
-      serverBaseUrl: config.OIDCauthorizedRedirectRoute,
-      tokenEndpoint: config.OIDCtokenEndpoint
-        ? config.OIDCtokenEndpoint
-        : 'token',
-      authEndpoint: config.OIDCauthEndpoint ? config.OIDCauthEndpoint : 'auth',
-      logoutEndpoint: config.OIDClogoutEndpoint
-        ? config.OIDClogoutEndpoint
-        : 'logout',
-      clientId: config.OIDCclientId,
-      authorizedRedirectRoute: config.OIDCauthorizedRedirectRoute
-        ? config.OIDCauthorizedRedirectRoute
-        : '/',
-      serverTokenEndpoint: config.OIDCserverTokenEndpoint
-        ? config.OIDCserverTokenEndpoint
-        : 'token/',
-      serverRefreshEndpoint: config.OIDCserverRefreshEndpoint
-        ? config.OIDCserverRefreshEndpoint
-        : 'refresh/',
-      InternalRedirectUrl: '',
-      apiCodeEndpoint: config.apiCodeEndpoint
-    }
+const config = Config.deserialize(await fetch('../config.json').then(r => r.json()));
+const OIDCplugin = await OpenIdConnectPlugin({
+  router,
+  configuration: {
+    baseUrl: config.OIDCbaseUrl,
+    serverBaseUrl: config.OIDCauthorizedRedirectRoute,
+    tokenEndpoint: config.OIDCtokenEndpoint || 'token',
+    authEndpoint: config.OIDCauthEndpoint || 'auth',
+    logoutEndpoint: config.OIDClogoutEndpoint || 'logout',
+    clientId: config.OIDCclientId,
+    authorizedRedirectRoute: config.OIDCauthorizedRedirectRoute || '/',
+    serverTokenEndpoint: config.OIDCserverTokenEndpoint || 'token/',
+    serverRefreshEndpoint: config.OIDCserverRefreshEndpoint || 'refresh/',
+    InternalRedirectUrl: '',
+    apiCodeEndpoint: config.apiCodeEndpoint
+  },
+})
 
-    const OIDCplugin = await OpenIdConnectPlugin({
-      configuration: OIDCconfig,
-      router: router
-    })
-
-    createApp(App)
-      .use(Unicon)
-      .use(OIDCplugin)
-      .use(store)
-      .use(router)
-      .mount('#app')
-  })
+createApp(App)
+  .use(Unicon)
+  .use(OIDCplugin)
+  .use(store)
+  .use(router)
+  .mount('#app')

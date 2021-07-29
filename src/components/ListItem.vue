@@ -40,7 +40,7 @@
 </template>
 
 <script lang="ts">
-  import { metadata } from '@/queries/entities'
+  import { Metadata } from '@/queries'
   import { defineComponent, PropType } from 'vue'
 
   export default defineComponent({
@@ -51,13 +51,11 @@
         default: false
       },
       meta: {
-        type: Array as PropType<metadata[]>,
+        type: Array as PropType<Metadata[]>,
         default: [],
         required: false
       }
     },
-    setup: () => {
-      return {}
-    }
+    setup: () => {}
   })
 </script>

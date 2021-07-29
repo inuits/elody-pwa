@@ -1,0 +1,31 @@
+query getEntities($limit: Int, $skip: Int) {
+  Entities(limit: $limit, skip: $skip) {
+    count
+    limit
+    results {
+      id
+      type
+      metadata(key: [title, type]) {
+        key
+        value
+      }
+    }
+  }
+}
+
+query getEntityById($id: String!) {
+  Entity(id: $id) {
+    id
+    type
+    title: metadata(key: [title]) {
+      value
+    }
+    metadata(key: [description, material, type]) {
+      key
+      value
+    }
+    mediafiles {
+      location
+    }
+  }
+}
