@@ -1,9 +1,18 @@
+const { GraphQLCodegenWebpackPlugin } = require('graphql-codegen-webpack-plugin');
+
 module.exports = {
   devServer: {
-    disableHostCheck: true
+      disableHostCheck: true,
+      progress: false,
   },
   pluginOptions: {
-    foo: {
-    }
-  }
+  },
+  configureWebpack: {
+    plugins: [
+      new GraphQLCodegenWebpackPlugin({ configPath: './codegen.yml' }),
+    ],
+    experiments: {
+      topLevelAwait: true,
+    },
+  },
 }

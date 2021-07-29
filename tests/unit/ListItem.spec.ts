@@ -1,16 +1,16 @@
-import { metadata } from '@/queries/entities'
+import { Metadata, MetaKey } from '@/queries'
 import { shallowMount } from '@vue/test-utils'
 import { h } from 'vue'
-import ListItem from '../../src/components/ListItem.vue'
+import ListItem from '@/components/ListItem.vue'
 
-const metaLabel1 = 'Label 1'
-const metaLabel2 = 'Label 2'
-const metaLabel3 = 'Label 3'
-const metaInfo1 = 'Info 1'
-const metaInfo2 = 'Info 2'
-const metaInfo3 = 'Info 3'
+const metaLabel1 = MetaKey.Title;
+const metaLabel2 = MetaKey.Description;
+const metaLabel3 = MetaKey.Collection;
+const metaInfo1 = 'Info 1';
+const metaInfo2 = 'Info 2';
+const metaInfo3 = 'Info 3';
 
-const metaProp: metadata[] = [
+const metaProp: Metadata[] = [
   { key: metaLabel1, value: metaInfo1 },
   { key: metaLabel2, value: metaInfo2 },
   { key: metaLabel3, value: metaInfo3 }

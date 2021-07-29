@@ -59,7 +59,7 @@
       'update:fullPage',
       'update:home'
     ],
-    setup: (props, { emit }) => {
+    setup: (_props, { emit }) => {
       const zoomInRef = ref<HTMLDivElement | undefined>(undefined)
       const zoomOutRef = ref<HTMLDivElement | undefined>(undefined)
       const fullPageRef = ref<HTMLDivElement | undefined>(undefined)

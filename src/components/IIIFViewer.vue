@@ -45,7 +45,7 @@
           tileSources: {
             type: 'image',
             url: props.imageUrl
-          }
+          },
         }
 
         if (zoomInDiv.value !== null) {

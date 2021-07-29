@@ -14,14 +14,10 @@
 <script lang="ts">
   import { defineComponent, watch, inject, onMounted } from 'vue'
   import { useQuery } from '@vue/apollo-composable'
-  import IIIFViewer from '../components/IIIFViewer.vue'
-  import MetaView from '../components/MetaView.vue'
+  import IIIFViewer from '@/components/IIIFViewer.vue'
+  import MetaView from '@/components/MetaView.vue'
   import { useRoute } from 'vue-router'
-  import {
-    getEntity,
-    getEntityQueryType,
-    getEntityQueryVariableType
-  } from '@/queries/entities'
+  import { GetEntityByIdDocument } from '@/queries';
   import { getRouteParams } from '@/helpers'
   import { updatePageTitleType } from '@/App.vue'
 
@@ -37,29 +33,21 @@
         'updatePageTitle'
       )
 
-      const { result, loading } = useQuery<
-        getEntityQueryType,
-        getEntityQueryVariableType
-      >(getEntity, {
+      const { result, loading } = useQuery(GetEntityByIdDocument, {
         id: getRouteParams(route, 'id')
       })
 
       watch(result, value => {
-        const title = value.Entity.title[0].value
-        updatePageTitle && updatePageTitle(title)
+        const title = value?.Entity?.title[0]?.value
+        updatePageTitle && title && updatePageTitle(title)
       })
 
       onMounted(() => {
-        if (result.value) {
-          const title = result.value.Entity.title[0].value
-          updatePageTitle && updatePageTitle(title)
-        }
+        const title = result.value?.Entity?.title[0]?.value
+        updatePageTitle && title && updatePageTitle(title)
       })
 
-      return {
-        result,
-        loading
-      }
+      return { result, loading }
     }
   })
 </script>
