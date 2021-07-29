@@ -3,3 +3,26 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --color-neutral-10: theme('colors.neutral.10');
+  --color-neutral-20: theme('colors.neutral.20');
+  --color-neutral-30: theme('colors.neutral.30');
+  --color-neutral-40: theme('colors.neutral.40');
+  --color-neutral-50: theme('colors.neutral.50');
+  --color-neutral-60: theme('colors.neutral.60');
+  --color-neutral-70: theme('colors.neutral.70');
+  --color-neutral-80: theme('colors.neutral.80');
+  --color-neutral-90: theme('colors.neutral.90');
+  --color-neutral-100: theme('colors.neutral.100');
+  --color-neutral-200: theme('colors.neutral.200');
+  --color-neutral-300: theme('colors.neutral.300');
+  --color-neutral-400: theme('colors.neutral.400');
+  --color-neutral-500: theme('colors.neutral.500');
+  --color-neutral-600: theme('colors.neutral.600');
+  --color-neutral-700: theme('colors.neutral.700');
+  --color-neutral-800: theme('colors.neutral.800');
+  --color-neutral-900: theme('colors.neutral.900');
+  --color-main-light: theme('colors.main.light');
+  --color-main-dark: theme('colors.main.dark');
+}
