@@ -8,7 +8,7 @@
   >
     <unicon
       class="cursor-pointer"
-      :name="Unicons.AngleLeft"
+      :name="Unicons.AngleLeft.name"
       height="16"
       :fill="loading ? 'var(--colors-neutral-20)' : 'var(--colors-neutral-700)'"
       @click="prev"
@@ -18,7 +18,7 @@
     </div>
     <unicon
       class="cursor-pointer"
-      :name="Unicons.AngleRight"
+      :name="Unicons.AngleRight.name"
       height="16"
       :fill="loading ? 'var(--colors-neutral-20)' : 'var(--colors-neutral-700)'"
       @click="next"

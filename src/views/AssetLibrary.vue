@@ -23,7 +23,7 @@
           ]"
         >
           <template #actions>
-            <BaseButton :loading="true" class="ml-2" :icon="Unicons.Eye" />
+            <BaseButton :loading="true" class="ml-2" :icon="Unicons.Eye.name" />
           </template>
         </ListItem>
       </div>
@@ -38,7 +38,7 @@
             <BaseButton
               :loading="loading"
               class="ml-2"
-              :icon="Unicons.Eye"
+              :icon="Unicons.Eye.name"
               @click="router.push({ name: 'SingleEntity', params: { id: entity.id } })"
             />
           </template>
