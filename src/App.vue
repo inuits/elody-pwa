@@ -10,7 +10,7 @@
         DAMS
       </router-link>
       <BaseButton
-        :icon="Unicons.BookOpen"
+        :icon="Unicons.BookOpen.name"
         bg-color="neutral-30"
         @click="router.push({ name: 'AssetLibrary' })"
       />
@@ -29,7 +29,7 @@
             @click="auth && auth.login()"
           />
           <div v-if="auth && auth.isAuthenticated">
-            <BaseButton :icon="Unicons.User" bg-color="neutral-30" />
+            <BaseButton :icon="Unicons.User.name" bg-color="neutral-30" />
           </div>
         </div>
       </div>
