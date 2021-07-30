@@ -1,32 +1,31 @@
+import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
 import { createApp } from 'vue';
-import App from './App.vue';
-import './registerServiceWorker';
-import router from './router';
-import store from './store';
-import './index.css';
 import Unicon from 'vue-unicons';
-import { Unicons } from './enums';
-import Config from './models/ConfigModel';
-import { OpenIdConnectPlugin } from './OIDC/OpenIdConnectPlugin';
+import { DefaultApolloClient } from '@vue/apollo-composable';
+
+import App from './App.vue';
+import { router } from './router';
+import { store } from './store';
+import { Unicons } from './types';
+import { DefaultAuth, OpenIdConnectPlugin } from '@/OpenIdConnectPlugin';
+
+import './registerServiceWorker';
+import './index.css';
 
 Unicon.add(Object.values(Unicons));
 
-const config = Config.deserialize(await fetch('../config.json').then((r) => r.json()));
-const OIDCplugin = await OpenIdConnectPlugin({
-  router,
-  configuration: {
-    baseUrl: config.OIDCbaseUrl,
-    serverBaseUrl: config.OIDCauthorizedRedirectRoute,
-    tokenEndpoint: config.OIDCtokenEndpoint || 'token',
-    authEndpoint: config.OIDCauthEndpoint || 'auth',
-    logoutEndpoint: config.OIDClogoutEndpoint || 'logout',
-    clientId: config.OIDCclientId,
-    authorizedRedirectRoute: config.OIDCauthorizedRedirectRoute || '/',
-    serverTokenEndpoint: config.OIDCserverTokenEndpoint || 'token/',
-    serverRefreshEndpoint: config.OIDCserverRefreshEndpoint || 'refresh/',
-    InternalRedirectUrl: '',
-    apiCodeEndpoint: config.apiCodeEndpoint,
-  },
-});
+const config = await fetch('../config.json').then((r) => r.json());
 
-createApp(App).use(Unicon).use(OIDCplugin).use(store).use(router).mount('#app');
+createApp(App)
+  .use(Unicon)
+  .use(store)
+  .use(router)
+  .provide(DefaultAuth, await OpenIdConnectPlugin.build(router, config.oidc))
+  .provide(
+    DefaultApolloClient,
+    new ApolloClient({
+      link: createHttpLink({ uri: config.graphQlLink }),
+      cache: new InMemoryCache(),
+    }),
+  )
+  .mount('#app');

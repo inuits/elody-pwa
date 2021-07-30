@@ -10,12 +10,12 @@
 
 <script lang="ts">
   import { defineComponent, watch, inject, onMounted } from 'vue';
+  import { useRoute } from 'vue-router';
   import { useQuery } from '@vue/apollo-composable';
+
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import MetaView from '@/components/MetaView.vue';
-  import { useRoute } from 'vue-router';
   import { GetEntityByIdDocument } from '@/queries';
-  import { getRouteParams } from '@/helpers';
   import { updatePageTitleType } from '@/App.vue';
 
   export default defineComponent({
@@ -29,7 +29,7 @@
       const updatePageTitle: updatePageTitleType | undefined = inject('updatePageTitle');
 
       const { result, loading } = useQuery(GetEntityByIdDocument, {
-        id: getRouteParams(route, 'id'),
+        id: Array.isArray(route.params['id']) ? route.params['id'][0] : (route.params['id'] as string),
       });
 
       watch(result, (value) => {

@@ -1,25 +1,25 @@
 import { NavigationGuardWithThis } from 'vue-router';
 import { watchEffect } from 'vue';
-import { getConfig, OIDCplugin } from './OpenIdConnectPlugin';
+import { useAuth } from '@/OpenIdConnectPlugin';
 
-export const routeGuard: NavigationGuardWithThis<undefined> = (_to, _from, next) => {
-  const { isAuthenticated, loading, login } = OIDCplugin;
+export const authGuard: NavigationGuardWithThis<undefined> = (_to, _from, next) => {
+  const auth = useAuth();
 
   const verify = () => {
-    if (isAuthenticated.value) {
+    if (auth.isAuthenticated.value) {
       return next();
     }
-    login(getConfig());
+    auth?.login();
   };
 
   // If loading has already finished, check our auth state using `fn()`
-  if (!loading.value) {
+  if (!auth.loading.value) {
     return verify();
   }
 
   // Watch for the loading property to change before we check isAuthenticated
   watchEffect(() => {
-    if (!loading.value) {
+    if (!auth.loading.value) {
       return verify();
     }
   });

@@ -17,7 +17,7 @@
 
 <script lang="ts">
   import { defineComponent, onMounted, ref, PropType } from 'vue';
-  import { Unicons } from '../enums';
+  import { Unicons } from '@/types';
 
   export default defineComponent({
     name: 'ViewerToolbar',

@@ -41,13 +41,11 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, provide, ref, inject } from 'vue';
-  import { DefaultApolloClient } from '@vue/apollo-composable';
-  import { apolloClient } from './apolloClient';
+  import { defineComponent, provide, ref } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  import { Unicons } from './enums';
-  import BaseButton from './components/base/BaseButton.vue';
-  import { OIDCplugin } from './OIDC/OpenIdConnectPlugin';
+  import { Unicons } from '@/types';
+  import BaseButton from '@/components/base/BaseButton.vue';
+  import { useAuth } from '@/OpenIdConnectPlugin';
 
   export type updatePageTitleType = (_newTitle: string) => void;
   export type setRoutePageTitleType = () => void;
@@ -59,9 +57,7 @@
     },
     inject: ['Auth'],
     setup() {
-      const auth = inject<OIDCplugin>('Auth');
-      // Provide appolloClient for all children
-      provide(DefaultApolloClient, apolloClient);
+      const auth = useAuth();
       const route = useRoute();
       const router = useRouter();
 
