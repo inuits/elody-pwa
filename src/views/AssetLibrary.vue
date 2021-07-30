@@ -55,7 +55,7 @@
   import ListItem from '@/components/ListItem.vue';
   import BaseButton from '@/components/base/BaseButton.vue';
   import Pagination from '@/components/base/Pagination.vue';
-  import { Unicons } from '@/enums';
+  import { Unicons } from '@/types';
   import { useRouter } from 'vue-router';
   import { GetEntitiesDocument, GetEntitiesQueryVariables } from '@/queries';
   import { setRoutePageTitleType } from '@/App.vue';

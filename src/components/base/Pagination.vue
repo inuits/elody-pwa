@@ -28,7 +28,7 @@
 
 <script lang="ts">
   import { defineComponent, PropType, computed } from 'vue';
-  import { Unicons } from '../../enums';
+  import { Unicons } from '@/types';
 
   export type paginationInfoType = {
     limit: number;
