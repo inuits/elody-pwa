@@ -19,7 +19,6 @@ export interface OpenIdConnectConfiguration {
   serverTokenEndpoint?: string;
   serverRefreshEndpoint?: string;
   internalRedirectUrl?: string;
-  encodeRedirectUrl?: boolean;
   apiCodeEndpoint?: string;
 }
 const defaultConfig: OpenIdConnectConfiguration = {
@@ -34,7 +33,6 @@ const defaultConfig: OpenIdConnectConfiguration = {
   serverRefreshEndpoint: 'refresh/',
   internalRedirectUrl: '',
   apiCodeEndpoint: '',
-  encodeRedirectUrl: false,
 };
 
 export interface OpenIdConnectUserInformation {
@@ -50,6 +48,7 @@ export class OpenIdConnectPlugin {
   loading: Ref<boolean>;
   error: Ref<any>;
   config: OpenIdConnectConfiguration;
+  static instance: OpenIdConnectPlugin;
 
   constructor(config: Partial<OpenIdConnectConfiguration>) {
     this.isAuthenticated = ref(false);
@@ -82,7 +81,7 @@ export class OpenIdConnectPlugin {
         authCode,
         clientId,
         tokenEndpoint,
-        redirectUri: buildInternalRedirectUrl(internalRedirectUrl, false),
+        redirectUri: new URL(internalRedirectUrl || '/', window.location.href).toString(),
       }),
     });
     const storedRedirectRoute = sessionStorage.getItem(loginRedirectRouteKey) || '';
@@ -96,40 +95,42 @@ export class OpenIdConnectPlugin {
       sessionStorage.setItem(loginRedirectRouteKey, finalRedirectRoute);
     }
 
-    const { authEndpoint, baseUrl, clientId, encodeRedirectUrl, internalRedirectUrl, scope } = this.config;
-    const redirectUrl = buildInternalRedirectUrl(internalRedirectUrl, !encodeRedirectUrl);
-    const builtAuthEndpoint = buildAuthEndpoint(authEndpoint, encodeRedirectUrl);
-    const params = buildOpenIdParameterString(
-      {
-        scope: scope || 'openid',
-        client_id: clientId,
-        response_type: 'code',
-        redirect_uri: redirectUrl,
-      },
-      encodeRedirectUrl,
-    );
-    window.location.href = `${baseUrl}/${builtAuthEndpoint}${params}`;
+    const { authEndpoint, baseUrl, clientId, internalRedirectUrl, scope } = this.config;
+    const params = new URLSearchParams({
+      scope: scope || 'openid',
+      client_id: clientId,
+      response_type: 'code',
+      redirect_uri: new URL(internalRedirectUrl || '/', window.location.href).toString(),
+    });
+    console.log(`${baseUrl}/${authEndpoint}?${params}`);
+    window.location.href = `${baseUrl}/${authEndpoint}?${params}`;
   }
 
-  static async build(router: Router, config: Partial<OpenIdConnectConfiguration>): Promise<Plugin> {
+  static build(router: Router, config: Partial<OpenIdConnectConfiguration>): Plugin {
     const plugin = new OpenIdConnectPlugin(config);
-    const accessCode = (new URLSearchParams(window.location.search)).get('code');
+    const accessCode = new URLSearchParams(window.location.search).get('code');
     if (accessCode) {
       plugin.loading.value = true;
-      try {
-        const redirectPath = await plugin.postCode(accessCode);
+      setTimeout(async () => {
+        try {
+          const redirectPath = await plugin.postCode(accessCode);
+          plugin.loading.value = false;
+          plugin.isAuthenticated.value = true;
+          router.push({ path: redirectPath });
+        } catch (e) {
+          plugin.loading.value = false;
+          plugin.error.value = e;
+        }
+      });
+    } else if (!plugin.isAuthenticated.value) {
+      plugin.loading.value = true;
+      setTimeout(async () => {
+        plugin.isAuthenticated.value = await plugin.checkLoggedIn();
         plugin.loading.value = false;
-        plugin.isAuthenticated.value = true;
-        router.push({ path: redirectPath });
-      } catch (e) {
-        plugin.loading.value = false;
-        plugin.error.value = e;
-      }
-    }
-    if (!plugin.isAuthenticated.value) {
-      plugin.isAuthenticated.value = await plugin.checkLoggedIn();
+      });
     }
 
+    OpenIdConnectPlugin.instance = plugin;
     return {
       install: (app: App) => app.provide(DefaultAuth, plugin),
     };
@@ -138,24 +139,3 @@ export class OpenIdConnectPlugin {
 
 export const DefaultAuth: unique symbol = Symbol('Auth');
 export const useAuth = () => inject<OpenIdConnectPlugin>(DefaultAuth)!;
-
-function buildAuthEndpoint(authEndpoint: string, encoded = false): string {
-  // FIXME: Doesn't work, in general!
-  if (!encoded) {
-    return authEndpoint;
-  }
-  const [before, after] = authEndpoint.split('ReturnUrl=');
-  return before + 'ReturnUrl=' + encodeURIComponent(after);
-}
-
-function buildOpenIdParameterString(params: object, encoded = false): string {
-  const paramArray = Object.entries(params).map(([k, v]) => `${k}=${v}`).join('&');
-  return encoded ? encodeURIComponent(`?${paramArray}`) : `?${paramArray}`;
-}
-
-function buildInternalRedirectUrl(endpoint?: string, encoded = true): string {
-  const { protocol, hostname, port } = window.location;
-  const portString = port ? `:${port}` : '';
-  const redirectUrl = `${protocol}//${hostname}${portString}/${endpoint}`;
-  return encoded ? encodeURIComponent(redirectUrl) : redirectUrl;
-}
