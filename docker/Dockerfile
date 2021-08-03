@@ -7,7 +7,7 @@ ENV NPM_AUTH_TOKEN=$NPM_AUTH_TOKEN
 
 WORKDIR /app
 
-COPY .npmrc package.json package-lock.json ./
+COPY package.json package-lock.json ./
 
 RUN npm install
 CMD npm run serve
@@ -20,7 +20,7 @@ ARG NPM_AUTH_TOKEN
 
 WORKDIR /app
 
-COPY .npmrc package.json package-lock.json ./
+COPY package.json package-lock.json ./
 
 RUN npm install
 
