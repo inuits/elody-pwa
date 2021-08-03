@@ -45,7 +45,7 @@
   import { useRoute, useRouter } from 'vue-router';
   import { Unicons } from '@/types';
   import BaseButton from '@/components/base/BaseButton.vue';
-  import { useAuth } from '@/OpenIdConnectPlugin';
+  import { DefaultAuth, useAuth } from '@/OpenIdConnectPlugin';
 
   export type updatePageTitleType = (_newTitle: string) => void;
   export type setRoutePageTitleType = () => void;
@@ -55,7 +55,7 @@
     components: {
       BaseButton,
     },
-    inject: ['Auth'],
+    inject: { [DefaultAuth]: DefaultAuth },
     setup() {
       const auth = useAuth();
       const route = useRoute();

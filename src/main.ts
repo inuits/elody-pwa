@@ -20,7 +20,7 @@ createApp(App)
   .use(Unicon)
   .use(store)
   .use(router)
-  .use(await OpenIdConnectPlugin.build(router, config.oidc))
+  .use(OpenIdConnectPlugin.build(router, config.oidc))
   .provide(
     DefaultApolloClient,
     new ApolloClient({
