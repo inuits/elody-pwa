@@ -1,10 +1,6 @@
 <template>
   <div class="w-2/6 p-6 bg-neutral-0">
-    <div
-      v-for="metaItem in meta"
-      :key="metaItem.value"
-      class="flex flex-col mb-2 mt-2"
-    >
+    <div v-for="metaItem in meta" :key="metaItem.value" class="flex flex-col mb-2 mt-2">
       <span
         class="rounded font-base text-xs"
         :class="{

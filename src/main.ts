@@ -7,7 +7,7 @@ import App from './App.vue';
 import { router } from './router';
 import { store } from './store';
 import { Unicons } from './types';
-import { DefaultAuth, OpenIdConnectPlugin } from '@/OpenIdConnectPlugin';
+import { OpenIdConnectPlugin } from '@/OpenIdConnectPlugin';
 
 import './registerServiceWorker';
 import './index.css';
@@ -20,7 +20,7 @@ createApp(App)
   .use(Unicon)
   .use(store)
   .use(router)
-  .provide(DefaultAuth, await OpenIdConnectPlugin.build(router, config.oidc))
+  .use(await OpenIdConnectPlugin.build(router, config.oidc))
   .provide(
     DefaultApolloClient,
     new ApolloClient({
