@@ -29,7 +29,9 @@
       const updatePageTitle: updatePageTitleType | undefined = inject('updatePageTitle');
 
       const { result, loading } = useQuery(GetEntityByIdDocument, {
-        id: Array.isArray(route.params['id']) ? route.params['id'][0] : (route.params['id'] as string),
+        id: Array.isArray(route.params['id'])
+          ? route.params['id'][0]
+          : (route.params['id'] as string),
       });
 
       watch(result, (value) => {

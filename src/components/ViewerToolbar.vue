@@ -39,12 +39,7 @@
         default: null,
       },
     },
-    emits: [
-      'update:zoomIn',
-      'update:zoomOut',
-      'update:fullPage',
-      'update:home',
-    ],
+    emits: ['update:zoomIn', 'update:zoomOut', 'update:fullPage', 'update:home'],
     setup: (_props, { emit }) => {
       const zoomInRef = ref<HTMLDivElement | undefined>(undefined);
       const zoomOutRef = ref<HTMLDivElement | undefined>(undefined);
