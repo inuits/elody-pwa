@@ -1,4 +1,4 @@
-import { App, ref, reactive, Ref, Plugin, inject } from 'vue';
+import { App, ref, reactive, Ref, inject, watch, WatchStopHandle } from 'vue';
 import { Router } from 'vue-router';
 
 const loginRedirectRouteKey = 'oidc-login-redirect-route';
@@ -12,8 +12,6 @@ export interface OpenIdConnectConfiguration {
   clientSecret?: string;
   scope?: string;
   authorizedRedirectRoute: string;
-  // If not filled in then application will automatically redirect to openid provider
-  unauthorizedRedirectRoute?: string;
   // Properties needed for doing token call on backend server (more secure and keeps clientSecret out of frontend config)
   serverBaseUrl?: string;
   serverTokenEndpoint?: string;
@@ -43,12 +41,14 @@ export interface OpenIdConnectUserInformation {
   email: string;
 }
 
-export class OpenIdConnectPlugin {
+export const DefaultOIDC: unique symbol = Symbol('Auth');
+export const useAuth = () => inject<OpenIdConnectClient>(DefaultOIDC)!;
+
+export class OpenIdConnectClient {
   isAuthenticated: Ref<boolean>;
   loading: Ref<boolean>;
   error: Ref<any>;
   config: OpenIdConnectConfiguration;
-  static instance: OpenIdConnectPlugin;
 
   constructor(config: Partial<OpenIdConnectConfiguration>) {
     this.isAuthenticated = ref(false);
@@ -57,18 +57,45 @@ export class OpenIdConnectPlugin {
     this.config = reactive({ ...defaultConfig, ...config });
   }
 
-  async checkLoggedIn() {
-    const res = await fetch('/api/me', {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    });
-    return res.status !== 401;
+  install(app: App) {
+    app.provide(DefaultOIDC, this);
   }
 
-  async postCode(authCode: string) {
+  async processAuthCode(authCode: string, router: Router) {
+    this.loading.value = true;
+    try {
+      await this.sendReceivedCode(authCode);
+      this.isAuthenticated.value = true;
+
+      const storedRedirectRoute = sessionStorage.getItem(loginRedirectRouteKey) || '';
+      sessionStorage.removeItem(loginRedirectRouteKey);
+      router.push({ path: storedRedirectRoute || this.config.authorizedRedirectRoute });
+    } catch (e) {
+      this.isAuthenticated.value = false;
+      this.error.value = e;
+    }
+    this.loading.value = false;
+  }
+
+  async verifyServerAuth() {
+    this.loading.value = true;
+    try {
+      const res = await fetch('/api/me', {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      this.isAuthenticated.value = res.status !== 401;
+    } catch (e) {
+      this.isAuthenticated.value = false;
+      this.error.value = e;
+    }
+    this.loading.value = false;
+  }
+
+  async sendReceivedCode(authCode: string) {
     const { baseUrl, clientId, tokenEndpoint, internalRedirectUrl } = this.config;
     await fetch(`${this.config.apiCodeEndpoint}`, {
       method: 'POST',
@@ -84,17 +111,12 @@ export class OpenIdConnectPlugin {
         redirectUri: new URL(internalRedirectUrl || '/', window.location.href).toString(),
       }),
     });
-    const storedRedirectRoute = sessionStorage.getItem(loginRedirectRouteKey) || '';
-    sessionStorage.removeItem(loginRedirectRouteKey);
-    return storedRedirectRoute || this.config.authorizedRedirectRoute;
   }
 
-  login(finalRedirectRoute?: string) {
-    // Save final redirect route in session storage so it can be used at the end of the openid flow
+  redirectToLogin(finalRedirectRoute?: string): never {
     if (finalRedirectRoute) {
       sessionStorage.setItem(loginRedirectRouteKey, finalRedirectRoute);
     }
-
     const { authEndpoint, baseUrl, clientId, internalRedirectUrl, scope } = this.config;
     const params = new URLSearchParams({
       scope: scope || 'openid',
@@ -102,40 +124,36 @@ export class OpenIdConnectPlugin {
       response_type: 'code',
       redirect_uri: new URL(internalRedirectUrl || '/', window.location.href).toString(),
     });
-    console.log(`${baseUrl}/${authEndpoint}?${params}`);
     window.location.href = `${baseUrl}/${authEndpoint}?${params}`;
+    throw new Error('unreachable after redirect');
   }
 
-  static build(router: Router, config: Partial<OpenIdConnectConfiguration>): Plugin {
-    const plugin = new OpenIdConnectPlugin(config);
-    const accessCode = new URLSearchParams(window.location.search).get('code');
-    if (accessCode) {
-      plugin.loading.value = true;
-      setTimeout(async () => {
-        try {
-          const redirectPath = await plugin.postCode(accessCode);
-          plugin.loading.value = false;
-          plugin.isAuthenticated.value = true;
-          router.push({ path: redirectPath });
-        } catch (e) {
-          plugin.loading.value = false;
-          plugin.error.value = e;
-        }
-      });
-    } else if (!plugin.isAuthenticated.value) {
-      plugin.loading.value = true;
-      setTimeout(async () => {
-        plugin.isAuthenticated.value = await plugin.checkLoggedIn();
-        plugin.loading.value = false;
-      });
+  async assertIsAuthenticated(destination: string, cb: () => void): Promise<void> {
+    await waitTillFalse(this.loading);
+    if (this.isAuthenticated.value) {
+      return cb();
     }
-
-    OpenIdConnectPlugin.instance = plugin;
-    return {
-      install: (app: App) => app.provide(DefaultAuth, plugin),
-    };
+    await this.verifyServerAuth();
+    await waitTillFalse(this.loading);
+    if (this.isAuthenticated.value) {
+      return cb();
+    }
+    this.redirectToLogin(destination);
   }
 }
 
-export const DefaultAuth: unique symbol = Symbol('Auth');
-export const useAuth = () => inject<OpenIdConnectPlugin>(DefaultAuth)!;
+async function waitTillFalse(x: Ref<unknown>): Promise<void> {
+  return new Promise((resolve, _reject) => {
+    if (!x.value) {
+      return resolve();
+    }
+    /* eslint-disable prefer-const */
+    let stopWatch: WatchStopHandle;
+    stopWatch = watch(x, (loading) => {
+      if (!loading) {
+        stopWatch();
+        resolve();
+      }
+    });
+  });
+}

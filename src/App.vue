@@ -41,37 +41,32 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, provide, ref } from 'vue';
+  import { defineComponent, inject, provide, ref } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { Unicons } from '@/types';
   import BaseButton from '@/components/base/BaseButton.vue';
-  import { DefaultAuth, useAuth } from '@/OpenIdConnectPlugin';
+  import { DefaultOIDC, useAuth } from '@/OpenIdConnectPlugin';
 
-  export type updatePageTitleType = (_newTitle: string) => void;
-  export type setRoutePageTitleType = () => void;
+  export const useUpdatePageTitle = () => inject<(title?: string) => void>('updatePageTitle')!;
 
   export default defineComponent({
     name: 'App',
     components: {
       BaseButton,
     },
-    inject: { [DefaultAuth]: DefaultAuth },
+    inject: { [DefaultOIDC]: DefaultOIDC },
     setup() {
       const auth = useAuth();
       const route = useRoute();
       const router = useRouter();
 
-      // Provide option to update the page title
-      const pageTitle = ref<string | unknown>(route.meta.title);
-      const updatePageTitle: updatePageTitleType = (newTitle: string) => {
-        pageTitle.value = newTitle;
-      };
-      const setRoutePageTitle: setRoutePageTitleType = () => {
-        pageTitle.value = route.meta.title;
-      };
-
-      provide('updatePageTitle', updatePageTitle);
-      provide('setRoutePageTitle', setRoutePageTitle);
+      const pageTitle = ref<string>(route.meta.title as string);
+      router.afterEach((to, _from, _failure) => {
+        pageTitle.value = to.meta.title as string;
+      });
+      provide('updatePageTitle', (newTitle?: string) => {
+        pageTitle.value = newTitle || '';
+      });
 
       return {
         router,
