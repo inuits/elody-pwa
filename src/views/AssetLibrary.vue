@@ -27,7 +27,7 @@
           </template>
         </ListItem>
       </div>
-      <div v-else-if="result && result.Entities.results">
+      <div v-else-if="result?.Entities.results">
         <ListItem
           v-for="entity in result.Entities.results"
           :key="entity.id"
@@ -58,7 +58,6 @@
   import { Unicons } from '@/types';
   import { useRouter } from 'vue-router';
   import { GetEntitiesDocument, GetEntitiesQueryVariables } from '@/queries';
-  import { setRoutePageTitleType } from '@/App.vue';
 
   export default defineComponent({
     name: 'Home',
@@ -70,7 +69,6 @@
     },
     setup: () => {
       const router = useRouter();
-      const setRoutePageTitle: setRoutePageTitleType | undefined = inject('setRoutePageTitle');
       const paginationInfo = ref<GetEntitiesQueryVariables>({
         skip: 0,
         limit: 20,
@@ -83,10 +81,6 @@
           variables: value,
           updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
         });
-      });
-
-      onMounted(() => {
-        setRoutePageTitle && setRoutePageTitle();
       });
 
       return {
