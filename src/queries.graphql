@@ -25,7 +25,7 @@ query getEntityById($id: String!) {
       value
     }
     mediafiles {
-      location
+      original_file_location
     }
   }
 }

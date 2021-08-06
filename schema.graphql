@@ -29,7 +29,7 @@ type Entity {
 
 type MediaFile {
   _id: String!
-  location: String
+  original_file_location: String
   entities: [String]
 }
 

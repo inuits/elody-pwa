@@ -2,7 +2,7 @@
   <div class="h-full w-full flex relative">
     <i-i-i-f-viewer
       v-if="!loading && result.Entity.mediafiles?.[0]"
-      :image-url="result.Entity.mediafiles[0].location"
+      :image-url="result.Entity.mediafiles[0].original_file_location"
     />
     <meta-view v-if="!loading && result.Entity.metadata" :meta="result.Entity.metadata" />
   </div>
