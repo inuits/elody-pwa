@@ -42,10 +42,9 @@ type EntitiesResults {
 type Query {
   Entity(id: String!): Entity
   Entities(limit: Int, skip: Int): EntitiesResults
+  SearchEntities(limit: Int, skip: Int): EntitiesResults
 }
 
 type Mutation {
-  addMetadata(id: String!, metadata: MetadataInput!): Entity
   replaceMetadata(id: String!, metadata: [MetadataInput!]!): Entity
-  deleteMetadata(id: String!, key: MetaKey!): Void
 }

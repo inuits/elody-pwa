@@ -1,31 +1,45 @@
+fragment minimalEntity on Entity {
+  id
+  type
+  metadata(key: [title, type]) {
+    key
+    value
+  }
+}
+
+fragment fullEntity on Entity {
+  id
+  type
+  title: metadata(key: [title]) {
+    value
+  }
+  metadata(key: [description, material, type]) {
+    key
+    value
+  }
+  mediafiles {
+      original_file_location
+  }
+}
+
 query getEntities($limit: Int, $skip: Int) {
   Entities(limit: $limit, skip: $skip) {
     count
     limit
     results {
-      id
-      type
-      metadata(key: [title, type]) {
-        key
-        value
-      }
+      ...minimalEntity
     }
   }
 }
 
 query getEntityById($id: String!) {
   Entity(id: $id) {
-    id
-    type
-    title: metadata(key: [title]) {
-      value
-    }
-    metadata(key: [description, material, type]) {
-      key
-      value
-    }
-    mediafiles {
-      original_file_location
-    }
+    ...fullEntity
+  }
+}
+
+mutation editMetadata($id: String!, $metadata: [MetadataInput!]!) {
+  replaceMetadata(id: $id, metadata: $metadata) {
+    ...fullEntity
   }
 }

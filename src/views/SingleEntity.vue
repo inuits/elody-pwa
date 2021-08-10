@@ -1,17 +1,22 @@
 <template>
   <div class="h-full w-full flex relative">
-    <i-i-i-f-viewer
+    <IIIFViewer
       v-if="!loading && result.Entity.mediafiles?.[0]"
       :image-url="result.Entity.mediafiles[0].original_file_location"
     />
-    <meta-view v-if="!loading && result.Entity.metadata" :meta="result.Entity.metadata" />
+    <MetaView
+      :loading="loading"
+      :metadata="result?.Entity.metadata"
+      :edit-mode="editMode"
+    />
   </div>
 </template>
 
 <script lang="ts">
-  import { defineComponent, watch, inject, onMounted } from 'vue';
+  import { defineComponent, onMounted, ref, watch } from 'vue';
   import { useRoute } from 'vue-router';
-  import { useQuery } from '@vue/apollo-composable';
+  import { useMutation, useQuery } from '@vue/apollo-composable';
+  import { diff } from 'just-diff';
 
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import MetaView from '@/components/MetaView.vue';
@@ -24,27 +29,21 @@
       IIIFViewer,
       MetaView,
     },
-    setup: () => {
+    setup() {
       const route = useRoute();
-      const updatePageTitle = useUpdatePageTitle();
-
+      const editMode = ref(false);
       const { result, loading } = useQuery(GetEntityByIdDocument, {
         id: Array.isArray(route.params['id'])
           ? route.params['id'][0]
           : (route.params['id'] as string),
       });
+      // const { mutate: addMetadata } = useMutation();
 
-      watch(result, (value) => {
-        const title = value?.Entity?.title[0]?.value;
-        updatePageTitle(title);
-      });
+      const updatePageTitle = useUpdatePageTitle();
+      onMounted(() => updatePageTitle(result.value?.Entity?.title[0]?.value));
+      watch(result, (value) => updatePageTitle(value?.Entity?.title[0]?.value));
 
-      onMounted(() => {
-        const title = result.value?.Entity?.title[0]?.value;
-        updatePageTitle(title);
-      });
-
-      return { result, loading };
+      return { editMode, result, loading };
     },
   });
 </script>

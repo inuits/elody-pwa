@@ -1,6 +1,6 @@
 <template>
   <div class="w-2/6 p-6 bg-neutral-0">
-    <div v-for="metaItem in meta" :key="metaItem.value" class="flex flex-col mb-2 mt-2">
+    <div v-for="meta in metadata" :key="meta.value" class="flex flex-col mb-2 mt-2">
       <span
         class="rounded font-base text-xs"
         :class="{
@@ -8,8 +8,9 @@
           'text-neutral-60': !loading,
         }"
         data-test="meta-label"
-        >{{ metaItem.key }}</span
       >
+        {{ meta.key }}
+      </span>
       <span
         class="mt-0.5 rounded font-base text-sm"
         :class="{
@@ -17,8 +18,9 @@
           'text-neutral-700': !loading,
         }"
         data-test="meta-info"
-        >{{ metaItem.value }}</span
       >
+        {{ meta.value }}
+      </span>
     </div>
   </div>
 </template>
@@ -26,19 +28,17 @@
 <script lang="ts">
   import { Metadata } from '@/queries';
   import { defineComponent, PropType } from 'vue';
+  import { diff } from 'just-diff';
 
   export default defineComponent({
     name: 'MetaView',
     props: {
-      loading: {
-        type: Boolean,
-        default: false,
-      },
-      meta: {
-        type: Array as PropType<Metadata[]>,
-        default: () => [],
-        required: false,
-      },
+      loading: { type: Boolean, default: false },
+      metadata: { type: Array as PropType<Metadata[]>, default: () => [] },
+      editMode: { type: Boolean, default: false },
     },
+    setup() {
+      
+    }
   });
 </script>

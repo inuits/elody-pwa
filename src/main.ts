@@ -23,7 +23,7 @@ router.beforeEach(async (to, _from, next) => {
   if (!to.matched.some((route) => route.meta.requiresAuth)) {
     return next();
   }
-  await auth.assertIsAuthenticated(to.fullPath, next);
+  return await auth.assertIsAuthenticated(to.fullPath, next);
 });
 
 const authCode = new URLSearchParams(window.location.search).get('code');
