@@ -1,7 +1,7 @@
 schema: schema.graphql
+documents: src/queries.graphql
 generates:
   src/queries.ts:
-    documents: src/queries.graphql
     plugins:
       - add:
           content: |

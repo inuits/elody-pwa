@@ -49,7 +49,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, inject, ref, watch, onMounted } from 'vue';
+  import { defineComponent, ref, watch } from 'vue';
   import { useQuery } from '@vue/apollo-composable';
   import ListContainer from '@/components/ListContainer.vue';
   import ListItem from '@/components/ListItem.vue';
