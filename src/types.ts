@@ -8,6 +8,7 @@ import {
   uniAngleRight,
   uniBookOpen,
   uniUser,
+  uniSearch,
 } from 'vue-unicons/dist/icons';
 
 export enum Unicons {
@@ -20,4 +21,5 @@ export enum Unicons {
   AngleRight = uniAngleRight,
   BookOpen = uniBookOpen,
   User = uniUser,
+  SearchGlas = uniSearch,
 }

@@ -1,6 +1,7 @@
 <template>
   <div class="p-6">
-    <input v-model="searchQuery" type="text" placeholder="search" />
+    <InputField v-model="paginationInfo.searchQuery" />
+    <h1>{{ searchQuery }}</h1>
     <div class="flex justify-end py-4">
       <Pagination
         v-if="result"
@@ -54,11 +55,12 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref, watch } from 'vue';
+  import { defineComponent, ref, watch, reactive } from 'vue';
   import { useQuery } from '@vue/apollo-composable';
   import ListContainer from '@/components/ListContainer.vue';
   import ListItem from '@/components/ListItem.vue';
   import BaseButton from '@/components/base/BaseButton.vue';
+  import InputField from '@/components/base/InputField.vue';
   import Pagination from '@/components/base/Pagination.vue';
   import { Unicons } from '@/types';
   import { useRouter } from 'vue-router';
@@ -71,14 +73,14 @@
       ListItem,
       Pagination,
       BaseButton,
+      InputField,
     },
     setup: () => {
-      let searchQuery = 'asset';
       const router = useRouter();
-      const paginationInfo = ref<GetEntitiesQueryVariables>({
+      const paginationInfo = reactive<GetEntitiesQueryVariables>({
         skip: 0,
         limit: 20,
-        searchQuery: searchQuery,
+        searchQuery: 'asset',
       });
 
       const { result, loading, fetchMore } = useQuery(
@@ -94,7 +96,6 @@
       });
 
       return {
-        searchQuery,
         result,
         loading,
         router,
