@@ -32,14 +32,18 @@
           v-for="entity in result.Entities.results"
           :key="entity.id"
           :meta="entity.metadata"
-          @click="router.push({ name: 'SingleEntity', params: { id: entity.id } })"
+          @click="
+            router.push({ name: 'SingleEntity', params: { id: entity.id } })
+          "
         >
           <template #actions>
             <BaseButton
               :loading="loading"
               class="ml-2"
               :icon="Unicons.Eye.name"
-              @click="router.push({ name: 'SingleEntity', params: { id: entity.id } })"
+              @click="
+                router.push({ name: 'SingleEntity', params: { id: entity.id } })
+              "
             />
           </template>
         </ListItem>
@@ -68,13 +72,18 @@
       BaseButton,
     },
     setup: () => {
+      let searchQuery = 'asset';
       const router = useRouter();
       const paginationInfo = ref<GetEntitiesQueryVariables>({
         skip: 0,
         limit: 20,
+        searchQuery: searchQuery,
       });
 
-      const { result, loading, fetchMore } = useQuery(GetEntitiesDocument, paginationInfo);
+      const { result, loading, fetchMore } = useQuery(
+        GetEntitiesDocument,
+        paginationInfo,
+      );
 
       watch(paginationInfo, (value) => {
         fetchMore({
@@ -84,6 +93,7 @@
       });
 
       return {
+        searchQuery,
         result,
         loading,
         router,
