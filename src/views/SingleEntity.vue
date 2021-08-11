@@ -16,7 +16,6 @@
   import { defineComponent, onMounted, ref, watch } from 'vue';
   import { useRoute } from 'vue-router';
   import { useMutation, useQuery } from '@vue/apollo-composable';
-  import { diff } from 'just-diff';
 
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import MetaView from '@/components/MetaView.vue';
