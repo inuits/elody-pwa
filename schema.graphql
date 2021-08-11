@@ -41,7 +41,7 @@ type EntitiesResults {
 
 type Query {
   Entity(id: String!): Entity
-  Entities(limit: Int, skip: Int): EntitiesResults
+  Entities(limit: Int, skip: Int, searchQuery: String): EntitiesResults
   SearchEntities(limit: Int, skip: Int): EntitiesResults
 }
 
