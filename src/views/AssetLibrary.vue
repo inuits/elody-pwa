@@ -1,5 +1,6 @@
 <template>
   <div class="p-6">
+    <input v-model="searchQuery" type="text" placeholder="search" />
     <div class="flex justify-end py-4">
       <Pagination
         v-if="result"
