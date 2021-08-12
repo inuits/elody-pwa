@@ -1,7 +1,6 @@
 <template>
   <div class="p-6">
     <InputField v-model:search="paginationInfo.searchQuery" :debounce="true" />
-    <h1>{{ searchQuery }}</h1>
     <div class="flex justify-end py-4">
       <Pagination
         v-if="result"

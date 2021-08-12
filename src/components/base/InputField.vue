@@ -1,9 +1,9 @@
 <template>
-  <div class="relative flex flex-wrap mb-3">
+  <label class="block mb-1 text-sm text-gray-700">{{ props.label }}</label>
+  <div class="block flex flex-wrap mb-3">
     <span
       class="
         z-10
-        h-full
         leading-snug
         font-normal
         absolute
@@ -60,6 +60,11 @@
         require: false,
         default: 'Search Asset Library...',
       },
+      label: {
+        type: String,
+        require: false,
+        default: 'search',
+      },
       search: {
         type: String,
         required: false,
@@ -76,7 +81,6 @@
       const inputValue = ref<string>(props.search);
 
       function sendInputValue(value: string) {
-        console.log('send search value ', value);
         emit('update:search', value);
       }
 
@@ -90,7 +94,7 @@
         } else sendInputValue(value);
       });
 
-      return { Unicons, props };
+      return { Unicons, props, inputValue };
     },
   });
 </script>
