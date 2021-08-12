@@ -1,10 +1,10 @@
 <template>
   <div class="p-6">
-    <InputField v-model:search="paginationInfo.searchQuery" :debounce="true" />
+    <InputField v-model:search="queryVariables.searchQuery" :debounce="true" />
     <div class="flex justify-end py-4">
       <Pagination
         v-if="result"
-        v-model:paginationInfo="paginationInfo"
+        v-model:paginationInfo="queryVariables.pagination"
         :loading="loading"
         :max-page="Math.round(result.Entities.count / 20)"
       />
@@ -54,16 +54,23 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, watch, ref } from 'vue';
+  import { defineComponent, watch, ref, reactive } from 'vue';
   import { useQuery } from '@vue/apollo-composable';
   import ListContainer from '@/components/ListContainer.vue';
   import ListItem from '@/components/ListItem.vue';
   import BaseButton from '@/components/base/BaseButton.vue';
   import InputField from '@/components/base/InputField.vue';
-  import Pagination from '@/components/base/Pagination.vue';
+  import Pagination, {
+    Pagination as PaginationType,
+  } from '@/components/base/Pagination.vue';
   import { Unicons } from '@/types';
   import { useRouter } from 'vue-router';
   import { GetEntitiesDocument, GetEntitiesQueryVariables } from '@/queries';
+
+  type QueryVariables = {
+    pagination: PaginationType;
+    searchQuery: string;
+  };
 
   export default defineComponent({
     name: 'Home',
@@ -76,20 +83,25 @@
     },
     setup: () => {
       const router = useRouter();
-      const paginationInfo = ref<GetEntitiesQueryVariables>({
-        skip: 0,
-        limit: 20,
+      const defaultPagination: PaginationType = { skip: 0, limit: 20 };
+      const queryVariables = reactive<QueryVariables>({
+        pagination: defaultPagination,
         searchQuery: 'asset',
       });
 
-      const { result, loading, fetchMore } = useQuery(
-        GetEntitiesDocument,
-        paginationInfo,
-      );
+      const { result, loading, fetchMore } = useQuery(GetEntitiesDocument, {
+        limit: queryVariables.pagination.limit,
+        skip: queryVariables.pagination.skip,
+        searchQuery: queryVariables.searchQuery,
+      });
 
-      watch(paginationInfo, (value) => {
+      watch(queryVariables, (value: QueryVariables) => {
         fetchMore({
-          variables: value,
+          variables: {
+            limit: value.pagination.limit,
+            skip: value.pagination.skip,
+            searchQuery: value.searchQuery,
+          },
           updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
         });
       });
@@ -99,7 +111,7 @@
         loading,
         router,
         Unicons,
-        paginationInfo,
+        queryVariables,
       };
     },
   });

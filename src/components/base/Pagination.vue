@@ -30,10 +30,9 @@
   import { defineComponent, PropType, computed } from 'vue';
   import { Unicons } from '@/types';
 
-  export type paginationInfoType = {
+  export type Pagination = {
     limit: number;
     skip: number;
-    searchQuery: String;
   };
 
   export default defineComponent({
@@ -44,8 +43,8 @@
         default: false,
       },
       paginationInfo: {
-        type: Object as PropType<paginationInfoType>,
-        default: () => ({ limit: 20, skip: 0, searchQuery: 'asset' }),
+        type: Object as PropType<Pagination>,
+        default: () => ({ limit: 20, skip: 0 }),
         required: true,
       },
       maxPage: {
@@ -62,7 +61,6 @@
           emit('update:paginationInfo', {
             limit: props.paginationInfo.limit,
             skip: props.paginationInfo.skip + 1,
-            searchQuery: props.paginationInfo.searchQuery,
           });
       };
 
@@ -71,7 +69,6 @@
           emit('update:paginationInfo', {
             limit: props.paginationInfo.limit,
             skip: props.paginationInfo.skip - 1,
-            searchQuery: props.paginationInfo.searchQuery,
           });
       };
 

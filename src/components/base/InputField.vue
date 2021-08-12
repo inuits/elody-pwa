@@ -1,5 +1,9 @@
 <template>
-  <label class="block mb-1 text-sm text-gray-700">{{ props.label }}</label>
+  <label
+    v-if="props.label.length > 0"
+    class="block mb-1 text-sm text-gray-700"
+    >{{ props.label }}</label
+  >
   <div class="block flex flex-wrap mb-3">
     <span
       class="
@@ -63,7 +67,7 @@
       label: {
         type: String,
         require: false,
-        default: 'search',
+        default: '',
       },
       search: {
         type: String,
