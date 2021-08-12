@@ -50,7 +50,7 @@
 <script lang="ts">
   import { defineComponent, ref, watch } from 'vue';
   import { Unicons } from '@/types';
-  // import _ from 'lodash';
+  import { debounce } from 'ts-debounce';
 
   export default defineComponent({
     name: 'InputField',
@@ -58,9 +58,9 @@
       placeholder: {
         type: String,
         require: false,
-        default: 'Search',
+        default: 'Search Asset Library...',
       },
-      modelValue: {
+      search: {
         type: String,
         required: false,
         default: 'asset',
@@ -71,32 +71,26 @@
         default: false,
       },
     },
-    emits: ['update:modelValue'],
+    emits: ['update:search'],
     setup(props, { emit }) {
-      const inputValue = ref<string>(props.modelValue);
-      const emitValues = (input: any) => {
-        console.log("INPUT");
-        console.log(input);
-        emit('update:modelValue', input);
-      };
+      const inputValue = ref<string>(props.search);
 
-      const debounceInput = (event: any) => {
-        console.log('DEBOUNCE');
-        emitValues(event);
-        // if (props.debounce) {
-        //   _.debounce(() => {
-        //     emitValues;
-        //   }, 500);
-        // } else {
-        // emitValues(event.target.value);
-        // }
-      };
+      function sendInputValue(value: string) {
+        console.log('send search value ', value);
+        emit('update:search', value);
+      }
 
-      watch(inputValue, (value: any) => {
-        emit('update:modelValue', value);
+      const debounceInput = debounce(() => {}, 400);
+
+      watch(inputValue, (value: string) => {
+        if (props.debounce) {
+          debounceInput().then(() => {
+            sendInputValue(value);
+          });
+        } else sendInputValue(value);
       });
 
-      return { Unicons, props, debounceInput, emitValues, inputValue };
+      return { Unicons, props };
     },
   });
 </script>
