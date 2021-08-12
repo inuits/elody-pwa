@@ -33,6 +33,7 @@
   export type paginationInfoType = {
     limit: number;
     skip: number;
+    searchQuery: String;
   };
 
   export default defineComponent({
@@ -44,7 +45,7 @@
       },
       paginationInfo: {
         type: Object as PropType<paginationInfoType>,
-        default: () => ({ limit: 20, skip: 0 }),
+        default: () => ({ limit: 20, skip: 0, searchQuery: 'asset' }),
         required: true,
       },
       maxPage: {
@@ -61,6 +62,7 @@
           emit('update:paginationInfo', {
             limit: props.paginationInfo.limit,
             skip: props.paginationInfo.skip + 1,
+            searchQuery: props.paginationInfo.searchQuery,
           });
       };
 
@@ -69,6 +71,7 @@
           emit('update:paginationInfo', {
             limit: props.paginationInfo.limit,
             skip: props.paginationInfo.skip - 1,
+            searchQuery: props.paginationInfo.searchQuery,
           });
       };
 
