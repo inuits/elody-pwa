@@ -1,6 +1,6 @@
 <template>
   <div class="p-6">
-    <InputField v-model="paginationInfo.searchQuery" />
+    <InputField v-model:search="paginationInfo.searchQuery" :debounce="true" />
     <h1>{{ searchQuery }}</h1>
     <div class="flex justify-end py-4">
       <Pagination
@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref, watch, reactive } from 'vue';
+  import { defineComponent, watch, ref } from 'vue';
   import { useQuery } from '@vue/apollo-composable';
   import ListContainer from '@/components/ListContainer.vue';
   import ListItem from '@/components/ListItem.vue';
@@ -77,7 +77,7 @@
     },
     setup: () => {
       const router = useRouter();
-      const paginationInfo = reactive<GetEntitiesQueryVariables>({
+      const paginationInfo = ref<GetEntitiesQueryVariables>({
         skip: 0,
         limit: 20,
         searchQuery: 'asset',
