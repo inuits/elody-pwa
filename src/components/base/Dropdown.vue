@@ -1,5 +1,5 @@
 <template>
-  <label class="block text-sm text-gray-700 ml-3">Items</label>
+  <label class="block text-sm text-gray-700 ml-3">{{ props.label }}</label>
   <div class="block flex justify-center ml-3">
     <select class="w-48 rounded h-12" @click="toggleMenu">
       <option
@@ -20,6 +20,11 @@
   export default defineComponent({
     name: 'Dropdown',
     props: {
+      label: {
+        type: String,
+        required: false,
+        default: '',
+      },
       options: {
         type: Array as PropType<String[]>,
         required: true,
