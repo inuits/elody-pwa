@@ -1,10 +1,10 @@
 <template>
   <label
     v-if="props.label.length > 0"
-    class="block mb-1 text-sm text-gray-700"
+    class="block text-sm text-gray-700 ml-3"
     >{{ props.label }}</label
   >
-  <div class="block flex flex-wrap mb-3">
+  <div class="block flex flex-wrap items-center ml-3 mb-3 h-12 w-48">
     <span
       class="
         z-10
@@ -12,11 +12,9 @@
         font-normal
         absolute
         text-center text-blueGray-300
-        absolute
         bg-gray
         rounded
         text-base
-        items-center
         justify-center
         w-8
         pl-3
@@ -32,6 +30,8 @@
     <input
       v-model="inputValue"
       class="
+        items-center
+        mr-4
         px-3
         py-3
         placeholder-blueGray-300
@@ -42,7 +42,8 @@
         text-sm
         border border-blueGray-300
         outline-none
-        focus:outline-none focus:ring
+        focus:outline-none
+        focus:ring
         pl-10
       "
       type="text"
@@ -52,53 +53,53 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref, watch } from 'vue';
-  import { Unicons } from '@/types';
-  import { debounce } from 'ts-debounce';
+import { defineComponent, ref, watch } from 'vue';
+import { Unicons } from '@/types';
+import { debounce } from 'ts-debounce';
 
-  export default defineComponent({
-    name: 'InputField',
-    props: {
-      placeholder: {
-        type: String,
-        require: false,
-        default: '',
-      },
-      label: {
-        type: String,
-        require: false,
-        default: '',
-      },
-      search: {
-        type: String,
-        required: false,
-        default: '',
-      },
-      debounce: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
+export default defineComponent({
+  name: 'InputField',
+  props: {
+    placeholder: {
+      type: String,
+      require: false,
+      default: '',
     },
-    emits: ['update:search'],
-    setup(props, { emit }) {
-      const inputValue = ref<string>(props.search);
-
-      function sendInputValue(value: string) {
-        emit('update:search', value);
-      }
-
-      const debounceInput = debounce(() => {}, 400);
-
-      watch(inputValue, (value: string) => {
-        if (props.debounce) {
-          debounceInput().then(() => {
-            sendInputValue(value);
-          });
-        } else sendInputValue(value);
-      });
-
-      return { Unicons, props, inputValue, sendInputValue, debounceInput };
+    label: {
+      type: String,
+      require: false,
+      default: '',
     },
-  });
+    search: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    debounce: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
+  emits: ['update:search'],
+  setup(props, { emit }) {
+    const inputValue = ref<string>(props.search);
+
+    function sendInputValue(value: string) {
+      emit('update:search', value);
+    }
+
+    const debounceInput = debounce(() => {}, 400);
+
+    watch(inputValue, (value: string) => {
+      if (props.debounce) {
+        debounceInput().then(() => {
+          sendInputValue(value);
+        });
+      } else sendInputValue(value);
+    });
+
+    return { Unicons, props, inputValue, sendInputValue, debounceInput };
+  },
+});
 </script>
