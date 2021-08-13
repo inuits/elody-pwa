@@ -62,7 +62,7 @@
       placeholder: {
         type: String,
         require: false,
-        default: 'Search Asset Library...',
+        default: '',
       },
       label: {
         type: String,
@@ -72,7 +72,7 @@
       search: {
         type: String,
         required: false,
-        default: 'asset',
+        default: '',
       },
       debounce: {
         type: Boolean,
@@ -98,7 +98,7 @@
         } else sendInputValue(value);
       });
 
-      return { Unicons, props, inputValue };
+      return { Unicons, props, inputValue, sendInputValue, debounceInput };
     },
   });
 </script>

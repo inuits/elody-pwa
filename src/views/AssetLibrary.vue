@@ -1,6 +1,6 @@
 <template>
   <div class="p-6">
-    <InputField v-model:search="queryVariables.searchQuery" :debounce="true" />
+    <InputField v-model:search="queryVariables.searchQuery" :debounce="true" :placeholder="'Search Asset Library...'" />
     <div class="flex justify-end py-4">
       <Pagination
         v-if="result"
