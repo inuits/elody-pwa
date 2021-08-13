@@ -1,12 +1,27 @@
 <template>
   <div class="p-6">
-    <InputField v-model:search="queryVariables.searchQuery" :debounce="true" :placeholder="'Search Asset Library...'" />
+    <div class="flex flex-row flex-wrap w-full gap-y-4">
+      <InputField
+        v-model:search="queryVariables.searchQuery"
+        :label="'search'"
+        :debounce="true"
+        :placeholder="'Search Asset Library...'"
+      />
+      <div class="ml-12 flex flex-row">
+        <Dropdown
+          v-model:selected="queryVariables.pagination.limit"
+          :options="[5, 10, 15, 20]"
+        />
+      </div>
+    </div>
     <div class="flex justify-end py-4">
       <Pagination
         v-if="result"
         v-model:paginationInfo="queryVariables.pagination"
         :loading="loading"
-        :max-page="Math.round(result.Entities.count / 20)"
+        :max-page="
+          Math.round(result.Entities.count / queryVariables.pagination.limit)
+        "
       />
     </div>
     <ListContainer>
@@ -60,12 +75,13 @@
   import ListItem from '@/components/ListItem.vue';
   import BaseButton from '@/components/base/BaseButton.vue';
   import InputField from '@/components/base/InputField.vue';
+  import Dropdown from '@/components/base/Dropdown.vue';
   import Pagination, {
     Pagination as PaginationType,
   } from '@/components/base/Pagination.vue';
   import { Unicons } from '@/types';
   import { useRouter } from 'vue-router';
-  import { GetEntitiesDocument, GetEntitiesQueryVariables } from '@/queries';
+  import { GetEntitiesDocument } from '@/queries';
 
   type QueryVariables = {
     pagination: PaginationType;
@@ -80,10 +96,14 @@
       Pagination,
       BaseButton,
       InputField,
+      Dropdown,
     },
     setup: () => {
       const router = useRouter();
-      const defaultPagination: PaginationType = { skip: 0, limit: 20 };
+      const defaultPagination = reactive<PaginationType>({
+        skip: 0,
+        limit: 20,
+      });
       const queryVariables = reactive<QueryVariables>({
         pagination: defaultPagination,
         searchQuery: 'asset',
