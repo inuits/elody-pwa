@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Dropdown.vue Renders correctly 1`] = `
+<div
+  data-v-app=""
+>
+  
+  <label
+    class="block text-sm text-gray-700 ml-3"
+  />
+  <div
+    class="block flex justify-center ml-3"
+  >
+    <select
+      class="w-48 rounded h-12"
+    >
+      
+      <option
+        value="option"
+      >
+        5
+      </option>
+      <option
+        value="option"
+      >
+        10
+      </option>
+      <option
+        value="option"
+      >
+        15
+      </option>
+      <option
+        value="option"
+      >
+        20
+      </option>
+      
+    </select>
+  </div>
+  
+</div>
+`;

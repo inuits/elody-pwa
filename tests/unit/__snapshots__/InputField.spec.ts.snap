@@ -6,12 +6,12 @@ exports[`InputField.vue Renders correctly 1`] = `
 >
   
   <label
-    class="block mb-1 text-sm text-gray-700"
+    class="block text-sm text-gray-700 ml-3"
   >
     search
   </label>
   <div
-    class="block flex flex-wrap mb-3"
+    class="block flex flex-wrap items-center ml-3 mb-3 h-12 w-48"
   >
     <span
       class="
@@ -20,11 +20,9 @@ exports[`InputField.vue Renders correctly 1`] = `
         font-normal
         absolute
         text-center text-blueGray-300
-        absolute
         bg-gray
         rounded
         text-base
-        items-center
         justify-center
         w-8
         pl-3
@@ -39,6 +37,8 @@ exports[`InputField.vue Renders correctly 1`] = `
     </span>
     <input
       class="
+        items-center
+        mr-4
         px-3
         py-3
         placeholder-blueGray-300
@@ -49,7 +49,8 @@ exports[`InputField.vue Renders correctly 1`] = `
         text-sm
         border border-blueGray-300
         outline-none
-        focus:outline-none focus:ring
+        focus:outline-none
+        focus:ring
         pl-10
       "
       placeholder="Search Asset Library..."
