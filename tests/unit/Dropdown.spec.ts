@@ -8,7 +8,7 @@ describe('Dropdown.vue', () => {
   beforeEach(() => {
     wrapper = shallowMount(Dropdown, {
       props: {
-        options: [5, 10, 15, 20],
+        options: ['5', '10', '15', '20'],
         selected: '5',
       },
     });
@@ -48,5 +48,5 @@ describe('Dropdown.vue', () => {
     });
   });
 
-  it('', () => {});
+  it('', () => { });
 });

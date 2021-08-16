@@ -1,9 +1,5 @@
 <template>
-  <label
-    v-if="props.label.length > 0"
-    class="block text-sm text-gray-700 ml-3"
-    >{{ props.label }}</label
-  >
+  <label v-if="label" class="block text-sm text-gray-700 ml-3">{{ label }}</label>
   <div class="block flex flex-wrap items-center ml-3 mb-3 h-12 w-48">
     <span
       class="
@@ -53,53 +49,44 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from 'vue';
-import { Unicons } from '@/types';
-import { debounce } from 'ts-debounce';
+  import { defineComponent, ref, watch } from 'vue';
+  import { Unicons } from '@/types';
+  import { debounce } from 'ts-debounce';
 
-export default defineComponent({
-  name: 'InputField',
-  props: {
-    placeholder: {
-      type: String,
-      require: false,
-      default: '',
+  export default defineComponent({
+    name: 'InputField',
+    props: {
+      placeholder: {
+        type: String,
+        require: false,
+        default: '',
+      },
+      label: {
+        type: String,
+        require: false,
+        default: '',
+      },
+      search: {
+        type: String,
+        required: false,
+        default: '',
+      },
+      debounce: {
+        type: Boolean,
+        required: false,
+        default: false,
+      },
     },
-    label: {
-      type: String,
-      require: false,
-      default: '',
+    emits: ['update:search'],
+    setup(props, { emit }) {
+      const inputValue = ref<string>(props.search);
+      const debounceInput = debounce(() => {}, 400);
+      watch(inputValue, (value: string) => {
+        if (props.debounce) {
+          debounceInput().then(() => emit('update:search', value));
+        } else emit('update:search', value);
+      });
+      return { Unicons, inputValue };
     },
-    search: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    debounce: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-  },
-  emits: ['update:search'],
-  setup(props, { emit }) {
-    const inputValue = ref<string>(props.search);
-
-    function sendInputValue(value: string) {
-      emit('update:search', value);
-    }
-
-    const debounceInput = debounce(() => {}, 400);
-
-    watch(inputValue, (value: string) => {
-      if (props.debounce) {
-        debounceInput().then(() => {
-          sendInputValue(value);
-        });
-      } else sendInputValue(value);
-    });
-
-    return { Unicons, props, inputValue, sendInputValue, debounceInput };
-  },
-});
+  });
 </script>

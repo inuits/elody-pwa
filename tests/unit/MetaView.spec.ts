@@ -1,4 +1,4 @@
-import { Metadata, MetaKey } from '@/queries';
+import { MetaKey } from '@/queries';
 import { shallowMount } from '@vue/test-utils';
 import MetaView from '@/components/MetaView.vue';
 
@@ -9,72 +9,53 @@ const metaInfo1 = 'Info 1';
 const metaInfo2 = 'Info 2';
 const metaInfo3 = 'Info 3';
 
-const metaProp: Metadata[] = [
-  { key: metaLabel1, value: metaInfo1 },
-  { key: metaLabel2, value: metaInfo2 },
-  { key: metaLabel3, value: metaInfo3 },
-];
+const props = {
+  error: '',
+  loading: false,
+  editMode: false,
+  startEdit: () => { },
+  discardEdit: () => { },
+  saveEdit: () => { },
+  metadata: [
+    { key: metaLabel1, value: metaInfo1 },
+    { key: metaLabel2, value: metaInfo2 },
+    { key: metaLabel3, value: metaInfo3 },
+  ],
+};
 
 describe('MetaView.vue', () => {
   it('Renders correct meta in MetaView', () => {
-    const wrapper = shallowMount(MetaView, {
-      props: {
-        metadata: metaProp,
-      },
-    });
+    const wrapper = shallowMount(MetaView, { props });
+    const labels = wrapper.findAll('[data-test="meta-label"]');
+    const info = wrapper.findAll('[data-test="meta-info"]');
 
-    expect(wrapper.findAll('[data-test="meta-label"]')[0].text()).toMatch(
-      metaLabel1,
-    );
-    expect(wrapper.findAll('[data-test="meta-label"]')[1].text()).toMatch(
-      metaLabel2,
-    );
-    expect(wrapper.findAll('[data-test="meta-label"]')[2].text()).toMatch(
-      metaLabel3,
-    );
-    expect(wrapper.findAll('[data-test="meta-info"]')[0].text()).toMatch(
-      metaInfo1,
-    );
-    expect(wrapper.findAll('[data-test="meta-info"]')[1].text()).toMatch(
-      metaInfo2,
-    );
-    expect(wrapper.findAll('[data-test="meta-info"]')[2].text()).toMatch(
-      metaInfo3,
-    );
+    expect(labels[0].text()).toMatch(metaLabel1);
+    expect(labels[1].text()).toMatch(metaLabel2);
+    expect(labels[2].text()).toMatch(metaLabel3);
+    expect(info[0].text()).toMatch(metaInfo1);
+    expect(info[1].text()).toMatch(metaInfo2);
+    expect(info[2].text()).toMatch(metaInfo3);
   });
 
   // TODO: Css check with regex, to check if text and bg are not the same, not depending on chosen color
   it('Css classes meta correct on loading', () => {
     const wrapper = shallowMount(MetaView, {
-      props: {
-        metadata: metaProp,
-        loading: true,
-      },
+      props: { ...props, loading: true },
     });
+    const labels = wrapper.findAll('[data-test="meta-label"]');
+    const info = wrapper.findAll('[data-test="meta-info"]');
 
-    const labelClasses = wrapper
-      .findAll('[data-test="meta-label"]')[0]
-      .classes();
-    const infoClasses = wrapper.findAll('[data-test="meta-info"]')[0].classes();
-
-    expect(labelClasses).toContain('text-neutral-20');
-    expect(labelClasses).toContain('bg-neutral-20');
-
-    expect(infoClasses).toContain('text-neutral-20');
-    expect(infoClasses).toContain('bg-neutral-20');
+    expect(labels[0].classes()).toContain('text-neutral-20');
+    expect(labels[0].classes()).toContain('bg-neutral-20');
+    expect(info[0].classes()).toContain('text-neutral-20');
+    expect(info[0].classes()).toContain('bg-neutral-20');
   });
 
   it('Css classes meta correct NOT loading', () => {
     const wrapper = shallowMount(MetaView, {
-      props: {
-        metadata: metaProp,
-        loading: false,
-      },
+      props: { ...props, loading: false },
     });
-
-    const labelClasses = wrapper
-      .findAll('[data-test="meta-label"]')[0]
-      .classes();
+    const labelClasses = wrapper.findAll('[data-test="meta-label"]')[0].classes();
     const infoClasses = wrapper.findAll('[data-test="meta-info"]')[0].classes();
 
     expect(labelClasses.includes('text-neutral-20')).toBe(false);
