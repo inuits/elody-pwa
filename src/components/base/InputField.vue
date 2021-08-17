@@ -1,52 +1,42 @@
 <template>
-  <label v-if="label" class="block text-sm text-gray-700 ml-3">{{
-    label
-  }}</label>
-  <div class="block flex flex-wrap items-center ml-3 mb-3 h-12 w-48">
-    <span
-      class="
-        z-10
-        leading-snug
-        font-normal
-        absolute
-        text-center text-blueGray-300
-        bg-gray
-        rounded
-        text-base
-        justify-center
-        w-8
-        pl-3
-        py-3
-      "
-    >
+  <label class="block my-2">
+    <span v-if="label" class="font-base ml-1 text-neutral-700 text-sm">{{
+      label
+    }}</span>
+    <div class="flex flex-row">
       <unicon
         :name="Unicons.SearchGlas.name"
-        height="20"
-        fill="var(--colors-neutral-700)"
+        class="
+          h-9
+          bg-neutral-20
+          rounded-l
+          pl-2
+          border-t-2 border-b-2 border-l-2 border-neutral-40 border-opacity-25
+        "
+        fill="var(--text-neutral-20)"
       />
-    </span>
-    <input
-      v-model="inputValue"
-      class="
-        items-center
-        mr-4
-        px-3
-        py-3
-        placeholder-blueGray-300
-        text-blueGray-600
-        relative
-        bg-white
-        rounded
-        text-sm
-        border border-blueGray-300
-        outline-none
-        focus:outline-none focus:ring
-        pl-10
-      "
-      type="text"
-      :placeholder="placeholder"
-    />
-  </div>
+
+      <input
+        v-model="inputValue"
+        class="
+          h-9
+          mr-4
+          py-2
+          pl-4
+          w-48
+          min-w-0
+          text-neutral-700 text-sm
+          font-base
+          rounded-r
+          bg-neutral-20
+          border-t-2 border-b-2 border-r-2 border-neutral-40 border-opacity-25
+          focus:outline-none
+        "
+        type="text"
+        :placeholder="placeholder"
+      />
+    </div>
+  </label>
 </template>
 
 <script lang="ts">

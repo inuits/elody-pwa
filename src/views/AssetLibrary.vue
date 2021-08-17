@@ -5,11 +5,18 @@
         v-model="queryVariables.searchQuery"
         :debounce="true"
         :placeholder="'Search Asset Library...'"
+        :label="'Search'"
       />
-      <div class="ml-12 flex flex-row">
+      <div class="my-2 flex flex-row justify-left">
         <Dropdown
           v-model:selected="queryVariables.pagination.limit"
           :options="[5, 10, 15, 20]"
+          :label="'Items'"
+        />
+        <Dropdown
+          v-model:selected="queryVariables.sort"
+          :options="['Recently updated']"
+          :label="'Sort'"
         />
       </div>
     </div>
@@ -85,6 +92,7 @@
   type QueryVariables = {
     pagination: PaginationType;
     searchQuery: string;
+    sort: string;
   };
 
   export default defineComponent({
@@ -106,6 +114,7 @@
       const queryVariables = reactive<QueryVariables>({
         pagination: defaultPagination,
         searchQuery: 'asset',
+        sort: '',
       });
 
       const { result, loading, fetchMore } = useQuery(GetEntitiesDocument, {
