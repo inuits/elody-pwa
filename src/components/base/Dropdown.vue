@@ -6,6 +6,7 @@
         v-for="option in options"
         :key="option"
         value="option"
+        :selected="option === props.selected ? true : false"
         @click="setSelectedItem(option)"
       >
         {{ option }}

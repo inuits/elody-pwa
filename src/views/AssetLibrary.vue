@@ -26,7 +26,7 @@
     <ListContainer>
       <div v-if="loading">
         <ListItem
-          v-for="n in 20"
+          v-for="n in queryVariables.pagination.limit"
           :key="n"
           title="loading"
           :loading="true"
@@ -68,7 +68,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, watch, ref, reactive } from 'vue';
+  import { defineComponent, watch, reactive } from 'vue';
   import { useQuery } from '@vue/apollo-composable';
   import ListContainer from '@/components/ListContainer.vue';
   import ListItem from '@/components/ListItem.vue';
