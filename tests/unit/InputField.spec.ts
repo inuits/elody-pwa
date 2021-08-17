@@ -34,7 +34,7 @@ describe('InputField.vue', () => {
 
   it("Emits a new value to it's parent", () => {
     wrapper.vm.sendInputValue('ijzer');
-    expect(wrapper.emitted('update:search')).toEqual([['ijzer']]);
+    expect(wrapper.emitted('update:modelValue')).toEqual([['ijzer']]);
   });
 
   it('Has function debounceInput defined', () => {

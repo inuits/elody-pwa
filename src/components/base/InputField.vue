@@ -1,5 +1,7 @@
 <template>
-  <label v-if="label" class="block text-sm text-gray-700 ml-3">{{ label }}</label>
+  <label v-if="label" class="block text-sm text-gray-700 ml-3">{{
+    label
+  }}</label>
   <div class="block flex flex-wrap items-center ml-3 mb-3 h-12 w-48">
     <span
       class="
@@ -38,8 +40,7 @@
         text-sm
         border border-blueGray-300
         outline-none
-        focus:outline-none
-        focus:ring
+        focus:outline-none focus:ring
         pl-10
       "
       type="text"
@@ -66,7 +67,7 @@
         require: false,
         default: '',
       },
-      search: {
+      modelValue: {
         type: String,
         required: false,
         default: '',
@@ -77,16 +78,19 @@
         default: false,
       },
     },
-    emits: ['update:search'],
+    emits: ['update:modelValue'],
     setup(props, { emit }) {
-      const inputValue = ref<string>(props.search);
+      const inputValue = ref<string>(props.modelValue);
       const debounceInput = debounce(() => {}, 400);
+      function sendInputValue(value: string) {
+        emit('update:modelValue', value);
+      }
       watch(inputValue, (value: string) => {
         if (props.debounce) {
-          debounceInput().then(() => emit('update:search', value));
-        } else emit('update:search', value);
+          debounceInput().then(() => sendInputValue(value));
+        } else sendInputValue(value);
       });
-      return { Unicons, inputValue };
+      return { Unicons, inputValue, debounceInput, sendInputValue };
     },
   });
 </script>
