@@ -25,5 +25,5 @@ export enum Unicons {
   AngleDown = uniAngleDown,
   BookOpen = uniBookOpen,
   User = uniUser,
-  SearchGlas = uniSearch,
+  SearchGlass = uniSearch,
 }

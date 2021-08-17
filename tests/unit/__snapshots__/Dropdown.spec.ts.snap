@@ -5,7 +5,7 @@ exports[`Dropdown.vue Renders correctly 1`] = `
   class="block"
 >
   <span
-    class="ml-1 text-neutral-700 text-sm font-base"
+    class="ml-1 text-neutral-700 text-sm"
   />
   <select
     class="
@@ -16,7 +16,6 @@ exports[`Dropdown.vue Renders correctly 1`] = `
         w-48
         min-w-0
         border-2 border-neutral-40 border-opacity-25
-        font-base
         text-neutral-700 text-sm
         rounded
         bg-neutral-20
@@ -25,22 +24,22 @@ exports[`Dropdown.vue Renders correctly 1`] = `
   >
     
     <option
-      class="font-base rounded py-2 px-4 bg-neutral-20 h-9"
+      class="rounded py-2 px-4 bg-neutral-20 h-9"
     >
       5
     </option>
     <option
-      class="font-base rounded py-2 px-4 bg-neutral-20 h-9"
+      class="rounded py-2 px-4 bg-neutral-20 h-9"
     >
       10
     </option>
     <option
-      class="font-base rounded py-2 px-4 bg-neutral-20 h-9"
+      class="rounded py-2 px-4 bg-neutral-20 h-9"
     >
       15
     </option>
     <option
-      class="font-base rounded py-2 px-4 bg-neutral-20 h-9"
+      class="rounded py-2 px-4 bg-neutral-20 h-9"
     >
       20
     </option>

@@ -12,7 +12,7 @@
         class="flex justify-start flex-col px-1 w-1/4"
       >
         <span
-          class="rounded font-base text-xs"
+          class="rounded text-xs"
           :class="{
             'bg-neutral-20 text-neutral-20': loading,
             'text-neutral-60': !loading,
@@ -22,7 +22,7 @@
           {{ metaItem.key }}
         </span>
         <span
-          class="mt-0.5 rounded font-base text-sm"
+          class="mt-0.5 rounded text-sm"
           :class="{
             'bg-neutral-20 text-neutral-20': loading,
             'text-neutral-700': !loading,
