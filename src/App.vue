@@ -41,20 +41,23 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, inject, provide, ref } from 'vue';
+  import { defineComponent, inject, provide, ref, Ref, onMounted, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { Unicons } from '@/types';
   import BaseButton from '@/components/base/BaseButton.vue';
   import { DefaultOIDC, useAuth } from '@/OpenIdConnectPlugin';
 
   export const useUpdatePageTitle = () => inject<(title?: string) => void>('updatePageTitle')!;
+  export function usePageTitle(x: Ref<string | undefined>) {
+    const fn = useUpdatePageTitle();
+    onMounted(() => fn(x.value));
+    watch(x, (value) => fn(value));
+  }
 
   export default defineComponent({
     name: 'App',
-    components: {
-      BaseButton,
-    },
-    inject: { [DefaultOIDC]: DefaultOIDC },
+    components: { BaseButton },
+    inject: { DefaultOIDC },
     setup() {
       const auth = useAuth();
       const route = useRoute();

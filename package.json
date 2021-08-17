@@ -71,7 +71,8 @@
     "singleQuote": true,
     "semi": true,
     "vueIndentScriptAndStyle": true,
-    "trailingComma": "all"
+    "trailingComma": "all",
+    "printWidth": 90
   },
   "babel": {
     "presets": [

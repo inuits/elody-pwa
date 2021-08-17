@@ -46,16 +46,8 @@
   export default defineComponent({
     name: 'ListItem',
     props: {
-      loading: {
-        type: Boolean,
-        default: false,
-      },
-      meta: {
-        type: Array as PropType<Metadata[]>,
-        default: () => [],
-        required: false,
-      },
+      loading: { type: Boolean, default: false },
+      meta: { type: Array as PropType<Metadata[]>, default: () => [] },
     },
-    setup: () => {},
   });
 </script>
