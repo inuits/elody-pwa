@@ -54,29 +54,25 @@
     },
     emits: ['update:paginationInfo'],
     setup: (props, { emit }) => {
-      const currentPage = computed<number>(() => props.paginationInfo.skip + 1);
-
-      const next = () => {
-        currentPage.value < props.maxPage &&
-          emit('update:paginationInfo', {
-            limit: props.paginationInfo.limit,
-            skip: props.paginationInfo.skip + 1,
-          });
-      };
-
-      const prev = () => {
-        currentPage.value > 1 &&
-          emit('update:paginationInfo', {
-            limit: props.paginationInfo.limit,
-            skip: props.paginationInfo.skip - 1,
-          });
-      };
+      const currentPage = computed(() => props.paginationInfo.skip + 1);
 
       return {
-        next,
-        prev,
         currentPage,
         Unicons,
+        prev() {
+          currentPage.value > 1 &&
+            emit('update:paginationInfo', {
+              limit: props.paginationInfo.limit,
+              skip: props.paginationInfo.skip - 1,
+          });
+        },
+        next() {
+          currentPage.value < props.maxPage &&
+            emit('update:paginationInfo', {
+              limit: props.paginationInfo.limit,
+              skip: props.paginationInfo.skip + 1,
+            });
+        },
       };
     },
   });

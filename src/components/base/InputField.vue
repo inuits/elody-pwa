@@ -1,38 +1,26 @@
 <template>
   <label class="block my-2">
-    <span v-if="label" class="font-base ml-1 text-neutral-700 text-sm">{{
-      label
-    }}</span>
-    <div class="flex flex-row">
+    <span v-if="label" class="ml-1 text-neutral-700 text-sm">{{ label }}</span>
+    <div class="flex flex-row border border-neutral-30 rounded mr-4">
       <unicon
-        :name="Unicons.SearchGlas.name"
-        class="
-          h-full
-          bg-neutral-20
-          rounded-l
-          pl-2
-          border-t-2 border-b-2 border-l-2 border-neutral-40 border-opacity-25
-        "
+        :name="Unicons.SearchGlass.name"
+        class="h-full bg-neutral-20 pl-2"
         fill="var(--text-neutral-20)"
       />
 
       <input
         v-model="inputValue"
+        v-bind="$attrs"
         class="
-          mr-4
           py-2
           pl-4
           w-48
           min-w-0
           text-neutral-700 text-sm
-          font-base
-          rounded-r
           bg-neutral-20
-          border-t-2 border-b-2 border-r-2 border-neutral-40 border-opacity-25
           focus:outline-none
         "
         type="text"
-        :placeholder="placeholder"
       />
     </div>
   </label>
@@ -45,41 +33,22 @@
 
   export default defineComponent({
     name: 'InputField',
+    inheritAttrs: false,
     props: {
-      placeholder: {
-        type: String,
-        require: false,
-        default: '',
-      },
-      label: {
-        type: String,
-        require: false,
-        default: '',
-      },
-      modelValue: {
-        type: String,
-        required: false,
-        default: '',
-      },
-      debounce: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
+      label: { type: String, default: '' },
+      modelValue: { type: String, default: '' },
+      debounce: { type: Boolean, default: false },
+      debounceWait: { type: Number, default: 400 },
     },
     emits: ['update:modelValue'],
     setup(props, { emit }) {
       const inputValue = ref<string>(props.modelValue);
-      const debounceInput = debounce(() => {}, 400);
-      function sendInputValue(value: string) {
-        emit('update:modelValue', value);
+      let emitValue = (value: string) => emit('update:modelValue', value);
+      if (props.debounce) {
+        emitValue = debounce(emitValue, props.debounceWait);
       }
-      watch(inputValue, (value: string) => {
-        if (props.debounce) {
-          debounceInput().then(() => sendInputValue(value));
-        } else sendInputValue(value);
-      });
-      return { Unicons, inputValue, debounceInput, sendInputValue };
+      watch(inputValue, emitValue);
+      return { Unicons, inputValue };
     },
   });
 </script>

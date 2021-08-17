@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, PropType, computed } from 'vue';
+  import { defineComponent, PropType } from 'vue';
   import { Unicons } from '@/types';
   import Icon from '@/components/base/Icon.vue';
 
@@ -47,7 +47,7 @@
     @apply absolute left-1 top-1 bg-neutral-0 w-9 h-9 rounded transition;
   }
   /* :checked doesn't work for whatever reason, as Vue doesn't apply the
-     attr at all */
+     attribute at all */
   .input.checked ~ .iconOn,
   .input:not(.checked) ~ .iconOff {
     fill: var(--color-main-dark);
