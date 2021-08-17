@@ -18,16 +18,8 @@ describe('Dropdown.vue', () => {
     expect(wrapper.element).toMatchSnapshot();
   });
 
-  // it('Has function setSelectedItem() defined', () => {
-  //   expect(wrapper.vm.setSelectedItem()).toBeTruthy();
-  // });
-
-  // it('Has function toggleMenu() defined', () => {
-  //   expect(wrapper.vm.toggleMenu()).toBeTruthy();
-  // });
-
-  it('Option displays first value', () => {
-    expect(wrapper.find('[value="option"]').text()).toMatch('5');
+  it('Option gets selected value for options', () => {
+    expect(wrapper.vm.selectedItem).toMatch('5');
   });
 
   it('renders the correct label', () => {
@@ -35,10 +27,18 @@ describe('Dropdown.vue', () => {
     expect(label.text()).toMatch('');
   });
 
-  it("Emits a new value to it's parent", () => {
-    wrapper.vm.setSelectedItem('15');
-    expect(wrapper.emitted('update:selected')).toEqual([['15']]);
+  it('has the selectedItem ref variable', () => {
+    expect(wrapper.vm.selectedItem).toBeTruthy();
   });
+
+  // it("Emits a new value to it's parent", () => {
+  //   // wrapper.selectedItem = '15';
+  //   wrapper.vm.$nextTick(() => {
+  //     // expect(wrapper.emitted('update:selected')).toEqual([['15']]);
+  //     // expect(wrapper.emitted('update:selected')).toBe('15');
+  //     expect(wrapper.emitted('update:selected')).toBeTruthy();
+  //   });
+  // });
 
   it('Updated reactive selected value', () => {
     const option = wrapper.find('option');
@@ -47,6 +47,4 @@ describe('Dropdown.vue', () => {
       expect(wrapper.state.selected.value).toBe('10');
     });
   });
-
-  it('', () => { });
 });
