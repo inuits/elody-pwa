@@ -114,7 +114,7 @@
       const queryVariables = reactive<QueryVariables>({
         pagination: defaultPagination,
         searchQuery: 'asset',
-        sort: '',
+        sort: 'Recently updated',
       });
 
       const { result, loading, fetchMore } = useQuery(GetEntitiesDocument, {
@@ -126,8 +126,8 @@
       watch(queryVariables, (value: QueryVariables) => {
         fetchMore({
           variables: {
-            limit: value.pagination.limit,
-            skip: value.pagination.skip,
+            limit: Number(value.pagination.limit),
+            skip: Number(value.pagination.skip),
             searchQuery: value.searchQuery,
           },
           updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
