@@ -7,7 +7,7 @@
       <unicon
         :name="Unicons.SearchGlas.name"
         class="
-          h-9
+          h-full
           bg-neutral-20
           rounded-l
           pl-2
@@ -19,7 +19,6 @@
       <input
         v-model="inputValue"
         class="
-          h-9
           mr-4
           py-2
           pl-4

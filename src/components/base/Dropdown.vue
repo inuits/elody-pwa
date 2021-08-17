@@ -3,7 +3,6 @@
     <span class="ml-1 text-neutral-700 text-sm font-base">{{ props.label }}</span>
     <select
       class="
-        h-9
         block
         mr-4
         py-2
