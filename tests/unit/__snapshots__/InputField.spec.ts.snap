@@ -30,7 +30,7 @@ exports[`InputField.vue Renders correctly 1`] = `
       "
     >
       <unicon
-        fill="var(--colors-neutral-700)"
+        fill="var(--color-neutral-700)"
         height="20"
         name="search-glas"
       />

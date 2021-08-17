@@ -13,9 +13,10 @@ fragment fullEntity on Entity {
   title: metadata(key: [title]) {
     value
   }
-  metadata(key: [description, material, type]) {
+  metadata {
     key
     value
+    lang
   }
   mediafiles {
       original_file_location

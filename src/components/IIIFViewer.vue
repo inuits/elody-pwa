@@ -1,12 +1,14 @@
 <template>
-  <div ref="OpenSeadragon-toolbar" class="hidden" />
-  <ViewerToolbar
-    v-model:zoomIn="zoomInDiv"
-    v-model:zoomOut="zoomOutDiv"
-    v-model:fullPage="fullPageButtonDiv"
-    v-model:home="homeDiv"
-  />
-  <div ref="OpenSeadragonDiv" class="h-full w-full z-0 checkboard" />
+  <div class="relative w-full h-full">
+    <div ref="OpenSeadragon-toolbar" class="hidden" />
+    <ViewerToolbar
+      v-model:zoomIn="zoomInDiv"
+      v-model:zoomOut="zoomOutDiv"
+      v-model:fullPage="fullPageButtonDiv"
+      v-model:home="homeDiv"
+      />
+    <div ref="OpenSeadragonDiv" class="w-full h-full z-0 checkboard" />
+  </div>
 </template>
 
 <script lang="ts">
@@ -20,10 +22,7 @@
       ViewerToolbar,
     },
     props: {
-      imageUrl: {
-        type: String,
-        default: '',
-      },
+      imageUrl: { type: String, default: '' },
     },
     setup: (props) => {
       const OpenSeadragonDiv = ref<HTMLDivElement | undefined>(undefined);

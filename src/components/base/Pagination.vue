@@ -10,7 +10,7 @@
       class="cursor-pointer"
       :name="Unicons.AngleLeft.name"
       height="16"
-      :fill="loading ? 'var(--colors-neutral-20)' : 'var(--colors-neutral-700)'"
+      :fill="loading ? 'var(--color-neutral-20)' : 'var(--color-neutral-700)'"
       @click="prev"
     />
     <div class="inline-block text-sm mx-3" data-test="page-count-label">

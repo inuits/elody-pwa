@@ -25,9 +25,7 @@
         v-if="result"
         v-model:paginationInfo="queryVariables.pagination"
         :loading="loading"
-        :max-page="
-          Math.round(result.Entities.count / queryVariables.pagination.limit)
-        "
+        :max-page="Math.round(result.Entities.count / queryVariables.pagination.limit)"
       />
     </div>
     <ListContainer>
@@ -54,18 +52,14 @@
           v-for="entity in result.Entities.results"
           :key="entity.id"
           :meta="entity.metadata"
-          @click="
-            router.push({ name: 'SingleEntity', params: { id: entity.id } })
-          "
+          @click="router.push({ name: 'SingleEntity', params: { id: entity.id } })"
         >
           <template #actions>
             <BaseButton
               :loading="loading"
               class="ml-2"
               :icon="Unicons.Eye.name"
-              @click="
-                router.push({ name: 'SingleEntity', params: { id: entity.id } })
-              "
+              @click="router.push({ name: 'SingleEntity', params: { id: entity.id } })"
             />
           </template>
         </ListItem>

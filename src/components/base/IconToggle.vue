@@ -1,0 +1,62 @@
+<template>
+  <label class="toggle flex items-center cursor-pointer">
+    <div class="box">
+      <input
+        type="checkbox"
+        class="input sr-only"
+        :class="{ checked }"
+        :checked="checked"
+        @change="$emit('update:checked', $event.target.checked)"
+      />
+      <div class="dot"></div>
+      <Icon :name="iconOff" class="iconOff" />
+      <Icon :name="iconOn" class="iconOn" />
+    </div>
+    <div v-if="label" class="ml-3 text-gray-700 font-medium">{{ label }}</div>
+  </label>
+</template>
+
+<script lang="ts">
+  import { defineComponent, PropType, computed } from 'vue';
+  import { Unicons } from '@/types';
+  import Icon from '@/components/base/Icon.vue';
+
+  export default defineComponent({
+    name: 'IconToggle',
+    components: { Icon },
+    inheritAttrs: false,
+    props: {
+      label: { type: String, default: '' },
+      checked: { type: Boolean, default: false },
+      iconOff: { type: String as PropType<keyof Unicons>, required: true },
+      iconOn: { type: String as PropType<keyof Unicons>, required: true },
+    },
+    emits: ['update:checked'],
+  });
+</script>
+
+<style lang="postcss" scoped>
+  .box {
+    @apply block relative bg-neutral-20 rounded p-1;
+  }
+  .iconOn,
+  .iconOff {
+    @apply inline-block relative align-top h-9 p-2;
+  }
+  .dot {
+    @apply absolute left-1 top-1 bg-neutral-0 w-9 h-9 rounded transition;
+  }
+  /* :checked doesn't work for whatever reason, as Vue doesn't apply the
+     attr at all */
+  .input.checked ~ .iconOn,
+  .input:not(.checked) ~ .iconOff {
+    fill: var(--color-main-dark);
+  }
+  .input:not(.checked) ~ .iconOn,
+  .input.checked ~ .iconOff {
+    fill: var(--color-neutral-700);
+  }
+  .input.checked ~ .dot {
+    transform: translateX(100%);
+  }
+</style>

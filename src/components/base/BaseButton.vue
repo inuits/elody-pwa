@@ -10,7 +10,7 @@
       v-if="icon"
       :name="icon"
       height="16"
-      :fill="loading ? 'var(--colors-neutral-20)' : 'var(--colors-neutral-700)'"
+      :fill="loading ? 'var(--color-neutral-20)' : 'var(--color-neutral-700)'"
     />
     <span v-if="label" class="text-sm ml-0.5 leading-4">{{ label }}</span>
   </button>

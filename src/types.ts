@@ -1,4 +1,5 @@
 import {
+  uniEdit,
   uniEye,
   uniFileDownload,
   uniSearchPlus,
@@ -13,6 +14,7 @@ import {
 } from 'vue-unicons/dist/icons';
 
 export enum Unicons {
+  Edit = uniEdit,
   Eye = uniEye,
   Download = uniFileDownload,
   SearchPlus = uniSearchPlus,

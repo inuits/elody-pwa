@@ -44,7 +44,7 @@
         default: '',
       },
       options: {
-        type: Array as PropType<String[]>,
+        type: Array,
         required: true,
         default: undefined,
       },
