@@ -2,8 +2,7 @@
   <div class="p-6">
     <div class="flex flex-row flex-wrap w-full gap-y-4">
       <InputField
-        v-model:search="queryVariables.searchQuery"
-        :label="'search'"
+        v-model="queryVariables.searchQuery"
         :debounce="true"
         :placeholder="'Search Asset Library...'"
       />

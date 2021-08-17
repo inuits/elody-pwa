@@ -49,8 +49,7 @@ exports[`InputField.vue Renders correctly 1`] = `
         text-sm
         border border-blueGray-300
         outline-none
-        focus:outline-none
-        focus:ring
+        focus:outline-none focus:ring
         pl-10
       "
       placeholder="Search Asset Library..."
