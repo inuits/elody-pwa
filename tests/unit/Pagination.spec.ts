@@ -5,15 +5,22 @@ jest.mock('@/types');
 const defaultProps = {
   skip: 0,
   limit: 20,
-  maxPage: 8,
+  totalItems: 8,
 };
 
 describe('Pagination.vue', () => {
   it('Renders correct intial page count', () => {
     const wrapper = shallowMount(Pagination, {
-      props: defaultProps,
+      props: { defaultProps, totalItems: 40 },
     });
-    expect(wrapper.find('[data-test="page-label"]').text()).toMatch('Page 1 of 8');
+    expect(wrapper.find('[data-test="page-count-label"]').text()).toMatch('Page 1 of 2');
+  });
+
+  it('Renders correct page count when 1 item', () => {
+    const wrapper = shallowMount(Pagination, {
+      props: { defaultProps, totalItems: 1 },
+    });
+    expect(wrapper.find('[data-test="page-count-label"]').text()).toMatch('Page 1 of 1');
   });
 
   it('Page up event', () => {
@@ -21,7 +28,9 @@ describe('Pagination.vue', () => {
       props: defaultProps,
     });
     wrapper.vm.next();
-    expect(wrapper.emitted('update:skip')).toEqual([[1]]);
+    wrapper.vm.$nextTick(() => {
+      expect(wrapper.emitted('update:skip')).toEqual([[1]]);
+    });
   });
 
   it('Page down event', () => {

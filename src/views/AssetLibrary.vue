@@ -2,23 +2,31 @@
   <div class="p-6">
     <div class="flex flex-row flex-wrap gap-y-4">
       <InputField
-        v-model="query.searchQuery"
+        v-model="searchQuery"
         :icon="Unicons.SearchGlass.name"
         :debounce="true"
         placeholder="Search Asset Library..."
         label="Search"
       />
       <div class="my-2 flex flex-row justify-left">
-        <Dropdown v-model="query.limit" :options="[5, 10, 15, 20]" label="Items" />
-        <Dropdown v-model="query.sort" :options="['Recently updated']" label="Sort" />
+        <Dropdown
+          v-model="query.limit"
+          :options="[5, 10, 15, 20]"
+          label="Items"
+        />
+        <Dropdown
+          v-model="query.sort"
+          :options="['Recently updated']"
+          label="Sort"
+        />
       </div>
       <div class="flex-grow"></div>
       <Pagination
-        v-if="result"
+        v-if="result?.Entities?.count > 0"
         v-model:skip="query.skip"
         :limit="query.limit"
         :loading="loading"
-        :max-page="Math.round(result.Entities.count / query.limit)"
+        :total-items="result.Entities.count"
       />
     </div>
     <ListContainer>
@@ -45,14 +53,18 @@
           v-for="entity in result.Entities.results"
           :key="entity.id"
           :meta="entity.metadata"
-          @click="router.push({ name: 'SingleEntity', params: { id: entity.id } })"
+          @click="
+            router.push({ name: 'SingleEntity', params: { id: entity.id } })
+          "
         >
           <template #actions>
             <BaseButton
               :loading="loading"
               class="ml-2"
               :icon="Unicons.Eye.name"
-              @click="router.push({ name: 'SingleEntity', params: { id: entity.id } })"
+              @click="
+                router.push({ name: 'SingleEntity', params: { id: entity.id } })
+              "
             />
           </template>
         </ListItem>
@@ -62,7 +74,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, watch, reactive } from 'vue';
+  import { defineComponent, watch, reactive, ref } from 'vue';
   import { useQuery } from '@vue/apollo-composable';
   import ListContainer from '@/components/ListContainer.vue';
   import ListItem from '@/components/ListItem.vue';
@@ -86,16 +98,28 @@
     },
     setup: () => {
       const router = useRouter();
+      const searchQuery = ref('');
       const query = reactive({
         skip: 0,
         limit: 20,
-        searchQuery: 'asset',
-        sort: 'Recently updated',
       });
 
-      const { result, loading, fetchMore } = useQuery(GetEntitiesDocument, query);
+      const queryVariables = reactive({
+        limit: query.limit,
+        skip: query.skip,
+        searchQuery: searchQuery,
+      });
 
-      watch(query, (value: GetEntitiesQueryVariables) => {
+      const { result, loading, fetchMore } = useQuery(
+        GetEntitiesDocument,
+        queryVariables,
+      );
+
+      watch(searchQuery, (value: string) => {
+        query.skip = 0;
+      });
+
+      watch(queryVariables, (value: GetEntitiesQueryVariables) => {
         fetchMore({
           variables: value,
           updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
@@ -108,6 +132,7 @@
         router,
         Unicons,
         query,
+        searchQuery,
       };
     },
   });
