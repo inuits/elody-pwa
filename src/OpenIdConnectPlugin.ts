@@ -1,5 +1,5 @@
 import { App, ref, reactive, Ref, inject, watch, WatchStopHandle } from 'vue';
-import { Router } from 'vue-router';
+import { Router, NavigationGuardNext } from 'vue-router';
 
 const loginRedirectRouteKey = 'oidc-login-redirect-route';
 
@@ -113,7 +113,7 @@ export class OpenIdConnectClient {
     });
   }
 
-  getLoginRedirect(finalRedirectRoute?: string): string {
+  redirectToLogin(finalRedirectRoute?: string) {
     if (finalRedirectRoute) {
       sessionStorage.setItem(loginRedirectRouteKey, finalRedirectRoute);
     }
@@ -124,10 +124,10 @@ export class OpenIdConnectClient {
       response_type: 'code',
       redirect_uri: new URL(internalRedirectUrl || '/', window.location.href).toString(),
     });
-    return `${baseUrl}/${authEndpoint}?${params}`;
+    window.location.href = `${baseUrl}/${authEndpoint}?${params}`;
   }
 
-  async assertIsAuthenticated(dest: string, cb: (x?: string) => void): Promise<void> {
+  async assertIsAuthenticated(destination: string, cb: NavigationGuardNext): Promise<void> {
     await waitTillFalse(this.loading);
     if (this.isAuthenticated.value) {
       return cb();
@@ -137,7 +137,8 @@ export class OpenIdConnectClient {
     if (this.isAuthenticated.value) {
       return cb();
     }
-    return cb(this.getLoginRedirect(dest));
+    this.redirectToLogin(destination);
+    return cb(false);
   }
 }
 
