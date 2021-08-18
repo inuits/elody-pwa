@@ -10,7 +10,7 @@ describe('InputField.vue', () => {
       placeholder: 'Search Asset Library...',
       label: 'search',
       search: 'asset',
-      debounce: true,
+      debounce: false,
     },
   });
 
@@ -20,7 +20,6 @@ describe('InputField.vue', () => {
 
   it('renders the correct label', () => {
     const label = wrapper.find('label');
-
     expect(label.text()).toMatch('');
   });
 
@@ -29,19 +28,7 @@ describe('InputField.vue', () => {
     input.setValue('dummy');
     wrapper.vm.$nextTick(() => {
       expect(wrapper.inputValue.value).toBe('dummy');
+      expect(wrapper.emitted('update:modelValue')).toEqual([['dummy']]);
     });
-  });
-
-  it("Emits a new value to it's parent", () => {
-    wrapper.vm.sendInputValue('ijzer');
-    expect(wrapper.emitted('update:modelValue')).toEqual([['ijzer']]);
-  });
-
-  it('Has function debounceInput defined', () => {
-    expect(wrapper.vm.debounceInput()).toBeTruthy();
-  });
-
-  it('Has inputValue ref variable defined', () => {
-    expect(wrapper.vm.inputValue).toBeTruthy();
   });
 });

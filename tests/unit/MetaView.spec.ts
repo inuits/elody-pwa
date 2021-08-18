@@ -37,7 +37,6 @@ describe('MetaView.vue', () => {
     expect(info[2].text()).toMatch(metaInfo3);
   });
 
-  // TODO: Css check with regex, to check if text and bg are not the same, not depending on chosen color
   it('Css classes meta correct on loading', () => {
     const wrapper = shallowMount(MetaView, {
       props: { ...props, loading: true },
@@ -45,10 +44,8 @@ describe('MetaView.vue', () => {
     const labels = wrapper.findAll('[data-test="meta-label"]');
     const info = wrapper.findAll('[data-test="meta-info"]');
 
-    expect(labels[0].classes()).toContain('text-neutral-20');
-    expect(labels[0].classes()).toContain('bg-neutral-20');
-    expect(info[0].classes()).toContain('text-neutral-20');
-    expect(info[0].classes()).toContain('bg-neutral-20');
+    expect(labels[0].classes()).toContain('loading');
+    expect(info[0].classes()).toContain('loading');
   });
 
   it('Css classes meta correct NOT loading', () => {
@@ -58,12 +55,7 @@ describe('MetaView.vue', () => {
     const labelClasses = wrapper.findAll('[data-test="meta-label"]')[0].classes();
     const infoClasses = wrapper.findAll('[data-test="meta-info"]')[0].classes();
 
-    expect(labelClasses.includes('text-neutral-20')).toBe(false);
-    expect(labelClasses.includes('bg-neutral-20')).toBe(false);
-    expect(labelClasses).toContain('text-neutral-60');
-
-    expect(infoClasses.includes('text-neutral-20')).toBe(false);
-    expect(infoClasses.includes('bg-neutral-20')).toBe(false);
-    expect(infoClasses).toContain('text-neutral-700');
+    expect(labelClasses.includes('loading')).toBe(false);
+    expect(infoClasses.includes('loading')).toBe(false);
   });
 });
