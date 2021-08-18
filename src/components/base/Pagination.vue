@@ -13,8 +13,8 @@
       :fill="loading ? 'var(--color-neutral-20)' : 'var(--color-neutral-700)'"
       @click="prev"
     />
-    <div class="inline-block text-sm mx-3" data-test="page-label">
-      Page {{ currentPage }} of {{ maxPage }}
+    <div class="inline-block text-sm mx-3" data-test="page-count-label">
+      Page {{ currentPage }} of {{ maxPage() }}
     </div>
     <unicon
       class="cursor-pointer"
@@ -36,22 +36,29 @@
       loading: { type: Boolean, default: false },
       limit: { type: Number, default: 20 },
       skip: { type: Number, default: 0 },
-      maxPage: { type: Number, default: 1 },
+      totalItems: { type: Number, default: 1 },
     },
     emits: ['update:skip'],
     setup: (props, { emit }) => {
       const currentPage = computed(() => props.skip + 1);
 
+      const maxPage = () => {
+        if (props.totalItems > 1)
+          return Math.round(props.totalItems / props.limit);
+        else return 1;
+      };
+
       return {
         currentPage,
         Unicons,
+        maxPage,
         prev() {
           if (currentPage.value > 1) {
             emit('update:skip', props.skip - 1);
           }
         },
         next() {
-          if (currentPage.value < props.maxPage) {
+          if (currentPage.value < maxPage()) {
             emit('update:skip', props.skip + 1);
           }
         },
