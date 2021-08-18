@@ -27,51 +27,33 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, PropType, computed } from 'vue';
+  import { defineComponent, computed } from 'vue';
   import { Unicons } from '@/types';
-
-  export type Pagination = {
-    limit: number;
-    skip: number;
-  };
 
   export default defineComponent({
     name: 'Pagination',
     props: {
-      loading: {
-        type: Boolean,
-        default: false,
-      },
-      paginationInfo: {
-        type: Object as PropType<Pagination>,
-        default: () => ({ limit: 20, skip: 0 }),
-        required: true,
-      },
-      maxPage: {
-        type: Number,
-        default: 1,
-      },
+      loading: { type: Boolean, default: false },
+      limit: { type: Number, default: 20 },
+      skip: { type: Number, default: 0 },
+      maxPage: { type: Number, default: 1 },
     },
-    emits: ['update:paginationInfo'],
+    emits: ['update:skip'],
     setup: (props, { emit }) => {
-      const currentPage = computed(() => props.paginationInfo.skip + 1);
+      const currentPage = computed(() => props.skip + 1);
 
       return {
         currentPage,
         Unicons,
         prev() {
-          currentPage.value > 1 &&
-            emit('update:paginationInfo', {
-              limit: props.paginationInfo.limit,
-              skip: props.paginationInfo.skip - 1,
-          });
+          if (currentPage.value > 1) {
+            emit('update:skip', props.skip - 1);
+          }
         },
         next() {
-          currentPage.value < props.maxPage &&
-            emit('update:paginationInfo', {
-              limit: props.paginationInfo.limit,
-              skip: props.paginationInfo.skip + 1,
-            });
+          if (currentPage.value < props.maxPage) {
+            emit('update:skip', props.skip + 1);
+          }
         },
       };
     },

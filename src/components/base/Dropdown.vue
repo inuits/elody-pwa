@@ -1,7 +1,7 @@
 <template>
   <label class="block">
     <span class="ml-1 text-neutral-700 text-sm">{{ label }}</span>
-    <select v-model="selectedItem" class="select">
+    <select v-model="selectedItem">
       <option v-for="option in options" :key="option" :value="option">
         {{ option }}
       </option>
@@ -17,25 +17,25 @@
     props: {
       label: { type: String, default: '' },
       options: { type: Array, required: true },
-      selected: { type: String, default: undefined },
+      modelValue: { type: Object, default: undefined },
     },
-    emits: ['update:selected'],
+    emits: ['update:modelValue'],
     setup(props, { emit }) {
-      const selectedItem = ref(props.selected);
-      watch(selectedItem, (value) => emit('update:selected', value));
+      const selectedItem = ref(props.modelValue);
+      watch(selectedItem, (value) => emit('update:modelValue', value));
       return { Unicons, selectedItem };
     },
   });
 </script>
 <style lang="postcss" scoped>
-  .select {
+  select {
     @apply block mr-4 p-2 w-48 min-w-0;
     @apply border border-neutral-30;
     @apply text-neutral-700 text-sm;
     @apply rounded bg-neutral-20;
     @apply focus:outline-none;
   }
-  .select option {
+  option {
     @apply rounded py-2 px-4 bg-neutral-20 h-9;
   }
 </style>

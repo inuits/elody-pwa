@@ -1,37 +1,29 @@
 <template>
   <div class="p-6">
-    <div class="flex flex-row flex-wrap w-full gap-y-4">
+    <div class="flex flex-row flex-wrap gap-y-4">
       <InputField
-        v-model="queryVariables.searchQuery"
+        v-model="query.searchQuery"
         :debounce="true"
-        :placeholder="'Search Asset Library...'"
-        :label="'Search'"
+        placeholder="Search Asset Library..."
+        label="Search"
       />
       <div class="my-2 flex flex-row justify-left">
-        <Dropdown
-          v-model:selected="queryVariables.pagination.limit"
-          :options="[5, 10, 15, 20]"
-          :label="'Items'"
-        />
-        <Dropdown
-          v-model:selected="queryVariables.sort"
-          :options="['Recently updated']"
-          :label="'Sort'"
-        />
+        <Dropdown v-model="query.limit" :options="[5, 10, 15, 20]" label="Items" />
+        <Dropdown v-model="query.sort" :options="['Recently updated']" label="Sort" />
       </div>
-    </div>
-    <div class="flex justify-end py-4">
+      <div class="flex-grow"></div>
       <Pagination
         v-if="result"
-        v-model:paginationInfo="queryVariables.pagination"
+        v-model:skip="query.skip"
+        :limit="query.limit"
         :loading="loading"
-        :max-page="Math.round(result.Entities.count / queryVariables.pagination.limit)"
+        :max-page="Math.round(result.Entities.count / query.limit)"
       />
     </div>
     <ListContainer>
       <div v-if="loading">
         <ListItem
-          v-for="n in queryVariables.pagination.limit"
+          v-for="n in query.limit"
           :key="n"
           title="loading"
           :loading="true"
@@ -76,18 +68,10 @@
   import BaseButton from '@/components/base/BaseButton.vue';
   import InputField from '@/components/base/InputField.vue';
   import Dropdown from '@/components/base/Dropdown.vue';
-  import Pagination, {
-    Pagination as PaginationType,
-  } from '@/components/base/Pagination.vue';
+  import Pagination from '@/components/base/Pagination.vue';
   import { Unicons } from '@/types';
   import { useRouter } from 'vue-router';
-  import { GetEntitiesDocument } from '@/queries';
-
-  type QueryVariables = {
-    pagination: PaginationType;
-    searchQuery: string;
-    sort: string;
-  };
+  import { GetEntitiesDocument, GetEntitiesQueryVariables } from '@/queries';
 
   export default defineComponent({
     name: 'Home',
@@ -101,29 +85,18 @@
     },
     setup: () => {
       const router = useRouter();
-      const defaultPagination = reactive<PaginationType>({
+      const query = reactive({
         skip: 0,
         limit: 20,
-      });
-      const queryVariables = reactive<QueryVariables>({
-        pagination: defaultPagination,
         searchQuery: 'asset',
         sort: 'Recently updated',
       });
 
-      const { result, loading, fetchMore } = useQuery(GetEntitiesDocument, {
-        limit: queryVariables.pagination.limit,
-        skip: queryVariables.pagination.skip,
-        searchQuery: queryVariables.searchQuery,
-      });
+      const { result, loading, fetchMore } = useQuery(GetEntitiesDocument, query);
 
-      watch(queryVariables, (value: QueryVariables) => {
+      watch(query, (value: GetEntitiesQueryVariables) => {
         fetchMore({
-          variables: {
-            limit: Number(value.pagination.limit),
-            skip: Number(value.pagination.skip),
-            searchQuery: value.searchQuery,
-          },
+          variables: value,
           updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
         });
       });
@@ -133,7 +106,7 @@
         loading,
         router,
         Unicons,
-        queryVariables,
+        query,
       };
     },
   });
