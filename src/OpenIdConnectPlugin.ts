@@ -113,7 +113,7 @@ export class OpenIdConnectClient {
     });
   }
 
-  redirectToLogin(finalRedirectRoute?: string): boolean {
+  getLoginRedirect(finalRedirectRoute?: string): string {
     if (finalRedirectRoute) {
       sessionStorage.setItem(loginRedirectRouteKey, finalRedirectRoute);
     }
@@ -124,11 +124,10 @@ export class OpenIdConnectClient {
       response_type: 'code',
       redirect_uri: new URL(internalRedirectUrl || '/', window.location.href).toString(),
     });
-    window.location.href = `${baseUrl}/${authEndpoint}?${params}`;
-    return false;
+    return `${baseUrl}/${authEndpoint}?${params}`;
   }
 
-  async assertIsAuthenticated(destination: string, cb: () => void): Promise<boolean | void> {
+  async assertIsAuthenticated(dest: string, cb: (x?: string) => void): Promise<void> {
     await waitTillFalse(this.loading);
     if (this.isAuthenticated.value) {
       return cb();
@@ -138,7 +137,7 @@ export class OpenIdConnectClient {
     if (this.isAuthenticated.value) {
       return cb();
     }
-    return this.redirectToLogin(destination);
+    return cb(this.getLoginRedirect(dest));
   }
 }
 

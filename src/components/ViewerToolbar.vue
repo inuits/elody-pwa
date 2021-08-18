@@ -2,13 +2,13 @@
   <div class="absolute w-11/12 bg-neutral-0 z-20 ml-12 mt-7 p-2 shadow-sm flex justify-between h-10">
     <div>
       <a ref="fullPageRef" class="mr-2 ml-2">
-        <unicon :name="Unicons.Desktop.name" height="20" fill="var(--color-neutral-700)" />
+        <unicon :name="Unicons.Desktop.name" height="20" class="text-neutral-700" />
       </a>
       <a ref="zoomInRef" class="mr-2"
-        ><unicon :name="Unicons.SearchPlus.name" height="20" fill="var(--color-neutral-700)"
+        ><unicon :name="Unicons.SearchPlus.name" height="20" class="text-neutral-700"
       /></a>
       <a ref="zoomOutRef">
-        <unicon :name="Unicons.SearchMinus.name" height="20" fill="var(--color-neutral-700)" />
+        <unicon :name="Unicons.SearchMinus.name" height="20" class="text-neutral-700" />
       </a>
     </div>
     <a ref="homeRef" class="text-sm mr-2 text-neutral-700">Reset view</a>
