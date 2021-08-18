@@ -13,7 +13,7 @@
       :fill="loading ? 'var(--color-neutral-20)' : 'var(--color-neutral-700)'"
       @click="prev"
     />
-    <div class="inline-block text-sm mx-3" data-test="page-count-label">
+    <div class="inline-block text-sm mx-3" data-test="page-label">
       Page {{ currentPage }} of {{ maxPage }}
     </div>
     <unicon

@@ -1,61 +1,33 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`InputField.vue Renders correctly 1`] = `
-<div
-  data-v-app=""
+<label
+  class="block my-2"
 >
-  
-  <label
-    class="block text-sm text-gray-700 ml-3"
+  <span
+    class="ml-1 text-neutral-700 text-sm"
   >
     search
-  </label>
+  </span>
   <div
-    class="block flex flex-wrap items-center ml-3 mb-3 h-12 w-48"
+    class="flex flex-row bg-neutral-20 border border-neutral-30 rounded mr-4"
   >
-    <span
-      class="
-        z-10
-        leading-snug
-        font-normal
-        absolute
-        text-center text-blueGray-300
-        bg-gray
-        rounded
-        text-base
-        justify-center
-        w-8
-        pl-3
-        py-3
-      "
-    >
-      <unicon
-        fill="var(--color-neutral-700)"
-        height="20"
-        name="search-glas"
-      />
-    </span>
+    <unicon
+      class="h-full pl-2 text-neutral-700"
+      name="search-glass"
+    />
     <input
-      class="
-        items-center
-        mr-4
-        px-3
-        py-3
-        placeholder-blueGray-300
-        text-blueGray-600
-        relative
-        bg-white
-        rounded
-        text-sm
-        border border-blueGray-300
-        outline-none
-        focus:outline-none focus:ring
-        pl-10
-      "
+      class="py-2
+          pl-4
+          w-48
+          min-w-0
+          bg-neutral-20
+          text-neutral-700 text-sm
+          focus:outline-none"
       placeholder="Search Asset Library..."
+      search="asset"
       type="text"
     />
   </div>
-  
-</div>
+</label>
 `;

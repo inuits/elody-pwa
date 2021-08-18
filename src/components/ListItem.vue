@@ -1,5 +1,5 @@
 <template>
-  <li class="row" :class="{ loading }">
+  <li class="row" :class="{ loading }" data-test="meta-row">
     <div class="flex w-full">
       <div v-for="metaItem in meta" :key="metaItem.value" class="col">
         <span class="label" data-test="meta-label">{{ metaItem.key }}</span>

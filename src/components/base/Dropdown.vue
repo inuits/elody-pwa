@@ -8,6 +8,7 @@
     </select>
   </label>
 </template>
+
 <script lang="ts">
   import { defineComponent, ref, watch } from 'vue';
   import { Unicons } from '@/types';
@@ -27,6 +28,7 @@
     },
   });
 </script>
+
 <style lang="postcss" scoped>
   select {
     @apply block mr-4 p-2 w-48 min-w-0;
