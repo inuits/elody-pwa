@@ -3,6 +3,7 @@
     <div class="flex flex-row flex-wrap gap-y-4">
       <InputField
         v-model="query.searchQuery"
+        :icon="Unicons.SearchGlass.name"
         :debounce="true"
         placeholder="Search Asset Library..."
         label="Search"

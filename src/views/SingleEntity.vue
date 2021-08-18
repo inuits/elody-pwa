@@ -9,14 +9,15 @@
         :icon-on="Unicons.Edit.name"
         :icon-off="Unicons.Eye.name"
       />
-      <MetaView
-        :edit-mode="editMode"
+      <MetaEdit
+        v-if="editMode"
+        :error="error"
         :loading="loading"
         :metadata="metadata"
-        :start-edit="startEdit"
-        :discard-edit="discardEdit"
-        :save-edit="saveEdit"
+        :discard="discard"
+        :save="save"
       />
+      <MetaView v-else :loading="loading" :metadata="metadata" />
     </div>
   </div>
 </template>
@@ -28,6 +29,7 @@
 
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import IconToggle from '@/components/base/IconToggle.vue';
+  import MetaEdit from '@/components/MetaEdit.vue';
   import MetaView from '@/components/MetaView.vue';
   import { GetEntityByIdDocument, EditMetadataDocument, MetadataInput } from '@/queries';
   import { usePageTitle } from '@/App.vue';
@@ -37,11 +39,11 @@
 
   export default defineComponent({
     name: 'SingleEntity',
-    components: { IIIFViewer, IconToggle, MetaView },
+    components: { IIIFViewer, IconToggle, MetaEdit, MetaView },
     setup() {
       const editMode = ref(false);
       const id = asString(useRoute().params['id']);
-      const { result, loading, refetch } = useQuery(GetEntityByIdDocument, { id });
+      const { result, error, loading, refetch } = useQuery(GetEntityByIdDocument, { id });
       const { mutate } = useMutation(EditMetadataDocument);
 
       usePageTitle(computed(() => result.value?.Entity?.title[0]?.value));
@@ -49,11 +51,11 @@
         Unicons,
         editMode,
         loading,
+        error,
         metadata: computed(() => result?.value?.Entity?.metadata || []),
         mediafile: computed(() => result?.value?.Entity?.mediafiles?.[0]),
-        startEdit: () => (editMode.value = true),
-        discardEdit: () => (editMode.value = false),
-        async saveEdit(metadata: MetadataInput[]) {
+        discard: () => (editMode.value = false),
+        async save(metadata: MetadataInput[]) {
           await mutate({ id, metadata });
           await refetch();
           editMode.value = false;

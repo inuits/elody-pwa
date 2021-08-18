@@ -11,6 +11,7 @@ import {
   uniBookOpen,
   uniUser,
   uniSearch,
+  uniPlusCircle,
 } from 'vue-unicons/dist/icons';
 
 export enum Unicons {
@@ -26,4 +27,5 @@ export enum Unicons {
   BookOpen = uniBookOpen,
   User = uniUser,
   SearchGlass = uniSearch,
+  PlusCircle = uniPlusCircle,
 }
