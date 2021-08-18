@@ -6,10 +6,8 @@ describe('Pagination.vue', () => {
   it('Renders correct intial page count', () => {
     const wrapper = shallowMount(Pagination, {
       props: {
-        paginationInfo: {
-          skip: 0,
-          limit: 20,
-        },
+        skip: 0,
+        limit: 20,
         maxPage: 8,
       },
     });
@@ -22,65 +20,49 @@ describe('Pagination.vue', () => {
   it('Page up event', () => {
     const wrapper = shallowMount(Pagination, {
       props: {
-        paginationInfo: {
-          skip: 0,
-          limit: 20,
-        },
+        skip: 0,
+        limit: 20,
         maxPage: 8,
       },
     });
-
     wrapper.vm.next();
-    const updatePaginationInfoEvent = wrapper.emitted('update:paginationInfo');
-
-    expect(updatePaginationInfoEvent).toEqual([[{ limit: 20, skip: 1 }]]);
+    expect(wrapper.emitted('update:skip')).toEqual([[1]]);
   });
 
   it('Page down event', () => {
     const wrapper = shallowMount(Pagination, {
       props: {
-        paginationInfo: {
-          skip: 5,
-          limit: 20,
-        },
+        skip: 5,
+        limit: 20,
         maxPage: 8,
       },
     });
-
     wrapper.vm.prev();
-    const updatePaginationInfoEvent = wrapper.emitted('update:paginationInfo');
-
-    expect(updatePaginationInfoEvent).toEqual([[{ limit: 20, skip: 4 }]]);
+    expect(wrapper.emitted('update:skip')).toEqual([[4]]);
   });
 
   it('Page max -> no emit', () => {
     const wrapper = shallowMount(Pagination, {
       props: {
-        paginationInfo: {
-          skip: 8,
-          limit: 20,
-        },
+        skip: 8,
+        limit: 20,
         maxPage: 8,
       },
     });
-
     wrapper.vm.next();
-    expect(wrapper.emitted('update:paginationInfo')).toBe(undefined);
+    expect(wrapper.emitted('update:skip')).toBe(undefined);
   });
 
   it('Page min -> no emit', () => {
     const wrapper = shallowMount(Pagination, {
       props: {
-        paginationInfo: {
-          skip: 0,
-          limit: 20,
-        },
+        skip: 0,
+        limit: 20,
         maxPage: 8,
       },
     });
-
     wrapper.vm.prev();
-    expect(wrapper.emitted('update:paginationInfo')).toBe(undefined);
+    expect(wrapper.emitted('update:skip')).toBe(undefined);
   });
 
   // TODO: Css check with regex, to check if text and bg are not the same, not depending on chosen color
@@ -88,10 +70,8 @@ describe('Pagination.vue', () => {
     const wrapper = shallowMount(Pagination, {
       props: {
         loading: true,
-        paginationInfo: {
-          skip: 0,
-          limit: 20,
-        },
+        skip: 0,
+        limit: 20,
       },
     });
 
@@ -103,10 +83,8 @@ describe('Pagination.vue', () => {
     const wrapper = shallowMount(Pagination, {
       props: {
         loading: false,
-        paginationInfo: {
-          skip: 0,
-          limit: 20,
-        },
+        skip: 0,
+        limit: 20,
       },
     });
 

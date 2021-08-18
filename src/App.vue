@@ -16,7 +16,7 @@
       />
     </nav>
     <div class="pl-20 h-screen flex flex-col">
-      <div class="w-full px-6 py-8 border-b border-neutral-30 bg-neutral-0 z-10">
+      <div class="w-full px-6 py-8 border-b border-neutral-30 z-10">
         <h1 class="text-lg font-semibold text-neutral-800 float-left">
           {{ pageTitle }}
         </h1>
@@ -28,7 +28,7 @@
             txt-color="main-dark"
             @click="auth && auth.login()"
           />
-          <div v-if="auth && auth.isAuthenticated">
+          <div v-if="auth?.isAuthenticated">
             <BaseButton :icon="Unicons.User.name" bg-color="neutral-30" />
           </div>
         </div>

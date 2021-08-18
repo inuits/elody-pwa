@@ -32,7 +32,9 @@ if (authCode) {
 }
 
 createApp(App)
-  .use(Unicon)
+  .use(Unicon, {
+    fill: 'currentColor',
+  })
   .use(store)
   .use(router)
   .use(auth)
