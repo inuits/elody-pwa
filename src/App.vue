@@ -47,7 +47,8 @@
   import BaseButton from '@/components/base/BaseButton.vue';
   import { DefaultOIDC, useAuth } from '@/OpenIdConnectPlugin';
 
-  export const useUpdatePageTitle = () => inject<(title?: string) => void>('updatePageTitle')!;
+  export const useUpdatePageTitle = () =>
+    inject<(title?: string) => void>('updatePageTitle')!;
   export function usePageTitle(x: Ref<string | undefined>) {
     const fn = useUpdatePageTitle();
     onMounted(() => fn(x.value));

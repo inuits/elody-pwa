@@ -127,7 +127,7 @@ export class OpenIdConnectClient {
     window.location.href = `${baseUrl}/${authEndpoint}?${params}`;
   }
 
-  async assertIsAuthenticated(destination: string, cb: NavigationGuardNext): Promise<void> {
+  async assertIsAuthenticated(dest: string, cb: NavigationGuardNext): Promise<void> {
     await waitTillFalse(this.loading);
     if (this.isAuthenticated.value) {
       return cb();
@@ -137,7 +137,7 @@ export class OpenIdConnectClient {
     if (this.isAuthenticated.value) {
       return cb();
     }
-    this.redirectToLogin(destination);
+    this.redirectToLogin(dest);
     return cb(false);
   }
 }

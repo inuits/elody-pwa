@@ -6,7 +6,7 @@
       v-model:zoomOut="zoomOutDiv"
       v-model:fullPage="fullPageButtonDiv"
       v-model:home="homeDiv"
-      />
+    />
     <div ref="OpenSeadragonDiv" class="w-full h-full z-0 checkboard" />
   </div>
 </template>
