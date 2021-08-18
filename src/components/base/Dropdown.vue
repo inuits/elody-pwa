@@ -18,7 +18,7 @@
     props: {
       label: { type: String, default: '' },
       options: { type: Array, required: true },
-      modelValue: { type: Object, default: undefined },
+      modelValue: { type: String, default: undefined },
     },
     emits: ['update:modelValue'],
     setup(props, { emit }) {
