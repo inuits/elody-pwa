@@ -3,36 +3,35 @@
     <div class="flex flex-row flex-wrap gap-y-4">
       <InputField
         v-model="searchQuery"
-        :icon="Unicons.SearchGlass.name"
         :debounce="true"
         placeholder="Search Asset Library..."
         label="Search"
       />
-      <div class="my-2 flex flex-row justify-left">
+      <div class="pl-4 my-2 flex flex-row justify-left">
         <Dropdown
-          v-model="query.limit"
+          v-model="queryVariables.pagination.limit"
           :options="[5, 10, 15, 20]"
           label="Items"
         />
         <Dropdown
-          v-model="query.sort"
+          v-model="queryVariables.sort"
           :options="['Recently updated']"
           label="Sort"
         />
       </div>
       <div class="flex-grow"></div>
       <Pagination
-        v-if="result?.Entities?.count > 0"
-        v-model:skip="query.skip"
-        :limit="query.limit"
+        v-if="result?.Entities.count > 0"
+        v-model:skip="queryVariables.pagination.skip"
+        :limit="queryVariables.pagination.limit"
         :loading="loading"
-        :total-items="result.Entities.count"
+        :total-items="result?.Entities.count"
       />
     </div>
     <ListContainer>
       <div v-if="loading">
         <ListItem
-          v-for="n in query.limit"
+          v-for="n in queryVariables.pagination.limit"
           :key="n"
           title="loading"
           :loading="true"
@@ -53,18 +52,14 @@
           v-for="entity in result.Entities.results"
           :key="entity.id"
           :meta="entity.metadata"
-          @click="
-            router.push({ name: 'SingleEntity', params: { id: entity.id } })
-          "
+          @click="router.push({ name: 'SingleEntity', params: { id: entity.id } })"
         >
           <template #actions>
             <BaseButton
               :loading="loading"
               class="ml-2"
               :icon="Unicons.Eye.name"
-              @click="
-                router.push({ name: 'SingleEntity', params: { id: entity.id } })
-              "
+              @click="router.push({ name: 'SingleEntity', params: { id: entity.id } })"
             />
           </template>
         </ListItem>
@@ -81,13 +76,21 @@
   import BaseButton from '@/components/base/BaseButton.vue';
   import InputField from '@/components/base/InputField.vue';
   import Dropdown from '@/components/base/Dropdown.vue';
-  import Pagination from '@/components/base/Pagination.vue';
+  import Pagination, { PaginationInfo } from '@/components/base/Pagination.vue';
   import { Unicons } from '@/types';
   import { useRouter } from 'vue-router';
-  import { GetEntitiesDocument, GetEntitiesQueryVariables } from '@/queries';
+  import { GetEntitiesDocument } from '@/queries';
+  import { store } from '@/store';
+
+  type QueryVariables = {
+    pagination: PaginationInfo;
+    searchQuery: string;
+    sort: string;
+  };
 
   export default defineComponent({
     name: 'Home',
+    store: store,
     components: {
       ListContainer,
       ListItem,
@@ -98,32 +101,43 @@
     },
     setup: () => {
       const router = useRouter();
-      const searchQuery = ref('');
-      const query = reactive({
+      const searchQuery = ref<string>('');
+      const defaultPagination = reactive<PaginationInfo>({
         skip: 0,
         limit: 20,
       });
 
-      const queryVariables = reactive({
-        limit: query.limit,
-        skip: query.skip,
-        searchQuery: searchQuery,
+      const queryVariables = reactive<QueryVariables>({
+        pagination: store.state.pagination,
+        searchQuery: searchQuery.value,
+        sort: 'Recently updated',
       });
 
-      const { result, loading, fetchMore } = useQuery(
-        GetEntitiesDocument,
-        queryVariables,
-      );
-
-      watch(searchQuery, (value: string) => {
-        query.skip = 0;
+      const { result, loading, fetchMore } = useQuery(GetEntitiesDocument, {
+        limit: queryVariables.pagination.limit,
+        skip: queryVariables.pagination.skip,
+        searchQuery: searchQuery.value,
       });
 
-      watch(queryVariables, (value: GetEntitiesQueryVariables) => {
+      const getData = () => {
+        store.commit('updatePagination', queryVariables.pagination);
         fetchMore({
-          variables: value,
+          variables: {
+            limit: Number(store.state.pagination.limit),
+            skip: Number(queryVariables.pagination.skip),
+            searchQuery: searchQuery.value,
+          },
           updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
         });
+      };
+
+      watch(searchQuery, (value: string) => {
+        queryVariables.pagination = defaultPagination;
+        getData();
+      });
+
+      watch(queryVariables, (value: any) => {
+        getData();
       });
 
       return {
@@ -131,7 +145,7 @@
         loading,
         router,
         Unicons,
-        query,
+        queryVariables,
         searchQuery,
       };
     },

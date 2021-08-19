@@ -30,6 +30,11 @@
   import { defineComponent, computed } from 'vue';
   import { Unicons } from '@/types';
 
+  export type PaginationInfo = {
+    limit: number;
+    skip: number;
+  };
+
   export default defineComponent({
     name: 'Pagination',
     props: {
@@ -43,8 +48,7 @@
       const currentPage = computed(() => props.skip + 1);
 
       const maxPage = () => {
-        if (props.totalItems > 1)
-          return Math.round(props.totalItems / props.limit);
+        if (props.totalItems > 1) return Math.round(props.totalItems / props.limit);
         else return 1;
       };
 
