@@ -1,5 +1,5 @@
-import { mount, shallowMount } from '@vue/test-utils';
-import Dropdown from '@/components/base/Dropdown.vue';
+import { shallowMount } from '@vue/test-utils';
+import Dropdown from '../../src/components/base/Dropdown.vue';
 jest.mock('@/types');
 
 let wrapper: any;

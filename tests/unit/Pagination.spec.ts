@@ -9,7 +9,7 @@ const defaultProps = {
 };
 
 describe('Pagination.vue', () => {
-  it('Renders correct intial page count', () => {
+  it('Renders correct intial page count > 1', () => {
     const wrapper = shallowMount(Pagination, {
       props: { defaultProps, totalItems: 40 },
     });
