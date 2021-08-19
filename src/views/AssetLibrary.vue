@@ -123,7 +123,7 @@
         store.commit('updatePagination', queryVariables.pagination);
         fetchMore({
           variables: {
-            limit: Number(store.state.pagination.limit),
+            limit: Number(queryVariables.pagination.limit),
             skip: Number(queryVariables.pagination.skip),
             searchQuery: searchQuery.value,
           },
@@ -132,7 +132,8 @@
       };
 
       watch(searchQuery, (value: string) => {
-        queryVariables.pagination = defaultPagination;
+        queryVariables.pagination.limit = store.state.pagination.limit;
+        queryVariables.pagination.skip = 0;
         getData();
       });
 
