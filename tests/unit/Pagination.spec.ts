@@ -9,6 +9,15 @@ const defaultProps = {
 };
 
 describe('Pagination.vue', () => {
+  it('Calculates the correct maxPage depending on totalItems', () => {
+    const wrapper = shallowMount(Pagination, {
+      props: { defaultProps, totalItems: 28 },
+    });
+
+    const maxPage = wrapper.vm.maxPage();
+    wrapper.vm.$nextTick(() => expect(maxPage).toBe(3));
+  });
+
   it('Renders correct intial page count > 1', () => {
     const wrapper = shallowMount(Pagination, {
       props: { defaultProps, totalItems: 40 },
