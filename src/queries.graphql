@@ -23,8 +23,8 @@ fragment fullEntity on Entity {
   }
 }
 
-query getEntities($limit: Int, $skip: Int, $searchQuery: String) {
-  Entities(limit: $limit, skip: $skip, searchQuery: $searchQuery) {
+query getEntities($limit: Int, $skip: Int, $searchValue: SearchFilter) {
+  Entities(limit: $limit, skip: $skip, searchValue: $searchValue) {
     count
     limit
     results {
