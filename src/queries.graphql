@@ -5,6 +5,9 @@ fragment minimalEntity on Entity {
     key
     value
   }
+  mediafiles {
+    thumbnail_file_location
+  }
 }
 
 fragment fullEntity on Entity {

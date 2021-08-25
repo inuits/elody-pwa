@@ -15,7 +15,7 @@
           label="Items"
         />
         <Dropdown
-          v-if="result?.Entities.count > 0 && searchQuery != ''"
+          v-if="result?.Entities.count > 1 && searchQuery != ''"
           v-model="queryVariables.sort"
           :options="['Title', 'Collection']"
           label="Sort"
@@ -54,6 +54,7 @@
           v-for="entity in result.Entities.results"
           :key="entity.id"
           :meta="entity.metadata"
+          :media="entity.mediafiles"
           @click="router.push({ name: 'SingleEntity', params: { id: entity.id } })"
         >
           <template #actions>
