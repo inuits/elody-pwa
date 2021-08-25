@@ -1,6 +1,24 @@
 <template>
   <li class="row" :class="{ loading }" data-test="meta-row">
     <div class="flex w-full">
+      <img
+        v-if="media.length > 0"
+        class="h-10 w-10 obtain-cover mr-4 rounded-sm outline-none shadow-sm"
+        :src="media[0].thumbnail_file_location"
+        alt=""
+      />
+      <img
+        v-if="media.length == 0"
+        class="
+          h-10
+          w-10
+          mr-4
+          bg-transparent
+          border-transparent border-2
+          outline-none
+          rounded-sm
+        "
+      />
       <div v-for="metaItem in meta" :key="metaItem.value" class="col">
         <span class="label" data-test="meta-label">{{ metaItem.key }}</span>
         <span class="info" data-test="meta-info">{{ metaItem.value }}</span>
@@ -13,7 +31,7 @@
 </template>
 
 <script lang="ts">
-  import { Metadata } from '@/queries';
+  import { MediaFile, Metadata } from '@/queries';
   import { defineComponent, PropType } from 'vue';
 
   export default defineComponent({
@@ -21,6 +39,7 @@
     props: {
       loading: { type: Boolean, default: false },
       meta: { type: Array as PropType<Metadata[]>, default: () => [] },
+      media: { type: Array as PropType<MediaFile[]>, default: () => [] },
     },
   });
 </script>
