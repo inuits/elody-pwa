@@ -9,13 +9,15 @@
       />
       <div class="pl-4 my-2 flex flex-row justify-left">
         <Dropdown
+          v-if="result?.Entities.count > 0"
           v-model="queryVariables.pagination.limit"
           :options="[5, 10, 15, 20]"
           label="Items"
         />
         <Dropdown
+          v-if="result?.Entities.count > 0 && searchQuery != ''"
           v-model="queryVariables.sort"
-          :options="['Recently updated']"
+          :options="['Title', 'Collection']"
           label="Sort"
         />
       </div>
@@ -102,21 +104,21 @@
     setup: () => {
       const router = useRouter();
       const searchQuery = ref<string>('');
-      const defaultPagination = reactive<PaginationInfo>({
-        skip: 0,
-        limit: 20,
-      });
 
       const queryVariables = reactive<QueryVariables>({
         pagination: store.state.pagination,
         searchQuery: searchQuery.value,
-        sort: 'Recently updated',
+        sort: 'Title',
       });
 
       const { result, loading, fetchMore } = useQuery(GetEntitiesDocument, {
         limit: queryVariables.pagination.limit,
         skip: queryVariables.pagination.skip,
-        searchQuery: searchQuery.value,
+        searchValue: {
+          value: queryVariables.searchQuery,
+          isAsc: false,
+          key: queryVariables.sort.toLowerCase(),
+        },
       });
 
       const getData = () => {
@@ -125,7 +127,11 @@
           variables: {
             limit: Number(queryVariables.pagination.limit),
             skip: Number(queryVariables.pagination.skip),
-            searchQuery: searchQuery.value,
+            searchValue: {
+              value: searchQuery.value,
+              isAsc: false,
+              key: queryVariables.sort.toLowerCase(),
+            },
           },
           updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
         });
