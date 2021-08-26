@@ -12,6 +12,7 @@ import {
   uniUser,
   uniSearch,
   uniPlusCircle,
+  uniImageSlash,
 } from 'vue-unicons/dist/icons';
 
 export enum Unicons {
@@ -28,4 +29,5 @@ export enum Unicons {
   User = uniUser,
   SearchGlass = uniSearch,
   PlusCircle = uniPlusCircle,
+  NoImage = uniImageSlash,
 }
