@@ -5,19 +5,12 @@
         v-if="media.length > 0"
         class="h-10 w-10 obtain-cover mr-4 rounded-sm outline-none shadow-sm"
         :src="media[0].thumbnail_file_location"
-        alt=""
+        @error="setNoImage()"
       />
-      <img
-        v-if="media.length == 0"
-        class="
-          h-10
-          w-10
-          mr-4
-          bg-transparent
-          border-transparent border-2
-          outline-none
-          rounded-sm
-        "
+      <unicon
+        v-if="(thumbIcon && media.length == 0) || (imageSrcError && thumbIcon)"
+        :name="thumbIcon"
+        class="h-10 w-10 p-1 text-neutral-700 mr-4 rounded-sm outline-none shadow-sm"
       />
       <div v-for="metaItem in meta" :key="metaItem.value" class="col">
         <span class="label" data-test="meta-label">{{ metaItem.key }}</span>
@@ -33,6 +26,7 @@
 <script lang="ts">
   import { MediaFile, Metadata } from '@/queries';
   import { defineComponent, PropType } from 'vue';
+  import { Unicons } from '@/types';
 
   export default defineComponent({
     name: 'ListItem',
@@ -40,6 +34,14 @@
       loading: { type: Boolean, default: false },
       meta: { type: Array as PropType<Metadata[]>, default: () => [] },
       media: { type: Array as PropType<MediaFile[]>, default: () => [] },
+      thumbIcon: { type: String as PropType<keyof Unicons>, default: '' },
+    },
+    setup() {
+      let imageSrcError = false;
+      const setNoImage = () => {
+        imageSrcError = true;
+      };
+      return { setNoImage, imageSrcError };
     },
   });
 </script>

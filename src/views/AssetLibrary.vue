@@ -55,6 +55,7 @@
           :key="entity.id"
           :meta="entity.metadata"
           :media="entity.mediafiles"
+          :thumb-icon="Unicons.NoImage.name"
           @click="router.push({ name: 'SingleEntity', params: { id: entity.id } })"
         >
           <template #actions>
