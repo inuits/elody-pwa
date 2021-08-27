@@ -4,7 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Unicon from 'vue-unicons';
 import { DefaultApolloClient } from '@vue/apollo-composable';
 
-import { OpenIdConnectClient } from '@/OpenIdConnectPlugin';
+import { OpenIdConnectClient } from 'session-vue-3-oidc-library';
 import App from './App.vue';
 import { routes } from './views';
 import { store } from './store';

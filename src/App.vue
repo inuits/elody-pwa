@@ -45,7 +45,7 @@
   import { useRoute, useRouter } from 'vue-router';
   import { Unicons } from '@/types';
   import BaseButton from '@/components/base/BaseButton.vue';
-  import { DefaultOIDC, useAuth } from '@/OpenIdConnectPlugin';
+  import { DefaultOIDC, useAuth } from 'session-vue-3-oidc-library';
 
   export const useUpdatePageTitle = () =>
     inject<(title?: string) => void>('updatePageTitle')!;
