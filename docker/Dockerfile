@@ -1,5 +1,5 @@
 ### Development stage
-FROM node:lts-alpine as development-stage
+FROM node:lts as development-stage
 
 ARG NPM_AUTH_TOKEN
 # We need to set NPM_AUTH_TOKEN build ARG to ENV because we need valid .npmrc file for development aswell
@@ -7,10 +7,11 @@ ENV NPM_AUTH_TOKEN=$NPM_AUTH_TOKEN
 
 WORKDIR /app
 
+ENTRYPOINT ["/entrypoint.sh"]
+COPY docker/entrypoint*.sh /
 COPY package*.json ./
 
 RUN npm install
-CMD npm run serve
 EXPOSE 80
 
 ### Build stage
