@@ -20,14 +20,14 @@
     "graphql": "^15.5.1",
     "graphql-tag": "^2.12.5",
     "openseadragon": "^2.4.2",
+    "session-vue-3-oidc-library": "git+https://gitlab.com/inuits/coghent/session-vue-3-oidc-library.git#main",
     "register-service-worker": "^1.7.1",
     "ts-debounce": "^3.0.0",
     "vee-validate": "^4.4.9",
     "vue": "^3.1.5",
     "vue-router": "^4.0.10",
     "vue-unicons": "^3.2.1",
-    "vuex": "^4.0.2",
-    "session-vue-3-oidc-library": "git+https://gitlab.com/inuits/coghent/session-vue-3-oidc-library.git#main"
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@graphql-codegen/add": "^2.0.2",
