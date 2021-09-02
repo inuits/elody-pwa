@@ -1,11 +1,31 @@
 <template>
   <div id="font-body">
     <nav
-      class="fixed left-0 top-0 w-20  h-screen flex flex-col justify-start align-center pt-10 bg-neutral-20 px-5"
+      class="
+        fixed
+        left-0
+        top-0
+        w-20
+        h-screen
+        flex flex-col
+        justify-start
+        align-center
+        pt-10
+        bg-neutral-20
+        px-5
+      "
     >
       <router-link
         :to="{ name: 'AssetLibrary' }"
-        class="logo text-base text-neutral-700 font-semibold flex justify-center items-center mb-8"
+        class="
+          logo
+          text-base text-neutral-700
+          font-semibold
+          flex
+          justify-center
+          items-center
+          mb-8
+        "
       >
         DAMS
       </router-link>

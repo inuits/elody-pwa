@@ -76,8 +76,21 @@
     background-color: #fff;
     background-size: 60px 60px;
     background-position: 0 0, 30px 30px;
-    background-image:
-      linear-gradient(45deg, #f4f5f7 25%, transparent 25%, transparent 75%, #f4f5f7 75%, #f4f5f7),
-      linear-gradient(45deg, #f4f5f7 25%, transparent 25%, transparent 75%, #f4f5f7 75%, #f4f5f7);
+    background-image: linear-gradient(
+        45deg,
+        #f4f5f7 25%,
+        transparent 25%,
+        transparent 75%,
+        #f4f5f7 75%,
+        #f4f5f7
+      ),
+      linear-gradient(
+        45deg,
+        #f4f5f7 25%,
+        transparent 25%,
+        transparent 75%,
+        #f4f5f7 75%,
+        #f4f5f7
+      );
   }
 </style>
