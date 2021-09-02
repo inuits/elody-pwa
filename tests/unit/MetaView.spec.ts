@@ -13,9 +13,9 @@ const props = {
   error: '',
   loading: false,
   editMode: false,
-  startEdit: () => { },
-  discardEdit: () => { },
-  saveEdit: () => { },
+  startEdit: () => {},
+  discardEdit: () => {},
+  saveEdit: () => {},
   metadata: [
     { key: metaLabel1, value: metaInfo1 },
     { key: metaLabel2, value: metaInfo2 },

@@ -46,7 +46,9 @@
       });
       return {
         Unicons,
-        values, newType, newValue,
+        values,
+        newType,
+        newValue,
         onSubmit: handleSubmit(props.save),
         add() {
           setValues([...values, { key: newType.value, value: newValue.value }]);
@@ -57,5 +59,4 @@
   });
 </script>
 
-<style lang="postcss" scoped>
-</style>
+<style lang="postcss" scoped></style>
