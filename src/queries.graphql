@@ -14,24 +14,49 @@ fragment fullEntity on Entity {
   id
   type
   title: metadata(key: [title]) {
-    value
-  }
-  metadata {
     key
     value
-    lang
+  }
+  metadata(key: [description, material, type]) {
+    key
+    value
   }
   mediafiles {
-      original_file_location
+    _id
+    original_file_location
+  }
+  relations {
+    key
+    type
   }
 }
 
-query getEntities($limit: Int, $skip: Int, $searchValue: SearchFilter) {
+query getEntities($limit: Int, $skip: Int, $searchValue: SearchFilter!) {
   Entities(limit: $limit, skip: $skip, searchValue: $searchValue) {
     count
     limit
     results {
       ...minimalEntity
+    }
+  }
+}
+
+query getFullEntities(
+  $limit: Int
+  $skip: Int
+  $searchValue: SearchFilter!
+  $fetchPolicy: String
+) {
+  Entities(
+    limit: $limit
+    skip: $skip
+    searchValue: $searchValue
+    fetchPolicy: $fetchPolicy
+  ) {
+    count
+    limit
+    results {
+      ...fullEntity
     }
   }
 }
@@ -44,6 +69,8 @@ query getEntityById($id: String!) {
 
 mutation editMetadata($id: String!, $metadata: [MetadataInput!]!) {
   replaceMetadata(id: $id, metadata: $metadata) {
-    ...fullEntity
+    key
+    value
+    lang
   }
 }

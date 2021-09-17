@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve --port 80",
+    "serve": "vue-cli-service serve --port 1025",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "test:unit:watch": "vue-cli-service test:unit --watch",
     "test:e2e": "vue-cli-service test:e2e",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "generate": "graphql-codegen"
   },
   "dependencies": {
     "@apollo/client": "^3.3.21",
@@ -20,8 +21,8 @@
     "graphql": "^15.5.1",
     "graphql-tag": "^2.12.5",
     "openseadragon": "^2.4.2",
-    "session-vue-3-oidc-library": "git+https://gitlab.com/inuits/coghent/session-vue-3-oidc-library.git#main",
     "register-service-worker": "^1.7.1",
+    "session-vue-3-oidc-library": "git+https://gitlab.com/inuits/coghent/session-vue-3-oidc-library.git#main",
     "ts-debounce": "^3.0.0",
     "vee-validate": "^4.4.9",
     "vue": "^3.1.5",
@@ -71,13 +72,6 @@
       "tailwindcss": {},
       "autoprefixer": {}
     }
-  },
-  "prettier": {
-    "singleQuote": true,
-    "semi": true,
-    "vueIndentScriptAndStyle": true,
-    "trailingComma": "all",
-    "printWidth": 90
   },
   "babel": {
     "presets": [
