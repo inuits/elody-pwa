@@ -1,4 +1,4 @@
-schema: schema.graphql
+schema: ../inuits-dams-graphql-service/schema.graphql
 documents: src/queries.graphql
 generates:
   src/queries.ts:
