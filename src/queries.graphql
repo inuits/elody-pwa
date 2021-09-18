@@ -67,6 +67,20 @@ query getEntityById($id: String!) {
   }
 }
 
+query getDirectories {
+  Directories {
+    id
+    label
+    parent
+  }
+}
+
+mutation postStartImport($folder: String!) {
+  StartImport(folder: $folder) {
+    message_id
+  }
+}
+
 mutation editMetadata($id: String!, $metadata: [MetadataInput!]!) {
   replaceMetadata(id: $id, metadata: $metadata) {
     key

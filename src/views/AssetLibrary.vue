@@ -85,6 +85,7 @@
   import { useRouter } from 'vue-router';
   import { GetEntitiesDocument } from '@/queries';
   import { store } from '@/store';
+  import { useAuth } from 'session-vue-3-oidc-library';
 
   type QueryVariables = {
     pagination: PaginationInfo;
@@ -106,6 +107,8 @@
     setup: () => {
       const router = useRouter();
       const searchQuery = ref<string>('');
+      const auth = useAuth();
+      console.log(auth);
 
       const queryVariables = reactive<QueryVariables>({
         pagination: store.state.pagination,

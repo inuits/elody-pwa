@@ -2,8 +2,7 @@ const { GraphQLCodegenWebpackPlugin } = require('graphql-codegen-webpack-plugin'
 
 module.exports = {
   devServer: {
-    disableHostCheck: true,
-    progress: false,
+    allowedHosts: 'all',
   },
   pluginOptions: {},
   configureWebpack: {

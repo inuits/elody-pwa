@@ -15,7 +15,6 @@ module.exports = {
   },
   rules: {
     semi: ['error', 'always'],
-    'max-len': ['warn', { code: 150 }],
     'vue/no-multiple-template-root': 0,
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
