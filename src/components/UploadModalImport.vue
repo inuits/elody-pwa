@@ -20,6 +20,7 @@
   import BaseButton from './base/BaseButton.vue';
   import { useMutation } from '@vue/apollo-composable';
   import { Directory, PostStartImportDocument } from '@/queries';
+  import { UploadModalType } from './UploadModal.vue';
 
   export default defineComponent({
     name: 'UploadModalImport',
@@ -30,8 +31,9 @@
     props: {},
     setup() {
       const { mutate } = useMutation(PostStartImportDocument);
-
       const selectedDirectory = ref<Directory | undefined>();
+      const updateUploadModal =
+        inject<(UploadModal: UploadModalType) => void | undefined>('updateUploadModal');
 
       const updateSelectedDirectory = (directory: Directory) => {
         selectedDirectory.value = directory;
@@ -50,6 +52,10 @@
           mutate({
             folder: selectedDirectory.value.id,
           });
+          updateUploadModal &&
+            updateUploadModal({
+              state: 'hide',
+            });
         }
       };
 
