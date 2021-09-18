@@ -34,6 +34,12 @@
         bg-color="neutral-30"
         @click="router.push({ name: 'AssetLibrary' })"
       />
+      <BaseButton
+        :icon="Unicons.Upload.name"
+        class="mt-1"
+        bg-color="neutral-30"
+        @click="() => updateUploadModal({ state: 'show' })"
+      />
     </nav>
     <div class="pl-20 h-screen flex flex-col">
       <div class="w-full px-6 py-8 border-b border-neutral-30 z-10">
@@ -57,6 +63,7 @@
         <router-view />
       </div>
     </div>
+    <upload-modal :modal-type="uploadModal" />
   </div>
 </template>
 
@@ -66,6 +73,7 @@
   import { Unicons } from '@/types';
   import BaseButton from '@/components/base/BaseButton.vue';
   import { DefaultOIDC, useAuth } from 'session-vue-3-oidc-library';
+  import UploadModal, { UploadModalType } from '@/components/UploadModal.vue';
 
   export const useUpdatePageTitle = () =>
     inject<(title?: string) => void>('updatePageTitle')!;
@@ -77,7 +85,7 @@
 
   export default defineComponent({
     name: 'App',
-    components: { BaseButton },
+    components: { BaseButton, UploadModal },
     inject: { DefaultOIDC },
     setup() {
       const auth = useAuth();
@@ -92,11 +100,26 @@
         pageTitle.value = newTitle || '';
       });
 
+      const uploadModal = ref<UploadModalType>({
+        state: 'hide',
+      });
+
+      const updateUploadModal = (uploadModalInput: UploadModalType) => {
+        uploadModal.value = uploadModalInput;
+      };
+
+      provide<(uploadModalInput: UploadModalType) => void>(
+        'updateUploadModal',
+        updateUploadModal,
+      );
+
       return {
         router,
         pageTitle,
         Unicons,
         auth,
+        uploadModal,
+        updateUploadModal,
       };
     },
   });

@@ -1,0 +1,108 @@
+scalar Void
+
+enum MetaKey {
+  title
+  type
+  collection
+  description
+  material
+}
+
+enum RelationType {
+  authoredBy
+  isIn
+  contains
+}
+
+enum JSPatchOp {
+  add
+  replace
+  remove
+}
+
+input JSPatch {
+  op: JSPatchOp!
+  path: [String!]!
+  value: String!
+}
+
+type Metadata {
+  key: MetaKey!
+  value: String!
+  lang: String
+}
+
+input MetadataInput {
+  key: MetaKey!
+  value: String!
+  lang: String
+}
+
+type Entity {
+  id: String!
+  type: String!
+  metadata(key: [MetaKey]): [Metadata]!
+  relations: [Relation]
+  mediafiles: [MediaFile]
+}
+
+type MediaFile {
+  _id: String!
+  original_file_location: String
+  thumbnail_file_location: String
+  entities: [String]
+}
+
+type Relation {
+  key: String!
+  type: RelationType!
+}
+
+type EntitiesResults {
+  results: [Entity]
+  count: Int
+  limit: Int
+}
+
+input SearchFilter {
+  value: String
+  isAsc: Boolean
+  key: String
+  raw: Boolean
+}
+
+type User {
+  id: String!
+  email: String!
+  family_name: String!
+  given_name: String!
+  name: String!
+  preferred_username: String!
+}
+
+type Directory {
+  id: String
+  label: String
+  parent: String!
+}
+
+type ImportReturn {
+  message_id: String
+}
+
+type Query {
+  Entity(id: String!): Entity
+  Entities(
+    limit: Int
+    skip: Int
+    searchValue: SearchFilter!
+    fetchPolicy: String
+  ): EntitiesResults
+  User: User
+  Directories: [Directory]
+}
+
+type Mutation {
+  replaceMetadata(id: String!, metadata: [MetadataInput!]!): [Metadata!]!
+  StartImport(folder: String!): ImportReturn
+}

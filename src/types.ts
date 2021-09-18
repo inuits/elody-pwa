@@ -13,6 +13,7 @@ import {
   uniSearch,
   uniPlusCircle,
   uniImageSlash,
+  uniCloudUpload,
 } from 'vue-unicons/dist/icons';
 
 export enum Unicons {
@@ -30,4 +31,5 @@ export enum Unicons {
   SearchGlass = uniSearch,
   PlusCircle = uniPlusCircle,
   NoImage = uniImageSlash,
+  Upload = uniCloudUpload,
 }
