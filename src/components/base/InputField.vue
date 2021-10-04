@@ -5,20 +5,23 @@
       class="flex flex-row bg-neutral-20 border border-neutral-30 rounded"
       :class="{ 'mr-4': icon }"
     >
-      <unicon v-if="icon" :name="icon" class="h-full pl-2 text-neutral-700" />
+      <unicon v-if="icon" :name="icon" :class="[`h-full pl-2 text-neutral-700 bg-${bgColor}`]" />
       <input
+        :disabled="isDisabled"
         v-model="inputValue"
         v-bind="$attrs"
-        class="
+        :class="[`
           py-2
           pl-4
           w-full
+          rounded
           min-w-48
-          bg-neutral-20
+          bg-${bgColor}
           text-neutral-700 text-sm
-          focus:outline-none
-        "
+          focus:outline-none`
+        ]"
         type="text"
+        name=""
       />
     </div>
   </label>
@@ -38,6 +41,9 @@
       debounce: { type: Boolean, default: false },
       debounceWait: { type: Number, default: 400 },
       icon: { type: String as PropType<keyof Unicons>, default: undefined },
+      bgColor:{ type: String, default: 'neutral-0'},
+      name: { type: String, default: "", required: false},
+      isDisabled: { type: true || false, default: false, required: false},
     },
     emits: ['update:modelValue'],
     setup(props, { emit }) {

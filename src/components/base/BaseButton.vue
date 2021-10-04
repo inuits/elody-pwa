@@ -1,8 +1,8 @@
 <template>
   <button
     :class="[
-      `bg-${bgColor} flex justify-center p-2.5 rounded transition-colors duration-300`,
-      loading ? `text-${bgColor}` : `text-${txtColor} hover:bg-${bgHoverColor}`,
+      `bg-${bgColor} flex justify-center items-center px-3 py-2 rounded transition-colors duration-300`,
+      loading ? `text-${bgColor}` : `text-${txtColor} hover:bg-${bgHoverColor} border-2  border-${borderColor}`,
       label ? `pl-1.5` : ``,
     ]"
   >
@@ -10,7 +10,7 @@
       v-if="icon"
       :name="icon"
       height="16"
-      :fill="loading ? 'var(--color-neutral-20)' : 'var(--color-neutral-700)'"
+      :fill="loading ? 'var(--color-neutral-20)' : `${iconColor}`"
     />
     <span v-if="label" class="text-sm ml-0.5 leading-4">{{ label }}</span>
   </button>
@@ -49,6 +49,14 @@
         type: String,
         default: 'neutral-700',
       },
+      iconColor:{
+        type: String,
+        default: "var(--color-neutral-700)"
+      },
+      borderColor:{
+        type: String,
+        default: "transparent"
+      }
     },
   });
 </script>

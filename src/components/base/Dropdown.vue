@@ -1,6 +1,6 @@
 <template>
-  <label class="block">
-    <span class="ml-1 text-neutral-700 text-sm">{{ label }}</span>
+  <label class="block w-full">
+    <span :class="[`ml-1 text-${labelColor} text-sm`]">{{ label }}</span>
     <select v-model="selectedItem">
       <option v-for="option in options" :key="option" :value="option">
         {{ option }}
@@ -19,6 +19,14 @@
       label: { type: String, default: '' },
       options: { type: Array, required: true },
       modelValue: { type: String, default: undefined },
+      bgColor: {
+        type: String,
+        default: 'neutral-0',
+      },
+      labelColor: {
+        type: String,
+        default: 'neutral-600',
+      },
     },
     emits: ['update:modelValue'],
     setup(props, { emit }) {
