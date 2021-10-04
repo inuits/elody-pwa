@@ -42,10 +42,18 @@
       />
     </nav>
     <div class="pl-20 h-screen flex flex-col">
-      <div class="w-full px-6 py-8 border-b border-neutral-30 z-10">
+      <div class="w-full px-6 py-8 border-b border-neutral-30 z-10 flex items-center">
         <h1 class="text-lg font-semibold text-neutral-800 float-left">
           {{ pageTitle }}
         </h1>
+        <div v-if="true" class="mx-4">
+           <IconToggle
+            @click="updatedEditMode()"
+            :checked="editMode"
+            :icon-on="Unicons.Edit.name"
+            :icon-off="Unicons.Eye.name"
+          />
+        </div>
         <div class="float-right">
           <BaseButton
             v-if="auth && !auth.isAuthenticated"
@@ -68,12 +76,14 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, inject, provide, ref, Ref, onMounted, watch } from 'vue';
+  import { defineComponent, inject, provide, ref, Ref, onMounted, watch, computed } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { Unicons } from '@/types';
   import BaseButton from '@/components/base/BaseButton.vue';
+  import IconToggle from '@/components/base/IconToggle.vue';
   import { DefaultOIDC, useAuth } from 'session-vue-3-oidc-library';
   import UploadModal, { UploadModalType } from '@/components/UploadModal.vue';
+import { store } from './store';
 
   export const useUpdatePageTitle = () =>
     inject<(title?: string) => void>('updatePageTitle')!;
@@ -85,7 +95,7 @@
 
   export default defineComponent({
     name: 'App',
-    components: { BaseButton, UploadModal },
+    components: { BaseButton, UploadModal, IconToggle },
     inject: { DefaultOIDC },
     setup() {
       const auth = useAuth();
@@ -108,6 +118,12 @@
         uploadModal.value = uploadModalInput;
       };
 
+      const updatedEditMode = () => {
+        console.log("logging");
+        store.commit("updateEditMode", !store.state.editMode);
+        console.log(store.state.editMode);
+      };
+
       provide<(uploadModalInput: UploadModalType) => void>(
         'updateUploadModal',
         updateUploadModal,
@@ -120,6 +136,8 @@
         auth,
         uploadModal,
         updateUploadModal,
+        updatedEditMode,
+        editMode: computed(() => {return store.state.editMode;}),
       };
     },
   });

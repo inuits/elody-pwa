@@ -1,20 +1,26 @@
 <template>
   <div class="p-6 bg-neutral-0">
-    <BaseButton label="Discard" @click="discard" />
-    <BaseButton label="Save" @click="save" />
-
+        <BaseButton label="Save" @click="save" />
     <Form @submit="onSubmit">
-      <div v-for="row in values" :key="row.key" class="my-2">
-        <span class="label" :class="{ loading }">{{ row.key }}</span>
-        <Field name="row.key" />
+      <div v-for="item in formMetadata" :key="item.key" class="flex flex-col mb-2 mt-2">
+        <span class="text-sm flex" :class="{ loading }">{{ item.key }}</span>
+        <Field name="item.value" />
       </div>
     </Form>
-  </div>
-  <div class="p-6 bg-neutral-20">
-    <h2>Add meta data</h2>
-    <Dropdown v-model="newType" label="Type" :options="[]" />
-    <InputField v-model="newValue" label="Value" />
-    <BaseButton label="Add" :icon="Unicons.PlusCircle.name" @click="add" />
+    <!-- <Form @submit="onSubmit">
+      <div v-for="row in values" :key="row.key" class="flex flex-col mb-2 mt-2 overflow-y-auto">
+        <span class="text-sm flex" :class="{ loading }" data-test="meta-label">
+          {{ row.key }}
+        </span>
+         <InputField
+          v-model="row.value"
+          :debounce="true"
+          placeholder=""
+          :bgColor="'neutral-20'"
+      />
+      </div>
+    </form> -->
+    <MetaAdd @addMetadata="newMetadata"/>
   </div>
 </template>
 
@@ -22,15 +28,13 @@
   import { Metadata } from '@/queries';
   import { defineComponent, PropType, ref } from 'vue';
   import { useForm, Field, Form } from 'vee-validate';
-  import BaseButton from '@/components/base/BaseButton.vue';
-  import Dropdown from '@/components/base/Dropdown.vue';
-  import InputField from '@/components/base/InputField.vue';
   import { Unicons } from '@/types';
-  import { MetaKey } from '@/queries';
+  import MetaAdd from '@/components/MetaAdd.vue';
+
 
   export default defineComponent({
     name: 'MetaView',
-    components: { BaseButton, Dropdown, Field, Form, InputField },
+    components: { Form, Field, MetaAdd },
     props: {
       error: { type: String, default: '' },
       loading: { type: Boolean, default: false },
@@ -38,22 +42,25 @@
       discard: { type: Function as PropType<() => void>, required: true },
       save: { type: Function as PropType<(x: Metadata[]) => void>, required: true },
     },
-    setup(props) {
-      const newType = ref(MetaKey.Description);
-      const newValue = ref('');
-      const { values, setValues, handleSubmit } = useForm({
-        initialValues: props.metadata,
-      });
+    emits: ['updatedMetadata'],
+    setup(props, {emit}) {
+      let formMetadata = ref(props.metadata);
+      const newMetadata = (metadata: Metadata) => {
+        formMetadata.value.push(metadata);
+        console.log(formMetadata.value.map(val => {return val.key;}));
+      };
+      const { values, handleSubmit } = useForm({initialValues: formMetadata});
+
+      const saveChanges = () => {
+        emit('updatedMetadata', values);
+      };
+      
+
       return {
         Unicons,
         values,
-        newType,
-        newValue,
+        newMetadata,
         onSubmit: handleSubmit(props.save),
-        add() {
-          setValues([...values, { key: newType.value, value: newValue.value }]);
-          newValue.value = '';
-        },
       };
     },
   });

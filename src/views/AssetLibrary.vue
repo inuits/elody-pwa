@@ -6,6 +6,7 @@
         :debounce="true"
         placeholder="Search Asset Library..."
         label="Search"
+        :bgColor="'neutral-20'"
       />
       <div class="pl-4 my-2 flex flex-row justify-left">
         <Dropdown
