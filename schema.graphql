@@ -69,6 +69,7 @@ input SearchFilter {
   isAsc: Boolean
   key: String
   raw: Boolean
+  relation_filter: [String]
 }
 
 type User {
