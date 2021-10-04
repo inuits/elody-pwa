@@ -75,6 +75,15 @@ query getDirectories {
   }
 }
 
+query getEnumsByName($enumName: String!) {
+  __type(name: $enumName) {
+    name
+    enumValues {
+      name
+    }
+  }
+}
+
 mutation postStartImport($folder: String!) {
   StartImport(folder: $folder) {
     message_id
