@@ -145,6 +145,7 @@ export type SearchFilter = {
   isAsc?: Maybe<Scalars['Boolean']>;
   key?: Maybe<Scalars['String']>;
   raw?: Maybe<Scalars['Boolean']>;
+  relation_filter?: Maybe<Array<Maybe<Scalars['String']>>>;
 };
 
 export type User = {

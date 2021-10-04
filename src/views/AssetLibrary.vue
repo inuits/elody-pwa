@@ -124,6 +124,7 @@
           value: queryVariables.searchQuery,
           isAsc: false,
           key: queryVariables.sort.toLowerCase(),
+          relation_filter: [],
         },
       });
 
@@ -137,6 +138,7 @@
               value: searchQuery.value,
               isAsc: false,
               key: queryVariables.sort.toLowerCase(),
+              relation_filter: [],
             },
           },
           updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
