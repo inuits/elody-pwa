@@ -37,14 +37,14 @@
 
 <style lang="postcss" scoped>
   .box {
-    @apply block relative bg-neutral-20 rounded p-1;
+    @apply block relative bg-neutral-20 rounded;
   }
   .iconOn,
   .iconOff {
     @apply inline-block relative align-top h-9 p-2;
   }
   .dot {
-    @apply absolute left-1 top-1 bg-neutral-0 w-9 h-9 rounded transition;
+    @apply absolute left-1 top-1 bg-neutral-20 w-9 rounded transition;
   }
   /* :checked doesn't work for whatever reason, as Vue doesn't apply the
      attribute at all */

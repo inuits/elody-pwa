@@ -5,7 +5,7 @@
       w-11/12
       bg-neutral-0
       z-20
-      ml-12
+      mx-4
       mt-7
       p-2
       shadow-sm

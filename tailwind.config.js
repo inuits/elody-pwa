@@ -38,6 +38,9 @@ module.exports = {
         400: '#0052CC',
         500: '#0747A6',
       },
+      red:{
+        default: '#e50000',
+      },
       main: {
         light: '#DEEBFF',
         dark: '#0052CC',
