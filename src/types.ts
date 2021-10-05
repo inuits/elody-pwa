@@ -15,6 +15,7 @@ import {
   uniImageSlash,
   uniCloudUpload,
   uniHistory,
+  uniImage,
 } from "vue-unicons/dist/icons";
 
 export enum Unicons {
@@ -34,4 +35,5 @@ export enum Unicons {
   NoImage = uniImageSlash,
   Upload = uniCloudUpload,
   history = uniHistory,
+  image = uniImage,
 }
