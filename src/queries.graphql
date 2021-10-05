@@ -84,8 +84,8 @@ query getEnumsByName($enumName: String!) {
   }
 }
 
-query getJobs {
-  Jobs {
+query getJobs($limit: Int) {
+  Jobs(limit: $limit) {
     results {
       job_type
       job_type
@@ -103,6 +103,23 @@ query getJobs {
     count
     limit
     next
+  }
+}
+
+query getJob($id: String!) {
+  Job(id: $id) {
+    job_type
+    job_type
+    job_info
+    status
+    user
+    asset_id
+    mediafile_id
+    parent_job_id
+    end_time
+    _id
+    _key
+    _rev
   }
 }
 

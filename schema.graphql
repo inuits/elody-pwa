@@ -122,7 +122,8 @@ type Query {
   ): EntitiesResults
   User: User
   Directories: [Directory]
-  Jobs: JobsResults
+  Jobs(limit: Int): JobsResults
+  Job(id: String!): Job
 }
 
 type Mutation {
