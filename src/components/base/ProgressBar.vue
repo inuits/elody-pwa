@@ -1,6 +1,7 @@
 <template>
-  <div class="w-full bg-neutral-50 mx-2 my-1" >
-    <div :class="[`bg-${color} rounded h-1 w-full flex`]" :style="[`width: ${progressValue}%`]"></div>
+  <div class="w-full mx-4 my-1 flex items-center" >
+    <div :class="[`bg-${color} rounded h-1.5 w-full `]" :style="[`width: ${progressValue}%`]"></div>
+    <div class="bg-neutral-20 rounded h-1.5 w-full"></div>
   </div>
 </template>
 <script lang="ts">
@@ -16,7 +17,7 @@ export default defineComponent({
     },
     color: {
       type: String,
-      default: "blue-500",
+      default: "neutral-700",
     }
   },
   setup(props) {
