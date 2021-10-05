@@ -11,7 +11,6 @@ export const store = createStore({
     },
     updateEditMode(state, isEditing) {
       state.editMode = isEditing;
-      console.log(`Updated EDITMODE to ${isEditing}`);
     },
   },
   actions: {},

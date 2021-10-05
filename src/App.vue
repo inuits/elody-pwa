@@ -42,17 +42,30 @@
       />
     </nav>
     <div class="pl-20 h-screen flex flex-col">
-      <div class="w-full px-6 py-8 border-b border-neutral-30 z-10 flex items-center">
-        <h1 class="text-lg font-semibold text-neutral-800 float-left">
-          {{ pageTitle }}
-        </h1>
-        <div v-if="true" class="mx-4">
-           <IconToggle
-            @click="updatedEditMode()"
-            :checked="editMode"
-            :icon-on="Unicons.Edit.name"
-            :icon-off="Unicons.Eye.name"
-          />
+      <div
+        class="
+          w-full
+          px-6
+          py-8
+          border-b border-neutral-30
+          z-10
+          flex
+          items-center
+          justify-between
+        "
+      >
+        <div class="flex w-full">
+          <h1 class="text-lg font-semibold text-neutral-800 float-left">
+            {{ pageTitle }}
+          </h1>
+          <div v-if="true" class="mx-4">
+            <IconToggle
+              v-show="!isHome"
+              v-model:checked="editMode"
+              :icon-on="Unicons.Edit.name"
+              :icon-off="Unicons.Eye.name"
+            />
+          </div>
         </div>
         <div class="float-right">
           <BaseButton
@@ -76,14 +89,23 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, inject, provide, ref, Ref, onMounted, watch, computed } from 'vue';
+  import {
+    defineComponent,
+    inject,
+    provide,
+    ref,
+    Ref,
+    onMounted,
+    watch,
+    computed,
+  } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { Unicons } from '@/types';
   import BaseButton from '@/components/base/BaseButton.vue';
   import IconToggle from '@/components/base/IconToggle.vue';
   import { DefaultOIDC, useAuth } from 'session-vue-3-oidc-library';
   import UploadModal, { UploadModalType } from '@/components/UploadModal.vue';
-import { store } from './store';
+  import { store } from './store';
 
   export const useUpdatePageTitle = () =>
     inject<(title?: string) => void>('updatePageTitle')!;
@@ -101,6 +123,7 @@ import { store } from './store';
       const auth = useAuth();
       const route = useRoute();
       const router = useRouter();
+      const editMode = ref<boolean>(false);
 
       const pageTitle = ref<string>(route.meta.title as string);
       router.afterEach((to, _from, _failure) => {
@@ -109,6 +132,7 @@ import { store } from './store';
       provide('updatePageTitle', (newTitle?: string) => {
         pageTitle.value = newTitle || '';
       });
+      const isHome = computed<boolean>(() => route.name === 'AssetLibrary');
 
       const uploadModal = ref<UploadModalType>({
         state: 'hide',
@@ -119,9 +143,8 @@ import { store } from './store';
       };
 
       const updatedEditMode = () => {
-        console.log("logging");
-        store.commit("updateEditMode", !store.state.editMode);
-        console.log(store.state.editMode);
+        console.log('logging');
+        store.commit('updateEditMode', !store.state.editMode);
       };
 
       provide<(uploadModalInput: UploadModalType) => void>(
@@ -129,15 +152,21 @@ import { store } from './store';
         updateUploadModal,
       );
 
+      provide<(editMode: boolean) => void>('updateEditMode', (input: boolean) => {
+        editMode.value = input;
+      });
+      provide<Ref<boolean>>('editMode', editMode);
+
       return {
+        isHome,
         router,
         pageTitle,
         Unicons,
         auth,
         uploadModal,
+        editMode,
         updateUploadModal,
         updatedEditMode,
-        editMode: computed(() => {return store.state.editMode;}),
       };
     },
   });

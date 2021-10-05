@@ -12,9 +12,11 @@
         :name="thumbIcon"
         class="h-10 w-10 p-1 text-neutral-700 mr-4 rounded-sm outline-none shadow-sm"
       />
-      <div v-for="metaItem in meta" :key="metaItem.value" class="col">
-        <span class="label" data-test="meta-label">{{ metaItem.key }}</span>
-        <span class="info" data-test="meta-info">{{ metaItem.value }}</span>
+      <div class="flex w-full">
+        <div v-for="metaItem in only4Meta(meta)" :key="metaItem.value" class="col">
+          <span class="label" data-test="meta-label">{{ metaItem.key }}</span>
+          <span class="info" data-test="meta-info">{{ metaItem.value }}</span>
+        </div>
       </div>
     </div>
     <div class="flex flex-row" data-test="action-slot">
@@ -41,7 +43,11 @@
       const setNoImage = () => {
         imageSrcError = true;
       };
-      return { setNoImage, imageSrcError };
+
+      const only4Meta = (input: Metadata[]) => {
+        return input.slice(0, 4);
+      };
+      return { setNoImage, imageSrcError, only4Meta };
     },
   });
 </script>

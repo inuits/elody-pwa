@@ -1,25 +1,62 @@
 <template>
   <div class="h-full w-full flex relative">
     <div class="flex w-4/6">
-      <IIIFViewer :image-url="mediafile?.original_file_location" />
-      <div v-if="editMode" class="absolute bottom-6 z-20 flex flex-column rounded gap-x-2 bg-neutral-0 shadow-2xl px-4 py-2 ml-6">
-        <BaseButton :bgColor="'blue-400'" :txtColor="'neutral-0'" label="Save" @click="discard()" />
-        <BaseButton label="Discard" bgColor="'neutral-0'" :borderColor="'red-default'" :txtColor="'red-default'" @click="save()" />
+      <IIIFViewer v-if="!loading" :image-url="mediafile?.original_file_location" />
+      <div
+        v-if="editMode"
+        class="
+          absolute
+          bottom-6
+          z-20
+          flex flex-column
+          rounded
+          gap-x-2
+          bg-neutral-0
+          shadow-2xl
+          px-4
+          py-2
+          ml-6
+        "
+      >
+        <BaseButton
+          :bg-color="'blue-400'"
+          :txt-color="'neutral-0'"
+          label="Save"
+          @click="save()"
+        />
+        <BaseButton
+          label="Discard"
+          bg-color="'neutral-0'"
+          :border-color="'red-default'"
+          :txt-color="'red-default'"
+          @click="discard()"
+        />
       </div>
     </div>
-    <Meta class="w-2/6" :entityId="entityId" :metadata="metadata" :editMode="editMode"/>
+    <Meta
+      class="w-2/6"
+      :entity-id="entityId"
+      :metadata="metadata"
+      :edit-mode="editMode"
+      :entity-title="title"
+    />
   </div>
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, ref } from 'vue';
+  import { computed, defineComponent, inject, provide, ref, Ref } from 'vue';
   import { useRoute } from 'vue-router';
   import { useMutation, useQuery } from '@vue/apollo-composable';
 
   import BaseButton from '@/components/base/BaseButton.vue';
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import Meta from '@/components/Meta.vue';
-  import { GetEntityByIdDocument, EditMetadataDocument, MetadataInput, Metadata } from '@/queries';
+  import {
+    GetEntityByIdDocument,
+    EditMetadataDocument,
+    MetadataInput,
+    Metadata,
+  } from '@/queries';
   import { usePageTitle } from '@/App.vue';
   import { Unicons } from '@/types';
 
@@ -29,26 +66,50 @@
     name: 'SingleEntity',
     components: { IIIFViewer, BaseButton, Meta },
     setup() {
-      const editMode = ref(false);
+      const editMode = inject<Ref<boolean>>('editMode');
+      const updateEditMode = inject<(input: boolean) => void>('updateEditMode');
       const id = asString(useRoute().params['id']);
       const { result, error, loading, refetch } = useQuery(GetEntityByIdDocument, { id });
-      const { mutate } = useMutation(EditMetadataDocument);
+      const title = computed(() => result.value?.Entity?.title[0]?.value);
 
-      usePageTitle(computed(() => result.value?.Entity?.title[0]?.value));
+      usePageTitle(title);
+
+      const saveCallbacks = ref<{ (): Promise<void> }[]>([]);
+
+      provide('saveCallBacks', saveCallbacks.value);
+      provide('addSaveCallBacks', (input: () => Promise<void>) =>
+        saveCallbacks.value.push(input),
+      );
+
+      const save = () => {
+        saveCallbacks.value.forEach((callback: () => Promise<void>) => {
+          callback().then(() => {
+            if (editMode) {
+              editMode.value = false;
+              refetch();
+            }
+          });
+        });
+      };
+
+      const discard = () => {
+        updateEditMode && updateEditMode(false);
+        saveCallbacks.value = [];
+      };
+
       return {
         Unicons,
         editMode,
         loading,
         error,
+        title,
         metadata: computed(() => result?.value?.Entity?.metadata || []),
         mediafile: computed(() => result?.value?.Entity?.mediafiles?.[0]),
-        discard: () => (editMode.value = false),
-        async save(metadata: Metadata[]) {
-          await mutate({ id, metadata });
-          await refetch();
-          editMode.value = false;
-        },
-        entityId: computed(() => {return id;}),
+        save,
+        discard,
+        entityId: computed(() => {
+          return id;
+        }),
       };
     },
   });

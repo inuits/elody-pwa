@@ -6,7 +6,7 @@
         :debounce="true"
         placeholder="Search Asset Library..."
         label="Search"
-        :bgColor="'neutral-20'"
+        :bg-color="'neutral-20'"
       />
       <div class="pl-4 my-2 flex flex-row justify-left">
         <Dropdown
@@ -109,7 +109,6 @@
       const router = useRouter();
       const searchQuery = ref<string>('');
       const auth = useAuth();
-      console.log(auth);
 
       const queryVariables = reactive<QueryVariables>({
         pagination: store.state.pagination,
