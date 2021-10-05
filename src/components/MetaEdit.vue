@@ -1,66 +1,90 @@
 <template>
   <div class="p-6 bg-neutral-0">
-        <BaseButton label="Save" @click="save" />
-    <Form @submit="onSubmit">
-      <div v-for="item in formMetadata" :key="item.key" class="flex flex-col mb-2 mt-2">
-        <span class="text-sm flex" :class="{ loading }">{{ item.key }}</span>
-        <Field name="item.value" />
-      </div>
-    </Form>
-    <!-- <Form @submit="onSubmit">
-      <div v-for="row in values" :key="row.key" class="flex flex-col mb-2 mt-2 overflow-y-auto">
-        <span class="text-sm flex" :class="{ loading }" data-test="meta-label">
-          {{ row.key }}
-        </span>
-         <InputField
-          v-model="row.value"
-          :debounce="true"
-          placeholder=""
-          :bgColor="'neutral-20'"
+    <Form
+      v-slot="{ handleSubmit }"
+      :initial-values="{ metadata: formMetadata }"
+      @submit="onSubmit"
+    >
+      <FieldArray v-slot="{ fields, push }" name="metadata">
+        <fieldset v-for="(field, idx) in fields" :key="field.key" class="my-2">
+          <label :class="[lableStyle]" :for="`value_${idx}`">{{ field.value.key }}</label>
+          <div :class="[inputContainerStyle]">
+            <Field
+              :id="`value_${idx}`"
+              :name="`metadata[${idx}].value`"
+              :class="[`bg-neutral-0`, inputStyle]"
+            />
+          </div>
+        </fieldset>
+        <MetaAdd @addMetadata="push" />
+      </FieldArray>
+      <add-save-callback
+        :callback="
+          async () => {
+            await handleSubmit(onSubmit);
+          }
+        "
       />
-      </div>
-    </form> -->
-    <MetaAdd @addMetadata="newMetadata"/>
+    </Form>
   </div>
 </template>
 
 <script lang="ts">
-  import { Metadata } from '@/queries';
+  import { EditMetadataDocument, Metadata, MetaKey } from '@/queries';
   import { defineComponent, PropType, ref } from 'vue';
-  import { useForm, Field, Form } from 'vee-validate';
+  import { Field, Form, ErrorMessage, FieldArray } from 'vee-validate';
   import { Unicons } from '@/types';
   import MetaAdd from '@/components/MetaAdd.vue';
+  import { useMutation } from '@vue/apollo-composable';
+  import { useRoute } from 'vue-router';
+  import { inputStyle, inputContainerStyle, lableStyle } from './base/InputField.vue';
+  import AddSaveCallback from './base/addSaveCallback.vue';
 
+  const asString = (x: string | string[]) => (Array.isArray(x) ? x[0] : x);
 
   export default defineComponent({
-    name: 'MetaView',
-    components: { Form, Field, MetaAdd },
+    name: 'MetaEdit',
+    components: { MetaAdd, Form, FieldArray, Field, AddSaveCallback },
     props: {
       error: { type: String, default: '' },
       loading: { type: Boolean, default: false },
+      entityTitle: { type: String, required: true },
       metadata: { type: Array as PropType<Metadata[]>, required: true },
       discard: { type: Function as PropType<() => void>, required: true },
-      save: { type: Function as PropType<(x: Metadata[]) => void>, required: true },
+      save: {
+        type: Function as PropType<(x: Metadata[]) => void>,
+        required: true,
+      },
     },
     emits: ['updatedMetadata'],
-    setup(props, {emit}) {
-      let formMetadata = ref(props.metadata);
-      const newMetadata = (metadata: Metadata) => {
-        formMetadata.value.push(metadata);
-        console.log(formMetadata.value.map(val => {return val.key;}));
-      };
-      const { values, handleSubmit } = useForm({initialValues: formMetadata});
+    setup(props, { emit }) {
+      let formMetadata = ref<Metadata[]>([
+        {
+          key: MetaKey.Title,
+          value: props.entityTitle,
+        },
+      ]);
 
-      const saveChanges = () => {
-        emit('updatedMetadata', values);
+      const id = asString(useRoute().params['id']);
+      props.metadata.forEach((meta: Metadata) => {
+        formMetadata.value.push({
+          key: meta.key,
+          value: meta.value,
+        });
+      });
+      const { mutate } = useMutation(EditMetadataDocument);
+
+      const onSubmit = async (input: { metadata: Metadata[] }) => {
+        await mutate({ id, metadata: input.metadata });
       };
-      
 
       return {
         Unicons,
-        values,
-        newMetadata,
-        onSubmit: handleSubmit(props.save),
+        onSubmit,
+        formMetadata,
+        inputStyle,
+        lableStyle,
+        inputContainerStyle,
       };
     },
   });

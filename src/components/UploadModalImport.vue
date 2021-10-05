@@ -47,7 +47,6 @@
       provide<Ref<Directory | undefined>>('selectedDirectory', selectedDirectory);
 
       const doImport = () => {
-        console.log(selectedDirectory);
         if (selectedDirectory.value && selectedDirectory.value.id) {
           mutate({
             folder: selectedDirectory.value.id,

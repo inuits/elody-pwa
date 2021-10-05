@@ -16,6 +16,7 @@ module.exports = {
   rules: {
     semi: ['error', 'always'],
     'vue/no-multiple-template-root': 0,
+    'vue/no-unused-vars': 0,
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
   },

@@ -24,7 +24,7 @@
     "register-service-worker": "^1.7.1",
     "session-vue-3-oidc-library": "git+https://gitlab.com/inuits/coghent/session-vue-3-oidc-library.git#main",
     "ts-debounce": "^3.0.0",
-    "vee-validate": "^4.4.9",
+    "vee-validate": "^4.5.2",
     "vue": "^3.1.5",
     "vue-router": "^4.0.10",
     "vue-unicons": "^3.2.1",
