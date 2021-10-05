@@ -35,6 +35,11 @@
         @click="router.push({ name: 'AssetLibrary' })"
       />
       <BaseButton
+        :icon="Unicons.history.name"
+        bg-color="neutral-30"
+        @click="router.push({ name: 'History' })"
+      />
+      <BaseButton
         :icon="Unicons.Upload.name"
         class="mt-1"
         bg-color="neutral-30"
