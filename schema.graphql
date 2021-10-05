@@ -91,6 +91,27 @@ type ImportReturn {
   message_id: String
 }
 
+type Job {
+  job_type: String
+  job_info: String
+  status: String
+  user: String
+  asset_id: String
+  mediafile_id: String
+  parent_job_id: String
+  end_time: String
+  _id: String
+  _key: String
+  _rev: String
+}
+
+type JobsResults {
+  results: [Job]
+  count: Int
+  limit: Int
+  next: String
+}
+
 type Query {
   Entity(id: String!): Entity
   Entities(
@@ -101,6 +122,7 @@ type Query {
   ): EntitiesResults
   User: User
   Directories: [Directory]
+  Jobs: JobsResults
 }
 
 type Mutation {

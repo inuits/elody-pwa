@@ -84,6 +84,28 @@ query getEnumsByName($enumName: String!) {
   }
 }
 
+query getJobs {
+  Jobs {
+    results {
+      job_type
+      job_type
+      job_info
+      status
+      user
+      asset_id
+      mediafile_id
+      parent_job_id
+      end_time
+      _id
+      _key
+      _rev
+    }
+    count
+    limit
+    next
+  }
+}
+
 mutation postStartImport($folder: String!) {
   StartImport(folder: $folder) {
     message_id
