@@ -14,7 +14,8 @@ import {
   uniPlusCircle,
   uniImageSlash,
   uniCloudUpload,
-} from 'vue-unicons/dist/icons';
+  uniHistory,
+} from "vue-unicons/dist/icons";
 
 export enum Unicons {
   Edit = uniEdit,
@@ -32,4 +33,5 @@ export enum Unicons {
   PlusCircle = uniPlusCircle,
   NoImage = uniImageSlash,
   Upload = uniCloudUpload,
+  history = uniHistory,
 }
