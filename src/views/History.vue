@@ -1,26 +1,20 @@
 <template>
-  <div class="bg-neutral-20 h-full px-6 py-4">
-    <div v-for="job in jobs" :key="job.job_id">
-      <Job :job="job" />
-    </div>
-   
-  </div>
-  
+    <ParentJob :jobs="jobs"/>
+    <ParentJob :jobs="jobs"/>
+    <ParentJob :jobs="jobs"/>
 </template>
 
 <script lang="ts">
 import { GetJobsDocument } from '@/queries';
 import { useQuery } from '@vue/apollo-composable';
 import { computed, defineComponent } from 'vue';
-import Job from '@/components/Job.vue';
-
-
+import ParentJob from '@/components/ParentJob.vue';
 
 export default defineComponent({
   name: "History",
-  components: { Job },
+  components: { ParentJob },
   setup() {
-    const { result } = useQuery(GetJobsDocument);
+    const { result } = useQuery(GetJobsDocument, {limit: 2});
     console.log(result);
     return {
       jobs: computed( () => {return result.value?.Jobs?.results;}),

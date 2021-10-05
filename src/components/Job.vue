@@ -1,14 +1,14 @@
 <template>
-   <div class="flex flex-row bg-neutral-0 px-6 py-2 rounded justify-center my-2">
-      <div class="px-3 rounded flex justify-center items-center bg-neutral-20">
+   <div class="flex flex-row bg-neutral-0 px-6 py-2 rounded justify-center my-2 text-sm items-center">
+      <div class="p-2 rounded flex justify-center items-center bg-neutral-20">
          <Icon
-        name="image"
+        :name="Unicons.Image.name"
         height="18"
         :fill="`blue-500`"
       />
       </div>  
       <p class="w-2/6 mx-4 flex items-center">{{job.job_info}}</p>
-      <div class="text-neutral-0 text-ms rounded block h-2 px-6 py-1 bg-neutral-700 h-full text-center align-middle">40%</div>
+      <Label :name="'50%'" :color="'blue-500'"/>
       <ProgressBar :progress="50"/>
       <BaseButton
         label="view"
@@ -23,11 +23,12 @@ import { Unicons } from '@/types';
 import ProgressBar from '@/components/base/ProgressBar.vue';
 import Icon from '@/components/base/Icon.vue';
 import BaseButton from '@/components/base/BaseButton.vue';
+import Label from '@/components/base/Label.vue';
 import { Job } from '@/queries';
 
 export default defineComponent({
   name: "Job",
-  components: { ProgressBar, Icon, BaseButton },
+  components: { ProgressBar, Icon, BaseButton, Label },
   props: {
     job: {
       type: String as PropType<Job>,
