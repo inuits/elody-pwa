@@ -19,7 +19,7 @@
     state: ModalState;
   };
 
-  export const uploadModalState = ref<UploadModalType>({
+  const uploadModalState = ref<UploadModalType>({
     state: 'hide',
   });
 
