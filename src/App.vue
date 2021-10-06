@@ -1,51 +1,6 @@
 <template>
   <div id="font-body">
-    <nav
-      class="
-        fixed
-        left-0
-        top-0
-        w-20
-        h-screen
-        flex flex-col
-        justify-start
-        align-center
-        pt-10
-        bg-neutral-20
-        px-5
-      "
-    >
-      <router-link
-        :to="{ name: 'AssetLibrary' }"
-        class="
-          logo
-          text-base text-neutral-700
-          font-semibold
-          flex
-          justify-center
-          items-center
-          mb-8
-        "
-      >
-        DAMS
-      </router-link>
-      <BaseButton
-        :icon="Unicons.BookOpen.name"
-        bg-color="neutral-30"
-        @click="router.push({ name: 'AssetLibrary' })"
-      />
-      <BaseButton
-        :icon="Unicons.History.name"
-        bg-color="neutral-30"
-        @click="router.push({ name: 'History' })"
-      />
-      <BaseButton
-        :icon="Unicons.Upload.name"
-        class="mt-1"
-        bg-color="neutral-30"
-        @click="() => updateUploadModal({ state: 'show' })"
-      />
-    </nav>
+    <the-navigation />
     <div class="pl-20 h-screen flex flex-col">
       <div
         class="
@@ -89,7 +44,7 @@
         <router-view />
       </div>
     </div>
-    <upload-modal :modal-type="uploadModal" />
+    <upload-modal />
   </div>
 </template>
 
@@ -109,8 +64,9 @@
   import BaseButton from '@/components/base/BaseButton.vue';
   import IconToggle from '@/components/base/IconToggle.vue';
   import { DefaultOIDC, useAuth } from 'session-vue-3-oidc-library';
-  import UploadModal, { UploadModalType } from '@/components/UploadModal.vue';
+  import UploadModal from '@/components/UploadModal.vue';
   import { store } from './store';
+  import TheNavigation from '@/components/TheNavigation.vue';
 
   export const useUpdatePageTitle = () =>
     inject<(title?: string) => void>('updatePageTitle')!;
@@ -122,7 +78,7 @@
 
   export default defineComponent({
     name: 'App',
-    components: { BaseButton, UploadModal, IconToggle },
+    components: { BaseButton, UploadModal, IconToggle, TheNavigation },
     inject: { DefaultOIDC },
     setup() {
       const auth = useAuth();
@@ -139,24 +95,6 @@
       });
       const isHome = computed<boolean>(() => route.name === 'AssetLibrary');
 
-      const uploadModal = ref<UploadModalType>({
-        state: 'hide',
-      });
-
-      const updateUploadModal = (uploadModalInput: UploadModalType) => {
-        uploadModal.value = uploadModalInput;
-      };
-
-      const updatedEditMode = () => {
-        console.log('logging');
-        store.commit('updateEditMode', !store.state.editMode);
-      };
-
-      provide<(uploadModalInput: UploadModalType) => void>(
-        'updateUploadModal',
-        updateUploadModal,
-      );
-
       provide<(editMode: boolean) => void>('updateEditMode', (input: boolean) => {
         editMode.value = input;
       });
@@ -168,10 +106,7 @@
         pageTitle,
         Unicons,
         auth,
-        uploadModal,
         editMode,
-        updateUploadModal,
-        updatedEditMode,
       };
     },
   });
