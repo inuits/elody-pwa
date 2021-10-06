@@ -12,28 +12,35 @@ import { Unicons } from './types';
 
 import './registerServiceWorker';
 import './index.css';
+import { environment as _ } from "./environment";
 
 Unicon.add(Object.values(Unicons));
 
-const config = await fetch('../config.json').then((r) => r.json());
+const config = await fetch("../config.json").then((r) => r.json());
 const auth = new OpenIdConnectClient(config.oidc);
 
-const router = createRouter({ routes, history: createWebHistory(process.env.BASE_URL) });
-router.beforeEach(async (to, _from, next) => {
-  if (!to.matched.some((route) => route.meta.requiresAuth)) {
-    return next();
-  }
-  await auth.assertIsAuthenticated(to.fullPath, next);
+const router = createRouter({
+  routes,
+  history: createWebHistory(process.env.BASE_URL),
 });
 
-const authCode = new URLSearchParams(window.location.search).get('code');
+if (_.auth) {
+  router.beforeEach(async (to, _from, next) => {
+    if (!to.matched.some((route) => route.meta.requiresAuth)) {
+      return next();
+    }
+    await auth.assertIsAuthenticated(to.fullPath, next);
+  });
+}
+
+const authCode = new URLSearchParams(window.location.search).get("code");
 if (authCode) {
   auth.processAuthCode(authCode, router);
 }
 
 createApp(App)
   .use(Unicon, {
-    fill: 'currentColor',
+    fill: "currentColor",
   })
   .use(store)
   .use(router)
@@ -43,6 +50,6 @@ createApp(App)
     new ApolloClient({
       link: createHttpLink({ uri: config.graphQlLink }),
       cache: new InMemoryCache(),
-    }),
+    })
   )
-  .mount('#app');
+  .mount("#app");
