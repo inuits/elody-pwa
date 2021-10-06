@@ -44,21 +44,17 @@
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, inject, provide, ref, Ref } from 'vue';
+  import { computed, defineComponent, inject, provide, ref, Ref, watch } from 'vue';
   import { useRoute } from 'vue-router';
-  import { useMutation, useQuery } from '@vue/apollo-composable';
+  import { useQuery } from '@vue/apollo-composable';
 
   import BaseButton from '@/components/base/BaseButton.vue';
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import Meta from '@/components/Meta.vue';
-  import {
-    GetEntityByIdDocument,
-    EditMetadataDocument,
-    MetadataInput,
-    Metadata,
-  } from '@/queries';
-  import { usePageTitle } from '@/App.vue';
+  import { GetEntityByIdDocument } from '@/queries';
+  import { usePageTitle } from '@/components/TheHeader.vue';
   import { Unicons } from '@/types';
+  import { useEditMode } from '@/components/EditToggle.vue';
 
   const asString = (x: string | string[]) => (Array.isArray(x) ? x[0] : x);
 
@@ -66,13 +62,16 @@
     name: 'SingleEntity',
     components: { IIIFViewer, BaseButton, Meta },
     setup() {
-      const editMode = inject<Ref<boolean>>('editMode');
-      const updateEditMode = inject<(input: boolean) => void>('updateEditMode');
+      const { editMode, disableEditMode } = useEditMode();
       const id = asString(useRoute().params['id']);
       const { result, error, loading, refetch } = useQuery(GetEntityByIdDocument, { id });
       const title = computed(() => result.value?.Entity?.title[0]?.value);
 
-      usePageTitle(title);
+      const { updatePageTitle } = usePageTitle();
+
+      watch(title, (value: string | undefined) => {
+        value && updatePageTitle(value);
+      });
 
       const saveCallbacks = ref<{ (): Promise<void> }[]>([]);
 
@@ -93,7 +92,7 @@
       };
 
       const discard = () => {
-        updateEditMode && updateEditMode(false);
+        disableEditMode();
         saveCallbacks.value = [];
       };
 
