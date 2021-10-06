@@ -82,7 +82,7 @@ export default defineComponent({
   components: { BaseButton, UploadModal, IconToggle, TheNavigation },
   inject: { DefaultOIDC },
   setup() {
-    const auth = useAuth() ? _.auth : {};
+    const auth = useAuth();
     const route = useRoute();
     const router = useRouter();
     const editMode = ref<boolean>(false);
