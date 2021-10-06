@@ -21,7 +21,8 @@
   import { defineComponent, inject, PropType, Ref } from 'vue';
   import MetaEdit from '@/components/MetaEdit.vue';
   import MetaView from '@/components/MetaView.vue';
-  import { EditMetadataDocument, Metadata, MetadataInput, MetaKey } from '@/queries';
+  import { Metadata } from '@/queries';
+  import { useEditMode } from './EditToggle.vue';
 
   export default defineComponent({
     name: 'Meta',
@@ -32,7 +33,7 @@
       entityTitle: { type: String, required: true },
     },
     setup() {
-      const editMode = inject<Ref<boolean>>('editMode');
+      const { editMode } = useEditMode();
 
       return {
         editMode,
