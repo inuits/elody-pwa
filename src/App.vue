@@ -59,7 +59,7 @@
           justify-between
         "
       >
-        <div class="flex w-full">
+        <div class="flex w-full items-center">
           <h1 class="text-lg font-semibold text-neutral-800 float-left">
             {{ pageTitle }}
           </h1>

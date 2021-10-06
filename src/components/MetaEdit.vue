@@ -5,15 +5,22 @@
       :initial-values="{ metadata: formMetadata }"
       @submit="onSubmit"
     >
-      <FieldArray v-slot="{ fields, push }" name="metadata">
+      <FieldArray v-slot="{ fields, push, remove }" name="metadata">
         <fieldset v-for="(field, idx) in fields" :key="field.key" class="my-2">
           <label :class="[lableStyle]" :for="`value_${idx}`">{{ field.value.key }}</label>
-          <div :class="[inputContainerStyle]">
+          <div :class="[inputContainerStyle, ' input-container']">
             <Field
               :id="`value_${idx}`"
               :name="`metadata[${idx}].value`"
               :class="[`bg-neutral-0`, inputStyle]"
             />
+            <div class="delete">
+              <BaseButton
+                :icon="Unicons.Trash.name"
+                bg-color="neutral-30 "
+                @click="remove(idx)"
+              />
+            </div>
           </div>
         </fieldset>
         <MetaAdd @addMetadata="push" />
@@ -39,12 +46,13 @@
   import { useRoute } from 'vue-router';
   import { inputStyle, inputContainerStyle, lableStyle } from './base/InputField.vue';
   import AddSaveCallback from './base/addSaveCallback.vue';
+  import BaseButton from './base/BaseButton.vue';
 
   const asString = (x: string | string[]) => (Array.isArray(x) ? x[0] : x);
 
   export default defineComponent({
     name: 'MetaEdit',
-    components: { MetaAdd, Form, FieldArray, Field, AddSaveCallback },
+    components: { MetaAdd, Form, FieldArray, Field, AddSaveCallback, BaseButton },
     props: {
       error: { type: String, default: '' },
       loading: { type: Boolean, default: false },
@@ -90,4 +98,11 @@
   });
 </script>
 
-<style lang="postcss" scoped></style>
+<style lang="postcss">
+  .input-container .delete {
+    display: none;
+  }
+  .input-container:hover .delete {
+    display: block;
+  }
+</style>
