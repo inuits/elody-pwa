@@ -18,7 +18,8 @@ import {
   uniImage,
   uniExport,
   uniMinus,
-} from "vue-unicons/dist/icons";
+  uniTrashAlt,
+} from 'vue-unicons/dist/icons';
 
 export enum Unicons {
   Edit = uniEdit,
@@ -40,4 +41,5 @@ export enum Unicons {
   Image = uniImage,
   Export = uniExport,
   Minus = uniMinus,
+  Trash = uniTrashAlt,
 }
