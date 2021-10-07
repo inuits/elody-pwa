@@ -84,8 +84,8 @@ query getEnumsByName($enumName: String!) {
   }
 }
 
-query getJobs($paginationInfo: PaginationInfo) {
-  Jobs(paginationInfo: $paginationInfo) {
+query getJobs($paginationInfo: PaginationInfo, $filters: Filters) {
+  Jobs(paginationInfo: $paginationInfo, filters: $filters) {
     results {
       job_type
       job_type
