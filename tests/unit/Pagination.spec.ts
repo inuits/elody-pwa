@@ -32,38 +32,56 @@ describe('Pagination.vue', () => {
     expect(wrapper.find('[data-test="page-count-label"]').text()).toMatch('Page 1 of 1');
   });
 
-  it('Page up event', () => {
+  it("Page up event", () => {
     const wrapper = shallowMount(Pagination, {
       props: defaultProps,
     });
-    wrapper.vm.next();
+    wrapper.vm.next(1);
     wrapper.vm.$nextTick(() => {
-      expect(wrapper.emitted('update:skip')).toEqual([[1]]);
+      expect(wrapper.emitted("update:skip")).toEqual([[1]]);
     });
   });
 
-  it('Page down event', () => {
+  it("Five pages up event", () => {
+    const wrapper = shallowMount(Pagination, {
+      props: defaultProps,
+    });
+    wrapper.vm.next(5);
+    wrapper.vm.$nextTick(() => {
+      expect(wrapper.emitted("update:skip")).toEqual([[5]]);
+    });
+  });
+
+  it("Page down event", () => {
     const wrapper = shallowMount(Pagination, {
       props: { ...defaultProps, skip: 5 },
     });
-    wrapper.vm.prev();
-    expect(wrapper.emitted('update:skip')).toEqual([[4]]);
+    wrapper.vm.prev(1);
+    expect(wrapper.emitted("update:skip")).toEqual([[4]]);
   });
 
-  it('Page max -> no emit', () => {
+  it("Five pages down event", () => {
+    const wrapper = shallowMount(Pagination, {
+      props: { ...defaultProps, skip: 5 },
+    });
+    wrapper.vm.prev(5);
+    expect(wrapper.emitted("update:skip")).toEqual([[1]]);
+  });
+
+  it("Page max -> no emit", () => {
     const wrapper = shallowMount(Pagination, {
       props: { ...defaultProps, skip: 8 },
     });
-    wrapper.vm.next();
-    expect(wrapper.emitted('update:skip')).toBe(undefined);
+    wrapper.vm.next(1);
+    expect(wrapper.emitted("update:skip")).toBe(undefined);
   });
 
-  it('Page min -> no emit', () => {
+  it("Page min -> no emit", () => {
     const wrapper = shallowMount(Pagination, {
       props: defaultProps,
     });
-    wrapper.vm.prev();
-    expect(wrapper.emitted('update:skip')).toBe(undefined);
+    wrapper.vm.prev(1);
+    expect(wrapper.emitted("update:skip")).toBe(undefined);
   });
 
   it('Css classes meta correct on loading', () => {
