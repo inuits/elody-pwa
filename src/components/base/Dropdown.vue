@@ -1,6 +1,6 @@
 <template>
   <label class="block w-full">
-    <span :class="[`ml-1 text-${labelColor} text-sm`]">{{ label }}</span>
+    <span v-if="label" :class="[`ml-1 text-${labelColor} text-sm`]">{{ label }}</span>
     <select v-model="selectedItem">
       <option v-for="option in options" :key="option" :value="option">
         {{ option }}
