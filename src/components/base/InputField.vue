@@ -1,6 +1,6 @@
 <template>
   <label class="block my-2">
-    <span class="ml-1 text-neutral-700 text-sm">{{ label }}</span>
+    <span v-if="label" class="ml-1 text-neutral-700 text-sm">{{ label }}</span>
     <div :class="[{ 'mr-4': icon }, inputContainerStyle]">
       <unicon
         v-if="icon"
