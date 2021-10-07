@@ -9,8 +9,10 @@
         :total-items="jobs.count"
       />
     </div>
-    <div v-for="job in jobs.results" :key="job.job_key">
-      <ParentJob :job="job" />
+    <div v-if="jobs.results"> 
+      <div  v-for="job in jobs.results" :key="job.job_key">
+        <ParentJob :job="job" />
+      </div>
     </div>
   </div>
 </template>
@@ -63,7 +65,7 @@ export default defineComponent({
 
     return {
       jobs: computed(() => {
-        return result.value?.Jobs;
+        return result.value?.Jobs || [];
       }),
       result,
       limit,
