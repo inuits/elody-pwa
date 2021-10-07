@@ -1,5 +1,5 @@
 ### Development stage
-FROM node:lts as development-stage
+FROM node:14.17.6 as development-stage
 
 ARG NPM_AUTH_TOKEN
 # We need to set NPM_AUTH_TOKEN build ARG to ENV because we need valid .npmrc file for development aswell
@@ -15,7 +15,7 @@ RUN npm install
 EXPOSE 80
 
 ### Build stage
-FROM node:lts-alpine as build-stage
+FROM node:14.17.6-alpine3.12 as build-stage
 
 ARG NPM_AUTH_TOKEN
 
