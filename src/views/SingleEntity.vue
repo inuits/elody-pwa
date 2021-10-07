@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, inject, provide, ref, Ref, watch } from 'vue';
+  import { computed, defineComponent, provide, ref, watch } from 'vue';
   import { useRoute } from 'vue-router';
   import { useQuery } from '@vue/apollo-composable';
 
