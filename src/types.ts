@@ -19,7 +19,9 @@ import {
   uniExport,
   uniMinus,
   uniTrashAlt,
-} from 'vue-unicons/dist/icons';
+  uniAngleDoubleLeft,
+  uniAngleDoubleRight,
+} from "vue-unicons/dist/icons";
 
 export enum Unicons {
   Edit = uniEdit,
@@ -30,6 +32,8 @@ export enum Unicons {
   Desktop = uniDesktop,
   AngleLeft = uniAngleLeft,
   AngleRight = uniAngleRight,
+  AngleDoubleLeft = uniAngleDoubleLeft,
+  AngleDoubleRight = uniAngleDoubleRight,
   AngleDown = uniAngleDown,
   BookOpen = uniBookOpen,
   User = uniUser,
