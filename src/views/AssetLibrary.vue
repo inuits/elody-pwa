@@ -85,7 +85,6 @@
   import { Unicons } from '@/types';
   import { useRouter } from 'vue-router';
   import { GetEntitiesDocument } from '@/queries';
-  import { store } from '@/store';
   import { useAuth } from 'session-vue-3-oidc-library';
 
   type QueryVariables = {
@@ -96,7 +95,6 @@
 
   export default defineComponent({
     name: 'Home',
-    store: store,
     components: {
       ListContainer,
       ListItem,
@@ -111,7 +109,10 @@
       const auth = useAuth();
 
       const queryVariables = reactive<QueryVariables>({
-        pagination: store.state.pagination,
+        pagination: {
+          limit: 20,
+          skip: 0,
+        },
         searchQuery: searchQuery.value,
         sort: 'Title',
       });
@@ -128,11 +129,12 @@
       });
 
       const getData = () => {
-        store.commit('updatePagination', queryVariables.pagination);
         fetchMore({
           variables: {
             limit: Number(queryVariables.pagination.limit),
-            skip: Number(queryVariables.pagination.skip),
+            skip:
+              Number(queryVariables.pagination.skip) *
+              Number(queryVariables.pagination.limit),
             searchValue: {
               value: searchQuery.value,
               isAsc: false,
@@ -145,7 +147,6 @@
       };
 
       watch(searchQuery, (value: string) => {
-        queryVariables.pagination.limit = store.state.pagination.limit;
         queryVariables.pagination.skip = 0;
         getData();
       });
