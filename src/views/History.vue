@@ -1,7 +1,17 @@
 <template>
-  <div>
+  <div class="p-6">
     <div class="flex flex-row gap-y-4 items-center">
-      <Dropdown v-model="queryVariables.pagination.limit" :options="[5, 10, 15, 20]" />
+       <InputField
+        v-model="searchQuery"
+        :debounce="true"
+        placeholder="Search History"
+        label=""
+        :bg-color="'neutral-20'"
+      />
+      <div class="pl-4 my-2 flex flex-row justify-left">
+        <Dropdown v-model="queryVariables.pagination.limit" :options="[5, 10, 15, 20]" />
+      </div>
+      <div class="flex-grow"></div>
       <Pagination
         v-if="jobs.count > 0"
         v-model:skip="queryVariables.pagination.skip"
@@ -23,16 +33,24 @@ import { useQuery } from '@vue/apollo-composable';
 import { computed, defineComponent, ref, watch, reactive } from 'vue';
 import ParentJob from '@/components/ParentJob.vue';
 import Dropdown from '@/components/base/Dropdown.vue';
+import InputField from '@/components/base/InputField.vue';
+
 import Pagination, { PaginationInfo } from '@/components/base/Pagination.vue';
+
+type Filter = {
+  query: string;
+  sort?: string;
+};
+
 
 type QueryVariables = {
   pagination: PaginationInfo;
-  searchQuery: string;
+  filters: Filter;
 };
 
 export default defineComponent({
   name: 'History',
-  components: { ParentJob, Dropdown, Pagination },
+  components: { ParentJob, Dropdown, Pagination, InputField },
   setup() {
     const limit = ref(5);
     const searchQuery = ref('');
@@ -41,7 +59,9 @@ export default defineComponent({
         limit: limit.value,
         skip: 0,
       },
-      searchQuery: searchQuery.value,
+      filters: {
+        query: searchQuery.value
+      }
     });
 
     const { result, fetchMore } = useQuery(GetJobsDocument, {
@@ -49,6 +69,9 @@ export default defineComponent({
         limit: queryVariables.pagination.limit,
         skip: queryVariables.pagination.skip,
       },
+      filters: {
+        query: queryVariables.filters.query,
+      }
     });
 
     watch(queryVariables, () => {
@@ -58,9 +81,16 @@ export default defineComponent({
             limit: queryVariables.pagination.limit,
             skip: queryVariables.pagination.skip,
           },
+          filters: {
+            query: queryVariables.filters.query,
+          }
         },
         updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
       });
+    });
+
+    watch(searchQuery, () => {
+      queryVariables.filters.query = searchQuery.value;
     });
 
     return {

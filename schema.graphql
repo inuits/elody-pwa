@@ -118,6 +118,11 @@ input PaginationInfo {
   skip: Int
 }
 
+input Filters {
+  query: String
+  sort: String
+}
+
 type Query {
   Entity(id: String!): Entity
   Entities(
@@ -128,7 +133,7 @@ type Query {
   ): EntitiesResults
   User: User
   Directories: [Directory]
-  Jobs(paginationInfo: PaginationInfo): JobsResults
+  Jobs(paginationInfo: PaginationInfo, filters: Filters): JobsResults
   Job(id: String!): Job
 }
 
