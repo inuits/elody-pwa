@@ -41,6 +41,9 @@ module.exports = {
       red:{
         default: '#e50000',
       },
+      green:{
+        default: '#00b200',
+      },
       main: {
         light: '#DEEBFF',
         dark: '#0052CC',

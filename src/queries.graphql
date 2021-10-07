@@ -84,8 +84,8 @@ query getEnumsByName($enumName: String!) {
   }
 }
 
-query getJobs($limit: Int) {
-  Jobs(limit: $limit) {
+query getJobs($paginationInfo: PaginationInfo) {
+  Jobs(paginationInfo: $paginationInfo) {
     results {
       job_type
       job_type
@@ -96,6 +96,7 @@ query getJobs($limit: Int) {
       mediafile_id
       parent_job_id
       end_time
+      start_time
       _id
       _key
       _rev
@@ -117,6 +118,7 @@ query getJob($id: String!) {
     mediafile_id
     parent_job_id
     end_time
+    start_time
     _id
     _key
     _rev
