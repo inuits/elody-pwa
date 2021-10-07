@@ -100,6 +100,7 @@ type Job {
   mediafile_id: String
   parent_job_id: String
   end_time: String
+  start_time: String
   _id: String
   _key: String
   _rev: String
@@ -112,6 +113,11 @@ type JobsResults {
   next: String
 }
 
+input PaginationInfo {
+  limit: Int
+  skip: Int
+}
+
 type Query {
   Entity(id: String!): Entity
   Entities(
@@ -122,7 +128,7 @@ type Query {
   ): EntitiesResults
   User: User
   Directories: [Directory]
-  Jobs(limit: Int): JobsResults
+  Jobs(paginationInfo: PaginationInfo): JobsResults
   Job(id: String!): Job
 }
 
