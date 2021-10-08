@@ -15,7 +15,7 @@
       <Pagination
         v-if="jobs.count > 0"
         v-model:skip="queryVariables.pagination.skip"
-        :limit="queryVariables.pagination.limit"
+        v-model:limit="queryVariables.pagination.limit"
         :total-items="jobs.count"
       />
     </div>
@@ -36,6 +36,7 @@ import Dropdown from '@/components/base/Dropdown.vue';
 import InputField from '@/components/base/InputField.vue';
 
 import Pagination, { PaginationInfo } from '@/components/base/Pagination.vue';
+import useRouteHelpers from '@/composables/useRouteHelpers';
 
 type Filter = {
   query: string;
@@ -56,13 +57,15 @@ export default defineComponent({
     const searchQuery = ref('');
     const queryVariables = reactive<QueryVariables>({
       pagination: {
-        limit: limit.value,
-        skip: 0,
+        limit: 5,
+        skip: 1,
       },
       filters: {
         query: searchQuery.value
       }
     });
+    const helper = useRouteHelpers();
+    queryVariables.pagination = helper.getPaginationInfoFromUrl(queryVariables.pagination) as PaginationInfo;
 
     const { result, fetchMore } = useQuery(GetJobsDocument, {
       paginationInfo: {
@@ -75,6 +78,7 @@ export default defineComponent({
     });
 
     watch(queryVariables, () => {
+      helper.updatePaginationInfoQueryParams(queryVariables.pagination);
       fetchMore({
         variables: {
           paginationInfo: {

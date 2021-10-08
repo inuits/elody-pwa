@@ -47,6 +47,7 @@
 <script lang="ts">
   import { defineComponent, computed } from 'vue';
   import { Unicons } from '@/types';
+  import  useRouteHelpers from '@/composables/useRouteHelpers';
 
   export type PaginationInfo = {
     limit: number;
@@ -58,12 +59,19 @@
     props: {
       loading: { type: Boolean, default: false },
       limit: { type: Number, default: 20 },
-      skip: { type: Number, default: 0 },
+      skip: { type: Number, default: 1 },
       totalItems: { type: Number, default: 1 },
     },
     emits: ['update:skip'],
     setup: (props, { emit }) => {
-      const currentPage = computed(() => props.skip + 1);
+      const helper = useRouteHelpers();      
+      const currentPage = computed(() => {
+        if(props.skip == 0){
+          helper.updatePaginationInfoQueryParams({limit: props.limit, skip: 1});
+          return 1;
+        }else return props.skip;
+        
+      });
 
       const maxPage = () => {
         if (props.totalItems > 1) return Math.ceil(props.totalItems / props.limit);
@@ -72,13 +80,22 @@
 
       const prev = (pages: number) => {
         if (currentPage.value - pages > 1) {
+          helper.updatePaginationInfoQueryParams({limit: props.limit, skip: props.skip - pages});
           emit('update:skip', props.skip - pages);
-        }else emit('update:skip', 0);
+        }else {
+          helper.updatePaginationInfoQueryParams({limit: props.limit, skip: 1});
+          emit('update:skip', 1);
+        }
       };
+
       const next = (pages: number) => {
         if (currentPage.value + pages <= maxPage()) {
+          helper.updatePaginationInfoQueryParams({limit: props.limit, skip: props.skip + pages});
           emit('update:skip', props.skip + pages);
-        }else emit('update:skip', maxPage());
+        }else {
+          helper.updatePaginationInfoQueryParams({limit: props.limit, skip: maxPage()});
+          emit('update:skip', maxPage());
+        }
       };
 
       return {
