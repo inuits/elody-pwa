@@ -1,19 +1,15 @@
 <template>
   <div class="w-2/6">
-    <div>
-      <meta-view v-if="!editMode" :edit-mode="editMode" :metadata="metadata" />
-    </div>
-    <div v-if="editMode" class="absolute w-2/6">
-      <meta-edit
-        v-if="metadata.length > 0"
-        :error="error"
-        :loading="loading"
-        :metadata="metadata"
-        :discard="discard"
-        :entity-title="entityTitle"
-        @addMetadata="addEditedMetadata"
-      />
-    </div>
+    <meta-view v-if="!isEdit" :metadata="metadata" />
+    <meta-edit
+      v-if="isEdit"
+      :error="error"
+      :loading="loading"
+      :metadata="metadata"
+      :discard="discard"
+      :entity-title="entityTitle"
+      @addMetadata="addEditedMetadata"
+    />
   </div>
 </template>
 
@@ -29,14 +25,13 @@
     components: { MetaEdit, MetaView },
     props: {
       metadata: { type: Array as PropType<Metadata[]>, required: true },
-      entityId: { type: String, default: '' },
       entityTitle: { type: String, required: true },
     },
     setup() {
-      const { editMode } = useEditMode();
+      const { isEdit } = useEditMode();
 
       return {
-        editMode,
+        isEdit,
       };
     },
   });

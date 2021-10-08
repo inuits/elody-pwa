@@ -18,3 +18,5 @@ export const hasOwnProperty = <X extends {}, Y extends PropertyKey>(
 ): obj is X & Record<Y, unknown> => {
   return obj.hasOwnProperty(prop);
 };
+
+export const asString = (x: string | string[]) => (Array.isArray(x) ? x[0] : x);
