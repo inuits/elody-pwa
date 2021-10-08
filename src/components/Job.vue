@@ -11,14 +11,17 @@
       <Label :name="'50%'" :color="'blue-500'"/>
       <ProgressBar :progress="50"/>
       <BaseButton
+        v-if="job.asset_id"
         label="view"
         :icon="Unicons.Eye.name"
+        @click="router.push({ name: 'SingleEntity', params: { id: job.asset_id } })"
         /> 
     </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
+import { useRouter } from 'vue-router';
 import { Unicons } from '@/types';
 import ProgressBar from '@/components/base/ProgressBar.vue';
 import Icon from '@/components/base/Icon.vue';
@@ -36,7 +39,8 @@ export default defineComponent({
     },
   },
   setup() {
-    return {Unicons};
+    const router = useRouter();
+    return {Unicons, router};
   },
 });
 </script>

@@ -77,7 +77,6 @@
       };
       const next = (pages: number) => {
         if (currentPage.value + pages <= maxPage()) {
-          console.log(currentPage.value + pages);
           emit('update:skip', props.skip + pages);
         }else emit('update:skip', maxPage());
       };

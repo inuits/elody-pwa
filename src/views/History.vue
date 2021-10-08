@@ -21,7 +21,7 @@
     </div>
     <div v-if="jobs.results"> 
       <div  v-for="job in jobs.results" :key="job.job_key">
-        <ParentJob :job="job" />
+        <ParentJob :job="job" :subjobs="jobs.results" />
       </div>
     </div>
   </div>

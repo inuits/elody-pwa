@@ -39,18 +39,19 @@
         </div>
       </div>
       
-      <BaseButton v-if="jobs.length > 0" label="collaps" :icon="Unicons.Minus.name" @click="toggleCollapse" />
+      <BaseButton v-if="subjobs.length > 0 && isCollapsed != true" label="Expand" :icon="Unicons.Plus.name" @click="toggleCollapse" />
+      <BaseButton v-if="subjobs.length > 0 && isCollapsed == true" label="Collaps" :icon="Unicons.Minus.name" @click="toggleCollapse" />
     </div>
     <div v-if="isCollapsed">
-      <div v-for="job in jobs" :key="job.job_id">
-        <JobComp :job="{}" />
+      <div v-for="job in subjobs" :key="job.job_id">
+        <JobComp :job="job" />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref } from 'vue';
+import { computed, defineComponent, PropType, ref, reactive } from 'vue';
 import { Unicons } from '@/types';
 import Icon from '@/components/base/Icon.vue';
 import BaseButton from '@/components/base/BaseButton.vue';
@@ -79,9 +80,12 @@ export default defineComponent({
       type: String as PropType<Job>,
       required: true,
     },
+    subjobs: {
+      type: Array as PropType<Job[]>,
+    },
   },
   setup(props) {
-    const isCollapsed = ref<Boolean>(false);;
+    const isCollapsed = ref<Boolean>(false);
     
     const toggleCollapse = () => {
       isCollapsed.value = !isCollapsed.value;
