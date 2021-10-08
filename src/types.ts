@@ -21,6 +21,7 @@ import {
   uniTrashAlt,
   uniAngleDoubleLeft,
   uniAngleDoubleRight,
+  uniPlus
 } from "vue-unicons/dist/icons";
 
 export enum Unicons {
@@ -45,5 +46,6 @@ export enum Unicons {
   Image = uniImage,
   Export = uniExport,
   Minus = uniMinus,
+  Plus = uniPlus,
   Trash = uniTrashAlt,
 }
