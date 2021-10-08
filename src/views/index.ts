@@ -2,6 +2,8 @@ import { RouteRecordRaw } from 'vue-router';
 import AssetLibrary from './AssetLibrary.vue';
 import History from './History.vue';
 
+export type urlParams = 'id';
+
 export const routes: RouteRecordRaw[] = [
   {
     path: '/',

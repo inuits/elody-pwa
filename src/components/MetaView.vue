@@ -27,7 +27,6 @@
     props: {
       loading: { type: Boolean, default: false },
       metadata: { type: Array as PropType<Metadata[]>, required: true },
-      editMode: { type: true || false, default: false },
     },
     setup(props) {
       const { result, error, loading, refetch } = useQuery(GetEnumsByNameDocument, {

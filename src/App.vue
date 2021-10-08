@@ -8,6 +8,7 @@
       </div>
     </div>
     <upload-modal />
+    <edit-modal />
   </div>
 </template>
 
@@ -17,10 +18,11 @@
   import UploadModal from '@/components/UploadModal.vue';
   import TheNavigation from '@/components/TheNavigation.vue';
   import TheHeader from '@/components/TheHeader.vue';
+  import EditModal from '@/components/EditModal.vue';
 
   export default defineComponent({
     name: 'App',
-    components: { UploadModal, TheNavigation, TheHeader },
+    components: { UploadModal, TheNavigation, TheHeader, EditModal },
     inject: { DefaultOIDC },
     setup() {
       const auth = useAuth();

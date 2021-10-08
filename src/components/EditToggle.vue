@@ -2,7 +2,7 @@
   <div v-if="true" class="mx-4">
     <IconToggle
       v-show="isSingle"
-      v-model:checked="editMode"
+      v-model:checked="toggleBoolean"
       :icon-on="Unicons.Edit.name"
       :icon-off="Unicons.Eye.name"
     />
@@ -10,18 +10,22 @@
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, ref } from 'vue';
+  import { computed, defineComponent, ref, watch } from 'vue';
   import IconToggle from './base/IconToggle.vue';
-  import { useRoute } from 'vue-router';
+  import useRouteHelpers from '@/composables/useRouteHelpers';
   import { Unicons } from '@/types';
 
-  const editMode = ref<boolean>(false);
+  export type EditModes = 'edit' | 'view' | 'loading';
+
+  const editMode = ref<EditModes>('view');
 
   export const useEditMode = () => {
-    const setEditMode = () => (editMode.value = true);
-    const disableEditMode = () => (editMode.value = false);
+    const setEditMode = () => (editMode.value = 'edit');
+    const disableEditMode = () => (editMode.value = 'view');
+    const isEdit = computed<boolean>(() => editMode.value === 'edit');
 
     return {
+      isEdit,
       editMode,
       setEditMode,
       disableEditMode,
@@ -32,14 +36,22 @@
     name: 'EditToggle',
     components: { IconToggle },
     setup() {
-      const { editMode } = useEditMode();
-      const route = useRoute();
-      const isSingle = computed<boolean>(() => route.name === 'SingleEntity');
+      const toggleBoolean = ref<boolean>(false);
+      const { disableEditMode, setEditMode } = useEditMode();
+      const { isSingle } = useRouteHelpers();
+
+      watch(toggleBoolean, (value: boolean) => {
+        if (toggleBoolean.value) {
+          setEditMode();
+        } else {
+          disableEditMode();
+        }
+      });
 
       return {
         Unicons,
         isSingle,
-        editMode,
+        toggleBoolean,
       };
     },
   });

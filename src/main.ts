@@ -12,11 +12,11 @@ import { Unicons } from './types';
 
 import './registerServiceWorker';
 import './index.css';
-import { environment as _ } from "./environment";
+import { environment as _ } from './environment';
 
 Unicon.add(Object.values(Unicons));
 
-const config = await fetch("../config.json").then((r) => r.json());
+const config = await fetch('../config.json').then((r) => r.json());
 const auth = new OpenIdConnectClient(config.oidc);
 
 const router = createRouter({
@@ -33,14 +33,14 @@ if (_.auth) {
   });
 }
 
-const authCode = new URLSearchParams(window.location.search).get("code");
+const authCode = new URLSearchParams(window.location.search).get('code');
 if (authCode) {
   auth.processAuthCode(authCode, router);
 }
 
 createApp(App)
   .use(Unicon, {
-    fill: "currentColor",
+    fill: 'currentColor',
   })
   .use(store)
   .use(router)
@@ -50,6 +50,6 @@ createApp(App)
     new ApolloClient({
       link: createHttpLink({ uri: config.graphQlLink }),
       cache: new InMemoryCache(),
-    })
+    }),
   )
-  .mount("#app");
+  .mount('#app');
