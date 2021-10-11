@@ -1,7 +1,7 @@
 <template>
   <button
     :class="[
-      `bg-${bgColor} flex justify-center items-center px-3 py-2 rounded transition-colors duration-300 m-1`,
+      `bg-${bgColor} flex justify-center items-center px-3 py-2 rounded transition-colors duration-300`,
       loading
         ? `text-${bgColor}`
         : `text-${txtColor} hover:bg-${bgHoverColor} border-2  border-${borderColor}`,

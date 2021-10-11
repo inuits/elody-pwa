@@ -18,6 +18,7 @@
             <div class="delete">
               <BaseButton
                 :icon="Unicons.Trash.name"
+                class="h-full"
                 bg-color="neutral-30 "
                 @click="remove(idx)"
               />
