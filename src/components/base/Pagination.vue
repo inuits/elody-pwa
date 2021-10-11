@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, computed } from 'vue';
+  import { defineComponent, computed, watch, reactive } from 'vue';
   import { Unicons } from '@/types';
   import useRouteHelpers from '@/composables/useRouteHelpers';
 
@@ -68,6 +68,13 @@
     emits: ['update:skip'],
     setup: (props, { emit }) => {
       const helper = useRouteHelpers();
+      let paginationInfo = reactive<PaginationInfo>({limit: props.limit, skip: props.skip});
+      paginationInfo = helper.getPaginationInfoFromUrl(paginationInfo) as PaginationInfo;
+
+      watch(paginationInfo, () => {
+        helper.updatePaginationInfoQueryParams({ limit: props.limit, skip: props.skip });
+      });
+
       const currentPage = computed(() => {
         if (props.skip == 0) {
           helper.updatePaginationInfoQueryParams({ limit: props.limit, skip: 1 });

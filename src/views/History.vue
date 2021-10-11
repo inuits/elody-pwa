@@ -36,7 +36,6 @@
   import InputField from '@/components/base/InputField.vue';
 
   import Pagination, { PaginationInfo } from '@/components/base/Pagination.vue';
-  import useRouteHelpers from '@/composables/useRouteHelpers';
 
   type Filter = {
     query: string;
@@ -63,11 +62,7 @@
           query: searchQuery.value,
         },
       });
-      const helper = useRouteHelpers();
-      queryVariables.pagination = helper.getPaginationInfoFromUrl(
-        queryVariables.pagination,
-      ) as PaginationInfo;
-
+      
       const { result, fetchMore } = useQuery(GetJobsDocument, {
         paginationInfo: {
           limit: queryVariables.pagination.limit,
@@ -79,7 +74,6 @@
       });
 
       watch(queryVariables, () => {
-        helper.updatePaginationInfoQueryParams(queryVariables.pagination);
         fetchMore({
           variables: {
             paginationInfo: {
