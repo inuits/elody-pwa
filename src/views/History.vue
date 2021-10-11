@@ -1,7 +1,7 @@
 <template>
   <div class="p-6">
     <div class="flex flex-row gap-y-4 items-center">
-       <InputField
+      <InputField
         v-model="searchQuery"
         :debounce="true"
         placeholder="Search History"
@@ -19,8 +19,8 @@
         :total-items="jobs.count"
       />
     </div>
-    <div v-if="jobs.results"> 
-      <div  v-for="job in jobs.results" :key="job.job_key">
+    <div v-if="jobs.results">
+      <div v-for="job in jobs.results" :key="job.job_key">
         <ParentJob :job="job" :subjobs="jobs.results" />
       </div>
     </div>
@@ -28,84 +28,85 @@
 </template>
 
 <script lang="ts">
-import { GetJobsDocument } from '@/queries';
-import { useQuery } from '@vue/apollo-composable';
-import { computed, defineComponent, ref, watch, reactive } from 'vue';
-import ParentJob from '@/components/ParentJob.vue';
-import Dropdown from '@/components/base/Dropdown.vue';
-import InputField from '@/components/base/InputField.vue';
+  import { GetJobsDocument } from '@/queries';
+  import { useQuery } from '@vue/apollo-composable';
+  import { computed, defineComponent, ref, watch, reactive } from 'vue';
+  import ParentJob from '@/components/ParentJob.vue';
+  import Dropdown from '@/components/base/Dropdown.vue';
+  import InputField from '@/components/base/InputField.vue';
 
-import Pagination, { PaginationInfo } from '@/components/base/Pagination.vue';
-import useRouteHelpers from '@/composables/useRouteHelpers';
+  import Pagination, { PaginationInfo } from '@/components/base/Pagination.vue';
+  import useRouteHelpers from '@/composables/useRouteHelpers';
 
-type Filter = {
-  query: string;
-  sort?: string;
-};
+  type Filter = {
+    query: string;
+    sort?: string;
+  };
 
+  type QueryVariables = {
+    pagination: PaginationInfo;
+    filters: Filter;
+  };
 
-type QueryVariables = {
-  pagination: PaginationInfo;
-  filters: Filter;
-};
-
-export default defineComponent({
-  name: 'History',
-  components: { ParentJob, Dropdown, Pagination, InputField },
-  setup() {
-    const limit = ref(5);
-    const searchQuery = ref('');
-    const queryVariables = reactive<QueryVariables>({
-      pagination: {
-        limit: 5,
-        skip: 1,
-      },
-      filters: {
-        query: searchQuery.value
-      }
-    });
-    const helper = useRouteHelpers();
-    queryVariables.pagination = helper.getPaginationInfoFromUrl(queryVariables.pagination) as PaginationInfo;
-
-    const { result, fetchMore } = useQuery(GetJobsDocument, {
-      paginationInfo: {
-        limit: queryVariables.pagination.limit,
-        skip: queryVariables.pagination.skip,
-      },
-      filters: {
-        query: queryVariables.filters.query,
-      }
-    });
-
-    watch(queryVariables, () => {
-      helper.updatePaginationInfoQueryParams(queryVariables.pagination);
-      fetchMore({
-        variables: {
-          paginationInfo: {
-            limit: queryVariables.pagination.limit,
-            skip: queryVariables.pagination.skip,
-          },
-          filters: {
-            query: queryVariables.filters.query,
-          }
+  export default defineComponent({
+    name: 'History',
+    components: { ParentJob, Dropdown, Pagination, InputField },
+    setup() {
+      const limit = ref(5);
+      const searchQuery = ref('');
+      const queryVariables = reactive<QueryVariables>({
+        pagination: {
+          limit: 5,
+          skip: 1,
         },
-        updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
+        filters: {
+          query: searchQuery.value,
+        },
       });
-    });
+      const helper = useRouteHelpers();
+      queryVariables.pagination = helper.getPaginationInfoFromUrl(
+        queryVariables.pagination,
+      ) as PaginationInfo;
 
-    watch(searchQuery, () => {
-      queryVariables.filters.query = searchQuery.value;
-    });
+      const { result, fetchMore } = useQuery(GetJobsDocument, {
+        paginationInfo: {
+          limit: queryVariables.pagination.limit,
+          skip: queryVariables.pagination.skip,
+        },
+        filters: {
+          query: queryVariables.filters.query,
+        },
+      });
 
-    return {
-      jobs: computed(() => {
-        return result.value?.Jobs || [];
-      }),
-      result,
-      limit,
-      searchQuery,
-      queryVariables,
-    };
-  },
-});
+      watch(queryVariables, () => {
+        helper.updatePaginationInfoQueryParams(queryVariables.pagination);
+        fetchMore({
+          variables: {
+            paginationInfo: {
+              limit: queryVariables.pagination.limit,
+              skip: queryVariables.pagination.skip,
+            },
+            filters: {
+              query: queryVariables.filters.query,
+            },
+          },
+          updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
+        });
+      });
+
+      watch(searchQuery, () => {
+        queryVariables.filters.query = searchQuery.value;
+      });
+
+      return {
+        jobs: computed(() => {
+          return result.value?.Jobs || [];
+        }),
+        result,
+        limit,
+        searchQuery,
+        queryVariables,
+      };
+    },
+  });
 </script>

@@ -21,8 +21,8 @@ import {
   uniTrashAlt,
   uniAngleDoubleLeft,
   uniAngleDoubleRight,
-  uniPlus
-} from "vue-unicons/dist/icons";
+  uniPlus,
+} from 'vue-unicons/dist/icons';
 
 export enum Unicons {
   Edit = uniEdit,

@@ -8,8 +8,8 @@
         :class="[`h-full pl-2 text-neutral-700 bg-${bgColor}`]"
       />
       <input
-        :disabled="isDisabled"
         v-model="inputValue"
+        :disabled="isDisabled"
         v-bind="$attrs"
         :class="[`bg-${bgColor}`, inputStyle]"
         type="text"
