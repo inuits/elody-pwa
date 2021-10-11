@@ -11,6 +11,7 @@
           <div :class="[inputContainerStyle, ' input-container']">
             <Field
               :id="`value_${idx}`"
+              :as="editFieldType[field.value.key]"
               :name="`metadata[${idx}].value`"
               :class="[`bg-neutral-0`, inputStyle]"
             />
@@ -47,6 +48,14 @@
   import AddSaveCallback from './base/addSaveCallback.vue';
   import BaseButton from './base/BaseButton.vue';
   import useRouteHelpers from '@/composables/useRouteHelpers';
+
+  const editFieldType: Record<MetaKey, string> = {
+    title: 'input',
+    type: 'input',
+    collection: 'input',
+    description: 'textarea',
+    material: 'input',
+  };
 
   export default defineComponent({
     name: 'MetaEdit',
@@ -90,6 +99,7 @@
         formMetadata,
         inputStyle,
         lableStyle,
+        editFieldType,
         inputContainerStyle,
       };
     },
