@@ -37,18 +37,27 @@
     components: { IconToggle },
     setup() {
       const toggleBoolean = ref<boolean>(false);
-      const { disableEditMode, setEditMode } = useEditMode();
+      const { disableEditMode, setEditMode, isEdit } = useEditMode();
       const { isSingle } = useRouteHelpers();
 
       watch(toggleBoolean, (value: boolean) => {
-        if (toggleBoolean.value) {
+        if (value) {
           setEditMode();
         } else {
           disableEditMode();
         }
       });
 
+      watch(isEdit, (value: boolean) => {
+        if (value) {
+          toggleBoolean.value = true;
+        } else {
+          toggleBoolean.value = false;
+        }
+      });
+
       return {
+        isEdit,
         Unicons,
         isSingle,
         toggleBoolean,
