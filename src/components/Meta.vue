@@ -1,5 +1,5 @@
 <template>
-  <div class="w-2/6">
+  <div class="w-2/6 overflow-scroll">
     <meta-view v-if="!isEdit" :metadata="metadata" />
     <meta-edit
       v-if="isEdit"

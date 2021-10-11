@@ -36,7 +36,7 @@
     <BaseButton
       :icon="Unicons.History.name"
       bg-color="neutral-30"
-      class="m-1"
+      class="mt-1"
       @click="router.push({ name: 'History' })"
     />
     <BaseButton
