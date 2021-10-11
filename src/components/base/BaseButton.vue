@@ -2,7 +2,9 @@
   <button
     :class="[
       `bg-${bgColor} flex justify-center items-center px-3 py-2 rounded transition-colors duration-300 m-1`,
-      loading ? `text-${bgColor}` : `text-${txtColor} hover:bg-${bgHoverColor} border-2  border-${borderColor}`,
+      loading
+        ? `text-${bgColor}`
+        : `text-${txtColor} hover:bg-${bgHoverColor} border-2  border-${borderColor}`,
       label ? `pl-1.5` : ``,
     ]"
   >
@@ -49,14 +51,14 @@
         type: String,
         default: 'neutral-700',
       },
-      iconColor:{
+      iconColor: {
         type: String,
-        default: "var(--color-neutral-700)"
+        default: 'var(--color-neutral-700)',
       },
-      borderColor:{
+      borderColor: {
         type: String,
-        default: "transparent"
-      }
+        default: 'transparent',
+      },
     },
   });
 </script>

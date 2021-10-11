@@ -38,10 +38,10 @@ module.exports = {
         400: '#0052CC',
         500: '#0747A6',
       },
-      red:{
+      red: {
         default: '#e50000',
       },
-      green:{
+      green: {
         default: '#00b200',
       },
       main: {

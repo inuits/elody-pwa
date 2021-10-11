@@ -6,10 +6,10 @@
     <BaseButton
       label="Add"
       :icon="Unicons.PlusCircle.name"
+      :icon-color="'var(--color-neutral-10)'"
+      :bg-color="'blue-400'"
+      :txt-color="'neutral-0'"
       @click="add"
-      :iconColor="'var(--color-neutral-10)'"
-      :bgColor="'blue-400'"
-      :txtColor="'neutral-0'"
     />
   </div>
 </template>
