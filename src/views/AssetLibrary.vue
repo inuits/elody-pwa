@@ -26,7 +26,7 @@
       <Pagination
         v-if="result?.Entities.count > 0"
         v-model:skip="queryVariables.pagination.skip"
-        :limit="queryVariables.pagination.limit"
+        v-model:limit="queryVariables.pagination.limit"
         :loading="loading"
         :total-items="result?.Entities.count"
       />
