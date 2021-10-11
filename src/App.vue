@@ -3,7 +3,7 @@
     <the-navigation />
     <div class="pl-20 h-screen flex flex-col">
       <the-header />
-      <div class="flex-grow">
+      <div :class="['flex-grow', { 'h-full overflow-hidden': isSingle }]">
         <router-view />
       </div>
     </div>
@@ -19,6 +19,7 @@
   import TheNavigation from '@/components/TheNavigation.vue';
   import TheHeader from '@/components/TheHeader.vue';
   import EditModal from '@/components/EditModal.vue';
+  import useRouteHelpers from './composables/useRouteHelpers';
 
   export default defineComponent({
     name: 'App',
@@ -26,9 +27,11 @@
     inject: { DefaultOIDC },
     setup() {
       const auth = useAuth();
+      const { isSingle } = useRouteHelpers();
 
       return {
         auth,
+        isSingle,
       };
     },
   });
