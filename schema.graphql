@@ -101,9 +101,12 @@ type Job {
   parent_job_id: String
   end_time: String
   start_time: String
+  amount_of_jobs: Int
+  completed_jobs: Int
   _id: String
   _key: String
   _rev: String
+  sub_jobs: [Job]
 }
 
 type JobsResults {
@@ -118,9 +121,16 @@ input PaginationInfo {
   skip: Int
 }
 
+enum JobType {
+  All
+  MediaFile
+  CSVImport
+  FileUpload
+}
+
 input Filters {
   query: String
-  sort: String
+  type: String!
 }
 
 type Query {

@@ -31,6 +31,31 @@ fragment fullEntity on Entity {
   }
 }
 
+fragment job on Job {
+  job_type
+  job_type
+  job_info
+  status
+  user
+  asset_id
+  mediafile_id
+  parent_job_id
+  end_time
+  start_time
+  amount_of_jobs
+  completed_jobs
+  _id
+  _key
+  _rev
+}
+
+fragment jobWithSubJobs on Job {
+  ...job
+  sub_jobs {
+    ...job
+  }
+}
+
 query getEntities($limit: Int, $skip: Int, $searchValue: SearchFilter!) {
   Entities(limit: $limit, skip: $skip, searchValue: $searchValue) {
     count
@@ -87,19 +112,7 @@ query getEnumsByName($enumName: String!) {
 query getJobs($paginationInfo: PaginationInfo, $filters: Filters) {
   Jobs(paginationInfo: $paginationInfo, filters: $filters) {
     results {
-      job_type
-      job_type
-      job_info
-      status
-      user
-      asset_id
-      mediafile_id
-      parent_job_id
-      end_time
-      start_time
-      _id
-      _key
-      _rev
+      ...job
     }
     count
     limit
@@ -109,19 +122,7 @@ query getJobs($paginationInfo: PaginationInfo, $filters: Filters) {
 
 query getJob($id: String!) {
   Job(id: $id) {
-    job_type
-    job_type
-    job_info
-    status
-    user
-    asset_id
-    mediafile_id
-    parent_job_id
-    end_time
-    start_time
-    _id
-    _key
-    _rev
+    ...jobWithSubJobs
   }
 }
 
