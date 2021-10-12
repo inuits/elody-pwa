@@ -1,7 +1,7 @@
 <template>
-  <div class="bg-neutral-20 rounded px-6 py-4 text-sm mx-2 my-1">
-    <div class="bg-neutral-0 flex flex-row rounded-t-lg px-6 py-4 items-center">
-      <div class="p-2 rounded flex justify-center items-center bg-neutral-20">
+  <div class="bg-neutral-20 rounded px-1 py-1 text-sm text-neutral-700">
+    <div class="bg-neutral-0 flex flex-row rounded-t-lg px-4 py-2 items-center">
+      <div class="p-1 rounded flex justify-center items-center bg-neutral-20">
         <Icon :name="Unicons.Export.name" height="18" :fill="`blue-500`" />
       </div>
       <div class="my-1 mx-6 w-2/6">
@@ -38,112 +38,79 @@
           <ProgressBar :progress="50" />
         </div>
       </div>
-
-      <BaseButton
-        v-if="subjobs.length > 0 && isCollapsed != true"
-        label="Expand"
-        :icon="Unicons.Plus.name"
-        @click="toggleCollapse"
-      />
-      <BaseButton
-        v-if="subjobs.length > 0 && isCollapsed == true"
-        label="Collaps"
-        :icon="Unicons.Minus.name"
-        @click="toggleCollapse"
-      />
-    </div>
-    <div v-if="isCollapsed">
-      <div v-for="subJob in subjobs" :key="subJob.job_id">
-        <JobComp :job="subJob" />
+      <div v-if="job.amount_of_jobs > 1">
+        <BaseButton
+          v-if="isCollapsed == true"
+          label="Expand"
+          :icon="Unicons.Plus.name"
+          @click="toggleCollapse"
+        />
+        <BaseButton
+          v-if="isCollapsed != true"
+          label="Collaps"
+          :icon="Unicons.Minus.name"
+          @click="toggleCollapse"
+        />
       </div>
+    </div>
+    <div v-if="!isCollapsed">
+      <ListContainer>
+        <div v-for="subJob in subJobs" :key="subJob.job_id">
+          <JobComp :job="subJob" />
+        </div>
+      </ListContainer>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, PropType, ref, reactive } from 'vue';
-  import { Unicons } from '@/types';
-  import Icon from '@/components/base/Icon.vue';
-  import BaseButton from '@/components/base/BaseButton.vue';
-  import ProgressBar from '@/components/base/ProgressBar.vue';
-  import Label from '@/components/base/Label.vue';
-  import JobComp from '@/components/Job.vue';
-  import { Job } from '@/queries';
+import { computed, defineComponent, PropType, ref } from 'vue';
+import { Unicons } from '@/types';
+import Icon from '@/components/base/Icon.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
+import ProgressBar from '@/components/base/ProgressBar.vue';
+import Label from '@/components/base/Label.vue';
+import JobComp from '@/components/Job.vue';
+import { GetJobDocument, Job } from '@/queries';
+import { useQuery } from '@vue/apollo-composable';
+import useJobHelpers from '@/composables/useJobHelpers';
 
-  export enum Status {
-    Finished = 'finished',
-    Failed = 'failed',
-    Pending = 'pending',
-  }
-
-  export type State = {
-    name: 'failed' | 'pending' | 'finished';
-    color: 'red-default' | 'neutral-700' | 'green-default';
-    message?: string;
-  };
-
-  export default defineComponent({
-    name: 'ParentJob',
-    components: { JobComp, Icon, ProgressBar, BaseButton, Label },
-    props: {
-      job: {
-        type: String as PropType<Job>,
-        required: true,
-      },
-      subjobs: {
-        type: Array as PropType<Job[]>,
-        default: () => [],
-      },
+export default defineComponent({
+  name: 'ParentJob',
+  components: { JobComp, Icon, ProgressBar, BaseButton, Label },
+  props: {
+    job: {
+      type: String as PropType<Job>,
+      required: true,
     },
-    setup(props) {
-      const isCollapsed = ref<Boolean>(false);
+  },
+  setup(props) {
+    const jobHelper = useJobHelpers();
+    const state = jobHelper.getJobStatus(props.job);
+    const isCollapsed = ref<Boolean>(true);
+    const { result, fetchMore } = useQuery(GetJobDocument, { id: props.job._key });
 
-      const toggleCollapse = () => {
-        isCollapsed.value = !isCollapsed.value;
-      };
-      const jobTime = computed(() => {
-        const diff =
-          new Date(props.job.end_time as string).valueOf() -
-          new Date(props.job.start_time as string).valueOf();
-        var timeElapsed = Math.ceil(diff / (1000 * 3600 * 24));
-        return timeElapsed;
+    const toggleCollapse = () => {
+      isCollapsed.value = !isCollapsed.value;
+      if (!isCollapsed.value) updateSubJobs();
+    };
+    const jobStartDate = jobHelper.getFormatedDate(props.job.start_time as string);
+    const updateSubJobs = () => {
+      fetchMore({
+        variables: {
+          id: props.job._key,
+        },
       });
+    };
 
-      const jobStartDate = computed(() => {
-        return new Date(props.job.start_time as string).toLocaleString();
-      });
-      const state = computed((): State => {
-        switch (props.job.status) {
-          case Status.Finished:
-            return {
-              name: Status.Finished,
-              color: 'green-default',
-              message: `${jobTime.value} upload time`,
-            } as State;
-          case Status.Failed:
-            return {
-              name: Status.Failed,
-              color: 'red-default',
-              message: 'failed',
-            } as State;
-          default:
-            return {
-              name: Status.Pending,
-              color: 'neutral-700',
-              message: 'pending',
-            } as State;
-        }
-      });
-
-      return {
-        Unicons,
-        toggleCollapse,
-        isCollapsed,
-        jobStartDate,
-        jobs: [],
-        state,
-        jobTime,
-      };
-    },
-  });
+    return {
+      subJobs: computed(() => result.value?.Job?.sub_jobs),
+      Unicons,
+      toggleCollapse,
+      isCollapsed,
+      jobStartDate,
+      state,
+    };
+  },
+});
 </script>

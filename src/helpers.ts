@@ -1,3 +1,7 @@
+import { useQuery } from '@vue/apollo-composable';
+import { computed } from 'vue';
+import { GetEnumsByNameDocument } from './queries';
+
 export const getFromObjectArrayByKey = <T>(
   array: T[],
   key: string,
@@ -20,3 +24,8 @@ export const hasOwnProperty = <X extends {}, Y extends PropertyKey>(
 };
 
 export const asString = (x: string | string[]) => (Array.isArray(x) ? x[0] : x);
+
+export const getEnumValuesOf = (enumName: string) => {
+  const { result } = useQuery(GetEnumsByNameDocument, { enumName: enumName });
+  return result;
+};

@@ -12,7 +12,7 @@
         <Dropdown
           v-if="result?.Entities.count > 0"
           v-model="queryVariables.pagination.limit"
-          :options="[5, 10, 15, 20]"
+          :options="paginationLimits"
           label="Items"
         />
         <Dropdown
@@ -74,95 +74,98 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, watch, reactive, ref } from 'vue';
-  import { useQuery } from '@vue/apollo-composable';
-  import ListContainer from '@/components/ListContainer.vue';
-  import ListItem from '@/components/ListItem.vue';
-  import BaseButton from '@/components/base/BaseButton.vue';
-  import InputField from '@/components/base/InputField.vue';
-  import Dropdown from '@/components/base/Dropdown.vue';
-  import Pagination, { PaginationInfo } from '@/components/base/Pagination.vue';
-  import { Unicons } from '@/types';
-  import { useRouter } from 'vue-router';
-  import { GetEntitiesDocument } from '@/queries';
-  import { useAuth } from 'session-vue-3-oidc-library';
+import { defineComponent, watch, reactive, ref } from 'vue';
+import { useQuery } from '@vue/apollo-composable';
+import ListContainer from '@/components/ListContainer.vue';
+import ListItem from '@/components/ListItem.vue';
+import BaseButton from '@/components/base/BaseButton.vue';
+import InputField from '@/components/base/InputField.vue';
+import Dropdown from '@/components/base/Dropdown.vue';
+import Pagination, { PaginationInfo, paginationLimits } from '@/components/base/Pagination.vue';
+import { Unicons } from '@/types';
+import { useRouter } from 'vue-router';
+import { GetEntitiesDocument } from '@/queries';
+import { useAuth } from 'session-vue-3-oidc-library';
+import useRouteHelpers from '@/composables/useRouteHelpers';
 
-  type QueryVariables = {
-    pagination: PaginationInfo;
-    searchQuery: string;
-    sort: string;
-  };
+type QueryVariables = {
+  pagination: PaginationInfo;
+  searchQuery: string;
+  sort: string;
+};
 
-  export default defineComponent({
-    name: 'Home',
-    components: {
-      ListContainer,
-      ListItem,
-      Pagination,
-      BaseButton,
-      InputField,
-      Dropdown,
-    },
-    setup: () => {
-      const router = useRouter();
-      const searchQuery = ref<string>('');
-      const auth = useAuth();
+export default defineComponent({
+  name: 'Home',
+  components: {
+    ListContainer,
+    ListItem,
+    Pagination,
+    BaseButton,
+    InputField,
+    Dropdown,
+  },
+  setup: () => {
+    const router = useRouter();
+    const searchQuery = ref<string>('');
+    const auth = useAuth();
+    const routeHelper = useRouteHelpers();
+    const paginationInfo = reactive({
+      limit: 20,
+      skip: 1,
+    });
+    routeHelper.getPaginationInfoFromUrl(paginationInfo);
 
-      const queryVariables = reactive<QueryVariables>({
-        pagination: {
-          limit: 20,
-          skip: 0,
-        },
-        searchQuery: searchQuery.value,
-        sort: 'Title',
-      });
+    const queryVariables = reactive<QueryVariables>({
+      pagination: paginationInfo,
+      searchQuery: searchQuery.value,
+      sort: 'Title',
+    });
 
-      const { result, loading, fetchMore } = useQuery(GetEntitiesDocument, {
-        limit: queryVariables.pagination.limit,
-        skip: queryVariables.pagination.skip,
-        searchValue: {
-          value: queryVariables.searchQuery,
-          isAsc: false,
-          key: queryVariables.sort.toLowerCase(),
-          relation_filter: [],
-        },
-      });
+    const { result, loading, fetchMore } = useQuery(GetEntitiesDocument, {
+      limit: queryVariables.pagination.limit,
+      skip: queryVariables.pagination.skip,
+      searchValue: {
+        value: queryVariables.searchQuery,
+        isAsc: false,
+        key: queryVariables.sort.toLowerCase(),
+        relation_filter: [],
+      },
+    });
 
-      const getData = () => {
-        fetchMore({
-          variables: {
-            limit: Number(queryVariables.pagination.limit),
-            skip:
-              Number(queryVariables.pagination.skip) *
-              Number(queryVariables.pagination.limit),
-            searchValue: {
-              value: searchQuery.value,
-              isAsc: false,
-              key: queryVariables.sort.toLowerCase(),
-              relation_filter: [],
-            },
+    const getData = () => {
+      fetchMore({
+        variables: {
+          limit: Number(queryVariables.pagination.limit),
+          skip: Number(queryVariables.pagination.skip) * Number(queryVariables.pagination.limit),
+          searchValue: {
+            value: searchQuery.value,
+            isAsc: false,
+            key: queryVariables.sort.toLowerCase(),
+            relation_filter: [],
           },
-          updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
-        });
-      };
-
-      watch(searchQuery, (value: string) => {
-        queryVariables.pagination.skip = 0;
-        getData();
+        },
+        updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
       });
+    };
 
-      watch(queryVariables, (value: any) => {
-        getData();
-      });
+    watch(searchQuery, (value: string) => {
+      queryVariables.pagination.skip = 1;
+      getData();
+    });
 
-      return {
-        result,
-        loading,
-        router,
-        Unicons,
-        queryVariables,
-        searchQuery,
-      };
-    },
-  });
+    watch(queryVariables, () => {
+      getData();
+    });
+
+    return {
+      result,
+      loading,
+      router,
+      Unicons,
+      queryVariables,
+      searchQuery,
+      paginationLimits,
+    };
+  },
+});
 </script>

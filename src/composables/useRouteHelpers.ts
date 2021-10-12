@@ -31,18 +31,23 @@ const useRouteHelpers = (): {
     if (route.query.page || route.query.items) {
       info.skip = Number(route.query.page);
       info.limit = Number(route.query.items);
+      updatePaginationInfoQueryParams(info);
     }
+    updatePaginationInfoQueryParams(info);
     return { limit: info.limit, skip: info.skip } as PaginationInfo;
   };
 
   const updatePaginationInfoQueryParams = (info: PaginationInfo) => {
     if (info.skip == 0) {
       router.replace({ query: { items: info.limit, page: info.skip + 1 } });
-    }
-    if (info.limit && info.limit > 20) {
+    } else {
       router.replace({ query: { items: info.limit, page: info.skip } });
     }
-    router.replace({ query: { items: info.limit, page: info.skip } });
+    if (info.limit && info.limit > 20) {
+      router.replace({ query: { items: 20, page: info.skip } });
+    } else {
+      router.replace({ query: { items: info.limit, page: info.skip } });
+    }
   };
 
   return {

@@ -1,23 +1,23 @@
 <template>
   <div
     class="
+      px-4
+      py-2
       flex flex-row
       bg-neutral-0
-      px-6
-      py-2
       rounded
-      justify-center
       my-2
-      text-sm
+      mx-4
       items-center
+      text-neutral-700
     "
   >
     <div class="p-2 rounded flex justify-center items-center bg-neutral-20">
-      <Icon :name="Unicons.Image.name" height="18" :fill="`blue-500`" />
+      <Icon :name="Unicons.Image.name" height="16" :fill="`blue-500`" />
     </div>
     <p class="w-2/6 mx-4 flex items-center">{{ job.job_info }}</p>
-    <Label :name="'50%'" :color="'blue-500'" />
-    <ProgressBar :progress="50" />
+    <Label :name="state.name" :color="state.color" />
+    <div class="flex-grow"></div>
     <BaseButton
       v-if="job.asset_id"
       label="view"
@@ -31,24 +31,26 @@
   import { defineComponent, PropType } from 'vue';
   import { useRouter } from 'vue-router';
   import { Unicons } from '@/types';
-  import ProgressBar from '@/components/base/ProgressBar.vue';
   import Icon from '@/components/base/Icon.vue';
   import BaseButton from '@/components/base/BaseButton.vue';
   import Label from '@/components/base/Label.vue';
   import { Job } from '@/queries';
+  import useJobHelpers from '@/composables/useJobHelpers';
 
   export default defineComponent({
     name: 'Job',
-    components: { ProgressBar, Icon, BaseButton, Label },
+    components: { Icon, BaseButton, Label },
     props: {
       job: {
         type: String as PropType<Job>,
         required: true,
       },
     },
-    setup() {
+    setup(props) {
+      const jobHelper = useJobHelpers();
+      const state = jobHelper.getJobStatus(props.job);
       const router = useRouter();
-      return { Unicons, router };
+      return { Unicons, router, state };
     },
   });
 </script>
