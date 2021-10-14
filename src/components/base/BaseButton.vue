@@ -19,46 +19,46 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
-import { Unicons } from '@/types';
+  import { defineComponent, PropType } from 'vue';
+  import { Unicons } from '@/types';
 
-export default defineComponent({
-  name: 'BaseButton',
-  props: {
-    label: {
-      type: [String],
-      required: false,
-      default: undefined,
+  export default defineComponent({
+    name: 'BaseButton',
+    props: {
+      label: {
+        type: [String],
+        required: false,
+        default: undefined,
+      },
+      loading: {
+        type: Boolean,
+        default: false,
+      },
+      icon: {
+        type: String as PropType<keyof Unicons>,
+        required: false,
+        default: undefined,
+      },
+      bgColor: {
+        type: String,
+        default: 'neutral-20',
+      },
+      bgHoverColor: {
+        type: String,
+        default: 'neutral-70',
+      },
+      txtColor: {
+        type: String,
+        default: 'neutral-700',
+      },
+      iconColor: {
+        type: String,
+        default: 'var(--color-neutral-700)',
+      },
+      borderColor: {
+        type: String,
+        default: 'transparent',
+      },
     },
-    loading: {
-      type: Boolean,
-      default: false,
-    },
-    icon: {
-      type: String as PropType<keyof Unicons>,
-      required: false,
-      default: undefined,
-    },
-    bgColor: {
-      type: String,
-      default: 'neutral-20',
-    },
-    bgHoverColor: {
-      type: String,
-      default: 'neutral-70',
-    },
-    txtColor: {
-      type: String,
-      default: 'neutral-700',
-    },
-    iconColor: {
-      type: String,
-      default: 'var(--color-neutral-700)',
-    },
-    borderColor: {
-      type: String,
-      default: 'transparent',
-    },
-  },
-});
+  });
 </script>

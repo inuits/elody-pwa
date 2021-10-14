@@ -33,7 +33,6 @@
       const { result } = useQuery(GetEnumsByNameDocument, { enumName: 'MetaKey' });
 
       const add = () => {
-        console.log({ key: newType.value, value: newValue.value });
         emit('addMetadata', { key: newType.value, value: newValue.value });
       };
 
