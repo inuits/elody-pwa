@@ -22,7 +22,7 @@
     "graphql-tag": "^2.12.5",
     "openseadragon": "^2.4.2",
     "register-service-worker": "^1.7.1",
-    "session-vue-3-oidc-library": "git+https://gitlab.com/inuits/coghent/session-vue-3-oidc-library.git#main",
+    "session-vue-3-oidc-library": "^0.1.0",
     "ts-debounce": "^3.0.0",
     "vee-validate": "^4.5.2",
     "vue": "^3.1.5",
