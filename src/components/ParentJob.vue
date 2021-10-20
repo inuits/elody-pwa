@@ -67,7 +67,10 @@
   import {
     computed,
     defineComponent,
+    onBeforeUnmount,
+    onBeforeUpdate,
     onMounted,
+    onUnmounted,
     onUpdated,
     PropType,
     ref,
@@ -83,6 +86,7 @@
   import { useQuery } from '@vue/apollo-composable';
   import useJobHelpers from '@/composables/useJobHelpers';
   import ListContainer from '@/components/ListContainer.vue';
+  import { Computed } from 'vuex';
 
   export default defineComponent({
     name: 'ParentJob',
@@ -97,11 +101,13 @@
       const jobHelper = useJobHelpers();
       const state = jobHelper.getJobStatus(props.job);
       const isCollapsed = ref<Boolean>(true);
+      const fetchingSubJobs = ref<Boolean>(true);
       const { result, fetchMore } = useQuery(GetJobDocument, {
         id: props.job._key,
       });
 
       const toggleCollapse = () => {
+        fetchingSubJobs.value = true;
         isCollapsed.value = !isCollapsed.value;
         if (!isCollapsed.value) updateSubJobs();
       };
@@ -112,11 +118,16 @@
             id: props.job._key,
           },
           updateQuery: (prevResult, { fetchMoreResult }) => {
+            fetchingSubJobs.value = false;
             if (!fetchMoreResult) return prevResult;
             return fetchMoreResult;
           },
         });
       };
+
+      onBeforeUpdate(() => {
+        if (!fetchingSubJobs.value) isCollapsed.value = true;
+      });
 
       return {
         subJobs: computed(() => {
