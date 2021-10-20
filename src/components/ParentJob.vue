@@ -64,7 +64,15 @@
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, PropType, ref } from 'vue';
+  import {
+    computed,
+    defineComponent,
+    onMounted,
+    onUpdated,
+    PropType,
+    ref,
+    watch,
+  } from 'vue';
   import { Unicons } from '@/types';
   import Icon from '@/components/base/Icon.vue';
   import BaseButton from '@/components/base/BaseButton.vue';
@@ -74,13 +82,14 @@
   import { GetJobDocument, Job } from '@/queries';
   import { useQuery } from '@vue/apollo-composable';
   import useJobHelpers from '@/composables/useJobHelpers';
+  import ListContainer from '@/components/ListContainer.vue';
 
   export default defineComponent({
     name: 'ParentJob',
-    components: { JobComp, Icon, ProgressBar, BaseButton, Label },
+    components: { JobComp, Icon, ProgressBar, BaseButton, Label, ListContainer },
     props: {
       job: {
-        type: String as PropType<Job>,
+        type: Object as PropType<Job>,
         required: true,
       },
     },
@@ -88,7 +97,9 @@
       const jobHelper = useJobHelpers();
       const state = jobHelper.getJobStatus(props.job);
       const isCollapsed = ref<Boolean>(true);
-      const { result, fetchMore } = useQuery(GetJobDocument, { id: props.job._key });
+      const { result, fetchMore } = useQuery(GetJobDocument, {
+        id: props.job._key,
+      });
 
       const toggleCollapse = () => {
         isCollapsed.value = !isCollapsed.value;
@@ -100,11 +111,17 @@
           variables: {
             id: props.job._key,
           },
+          updateQuery: (prevResult, { fetchMoreResult }) => {
+            if (!fetchMoreResult) return prevResult;
+            return fetchMoreResult;
+          },
         });
       };
 
       return {
-        subJobs: computed(() => result.value?.Job?.sub_jobs),
+        subJobs: computed(() => {
+          return result.value?.Job?.sub_jobs;
+        }),
         Unicons,
         toggleCollapse,
         isCollapsed,
