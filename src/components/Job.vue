@@ -42,7 +42,7 @@
     components: { Icon, BaseButton, Label },
     props: {
       job: {
-        type: String as PropType<Job>,
+        type: Object as PropType<Job>,
         required: true,
       },
     },
