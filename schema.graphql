@@ -11,7 +11,10 @@ enum MetaKey {
 enum RelationType {
   authoredBy
   isIn
+  isTypeOf
   contains
+  parent
+  components
 }
 
 enum JSPatchOp {
@@ -38,12 +41,19 @@ input MetadataInput {
   lang: String
 }
 
+input RelationInput {
+  key: String
+  type: RelationType
+}
+
 type Entity {
   id: String!
   type: String!
   metadata(key: [MetaKey]): [Metadata]!
-  relations: [Relation]
+  relations(key: [RelationType!]): [Relation]
   mediafiles: [MediaFile]
+  components: [Entity]
+  parents: [Entity]
 }
 
 type MediaFile {
@@ -150,4 +160,5 @@ type Query {
 type Mutation {
   replaceMetadata(id: String!, metadata: [MetadataInput!]!): [Metadata!]!
   StartImport(folder: String!): ImportReturn
+  addRelations(id: String!, relations: [RelationInput]): [Relation]!
 }
