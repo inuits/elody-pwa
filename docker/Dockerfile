@@ -20,7 +20,7 @@ ARG NPM_AUTH_TOKEN
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY .npmrc package*.json ./
 
 RUN npm install
 
