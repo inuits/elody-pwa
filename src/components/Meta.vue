@@ -1,8 +1,15 @@
 <template>
-  <div class="w-2/6 overflow-scroll">
-    <meta-view v-if="!isEdit" :metadata="metadata" />
+  <div
+    :class="[
+      'w-2/6 overflow-scroll',
+      {
+        'animate-pulse bg-neutral-20 text-neutral-20': loading,
+      },
+    ]"
+  >
+    <meta-view v-if="!loading && !isEdit" :metadata="metadata" />
     <meta-edit
-      v-if="isEdit"
+      v-if="!loading && isEdit"
       :error="error"
       :loading="loading"
       :metadata="metadata"
@@ -26,6 +33,10 @@
     props: {
       metadata: { type: Array as PropType<Metadata[]>, required: true },
       entityTitle: { type: String, required: true },
+      loading: {
+        type: Boolean,
+        default: false,
+      },
     },
     setup() {
       const { isEdit } = useEditMode();

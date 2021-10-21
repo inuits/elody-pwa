@@ -1,5 +1,12 @@
 <template>
-  <div class="relative w-full h-full">
+  <div
+    :class="[
+      'relative w-full h-full',
+      {
+        checkboard: loading,
+      },
+    ]"
+  >
     <div ref="OpenSeadragon-toolbar" class="hidden" />
     <ViewerToolbar
       v-model:zoomIn="zoomInDiv"
@@ -23,6 +30,10 @@
     },
     props: {
       imageUrl: { type: String, default: '' },
+      loading: {
+        type: Boolean,
+        default: false,
+      },
     },
     setup: (props) => {
       const OpenSeadragonDiv = ref<HTMLDivElement | undefined>(undefined);
@@ -70,27 +81,3 @@
     },
   });
 </script>
-
-<style scoped>
-  .checkboard {
-    background-color: #fff;
-    background-size: 60px 60px;
-    background-position: 0 0, 30px 30px;
-    background-image: linear-gradient(
-        45deg,
-        #f4f5f7 25%,
-        transparent 25%,
-        transparent 75%,
-        #f4f5f7 75%,
-        #f4f5f7
-      ),
-      linear-gradient(
-        45deg,
-        #f4f5f7 25%,
-        transparent 25%,
-        transparent 75%,
-        #f4f5f7 75%,
-        #f4f5f7
-      );
-  }
-</style>
