@@ -7,4 +7,4 @@ if [ ! -f $DIR/.npmrc.local ]; then
 fi
 
 docker run -it --rm -v $DIR/.npmrc.local:/root/.npmrc node:lts-alpine npm login --registry=https://nexus.inuits.io/repository/npm --always-auth
-grep _authToken .npmrc.local | sed -e 's/^.*_authToken=/NPM_AUTH_TOKEN=/' > ${1:-.env}
+grep _authToken .npmrc.local | sed -e 's/^.*_authToken=/NPM_AUTH_TOKEN=/' > ${1:-.env.local}
