@@ -1,10 +1,19 @@
 <template>
   <div class="h-full w-full flex relative">
-    <div class="flex w-4/6">
-      <IIIFViewer v-if="!loading" :image-url="mediafile?.original_file_location" />
+    <entity-components-selection
+      class="w-40"
+      :loading="loading"
+      :entities="components"
+      :parents="parents"
+      :selected-id="entityId"
+      :thumbnail="thumbnail"
+    />
+    <div :class="['flex w-4/6', { checkboard: loading }]">
+      <IIIFViewer v-if="!loading" :image-url="mediafile" />
     </div>
     <Meta
       class="w-2/6"
+      :loading="loading"
       :entity-id="entityId"
       :metadata="metadata"
       :edit-mode="editMode"
@@ -14,25 +23,34 @@
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, watch } from 'vue';
+  import { computed, defineComponent, watch, ref } from 'vue';
   import { useQuery } from '@vue/apollo-composable';
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import Meta from '@/components/Meta.vue';
-  import { GetEntityByIdDocument } from '@/queries';
+  import { GetEntityByIdDocument, GetEntityByIdQuery, Maybe, Metadata } from '@/queries';
   import { usePageTitle } from '@/components/TheHeader.vue';
   import { EditModes, useEditMode } from '@/components/EditToggle.vue';
   import useRouteHelpers from '@/composables/useRouteHelpers';
+  import EntityComponentsSelection from '@/components/EntityComponentsSelection.vue';
+  import { useRoute } from 'vue-router';
 
   export default defineComponent({
     name: 'SingleEntity',
-    components: { IIIFViewer, Meta },
+    components: { IIIFViewer, Meta, EntityComponentsSelection },
     setup() {
+      const route = useRoute();
       const { editMode } = useEditMode();
       const { getParam } = useRouteHelpers();
-      const id = getParam('id');
-      const { result, loading, refetch } = useQuery(GetEntityByIdDocument, { id });
+      const id = ref<string>(getParam('id'));
+      //For some reason loading from useQuery is not working
+      const loading = ref<boolean>(true);
+      const { result, refetch, onResult } = useQuery(GetEntityByIdDocument, {
+        id: id.value,
+      });
       const title = computed(() => result.value?.Entity?.title[0]?.value);
-
+      const mediafile = ref<Maybe<string> | undefined>();
+      const thumbnail = ref<Maybe<string> | undefined>();
+      const metadata = ref<Maybe<Metadata>[]>([]);
       const { updatePageTitle } = usePageTitle();
 
       watch(title, (value: string | undefined) => {
@@ -45,14 +63,42 @@
         }
       });
 
+      watch(
+        () => route.params.id,
+        async (newId) => {
+          if (!Array.isArray(newId)) {
+            loading.value = true;
+            id.value = newId;
+            refetch({
+              id: newId,
+            });
+          }
+        },
+      );
+
+      onResult((queryResult) => {
+        if (queryResult.data && queryResult.data.Entity?.mediafiles?.[0]) {
+          mediafile.value =
+            queryResult.data.Entity?.mediafiles?.[0].original_file_location;
+          thumbnail.value =
+            queryResult.data.Entity?.mediafiles?.[0].thumbnail_file_location;
+        }
+
+        metadata.value = queryResult?.data?.Entity?.metadata || [];
+        loading.value = false;
+      });
+
       return {
         editMode,
         loading,
         title,
-        metadata: computed(() => result?.value?.Entity?.metadata || []),
-        mediafile: computed(() => result?.value?.Entity?.mediafiles?.[0]),
+        metadata,
+        mediafile,
+        thumbnail,
+        components: computed(() => result?.value?.Entity?.components),
+        parents: computed(() => result?.value?.Entity?.parents),
         entityId: computed(() => {
-          return id;
+          return id.value;
         }),
       };
     },

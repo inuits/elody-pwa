@@ -24,10 +24,13 @@ fragment fullEntity on Entity {
   mediafiles {
     _id
     original_file_location
+    thumbnail_file_location
   }
-  relations {
-    key
-    type
+  parents {
+    ...minimalEntity
+  }
+  components {
+    ...minimalEntity
   }
 }
 

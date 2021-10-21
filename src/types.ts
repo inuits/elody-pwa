@@ -21,6 +21,8 @@ import {
   uniTrashAlt,
   uniAngleDoubleLeft,
   uniAngleDoubleRight,
+  uniSortAmountDown,
+  uniSortAmountUp,
   uniPlus,
 } from 'vue-unicons/dist/icons';
 
@@ -48,4 +50,6 @@ export enum Unicons {
   Minus = uniMinus,
   Plus = uniPlus,
   Trash = uniTrashAlt,
+  SortUp = uniSortAmountUp,
+  SortDown = uniSortAmountDown,
 }
