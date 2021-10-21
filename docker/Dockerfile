@@ -2,17 +2,16 @@
 FROM node:14.17.6 as development-stage
 
 ARG NPM_AUTH_TOKEN
-# We need to set NPM_AUTH_TOKEN build ARG to ENV because we need valid .npmrc file for development aswell
-ENV NPM_AUTH_TOKEN=$NPM_AUTH_TOKEN
 
 WORKDIR /app
 
 ENTRYPOINT ["/entrypoint.sh"]
 COPY docker/entrypoint*.sh /
-COPY package*.json ./
+COPY .npmrc package*.json ./
 
 RUN npm install
-EXPOSE 80
+
+EXPOSE 8080
 
 ### Build stage
 FROM node:14.17.6-alpine3.12 as build-stage
