@@ -142,3 +142,10 @@ mutation editMetadata($id: String!, $metadata: [MetadataInput!]!) {
     lang
   }
 }
+
+mutation addComponent($id: String!, $relations: [RelationInput!]!) {
+  addRelations(id: $id, relations: $relations) {
+    key
+    type
+  }
+}

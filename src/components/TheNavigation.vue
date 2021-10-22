@@ -15,7 +15,7 @@
     "
   >
     <router-link
-      :to="{ name: 'AssetLibrary' }"
+      :to="{ name: 'Home' }"
       class="
         logo
         text-base text-neutral-700
@@ -31,7 +31,7 @@
     <BaseButton
       :icon="Unicons.BookOpen.name"
       bg-color="neutral-30"
-      @click="router.push({ name: 'AssetLibrary' })"
+      @click="router.push({ name: 'Home' })"
     />
     <BaseButton
       :icon="Unicons.History.name"

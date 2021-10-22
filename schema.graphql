@@ -160,5 +160,5 @@ type Query {
 type Mutation {
   replaceMetadata(id: String!, metadata: [MetadataInput!]!): [Metadata!]!
   StartImport(folder: String!): ImportReturn
-  addRelations(id: String!, relations: [RelationInput]): [Relation]!
+  addRelations(id: String!, relations: [RelationInput!]!): [Relation]!
 }

@@ -57,10 +57,21 @@
           :meta="entity.metadata"
           :media="entity.mediafiles"
           :thumb-icon="Unicons.NoImage.name"
-          @click="router.push({ name: 'SingleEntity', params: { id: entity.id } })"
+          @click="
+            !enableSelection &&
+              router.push({ name: 'SingleEntity', params: { id: entity.id } })
+          "
         >
           <template #actions>
             <BaseButton
+              v-if="enableSelection"
+              :loading="loading"
+              class="ml-2"
+              :icon="Unicons.PlusCircle.name"
+              @click="addSelection(entity.id)"
+            />
+            <BaseButton
+              v-else
               :loading="loading"
               class="ml-2"
               :icon="Unicons.Eye.name"
@@ -88,7 +99,6 @@
   import { Unicons } from '@/types';
   import { useRouter } from 'vue-router';
   import { GetEntitiesDocument } from '@/queries';
-  import { useAuth } from 'session-vue-3-oidc-library';
   import useRouteHelpers from '@/composables/useRouteHelpers';
 
   type QueryVariables = {
@@ -98,7 +108,7 @@
   };
 
   export default defineComponent({
-    name: 'Home',
+    name: 'AssetLibrary',
     components: {
       ListContainer,
       ListItem,
@@ -107,10 +117,16 @@
       InputField,
       Dropdown,
     },
-    setup: () => {
+    props: {
+      enableSelection: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    emits: ['addSelection'],
+    setup: (props, { emit }) => {
       const router = useRouter();
       const searchQuery = ref<string>('');
-      const auth = useAuth();
       const routeHelper = useRouteHelpers();
       const paginationInfo = reactive({
         limit: 20,
@@ -163,6 +179,10 @@
         getData();
       });
 
+      const addSelection = (id: string) => {
+        emit('addSelection', id);
+      };
+
       return {
         result,
         loading,
@@ -170,6 +190,7 @@
         Unicons,
         queryVariables,
         searchQuery,
+        addSelection,
         paginationLimits,
       };
     },
