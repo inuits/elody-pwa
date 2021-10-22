@@ -36,7 +36,16 @@
 <script lang="ts">
   import { GetJobsDocument } from '@/queries';
   import { useQuery } from '@vue/apollo-composable';
-  import { computed, defineComponent, ref, watch, reactive, PropType } from 'vue';
+  import {
+    computed,
+    defineComponent,
+    ref,
+    watch,
+    reactive,
+    PropType,
+    onUpdated,
+    onMounted,
+  } from 'vue';
   import ParentJob from '@/components/ParentJob.vue';
   import Dropdown from '@/components/base/Dropdown.vue';
   import InputField from '@/components/base/InputField.vue';
@@ -84,7 +93,7 @@
       const { result, fetchMore } = useQuery(GetJobsDocument, {
         paginationInfo: {
           limit: queryVariables.pagination.limit,
-          skip: queryVariables.pagination.skip,
+          skip: queryVariables.pagination.skip -1,
         },
         filters: {
           query: queryVariables.filters.query,
@@ -96,8 +105,9 @@
         fetchMore({
           variables: {
             paginationInfo: {
-              limit: queryVariables.pagination.limit,
-              skip: queryVariables.pagination.skip,
+              limit: Number(queryVariables.pagination.limit),
+              skip: Number(queryVariables.pagination.skip -1) *
+              Number(queryVariables.pagination.limit),
             },
             filters: {
               query: queryVariables.filters.query,
