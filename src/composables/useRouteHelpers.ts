@@ -43,7 +43,7 @@ const useRouteHelpers = (): {
     } else {
       router.replace({ query: { items: info.limit, page: info.skip } });
     }
-    if (info.limit && info.limit > 60) {
+    if (info.limit && info.limit > 20) {
       router.replace({ query: { items: 20, page: info.skip } });
     } else {
       router.replace({ query: { items: info.limit, page: info.skip } });
