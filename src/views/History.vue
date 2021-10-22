@@ -102,6 +102,7 @@
       });
 
       watch(queryVariables, () => {
+        routeHelper.updatePaginationInfoQueryParams(queryVariables.pagination);
         fetchMore({
           variables: {
             paginationInfo: {
