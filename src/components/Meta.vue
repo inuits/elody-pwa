@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, inject, PropType, Ref } from 'vue';
+  import { defineComponent, PropType } from 'vue';
   import MetaEdit from '@/components/MetaEdit.vue';
   import MetaView from '@/components/MetaView.vue';
   import { Metadata } from '@/queries';

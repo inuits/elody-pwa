@@ -7,6 +7,7 @@
       :parents="parents"
       :selected-id="entityId"
       :thumbnail="thumbnail"
+      :edit-mode="editMode"
     />
     <div :class="['flex w-4/6', { checkboard: loading }]">
       <IIIFViewer v-if="!loading" :image-url="mediafile" />
@@ -16,10 +17,10 @@
       :loading="loading"
       :entity-id="entityId"
       :metadata="metadata"
-      :edit-mode="editMode"
       :entity-title="title"
     />
   </div>
+  <PickAssetModal :entity-id="entityId" />
 </template>
 
 <script lang="ts">
@@ -33,10 +34,11 @@
   import useRouteHelpers from '@/composables/useRouteHelpers';
   import EntityComponentsSelection from '@/components/EntityComponentsSelection.vue';
   import { useRoute } from 'vue-router';
+  import PickAssetModal from '@/components/PickAssetModal.vue';
 
   export default defineComponent({
     name: 'SingleEntity',
-    components: { IIIFViewer, Meta, EntityComponentsSelection },
+    components: { IIIFViewer, Meta, EntityComponentsSelection, PickAssetModal },
     setup() {
       const route = useRoute();
       const { editMode } = useEditMode();
