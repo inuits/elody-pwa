@@ -126,7 +126,7 @@
 
       const { result, loading, fetchMore } = useQuery(GetEntitiesDocument, {
         limit: queryVariables.pagination.limit,
-        skip: queryVariables.pagination.skip,
+        skip: queryVariables.pagination.skip -1,
         searchValue: {
           value: queryVariables.searchQuery,
           isAsc: false,
@@ -140,7 +140,7 @@
           variables: {
             limit: Number(queryVariables.pagination.limit),
             skip:
-              Number(queryVariables.pagination.skip) *
+              Number(queryVariables.pagination.skip -1) *
               Number(queryVariables.pagination.limit),
             searchValue: {
               value: searchQuery.value,
