@@ -1,5 +1,4 @@
 import { RouteRecordRaw } from 'vue-router';
-import AssetLibrary from './AssetLibrary.vue';
 import History from './History.vue';
 
 export type urlParams = 'id';
@@ -7,9 +6,9 @@ export type urlParams = 'id';
 export const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    name: 'AssetLibrary',
-    meta: { title: 'Asset Library', requiresAuth: true },
-    component: AssetLibrary,
+    name: 'Home',
+    meta: { title: 'Home', requiresAuth: true },
+    component: () => import(/* webpackChunkName: "about" */ './Home.vue'),
   },
   {
     path: '/entity/:id',

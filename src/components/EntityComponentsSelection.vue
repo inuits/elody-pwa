@@ -34,6 +34,15 @@
         >No child assets</span
       >
     </div>
+    <BaseButton
+      v-show="isEdit"
+      label="Add child"
+      :icon="Unicons.PlusCircle.name"
+      :icon-color="'var(--color-neutral-10)'"
+      :bg-color="'blue-400'"
+      :txt-color="'neutral-0'"
+      @click="openPickAssetModal"
+    />
   </div>
 </template>
 <script lang="ts">
@@ -42,12 +51,16 @@
   import EntityComponentSelectionStrip from '@/components/EntityComponentsSelectionStrip.vue';
   import IconToggle from './base/IconToggle.vue';
   import { Unicons } from '@/types';
+  import { useEditMode } from './EditToggle.vue';
+  import BaseButton from './base/BaseButton.vue';
+  import { usePickAssetModal } from './PickAssetModal.vue';
 
   export default defineComponent({
     name: 'EntityComponentSelection',
     components: {
       EntityComponentSelectionStrip,
       IconToggle,
+      BaseButton,
     },
     props: {
       entities: { type: Array as PropType<MinimalEntityFragment[]>, required: true },
@@ -64,6 +77,8 @@
     },
     setup(props) {
       const showParents = ref<boolean>(false);
+      const { isEdit } = useEditMode();
+      const { openPickAssetModal } = usePickAssetModal();
 
       const toggleParent = () => {
         showParents.value = !showParents.value;
@@ -78,9 +93,11 @@
       );
 
       return {
+        isEdit,
         Unicons,
         showParents,
         toggleParent,
+        openPickAssetModal,
       };
     },
   });

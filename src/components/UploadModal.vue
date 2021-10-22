@@ -12,7 +12,7 @@
 </template>
 <script lang="ts">
   import Modal, { ModalState } from './base/Modal.vue';
-  import { defineComponent, inject, PropType, provide, ref } from 'vue';
+  import { defineComponent, ref } from 'vue';
   import UploadModalImport from './UploadModalImport.vue';
 
   export type UploadModalType = {
