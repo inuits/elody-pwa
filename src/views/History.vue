@@ -36,16 +36,7 @@
 <script lang="ts">
   import { GetJobsDocument } from '@/queries';
   import { useQuery } from '@vue/apollo-composable';
-  import {
-    computed,
-    defineComponent,
-    ref,
-    watch,
-    reactive,
-    PropType,
-    onUpdated,
-    onMounted,
-  } from 'vue';
+  import { computed, defineComponent, ref, watch, reactive, onMounted } from 'vue';
   import ParentJob from '@/components/ParentJob.vue';
   import Dropdown from '@/components/base/Dropdown.vue';
   import InputField from '@/components/base/InputField.vue';
@@ -90,10 +81,15 @@
         },
       });
 
+      onMounted(() => {
+        queryVariables.pagination.limit = 20;
+        queryVariables.pagination.skip = 1;
+      });
+
       const { result, fetchMore } = useQuery(GetJobsDocument, {
         paginationInfo: {
           limit: queryVariables.pagination.limit,
-          skip: queryVariables.pagination.skip -1,
+          skip: queryVariables.pagination.skip - 1,
         },
         filters: {
           query: queryVariables.filters.query,
@@ -103,12 +99,17 @@
 
       watch(queryVariables, () => {
         routeHelper.updatePaginationInfoQueryParams(queryVariables.pagination);
+        getData();
+      });
+
+      const getData = () => {
         fetchMore({
           variables: {
             paginationInfo: {
               limit: Number(queryVariables.pagination.limit),
-              skip: Number(queryVariables.pagination.skip -1) *
-              Number(queryVariables.pagination.limit),
+              skip:
+                Number(queryVariables.pagination.skip - 1) *
+                Number(queryVariables.pagination.limit),
             },
             filters: {
               query: queryVariables.filters.query,
@@ -117,10 +118,11 @@
           },
           updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
         });
-      });
+      };
 
       watch(searchQuery, () => {
         queryVariables.filters.query = searchQuery.value;
+        getData();
       });
 
       return {
