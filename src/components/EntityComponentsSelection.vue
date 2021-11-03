@@ -46,7 +46,19 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, PropType, ref, watch } from 'vue';
+  import {
+    defineComponent,
+    onBeforeUnmount,
+    onDeactivated,
+    onMounted,
+    onRenderTracked,
+    onRenderTriggered,
+    onUnmounted,
+    onUpdated,
+    PropType,
+    ref,
+    watch,
+  } from 'vue';
   import { MinimalEntityFragment } from '@/queries';
   import EntityComponentSelectionStrip from '@/components/EntityComponentsSelectionStrip.vue';
   import IconToggle from './base/IconToggle.vue';
@@ -77,7 +89,7 @@
     },
     setup(props) {
       const showParents = ref<boolean>(false);
-      const { isEdit } = useEditMode();
+      const { isEdit, disableEditMode} = useEditMode();
       const { openPickAssetModal } = usePickAssetModal();
 
       const toggleParent = () => {
@@ -91,6 +103,10 @@
           showParents.value = false;
         },
       );
+
+      onUnmounted(() => {
+        disableEditMode();
+      });
 
       return {
         isEdit,
