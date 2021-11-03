@@ -48,13 +48,7 @@
 <script lang="ts">
   import {
     defineComponent,
-    onBeforeUnmount,
-    onDeactivated,
-    onMounted,
-    onRenderTracked,
-    onRenderTriggered,
     onUnmounted,
-    onUpdated,
     PropType,
     ref,
     watch,
