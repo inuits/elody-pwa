@@ -31,6 +31,7 @@ const useRouteHelpers = (): {
     if (route.query.page || route.query.items) {
       info.skip = Number(route.query.page);
       info.limit = Number(route.query.items);
+      if(info.limit > 20) info.limit = 20;
       updatePaginationInfoQueryParams(info);
     }
     updatePaginationInfoQueryParams(info);
