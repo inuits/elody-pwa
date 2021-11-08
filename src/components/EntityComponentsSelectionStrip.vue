@@ -2,7 +2,7 @@
   <div
     v-for="(entity, arrayKey) in entities"
     :key="entity.id"
-    :class="[' px-5 py-2 flex flex-col justify-end overflow-y-scroll']"
+    :class="[' px-5 py-2 flex flex-col justify-end']"
   >
     <img
       v-if="entity.mediafiles.length > 0"
@@ -15,7 +15,7 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, PropType } from 'vue';
+  import { defineComponent, PropType, watch } from 'vue';
   import { MinimalEntityFragment } from '@/queries';
   import { useRouter } from 'vue-router';
 
@@ -28,7 +28,14 @@
         required: true,
       },
     },
-    setup() {
+    setup(props) {
+      watch(
+        () => props.entities,
+        () => {
+          console.log('Entities', props.entities);
+        },
+        { immediate: true },
+      );
       return {
         router: useRouter(),
       };
