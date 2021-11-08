@@ -36,7 +36,7 @@
       >
     </div>
     <BaseButton
-      v-show="isEdit"
+      v-show="isEdit && !showParents"
       label="Add child"
       :icon="Unicons.PlusCircle.name"
       :icon-color="'var(--color-neutral-10)'"
