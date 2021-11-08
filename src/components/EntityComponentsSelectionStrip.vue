@@ -2,7 +2,7 @@
   <div
     v-for="(entity, arrayKey) in entities"
     :key="entity.id"
-    :class="[' px-5 py-2 flex flex-col justify-end']"
+    :class="[' px-5 py-2 flex flex-col justify-end overflow-y-scroll']"
   >
     <img
       v-if="entity.mediafiles.length > 0"
