@@ -4,6 +4,7 @@
     class="
       absolute
       bottom-6
+      left-52
       z-20
       flex flex-column
       rounded
