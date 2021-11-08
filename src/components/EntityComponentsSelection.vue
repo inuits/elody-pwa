@@ -12,9 +12,10 @@
       v-model:checked="showParents"
       :icon-on="Unicons.SortUp.name"
       :icon-off="Unicons.SortDown.name"
+      class="justify-self-start"
     />
-    <div v-if="!loading" class="flex flex-col items-end mt-2">
-      <EntityComponentSelectionStrip v-if="showParents" :entities="parents" />
+    <div v-if="!loading" class="flex flex-col items-end mt-2 overflow-y-scroll">
+      <EntityComponentSelectionStrip v-if="showParents" :entities="parents"/>
       <span
         v-show="showParents && parents.length === 0"
         class="w-full text-center font-light py-2"
@@ -42,17 +43,12 @@
       :bg-color="'blue-400'"
       :txt-color="'neutral-0'"
       @click="openPickAssetModal"
+      class="justify-self-end"
     />
   </div>
 </template>
 <script lang="ts">
-  import {
-    defineComponent,
-    onUnmounted,
-    PropType,
-    ref,
-    watch,
-  } from 'vue';
+  import { defineComponent, onUnmounted, PropType, ref, watch } from 'vue';
   import { MinimalEntityFragment } from '@/queries';
   import EntityComponentSelectionStrip from '@/components/EntityComponentsSelectionStrip.vue';
   import IconToggle from './base/IconToggle.vue';
@@ -83,7 +79,7 @@
     },
     setup(props) {
       const showParents = ref<boolean>(false);
-      const { isEdit, disableEditMode} = useEditMode();
+      const { isEdit, disableEditMode } = useEditMode();
       const { openPickAssetModal } = usePickAssetModal();
 
       const toggleParent = () => {
