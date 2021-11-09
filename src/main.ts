@@ -48,7 +48,7 @@ createApp(App)
   .provide(
     DefaultApolloClient,
     new ApolloClient({
-      link: createHttpLink({ uri: config.graphQlLink }),
+      link: createHttpLink({ uri: config.graphQlLink || '/api/graphql' }),
       cache: new InMemoryCache(),
     }),
   )
