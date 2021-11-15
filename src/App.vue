@@ -20,6 +20,8 @@
   import TheHeader from '@/components/TheHeader.vue';
   import EditModal from '@/components/EditModal.vue';
   import useRouteHelpers from './composables/useRouteHelpers';
+  import { useHead } from '@vueuse/head';
+  import { environment as _ } from './environment';
 
   export default defineComponent({
     name: 'App',
@@ -28,6 +30,25 @@
     setup() {
       const auth = useAuth();
       const { isSingle } = useRouteHelpers();
+
+      const getIndexValue = () => {
+        let indexStr = '';
+        if (_.index) {
+          indexStr = 'INDEX, FOLLOW';
+        } else {
+          indexStr = 'NOINDEX, NOFOLLOW';
+        }
+        return indexStr;
+      };
+
+      useHead({
+        meta: [
+          {
+            name: `ROBOTS`,
+            content: getIndexValue(),
+          },
+        ],
+      });
 
       return {
         auth,
