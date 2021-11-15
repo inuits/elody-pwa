@@ -10,6 +10,8 @@ import { routes } from './views';
 import { store } from './store';
 import { Unicons } from './types';
 
+import { createHead } from '@vueuse/head'
+
 import './registerServiceWorker';
 import './index.css';
 import { environment as _ } from './environment';
@@ -18,6 +20,7 @@ Unicon.add(Object.values(Unicons));
 
 const config = await fetch('../config.json').then((r) => r.json());
 const auth = new OpenIdConnectClient(config.oidc);
+const head = createHead();
 
 const router = createRouter({
   routes,
@@ -45,6 +48,7 @@ createApp(App)
   .use(store)
   .use(router)
   .use(auth)
+  .use(head)
   .provide(
     DefaultApolloClient,
     new ApolloClient({
