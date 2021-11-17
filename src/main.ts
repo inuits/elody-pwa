@@ -10,7 +10,7 @@ import { routes } from './views';
 import { store } from './store';
 import { Unicons } from './types';
 
-import { createHead } from '@vueuse/head'
+import { createHead } from '@vueuse/head';
 
 import './registerServiceWorker';
 import './index.css';
