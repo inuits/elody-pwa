@@ -33,6 +33,7 @@ type Metadata {
   key: MetaKey!
   value: String!
   lang: String
+  immutable: Boolean
 }
 
 input MetadataInput {

@@ -54,14 +54,6 @@
         enumName: 'MetaKey',
       });
 
-      watch(
-        () => props.relations,
-        () => {
-          console.log('RELATIONS', props.relations);
-        },
-        { immediate: true },
-      );
-
       return { labels: computed(() => result.value?.__type?.enumValues || []), props };
     },
   });

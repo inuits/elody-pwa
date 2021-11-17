@@ -4,6 +4,8 @@ fragment minimalEntity on Entity {
   metadata(key: [title, type]) {
     key
     value
+    lang
+    immutable
   }
   mediafiles {
     thumbnail_file_location
@@ -16,10 +18,14 @@ fragment fullEntity on Entity {
   title: metadata(key: [title]) {
     key
     value
+    lang
+    immutable
   }
   metadata(key: [description, material, type]) {
     key
     value
+    lang
+    immutable
   }
   relations(key: [authoredBy, isIn, isTypeOf, contains]) {
     key

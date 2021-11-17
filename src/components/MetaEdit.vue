@@ -10,6 +10,7 @@
           <label :class="[lableStyle]" :for="`value_${idx}`">{{ field.value.key }}</label>
           <div :class="[inputContainerStyle, ' input-container']">
             <Field
+              :disabled="`metadata[${idx}].immutable`"
               :id="`value_${idx}`"
               :as="editFieldType[field.value.key]"
               :name="`metadata[${idx}].value`"
@@ -17,6 +18,7 @@
             />
             <div class="delete">
               <BaseButton
+                v-show="!`metadata[${idx}].immutable`"
                 :icon="Unicons.Trash.name"
                 class="h-full"
                 bg-color="neutral-30 "
