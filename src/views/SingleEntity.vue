@@ -17,6 +17,7 @@
       :loading="loading"
       :entity-id="entityId"
       :metadata="metadata"
+      :relations="relations"
       :entity-title="title"
     />
   </div>
@@ -28,7 +29,7 @@
   import { useQuery } from '@vue/apollo-composable';
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import Meta from '@/components/Meta.vue';
-  import { GetEntityByIdDocument, GetEntityByIdQuery, Maybe, Metadata } from '@/queries';
+  import { GetEntityByIdDocument, GetEntityByIdQuery, Maybe, Metadata, Relation } from '@/queries';
   import { usePageTitle } from '@/components/TheHeader.vue';
   import { EditModes, useEditMode } from '@/components/EditToggle.vue';
   import useRouteHelpers from '@/composables/useRouteHelpers';
@@ -53,6 +54,7 @@
       const mediafile = ref<Maybe<string> | undefined>();
       const thumbnail = ref<Maybe<string> | undefined>();
       const metadata = ref<Maybe<Metadata>[]>([]);
+      const relations = ref<Maybe<Relation>[]>([]);
       const { updatePageTitle } = usePageTitle();
 
       watch(title, (value: string | undefined) => {
@@ -79,6 +81,7 @@
       );
 
       onResult((queryResult) => {
+        console.log('QueryResult', queryResult);
         if (queryResult.data && queryResult.data.Entity?.mediafiles?.[0]) {
           mediafile.value =
             queryResult.data.Entity?.mediafiles?.[0].original_file_location;
@@ -87,6 +90,7 @@
         }
 
         metadata.value = queryResult?.data?.Entity?.metadata || [];
+        relations.value = queryResult?.data?.Entity?.relations || [];
         loading.value = false;
       });
 
@@ -95,6 +99,7 @@
         loading,
         title,
         metadata,
+        relations,
         mediafile,
         thumbnail,
         components: computed(() => result?.value?.Entity?.components),

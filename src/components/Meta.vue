@@ -7,7 +7,7 @@
       },
     ]"
   >
-    <meta-view v-if="!loading && !isEdit" :metadata="metadata" />
+    <meta-view v-if="!loading && !isEdit" :metadata="metadata" :relations="relations" />
     <meta-edit
       v-if="!loading && isEdit"
       :error="error"
@@ -24,14 +24,15 @@
   import { defineComponent, PropType } from 'vue';
   import MetaEdit from '@/components/MetaEdit.vue';
   import MetaView from '@/components/MetaView.vue';
-  import { Metadata } from '@/queries';
   import { useEditMode } from './EditToggle.vue';
+  import { Metadata, Relation } from '@/queries';
 
   export default defineComponent({
     name: 'Meta',
     components: { MetaEdit, MetaView },
     props: {
       metadata: { type: Array as PropType<Metadata[]>, required: true },
+      relations: { type: Array as PropType<Relation[]>, required: true },
       entityTitle: { type: String, required: true },
       loading: {
         type: Boolean,
@@ -40,6 +41,7 @@
     },
     setup() {
       const { isEdit } = useEditMode();
+  
 
       return {
         isEdit,
