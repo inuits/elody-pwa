@@ -21,6 +21,11 @@ fragment fullEntity on Entity {
     key
     value
   }
+  relations(key: [authoredBy, isIn, isTypeOf, contains]) {
+    key
+    type
+    label
+  }
   mediafiles {
     _id
     original_file_location
@@ -32,6 +37,12 @@ fragment fullEntity on Entity {
   components {
     ...minimalEntity
   }
+}
+
+fragment fullRelation on Relation {
+  key
+  type
+  label
 }
 
 fragment job on Job {

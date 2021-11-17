@@ -44,6 +44,7 @@ input MetadataInput {
 input RelationInput {
   key: String
   type: RelationType
+  label: String
 }
 
 type Entity {
@@ -66,6 +67,7 @@ type MediaFile {
 type Relation {
   key: String!
   type: RelationType!
+  label: String
 }
 
 type EntitiesResults {

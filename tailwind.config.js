@@ -8,6 +8,10 @@ module.exports = {
     },
     colors: {
       transparent: 'transparent',
+      tag: {
+        neutral: '#e0dfdf',
+        selected: '#2d242a',
+      },
       neutral: {
         0: '#FFFFFF',
         10: '#FAFBFC',
