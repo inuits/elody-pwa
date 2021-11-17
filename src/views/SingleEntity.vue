@@ -81,7 +81,6 @@
       );
 
       onResult((queryResult) => {
-        console.log('QueryResult', queryResult);
         if (queryResult.data && queryResult.data.Entity?.mediafiles?.[0]) {
           mediafile.value =
             queryResult.data.Entity?.mediafiles?.[0].original_file_location;
