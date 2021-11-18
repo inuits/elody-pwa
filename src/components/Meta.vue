@@ -41,7 +41,6 @@
     },
     setup() {
       const { isEdit } = useEditMode();
-  
 
       return {
         isEdit,

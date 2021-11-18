@@ -15,14 +15,14 @@
       class="justify-self-start"
     />
     <div v-if="!loading" class="flex flex-col items-end mt-2 overflow-y-scroll">
-      <EntityComponentSelectionStrip v-if="showParents" :entities="parents"/>
+      <EntityComponentSelectionStrip v-if="showParents" :entities="parents" />
       <span
         v-show="showParents && parents.length === 0"
         class="w-full text-center font-light py-2"
         >No parent assets</span
       >
       <img
-        v-if="thumbnail"
+        v-if="thumbnail !== ''"
         :class="[
           'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-blue-500 border-4',
         ]"
@@ -42,8 +42,8 @@
       :icon-color="'var(--color-neutral-10)'"
       :bg-color="'blue-400'"
       :txt-color="'neutral-0'"
-      @click="openPickAssetModal"
       class="justify-self-end"
+      @click="openPickAssetModal"
     />
   </div>
 </template>
@@ -67,7 +67,7 @@
     props: {
       entities: { type: Array as PropType<MinimalEntityFragment[]>, required: true },
       parents: { type: Array as PropType<MinimalEntityFragment[]>, required: true },
-      thumbnail: { type: String },
+      thumbnail: { type: String, default: '' },
       selectedId: {
         type: String,
         required: true,

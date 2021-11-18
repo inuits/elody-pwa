@@ -10,8 +10,8 @@
           <label :class="[lableStyle]" :for="`value_${idx}`">{{ field.value.key }}</label>
           <div :class="[inputContainerStyle, ' input-container']">
             <Field
-              :disabled="`metadata[${idx}].immutable`"
               :id="`value_${idx}`"
+              :disabled="`metadata[${idx}].immutable`"
               :as="editFieldType[field.value.key]"
               :name="`metadata[${idx}].value`"
               :class="[`bg-neutral-0`, inputStyle]"

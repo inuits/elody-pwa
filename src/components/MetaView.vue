@@ -16,13 +16,17 @@
     No metadata available
   </div>
 
-  <div v-if="relations.length != 0" class="p-6 bg-neutral-0 flex flex-row flex-wrap w-max">
+  <div
+    v-if="relations.length != 0"
+    class="p-6 bg-neutral-0 flex flex-row flex-wrap w-max"
+  >
     <div v-for="relation in relations" :key="relation.key">
-    <relation-tag v-if="relation.label != null"
-      :id="relation.key"
-      :label="relation.label"
-      class="bg-tag-neutral m-2 ml-0"
-    />
+      <relation-tag
+        v-if="relation.label != null"
+        :id="relation.key"
+        :label="relation.label"
+        class="bg-tag-neutral m-2 ml-0"
+      />
     </div>
   </div>
   <div
@@ -41,13 +45,13 @@
 
   export default defineComponent({
     name: 'MetaView',
+    components: {
+      RelationTag,
+    },
     props: {
       loading: { type: Boolean, default: false },
       metadata: { type: Array as PropType<Metadata[]>, required: true },
-      relations: { type: Array as PropType<Relation[]> },
-    },
-    components: {
-      RelationTag,
+      relations: { type: Array as PropType<Relation[]>, default: () => [] },
     },
     setup(props) {
       const { result, error, loading, refetch } = useQuery(GetEnumsByNameDocument, {
