@@ -29,7 +29,13 @@
   import { useQuery } from '@vue/apollo-composable';
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import Meta from '@/components/Meta.vue';
-  import { GetEntityByIdDocument, GetEntityByIdQuery, Maybe, Metadata, Relation } from '@/queries';
+  import {
+    GetEntityByIdDocument,
+    GetEntityByIdQuery,
+    Maybe,
+    Metadata,
+    Relation,
+  } from '@/queries';
   import { usePageTitle } from '@/components/TheHeader.vue';
   import { EditModes, useEditMode } from '@/components/EditToggle.vue';
   import useRouteHelpers from '@/composables/useRouteHelpers';

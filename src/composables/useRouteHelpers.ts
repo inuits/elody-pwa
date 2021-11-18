@@ -31,7 +31,7 @@ const useRouteHelpers = (): {
     if (route.query.page || route.query.items) {
       info.skip = Number(route.query.page);
       info.limit = Number(route.query.items);
-      if(info.limit > 20) info.limit = 20;
+      if (info.limit > 20) info.limit = 20;
       updatePaginationInfoQueryParams(info);
     }
     updatePaginationInfoQueryParams(info);
@@ -39,8 +39,7 @@ const useRouteHelpers = (): {
   };
 
   const updatePaginationInfoQueryParams = (info: PaginationInfo) => {
-
-    if (info.limit && info.skip || info.skip == 0 && info.limit) {
+    if ((info.limit && info.skip) || (info.skip == 0 && info.limit)) {
       if (info.limit > 20 || info.skip < 1) {
         router.replace({ query: { items: 20, page: 1 } });
       } else {
@@ -49,7 +48,6 @@ const useRouteHelpers = (): {
     } else {
       router.replace({ query: { items: 20, page: 1 } });
     }
-
   };
 
   return {
