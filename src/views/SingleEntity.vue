@@ -21,7 +21,7 @@
       :entity-title="title"
     />
   </div>
-  <PickAssetModal :entity-id="entityId" />
+  <PickAssetModal :entity-id="entityId" @update-entity="updateEntities"/>
 </template>
 
 <script lang="ts">
@@ -73,6 +73,10 @@
         }
       });
 
+      const updateEntities = () => {
+        refetch();
+      };
+
       watch(
         () => route.params.id,
         async (newId) => {
@@ -112,6 +116,7 @@
         entityId: computed(() => {
           return id.value;
         }),
+        updateEntities,
       };
     },
   });
