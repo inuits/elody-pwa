@@ -1,9 +1,9 @@
 <template>
-  <div v-for="directory in result?.Directories" :key="directory.id">
+  <div v-for="directory in data?.Directories" :key="directory.id">
     <folder-tree-line
-      v-if="result?.Directories && directory && directory.parent === '/'"
+      v-if="data?.Directories && directory && directory.parent === '/'"
       :directory="directory"
-      :dictionary="result?.Directories"
+      :dictionary="data?.Directories"
       :default-open="true"
     />
   </div>
@@ -19,11 +19,15 @@
     components: {
       FolderTreeLine,
     },
+    props: {
+      data: {
+        type: Array,
+        required: true,
+      },
+    },
     setup() {
-      const { result } = useQuery(GetDirectoriesDocument);
-
+    
       return {
-        result,
       };
     },
   });

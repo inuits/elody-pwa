@@ -6,14 +6,16 @@
     @hide-modal="closeUploadModal"
   >
     <div class="bg-neutral-20 w-full h-full flex flex-col">
-      <upload-modal-import />
+      <upload-modal-import :directories="result" />
     </div>
   </modal>
 </template>
 <script lang="ts">
   import Modal, { ModalState } from './base/Modal.vue';
-  import { defineComponent, ref } from 'vue';
+  import { defineComponent, ref, watch } from 'vue';
   import UploadModalImport from './UploadModalImport.vue';
+  import { useQuery } from '@vue/apollo-composable';
+  import { GetDirectoriesDocument, GetDirectoriesQuery } from '@/queries';
 
   export type UploadModalType = {
     state: ModalState;
@@ -55,10 +57,29 @@
     },
     setup() {
       const { closeUploadModal, uploadModalState } = useUploadModal();
+      const fetchEnabled = ref(false);
+      const { result, refetch } = useQuery(GetDirectoriesDocument, null, () => ({
+        enabled: fetchEnabled.value,
+      }));
+
+      watch(
+        () => uploadModalState.value.state,
+        () => {
+          if (uploadModalState.value.state === 'show') getData();
+        },
+        { immediate: true },
+      );
+
+      const getData = () => {
+        if(fetchEnabled.value === true ) refetch();
+        else fetchEnabled.value = true;
+
+      };
 
       return {
         uploadModalState,
         closeUploadModal,
+        result,
       };
     },
   });
