@@ -112,8 +112,8 @@ query getEntityById($id: String!) {
   }
 }
 
-query getDirectories {
-  Directories {
+query getDirectories($dir: String) {
+  Directories(dir: $dir) {
     id
     dir
     has_subdirs

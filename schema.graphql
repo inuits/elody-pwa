@@ -155,7 +155,7 @@ type Query {
     fetchPolicy: String
   ): EntitiesResults
   User: User
-  Directories: [Directory]
+  Directories(dir: String): [Directory]
   Jobs(paginationInfo: PaginationInfo, filters: Filters): JobsResults
   Job(id: String!): Job
 }
