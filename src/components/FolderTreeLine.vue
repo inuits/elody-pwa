@@ -59,7 +59,7 @@
           "
         />
         <span class="inline-block mr-3 group-hover:text-blue-500"
-          >{{ directory.label }}
+          >{{ directory.dir }}
         </span>
       </div>
       <div class="flex-grow-0" :class="{ 'w-11': !hasSubDirectories() }" @click="toggle">
@@ -89,7 +89,7 @@
       </div>
     </li>
     <contractor-tree-line
-      v-for="(subDirectory, index) in subDirectories"
+      v-for="(subDirectory, index) in result"
       v-show="open"
       :key="index"
       :directory="subDirectory"
@@ -107,17 +107,19 @@
 
 <script lang="ts">
   import { defineComponent, inject, PropType, Ref, ref, watch } from 'vue';
-  import { Directory } from '@/queries';
-  import { getFromObjectArrayByKey } from '@/helpers';
+  import { Directory, GetDirectoriesDocument } from '@/queries';
+  import { useQuery } from '@vue/apollo-composable';
 
   export default defineComponent({
     name: 'ContractorTreeLine',
     props: {
       directory: {
+        //Current directory
         type: Object as PropType<Directory>,
         required: true,
       },
       dictionary: {
+        //All directories
         type: Object as PropType<Directory[]>,
         required: true,
         default: () => {},
@@ -139,21 +141,38 @@
     },
     setup(props) {
       const open = ref<boolean>(props.defaultOpen);
+      const fetchEnabled = ref(false);
+      // const { result, refetch, onResult} = useQuery(GetDirectoriesDocument, {dir: props.directory.dir}, () => ({
+      //   enabled: fetchEnabled.value,
+      // }));
 
-      const subDirectories = ref<Directory[]>([]);
-      if (props.directory.id) {
-        subDirectories.value = getFromObjectArrayByKey<Directory>(
-          props.dictionary,
-          'parent',
-          props.directory.id,
-        );
-      }
+      watch(
+        () => props.directory,
+        () => {
+          console.log('props.directory', props.directory);
+        },
+        { immediate: true },
+      );
 
-      const hasSubDirectories = () => subDirectories.value.length > 0;
+      watch(
+        () => props.dictionary,
+        () => {
+          console.log('props.dictionary', props.dictionary);
+        },
+        { immediate: true },
+      );
+
+      // onResult(() => {
+      //   console.log('CHILDS RESULT', result);
+      // });
+
+      const hasSubDirectories = () => props.directory.has_subdirs;
 
       const toggle = () => {
         if (hasSubDirectories()) {
           open.value = !open.value;
+          // if (!fetchEnabled.value) fetchEnabled.value = true;
+          // else refetch();
         }
       };
 
@@ -169,7 +188,7 @@
         hasSubDirectories,
         updateSelectedDirectory,
         selectedDirectory,
-        subDirectories,
+        // result
       };
     },
   });
