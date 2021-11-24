@@ -115,7 +115,8 @@ query getEntityById($id: String!) {
 query getDirectories {
   Directories {
     id
-    label
+    dir
+    has_subdirs
     parent
   }
 }

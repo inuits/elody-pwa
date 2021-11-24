@@ -96,7 +96,8 @@ type User {
 
 type Directory {
   id: String
-  label: String
+  dir: String
+  has_subdirs: Boolean
   parent: String!
 }
 
