@@ -89,9 +89,9 @@
       </div>
     </li>
     <contractor-tree-line
-      v-for="(subDirectory, index) in result"
+      v-for="subDirectory in result"
       v-show="open"
-      :key="index"
+      :key="subDirectory.id"
       :directory="subDirectory"
       :dictionary="dictionary"
       :default-open="false"
@@ -142,37 +142,21 @@
     setup(props) {
       const open = ref<boolean>(props.defaultOpen);
       const fetchEnabled = ref(false);
-      // const { result, refetch, onResult} = useQuery(GetDirectoriesDocument, {dir: props.directory.dir}, () => ({
-      //   enabled: fetchEnabled.value,
-      // }));
+      const { result, refetch, onResult} = useQuery(GetDirectoriesDocument, {dir: props.directory.id}, () => ({
+        enabled: fetchEnabled.value,
+      }));
 
-      watch(
-        () => props.directory,
-        () => {
-          console.log('props.directory', props.directory);
-        },
-        { immediate: true },
-      );
-
-      watch(
-        () => props.dictionary,
-        () => {
-          console.log('props.dictionary', props.dictionary);
-        },
-        { immediate: true },
-      );
-
-      // onResult(() => {
-      //   console.log('CHILDS RESULT', result);
-      // });
+      onResult(() => {
+        console.log('CHILDS RESULT', result.value);
+      });
 
       const hasSubDirectories = () => props.directory.has_subdirs;
 
       const toggle = () => {
         if (hasSubDirectories()) {
           open.value = !open.value;
-          // if (!fetchEnabled.value) fetchEnabled.value = true;
-          // else refetch();
+          if (!fetchEnabled.value) fetchEnabled.value = true;
+          else refetch();
         }
       };
 
@@ -188,7 +172,7 @@
         hasSubDirectories,
         updateSelectedDirectory,
         selectedDirectory,
-        // result
+        result
       };
     },
   });

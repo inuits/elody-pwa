@@ -58,9 +58,13 @@
     setup() {
       const { closeUploadModal, uploadModalState } = useUploadModal();
       const fetchEnabled = ref(false);
-      const { result, refetch } = useQuery(GetDirectoriesDocument, null, () => ({
-        enabled: fetchEnabled.value,
-      }));
+      const { result, refetch } = useQuery(
+        GetDirectoriesDocument,
+        null,
+        () => ({
+          enabled: fetchEnabled.value,
+        }),
+      );
 
       watch(
         () => uploadModalState.value.state,
@@ -71,9 +75,8 @@
       );
 
       const getData = () => {
-        if(fetchEnabled.value === true ) refetch();
+        if (fetchEnabled.value === true) refetch();
         else fetchEnabled.value = true;
-
       };
 
       return {
