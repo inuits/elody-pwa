@@ -9,8 +9,6 @@
   </div>
 </template>
 <script lang="ts">
-  import { GetDirectoriesDocument } from '@/queries';
-  import { useQuery } from '@vue/apollo-composable';
   import { defineComponent } from 'vue';
   import FolderTreeLine from './FolderTreeLine.vue';
 

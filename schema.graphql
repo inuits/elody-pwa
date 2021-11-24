@@ -93,7 +93,6 @@ type User {
   name: String!
   preferred_username: String!
 }
-
 type Directory {
   id: String
   dir: String
