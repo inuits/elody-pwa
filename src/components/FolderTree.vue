@@ -4,12 +4,13 @@
       v-if="data?.Directories && directory && directory.parent === '/'"
       :directory="directory"
       :dictionary="data?.Directories"
-      :default-open="true"
+      :default-open="false"
     />
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent } from 'vue';
+  import { Directory } from '@/queries';
+import { defineComponent, PropType } from 'vue';
   import FolderTreeLine from './FolderTreeLine.vue';
 
   export default defineComponent({
@@ -19,14 +20,11 @@
     },
     props: {
       data: {
-        type: Array,
+        type: Object as PropType<Directory[]>,
         required: true,
       },
     },
-    setup() {
-    
-      return {
-      };
+    setup() {    
     },
   });
 </script>

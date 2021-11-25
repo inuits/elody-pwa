@@ -15,7 +15,7 @@
   import { defineComponent, ref, watch } from 'vue';
   import UploadModalImport from './UploadModalImport.vue';
   import { useQuery } from '@vue/apollo-composable';
-  import { GetDirectoriesDocument, GetDirectoriesQuery } from '@/queries';
+  import { GetDirectoriesDocument } from '@/queries';
 
   export type UploadModalType = {
     state: ModalState;
@@ -60,7 +60,7 @@
       const fetchEnabled = ref(false);
       const { result, refetch } = useQuery(
         GetDirectoriesDocument,
-        null,
+        {dir:'/'},
         () => ({
           enabled: fetchEnabled.value,
         }),
