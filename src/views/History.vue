@@ -81,11 +81,6 @@
         },
       });
 
-      onMounted(() => {
-        queryVariables.pagination.limit = 20;
-        queryVariables.pagination.skip = 1;
-      });
-
       const { result, fetchMore } = useQuery(GetJobsDocument, {
         paginationInfo: {
           limit: queryVariables.pagination.limit,
