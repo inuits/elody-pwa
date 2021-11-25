@@ -89,7 +89,7 @@
       </div>
     </li>
     <contractor-tree-line
-      v-for="subDirectory in result"
+      v-for="subDirectory in subDirectories"
       v-show="open"
       :key="subDirectory.id"
       :directory="subDirectory"
@@ -99,14 +99,13 @@
       :parent-id="subDirectory.id ? subDirectory.id : undefined"
       :class="{
         '-mt-0': index === 0,
-        'last-ul': index === subDirectories.length - 1,
-      }"
+        'last-ul': index === subDirectories.length - 1,}"
     />
   </ul>
 </template>
 
 <script lang="ts">
-  import { defineComponent, inject, PropType, Ref, ref, watch } from 'vue';
+  import { defineComponent, inject, PropType, ref } from 'vue';
   import { Directory, GetDirectoriesDocument } from '@/queries';
   import { useQuery } from '@vue/apollo-composable';
 
@@ -142,12 +141,16 @@
     setup(props) {
       const open = ref<boolean>(props.defaultOpen);
       const fetchEnabled = ref(false);
-      const { result, refetch, onResult} = useQuery(GetDirectoriesDocument, {dir: props.directory.id}, () => ({
+      const { result, refetch, onResult} = useQuery(GetDirectoriesDocument, {dir: `${props.directory.id}/`}, () => ({
         enabled: fetchEnabled.value,
       }));
+      const subDirectories = ref<Directory[]>([]);
 
-      onResult(() => {
-        console.log('CHILDS RESULT', result.value);
+      onResult((value) => {
+        if(value.data){
+          console.log(value.data.Directories);
+          subDirectories.value = value.data.Directories as Directory[];
+        };
       });
 
       const hasSubDirectories = () => props.directory.has_subdirs;
@@ -156,8 +159,8 @@
         if (hasSubDirectories()) {
           open.value = !open.value;
           if (!fetchEnabled.value) fetchEnabled.value = true;
-          else refetch();
-        }
+          else refetch({dir: `${props.directory.id}/`});
+        };
       };
 
       const updateSelectedDirectory = inject<(contractor: Directory) => void | undefined>(
@@ -172,7 +175,8 @@
         hasSubDirectories,
         updateSelectedDirectory,
         selectedDirectory,
-        result
+        result,
+        subDirectories,
       };
     },
   });
