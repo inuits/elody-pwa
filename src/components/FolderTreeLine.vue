@@ -187,6 +187,7 @@ export default defineComponent({
       selectedDirectory,
       result,
       subDirectories,
+      loading,
     };
   },
 });
