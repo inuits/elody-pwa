@@ -156,7 +156,9 @@
       const hasSubDirectories = () => props.directory.has_subdirs;
 
       const toggle = () => {
-        if (hasSubDirectories()) {
+        if(open.value){
+          open.value = !open.value;
+        }else if (hasSubDirectories()) {
           open.value = !open.value;
           if (!fetchEnabled.value) fetchEnabled.value = true;
           else refetch({dir: `${props.directory.id}/`});
