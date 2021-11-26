@@ -94,16 +94,19 @@ export default defineComponent({
     const jobHelper = useJobHelpers();
     const state = jobHelper.getJobStatus(props.job);
     const isCollapsed = ref<Boolean>(true);
-    const fetchingSubJobs = ref<Boolean>(true);
+    const fetchingSubJobs = ref<Boolean>(false);
     const { result, fetchMore, loading } = useQuery(GetJobDocument, {
       id: props.job._key,
     });
     const subjobLimit = ref<number>(10);
 
     const toggleCollapse = () => {
-      fetchingSubJobs.value = true;
       isCollapsed.value = !isCollapsed.value;
-      if (!isCollapsed.value) updateSubJobs();
+      if (!isCollapsed.value) {
+        fetchingSubJobs.value = true;
+        subjobLimit.value = 10;
+        updateSubJobs();
+      };
     };
     const jobStartDate = jobHelper.getFormatedDate(props.job.start_time as string);
     const updateSubJobs = () => {
