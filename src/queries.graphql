@@ -7,9 +7,6 @@ fragment minimalEntity on Entity {
     lang
     immutable
   }
-  mediafiles {
-    thumbnail_file_location
-  }
 }
 
 fragment fullEntity on Entity {
