@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'overflow-scroll',
+      'overflow-y-scroll',
       {
         'animate-pulse bg-neutral-20 text-neutral-20': loading,
       },

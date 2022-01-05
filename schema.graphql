@@ -6,6 +6,7 @@ enum MetaKey {
   collection
   description
   material
+  object_number
 }
 
 enum RelationType {
@@ -69,6 +70,7 @@ type Entity {
   metadataCollection: [MetadataCollection]
   components: [Entity]
   parents: [Entity]
+  primary_mediafile: String
 }
 
 type MediaFile {

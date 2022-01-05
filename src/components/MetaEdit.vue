@@ -58,6 +58,7 @@
     collection: 'input',
     description: 'textarea',
     material: 'input',
+    object_number: 'input',
   };
 
   export default defineComponent({

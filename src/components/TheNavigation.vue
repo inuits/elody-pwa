@@ -12,6 +12,7 @@
       pt-10
       bg-neutral-20
       px-5
+      z-50
     "
   >
     <router-link

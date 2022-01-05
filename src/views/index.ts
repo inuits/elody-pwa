@@ -9,12 +9,14 @@ export const routes: RouteRecordRaw[] = [
     name: 'Home',
     meta: { title: 'Home', requiresAuth: true },
     component: () => import(/* webpackChunkName: "about" */ './Home.vue'),
-  },
-  {
-    path: '/entity/:id',
-    name: 'SingleEntity',
-    meta: { title: 'Single Asset', requiresAuth: true },
-    component: () => import(/* webpackChunkName: "about" */ './SingleEntity.vue'),
+    children: [
+      {
+        path: 'entity/:id',
+        name: 'SingleEntity',
+        meta: { title: 'Single Asset', requiresAuth: true },
+        component: () => import(/* webpackChunkName: "about" */ './SingleEntity.vue'),
+      },
+    ],
   },
   {
     path: '/history',

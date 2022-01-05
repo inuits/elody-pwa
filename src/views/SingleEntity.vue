@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full w-full flex relative">
+  <div class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0">
     <entity-image-selection
       v-show="loading || mediafiles.length > 0"
       v-model:selectedImage="mediafile"
@@ -32,24 +32,28 @@
   import { GetEntityByIdDocument, Maybe, MediaFile, MetadataCollection } from '@/queries';
   import { usePageTitle } from '@/components/TheHeader.vue';
   import { EditModes, useEditMode } from '@/components/EditToggle.vue';
-  import useRouteHelpers from '@/composables/useRouteHelpers';
   import EntityImageSelection from '@/components/EntityImageSelection.vue';
   import { useRoute } from 'vue-router';
   import PickAssetModal from '@/components/PickAssetModal.vue';
+  import { asString } from '@/helpers';
 
   export default defineComponent({
     name: 'SingleEntity',
     components: { IIIFViewer, Meta, PickAssetModal, EntityImageSelection },
     setup() {
-      const route = useRoute();
+      const id = asString(useRoute().params['id']);
       const { editMode } = useEditMode();
-      const { getParam } = useRouteHelpers();
-      const id = ref<string>(getParam('id'));
-      //For some reason loading from useQuery is not working
       const loading = ref<boolean>(true);
-      const { result, refetch, onResult } = useQuery(GetEntityByIdDocument, {
-        id: id.value,
-      });
+      const { result, refetch, onResult } = useQuery(
+        GetEntityByIdDocument,
+        {
+          id: id,
+        },
+        {
+          notifyOnNetworkStatusChange: true,
+          fetchPolicy: 'no-cache',
+        },
+      );
       const title = computed(() => result.value?.Entity?.title[0]?.value);
       const mediafile = ref<Maybe<string> | undefined>();
       const mediafiles = ref<MediaFile[]>([]);
@@ -70,18 +74,18 @@
         refetch();
       };
 
-      watch(
-        () => route.params.id,
-        async (newId) => {
-          if (!Array.isArray(newId)) {
-            loading.value = true;
-            id.value = newId;
-            refetch({
-              id: newId,
-            });
-          }
-        },
-      );
+      // watch(
+      //   () => route.params.id,
+      //   async (newId) => {
+      //     if (!Array.isArray(newId)) {
+      //       loading.value = true;
+      //       id.value = newId;
+      //       refetch({
+      //         id: newId,
+      //       });
+      //     }
+      //   },
+      // );
 
       onResult((queryResult) => {
         if (queryResult.data && queryResult.data.Entity?.mediafiles?.[0]) {
@@ -104,7 +108,7 @@
         mediafile,
         metadataCollection,
         entityId: computed(() => {
-          return id.value;
+          return id;
         }),
         updateEntities,
       };
