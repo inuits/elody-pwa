@@ -1,27 +1,27 @@
 <template>
   <div class="h-full w-full flex relative">
-    <entity-components-selection
+    <entity-image-selection
+      v-show="loading || mediafiles.length > 0"
+      v-model:selectedImage="mediafile"
       class="w-40"
       :loading="loading"
-      :entities="components"
-      :parents="parents"
-      :selected-id="entityId"
-      :thumbnail="thumbnail"
-      :edit-mode="editMode"
+      :mediafiles="mediafiles"
     />
-    <div :class="['flex w-4/6', { checkboard: loading }]">
+    <div
+      v-show="!loading && mediafiles.length > 0"
+      :class="['flex w-4/6', { checkboard: loading }]"
+    >
       <IIIFViewer v-if="!loading" :image-url="mediafile" />
     </div>
     <Meta
-      class="w-2/6"
+      :class="!loading && mediafiles.length > 0 ? 'w-2/6' : 'w-full'"
       :loading="loading"
       :entity-id="entityId"
-      :metadata="metadata"
-      :relations="relations"
+      :metadata="metadataCollection"
       :entity-title="title"
     />
   </div>
-  <PickAssetModal :entity-id="entityId" @update-entity="updateEntities"/>
+  <PickAssetModal :entity-id="entityId" @update-entity="updateEntities" />
 </template>
 
 <script lang="ts">
@@ -29,23 +29,17 @@
   import { useQuery } from '@vue/apollo-composable';
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import Meta from '@/components/Meta.vue';
-  import {
-    GetEntityByIdDocument,
-    GetEntityByIdQuery,
-    Maybe,
-    Metadata,
-    Relation,
-  } from '@/queries';
+  import { GetEntityByIdDocument, Maybe, MediaFile, MetadataCollection } from '@/queries';
   import { usePageTitle } from '@/components/TheHeader.vue';
   import { EditModes, useEditMode } from '@/components/EditToggle.vue';
   import useRouteHelpers from '@/composables/useRouteHelpers';
-  import EntityComponentsSelection from '@/components/EntityComponentsSelection.vue';
+  import EntityImageSelection from '@/components/EntityImageSelection.vue';
   import { useRoute } from 'vue-router';
   import PickAssetModal from '@/components/PickAssetModal.vue';
 
   export default defineComponent({
     name: 'SingleEntity',
-    components: { IIIFViewer, Meta, EntityComponentsSelection, PickAssetModal },
+    components: { IIIFViewer, Meta, PickAssetModal, EntityImageSelection },
     setup() {
       const route = useRoute();
       const { editMode } = useEditMode();
@@ -58,12 +52,11 @@
       });
       const title = computed(() => result.value?.Entity?.title[0]?.value);
       const mediafile = ref<Maybe<string> | undefined>();
-      const thumbnail = ref<Maybe<string> | undefined>();
-      const metadata = ref<Maybe<Metadata>[]>([]);
-      const relations = ref<Maybe<Relation>[]>([]);
+      const mediafiles = ref<MediaFile[]>([]);
+      const metadataCollection = ref<MetadataCollection[]>([]);
       const { updatePageTitle } = usePageTitle();
 
-      watch(title, (value: string | undefined) => {
+      watch(title, (value: Maybe<string> | undefined) => {
         value && updatePageTitle(value);
       });
 
@@ -92,27 +85,24 @@
 
       onResult((queryResult) => {
         if (queryResult.data && queryResult.data.Entity?.mediafiles?.[0]) {
-          mediafile.value =
-            queryResult.data.Entity?.mediafiles?.[0].original_file_location;
-          thumbnail.value =
-            queryResult.data.Entity?.mediafiles?.[0].thumbnail_file_location;
+          mediafile.value = queryResult.data.Entity?.mediafiles?.[0].filename;
         }
 
-        metadata.value = queryResult?.data?.Entity?.metadata || [];
-        relations.value = queryResult?.data?.Entity?.relations || [];
+        //@ts-ignore
+        metadataCollection.value = queryResult?.data?.Entity?.metadataCollection || [];
+        //@ts-ignore
+        mediafiles.value = queryResult.data.Entity?.mediafiles
+          ? queryResult.data.Entity?.mediafiles
+          : [];
         loading.value = false;
       });
 
       return {
-        editMode,
         loading,
         title,
-        metadata,
-        relations,
+        mediafiles,
         mediafile,
-        thumbnail,
-        components: computed(() => result?.value?.Entity?.components),
-        parents: computed(() => result?.value?.Entity?.parents),
+        metadataCollection,
         entityId: computed(() => {
           return id.value;
         }),

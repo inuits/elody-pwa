@@ -11,12 +11,13 @@ enum MetaKey {
 enum RelationType {
   authoredBy
   isIn
-  isTypeOf
   contains
-  parent
+  isTypeOf
+  isUsedIn
   components
+  parent
+  carriedOutBy
 }
-
 enum JSPatchOp {
   add
   replace
@@ -31,15 +32,26 @@ input JSPatch {
 
 type Metadata {
   key: MetaKey!
-  value: String!
+  value: String
+  nestedMetaData: Entity
   lang: String
+  unMappedKey: String
+  label: String
+  type: RelationType
   immutable: Boolean
 }
 
 input MetadataInput {
   key: MetaKey!
-  value: String!
+  value: String
   lang: String
+}
+
+type MetadataCollection {
+  label: String!
+  data: [Metadata]
+  nested: Boolean
+  key: String!
 }
 
 input RelationInput {
@@ -54,6 +66,7 @@ type Entity {
   metadata(key: [MetaKey]): [Metadata]!
   relations(key: [RelationType!]): [Relation]
   mediafiles: [MediaFile]
+  metadataCollection: [MetadataCollection]
   components: [Entity]
   parents: [Entity]
 }
@@ -62,6 +75,7 @@ type MediaFile {
   _id: String!
   original_file_location: String
   thumbnail_file_location: String
+  filename: String
   entities: [String]
 }
 

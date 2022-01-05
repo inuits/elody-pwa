@@ -9,6 +9,21 @@ fragment minimalEntity on Entity {
   }
 }
 
+fragment nestedEntity on Entity {
+  id
+  type
+  metadataCollection {
+    label
+    nested
+    key
+    data {
+      value
+      unMappedKey
+      label
+    }
+  }
+}
+
 fragment fullEntity on Entity {
   id
   type
@@ -18,21 +33,24 @@ fragment fullEntity on Entity {
     lang
     immutable
   }
-  metadata(key: [description, material, type]) {
-    key
-    value
-    lang
-    immutable
-  }
-  relations(key: [authoredBy, isIn, isTypeOf, contains]) {
-    key
-    type
-    label
-  }
   mediafiles {
     _id
     original_file_location
+    filename
     thumbnail_file_location
+  }
+  metadataCollection {
+    label
+    nested
+    key
+    data {
+      value
+      unMappedKey
+      label
+      nestedMetaData {
+        ...nestedEntity
+      }
+    }
   }
   parents {
     ...minimalEntity

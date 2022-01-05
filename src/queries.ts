@@ -38,6 +38,7 @@ export type Entity = {
   metadata: Array<Maybe<Metadata>>;
   relations?: Maybe<Array<Maybe<Relation>>>;
   mediafiles?: Maybe<Array<Maybe<MediaFile>>>;
+  metadataCollection?: Maybe<Array<Maybe<MetadataCollection>>>;
   components?: Maybe<Array<Maybe<Entity>>>;
   parents?: Maybe<Array<Maybe<Entity>>>;
 };
@@ -113,6 +114,7 @@ export type MediaFile = {
   _id: Scalars['String'];
   original_file_location?: Maybe<Scalars['String']>;
   thumbnail_file_location?: Maybe<Scalars['String']>;
+  filename?: Maybe<Scalars['String']>;
   entities?: Maybe<Array<Maybe<Scalars['String']>>>;
 };
 
@@ -127,14 +129,26 @@ export enum MetaKey {
 export type Metadata = {
   __typename?: 'Metadata';
   key: MetaKey;
-  value: Scalars['String'];
+  value?: Maybe<Scalars['String']>;
+  nestedMetaData?: Maybe<Entity>;
   lang?: Maybe<Scalars['String']>;
+  unMappedKey?: Maybe<Scalars['String']>;
+  label?: Maybe<Scalars['String']>;
+  type?: Maybe<RelationType>;
   immutable?: Maybe<Scalars['Boolean']>;
+};
+
+export type MetadataCollection = {
+  __typename?: 'MetadataCollection';
+  label: Scalars['String'];
+  data?: Maybe<Array<Maybe<Metadata>>>;
+  nested?: Maybe<Scalars['Boolean']>;
+  key: Scalars['String'];
 };
 
 export type MetadataInput = {
   key: MetaKey;
-  value: Scalars['String'];
+  value?: Maybe<Scalars['String']>;
   lang?: Maybe<Scalars['String']>;
 };
 
@@ -222,10 +236,12 @@ export type RelationInput = {
 export enum RelationType {
   AuthoredBy = 'authoredBy',
   IsIn = 'isIn',
-  IsTypeOf = 'isTypeOf',
   Contains = 'contains',
+  IsTypeOf = 'isTypeOf',
+  IsUsedIn = 'isUsedIn',
+  Components = 'components',
   Parent = 'parent',
-  Components = 'components'
+  CarriedOutBy = 'carriedOutBy'
 }
 
 export type SearchFilter = {
@@ -354,9 +370,14 @@ export type __EnumValue = {
   deprecationReason?: Maybe<Scalars['String']>;
 };
 
-export type MinimalEntityFragment = { __typename?: 'Entity', id: string, type: string, metadata: Array<Maybe<{ __typename?: 'Metadata', key: MetaKey, value: string, lang?: Maybe<string>, immutable?: Maybe<boolean> }>> };
+export type MinimalEntityFragment = { __typename?: 'Entity', id: string, type: string, metadata: Array<Maybe<{ __typename?: 'Metadata', key: MetaKey, value?: Maybe<string>, lang?: Maybe<string>, immutable?: Maybe<boolean> }>> };
 
-export type FullEntityFragment = { __typename?: 'Entity', id: string, type: string, title: Array<Maybe<{ __typename?: 'Metadata', key: MetaKey, value: string, lang?: Maybe<string>, immutable?: Maybe<boolean> }>>, metadata: Array<Maybe<{ __typename?: 'Metadata', key: MetaKey, value: string, lang?: Maybe<string>, immutable?: Maybe<boolean> }>>, relations?: Maybe<Array<Maybe<{ __typename?: 'Relation', key: string, type: RelationType, label?: Maybe<string> }>>>, mediafiles?: Maybe<Array<Maybe<{ __typename?: 'MediaFile', _id: string, original_file_location?: Maybe<string>, thumbnail_file_location?: Maybe<string> }>>>, parents?: Maybe<Array<Maybe<(
+export type NestedEntityFragment = { __typename?: 'Entity', id: string, type: string, metadataCollection?: Maybe<Array<Maybe<{ __typename?: 'MetadataCollection', label: string, nested?: Maybe<boolean>, key: string, data?: Maybe<Array<Maybe<{ __typename?: 'Metadata', value?: Maybe<string>, unMappedKey?: Maybe<string>, label?: Maybe<string> }>>> }>>> };
+
+export type FullEntityFragment = { __typename?: 'Entity', id: string, type: string, title: Array<Maybe<{ __typename?: 'Metadata', key: MetaKey, value?: Maybe<string>, lang?: Maybe<string>, immutable?: Maybe<boolean> }>>, mediafiles?: Maybe<Array<Maybe<{ __typename?: 'MediaFile', _id: string, original_file_location?: Maybe<string>, filename?: Maybe<string>, thumbnail_file_location?: Maybe<string> }>>>, metadataCollection?: Maybe<Array<Maybe<{ __typename?: 'MetadataCollection', label: string, nested?: Maybe<boolean>, key: string, data?: Maybe<Array<Maybe<{ __typename?: 'Metadata', value?: Maybe<string>, unMappedKey?: Maybe<string>, label?: Maybe<string>, nestedMetaData?: Maybe<(
+        { __typename?: 'Entity' }
+        & NestedEntityFragment
+      )> }>>> }>>>, parents?: Maybe<Array<Maybe<(
     { __typename?: 'Entity' }
     & MinimalEntityFragment
   )>>>, components?: Maybe<Array<Maybe<(
@@ -459,7 +480,7 @@ export type EditMetadataMutationVariables = Exact<{
 }>;
 
 
-export type EditMetadataMutation = { __typename?: 'Mutation', replaceMetadata: Array<{ __typename?: 'Metadata', key: MetaKey, value: string, lang?: Maybe<string> }> };
+export type EditMetadataMutation = { __typename?: 'Mutation', replaceMetadata: Array<{ __typename?: 'Metadata', key: MetaKey, value?: Maybe<string>, lang?: Maybe<string> }> };
 
 export type AddComponentMutationVariables = Exact<{
   id: Scalars['String'];
@@ -469,8 +490,9 @@ export type AddComponentMutationVariables = Exact<{
 
 export type AddComponentMutation = { __typename?: 'Mutation', addRelations: Array<Maybe<{ __typename?: 'Relation', key: string, type: RelationType }>> };
 
+export const NestedEntityFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"nestedEntity"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Entity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"metadataCollection"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"nested"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"unMappedKey"}},{"kind":"Field","name":{"kind":"Name","value":"label"}}]}}]}}]}}]} as unknown as DocumentNode<NestedEntityFragment, unknown>;
 export const MinimalEntityFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"minimalEntity"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Entity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"key"},"value":{"kind":"ListValue","values":[{"kind":"EnumValue","value":"title"},{"kind":"EnumValue","value":"type"}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"lang"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}}]}}]} as unknown as DocumentNode<MinimalEntityFragment, unknown>;
-export const FullEntityFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"fullEntity"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Entity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","alias":{"kind":"Name","value":"title"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"key"},"value":{"kind":"ListValue","values":[{"kind":"EnumValue","value":"title"}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"lang"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"key"},"value":{"kind":"ListValue","values":[{"kind":"EnumValue","value":"description"},{"kind":"EnumValue","value":"material"},{"kind":"EnumValue","value":"type"}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"lang"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}},{"kind":"Field","name":{"kind":"Name","value":"relations"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"key"},"value":{"kind":"ListValue","values":[{"kind":"EnumValue","value":"authoredBy"},{"kind":"EnumValue","value":"isIn"},{"kind":"EnumValue","value":"isTypeOf"},{"kind":"EnumValue","value":"contains"}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"label"}}]}},{"kind":"Field","name":{"kind":"Name","value":"mediafiles"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"original_file_location"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnail_file_location"}}]}},{"kind":"Field","name":{"kind":"Name","value":"parents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalEntity"}}]}},{"kind":"Field","name":{"kind":"Name","value":"components"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalEntity"}}]}}]}},...MinimalEntityFragmentDoc.definitions]} as unknown as DocumentNode<FullEntityFragment, unknown>;
+export const FullEntityFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"fullEntity"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Entity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","alias":{"kind":"Name","value":"title"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"key"},"value":{"kind":"ListValue","values":[{"kind":"EnumValue","value":"title"}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"lang"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}},{"kind":"Field","name":{"kind":"Name","value":"mediafiles"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"original_file_location"}},{"kind":"Field","name":{"kind":"Name","value":"filename"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnail_file_location"}}]}},{"kind":"Field","name":{"kind":"Name","value":"metadataCollection"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"nested"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"unMappedKey"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"nestedMetaData"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"nestedEntity"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"parents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalEntity"}}]}},{"kind":"Field","name":{"kind":"Name","value":"components"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalEntity"}}]}}]}},...NestedEntityFragmentDoc.definitions,...MinimalEntityFragmentDoc.definitions]} as unknown as DocumentNode<FullEntityFragment, unknown>;
 export const FullRelationFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"fullRelation"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Relation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"label"}}]}}]} as unknown as DocumentNode<FullRelationFragment, unknown>;
 export const JobFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"job"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Job"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"job_type"}},{"kind":"Field","name":{"kind":"Name","value":"job_type"}},{"kind":"Field","name":{"kind":"Name","value":"job_info"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"user"}},{"kind":"Field","name":{"kind":"Name","value":"asset_id"}},{"kind":"Field","name":{"kind":"Name","value":"mediafile_id"}},{"kind":"Field","name":{"kind":"Name","value":"parent_job_id"}},{"kind":"Field","name":{"kind":"Name","value":"end_time"}},{"kind":"Field","name":{"kind":"Name","value":"start_time"}},{"kind":"Field","name":{"kind":"Name","value":"amount_of_jobs"}},{"kind":"Field","name":{"kind":"Name","value":"completed_jobs"}},{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"_key"}},{"kind":"Field","name":{"kind":"Name","value":"_rev"}}]}}]} as unknown as DocumentNode<JobFragment, unknown>;
 export const JobWithSubJobsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"jobWithSubJobs"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Job"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"job"}},{"kind":"Field","name":{"kind":"Name","value":"sub_jobs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"job"}}]}}]}},...JobFragmentDoc.definitions]} as unknown as DocumentNode<JobWithSubJobsFragment, unknown>;
