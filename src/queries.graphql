@@ -1,12 +1,13 @@
 fragment minimalEntity on Entity {
   id
   type
-  metadata(key: [title, type]) {
+  metadata(key: [title, object_number]) {
     key
     value
     lang
     immutable
   }
+  primary_mediafile
 }
 
 fragment nestedEntity on Entity {

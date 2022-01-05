@@ -7,10 +7,7 @@
       },
     ]"
   >
-    <div
-      v-if="!loading && selectedImage"
-      class="flex flex-col items-end mt-2 overflow-y-scroll"
-    >
+    <div v-if="!loading && selectedImage" class="flex flex-col items-end mt-2">
       <div
         v-for="(mediaFile, arrayKey) in mediafiles"
         :key="mediaFile.filename ? mediaFile.filename : 'no-filename'"

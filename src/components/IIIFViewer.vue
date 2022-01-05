@@ -48,42 +48,46 @@
       const loading = ref<boolean>(true);
 
       onMounted(() => {
-        const dragonOption: OpenSeadragon.Options = {
-          element: OpenSeadragonDiv.value,
-          prefixUrl: '/static/openseadragon/images/',
-          // @ts-ignore
-          toolbar: document.getElementById('OpenSeadragon-toolbar'),
-          tileSources: `https://api-uat.collectie.gent/iiif/image/iiif/3/${props.imageUrl}/info.json`,
-        };
+        if (props.imageUrl) {
+          const dragonOption: OpenSeadragon.Options = {
+            element: OpenSeadragonDiv.value,
+            prefixUrl: '/static/openseadragon/images/',
+            // @ts-ignore
+            toolbar: document.getElementById('OpenSeadragon-toolbar'),
+            tileSources: `https://api-uat.collectie.gent/iiif/image/iiif/3/${props.imageUrl}/info.json`,
+          };
 
-        if (zoomInDiv.value !== null) {
-          dragonOption.zoomInButton = zoomInDiv.value;
-        }
-        if (zoomOutDiv.value !== null) {
-          dragonOption.zoomOutButton = zoomOutDiv.value;
-        }
-        if (fullPageButtonDiv.value !== null) {
-          dragonOption.fullPageButton = fullPageButtonDiv.value;
-        }
-        if (homeDiv.value !== null) {
-          dragonOption.homeButton = homeDiv.value;
-        }
+          if (zoomInDiv.value !== null) {
+            dragonOption.zoomInButton = zoomInDiv.value;
+          }
+          if (zoomOutDiv.value !== null) {
+            dragonOption.zoomOutButton = zoomOutDiv.value;
+          }
+          if (fullPageButtonDiv.value !== null) {
+            dragonOption.fullPageButton = fullPageButtonDiv.value;
+          }
+          if (homeDiv.value !== null) {
+            dragonOption.homeButton = homeDiv.value;
+          }
 
-        viewer = OpenSeadragon(dragonOption);
+          viewer = OpenSeadragon(dragonOption);
 
-        watch(
-          () => props.imageUrl,
-          (value: string) => {
-            loading.value = true;
-            viewer.open(
-              `https://api-uat.collectie.gent/iiif/image/iiif/3/${value}/info.json`,
-            );
-          },
-        );
+          watch(
+            () => props.imageUrl,
+            (value: string) => {
+              if (value) {
+                loading.value = true;
+                viewer.open(
+                  `https://api-uat.collectie.gent/iiif/image/iiif/3/${value}/info.json`,
+                );
+              }
+            },
+          );
 
-        viewer.addHandler('tile-drawn', () => {
-          loading.value = false;
-        });
+          viewer.addHandler('tile-drawn', () => {
+            loading.value = false;
+          });
+        }
       });
 
       return {

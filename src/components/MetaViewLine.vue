@@ -46,6 +46,7 @@
 <script lang="ts">
   import { Maybe, Metadata, MetadataCollection } from '@/queries';
   import { defineComponent, PropType } from 'vue';
+  import { useRouter } from 'vue-router';
 
   export default defineComponent({
     name: 'MetaViewLine',
@@ -55,6 +56,7 @@
       nested: { type: Boolean, default: true },
     },
     setup() {
+      const router = useRouter();
       const concatMetaDataValue = (input: Maybe<Metadata>[]): string => {
         let result = '';
         input.forEach((data: Maybe<Metadata>) => {
@@ -70,6 +72,7 @@
       };
 
       return {
+        router,
         concatMetaDataValue,
       };
     },

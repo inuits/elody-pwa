@@ -9,13 +9,14 @@
       flex
       items-center
       justify-between
+      bg-neutral-0
     "
   >
     <div class="flex w-full items-center">
       <h1 class="text-lg font-semibold text-neutral-800 float-left">
         {{ pageTitle }}
       </h1>
-      <edit-toggle />
+      <!-- <edit-toggle /> -->
     </div>
     <div class="float-right">
       <BaseButton
@@ -61,7 +62,7 @@
 
   export default defineComponent({
     name: 'TheHeader',
-    components: { BaseButton, EditToggle },
+    components: { BaseButton },
     setup() {
       const { pageTitle } = usePageTitle();
 

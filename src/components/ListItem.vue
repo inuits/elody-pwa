@@ -2,15 +2,25 @@
   <li class="row" :class="{ loading }" data-test="meta-row">
     <div class="flex w-full">
       <img
-        v-if="media.length > 0"
-        class="h-10 w-10 obtain-cover mr-4 rounded-sm outline-none shadow-sm"
-        :src="media[0].thumbnail_file_location"
+        v-if="media"
+        class="h-10 w-10 obtain-cover mr-4 rounded-sm outline-none shadow-sm self-center"
+        :src="`https://api-uat.collectie.gent/iiif/imageiiif/3/${media}/square/100,/0/default.jpg`"
         @error="setNoImage()"
       />
       <unicon
-        v-if="(thumbIcon && media.length == 0) || (imageSrcError && thumbIcon)"
+        v-if="(thumbIcon && !media) || (imageSrcError && thumbIcon)"
         :name="thumbIcon"
-        class="h-10 w-10 p-1 text-neutral-700 mr-4 rounded-sm outline-none shadow-sm"
+        class="
+          h-10
+          w-10
+          p-1
+          text-neutral-700
+          mr-4
+          rounded-sm
+          outline-none
+          shadow-sm
+          self-center
+        "
       />
       <div class="flex w-full">
         <div v-for="metaItem in only4Meta(meta)" :key="metaItem.value" class="col">
@@ -35,7 +45,7 @@
     props: {
       loading: { type: Boolean, default: false },
       meta: { type: Array as PropType<Metadata[]>, default: () => [] },
-      media: { type: Array as PropType<MediaFile[]>, default: () => [] },
+      media: { type: String },
       thumbIcon: { type: String as PropType<keyof Unicons>, default: '' },
     },
     setup() {

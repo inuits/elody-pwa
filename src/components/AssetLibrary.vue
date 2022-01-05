@@ -18,7 +18,7 @@
         <Dropdown
           v-if="result?.Entities.count > 1 && searchQuery != ''"
           v-model="queryVariables.sort"
-          :options="['Title', 'Collection']"
+          :options="['Title', 'object_number']"
           label="Sort"
         />
       </div>
@@ -55,7 +55,7 @@
           v-for="entity in result.Entities.results"
           :key="entity.id"
           :meta="entity.metadata"
-          :media="entity.mediafiles"
+          :media="entity.primary_mediafile"
           :thumb-icon="Unicons.NoImage.name"
           @click="
             !enableSelection &&
@@ -140,16 +140,22 @@
         sort: 'Title',
       });
 
-      const { result, loading, fetchMore } = useQuery(GetEntitiesDocument, {
-        limit: queryVariables.pagination.limit,
-        skip: queryVariables.pagination.skip - 1,
-        searchValue: {
-          value: queryVariables.searchQuery,
-          isAsc: false,
-          key: queryVariables.sort.toLowerCase(),
-          relation_filter: [],
+      const { result, loading, fetchMore } = useQuery(
+        GetEntitiesDocument,
+        {
+          limit: queryVariables.pagination.limit,
+          skip: queryVariables.pagination.skip - 1,
+          searchValue: {
+            value: queryVariables.searchQuery,
+            isAsc: false,
+            key: queryVariables.sort.toLowerCase(),
+            relation_filter: [],
+          },
         },
-      });
+        {
+          notifyOnNetworkStatusChange: true,
+        },
+      );
 
       const getData = () => {
         fetchMore({

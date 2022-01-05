@@ -1,11 +1,5 @@
 <template>
-  <div
-    class="flex items-center"
-    :class="{
-      'bg-neutral-20 text-neutral-20': loading,
-      'text-neutral-700': !loading,
-    }"
-  >
+  <div class="flex items-center">
     <unicon
       class="cursor-pointer"
       :name="Unicons.AngleLeft.name"
@@ -37,7 +31,7 @@
       class="cursor-pointer"
       :name="Unicons.AngleRight.name"
       height="16"
-      :fill="loading ? 'var(--colors-neutral-20)' : 'var(--colors-neutral-700)'"
+      :fill="loading ? 'var(--color-neutral-20)' : 'var(--colors-neutral-700)'"
       @click="next(1)"
     />
   </div>
@@ -76,32 +70,39 @@
       });
 
       const prev = (pages: number) => {
-        if (currentPage.value - pages > 1) {
-          helper.updatePaginationInfoQueryParams({
-            limit: props.limit,
-            skip: props.skip - pages,
-          });
-          emit('update:skip', props.skip - pages);
-          emit('update:limit', props.limit);
-        } else {
-          helper.updatePaginationInfoQueryParams({ limit: props.limit, skip: 1 });
-          emit('update:skip', 1);
-          emit('update:limit', props.limit);
+        if (!props.loading) {
+          if (currentPage.value - pages > 1) {
+            helper.updatePaginationInfoQueryParams({
+              limit: props.limit,
+              skip: props.skip - pages,
+            });
+            emit('update:skip', props.skip - pages);
+            emit('update:limit', props.limit);
+          } else {
+            helper.updatePaginationInfoQueryParams({ limit: props.limit, skip: 1 });
+            emit('update:skip', 1);
+            emit('update:limit', props.limit);
+          }
         }
       };
 
       const next = (pages: number) => {
-        if (currentPage.value + pages <= maxPage()) {
-          helper.updatePaginationInfoQueryParams({
-            limit: props.limit,
-            skip: props.skip + pages,
-          });
-          emit('update:skip', props.skip + pages);
-          emit('update:limit', props.limit);
-        } else {
-          helper.updatePaginationInfoQueryParams({ limit: props.limit, skip: maxPage() });
-          emit('update:skip', maxPage());
-          emit('update:limit', props.limit);
+        if (!props.loading) {
+          if (currentPage.value + pages <= maxPage()) {
+            helper.updatePaginationInfoQueryParams({
+              limit: props.limit,
+              skip: props.skip + pages,
+            });
+            emit('update:skip', props.skip + pages);
+            emit('update:limit', props.limit);
+          } else {
+            helper.updatePaginationInfoQueryParams({
+              limit: props.limit,
+              skip: maxPage(),
+            });
+            emit('update:skip', maxPage());
+            emit('update:limit', props.limit);
+          }
         }
       };
       const maxPage = () => {
