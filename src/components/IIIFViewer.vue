@@ -14,12 +14,18 @@
       v-model:fullPage="fullPageButtonDiv"
       v-model:home="homeDiv"
     />
+    <div
+      v-show="loading"
+      class="absolute flex h-full items-center justify-center text-center w-full z-40"
+    >
+      Loading ...
+    </div>
     <div ref="OpenSeadragonDiv" class="w-full h-full z-0 checkboard" />
   </div>
 </template>
 
 <script lang="ts">
-  import { defineComponent, onMounted, ref } from 'vue';
+  import { defineComponent, onMounted, ref, watch } from 'vue';
   import OpenSeadragon from 'openseadragon';
   import ViewerToolbar from './ViewerToolbar.vue';
 
@@ -30,10 +36,6 @@
     },
     props: {
       imageUrl: { type: String, default: '' },
-      loading: {
-        type: Boolean,
-        default: false,
-      },
     },
     setup: (props) => {
       const OpenSeadragonDiv = ref<HTMLDivElement | undefined>(undefined);
@@ -42,6 +44,8 @@
       const zoomOutDiv = ref<string | undefined>(undefined);
       const fullPageButtonDiv = ref<string | undefined>(undefined);
       const homeDiv = ref<string | undefined>(undefined);
+      let viewer: any = undefined;
+      const loading = ref<boolean>(true);
 
       onMounted(() => {
         const dragonOption: OpenSeadragon.Options = {
@@ -49,10 +53,7 @@
           prefixUrl: '/static/openseadragon/images/',
           // @ts-ignore
           toolbar: document.getElementById('OpenSeadragon-toolbar'),
-          tileSources: {
-            type: 'image',
-            url: props.imageUrl,
-          },
+          tileSources: `https://api-uat.collectie.gent/iiif/image/iiif/3/${props.imageUrl}/info.json`,
         };
 
         if (zoomInDiv.value !== null) {
@@ -68,7 +69,21 @@
           dragonOption.homeButton = homeDiv.value;
         }
 
-        OpenSeadragon(dragonOption);
+        viewer = OpenSeadragon(dragonOption);
+
+        watch(
+          () => props.imageUrl,
+          (value: string) => {
+            loading.value = true;
+            viewer.open(
+              `https://api-uat.collectie.gent/iiif/image/iiif/3/${value}/info.json`,
+            );
+          },
+        );
+
+        viewer.addHandler('tile-drawn', () => {
+          loading.value = false;
+        });
       });
 
       return {
@@ -77,6 +92,7 @@
         zoomOutDiv,
         fullPageButtonDiv,
         homeDiv,
+        loading,
       };
     },
   });
