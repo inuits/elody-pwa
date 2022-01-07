@@ -4,7 +4,7 @@
       <img
         v-if="media"
         class="h-10 w-10 obtain-cover mr-4 rounded-sm outline-none shadow-sm self-center"
-        :src="`https://api-uat.collectie.gent/iiif/imageiiif/3/${media}/square/100,/0/default.jpg`"
+        :src="`${config.iiifLink}${media}/square/100,/0/default.jpg`"
         @error="setNoImage()"
       />
       <unicon
@@ -37,7 +37,7 @@
 
 <script lang="ts">
   import { MediaFile, Metadata } from '@/queries';
-  import { defineComponent, PropType } from 'vue';
+  import { defineComponent, inject, PropType } from 'vue';
   import { Unicons } from '@/types';
 
   export default defineComponent({
@@ -49,6 +49,7 @@
       thumbIcon: { type: String as PropType<keyof Unicons>, default: '' },
     },
     setup() {
+      const config: any = inject('config');
       let imageSrcError = false;
       const setNoImage = () => {
         imageSrcError = true;
@@ -57,7 +58,7 @@
       const only4Meta = (input: Metadata[]) => {
         return input.slice(0, 4);
       };
-      return { setNoImage, imageSrcError, only4Meta };
+      return { setNoImage, imageSrcError, only4Meta, config };
     },
   });
 </script>

@@ -1,5 +1,6 @@
 {
   "graphQlLink": "/api/graphql",
+  "iiifLink": "https://localhost:8182/iiif/image/iiif/3/",
   "oidc": {
     "baseUrl": "http://localhost:8080/auth/realms/dams",
     "clientId": "dams-dashboard",

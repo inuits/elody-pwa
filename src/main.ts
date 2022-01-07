@@ -49,6 +49,7 @@ createApp(App)
   .use(router)
   .use(auth)
   .use(head)
+  .provide('config', config)
   .provide(
     DefaultApolloClient,
     new ApolloClient({
