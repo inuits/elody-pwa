@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, onMounted, ref, watch } from 'vue';
+  import { defineComponent, inject, onMounted, ref, watch } from 'vue';
   import OpenSeadragon from 'openseadragon';
   import ViewerToolbar from './ViewerToolbar.vue';
 
@@ -39,7 +39,7 @@
     },
     setup: (props) => {
       const OpenSeadragonDiv = ref<HTMLDivElement | undefined>(undefined);
-
+      const config: any = inject('config');
       const zoomInDiv = ref<string | undefined>(undefined);
       const zoomOutDiv = ref<string | undefined>(undefined);
       const fullPageButtonDiv = ref<string | undefined>(undefined);
@@ -54,7 +54,7 @@
             prefixUrl: '/static/openseadragon/images/',
             // @ts-ignore
             toolbar: document.getElementById('OpenSeadragon-toolbar'),
-            tileSources: `https://api-uat.collectie.gent/iiif/image/iiif/3/${props.imageUrl}/info.json`,
+            tileSources: `${config.iiifLink}${props.imageUrl}/info.json`,
           };
 
           if (zoomInDiv.value !== null) {
@@ -77,9 +77,7 @@
             (value: string) => {
               if (value) {
                 loading.value = true;
-                viewer.open(
-                  `https://api-uat.collectie.gent/iiif/image/iiif/3/${value}/info.json`,
-                );
+                viewer.open(`${config.iiifLink}${value}/info.json`);
               }
             },
           );
@@ -92,9 +90,9 @@
 
       return {
         OpenSeadragonDiv,
+        fullPageButtonDiv,
         zoomInDiv,
         zoomOutDiv,
-        fullPageButtonDiv,
         homeDiv,
         loading,
       };
