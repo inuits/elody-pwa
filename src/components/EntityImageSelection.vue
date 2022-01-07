@@ -17,25 +17,25 @@
           v-if="
             mediaFile.thumbnail_file_location &&
             mediaFile.filename &&
-            mediaFile.filename !== selectedImage
+            mediaFile.filename !== selectedImage.filename
           "
           :class="[
             'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full',
           ]"
           :src="mediaFile.thumbnail_file_location"
-          @click="selectImage(mediaFile.filename)"
+          @click="selectImage(mediaFile)"
         />
         <img
           v-if="
             mediaFile.thumbnail_file_location &&
             mediaFile.filename &&
-            mediaFile.filename === selectedImage
+            mediaFile.filename === selectedImage.filename
           "
           :class="[
             'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2 border-blue-500',
           ]"
           :src="mediaFile.thumbnail_file_location"
-          @click="selectImage(mediaFile.filename)"
+          @click="selectImage(mediaFile)"
         />
       </div>
     </div>
@@ -50,7 +50,7 @@
     props: {
       mediafiles: { type: Array as PropType<MediaFile[]>, required: true },
       selectedImage: {
-        type: String,
+        type: Object as PropType<MediaFile>,
         required: true,
       },
       loading: {
@@ -60,8 +60,8 @@
     },
     emits: ['update:selectedImage'],
     setup(props, { emit }) {
-      const selectImage = (url: Maybe<string> | undefined) => {
-        url && emit('update:selectedImage', url);
+      const selectImage = (mediafile: MediaFile) => {
+        mediafile && emit('update:selectedImage', mediafile);
       };
 
       return {
