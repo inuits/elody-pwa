@@ -11,7 +11,11 @@
       v-show="!loading && mediafiles.length > 0"
       :class="['flex w-4/6', { checkboard: loading }]"
     >
-      <IIIFViewer v-if="!loading" :image-url="mediafile" />
+      <IIIFViewer
+        v-if="!loading"
+        :image-url="mediafile?.filename"
+        :image-meta-data="mediafile.metadata"
+      />
     </div>
     <Meta
       :class="!loading && mediafiles.length > 0 ? 'w-2/6' : 'w-full'"
@@ -55,7 +59,7 @@
         },
       );
       const title = computed(() => result.value?.Entity?.title[0]?.value);
-      const mediafile = ref<Maybe<string> | undefined>();
+      const mediafile = ref<MediaFile | undefined>();
       const mediafiles = ref<MediaFile[]>([]);
       const metadataCollection = ref<MetadataCollection[]>([]);
       const { updatePageTitle } = usePageTitle();
@@ -89,7 +93,7 @@
 
       onResult((queryResult) => {
         if (queryResult.data && queryResult.data.Entity?.mediafiles?.[0]) {
-          mediafile.value = queryResult.data.Entity?.mediafiles?.[0].filename;
+          mediafile.value = queryResult.data.Entity?.mediafiles?.[0];
         }
 
         //@ts-ignore

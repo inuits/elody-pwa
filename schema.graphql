@@ -73,12 +73,18 @@ type Entity {
   primary_mediafile: String
 }
 
+type MediaFileMetadata {
+  key: String
+  value: String
+}
+
 type MediaFile {
   _id: String!
   original_file_location: String
   thumbnail_file_location: String
   filename: String
   entities: [String]
+  metadata: [MediaFileMetadata]
 }
 
 type Relation {

@@ -13,6 +13,7 @@
       v-model:zoomOut="zoomOutDiv"
       v-model:fullPage="fullPageButtonDiv"
       v-model:home="homeDiv"
+      :image-meta-data="imageMetaData"
     />
     <div
       v-show="loading"
@@ -25,9 +26,10 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, inject, onMounted, ref, watch } from 'vue';
+  import { defineComponent, inject, onMounted, PropType, ref, watch } from 'vue';
   import OpenSeadragon from 'openseadragon';
   import ViewerToolbar from './ViewerToolbar.vue';
+  import { MediaFileMetadata } from '@/queries';
 
   export default defineComponent({
     name: 'IIIFViewer',
@@ -36,6 +38,11 @@
     },
     props: {
       imageUrl: { type: String, default: '' },
+      imageMetaData: {
+        type: Array as PropType<MediaFileMetadata[]>,
+        required: false,
+        default: () => [],
+      },
     },
     setup: (props) => {
       const OpenSeadragonDiv = ref<HTMLDivElement | undefined>(undefined);
