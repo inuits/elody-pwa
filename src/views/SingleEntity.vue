@@ -61,7 +61,7 @@
       const { updatePageTitle } = usePageTitle();
 
       watch(title, (value: Maybe<string> | undefined) => {
-        value && updatePageTitle(value);
+        value && updatePageTitle(value, 'entityTitle');
       });
 
       watch(editMode, (value: EditModes) => {

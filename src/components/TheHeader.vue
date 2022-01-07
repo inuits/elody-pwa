@@ -14,7 +14,13 @@
   >
     <div class="flex w-full items-center">
       <h1 class="text-lg font-semibold text-neutral-800 float-left">
-        {{ pageTitle }}
+        {{ pageTitle.routerTitle
+        }}<span
+          v-if="pageTitle.entityTitle !== '' && route.meta.showEntityTitle"
+          class="text-neutral-400"
+        >
+          / {{ pageTitle.entityTitle }}</span
+        >
       </h1>
       <!-- <edit-toggle /> -->
     </div>
@@ -35,19 +41,35 @@
 
 <script lang="ts">
   import { defineComponent, ref } from 'vue';
-  import { useRouter } from 'vue-router';
+  import { useRoute, useRouter } from 'vue-router';
   import BaseButton from './base/BaseButton.vue';
   import { Unicons } from '@/types';
   import EditToggle from './EditToggle.vue';
 
-  const pageTitle = ref<string>('');
+  type titleTypes = 'routerTitle' | 'entityTitle';
+
+  type pageTitle = {
+    routerTitle: string;
+    entityTitle: string;
+  };
+
+  const pageTitle = ref<pageTitle>({
+    routerTitle: '',
+    entityTitle: '',
+  });
 
   export const usePageTitle = () => {
     const router = useRouter();
 
-    const updatePageTitle = (input: string) => {
-      pageTitle.value = input;
+    const updatePageTitle = (input: string, type: titleTypes = 'routerTitle') => {
+      pageTitle.value[type] = input;
     };
+
+    router.beforeEach((to, _from, next) => {
+      updatePageTitle('', 'entityTitle');
+
+      next();
+    });
 
     router.afterEach((to, _from, _failure) => {
       updatePageTitle(to.meta.title as string);
@@ -65,8 +87,9 @@
     components: { BaseButton },
     setup() {
       const { pageTitle } = usePageTitle();
-
+      const route = useRoute();
       return {
+        route,
         pageTitle,
       };
     },

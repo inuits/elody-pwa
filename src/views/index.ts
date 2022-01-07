@@ -13,7 +13,7 @@ export const routes: RouteRecordRaw[] = [
       {
         path: 'entity/:id',
         name: 'SingleEntity',
-        meta: { title: 'Single Asset', requiresAuth: true },
+        meta: { title: 'Single Asset', requiresAuth: true, showEntityTitle: true },
         component: () => import(/* webpackChunkName: "about" */ './SingleEntity.vue'),
       },
     ],
