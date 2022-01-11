@@ -4,7 +4,7 @@
       <img
         v-if="media"
         class="h-10 w-10 obtain-cover mr-4 rounded-sm outline-none shadow-sm self-center"
-        :src="`${config.iiifLink}${media}/square/100,/0/default.jpg`"
+        :src="`${config.iiifLink}/iiif/3/${media}/square/100,/0/default.jpg`"
         @error="setNoImage()"
       />
       <unicon

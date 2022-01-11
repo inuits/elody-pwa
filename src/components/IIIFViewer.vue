@@ -61,7 +61,7 @@
             prefixUrl: '/static/openseadragon/images/',
             // @ts-ignore
             toolbar: document.getElementById('OpenSeadragon-toolbar'),
-            tileSources: `${config.iiifLink}${props.imageUrl}/info.json`,
+            tileSources: `${config.iiifLink}/iiif/3/${props.imageUrl}/info.json`,
           };
 
           if (zoomInDiv.value !== null) {
@@ -84,7 +84,7 @@
             (value: string) => {
               if (value) {
                 loading.value = true;
-                viewer.open(`${config.iiifLink}${value}/info.json`);
+                viewer.open(`${config.iiifLink}/iiif/3/${value}/info.json`);
               }
             },
           );
