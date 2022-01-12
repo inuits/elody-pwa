@@ -12,7 +12,7 @@
       :class="['flex w-4/6', { checkboard: loading }]"
     >
       <IIIFViewer
-        v-if="!loading"
+        v-if="!loading && mediafile"
         :image-url="mediafile?.filename"
         :image-meta-data="mediafile.metadata"
       />
