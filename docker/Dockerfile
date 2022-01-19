@@ -22,7 +22,7 @@ WORKDIR /app
 
 COPY .npmrc package*.json ./
 
-RUN npm install
+RUN npm ci
 
 COPY ./ ./
 
