@@ -9,6 +9,7 @@ import App from './App.vue';
 import { routes } from './views';
 import { store } from './store';
 import { Unicons } from './types';
+import { i18n } from './helpers';
 
 import { createHead } from '@vueuse/head';
 
@@ -48,6 +49,7 @@ createApp(App)
   .use(store)
   .use(router)
   .use(auth)
+  .use(i18n)
   .use(head)
   .provide('config', config)
   .provide(
