@@ -5,10 +5,9 @@
         v-if="item.nested"
         class="underline"
         :href="`/${item.key.replace('entities', 'entity')}`"
-      >
-        {{ item.label }}
-      </a>
-      <span v-else>{{ item.label }}</span>
+        v-html="t(`${item.label}`)"
+      />
+      <span v-else v-html="t(`${item.label}`)" />
     </div>
     <div v-else class="label" :class="{ loading }">no label</div>
     <div v-if="item.data && item.nested && nested">
@@ -46,6 +45,7 @@
 <script lang="ts">
   import { Maybe, Metadata, MetadataCollection } from '@/queries';
   import { defineComponent, PropType } from 'vue';
+  import { useI18n } from 'vue-i18n';
   import { useRouter } from 'vue-router';
 
   export default defineComponent({
@@ -57,6 +57,7 @@
     },
     setup() {
       const router = useRouter();
+      const { t } = useI18n();
       const concatMetaDataValue = (input: Maybe<Metadata>[]): string => {
         let result = '';
         input.forEach((data: Maybe<Metadata>) => {
@@ -72,6 +73,7 @@
       };
 
       return {
+        t,
         router,
         concatMetaDataValue,
       };
