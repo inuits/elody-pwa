@@ -5,7 +5,7 @@
         flex
         items-center
         space-x-3
-        border-solid border-b-2 border-neutral-30
+        border-solid border-b-2 border-neutral-30 border-r-0
         w-full
         justify-between
         px-3

@@ -31,7 +31,7 @@
 </template>
 <script lang="ts">
   import { defineComponent, watch, ref } from 'vue';
-  import FilterAccordion from '@/components/base/FilterAccordion';
+  import FilterAccordion from '@/components/base/FilterAccordion.vue';
 
   export default defineComponent({
     components: {
