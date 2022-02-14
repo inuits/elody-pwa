@@ -1,6 +1,6 @@
 <template>
   <div class="flex">
-    <FilterSideBar v-show="showDrawer" />
+    <FilterSideBar v-if="showDrawer" />
     <div class="p-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
         <InputField

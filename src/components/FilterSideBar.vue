@@ -1,5 +1,5 @@
 <template>
-  <div class="w-2/6 border-solid border-r-2 border-neutral-30">
+  <div class="w-2/6 border-l-2 border-r-2 border-solid border-neutral-30">
     <div>
       <div class="flex justify-between m-3">
         <p class="text-xl font-medium">Filter</p>
