@@ -24,6 +24,7 @@ import {
   uniSortAmountDown,
   uniSortAmountUp,
   uniPlus,
+  uniFilter,
 } from 'vue-unicons/dist/icons';
 
 export enum Unicons {
@@ -52,4 +53,5 @@ export enum Unicons {
   Trash = uniTrashAlt,
   SortUp = uniSortAmountUp,
   SortDown = uniSortAmountDown,
+  Filter = uniFilter,
 }
