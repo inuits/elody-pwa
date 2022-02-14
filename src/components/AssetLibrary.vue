@@ -1,5 +1,5 @@
 <template>
-  <div class="flex">
+  <div class="lg:flex">
     <FilterSideBar v-show="showDrawer" />
     <div class="p-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
