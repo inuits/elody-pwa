@@ -1,8 +1,6 @@
 <template>
   <div class="flex">
-    <div>
-      <FilterSideBar v-show="showDrawer" />
-    </div>
+    <FilterSideBar v-show="showDrawer" />
     <div class="p-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
         <div>
