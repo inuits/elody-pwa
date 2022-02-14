@@ -1,8 +1,54 @@
 <template>
   <div class="flex">
-    <FilterSideBar v-if="showDrawer" />
+    <div>
+      <FilterSideBar v-show="showDrawer" />
+    </div>
     <div class="p-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
+        <div>
+          <button
+            class="
+              rounded-md
+              bg-neutral-60
+              text-white
+              font-medium
+              text-xs
+              leading-tight
+              uppercase
+              hover:bg-neutral-40
+              focus:bg-neutral-0 focus:outline-none focus:ring-10
+              active:bg-neutral-400 active:text-blue-300
+              transition
+              duration-150
+              ease-in-out
+              m-0
+            "
+            @click="toggleDrawer()"
+          >
+            <unicon :name="Unicons.Filter.name"></unicon>
+          </button>
+          <button
+            class="
+              rounded-md
+              bg-neutral-60
+              text-white
+              font-medium
+              text-xs
+              leading-tight
+              uppercase
+              hover:bg-neutral-40
+              focus:bg-neutral-0 focus:outline-none focus:ring-10
+              active:bg-neutral-400 active:text-blue-300
+              transition
+              duration-150
+              ease-in-out
+              m-0
+            "
+            @click="closeDrawer()"
+          >
+            <unicon :name="Unicons.SearchGlass.name"></unicon>
+          </button>
+        </div>
         <InputField
           v-model="searchQuery"
           :debounce="true"
@@ -88,7 +134,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, watch, reactive, ref } from 'vue';
+  import { defineComponent, watch, reactive, ref, computed } from 'vue';
   import { useQuery } from '@vue/apollo-composable';
   import ListContainer from '@/components/ListContainer.vue';
   import ListItem from '@/components/ListItem.vue';
@@ -194,6 +240,19 @@
         emit('addSelection', id);
       };
 
+      //let showDrawer: boolean = false;
+      const showDrawer = ref(false);
+
+      const toggleDrawer = () => {
+        showDrawer.value = true;
+        console.log(showDrawer);
+      };
+
+      const closeDrawer = () => {
+        showDrawer.value = false;
+        console.log(showDrawer);
+      };
+
       return {
         result,
         loading,
@@ -204,6 +263,9 @@
         addSelection,
         paginationLimits,
         FilterSideBar,
+        toggleDrawer,
+        closeDrawer,
+        showDrawer,
       };
     },
   });
