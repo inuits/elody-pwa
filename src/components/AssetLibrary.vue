@@ -1,86 +1,89 @@
 <template>
-  <div class="p-6">
-    <div class="flex flex-row flex-wrap gap-y-4">
-      <InputField
-        v-model="searchQuery"
-        :debounce="true"
-        placeholder="Search Asset Library..."
-        label="Search"
-        :bg-color="'neutral-20'"
-      />
-      <div class="pl-4 my-2 flex flex-row justify-left">
-        <Dropdown
+  <div class="flex">
+    <FilterSideBar v-show="showDrawer" />
+    <div class="p-6 w-full">
+      <div class="flex flex-row flex-wrap gap-y-4">
+        <InputField
+          v-model="searchQuery"
+          :debounce="true"
+          placeholder="Search Asset Library..."
+          label="Search"
+          :bg-color="'neutral-20'"
+        />
+        <div class="pl-4 my-2 flex flex-row justify-left">
+          <Dropdown
+            v-if="result?.Entities.count > 0"
+            v-model="queryVariables.pagination.limit"
+            :options="paginationLimits"
+            label="Items"
+          />
+          <Dropdown
+            v-if="result?.Entities.count > 1 && searchQuery != ''"
+            v-model="queryVariables.sort"
+            :options="['Title', 'object_number']"
+            label="Sort"
+          />
+        </div>
+        <div class="flex-grow"></div>
+        <Pagination
           v-if="result?.Entities.count > 0"
-          v-model="queryVariables.pagination.limit"
-          :options="paginationLimits"
-          label="Items"
-        />
-        <Dropdown
-          v-if="result?.Entities.count > 1 && searchQuery != ''"
-          v-model="queryVariables.sort"
-          :options="['Title', 'object_number']"
-          label="Sort"
+          v-model:skip="queryVariables.pagination.skip"
+          v-model:limit="queryVariables.pagination.limit"
+          :loading="loading"
+          :total-items="result?.Entities.count"
         />
       </div>
-      <div class="flex-grow"></div>
-      <Pagination
-        v-if="result?.Entities.count > 0"
-        v-model:skip="queryVariables.pagination.skip"
-        v-model:limit="queryVariables.pagination.limit"
-        :loading="loading"
-        :total-items="result?.Entities.count"
-      />
+      <ListContainer>
+        <div v-if="loading">
+          <ListItem
+            v-for="n in queryVariables.pagination.limit"
+            :key="n"
+            title="loading"
+            :loading="true"
+            :meta="[
+              { key: '/', value: '/' },
+              { key: '/', value: '/' },
+              { key: '/', value: '/' },
+              { key: '/', value: '/' },
+            ]"
+          >
+            <template #actions>
+              <BaseButton :loading="true" class="ml-2" :icon="Unicons.Eye.name" />
+            </template>
+          </ListItem>
+        </div>
+        <div v-else-if="result?.Entities.results">
+          <ListItem
+            v-for="entity in result.Entities.results"
+            :key="entity.id"
+            :meta="entity.metadata"
+            :media="entity.primary_mediafile"
+            :thumb-icon="Unicons.NoImage.name"
+            @click="
+              !enableSelection &&
+                router.push({ name: 'SingleEntity', params: { id: entity.id } })
+            "
+          >
+            <template #actions>
+              <BaseButton
+                v-if="enableSelection"
+                :loading="loading"
+                class="ml-2"
+                :icon="Unicons.PlusCircle.name"
+                @click="addSelection(entity.id)"
+              />
+              <BaseButton
+                v-else
+                :loading="loading"
+                class="ml-2"
+                :icon="Unicons.Eye.name"
+                @click="router.push({ name: 'SingleEntity', params: { id: entity.id } })"
+              />
+            </template>
+          </ListItem>
+        </div>
+      </ListContainer>
     </div>
-    <ListContainer>
-      <div v-if="loading">
-        <ListItem
-          v-for="n in queryVariables.pagination.limit"
-          :key="n"
-          title="loading"
-          :loading="true"
-          :meta="[
-            { key: '/', value: '/' },
-            { key: '/', value: '/' },
-            { key: '/', value: '/' },
-            { key: '/', value: '/' },
-          ]"
-        >
-          <template #actions>
-            <BaseButton :loading="true" class="ml-2" :icon="Unicons.Eye.name" />
-          </template>
-        </ListItem>
-      </div>
-      <div v-else-if="result?.Entities.results">
-        <ListItem
-          v-for="entity in result.Entities.results"
-          :key="entity.id"
-          :meta="entity.metadata"
-          :media="entity.primary_mediafile"
-          :thumb-icon="Unicons.NoImage.name"
-          @click="
-            !enableSelection &&
-              router.push({ name: 'SingleEntity', params: { id: entity.id } })
-          "
-        >
-          <template #actions>
-            <BaseButton
-              v-if="enableSelection"
-              :loading="loading"
-              class="ml-2"
-              :icon="Unicons.PlusCircle.name"
-              @click="addSelection(entity.id)"
-            />
-            <BaseButton
-              v-else
-              :loading="loading"
-              class="ml-2"
-              :icon="Unicons.Eye.name"
-              @click="router.push({ name: 'SingleEntity', params: { id: entity.id } })"
-            />
-          </template>
-        </ListItem>
-      </div>
-    </ListContainer>
   </div>
 </template>
 
@@ -100,6 +103,7 @@
   import { useRouter } from 'vue-router';
   import { GetEntitiesDocument } from '@/queries';
   import useRouteHelpers from '@/composables/useRouteHelpers';
+  import FilterSideBar from '@/components/FilterSideBar.vue';
 
   type QueryVariables = {
     pagination: PaginationInfo;
@@ -116,6 +120,7 @@
       BaseButton,
       InputField,
       Dropdown,
+      FilterSideBar,
     },
     props: {
       enableSelection: {
@@ -198,6 +203,7 @@
         searchQuery,
         addSelection,
         paginationLimits,
+        FilterSideBar,
       };
     },
   });
