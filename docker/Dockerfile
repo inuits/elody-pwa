@@ -9,7 +9,9 @@ ENTRYPOINT ["/entrypoint.sh"]
 COPY docker/entrypoint*.sh /
 COPY .npmrc package*.json ./
 
-RUN npm install
+RUN npm cache clean --force
+RUN npm cache verify
+RUN npm ci
 
 EXPOSE 8080
 
