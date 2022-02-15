@@ -42,14 +42,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+  import { defineComponent } from 'vue';
 
-export default defineComponent({
-  name: 'LoadingList',
-  props: {
-  },
-  setup() {
-    return {};
-  },
-});
+  export default defineComponent({
+    name: 'LoadingList',
+    props: {},
+    setup() {
+      return {};
+    },
+  });
 </script>

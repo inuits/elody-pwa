@@ -88,7 +88,7 @@
         </a>
       </div>
     </li>
-    <loading-list v-if="loading"/>
+    <loading-list v-if="loading" />
     <contractor-tree-line
       v-for="subDirectory in subDirectories"
       v-show="open"
@@ -107,151 +107,151 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, PropType, ref } from 'vue';
-import { Directory, GetDirectoriesDocument } from '@/queries';
-import { useQuery } from '@vue/apollo-composable';
-import LoadingList from '@/components/base/LoadingList.vue';
+  import { defineComponent, inject, PropType, ref } from 'vue';
+  import { Directory, GetDirectoriesDocument } from '@/queries';
+  import { useQuery } from '@vue/apollo-composable';
+  import LoadingList from '@/components/base/LoadingList.vue';
 
-export default defineComponent({
-  name: 'ContractorTreeLine',
-  components:{ LoadingList },
-  props: {
-    directory: {
-      //Current directory
-      type: Object as PropType<Directory>,
-      required: true,
+  export default defineComponent({
+    name: 'ContractorTreeLine',
+    components: { LoadingList },
+    props: {
+      directory: {
+        //Current directory
+        type: Object as PropType<Directory>,
+        required: true,
+      },
+      dictionary: {
+        //All directories
+        type: Object as PropType<Directory[]>,
+        required: true,
+        default: () => {},
+      },
+      defaultOpen: {
+        type: Boolean,
+        required: true,
+      },
+      depth: {
+        type: Number,
+        required: false,
+        default: 0,
+      },
+      parentId: {
+        type: String,
+        required: false,
+        default: undefined,
+      },
     },
-    dictionary: {
-      //All directories
-      type: Object as PropType<Directory[]>,
-      required: true,
-      default: () => {},
+    setup(props) {
+      const open = ref<boolean>(props.defaultOpen);
+      const fetchEnabled = ref(false);
+      const { result, refetch, onResult, loading } = useQuery(
+        GetDirectoriesDocument,
+        { dir: `${props.directory.id}/` },
+        () => ({
+          enabled: fetchEnabled.value,
+        }),
+      );
+      const subDirectories = ref<Directory[]>([]);
+
+      onResult((value) => {
+        if (value.data) {
+          console.log(value.data.Directories);
+          subDirectories.value = value.data.Directories as Directory[];
+        }
+      });
+
+      const hasSubDirectories = () => props.directory.has_subdirs;
+
+      const toggle = () => {
+        if (open.value) {
+          open.value = !open.value;
+        } else if (hasSubDirectories()) {
+          open.value = !open.value;
+          if (!fetchEnabled.value) fetchEnabled.value = true;
+          else refetch({ dir: `${props.directory.id}/` });
+        }
+      };
+
+      const updateSelectedDirectory = inject<(contractor: Directory) => void | undefined>(
+        'updateSelectedDirectory',
+      );
+
+      const selectedDirectory = inject<Directory | undefined>('selectedDirectory');
+
+      return {
+        open,
+        toggle,
+        hasSubDirectories,
+        updateSelectedDirectory,
+        selectedDirectory,
+        result,
+        subDirectories,
+        loading,
+      };
     },
-    defaultOpen: {
-      type: Boolean,
-      required: true,
-    },
-    depth: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    parentId: {
-      type: String,
-      required: false,
-      default: undefined,
-    },
-  },
-  setup(props) {
-    const open = ref<boolean>(props.defaultOpen);
-    const fetchEnabled = ref(false);
-    const { result, refetch, onResult, loading } = useQuery(
-      GetDirectoriesDocument,
-      { dir: `${props.directory.id}/` },
-      () => ({
-        enabled: fetchEnabled.value,
-      }),
-    );
-    const subDirectories = ref<Directory[]>([]);
-
-    onResult((value) => {
-      if (value.data) {
-        console.log(value.data.Directories);
-        subDirectories.value = value.data.Directories as Directory[];
-      }
-    });
-
-    const hasSubDirectories = () => props.directory.has_subdirs;
-
-    const toggle = () => {
-      if (open.value) {
-        open.value = !open.value;
-      } else if (hasSubDirectories()) {
-        open.value = !open.value;
-        if (!fetchEnabled.value) fetchEnabled.value = true;
-        else refetch({ dir: `${props.directory.id}/` });
-      }
-    };
-
-    const updateSelectedDirectory = inject<(contractor: Directory) => void | undefined>(
-      'updateSelectedDirectory',
-    );
-
-    const selectedDirectory = inject<Directory | undefined>('selectedDirectory');
-
-    return {
-      open,
-      toggle,
-      hasSubDirectories,
-      updateSelectedDirectory,
-      selectedDirectory,
-      result,
-      subDirectories,
-      loading,
-    };
-  },
-});
+  });
 </script>
 
 <style scoped>
-.h-1px {
-  height: 1px;
-}
+  .h-1px {
+    height: 1px;
+  }
 
-.w-1px {
-  width: 1px;
-}
+  .w-1px {
+    width: 1px;
+  }
 
-.last-ul li {
-  position: relative;
-}
+  .last-ul li {
+    position: relative;
+  }
 
-.last-ul {
-  border-left: 0;
-}
+  .last-ul {
+    border-left: 0;
+  }
 
-.last-ul > li:before {
-  content: '';
-  border-left: 1px solid #253858;
-  position: absolute;
-  height: 50%;
-  top: 0;
-  left: 0px;
-}
+  .last-ul > li:before {
+    content: '';
+    border-left: 1px solid #253858;
+    position: absolute;
+    height: 50%;
+    top: 0;
+    left: 0px;
+  }
 
-.last-ul > li:after {
-  content: '';
-  border-left: 1px solid #253858;
-  position: absolute;
-  height: 2rem;
-  top: -2rem;
-  left: 0px;
-}
+  .last-ul > li:after {
+    content: '';
+    border-left: 1px solid #253858;
+    position: absolute;
+    height: 2rem;
+    top: -2rem;
+    left: 0px;
+  }
 
-.circle {
-  width: 10px;
-  flex-basis: 10px;
-  height: 10px;
-  flex-grow: 0;
-  flex-shrink: 0;
-}
+  .circle {
+    width: 10px;
+    flex-basis: 10px;
+    height: 10px;
+    flex-grow: 0;
+    flex-shrink: 0;
+  }
 
-.line-width {
-  flex-basis: 2rem;
-  flex-grow: 0;
-  flex-shrink: 0;
-}
+  .line-width {
+    flex-basis: 2rem;
+    flex-grow: 0;
+    flex-shrink: 0;
+  }
 
-.hover-effect:hover {
-  position: relative;
-}
-.hover-effect:hover:before {
-  background-color: red;
-  width: 100%;
-  height: 100%;
-  left: 0;
-  top: 0;
-  content: '';
-  position: absolute;
-}
+  .hover-effect:hover {
+    position: relative;
+  }
+  .hover-effect:hover:before {
+    background-color: red;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    content: '';
+    position: absolute;
+  }
 </style>
