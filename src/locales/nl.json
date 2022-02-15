@@ -1,16 +1,13 @@
 {
   "beheerder": "instelling",
-  //herkomst
   "MaterieelDing.isOvergedragenBijVerwerving": "herkomst",
   "verwerving.plaats": "plaats van verwerving",
   "verwerving.methode": "verwervingsmethode",
   "Periode.begin": "begin periode",
   "Periode.einde": "einde periode",
-  //prductie
   "MaterieelDing.productie": "productie",
   "Gebeurtenis.tijd": "productiedatum",
   "vervaardiging.plaats": "plaats van vervaardiging",
   "vervaardiger.rol": "rol",
-  //tentoonstelling
-  "Entiteit.maaktDeelUitVan": "tentoonstellingen" //  gebruiktBijActiviteit mag hier als key dan wegvallen.
+  "Entiteit.maaktDeelUitVan": "tentoonstellingen"
 }

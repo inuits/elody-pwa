@@ -1,5 +1,4 @@
 import { useQuery } from '@vue/apollo-composable';
-import { computed } from 'vue';
 import { GetEnumsByNameDocument } from './queries';
 import { createI18n, LocaleMessages, VueMessageType } from 'vue-i18n';
 
