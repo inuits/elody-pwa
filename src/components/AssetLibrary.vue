@@ -3,49 +3,12 @@
     <FilterSideBar v-show="showDrawer" />
     <div class="p-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
-        <div>
-          <button
-            class="
-              rounded-md
-              bg-neutral-60
-              text-white
-              font-medium
-              text-xs
-              leading-tight
-              uppercase
-              hover:bg-neutral-40
-              focus:bg-neutral-0 focus:outline-none focus:ring-10
-              active:bg-neutral-400 active:text-blue-300
-              transition
-              duration-150
-              ease-in-out
-              m-0
-            "
-            @click="toggleDrawer()"
-          >
-            <unicon :name="Unicons.Filter.name"></unicon>
-          </button>
-          <button
-            class="
-              rounded-md
-              bg-neutral-60
-              text-white
-              font-medium
-              text-xs
-              leading-tight
-              uppercase
-              hover:bg-neutral-40
-              focus:bg-neutral-0 focus:outline-none focus:ring-10
-              active:bg-neutral-400 active:text-blue-300
-              transition
-              duration-150
-              ease-in-out
-              m-0
-            "
-            @click="closeDrawer()"
-          >
-            <unicon :name="Unicons.SearchGlass.name"></unicon>
-          </button>
+        <div class="mt-10">
+          <IconToggle
+            v-model:checked="showDrawer"
+            :icon-on="Unicons.SearchGlass.name"
+            :icon-off="Unicons.Filter.name"
+          />
         </div>
         <InputField
           v-model="searchQuery"
@@ -148,6 +111,7 @@
   import { GetEntitiesDocument } from '@/queries';
   import useRouteHelpers from '@/composables/useRouteHelpers';
   import FilterSideBar from '@/components/FilterSideBar.vue';
+  import IconToggle from '@/components/base/IconToggle.vue';
 
   type QueryVariables = {
     pagination: PaginationInfo;
@@ -165,6 +129,7 @@
       InputField,
       Dropdown,
       FilterSideBar,
+      IconToggle,
     },
     props: {
       enableSelection: {
@@ -241,15 +206,16 @@
       //let showDrawer: boolean = false;
       const showDrawer = ref(false);
 
-      const toggleDrawer = () => {
-        showDrawer.value = true;
-        console.log(showDrawer);
-      };
+      /* const toggleDrawer = () => {
+        showDrawer.value = !showDrawer.value;
 
-      const closeDrawer = () => {
+        console.log(showDrawer);
+      }; */
+
+      /* const closeDrawer = () => {
         showDrawer.value = false;
         console.log(showDrawer);
-      };
+      }; */
 
       return {
         result,
@@ -261,8 +227,8 @@
         addSelection,
         paginationLimits,
         FilterSideBar,
-        toggleDrawer,
-        closeDrawer,
+        // toggleDrawer,
+        // closeDrawer,
         showDrawer,
       };
     },
