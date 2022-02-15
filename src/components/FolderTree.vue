@@ -10,7 +10,7 @@
 </template>
 <script lang="ts">
   import { Directory } from '@/queries';
-import { defineComponent, PropType } from 'vue';
+  import { defineComponent, PropType } from 'vue';
   import FolderTreeLine from './FolderTreeLine.vue';
 
   export default defineComponent({
@@ -24,7 +24,6 @@ import { defineComponent, PropType } from 'vue';
         required: true,
       },
     },
-    setup() {    
-    },
+    setup() {},
   });
 </script>

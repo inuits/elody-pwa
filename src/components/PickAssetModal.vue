@@ -12,7 +12,7 @@
 </template>
 <script lang="ts">
   import Modal, { ModalState } from './base/Modal.vue';
-  import { defineComponent, ref} from 'vue';
+  import { defineComponent, ref } from 'vue';
   import AssetLibrary from '@/components/AssetLibrary.vue';
   import { useMutation } from '@vue/apollo-composable';
   import { AddComponentDocument, RelationType } from '@/queries';
@@ -62,7 +62,7 @@
       },
     },
     emits: ['updateEntity'],
-    setup(props, {emit}) {
+    setup(props, { emit }) {
       const { closePickAssetModal, pickAssetModalState } = usePickAssetModal();
       const { mutate } = useMutation(AddComponentDocument);
       const addItem = async (id: string) => {
