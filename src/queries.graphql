@@ -167,6 +167,16 @@ query getJob($id: String!) {
   }
 }
 
+query getAdvancedFilters(){
+  advancedFilter{
+    label
+    type
+    key
+  }
+}
+
+# query advancedQuery
+
 mutation postStartImport($folder: String!) {
   StartImport(folder: $folder) {
     message_id

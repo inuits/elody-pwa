@@ -9,6 +9,31 @@ enum MetaKey {
   object_number
 }
 
+""" enum advancedFilters{
+  titelFilter,
+  objectnummerFilter,
+  beschrijvingFilter,
+  collectieFilter,
+  beheerderFilter,
+  hoogteFilter,
+  breedteFilter,
+  diepteFilter
+} """
+
+enum advancedFilterTypes{
+  tekst,
+  multiselect,
+  checklist,
+  minmax
+}
+
+type advancedFilter{
+  key: String!,
+  label: String,
+  type: advancedFilterTypes!
+}
+
+
 enum RelationType {
   authoredBy
   isIn
@@ -41,6 +66,8 @@ type Metadata {
   type: RelationType
   immutable: Boolean
 }
+
+
 
 input MetadataInput {
   key: MetaKey!
@@ -106,6 +133,7 @@ input SearchFilter {
   raw: Boolean
   relation_filter: [String]
 }
+
 
 type User {
   id: String!
@@ -180,6 +208,7 @@ type Query {
   Directories(dir: String): [Directory]
   Jobs(paginationInfo: PaginationInfo, filters: Filters): JobsResults
   Job(id: String!): Job
+  advancedFilters: [advancedFilter]
 }
 
 type Mutation {
