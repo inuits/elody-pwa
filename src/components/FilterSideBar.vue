@@ -32,6 +32,9 @@
 <script lang="ts">
   import { defineComponent, watch, ref } from 'vue';
   import FilterAccordion from '@/components/base/FilterAccordion.vue';
+  import { useQuery } from '@vue/apollo-composable';
+  import { AdvancedFilterTypes, GetAdvancedFiltersDocument } from '@/queries';
+  import gql from 'graphql-tag';
 
   export default defineComponent({
     components: {
@@ -47,7 +50,22 @@
         },
         { immediate: true },
       );
-      return { activeCount };
+
+      const { result } = useQuery(gql`
+        query getAdvancedFilters {
+          advancedFilters {
+            label
+            type
+            key
+          }
+        }
+      `);
+      watch(result, (value) => {
+        console.log(result.value);
+      });
+      return { activeCount, result };
+
+      //je kan nu result.advancedFilters gebruiken 
     },
   });
 </script>
