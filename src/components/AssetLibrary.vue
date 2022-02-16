@@ -203,20 +203,9 @@
         emit('addSelection', id);
       };
 
-      //let showDrawer: boolean = false;
       const showDrawer = ref(false);
 
-      /* const toggleDrawer = () => {
-        showDrawer.value = !showDrawer.value;
-
-        console.log(showDrawer);
-      }; */
-
-      /* const closeDrawer = () => {
-        showDrawer.value = false;
-        console.log(showDrawer);
-      }; */
-
+      
       return {
         result,
         loading,
@@ -227,8 +216,6 @@
         addSelection,
         paginationLimits,
         FilterSideBar,
-        // toggleDrawer,
-        // closeDrawer,
         showDrawer,
       };
     },
