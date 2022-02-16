@@ -3,11 +3,11 @@
     <FilterSideBar v-show="showDrawer" />
     <div class="p-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
-        <div class="mt-10">
+        <div class="mt-8 mr-4">
           <IconToggle
             v-model:checked="showDrawer"
-            :icon-on="Unicons.SearchGlass.name"
-            :icon-off="Unicons.Filter.name"
+            :icon-on="Unicons.Filter.name"
+            :icon-off="Unicons.SearchGlass.name"
           />
         </div>
         <InputField
@@ -112,6 +112,7 @@
   import useRouteHelpers from '@/composables/useRouteHelpers';
   import FilterSideBar from '@/components/FilterSideBar.vue';
   import IconToggle from '@/components/base/IconToggle.vue';
+  import gql from 'graphql-tag';
 
   type QueryVariables = {
     pagination: PaginationInfo;
@@ -205,7 +206,6 @@
 
       const showDrawer = ref(false);
 
-      
       return {
         result,
         loading,

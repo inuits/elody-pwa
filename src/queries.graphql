@@ -167,15 +167,13 @@ query getJob($id: String!) {
   }
 }
 
-query getAdvancedFilters(){
-  advancedFilter{
+query getAdvancedFilters {
+  advancedFilters {
     label
     type
     key
   }
 }
-
-# query advancedQuery
 
 mutation postStartImport($folder: String!) {
   StartImport(folder: $folder) {
