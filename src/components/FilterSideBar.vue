@@ -17,6 +17,8 @@
           bg-hover-color="blue-75"
           label="Clear All"
           txt-color="blue-300"
+          :disabled="activeCount == 0"
+          class="disabled:cursor-not-allowed disabled:opacity-50"
           @click="clearFilters"
         />
         <BaseButton
@@ -33,20 +35,26 @@
       :key="filter.key"
       class="filters w-full lg:h-1770"
     >
-      <FilterAccordion>
+      <FilterAccordion :actief="filterValues[i] === undefined ? true : false">
         <template #title>{{
           filter.label.charAt(0).toUpperCase() + filter.label.slice(1)
         }}</template>
         <template #content>
           <TextFilter
             v-if="filter.type === 'tekst'"
-            v-model:inputValue="selectedFilters[i]"
+            v-model:inputValue="filterValues[i]"
+            :filterkey="filter.key"
             :text="filter.label"
           />
-          <ChecklistFilter v-if="filter.type === 'checklist'" :options="filter.options" />
+          <ChecklistFilter
+            v-if="filter.type === 'checklist'"
+            v-model:listValue="filterValues[i]"
+            :filterkey="filter.key"
+          />
           <MinmaxFilter
             v-if="filter.type === 'minmax'"
-            v-model:minmaxValue="selectedFilters[i]"
+            v-model:minmaxValue="filterValues[i]"
+            :filterkey="filter.key"
           />
         </template>
       </FilterAccordion>
@@ -84,34 +92,34 @@
         }
       `);
 
-      watch(result, (value) => {
-        console.log(result.value);
-      });
+      const filterValues = ref<Array<object | undefined>>([]);
+      const filterObjects = ref<Array<object | undefined>>([]);
+      const activeCount = ref<number>(0);
+      const andorbool = ref<boolean>(false);
 
-      const selectedFilters = ref([]);
-      const filterObjects = ref<object[]>([]);
-      const activeCount = selectedFilters.value.length;
-
-      const applyFilters = () => {
+      watch(filterValues.value, () => {
         filterObjects.value = [];
 
-        for (let i = 0; i < selectedFilters.value.length; i++) {
-          if (selectedFilters.value[i] != undefined && selectedFilters.value[i] != '') {
-            filterObjects.value.push({
-              key: result.value.advancedFilters[i].key,
-              value: selectedFilters.value[i],
-            });
+        for (let i = 0; i < filterValues.value.length; i++) {
+          if (filterValues.value[i] != undefined) {
+            filterObjects.value.push(filterValues.value[i]);
           }
         }
-        
+
+        activeCount.value = filterObjects.value.length;
+      });
+
+      const applyFilters = () => {
         console.log(filterObjects.value);
       };
 
       const clearFilters = () => {
-        selectedFilters.value = [];
+        for (let i = 0; i < filterValues.value.length; i++) {
+          filterValues.value[i] = undefined;
+        }
       };
 
-      return { result, activeCount, applyFilters, selectedFilters, clearFilters };
+      return { result, activeCount, applyFilters, filterValues, clearFilters };
 
       //je kan nu result.advancedFilters gebruiken
     },
