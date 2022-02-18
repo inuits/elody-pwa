@@ -9,7 +9,7 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, ref, watch } from 'vue';
+  import { defineComponent, ref, watch, watchEffect } from 'vue';
   import InputField from '@/components/base/InputField.vue';
   export default defineComponent({
     name: 'TextFilter',
@@ -22,12 +22,28 @@
         required: false,
         default: '',
       },
+      filterkey: {
+        type: [String],
+        required: true,
+      },
     },
     emits: ['update:inputValue'],
     setup(props, { emit }) {
       const inputValue = ref<string>('');
-      let emitValue = (value: string) => emit('update:inputValue', value);
-      watch(inputValue, emitValue);
+      const returnObject = ref();
+
+      let emitValue = (value: object) => emit('update:inputValue', value);
+
+      watch(inputValue, () => {
+        if (inputValue.value != '' && inputValue.value != undefined) {
+          returnObject.value = { key: props.filterkey, value: inputValue.value };
+        } else {
+          returnObject.value = undefined;
+        }
+      });
+
+      watch(returnObject, emitValue);
+
       return { inputValue };
     },
   });

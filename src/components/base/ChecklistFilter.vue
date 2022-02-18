@@ -25,27 +25,36 @@
   export default defineComponent({
     name: 'ChecklistFilter',
     props: {
-      options: {
+      filterkey: {
         type: [String],
-        required: false,
+        required: true,
         default: undefined,
       },
     },
-    emits: ['update:checklistValue'],
+    emits: ['update:listValue'],
     setup(props, { emit }) {
+      const options = ['a', 'b', 'c', 'd', 'e', 'f'];
       const checklistValue = ref([]);
-      const checklistObject = ref<object>({});
-      watch(checklistValue, () => {
-        checklistObject.value = {
-          key: 'checklist',
-          value: checklistObject.value,
-        };
-        console.log(checklistValue.value);
-        console.log(checklistObject.value);
+      const returnObject = ref();
+
+      watch(checklistValue.value, () => {
+        let temp = [];
+        for (let i = 0; i < checklistValue.value.length; i++) {
+          if (checklistValue.value[i] == true) {
+            temp.push(options[i]);
+          }
+        }
+
+        if (temp.length > 0) {
+          returnObject.value = { key: props.filterkey, value: temp };
+        } else {
+          returnObject.value = undefined;
+        }
       });
-      let emitValue = (value: object) => emit('update:checklistValue', value);
-      watch(checklistObject, emitValue);
-      return { checklistValue };
+
+      let emitValue = (value: object) => emit('update:listValue', value);
+      watch(returnObject, emitValue);
+      return { checklistValue, options };
     },
   });
 </script>
