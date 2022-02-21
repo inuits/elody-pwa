@@ -56,21 +56,26 @@
             v-model:minmaxValue="filterValues[i]"
             :filterkey="filter.key"
           />
+          <MultiFilter
+            v-if="filter.type === 'multiselect'"
+            v-model:Multiselectvalue="filterValues[i]"
+            :filterkey="filter.key"
+          />
         </template>
       </FilterAccordion>
     </div>
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, watch, ref } from 'vue';
+  import { defineComponent, watch, ref, reactive } from 'vue';
   import FilterAccordion from '@/components/base/FilterAccordion.vue';
   import { useQuery } from '@vue/apollo-composable';
   import { AdvancedFilterTypes, GetAdvancedFiltersDocument } from '@/queries';
-  import gql from 'graphql-tag';
   import BaseButton from '@/components/base/BaseButton.vue';
   import MinmaxFilter from '@/components/base/MinmaxFilter.vue';
   import TextFilter from '@/components/base/TextFilter.vue';
   import ChecklistFilter from '@/components/base/ChecklistFilter.vue';
+  import MultiFilter from '@/components/base/MultiFilter.vue';
 
   export default defineComponent({
     name: 'FilterSideBar',
@@ -80,22 +85,20 @@
       MinmaxFilter,
       TextFilter,
       ChecklistFilter,
+      MultiFilter,
     },
     setup() {
-      const { result } = useQuery(gql`
-        query getAdvancedFilters {
-          advancedFilters {
-            label
-            type
-            key
-          }
-        }
-      `);
-
       const filterValues = ref<Array<object | undefined>>([]);
       const filterObjects = ref<Array<object | undefined>>([]);
       const activeCount = ref<number>(0);
       const andorbool = ref<boolean>(false);
+
+      const { result, onResult } = useQuery(GetAdvancedFiltersDocument);
+
+      onResult((value) => {
+        console.log('vanafhier');
+        console.log(value);
+      });
 
       watch(filterValues.value, () => {
         filterObjects.value = [];
@@ -119,7 +122,7 @@
         }
       };
 
-      return { result, activeCount, applyFilters, filterValues, clearFilters };
+      return { result, onResult, activeCount, applyFilters, filterValues, clearFilters };
 
       //je kan nu result.advancedFilters gebruiken
     },
