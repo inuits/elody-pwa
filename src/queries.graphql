@@ -175,6 +175,13 @@ query getAdvancedFilters {
   }
 }
 
+query getFilterOptions($key: String!) {
+  FilterOptions(key: $key) {
+    value
+    label
+  }
+}
+
 mutation postStartImport($folder: String!) {
   StartImport(folder: $folder) {
     message_id

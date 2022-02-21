@@ -112,7 +112,6 @@
   import useRouteHelpers from '@/composables/useRouteHelpers';
   import FilterSideBar from '@/components/FilterSideBar.vue';
   import IconToggle from '@/components/base/IconToggle.vue';
-  import gql from 'graphql-tag';
 
   type QueryVariables = {
     pagination: PaginationInfo;
