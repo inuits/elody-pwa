@@ -31,34 +31,34 @@
       </div>
     </div>
     <div
-      v-for="(filter, i) in result.advancedFilters"
+      v-for="(filter, i) in filters.advancedFilters"
       :key="filter.key"
       class="filters w-full lg:h-1770"
     >
-      <FilterAccordion :actief="filterValues[i] === undefined ? true : false">
-        <template #title>{{
-          filter.label.charAt(0).toUpperCase() + filter.label.slice(1)
-        }}</template>
+      <FilterAccordion>
+        <template #title>
+          <Label :color="neutral - 0" class="text-neutral-900" :name="filter.label" />
+        </template>
         <template #content>
           <TextFilter
             v-if="filter.type === 'tekst'"
-            v-model:inputValue="filterValues[i]"
+            v-model:inputValue="initialFilters[i]"
             :filterkey="filter.key"
             :text="filter.label"
           />
           <ChecklistFilter
             v-if="filter.type === 'checklist'"
-            v-model:listValue="filterValues[i]"
+            v-model:listValue="initialFilters[i]"
             :filterkey="filter.key"
           />
           <MinmaxFilter
             v-if="filter.type === 'minmax'"
-            v-model:minmaxValue="filterValues[i]"
+            v-model:minmaxValue="initialFilters[i]"
             :filterkey="filter.key"
           />
           <MultiFilter
             v-if="filter.type === 'multiselect'"
-            v-model:MultiselectValue="filterValues[i]"
+            v-model:Multiselectvalue="initialFilters[i]"
             :filterkey="filter.key"
           />
         </template>
@@ -67,7 +67,7 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, watch, ref, reactive } from 'vue';
+  import { defineComponent, watch, ref, computed } from 'vue';
   import FilterAccordion from '@/components/base/FilterAccordion.vue';
   import { useQuery } from '@vue/apollo-composable';
   import { AdvancedFilterTypes, GetAdvancedFiltersDocument } from '@/queries';
@@ -76,6 +76,7 @@
   import TextFilter from '@/components/base/TextFilter.vue';
   import ChecklistFilter from '@/components/base/ChecklistFilter.vue';
   import MultiFilter from '@/components/base/MultiFilter.vue';
+  import Label from '@/components/base/Label.vue';
 
   export default defineComponent({
     name: 'FilterSideBar',
@@ -86,45 +87,58 @@
       TextFilter,
       ChecklistFilter,
       MultiFilter,
+      Label,
     },
+    emits: ['update:activeFilters'],
     setup() {
-      const filterValues = ref<Array<object | undefined>>([]);
-      const filterObjects = ref<Array<object | undefined>>([]);
-      const activeCount = ref<number>(0);
-      const andorbool = ref<boolean>(false);
+      type filterObject = {
+        key: string;
+        value: object | string | string[] | undefined;
+      };
 
-      const { result, onResult } = useQuery(GetAdvancedFiltersDocument);
+      const initialFilters = ref<filterObject[]>([]);
+      const activeFilters = ref<filterObject[]>([]);
+      const activeCount = computed(() => activeFilters.value.length);
 
-      onResult((value) => {
-        console.log('vanafhier');
-        console.log(value);
-      });
+      const { result: filters } = useQuery(GetAdvancedFiltersDocument);
 
-      watch(filterValues.value, () => {
-        filterObjects.value = [];
+      watch(initialFilters.value, () => {
+        activeFilters.value = [];
 
-        for (let i = 0; i < filterValues.value.length; i++) {
-          if (filterValues.value[i] != undefined) {
-            filterObjects.value.push(filterValues.value[i]);
+        for (let i = 0; i < initialFilters.value.length; i++) {
+          if (
+            initialFilters.value[i] !== undefined &&
+            initialFilters.value[i].value !== undefined
+          ) {
+            activeFilters.value.push(initialFilters.value[i]);
           }
         }
-
-        activeCount.value = filterObjects.value.length;
       });
 
       const applyFilters = () => {
-        console.log(filterObjects.value);
+        console.log(activeFilters.value);
+        //emit('update:activeFilters', activeFilters.value);
       };
 
       const clearFilters = () => {
-        for (let i = 0; i < filterValues.value.length; i++) {
-          filterValues.value[i] = undefined;
+        for (let i = 0; i < initialFilters.value.length; i++) {
+          initialFilters.value[i] = {
+            key: initialFilters.value[i].key,
+            value: undefined,
+          };
         }
       };
 
-      return { result, onResult, activeCount, applyFilters, filterValues, clearFilters };
+      return {
+        filters,
+        activeCount,
+        applyFilters,
+        initialFilters,
+        clearFilters,
+        AdvancedFilterTypes,
+      };
 
-      //je kan nu result.advancedFilters gebruiken
+      //je kan nu filters.advancedFilters gebruiken
     },
   });
 </script>

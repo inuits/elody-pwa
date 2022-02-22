@@ -15,8 +15,18 @@
     >
       <slot name="title" />
       <p>
-        <span v-show="isOpen" class="text-2xl">-</span>
-        <span v-show="!isOpen" class="text-2xl">+</span>
+        <span v-show="isOpen"
+          ><unicon
+            :name="Unicons.Minus.name"
+            height="20"
+            :fill="loading ? 'var(--color-neutral-20)' : `${iconColor}`"
+        /></span>
+        <span v-show="!isOpen"
+          ><unicon
+            :name="Unicons.Plus.name"
+            height="20"
+            :fill="loading ? 'var(--color-neutral-20)' : `${iconColor}`"
+        /></span>
       </p>
     </button>
 
@@ -27,6 +37,7 @@
 </template>
 <script>
   import { defineComponent, ref } from 'vue';
+  import { Unicons } from '@/types';
   export default defineComponent({
     name: 'FilterAccordion',
     setup() {
@@ -34,7 +45,7 @@
       const toggleAccordion = () => {
         isOpen.value = !isOpen.value;
       };
-      return { isOpen, toggleAccordion };
+      return { isOpen, toggleAccordion, Unicons };
     },
   });
 </script>

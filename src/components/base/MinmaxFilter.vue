@@ -33,21 +33,34 @@
     },
     emits: ['update:minmaxValue'],
     setup(props, { emit }) {
-      const minValue = ref('');
-      const maxValue = ref('');
-      const minmaxValue = ref();
+      type returnObjectValue = {
+        min: string;
+        max: string;
+      };
+
+      type returnObject = {
+        key: string;
+        value: returnObjectValue | undefined;
+      };
+
+      const minValue = ref<string>('');
+      const maxValue = ref<string>('');
+      const returnObject = ref<returnObject>();
+
       watch([minValue, maxValue], () => {
         if (minValue.value != '' || maxValue.value != '') {
-          minmaxValue.value = {
+          returnObject.value = {
             key: props.filterkey,
             value: { min: minValue.value, max: maxValue.value },
           };
         } else {
-          minmaxValue.value = undefined;
+          returnObject.value = { key: props.filterkey, value: undefined };
         }
       });
+
       let emitValue = (value: object) => emit('update:minmaxValue', value);
-      watch(minmaxValue, emitValue);
+      watch(returnObject, emitValue);
+
       return { minValue, maxValue };
     },
   });
