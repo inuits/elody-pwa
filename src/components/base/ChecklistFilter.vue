@@ -45,13 +45,13 @@
 
       const options = ['a'];
 
-      watch(checklistValue, () => {
+      watch(checklistValue.value, () => {
         let temp = [];
-        for (let i = 0; i < checklistValue.value.length; i++) {
-          if (checklistValue.value[i] == true) {
-            temp.push(options[i]);
-            console.log('checklistvaluetester');
-            console.log(checklistValue.value[i]);
+        if (result.value?.FilterOptions) {
+          for (let i = 0; i < checklistValue.value.length; i++) {
+            if (checklistValue.value[i] == true) {
+              temp.push(result.value.FilterOptions[i]);
+            }
           }
         }
 

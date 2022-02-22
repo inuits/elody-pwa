@@ -58,7 +58,7 @@
           />
           <MultiFilter
             v-if="filter.type === 'multiselect'"
-            v-model:Multiselectvalue="filterValues[i]"
+            v-model:MultiselectValue="filterValues[i]"
             :filterkey="filter.key"
           />
         </template>
