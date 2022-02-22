@@ -1,6 +1,6 @@
 <template>
   <div class="lg:flex">
-    <FilterSideBar v-show="showDrawer" />
+    <FilterSideBar v-show="showDrawer" v-model:activeFilters="activeFilters" />
     <div class="p-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
         <div class="mt-8 mr-4">
@@ -118,7 +118,10 @@
     searchQuery: string;
     sort: string;
   };
-
+  type filterObject = {
+    key: string;
+    value: object | string | string[] | undefined;
+  };
   export default defineComponent({
     name: 'AssetLibrary',
     components: {
@@ -141,12 +144,17 @@
     setup: (props, { emit }) => {
       const router = useRouter();
       const searchQuery = ref<string>('');
+      let activeFilters = ref<filterObject[]>([]);
       const routeHelper = useRouteHelpers();
       const paginationInfo = reactive({
         limit: 20,
         skip: 1,
       });
       routeHelper.getPaginationInfoFromUrl(paginationInfo);
+
+      watch(activeFilters.value, () => {
+        console.log(activeFilters.value);
+      });
 
       const queryVariables = reactive<QueryVariables>({
         pagination: paginationInfo,
@@ -216,6 +224,7 @@
         paginationLimits,
         FilterSideBar,
         showDrawer,
+        activeFilters,
       };
     },
   });
