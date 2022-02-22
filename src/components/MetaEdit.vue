@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts">
-  import { EditMetadataDocument, Metadata, MetaKey } from '@/queries';
+  import { EditMetadataDocument, Metadata } from '@/queries';
   import { defineComponent, PropType, ref } from 'vue';
   import { Field, Form, FieldArray } from 'vee-validate';
   import { Unicons } from '@/types';
@@ -52,14 +52,14 @@
   import BaseButton from './base/BaseButton.vue';
   import useRouteHelpers from '@/composables/useRouteHelpers';
 
-  const editFieldType: Record<MetaKey, string> = {
-    title: 'input',
-    type: 'input',
-    collection: 'input',
-    description: 'textarea',
-    material: 'input',
-    object_number: 'input',
-  };
+  // const editFieldType: Record<MetaKey, string> = {
+  //   title: 'input',
+  //   type: 'input',
+  //   collection: 'input',
+  //   description: 'textarea',
+  //   material: 'input',
+  //   object_number: 'input',
+  // };
 
   export default defineComponent({
     name: 'MetaEdit',
@@ -70,42 +70,39 @@
     },
     emits: ['updatedMetadata'],
     setup(props) {
-      const { getParam } = useRouteHelpers();
-      let formMetadata = ref<Metadata[]>([
-        {
-          key: MetaKey.Title,
-          value: props.entityTitle,
-        },
-      ]);
-
-      props.metadata.forEach((meta: Metadata) => {
-        formMetadata.value.push({
-          key: meta.key,
-          value: meta.value,
-        });
-      });
-      const { mutate } = useMutation(EditMetadataDocument);
-
-      const id = getParam('id');
-      const onSubmit = () => {
-        if (id === 'NOID') {
-          console.error('no valid id');
-        } else {
-          async (input: { metadata: Metadata[] }) => {
-            await mutate({ id, metadata: input.metadata });
-          };
-        }
-      };
-
-      return {
-        Unicons,
-        onSubmit,
-        formMetadata,
-        inputStyle,
-        lableStyle,
-        editFieldType,
-        inputContainerStyle,
-      };
+      // const { getParam } = useRouteHelpers();
+      // let formMetadata = ref<Metadata[]>([
+      //   {
+      //     key: MetaKey.Title,
+      //     value: props.entityTitle,
+      //   },
+      // ]);
+      // props.metadata.forEach((meta: Metadata) => {
+      //   formMetadata.value.push({
+      //     key: meta.key,
+      //     value: meta.value,
+      //   });
+      // });
+      // const { mutate } = useMutation(EditMetadataDocument);
+      // const id = getParam('id');
+      // const onSubmit = () => {
+      //   if (id === 'NOID') {
+      //     console.error('no valid id');
+      //   } else {
+      //     async (input: { metadata: Metadata[] }) => {
+      //       await mutate({ id, metadata: input.metadata });
+      //     };
+      //   }
+      // };
+      // return {
+      //   Unicons,
+      //   onSubmit,
+      //   formMetadata,
+      //   inputStyle,
+      //   lableStyle,
+      //   editFieldType,
+      //   inputContainerStyle,
+      // };
     },
   });
 </script>

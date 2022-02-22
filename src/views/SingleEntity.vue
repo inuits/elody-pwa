@@ -2,7 +2,7 @@
   <div class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0">
     <entity-image-selection
       v-show="loading || mediafiles.length > 0"
-      v-model:selectedImage="mediafile"
+      v-model:selectedImage="selectedMediafile"
       class="w-40"
       :loading="loading"
       :mediafiles="mediafiles"
@@ -12,20 +12,20 @@
       :class="['flex w-4/6', { checkboard: loading }]"
     >
       <IIIFViewer
-        v-if="!loading && mediafile"
-        :image-url="mediafile?.filename"
-        :image-meta-data="mediafile.metadata"
+        v-if="!loading && selectedMediafile !== null"
+        :image-url="selectedMediafile?.filename"
+        :image-meta-data="selectedMediafile.metadata"
       />
     </div>
     <Meta
       :class="!loading && mediafiles.length > 0 ? 'w-2/6' : 'w-full'"
       :loading="loading"
-      :entity-id="entityId"
-      :metadata="metadataCollection"
+      :entity-id="result ? result.Entity.id : undefined"
+      :metadata="result ? result.Entity.metadata : []"
       :entity-title="title"
     />
   </div>
-  <PickAssetModal :entity-id="entityId" @update-entity="updateEntities" />
+  <!-- <PickAssetModal :entity-id="entityId" @update-entity="updateEntities" /> -->
 </template>
 
 <script lang="ts">
@@ -33,22 +33,26 @@
   import { useQuery } from '@vue/apollo-composable';
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import Meta from '@/components/Meta.vue';
-  import { GetEntityByIdDocument, Maybe, MediaFile, MetadataCollection } from '@/queries';
+  import { GetEntityByIdDocument, GetEntityByIdQuery, Maybe, MediaFile } from '@/queries';
   import { usePageTitle } from '@/components/TheHeader.vue';
   import { EditModes, useEditMode } from '@/components/EditToggle.vue';
   import EntityImageSelection from '@/components/EntityImageSelection.vue';
   import { useRoute } from 'vue-router';
-  import PickAssetModal from '@/components/PickAssetModal.vue';
+  // import PickAssetModal from '@/components/PickAssetModal.vue';
   import { asString } from '@/helpers';
 
   export default defineComponent({
     name: 'SingleEntity',
-    components: { IIIFViewer, Meta, PickAssetModal, EntityImageSelection },
+    components: { IIIFViewer, EntityImageSelection, Meta },
     setup() {
       const id = asString(useRoute().params['id']);
-      const { editMode } = useEditMode();
       const loading = ref<boolean>(true);
-      const { result, refetch, onResult } = useQuery(
+      const selectedMediafile = ref<MediaFile | null>(null);
+      const mediafiles = ref<MediaFile[]>([]);
+      const { editMode } = useEditMode();
+      const { updatePageTitle } = usePageTitle();
+
+      const { result, refetch, onResult } = useQuery<GetEntityByIdQuery>(
         GetEntityByIdDocument,
         {
           id: id,
@@ -58,11 +62,13 @@
           fetchPolicy: 'no-cache',
         },
       );
-      const title = computed(() => result.value?.Entity?.title[0]?.value);
-      const mediafile = ref<MediaFile | undefined>();
-      const mediafiles = ref<MediaFile[]>([]);
-      const metadataCollection = ref<MetadataCollection[]>([]);
-      const { updatePageTitle } = usePageTitle();
+      const title = computed(() => {
+        if (result.value && result.value.Entity?.title[0]?.__typename === 'Metadata') {
+          const tileMetada = result.value.Entity?.title[0];
+          return tileMetada.value;
+        }
+        return undefined;
+      });
 
       watch(title, (value: Maybe<string> | undefined) => {
         value && updatePageTitle(value, 'entityTitle');
@@ -78,42 +84,31 @@
         refetch();
       };
 
-      // watch(
-      //   () => route.params.id,
-      //   async (newId) => {
-      //     if (!Array.isArray(newId)) {
-      //       loading.value = true;
-      //       id.value = newId;
-      //       refetch({
-      //         id: newId,
-      //       });
-      //     }
-      //   },
-      // );
-
       onResult((queryResult) => {
-        if (queryResult.data && queryResult.data.Entity?.mediafiles?.[0]) {
-          mediafile.value = queryResult.data.Entity?.mediafiles?.[0];
+        if (
+          queryResult.data &&
+          queryResult.data.Entity?.media?.mediafiles &&
+          queryResult.data.Entity?.media?.mediafiles?.length > 0
+        ) {
+          queryResult.data.Entity.media.mediafiles?.forEach((mediafile) => {
+            if (mediafile?.__typename === 'MediaFile') {
+              if (selectedMediafile.value === null) {
+                selectedMediafile.value = mediafile;
+              }
+              mediafiles.value.push(mediafile);
+            }
+          });
         }
 
-        //@ts-ignore
-        metadataCollection.value = queryResult?.data?.Entity?.metadataCollection || [];
-        //@ts-ignore
-        mediafiles.value = queryResult.data.Entity?.mediafiles
-          ? queryResult.data.Entity?.mediafiles
-          : [];
         loading.value = false;
       });
 
       return {
+        result,
         loading,
         title,
         mediafiles,
-        mediafile,
-        metadataCollection,
-        entityId: computed(() => {
-          return id;
-        }),
+        selectedMediafile,
         updateEntities,
       };
     },

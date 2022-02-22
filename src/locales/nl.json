@@ -1,13 +1,16 @@
 {
-  "beheerder": "instelling",
-  "MaterieelDing.isOvergedragenBijVerwerving": "herkomst",
-  "verwerving.plaats": "plaats van verwerving",
-  "verwerving.methode": "verwervingsmethode",
-  "Periode.begin": "begin periode",
-  "Periode.einde": "einde periode",
-  "MaterieelDing.productie": "productie",
-  "Gebeurtenis.tijd": "productiedatum",
-  "vervaardiging.plaats": "plaats van vervaardiging",
-  "vervaardiger.rol": "rol",
-  "Entiteit.maaktDeelUitVan": "tentoonstellingen"
+  "metadata": {
+    "no-metadata": "Geen metadata beschikbaar",
+    "beheerder": "instelling",
+    "MaterieelDing.isOvergedragenBijVerwerving": "herkomst",
+    "verwerving.plaats": "plaats van verwerving",
+    "verwerving.methode": "verwervingsmethode",
+    "Periode.begin": "begin periode",
+    "Periode.einde": "einde periode",
+    "MaterieelDing.productie": "productie",
+    "Gebeurtenis.tijd": "productiedatum",
+    "vervaardiging.plaats": "plaats van vervaardiging",
+    "vervaardiger.rol": "rol",
+    "Entiteit.maaktDeelUitVan": "tentoonstellingen"
+  }
 }

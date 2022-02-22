@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-  import { Maybe, Metadata, MetadataCollection } from '@/queries';
+  import { Maybe, Metadata, MetadataAndRelation } from '@/queries';
   import { defineComponent, PropType } from 'vue';
   import MetaViewLine from './MetaViewLine.vue';
 
@@ -20,27 +20,9 @@
     components: { MetaViewLine },
     props: {
       loading: { type: Boolean, default: false },
-      metadata: { type: Array as PropType<MetadataCollection[]>, required: true },
+      metadata: { type: Array as PropType<MetadataAndRelation[]>, required: true },
     },
-    setup() {
-      const concatMetaDataValue = (input: Maybe<Metadata>[]): string => {
-        let result = '';
-        input.forEach((data: Maybe<Metadata>) => {
-          if (result !== '' && data && data.value) {
-            result = `${result}, ${data.value}`;
-          }
-          if (result === '' && data && data.value) {
-            result = data.value;
-          }
-        });
-
-        return result;
-      };
-
-      return {
-        concatMetaDataValue,
-      };
-    },
+    setup() {},
   });
 </script>
 

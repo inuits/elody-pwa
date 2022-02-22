@@ -1,5 +1,5 @@
 import { useQuery } from '@vue/apollo-composable';
-import { GetEnumsByNameDocument } from './queries';
+// import { GetEnumsByNameDocument } from './queries';
 import { createI18n, LocaleMessages, VueMessageType } from 'vue-i18n';
 
 export const getFromObjectArrayByKey = <T>(
@@ -24,11 +24,6 @@ export const hasOwnProperty = <X extends {}, Y extends PropertyKey>(
 };
 
 export const asString = (x: string | string[]) => (Array.isArray(x) ? x[0] : x);
-
-export const getEnumValuesOf = (enumName: string) => {
-  const { result } = useQuery(GetEnumsByNameDocument, { enumName: enumName });
-  return result;
-};
 
 /**
  * Load locale messages

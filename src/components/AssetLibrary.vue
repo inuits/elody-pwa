@@ -63,8 +63,8 @@
           <ListItem
             v-for="entity in result.Entities.results"
             :key="entity.id"
-            :meta="entity.metadata"
-            :media="entity.primary_mediafile"
+            :meta="entity.teaserMetadata"
+            :media="entity.media.primaryMediafile"
             :thumb-icon="Unicons.NoImage.name"
             @click="
               !enableSelection &&
@@ -95,7 +95,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, watch, reactive, ref, computed } from 'vue';
+  import { defineComponent, watch, reactive, ref } from 'vue';
   import { useQuery } from '@vue/apollo-composable';
   import ListContainer from '@/components/ListContainer.vue';
   import ListItem from '@/components/ListItem.vue';
@@ -176,6 +176,7 @@
         },
         {
           notifyOnNetworkStatusChange: true,
+          fetchPolicy: 'no-cache',
         },
       );
 
@@ -222,7 +223,6 @@
         searchQuery,
         addSelection,
         paginationLimits,
-        FilterSideBar,
         showDrawer,
         activeFilters,
       };
