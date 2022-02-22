@@ -29,19 +29,23 @@
     },
     emits: ['update:inputValue'],
     setup(props, { emit }) {
-      const inputValue = ref<string>('');
-      const returnObject = ref();
+      type returnObject = {
+        key: string;
+        value: string | undefined;
+      };
 
-      let emitValue = (value: object) => emit('update:inputValue', value);
+      const inputValue = ref<string>('');
+      const returnObject = ref<returnObject>();
 
       watch(inputValue, () => {
         if (inputValue.value != '' && inputValue.value != undefined) {
           returnObject.value = { key: props.filterkey, value: inputValue.value };
         } else {
-          returnObject.value = undefined;
+          returnObject.value = { key: props.filterkey, value: undefined };
         }
       });
 
+      let emitValue = (value: object) => emit('update:inputValue', value);
       watch(returnObject, emitValue);
 
       return { inputValue };

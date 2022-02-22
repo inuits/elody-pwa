@@ -1,6 +1,6 @@
 <template>
   <div>
-    <ul v-for="(option, index) in result.FilterOptions" :key="option">
+    <ul v-for="(option, index) in options.FilterOptions" :key="option">
       <li>
         <input
           :id="option.label"
@@ -30,27 +30,24 @@
       filterkey: {
         type: [String],
         required: true,
-        default: undefined,
       },
     },
     emits: ['update:listValue'],
     setup(props, { emit }) {
-      const checklistValue = ref([]);
-      const returnObject = ref();
 
-      const { result, onResult } = useQuery(GetFilterOptionsDocument, {
+      const checklistValue = ref<Boolean[]>([]);
+      const returnObject = ref<object>();
+
+      const { result: options } = useQuery(GetFilterOptionsDocument, {
         key: props.filterkey,
       });
-      console.log(result.value);
-
-      const options = ['a'];
 
       watch(checklistValue.value, () => {
         let temp = [];
-        if (result.value?.FilterOptions) {
+        if (options.value?.FilterOptions) {
           for (let i = 0; i < checklistValue.value.length; i++) {
             if (checklistValue.value[i] == true) {
-              temp.push(result.value.FilterOptions[i]);
+              temp.push(options.value.FilterOptions[i]);
             }
           }
         }
@@ -58,13 +55,14 @@
         if (temp.length > 0) {
           returnObject.value = { key: props.filterkey, value: temp };
         } else {
-          returnObject.value = undefined;
+          returnObject.value = { key: props.filterkey, value: undefined };
         }
       });
 
       let emitValue = (value: object) => emit('update:listValue', value);
       watch(returnObject, emitValue);
-      return { result, checklistValue, options };
+
+      return { options, checklistValue };
     },
   });
 </script>
