@@ -1,4 +1,7 @@
 {
+  "search": {
+    "noresult": "Geen resultaten"
+  },
   "metadata": {
     "no-metadata": "Geen metadata beschikbaar",
     "beheerder": "instelling",
