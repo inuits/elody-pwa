@@ -16,13 +16,12 @@
 </template>
 <script lang="ts">
   import { defineComponent, PropType, watch } from 'vue';
-  import { MinimalEntityFragment } from '@/queries';
   import { useRouter } from 'vue-router';
 
   export default defineComponent({
     name: 'EntityComponentSelectionStrip',
     props: {
-      entities: { type: Array as PropType<MinimalEntityFragment[]>, required: true },
+      entities: { type: Array as PropType<any[]>, required: true },
       selectedId: {
         type: String,
         required: true,

@@ -20,14 +20,6 @@ fragment minimalBaseEntity on Entity {
   }
 }
 
-fragment minimalEntity on Entity {
-  ...minimalBaseEntity
-  __typename
-  ... on Asset {
-    ...minimalAsset
-  }
-}
-
 fragment minimalAsset on Asset {
   ...minimalBaseEntity
   teaserMetadata: metadata(keys: ["title", "object_number"], excludeOrInclude: include) {
@@ -128,7 +120,14 @@ query getEntities($limit: Int, $skip: Int, $searchValue: SearchFilter!) {
     count
     limit
     results {
-      ...minimalEntity
+      id
+      type
+      media {
+        primaryMediafile
+      }
+      ... on Asset {
+        ...minimalAsset
+      }
     }
   }
 }

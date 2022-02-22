@@ -49,7 +49,6 @@
 </template>
 <script lang="ts">
   import { defineComponent, onUnmounted, PropType, ref, watch } from 'vue';
-  import { MinimalEntityFragment } from '@/queries';
   import EntityComponentSelectionStrip from '@/components/EntityComponentsSelectionStrip.vue';
   import IconToggle from './base/IconToggle.vue';
   import { Unicons } from '@/types';
@@ -65,8 +64,8 @@
       BaseButton,
     },
     props: {
-      entities: { type: Array as PropType<MinimalEntityFragment[]>, required: true },
-      parents: { type: Array as PropType<MinimalEntityFragment[]>, required: true },
+      entities: { type: Array as PropType<any[]>, required: true },
+      parents: { type: Array as PropType<any[]>, required: true },
       thumbnail: { type: String, default: '' },
       selectedId: {
         type: String,

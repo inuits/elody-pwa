@@ -1,6 +1,6 @@
 <template>
   <div class="lg:flex">
-    <FilterSideBar v-show="showDrawer" v-model:activeFilters="activeFilters" />
+    <!-- <FilterSideBar v-show="showDrawer" v-model:activeFilters="activeFilters" /> -->
     <div class="p-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
         <div class="mt-8 mr-4">
@@ -15,6 +15,7 @@
           :debounce="true"
           placeholder="Search Asset Library..."
           label="Search"
+          :is-disabled="loading"
           :bg-color="'neutral-20'"
         />
         <div class="pl-4 my-2 flex flex-row justify-left">
@@ -88,6 +89,9 @@
               />
             </template>
           </ListItem>
+          <div v-if="result?.Entities.results.length === 0" class="p-4">
+            {{ t('search.noresult') }}
+          </div>
         </div>
       </ListContainer>
     </div>
@@ -112,6 +116,7 @@
   import useRouteHelpers from '@/composables/useRouteHelpers';
   import FilterSideBar from '@/components/FilterSideBar.vue';
   import IconToggle from '@/components/base/IconToggle.vue';
+  import { useI18n } from 'vue-i18n';
 
   type QueryVariables = {
     pagination: PaginationInfo;
@@ -131,7 +136,7 @@
       BaseButton,
       InputField,
       Dropdown,
-      FilterSideBar,
+      // FilterSideBar,
       IconToggle,
     },
     props: {
@@ -143,7 +148,7 @@
     emits: ['addSelection'],
     setup: (props, { emit }) => {
       const router = useRouter();
-      const searchQuery = ref<string>('');
+      const searchQuery = ref<string>('wafelijzer');
       let activeFilters = ref<filterObject[]>([]);
       const routeHelper = useRouteHelpers();
       const paginationInfo = reactive({
@@ -151,6 +156,7 @@
         skip: 1,
       });
       routeHelper.getPaginationInfoFromUrl(paginationInfo);
+      const { t } = useI18n();
 
       watch(activeFilters.value, () => {
         console.log(activeFilters.value);
@@ -176,7 +182,6 @@
         },
         {
           notifyOnNetworkStatusChange: true,
-          fetchPolicy: 'no-cache',
         },
       );
 
@@ -215,6 +220,7 @@
       const showDrawer = ref(false);
 
       return {
+        t,
         result,
         loading,
         router,
