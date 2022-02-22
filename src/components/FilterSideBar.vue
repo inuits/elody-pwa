@@ -90,7 +90,7 @@
       Label,
     },
     emits: ['update:activeFilters'],
-    setup() {
+    setup(props, { emit }) {
       type filterObject = {
         key: string;
         value: object | string | string[] | undefined;
@@ -118,7 +118,7 @@
       const applyFilters = () => {
         console.log('activeFilters.value');
         console.log(activeFilters.value);
-        //emit('update:activeFilters', activeFilters.value);
+        emit('update:activeFilters', activeFilters.value);
       };
 
       const clearFilters = () => {
@@ -137,6 +137,7 @@
         initialFilters,
         clearFilters,
         AdvancedFilterTypes,
+        activeFilters,
       };
 
       //je kan nu filters.advancedFilters gebruiken
