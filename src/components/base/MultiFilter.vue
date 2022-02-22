@@ -1,18 +1,16 @@
 <template>
   <div>
     <Multiselect
-      v-model="value"
+      v-model="MultiSelectValue"
       mode="tags"
-      searchable="true"
+      :searchable="true"
       :close-on-select="false"
-      :options="options"
+      :options="result?.FilterOptions"
       label="label"
-      track-by="label"
-      value-prop="label"
+      track-by="value"
+      value-prop="value"
       placeholder="choose your filters"
       no-results-text="no filter with that name found"
-      loading="true"
-      class="multiselect-blue"
     />
   </div>
 </template>
@@ -20,10 +18,11 @@
 <script lang="ts">
   import { GetFilterOptionsDocument } from '@/queries';
   import { useQuery } from '@vue/apollo-composable';
+  import { ref, defineComponent, watch } from 'vue';
   import Multiselect from '@vueform/multiselect';
-  import { ref, defineComponent } from 'vue';
 
   export default defineComponent({
+    name: 'MultiFilter',
     components: {
       Multiselect,
     },
@@ -34,19 +33,32 @@
         default: undefined,
       },
     },
-    setup(props) {
-      const value = ref();
+    emits: ['update:MultiselectValue'],
+    setup(props, { emit }) {
+      const MultiSelectValue = ref([]);
+      const returnObject = ref();
+
+      watch(MultiSelectValue, () => {
+        if (MultiSelectValue.value.length > 0) {
+          returnObject.value = { key: props.filterkey, value: MultiSelectValue.value };
+        } else {
+          returnObject.value = undefined;
+        }
+      });
+
       const { result, onResult } = useQuery(GetFilterOptionsDocument, {
         key: props.filterkey,
       });
-      console.log('multiiiiii');
-      console.log(result.value);
-      const options = result.value?.FilterOptions;
-      console.log('optieeeeee');
-      console.log(options);
+      let emitValue = (value: object) => emit('update:MultiselectValue', value);
 
-      return { result, value, options };
+      watch(returnObject, emitValue);
+      return { result, MultiSelectValue };
     },
   });
 </script>
 <style src="@vueform/multiselect/themes/default.css"></style>
+<style>
+  :root {
+    --ms-tag-bg: #0052cc;
+  }
+</style>
