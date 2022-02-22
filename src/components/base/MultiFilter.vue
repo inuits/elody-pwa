@@ -7,8 +7,8 @@
       :close-on-select="false"
       :options="result?.FilterOptions"
       label="label"
-      track-by="value"
-      value-prop="value"
+      track-by="label"
+      value-prop="label"
       placeholder="choose your filters"
       no-results-text="no filter with that name found"
     />
@@ -64,5 +64,6 @@
 <style>
   :root {
     --ms-tag-bg: #0052cc;
+    --ms-ring-color: white;
   }
 </style>
