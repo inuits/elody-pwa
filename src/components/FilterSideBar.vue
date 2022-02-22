@@ -122,12 +122,9 @@
       };
 
       const clearFilters = () => {
-        for (let i = 0; i < initialFilters.value.length; i++) {
-          initialFilters.value[i] = {
-            key: initialFilters.value[i].key,
-            value: undefined,
-          };
-        }
+        initialFilters.value.forEach((e) => {
+          e.value = undefined;
+        });
       };
 
       return {
