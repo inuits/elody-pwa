@@ -1,26 +1,80 @@
 scalar Void
 
-enum MetaKey {
-  title
-  type
-  collection
-  description
-  material
-  object_number
+enum ExcludeOrInclude {
+  exclude
+  include
 }
 
-"""
- enum advancedFilters{
-  titelFilter,
-  objectnummerFilter,
-  beschrijvingFilter,
-  collectieFilter,
-  beheerderFilter,
-  hoogteFilter,
-  breedteFilter,
-  diepteFilter
+interface Entity {
+  id: String!
+  type: String!
+  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
+  media: Media
 }
-"""
+
+type BaseEntity implements Entity {
+  id: String!
+  type: String!
+  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
+  media: Media
+}
+
+type Asset implements Entity {
+  id: String!
+  type: String!
+  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
+  media: Media
+  teaserMetadata: [MetadataAndRelation]
+  title: [MetadataAndRelation]
+}
+
+type Metadata {
+  key: String!
+  value: String!
+  lang: String
+  label: String!
+  immutable: Boolean
+}
+
+type MetadataRelation {
+  key: String!
+  value: String!
+  label: String!
+  type: String
+  linkedEntity: Entity
+}
+
+union MetadataAndRelation = Metadata | MetadataRelation
+
+type Media {
+  primaryMediafile: String
+  primaryMediafileLocation: String
+  primaryThumbnailLocation: String
+  mediafiles: [MediaFile]
+}
+
+type MediaFile {
+  _id: String!
+  original_file_location: String
+  thumbnail_file_location: String
+  filename: String
+  entities: [String]
+  metadata: [MediaFileMetadata]
+}
+
+type MediaFileMetadata {
+  key: String
+  value: String
+}
+
+type EntitiesResults {
+  results: [Entity]
+  count: Int
+  limit: Int
+}
+
+#Advanced search
+
 enum advancedFilterTypes {
   tekst
   multiselect
@@ -39,96 +93,6 @@ type filterOption {
   label: String
 }
 
-enum RelationType {
-  authoredBy
-  isIn
-  contains
-  isTypeOf
-  isUsedIn
-  components
-  parent
-  carriedOutBy
-}
-enum JSPatchOp {
-  add
-  replace
-  remove
-}
-
-input JSPatch {
-  op: JSPatchOp!
-  path: [String!]!
-  value: String!
-}
-
-type Metadata {
-  key: MetaKey!
-  value: String
-  nestedMetaData: Entity
-  lang: String
-  unMappedKey: String
-  label: String
-  type: RelationType
-  immutable: Boolean
-}
-
-input MetadataInput {
-  key: MetaKey!
-  value: String
-  lang: String
-}
-
-type MetadataCollection {
-  label: String!
-  data: [Metadata]
-  nested: Boolean
-  key: String!
-}
-
-input RelationInput {
-  key: String
-  type: RelationType
-  label: String
-}
-
-type Entity {
-  id: String!
-  type: String!
-  metadata(key: [MetaKey]): [Metadata]!
-  relations(key: [RelationType!]): [Relation]
-  mediafiles: [MediaFile]
-  metadataCollection: [MetadataCollection]
-  components: [Entity]
-  parents: [Entity]
-  primary_mediafile: String
-}
-
-type MediaFileMetadata {
-  key: String
-  value: String
-}
-
-type MediaFile {
-  _id: String!
-  original_file_location: String
-  thumbnail_file_location: String
-  filename: String
-  entities: [String]
-  metadata: [MediaFileMetadata]
-}
-
-type Relation {
-  key: String!
-  type: RelationType!
-  label: String
-}
-
-type EntitiesResults {
-  results: [Entity]
-  count: Int
-  limit: Int
-}
-
 input SearchFilter {
   value: String
   isAsc: Boolean
@@ -136,6 +100,8 @@ input SearchFilter {
   raw: Boolean
   relation_filter: [String]
 }
+
+#Users
 
 type User {
   id: String!
@@ -145,6 +111,9 @@ type User {
   name: String!
   preferred_username: String!
 }
+
+#Import
+
 type Directory {
   id: String
   dir: String
@@ -152,8 +121,18 @@ type Directory {
   parent: String!
 }
 
-type ImportReturn {
-  message_id: String
+#Jobs
+
+enum JobType {
+  All
+  MediaFile
+  CSVImport
+  FileUpload
+}
+
+input PaginationInfo {
+  limit: Int
+  skip: Int
 }
 
 type Job {
@@ -181,18 +160,7 @@ type JobsResults {
   next: String
 }
 
-input PaginationInfo {
-  limit: Int
-  skip: Int
-}
-
-enum JobType {
-  All
-  MediaFile
-  CSVImport
-  FileUpload
-}
-
+#Query
 input Filters {
   query: String
   type: String!
@@ -214,8 +182,19 @@ type Query {
   FilterOptions(key: String!): [filterOption]
 }
 
+#Mutations
 type Mutation {
   replaceMetadata(id: String!, metadata: [MetadataInput!]!): [Metadata!]!
   StartImport(folder: String!): ImportReturn
-  addRelations(id: String!, relations: [RelationInput!]!): [Relation]!
+  # addRelations(id: String!, relations: [RelationInput!]!): [Relation]!
+}
+
+input MetadataInput {
+  key: String!
+  value: String
+  lang: String
+}
+
+type ImportReturn {
+  message_id: String
 }

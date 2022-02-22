@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts">
-  import { MediaFile, Metadata } from '@/queries';
+  import { Metadata } from '@/queries';
   import { defineComponent, inject, PropType } from 'vue';
   import { Unicons } from '@/types';
 
@@ -44,8 +44,11 @@
     name: 'ListItem',
     props: {
       loading: { type: Boolean, default: false },
-      meta: { type: Array as PropType<Metadata[]>, default: () => [] },
-      media: { type: String },
+      meta: {
+        type: Array as PropType<{ key: string; value: string }[]>,
+        default: () => [],
+      },
+      media: { type: String, default: undefined },
       thumbIcon: { type: String as PropType<keyof Unicons>, default: '' },
     },
     setup() {

@@ -42,15 +42,15 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, PropType, ref, watch } from 'vue';
-  import { Maybe, MediaFile, MinimalEntityFragment } from '@/queries';
+  import { defineComponent, PropType } from 'vue';
+  import { MediaFile } from '@/queries';
 
   export default defineComponent({
     name: 'EntityImageSelection',
     props: {
       mediafiles: { type: Array as PropType<MediaFile[]>, required: true },
       selectedImage: {
-        type: Object as PropType<MediaFile>,
+        type: Object as PropType<MediaFile | null>,
         required: true,
       },
       loading: {

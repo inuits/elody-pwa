@@ -1,7 +1,7 @@
 <template>
   <div class="p-6 bg-neutral-20 w-full">
     <h2>Add meta data</h2>
-    <Dropdown v-model="newType" label="Type" :options="labels" />
+    <!-- <Dropdown v-model="newType" label="Type" :options="labels" />
     <InputField v-model="newValue" label="Value" />
     <BaseButton
       label="Add"
@@ -10,7 +10,7 @@
       :bg-color="'blue-400'"
       :txt-color="'neutral-0'"
       @click="add"
-    />
+    /> -->
   </div>
 </template>
 
@@ -19,37 +19,36 @@
   import BaseButton from '@/components/base/BaseButton.vue';
   import Dropdown from '@/components/base/Dropdown.vue';
   import InputField from '@/components/base/InputField.vue';
-  import { GetEnumsByNameDocument, MetaKey } from '@/queries';
   import { useQuery } from '@vue/apollo-composable';
   import { Unicons } from '@/types';
 
   export default defineComponent({
     name: 'MetaAdd',
-    components: { Dropdown, BaseButton, InputField },
+    // components: { Dropdown, BaseButton, InputField },
     emits: ['addMetadata'],
     setup(props, { emit }) {
-      const newType = ref(MetaKey.Type);
-      const newValue = ref('');
-      const { result } = useQuery(GetEnumsByNameDocument, { enumName: 'MetaKey' });
+      // const newType = ref(MetaKey.Type);
+      // const newValue = ref('');
+      // const { result } = useQuery(GetEnumsByNameDocument, { enumName: 'MetaKey' });
 
-      const add = () => {
-        emit('addMetadata', { key: newType.value, value: newValue.value });
-      };
+      // const add = () => {
+      //   emit('addMetadata', { key: newType.value, value: newValue.value });
+      // };
 
-      const labels = computed(() =>
-        result.value?.__type?.enumValues
-          ?.filter((val) => val.name !== MetaKey.Title)
-          .map((val) => {
-            return val.name;
-          }),
-      );
+      // const labels = computed(() =>
+      //   result.value?.__type?.enumValues
+      //     ?.filter((val: any) => val.name !== MetaKey.Title)
+      //     .map((val: any) => {
+      //       return val.name;
+      //     }),
+      // );
 
       return {
-        add,
-        labels,
-        Unicons,
-        newValue,
-        newType,
+        // add,
+        // labels,
+        // Unicons,
+        // newValue,
+        // newType,
       };
     },
   });

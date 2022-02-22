@@ -22,17 +22,17 @@
 
 <script lang="ts">
   import { defineComponent, PropType } from 'vue';
-  import MetaEdit from '@/components/MetaEdit.vue';
+  // import MetaEdit from '@/components/MetaEdit.vue';
   import MetaView from '@/components/MetaView.vue';
   import { useEditMode } from './EditToggle.vue';
-  import { Metadata, MetadataCollection, Relation } from '@/queries';
+  import { MetadataAndRelation } from '@/queries';
 
   export default defineComponent({
     name: 'Meta',
     components: { MetaView },
     props: {
-      metadata: { type: Array as PropType<MetadataCollection[]>, required: true },
-      entityTitle: { type: String, required: true },
+      metadata: { type: Array as PropType<MetadataAndRelation[]>, required: true },
+      entityTitle: { type: String, required: false, default: undefined },
       loading: {
         type: Boolean,
         default: false,

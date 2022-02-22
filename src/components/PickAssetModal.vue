@@ -15,7 +15,7 @@
   import { defineComponent, ref } from 'vue';
   import AssetLibrary from '@/components/AssetLibrary.vue';
   import { useMutation } from '@vue/apollo-composable';
-  import { AddComponentDocument, RelationType } from '@/queries';
+  // import { AddComponentDocument, RelationType } from '@/queries';
 
   export type PickAssetModalType = {
     state: ModalState;
@@ -64,12 +64,12 @@
     emits: ['updateEntity'],
     setup(props, { emit }) {
       const { closePickAssetModal, pickAssetModalState } = usePickAssetModal();
-      const { mutate } = useMutation(AddComponentDocument);
+      // const { mutate } = useMutation(AddComponentDocument);
       const addItem = async (id: string) => {
-        await mutate({
-          id: props.entityId,
-          relations: [{ type: RelationType.Components, key: id }],
-        });
+        // await mutate({
+        //   id: props.entityId,
+        //   relations: [{ type: RelationType.Components, key: id }],
+        // });
         emit('updateEntity');
         closePickAssetModal();
       };

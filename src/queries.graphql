@@ -1,26 +1,51 @@
-fragment minimalEntity on Entity {
-  id
-  type
-  metadata(key: [title, object_number]) {
-    key
-    value
-    lang
-    immutable
-  }
-  primary_mediafile
+fragment metadata on Metadata {
+  key
+  value
+  label
+  immutable
 }
 
-fragment nestedEntity on Entity {
+fragment metadataRelation on MetadataRelation {
+  key
+  value
+  label
+  type
+}
+
+fragment minimalBaseEntity on Entity {
   id
   type
-  metadataCollection {
-    label
-    nested
-    key
-    data {
-      value
-      unMappedKey
-      label
+  media {
+    primaryMediafile
+  }
+}
+
+fragment minimalEntity on Entity {
+  ...minimalBaseEntity
+  __typename
+  ... on Asset {
+    ...minimalAsset
+  }
+}
+
+fragment minimalAsset on Asset {
+  ...minimalBaseEntity
+  teaserMetadata: metadata(keys: ["title", "object_number"], excludeOrInclude: include) {
+    __typename
+    ... on Metadata {
+      ...metadata
+    }
+    ... on MetadataRelation {
+      ...metadataRelation
+    }
+  }
+  title: metadata(keys: ["title"], excludeOrInclude: include) {
+    __typename
+    ... on Metadata {
+      ...metadata
+    }
+    ... on MetadataRelation {
+      ...metadataRelation
     }
   }
 }
@@ -28,47 +53,90 @@ fragment nestedEntity on Entity {
 fragment fullEntity on Entity {
   id
   type
-  title: metadata(key: [title]) {
-    key
-    value
-    lang
-    immutable
-  }
-  mediafiles {
-    _id
-    original_file_location
-    filename
-    thumbnail_file_location
-    metadata {
+  title: metadata(keys: ["title"], excludeOrInclude: include) {
+    __typename
+    ... on Metadata {
       key
       value
+      label
+      immutable
     }
   }
-  metadataCollection {
-    label
-    nested
-    key
-    data {
-      value
-      unMappedKey
-      label
-      nestedMetaData {
-        ...nestedEntity
+  media {
+    mediafiles {
+      _id
+      filename
+      thumbnail_file_location
+      metadata {
+        key
+        value
       }
     }
   }
-  parents {
-    ...minimalEntity
-  }
-  components {
-    ...minimalEntity
+}
+
+fragment fullEntityRecursive on Entity {
+  ...fullEntity
+  metadata(keys: ["title"], excludeOrInclude: exclude) {
+    __typename
+    ... on Metadata {
+      ...metadata
+    }
+    ... on MetadataRelation {
+      ...metadataRelation
+      linkedEntity {
+        ...fullEntity
+        metadata(keys: [], excludeOrInclude: exclude) {
+          __typename
+          ... on Metadata {
+            ...metadata
+          }
+          ... on MetadataRelation {
+            ...metadataRelation
+            linkedEntity {
+              ...fullEntity
+              metadata(keys: [], excludeOrInclude: exclude) {
+                __typename
+                ... on Metadata {
+                  ...metadata
+                }
+                ... on MetadataRelation {
+                  ...metadataRelation
+                  linkedEntity {
+                    ...fullEntity
+                    metadata(keys: [], excludeOrInclude: exclude) {
+                      ... on Metadata {
+                        ...metadata
+                      }
+                      ... on MetadataRelation {
+                        ...metadataRelation
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
 
-fragment fullRelation on Relation {
-  key
-  type
-  label
+query getEntities($limit: Int, $skip: Int, $searchValue: SearchFilter!) {
+  Entities(limit: $limit, skip: $skip, searchValue: $searchValue) {
+    count
+    limit
+    results {
+      ...minimalEntity
+    }
+  }
+}
+
+query getEntityById($id: String!) {
+  Entity(id: $id) {
+    ...fullEntityRecursive
+  }
 }
 
 fragment job on Job {
@@ -96,57 +164,12 @@ fragment jobWithSubJobs on Job {
   }
 }
 
-query getEntities($limit: Int, $skip: Int, $searchValue: SearchFilter!) {
-  Entities(limit: $limit, skip: $skip, searchValue: $searchValue) {
-    count
-    limit
-    results {
-      ...minimalEntity
-    }
-  }
-}
-
-query getFullEntities(
-  $limit: Int
-  $skip: Int
-  $searchValue: SearchFilter!
-  $fetchPolicy: String
-) {
-  Entities(
-    limit: $limit
-    skip: $skip
-    searchValue: $searchValue
-    fetchPolicy: $fetchPolicy
-  ) {
-    count
-    limit
-    results {
-      ...fullEntity
-    }
-  }
-}
-
-query getEntityById($id: String!) {
-  Entity(id: $id) {
-    ...fullEntity
-  }
-}
-
 query getDirectories($dir: String) {
   Directories(dir: $dir) {
     id
     dir
     has_subdirs
     parent
-  }
-}
-
-query getEnumsByName($enumName: String!) {
-  __type(name: $enumName) {
-    name
-    enumValues {
-      name
-    }
   }
 }
 
@@ -193,12 +216,5 @@ mutation editMetadata($id: String!, $metadata: [MetadataInput!]!) {
     key
     value
     lang
-  }
-}
-
-mutation addComponent($id: String!, $relations: [RelationInput!]!) {
-  addRelations(id: $id, relations: $relations) {
-    key
-    type
   }
 }

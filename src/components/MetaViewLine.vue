@@ -2,80 +2,77 @@
   <div v-for="item in metadata" :key="item.label" class="flex flex-col mb-2 mt-2">
     <div v-if="item.label" class="label" :class="{ loading }" data-test="meta-label">
       <a
-        v-if="item.nested"
+        v-if="item.linkedEntity"
         class="underline"
         :href="`/${item.key.replace('entities', 'entity')}`"
-        v-html="t(`${item.label}`)"
-      />
-      <span v-else v-html="t(`${item.label}`)" />
+      >
+        {{ checkTranslationForlabel(item.label) }}
+      </a>
+      <span v-else>{{ checkTranslationForlabel(item.label) }}</span>
     </div>
     <div v-else class="label" :class="{ loading }">no label</div>
-    <div v-if="item.data && item.nested && nested">
-      <div
-        v-for="data in item.data"
-        :key="data?.nestedMetaData ? data?.nestedMetaData.id : 'no-id'"
-        class="ml-4"
-      >
+    <div v-if="item.linkedEntity && nested">
+      <div class="ml-4">
         <meta-view-line
-          v-if="data?.nestedMetaData?.metadataCollection"
-          :metadata="data?.nestedMetaData?.metadataCollection"
+          v-if="item.linkedEntity.metadata"
+          :metadata="item.linkedEntity.metadata"
           :loading="loading"
-          :nested="false"
+          :nested="true"
         />
       </div>
     </div>
     <div
-      v-if="(item.data && !item.nested) || (item.data && item.nested && !nested)"
+      v-if="
+        (item.value && !item.linkedEntity) || (item.value && item.linkedEntity && !nested)
+      "
       class="value"
       :class="{ loading }"
       data-test="meta-info"
     >
-      {{ concatMetaDataValue(item.data) }}
+      {{ item.value }}
     </div>
-    <div v-if="!item.data" class="value" :class="{ loading }">no data</div>
+    <div v-if="!item.value" class="value" :class="{ loading }">no data</div>
   </div>
   <div
     v-if="metadata.length == 0"
     class="justify-left items-center flex text-sm text-red-default"
-  >
-    No metadata available
-  </div>
+  ></div>
 </template>
 
 <script lang="ts">
-  import { Maybe, Metadata, MetadataCollection } from '@/queries';
+  import { MetadataAndRelation } from '@/queries';
   import { defineComponent, PropType } from 'vue';
   import { useI18n } from 'vue-i18n';
   import { useRouter } from 'vue-router';
+  import { Unicons } from '@/types';
 
   export default defineComponent({
     name: 'MetaViewLine',
     props: {
       loading: { type: Boolean, default: false },
-      metadata: { type: Array as PropType<MetadataCollection[]>, required: false },
+      metadata: {
+        type: Array as PropType<MetadataAndRelation[]>,
+        required: false,
+        default: () => [],
+      },
       nested: { type: Boolean, default: true },
     },
     setup() {
       const router = useRouter();
       const { t } = useI18n();
-      const concatMetaDataValue = (input: Maybe<Metadata>[]): string => {
-        let result = '';
-        input.forEach((data: Maybe<Metadata>) => {
-          if (result !== '' && data && data.value) {
-            result = `${result}, ${data.value}`;
-          }
-          if (result === '' && data && data.value) {
-            result = data.value;
-          }
-        });
 
-        return result;
+      const checkTranslationForlabel = (input: string) => {
+        const translationKey = `metadata.${input}`;
+        const translation = t(translationKey);
+
+        return translation === translationKey ? input : translation;
       };
 
       return {
         t,
         router,
-        concatMetaDataValue,
+        Unicons,
+        checkTranslationForlabel,
       };
     },
   });
