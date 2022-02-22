@@ -58,7 +58,7 @@
           />
           <MultiFilter
             v-if="filter.type === 'multiselect'"
-            v-model:Multiselectvalue="initialFilters[i]"
+            v-model:MultiselectValue="initialFilters[i]"
             :filterkey="filter.key"
           />
         </template>
@@ -116,6 +116,7 @@
       });
 
       const applyFilters = () => {
+        console.log('activeFilters.value');
         console.log(activeFilters.value);
         //emit('update:activeFilters', activeFilters.value);
       };

@@ -30,19 +30,23 @@
       filterkey: {
         type: [String],
         required: true,
-        default: undefined,
       },
     },
     emits: ['update:MultiselectValue'],
     setup(props, { emit }) {
-      const MultiSelectValue = ref([]);
-      const returnObject = ref();
+      type returnType = {
+        key: string;
+        value: string[] | undefined;
+      };
+
+      const MultiSelectValue = ref<string[]>([]);
+      const returnObject = ref<returnType>();
 
       watch(MultiSelectValue, () => {
         if (MultiSelectValue.value.length > 0) {
           returnObject.value = { key: props.filterkey, value: MultiSelectValue.value };
         } else {
-          returnObject.value = undefined;
+          returnObject.value = { key: props.filterkey, value: undefined };
         }
       });
 
