@@ -1,6 +1,6 @@
 <template>
   <div>
-    <ul v-for="(option, index) in options.FilterOptions" :key="option">
+    <ul v-for="(option, index) in options?.FilterOptions" :key="option">
       <li>
         <input
           :id="option.label"
@@ -34,7 +34,6 @@
     },
     emits: ['update:listValue'],
     setup(props, { emit }) {
-
       const checklistValue = ref<Boolean[]>([]);
       const returnObject = ref<object>();
 

@@ -19,6 +19,8 @@
 <script lang="ts">
   import { defineComponent, PropType, ref, watch } from 'vue';
   import InputField from '@/components/base/InputField.vue';
+  import { GetFilterOptionsDocument } from '@/queries';
+  import { useQuery } from '@vue/apollo-composable';
 
   export default defineComponent({
     name: 'MinmaxFilter',
