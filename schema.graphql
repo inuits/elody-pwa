@@ -28,6 +28,11 @@ type Asset implements Entity {
   title: [MetadataAndRelation]
 }
 
+type RelationMetaData {
+  key: String!
+  value: String!
+}
+
 type Metadata {
   key: String!
   value: String!
@@ -41,6 +46,7 @@ type MetadataRelation {
   value: String!
   label: String!
   type: String
+  metadataOnRelation: [RelationMetaData]
   linkedEntity: Entity
 }
 
@@ -202,7 +208,7 @@ type Query {
   advancedEntities(
     limit: Int
     skip: Int
-    advancedSearchValue: [AdvancedSearchInput]
+    advancedSearchValue: AdvancedSearchInput
 
     fetchPolicy: String
   ): EntitiesResults
@@ -212,7 +218,6 @@ type Query {
   Job(id: String!): Job
   advancedFilters: [advancedFilter]
   FilterOptions(key: String!): [filterOption]
-  advancedFiltersSearchQuery(input: [AdvancedSearchInput]): EntitiesResults
 }
 
 #Mutations
