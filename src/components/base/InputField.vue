@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, PropType, ref, watch } from 'vue';
+  import { computed, defineComponent, PropType, ref, watch } from 'vue';
   import { Unicons } from '@/types';
   import { debounce } from 'ts-debounce';
   export const lableStyle = 'ml-1 text-neutral-700 text-sm"';
@@ -44,12 +44,18 @@
     },
     emits: ['update:modelValue'],
     setup(props, { emit }) {
-      const inputValue = ref<string>(props.modelValue);
       let emitValue = (value: string) => emit('update:modelValue', value);
       if (props.debounce) {
         emitValue = debounce(emitValue, props.debounceWait);
       }
-      watch(inputValue, emitValue);
+      const inputValue = computed({
+        get() {
+          return props.modelValue;
+        },
+        set(value: string) {
+          emitValue(value);
+        },
+      });
       return { inputValue, inputStyle, inputContainerStyle };
     },
   });
