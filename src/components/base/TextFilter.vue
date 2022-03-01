@@ -1,7 +1,7 @@
 <template>
   <div>
     <InputField
-      v-model="returnObject.value"
+      v-model:modelValue="returnObject.value"
       :debounce="true"
       :placeholder="text"
       :bg-color="'neutral-20'"

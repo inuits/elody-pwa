@@ -13,9 +13,10 @@
       textoff="Of"
     />
   </div>
-  <div></div>
+
   <div>
     <Multiselect
+      v-if="MultiFuzzyKeuze == true"
       v-model="MultiSelectValue"
       mode="tags"
       :searchable="true"
@@ -28,6 +29,15 @@
       no-results-text="no filter with that name found"
     />
   </div>
+  <div>
+    <InputField
+      v-if="MultiFuzzyKeuze == false"
+      v-model="Fuzzyinput"
+      :debounce="true"
+      placeholder="Fuzzy Search..."
+      :bg-color="'neutral-20'"
+    />
+  </div>
 </template>
 
 <script lang="ts">
@@ -36,12 +46,14 @@
   import { ref, defineComponent, watch } from 'vue';
   import Multiselect from '@vueform/multiselect';
   import AndOrToggle from './AndOrToggle.vue';
+  import InputField from '@/components/base/InputField.vue';
 
   export default defineComponent({
     name: 'MultiFilter',
     components: {
       Multiselect,
       AndOrToggle,
+      InputField,
     },
     props: {
       filterkey: {
@@ -53,24 +65,32 @@
     setup(props, { emit }) {
       type returnType = {
         key: string;
-        value: string[] | undefined;
-        AndOrValue: String;
+        value: string[] | String | undefined;
+        AndOrValue: String | undefined;
         MultiFuzzyChoice: String;
       };
 
       const MultiSelectValue = ref<string[]>([]);
       const returnObject = ref<returnType>();
+      const Fuzzyinput = ref<String>();
 
       const EnOfKeuze = ref<boolean>(true);
       const MultiFuzzyKeuze = ref<boolean>(true);
 
-      watch([MultiSelectValue, MultiFuzzyKeuze, EnOfKeuze], () => {
-        if (MultiSelectValue.value.length > 0) {
+      watch([MultiSelectValue, MultiFuzzyKeuze, EnOfKeuze, Fuzzyinput], () => {
+        if (MultiSelectValue.value.length > 0 && MultiFuzzyKeuze.value === true) {
           returnObject.value = {
             key: props.filterkey,
             value: MultiSelectValue.value,
             MultiFuzzyChoice: MultiFuzzyKeuze.value == true ? 'Multi' : 'Fuzzy',
             AndOrValue: EnOfKeuze.value == true ? 'En' : 'Of',
+          };
+        } else if (MultiFuzzyKeuze.value === false && Fuzzyinput.value !== '') {
+          returnObject.value = {
+            key: props.filterkey,
+            value: Fuzzyinput.value,
+            MultiFuzzyChoice: 'Fuzzy',
+            AndOrValue: undefined,
           };
         } else {
           returnObject.value = {
@@ -91,7 +111,7 @@
 
       watch(returnObject, emitValue);
 
-      return { result, MultiSelectValue, MultiFuzzyKeuze, EnOfKeuze };
+      return { result, MultiSelectValue, MultiFuzzyKeuze, EnOfKeuze, Fuzzyinput };
     },
   });
 </script>
