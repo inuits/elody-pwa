@@ -31,41 +31,39 @@
         />
       </div>
     </div>
-    <div>
-      <div
-        v-for="(filter, i) in filters?.advancedFilters"
-        :key="filter.key"
-        class="filters w-full lg:h-1770"
+    <div
+      v-for="(filter, i) in filters?.advancedFilters"
+      :key="filter.key"
+      class="filters w-full lg:h-1770"
+    >
+      <FilterAccordion
+        :active="initialFilters[i] && initialFilters[i].value != undefined ? true : false"
+        :label="filter.label"
       >
-        <FilterAccordion>
-          <template #title>
-            <Label :color="neutral - 0" class="text-neutral-900" :name="filter.label" />
-          </template>
-          <template #content>
-            <TextFilter
-              v-if="filter.type === 'tekst'"
-              v-model:inputValue="initialFilters[i]"
-              :filterkey="filter.key"
-              :text="filter.label"
-            />
-            <ChecklistFilter
-              v-if="filter.type === 'checklist'"
-              v-model:listValue="initialFilters[i]"
-              :filterkey="filter.key"
-            />
-            <MinmaxFilter
-              v-if="filter.type === 'minmax'"
-              v-model:minmaxValue="initialFilters[i]"
-              :filterkey="filter.key"
-            />
-            <MultiFilter
-              v-if="filter.type === 'multiselect'"
-              v-model:MultiselectValue="initialFilters[i]"
-              :filterkey="filter.key"
-            />
-          </template>
-        </FilterAccordion>
-      </div>
+        <template #content>
+          <TextFilter
+            v-if="filter.type === AdvancedFilterTypes.Tekst"
+            v-model:inputValue="initialFilters[i]"
+            :filterkey="filter.key"
+            :text="filter.label"
+          />
+          <ChecklistFilter
+            v-if="filter.type === AdvancedFilterTypes.Checklist"
+            v-model:listValue="initialFilters[i]"
+            :filterkey="filter.key"
+          />
+          <MinmaxFilter
+            v-if="filter.type === AdvancedFilterTypes.Minmax"
+            v-model:minmaxValue="initialFilters[i]"
+            :filterkey="filter.key"
+          />
+          <MultiFilter
+            v-if="filter.type === AdvancedFilterTypes.Multiselect"
+            v-model:MultiselectValue="initialFilters[i]"
+            :filterkey="filter.key"
+          />
+        </template>
+      </FilterAccordion>
     </div>
   </div>
 </template>
@@ -79,7 +77,6 @@
   import TextFilter from '@/components/base/TextFilter.vue';
   import ChecklistFilter from '@/components/base/ChecklistFilter.vue';
   import MultiFilter from '@/components/base/MultiFilter.vue';
-  import Label from '@/components/base/Label.vue';
   import AndOrToggle from './base/AndOrToggle.vue';
   import { AdvancedSearchInput, AdvancedInputType } from '@/queries';
 
@@ -92,7 +89,6 @@
       TextFilter,
       ChecklistFilter,
       MultiFilter,
-      Label,
       AndOrToggle,
     },
 

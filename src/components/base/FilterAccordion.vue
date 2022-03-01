@@ -11,21 +11,21 @@
         px-3
         py-5
       "
+      :class="props.active == true ? 'bg-blue-50' : ''"
       @click="toggleAccordion"
     >
-      <slot name="title" />
+      <Label
+        :name="props.label"
+        :color="props.active == true ? 'blue-50' : 'neutral-0'"
+        class="text-neutral-900"
+      />
+
       <p>
         <span v-show="isOpen"
-          ><unicon
-            :name="Unicons.Minus.name"
-            height="20"
-            :fill="loading ? 'var(--color-neutral-20)' : `${iconColor}`"
+          ><unicon :name="Unicons.Minus.name" height="20" fill="var(--neutral-900)"
         /></span>
         <span v-show="!isOpen"
-          ><unicon
-            :name="Unicons.Plus.name"
-            height="20"
-            :fill="loading ? 'var(--color-neutral-20)' : `${iconColor}`"
+          ><unicon :name="Unicons.Plus.name" height="20" fill="var(--neutral-900)"
         /></span>
       </p>
     </button>
@@ -36,16 +36,31 @@
   </div>
 </template>
 <script>
-  import { defineComponent, ref } from 'vue';
+  import { defineComponent, ref, computed } from 'vue';
   import { Unicons } from '@/types';
+  import Label from '@/components/base/Label.vue';
   export default defineComponent({
     name: 'FilterAccordion',
-    setup() {
+    components: {
+      Label,
+    },
+    props: {
+      active: {
+        type: Boolean,
+        required: true,
+      },
+      label: {
+        type: String,
+        required: true,
+      },
+    },
+    setup(props) {
       const isOpen = ref(false);
       const toggleAccordion = () => {
         isOpen.value = !isOpen.value;
       };
-      return { isOpen, toggleAccordion, Unicons };
+
+      return { isOpen, toggleAccordion, Unicons, props };
     },
   });
 </script>
