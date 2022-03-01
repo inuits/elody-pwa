@@ -19,7 +19,9 @@ import { environment as _ } from './environment';
 
 Unicon.add(Object.values(Unicons));
 
-const config = await fetch('../config.json').then((r) => r.json());
+const config = await fetch(
+  process.env.VUE_APP_CONFIG_URL ? process.env.VUE_APP_CONFIG_URL : '../config.json',
+).then((r) => r.json());
 const auth = new OpenIdConnectClient(config.oidc);
 const head = createHead();
 
