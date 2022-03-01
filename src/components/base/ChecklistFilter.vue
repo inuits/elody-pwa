@@ -1,4 +1,5 @@
 <template>
+  <div><AndOrToggle v-model:AndOrValue="EnOfKeuze" texton="En" textoff="Of" /></div>
   <div>
     <ul v-for="(option, index) in options?.FilterOptions" :key="option">
       <li>
@@ -23,9 +24,10 @@
   import { GetFilterOptionsDocument } from '@/queries';
   import { useQuery } from '@vue/apollo-composable';
   import { defineComponent, ref, watch } from 'vue';
-
+  import AndOrToggle from './AndOrToggle.vue';
   export default defineComponent({
     name: 'ChecklistFilter',
+    components: { AndOrToggle },
     props: {
       filterkey: {
         type: [String],
@@ -36,32 +38,45 @@
     setup(props, { emit }) {
       const checklistValue = ref<Boolean[]>([]);
       const returnObject = ref<object>();
-
+      const EnOfKeuze = ref<boolean>(true);
       const { result: options } = useQuery(GetFilterOptionsDocument, {
         key: props.filterkey,
       });
 
-      watch(checklistValue.value, () => {
+      watch([checklistValue.value, EnOfKeuze], () => {
         let temp = [];
         if (options.value?.FilterOptions) {
           for (let i = 0; i < checklistValue.value.length; i++) {
             if (checklistValue.value[i] == true) {
-              temp.push(options.value.FilterOptions[i]);
+              temp.push(options.value.FilterOptions[i]?.value);
             }
           }
         }
 
         if (temp.length > 0) {
-          returnObject.value = { key: props.filterkey, value: temp };
+          returnObject.value = {
+            key: props.filterkey,
+            value: temp,
+            AndOrValue: EnOfKeuze.value == true ? 'En' : 'Of',
+          };
         } else {
-          returnObject.value = { key: props.filterkey, value: undefined };
+          returnObject.value = {
+            key: props.filterkey,
+            value: undefined,
+            AndOrValue: EnOfKeuze.value == true ? 'En' : 'Of',
+          };
         }
+        /* let testvar = JSON.stringify(returnObject.value);
+        console.log(testvar); */
+      });
+      watch(EnOfKeuze, () => {
+        console.log('boollog checkfilter', EnOfKeuze.value);
       });
 
       let emitValue = (value: object) => emit('update:listValue', value);
       watch(returnObject, emitValue);
 
-      return { options, checklistValue };
+      return { options, checklistValue, EnOfKeuze };
     },
   });
 </script>

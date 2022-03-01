@@ -132,6 +132,27 @@ query getEntities($limit: Int, $skip: Int, $searchValue: SearchFilter!) {
   }
 }
 
+query getAdvancedEntities(
+  $limit: Int
+  $skip: Int
+  $advancedSearchValue: [AdvancedSearchInput]!
+) {
+  advancedEntities(limit: $limit, skip: $skip, advancedSearchValue: $advancedSearchValue) {
+    count
+    limit
+    results {
+      id
+      type
+      media {
+        primaryMediafile
+      }
+      ... on Asset {
+        ...minimalAsset
+      }
+    }
+  }
+}
+
 query getEntityById($id: String!) {
   Entity(id: $id) {
     ...fullEntityRecursive
@@ -196,6 +217,13 @@ query getAdvancedFilters {
     key
   }
 }
+
+# query getAdvancedFilterResult($filters: [AdvancedSearchInput]!) {
+#   Entities(filters: $filters) {
+#     count
+#     limit
+#   }
+# }
 
 query getFilterOptions($key: String!) {
   FilterOptions(key: $key) {

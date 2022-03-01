@@ -1,6 +1,6 @@
 <template>
   <div class="lg:flex">
-    <!-- <FilterSideBar v-show="showDrawer" v-model:activeFilters="activeFilters" /> -->
+    <FilterSideBar v-show="showDrawer" v-model:activeFilters="activeFilters" />
     <div class="p-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
         <div class="mt-8 mr-4">
@@ -112,7 +112,13 @@
   } from '@/components/base/Pagination.vue';
   import { Unicons } from '@/types';
   import { useRouter } from 'vue-router';
-  import { GetEntitiesDocument } from '@/queries';
+  import {
+    GetEntitiesDocument,
+    GetAdvancedEntitiesDocument,
+    AdvancedSearchInput,
+    AdvancedInputType,
+    GetJobDocument,
+  } from '@/queries';
   import useRouteHelpers from '@/composables/useRouteHelpers';
   import FilterSideBar from '@/components/FilterSideBar.vue';
   import IconToggle from '@/components/base/IconToggle.vue';
@@ -121,6 +127,12 @@
   type QueryVariables = {
     pagination: PaginationInfo;
     searchQuery: string;
+    sort: string;
+  };
+
+  type advancedQueryVariables = {
+    pagination: PaginationInfo;
+    advancedSearchQuery: AdvancedInputType[];
     sort: string;
   };
   type filterObject = {
@@ -136,7 +148,7 @@
       BaseButton,
       InputField,
       Dropdown,
-      // FilterSideBar,
+      FilterSideBar,
       IconToggle,
     },
     props: {
@@ -148,8 +160,9 @@
     emits: ['addSelection'],
     setup: (props, { emit }) => {
       const router = useRouter();
-      const searchQuery = ref<string>('wafelijzer');
-      let activeFilters = ref<filterObject[]>([]);
+      const searchQuery = ref<string>('');
+      const advancedSearchQuery = ref<AdvancedInputType[]>([]);
+      const activeFilters = ref<AdvancedInputType[]>([]);
       const routeHelper = useRouteHelpers();
       const paginationInfo = reactive({
         limit: 20,
@@ -158,8 +171,10 @@
       routeHelper.getPaginationInfoFromUrl(paginationInfo);
       const { t } = useI18n();
 
-      watch(activeFilters.value, () => {
+      watch(activeFilters, () => {
+        console.log('assetlibrary');
         console.log(activeFilters.value);
+        console.log(JSON.stringify(activeFilters.value));
       });
 
       const queryVariables = reactive<QueryVariables>({
@@ -168,6 +183,14 @@
         sort: 'Title',
       });
 
+      //advanced queryvariables
+      const advancedQueryvariables = reactive<advancedQueryVariables>({
+        pagination: paginationInfo,
+        advancedSearchQuery: advancedSearchQuery.value,
+        sort: 'Title',
+      });
+
+      //gewone zoek query
       const { result, loading, fetchMore } = useQuery(
         GetEntitiesDocument,
         {
@@ -185,6 +208,25 @@
         },
       );
 
+      // advanced query
+      const { result: advancedFilterResult, fetchMore: appliedFilters } = useQuery(
+        GetAdvancedEntitiesDocument,
+        {
+          limit: advancedQueryvariables.pagination.limit,
+          skip: advancedQueryvariables.pagination.skip,
+          advancedSearchValue: {
+            value: advancedQueryvariables.advancedSearchQuery,
+            isAsc: false,
+            key: advancedQueryvariables.sort.toLowerCase(),
+            relation_filter: [],
+          },
+        },
+        {
+          notifyOnNetworkStatusChange: true,
+        },
+      );
+
+      // gewone data
       const getData = () => {
         fetchMore({
           variables: {
@@ -203,6 +245,26 @@
         });
       };
 
+      //advanced data
+      const getAdvancedData = () => {
+        appliedFilters({
+          variables: {
+            limit: Number(advancedQueryvariables.pagination.limit),
+            skip:
+              Number(advancedQueryvariables.pagination.skip - 1) *
+              Number(advancedQueryvariables.pagination.limit),
+            advancedSearchValue: {
+              value: advancedSearchQuery.value,
+              isAsc: false,
+              key: advancedQueryvariables.sort.toLowerCase(),
+              relation_filter: [],
+            },
+          },
+          updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
+        });
+      };
+
+      // gewone search query
       watch(searchQuery, (value: string) => {
         queryVariables.pagination.skip = 1;
         getData();
@@ -213,6 +275,17 @@
         getData();
       });
 
+      //advanced search query
+      watch(advancedSearchQuery, (value: AdvancedInputType[]) => {
+        advancedQueryvariables.pagination.skip = 1;
+        getAdvancedData();
+      });
+
+      watch(advancedQueryvariables, () => {
+        routeHelper.updatePaginationInfoQueryParams(advancedQueryvariables.pagination);
+        getAdvancedData();
+      });
+
       const addSelection = (id: string) => {
         emit('addSelection', id);
       };
@@ -221,16 +294,18 @@
 
       return {
         t,
-        result,
+        advancedFilterResult,
         loading,
         router,
         Unicons,
         queryVariables,
         searchQuery,
+        advancedSearchQuery,
         addSelection,
         paginationLimits,
         showDrawer,
         activeFilters,
+        result,
       };
     },
   });

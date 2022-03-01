@@ -12,6 +12,7 @@
       <div
         class="flex justify-between border-solid border-b-2 border-neutral-30 px-3 pb-3"
       >
+        <AndOrToggle v-model:AndOrValue="EnOfKeuze" texton="En" textoff="Of" />
         <BaseButton
           bg-color="blue-50"
           bg-hover-color="blue-75"
@@ -79,6 +80,8 @@
   import ChecklistFilter from '@/components/base/ChecklistFilter.vue';
   import MultiFilter from '@/components/base/MultiFilter.vue';
   import Label from '@/components/base/Label.vue';
+  import AndOrToggle from './base/AndOrToggle.vue';
+  import { AdvancedSearchInput, AdvancedInputType } from '@/queries';
 
   export default defineComponent({
     name: 'FilterSideBar',
@@ -90,7 +93,9 @@
       ChecklistFilter,
       MultiFilter,
       Label,
+      AndOrToggle,
     },
+
     emits: ['update:activeFilters'],
     setup(props, { emit }) {
       type filterObject = {
@@ -101,6 +106,9 @@
       const initialFilters = ref<filterObject[]>([]);
       const activeFilters = ref<filterObject[]>([]);
       const activeCount = computed(() => activeFilters.value.length);
+      const EnOfKeuze = ref<boolean>(true);
+
+      const tester = ref<Boolean>(true);
 
       const { result: filters } = useQuery(GetAdvancedFiltersDocument);
 
@@ -118,14 +126,19 @@
       });
 
       const applyFilters = () => {
-        console.log('activeFilters.value');
+        console.log('activeFilters log');
         console.log(activeFilters.value);
         emit('update:activeFilters', activeFilters.value);
       };
 
+      let clearvar = initialFilters.value;
+
       const clearFilters = () => {
         initialFilters.value.forEach((e) => {
           e.value = undefined;
+
+          console.log(initialFilters.value);
+          console.log('clearvar na clearfilters', clearvar);
         });
       };
 
@@ -137,6 +150,8 @@
         clearFilters,
         AdvancedFilterTypes,
         activeFilters,
+        clearvar,
+        EnOfKeuze,
       };
 
       //je kan nu filters.advancedFilters gebruiken
