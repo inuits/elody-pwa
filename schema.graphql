@@ -10,6 +10,7 @@ interface Entity {
   type: String!
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
   media: Media
+  form: Form
 }
 
 type BaseEntity implements Entity {
@@ -17,6 +18,7 @@ type BaseEntity implements Entity {
   type: String!
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
   media: Media
+  form: Form
 }
 
 type Asset implements Entity {
@@ -26,6 +28,15 @@ type Asset implements Entity {
   media: Media
   teaserMetadata: [MetadataAndRelation]
   title: [MetadataAndRelation]
+  form: Form
+}
+
+type Frame implements Entity {
+  id: String!
+  type: String!
+  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
+  media: Media
+  form: Form
 }
 
 type RelationMetaData {
@@ -188,6 +199,41 @@ type JobsResults {
   count: Int
   limit: Int
   next: String
+}
+
+#Forms
+enum InputFieldTypes {
+  text
+  number
+}
+
+enum validation {
+  required
+  optional
+}
+
+type MetadataField {
+  key: String!
+  type: InputFieldTypes!
+  validation: validation
+}
+
+type RelationField {
+  relationType: String!
+  metadata: [MetadataField]
+  acceptedEntityTypes: [String]!
+}
+
+union MetadataOrRelationField = MetadataField | RelationField
+
+type Form {
+  fields: [MetadataOrRelationField]
+}
+
+input MetadataFormInput {
+  key: String!
+  value: String
+  lang: String
 }
 
 #Query
