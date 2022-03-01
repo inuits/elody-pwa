@@ -39,6 +39,7 @@
       const checklistValue = ref<Boolean[]>([]);
       const returnObject = ref<object>();
       const EnOfKeuze = ref<boolean>(true);
+
       const { result: options } = useQuery(GetFilterOptionsDocument, {
         key: props.filterkey,
       });
@@ -66,11 +67,6 @@
             AndOrValue: EnOfKeuze.value == true ? 'En' : 'Of',
           };
         }
-        /* let testvar = JSON.stringify(returnObject.value);
-        console.log(testvar); */
-      });
-      watch(EnOfKeuze, () => {
-        console.log('boollog checkfilter', EnOfKeuze.value);
       });
 
       let emitValue = (value: object) => emit('update:listValue', value);

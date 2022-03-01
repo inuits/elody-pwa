@@ -1,7 +1,7 @@
 <template>
   <div>
     <InputField
-      v-model="inputValue"
+      v-model="returnObject.value"
       :debounce="true"
       :placeholder="text"
       :bg-color="'neutral-20'"
@@ -9,24 +9,21 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, ref, watch, watchEffect } from 'vue';
+  import { defineComponent, ref, watch } from 'vue';
   import InputField from '@/components/base/InputField.vue';
-
   export default defineComponent({
     name: 'TextFilter',
     components: {
       InputField,
     },
-
     props: {
       text: {
-        type: [String],
+        type: String,
         required: false,
         default: '',
       },
-
       filterkey: {
-        type: [String],
+        type: String,
         required: true,
       },
     },
@@ -37,24 +34,17 @@
         value: string | undefined;
       };
 
-      const inputValue = ref<string>('');
+      const returnObject = ref<returnObject>({ key: props.filterkey, value: '' });
 
-      const returnObject = ref<returnObject>();
-
-      watch(inputValue, () => {
-        if (inputValue.value != '' && inputValue.value != undefined) {
-          returnObject.value = { key: props.filterkey, value: inputValue.value };
+      watch(returnObject.value, () => {
+        if (returnObject.value.value != '' && returnObject.value.value != undefined) {
+          emit('update:inputValue', returnObject.value);
         } else {
-          returnObject.value = { key: props.filterkey, value: undefined };
+          emit('update:inputValue', returnObject.value);
         }
-        /*  let testvar = JSON.stringify(returnObject.value);
-        console.log(testvar); */
       });
 
-      let emitValue = (value: object) => emit('update:inputValue', value);
-      watch(returnObject, emitValue);
-
-      return { inputValue };
+      return { returnObject };
     },
   });
 </script>
