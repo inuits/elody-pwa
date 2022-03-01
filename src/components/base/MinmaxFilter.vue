@@ -58,6 +58,8 @@
         } else {
           returnObject.value = { key: props.filterkey, value: undefined };
         }
+        /* let testvar = JSON.stringify(returnObject.value);
+        console.log(testvar); */
       });
 
       let emitValue = (value: object) => emit('update:minmaxValue', value);
