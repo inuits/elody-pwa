@@ -24,6 +24,24 @@ fragment minimalBaseEntity on Entity {
   }
 }
 
+fragment editForm on Form {
+  fields {
+    __typename
+    ... on MetadataField {
+      key
+      type
+    }
+    ... on RelationField {
+      relationType
+      metadata {
+        key
+        type
+      }
+      acceptedEntityTypes
+    }
+  }
+}
+
 fragment minimalAsset on Asset {
   ...minimalBaseEntity
   teaserMetadata: metadata(keys: ["title", "object_number"], excludeOrInclude: include) {
@@ -49,6 +67,9 @@ fragment minimalAsset on Asset {
 fragment fullEntity on Entity {
   id
   type
+  form {
+    ...editForm
+  }
   title: metadata(keys: ["title"], excludeOrInclude: include) {
     __typename
     ... on Metadata {
