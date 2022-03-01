@@ -10,6 +10,10 @@ fragment metadataRelation on MetadataRelation {
   value
   label
   type
+  metadataOnRelation {
+    key
+    value
+  }
 }
 
 fragment minimalBaseEntity on Entity {
@@ -135,9 +139,13 @@ query getEntities($limit: Int, $skip: Int, $searchValue: SearchFilter!) {
 query getAdvancedEntities(
   $limit: Int
   $skip: Int
-  $advancedSearchValue: [AdvancedSearchInput]!
+  $advancedSearchValue: AdvancedSearchInput!
 ) {
-  advancedEntities(limit: $limit, skip: $skip, advancedSearchValue: $advancedSearchValue) {
+  advancedEntities(
+    limit: $limit
+    skip: $skip
+    advancedSearchValue: $advancedSearchValue
+  ) {
     count
     limit
     results {
