@@ -1,7 +1,7 @@
 <template>
   <div class="flex md:justify-around">
     <MinMaxField
-      v-model="minValue"
+      v-model="returnObject.value.min"
       :debounce="true"
       placeholder="min"
       :bg-color="'neutral-20'"
@@ -9,7 +9,7 @@
       min="0"
     />
     <MinMaxField
-      v-model="maxValue"
+      v-model="returnObject.value.max"
       :debounce="true"
       placeholder="max"
       :bg-color="'neutral-20'"
@@ -19,9 +19,6 @@
 </template>
 <script lang="ts">
   import { defineComponent, PropType, ref, watch } from 'vue';
-  import InputField from '@/components/base/InputField.vue';
-  import { GetFilterOptionsDocument } from '@/queries';
-  import { useQuery } from '@vue/apollo-composable';
   import MinMaxField from '@/components/base/MinMaxField.vue';
 
   export default defineComponent({
@@ -37,28 +34,31 @@
     },
     emits: ['update:minmaxValue'],
     setup(props, { emit }) {
-      const returnObject = {
-        key: props.filterkey,
-        value: { min: 0, max: 0 },
+      type returnObjectType = {
+        key: string;
+        value: { min: number | undefined; max: number | undefined };
       };
-      const minValue = ref<number>(returnObject.value.min);
-      const maxValue = ref<number>(returnObject.value.max);
 
-      watch([minValue, maxValue], () => {
-        if (minValue.value != undefined && maxValue) {
-          minValue.value == maxValue.value ? minValue.value++ : null;
-        }
-
-        if (minValue.value != undefined || maxValue.value != undefined) {
-          emit('update:minmaxValue', returnObject);
-        } else {
-          emit('update:minmaxValue', { key: props.filterkey, value: undefined });
-        }
-        /* let testvar = JSON.stringify(returnObject.value);
-        console.log(testvar); */
+      const returnObject = ref<returnObjectType>({
+        key: props.filterkey,
+        value: { min: undefined, max: undefined },
       });
 
-      return { minValue, maxValue };
+      watch(returnObject.value, () => {
+        if (
+          returnObject.value.value.min != undefined ||
+          returnObject.value.value.max != undefined
+        ) {
+          emit('update:minmaxValue', returnObject.value);
+        } else {
+          emit('update:minmaxValue', {
+            key: props.filterkey,
+            value: undefined,
+          });
+        }
+      });
+
+      return { returnObject };
     },
   });
 </script>

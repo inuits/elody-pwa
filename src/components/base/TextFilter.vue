@@ -37,9 +37,10 @@
       const returnObject = ref<returnObject>({ key: props.filterkey, value: '' });
 
       watch(returnObject.value, () => {
-        if (returnObject.value.value != '' && returnObject.value.value != undefined) {
+        if (returnObject.value.value != '') {
           emit('update:inputValue', returnObject.value);
         } else {
+          returnObject.value.value = undefined;
           emit('update:inputValue', returnObject.value);
         }
       });

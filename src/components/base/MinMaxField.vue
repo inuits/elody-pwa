@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, PropType, ref, watch } from 'vue';
+  import { defineComponent, PropType, computed, ref, watch } from 'vue';
   import { Unicons } from '@/types';
   import { debounce } from 'ts-debounce';
   export const lableStyle = 'ml-1 text-neutral-700 text-sm"';
@@ -36,24 +36,30 @@
     inheritAttrs: false,
     props: {
       label: { type: String, default: '' },
-      modelValue: { type: String, default: '' },
+      modelValue: { type: Number, default: 0 },
       debounce: { type: Boolean, default: false },
       debounceWait: { type: Number, default: 400 },
       icon: { type: String as PropType<keyof Unicons>, default: undefined },
       bgColor: { type: String, default: 'neutral-0' },
       name: { type: String, default: '', required: false },
       isDisabled: { type: true || false, default: false, required: false },
-      min: { type: String, default: '0', required: false },
+      min: { type: String, default: '', required: false },
       max: { type: String, default: '', required: false },
     },
     emits: ['update:modelValue'],
     setup(props, { emit }) {
-      const inputValue = ref<string>(props.modelValue);
-      let emitValue = (value: string) => emit('update:modelValue', value);
+      let emitValue = (value: number) => emit('update:modelValue', value);
       if (props.debounce) {
         emitValue = debounce(emitValue, props.debounceWait);
       }
-      watch(inputValue, emitValue);
+      const inputValue = computed({
+        get() {
+          return props.modelValue;
+        },
+        set(value: number) {
+          emitValue(value);
+        },
+      });
 
       return { inputValue, inputStyle, inputContainerStyle, props };
     },
