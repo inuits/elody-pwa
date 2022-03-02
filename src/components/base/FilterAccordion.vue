@@ -16,10 +16,9 @@
     >
       <Label
         :name="props.label"
-        :color="props.active == true ? 'blue-50' : 'neutral-0'"
+        :color="props.active == true ? 'blue-50' : 'bg-neutral-10'"
         class="text-neutral-900"
       />
-
       <p>
         <span v-show="isOpen"
           ><unicon :name="Unicons.Minus.name" height="20" fill="var(--neutral-900)"
@@ -29,7 +28,6 @@
         /></span>
       </p>
     </button>
-
     <div v-show="isOpen" class="border-solid border-b-2 border-neutral-30 px-3 py-5">
       <slot name="content" />
     </div>

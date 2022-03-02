@@ -37,7 +37,24 @@
       class="filters w-full lg:h-1770"
     >
       <FilterAccordion
-        :active="initialFilters[i] && initialFilters[i].value != undefined ? true : false"
+        :active="
+          initialFilters[i]
+            ? typeof initialFilters[i].value != 'object'
+              ? initialFilters[i].value != undefined
+                ? true
+                : false
+              : typeof initialFilters[i].value == 'object'
+              ? Array.isArray(initialFilters[i].value)
+                ? initialFilters[i].value.length > 0
+                  ? true
+                  : false
+                : initialFilters[i].value.min != undefined ||
+                  initialFilters[i].value.max != undefined
+                ? true
+                : false
+              : false
+            : null
+        "
         :label="filter.label"
       >
         <template #content>
@@ -104,37 +121,37 @@
       const activeCount = computed(() => activeFilters.value.length);
       const EnOfKeuze = ref<boolean>(true);
 
-      const tester = ref<Boolean>(true);
-
       const { result: filters } = useQuery(GetAdvancedFiltersDocument);
 
       watch(initialFilters.value, () => {
         activeFilters.value = [];
 
-        for (let i = 0; i < initialFilters.value.length; i++) {
-          if (
-            initialFilters.value[i] !== undefined &&
-            initialFilters.value[i].value !== undefined
-          ) {
-            activeFilters.value.push(initialFilters.value[i]);
+        initialFilters.value.forEach((initialFilter) => {
+          if (Array.isArray(initialFilter.value)) {
+            //IS VALUE EEN ARRAY
+            initialFilter.value.length > 0 //IS ARRAY LANGER ALS 0
+              ? activeFilters.value.push(initialFilter)
+              : null; // NIKS
+          } else if (initialFilter.value != undefined) {
+            activeFilters.value.push(initialFilter);
           }
-        }
+        });
       });
 
       const applyFilters = () => {
-        console.log('activeFilters log');
-        console.log(activeFilters.value);
         emit('update:activeFilters', activeFilters.value);
       };
 
-      let clearvar = initialFilters.value;
-
       const clearFilters = () => {
+        activeFilters.value = [];
         initialFilters.value.forEach((e) => {
-          e.value = undefined;
-
-          console.log(initialFilters.value);
-          console.log('clearvar na clearfilters', clearvar);
+          typeof e.value == 'string'
+            ? (e.value = undefined)
+            : typeof e.value == 'object'
+            ? Array.isArray(e.value)
+              ? (e.value = undefined)
+              : (e.value = { min: undefined, max: undefined })
+            : null;
         });
       };
 
@@ -146,7 +163,6 @@
         clearFilters,
         AdvancedFilterTypes,
         activeFilters,
-        clearvar,
         EnOfKeuze,
       };
 

@@ -1,11 +1,13 @@
 <template>
-  <div><AndOrToggle v-model:AndOrValue="EnOfKeuze" texton="En" textoff="Of" /></div>
+  <div>
+    <AndOrToggle v-model:AndOrValue="returnObject.AndOrValue" texton="En" textoff="Of" />
+  </div>
   <div>
     <ul v-for="(option, index) in options?.FilterOptions" :key="option">
       <li>
         <input
           :id="option.label"
-          v-model="checklistValue[index]"
+          v-model="returnObject.value[index]"
           type="checkbox"
           :name="option.label"
           :value="option.value"
@@ -36,43 +38,30 @@
     },
     emits: ['update:listValue'],
     setup(props, { emit }) {
-      const checklistValue = ref<Boolean[]>([]);
-      const returnObject = ref<object>();
-      const EnOfKeuze = ref<boolean>(true);
+      type returnObject = {
+        key: string;
+        value: string[] | undefined;
+        AndOrValue: boolean;
+      };
+
+      const returnObject = ref<returnObject>({
+        key: props.filterkey,
+        value: [],
+        AndOrValue: true,
+      });
 
       const { result: options } = useQuery(GetFilterOptionsDocument, {
         key: props.filterkey,
       });
 
-      watch([checklistValue.value, EnOfKeuze], () => {
-        let temp = [];
-        if (options.value?.FilterOptions) {
-          for (let i = 0; i < checklistValue.value.length; i++) {
-            if (checklistValue.value[i] == true) {
-              temp.push(options.value.FilterOptions[i]?.value);
-            }
-          }
+      watch([returnObject.value], () => {
+        if (returnObject.value.value == undefined) {
+          returnObject.value.value = [];
         }
-
-        if (temp.length > 0) {
-          returnObject.value = {
-            key: props.filterkey,
-            value: temp,
-            AndOrValue: EnOfKeuze.value == true ? 'En' : 'Of',
-          };
-        } else {
-          returnObject.value = {
-            key: props.filterkey,
-            value: undefined,
-            AndOrValue: EnOfKeuze.value == true ? 'En' : 'Of',
-          };
-        }
+        emit('update:listValue', returnObject.value);
       });
 
-      let emitValue = (value: object) => emit('update:listValue', value);
-      watch(returnObject, emitValue);
-
-      return { options, checklistValue, EnOfKeuze };
+      return { options, returnObject };
     },
   });
 </script>
