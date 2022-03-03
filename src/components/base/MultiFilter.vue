@@ -17,7 +17,7 @@
   <div>
     <Multiselect
       v-if="returnObject.MultiFuzzyChoice == true"
-      v-model="returnObject.value"
+      v-model="multiValue"
       mode="tags"
       :searchable="true"
       :close-on-select="false"
@@ -32,7 +32,7 @@
   <div>
     <InputField
       v-if="returnObject.MultiFuzzyChoice == false"
-      v-model="returnObject.value"
+      v-model="fuzzyValue"
       :debounce="true"
       placeholder="Fuzzy Search..."
       :bg-color="'neutral-20'"
@@ -72,20 +72,39 @@
 
       const returnObject = ref<returnType>({
         key: props.filterkey,
-        value: [],
+        value: undefined,
         AndOrValue: true,
         MultiFuzzyChoice: true,
       });
 
+      const multiValue = ref<string[]>([]);
+      const fuzzyValue = ref<string>('');
+
       watch(returnObject.value, () => {
+        returnObject.value.value === undefined
+          ? ((multiValue.value = []), (fuzzyValue.value = ''))
+          : null;
+
         emit('update:MultiselectValue', returnObject.value);
+      });
+
+      watch(multiValue, () => {
+        returnObject.value.MultiFuzzyChoice
+          ? (returnObject.value.value = multiValue.value)
+          : null;
+      });
+
+      watch(fuzzyValue, () => {
+        (fuzzyValue.value === '' || fuzzyValue.value === undefined) && !returnObject.value.MultiFuzzyChoice
+          ? returnObject.value.value = undefined
+          : (returnObject.value.value = fuzzyValue.value);
       });
 
       const { result, onResult } = useQuery(GetFilterOptionsDocument, {
         key: props.filterkey,
       });
 
-      return { result, returnObject };
+      return { result, returnObject, multiValue, fuzzyValue };
     },
   });
 </script>
