@@ -7,6 +7,7 @@
         :name="icon"
         :class="[`h-full pl-2 text-neutral-700 bg-${bgColor}`]"
       />
+
       <input
         v-model="inputValue"
         :disabled="isDisabled"
@@ -15,7 +16,6 @@
         type="number"
         :min="props.min"
         :max="props.max"
-        name=""
       />
     </div>
   </label>
@@ -33,6 +33,7 @@
 
   export default defineComponent({
     name: 'InputField',
+
     inheritAttrs: false,
     props: {
       label: { type: String, default: '' },

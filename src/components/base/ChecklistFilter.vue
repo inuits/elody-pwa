@@ -3,11 +3,11 @@
     <AndOrToggle v-model:AndOrValue="returnObject.AndOrValue" texton="En" textoff="Of" />
   </div>
   <div>
-    <ul v-for="(option, index) in options?.FilterOptions" :key="option">
+    <ul v-for="option in options?.FilterOptions" :key="option">
       <li>
         <input
           :id="option.label"
-          v-model="returnObject.value[index]"
+          v-model="returnObject.value"
           type="checkbox"
           :name="option.label"
           :value="option.value"
@@ -54,22 +54,10 @@
         key: props.filterkey,
       });
 
-      watch([returnObject.value], () => {
-        if (returnObject.value.value === undefined) {
+      watch(returnObject.value, () => {
+        if (returnObject.value.value == undefined) {
           returnObject.value.value = [];
         }
-
-        let counter = 0;
-
-        for (let i = 0; i < returnObject.value.value.length; i++) {
-          returnObject.value.value[i] === false || returnObject.value.value[i] === null
-            ? counter++
-            : null;
-        }
-
-        counter == returnObject.value.value.length
-          ? (returnObject.value.value = undefined)
-          : null;
 
         emit('update:listValue', returnObject.value);
       });
