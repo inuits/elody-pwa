@@ -40,7 +40,7 @@
     setup(props, { emit }) {
       type returnObject = {
         key: string;
-        value: string[] | undefined;
+        value: boolean[] | undefined;
         AndOrValue: boolean;
       };
 
@@ -58,6 +58,19 @@
         if (returnObject.value.value == undefined) {
           returnObject.value.value = [];
         }
+
+        let counter = 0;
+
+        for (let i = 0; i < returnObject.value.value.length; i++) {
+          returnObject.value.value[i] == false || returnObject.value.value[i] == undefined
+            ? counter++
+            : null;
+        }
+
+        counter == returnObject.value.value.length
+          ? (returnObject.value.value = undefined)
+          : null;
+
         emit('update:listValue', returnObject.value);
       });
 
