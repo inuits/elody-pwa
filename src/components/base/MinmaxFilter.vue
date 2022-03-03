@@ -1,6 +1,7 @@
 <template>
   <div class="flex md:justify-around">
     <MinMaxField
+      id="inputBox"
       v-model="returnObject.value.min"
       :debounce="true"
       placeholder="min"
