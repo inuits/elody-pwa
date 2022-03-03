@@ -55,14 +55,14 @@
       });
 
       watch([returnObject.value], () => {
-        if (returnObject.value.value == undefined) {
+        if (returnObject.value.value === undefined) {
           returnObject.value.value = [];
         }
 
         let counter = 0;
 
         for (let i = 0; i < returnObject.value.value.length; i++) {
-          returnObject.value.value[i] == false || returnObject.value.value[i] == undefined
+          returnObject.value.value[i] === false || returnObject.value.value[i] === null
             ? counter++
             : null;
         }
