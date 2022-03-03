@@ -46,8 +46,9 @@
 
       watch(returnObject.value, () => {
         if (
-          returnObject.value.value.min != undefined ||
-          returnObject.value.value.max != undefined
+          (returnObject.value.value.min != undefined ||
+            returnObject.value.value.max != undefined) &&
+          (returnObject.value.value.min != 0 || returnObject.value.value.max != 0)
         ) {
           emit('update:minmaxValue', returnObject.value);
         } else {
