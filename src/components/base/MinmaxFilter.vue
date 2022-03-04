@@ -2,7 +2,7 @@
   <div class="flex md:justify-around">
     <MinMaxField
       id="inputBox"
-      v-model="returnObject.value.min"
+      v-model="inputFieldMin"
       :debounce="true"
       placeholder="min"
       :bg-color="'neutral-20'"
@@ -10,18 +10,19 @@
       min="0"
     />
     <MinMaxField
-      v-model="returnObject.value.max"
+      v-model="inputFieldMax"
       :debounce="true"
       placeholder="max"
       :bg-color="'neutral-20'"
       label="max"
-      :min="returnObject.value.min + 1"
+      :min="inputFieldMin + 1"
     />
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, PropType, ref, watch } from 'vue';
+  import { computed, defineComponent, PropType } from 'vue';
   import MinMaxField from '@/components/base/MinMaxField.vue';
+  import { defaultReturnMinMaxObject, FilterInList } from '@/composables/useFilterHelper';
 
   export default defineComponent({
     name: 'MinmaxFilter',
@@ -29,6 +30,11 @@
       MinMaxField,
     },
     props: {
+      minmaxValue: {
+        type: Object as PropType<FilterInList>,
+        required: false,
+        default: undefined,
+      },
       filterkey: {
         type: [String],
         required: true,
@@ -36,32 +42,50 @@
     },
     emits: ['update:minmaxValue'],
     setup(props, { emit }) {
-      type returnObjectType = {
-        key: string;
-        value: { min: number | undefined; max: number | undefined };
-      };
+      emit('update:minmaxValue', defaultReturnMinMaxObject(props.filterkey));
 
-      const returnObject = ref<returnObjectType>({
-        key: props.filterkey,
-        value: { min: undefined, max: undefined },
+      const inputFieldMin = computed<number | undefined>({
+        get() {
+          return props.minmaxValue &&
+            props.minmaxValue.input.minMaxInput &&
+            props.minmaxValue.input.minMaxInput.min
+            ? props.minmaxValue.input.minMaxInput.min
+            : undefined;
+        },
+        set(value) {
+          emit(
+            'update:minmaxValue',
+            defaultReturnMinMaxObject(props.filterkey, {
+              min: value,
+              max: inputFieldMax.value,
+            }),
+          );
+        },
       });
 
-      watch(returnObject.value, () => {
-        if (
-          (returnObject.value.value.min != undefined ||
-            returnObject.value.value.max != undefined) &&
-          (returnObject.value.value.min != 0 || returnObject.value.value.max != 0)
-        ) {
-          emit('update:minmaxValue', returnObject.value);
-        } else {
-          emit('update:minmaxValue', {
-            key: props.filterkey,
-            value: undefined,
-          });
-        }
+      const inputFieldMax = computed<number | undefined>({
+        get() {
+          return props.minmaxValue &&
+            props.minmaxValue.input.minMaxInput &&
+            props.minmaxValue.input.minMaxInput.max
+            ? props.minmaxValue.input.minMaxInput.max
+            : undefined;
+        },
+        set(value) {
+          emit(
+            'update:minmaxValue',
+            defaultReturnMinMaxObject(props.filterkey, {
+              min: inputFieldMin.value,
+              max: value,
+            }),
+          );
+        },
       });
 
-      return { returnObject };
+      return { inputFieldMin, inputFieldMax };
     },
   });
 </script>
+
+function isInteger(value: MinMaxInput|undefined) { throw new Error('Function not
+implemented.'); }

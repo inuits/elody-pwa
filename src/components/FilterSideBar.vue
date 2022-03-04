@@ -18,7 +18,6 @@
           bg-hover-color="blue-75"
           label="Clear All"
           txt-color="blue-300"
-          :disabled="activeCount == 0"
           class="disabled:cursor-not-allowed disabled:opacity-50"
           @click="clearFilters"
         />
@@ -37,26 +36,7 @@
       class="filters w-full lg:h-1770"
     >
       <FilterAccordion
-        :active="
-          initialFilters[i]
-            ? typeof initialFilters[i].value != 'object'
-              ? initialFilters[i].value != undefined
-                ? true
-                : false
-              : typeof initialFilters[i].value == 'object'
-              ? Array.isArray(initialFilters[i].value)
-                ? initialFilters[i].value.length > 0
-                  ? true
-                  : false
-                : (initialFilters[i].value.min != undefined &&
-                    initialFilters[i].value.min !== 0) ||
-                  (initialFilters[i].value.max != undefined &&
-                    initialFilters[i].value.max !== 0)
-                ? true
-                : false
-              : false
-            : undefined
-        "
+        :active="initialFilters[i] && initialFilters[i].isActive"
         :label="filter.label"
       >
         <template #content>
@@ -78,7 +58,7 @@
           />
           <MultiFilter
             v-if="filter.type === AdvancedFilterTypes.Multiselect"
-            v-model:MultiselectValue="initialFilters[i]"
+            v-model:multiSelectValue="initialFilters[i]"
             :filterkey="filter.key"
           />
         </template>
@@ -87,21 +67,21 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, watch, ref, computed } from 'vue';
+  import { defineComponent, ref, computed } from 'vue';
   import FilterAccordion from '@/components/base/FilterAccordion.vue';
   import { useQuery } from '@vue/apollo-composable';
-  import {
-    AdvancedFilterTypes,
-    AdvancedInputType,
-    AdvancedSearchInput,
-    GetAdvancedFiltersDocument,
-  } from '@/queries';
+  import { AdvancedFilterTypes, GetAdvancedFiltersDocument } from '@/queries';
   import BaseButton from '@/components/base/BaseButton.vue';
   import MinmaxFilter from '@/components/base/MinmaxFilter.vue';
   import TextFilter from '@/components/base/TextFilter.vue';
   import ChecklistFilter from '@/components/base/ChecklistFilter.vue';
   import MultiFilter from '@/components/base/MultiFilter.vue';
   import AndOrToggle from './base/AndOrToggle.vue';
+  import {
+    clearAdvancedSearchInput,
+    FilterInList,
+    getActiveFilters,
+  } from '@/composables/useFilterHelper';
 
   export default defineComponent({
     name: 'FilterSideBar',
@@ -117,46 +97,16 @@
 
     emits: ['update:activeFilters'],
     setup(props, { emit }) {
-      const initialFilters = ref<AdvancedSearchInput[]>([]);
-      const activeFilters = ref<AdvancedSearchInput[]>([]);
-      const activeCount = computed(() => activeFilters.value.length);
+      const initialFilters = ref<FilterInList[]>([]);
+      const activeCount = computed(() => getActiveFilters(initialFilters.value).length);
       const AndOrChoice = ref<boolean>(true);
-
       const { result: filters } = useQuery(GetAdvancedFiltersDocument);
 
-      // Haalt undifined eruit -> verplaats naar voor call of in graphql
-      watch(initialFilters.value, () => {
-        activeFilters.value = [];
-
-        initialFilters.value.forEach((initialFilter) => {
-          if (Array.isArray(initialFilter.value)) {
-            //IS VALUE EEN ARRAY
-            initialFilter.value.length > 0 //IS ARRAY LANGER ALS 0
-              ? activeFilters.value.push(initialFilter)
-              : null; // NIKS
-          } else if (initialFilter.value != undefined) {
-            activeFilters.value.push(initialFilter);
-          }
-        });
-      });
-
       const applyFilters = () => {
-        emit('update:activeFilters', activeFilters.value);
-      };
-
-      const clearAdvancedSearchInput = (
-        input: AdvancedSearchInput[],
-      ): AdvancedSearchInput[] => {
-        input.forEach((e) => {
-          typeof e.value == 'string'
-            ? (e.value = undefined)
-            : typeof e.value == 'object'
-            ? Array.isArray(e.value)
-              ? (e.value = undefined)
-              : (e.value = { min: undefined, max: undefined })
-            : null;
+        const returnArray = initialFilters.value.map((filter: FilterInList) => {
+          return filter.input;
         });
-        return input;
+        emit('update:activeFilters', returnArray);
       };
 
       const clearFilters = () => {
@@ -170,7 +120,6 @@
         initialFilters,
         clearFilters,
         AdvancedFilterTypes,
-        activeFilters,
         AndOrChoice,
       };
     },
