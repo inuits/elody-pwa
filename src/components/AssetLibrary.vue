@@ -14,7 +14,7 @@
           />
         </div>
         <InputField
-          v-model="searchQuery"
+          v-model="queryVariables.searchValue.value"
           :debounce="true"
           placeholder="Search Asset Library..."
           label="Search"
@@ -29,7 +29,7 @@
             label="Items"
           />
           <Dropdown
-            v-if="result?.Entities.count > 1 && searchQuery != ''"
+            v-if="result?.Entities.count > 1 && queryVariables.searchValue.value != ''"
             v-model="queryVariables.sort"
             :options="['Title', 'object_number']"
             label="Sort"
@@ -143,7 +143,6 @@
     emits: ['addSelection'],
     setup: (props, { emit }) => {
       const router = useRouter();
-      const searchQuery = ref<string>('');
       const routeHelper = useRouteHelpers();
       const paginationInfo = reactive({
         limit: 20,
@@ -156,7 +155,7 @@
         limit: paginationInfo.limit,
         skip: paginationInfo.skip - 1,
         searchValue: {
-          value: searchQuery.value,
+          value: '',
           isAsc: false,
           key: 'title',
         },
@@ -166,42 +165,8 @@
         searchInputType: SearchInputType.SimpleInputtype,
       });
 
-      const { result, loading, fetchMore } = useQuery(
-        GetEntitiesDocument,
-        queryVariables,
-        {
-          notifyOnNetworkStatusChange: true,
-        },
-      );
-
-      const getData = () => {
-        fetchMore({
-          variables: {
-            limit: Number(queryVariables.limit),
-            skip:
-              Number(queryVariables.skip && queryVariables.skip - 1) *
-              Number(queryVariables.limit),
-            searchValue: {
-              value: searchQuery.value,
-              isAsc: false,
-              key: 'title',
-            },
-          },
-          updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
-        });
-      };
-
-      watch(searchQuery, (value: string) => {
-        queryVariables.skip = 1;
-        getData();
-      });
-
-      watch(queryVariables, () => {
-        routeHelper.updatePaginationInfoQueryParams({
-          limit: queryVariables.limit,
-          skip: queryVariables.skip,
-        });
-        getData();
+      const { result, loading } = useQuery(GetEntitiesDocument, queryVariables, {
+        notifyOnNetworkStatusChange: true,
       });
 
       const addSelection = (id: string) => {
@@ -216,7 +181,6 @@
         router,
         Unicons,
         queryVariables,
-        searchQuery,
         addSelection,
         paginationLimits,
         showDrawer,
