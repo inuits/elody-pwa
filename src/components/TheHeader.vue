@@ -22,7 +22,7 @@
           / {{ pageTitle.entityTitle }}</span
         >
       </h1>
-      <!-- <edit-toggle /> -->
+      <edit-toggle />
     </div>
     <div class="float-right">
       <BaseButton
@@ -84,7 +84,7 @@
 
   export default defineComponent({
     name: 'TheHeader',
-    components: { BaseButton },
+    components: { BaseButton, EditToggle },
     setup() {
       const { pageTitle } = usePageTitle();
       const route = useRoute();

@@ -38,33 +38,12 @@
   import BaseButton from '@/components/base/BaseButton.vue';
 
   export default defineComponent({
-    naem: 'EditModal',
+    name: 'EditModal',
     components: {
       BaseButton,
     },
     setup() {
-      const { disableEditMode, isEdit } = useEditMode();
-      const saveCallbacks = ref<{ (): Promise<void> }[]>([]);
-
-      provide('saveCallBacks', saveCallbacks.value);
-      provide('addSaveCallBacks', (input: () => Promise<void>) =>
-        saveCallbacks.value.push(input),
-      );
-
-      const save = () => {
-        saveCallbacks.value.forEach((callback: () => Promise<void>) => {
-          callback().then(() => {
-            if (isEdit) {
-              disableEditMode();
-            }
-          });
-        });
-      };
-
-      const discard = () => {
-        disableEditMode();
-        saveCallbacks.value = [];
-      };
+      const { isEdit, save, discard } = useEditMode();
 
       return {
         save,

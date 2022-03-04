@@ -102,7 +102,7 @@ export type Filters = {
 
 export type Form = {
   __typename?: 'Form';
-  fields?: Maybe<Array<Maybe<MetadataOrRelationField>>>;
+  fields: Array<Maybe<MetadataOrRelationField>>;
 };
 
 export type Frame = Entity & {
@@ -201,15 +201,20 @@ export type MetadataAndRelation = Metadata | MetadataRelation;
 
 export type MetadataField = {
   __typename?: 'MetadataField';
+  label?: Maybe<Scalars['String']>;
   key: Scalars['String'];
   type: InputFieldTypes;
   validation?: Maybe<Validation>;
 };
 
-export type MetadataFormInput = {
+export type MetadataFieldInput = {
   key: Scalars['String'];
   value?: Maybe<Scalars['String']>;
-  lang?: Maybe<Scalars['String']>;
+};
+
+export type MetadataFormInput = {
+  Metadata?: Maybe<Array<Maybe<MetadataFieldInput>>>;
+  relations?: Maybe<Array<Maybe<RelationInput>>>;
 };
 
 export type MetadataInput = {
@@ -243,6 +248,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   replaceMetadata: Array<Metadata>;
   StartImport?: Maybe<ImportReturn>;
+  replaceRelationsAndMetaData?: Maybe<Scalars['String']>;
 };
 
 
@@ -254,6 +260,11 @@ export type MutationReplaceMetadataArgs = {
 
 export type MutationStartImportArgs = {
   folder: Scalars['String'];
+};
+
+
+export type MutationReplaceRelationsAndMetaDataArgs = {
+  form?: Maybe<MetadataFormInput>;
 };
 
 export type PaginationInfo = {
@@ -318,6 +329,7 @@ export type QueryFilterOptionsArgs = {
 
 export type RelationField = {
   __typename?: 'RelationField';
+  label?: Maybe<Scalars['String']>;
   relationType: Scalars['String'];
   metadata?: Maybe<Array<Maybe<MetadataField>>>;
   acceptedEntityTypes: Array<Maybe<Scalars['String']>>;
@@ -372,6 +384,12 @@ export type FilterOption = {
   label?: Maybe<Scalars['String']>;
 };
 
+export type RelationInput = {
+  relationType: Scalars['String'];
+  metadata?: Maybe<Array<Maybe<MetadataFieldInput>>>;
+  linkedEntityId?: Maybe<Scalars['String']>;
+};
+
 export enum Validation {
   Required = 'required',
   Optional = 'optional'
@@ -389,7 +407,7 @@ type MinimalBaseEntity_Frame_Fragment = { __typename?: 'Frame', id: string, type
 
 export type MinimalBaseEntityFragment = MinimalBaseEntity_Asset_Fragment | MinimalBaseEntity_BaseEntity_Fragment | MinimalBaseEntity_Frame_Fragment;
 
-export type EditFormFragment = { __typename?: 'Form', fields?: Maybe<Array<Maybe<{ __typename: 'MetadataField', key: string, type: InputFieldTypes } | { __typename: 'RelationField', relationType: string, acceptedEntityTypes: Array<Maybe<string>>, metadata?: Maybe<Array<Maybe<{ __typename?: 'MetadataField', key: string, type: InputFieldTypes }>>> }>>> };
+export type EditFormFragment = { __typename?: 'Form', fields: Array<Maybe<{ __typename: 'MetadataField', label?: Maybe<string>, key: string, type: InputFieldTypes } | { __typename: 'RelationField', label?: Maybe<string>, relationType: string, acceptedEntityTypes: Array<Maybe<string>>, metadata?: Maybe<Array<Maybe<{ __typename?: 'MetadataField', key: string, type: InputFieldTypes, label?: Maybe<string> }>>> }>> };
 
 export type MinimalAssetFragment = (
   { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
@@ -431,236 +449,27 @@ type FullEntityRecursive_Asset_Fragment = (
     & MetadataFragment
   ) | (
     { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-      { __typename?: 'Asset', metadata: Array<Maybe<(
+      { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-          { __typename?: 'Asset', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Asset_Fragment
-        ) | (
-          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_BaseEntity_Fragment
-        ) | (
-          { __typename?: 'Frame', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Frame_Fragment
-        )> }
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>>, metadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
       )>> }
+      & MinimalBaseEntity_Asset_Fragment
       & FullEntity_Asset_Fragment
     ) | (
       { __typename?: 'BaseEntity', metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-          { __typename?: 'Asset', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Asset_Fragment
-        ) | (
-          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_BaseEntity_Fragment
-        ) | (
-          { __typename?: 'Frame', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Frame_Fragment
-        )> }
+        { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
       )>> }
       & FullEntity_BaseEntity_Fragment
@@ -669,115 +478,7 @@ type FullEntityRecursive_Asset_Fragment = (
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-          { __typename?: 'Asset', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Asset_Fragment
-        ) | (
-          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_BaseEntity_Fragment
-        ) | (
-          { __typename?: 'Frame', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Frame_Fragment
-        )> }
+        { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
       )>> }
       & FullEntity_Frame_Fragment
@@ -793,236 +494,27 @@ type FullEntityRecursive_BaseEntity_Fragment = (
     & MetadataFragment
   ) | (
     { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-      { __typename?: 'Asset', metadata: Array<Maybe<(
+      { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-          { __typename?: 'Asset', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Asset_Fragment
-        ) | (
-          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_BaseEntity_Fragment
-        ) | (
-          { __typename?: 'Frame', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Frame_Fragment
-        )> }
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>>, metadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
       )>> }
+      & MinimalBaseEntity_Asset_Fragment
       & FullEntity_Asset_Fragment
     ) | (
       { __typename?: 'BaseEntity', metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-          { __typename?: 'Asset', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Asset_Fragment
-        ) | (
-          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_BaseEntity_Fragment
-        ) | (
-          { __typename?: 'Frame', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Frame_Fragment
-        )> }
+        { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
       )>> }
       & FullEntity_BaseEntity_Fragment
@@ -1031,115 +523,7 @@ type FullEntityRecursive_BaseEntity_Fragment = (
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-          { __typename?: 'Asset', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Asset_Fragment
-        ) | (
-          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_BaseEntity_Fragment
-        ) | (
-          { __typename?: 'Frame', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Frame_Fragment
-        )> }
+        { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
       )>> }
       & FullEntity_Frame_Fragment
@@ -1155,236 +539,27 @@ type FullEntityRecursive_Frame_Fragment = (
     & MetadataFragment
   ) | (
     { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-      { __typename?: 'Asset', metadata: Array<Maybe<(
+      { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-          { __typename?: 'Asset', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Asset_Fragment
-        ) | (
-          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_BaseEntity_Fragment
-        ) | (
-          { __typename?: 'Frame', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Frame_Fragment
-        )> }
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>>, metadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
       )>> }
+      & MinimalBaseEntity_Asset_Fragment
       & FullEntity_Asset_Fragment
     ) | (
       { __typename?: 'BaseEntity', metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-          { __typename?: 'Asset', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Asset_Fragment
-        ) | (
-          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_BaseEntity_Fragment
-        ) | (
-          { __typename?: 'Frame', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Frame_Fragment
-        )> }
+        { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
       )>> }
       & FullEntity_BaseEntity_Fragment
@@ -1393,115 +568,7 @@ type FullEntityRecursive_Frame_Fragment = (
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-          { __typename?: 'Asset', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Asset_Fragment
-        ) | (
-          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_BaseEntity_Fragment
-        ) | (
-          { __typename?: 'Frame', metadata: Array<Maybe<(
-            { __typename: 'Metadata' }
-            & MetadataFragment
-          ) | (
-            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
-              { __typename?: 'Asset', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Asset_Fragment
-            ) | (
-              { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_BaseEntity_Fragment
-            ) | (
-              { __typename?: 'Frame', metadata: Array<Maybe<(
-                { __typename?: 'Metadata' }
-                & MetadataFragment
-              ) | (
-                { __typename?: 'MetadataRelation' }
-                & MetadataRelationFragment
-              )>> }
-              & FullEntity_Frame_Fragment
-            )> }
-            & MetadataRelationFragment
-          )>> }
-          & FullEntity_Frame_Fragment
-        )> }
+        { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
       )>> }
       & FullEntity_Frame_Fragment
@@ -1618,13 +685,20 @@ export type EditMetadataMutationVariables = Exact<{
 
 export type EditMetadataMutation = { __typename?: 'Mutation', replaceMetadata: Array<{ __typename?: 'Metadata', key: string, value: string, lang?: Maybe<string> }> };
 
+export type ReplaceRelationsAndMetaDataMutationVariables = Exact<{
+  form: MetadataFormInput;
+}>;
+
+
+export type ReplaceRelationsAndMetaDataMutation = { __typename?: 'Mutation', replaceRelationsAndMetaData?: Maybe<string> };
+
 export const MinimalBaseEntityFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"minimalBaseEntity"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Entity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"media"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"primaryMediafile"}}]}}]}}]} as unknown as DocumentNode<MinimalBaseEntityFragment, unknown>;
 export const MetadataFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"metadata"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}}]} as unknown as DocumentNode<MetadataFragment, unknown>;
 export const MetadataRelationFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"metadataRelation"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"metadataOnRelation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]} as unknown as DocumentNode<MetadataRelationFragment, unknown>;
 export const MinimalAssetFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"minimalAsset"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Asset"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false},{"kind":"StringValue","value":"object_number","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}},{"kind":"Field","alias":{"kind":"Name","value":"title"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},...MinimalBaseEntityFragmentDoc.definitions,...MetadataFragmentDoc.definitions,...MetadataRelationFragmentDoc.definitions]} as unknown as DocumentNode<MinimalAssetFragment, unknown>;
-export const EditFormFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"editForm"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Form"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataField"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"type"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RelationField"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"relationType"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"type"}}]}},{"kind":"Field","name":{"kind":"Name","value":"acceptedEntityTypes"}}]}}]}}]}}]} as unknown as DocumentNode<EditFormFragment, unknown>;
+export const EditFormFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"editForm"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Form"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataField"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"type"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RelationField"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"relationType"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"label"}}]}},{"kind":"Field","name":{"kind":"Name","value":"acceptedEntityTypes"}}]}}]}}]}}]} as unknown as DocumentNode<EditFormFragment, unknown>;
 export const FullEntityFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"fullEntity"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Entity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"form"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"editForm"}}]}},{"kind":"Field","alias":{"kind":"Name","value":"title"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"media"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"mediafiles"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"filename"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnail_file_location"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}},...EditFormFragmentDoc.definitions]} as unknown as DocumentNode<FullEntityFragment, unknown>;
-export const FullEntityRecursiveFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"fullEntityRecursive"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Entity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"fullEntity"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"exclude"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}},{"kind":"Field","name":{"kind":"Name","value":"linkedEntity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"fullEntity"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"exclude"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}},{"kind":"Field","name":{"kind":"Name","value":"linkedEntity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"fullEntity"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"exclude"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}},{"kind":"Field","name":{"kind":"Name","value":"linkedEntity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"fullEntity"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"exclude"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}}]}}]}}]}}]}}]}}]}}]}}]}}]}},...FullEntityFragmentDoc.definitions,...MetadataFragmentDoc.definitions,...MetadataRelationFragmentDoc.definitions]} as unknown as DocumentNode<FullEntityRecursiveFragment, unknown>;
+export const FullEntityRecursiveFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"fullEntityRecursive"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Entity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"fullEntity"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"exclude"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}},{"kind":"Field","name":{"kind":"Name","value":"linkedEntity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Asset"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false},{"kind":"StringValue","value":"object_number","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"fullEntity"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"exclude"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}}]}}]}}]}},...FullEntityFragmentDoc.definitions,...MetadataFragmentDoc.definitions,...MetadataRelationFragmentDoc.definitions,...MinimalBaseEntityFragmentDoc.definitions]} as unknown as DocumentNode<FullEntityRecursiveFragment, unknown>;
 export const JobFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"job"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Job"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"job_type"}},{"kind":"Field","name":{"kind":"Name","value":"job_type"}},{"kind":"Field","name":{"kind":"Name","value":"job_info"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"user"}},{"kind":"Field","name":{"kind":"Name","value":"asset_id"}},{"kind":"Field","name":{"kind":"Name","value":"mediafile_id"}},{"kind":"Field","name":{"kind":"Name","value":"parent_job_id"}},{"kind":"Field","name":{"kind":"Name","value":"end_time"}},{"kind":"Field","name":{"kind":"Name","value":"start_time"}},{"kind":"Field","name":{"kind":"Name","value":"amount_of_jobs"}},{"kind":"Field","name":{"kind":"Name","value":"completed_jobs"}},{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"_key"}},{"kind":"Field","name":{"kind":"Name","value":"_rev"}}]}}]} as unknown as DocumentNode<JobFragment, unknown>;
 export const JobWithSubJobsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"jobWithSubJobs"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Job"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"job"}},{"kind":"Field","name":{"kind":"Name","value":"sub_jobs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"job"}}]}}]}},...JobFragmentDoc.definitions]} as unknown as DocumentNode<JobWithSubJobsFragment, unknown>;
 export const GetEntitiesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getEntities"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"skip"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"searchValue"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"SearchFilter"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Entities"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"skip"},"value":{"kind":"Variable","name":{"kind":"Name","value":"skip"}}},{"kind":"Argument","name":{"kind":"Name","value":"searchValue"},"value":{"kind":"Variable","name":{"kind":"Name","value":"searchValue"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"limit"}},{"kind":"Field","name":{"kind":"Name","value":"results"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"media"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"primaryMediafile"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Asset"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalAsset"}}]}}]}}]}}]}},...MinimalAssetFragmentDoc.definitions]} as unknown as DocumentNode<GetEntitiesQuery, GetEntitiesQueryVariables>;
@@ -1637,3 +711,4 @@ export const GetAdvancedFiltersDocument = {"kind":"Document","definitions":[{"ki
 export const GetFilterOptionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getFilterOptions"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"key"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"FilterOptions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"key"},"value":{"kind":"Variable","name":{"kind":"Name","value":"key"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}}]}}]}}]} as unknown as DocumentNode<GetFilterOptionsQuery, GetFilterOptionsQueryVariables>;
 export const PostStartImportDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"postStartImport"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"folder"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"StartImport"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"folder"},"value":{"kind":"Variable","name":{"kind":"Name","value":"folder"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"message_id"}}]}}]}}]} as unknown as DocumentNode<PostStartImportMutation, PostStartImportMutationVariables>;
 export const EditMetadataDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"editMetadata"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"metadata"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataInput"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"replaceMetadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"metadata"},"value":{"kind":"Variable","name":{"kind":"Name","value":"metadata"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"lang"}}]}}]}}]} as unknown as DocumentNode<EditMetadataMutation, EditMetadataMutationVariables>;
+export const ReplaceRelationsAndMetaDataDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"replaceRelationsAndMetaData"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"form"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataFormInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"replaceRelationsAndMetaData"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"form"},"value":{"kind":"Variable","name":{"kind":"Name","value":"form"}}}]}]}}]} as unknown as DocumentNode<ReplaceRelationsAndMetaDataMutation, ReplaceRelationsAndMetaDataMutationVariables>;

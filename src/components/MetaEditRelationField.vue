@@ -1,28 +1,30 @@
 <template>
   <span v-if="label" class="ml-1 text-neutral-700 text-sm">{{ label }}</span>
-  <div v-for="({ value, key }, idx) in fields" :key="key" class="my-2">
-    <div :class="[inputContainerStyle, ' input-container p-4 gap-3 flex-col']">
-      <div
-        v-for="{ label: metadataLabel, key: metadataKey } in structure.metadata"
-        :key="`${idx}-${metadataKey}`"
-      >
-        <MetaEditDataField
-          :label="metadataLabel"
-          :field-key="`${structure.relationType}[${idx}].metadata.${metadataKey}`"
+  <div>
+    <div v-for="({ value, key }, idx) in fields" :key="key" class="my-2">
+      <div :class="[inputContainerStyle, ' input-container p-4 gap-3 flex-col']">
+        <div
+          v-for="{ label: metadataLabel, key: metadataKey } in structure.metadata"
+          :key="`${idx}-${metadataKey}`"
+        >
+          <MetaEditDataField
+            :label="metadataLabel"
+            :field-key="`${structure.relationType}[${idx}].metadata.${metadataKey}`"
+          />
+        </div>
+        <ListItem
+          v-if="value.linkedEntity && value.linkedEntity.teaserMetadata"
+          :meta="value.linkedEntity.teaserMetadata"
+          :thumb-icon="Unicons.NoImage.name"
         />
-      </div>
-      <ListItem
-        v-if="value.linkedEntity && value.linkedEntity.teaserMetadata"
-        :meta="value.linkedEntity.teaserMetadata"
-        :thumb-icon="Unicons.NoImage.name"
-      />
-      <div class="delete">
-        <BaseButton
-          :icon="Unicons.Trash.name"
-          class="h-full"
-          bg-color="neutral-30 "
-          @click="remove(idx)"
-        />
+        <div class="delete">
+          <BaseButton
+            :icon="Unicons.Trash.name"
+            class="h-full"
+            bg-color="neutral-30 "
+            @click="remove(idx)"
+          />
+        </div>
       </div>
     </div>
   </div>

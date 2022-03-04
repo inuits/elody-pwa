@@ -1,5 +1,5 @@
 <template>
-  <div v-if="true" class="mx-4">
+  <div v-if="isEditToggleVisible" class="mx-4">
     <IconToggle
       v-show="isSingle"
       v-model:checked="toggleBoolean"
@@ -16,19 +16,46 @@
   import { Unicons } from '@/types';
 
   export type EditModes = 'edit' | 'view' | 'loading';
+  export type callback = (e?: Event | undefined) => Promise<unknown>;
 
   const editMode = ref<EditModes>('view');
+  const saveCallbacks = ref<callback[]>([]);
+  const isEditToggleVisible = ref<boolean>(false);
 
   export const useEditMode = () => {
     const setEditMode = () => (editMode.value = 'edit');
     const disableEditMode = () => (editMode.value = 'view');
     const isEdit = computed<boolean>(() => editMode.value === 'edit');
+    const addSaveCallback = (input: callback) => saveCallbacks.value.push(input);
+    const showEditToggle = () => (isEditToggleVisible.value = true);
+    const hideEditToggle = () => (isEditToggleVisible.value = false);
+
+    const save = () => {
+      saveCallbacks.value.forEach((callback: callback) => {
+        callback().then(() => {
+          if (isEdit.value) {
+            disableEditMode();
+          }
+        });
+      });
+    };
+
+    const discard = () => {
+      disableEditMode();
+      saveCallbacks.value = [];
+    };
 
     return {
+      save,
       isEdit,
       editMode,
+      discard,
       setEditMode,
+      addSaveCallback,
       disableEditMode,
+      showEditToggle,
+      hideEditToggle,
+      isEditToggleVisible,
     };
   };
 
@@ -37,7 +64,13 @@
     components: { IconToggle },
     setup() {
       const toggleBoolean = ref<boolean>(false);
-      const { disableEditMode, setEditMode, isEdit } = useEditMode();
+      const {
+        disableEditMode,
+        setEditMode,
+        isEdit,
+        hideEditToggle,
+        isEditToggleVisible,
+      } = useEditMode();
       const { isSingle } = useRouteHelpers();
 
       watch(toggleBoolean, (value: boolean) => {
@@ -56,11 +89,18 @@
         }
       });
 
+      watch(isSingle, (value: boolean) => {
+        if (value === false) {
+          hideEditToggle();
+        }
+      });
+
       return {
         isEdit,
         Unicons,
         isSingle,
         toggleBoolean,
+        isEditToggleVisible,
       };
     },
   });
