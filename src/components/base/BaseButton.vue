@@ -1,5 +1,6 @@
 <template>
   <button
+    type="button"
     :class="[
       `bg-${bgColor} text-sm flex justify-center items-center px-3 py-2 rounded transition-colors duration-300 m-1`,
       loading
