@@ -48,12 +48,14 @@
                 ? initialFilters[i].value.length > 0
                   ? true
                   : false
-                : initialFilters[i].value.min != undefined ||
-                  initialFilters[i].value.max != undefined
+                : (initialFilters[i].value.min != undefined &&
+                    initialFilters[i].value.min !== 0) ||
+                  (initialFilters[i].value.max != undefined &&
+                    initialFilters[i].value.max !== 0)
                 ? true
                 : false
               : false
-            : null
+            : undefined
         "
         :label="filter.label"
       >
