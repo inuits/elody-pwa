@@ -114,8 +114,6 @@ input SearchFilter {
   value: String
   isAsc: Boolean
   key: String
-  raw: Boolean
-  relation_filter: [String]
 }
 
 input MinMaxInput {
@@ -129,6 +127,11 @@ input MultiSelectInput {
   value: [String]
 }
 
+enum SearchInputType {
+  AdvancedInputType
+  SimpleInputtype
+}
+
 enum AdvancedInputType {
   MinMaxInput
   TextInput
@@ -137,9 +140,6 @@ enum AdvancedInputType {
 
 input AdvancedSearchInput {
   value: [AdvancedInputType]
-  isAsc: Boolean
-  relation_filter: [String]
-  key: String
 }
 
 #Users
@@ -259,15 +259,9 @@ type Query {
   Entities(
     limit: Int
     skip: Int
-    searchValue: SearchFilter!
-
-    fetchPolicy: String
-  ): EntitiesResults
-  advancedEntities(
-    limit: Int
-    skip: Int
+    searchInputType: SearchInputType
+    searchValue: SearchFilter
     advancedSearchValue: AdvancedSearchInput
-
     fetchPolicy: String
   ): EntitiesResults
   User: User
