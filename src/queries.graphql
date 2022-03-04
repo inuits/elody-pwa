@@ -28,14 +28,17 @@ fragment editForm on Form {
   fields {
     __typename
     ... on MetadataField {
+      label
       key
       type
     }
     ... on RelationField {
+      label
       relationType
       metadata {
         key
         type
+        label
       }
       acceptedEntityTypes
     }
@@ -102,6 +105,21 @@ fragment fullEntityRecursive on Entity {
     ... on MetadataRelation {
       ...metadataRelation
       linkedEntity {
+        ... on Asset {
+          ...minimalBaseEntity
+          teaserMetadata: metadata(
+            keys: ["title", "object_number"]
+            excludeOrInclude: include
+          ) {
+            __typename
+            ... on Metadata {
+              ...metadata
+            }
+            ... on MetadataRelation {
+              ...metadataRelation
+            }
+          }
+        }
         ...fullEntity
         metadata(keys: [], excludeOrInclude: exclude) {
           __typename
@@ -110,29 +128,29 @@ fragment fullEntityRecursive on Entity {
           }
           ... on MetadataRelation {
             ...metadataRelation
-            linkedEntity {
-              ...fullEntity
-              metadata(keys: [], excludeOrInclude: exclude) {
-                __typename
-                ... on Metadata {
-                  ...metadata
-                }
-                ... on MetadataRelation {
-                  ...metadataRelation
-                  linkedEntity {
-                    ...fullEntity
-                    metadata(keys: [], excludeOrInclude: exclude) {
-                      ... on Metadata {
-                        ...metadata
-                      }
-                      ... on MetadataRelation {
-                        ...metadataRelation
-                      }
-                    }
-                  }
-                }
-              }
-            }
+            # linkedEntity {
+            #   ...fullEntity
+            #   metadata(keys: [], excludeOrInclude: exclude) {
+            #     __typename
+            #     ... on Metadata {
+            #       ...metadata
+            #     }
+            #     ... on MetadataRelation {
+            #       ...metadataRelation
+            #       linkedEntity {
+            #         ...fullEntity
+            #         metadata(keys: [], excludeOrInclude: exclude) {
+            #           ... on Metadata {
+            #             ...metadata
+            #           }
+            #           ... on MetadataRelation {
+            #             ...metadataRelation
+            #           }
+            #         }
+            #       }
+            #     }
+            #   }
+            # }
           }
         }
       }
@@ -273,4 +291,8 @@ mutation editMetadata($id: String!, $metadata: [MetadataInput!]!) {
     value
     lang
   }
+}
+
+mutation replaceRelationsAndMetaData($form: MetadataFormInput!) {
+  replaceRelationsAndMetaData(form: $form)
 }

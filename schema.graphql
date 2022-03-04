@@ -213,12 +213,14 @@ enum validation {
 }
 
 type MetadataField {
+  label: String
   key: String!
   type: InputFieldTypes!
   validation: validation
 }
 
 type RelationField {
+  label: String
   relationType: String!
   metadata: [MetadataField]
   acceptedEntityTypes: [String]!
@@ -227,13 +229,23 @@ type RelationField {
 union MetadataOrRelationField = MetadataField | RelationField
 
 type Form {
-  fields: [MetadataOrRelationField]
+  fields: [MetadataOrRelationField]!
+}
+
+input MetadataFieldInput {
+  key: String!
+  value: String
+}
+
+input relationInput {
+  relationType: String!
+  metadata: [MetadataFieldInput]
+  linkedEntityId: String
 }
 
 input MetadataFormInput {
-  key: String!
-  value: String
-  lang: String
+  Metadata: [MetadataFieldInput]
+  relations: [relationInput]
 }
 
 #Query
@@ -271,6 +283,7 @@ type Mutation {
   replaceMetadata(id: String!, metadata: [MetadataInput!]!): [Metadata!]!
   StartImport(folder: String!): ImportReturn
   # addRelations(id: String!, relations: [RelationInput!]!): [Relation]!
+  replaceRelationsAndMetaData(form: MetadataFormInput): String
 }
 
 input MetadataInput {

@@ -23,6 +23,7 @@
       :entity-id="result ? result.Entity.id : undefined"
       :metadata="result ? result.Entity.metadata : []"
       :entity-title="title"
+      :form="result?.Entity?.form"
     />
   </div>
   <!-- <PickAssetModal :entity-id="entityId" @update-entity="updateEntities" /> -->
@@ -49,7 +50,7 @@
       const loading = ref<boolean>(true);
       const selectedMediafile = ref<MediaFile | null>(null);
       const mediafiles = ref<MediaFile[]>([]);
-      const { editMode } = useEditMode();
+      const { editMode, showEditToggle } = useEditMode();
       const { updatePageTitle } = usePageTitle();
 
       const { result, refetch, onResult } = useQuery<GetEntityByIdQuery>(
@@ -90,6 +91,7 @@
           queryResult.data.Entity?.media?.mediafiles &&
           queryResult.data.Entity?.media?.mediafiles?.length > 0
         ) {
+          mediafiles.value = [];
           queryResult.data.Entity.media.mediafiles?.forEach((mediafile) => {
             if (mediafile?.__typename === 'MediaFile') {
               if (selectedMediafile.value === null) {
@@ -98,6 +100,11 @@
               mediafiles.value.push(mediafile);
             }
           });
+        }
+        console.log(queryResult.data.Entity?.form);
+        //If form show edit togle
+        if (queryResult.data.Entity?.form) {
+          showEditToggle();
         }
 
         loading.value = false;
