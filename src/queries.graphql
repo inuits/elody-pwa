@@ -158,32 +158,19 @@ fragment fullEntityRecursive on Entity {
   }
 }
 
-query getEntities($limit: Int, $skip: Int, $searchValue: SearchFilter!) {
-  Entities(limit: $limit, skip: $skip, searchValue: $searchValue) {
-    count
-    limit
-    results {
-      id
-      type
-      media {
-        primaryMediafile
-      }
-      ... on Asset {
-        ...minimalAsset
-      }
-    }
-  }
-}
-
-query getAdvancedEntities(
+query getEntities(
   $limit: Int
   $skip: Int
+  $searchValue: SearchFilter!
   $advancedSearchValue: AdvancedSearchInput!
+  $searchInputType: SearchInputType
 ) {
-  advancedEntities(
+  Entities(
     limit: $limit
     skip: $skip
+    searchValue: $searchValue
     advancedSearchValue: $advancedSearchValue
+    searchInputType: $searchInputType
   ) {
     count
     limit

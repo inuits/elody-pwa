@@ -12,7 +12,7 @@
       <div
         class="flex justify-between border-solid border-b-2 border-neutral-30 px-3 pb-3"
       >
-        <AndOrToggle v-model:AndOrValue="EnOfKeuze" texton="En" textoff="Of" />
+        <AndOrToggle v-model:AndOrValue="AndOrChoice" texton="En" textoff="Of" />
         <BaseButton
           bg-color="blue-50"
           bg-hover-color="blue-75"
@@ -90,14 +90,18 @@
   import { defineComponent, watch, ref, computed } from 'vue';
   import FilterAccordion from '@/components/base/FilterAccordion.vue';
   import { useQuery } from '@vue/apollo-composable';
-  import { AdvancedFilterTypes, GetAdvancedFiltersDocument } from '@/queries';
+  import {
+    AdvancedFilterTypes,
+    AdvancedInputType,
+    AdvancedSearchInput,
+    GetAdvancedFiltersDocument,
+  } from '@/queries';
   import BaseButton from '@/components/base/BaseButton.vue';
   import MinmaxFilter from '@/components/base/MinmaxFilter.vue';
   import TextFilter from '@/components/base/TextFilter.vue';
   import ChecklistFilter from '@/components/base/ChecklistFilter.vue';
   import MultiFilter from '@/components/base/MultiFilter.vue';
   import AndOrToggle from './base/AndOrToggle.vue';
-  import { AdvancedSearchInput, AdvancedInputType } from '@/queries';
 
   export default defineComponent({
     name: 'FilterSideBar',
@@ -113,18 +117,14 @@
 
     emits: ['update:activeFilters'],
     setup(props, { emit }) {
-      type filterObject = {
-        key: string;
-        value: object | string | string[] | undefined;
-      };
-
-      const initialFilters = ref<filterObject[]>([]);
-      const activeFilters = ref<filterObject[]>([]);
+      const initialFilters = ref<AdvancedSearchInput[]>([]);
+      const activeFilters = ref<AdvancedSearchInput[]>([]);
       const activeCount = computed(() => activeFilters.value.length);
-      const EnOfKeuze = ref<boolean>(true);
+      const AndOrChoice = ref<boolean>(true);
 
       const { result: filters } = useQuery(GetAdvancedFiltersDocument);
 
+      // Haalt undifined eruit -> verplaats naar voor call of in graphql
       watch(initialFilters.value, () => {
         activeFilters.value = [];
 
@@ -144,9 +144,10 @@
         emit('update:activeFilters', activeFilters.value);
       };
 
-      const clearFilters = () => {
-        activeFilters.value = [];
-        initialFilters.value.forEach((e) => {
+      const clearAdvancedSearchInput = (
+        input: AdvancedSearchInput[],
+      ): AdvancedSearchInput[] => {
+        input.forEach((e) => {
           typeof e.value == 'string'
             ? (e.value = undefined)
             : typeof e.value == 'object'
@@ -155,6 +156,11 @@
               : (e.value = { min: undefined, max: undefined })
             : null;
         });
+        return input;
+      };
+
+      const clearFilters = () => {
+        initialFilters.value = clearAdvancedSearchInput(initialFilters.value);
       };
 
       return {
@@ -165,10 +171,8 @@
         clearFilters,
         AdvancedFilterTypes,
         activeFilters,
-        EnOfKeuze,
+        AndOrChoice,
       };
-
-      //je kan nu filters.advancedFilters gebruiken
     },
   });
 </script>
