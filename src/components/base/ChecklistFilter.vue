@@ -1,13 +1,13 @@
 <template>
   <div>
-    <AndOrToggle v-model:AndOrValue="returnObject.AndOrValue" texton="En" textoff="Of" />
+    <AndOrToggle v-model:AndOrValue="isAnd" texton="En" textoff="Of" />
   </div>
   <div>
     <ul v-for="option in options?.FilterOptions" :key="option">
       <li>
         <input
           :id="option.label"
-          v-model="returnObject.value"
+          v-model="inputFieldMulti"
           type="checkbox"
           :name="option.label"
           :value="option.value"
@@ -23,14 +23,23 @@
   </div>
 </template>
 <script lang="ts">
-  import { GetFilterOptionsDocument } from '@/queries';
+  import {
+    defaultReturnMultiSelectObject,
+    FilterInList,
+  } from '@/composables/useFilterHelper';
+  import { GetFilterOptionsDocument, Maybe } from '@/queries';
   import { useQuery } from '@vue/apollo-composable';
-  import { defineComponent, ref, watch } from 'vue';
+  import { computed, defineComponent, PropType, ref } from 'vue';
   import AndOrToggle from './AndOrToggle.vue';
   export default defineComponent({
     name: 'ChecklistFilter',
     components: { AndOrToggle },
     props: {
+      listValue: {
+        type: Object as PropType<FilterInList>,
+        required: false,
+        default: undefined,
+      },
       filterkey: {
         type: [String],
         required: true,
@@ -38,31 +47,54 @@
     },
     emits: ['update:listValue'],
     setup(props, { emit }) {
-      type returnObject = {
-        key: string;
-        value: boolean[] | undefined;
-        AndOrValue: boolean;
-      };
-
-      const returnObject = ref<returnObject>({
-        key: props.filterkey,
-        value: [],
-        AndOrValue: true,
-      });
-
+      emit('update:listValue', defaultReturnMultiSelectObject(props.filterkey));
       const { result: options } = useQuery(GetFilterOptionsDocument, {
         key: props.filterkey,
       });
 
-      watch(returnObject.value, () => {
-        if (returnObject.value.value == undefined) {
-          returnObject.value.value = [];
-        }
-
-        emit('update:listValue', returnObject.value);
+      const andOr = ref<'and' | 'or'>('and');
+      const isAnd = computed<boolean>({
+        get() {
+          return andOr.value === 'and';
+        },
+        set(newValue) {
+          if (newValue) {
+            andOr.value = 'and';
+          } else {
+            andOr.value = 'or';
+          }
+          props.listValue &&
+            props.listValue.input.multiSelectInput &&
+            emit(
+              'update:listValue',
+              defaultReturnMultiSelectObject(props.filterkey, {
+                value: props.listValue.input.multiSelectInput.value,
+                AndOrValue: newValue,
+              }),
+            );
+        },
       });
 
-      return { options, returnObject };
+      const inputFieldMulti = computed<Maybe<Maybe<string>[]> | undefined>({
+        get() {
+          return props.listValue && props.listValue.input.multiSelectInput
+            ? props.listValue.input.multiSelectInput.value
+            : undefined;
+        },
+        set(value) {
+          if (props.listValue) {
+            emit(
+              'update:listValue',
+              defaultReturnMultiSelectObject(props.filterkey, {
+                value: value,
+                AndOrValue: isAnd.value,
+              }),
+            );
+          }
+        },
+      });
+
+      return { options, inputFieldMulti, isAnd };
     },
   });
 </script>

@@ -1,23 +1,18 @@
 <template>
   <div class="mb-1 flex">
     <AndOrToggle
-      v-model:AndOrValue="returnObject.MultiFuzzyChoice"
+      v-model:AndOrValue="isMulti"
       texton="Multi"
       textoff="Fuzzy"
       class="mr-1"
     />
-    <AndOrToggle
-      v-if="returnObject.MultiFuzzyChoice == true"
-      v-model:AndOrValue="returnObject.AndOrValue"
-      texton="En"
-      textoff="Of"
-    />
+    <AndOrToggle v-if="isMulti" v-model:AndOrValue="isAnd" texton="En" textoff="Of" />
   </div>
 
   <div>
     <Multiselect
-      v-if="returnObject.MultiFuzzyChoice == true"
-      v-model="multiValue"
+      v-if="isMulti"
+      v-model="inputFieldMulti"
       mode="tags"
       :searchable="true"
       :close-on-select="false"
@@ -31,8 +26,8 @@
   </div>
   <div>
     <InputField
-      v-if="returnObject.MultiFuzzyChoice == false"
-      v-model="fuzzyValue"
+      v-if="!isMulti"
+      v-model="inputField"
       :debounce="true"
       placeholder="Fuzzy Search..."
       :bg-color="'neutral-20'"
@@ -41,12 +36,17 @@
 </template>
 
 <script lang="ts">
-  import { GetFilterOptionsDocument } from '@/queries';
+  import { GetFilterOptionsDocument, Maybe } from '@/queries';
   import { useQuery } from '@vue/apollo-composable';
-  import { ref, defineComponent, watch } from 'vue';
+  import { ref, defineComponent, computed, PropType } from 'vue';
   import Multiselect from '@vueform/multiselect';
   import AndOrToggle from './AndOrToggle.vue';
   import InputField from '@/components/base/InputField.vue';
+  import {
+    defaultReturnMultiSelectObject,
+    defaultReturnTextObject,
+    FilterInList,
+  } from '@/composables/useFilterHelper';
 
   export default defineComponent({
     name: 'MultiFilter',
@@ -56,55 +56,93 @@
       InputField,
     },
     props: {
+      multiSelectValue: {
+        type: Object as PropType<FilterInList>,
+        required: false,
+        default: undefined,
+      },
       filterkey: {
         type: [String],
         required: true,
       },
     },
-    emits: ['update:MultiselectValue'],
+    emits: ['update:multiSelectValue'],
     setup(props, { emit }) {
-      type returnType = {
-        key: string;
-        value: string[] | String | undefined;
-        AndOrValue: Boolean | String;
-        MultiFuzzyChoice: Boolean | String;
-      };
+      emit('update:multiSelectValue', defaultReturnMultiSelectObject(props.filterkey));
+      const andOr = ref<'and' | 'or'>('and');
+      const isAnd = computed<boolean>({
+        get() {
+          return andOr.value === 'and';
+        },
+        set(newValue) {
+          if (newValue) {
+            andOr.value = 'and';
+          } else {
+            andOr.value = 'or';
+          }
+          props.multiSelectValue &&
+            props.multiSelectValue.input.multiSelectInput &&
+            emit(
+              'update:multiSelectValue',
+              defaultReturnMultiSelectObject(props.filterkey, {
+                value: props.multiSelectValue.input.multiSelectInput.value,
+                AndOrValue: newValue,
+              }),
+            );
+        },
+      });
+      const multiOrFuzzy = ref<'multi' | 'fuzzy'>('multi');
+      const isMulti = computed<boolean>({
+        get() {
+          return multiOrFuzzy.value === 'multi';
+        },
+        set(newValue) {
+          if (newValue) {
+            multiOrFuzzy.value = 'multi';
+          } else {
+            multiOrFuzzy.value = 'fuzzy';
+          }
+        },
+      });
 
-      const returnObject = ref<returnType>({
+      const inputFieldMulti = computed<Maybe<Maybe<string>[]> | undefined>({
+        get() {
+          return props.multiSelectValue && props.multiSelectValue.input.multiSelectInput
+            ? props.multiSelectValue.input.multiSelectInput.value
+            : undefined;
+        },
+        set(value) {
+          if (props.multiSelectValue) {
+            emit(
+              'update:multiSelectValue',
+              defaultReturnMultiSelectObject(props.filterkey, {
+                value: value,
+                AndOrValue: isAnd.value,
+              }),
+            );
+          }
+        },
+      });
+
+      const inputField = computed<string | undefined | null>({
+        get() {
+          return props.multiSelectValue && props.multiSelectValue.input.textInput
+            ? props.multiSelectValue.input.textInput.value
+            : undefined;
+        },
+        set(value) {
+          emit(
+            'update:multiSelectValue',
+            defaultReturnTextObject(props.filterkey, value),
+          );
+        },
+      });
+
+      const { result } = useQuery(GetFilterOptionsDocument, {
         key: props.filterkey,
-        value: undefined,
-        AndOrValue: true,
-        MultiFuzzyChoice: true,
       });
 
-      const multiValue = ref<string[]>([]);
-      const fuzzyValue = ref<string>('');
-
-      watch(returnObject.value, () => {
-        returnObject.value.value === undefined
-          ? ((multiValue.value = []), (fuzzyValue.value = ''))
-          : null;
-
-        emit('update:MultiselectValue', returnObject.value);
-      });
-
-      watch(multiValue, () => {
-        returnObject.value.MultiFuzzyChoice
-          ? (returnObject.value.value = multiValue.value)
-          : null;
-      });
-
-      watch(fuzzyValue, () => {
-        (fuzzyValue.value === '' || fuzzyValue.value === undefined) && !returnObject.value.MultiFuzzyChoice
-          ? returnObject.value.value = undefined
-          : (returnObject.value.value = fuzzyValue.value);
-      });
-
-      const { result, onResult } = useQuery(GetFilterOptionsDocument, {
-        key: props.filterkey,
-      });
-
-      return { result, returnObject, multiValue, fuzzyValue };
+      return { result, isMulti, isAnd, inputFieldMulti, inputField };
     },
   });
 </script>

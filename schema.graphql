@@ -117,14 +117,15 @@ input SearchFilter {
 }
 
 input MinMaxInput {
-  min: String
-  max: String
+  min: Int
+  max: Int
 }
 input TextInput {
   value: String
 }
 input MultiSelectInput {
   value: [String]
+  AndOrValue: Boolean
 }
 
 enum SearchInputType {
@@ -138,10 +139,13 @@ enum AdvancedInputType {
   MultiSelectInput
 }
 
-input AdvancedSearchInput {
-  value: [AdvancedInputType]
+input FilterInput {
+  key: String!
+  type: AdvancedInputType!
+  minMaxInput: MinMaxInput
+  textInput: TextInput
+  multiSelectInput: MultiSelectInput
 }
-
 #Users
 
 type User {
@@ -261,7 +265,7 @@ type Query {
     skip: Int
     searchInputType: SearchInputType
     searchValue: SearchFilter
-    advancedSearchValue: AdvancedSearchInput
+    advancedSearchValue: [FilterInput]
     fetchPolicy: String
   ): EntitiesResults
   User: User

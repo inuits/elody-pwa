@@ -161,8 +161,8 @@ fragment fullEntityRecursive on Entity {
 query getEntities(
   $limit: Int
   $skip: Int
-  $searchValue: SearchFilter!
-  $advancedSearchValue: AdvancedSearchInput!
+  $searchValue: SearchFilter
+  $advancedSearchValue: [FilterInput]
   $searchInputType: SearchInputType
 ) {
   Entities(

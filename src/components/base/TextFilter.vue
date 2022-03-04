@@ -1,7 +1,7 @@
 <template>
   <div>
     <InputField
-      v-model:modelValue="returnObject.value"
+      v-model:modelValue="inputField"
       :debounce="true"
       :placeholder="text"
       :bg-color="'neutral-20'"
@@ -9,18 +9,22 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, ref, watch } from 'vue';
+  import { computed, defineComponent, PropType } from 'vue';
   import InputField from '@/components/base/InputField.vue';
+  import {
+    defaultReturnTextObject,
+    FilterInList,
+  } from '../../composables/useFilterHelper';
   export default defineComponent({
     name: 'TextFilter',
     components: {
       InputField,
     },
     props: {
-      text: {
-        type: String,
+      inputValue: {
+        type: Object as PropType<FilterInList>,
         required: false,
-        default: '',
+        default: undefined,
       },
       filterkey: {
         type: String,
@@ -29,23 +33,20 @@
     },
     emits: ['update:inputValue'],
     setup(props, { emit }) {
-      type returnObject = {
-        key: string;
-        value: string | undefined;
-      };
+      emit('update:inputValue', defaultReturnTextObject(props.filterkey));
 
-      const returnObject = ref<returnObject>({ key: props.filterkey, value: '' });
-
-      watch(returnObject.value, () => {
-        if (returnObject.value.value != '') {
-          emit('update:inputValue', returnObject.value);
-        } else {
-          returnObject.value.value = undefined;
-          emit('update:inputValue', returnObject.value);
-        }
+      const inputField = computed<string | undefined | null>({
+        get() {
+          return props.inputValue && props.inputValue.input.textInput
+            ? props.inputValue.input.textInput.value
+            : undefined;
+        },
+        set(value) {
+          emit('update:inputValue', defaultReturnTextObject(props.filterkey, value));
+        },
       });
 
-      return { returnObject };
+      return { inputField };
     },
   });
 </script>
