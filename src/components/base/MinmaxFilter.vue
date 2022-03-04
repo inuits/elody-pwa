@@ -15,6 +15,7 @@
       placeholder="max"
       :bg-color="'neutral-20'"
       label="max"
+      :min="returnObject.value.min + 1"
     />
   </div>
 </template>
