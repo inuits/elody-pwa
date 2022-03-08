@@ -1,7 +1,7 @@
 <template>
   <div class="lg:flex">
     <FilterSideBar
-      v-show="showDrawer"
+      v-show="!showDrawer"
       v-model:activeFilters="queryVariables.advancedSearchValue"
     />
     <div class="p-6 w-full">
@@ -9,8 +9,8 @@
         <div class="mt-8 mr-4">
           <IconToggle
             v-model:checked="showDrawer"
-            :icon-on="Unicons.Filter.name"
-            :icon-off="Unicons.SearchGlass.name"
+            :icon-on="Unicons.SearchGlass.name"
+            :icon-off="Unicons.Filter.name"
           />
         </div>
         <InputField
@@ -20,6 +20,7 @@
           label="Search"
           :is-disabled="loading"
           :bg-color="'neutral-20'"
+          :disabled="!showDrawer"
         />
         <div class="pl-4 my-2 flex flex-row justify-left">
           <Dropdown
@@ -159,7 +160,7 @@
           isAsc: false,
           key: 'title',
         },
-        advancedSearchValue: [],
+        advancedSearchValue: {},
         searchInputType: SearchInputType.SimpleInputtype,
       });
 
@@ -171,7 +172,7 @@
         emit('addSelection', id);
       };
 
-      const showDrawer = ref(false);
+      const showDrawer = ref(true);
 
       return {
         t,
