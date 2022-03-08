@@ -162,7 +162,7 @@ query getEntities(
   $limit: Int
   $skip: Int
   $searchValue: SearchFilter
-  $advancedSearchValue: [FilterInput]
+  $advancedSearchValue: AdvancedSearchInput
   $searchInputType: SearchInputType
 ) {
   Entities(

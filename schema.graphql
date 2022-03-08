@@ -265,7 +265,7 @@ type Query {
     skip: Int
     searchInputType: SearchInputType
     searchValue: SearchFilter
-    advancedSearchValue: [FilterInput]
+    advancedSearchValue: AdvancedSearchInput
     fetchPolicy: String
   ): EntitiesResults
   User: User
@@ -274,6 +274,10 @@ type Query {
   Job(id: String!): Job
   advancedFilters: [advancedFilter]
   FilterOptions(key: String!): [filterOption]
+}
+
+input AdvancedSearchInput {
+  value: [AdvancedInputType]
 }
 
 #Mutations
