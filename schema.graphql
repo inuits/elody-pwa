@@ -70,6 +70,25 @@ type Media {
   mediafiles: [MediaFile]
 }
 
+# type mp3 {
+#   key: String
+# }
+
+# type mp4 {
+#   key: String
+# }
+
+# enum MIME {
+#   mp3
+#   mp4
+# }
+
+# type MIMEtypes {
+#   type: MIME
+#   audio: mp3
+#   video: mp4
+# }
+
 type MediaFile {
   _id: String!
   original_file_location: String
@@ -77,6 +96,7 @@ type MediaFile {
   filename: String
   entities: [String]
   metadata: [MediaFileMetadata]
+  # mediatype: MIMEtypes
 }
 
 type MediaFileMetadata {

@@ -25,6 +25,7 @@ import {
   uniSortAmountUp,
   uniPlus,
   uniFilter,
+  uniVolume,
 } from 'vue-unicons/dist/icons';
 
 export enum Unicons {
@@ -54,4 +55,5 @@ export enum Unicons {
   SortUp = uniSortAmountUp,
   SortDown = uniSortAmountDown,
   Filter = uniFilter,
+  AudioThumbnail = uniVolume,
 }

@@ -7,10 +7,12 @@
       :loading="loading"
       :mediafiles="mediafiles"
     />
+
     <div
       v-show="!loading && mediafiles.length > 0"
       :class="['flex w-4/6', { checkboard: loading }]"
     >
+<<<<<<< Updated upstream
       <VideoPlayer
         v-if="
           !loading &&
@@ -19,12 +21,26 @@
         "
         :uri="selectedMediafile.filename"
       />
+=======
+      <AudioPlayer
+        v-if="selectedMediafile.filename?.includes('mp3')"
+        :source="selectedMediafile?.filename"
+        :type="selectedMediafile?.mediatype"
+      />
+      <!-- videoplayer   v-if="selectedMediafile?.filename.includes('.mp4')"-->
+>>>>>>> Stashed changes
       <IIIFViewer
-        v-if="!loading && selectedMediafile !== null"
+        v-if="
+          !loading &&
+          selectedMediafile !== null &&
+          !selectedMediafile?.filename.includes('.mp4') &&
+          !selectedMediafile?.filename.includes('.mp3')
+        "
         :image-url="selectedMediafile?.filename"
         :image-meta-data="selectedMediafile.metadata"
       />
     </div>
+    <!-- meta is metadata form-->
     <Meta
       :class="!loading && mediafiles.length > 0 ? 'w-2/6' : 'w-full'"
       :loading="loading"
@@ -49,6 +65,7 @@
   import { useRoute } from 'vue-router';
   // import PickAssetModal from '@/components/PickAssetModal.vue';
   import { asString } from '@/helpers';
+<<<<<<< Updated upstream
   import VideoPlayer from '@/components/base/VideoPlayer.vue';
   export default defineComponent({
     name: 'SingleEntity',
@@ -58,6 +75,13 @@
       Meta,
       VideoPlayer,
     },
+=======
+  import AudioPlayer from '@/components/base/AudioPlayer.vue';
+
+  export default defineComponent({
+    name: 'SingleEntity',
+    components: { IIIFViewer, EntityImageSelection, Meta, AudioPlayer },
+>>>>>>> Stashed changes
     setup() {
       const id = asString(useRoute().params['id']);
       const loading = ref<boolean>(true);
