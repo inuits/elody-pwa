@@ -49,7 +49,6 @@
       :form="result?.Entity?.form"
     />
   </div>
-  <!-- <PickAssetModal :entity-id="entityId" @update-entity="updateEntities" /> -->
 </template>
 
 <script lang="ts">
@@ -59,10 +58,9 @@
   import Meta from '@/components/Meta.vue';
   import { GetEntityByIdDocument, GetEntityByIdQuery, Maybe, MediaFile } from '@/queries';
   import { usePageTitle } from '@/components/TheHeader.vue';
-  import { EditModes, useEditMode } from '@/components/EditToggle.vue';
+  import { useEditMode } from '@/components/EditToggle.vue';
   import EntityImageSelection from '@/components/EntityImageSelection.vue';
   import { useRoute } from 'vue-router';
-  // import PickAssetModal from '@/components/PickAssetModal.vue';
   import { asString } from '@/helpers';
   import VideoPlayer from '@/components/base/VideoPlayer.vue';
   import AudioPlayer from '@/components/base/AudioPlayer.vue';
@@ -105,12 +103,6 @@
         value && updatePageTitle(value, 'entityTitle');
       });
 
-      watch(editMode, (value: EditModes) => {
-        if (value === 'view') {
-          refetch();
-        }
-      });
-
       const updateEntities = () => {
         refetch();
       };
@@ -131,7 +123,6 @@
             }
           });
         }
-        console.log(queryResult.data.Entity?.form);
         //If form show edit togle
         if (queryResult.data.Entity?.form) {
           showEditToggle();

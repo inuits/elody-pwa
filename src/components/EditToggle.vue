@@ -1,6 +1,6 @@
 <template>
   <div v-if="isEditToggleVisible" class="mx-4">
-    <IconToggle
+    <icon-toggle
       v-show="isSingle"
       v-model:checked="toggleBoolean"
       :icon-on="Unicons.Edit.name"

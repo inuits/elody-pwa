@@ -1,35 +1,24 @@
 <template>
-  <div v-for="item in metadata" :key="item.label" class="flex flex-col mb-2 mt-2">
-    <div v-if="item.label" class="label" :class="{ loading }" data-test="meta-label">
-      {{ checkTranslationForlabel(item.label) }}
-    </div>
-    <div v-else class="label" :class="{ loading }">no label</div>
-    <meta-viewline-relation
-      v-if="item.linkedEntity && item.linkedEntity.type === 'asset'"
-      :metadata="item"
-    />
-    <meta-view-line
-      v-if="
-        item.linkedEntity &&
-        item.linkedEntity.metadata &&
-        item.linkedEntity.type !== 'asset'
-      "
-      :metadata="item.linkedEntity.metadata"
-      :loading="loading"
-    />
-    <div
-      v-if="!item.linkedEntity"
-      class="value"
-      :class="{ loading }"
-      data-test="meta-info"
-    >
-      {{ item.value ? item.value : 'no data' }}
+  <div class="my-2">
+    <div :class="[inputContainerStyle, ' input-container p-4 gap-3 flex-col']">
+      <div
+        v-for="{ value: metadataValue, key: metadataKey } in metadata.metadataOnRelation"
+        :key="`${metadata.id}-${metadataKey}`"
+      >
+        <div class="label" :class="{ loading }" data-test="meta-label">
+          {{ metadataKey }}
+        </div>
+        <div class="value" :class="{ loading }" data-test="meta-info">
+          {{ metadataValue ? metadataValue : 'no data' }}
+        </div>
+      </div>
+      <ListItem
+        v-if="metadata.linkedEntity"
+        :meta="metadata.linkedEntity.teaserMetadata"
+        :thumb-icon="Unicons.NoImage.name"
+      />
     </div>
   </div>
-  <div
-    v-if="metadata.length == 0"
-    class="justify-left items-center flex text-sm text-red-default"
-  ></div>
 </template>
 
 <script lang="ts">
@@ -38,11 +27,12 @@
   import { useI18n } from 'vue-i18n';
   import { useRouter } from 'vue-router';
   import { Unicons } from '@/types';
-  import MetaViewlineRelation from './MetaViewlineRelation.vue';
+  import { inputContainerStyle, lableStyle } from './base/InputField.vue';
+  import ListItem from '@/components/ListItem.vue';
 
   export default defineComponent({
-    name: 'MetaViewLine',
-    components: { MetaViewlineRelation },
+    name: 'MetaViewlineRelation',
+    components: { ListItem },
     props: {
       loading: { type: Boolean, default: false },
       metadata: {
@@ -66,6 +56,7 @@
         t,
         router,
         Unicons,
+        inputContainerStyle,
         checkTranslationForlabel,
       };
     },

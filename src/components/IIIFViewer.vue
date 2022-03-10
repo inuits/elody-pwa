@@ -8,7 +8,7 @@
     ]"
   >
     <div ref="OpenSeadragon-toolbar" class="hidden" />
-    <ViewerToolbar
+    <viewer-toolbar
       v-model:zoomIn="zoomInDiv"
       v-model:zoomOut="zoomOutDiv"
       v-model:fullPage="fullPageButtonDiv"

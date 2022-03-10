@@ -82,7 +82,7 @@
                 :loading="loading"
                 class="ml-2"
                 :icon="Unicons.PlusCircle.name"
-                @click="addSelection(entity.id)"
+                @click="addSelection(entity)"
               />
               <BaseButton
                 v-else

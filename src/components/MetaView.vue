@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-  import { Maybe, Metadata, MetadataAndRelation } from '@/queries';
+  import { MetadataAndRelation } from '@/queries';
   import { defineComponent, PropType } from 'vue';
   import MetaViewLine from './MetaViewLine.vue';
 

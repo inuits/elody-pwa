@@ -18,6 +18,7 @@ fragment metadataRelation on MetadataRelation {
 
 fragment minimalBaseEntity on Entity {
   id
+  uuid
   type
   media {
     primaryMediafile
@@ -176,6 +177,7 @@ query getEntities(
     limit
     results {
       id
+      uuid
       type
       media {
         primaryMediafile
@@ -280,6 +282,8 @@ mutation editMetadata($id: String!, $metadata: [MetadataInput!]!) {
   }
 }
 
-mutation replaceRelationsAndMetaData($form: MetadataFormInput!) {
-  replaceRelationsAndMetaData(form: $form)
+mutation replaceRelationsAndMetaData($id: String!, $form: MetadataFormInput!) {
+  replaceRelationsAndMetaData(id: $id, form: $form) {
+    ...fullEntityRecursive
+  }
 }

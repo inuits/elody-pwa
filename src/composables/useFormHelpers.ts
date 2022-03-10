@@ -1,11 +1,11 @@
 import {
   Entity,
   Form,
-  InputFieldTypes,
   Maybe,
   Metadata,
   MetadataAndRelation,
   MetadataField,
+  MetadataFormInput,
   MetadataOrRelationField,
   MetadataRelation,
   RelationField,
@@ -16,6 +16,8 @@ export const LINKED_ENTITY: string = 'linkedEntity';
 
 export type relationValues = {
   linkedEntity: Maybe<Entity> | undefined;
+  key: string;
+  label: string;
   metadata: IntialValues;
 };
 
@@ -44,6 +46,8 @@ const useFormHelper = (form: Form, entityTitle: string) => {
           (relationMetaData: MetadataRelation) => {
             relationArray.push({
               linkedEntity: relationMetaData.linkedEntity,
+              key: relationMetaData.key,
+              label: field.label ? field.label : relationMetaData.key,
               metadata: buildInitialValues(
                 relationMetaData.metadataOnRelation as MetadataAndRelation[],
                 field.metadata as MetadataOrRelationField[],
@@ -85,12 +89,46 @@ const useFormHelper = (form: Form, entityTitle: string) => {
     }) as MetadataRelation[];
   };
 
-  return { buildInitialValues };
+  const serialzeFormToInput = (values: IntialValues): MetadataFormInput => {
+    const input: MetadataFormInput = {
+      Metadata: [],
+      relations: [],
+    };
+    console.log(values);
+    Object.entries(values).forEach((value: [string, string | relationValues[]]) => {
+      if (typeof value[1] === 'string') {
+        input.Metadata?.push({ key: value[0], value: value[1] });
+      }
+      if (typeof value[1] === 'object') {
+        value[1].forEach((relationValue) => {
+          input.relations?.push({
+            relationType: value[0],
+            linkedEntityId: relationValue.key,
+            label: relationValue.label,
+            metadata: Object.entries(relationValue.metadata).map((value) => {
+              if (typeof value[1] === 'string') {
+                return { key: value[0], value: value[1] };
+              }
+              return { key: '', value: '' };
+            }),
+          });
+        });
+      }
+    });
+    return input;
+  };
+
+  return { buildInitialValues, serialzeFormToInput };
 };
 
-export const getEmptyMetadatRelationObject = (fields: RelationField) => {
+export const getEmptyMetadatRelationObject = (
+  fields: RelationField,
+  id: string,
+  linkedEntity: Entity | undefined = undefined,
+) => {
   const intialValue: relationValues = {
-    linkedEntity: undefined,
+    linkedEntity: linkedEntity,
+    key: id,
     metadata: {},
   };
   if (fields.metadata) {
@@ -98,7 +136,6 @@ export const getEmptyMetadatRelationObject = (fields: RelationField) => {
       if (field) intialValue.metadata[field.key] = '';
     });
   }
-  console.log(intialValue);
   return intialValue;
 };
 

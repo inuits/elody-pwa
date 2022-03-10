@@ -1,6 +1,6 @@
 <template>
   <div class="p-6 bg-neutral-20 w-full">
-    <h2>Add frame</h2>
+    <h2>Add {{ label }}</h2>
     <BaseButton
       label="Add"
       :icon="Unicons.PlusCircle.name"
@@ -20,6 +20,12 @@
   export default defineComponent({
     name: 'MetaAdd',
     components: { BaseButton },
+    props: {
+      label: {
+        type: String,
+        required: false,
+      },
+    },
     emits: ['addMetadata'],
     setup(props, { emit }) {
       const add = () => {

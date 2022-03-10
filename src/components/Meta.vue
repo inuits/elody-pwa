@@ -7,12 +7,16 @@
       },
     ]"
   >
-    <meta-view v-if="!loading && !isEdit" :metadata="metadata" :relations="relations" />
+    <meta-view
+      v-if="!loading && !isEdit"
+      :metadata="metadataComputed"
+      :relations="relations"
+    />
     <meta-edit
       v-if="!loading && isEdit && form"
+      v-model="metadataComputed"
       :error="error"
       :loading="loading"
-      :metadata="metadata"
       :discard="discard"
       :entity-title="entityTitle"
       :form="form"
@@ -21,7 +25,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, PropType } from 'vue';
+  import { computed, defineComponent, PropType, ref, watch } from 'vue';
   import MetaEdit from '@/components/MetaEdit.vue';
   import MetaView from '@/components/MetaView.vue';
   import { useEditMode } from './EditToggle.vue';
@@ -39,11 +43,20 @@
         default: false,
       },
     },
-    setup() {
+    setup(props) {
       const { isEdit } = useEditMode();
+      const metadataComputed = ref<MetadataAndRelation[]>(props.metadata);
+
+      watch(
+        () => props.metadata,
+        (value) => {
+          metadataComputed.value = value;
+        },
+      );
 
       return {
         isEdit,
+        metadataComputed,
       };
     },
   });
