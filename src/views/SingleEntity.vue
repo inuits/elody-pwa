@@ -11,6 +11,14 @@
       v-show="!loading && mediafiles.length > 0"
       :class="['flex w-4/6', { checkboard: loading }]"
     >
+      <VideoPlayer
+        v-if="
+          !loading &&
+          selectedMediafile !== null &&
+          selectedMediafile.filename?.includes('.mp4')
+        "
+        :uri="selectedMediafile.filename"
+      />
       <IIIFViewer
         v-if="!loading && selectedMediafile !== null"
         :image-url="selectedMediafile?.filename"
@@ -41,10 +49,15 @@
   import { useRoute } from 'vue-router';
   // import PickAssetModal from '@/components/PickAssetModal.vue';
   import { asString } from '@/helpers';
-
+  import VideoPlayer from '@/components/base/VideoPlayer.vue';
   export default defineComponent({
     name: 'SingleEntity',
-    components: { IIIFViewer, EntityImageSelection, Meta },
+    components: {
+      IIIFViewer,
+      EntityImageSelection,
+      Meta,
+      VideoPlayer,
+    },
     setup() {
       const id = asString(useRoute().params['id']);
       const loading = ref<boolean>(true);
