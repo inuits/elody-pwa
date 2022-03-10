@@ -129,6 +129,7 @@ export const getEmptyMetadatRelationObject = (
   const intialValue: relationValues = {
     linkedEntity: linkedEntity,
     key: id,
+    label: fields.label ? fields.label : '',
     metadata: {},
   };
   if (fields.metadata) {
