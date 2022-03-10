@@ -5,44 +5,59 @@
     :modal-state="pickAssetModalState.state"
     @hide-modal="closePickAssetModal"
   >
-    <div class="bg-neutral-20 w-full h-full flex flex-col">
+    <div
+      v-if="pickAssetModalState.state !== 'initial'"
+      class="bg-neutral-20 w-full h-full flex flex-col"
+    >
       <AssetLibrary :enable-selection="true" @add-selection="addItem" />
     </div>
   </modal>
 </template>
 <script lang="ts">
   import Modal, { ModalState } from './base/Modal.vue';
-  import { defineComponent, ref } from 'vue';
+  import { defineComponent, ref, watch } from 'vue';
   import AssetLibrary from '@/components/AssetLibrary.vue';
-  import { useMutation } from '@vue/apollo-composable';
-  // import { AddComponentDocument, RelationType } from '@/queries';
+  import { Entity } from '@/queries';
 
   export type PickAssetModalType = {
     state: ModalState;
+    pickedAsset: Entity | undefined;
   };
 
   const pickAssetModalState = ref<PickAssetModalType>({
-    state: 'hide',
+    state: 'initial',
+    pickedAsset: undefined,
   });
 
-  export const usePickAssetModal = () => {
+  export const usePickAssetModal = (cb?: (_value: Entity) => void) => {
     const updatePickAssetModal = (uploadModalInput: PickAssetModalType) => {
       pickAssetModalState.value = uploadModalInput;
+    };
+    const callBack = ref<((_value: Entity) => void) | undefined>(cb ? cb : undefined);
+
+    const pickAsset = (pickedAsset: Entity) => {
+      updatePickAssetModal({
+        state: 'hide',
+        pickedAsset: pickedAsset,
+      });
     };
 
     const closePickAssetModal = () => {
       updatePickAssetModal({
         state: 'hide',
+        pickedAsset: undefined,
       });
     };
 
     const openPickAssetModal = () => {
       updatePickAssetModal({
         state: 'show',
+        pickedAsset: undefined,
       });
     };
 
     return {
+      pickAsset,
       closePickAssetModal,
       openPickAssetModal,
       pickAssetModalState,
@@ -55,23 +70,10 @@
       Modal,
       AssetLibrary,
     },
-    props: {
-      entityId: {
-        type: String,
-        required: true,
-      },
-    },
-    emits: ['updateEntity'],
-    setup(props, { emit }) {
-      const { closePickAssetModal, pickAssetModalState } = usePickAssetModal();
-      // const { mutate } = useMutation(AddComponentDocument);
-      const addItem = async (id: string) => {
-        // await mutate({
-        //   id: props.entityId,
-        //   relations: [{ type: RelationType.Components, key: id }],
-        // });
-        emit('updateEntity');
-        closePickAssetModal();
+    setup() {
+      const { pickAsset, closePickAssetModal, pickAssetModalState } = usePickAssetModal();
+      const addItem = async (asset: Entity) => {
+        pickAsset(asset);
       };
 
       return {

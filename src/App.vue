@@ -9,6 +9,7 @@
     </div>
     <upload-modal />
     <edit-modal />
+    <pick-asset-modal />
   </div>
 </template>
 
@@ -22,10 +23,11 @@
   import useRouteHelpers from './composables/useRouteHelpers';
   import { useHead } from '@vueuse/head';
   import { environment as _ } from './environment';
+  import PickAssetModal from '@/components/PickAssetModal.vue';
 
   export default defineComponent({
     name: 'App',
-    components: { UploadModal, TheNavigation, TheHeader, EditModal },
+    components: { UploadModal, TheNavigation, TheHeader, EditModal, PickAssetModal },
     inject: { DefaultOIDC },
     setup() {
       const auth = useAuth();

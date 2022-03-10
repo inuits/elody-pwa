@@ -57,7 +57,7 @@
 <script lang="ts">
   import { defineComponent, PropType, toRefs, watch } from 'vue';
 
-  export type ModalState = 'show' | 'hide' | 'loading';
+  export type ModalState = 'initial' | 'show' | 'hide' | 'loading';
 
   export default defineComponent({
     name: 'Modal',

@@ -28,22 +28,20 @@
       </div>
     </div>
   </div>
-  <MetaAdd @addMetadata="addRelation" />
+  <MetaAdd :label="label" @addMetadata="openPickAssetModal" />
 </template>
 
 <script lang="ts">
-  import {
-    RelationField,
-    ReplaceRelationsAndMetaDataMutation,
-    ReplaceRelationsAndMetaDataMutationVariables,
-  } from '@/queries';
-  import { defineComponent, PropType } from 'vue';
+  import { Entity, RelationField } from '@/queries';
+  import { defineComponent, PropType, watch } from 'vue';
   import MetaEditDataField from './MetaEditDataField.vue';
   import { useFieldArray } from 'vee-validate';
   import { inputContainerStyle, lableStyle } from './base/InputField.vue';
   import { Unicons } from '@/types';
   import BaseButton from './base/BaseButton.vue';
   import MetaAdd from '@/components/MetaAdd.vue';
+  import { PickAssetModalType, usePickAssetModal } from './PickAssetModal.vue';
+
   import {
     getEmptyMetadatRelationObject,
     relationValues,
@@ -65,10 +63,29 @@
       const { remove, push, fields, update } = useFieldArray<relationValues>(
         props.structure.relationType,
       );
-      const emptyObject = getEmptyMetadatRelationObject(props.structure);
-      const addRelation = () => {
-        push(emptyObject);
+      const addRelation = (value: Entity) => {
+        push(
+          getEmptyMetadatRelationObject(props.structure, value.uuid, {
+            //@ts-ignore  Error when passing value object in vee-validate
+            teaserMetadata: [
+              //@ts-ignore
+              { value: value.id, key: 'object_number' },
+              //@ts-ignore
+              { value: value.title[0].value, key: 'titel' },
+            ],
+          }),
+        );
+        closePickAssetModal();
       };
+      const { openPickAssetModal, closePickAssetModal, pickAssetModalState } =
+        usePickAssetModal(addRelation);
+
+      watch(pickAssetModalState, (value: PickAssetModalType) => {
+        if (value.pickedAsset) {
+          addRelation(value.pickedAsset);
+          closePickAssetModal();
+        }
+      });
 
       return {
         push,
@@ -78,6 +95,7 @@
         Unicons,
         lableStyle,
         addRelation,
+        openPickAssetModal,
         inputContainerStyle,
       };
     },
