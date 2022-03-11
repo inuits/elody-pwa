@@ -31,13 +31,17 @@ export const defaultReturnMultiSelectObject = (
 };
 
 const checkIfMinMaxActive = (value: MinMaxInput | undefined): boolean => {
-  if (value === undefined) {
+  if (
+    value === undefined ||
+    (value.min === 0 && value.max === 0) ||
+    (value.min === undefined && value.max === undefined) ||
+    (value.min === 0 && value.max === undefined) ||
+    (value.min === undefined && value.max === 0)
+  ) {
     return false;
+  } else {
+    return true;
   }
-  return (
-    (value.min != undefined || value.max != undefined) &&
-    (value.min != 0 || value.max != 0)
-  );
 };
 
 export const defaultReturnMinMaxObject = (
