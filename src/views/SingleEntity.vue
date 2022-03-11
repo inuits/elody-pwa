@@ -10,7 +10,7 @@
 
     <div
       v-show="!loading && mediafiles.length > 0"
-      :class="['flex w-4/6', { checkboard: loading }]"
+      :class="['flex w-4/6 justify-center ', { checkboard: loading }]"
     >
       <VideoPlayer
         v-if="

@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <audio controls>
+  <div class="flex w-full h-full justify-center items-center">
+    <audio controls class="w-full">
       <source
         :src="'https://coghent-api-dev.inuits.dev/storage/v1/download/' + props.source"
         type="audio/mpeg"
