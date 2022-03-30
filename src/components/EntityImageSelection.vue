@@ -29,7 +29,8 @@
           v-if="
             mediaFile.thumbnail_file_location &&
             mediaFile.filename &&
-            mediaFile.filename === selectedImage.filename
+            mediaFile.filename === selectedImage.filename &&
+            !mediaFile?.filename.includes('.mp3')
           "
           :class="[
             'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2 border-blue-500',
@@ -37,16 +38,26 @@
           :src="mediaFile.thumbnail_file_location"
           @click="selectImage(mediaFile)"
         />
+        <AudioThumbnail
+          v-if="mediaFile?.filename.includes('.mp3')"
+          :class="[
+            'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2 border-blue-500',
+          ]"
+          @click="selectImage(mediaFile)"
+        />
       </div>
     </div>
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, PropType } from 'vue';
+  import { defineComponent, PropType, ref, watch } from 'vue';
   import { MediaFile } from '@/queries';
-
+  import AudioThumbnail from '../components/base/audiothumbnail.vue';
   export default defineComponent({
     name: 'EntityImageSelection',
+    components: {
+      AudioThumbnail,
+    },
     props: {
       mediafiles: { type: Array as PropType<MediaFile[]>, required: true },
       selectedImage: {
