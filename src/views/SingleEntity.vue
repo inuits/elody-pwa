@@ -18,7 +18,7 @@
           selectedMediafile !== null &&
           selectedMediafile.filename?.includes('.mp4')
         "
-        :uri="selectedMediafile.filename"
+        :source="selectedMediafile"
       />
       <AudioPlayer
         v-if="
@@ -26,14 +26,23 @@
           selectedMediafile !== null &&
           selectedMediafile.filename?.includes('mp3')
         "
-        :source="selectedMediafile?.filename"
+        :source="selectedMediafile"
+      />
+      <PDFViewer
+        v-if="
+          !loading &&
+          selectedMediafile !== null &&
+          selectedMediafile.filename?.includes('pdf')
+        "
+        :source="selectedMediafile"
       />
       <IIIFViewer
         v-if="
           !loading &&
           selectedMediafile !== null &&
           !selectedMediafile?.filename.includes('.mp4') &&
-          !selectedMediafile?.filename.includes('.mp3')
+          !selectedMediafile?.filename.includes('.mp3') &&
+          !selectedMediafile?.filename.includes('.pdf')
         "
         :image-url="selectedMediafile?.filename"
         :image-meta-data="selectedMediafile.metadata"
@@ -64,6 +73,7 @@
   import { asString } from '@/helpers';
   import VideoPlayer from '@/components/base/VideoPlayer.vue';
   import AudioPlayer from '@/components/base/AudioPlayer.vue';
+  import PDFViewer from '@/components/base/PDFViewer.vue';
   export default defineComponent({
     name: 'SingleEntity',
     components: {
@@ -72,6 +82,7 @@
       Meta,
       VideoPlayer,
       AudioPlayer,
+      PDFViewer,
     },
     setup() {
       const id = asString(useRoute().params['id']);

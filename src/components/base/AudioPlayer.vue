@@ -2,28 +2,32 @@
   <div class="flex w-full h-full justify-center items-center">
     <audio controls class="w-full">
       <source
-        :src="'https://coghent-api-dev.inuits.dev/storage/v1/download/' + props.source"
+        :src="'https://coghent-api-dev.inuits.dev/storage/v1/download/' + source.filename"
         type="audio/mpeg"
       />
       Your browser does not support the audio element.
     </audio>
+    <media-info class="" :meta-data="source.metadata" />
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent } from 'vue';
+  import { MediaFileMetadata } from '@/queries';
+  import { defineComponent, PropType } from 'vue';
+  import MediaInfo from './MediaInfo.vue';
 
   export default defineComponent({
     name: 'AudioPlayer',
+    components: {
+      MediaInfo,
+    },
     props: {
       source: {
-        type: String,
-        default: '',
-        required: false,
+        type: Array as PropType<MediaFileMetadata[]>,
+        required: true,
       },
     },
-
-    setup(props) {
-      return { props };
+    setup() {
+      return {};
     },
   });
 </script>
