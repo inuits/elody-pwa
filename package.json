@@ -23,6 +23,8 @@
     "graphql": "^15.5.1",
     "graphql-tag": "^2.12.5",
     "openseadragon": "^2.4.2",
+    "pdfjs-dist": "^2.13.216",
+    "pdfvuer": "^2.0.1",
     "register-service-worker": "^1.7.1",
     "session-vue-3-oidc-library": "^0.1.2",
     "ts-debounce": "^3.0.0",
@@ -39,6 +41,7 @@
     "@graphql-codegen/typed-document-node": "^1.18.10",
     "@graphql-codegen/typescript": "^1.23.0",
     "@graphql-codegen/typescript-operations": "^1.18.4",
+    "@intlify/vue-i18n-loader": "^3.0.0",
     "@tailwindcss/postcss7-compat": "^2.2.7",
     "@types/jest": "^26.0.24",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
@@ -58,6 +61,7 @@
     "@vue/eslint-config-typescript": "^7.0.0",
     "@vue/test-utils": "^2.0.0-rc.12",
     "eslint": "^7.31.0",
+    "eslint-plugin-i18n": "^2.1.0",
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-vue": "^7.14.0",
     "graphql-codegen-webpack-plugin": "0.0.7",
@@ -67,9 +71,7 @@
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.2.7",
     "ts-jest": "^26.5.6",
     "typescript": "^4.3.5",
-    "vue-jest": "^5.0.0-alpha.10",
-    "@intlify/vue-i18n-loader": "^3.0.0",
-    "eslint-plugin-i18n": "^2.1.0"
+    "vue-jest": "^5.0.0-alpha.10"
   },
   "postcss": {
     "plugins": {
