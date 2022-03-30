@@ -27,27 +27,19 @@
     </div>
     <a ref="homeRef" class="text-sm mr-2 text-neutral-700">Reset view</a>
   </div>
-  <div
-    v-show="imageMetaData.length > 0"
-    class="metainfo absolute bg-neutral-0 z-20 mx-4 mt-7 p-4 shadow-sm bottom-0"
-  >
-    <h3 class="text-sm text-neutral-700 font-semibold">Mediainfo</h3>
-    <div v-for="item in imageMetaData" :key="item.label" class="flex flex-col mb-2 mt-2">
-      <div class="label">{{ item.key }}</div>
-      <div v-if="item.value" class="value">
-        {{ item.value }}
-      </div>
-    </div>
-  </div>
+  <media-info :meta-data="imageMetaData" />
 </template>
 
 <script lang="ts">
   import { defineComponent, onMounted, ref, PropType } from 'vue';
   import { Unicons } from '@/types';
   import { MediaFileMetadata } from '@/queries';
-
+  import MediaInfo from './base/MediaInfo.vue';
   export default defineComponent({
     name: 'ViewerToolbar',
+    components: {
+      MediaInfo,
+    },
     props: {
       zoomIn: {
         type: Object as PropType<HTMLDivElement | string | null>,
@@ -95,19 +87,3 @@
     },
   });
 </script>
-<style lang="postcss" scoped>
-  .label {
-    @apply rounded font-body text-xs text-neutral-60;
-  }
-  .value {
-    @apply rounded font-body text-sm text-neutral-700 mt-0.5;
-  }
-  .label.loading,
-  .value.loading {
-    @apply bg-neutral-20 text-neutral-20;
-  }
-
-  .metainfo {
-    bottom: 1rem;
-  }
-</style>

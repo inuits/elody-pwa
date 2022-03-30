@@ -1,14 +1,10 @@
 <template>
   <div
-    :v-show="props.imageMetaData.length > 0"
+    v-show="metaData.length > 0"
     class="metainfo absolute bg-neutral-0 z-20 mx-4 mt-7 p-4 shadow-sm bottom-0"
   >
     <h3 class="text-sm text-neutral-700 font-semibold">Mediainfo</h3>
-    <div
-      :key="item.label"
-      :v-for="item in props.imageMetaData"
-      class="flex flex-col mb-2 mt-2"
-    >
+    <div v-for="item in metaData" :key="item.key" class="flex flex-col mb-2 mt-2">
       <div class="label">{{ item.key }}</div>
       <div v-if="item.value" class="value">
         {{ item.value }}
@@ -23,14 +19,31 @@
   export default defineComponent({
     name: 'MediaInfo',
     props: {
-      imageMetaData: {
+      metaData: {
         type: Array as PropType<MediaFileMetadata[]>,
         required: false,
         default: () => [],
       },
     },
     setup(props) {
+      console.log(props.metaData[0].key);
       return { props };
     },
   });
 </script>
+<style lang="postcss" scoped>
+  .label {
+    @apply rounded font-body text-xs text-neutral-60;
+  }
+  .value {
+    @apply rounded font-body text-sm text-neutral-700 mt-0.5;
+  }
+  .label.loading,
+  .value.loading {
+    @apply bg-neutral-20 text-neutral-20;
+  }
+
+  .metainfo {
+    bottom: 1rem;
+  }
+</style>
