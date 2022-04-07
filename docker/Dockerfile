@@ -13,7 +13,7 @@ COPY .npmrc package*.json ./
 
 RUN npm cache clean --force
 RUN npm cache verify
-RUN npm ci
+RUN npm install
 
 EXPOSE 8080
 
