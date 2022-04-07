@@ -18,4 +18,4 @@ else
   exit 1
 fi
 
-${DOCKER} build -f docker/Dockerfile -t inuits-dams-frontend:prod --target=production-stage --build-arg NPM_AUTH_TOKEN=${NPM_AUTH_TOKEN} $__DIR $@
+${DOCKER} build -f docker/Dockerfile -t inuits-dams-frontend:prod --target=production-stage --build-arg NPM_CONFIG__AUTH_TOKEN=${NPM_CONFIG__AUTH_TOKEN} $__DIR $@
