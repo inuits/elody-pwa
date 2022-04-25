@@ -1,4 +1,5 @@
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { ParentBasedSampler, TraceIdRatioBasedSampler, AlwaysOnSampler } from '@opentelemetry/core';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { XMLHttpRequestInstrumentation } from '@opentelemetry/instrumentation-xml-http-request';
 import { UserInteractionInstrumentation } from '@opentelemetry/instrumentation-user-interaction';
@@ -38,7 +39,7 @@ import { environment as _ } from './environment';
 import init from './otel/tracer';
 
 const serviceName = 'Dams frontend';
-const { provider } = init(serviceName, BatchSpanProcessor);
+const { provider } = init(serviceName, new ParentBasedSampler({root: new TraceIdRatioBasedSampler(1)}), BatchSpanProcessor);
 
 Unicon.add(Object.values(Unicons));
 
