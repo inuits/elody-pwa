@@ -1,3 +1,21 @@
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import { XMLHttpRequestInstrumentation } from '@opentelemetry/instrumentation-xml-http-request';
+import { UserInteractionInstrumentation } from '@opentelemetry/instrumentation-user-interaction';
+import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
+// Registering instrumentations
+registerInstrumentations({
+  instrumentations: [
+    new UserInteractionInstrumentation(),
+    new XMLHttpRequestInstrumentation({
+      // propagateTraceHeaderCorsUrls: [
+      //     /.+/g, //Regex to match your backend urls. This should be updated.
+      // ]
+    }),
+    new FetchInstrumentation()
+  ],
+});
+
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
 import { createApp } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
@@ -16,6 +34,11 @@ import { createHead } from '@vueuse/head';
 import './registerServiceWorker';
 import './index.css';
 import { environment as _ } from './environment';
+
+import init from './otel/tracer';
+
+const serviceName = 'Dams frontend';
+const { provider } = init(serviceName, BatchSpanProcessor);
 
 Unicon.add(Object.values(Unicons));
 
