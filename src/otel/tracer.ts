@@ -1,16 +1,16 @@
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
 import { ZoneContextManager } from '@opentelemetry/context-zone';
-import { ParentBasedSampler, TraceIdRatioBasedSampler, AlwaysOnSampler } from '@opentelemetry/core';
 import { ConsoleSpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 
 // Plugins
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { Sampler } from '@opentelemetry/api';
 
 import { environment as env} from '../environment';
 
-const init = function (serviceName: string, spanProcessor: any) {
+const init = function (serviceName: string, sampler: Sampler | undefined, spanProcessor: any) {
 
     const otelExporter = new OTLPTraceExporter({
         url: `http://${env.otel.host}:${env.otel.port}/v1/traces`, 
@@ -24,7 +24,7 @@ const init = function (serviceName: string, spanProcessor: any) {
         resource: new Resource({
             [SemanticResourceAttributes.SERVICE_NAME]: serviceName
         }), 
-         
+        sampler: sampler
     });
 
     // provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter())); // Uncomment this, if you want print data on console for e.g. for  debugging purposes.
