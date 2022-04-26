@@ -13,7 +13,7 @@ import { environment as env} from '../environment';
 const init = function (serviceName: string, sampler: Sampler | undefined, spanProcessor: any) {
 
     const otelExporter = new OTLPTraceExporter({
-        url: `http://${env.otel.host}:${env.otel.port}/v1/traces`, 
+        url: `http://${env.otlp.host}:${env.otlp.port}/v1/traces`, 
         // headers: {
         //     "content-type": "application/json"
         // }
