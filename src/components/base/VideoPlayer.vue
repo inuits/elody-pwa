@@ -1,8 +1,8 @@
 <template>
   <video class="w-full h-full" controls>
     <source
-      :src="'https://coghent-api-dev.inuits.dev/storage/v1/download/' + source.filename"
-      type="video/mp4"
+      :src="'https://coghent-api-dev.inuits.dev/storage/v1/download/' + source?.filename"
+      :type="source?.mimetype"
     />
   </video>
   <media-info class="" :meta-data="source.metadata" />

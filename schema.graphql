@@ -93,6 +93,27 @@ type Media {
 #   video: mp4
 # }
 
+enum AudioMIMETypes {
+  audiompeg
+  audioogg
+  audiowav
+}
+enum VideoMIMETypes {
+  videomp4
+  videowebm
+  videoogg
+}
+
+enum ApplicationMIMETypes {
+  applicationpdf
+}
+
+enum MIMETypes {
+  AudioMIMETypes
+  VideoMIMETypes
+  PDFMIMETypes
+}
+
 type MediaFile {
   _id: String!
   original_file_location: String
@@ -101,6 +122,7 @@ type MediaFile {
   entities: [String]
   metadata: [MediaFileMetadata]
   # mediatype: MIMEtypes
+  mimetype: string
 }
 
 type MediaFileMetadata {

@@ -16,7 +16,7 @@
         v-if="
           !loading &&
           selectedMediafile !== null &&
-          selectedMediafile.filename?.includes('.mp4')
+          selectedMediafile.mimetype.includes('video')
         "
         :source="selectedMediafile"
       />
@@ -24,7 +24,7 @@
         v-if="
           !loading &&
           selectedMediafile !== null &&
-          selectedMediafile.filename?.includes('mp3')
+          selectedMediafile?.mimetype.includes('audio')
         "
         :source="selectedMediafile"
       />
@@ -32,7 +32,7 @@
         v-if="
           !loading &&
           selectedMediafile !== null &&
-          selectedMediafile.filename?.includes('pdf')
+          selectedMediafile?.mimetype === 'application/pdf'
         "
         :source="selectedMediafile"
       />
@@ -40,9 +40,10 @@
         v-if="
           !loading &&
           selectedMediafile !== null &&
-          !selectedMediafile?.filename.includes('.mp4') &&
-          !selectedMediafile?.filename.includes('.mp3') &&
-          !selectedMediafile?.filename.includes('.pdf')
+          selectedMediafile?.mimetype.includes('image') &&
+          !selectedMediafile?.mimetype.includes('video') &&
+          !selectedMediafile?.mimetype.includes('audio') &&
+          !selectedMediafile?.mimetype.includes('application')
         "
         :image-url="selectedMediafile?.filename"
         :image-meta-data="selectedMediafile.metadata"

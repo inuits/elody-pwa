@@ -1,7 +1,8 @@
 <template>
   <object
     class="h-full w-full object-contain"
-    :data="'https://coghent-api-dev.inuits.dev/storage/v1/download/' + source?.filename"
+    :data="'http://storage-api.dams.localhost:8100/download/' + source?.filename"
+    :type="source?.mimetype"
   ></object>
 </template>
 
