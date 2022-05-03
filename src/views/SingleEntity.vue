@@ -16,7 +16,7 @@
         v-if="
           !loading &&
           selectedMediafile !== null &&
-          selectedMediafile?.mimetype.includes('video')
+          selectedMediafile.mimetype.includes('video')
         "
         :source="selectedMediafile"
       />
@@ -24,7 +24,7 @@
         v-if="
           !loading &&
           selectedMediafile !== null &&
-          selectedMediafile?.mimetype.includes('audio')
+          selectedMediafile.mimetype.includes('audio')
         "
         :source="selectedMediafile"
       />
@@ -32,7 +32,7 @@
         v-if="
           !loading &&
           selectedMediafile !== null &&
-          selectedMediafile?.mimetype.includes('pdf')
+          selectedMediafile.mimetype.includes('pdf')
         "
         :source="selectedMediafile"
       />
@@ -40,13 +40,10 @@
         v-if="
           !loading &&
           selectedMediafile !== null &&
-          selectedMediafile?.mimetype.includes('image') &&
-          !selectedMediafile?.mimetype.includes('video') &&
-          !selectedMediafile?.mimetype.includes('audio') &&
-          !selectedMediafile?.mimetype.includes('application')
+          selectedMediafile.mimetype.includes('image')
         "
-        :image-url="selectedMediafile?.filename"
-        :image-meta-data="selectedMediafile?.metadata"
+        :image-url="selectedMediafile.filename"
+        :image-meta-data="selectedMediafile.metadata"
       />
     </div>
     <!-- meta is metadata form-->
