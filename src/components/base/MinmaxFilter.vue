@@ -86,5 +86,5 @@
   });
 </script>
 
-function isInteger(value: MinMaxInput|undefined) { throw new Error('Function not
-implemented.'); }
+/* function isInteger(value: MinMaxInput|undefined) { throw new Error('Function not
+implemented.'); } */

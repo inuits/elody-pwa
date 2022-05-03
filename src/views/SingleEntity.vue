@@ -16,7 +16,7 @@
         v-if="
           !loading &&
           selectedMediafile !== null &&
-          selectedMediafile.mimetype.includes('video')
+          selectedMediafile?.mimetype.includes('video')
         "
         :source="selectedMediafile"
       />
@@ -32,7 +32,7 @@
         v-if="
           !loading &&
           selectedMediafile !== null &&
-          selectedMediafile?.mimetype === 'application/pdf'
+          selectedMediafile?.mimetype.includes('pdf')
         "
         :source="selectedMediafile"
       />
@@ -46,7 +46,7 @@
           !selectedMediafile?.mimetype.includes('application')
         "
         :image-url="selectedMediafile?.filename"
-        :image-meta-data="selectedMediafile.metadata"
+        :image-meta-data="selectedMediafile?.metadata"
       />
     </div>
     <!-- meta is metadata form-->

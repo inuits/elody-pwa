@@ -189,6 +189,13 @@ query getEntities(
   }
 }
 
+# query getAdvancedEntities($filters: [AdvancedSearchInput]!) {
+#   Entities(filters: $filters) {
+#     count
+#     limit
+#   }
+# }
+
 query getEntityById($id: String!) {
   Entity(id: $id) {
     ...fullEntityRecursive
@@ -253,13 +260,6 @@ query getAdvancedFilters {
     key
   }
 }
-
-# query getAdvancedFilterResult($filters: [AdvancedSearchInput]!) {
-#   Entities(filters: $filters) {
-#     count
-#     limit
-#   }
-# }
 
 query getFilterOptions($key: String!) {
   FilterOptions(key: $key) {
