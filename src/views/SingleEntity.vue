@@ -58,15 +58,24 @@
       :entity-title="title"
       :form="result?.Entity?.form"
     />
+    <button @click="deleteAsset">Delete Asset</button>
   </div>
 </template>
 
 <script lang="ts">
   import { computed, defineComponent, watch, ref } from 'vue';
-  import { useQuery } from '@vue/apollo-composable';
+  import { useMutation, useQuery } from '@vue/apollo-composable';
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import Meta from '@/components/Meta.vue';
-  import { GetEntityByIdDocument, GetEntityByIdQuery, Maybe, MediaFile } from '@/queries';
+  import {
+    GetEntityByIdDocument,
+    GetEntityByIdQuery,
+    Maybe,
+    MediaFile,
+    DeleteDataDocument,
+    DeleteDataMutation,
+    DeletePaths,
+  } from '@/queries';
   import { usePageTitle } from '@/components/TheHeader.vue';
   import { useEditMode } from '@/components/EditToggle.vue';
   import EntityImageSelection from '@/components/EntityImageSelection.vue';
@@ -75,6 +84,7 @@
   import VideoPlayer from '@/components/base/VideoPlayer.vue';
   import AudioPlayer from '@/components/base/AudioPlayer.vue';
   import PDFViewer from '@/components/base/PDFViewer.vue';
+
   export default defineComponent({
     name: 'SingleEntity',
     components: {
@@ -143,8 +153,16 @@
         loading.value = false;
       });
 
+      const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
+
+      const deleteAsset = () => {
+        mutate({ id, path: DeletePaths.Entities });
+        //window.history.back();
+      };
+
       return {
         result,
+        deleteAsset,
         loading,
         title,
         mediafiles,

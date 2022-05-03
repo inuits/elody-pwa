@@ -106,6 +106,8 @@
         const returnArray = initialFilters.value.map((filter: FilterInList) => {
           return filter.input;
         });
+
+        console.log(returnArray);
         emit('update:activeFilters', returnArray);
       };
 

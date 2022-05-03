@@ -152,6 +152,8 @@
       routeHelper.getPaginationInfoFromUrl(paginationInfo);
       const { t } = useI18n();
 
+      const showDrawer = ref(true);
+
       const queryVariables = reactive<GetEntitiesQueryVariables>({
         limit: paginationInfo.limit,
         skip: paginationInfo.skip - 1,
@@ -164,15 +166,27 @@
         searchInputType: SearchInputType.SimpleInputtype,
       });
 
-      const { result, loading } = useQuery(GetEntitiesDocument, queryVariables, {
+      watch(showDrawer, () => {
+        queryVariables.searchInputType = showDrawer.value
+          ? SearchInputType.SimpleInputtype
+          : SearchInputType.AdvancedInputType;
+      });
+
+      watch(
+        () => queryVariables.advancedSearchValue,
+        () => {
+          console.log(queryVariables.advancedSearchValue);
+          refetch(queryVariables);
+        },
+      );
+
+      const { result, loading, refetch } = useQuery(GetEntitiesDocument, queryVariables, {
         notifyOnNetworkStatusChange: true,
       });
 
       const addSelection = (id: string) => {
         emit('addSelection', id);
       };
-
-      const showDrawer = ref(true);
 
       return {
         t,

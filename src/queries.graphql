@@ -287,3 +287,7 @@ mutation replaceRelationsAndMetaData($id: String!, $form: MetadataFormInput!) {
     ...fullEntityRecursive
   }
 }
+
+mutation deleteData($id: String!, $path: deletePaths!) {
+  deleteData(id: $id, path: $path)
+}

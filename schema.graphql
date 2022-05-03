@@ -333,6 +333,13 @@ type Mutation {
   StartImport(folder: String!): ImportReturn
   # addRelations(id: String!, relations: [RelationInput!]!): [Relation]!
   replaceRelationsAndMetaData(id: String!, form: MetadataFormInput): Entity
+  deleteData(id: String!, path: deletePaths!): String
+  #deleteMediaFile(id: String!): String
+}
+
+enum deletePaths {
+  entities,
+  mediafiles,
 }
 
 input MetadataInput {
