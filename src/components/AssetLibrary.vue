@@ -162,7 +162,7 @@
           isAsc: false,
           key: 'title',
         },
-        advancedSearchValue: {},
+        advancedSearchValue: undefined,
         searchInputType: SearchInputType.SimpleInputtype,
       });
 

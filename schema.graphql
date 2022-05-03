@@ -93,27 +93,6 @@ type Media {
 #   video: mp4
 # }
 
-enum AudioMIMETypes {
-  audiompeg
-  audioogg
-  audiowav
-}
-enum VideoMIMETypes {
-  videomp4
-  videowebm
-  videoogg
-}
-
-enum ApplicationMIMETypes {
-  applicationpdf
-}
-
-enum MIMETypes {
-  AudioMIMETypes
-  VideoMIMETypes
-  PDFMIMETypes
-}
-
 type MediaFile {
   _id: String!
   original_file_location: String
@@ -122,7 +101,6 @@ type MediaFile {
   entities: [String]
   metadata: [MediaFileMetadata]
   # mediatype: MIMEtypes
-  mimetype: string
 }
 
 type MediaFileMetadata {
@@ -312,7 +290,7 @@ type Query {
     skip: Int
     searchInputType: SearchInputType
     searchValue: SearchFilter
-    advancedSearchValue: AdvancedSearchInput
+    advancedSearchValue: [FilterInput]
     fetchPolicy: String
   ): EntitiesResults
   User: User
@@ -338,8 +316,8 @@ type Mutation {
 }
 
 enum deletePaths {
-  entities,
-  mediafiles,
+  entities
+  mediafiles
 }
 
 input MetadataInput {
