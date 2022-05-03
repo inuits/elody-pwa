@@ -7,7 +7,6 @@
       placeholder="min"
       :bg-color="'neutral-20'"
       label="min"
-      min="0"
     />
     <MinMaxField
       v-model="inputFieldMax"

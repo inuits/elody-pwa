@@ -45,13 +45,20 @@
           ]"
           @click="selectImage(mediaFile)"
         />
+        <button @click="deleteMedia(mediaFile._id)">delete file</button>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts">
   import { defineComponent, PropType, ref, watch } from 'vue';
-  import { MediaFile } from '@/queries';
+  import { useMutation, useQuery } from '@vue/apollo-composable';
+  import {
+    MediaFile,
+    DeleteDataDocument,
+    DeleteDataMutation,
+    DeletePaths,
+  } from '@/queries';
   import AudioThumbnail from '../components/base/audiothumbnail.vue';
   export default defineComponent({
     name: 'EntityImageSelection',
@@ -75,8 +82,16 @@
         mediafile && emit('update:selectedImage', mediafile);
       };
 
+      const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
+
+      const deleteMedia = (id: string) => {
+        const parsedId = id.replace('mediafiles/', '');
+        mutate({ id: parsedId, path: DeletePaths.Mediafiles });
+      };
+
       return {
         selectImage,
+        deleteMedia,
       };
     },
   });

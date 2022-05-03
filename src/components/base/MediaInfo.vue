@@ -26,7 +26,6 @@
       },
     },
     setup(props) {
-      console.log(props.metaData[0].key);
       return { props };
     },
   });
