@@ -101,6 +101,7 @@ type MediaFile {
   entities: [String]
   metadata: [MediaFileMetadata]
   # mediatype: MIMEtypes
+  mimetype: String
 }
 
 type MediaFileMetadata {

@@ -26,10 +26,6 @@ export type AdvancedSearchInput = {
   value?: Maybe<Array<Maybe<AdvancedInputType>>>;
 };
 
-export enum ApplicationMimeTypes {
-  Applicationpdf = 'applicationpdf'
-}
-
 export type Asset = Entity & {
   __typename?: 'Asset';
   id: Scalars['String'];
@@ -47,12 +43,6 @@ export type AssetMetadataArgs = {
   keys: Array<Maybe<Scalars['String']>>;
   excludeOrInclude: ExcludeOrInclude;
 };
-
-export enum AudioMimeTypes {
-  Audiompeg = 'audiompeg',
-  Audioogg = 'audioogg',
-  Audiowav = 'audiowav'
-}
 
 export type BaseEntity = Entity & {
   __typename?: 'BaseEntity';
@@ -183,12 +173,6 @@ export type JobsResults = {
   next?: Maybe<Scalars['String']>;
 };
 
-export enum MimeTypes {
-  AudioMimeTypes = 'AudioMIMETypes',
-  VideoMimeTypes = 'VideoMIMETypes',
-  PdfmimeTypes = 'PDFMIMETypes'
-}
-
 export type Media = {
   __typename?: 'Media';
   primaryMediafile?: Maybe<Scalars['String']>;
@@ -205,7 +189,7 @@ export type MediaFile = {
   filename?: Maybe<Scalars['String']>;
   entities?: Maybe<Array<Maybe<Scalars['String']>>>;
   metadata?: Maybe<Array<Maybe<MediaFileMetadata>>>;
-  mimetype?: Maybe<MimeTypes>;
+  mimetype?: Maybe<Scalars['String']>;
 };
 
 export type MediaFileMetadata = {
@@ -393,12 +377,6 @@ export type User = {
   name: Scalars['String'];
   preferred_username: Scalars['String'];
 };
-
-export enum VideoMimeTypes {
-  Videomp4 = 'videomp4',
-  Videowebm = 'videowebm',
-  Videoogg = 'videoogg'
-}
 
 
 export type AdvancedFilter = {
