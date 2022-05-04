@@ -44,6 +44,7 @@ module.exports = {
       },
       red: {
         default: '#e50000',
+        dark: '#9b0000',
       },
       green: {
         default: '#00b200',
@@ -59,6 +60,7 @@ module.exports = {
     extend: {
       opacity: ['disabled'],
       cursor: ['disabled'],
+      display: ['group-hover'],
     },
   },
   plugins: [require('@tailwindcss/forms')({ useFormClasses: true })],
