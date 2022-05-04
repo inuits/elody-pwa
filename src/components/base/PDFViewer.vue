@@ -91,7 +91,6 @@
         zoomOut,
         loading,
         container,
-        source_base,
       };
     },
   });

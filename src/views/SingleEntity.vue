@@ -83,8 +83,6 @@
   import AudioPlayer from '@/components/base/AudioPlayer.vue';
   import PDFViewer from '@/components/base/PDFViewer.vue';
 
-  console.log(process.env.VUE_APP_DOWNLOAD_MEDIAFILE);
-
   export default defineComponent({
     name: 'SingleEntity',
     components: {
