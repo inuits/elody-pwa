@@ -17,7 +17,8 @@
           v-if="
             mediaFile.thumbnail_file_location &&
             mediaFile.filename &&
-            mediaFile.filename !== selectedImage.filename
+            mediaFile.filename !== selectedImage.filename &&
+            !mediaFile?.filename.includes('.mp3')
           "
           :class="[
             'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full',
@@ -39,7 +40,22 @@
           @click="selectImage(mediaFile)"
         />
         <AudioThumbnail
-          v-if="mediaFile?.filename.includes('.mp3')"
+          v-if="
+            mediaFile.filename !== selectedImage.filename &&
+            mediaFile.thumbnail_file_location
+            &&
+            mediaFile?.filename.includes('.mp3')
+          "
+          :class="[
+            'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2 ',
+          ]"
+          @click="selectImage(mediaFile)"
+        />
+        <AudioThumbnail
+          v-if="
+            mediaFile.filename === selectedImage.filename &&
+            mediaFile?.filename.includes('.mp3')
+          "
           :class="[
             'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2 border-blue-500',
           ]"
