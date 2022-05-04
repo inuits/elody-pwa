@@ -21,7 +21,6 @@
         :image-url="selectedMediafile.filename"
         :image-meta-data="selectedMediafile.metadata"
       />
-
       <VideoPlayer
         v-if="
           !loading &&

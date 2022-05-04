@@ -13,55 +13,60 @@
         :key="mediaFile.filename ? mediaFile.filename : 'no-filename'"
         :class="[' px-5 py-2 flex flex-col justify-end']"
       >
-        <img
-          v-if="
-            mediaFile.thumbnail_file_location &&
-            mediaFile.filename &&
-            mediaFile.filename !== selectedImage.filename &&
-            !mediaFile?.filename.includes('.mp3')
-          "
-          :class="[
-            'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full',
-          ]"
-          :src="mediaFile.thumbnail_file_location"
-          @click="selectImage(mediaFile)"
-        />
-        <img
-          v-if="
-            mediaFile.thumbnail_file_location &&
-            mediaFile.filename &&
-            mediaFile.filename === selectedImage.filename &&
-            !mediaFile?.filename.includes('.mp3')
-          "
-          :class="[
-            'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2 border-blue-500',
-          ]"
-          :src="mediaFile.thumbnail_file_location"
-          @click="selectImage(mediaFile)"
-        />
-        <AudioThumbnail
-          v-if="
-            mediaFile.filename !== selectedImage.filename &&
-            mediaFile.thumbnail_file_location
-            &&
-            mediaFile?.filename.includes('.mp3')
-          "
-          :class="[
-            'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2 ',
-          ]"
-          @click="selectImage(mediaFile)"
-        />
-        <AudioThumbnail
-          v-if="
-            mediaFile.filename === selectedImage.filename &&
-            mediaFile?.filename.includes('.mp3')
-          "
-          :class="[
-            'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2 border-blue-500',
-          ]"
-          @click="selectImage(mediaFile)"
-        />
-        <button @click="deleteMedia(mediaFile._id)">delete file</button>
+        <div class="relative group">
+          <trash-icon class="hidden group-hover:block" />
+          <img
+            v-if="
+              mediaFile.thumbnail_file_location &&
+              mediaFile.filename &&
+              mediaFile.filename !== selectedImage.filename &&
+              !mediaFile?.filename.includes('.mp3')
+            "
+            :class="[
+              'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full',
+            ]"
+            :src="mediaFile.thumbnail_file_location"
+            @click="selectImage(mediaFile)"
+          />
+          <img
+            v-if="
+              mediaFile.thumbnail_file_location &&
+              mediaFile.filename &&
+              mediaFile.filename === selectedImage.filename &&
+              !mediaFile?.filename.includes('.mp3')
+            "
+            :class="[
+              'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2 border-blue-500',
+            ]"
+            :src="mediaFile.thumbnail_file_location"
+            @click="selectImage(mediaFile)"
+          />
+        </div>
+        <div class="relative group">
+          <trash-icon class="hidden group-hover:block" />
+
+          <AudioThumbnail
+            v-if="
+              mediaFile.filename !== selectedImage.filename &&
+              mediaFile.thumbnail_file_location &&
+              mediaFile?.filename.includes('.mp3')
+            "
+            :class="[
+              'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2',
+            ]"
+            @click="selectImage(mediaFile)"
+          />
+          <AudioThumbnail
+            v-if="
+              mediaFile.filename === selectedImage.filename &&
+              mediaFile?.filename.includes('.mp3')
+            "
+            :class="[
+              'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2 border-blue-500',
+            ]"
+            @click="selectImage(mediaFile)"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -76,10 +81,12 @@
     DeletePaths,
   } from '@/queries';
   import AudioThumbnail from '../components/base/audiothumbnail.vue';
+  import TrashIcon from '../components/base/TrashIcon.vue';
   export default defineComponent({
     name: 'EntityImageSelection',
     components: {
       AudioThumbnail,
+      TrashIcon,
     },
     props: {
       mediafiles: { type: Array as PropType<MediaFile[]>, required: true },
