@@ -12,6 +12,18 @@
       v-show="!loading && mediafiles.length > 0"
       :class="['flex w-4/6 justify-center ', { checkboard: loading }]"
     >
+      <IIIFViewer
+        v-if="
+          !loading &&
+          selectedMediafile !== null &&
+          !selectedMediafile.mimetype.includes('video') &&
+          !selectedMediafile.mimetype.includes('audio') &&
+          !selectedMediafile.mimetype.includes('pdf')
+        "
+        :image-url="selectedMediafile.filename"
+        :image-meta-data="selectedMediafile.metadata"
+      />
+
       <VideoPlayer
         v-if="
           !loading &&
@@ -35,15 +47,6 @@
           selectedMediafile.mimetype.includes('pdf')
         "
         :source="selectedMediafile"
-      />
-      <IIIFViewer
-        v-if="
-          !loading &&
-          selectedMediafile !== null &&
-          selectedMediafile.mimetype.includes('image')
-        "
-        :image-url="selectedMediafile.filename"
-        :image-meta-data="selectedMediafile.metadata"
       />
     </div>
     <!-- meta is metadata form-->
@@ -96,6 +99,7 @@
       const id = asString(useRoute().params['id']);
       const loading = ref<boolean>(true);
       const selectedMediafile = ref<MediaFile | null>(null);
+
       const mediafiles = ref<MediaFile[]>([]);
       const { editMode, showEditToggle } = useEditMode();
       const { updatePageTitle } = usePageTitle();
