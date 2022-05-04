@@ -1,8 +1,10 @@
 <template>
-  <video class="w-full h-full" controls>
+<div class="w-full relative">
+    <video class="w-full h-full" controls>
     <source :src="source?.original_file_location" :type="source?.mimetype" />
   </video>
-  <media-info class="" :meta-data="source.metadata" />
+  <media-info class="right-0 mb-16" :meta-data="source.metadata" />
+</div>
 </template>
 <script lang="ts">
   import { MediaFile } from '@/queries';
