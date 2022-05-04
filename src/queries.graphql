@@ -87,6 +87,7 @@ fragment fullEntity on Entity {
     mediafiles {
       _id
       filename
+      original_file_location
       thumbnail_file_location
       mimetype
       metadata {

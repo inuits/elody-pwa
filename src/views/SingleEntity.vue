@@ -16,9 +16,7 @@
         v-if="
           !loading &&
           selectedMediafile !== null &&
-          !selectedMediafile.mimetype.includes('video') &&
-          !selectedMediafile.mimetype.includes('audio') &&
-          !selectedMediafile.mimetype.includes('pdf')
+          selectedMediafile.mimetype.includes('image')
         "
         :image-url="selectedMediafile.filename"
         :image-meta-data="selectedMediafile.metadata"
@@ -84,6 +82,8 @@
   import VideoPlayer from '@/components/base/VideoPlayer.vue';
   import AudioPlayer from '@/components/base/AudioPlayer.vue';
   import PDFViewer from '@/components/base/PDFViewer.vue';
+
+  console.log(process.env.VUE_APP_DOWNLOAD_MEDIAFILE);
 
   export default defineComponent({
     name: 'SingleEntity',

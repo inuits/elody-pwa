@@ -1,7 +1,7 @@
 <template>
   <object
     class="h-full w-full object-contain"
-    :data="'http://storage-api.dams.localhost:8100/download/' + source?.filename"
+    :data="source?.original_file_location"
     :type="source?.mimetype"
   ></object>
 </template>
@@ -91,6 +91,7 @@
         zoomOut,
         loading,
         container,
+        source_base,
       };
     },
   });
