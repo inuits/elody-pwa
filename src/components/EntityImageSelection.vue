@@ -15,7 +15,7 @@
       >
         <div class="relative group">
           <trash-icon
-            v-if="editMode === 'edit'"
+            v-if="editMode === 'edit' && !toBeDeleted.includes(mediaFile._id)"
             class="hidden group-hover:block"
             @click="addToSaveCallback(mediaFile._id, arrayKey)"
           />
@@ -66,7 +66,7 @@
             "
             :class="[
               'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2 border-blue-500',
-              toBeDeleted.includes(arrayKey) ? 'filter blur-xs grayscale' : '',
+              toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
             ]"
             @click="selectImage(mediaFile)"
           />
