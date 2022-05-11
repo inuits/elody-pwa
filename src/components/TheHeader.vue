@@ -22,7 +22,7 @@
           / {{ pageTitle.entityTitle }}</span
         >
       </h1>
-      <edit-toggle />
+      <EditToggle />
     </div>
     <div class="float-right">
       <BaseButton

@@ -54,7 +54,7 @@
   import { Unicons } from '@/types';
   import { useEditMode } from './EditToggle.vue';
   import BaseButton from './base/BaseButton.vue';
-  import { usePickAssetModal } from './PickAssetModal.vue';
+  import { usePickAssetModal } from '../components/PickAssetModal.vue';
 
   export default defineComponent({
     name: 'EntityComponentSelection',
