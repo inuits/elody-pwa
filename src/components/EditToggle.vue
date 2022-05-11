@@ -14,6 +14,7 @@
   import IconToggle from './base/IconToggle.vue';
   import useRouteHelpers from '@/composables/useRouteHelpers';
   import { Unicons } from '@/types';
+  import { toBeDeleted } from '@/components/EntityImageSelection.vue';
 
   export type EditModes = 'edit' | 'view' | 'loading';
   export type callback = (e?: Event | undefined) => Promise<unknown>;
@@ -43,6 +44,7 @@
     const discard = () => {
       disableEditMode();
       saveCallbacks.value = [];
+      toBeDeleted.value = [];
     };
 
     return {

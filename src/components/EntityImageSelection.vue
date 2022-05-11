@@ -15,8 +15,9 @@
       >
         <div class="relative group">
           <trash-icon
+            v-if="editMode === 'edit'"
             class="hidden group-hover:block"
-            @click="deleteMedia(mediaFile._id)"
+            @click="addToSaveCallback(mediaFile._id, arrayKey)"
           />
           <img
             v-if="
@@ -27,6 +28,7 @@
             "
             :class="[
               'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full',
+              toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
             ]"
             :src="mediaFile.thumbnail_file_location"
             @click="selectImage(mediaFile)"
@@ -40,6 +42,7 @@
             "
             :class="[
               'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2 border-blue-500',
+              toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
             ]"
             :src="mediaFile.thumbnail_file_location"
             @click="selectImage(mediaFile)"
@@ -52,6 +55,7 @@
             "
             :class="[
               'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2',
+              toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
             ]"
             @click="selectImage(mediaFile)"
           />
@@ -62,6 +66,7 @@
             "
             :class="[
               'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2 border-blue-500',
+              toBeDeleted.includes(arrayKey) ? 'filter blur-xs grayscale' : '',
             ]"
             @click="selectImage(mediaFile)"
           />
@@ -81,6 +86,10 @@
   } from '@/queries';
   import AudioThumbnail from '../components/base/audiothumbnail.vue';
   import TrashIcon from '../components/base/TrashIcon.vue';
+  import { useEditMode } from '@/components/EditToggle.vue';
+
+  export const toBeDeleted = ref<string[]>([]);
+
   export default defineComponent({
     name: 'EntityImageSelection',
     components: {
@@ -104,16 +113,24 @@
         mediafile && emit('update:selectedImage', mediafile);
       };
 
+      const { editMode, addSaveCallback } = useEditMode();
+
       const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 
-      const deleteMedia = (id: string) => {
+
+      const addToSaveCallback = (id: string, arrayKey: string) => {
         const parsedId = id.replace('mediafiles/', '');
-        mutate({ id: parsedId, path: DeletePaths.Mediafiles });
+        toBeDeleted.value.push(id);
+        addSaveCallback(async () => {
+          await mutate({ id: parsedId, path: DeletePaths.Mediafiles });
+        });
       };
 
       return {
         selectImage,
-        deleteMedia,
+        editMode,
+        addToSaveCallback,
+        toBeDeleted,
       };
     },
   });

@@ -22,7 +22,15 @@
           / {{ pageTitle.entityTitle }}</span
         >
       </h1>
-      <EditToggle />
+      <edit-toggle />
+      <BaseButton
+        v-if="editMode === 'edit'"
+        label="Delete"
+        bg-color="red-default"
+        bg-hover-color="red-dark"
+        txt-color="neutral-0"
+        @click="showConfirmation()"
+      />
     </div>
     <div class="float-right">
       <BaseButton
@@ -36,6 +44,11 @@
         <BaseButton :icon="Unicons.User.name" bg-color="neutral-30" />
       </div>
     </div>
+    <ConfirmationModal
+      v-show="confirmState === 'show'"
+      v-model:confirmState="confirmState"
+      :function="deleteAsset"
+    />
   </div>
 </template>
 
@@ -45,6 +58,11 @@
   import BaseButton from './base/BaseButton.vue';
   import { Unicons } from '@/types';
   import EditToggle from './EditToggle.vue';
+  import { DeleteDataDocument, DeleteDataMutation, DeletePaths } from '@/queries';
+  import { useMutation, useQuery } from '@vue/apollo-composable';
+  import { useEditMode } from '@/components/EditToggle.vue';
+  import { asString } from '@/helpers';
+  import ConfirmationModal from '@/components/base/ConfirmationModal.vue';
 
   type titleTypes = 'routerTitle' | 'entityTitle';
 
@@ -84,13 +102,33 @@
 
   export default defineComponent({
     name: 'TheHeader',
-    components: { BaseButton, EditToggle },
+    components: { BaseButton, EditToggle, ConfirmationModal },
     setup() {
       const { pageTitle } = usePageTitle();
       const route = useRoute();
+
+      const { editMode, addSaveCallback } = useEditMode();
+
+      const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
+
+      const deleteAsset = () => {
+        const id = asString(route.params['id']);
+        mutate({ id, path: DeletePaths.Entities });
+      };
+
+      const confirmState = ref<'hidden' | 'show'>('hidden');
+
+      const showConfirmation = () => {
+        confirmState.value = confirmState.value === 'show' ? 'hidden' : 'show';
+      };
+
       return {
         route,
         pageTitle,
+        editMode,
+        deleteAsset,
+        showConfirmation,
+        confirmState,
       };
     },
   });
