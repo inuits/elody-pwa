@@ -26,19 +26,20 @@
         items-center
         mb-8
       "
+      @click="forceDisableEditModalHome"
     >
       DAMS
     </router-link>
     <BaseButton
       :icon="Unicons.BookOpen.name"
       bg-color="neutral-30"
-      @click="router.push({ name: 'Home' })"
+      @click="forceDisableEditModalHome"
     />
     <BaseButton
       :icon="Unicons.History.name"
       bg-color="neutral-30"
       class="mt-1"
-      @click="router.push({ name: 'History' })"
+      @click="forceDisableEditModalHistory"
     />
     <BaseButton
       :icon="Unicons.Upload.name"
@@ -55,15 +56,39 @@
   import { useUploadModal } from './UploadModal.vue';
   import { Unicons } from '@/types';
   import { useRouter } from 'vue-router';
-
+  import { getCurrentInstance } from 'vue';
+  import { useEditMode } from './EditToggle.vue';
   export default defineComponent({
     name: 'TheNavigation',
     components: { BaseButton },
     setup: () => {
       const { openUploadModal } = useUploadModal();
       const router = useRouter();
+      const { disableEditMode } = useEditMode();
 
-      return { Unicons, openUploadModal, router };
+      const forceDisableEditModalHome = () => {
+        router.push({ name: 'Home' });
+        disableEditMode();
+      };
+
+      const forceDisableEditModalHistory = () => {
+        router.push({ name: 'History' });
+        disableEditMode();
+      };
+
+      const forceDisableEditModalUpload = () => {
+        useUploadModal();
+        disableEditMode();
+      };
+
+      return {
+        Unicons,
+        openUploadModal,
+        router,
+        forceDisableEditModalHome,
+        forceDisableEditModalHistory,
+        forceDisableEditModalUpload,
+      };
     },
   });
 </script>

@@ -7,7 +7,7 @@
   >
     <div
       v-if="pickAssetModalState.state !== 'initial'"
-      class="bg-neutral-20 w-full h-full flex flex-col"
+      class="bg-neutral-20 w-full h-full flex flex-col overflow-auto"
     >
       <AssetLibrary :enable-selection="true" @add-selection="addItem" />
     </div>
