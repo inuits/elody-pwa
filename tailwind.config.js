@@ -54,7 +54,11 @@ module.exports = {
         dark: '#0052CC',
       },
     },
-    extend: {},
+    extend: {
+      blur: {
+        xs: '1px',
+      }
+    },
   },
   variants: {
     extend: {

@@ -7,7 +7,6 @@
       :loading="loading"
       :mediafiles="mediafiles"
     />
-
     <div
       v-show="!loading && mediafiles.length > 0"
       :class="['flex w-4/6 justify-center ', { checkboard: loading }]"
@@ -55,7 +54,6 @@
       :entity-title="title"
       :form="result?.Entity?.form"
     />
-    <button @click="deleteAsset">Delete Asset</button>
   </div>
 </template>
 
@@ -64,15 +62,7 @@
   import { useMutation, useQuery } from '@vue/apollo-composable';
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import Meta from '@/components/Meta.vue';
-  import {
-    GetEntityByIdDocument,
-    GetEntityByIdQuery,
-    Maybe,
-    MediaFile,
-    DeleteDataDocument,
-    DeleteDataMutation,
-    DeletePaths,
-  } from '@/queries';
+  import { GetEntityByIdDocument, GetEntityByIdQuery, Maybe, MediaFile } from '@/queries';
   import { usePageTitle } from '@/components/TheHeader.vue';
   import { useEditMode } from '@/components/EditToggle.vue';
   import EntityImageSelection from '@/components/EntityImageSelection.vue';
@@ -146,26 +136,21 @@
         //If form show edit togle
         if (queryResult.data.Entity?.form) {
           showEditToggle();
+        }else if(queryResult.data?.Entity){
+          showEditToggle();
         }
 
         loading.value = false;
       });
 
-      const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
-
-      const deleteAsset = () => {
-        mutate({ id, path: DeletePaths.Entities });
-        //window.history.back();
-      };
-
       return {
         result,
-        deleteAsset,
         loading,
         title,
         mediafiles,
         selectedMediafile,
         updateEntities,
+        editMode,
       };
     },
   });

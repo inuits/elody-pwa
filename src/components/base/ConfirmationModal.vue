@@ -1,0 +1,66 @@
+<template>
+  <div
+    class="
+      absolute
+      top-1/2
+      left-1/2
+      transform
+      -translate-x-1/2 -translate-y-1/2
+      bg-neutral-30
+      p-4
+      rounded
+    "
+  >
+    <p class="m-2">Are you sure you want to delete this?</p>
+    <div class="m-2 flex justify-around">
+      <BaseButton
+        bg-color="neutral-100"
+        bg-hover-color="neutral-200"
+        txt-color="neutral-0"
+        label="Cancel"
+        @click="cancel"
+      />
+      <BaseButton
+        bg-color="red-default"
+        bg-hover-color="red-dark"
+        txt-color="neutral-0"
+        label="Confirm"
+        @click="confirm"
+      />
+    </div>
+  </div>
+</template>
+<script lang="ts">
+  import { defineComponent, ref, watch } from 'vue';
+  import BaseButton from './BaseButton.vue';
+
+  export default defineComponent({
+    name: 'ConfirmationModal',
+    components: {
+      BaseButton,
+    },
+    props: {
+      function: {
+        type: Function,
+        required: true,
+      },
+      confirmState: {
+        type: String,
+        required: true,
+      },
+    },
+    emits: ['update:confirmState'],
+    setup(props, { emit }) {
+      const confirm = () => {
+        emit('update:confirmState','hidden');
+        props.function();
+      };
+
+      const cancel = () => {
+        emit('update:confirmState','hidden');
+      };
+
+      return { confirm, cancel };
+    },
+  });
+</script>
