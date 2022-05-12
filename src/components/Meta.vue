@@ -8,7 +8,7 @@
     ]"
   >
     <meta-view
-      v-if="!loading && !isEdit && !form"
+      v-if="(!loading && !isEdit) ||(isEdit && !form)"
       :metadata="metadataComputed"
       :relations="relations"
     />
