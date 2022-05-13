@@ -15,7 +15,7 @@
   import useRouteHelpers from '@/composables/useRouteHelpers';
   import { Unicons } from '@/types';
   import { toBeDeleted } from '@/components/EntityImageSelection.vue';
-
+  import { useRouter } from 'vue-router';
   export type EditModes = 'edit' | 'view' | 'loading';
   export type callback = (e?: Event | undefined) => Promise<unknown>;
 
@@ -30,12 +30,13 @@
     const addSaveCallback = (input: callback) => saveCallbacks.value.push(input);
     const showEditToggle = () => (isEditToggleVisible.value = true);
     const hideEditToggle = () => (isEditToggleVisible.value = false);
-
+    const Router = useRouter();
     const save = () => {
       saveCallbacks.value.forEach((callback: callback) => {
         callback().then(() => {
           if (isEdit.value) {
             disableEditMode();
+            Router.go(0);
           }
         });
       });
