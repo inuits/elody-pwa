@@ -35,7 +35,7 @@ const init = function (serviceName: string, sampler: Sampler | undefined, spanPr
         contextManager: new ZoneContextManager(),
     });
 
-    return { provider };
+    return { provider, otelExporter };
 };
 
 export default init;
