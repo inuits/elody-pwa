@@ -39,7 +39,6 @@
     setup: (props, { emit }) => {
       const AndOrState = ref<boolean>(true);
       const switched = (value: boolean) => {
-        // console.log('boollog', value);
         AndOrState.value = value;
         emit('update:AndOrValue', value);
       };

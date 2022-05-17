@@ -70,7 +70,7 @@
   import { defineComponent, ref, computed } from 'vue';
   import FilterAccordion from '@/components/base/FilterAccordion.vue';
   import { useQuery } from '@vue/apollo-composable';
-  import { AdvancedFilterTypes, GetAdvancedFiltersDocument } from '@/queries';
+  import { AdvancedFilterTypes, GetAdvancedFiltersDocument, GetFormsDocument } from '@/queries';
   import BaseButton from '@/components/base/BaseButton.vue';
   import MinmaxFilter from '@/components/base/MinmaxFilter.vue';
   import TextFilter from '@/components/base/TextFilter.vue';
@@ -102,12 +102,12 @@
       const AndOrChoice = ref<boolean>(true);
       const { result: filters } = useQuery(GetAdvancedFiltersDocument);
 
+      const { result: form } = useQuery(GetFormsDocument, {type: 'story'});
+
       const applyFilters = () => {
         const returnArray = initialFilters.value.map((filter: FilterInList) => {
           return filter.input;
         });
-
-        console.log(returnArray);
         emit('update:activeFilters', returnArray);
       };
 
@@ -123,6 +123,7 @@
         clearFilters,
         AdvancedFilterTypes,
         AndOrChoice,
+        form,
       };
     },
   });

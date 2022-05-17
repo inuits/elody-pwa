@@ -43,6 +43,23 @@ type Frame implements Entity {
   form: Form
 }
 
+type Story {
+  id: String!
+  uuid: String!
+  type: String!
+  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [Frame]!
+  form: Form
+}
+
+#type boxEntity implements Entity {
+#  id: String!
+#  uuid: String!
+#  type: String!
+#  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
+#  media: Media
+#  form: Form
+#}
+
 type RelationMetaData {
   key: String!
   value: String!
@@ -74,25 +91,6 @@ type Media {
   mediafiles: [MediaFile]
 }
 
-# type mp3 {
-#   key: String
-# }
-
-# type mp4 {
-#   key: String
-# }
-
-# enum MIME {
-#   mp3
-#   mp4
-# }
-
-# type MIMEtypes {
-#   type: MIME
-#   audio: mp3
-#   video: mp4
-# }
-
 type MediaFile {
   _id: String!
   original_file_location: String
@@ -100,7 +98,6 @@ type MediaFile {
   filename: String
   entities: [String]
   metadata: [MediaFileMetadata]
-  # mediatype: MIMEtypes
   mimetype: String
 }
 
@@ -245,6 +242,7 @@ type MetadataField {
   label: String
   key: String!
   type: InputFieldTypes!
+  #order: Number
   validation: validation
 }
 
@@ -256,6 +254,11 @@ type RelationField {
 }
 
 union MetadataOrRelationField = MetadataField | RelationField
+
+enum RelationType {
+  frames
+  stories
+}
 
 type Form {
   fields: [MetadataOrRelationField]!
@@ -300,6 +303,7 @@ type Query {
   Job(id: String!): Job
   advancedFilters: [advancedFilter]
   FilterOptions(key: String!): [filterOption]
+  Form(type: String!): Form
 }
 
 input AdvancedSearchInput {
@@ -313,7 +317,6 @@ type Mutation {
   # addRelations(id: String!, relations: [RelationInput!]!): [Relation]!
   replaceRelationsAndMetaData(id: String!, form: MetadataFormInput): Entity
   deleteData(id: String!, path: deletePaths!): String
-  #deleteMediaFile(id: String!): String
 }
 
 enum deletePaths {

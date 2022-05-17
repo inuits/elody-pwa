@@ -175,7 +175,6 @@
       watch(
         () => queryVariables.advancedSearchValue,
         () => {
-          console.log(queryVariables.advancedSearchValue);
           refetch(queryVariables);
         },
       );
