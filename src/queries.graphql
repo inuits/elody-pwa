@@ -293,3 +293,26 @@ mutation replaceRelationsAndMetaData($id: String!, $form: MetadataFormInput!) {
 mutation deleteData($id: String!, $path: deletePaths!) {
   deleteData(id: $id, path: $path)
 }
+
+query GetForms($type: String!) {
+  Form(type: $type){
+    fields {
+      __typename
+      ... on MetadataField {
+        label
+        key
+        type
+      }
+      ... on RelationField {
+        label
+        relationType
+        metadata {
+          key
+          type
+          label
+        }
+        acceptedEntityTypes
+      }
+    }
+  }
+ }
