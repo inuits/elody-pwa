@@ -5,6 +5,7 @@ type Environment = {
     host: string;
     port: string;
   };
+  OTEL_IS_DISABLED: string;
 };
 
 export const environment: Environment = {
@@ -14,4 +15,5 @@ export const environment: Environment = {
     host: process.env.OTLP_DAMS_FRONTEND_HOST || 'otel-collector.dams.localhost',
     port: process.env.OTLP_DAMS_FRONTEND_PORT || '8100',
   },
+  OTEL_IS_DISABLED: process.env.OTEL_IS_DISABLED || "false",
 };

@@ -1,21 +1,6 @@
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { ParentBasedSampler, TraceIdRatioBasedSampler, AlwaysOnSampler } from '@opentelemetry/core';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { XMLHttpRequestInstrumentation } from '@opentelemetry/instrumentation-xml-http-request';
-import { UserInteractionInstrumentation } from '@opentelemetry/instrumentation-user-interaction';
-import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
-// Registering instrumentations
-registerInstrumentations({
-  instrumentations: [
-    new UserInteractionInstrumentation(),
-    new XMLHttpRequestInstrumentation({
-      // propagateTraceHeaderCorsUrls: [
-      //     /.+/g, //Regex to match your backend urls. This should be updated.
-      // ]
-    }),
-    new FetchInstrumentation()
-  ],
-});
+import { environment, environment as _ } from './environment';
+import init from './otel/tracer';
+const tracing = init(environment.OTEL_IS_DISABLED, 'Dams frontend', _.otlp.host, _.otlp.port);
 
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
 import { createApp } from 'vue';
@@ -34,12 +19,7 @@ import { createHead } from '@vueuse/head';
 
 import './registerServiceWorker';
 import './index.css';
-import { environment as _ } from './environment';
 
-import init from './otel/tracer';
-
-const serviceName = 'Dams frontend';
-const { provider } = init(serviceName, new ParentBasedSampler({root: new TraceIdRatioBasedSampler(1)}), BatchSpanProcessor);
 
 Unicon.add(Object.values(Unicons));
 
