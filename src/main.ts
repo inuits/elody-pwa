@@ -1,7 +1,4 @@
-import { environment, environment as _ } from './environment';
-import init from './otel/tracer';
-const tracing = init(environment.OTEL_IS_DISABLED, 'Dams frontend', _.otlp.host, _.otlp.port);
-
+import { environment as _ } from './environment';
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
 import { createApp } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
@@ -20,15 +17,18 @@ import { createHead } from '@vueuse/head';
 import './registerServiceWorker';
 import './index.css';
 
+import init from './otel/tracer';
 
 Unicon.add(Object.values(Unicons));
 
 const config = await fetch(
   process.env.VUE_APP_CONFIG_URL ? process.env.VUE_APP_CONFIG_URL : '../config.json',
-).then((r) => r.json());
-const auth = new OpenIdConnectClient(config.oidc);
-const head = createHead();
+  ).then((r) => r.json());
+  const auth = new OpenIdConnectClient(config.oidc);
+  const head = createHead();
 
+const tracing = init(config.otelIsDisabled, 'Dams frontend', config.otlpDashboard.host, config.otlpDashboard.port);
+  
 const router = createRouter({
   routes,
   history: createWebHistory(process.env.BASE_URL),
@@ -47,7 +47,6 @@ const authCode = new URLSearchParams(window.location.search).get('code');
 if (authCode) {
   auth.processAuthCode(authCode, router);
 }
-
 createApp(App)
   .use(Unicon, {
     fill: 'currentColor',
