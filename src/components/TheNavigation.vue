@@ -47,6 +47,12 @@
       bg-color="neutral-30"
       @click="openUploadModal"
     />
+    <BaseButton
+      :icon="Unicons.Create.name"
+      class="mt-1"
+      bg-color="neutral-30"
+      @click="openCreate"
+    />
   </nav>
 </template>
 
@@ -80,6 +86,9 @@
         useUploadModal();
         disableEditMode();
       };
+      const openCreate = () => {
+        router.push({ name: 'Create' });
+      };
 
       return {
         Unicons,
@@ -88,6 +97,7 @@
         forceDisableEditModalHome,
         forceDisableEditModalHistory,
         forceDisableEditModalUpload,
+        openCreate,
       };
     },
   });
