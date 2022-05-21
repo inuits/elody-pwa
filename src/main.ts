@@ -27,7 +27,7 @@ const config = await fetch(
   const auth = new OpenIdConnectClient(config.oidc);
   const head = createHead();
 
-const tracing = init(config.otelIsDisabled, 'Dams frontend', config.otlpDashboard.host, config.otlpDashboard.port);
+const tracing = init(config.otelIsEnabled, 'Dams frontend', config.otlpDashboard.host, config.otlpDashboard.port);
   
 const router = createRouter({
   routes,

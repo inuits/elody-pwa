@@ -14,8 +14,8 @@ import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
-const init = function (isTraceDisabled: string, serviceName: string, otlpHost: string, otlpPort: string) {
-    if (isTraceDisabled == "True") return;
+const init = function (isTraceEnabled: string, serviceName: string, otlpHost: string, otlpPort: string) {
+    if (isTraceEnabled == "False") return;
 
     const otelExporter = new OTLPTraceExporter({
         url: `http://${otlpHost}:${otlpPort}/v1/traces`, 
