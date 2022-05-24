@@ -294,8 +294,14 @@ mutation deleteData($id: String!, $path: deletePaths!) {
   deleteData(id: $id, path: $path)
 }
 
+mutation createEntity($data: EntityInput!) {
+  createEntity(entity: $data) {
+    ...fullEntity
+  }
+}
+
 query GetForms($type: String!) {
-  Form(type: $type){
+  Form(type: $type) {
     fields {
       __typename
       ... on MetadataField {
@@ -315,4 +321,4 @@ query GetForms($type: String!) {
       }
     }
   }
- }
+}

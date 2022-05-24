@@ -34,20 +34,23 @@ type Asset implements Entity {
   form: Form
 }
 
+type Story implements Entity {
+  id: String!
+  uuid: String!
+  type: String!
+  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
+  media: Media
+  teaserMetadata: [MetadataAndRelation]
+  title: [MetadataAndRelation]
+  form: Form
+}
+
 type Frame implements Entity {
   id: String!
   uuid: String!
   type: String!
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
   media: Media
-  form: Form
-}
-
-type Story {
-  id: String!
-  uuid: String!
-  type: String!
-  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [Frame]!
   form: Form
 }
 
@@ -310,6 +313,20 @@ input AdvancedSearchInput {
   value: [AdvancedInputType]
 }
 
+input EntityInput {
+  title: String
+
+  id: String
+  type: Entitytyping
+  metadata: [MetadataFieldInput]
+  identifiers: [String]
+}
+enum Entitytyping {
+  story
+  frame
+  asset
+}
+
 #Mutations
 type Mutation {
   replaceMetadata(id: String!, metadata: [MetadataInput!]!): [Metadata!]!
@@ -317,6 +334,7 @@ type Mutation {
   # addRelations(id: String!, relations: [RelationInput!]!): [Relation]!
   replaceRelationsAndMetaData(id: String!, form: MetadataFormInput): Entity
   deleteData(id: String!, path: deletePaths!): String
+  createEntity(entity: EntityInput!): Entity
 }
 
 enum deletePaths {
