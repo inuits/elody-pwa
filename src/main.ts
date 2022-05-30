@@ -18,6 +18,7 @@ import './index.css';
 import { environment as _ } from './environment';
 
 import { onError } from '@apollo/client/link/error';
+import useGraphqlErrors from './composables/useGraphqlErrors';
 
 Unicon.add(Object.values(Unicons));
 
@@ -34,32 +35,18 @@ const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
 });
 
+const authCode = new URLSearchParams(window.location.search).get('code');
+
 const graphqlErrorInterceptor = onError((error) => {
-  console.log({ error });
-
-  // FIXME: express sends response.status(401)
-  if (error.networkError) {
-    const network = error.networkError as ServerError;
-    console.log('auth before login auth', auth);
-    if (network && network.statusCode === 401 || network.statusCode === 400 && auth != null) {
-      console.log('Catched network error with statuscode 401 Unauthorized');
-      auth.redirectToLogin('/');
-    }
+  const errorHandler = useGraphqlErrors(error);
+  errorHandler.logFormattedErrors();
+  if (errorHandler.checkForUnauthorized() === true) {
+    new Promise(async (resolve, reject) => {
+      await fetch('/api/logout');
+      auth.redirectToLogin(router.currentRoute?.value.fullPath);
+      resolve;
+    });
   };
-
-  // FIXME: express does not send response.status(401). response from call is 401
-  if (error.response?.errors && error.response?.errors[0]) {
-    console.log('STATUS', error.response?.errors[0].extensions!.response.status);
-    fetch('/api/logout')
-      .then(async (response) => {
-        console.log(`STEP 1 | WEB LOGOUT | status response `, response.status);
-        router.push('/');
-        console.log(`STEP 1 | WEB LOGOUT | going back to home page /`);
-        window.location.reload();
-
-      })
-      .catch((error) => console.log(`WEB | Couldn't logout`, error));
-  }
 });
 
 if (_.auth) {
@@ -71,7 +58,6 @@ if (_.auth) {
   });
 }
 
-const authCode = new URLSearchParams(window.location.search).get('code');
 if (authCode) {
   auth.processAuthCode(authCode, router);
 }
