@@ -150,7 +150,8 @@ export type ImportReturn = {
 
 export enum InputFieldTypes {
   Text = 'text',
-  Number = 'number'
+  Number = 'number',
+  Boolean = 'boolean'
 }
 
 export type Job = {
@@ -228,6 +229,8 @@ export type MetadataField = {
   label?: Maybe<Scalars['String']>;
   key: Scalars['String'];
   type: InputFieldTypes;
+  order?: Maybe<Scalars['Int']>;
+  active?: Maybe<Scalars['Boolean']>;
   validation?: Maybe<Validation>;
 };
 
@@ -442,6 +445,22 @@ export enum AdvancedFilterTypes {
   Minmax = 'minmax'
 }
 
+export type BoxEntity = Entity & {
+  __typename?: 'boxEntity';
+  id: Scalars['String'];
+  uuid: Scalars['String'];
+  type: Scalars['String'];
+  metadata: Array<Maybe<MetadataAndRelation>>;
+  media?: Maybe<Media>;
+  form?: Maybe<Form>;
+};
+
+
+export type BoxEntityMetadataArgs = {
+  keys: Array<Maybe<Scalars['String']>>;
+  excludeOrInclude: ExcludeOrInclude;
+};
+
 export enum DeletePaths {
   Entities = 'entities',
   Mediafiles = 'mediafiles'
@@ -477,7 +496,9 @@ type MinimalBaseEntity_Frame_Fragment = { __typename?: 'Frame', id: string, uuid
 
 type MinimalBaseEntity_Story_Fragment = { __typename?: 'Story', id: string, uuid: string, type: string, media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }> };
 
-export type MinimalBaseEntityFragment = MinimalBaseEntity_Asset_Fragment | MinimalBaseEntity_BaseEntity_Fragment | MinimalBaseEntity_Frame_Fragment | MinimalBaseEntity_Story_Fragment;
+type MinimalBaseEntity_BoxEntity_Fragment = { __typename?: 'boxEntity', id: string, uuid: string, type: string, media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }> };
+
+export type MinimalBaseEntityFragment = MinimalBaseEntity_Asset_Fragment | MinimalBaseEntity_BaseEntity_Fragment | MinimalBaseEntity_Frame_Fragment | MinimalBaseEntity_Story_Fragment | MinimalBaseEntity_BoxEntity_Fragment;
 
 export type EditFormFragment = { __typename?: 'Form', fields: Array<Maybe<{ __typename: 'MetadataField', label?: Maybe<string>, key: string, type: InputFieldTypes } | { __typename: 'RelationField', label?: Maybe<string>, relationType: string, acceptedEntityTypes: Array<Maybe<string>>, metadata?: Maybe<Array<Maybe<{ __typename?: 'MetadataField', key: string, type: InputFieldTypes, label?: Maybe<string> }>>> }>> };
 
@@ -518,7 +539,12 @@ type FullEntity_Story_Fragment = { __typename?: 'Story', id: string, type: strin
     & EditFormFragment
   )>, title: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation' }>>, media?: Maybe<{ __typename?: 'Media', mediafiles?: Maybe<Array<Maybe<{ __typename?: 'MediaFile', _id: string, filename?: Maybe<string>, original_file_location?: Maybe<string>, thumbnail_file_location?: Maybe<string>, mimetype?: Maybe<string>, metadata?: Maybe<Array<Maybe<{ __typename?: 'MediaFileMetadata', key?: Maybe<string>, value?: Maybe<string> }>>> }>>> }> };
 
-export type FullEntityFragment = FullEntity_Asset_Fragment | FullEntity_BaseEntity_Fragment | FullEntity_Frame_Fragment | FullEntity_Story_Fragment;
+type FullEntity_BoxEntity_Fragment = { __typename?: 'boxEntity', id: string, type: string, form?: Maybe<(
+    { __typename?: 'Form' }
+    & EditFormFragment
+  )>, title: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation' }>>, media?: Maybe<{ __typename?: 'Media', mediafiles?: Maybe<Array<Maybe<{ __typename?: 'MediaFile', _id: string, filename?: Maybe<string>, original_file_location?: Maybe<string>, thumbnail_file_location?: Maybe<string>, mimetype?: Maybe<string>, metadata?: Maybe<Array<Maybe<{ __typename?: 'MediaFileMetadata', key?: Maybe<string>, value?: Maybe<string> }>>> }>>> }> };
+
+export type FullEntityFragment = FullEntity_Asset_Fragment | FullEntity_BaseEntity_Fragment | FullEntity_Frame_Fragment | FullEntity_Story_Fragment | FullEntity_BoxEntity_Fragment;
 
 type FullEntityRecursive_Asset_Fragment = (
   { __typename?: 'Asset', metadata: Array<Maybe<(
@@ -568,6 +594,15 @@ type FullEntityRecursive_Asset_Fragment = (
         & MetadataRelationFragment
       )>> }
       & FullEntity_Story_Fragment
+    ) | (
+      { __typename?: 'boxEntity', metadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>> }
+      & FullEntity_BoxEntity_Fragment
     )> }
     & MetadataRelationFragment
   )>> }
@@ -622,6 +657,15 @@ type FullEntityRecursive_BaseEntity_Fragment = (
         & MetadataRelationFragment
       )>> }
       & FullEntity_Story_Fragment
+    ) | (
+      { __typename?: 'boxEntity', metadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>> }
+      & FullEntity_BoxEntity_Fragment
     )> }
     & MetadataRelationFragment
   )>> }
@@ -676,6 +720,15 @@ type FullEntityRecursive_Frame_Fragment = (
         & MetadataRelationFragment
       )>> }
       & FullEntity_Story_Fragment
+    ) | (
+      { __typename?: 'boxEntity', metadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>> }
+      & FullEntity_BoxEntity_Fragment
     )> }
     & MetadataRelationFragment
   )>> }
@@ -730,13 +783,85 @@ type FullEntityRecursive_Story_Fragment = (
         & MetadataRelationFragment
       )>> }
       & FullEntity_Story_Fragment
+    ) | (
+      { __typename?: 'boxEntity', metadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>> }
+      & FullEntity_BoxEntity_Fragment
     )> }
     & MetadataRelationFragment
   )>> }
   & FullEntity_Story_Fragment
 );
 
-export type FullEntityRecursiveFragment = FullEntityRecursive_Asset_Fragment | FullEntityRecursive_BaseEntity_Fragment | FullEntityRecursive_Frame_Fragment | FullEntityRecursive_Story_Fragment;
+type FullEntityRecursive_BoxEntity_Fragment = (
+  { __typename?: 'boxEntity', metadata: Array<Maybe<(
+    { __typename: 'Metadata' }
+    & MetadataFragment
+  ) | (
+    { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+      { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>>, metadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>> }
+      & MinimalBaseEntity_Asset_Fragment
+      & FullEntity_Asset_Fragment
+    ) | (
+      { __typename?: 'BaseEntity', metadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>> }
+      & FullEntity_BaseEntity_Fragment
+    ) | (
+      { __typename?: 'Frame', metadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>> }
+      & FullEntity_Frame_Fragment
+    ) | (
+      { __typename?: 'Story', metadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>> }
+      & FullEntity_Story_Fragment
+    ) | (
+      { __typename?: 'boxEntity', metadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>> }
+      & FullEntity_BoxEntity_Fragment
+    )> }
+    & MetadataRelationFragment
+  )>> }
+  & FullEntity_BoxEntity_Fragment
+);
+
+export type FullEntityRecursiveFragment = FullEntityRecursive_Asset_Fragment | FullEntityRecursive_BaseEntity_Fragment | FullEntityRecursive_Frame_Fragment | FullEntityRecursive_Story_Fragment | FullEntityRecursive_BoxEntity_Fragment;
 
 export type GetEntitiesQueryVariables = Exact<{
   limit?: Maybe<Scalars['Int']>;
@@ -750,7 +875,7 @@ export type GetEntitiesQueryVariables = Exact<{
 export type GetEntitiesQuery = { __typename?: 'Query', Entities?: Maybe<{ __typename?: 'EntitiesResults', count?: Maybe<number>, limit?: Maybe<number>, results?: Maybe<Array<Maybe<(
       { __typename?: 'Asset', id: string, uuid: string, type: string, media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }> }
       & MinimalAssetFragment
-    ) | { __typename?: 'BaseEntity', id: string, uuid: string, type: string, media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }> } | { __typename?: 'Frame', id: string, uuid: string, type: string, media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }> } | { __typename?: 'Story', id: string, uuid: string, type: string, media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }> }>>> }> };
+    ) | { __typename?: 'BaseEntity', id: string, uuid: string, type: string, media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }> } | { __typename?: 'Frame', id: string, uuid: string, type: string, media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }> } | { __typename?: 'Story', id: string, uuid: string, type: string, media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }> } | { __typename?: 'boxEntity', id: string, uuid: string, type: string, media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }> }>>> }> };
 
 export type GetEntityByIdQueryVariables = Exact<{
   id: Scalars['String'];
@@ -769,6 +894,9 @@ export type GetEntityByIdQuery = { __typename?: 'Query', Entity?: Maybe<(
   ) | (
     { __typename?: 'Story' }
     & FullEntityRecursive_Story_Fragment
+  ) | (
+    { __typename?: 'boxEntity' }
+    & FullEntityRecursive_BoxEntity_Fragment
   )> };
 
 export type JobFragment = { __typename?: 'Job', job_type?: Maybe<string>, job_info?: Maybe<string>, status?: Maybe<string>, user?: Maybe<string>, asset_id?: Maybe<string>, mediafile_id?: Maybe<string>, parent_job_id?: Maybe<string>, end_time?: Maybe<string>, start_time?: Maybe<string>, amount_of_jobs?: Maybe<number>, completed_jobs?: Maybe<number>, _id?: Maybe<string>, _key?: Maybe<string>, _rev?: Maybe<string> };
@@ -854,6 +982,9 @@ export type ReplaceRelationsAndMetaDataMutation = { __typename?: 'Mutation', rep
   ) | (
     { __typename?: 'Story' }
     & FullEntityRecursive_Story_Fragment
+  ) | (
+    { __typename?: 'boxEntity' }
+    & FullEntityRecursive_BoxEntity_Fragment
   )> };
 
 export type DeleteDataMutationVariables = Exact<{
@@ -881,6 +1012,9 @@ export type CreateEntityMutation = { __typename?: 'Mutation', createEntity?: May
   ) | (
     { __typename?: 'Story' }
     & FullEntity_Story_Fragment
+  ) | (
+    { __typename?: 'boxEntity' }
+    & FullEntity_BoxEntity_Fragment
   )> };
 
 export type GetFormsQueryVariables = Exact<{

@@ -3,6 +3,7 @@
     <FilterSideBar
       v-show="!showDrawer"
       v-model:activeFilters="queryVariables.advancedSearchValue"
+      :acceptedEntityTypes="acceptedEntityTypes ? acceptedEntityTypes : []"
     />
     <div class="p-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
@@ -103,7 +104,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, watch, reactive, ref } from 'vue';
+  import { defineComponent, watch, reactive, ref, PropType } from 'vue';
   import { useQuery } from '@vue/apollo-composable';
   import ListContainer from '@/components/ListContainer.vue';
   import ListItem from '@/components/ListItem.vue';
@@ -139,6 +140,11 @@
       enableSelection: {
         type: Boolean,
         default: false,
+      },
+      acceptedEntityTypes: {
+        type: Array as PropType<string[]>,
+        default: () => [],
+        required: false,
       },
     },
     emits: ['addSelection'],
