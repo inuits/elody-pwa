@@ -9,7 +9,7 @@
       v-if="pickAssetModalState.state !== 'initial'"
       class="bg-neutral-20 w-full h-full flex flex-col overflow-auto"
     >
-      <AssetLibrary :enable-selection="true" @add-selection="addItem" />
+      <AssetLibrary :enable-selection="true" @add-selection="addItem" :acceptedEntityTypes="pickAssetModalState.acceptedEntityTypes"/>
     </div>
   </modal>
 </template>
@@ -22,11 +22,13 @@
   export type PickAssetModalType = {
     state: ModalState;
     pickedAsset: Entity | undefined;
+    acceptedEntityTypes?: string[];
   };
 
   const pickAssetModalState = ref<PickAssetModalType>({
     state: 'initial',
     pickedAsset: undefined,
+    acceptedEntityTypes: [],
   });
 
   export const usePickAssetModal = (cb?: (_value: Entity) => void) => {
@@ -49,10 +51,11 @@
       });
     };
 
-    const openPickAssetModal = () => {
+    const openPickAssetModal = (acceptedEntityTypes: string[]) => {
       updatePickAssetModal({
         state: 'show',
         pickedAsset: undefined,
+        acceptedEntityTypes: acceptedEntityTypes,
       });
     };
 

@@ -4,13 +4,29 @@
   </div>
   <div>
     <ul v-for="option in options?.FilterOptions" :key="option">
-      <li>
+      <li v-if="acceptedEntityTypes.length == 0 || filterkey !== 'type'">
         <input
           :id="option.label"
           v-model="inputFieldMulti"
           type="checkbox"
           :name="option.label"
           :value="option.value"
+        />
+        <label
+          :for="option.label"
+          class="ml-2 align-center p-10px cursor-pointer display-inline-block"
+        >
+          {{ option.label.charAt(0).toUpperCase() + option.label.slice(1) }}</label
+        >
+      </li>
+      <li v-if="acceptedEntityTypes.length > 0 && filterkey == 'type'">
+        <input
+          :id="option.value"
+          v-model="inputFieldMulti"
+          :value="option.value"
+          type="checkbox"
+          :name="option.label"
+          disabled
         />
         <label
           :for="option.label"
@@ -43,6 +59,11 @@
       filterkey: {
         type: [String],
         required: true,
+      },
+      acceptedEntityTypes: {
+        type: Array as PropType<string[]>,
+        default: () => [],
+        required: false,
       },
     },
     emits: ['update:listValue'],

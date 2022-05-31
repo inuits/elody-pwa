@@ -54,14 +54,14 @@ type Frame implements Entity {
   form: Form
 }
 
-#type boxEntity implements Entity {
-#  id: String!
-#  uuid: String!
-#  type: String!
-#  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
-#  media: Media
-#  form: Form
-#}
+type boxEntity implements Entity {
+  id: String!
+  uuid: String!
+  type: String!
+  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
+  media: Media
+  form: Form
+}
 
 type RelationMetaData {
   key: String!
@@ -234,6 +234,7 @@ type JobsResults {
 enum InputFieldTypes {
   text
   number
+  boolean
 }
 
 enum validation {
@@ -245,7 +246,8 @@ type MetadataField {
   label: String
   key: String!
   type: InputFieldTypes!
-  #order: Number
+  order: Int
+  active: Boolean
   validation: validation
 }
 
