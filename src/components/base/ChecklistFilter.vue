@@ -19,15 +19,8 @@
           {{ option.label.charAt(0).toUpperCase() + option.label.slice(1) }}</label
         >
       </li>
-      <li v-if="acceptedEntityTypes.length > 0 && filterkey == 'type'">
-        <input
-          :id="option.value"
-          v-model="inputFieldMulti"
-          :value="option.value"
-          type="checkbox"
-          :name="option.label"
-          disabled
-        />
+      <li v-if="acceptedEntityTypes.includes(option.value) && filterkey == 'type'">
+        <input :id="option.value" type="checkbox" :name="option.label" checked disabled />
         <label
           :for="option.label"
           class="ml-2 align-center p-10px cursor-pointer display-inline-block"
@@ -103,6 +96,18 @@
             : undefined;
         },
         set(value) {
+          if (props.acceptedEntityTypes.length > 0) {
+            value = props.acceptedEntityTypes;
+
+            emit(
+              'update:listValue',
+              defaultReturnMultiSelectObject(props.filterkey, {
+                value: value,
+                AndOrValue: isAnd.value,
+              }),
+            );
+          }
+
           if (props.listValue) {
             emit(
               'update:listValue',
@@ -114,6 +119,16 @@
           }
         },
       });
+
+      if (props.acceptedEntityTypes.length > 0 && props.filterkey === 'type') {
+        emit(
+          'update:listValue',
+          defaultReturnMultiSelectObject('type', {
+            value: props.acceptedEntityTypes,
+            AndOrValue: isAnd.value,
+          }),
+        );
+      }
 
       return { options, inputFieldMulti, isAnd };
     },
