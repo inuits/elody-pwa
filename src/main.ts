@@ -43,6 +43,7 @@ const router = createRouter({
 });
 
 const authCode = new URLSearchParams(window.location.search).get('code');
+auth.authCode = authCode;
 
 const graphqlErrorInterceptor = onError((error) => {
   const errorHandler = useGraphqlErrors(error);
@@ -50,6 +51,7 @@ const graphqlErrorInterceptor = onError((error) => {
   if (errorHandler.checkForUnauthorized() === true) {
     new Promise(async (resolve, reject) => {
       await fetch('/api/logout');
+      auth.resetAuthProperties();
       auth.redirectToLogin(router.currentRoute?.value.fullPath);
       resolve;
     });
@@ -58,6 +60,7 @@ const graphqlErrorInterceptor = onError((error) => {
 
 if (_.auth) {
   router.beforeEach(async (to, _from, next) => {
+    await auth.verifyServerAuth();
     if (!to.matched.some((route) => route.meta.requiresAuth)) {
       return next();
     }
