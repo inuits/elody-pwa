@@ -27,6 +27,7 @@ const config = await fetch(
 ).then((r) => r.json());
 let auth: typeof OpenIdConnectClient | null;
 auth != null ? auth : auth = new OpenIdConnectClient(config.oidc);
+console.log(`session-vue-3-oidc-library: v0.1.7`)
 
 const head = createHead();
 
