@@ -1,5 +1,8 @@
 <template>
-  <div class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0">
+  <div
+    v-if="!loading"
+    class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0"
+  >
     <entity-image-selection
       v-show="loading || mediafiles.length > 0"
       v-model:selectedImage="selectedMediafile"
