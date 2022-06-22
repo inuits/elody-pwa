@@ -3,7 +3,7 @@
     <FilterSideBar
       v-show="!showDrawer"
       v-model:activeFilters="queryVariables.advancedSearchValue"
-      :acceptedEntityTypes="acceptedEntityTypes ? acceptedEntityTypes : []"
+      :accepted-entity-types="acceptedEntityTypes ? acceptedEntityTypes : []"
     />
     <div class="p-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">

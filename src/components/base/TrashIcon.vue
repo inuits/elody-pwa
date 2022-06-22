@@ -11,8 +11,7 @@
       m-1
       bg-neutral-30
       hover:bg-red-default
-      border-2
-      border-neutral-900
+      border-2 border-neutral-900
     "
   >
     <Icon :name="Unicons.Trash.name" />

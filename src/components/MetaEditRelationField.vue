@@ -28,7 +28,10 @@
       </div>
     </div>
   </div>
-  <MetaAdd :label="label" @addMetadata="openPickAssetModal(structure.acceptedEntityTypes)" />
+  <MetaAdd
+    :label="label"
+    @addMetadata="openPickAssetModal(structure.acceptedEntityTypes)"
+  />
 </template>
 
 <script lang="ts">

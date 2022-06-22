@@ -1,5 +1,5 @@
 <template>
-  <InputField  v-model="value" :label="label === undefined ? fieldKey : label" />
+  <InputField v-model="value" :label="label === undefined ? fieldKey : label" />
 </template>
 
 <script lang="ts">
@@ -20,8 +20,6 @@
     },
     setup: (props) => {
       const { value } = useField<string>(props.fieldKey);
-
-      
 
       return {
         value,

@@ -9,9 +9,9 @@
         >
           <MetaEditDataField
             v-if="field && field.__typename === 'MetadataField'"
+            v-model="EntityTitle"
             :field-key="field.key"
             :label="field.label"
-            v-model="EntityTitle"
           />
           <!--  <MetaEditRelationField
             v-else-if="field && field.__typename === 'RelationField'"
@@ -19,7 +19,7 @@
             :label="field.label"
           /> -->
         </div>
-        <input type="text" placeholder="id" v-model="manualID" />
+        <input v-model="manualID" type="text" placeholder="id" />
         <BaseButton label="create" @click="create" />
       </form>
     </div>
