@@ -136,7 +136,7 @@
         //If form show edit togle
         if (queryResult.data.Entity?.form) {
           showEditToggle();
-        }else if(queryResult.data?.Entity){
+        } else if (queryResult.data?.Entity) {
           showEditToggle();
         }
 

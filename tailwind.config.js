@@ -57,7 +57,7 @@ module.exports = {
     extend: {
       blur: {
         xs: '1px',
-      }
+      },
     },
   },
   variants: {

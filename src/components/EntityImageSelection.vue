@@ -117,7 +117,6 @@
 
       const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 
-
       const addToSaveCallback = (id: string, arrayKey: string) => {
         const parsedId = id.replace('mediafiles/', '');
         toBeDeleted.value.push(id);

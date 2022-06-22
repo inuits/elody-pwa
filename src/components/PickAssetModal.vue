@@ -9,7 +9,11 @@
       v-if="pickAssetModalState.state !== 'initial'"
       class="bg-neutral-20 w-full h-full flex flex-col overflow-auto"
     >
-      <AssetLibrary :enable-selection="true" @add-selection="addItem" :acceptedEntityTypes="pickAssetModalState.acceptedEntityTypes"/>
+      <AssetLibrary
+        :enable-selection="true"
+        :accepted-entity-types="pickAssetModalState.acceptedEntityTypes"
+        @add-selection="addItem"
+      />
     </div>
   </modal>
 </template>

@@ -50,7 +50,7 @@
             v-if="filter.type === AdvancedFilterTypes.Checklist"
             v-model:listValue="initialFilters[i]"
             :filterkey="filter.key"
-            :acceptedEntityTypes="acceptedEntityTypes"
+            :accepted-entity-types="acceptedEntityTypes"
           />
           <MinmaxFilter
             v-if="filter.type === AdvancedFilterTypes.Minmax"
@@ -71,7 +71,11 @@
   import { defineComponent, ref, computed, PropType } from 'vue';
   import FilterAccordion from '@/components/base/FilterAccordion.vue';
   import { useQuery } from '@vue/apollo-composable';
-  import { AdvancedFilterTypes, GetAdvancedFiltersDocument, GetFormsDocument } from '@/queries';
+  import {
+    AdvancedFilterTypes,
+    GetAdvancedFiltersDocument,
+    GetFormsDocument,
+  } from '@/queries';
   import BaseButton from '@/components/base/BaseButton.vue';
   import MinmaxFilter from '@/components/base/MinmaxFilter.vue';
   import TextFilter from '@/components/base/TextFilter.vue';
@@ -109,7 +113,7 @@
       const AndOrChoice = ref<boolean>(true);
       const { result: filters } = useQuery(GetAdvancedFiltersDocument);
 
-      const { result: form } = useQuery(GetFormsDocument, {type: 'story'});
+      const { result: form } = useQuery(GetFormsDocument, { type: 'story' });
 
       const applyFilters = () => {
         const returnArray = initialFilters.value.map((filter: FilterInList) => {
