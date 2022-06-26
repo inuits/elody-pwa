@@ -54,12 +54,12 @@
     props: {
       loading: { type: Boolean, default: false },
       limit: { type: Number, default: 20 },
-      skip: { type: Number, default: 1 },
-      totalItems: { type: Number, default: 1 },
+      skip: { type: Number, default: 0 },
+      totalItems: { type: Number, default: 0 },
     },
     emits: ['update:skip', 'update:limit'],
     setup: (props, { emit }) => {
-      const helper = useRouteHelpers();
+      // const helper = useRouteHelpers();
       let paginationInfo = reactive<PaginationInfo>({
         limit: props.limit,
         skip: props.skip,
@@ -72,14 +72,14 @@
       const prev = (pages: number) => {
         if (!props.loading) {
           if (currentPage.value - pages > 1) {
-            helper.updatePaginationInfoQueryParams({
-              limit: props.limit,
-              skip: props.skip - pages,
-            });
+            // helper.updatePaginationInfoQueryParams({
+            //   limit: props.limit,
+            //   skip: props.skip - pages,
+            // });
             emit('update:skip', props.skip - pages);
             emit('update:limit', props.limit);
           } else {
-            helper.updatePaginationInfoQueryParams({ limit: props.limit, skip: 1 });
+            // helper.updatePaginationInfoQueryParams({ limit: props.limit, skip: 1 });
             emit('update:skip', 1);
             emit('update:limit', props.limit);
           }
@@ -89,17 +89,17 @@
       const next = (pages: number) => {
         if (!props.loading) {
           if (currentPage.value + pages <= maxPage()) {
-            helper.updatePaginationInfoQueryParams({
-              limit: props.limit,
-              skip: props.skip + pages,
-            });
+            // helper.updatePaginationInfoQueryParams({
+            //   limit: props.limit,
+            //   skip: props.skip + pages,
+            // });
             emit('update:skip', props.skip + pages);
             emit('update:limit', props.limit);
           } else {
-            helper.updatePaginationInfoQueryParams({
-              limit: props.limit,
-              skip: maxPage(),
-            });
+            // helper.updatePaginationInfoQueryParams({
+            //   limit: props.limit,
+            //   skip: maxPage(),
+            // });
             emit('update:skip', maxPage());
             emit('update:limit', props.limit);
           }
@@ -111,13 +111,13 @@
       };
 
       const init = () => {
-        paginationInfo = helper.getPaginationInfoFromUrl({
-          limit: props.limit,
-          skip: props.skip,
-        }) as PaginationInfo;
+        // paginationInfo = helper.getPaginationInfoFromUrl({
+        //   limit: props.limit,
+        //   skip: props.skip,
+        // }) as PaginationInfo;
         if (paginationInfo.skip == 0 || paginationInfo.skip > maxPage()) {
-          helper.updatePaginationInfoQueryParams({ limit: props.limit, skip: 1 });
-          emit('update:skip', 1);
+          // helper.updatePaginationInfoQueryParams({ limit: props.limit, skip: 0 });
+          emit('update:skip', 0);
           emit('update:limit', paginationInfo.limit);
         } else {
           emit('update:skip', paginationInfo.skip);
