@@ -100,8 +100,7 @@ export type EntityInput = {
 
 export enum Entitytyping {
   Story = 'story',
-  Frame = 'frame',
-  Asset = 'asset'
+  Frame = 'frame'
 }
 
 export enum ExcludeOrInclude {
