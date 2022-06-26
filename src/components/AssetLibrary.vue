@@ -155,14 +155,14 @@
         limit: 20,
         skip: 1,
       });
-      routeHelper.getPaginationInfoFromUrl(paginationInfo);
+      // routeHelper.getPaginationInfoFromUrl(paginationInfo);
       const { t } = useI18n();
 
       const showDrawer = ref(true);
 
       const queryVariables = reactive<GetEntitiesQueryVariables>({
         limit: paginationInfo.limit,
-        skip: paginationInfo.skip - 1,
+        skip: paginationInfo.skip,
         searchValue: {
           value: '',
           isAsc: false,
