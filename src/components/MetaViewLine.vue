@@ -4,10 +4,12 @@
       {{ checkTranslationForlabel(item.label) }}
     </div>
     <div v-else class="label" :class="{ loading }">no label</div>
+
     <meta-viewline-relation
       v-if="item.linkedEntity && item.linkedEntity.type === 'asset'"
       :metadata="item"
     />
+
     <meta-view-line
       v-if="
         item.linkedEntity &&
@@ -17,6 +19,7 @@
       :metadata="item.linkedEntity.metadata"
       :loading="loading"
     />
+
     <div
       v-if="!item.linkedEntity"
       class="value"
