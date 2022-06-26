@@ -48,7 +48,10 @@ fragment editForm on Form {
 
 fragment minimalAsset on Asset {
   ...minimalBaseEntity
-  teaserMetadata: metadata(keys: ["title", "object_number"], excludeOrInclude: include) {
+  teaserMetadata: metadata(
+    keys: ["type", "title", "object_number"]
+    excludeOrInclude: include
+  ) {
     __typename
     ... on Metadata {
       ...metadata
@@ -123,6 +126,18 @@ fragment fullEntityRecursive on Entity {
             }
           }
         }
+        ... on Frame {
+          ...minimalBaseEntity
+          teaserMetadata: metadata(keys: ["title"], excludeOrInclude: include) {
+            __typename
+            ... on Metadata {
+              ...metadata
+            }
+            ... on MetadataRelation {
+              ...metadataRelation
+            }
+          }
+        }
         ...fullEntity
         metadata(keys: [], excludeOrInclude: exclude) {
           __typename
@@ -186,6 +201,48 @@ query getEntities(
       }
       ... on Asset {
         ...minimalAsset
+      }
+      ... on Frame {
+        teaserMetadata: metadata(keys: ["type", "title"], excludeOrInclude: include) {
+          __typename
+          ... on Metadata {
+            key
+            value
+            label
+            immutable
+          }
+          ... on MetadataRelation {
+            key
+            value
+            label
+            type
+            metadataOnRelation {
+              key
+              value
+            }
+          }
+        }
+      }
+      ... on Story {
+        teaserMetadata: metadata(keys: ["type", "title"], excludeOrInclude: include) {
+          __typename
+          ... on Metadata {
+            key
+            value
+            label
+            immutable
+          }
+          ... on MetadataRelation {
+            key
+            value
+            label
+            type
+            metadataOnRelation {
+              key
+              value
+            }
+          }
+        }
       }
     }
   }

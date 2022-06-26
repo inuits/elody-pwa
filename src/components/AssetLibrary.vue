@@ -7,7 +7,7 @@
     />
     <div class="p-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
-        <div class="mt-8 mr-4">
+        <div v-show="acceptedEntityTypes.length === 0" class="mt-8 mr-4">
           <IconToggle
             v-model:checked="showDrawer"
             :icon-on="Unicons.SearchGlass.name"
@@ -15,6 +15,7 @@
           />
         </div>
         <InputField
+          v-show="acceptedEntityTypes.length === 0"
           v-model="queryVariables.searchValue.value"
           :debounce="true"
           placeholder="Search Asset Library..."
@@ -23,7 +24,10 @@
           :bg-color="'neutral-20'"
           :disabled="!showDrawer"
         />
-        <div class="pl-4 my-2 flex flex-row justify-left">
+        <div
+          v-show="acceptedEntityTypes.length === 0"
+          class="pl-4 my-2 flex flex-row justify-left"
+        >
           <Dropdown
             v-if="result?.Entities.count > 0"
             v-model="queryVariables.limit"
@@ -70,7 +74,7 @@
             v-for="entity in result.Entities.results"
             :key="entity.id"
             :meta="entity.teaserMetadata"
-            :media="entity.media.primaryMediafile"
+            :media="entity.media ? entity.media.primaryMediafile : null"
             :thumb-icon="Unicons.NoImage.name"
             @click="
               !enableSelection &&
@@ -158,7 +162,7 @@
       // routeHelper.getPaginationInfoFromUrl(paginationInfo);
       const { t } = useI18n();
 
-      const showDrawer = ref(true);
+      const showDrawer = ref(props.acceptedEntityTypes.length === 0 ? true : false);
 
       const queryVariables = reactive<GetEntitiesQueryVariables>({
         limit: paginationInfo.limit,
@@ -169,7 +173,9 @@
           key: 'title',
         },
         advancedSearchValue: [],
-        searchInputType: SearchInputType.SimpleInputtype,
+        searchInputType: showDrawer.value
+          ? SearchInputType.SimpleInputtype
+          : SearchInputType.AdvancedInputType,
       });
 
       watch(showDrawer, () => {

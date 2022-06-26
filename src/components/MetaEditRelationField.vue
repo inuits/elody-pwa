@@ -74,7 +74,7 @@
               //@ts-ignore
               { value: value.id, key: 'object_number' },
               //@ts-ignore
-              { value: value.title[0].value, key: 'titel' },
+              // { value: value.title[0].value, key: 'titel' },
             ],
           }),
         );
