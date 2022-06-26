@@ -2,34 +2,25 @@
   <div class="p-6 bg-neutral-0 pb-20">
     <div>
       <label for="entities">Choose an entity to create...</label><br />
-      <select id="entity" v-model="selected" name="entity">
-        <option disabled value="">Choose an entity...</option>
-        <option value="story">Story</option>
-        <option value="frame">Frame</option>
-        <option value="asset">Asset</option>
-      </select>
+      <Dropdown v-model="selected" :options="Entitytyping" label="Type" />
     </div>
     <div>{{ selected }}</div>
-    <CreateStory v-if="selected == 'story'" />
-    <CreateFrame v-if="selected == 'frame'" />
-    <CreateAsset v-if="selected == 'asset'" />
+    <CreateEntityForm v-if="selected" :entity-type="selected" />
   </div>
 </template>
 <script lang="ts">
-  import { GetFormsDocument } from '@/queries';
-  import { useQuery } from '@vue/apollo-composable';
+  import Dropdown from '@/components/base/Dropdown.vue';
+  import { Entitytyping } from '@/queries';
   import { defineComponent, ref } from 'vue';
-  import { watch } from 'vue-demi';
-  import CreateStory from '../components/CreateStory.vue';
-  import CreateFrame from '../components/CreateFrame.vue';
-  import CreateAsset from '@/components/CreateAsset.vue';
+  import CreateEntityForm from '../components/CreateEntityForm.vue';
   export default defineComponent({
     name: 'CreateEntity',
-    components: { CreateStory, CreateFrame, CreateAsset },
+    components: { CreateEntityForm, Dropdown },
     setup() {
-      const selected = ref<String>('');
+      const selected = ref<Entitytyping>(Entitytyping.Story);
       return {
         selected,
+        Entitytyping,
       };
     },
   });
