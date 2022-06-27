@@ -6,7 +6,9 @@
     <div v-else class="label" :class="{ loading }">no label</div>
 
     <meta-viewline-relation
-      v-if="item.linkedEntity && ['asset', 'frame'].includes(item.linkedEntity.type)"
+      v-if="
+        item.linkedEntity && ['asset', 'story', 'box'].includes(item.linkedEntity.type)
+      "
       :metadata="item"
     />
 
@@ -15,7 +17,8 @@
         item.linkedEntity &&
         item.linkedEntity.metadata &&
         item.linkedEntity.type !== 'asset' &&
-        item.linkedEntity.type !== 'frame'
+        item.linkedEntity.type !== 'box' &&
+        item.linkedEntity.type !== 'story'
       "
       :metadata="item.linkedEntity.metadata"
       :loading="loading"

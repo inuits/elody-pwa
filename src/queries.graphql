@@ -138,6 +138,18 @@ fragment fullEntityRecursive on Entity {
             }
           }
         }
+        ... on Story {
+          ...minimalBaseEntity
+          teaserMetadata: metadata(keys: ["title"], excludeOrInclude: include) {
+            __typename
+            ... on Metadata {
+              ...metadata
+            }
+            ... on MetadataRelation {
+              ...metadataRelation
+            }
+          }
+        }
         ...fullEntity
         metadata(keys: [], excludeOrInclude: exclude) {
           __typename
