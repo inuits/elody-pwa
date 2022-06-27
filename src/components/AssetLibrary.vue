@@ -2,6 +2,7 @@
   <div class="lg:flex">
     <FilterSideBar
       v-show="!showDrawer"
+      ref="advancedFilterBarRef"
       v-model:activeFilters="queryVariables.advancedSearchValue"
       :accepted-entity-types="acceptedEntityTypes ? acceptedEntityTypes : []"
     />
@@ -108,7 +109,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, watch, reactive, ref, PropType } from 'vue';
+  import { defineComponent, watch, reactive, ref, PropType, onUpdated } from 'vue';
   import { useQuery } from '@vue/apollo-composable';
   import ListContainer from '@/components/ListContainer.vue';
   import ListItem from '@/components/ListItem.vue';
@@ -161,6 +162,7 @@
       });
       // routeHelper.getPaginationInfoFromUrl(paginationInfo);
       const { t } = useI18n();
+      const advancedFilterBarRef = ref<InstanceType<typeof FilterSideBar> | null>(null);
 
       const showDrawer = ref(props.acceptedEntityTypes.length === 0 ? true : false);
 
@@ -182,6 +184,16 @@
         queryVariables.searchInputType = showDrawer.value
           ? SearchInputType.SimpleInputtype
           : SearchInputType.AdvancedInputType;
+      });
+
+      onUpdated(() => {
+        if (
+          queryVariables.advancedSearchValue &&
+          //@ts-ignore
+          queryVariables.advancedSearchValue.length === 0
+        ) {
+          advancedFilterBarRef.value && advancedFilterBarRef.value.applyFilters();
+        }
       });
 
       watch(
@@ -206,6 +218,7 @@
         Unicons,
         queryVariables,
         addSelection,
+        advancedFilterBarRef,
         paginationLimits,
         showDrawer,
         result,
