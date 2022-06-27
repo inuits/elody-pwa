@@ -59,7 +59,7 @@
       };
 
       const only4Meta = (input: Metadata[]) => {
-        return input.slice(0, 4);
+        return input.filter((value) => value.value !== '').slice(0, 4);
       };
       return { setNoImage, imageSrcError, only4Meta, config };
     },
