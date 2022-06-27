@@ -51,7 +51,7 @@
       :icon="Unicons.Create.name"
       class="mt-1"
       bg-color="neutral-30"
-      @click="openCreate"
+      @click="openCreateModal"
     />
   </nav>
 </template>
@@ -62,13 +62,14 @@
   import { useUploadModal } from './UploadModal.vue';
   import { Unicons } from '@/types';
   import { useRouter } from 'vue-router';
-  import { getCurrentInstance } from 'vue';
   import { useEditMode } from './EditToggle.vue';
+  import { useCreateModal } from './CreateModal.vue';
   export default defineComponent({
     name: 'TheNavigation',
     components: { BaseButton },
     setup: () => {
       const { openUploadModal } = useUploadModal();
+      const { openCreateModal } = useCreateModal();
       const router = useRouter();
       const { disableEditMode } = useEditMode();
 
@@ -86,9 +87,6 @@
         useUploadModal();
         disableEditMode();
       };
-      const openCreate = () => {
-        router.push({ name: 'Create' });
-      };
 
       return {
         Unicons,
@@ -97,7 +95,7 @@
         forceDisableEditModalHome,
         forceDisableEditModalHistory,
         forceDisableEditModalUpload,
-        openCreate,
+        openCreateModal,
       };
     },
   });

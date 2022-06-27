@@ -2,16 +2,8 @@
   <div>
     <div class="p-6 bg-neutral-0 pb-20">
       <form v-if="result">
-        <div
-          v-for="field in result.Form.fields"
-          :key="field.__typename === 'MetadataField' ? field.key : 'no key'"
-        >
-          <MetaEditDataField
-            v-if="field && field.__typename === 'MetadataField'"
-            v-model="EntityTitle"
-            :field-key="field.key"
-            :label="field.label"
-          />
+        <div>
+          <MetaEditDataField v-model="EntityTitle" :field-key="title" :label="Title" />
         </div>
         <input v-model="manualID" type="text" placeholder="id" />
         <BaseButton label="create" @click="create" />
@@ -32,6 +24,7 @@
   import BaseButton from './base/BaseButton.vue';
   import urlSlug from 'url-slug';
   import { useRouter } from 'vue-router';
+  import { useCreateModal } from './CreateModal.vue';
 
   export default defineComponent({
     name: 'CreateEntityForm',
@@ -44,6 +37,7 @@
     },
     setup(props) {
       const router = useRouter();
+      const { closeCreateModal } = useCreateModal();
       const { result } = useQuery(GetFormsDocument, {
         type: props.entityType,
       });
@@ -68,9 +62,9 @@
             identifiers: [manualID.value],
           },
         });
+        closeCreateModal();
         router.push({ name: 'SingleEntity', params: { id: manualID.value } });
       };
-
       return { result, create, EntityTitle, manualID };
     },
   });
