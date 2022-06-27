@@ -24,10 +24,4 @@ export const routes: RouteRecordRaw[] = [
     meta: { title: 'History', requiresAuth: true },
     component: History,
   },
-  {
-    path: '/create',
-    name: 'Create',
-    meta: { title: 'Create', requiresAuth: true },
-    component: () => import(/* webpackChunkName: "about" */ './CreateEntity.vue'),
-  },
 ];
