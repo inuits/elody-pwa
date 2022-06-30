@@ -65,7 +65,13 @@
   import { useMutation, useQuery } from '@vue/apollo-composable';
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import Meta from '@/components/Meta.vue';
-  import { GetEntityByIdDocument, GetEntityByIdQuery, Maybe, MediaFile } from '@/queries';
+  import {
+    GetEntityByIdDocument,
+    GetEntityByIdQuery,
+    Maybe,
+    MediaFile,
+    GetEntityByIdQueryVariables,
+  } from '@/queries';
   import { usePageTitle } from '@/components/TheHeader.vue';
   import { useEditMode } from '@/components/EditToggle.vue';
   import EntityImageSelection from '@/components/EntityImageSelection.vue';
@@ -119,6 +125,7 @@
       });
 
       onBeforeRouteUpdate(async (to, from) => {
+        //@ts-ignore
         queryVariables.id = to.params.id;
       });
 

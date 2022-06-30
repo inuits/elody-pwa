@@ -77,7 +77,7 @@
   import TextFilter from '@/components/base/TextFilter.vue';
   import ChecklistFilter from '@/components/base/ChecklistFilter.vue';
   import MultiFilter from '@/components/base/MultiFilter.vue';
-  import AndOrToggle from './base/AndOrToggle.vue';
+  // import AndOrToggle from './base/AndOrToggle.vue';
   import {
     clearAdvancedSearchInput,
     FilterInList,
@@ -93,7 +93,7 @@
       TextFilter,
       ChecklistFilter,
       MultiFilter,
-      AndOrToggle,
+      // AndOrToggle,
     },
     props: {
       acceptedEntityTypes: {

@@ -39,10 +39,10 @@
   import { GetFilterOptionsDocument, Maybe } from '@/queries';
   import { useQuery } from '@vue/apollo-composable';
   import { computed, defineComponent, PropType, ref } from 'vue';
-  import AndOrToggle from './AndOrToggle.vue';
+  // import AndOrToggle from './AndOrToggle.vue';
   export default defineComponent({
     name: 'ChecklistFilter',
-    components: { AndOrToggle },
+    // components: { AndOrToggle },
     props: {
       listValue: {
         type: Object as PropType<FilterInList>,
