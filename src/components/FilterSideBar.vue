@@ -12,7 +12,7 @@
       <div
         class="flex justify-between border-solid border-b-2 border-neutral-30 px-3 pb-3"
       >
-        <AndOrToggle v-model:AndOrValue="AndOrChoice" texton="En" textoff="Of" />
+        <!-- <AndOrToggle v-model:AndOrValue="AndOrChoice" texton="En" textoff="Of" /> -->
         <BaseButton
           bg-color="blue-50"
           bg-hover-color="blue-75"
