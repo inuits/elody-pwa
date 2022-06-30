@@ -61,7 +61,7 @@
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, watch, ref } from 'vue';
+  import { computed, defineComponent, watch, ref, reactive } from 'vue';
   import { useMutation, useQuery } from '@vue/apollo-composable';
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import Meta from '@/components/Meta.vue';
@@ -69,7 +69,7 @@
   import { usePageTitle } from '@/components/TheHeader.vue';
   import { useEditMode } from '@/components/EditToggle.vue';
   import EntityImageSelection from '@/components/EntityImageSelection.vue';
-  import { useRoute } from 'vue-router';
+  import { useRoute, onBeforeRouteUpdate } from 'vue-router';
   import { asString } from '@/helpers';
   import VideoPlayer from '@/components/base/VideoPlayer.vue';
   import AudioPlayer from '@/components/base/AudioPlayer.vue';
@@ -91,14 +91,16 @@
       const selectedMediafile = ref<MediaFile | null>(null);
 
       const mediafiles = ref<MediaFile[]>([]);
-      const { editMode, showEditToggle } = useEditMode();
+      const { editMode, showEditToggle, hideEditToggle } = useEditMode();
       const { updatePageTitle } = usePageTitle();
+
+      const queryVariables = reactive<GetEntityByIdQueryVariables>({
+        id: id,
+      });
 
       const { result, refetch, onResult } = useQuery<GetEntityByIdQuery>(
         GetEntityByIdDocument,
-        {
-          id: id,
-        },
+        queryVariables,
         {
           notifyOnNetworkStatusChange: true,
           fetchPolicy: 'no-cache',
@@ -116,9 +118,9 @@
         value && updatePageTitle(value, 'entityTitle');
       });
 
-      const updateEntities = () => {
-        refetch();
-      };
+      onBeforeRouteUpdate(async (to, from) => {
+        queryVariables.id = to.params.id;
+      });
 
       onResult((queryResult) => {
         if (
@@ -137,9 +139,9 @@
           });
         }
         //If form show edit togle
-        if (queryResult.data.Entity?.form) {
+        if (queryResult.data && queryResult.data.Entity?.form) {
           showEditToggle();
-        } else if (queryResult.data?.Entity) {
+        } else if (queryResult.data && queryResult.data?.Entity) {
           showEditToggle();
         }
 
@@ -152,7 +154,6 @@
         title,
         mediafiles,
         selectedMediafile,
-        updateEntities,
         editMode,
       };
     },
