@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-1 flex">
+  <!-- <div class="mb-1 flex">
     <AndOrToggle
       v-model:AndOrValue="isMulti"
       texton="Multi"
@@ -7,7 +7,7 @@
       class="mr-1"
     />
     <AndOrToggle v-if="isMulti" v-model:AndOrValue="isAnd" texton="En" textoff="Of" />
-  </div>
+  </div> -->
 
   <div>
     <Multiselect
