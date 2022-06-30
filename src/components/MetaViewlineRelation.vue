@@ -16,6 +16,10 @@
         v-if="metadata.linkedEntity"
         :meta="metadata.linkedEntity.teaserMetadata"
         :thumb-icon="Unicons.NoImage.name"
+        :small="true"
+        @click="
+          router.push({ name: 'SingleEntity', params: { id: metadata.linkedEntity.id } })
+        "
       />
     </div>
   </div>

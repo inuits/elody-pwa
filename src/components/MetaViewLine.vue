@@ -1,13 +1,22 @@
 <template>
   <div v-for="item in metadata" :key="item.label" class="flex flex-col mb-2 mt-2">
-    <div v-if="item.label" class="label" :class="{ loading }" data-test="meta-label">
+    <div
+      v-if="item.label && item.label != item.key"
+      class="label"
+      :class="{ loading }"
+      data-test="meta-label"
+    >
       {{ checkTranslationForlabel(item.label) }}
     </div>
-    <div v-else class="label" :class="{ loading }">no label</div>
+    <div v-else-if="item.label != item.key" class="label" :class="{ loading }">
+      no label
+    </div>
 
     <meta-viewline-relation
       v-if="
-        item.linkedEntity && ['asset', 'story', 'box'].includes(item.linkedEntity.type)
+        item.linkedEntity &&
+        ['asset', 'story', 'box', 'frame'].includes(item.linkedEntity.type) &&
+        item.label != item.key
       "
       :metadata="item"
     />
@@ -18,7 +27,8 @@
         item.linkedEntity.metadata &&
         item.linkedEntity.type !== 'asset' &&
         item.linkedEntity.type !== 'box' &&
-        item.linkedEntity.type !== 'story'
+        item.linkedEntity.type !== 'story' &&
+        item.linkedEntity.type !== 'frame'
       "
       :metadata="item.linkedEntity.metadata"
       :loading="loading"

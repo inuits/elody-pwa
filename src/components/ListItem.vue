@@ -22,8 +22,13 @@
           self-center
         "
       />
-      <div class="flex w-full">
-        <div v-for="metaItem in only4Meta(meta)" :key="metaItem.value" class="col">
+      <div class="flex w-full" :class="small ? 'flex-col' : ''">
+        <div
+          v-for="metaItem in only4Meta(meta)"
+          :key="metaItem.value"
+          class="col"
+          :class="small ? ' w-full' : 'w-1/4'"
+        >
           <span class="label" data-test="meta-label">{{ metaItem.key }}</span>
           <span class="info" data-test="meta-info">{{ metaItem.value }}</span>
         </div>
@@ -50,6 +55,7 @@
       },
       media: { type: String, default: undefined },
       thumbIcon: { type: String as PropType<keyof Unicons>, default: '' },
+      small: { type: Boolean, default: false },
     },
     setup() {
       const config: any = inject('config');
@@ -74,7 +80,7 @@
     @apply transition-colors duration-300 hover:shadow-sm;
   }
   .col {
-    @apply flex justify-start flex-col px-1 w-1/4;
+    @apply flex justify-start flex-col px-1;
   }
   .label {
     @apply rounded text-xs text-neutral-60;
