@@ -1,11 +1,17 @@
 <template>
   <div>
-    <div class="p-6 bg-neutral-0 pb-20">
+    <div class="p-6 pt-0 bg-neutral-0 pb-20">
       <form v-if="result">
-        <div>
-          <MetaEditDataField v-model="EntityTitle" :field-key="title" :label="Title" />
-        </div>
-        <input v-model="manualID" type="text" placeholder="id" />
+        <span v-if="label" class="ml-1 text-neutral-700 text-sm">id</span>
+        <MetaEditDataField v-model="EntityTitle" :field-key="title" :label="Title" />
+        <span v-if="label" class="ml-1 text-neutral-700 text-sm">id</span>
+        <input
+          v-model="manualID"
+          disabled
+          type="text"
+          class="w-full px-3 py-2"
+          placeholder="id"
+        />
         <BaseButton label="create" @click="create" />
       </form>
     </div>

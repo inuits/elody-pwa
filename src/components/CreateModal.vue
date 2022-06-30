@@ -4,10 +4,15 @@
     :modal-state="createModalState.state"
     @hide-modal="closeCreateModal"
   >
-    <div class="p-6 bg-neutral-0 pb-20 w-full">
-      <div>
-        <label for="entities">Choose an entity to create...</label><br />
-        <Dropdown v-model="selected" :options="Entitytyping" label="Type" />
+    <div class="bg-neutral-0 w-full">
+      <div class="p-6 pb-0">
+        <h1>Create Entity</h1>
+        <Dropdown
+          v-model="selected"
+          :options="Entitytyping"
+          label="Type"
+          class="w-full"
+        />
       </div>
       <CreateEntityForm v-if="selected" :entity-type="selected" />
     </div>
