@@ -40,7 +40,7 @@
   import { useQuery } from '@vue/apollo-composable';
   import { ref, defineComponent, computed, PropType } from 'vue';
   import Multiselect from '@vueform/multiselect';
-  import AndOrToggle from './AndOrToggle.vue';
+  // import AndOrToggle from './AndOrToggle.vue';
   import InputField from '@/components/base/InputField.vue';
   import {
     defaultReturnMultiSelectObject,
@@ -52,7 +52,7 @@
     name: 'MultiFilter',
     components: {
       Multiselect,
-      AndOrToggle,
+      // AndOrToggle,
       InputField,
     },
     props: {
