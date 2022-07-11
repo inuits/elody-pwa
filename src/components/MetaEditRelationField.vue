@@ -67,14 +67,13 @@
         props.structure.relationType,
       );
       const addRelation = (value: Entity) => {
+        console.log('edit value: ', value);
         push(
           getEmptyMetadatRelationObject(props.structure, value.uuid, {
             //@ts-ignore  Error when passing value object in vee-validate
             teaserMetadata: [
               //@ts-ignore
-              { value: value.id, key: 'object_number' },
-              //@ts-ignore
-              // { value: value.title[0].value, key: 'titel' },
+              { value: value.title[0].value, key: 'titel' },
             ],
           }),
         );
