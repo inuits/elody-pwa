@@ -6,7 +6,7 @@
     @hide-modal="closePickAssetModal"
   >
     <div
-      v-if="pickAssetModalState.state !== 'initial'"
+      v-if="pickAssetModalState.state !== 'hide'"
       class="bg-neutral-20 w-full h-full flex flex-col overflow-auto"
     >
       <AssetLibrary
@@ -30,7 +30,7 @@
   };
 
   const pickAssetModalState = ref<PickAssetModalType>({
-    state: 'initial',
+    state: 'hide',
     pickedAsset: undefined,
     acceptedEntityTypes: [],
   });

@@ -67,7 +67,6 @@
         props.structure.relationType,
       );
       const addRelation = (value: Entity) => {
-        console.log('edit value: ', value);
         push(
           getEmptyMetadatRelationObject(props.structure, value.uuid, {
             //@ts-ignore  Error when passing value object in vee-validate

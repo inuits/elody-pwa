@@ -187,21 +187,10 @@
       });
 
       onUpdated(() => {
-        if (
-          queryVariables.advancedSearchValue &&
-          //@ts-ignore
-          queryVariables.advancedSearchValue.length === 0
-        ) {
+        if (queryVariables.advancedSearchValue) {
           advancedFilterBarRef.value && advancedFilterBarRef.value.applyFilters();
         }
       });
-
-      watch(
-        () => queryVariables.advancedSearchValue,
-        () => {
-          refetch(queryVariables);
-        },
-      );
 
       const { result, loading, refetch } = useQuery(GetEntitiesDocument, queryVariables, {
         notifyOnNetworkStatusChange: true,
