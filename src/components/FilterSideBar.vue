@@ -30,9 +30,6 @@
         />
       </div>
     </div>
-    <pre>
-    {{initialFilters[0]}}
-    </pre>
     <div
       v-for="(filter, i) in filters?.advancedFilters"
       :key="filter.key"
