@@ -134,7 +134,8 @@ export const getEmptyMetadatRelationObject = (
   };
   if (fields.metadata) {
     fields.metadata?.forEach((field: Maybe<MetadataField>) => {
-      if (field) intialValue.metadata[field.key] = '';
+      if (field?.type === 'boolean') intialValue.metadata[field.key] = 'false';
+      if (field?.type === 'text') intialValue.metadata[field.key] = '';
     });
   }
   return intialValue;

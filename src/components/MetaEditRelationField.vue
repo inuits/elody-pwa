@@ -4,12 +4,13 @@
     <div v-for="({ value, key }, idx) in fields" :key="key" class="my-2">
       <div :class="[inputContainerStyle, ' input-container p-4 gap-3 flex-col']">
         <div
-          v-for="{ label: metadataLabel, key: metadataKey } in structure.metadata"
+          v-for="{ label: metadataLabel, key: metadataKey, type: metadataType } in structure.metadata"
           :key="`${idx}-${metadataKey}`"
         >
           <MetaEditDataField
             :label="metadataLabel"
             :field-key="`${structure.relationType}[${idx}].metadata.${metadataKey}`"
+            :type="metadataType"
           />
         </div>
         <ListItem
