@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts">
-  import { Entity, RelationField } from '@/queries';
+  import { Entity, MetadataFragment, RelationField } from '@/queries';
   import { defineComponent, PropType, watch } from 'vue';
   import MetaEditDataField from './MetaEditDataField.vue';
   import { useFieldArray } from 'vee-validate';
@@ -71,13 +71,17 @@
           getEmptyMetadatRelationObject(props.structure, value.uuid, {
             //@ts-ignore  Error when passing value object in vee-validate
             teaserMetadata: [
-              //@ts-ignore
-              { value: value.title[0].value, key: 'titel' },
+              // @ts-ignore Possible undefined
+              { value: getTeaserMetaDataByKey(value.teaserMetadata, 'title').value  , key: 'titel' },
             ],
           }),
         );
-        closePickAssetModal();
       };
+
+      const getTeaserMetaDataByKey = (teaserMetaData: MetadataFragment[], key: string): MetadataFragment | undefined => {
+        return teaserMetaData.find((x: MetadataFragment) => x.key === key);
+      };
+
       const { openPickAssetModal, closePickAssetModal, pickAssetModalState } =
         usePickAssetModal(addRelation);
 
