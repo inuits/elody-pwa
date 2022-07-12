@@ -20,7 +20,7 @@ export const defaultReturnMultiSelectObject = (
   key: string,
   value: MultiSelectInput = { value: [], AndOrValue: true },
 ): FilterInList => {
-  return {
+  const filterObj: FilterInList = {
     isActive: value.value && value.value.length !== 0 ? true : false,
     input: {
       type: AdvancedInputType.MultiSelectInput,
@@ -28,6 +28,7 @@ export const defaultReturnMultiSelectObject = (
       multiSelectInput: value,
     },
   };
+  return filterObj;
 };
 
 const checkIfMinMaxActive = (value: MinMaxInput | undefined): boolean => {
