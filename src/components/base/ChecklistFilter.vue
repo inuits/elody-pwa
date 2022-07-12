@@ -38,7 +38,7 @@
   } from '@/composables/useFilterHelper';
   import { GetFilterOptionsDocument, Maybe } from '@/queries';
   import { useQuery } from '@vue/apollo-composable';
-  import { computed, defineComponent, PropType, ref } from 'vue';
+  import { computed, defineComponent, PropType, ref, watch } from 'vue';
   // import AndOrToggle from './AndOrToggle.vue';
   export default defineComponent({
     name: 'ChecklistFilter',
@@ -71,7 +71,7 @@
         get() {
           return andOr.value === 'and';
         },
-        set(newValue) {
+        set(newValue: any) {
           if (newValue) {
             andOr.value = 'and';
           } else {
@@ -89,35 +89,21 @@
         },
       });
 
-      const inputFieldMulti = computed<Maybe<Maybe<string>[]> | undefined>({
-        get() {
-          return props.listValue && props.listValue.input.multiSelectInput
-            ? props.listValue.input.multiSelectInput.value
-            : undefined;
-        },
-        set(value) {
-          if (props.acceptedEntityTypes.length > 0) {
-            value = props.acceptedEntityTypes;
+      const inputFieldMulti = ref<string[]>([]);
 
-            emit(
-              'update:listValue',
-              defaultReturnMultiSelectObject(props.filterkey, {
-                value: value,
-                AndOrValue: isAnd.value,
-              }),
-            );
-          }
-
-          if (props.listValue) {
-            emit(
-              'update:listValue',
-              defaultReturnMultiSelectObject(props.filterkey, {
-                value: value,
-                AndOrValue: isAnd.value,
-              }),
-            );
-          }
-        },
+      watch(() => inputFieldMulti.value, () => {
+        if (props.acceptedEntityTypes.length > 0) {
+          inputFieldMulti.value = props.acceptedEntityTypes;
+        }
+        if (props.listValue) {
+          emit(
+            'update:listValue',
+            defaultReturnMultiSelectObject(props.filterkey, {
+              value: inputFieldMulti.value,
+              AndOrValue: isAnd.value,
+            }),
+          );
+        }
       });
 
       if (props.acceptedEntityTypes.length > 0 && props.filterkey === 'type') {
