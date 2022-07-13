@@ -1,5 +1,5 @@
 <template>
-  <InputField v-model="value" :label="label === undefined ? fieldKey : label" />
+  <InputField v-model="value" :label="label === undefined ? fieldKey : label" :type="inputType" />
 </template>
 
 <script lang="ts">
@@ -17,12 +17,34 @@
         required: false,
         default: undefined,
       },
+      type: { type: String, required: false, default: 'text'}
     },
     setup: (props) => {
-      const { value } = useField<string>(props.fieldKey);
+      const { value } = useField<string>(props.fieldKey, {});
+      const inputType = ref<string>('text');
+
+      const setInputType = () => {
+        switch(props.type) { 
+          case 'text': {
+            inputType.value = 'text';
+            break;
+          }
+          case 'boolean': {
+            inputType.value = 'checkbox';
+            break;
+          }
+          default: {
+            inputType.value = 'text';
+            break;
+          } 
+        } 
+      };
+
+      setInputType();
 
       return {
         value,
+        inputType
       };
     },
   });
