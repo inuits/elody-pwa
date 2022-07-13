@@ -1,5 +1,5 @@
 <template>
-  <label class="block my-2">
+  <label class="block my-2" :class="type === 'checkbox' ? 'justify-end flex flex-row-reverse' : ''">
     <span v-if="label" class="ml-1 text-neutral-700 text-sm">{{ label }}</span>
     <div :class="[{ 'mr-4': icon }, inputContainerStyle]">
       <unicon
@@ -12,7 +12,7 @@
         :disabled="isDisabled"
         v-bind="$attrs"
         :class="[`bg-${bgColor}`, inputStyle]"
-        type="text"
+        :type="type"
         name=""
       />
     </div>
@@ -41,19 +41,22 @@
       bgColor: { type: String, default: 'neutral-0' },
       name: { type: String, default: '', required: false },
       isDisabled: { type: true || false, default: false, required: false },
+      type: { type: String, required: false, default: 'text'}
     },
     emits: ['update:modelValue'],
     setup(props, { emit }) {
       let emitValue = (value: string) => emit('update:modelValue', value);
+
       if (props.debounce) {
         emitValue = debounce(emitValue, props.debounceWait);
       }
+
       const inputValue = computed({
         get() {
           return props.modelValue;
         },
-        set(value: string) {
-          emitValue(value);
+        set(value: string | boolean) {
+          emitValue(value.toString());
         },
       });
       return { inputValue, inputStyle, inputContainerStyle };
