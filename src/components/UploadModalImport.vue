@@ -1,7 +1,14 @@
 <template>
   <div class="flex flex-col w-full my-2 p-5 flex-grow">
     <div class="bg-neutral-0 mb-4 rounded py-5 pl-5 h-full">
-      <folder-tree :data="directories" />
+      <tabs>
+        <tab title="Upload files">
+          UPLOADZONE
+        </tab>
+        <tab title="Import from external source">
+          <folder-tree :data="directories" />
+        </tab>
+      </tabs>
     </div>
   </div>
   <div class="w-full flex flex-col sticky bottom-0 p-5 bg-neutral-30 z-10">
@@ -21,12 +28,16 @@
   import { useMutation } from '@vue/apollo-composable';
   import { Directory, PostStartImportDocument } from '@/queries';
   import { UploadModalType, useUploadModal } from './UploadModal.vue';
+  import Tabs from './Tabs.vue';
+  import Tab from './Tab.vue';
 
   export default defineComponent({
     name: 'UploadModalImport',
     components: {
       FolderTree,
       BaseButton,
+      Tabs,
+      Tab,
     },
     props: {
       directories: {
