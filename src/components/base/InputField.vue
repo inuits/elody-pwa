@@ -34,7 +34,7 @@
     inheritAttrs: false,
     props: {
       label: { type: String, default: '' },
-      modelValue: { type: String || Boolean, default: '' },
+      modelValue: { type: String, default: '' },
       debounce: { type: Boolean, default: false },
       debounceWait: { type: Number, default: 400 },
       icon: { type: String as PropType<keyof Unicons>, default: undefined },
