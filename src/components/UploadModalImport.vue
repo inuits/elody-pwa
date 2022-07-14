@@ -1,25 +1,30 @@
 <template>
-  <div class="flex flex-col w-full my-2 p-5 flex-grow">
-    <div class="bg-neutral-0 mb-4 rounded py-5 pl-5 h-full">
-      <tabs>
-        <tab title="Upload files">
-          UPLOADZONE
-        </tab>
-        <tab title="Import from external source">
-          <folder-tree :data="directories" />
-        </tab>
-      </tabs>
-    </div>
-  </div>
-  <div class="w-full flex flex-col sticky bottom-0 p-5 bg-neutral-30 z-10">
-    <BaseButton
-      bg-color="blue-400"
-      txt-color="neutral-0"
-      label="Import"
-      bg-hover-color="blue-100"
-      @click="doImport()"
-    />
-  </div>
+  <tabs>
+    <!-- TAB1 -->
+    <tab title="Upload files">
+      <div class="p-3">
+        <dropzone v-model:progress="progress" />
+        <div class="text-center mt-5">
+          <dropzone-progress :progress="progress" />
+        </div>
+      </div>
+    </tab>
+
+    <!-- TAB2 -->
+    <tab title="Import from external source">
+      <folder-tree :data="directories" />
+      <div class="w-full flex flex-col sticky bottom-0 p-5 bg-neutral-30 z-10">
+        <BaseButton
+          bg-color="blue-400"
+          txt-color="neutral-0"
+          label="Import"
+          bg-hover-color="blue-100"
+          @click="doImport()"
+        />
+      </div>    
+    </tab>
+  </tabs>
+  
 </template>
 <script lang="ts">
   import { defineComponent, inject, provide, ref, Ref } from 'vue';
@@ -30,6 +35,8 @@
   import { UploadModalType, useUploadModal } from './UploadModal.vue';
   import Tabs from './Tabs.vue';
   import Tab from './Tab.vue';
+  import Dropzone from './Dropzone.vue';
+import DropzoneProgress from './DropzoneProgress.vue';
 
   export default defineComponent({
     name: 'UploadModalImport',
@@ -38,6 +45,8 @@
       BaseButton,
       Tabs,
       Tab,
+      Dropzone,
+        DropzoneProgress,
     },
     props: {
       directories: {
@@ -64,7 +73,6 @@
       provide<Ref<Directory | undefined>>('selectedDirectory', selectedDirectory);
 
       const doImport = () => {
-        console.log('DO IMPORT ');
         if (selectedDirectory.value && selectedDirectory.value.id) {
           mutate({
             folder: selectedDirectory.value.id,
@@ -73,8 +81,16 @@
         }
       };
 
+     const progress = ref<any>({
+        status: 'new',
+        progress: 0,
+        successFiles: 0,
+        errorFiles: 0,
+      });
+
       return {
         doImport,
+        progress,
       };
     },
   });

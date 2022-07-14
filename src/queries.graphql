@@ -378,6 +378,13 @@ mutation postStartImport($folder: String!) {
   }
 }
 
+mutation postMediaFile($mediaFileInput: MediaFileInput!) {
+  postMediaFile(mediaFileInput: $mediaFileInput) {
+    _id
+    filename
+  }
+}
+
 mutation editMetadata($id: String!, $metadata: [MetadataInput!]!) {
   replaceMetadata(id: $id, metadata: $metadata) {
     key

@@ -5,7 +5,7 @@
         v-for="(tab, index) in tabs"
         :key="index"
         @click="selectTab(index)"
-        class="text-center w-full cursor-pointer"
+        class="text-center w-full cursor-pointer py-2"
         :class="index === selectedIndex ? 'bg-neutral-800 text-neutral-0' : 'text-neutral-800 bg-neutral-0'"
       >
         {{ tab.props.title }}
@@ -19,7 +19,7 @@
 import {defineComponent, reactive, provide, onMounted, onBeforeMount, toRefs, VNode} from "vue";
 
 interface TabProps {
-  title: string;
+  title?: string;
 }
 
 export default defineComponent({
