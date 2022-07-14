@@ -12,7 +12,7 @@
     const index = ref(0);
     const isActive = ref(false);
 
-    const tabs = inject("TabsProvider");
+    const tabs: any = inject("TabsProvider");
 
     watch(
       () => tabs.selectedIndex,
