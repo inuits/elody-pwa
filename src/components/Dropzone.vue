@@ -176,8 +176,13 @@
           doUpload.value = () => {
             console.log('Uploading...', myDropzone);
             uploading.value = true;
+
             myDropzone.files.forEach((file: any) => {
-              mutate({ mediaFileInput: {filename: file.upload.filename, metadata: []}});
+
+            const fd = new FormData();
+            fd.append('file', file);
+
+            mutate({ mediaFileInput: {filename: file.upload.filename, metadata: []}, file: file});
             });
             // myDropzone.processQueue();
           };
