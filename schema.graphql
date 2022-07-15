@@ -1,4 +1,4 @@
-scalar Void
+scalar Upload
 
 enum ExcludeOrInclude {
   exclude
@@ -347,8 +347,8 @@ type Mutation {
   replaceRelationsAndMetaData(id: String!, form: MetadataFormInput): Entity
   deleteData(id: String!, path: deletePaths!): String
   createEntity(entity: EntityInput!): Entity
-  postMediaFile(mediaFileInput: MediaFileInput!): MediaFile
-  # uploadFile(id: String!, file: Upload!): File
+  postMediaFile(mediaFileInput: MediaFileInput!, file: Upload!): MediaFile
+  uploadFile(id: String!, file: Upload!): String
 }
 
 enum deletePaths {

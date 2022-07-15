@@ -378,8 +378,8 @@ mutation postStartImport($folder: String!) {
   }
 }
 
-mutation postMediaFile($mediaFileInput: MediaFileInput!) {
-  postMediaFile(mediaFileInput: $mediaFileInput) {
+mutation postMediaFile($mediaFileInput: MediaFileInput!, $file: Upload!) {
+  postMediaFile(mediaFileInput: $mediaFileInput, file: $file) {
     _id
     filename
   }
