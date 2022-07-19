@@ -20,6 +20,7 @@
     "@vue/apollo-composable": "^4.0.0-alpha.14",
     "@vueform/multiselect": "^2.3.2",
     "@vueuse/head": "^0.6.0",
+    "apollo-upload-client": "^17.0.0",
     "core-js": "^3.15.2",
     "dropzone": "^5.9.3",
     "graphql": "^15.5.1",

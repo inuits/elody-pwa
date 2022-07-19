@@ -2,7 +2,16 @@
   <div class="flex flex-col w-full">
     <div
       ref="dropzoneDiv"
-      class="bg-white-background w-full h-75-screen bg-blue inline-block border-dashed border-4 border-blue-light rounded p-5"
+      class="
+        bg-white-background
+        w-full
+        h-75-screen
+        bg-blue
+        inline-block
+        border-dashed border-4 border-blue-light
+        rounded
+        p-5
+      "
       :class="{
         'flex  justify-center items-center cursor-pointer': fileCount === 0,
         'justify-items-center grid grid-cols-4 place-content-start gap-4 ':
@@ -24,13 +33,22 @@
     <button
       v-if="doUpload"
       type="button"
-      class="py-2 mt-3 px-4 w-full bg-blue-400 text-neutral-0 rounded-sm hover:shadow-xl text-sm"
+      class="
+        py-2
+        mt-3
+        px-4
+        w-full
+        bg-blue-400
+        text-neutral-0
+        rounded-sm
+        hover:shadow-xl
+        text-sm
+      "
       :class="fileCount === 0 ? 'opacity-25 cursor-none' : 'cursor-pointer'"
       tabindex="-1"
       :disabled="fileCount === 0"
       @click="doUpload"
     >
-      
       upload
     </button>
   </div>
@@ -38,11 +56,36 @@
   <div class="hidden">
     <div
       ref="dropzonePreviewDiv"
-      class="dz-preview dz-file-preview w-40 mi-h-28 flex flex-col justify-center items-center hover:bg-blue-default10 p-3 rounded relative"
+      class="
+        dz-preview dz-file-preview
+        w-40
+        mi-h-28
+        flex flex-col
+        justify-center
+        items-center
+        hover:bg-blue-default10
+        p-3
+        rounded
+        relative
+      "
     >
       <a
         data-dz-remove
-        class="cursor-pointer absolute flex justify-center items-center top-2 right-2 bg-red-default rounded-full w-6 h-6 shadow hover:shadow-xl"
+        class="
+          cursor-pointer
+          absolute
+          flex
+          justify-center
+          items-center
+          top-2
+          right-2
+          bg-red-default
+          rounded-full
+          w-6
+          h-6
+          shadow
+          hover:shadow-xl
+        "
       >
         <svg
           width="9"
@@ -73,10 +116,7 @@
       </svg>
 
       <div class="dz-filename text-blue font-body text-sm mt-3 w-full">
-        <span
-          class="inline-block w-full text-center break-words"
-          data-dz-name
-        ></span>
+        <span class="inline-block w-full text-center break-words" data-dz-name></span>
       </div>
     </div>
   </div>
@@ -170,7 +210,7 @@
               });
               console.log('progress: ', progress);
               emit('update:progress', progress);
-            }
+            },
           );
 
           doUpload.value = () => {
@@ -178,11 +218,10 @@
             uploading.value = true;
 
             myDropzone.files.forEach((file: any) => {
-
-            const fd = new FormData();
-            fd.append('file', file);
-
-            mutate({ mediaFileInput: {filename: file.upload.filename, metadata: []}, file: file});
+              mutate({
+                mediaFileInput: { filename: file.upload.filename, metadata: [] },
+                file: file,
+              });
             });
             // myDropzone.processQueue();
           };
