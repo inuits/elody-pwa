@@ -5,6 +5,7 @@ import {
   InMemoryCache,
   ServerError,
 } from '@apollo/client/core';
+import { createUploadLink } from 'apollo-upload-client';
 import { createApp } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import Unicon from 'vue-unicons';
@@ -86,7 +87,7 @@ createApp(App)
     DefaultApolloClient,
     new ApolloClient({
       link: graphqlErrorInterceptor.concat(
-        createHttpLink({ uri: config.graphQlLink || '/api/graphql' }),
+        createUploadLink({ uri: config.graphQlLink || '/api/graphql' }),
       ),
       cache: new InMemoryCache(),
     }),
