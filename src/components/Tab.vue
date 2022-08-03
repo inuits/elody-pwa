@@ -1,5 +1,5 @@
 <template>
-  <div v-show="isActive">
+  <div v-show="isActive" style="height: -webkit-calc(100% - 40px);">
     <slot></slot>
   </div>
 </template>
