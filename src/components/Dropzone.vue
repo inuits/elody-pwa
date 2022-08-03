@@ -1,11 +1,10 @@
 <template>
-  <div class="flex flex-col w-full">
+  <div class="flex flex-col w-full h-full">
     <div
       ref="dropzoneDiv"
       class="
         bg-white-background
         w-full
-        h-75-screen
         bg-blue
         inline-block
         border-dashed border-4 border-blue-light
@@ -14,20 +13,29 @@
       "
       :class="{
         'flex  justify-center items-center cursor-pointer': fileCount === 0,
-        'justify-items-center grid grid-cols-4 place-content-start gap-4 ':
+        'justify-items-center grid grid-cols-6 place-content-start gap-4 ':
           fileCount !== 0,
       }"
+      style="height: -webkit-calc(100% - 40px);"
     >
       <div
         v-show="fileCount === 0"
         class="inline-block w-9/12 text-center"
-        @click="() => dropzoneDiv && dropzoneDiv.click()"
       >
-        <span class="text-lg text-blue-default50">
-          <a class="text-purple cursor-pointer">
-            Drag your files, or click here to add your files
-          </a>
-        </span>
+        <div class="dz-message"  data-dz-message>
+          <span v-if="counter.total === 0">Drag your files, or click here to add your files</span>
+          <div v-else>
+            <div v-show="counter.total === counter.failed + counter.success" style="width: fit-content" class="px-5 text-left border-4 border-neutral-100 py-5 rounded-md">
+              <div class="flex justify-between">
+                <div class="text-lg text-center pb-8 text-red-dark">{{counter.failed}} file(s) failed to upload.</div>
+                <div class="text-lg text-center pb-8 text-green-default">{{counter.success}} file(s) successfully uploaded.</div>
+              </div>
+              <div class="text-red-dark truncate" v-for="errorMessage in errorMessages" :key="errorMessage">
+                - {{errorMessage}}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <button
@@ -49,7 +57,18 @@
       :disabled="fileCount === 0"
       @click="doUpload"
     >
-      upload
+      <div class="flex justify-center" v-if="counter.total !== counter.failed + counter.success">
+        <div class="flex" style="width: fit-content">
+          <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="white" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Uploading...
+        </div>
+      </div>
+      <div v-else>
+        upload
+      </div>
     </button>
   </div>
   <!-- Template for the preview of files -->
@@ -143,8 +162,15 @@
       const dropzonePreviewDiv = ref<HTMLDivElement | undefined>(undefined);
       const uploading = ref<boolean>(false);
       const doUpload = ref<() => void | undefined>();
+      const open = ref<() => void | undefined>();
       const fileCount = ref<number>(0);
-      const { mutate } = useMutation<PostMediaFileMutation>(PostMediaFileDocument);
+      const { mutate, onDone, onError } = useMutation<PostMediaFileMutation>(PostMediaFileDocument);
+      const errorMessages = ref<Array<String>>([]);
+      const counter = ref<any>({
+        total: 0,
+        success: 0,
+        failed: 0,
+      });
 
       onMounted(async () => {
         if (dropzoneDiv.value && dropzonePreviewDiv) {
@@ -166,6 +192,12 @@
 
           myDropzone.on('addedfile', (value: any) => {
             console.log('aded file: ', value);
+            counter.value = {
+              total: 0,
+              success: 0,
+              failed: 0,
+            };
+            clearErrorMessages();
             updateFileCount();
           });
 
@@ -213,25 +245,46 @@
             },
           );
 
+          onDone((done: any) => {
+            console.log('done: ', done);
+            counter.value.success++;
+          });
+
+          onError((error: any) => {
+            error.graphQLErrors.forEach((graphQLError: any) => {
+              errorMessages.value.push(graphQLError.extensions.response.body);
+            });
+            counter.value.failed++;
+          });
+
+          const clearErrorMessages = (): void => {
+            errorMessages.value = [];
+          };
+
           doUpload.value = () => {
             console.log('Uploading...', myDropzone);
             uploading.value = true;
-
+            counter.value.total = myDropzone.files.length;
             myDropzone.files.forEach((file: any) => {
               mutate({
                 mediaFileInput: { filename: file.upload.filename, metadata: [] },
                 file: file,
               });
             });
+
+            myDropzone.removeAllFiles();
             // myDropzone.processQueue();
           };
         }
       });
 
+      
       return {
+        counter,
         doUpload,
         fileCount,
         dropzoneDiv,
+        errorMessages,
         dropzonePreviewDiv,
       };
     },

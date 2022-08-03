@@ -2,11 +2,8 @@
   <tabs>
     <!-- TAB1 -->
     <tab title="Upload files">
-      <div class="p-3">
+      <div class="p-3 h-full">
         <dropzone v-model:progress="progress" />
-        <div class="text-center mt-5">
-          <dropzone-progress :progress="progress" />
-        </div>
       </div>
     </tab>
 
@@ -36,7 +33,6 @@
   import Tabs from './Tabs.vue';
   import Tab from './Tab.vue';
   import Dropzone from './Dropzone.vue';
-import DropzoneProgress from './DropzoneProgress.vue';
 
   export default defineComponent({
     name: 'UploadModalImport',
@@ -46,7 +42,6 @@ import DropzoneProgress from './DropzoneProgress.vue';
       Tabs,
       Tab,
       Dropzone,
-        DropzoneProgress,
     },
     props: {
       directories: {

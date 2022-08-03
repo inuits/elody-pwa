@@ -87,6 +87,7 @@ createApp(App)
     DefaultApolloClient,
     new ApolloClient({
       link: graphqlErrorInterceptor.concat(
+        //@ts-ignore
         createUploadLink({ uri: config.graphQlLink || '/api/graphql' }),
       ),
       cache: new InMemoryCache(),
