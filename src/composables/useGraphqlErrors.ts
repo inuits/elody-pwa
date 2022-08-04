@@ -1,11 +1,12 @@
 import { ErrorResponse } from '@apollo/client/link/error';
+import useDropzoneHelper from '../composables/useDropzoneHelper';
 
 const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
   const checkForUnauthorized = () => {
     const gqlErrors = _errorResponse.graphQLErrors;
     let authErrors: Array<Boolean | undefined> = [];
     if (gqlErrors) {
-      authErrors = gqlErrors.map((error) => {
+      authErrors = gqlErrors.map((error: any) => {
         if (error.extensions) {
           if (error.extensions?.statusCode === 401) return true;
           if (
@@ -14,6 +15,22 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
             error.extensions?.response.status === 401
           )
             return true;
+        }
+      });
+    }
+    return authErrors.some((errors) => errors);
+  };
+
+  const checkForDuplicateFileUpload = () => {
+    let authErrors: Array<Boolean | undefined> = [];
+    const gqlErrors = _errorResponse.graphQLErrors;
+    if (gqlErrors) {
+      authErrors = gqlErrors.map((graphQLError: any) => {
+        if (graphQLError?.extensions?.response?.status === 409 && graphQLError?.extensions?.response?.body?.includes('Duplicate file')) {
+          const { setDropzoneErrorMessages, increaseFailedCounter } = useDropzoneHelper();
+          setDropzoneErrorMessages(graphQLError.extensions.response.body);
+          increaseFailedCounter();
+          return true;
         }
       });
     }
@@ -42,6 +59,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
   };
 
   return {
+    checkForDuplicateFileUpload,
     checkForUnauthorized,
     logFormattedErrors,
   };

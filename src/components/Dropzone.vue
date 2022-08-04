@@ -23,12 +23,12 @@
         class="inline-block w-9/12 text-center"
       >
         <div class="dz-message"  data-dz-message>
-          <span v-if="counter.total === 0">Drag your files, or click here to add your files</span>
+          <span v-if="total === 0">Drag your files, or click here to add your files</span>
           <div v-else>
-            <div v-show="counter.total === counter.failed + counter.success" style="width: fit-content" class="px-5 text-left border-4 border-neutral-100 py-5 rounded-md">
+            <div v-show="total === failed + success" style="width: fit-content" class="px-5 text-left border-4 border-neutral-100 py-5 rounded-md">
               <div class="flex justify-between">
-                <div class="text-lg text-center pb-8 text-red-dark">{{counter.failed}} file(s) failed to upload.</div>
-                <div class="text-lg text-center pb-8 text-green-default">{{counter.success}} file(s) successfully uploaded.</div>
+                <div class="text-lg text-center pb-8 text-red-dark">{{failed}} file(s) failed to upload.</div>
+                <div class="text-lg text-center pb-8 text-green-default">{{success}} file(s) successfully uploaded.</div>
               </div>
               <div class="text-red-dark truncate" v-for="errorMessage in errorMessages" :key="errorMessage">
                 - {{errorMessage}}
@@ -57,7 +57,7 @@
       :disabled="fileCount === 0"
       @click="doUpload"
     >
-      <div class="flex justify-center" v-if="counter.total !== counter.failed + counter.success">
+      <div class="flex justify-center" v-if="total !== failed + success">
         <div class="flex" style="width: fit-content">
           <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -71,7 +71,6 @@
       </div>
     </button>
   </div>
-  <!-- Template for the preview of files -->
   <div class="hidden">
     <div
       ref="dropzonePreviewDiv"
@@ -142,9 +141,10 @@
 </template>
 
 <script lang="ts">
+  import { PostMediaFileDocument, PostMediaFileMutation } from '@/queries';
+  import useDropzoneHelper from '../composables/useDropzoneHelper';
   import { onMounted, ref, defineComponent, PropType } from 'vue';
   import { useMutation } from '@vue/apollo-composable';
-  import { PostMediaFileDocument, PostMediaFileMutation } from '@/queries';
   import Dropzone from 'dropzone';
 
   export default defineComponent({
@@ -158,31 +158,17 @@
     },
     emits: ['update:progress'],
     setup(props, { emit }) {
-      const dropzoneDiv = ref<HTMLDivElement | undefined>(undefined);
-      const dropzonePreviewDiv = ref<HTMLDivElement | undefined>(undefined);
-      const uploading = ref<boolean>(false);
-      const doUpload = ref<() => void | undefined>();
-      const open = ref<() => void | undefined>();
-      const fileCount = ref<number>(0);
+      const { errorMessages, total, failed, success, increaseSuccessCounter, clearDropzoneErrorMessages, clearDropzoneCounters, getDropzoneSettings, increaseFailedCounter, setTotalCounter } = useDropzoneHelper();
       const { mutate, onDone, onError } = useMutation<PostMediaFileMutation>(PostMediaFileDocument);
-      const errorMessages = ref<Array<String>>([]);
-      const counter = ref<any>({
-        total: 0,
-        success: 0,
-        failed: 0,
-      });
+      const dropzonePreviewDiv = ref<HTMLDivElement | undefined>(undefined);
+      const dropzoneDiv = ref<HTMLDivElement | undefined>(undefined);
+      const doUpload = ref<() => void | undefined>();
+      const uploading = ref<boolean>(false);
+      const fileCount = ref<number>(0);
 
       onMounted(async () => {
         if (dropzoneDiv.value && dropzonePreviewDiv) {
-          const myDropzone = new Dropzone(dropzoneDiv.value, {
-            url: '/upload',
-            autoProcessQueue: false,
-            acceptedFiles: '.jpg',
-            previewTemplate: dropzonePreviewDiv.value?.outerHTML,
-            uploadMultiple: true,
-            parallelUploads: 99,
-            maxFiles: 99,
-          });
+          const myDropzone = new Dropzone(dropzoneDiv.value, getDropzoneSettings(dropzonePreviewDiv));
 
           const updateFileCount = () => {
             if (myDropzone) {
@@ -190,102 +176,43 @@
             }
           };
 
-          myDropzone.on('addedfile', (value: any) => {
-            console.log('aded file: ', value);
-            counter.value = {
-              total: 0,
-              success: 0,
-              failed: 0,
-            };
-            clearErrorMessages();
-            updateFileCount();
-          });
-
           myDropzone.on('removedfile', (value: any) => {
             updateFileCount();
           });
 
-          myDropzone.on('totaluploadprogress', (progressDropzone: any) => {
-            const progress: any = {
-              status: 'inProgress',
-              progress: Math.round(progressDropzone),
-              successFiles: 0,
-              errorFiles: 0,
-            };
-            uploading.value && emit('update:progress', progress);
+          myDropzone.on('addedfile', (value: any) => {
+            clearDropzoneCounters();
+            clearDropzoneErrorMessages();
+            updateFileCount();
           });
 
-          myDropzone.on(
-            'completemultiple',
-            (files: { status: 'error' | 'success' }[]) => {
-              console.log('files: ', files);
-              uploading.value = false;
-              // myDropzone.removeAllFiles();
-
-              const progress: any = {
-                status: 'success',
-                progress: 0,
-                successFiles: 0,
-                errorFiles: 0,
-              };
-
-              files.forEach((file: { status: 'error' | 'success' }) => {
-                if (file.status === 'error') {
-                  progress.status = 'hasError';
-                  progress.errorFiles = progress.errorFiles + 1;
-                }
-
-                if (file.status === 'success') {
-                  progress.status = 'success';
-                  progress.successFiles = progress.successFiles + 1;
-                }
-              });
-              console.log('progress: ', progress);
-              emit('update:progress', progress);
-            },
-          );
-
-          onDone((done: any) => {
-            console.log('done: ', done);
-            counter.value.success++;
+          onDone(() => {
+            increaseSuccessCounter();
           });
-
-          onError((error: any) => {
-            error.graphQLErrors.forEach((graphQLError: any) => {
-              errorMessages.value.push(graphQLError.extensions.response.body);
-            });
-            counter.value.failed++;
-          });
-
-          const clearErrorMessages = (): void => {
-            errorMessages.value = [];
-          };
 
           doUpload.value = () => {
-            console.log('Uploading...', myDropzone);
             uploading.value = true;
-            counter.value.total = myDropzone.files.length;
+            setTotalCounter(myDropzone.files.length);
             myDropzone.files.forEach((file: any) => {
               mutate({
                 mediaFileInput: { filename: file.upload.filename, metadata: [] },
                 file: file,
               });
             });
-
             myDropzone.removeAllFiles();
-            // myDropzone.processQueue();
           };
         }
       });
 
-      
       return {
-        counter,
-        doUpload,
-        fileCount,
-        dropzoneDiv,
-        errorMessages,
         dropzonePreviewDiv,
+        errorMessages,
+        dropzoneDiv,
+        fileCount,
+        doUpload,
+        success,
+        failed,
+        total,
       };
     },
   });
