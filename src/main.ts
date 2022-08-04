@@ -46,9 +46,16 @@ const router = createRouter({
 const authCode = new URLSearchParams(window.location.search).get('code');
 auth.authCode = authCode;
 
-const graphqlErrorInterceptor = onError((error) => {
+const graphqlErrorInterceptor = onError((error: any) => {
   const errorHandler = useGraphqlErrors(error);
   errorHandler.logFormattedErrors();
+  if (errorHandler.checkForDuplicateFileUpload() === true) {
+    console.log('TRUE OUTCOME');
+    new Promise(async (resolve) => {
+      resolve;
+    });
+  }
+
   if (errorHandler.checkForUnauthorized() === true) {
     new Promise(async (resolve, reject) => {
       await fetch('/api/logout');
