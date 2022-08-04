@@ -4,20 +4,33 @@
     class="metainfo absolute bg-neutral-0 z-20 mx-4 mt-7 p-4 shadow-sm bottom-0"
   >
     <h3 class="text-sm text-neutral-700 font-semibold">Mediainfo</h3>
-    <div v-for="item in metaData" :key="item.key" class="flex flex-col mb-2 mt-2">
-      <div class="label">{{ item.key }}</div>
-      <div v-if="item.value" class="value">
-        {{ item.value }}
+    <div v-if="!isEdit">
+      <div v-for="item in metaData" :key="item.key" class="flex flex-col mb-2 mt-2">
+        <div class="label">{{ item.key }}</div>
+        <div v-if="item.value" class="value">
+          {{ item.value }}
+        </div>
       </div>
     </div>
+    <meta-edit-media
+      v-else-if="form?.Form"
+      v-model="metadataComputed"
+      :form="form?.Form"
+    />
   </div>
 </template>
 <script lang="ts">
-  import { MediaFileMetadata } from '@/queries';
-  import { defineComponent, PropType } from 'vue';
+  import { GetFormsDocument, MediaFileMetadata } from '@/queries';
+  import { useQuery } from '@vue/apollo-composable';
+  import { defineComponent, PropType, ref } from 'vue';
+  import { useEditMode } from '../EditToggle.vue';
+  import MetaEditMedia from '@/components/MetaEditMedia.vue';
+
+  const { isEdit } = useEditMode();
 
   export default defineComponent({
     name: 'MediaInfo',
+    components: { MetaEditMedia },
     props: {
       metaData: {
         type: Array as PropType<MediaFileMetadata[]>,
@@ -26,7 +39,13 @@
       },
     },
     setup(props) {
-      return { props };
+      const metadataComputed = ref<MediaFileMetadata[]>(props.metaData);
+
+      const { result: form } = useQuery(GetFormsDocument, {
+        type: 'media',
+      });
+
+      return { isEdit, metadataComputed, form };
     },
   });
 </script>

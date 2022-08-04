@@ -245,6 +245,7 @@ enum InputFieldTypes {
   text
   number
   boolean
+  dropdown
 }
 
 enum validation {
@@ -258,7 +259,13 @@ type MetadataField {
   type: InputFieldTypes!
   order: Int
   active: Boolean
-  validation: validation
+  validation: validation,
+  options: [MetadataFieldOption]
+}
+
+type MetadataFieldOption {
+  label: String, 
+  value: String!
 }
 
 type RelationField {
@@ -348,6 +355,7 @@ type Mutation {
   deleteData(id: String!, path: deletePaths!): String
   createEntity(entity: EntityInput!): Entity
   postMediaFile(mediaFileInput: MediaFileInput!, file: Upload!): MediaFile
+  patchMediaFileMetadata(MediafileId: String!, MediaFileMetadata: [MediaFileMetadataInput]!): MediaFile
   uploadFile(id: String!, file: Upload!): String
 }
 

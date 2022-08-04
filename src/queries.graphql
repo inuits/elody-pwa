@@ -385,6 +385,13 @@ mutation postMediaFile($mediaFileInput: MediaFileInput!, $file: Upload!) {
   }
 }
 
+mutation patchMediaFileMetadata($mediafileId: String!, $mediaFileInput: [MediaFileMetadataInput]!) {
+  patchMediaFileMetadata(MediafileId: $mediafileId, MediaFileMetadata: $mediaFileInput) {
+    _id
+    filename
+  }
+}
+
 mutation editMetadata($id: String!, $metadata: [MetadataInput!]!) {
   replaceMetadata(id: $id, metadata: $metadata) {
     key
@@ -417,6 +424,10 @@ query GetForms($type: String!) {
         label
         key
         type
+        options {
+          value
+          label
+        }
       }
       ... on RelationField {
         label
