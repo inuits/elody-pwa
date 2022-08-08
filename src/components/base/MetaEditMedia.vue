@@ -27,7 +27,7 @@
 
   import { useMutation } from '@vue/apollo-composable';
   import { useEditMode } from '../EditToggle.vue';
-  import MetaEditDataField from './MetaEditDataField.vue';
+  import MetaEditDataField from '../MetaEditDataField.vue';
   import useFormHelper, { IntialValues } from '@/composables/useFormHelpers';
 
   export default defineComponent({

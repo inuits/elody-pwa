@@ -24,7 +24,7 @@
   import { useQuery } from '@vue/apollo-composable';
   import { defineComponent, PropType, ref } from 'vue';
   import { useEditMode } from '../EditToggle.vue';
-  import MetaEditMedia from '@/components/MetaEditMedia.vue';
+  import MetaEditMedia from '@/components/base/MetaEditMedia.vue';
 
   const { isEdit } = useEditMode();
 
