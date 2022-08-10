@@ -17,7 +17,7 @@
     </div>
     <p class="w-2/6 mx-4 flex items-center">{{ job.job_info }}</p>
     <Label :name="state.name" :color="state.color" />
-    <div class="flex-grow"></div>
+    <div class="flex-grow p-10">{{ job.error_message ? job.error_message : '' }}</div>
     <BaseButton
       v-if="job.asset_id"
       label="view"
