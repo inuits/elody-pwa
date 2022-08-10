@@ -1,8 +1,13 @@
 <template>
   <div class="w-full my-2" v-if="inputType == 'dropdown'">
-    <label :for="field.key">{{ field.label }}</label>
+    <label class="label" :for="field.key">{{ field.label }}</label>
     <select v-model="value" class="w-full" :name="field.key" :id="field.key">
-      <option v-for="option in field.options" :key="option.label" :value="option.label">
+      <option
+        class="value"
+        v-for="option in field.options"
+        :key="option.label"
+        :value="option.label"
+      >
         {{ option.label }}
       </option>
     </select>
@@ -71,3 +76,19 @@
     },
   });
 </script>
+<style lang="postcss" scoped>
+  .label {
+    @apply rounded font-body text-xs text-neutral-60;
+  }
+  .value {
+    @apply rounded font-body text-sm text-neutral-700 mt-0.5;
+  }
+  .label.loading,
+  .value.loading {
+    @apply bg-neutral-20 text-neutral-20;
+  }
+
+  .metainfo {
+    bottom: 1rem;
+  }
+</style>
