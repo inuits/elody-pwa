@@ -7,8 +7,8 @@
       >
         <MetaEditDataField
           v-if="field && field.__typename === 'MetadataField'"
-          :field-key="field.key"
-          :label="field.label"
+          :field="field"
+          :currentValue="modelValue.find((value) => value.key === field.key)"
         />
       </div>
     </form>

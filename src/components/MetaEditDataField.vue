@@ -1,30 +1,48 @@
 <template>
-  <InputField v-model="value" :label="label === undefined ? fieldKey : label" :type="inputType" />
+  <div class="w-full my-2" v-if="inputType == 'dropdown'">
+    <label :for="field.key">{{ field.label }}</label>
+    <select v-model="value" class="w-full" :name="field.key" :id="field.key">
+      <option v-for="option in field.options" :key="option.label" :value="option.label">
+        {{ option.label }}
+      </option>
+    </select>
+  </div>
+  <div class="w-full" v-else>
+    <InputField
+      v-model="value"
+      :label="field.label || field.key"
+      :type="field.type"
+      :placeholder="currentValue.value"
+    />
+  </div>
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref, PropType } from 'vue';
+  import { defineComponent, ref, PropType, Prop, watch } from 'vue';
   import InputField from '@/components/base/InputField.vue';
   import { useField } from 'vee-validate';
+  import { MetadataAndRelation, MetadataField } from '@/queries';
 
   export default defineComponent({
     name: 'MetaEditDataField',
     components: { InputField },
     props: {
-      fieldKey: { type: String, required: true },
-      label: {
-        type: String,
-        required: false,
-        default: undefined,
+      field: {
+        type: Object as PropType<MetadataField>,
+        required: true,
       },
-      type: { type: String, required: false, default: 'text'}
+      currentValue: {
+        type: Object as PropType<MetadataAndRelation>,
+        required: true,
+      },
     },
     setup: (props) => {
-      const { value } = useField<string>(props.fieldKey, {});
+      const { value } = useField<string>(props.field.key, {});
       const inputType = ref<string>('text');
 
       const setInputType = () => {
-        switch(props.type) { 
+        value.value = props.currentValue.value;
+        switch (props.field.type) {
           case 'text': {
             inputType.value = 'text';
             break;
@@ -33,18 +51,22 @@
             inputType.value = 'checkbox';
             break;
           }
+          case 'dropdown': {
+            inputType.value = 'dropdown';
+            break;
+          }
           default: {
             inputType.value = 'text';
             break;
-          } 
-        } 
+          }
+        }
       };
 
       setInputType();
 
       return {
         value,
-        inputType
+        inputType,
       };
     },
   });
