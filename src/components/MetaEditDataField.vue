@@ -1,63 +1,59 @@
 <template>
-  <div class="w-full my-2" v-if="inputType == 'dropdown'">
-    <label class="label" :for="field.key">{{ field.label }}</label>
-    <select v-model="value" class="w-full" :name="field.key" :id="field.key">
-      <option
-        class="value"
-        v-for="option in field.options"
-        :key="option.label"
-        :value="option.label"
-      >
-        {{ option.label }}
-      </option>
-    </select>
-  </div>
-  <div class="w-full" v-else>
-    <InputField
-      v-model="value"
-      :label="field.label || field.key"
-      :type="field.type"
-      :placeholder="currentValue.value"
-    />
-  </div>
+  <InputField
+    v-if="type !== 'dropdown'"
+    v-model="value"
+    :label="label === undefined ? fieldKey : label"
+  />
+  <Dropdown
+    v-else
+    v-model="value"
+    :label="label === undefined ? fieldKey : label"
+    :options="stringifyOption(options)"
+  />
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref, PropType, Prop, watch } from 'vue';
+  import { defineComponent, ref, PropType } from 'vue';
   import InputField from '@/components/base/InputField.vue';
+  import Dropdown from '@/components/base/Dropdown.vue';
   import { useField } from 'vee-validate';
-  import { MetadataAndRelation, MetadataField } from '@/queries';
+  import { MetadataFieldOption } from '@/queries';
 
   export default defineComponent({
     name: 'MetaEditDataField',
-    components: { InputField },
+    components: { InputField, Dropdown },
     props: {
-      field: {
-        type: Object as PropType<MetadataField>,
-        required: true,
+      fieldKey: { type: String, required: true },
+      label: {
+        type: String,
+        required: false,
+        default: undefined,
       },
-      currentValue: {
-        type: Object as PropType<MetadataAndRelation>,
-        required: true,
-      },
+      type: { type: String, required: false, default: 'text' },
+      options: { type: Array, required: false, default: () => [] },
     },
     setup: (props) => {
-      const { value } = useField<string>(props.field.key, {});
+      const { value } = useField<string>(props.fieldKey, {});
       const inputType = ref<string>('text');
 
+      const stringifyOption = (input: MetadataFieldOption[]) => {
+        let returnArray: string[] = [];
+
+        input.forEach((metaDataFieldObject: MetadataFieldOption) => {
+          returnArray.push(metaDataFieldObject.value);
+        });
+
+        return returnArray;
+      };
+
       const setInputType = () => {
-        value.value = props.currentValue.value;
-        switch (props.field.type) {
+        switch (props.type) {
           case 'text': {
             inputType.value = 'text';
             break;
           }
           case 'boolean': {
             inputType.value = 'checkbox';
-            break;
-          }
-          case 'dropdown': {
-            inputType.value = 'dropdown';
             break;
           }
           default: {
@@ -72,23 +68,8 @@
       return {
         value,
         inputType,
+        stringifyOption,
       };
     },
   });
 </script>
-<style lang="postcss" scoped>
-  .label {
-    @apply rounded font-body text-xs text-neutral-60;
-  }
-  .value {
-    @apply rounded font-body text-sm text-neutral-700 mt-0.5;
-  }
-  .label.loading,
-  .value.loading {
-    @apply bg-neutral-20 text-neutral-20;
-  }
-
-  .metainfo {
-    bottom: 1rem;
-  }
-</style>

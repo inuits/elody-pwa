@@ -7,8 +7,10 @@
       >
         <MetaEditDataField
           v-if="field && field.__typename === 'MetadataField'"
-          :field="field"
-          :currentValue="modelValue.find((value) => value.key === field.key)"
+          :field-key="field.key"
+          :label="field.label"
+          :options="field.type === 'dropdown' ? field.options : []"
+          :type="field.type"
         />
       </div>
     </form>
@@ -55,7 +57,6 @@
       //onDone((value) => {
       //   emit('update:modelValue', value.data?.patchMediaFileMetadata?.metadata);
       //});
-
       const {} = useForm<IntialValues>({
         initialValues: buildInitialValues(props.modelValue),
       });
