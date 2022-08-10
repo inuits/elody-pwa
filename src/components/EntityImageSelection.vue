@@ -76,7 +76,7 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, PropType, ref, watch } from 'vue';
+  import { defineComponent, onMounted, PropType, ref, watch } from 'vue';
   import { useMutation, useQuery } from '@vue/apollo-composable';
   import {
     MediaFile,
@@ -89,6 +89,22 @@
   import { useEditMode } from '@/components/EditToggle.vue';
 
   export const toBeDeleted = ref<string[]>([]);
+
+  type ImageSelectionState = {
+    selectedMediafileId: String;
+  };
+
+  const imageSelectionState = ref<ImageSelectionState>({
+    selectedMediafileId: '',
+  });
+
+  export const useEntityImageSelector = () => {
+    const updateSelectedEntityImage = (mediafileId: string) => {
+      imageSelectionState.value.selectedMediafileId = mediafileId;
+    };
+
+    return { imageSelectionState, updateSelectedEntityImage };
+  };
 
   export default defineComponent({
     name: 'EntityImageSelection',
@@ -109,7 +125,9 @@
     },
     emits: ['update:selectedImage'],
     setup(props, { emit }) {
+      const { updateSelectedEntityImage } = useEntityImageSelector();
       const selectImage = (mediafile: MediaFile) => {
+        updateSelectedEntityImage(mediafile._id);
         mediafile && emit('update:selectedImage', mediafile);
       };
 
@@ -124,6 +142,10 @@
           await mutate({ id: parsedId, path: DeletePaths.Mediafiles });
         });
       };
+
+      onMounted(() => {
+        updateSelectedEntityImage(props.selectedImage?._id || '');
+      });
 
       return {
         selectImage,
