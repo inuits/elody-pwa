@@ -127,7 +127,7 @@
     setup(props, { emit }) {
       const { updateSelectedEntityImage } = useEntityImageSelector();
       const selectImage = (mediafile: MediaFile) => {
-        updateSelectedEntityImage(mediafile._id);
+        updateSelectedEntityImage(mediafile._id.replace('mediafiles/', ''));
         mediafile && emit('update:selectedImage', mediafile);
       };
 
@@ -144,7 +144,9 @@
       };
 
       onMounted(() => {
-        updateSelectedEntityImage(props.selectedImage?._id || '');
+        updateSelectedEntityImage(
+          props.selectedImage?._id.replace('mediafiles/', '') || '',
+        );
       });
 
       return {
