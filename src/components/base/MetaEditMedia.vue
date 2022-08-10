@@ -21,6 +21,7 @@
     MediaFileMetadata,
     PatchMediaFileMetadataMutation,
     PatchMediaFileMetadataDocument,
+    MetadataAndRelation,
   } from '@/queries';
   import { defineComponent, PropType } from 'vue';
   import { useForm, useSubmitForm } from 'vee-validate';
@@ -35,8 +36,9 @@
     components: { MetaEditDataField },
     props: {
       mediaFileId: { type: String, required: true },
-      modelValue: { type: Array as PropType<MediaFileMetadata[]>, required: true },
+      modelValue: { type: Array as PropType<MetadataAndRelation[]>, required: true },
       form: { type: Object as PropType<Form>, required: true },
+      entityTitle: { type: String, required: true },
     },
     emits: ['update:modelValue'],
     setup(props, { emit }) {

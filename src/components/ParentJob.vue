@@ -110,7 +110,7 @@
       const isCollapsed = ref<Boolean>(true);
       const fetchingSubJobs = ref<Boolean>(false);
       const { result, fetchMore, loading } = useQuery(GetJobDocument, {
-        id: props.job._key,
+        id: props.job._key || '',
       });
       const subjobLimit = ref<number>(10);
 
@@ -126,7 +126,7 @@
       const updateSubJobs = () => {
         fetchMore({
           variables: {
-            id: props.job._key,
+            id: props.job._key || '',
           },
           updateQuery: (prevResult, { fetchMoreResult }) => {
             fetchingSubJobs.value = false;
