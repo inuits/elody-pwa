@@ -231,6 +231,7 @@ type Job {
   _key: String
   _rev: String
   sub_jobs: [Job]
+  error_message: String
 }
 
 type JobsResults {
@@ -259,12 +260,12 @@ type MetadataField {
   type: InputFieldTypes!
   order: Int
   active: Boolean
-  validation: validation
+  validation: validation,
   options: [MetadataFieldOption]
 }
 
 type MetadataFieldOption {
-  label: String
+  label: String, 
   value: String!
 }
 
@@ -355,10 +356,7 @@ type Mutation {
   deleteData(id: String!, path: deletePaths!): String
   createEntity(entity: EntityInput!): Entity
   postMediaFile(mediaFileInput: MediaFileInput!, file: Upload!): MediaFile
-  patchMediaFileMetadata(
-    MediafileId: String!
-    MediaFileMetadata: [MediaFileMetadataInput]!
-  ): MediaFile
+  patchMediaFileMetadata(MediafileId: String!, MediaFileMetadata: [MediaFileMetadataInput]!): MediaFile
   uploadFile(id: String!, file: Upload!): String
 }
 
@@ -382,7 +380,7 @@ type MediaFilePostReturn {
 }
 
 type File {
-  filename: String!
-  mimetype: String!
-  encoding: String!
-}
+    filename: String!
+    mimetype: String!
+    encoding: String!
+  }

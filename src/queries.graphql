@@ -322,6 +322,7 @@ fragment job on Job {
   _id
   _key
   _rev
+  error_message
 }
 
 fragment jobWithSubJobs on Job {
