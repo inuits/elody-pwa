@@ -29,7 +29,7 @@
     ReplaceRelationsAndMetaDataMutation,
     ReplaceRelationsAndMetaDataMutationVariables,
   } from '@/queries';
-  import { defineComponent, PropType, ref } from 'vue';
+  import { defineComponent, Prop, PropType, ref } from 'vue';
   import { useForm, useSubmitForm } from 'vee-validate';
 
   import { useMutation } from '@vue/apollo-composable';
