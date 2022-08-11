@@ -1,14 +1,16 @@
 <template>
   <InputField
-    v-if="type !== 'dropdown'"
+    v-if="field.type !== 'dropdown'"
     v-model="value"
-    :label="label === undefined ? fieldKey : label"
+    :label="field.label === undefined ? field.key : field.label"
+    :isDisabled="field.active === false ? true : false"
   />
   <Dropdown
     v-else
     v-model="value"
-    :label="label === undefined ? fieldKey : label"
-    :options="stringifyOption(options)"
+    :label="field.label === undefined ? field.key : field.label"
+    :options="stringifyOption(field.options)"
+    :isDisabled="field.active === false ? true : false"
   />
 </template>
 
@@ -17,23 +19,19 @@
   import InputField from '@/components/base/InputField.vue';
   import Dropdown from '@/components/base/Dropdown.vue';
   import { useField } from 'vee-validate';
-  import { MetadataFieldOption } from '@/queries';
+  import { MetadataField, MetadataFieldOption } from '@/queries';
 
   export default defineComponent({
     name: 'MetaEditDataField',
     components: { InputField, Dropdown },
     props: {
-      fieldKey: { type: String, required: true },
-      label: {
-        type: String,
-        required: false,
-        default: undefined,
+      field: {
+        type: Object as PropType<MetadataField>,
+        required: true,
       },
-      type: { type: String, required: false, default: 'text' },
-      options: { type: Array, required: false, default: () => [] },
     },
     setup: (props) => {
-      const { value } = useField<string>(props.fieldKey, {});
+      const { value } = useField<string>(props.field.key, {});
       const inputType = ref<string>('text');
 
       const stringifyOption = (input: MetadataFieldOption[]) => {
@@ -47,7 +45,7 @@
       };
 
       const setInputType = () => {
-        switch (props.type) {
+        switch (props.field.type) {
           case 'text': {
             inputType.value = 'text';
             break;

@@ -1,7 +1,15 @@
 <template>
   <label class="block w-full">
-    <span v-if="label" :class="[`ml-1 text-${labelColor} text-sm`]">{{ label }}</span>
-    <select v-model="selectedItem">
+    <span
+      v-if="label"
+      :class="[`ml-1 text-${labelColor} text-sm ${isDisabled ? 'opacity-50' : ''}`]"
+      >{{ label }}</span
+    >
+    <select
+      :class="isDisabled ? 'opacity-40 cursor-not-allowed' : ''"
+      v-model="selectedItem"
+      v-bind:disabled="isDisabled"
+    >
       <option v-for="option in options" :key="option" :value="option">
         {{ option }}
       </option>
@@ -18,6 +26,7 @@
     props: {
       label: { type: String, default: '' },
       options: { type: Array, required: true },
+      isDisabled: { type: Boolean, required: false },
       modelValue: { type: String, default: undefined },
       bgColor: {
         type: String,
@@ -32,6 +41,7 @@
     setup(props, { emit }) {
       const selectedItem = ref(props.modelValue);
       watch(selectedItem, (value) => emit('update:modelValue', value));
+      console.log(props.isDisabled);
       return { Unicons, selectedItem };
     },
   });
@@ -39,7 +49,7 @@
 
 <style lang="postcss" scoped>
   select {
-    @apply block mr-4 p-2 w-48 min-w-0;
+    @apply block mr-4 p-2 w-48 min-w-0 cursor-pointer;
     @apply border border-neutral-30;
     @apply text-neutral-700 text-sm;
     @apply rounded bg-neutral-20;

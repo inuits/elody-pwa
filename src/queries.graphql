@@ -498,6 +498,7 @@ query GetForms($type: String!) {
         label
         key
         type
+        active
         options {
           value
           label
