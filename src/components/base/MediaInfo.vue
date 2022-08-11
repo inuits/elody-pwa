@@ -22,7 +22,7 @@
 <script lang="ts">
   import { GetFormsDocument, MediaFileMetadata } from '@/queries';
   import { useQuery } from '@vue/apollo-composable';
-  import { defineComponent, PropType, ref } from 'vue';
+  import { defineComponent, PropType, ref, watch } from 'vue';
   import { useEditMode } from '../EditToggle.vue';
   import MetaEditMedia from '@/components/base/MetaEditMedia.vue';
 
@@ -40,6 +40,13 @@
     },
     setup(props) {
       const metadataComputed = ref<MediaFileMetadata[]>(props.metaData);
+
+      watch(
+        () => props.metaData,
+        (value) => {
+          metadataComputed.value = value;
+        },
+      );
 
       const { result: form } = useQuery(GetFormsDocument, {
         type: 'media',

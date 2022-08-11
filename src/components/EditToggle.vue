@@ -31,12 +31,13 @@
     const showEditToggle = () => (isEditToggleVisible.value = true);
     const hideEditToggle = () => (isEditToggleVisible.value = false);
     const Router = useRouter();
+    const saveEvent = new Event('save');
     const save = () => {
       saveCallbacks.value.forEach((callback: callback) => {
         callback().then(() => {
           if (isEdit.value) {
             disableEditMode();
-            Router.go(0);
+            document.dispatchEvent(saveEvent);
           }
         });
       });

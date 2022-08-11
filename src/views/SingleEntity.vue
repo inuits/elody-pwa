@@ -138,9 +138,9 @@
           queryResult.data.Entity?.media?.mediafiles?.length > 0
         ) {
           mediafiles.value = [];
-          queryResult.data.Entity.media.mediafiles?.forEach((mediafile) => {
+          queryResult.data.Entity.media.mediafiles?.forEach((mediafile, index) => {
             if (mediafile?.__typename === 'MediaFile') {
-              if (mediafileSelectionState.value.selectedMediafile === undefined) {
+              if (index === 0) {
                 mediafileSelectionState.value.selectedMediafile = mediafile;
               }
               mediafiles.value.push(mediafile);
@@ -155,6 +155,10 @@
         }
 
         loading.value = false;
+      });
+
+      document.addEventListener('save', () => {
+        refetch();
       });
 
       return {
