@@ -6,9 +6,9 @@
       >{{ label }}</span
     >
     <select
-      :class="isDisabled ? 'opacity-40 cursor-not-allowed' : ''"
       v-model="selectedItem"
-      v-bind:disabled="isDisabled"
+      :class="isDisabled ? 'opacity-40 cursor-not-allowed' : ''"
+      :disabled="isDisabled"
     >
       <option v-for="option in options" :key="option" :value="option">
         {{ option }}
