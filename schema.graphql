@@ -63,6 +63,24 @@ type boxEntity implements Entity {
   form: Form
 }
 
+type person implements Entity {
+  id: String!
+  uuid: String!
+  type: String!
+  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
+  media: Media
+  form: Form
+}
+
+type museum implements Entity {
+  id: String!
+  uuid: String!
+  type: String!
+  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
+  media: Media
+  form: Form
+}
+
 type RelationMetaData {
   key: String!
   value: String!
@@ -260,12 +278,12 @@ type MetadataField {
   type: InputFieldTypes!
   order: Int
   active: Boolean
-  validation: validation,
+  validation: validation
   options: [MetadataFieldOption]
 }
 
 type MetadataFieldOption {
-  label: String, 
+  label: String
   value: String!
 }
 
@@ -345,6 +363,7 @@ enum Entitytyping {
   story
   frame
   box
+  asset
 }
 
 #Mutations
@@ -356,7 +375,10 @@ type Mutation {
   deleteData(id: String!, path: deletePaths!): String
   createEntity(entity: EntityInput!): Entity
   postMediaFile(mediaFileInput: MediaFileInput!, file: Upload!): MediaFile
-  patchMediaFileMetadata(MediafileId: String!, MediaFileMetadata: [MediaFileMetadataInput]!): MediaFile
+  patchMediaFileMetadata(
+    MediafileId: String!
+    MediaFileMetadata: [MediaFileMetadataInput]!
+  ): MediaFile
   uploadFile(id: String!, file: Upload!): String
 }
 
@@ -380,7 +402,7 @@ type MediaFilePostReturn {
 }
 
 type File {
-    filename: String!
-    mimetype: String!
-    encoding: String!
-  }
+  filename: String!
+  mimetype: String!
+  encoding: String!
+}
