@@ -32,7 +32,7 @@
   import { useEditMode } from '../EditToggle.vue';
   import MetaEditDataField from '../MetaEditDataField.vue';
   import useFormHelper, { IntialValues } from '@/composables/useFormHelpers';
-  import { useEntityImageSelector } from '../EntityImageSelection.vue';
+  import { useEntityMediafileSelector } from '../EntityImageSelection.vue';
 
   export default defineComponent({
     name: 'MetaEditMedia',
@@ -45,7 +45,7 @@
     emits: ['update:modelValue'],
     setup(props, { emit }) {
       const { addSaveCallback } = useEditMode();
-      const { imageSelectionState } = useEntityImageSelector();
+      const { mediafileSelectionState } = useEntityMediafileSelector();
       const { buildInitialValues, serialzeFormToInput } = useFormHelper(
         props.form,
         props.entityTitle,
@@ -64,7 +64,10 @@
       addSaveCallback(
         useSubmitForm<IntialValues>(async (values) => {
           await mutate({
-            mediafileId: imageSelectionState.value.selectedMediafileId,
+            mediafileId: mediafileSelectionState.value.selectedMediafile?._id.replace(
+              'mediafiles/',
+              '',
+            ),
             mediaFileInput: serialzeFormToInput(values).Metadata,
           });
         }),
