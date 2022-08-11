@@ -139,11 +139,9 @@
         ) {
           mediafiles.value = [];
           queryResult.data.Entity.media.mediafiles?.forEach((mediafile) => {
-            console.log(mediafile);
             if (mediafile?.__typename === 'MediaFile') {
               if (mediafileSelectionState.value.selectedMediafile === undefined) {
                 mediafileSelectionState.value.selectedMediafile = mediafile;
-                console.log(mediafileSelectionState.value.selectedMediafile);
               }
               mediafiles.value.push(mediafile);
             }
