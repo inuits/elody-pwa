@@ -9,6 +9,8 @@
           v-if="field && field.__typename === 'MetadataField'"
           :field-key="field.key"
           :label="field.label"
+          :options="field.type === 'dropdown' ? field.options : []"
+          :type="field.type"
         />
         <MetaEditRelationField
           v-else-if="field && field.__typename === 'RelationField'"
