@@ -106,14 +106,17 @@
     setup() {
       const { pageTitle } = usePageTitle();
       const route = useRoute();
+      const router = useRouter();
 
-      const { editMode, addSaveCallback } = useEditMode();
+      const { editMode, disableEditMode } = useEditMode();
 
       const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 
-      const deleteAsset = () => {
+      const deleteAsset = async () => {
         const id = asString(route.params['id']);
-        mutate({ id, path: DeletePaths.Entities });
+        await mutate({ id, path: DeletePaths.Entities });
+        disableEditMode();
+        router.push({ name: 'Home' });
       };
 
       const confirmState = ref<'hidden' | 'show'>('hidden');
