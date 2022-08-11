@@ -90,20 +90,20 @@
 
   export const toBeDeleted = ref<string[]>([]);
 
-  type ImageSelectionState = {
-    selectedMediafileId: String;
+  type MediafileSelectionState = {
+    selectedMediafile: MediaFile | undefined;
   };
 
-  const imageSelectionState = ref<ImageSelectionState>({
-    selectedMediafileId: '',
+  const mediafileSelectionState = ref<MediafileSelectionState>({
+    selectedMediafile: undefined,
   });
 
-  export const useEntityImageSelector = () => {
-    const updateSelectedEntityImage = (mediafileId: string) => {
-      imageSelectionState.value.selectedMediafileId = mediafileId;
+  export const useEntityMediafileSelector = () => {
+    const updateSelectedEntityMediafile = (mediafile: MediaFile) => {
+      mediafileSelectionState.value.selectedMediafile = mediafile;
     };
 
-    return { imageSelectionState, updateSelectedEntityImage };
+    return { mediafileSelectionState, updateSelectedEntityMediafile };
   };
 
   export default defineComponent({
@@ -123,12 +123,10 @@
         default: false,
       },
     },
-    emits: ['update:selectedImage'],
-    setup(props, { emit }) {
-      const { updateSelectedEntityImage } = useEntityImageSelector();
+    setup(props) {
+      const { updateSelectedEntityMediafile } = useEntityMediafileSelector();
       const selectImage = (mediafile: MediaFile) => {
-        updateSelectedEntityImage(mediafile._id.replace('mediafiles/', ''));
-        mediafile && emit('update:selectedImage', mediafile);
+        updateSelectedEntityMediafile(mediafile);
       };
 
       const { editMode, addSaveCallback } = useEditMode();
@@ -144,9 +142,9 @@
       };
 
       onMounted(() => {
-        updateSelectedEntityImage(
-          props.selectedImage?._id.replace('mediafiles/', '') || '',
-        );
+        if (props.selectedImage) {
+          updateSelectedEntityMediafile(props.selectedImage);
+        }
       });
 
       return {

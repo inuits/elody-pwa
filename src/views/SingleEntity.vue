@@ -5,10 +5,10 @@
   >
     <entity-image-selection
       v-show="loading || mediafiles.length > 0"
-      v-model:selectedImage="selectedMediafile"
       class="w-40"
       :loading="loading"
       :mediafiles="mediafiles"
+      v-model:selectedImage="mediafileSelectionState.selectedMediafile"
     />
     <div
       v-show="!loading && mediafiles.length > 0"
@@ -17,35 +17,35 @@
       <IIIFViewer
         v-if="
           !loading &&
-          selectedMediafile !== null &&
-          selectedMediafile.mimetype.includes('image')
+          mediafileSelectionState.selectedMediafile !== undefined &&
+          mediafileSelectionState.selectedMediafile.mimetype.includes('image')
         "
-        :image-url="selectedMediafile.filename"
-        :image-meta-data="selectedMediafile.metadata"
+        :image-url="mediafileSelectionState.selectedMediafile.filename"
+        :image-meta-data="mediafileSelectionState.selectedMediafile.metadata"
       />
       <VideoPlayer
         v-if="
           !loading &&
-          selectedMediafile !== null &&
-          selectedMediafile.mimetype.includes('video')
+          mediafileSelectionState.selectedMediafile !== undefined &&
+          mediafileSelectionState.selectedMediafile.mimetype.includes('video')
         "
-        :source="selectedMediafile"
+        :source="mediafileSelectionState.selectedMediafile"
       />
       <AudioPlayer
         v-if="
           !loading &&
-          selectedMediafile !== null &&
-          selectedMediafile.mimetype.includes('audio')
+          mediafileSelectionState.selectedMediafile !== undefined &&
+          mediafileSelectionState.selectedMediafile.mimetype.includes('audio')
         "
-        :source="selectedMediafile"
+        :source="mediafileSelectionState.selectedMediafile"
       />
       <PDFViewer
         v-if="
           !loading &&
-          selectedMediafile !== null &&
-          selectedMediafile.mimetype.includes('pdf')
+          mediafileSelectionState.selectedMediafile !== undefined &&
+          mediafileSelectionState.selectedMediafile.mimetype.includes('pdf')
         "
-        :source="selectedMediafile"
+        :source="mediafileSelectionState.selectedMediafile"
       />
     </div>
     <!-- meta is metadata form-->
@@ -74,7 +74,9 @@
   } from '@/queries';
   import { usePageTitle } from '@/components/TheHeader.vue';
   import { useEditMode } from '@/components/EditToggle.vue';
-  import EntityImageSelection from '@/components/EntityImageSelection.vue';
+  import EntityImageSelection, {
+    useEntityMediafileSelector,
+  } from '@/components/EntityImageSelection.vue';
   import { useRoute, onBeforeRouteUpdate } from 'vue-router';
   import { asString } from '@/helpers';
   import VideoPlayer from '@/components/base/VideoPlayer.vue';
@@ -94,7 +96,7 @@
     setup() {
       const id = asString(useRoute().params['id']);
       const loading = ref<boolean>(true);
-      const selectedMediafile = ref<MediaFile | null>(null);
+      const { mediafileSelectionState } = useEntityMediafileSelector();
 
       const mediafiles = ref<MediaFile[]>([]);
       const { editMode, showEditToggle, hideEditToggle } = useEditMode();
@@ -137,9 +139,11 @@
         ) {
           mediafiles.value = [];
           queryResult.data.Entity.media.mediafiles?.forEach((mediafile) => {
+            console.log(mediafile);
             if (mediafile?.__typename === 'MediaFile') {
-              if (selectedMediafile.value === null) {
-                selectedMediafile.value = mediafile;
+              if (mediafileSelectionState.value.selectedMediafile === undefined) {
+                mediafileSelectionState.value.selectedMediafile = mediafile;
+                console.log(mediafileSelectionState.value.selectedMediafile);
               }
               mediafiles.value.push(mediafile);
             }
@@ -160,8 +164,8 @@
         loading,
         title,
         mediafiles,
-        selectedMediafile,
         editMode,
+        mediafileSelectionState,
       };
     },
   });
