@@ -1,5 +1,8 @@
 <template>
-  <label class="block my-2" :class="type === 'checkbox' ? 'justify-end flex flex-row-reverse' : ''">
+  <label
+    class="block my-2"
+    :class="type === 'checkbox' ? 'justify-end flex flex-row-reverse' : ''"
+  >
     <span v-if="label" class="ml-1 text-neutral-700 text-sm">{{ label }}</span>
     <div :class="[{ 'mr-4': icon }, inputContainerStyle]">
       <unicon
@@ -41,7 +44,7 @@
       bgColor: { type: String, default: 'neutral-0' },
       name: { type: String, default: '', required: false },
       isDisabled: { type: true || false, default: false, required: false },
-      type: { type: String, required: false, default: 'text'}
+      type: { type: String, required: false, default: 'text' },
     },
     emits: ['update:modelValue'],
     setup(props, { emit }) {
