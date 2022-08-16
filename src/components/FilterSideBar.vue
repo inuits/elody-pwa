@@ -68,7 +68,7 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, ref, computed, PropType, watch } from 'vue';
+  import { defineComponent, ref, computed, PropType } from 'vue';
   import FilterAccordion from '@/components/base/FilterAccordion.vue';
   import { useQuery } from '@vue/apollo-composable';
   import { AdvancedFilterTypes, GetAdvancedFiltersDocument } from '@/queries';
