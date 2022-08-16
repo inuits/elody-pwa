@@ -7,7 +7,11 @@
       >
         <MetaEditDataField
           v-if="field && field.__typename === 'MetadataField'"
-          :field="field"
+          :fieldKey="field.key"
+          :label="field.label"
+          :type="field.type"
+          :active="field.active"
+          :options="field.options"
         />
       </div>
     </form>
