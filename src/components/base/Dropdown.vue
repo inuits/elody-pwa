@@ -41,7 +41,6 @@
     setup(props, { emit }) {
       const selectedItem = ref(props.modelValue);
       watch(selectedItem, (value) => emit('update:modelValue', value));
-      console.log(props.isDisabled);
       return { Unicons, selectedItem };
     },
   });

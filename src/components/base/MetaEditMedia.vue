@@ -26,7 +26,7 @@
     PatchMediaFileMetadataDocument,
     MetadataAndRelation,
   } from '@/queries';
-  import { defineComponent, PropType } from 'vue';
+  import { defineComponent, PropType, watch } from 'vue';
   import { useForm, useSubmitForm } from 'vee-validate';
 
   import { useMutation } from '@vue/apollo-composable';
@@ -39,7 +39,6 @@
     name: 'MetaEditMedia',
     components: { MetaEditDataField },
     props: {
-      modelValue: { type: Array as PropType<MetadataAndRelation[]>, required: true },
       form: { type: Object as PropType<Form>, required: true },
       entityTitle: { type: String, required: true },
     },
@@ -51,6 +50,7 @@
         props.form,
         props.entityTitle,
       );
+      const { setValues, resetForm } = useForm<IntialValues>({});
       const { mutate, onDone } = useMutation<PatchMediaFileMetadataMutation>(
         PatchMediaFileMetadataDocument,
       );
@@ -58,9 +58,21 @@
       //onDone((value) => {
       //   emit('update:modelValue', value.data?.patchMediaFileMetadata?.metadata);
       //});
-      const {} = useForm<IntialValues>({
-        initialValues: buildInitialValues(props.modelValue),
-      });
+
+      watch(
+        mediafileSelectionState.value,
+        () => {
+          if (mediafileSelectionState.value.selectedMediafile?.metadata) {
+            setValues(
+              buildInitialValues(
+                //@ts-ignore
+                mediafileSelectionState.value.selectedMediafile.metadata,
+              ),
+            );
+          }
+        },
+        { immediate: true, deep: true },
+      );
 
       addSaveCallback(
         useSubmitForm<IntialValues>(async (values) => {
