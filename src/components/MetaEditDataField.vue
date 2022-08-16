@@ -41,7 +41,6 @@
       active: { type: Boolean, required: false, default: true },
     },
     setup: (props) => {
-      const { mediafileSelectionState } = useEntityMediafileSelector();
       const { value } = useField<string>(props.fieldKey, {});
 
       const stringifyOption = (input: MetadataFieldOption[]) => {
@@ -57,7 +56,6 @@
       return {
         value,
         stringifyOption,
-        mediafileSelectionState,
       };
     },
   });
