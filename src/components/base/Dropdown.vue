@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref, watch } from 'vue';
+  import { defineComponent, onMounted, onUpdated, ref, watch } from 'vue';
   import { Unicons } from '@/types';
 
   export default defineComponent({
@@ -41,6 +41,11 @@
     setup(props, { emit }) {
       const selectedItem = ref(props.modelValue);
       watch(selectedItem, (value) => emit('update:modelValue', value));
+
+      onUpdated(() => {
+        selectedItem.value = props.modelValue;
+      });
+
       return { Unicons, selectedItem };
     },
   });
