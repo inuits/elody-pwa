@@ -20,6 +20,7 @@
   import Dropdown from '@/components/base/Dropdown.vue';
   import { useField } from 'vee-validate';
   import { MetadataField, MetadataFieldOption } from '@/queries';
+  import { useEntityMediafileSelector } from './EntityImageSelection.vue';
 
   export default defineComponent({
     name: 'MetaEditDataField',
@@ -41,7 +42,7 @@
     },
     setup: (props) => {
       const { value } = useField<string>(props.fieldKey, {});
-      const inputType = ref<string>('text');
+      const { mediafileSelectionState } = useEntityMediafileSelector();
 
       const stringifyOption = (input: MetadataFieldOption[]) => {
         let returnArray: string[] = [];
@@ -53,29 +54,10 @@
         return returnArray;
       };
 
-      const setInputType = () => {
-        switch (props.type) {
-          case 'text': {
-            inputType.value = 'text';
-            break;
-          }
-          case 'boolean': {
-            inputType.value = 'checkbox';
-            break;
-          }
-          default: {
-            inputType.value = 'text';
-            break;
-          }
-        }
-      };
-
-      setInputType();
-
       return {
         value,
-        inputType,
         stringifyOption,
+        mediafileSelectionState,
       };
     },
   });
