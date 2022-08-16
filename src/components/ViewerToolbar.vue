@@ -1,18 +1,6 @@
 <template>
   <div
-    class="
-      absolute
-      w-11/12
-      bg-neutral-0
-      z-20
-      mx-4
-      mt-7
-      p-2
-      shadow-sm
-      flex
-      justify-between
-      h-10
-    "
+    class="absolute w-11/12 bg-neutral-0 z-20 mx-4 mt-7 p-2 shadow-sm flex justify-between h-10"
   >
     <div>
       <a ref="fullPageRef" class="mr-2 ml-2">
@@ -27,7 +15,7 @@
     </div>
     <a ref="homeRef" class="text-sm mr-2 text-neutral-700">Reset view</a>
   </div>
-  <media-info :meta-data="imageMetaData" />
+  <media-info />
 </template>
 
 <script lang="ts">
@@ -56,11 +44,6 @@
       home: {
         type: Object as PropType<HTMLDivElement | string | null>,
         default: null,
-      },
-      imageMetaData: {
-        type: Array as PropType<MediaFileMetadata[]>,
-        required: false,
-        default: () => [],
       },
     },
     emits: ['update:zoomIn', 'update:zoomOut', 'update:fullPage', 'update:home'],

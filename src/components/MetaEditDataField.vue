@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref, PropType } from 'vue';
+  import { defineComponent, ref, PropType, watch } from 'vue';
   import InputField from '@/components/base/InputField.vue';
   import Dropdown from '@/components/base/Dropdown.vue';
   import { useField } from 'vee-validate';
@@ -41,8 +41,8 @@
       active: { type: Boolean, required: false, default: true },
     },
     setup: (props) => {
-      const { value } = useField<string>(props.fieldKey, {});
       const { mediafileSelectionState } = useEntityMediafileSelector();
+      const { value } = useField<string>(props.fieldKey, {});
 
       const stringifyOption = (input: MetadataFieldOption[]) => {
         let returnArray: string[] = [];
