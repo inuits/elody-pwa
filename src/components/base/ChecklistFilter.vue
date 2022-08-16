@@ -91,6 +91,10 @@
 
       const inputFieldMulti = ref<string[]>([]);
 
+      const clearInputFieldMulti = () => {
+        inputFieldMulti.value = [];
+      };
+
       watch(() => inputFieldMulti.value, () => {
         if (props.acceptedEntityTypes.length > 0) {
           inputFieldMulti.value = props.acceptedEntityTypes;
@@ -106,6 +110,12 @@
         }
       });
 
+      watch(() => props.listValue, () => {
+        if (props.listValue && !props.listValue.isActive) {
+          clearInputFieldMulti();
+        }
+      });
+
       if (props.acceptedEntityTypes.length > 0 && props.filterkey === 'type') {
         emit(
           'update:listValue',
@@ -116,7 +126,7 @@
         );
       }
 
-      return { options, inputFieldMulti, isAnd };
+      return { options, inputFieldMulti, isAnd, clearInputFieldMulti };
     },
   });
 </script>
