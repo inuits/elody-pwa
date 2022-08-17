@@ -16,7 +16,7 @@ import App from './App.vue';
 import { routes } from './views';
 import { store } from './store';
 import { Unicons } from './types';
-import { i18n } from './helpers';
+import i18n from './helpers';
 
 import { createHead } from '@vueuse/head';
 

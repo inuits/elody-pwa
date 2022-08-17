@@ -10,4 +10,14 @@ module.exports = {
       topLevelAwait: true,
     },
   },
+  pluginOptions: {
+    i18n: {
+      locale: 'nl',
+      fallbackLocale: 'nl',
+      localeDir: 'locales',
+      enableLegacy: false,
+      runtimeOnly: false,
+      compositionOnly: false,
+      fullInstall: true,
+    },}
 };
