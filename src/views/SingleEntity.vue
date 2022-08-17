@@ -61,7 +61,7 @@
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, watch, ref, reactive } from 'vue';
+  import { computed, defineComponent, watch, ref, reactive, onMounted } from 'vue';
   import { useMutation, useQuery } from '@vue/apollo-composable';
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import Meta from '@/components/Meta.vue';
@@ -140,7 +140,12 @@
           mediafiles.value = [];
           queryResult.data.Entity.media.mediafiles?.forEach((mediafile, index) => {
             if (mediafile?.__typename === 'MediaFile') {
-              if (index === 0) {
+              if (mediafile._id == mediafileSelectionState.value.selectedMediafile?._id) {
+                mediafileSelectionState.value.selectedMediafile = mediafile;
+              } else if (
+                !mediafileSelectionState.value.selectedMediafile &&
+                index === 0
+              ) {
                 mediafileSelectionState.value.selectedMediafile = mediafile;
               }
               mediafiles.value.push(mediafile);
