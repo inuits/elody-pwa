@@ -1,28 +1,21 @@
 <template>
-      <folder-tree :data="directories" />
-      <div class="w-full flex flex-col sticky bottom-0 p-5 bg-neutral-30 z-10">
-        <BaseButton
-          bg-color="blue-400"
-          txt-color="neutral-0"
-          label="Import"
-          bg-hover-color="blue-100"
-          @click="doImport()"
-        />
-      </div>
+  <div class="p-3 h-full">
+    <dropzone v-model:progress="progress" />
+  </div>
 </template>
 <script lang="ts">
-  import { defineComponent, inject, provide, ref, Ref } from 'vue';
-  import FolderTree from './FolderTree.vue';
-  import BaseButton from './base/BaseButton.vue';
+  import { defineComponent, inject, provide, ref, Ref, watch } from 'vue';
   import { useMutation } from '@vue/apollo-composable';
   import { Directory, PostStartImportDocument } from '@/queries';
   import { UploadModalType, useUploadModal } from './UploadModal.vue';
+  import Dropzone from './Dropzone.vue';
+  import useDropzoneHelper from '@/composables/useDropzoneHelper';
+  const { clearDropzoneErrorMessages, clearDropzoneCounters } = useDropzoneHelper();
 
   export default defineComponent({
     name: 'UploadModalImport',
     components: {
-      FolderTree,
-      BaseButton,
+      Dropzone,
     },
     props: {
       directories: {
@@ -35,6 +28,8 @@
       const { mutate } = useMutation(PostStartImportDocument);
       const selectedDirectory = ref<Directory | undefined>();
       const uploadModal = useUploadModal();
+      const { uploadModalState } = useUploadModal();
+
       const updateUploadModal =
         inject<(UploadModal: UploadModalType) => void | undefined>('updateUploadModal');
 
@@ -63,6 +58,13 @@
         progress: 0,
         successFiles: 0,
         errorFiles: 0,
+      });
+
+      watch(
+      () => uploadModalState.value.state,
+      () => {
+        clearDropzoneCounters();
+        clearDropzoneErrorMessages();
       });
 
       return {

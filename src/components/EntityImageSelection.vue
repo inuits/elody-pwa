@@ -73,6 +73,12 @@
         </div>
       </div>
     </div>
+    <div class="mt-3">
+      <plus-circle-icon
+        v-if="editMode === 'edit'"
+        @click="openUploadModal(modalChoices.DROPZONE)"
+      />
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -86,7 +92,9 @@
   } from '@/queries';
   import AudioThumbnail from '../components/base/audiothumbnail.vue';
   import TrashIcon from '../components/base/TrashIcon.vue';
+  import PlusCircleIcon from '../components/base/PlusCircleIcon.vue';
   import { useEditMode } from '@/components/EditToggle.vue';
+import { useUploadModal } from './UploadModal.vue';
 
   export const toBeDeleted = ref<string[]>([]);
 
@@ -110,6 +118,7 @@
     name: 'EntityImageSelection',
     components: {
       AudioThumbnail,
+      PlusCircleIcon,
       TrashIcon,
     },
     props: {
@@ -123,8 +132,10 @@
         default: false,
       },
     },
-    setup(props) {
+    emits: ['refetchMediafiles'],
+    setup(props, { emit }) {
       const { updateSelectedEntityMediafile } = useEntityMediafileSelector();
+      const { openUploadModal, uploadModalState, modalChoices } = useUploadModal();
       const selectImage = (mediafile: MediaFile) => {
         updateSelectedEntityMediafile(mediafile);
       };
@@ -147,11 +158,19 @@
         }
       });
 
+      watch(uploadModalState, () => {
+        if (uploadModalState.value.state === 'hide') {
+          emit('refetchMediafiles', true);
+        }
+      });
+
       return {
         selectImage,
         editMode,
         addToSaveCallback,
         toBeDeleted,
+        openUploadModal,
+        modalChoices
       };
     },
   });

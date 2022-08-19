@@ -45,7 +45,7 @@
       :icon="Unicons.Upload.name"
       class="mt-1"
       bg-color="neutral-30"
-      @click="openUploadModal"
+      @click="openUploadModal(modalChoices.IMPORT)"
     />
     <BaseButton
       :icon="Unicons.Create.name"
@@ -68,7 +68,7 @@
     name: 'TheNavigation',
     components: { BaseButton },
     setup: () => {
-      const { openUploadModal } = useUploadModal();
+      const { openUploadModal, modalChoices } = useUploadModal();
       const { openCreateModal } = useCreateModal();
       const router = useRouter();
       const { disableEditMode } = useEditMode();
@@ -96,6 +96,7 @@
         forceDisableEditModalHistory,
         forceDisableEditModalUpload,
         openCreateModal,
+        modalChoices
       };
     },
   });

@@ -9,6 +9,8 @@
       :loading="loading"
       :mediafiles="mediafiles"
       v-model:selectedImage="mediafileSelectionState.selectedMediafile"
+      @refetchMediafiles="refetchMediafiles()"
+
     />
     <div
       v-show="!loading && mediafiles.length > 0"
@@ -166,6 +168,10 @@
         refetch();
       });
 
+      const refetchMediafiles = () => {
+        refetch();
+      };
+
       return {
         result,
         loading,
@@ -173,6 +179,7 @@
         mediafiles,
         editMode,
         mediafileSelectionState,
+        refetchMediafiles
       };
     },
   });
