@@ -1,38 +1,26 @@
 <template>
-  <div class="flex flex-col w-full my-2 p-5 flex-grow">
-    <div class="bg-neutral-0 mb-4 rounded py-5 pl-5 h-full">
-      <folder-tree :data="directories" />
-    </div>
-  </div>
-  <div class="w-full flex flex-col sticky bottom-0 p-5 bg-neutral-30 z-10">
-    <BaseButton
-      bg-color="blue-400"
-      txt-color="neutral-0"
-      label="Import"
-      bg-hover-color="blue-100"
-      @click="doImport()"
-    />
+  <div class="p-3 h-full">
+    <dropzone v-model:progress="progress" />
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, provide, ref, Ref } from 'vue';
-  import FolderTree from './FolderTree.vue';
-  import BaseButton from './base/BaseButton.vue';
+  import { defineComponent, inject, provide, ref, Ref, watch } from 'vue';
   import { useMutation } from '@vue/apollo-composable';
   import { Directory, PostStartImportDocument } from '@/queries';
-  import { useUploadModal } from './UploadModal.vue';
+  import { UploadModalType, useUploadModal } from './UploadModal.vue';
+  import Dropzone from './Dropzone.vue';
+  import useDropzoneHelper from '@/composables/useDropzoneHelper';
+  const { clearDropzoneErrorMessages, clearDropzoneCounters } = useDropzoneHelper();
 
   export default defineComponent({
     name: 'UploadModalImport',
     components: {
-      FolderTree,
-      BaseButton,
+      Dropzone,
     },
     props: {
       directories: {
         type: Array,
         required: true,
-        default: () => [],
       },
       hasDropzone: Boolean
     },
@@ -40,6 +28,10 @@
       const { mutate } = useMutation(PostStartImportDocument);
       const selectedDirectory = ref<Directory | undefined>();
       const uploadModal = useUploadModal();
+      const { uploadModalState } = useUploadModal();
+
+      const updateUploadModal =
+        inject<(UploadModal: UploadModalType) => void | undefined>('updateUploadModal');
 
       const updateSelectedDirectory = (directory: Directory) => {
         selectedDirectory.value = directory;
@@ -61,8 +53,23 @@
         }
       };
 
+     const progress = ref<any>({
+        status: 'new',
+        progress: 0,
+        successFiles: 0,
+        errorFiles: 0,
+      });
+
+      watch(
+      () => uploadModalState.value.state,
+      () => {
+        clearDropzoneCounters();
+        clearDropzoneErrorMessages();
+      });
+
       return {
         doImport,
+        progress,
       };
     },
   });

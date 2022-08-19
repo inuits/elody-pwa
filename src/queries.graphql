@@ -488,11 +488,8 @@ mutation postStartImport($folder: String!) {
   }
 }
 
-mutation postMediaFile($mediaFileInput: MediaFileInput!, $file: Upload!) {
-  postMediaFile(mediaFileInput: $mediaFileInput, file: $file) {
-    _id
-    filename
-  }
+mutation postMediaFile($entityId: String!, $mediaFileInput: MediaFileInput!, $file: Upload!) {
+  postMediaFile(entityId: $entityId, mediaFileInput: $mediaFileInput, file: $file)
 }
 
 mutation patchMediaFileMetadata(
