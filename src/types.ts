@@ -27,6 +27,7 @@ import {
   uniFilter,
   uniVolume,
   uniCreateDashboard,
+  uniImageRedo
 } from 'vue-unicons/dist/icons';
 
 export enum Unicons {
