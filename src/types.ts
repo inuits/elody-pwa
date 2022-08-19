@@ -27,6 +27,7 @@ import {
   uniFilter,
   uniVolume,
   uniCreateDashboard,
+  uniImageRedo
   uniCheck,
   uniTimes
 } from 'vue-unicons/dist/icons';

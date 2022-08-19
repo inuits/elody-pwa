@@ -146,6 +146,7 @@
   import { onMounted, ref, defineComponent, PropType } from 'vue';
   import { useMutation } from '@vue/apollo-composable';
   import Dropzone from 'dropzone';
+  import { useRoute } from 'vue-router';
 
   export default defineComponent({
     name: 'Dropzone',
@@ -158,14 +159,16 @@
     },
     emits: ['update:progress'],
     setup(props, { emit }) {
-      const { errorMessages, total, failed, success, increaseSuccessCounter, clearDropzoneErrorMessages, clearDropzoneCounters, getDropzoneSettings, increaseFailedCounter, setTotalCounter } = useDropzoneHelper();
+      const { errorMessages, total, failed, success, increaseSuccessCounter, clearDropzoneErrorMessages, clearDropzoneCounters, getDropzoneSettings, setTotalCounter } = useDropzoneHelper();
       const { mutate, onDone, onError } = useMutation<PostMediaFileMutation>(PostMediaFileDocument);
       const dropzonePreviewDiv = ref<HTMLDivElement | undefined>(undefined);
       const dropzoneDiv = ref<HTMLDivElement | undefined>(undefined);
       const doUpload = ref<() => void | undefined>();
       const uploading = ref<boolean>(false);
       const fileCount = ref<number>(0);
-
+      const route = useRoute();
+      clearDropzoneErrorMessages();
+      
       onMounted(async () => {
         if (dropzoneDiv.value && dropzonePreviewDiv) {
           const myDropzone = new Dropzone(dropzoneDiv.value, getDropzoneSettings(dropzonePreviewDiv));
@@ -194,8 +197,15 @@
             uploading.value = true;
             setTotalCounter(myDropzone.files.length);
             myDropzone.files.forEach((file: any) => {
+
+              const md = [
+                  {"key": "rights", "value": "CC0 1.0"},
+                  {"key": "source", "value": "Archief Gent"},
+                  {"key": "publication_status", "value": "publiek"},
+              ];
               mutate({
-                mediaFileInput: { filename: file.upload.filename, metadata: [] },
+                entityId: route.params['id'],
+                mediaFileInput: { filename: file.upload.filename, metadata: md},
                 file: file,
               });
             });
