@@ -95,26 +95,23 @@
         inputFieldMulti.value = [];
       };
 
-      watch(() => inputFieldMulti.value, () => {
-        if (props.acceptedEntityTypes.length > 0) {
-          inputFieldMulti.value = props.acceptedEntityTypes;
-        }
-        if (props.listValue) {
-          emit(
-            'update:listValue',
-            defaultReturnMultiSelectObject(props.filterkey, {
-              value: inputFieldMulti.value,
-              AndOrValue: isAnd.value,
-            }),
-          );
-        }
-      });
-
-      watch(() => props.listValue, () => {
-        if (props.listValue && !props.listValue.isActive) {
-          clearInputFieldMulti();
-        }
-      });
+      watch(
+        () => inputFieldMulti.value,
+        () => {
+          if (props.acceptedEntityTypes.length > 0) {
+            inputFieldMulti.value = props.acceptedEntityTypes;
+          }
+          if (props.listValue) {
+            emit(
+              'update:listValue',
+              defaultReturnMultiSelectObject(props.filterkey, {
+                value: inputFieldMulti.value,
+                AndOrValue: isAnd.value,
+              }),
+            );
+          }
+        },
+      );
 
       if (props.acceptedEntityTypes.length > 0 && props.filterkey === 'type') {
         emit(
