@@ -9,6 +9,8 @@
       class="w-40"
       :loading="loading"
       :mediafiles="mediafiles"
+      @refetchMediafiles="refetchMediafiles()"
+
     />
     <div
       v-show="!loading && mediafiles.length > 0"
@@ -167,6 +169,10 @@
         refetch();
       });
 
+      const refetchMediafiles = () => {
+        refetch();
+      };
+
       return {
         result,
         loading,
@@ -174,6 +180,7 @@
         mediafiles,
         editMode,
         mediafileSelectionState,
+        refetchMediafiles
       };
     },
   });
