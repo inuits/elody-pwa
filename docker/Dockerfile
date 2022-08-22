@@ -12,7 +12,7 @@ COPY docker/entrypoint*.sh /
 COPY .npmrc package*.json ./
 
 RUN npm set progress=false && npm config set depth 0
-RUN npm ci
+RUN npm install
 
 EXPOSE 8080
 
