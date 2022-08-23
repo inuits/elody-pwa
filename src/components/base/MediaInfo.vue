@@ -15,31 +15,105 @@
           {{ item.value }}
         </div>
       </div>
+      <div>
+        <div class="label">{{t('media-info.primaire-media')}}</div>
+        <div class="value h-5 w-5">
+          <Icon v-if="mediafileSelectionState.selectedMediafile.is_primary" :name="Unicons.Check.name" />
+          <Icon v-else :name="Unicons.Cross.name" />
+        </div>
+
+        <div class="label">{{t('media-info.thumbnail')}}</div>
+        <div class="value h-5 w-5">
+          <Icon v-if="mediafileSelectionState.selectedMediafile.is_thumbnail" :name="Unicons.Check.name" />
+          <Icon v-else :name="Unicons.Cross.name" />
+        </div>
+      </div>
     </div>
-    <meta-edit-media v-else-if="form?.Form" :form="form?.Form" />
+    <div v-if="isEdit" class="flex flex-col px-6 -mb-5 w-64 -ml-1">
+      <!-- PRIMAIR MEDIA-->
+      <div class="flex justify-between">
+        <span class="ml-1 text-neutral-700 text-sm">{{t('media-info.primaire-media')}}</span>
+        <div class="value h-5 w-5">
+          <Icon v-if="mediafileSelectionState.selectedMediafile.is_primary" :name="Unicons.Check.name" />
+          <Icon v-else :name="Unicons.Cross.name" />
+        </div>
+      </div>
+      <BaseButton
+        :label="t('media-info.set-primair')"
+        bg-color="neutral-100"
+        bg-hover-color="neutral-400"
+        txt-color="neutral-0"
+        @click="setMediaPrimaire(mediafileSelectionState.selectedMediafile)"
+      />
+      <!-- THUMBNAIL MEDIA -->
+      <div class="flex justify-between">
+        <span class="ml-1 text-neutral-700 text-sm">{{t('media-info.thumbnail')}}</span>
+        <div class="value h-5 w-5">
+          <Icon v-if="mediafileSelectionState.selectedMediafile.is_thumbnail" :name="Unicons.Check.name" />
+          <Icon v-else :name="Unicons.Cross.name" />
+        </div>
+      </div>
+      <BaseButton
+        :label="t('media-info.set-thumbnail')"
+        bg-color="neutral-100"
+        bg-hover-color="neutral-400"
+        txt-color="neutral-0"
+        @click="setMediaThumbnail()"
+      />
+    </div>
+    <meta-edit-media v-if="isEdit && form?.Form" :form="form?.Form" />
   </div>
 </template>
 <script lang="ts">
-  import { GetFormsDocument, MediaFileMetadata } from '@/queries';
+  import { GetFormsDocument, SetMediaPrimaireDocument, SetMediaPrimaireMutation } from '@/queries';
   import { useQuery } from '@vue/apollo-composable';
-  import { defineComponent, PropType, ref, watch } from 'vue';
+  import BaseButton from '../base/BaseButton.vue';
+  import { defineComponent } from 'vue';
   import { useEditMode } from '../EditToggle.vue';
   import MetaEditMedia from '@/components/base/MetaEditMedia.vue';
   import { useEntityMediafileSelector } from '../EntityImageSelection.vue';
-
+  import Icon from '@/components/base/Icon.vue';
+  import { Unicons } from '@/types';
+  import { useI18n } from 'vue-i18n';
+  import { useMutation } from '@vue/apollo-composable';
+  import { useRoute } from 'vue-router';
   const { isEdit } = useEditMode();
 
   export default defineComponent({
     name: 'MediaInfo',
-    components: { MetaEditMedia },
-    props: {},
-    setup(props) {
+    components: { MetaEditMedia, Icon, BaseButton },
+    setup() {
+      const { t } = useI18n();
+      const route = useRoute();
       const { mediafileSelectionState } = useEntityMediafileSelector();
       const { result: form } = useQuery(GetFormsDocument, {
         type: 'media',
       });
 
-      return { isEdit, form, mediafileSelectionState };
+      const { mutate } = useMutation<SetMediaPrimaireMutation>(
+        SetMediaPrimaireDocument,
+      );
+
+      const setMediaPrimaire = async (input: any) => {
+        console.log('INPUT: ', input);
+        await mutate({
+          entity_id: route.params['id'],
+          mediafile_id: input._id.replace('mediafiles/','')         
+        });
+      };
+
+      const setMediaThumbnail = async () => {
+        const { mutate } = useMutation<SetMediaPrimaireMutation>(
+          SetMediaPrimaireDocument,
+        );
+        console.log('SET MEDIA THUMBNAIL');
+        await mutate({
+          entity_id: 'ID1',
+          mediafile_id: "input._id.replace('mediafiles/','')"   
+        });
+      };
+
+      return { isEdit, form, mediafileSelectionState, Unicons, setMediaPrimaire, setMediaThumbnail, t };
     },
   });
 </script>
