@@ -4,13 +4,11 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, inject, provide, ref, Ref, watch } from 'vue';
-  import { useMutation } from '@vue/apollo-composable';
-  import { Directory, PostStartImportDocument } from '@/queries';
-  import { UploadModalType, useUploadModal } from './UploadModal.vue';
-  import Dropzone from './Dropzone.vue';
-  import useDropzoneHelper from '@/composables/useDropzoneHelper';
   const { clearDropzoneErrorMessages, clearDropzoneCounters } = useDropzoneHelper();
+  import useDropzoneHelper from '@/composables/useDropzoneHelper';
+  import { useUploadModal } from './UploadModal.vue';
+  import { defineComponent, ref, watch } from 'vue';
+  import Dropzone from './Dropzone.vue';
 
   export default defineComponent({
     name: 'UploadModalImport',
@@ -25,24 +23,6 @@
       hasDropzone: Boolean
     },
     setup() {
-      const { mutate } = useMutation(PostStartImportDocument);
-      const selectedDirectory = ref<Directory | undefined>();
-      const uploadModal = useUploadModal();
-      const { uploadModalState } = useUploadModal();
-
-      const updateUploadModal =
-        inject<(UploadModal: UploadModalType) => void | undefined>('updateUploadModal');
-
-      const updateSelectedDirectory = (directory: Directory) => {
-        selectedDirectory.value = directory;
-      };
-
-      provide<(directory: Directory) => void>(
-        'updateSelectedDirectory',
-        updateSelectedDirectory,
-      );
-
-      provide<Ref<Directory | undefined>>('selectedDirectory', selectedDirectory);
 
      const progress = ref<any>({
         status: 'new',
@@ -50,6 +30,8 @@
         successFiles: 0,
         errorFiles: 0,
       });
+
+      const { uploadModalState } = useUploadModal();
 
       watch(
       () => uploadModalState.value.state,
