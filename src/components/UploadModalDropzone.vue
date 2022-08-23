@@ -44,15 +44,6 @@
 
       provide<Ref<Directory | undefined>>('selectedDirectory', selectedDirectory);
 
-      const doImport = () => {
-        if (selectedDirectory.value && selectedDirectory.value.id) {
-          mutate({
-            folder: selectedDirectory.value.id,
-          });
-          uploadModal.closeUploadModal();
-        }
-      };
-
      const progress = ref<any>({
         status: 'new',
         progress: 0,
@@ -68,7 +59,6 @@
       });
 
       return {
-        doImport,
         progress,
       };
     },
