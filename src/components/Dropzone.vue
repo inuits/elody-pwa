@@ -150,14 +150,6 @@
 
   export default defineComponent({
     name: 'Dropzone',
-    props: {
-      progress: {
-        type: [String, Number, Object] as PropType<any>,
-        require: false,
-        default: undefined,
-      },
-    },
-    emits: ['update:progress'],
     setup(props, { emit }) {
       const { errorMessages, total, failed, success, increaseSuccessCounter, clearDropzoneErrorMessages, clearDropzoneCounters, getDropzoneSettings, setTotalCounter } = useDropzoneHelper();
       const { mutate, onDone, onError } = useMutation<PostMediaFileMutation>(PostMediaFileDocument);
