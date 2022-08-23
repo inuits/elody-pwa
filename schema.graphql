@@ -120,6 +120,8 @@ type MediaFile {
   entities: [String]
   metadata: [MediaFileMetadata]
   mimetype: String
+  is_primary: Boolean
+  is_thumbnail: Boolean
 }
 
 input MediaFileInput {
@@ -330,6 +332,7 @@ input Filters {
 
 type Query {
   Entity(id: String!): Entity
+  SetMediaPrimaire(entity_id: String!, mediafile_id: String!): String
   Entities(
     limit: Int
     skip: Int
@@ -379,7 +382,8 @@ type Mutation {
     MediafileId: String!
     MediaFileMetadata: [MediaFileMetadataInput]!
   ): MediaFile
-  uploadFile(id: String!, file: Upload!): String
+  uploadFile(id: String!, file: Upload!): String,
+  setMediaPrimaire(entity_id: String!, mediafile_id: String!): String
 }
 
 enum deletePaths {

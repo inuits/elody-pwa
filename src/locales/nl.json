@@ -15,5 +15,11 @@
     "vervaardiging.plaats": "plaats van vervaardiging",
     "vervaardiger.rol": "rol",
     "Entiteit.maaktDeelUitVan": "tentoonstellingen"
+  },
+  "media-info": {
+    "primaire-media": "primaire media",
+    "thumbnail": "thumbnail",
+    "set-primair": "stel als primaire",
+    "set-thumbnail": "stel als thumbnail"
   }
 }
