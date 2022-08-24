@@ -20,8 +20,9 @@
     },
     props: {
       data: {
-        type: Object as PropType<Directory[]>,
+        type: Array as PropType<Directory[]>,
         required: true,
+        default: () => [],
       },
     },
     setup() {},

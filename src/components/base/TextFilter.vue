@@ -3,7 +3,7 @@
     <InputField
       v-model:modelValue="inputField"
       :debounce="true"
-      :placeholder="text"
+      :placeholder="placeholderText"
       :bg-color="'neutral-20'"
     />
   </div>
@@ -29,6 +29,11 @@
       filterkey: {
         type: String,
         required: true,
+      },
+      placeholderText: {
+        type: String,
+        required: false,
+        default: '',
       },
     },
     emits: ['update:inputValue'],
