@@ -46,6 +46,7 @@
       active: {
         type: Boolean,
         required: true,
+        default: false,
       },
       label: {
         type: String,
