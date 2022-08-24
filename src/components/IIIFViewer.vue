@@ -37,6 +37,8 @@
     },
     props: {
       imageUrl: { type: String, default: '' },
+      imageTranscodeUrl: { type: String, default: '' },
+      isPublic: { type: Boolean, default: true },
     },
     setup: (props) => {
       const OpenSeadragonDiv = ref<HTMLDivElement | undefined>(undefined);
@@ -55,7 +57,12 @@
             prefixUrl: '/static/openseadragon/images/',
             // @ts-ignore
             toolbar: document.getElementById('OpenSeadragon-toolbar'),
-            tileSources: `${config.iiifLink}/iiif/3/${props.imageUrl}/info.json`,
+            tileSources: props.isPublic
+              ? `${config.iiifLink}/iiif/3/${props.imageUrl}/info.json`
+              : {
+                  type: 'image',
+                  url: `/api/mediafile/${props.imageTranscodeUrl}`,
+                },
           };
 
           if (zoomInDiv.value !== null) {
