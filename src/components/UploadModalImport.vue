@@ -53,8 +53,6 @@
       const { mutate } = useMutation(PostStartImportDocument);
       const selectedDirectory = ref<Directory | undefined>();
       const uploadModal = useUploadModal();
-      const updateUploadModal =
-        inject<(UploadModal: UploadModalType) => void | undefined>('updateUploadModal');
 
       const updateSelectedDirectory = (directory: Directory) => {
         selectedDirectory.value = directory;

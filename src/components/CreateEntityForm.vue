@@ -2,7 +2,7 @@
   <div>
     <div class="p-6 pt-0 bg-neutral-0 pb-20">
       <form v-if="result">
-        <MetaEditDataField v-model="EntityTitle" :field-key="title" :label="Title" />
+        <MetaEditDataField v-model="EntityTitle" field-key="title" label="Title" />
         <input
           v-model="manualID"
           disabled
