@@ -199,7 +199,6 @@
         Unicons,
         queryVariables,
         addSelection,
-        // advancedFilterBarRef,
         paginationLimits,
         showDrawer,
         result,

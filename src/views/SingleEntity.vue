@@ -5,10 +5,10 @@
   >
     <entity-image-selection
       v-show="loading || mediafiles.length > 0"
+      v-model:selectedImage="mediafileSelectionState.selectedMediafile"
       class="w-40"
       :loading="loading"
       :mediafiles="mediafiles"
-      v-model:selectedImage="mediafileSelectionState.selectedMediafile"
     />
     <div
       v-show="!loading && mediafiles.length > 0"
@@ -20,8 +20,11 @@
           mediafileSelectionState.selectedMediafile !== undefined &&
           mediafileSelectionState.selectedMediafile.mimetype.includes('image')
         "
+        :is-public="mediafileSelectionState.selectedMediafile.isPublic"
         :image-url="mediafileSelectionState.selectedMediafile.filename"
-        :image-meta-data="mediafileSelectionState.selectedMediafile.metadata"
+        :image-transcode-url="
+          mediafileSelectionState.selectedMediafile.transcode_filename
+        "
       />
       <VideoPlayer
         v-if="
