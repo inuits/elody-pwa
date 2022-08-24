@@ -32,7 +32,7 @@
         @click="showConfirmation()"
       />
     </div>
-    <div class="float-right">
+    <!-- <div class="float-right">
       <BaseButton
         v-if="auth && !auth.isAuthenticated"
         label="Log in"
@@ -43,7 +43,7 @@
       <div v-if="auth?.isAuthenticated">
         <BaseButton :icon="Unicons.User.name" bg-color="neutral-30" />
       </div>
-    </div>
+    </div> -->
     <ConfirmationModal
       v-show="confirmState === 'show'"
       v-model:confirmState="confirmState"

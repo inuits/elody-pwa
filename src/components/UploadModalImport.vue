@@ -18,10 +18,9 @@
           bg-hover-color="blue-100"
           @click="doImport()"
         />
-      </div>    
+      </div>
     </tab>
   </tabs>
-  
 </template>
 <script lang="ts">
   import { defineComponent, inject, provide, ref, Ref } from 'vue';
@@ -47,6 +46,7 @@
       directories: {
         type: Array,
         required: true,
+        default: () => [],
       },
     },
     setup() {
@@ -76,7 +76,7 @@
         }
       };
 
-     const progress = ref<any>({
+      const progress = ref<any>({
         status: 'new',
         progress: 0,
         successFiles: 0,
