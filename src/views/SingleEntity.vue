@@ -99,7 +99,8 @@
     setup() {
       const id = asString(useRoute().params['id']);
       const loading = ref<boolean>(true);
-      const { mediafileSelectionState } = useEntityMediafileSelector();
+      const { mediafileSelectionState, updateSelectedEntityMediafile } =
+        useEntityMediafileSelector();
 
       const mediafiles = ref<MediaFile[]>([]);
       const { editMode, showEditToggle, hideEditToggle } = useEditMode();
@@ -129,11 +130,6 @@
         value && updatePageTitle(value, 'entityTitle');
       });
 
-      onBeforeRouteUpdate(async (to, from) => {
-        //@ts-ignore
-        queryVariables.id = to.params.id;
-      });
-
       onResult((queryResult) => {
         if (
           queryResult.data &&
@@ -141,19 +137,21 @@
           queryResult.data.Entity?.media?.mediafiles?.length > 0
         ) {
           mediafiles.value = [];
+          let mediaFileChanged: boolean = false;
+
           queryResult.data.Entity.media.mediafiles?.forEach((mediafile, index) => {
             if (mediafile?.__typename === 'MediaFile') {
-              if (mediafile._id == mediafileSelectionState.value.selectedMediafile?._id) {
-                mediafileSelectionState.value.selectedMediafile = mediafile;
-              } else if (
-                !mediafileSelectionState.value.selectedMediafile &&
-                index === 0
-              ) {
-                mediafileSelectionState.value.selectedMediafile = mediafile;
+              if (mediafile._id == mediafileSelectionState.selectedMediafile?._id) {
+                updateSelectedEntityMediafile(mediafile);
+                mediaFileChanged = true;
               }
               mediafiles.value.push(mediafile);
             }
           });
+          if (!mediaFileChanged && mediafiles.value[0])
+            updateSelectedEntityMediafile(mediafiles.value[0]);
+          if (!mediaFileChanged && !mediafiles.value[0])
+            updateSelectedEntityMediafile(undefined);
         }
         //If form show edit togle
         if (queryResult.data && queryResult.data.Entity?.form) {
