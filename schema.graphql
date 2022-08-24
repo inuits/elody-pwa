@@ -261,8 +261,13 @@ type Job {
   _id: String
   _key: String
   _rev: String
-  sub_jobs: [Job]
+  sub_jobs: SubJobResults
   error_message: String
+}
+
+type SubJobResults {
+  count: Int
+  results: [Job]
 }
 
 type JobsResults {
