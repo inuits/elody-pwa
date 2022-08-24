@@ -7,7 +7,7 @@
   >
     <div class="bg-neutral-20 w-full h-full flex flex-col">
       <upload-modal-import v-if="modalToOpen === modalChoices.IMPORT" :directories="result" />
-      <upload-modal-dropzone v-if="modalToOpen === modalChoices.DROPZONE" :directories="result" />
+      <upload-modal-dropzone v-if="modalToOpen === modalChoices.DROPZONE" />
     </div>
   </modal>
 </template>
@@ -84,8 +84,11 @@
       );
 
       const getData = () => {
-        if (fetchEnabled.value === true) refetch();
-        else fetchEnabled.value = true;
+        if (modalToOpen.value === modalChoices.IMPORT) {
+          if (fetchEnabled.value === true) {
+            refetch();
+          } else fetchEnabled.value = true;
+        }
       };
 
       return {

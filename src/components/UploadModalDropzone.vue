@@ -16,10 +16,6 @@
       Dropzone,
     },
     props: {
-      directories: {
-        type: Array,
-        required: true,
-      },
       hasDropzone: Boolean
     },
     setup() {
