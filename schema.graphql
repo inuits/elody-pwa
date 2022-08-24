@@ -81,6 +81,15 @@ type museum implements Entity {
   form: Form
 }
 
+type thesaurus implements Entity {
+  id: String!
+  uuid: String!
+  type: String!
+  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
+  media: Media
+  form: Form
+}
+
 type RelationMetaData {
   key: String!
   value: String!

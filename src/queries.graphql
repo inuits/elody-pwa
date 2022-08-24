@@ -195,6 +195,18 @@ fragment fullEntityRecursive on Entity {
             }
           }
         }
+        ... on thesaurus {
+          ...minimalBaseEntity
+          teaserMetadata: metadata(keys: ["title"], excludeOrInclude: include) {
+            __typename
+            ... on Metadata {
+              ...metadata
+            }
+            ... on MetadataRelation {
+              ...metadataRelation
+            }
+          }
+        }
         ...fullEntity
         metadata(keys: [], excludeOrInclude: exclude) {
           __typename
@@ -344,6 +356,27 @@ query getEntities(
         }
       }
       ... on museum {
+        teaserMetadata: metadata(keys: ["title"], excludeOrInclude: include) {
+          __typename
+          ... on Metadata {
+            key
+            value
+            label
+            immutable
+          }
+          ... on MetadataRelation {
+            key
+            value
+            label
+            type
+            metadataOnRelation {
+              key
+              value
+            }
+          }
+        }
+      }
+       ... on thesaurus {
         teaserMetadata: metadata(keys: ["title"], excludeOrInclude: include) {
           __typename
           ... on Metadata {
