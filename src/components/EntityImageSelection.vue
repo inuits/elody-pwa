@@ -7,7 +7,7 @@
       },
     ]"
   >
-    <div v-if="!loading && selectedImage" class="flex flex-col items-end mt-2">
+    <div v-if="!loading && selectedImage" class="flex flex-col items-end mt-2 overflow-y-auto">
       <div
         v-for="(mediaFile, arrayKey) in mediafiles"
         :key="mediaFile.filename ? mediaFile.filename : 'no-filename'"
@@ -96,6 +96,7 @@
   import { useEditMode } from '@/components/EditToggle.vue';
   import { useUploadModal } from './UploadModal.vue';
   import useDropzoneHelper from '../composables/useDropzoneHelper';
+  import useMediaAssetLinkHelper from '../composables/useMediaAssetLinkHelper';
 
   export const toBeDeleted = ref<string[]>([]);
 
@@ -137,6 +138,7 @@
     setup(props, { emit }) {
       const { selectedFiles } = useDropzoneHelper();
       const { updateSelectedEntityMediafile } = useEntityMediafileSelector();
+      const { isMediaFileInLinkList, removeMediaFileFromLinkList } = useMediaAssetLinkHelper();
       const { openUploadModal, uploadModalState, modalChoices } = useUploadModal();
       const selectImage = (mediafile: MediaFile) => {
         updateSelectedEntityMediafile(mediafile);
@@ -147,11 +149,16 @@
       const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 
       const addToSaveCallback = (id: string, arrayKey: string) => {
+
         const parsedId = id.replace('mediafiles/', '');
         toBeDeleted.value.push(id);
-        addSaveCallback(async () => {
-          await mutate({ id: parsedId, path: DeletePaths.Mediafiles });
-        });
+        if (!isMediaFileInLinkList(id)) {
+          addSaveCallback(async () => {
+            await mutate({ id: parsedId, path: DeletePaths.Mediafiles });
+          });
+        } else {
+          removeMediaFileFromLinkList(id);
+        }
       };
 
       onMounted(() => {
