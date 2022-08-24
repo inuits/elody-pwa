@@ -374,7 +374,7 @@ query getEntities(
           }
         }
       }
-       ... on thesaurus {
+      ... on thesaurus {
         teaserMetadata: metadata(keys: ["title"], excludeOrInclude: include) {
           __typename
           ... on Metadata {
@@ -434,7 +434,10 @@ fragment job on Job {
 fragment jobWithSubJobs on Job {
   ...job
   sub_jobs {
-    ...job
+    count
+    results {
+      ...job
+    }
   }
 }
 

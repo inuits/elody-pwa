@@ -53,15 +53,15 @@
         />
       </div>
     </div>
-    <div v-if="!isCollapsed">
+    <div v-if="!isCollapsed && subJobs && subJobs.results">
       <ListContainer>
         <loading-list v-if="loading" />
-        <div v-for="subJob in subJobs.slice(0, subjobLimit)" :key="subJob.job_id">
+        <div v-for="subJob in subJobs.results.slice(0, subjobLimit)" :key="subJob.job_id">
           <JobComp :job="subJob" />
         </div>
         <div class="flex w-full justify-center">
           <button
-            v-if="subjobLimit <= subJobs.length"
+            v-if="subjobLimit <= subJobs.results.length"
             class="w-full mx-4 px-3 py-2 hover:bg-neutral-30 rounded"
             @click="increaseSubjobs()"
           >
@@ -109,9 +109,16 @@
       const state = jobHelper.getJobStatus(props.job);
       const isCollapsed = ref<Boolean>(true);
       const fetchingSubJobs = ref<Boolean>(false);
-      const { result, fetchMore, loading } = useQuery(GetJobDocument, {
-        id: props.job._key || '',
+      const queryOptions = ref({
+        enabled: false,
       });
+      const { result, refetch, loading } = useQuery(
+        GetJobDocument,
+        {
+          id: props.job._key || '',
+        },
+        queryOptions,
+      );
       const subjobLimit = ref<number>(10);
 
       const toggleCollapse = () => {
@@ -124,16 +131,10 @@
       };
       const jobStartDate = jobHelper.getFormatedDate(props.job.start_time as string);
       const updateSubJobs = () => {
-        fetchMore({
-          variables: {
-            id: props.job._key || '',
-          },
-          updateQuery: (prevResult, { fetchMoreResult }) => {
-            fetchingSubJobs.value = false;
-            if (!fetchMoreResult) return prevResult;
-            return fetchMoreResult;
-          },
-        });
+        queryOptions.value = {
+          enabled: true,
+        };
+        refetch();
       };
 
       onBeforeUpdate(() => {
