@@ -9,7 +9,7 @@
         <h1>Create Entity</h1>
         <Dropdown
           v-model="selected"
-          :options="Entitytyping"
+          :options="Object.values(Entitytyping)"
           label="Type"
           class="w-full"
         />

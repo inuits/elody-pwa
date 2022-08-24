@@ -27,7 +27,7 @@
       label: { type: String, default: '' },
       options: { type: Array, required: true },
       isDisabled: { type: Boolean, required: false },
-      modelValue: { type: String, default: undefined },
+      modelValue: { type: [String, Number], default: undefined },
       bgColor: {
         type: String,
         default: 'neutral-0',
