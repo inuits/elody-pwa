@@ -36,6 +36,7 @@
       saveCallbacks.value.forEach((callback: callback) => {
         callback().then(() => {
           if (isEdit.value) {
+            saveCallbacks.value = [];
             disableEditMode();
             document.dispatchEvent(saveEvent);
           }
