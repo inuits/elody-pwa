@@ -116,12 +116,14 @@ type MediaFile {
   _id: String!
   original_file_location: String
   thumbnail_file_location: String
+  transcode_filename: String
   filename: String
   entities: [String]
   metadata: [MediaFileMetadata]
   mimetype: String
   is_primary: Boolean
   is_thumbnail: Boolean
+  isPublic: Boolean
 }
 
 input MediaFileInput {
@@ -294,6 +296,7 @@ type RelationField {
   relationType: String!
   metadata: [MetadataField]
   acceptedEntityTypes: [String]!
+  disabled: Boolean
 }
 
 union MetadataOrRelationField = MetadataField | RelationField
