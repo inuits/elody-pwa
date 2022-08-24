@@ -76,6 +76,8 @@
     Maybe,
     MediaFile,
     GetEntityByIdQueryVariables,
+    PostMediaFileMutation,
+    PostMediaFileDocument,
   } from '@/queries';
   import { usePageTitle } from '@/components/TheHeader.vue';
   import { useEditMode } from '@/components/EditToggle.vue';
@@ -87,6 +89,7 @@
   import VideoPlayer from '@/components/base/VideoPlayer.vue';
   import AudioPlayer from '@/components/base/AudioPlayer.vue';
   import PDFViewer from '@/components/base/PDFViewer.vue';
+import useDropzoneHelper from '@/composables/useDropzoneHelper';
 
   export default defineComponent({
     name: 'SingleEntity',
@@ -99,6 +102,7 @@
       PDFViewer,
     },
     setup() {
+      const { myDropzone, isUploading, selectedFiles, increaseSuccessCounter } = useDropzoneHelper();
       const id = asString(useRoute().params['id']);
       const loading = ref<boolean>(true);
       const { mediafileSelectionState, updateSelectedEntityMediafile } =
@@ -127,6 +131,8 @@
         }
         return undefined;
       });
+
+      const { mutate, onDone } = useMutation<PostMediaFileMutation>(PostMediaFileDocument);
 
       watch(title, (value: Maybe<string> | undefined) => {
         value && updatePageTitle(value, 'entityTitle');
@@ -169,10 +175,6 @@
         refetch();
       });
 
-      const refetchMediafiles = () => {
-        refetch();
-      };
-
       return {
         result,
         loading,
@@ -180,7 +182,6 @@
         mediafiles,
         editMode,
         mediafileSelectionState,
-        refetchMediafiles
       };
     },
   });
