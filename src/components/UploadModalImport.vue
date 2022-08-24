@@ -1,5 +1,9 @@
 <template>
-  <folder-tree :data="directories" />
+  <div class="flex flex-col w-full my-2 p-5 flex-grow">
+    <div class="bg-neutral-0 mb-4 rounded py-5 pl-5 h-full">
+      <folder-tree :data="directories" />
+    </div>
+  </div>
   <div class="w-full flex flex-col sticky bottom-0 p-5 bg-neutral-30 z-10">
     <BaseButton
       bg-color="blue-400"
