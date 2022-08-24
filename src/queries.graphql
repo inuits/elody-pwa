@@ -40,6 +40,7 @@ fragment editForm on Form {
     ... on RelationField {
       label
       relationType
+      disabled
       metadata {
         key
         type
@@ -95,8 +96,10 @@ fragment fullEntity on Entity {
       _id
       filename
       original_file_location
+      transcode_filename
       thumbnail_file_location
       mimetype
+      isPublic
       metadata {
         key
         value
@@ -507,6 +510,7 @@ query GetForms($type: String!) {
       ... on RelationField {
         label
         relationType
+        disabled
         metadata {
           key
           type
