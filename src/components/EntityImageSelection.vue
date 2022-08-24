@@ -76,7 +76,7 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, onMounted, PropType, ref, watch } from 'vue';
+  import { defineComponent, onMounted, PropType, reactive, ref, watch } from 'vue';
   import { useMutation, useQuery } from '@vue/apollo-composable';
   import {
     MediaFile,
@@ -94,13 +94,13 @@
     selectedMediafile: MediaFile | undefined;
   };
 
-  const mediafileSelectionState = ref<MediafileSelectionState>({
+  const mediafileSelectionState = reactive<MediafileSelectionState>({
     selectedMediafile: undefined,
   });
 
   export const useEntityMediafileSelector = () => {
-    const updateSelectedEntityMediafile = (mediafile: MediaFile) => {
-      mediafileSelectionState.value.selectedMediafile = mediafile;
+    const updateSelectedEntityMediafile = (mediafile: MediaFile | undefined) => {
+      mediafileSelectionState.selectedMediafile = mediafile;
     };
 
     return { mediafileSelectionState, updateSelectedEntityMediafile };
