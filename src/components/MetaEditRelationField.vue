@@ -77,8 +77,8 @@
           getEmptyMetadatRelationObject(props.structure, value.uuid, {
             //@ts-ignore  Error when passing value object in vee-validate
             teaserMetadata: [
-              // @ts-ignore Possible undefined
               {
+                // @ts-ignore Possible undefined
                 value: getTeaserMetaDataByKey(value.teaserMetadata, 'title').value,
                 key: 'titel',
               },
