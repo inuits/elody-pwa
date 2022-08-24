@@ -4,7 +4,11 @@
     <div v-for="({ value, key }, idx) in fields" :key="key" class="my-2">
       <div :class="[inputContainerStyle, ' input-container p-4 gap-3 flex-col']">
         <div
-          v-for="{ label: metadataLabel, key: metadataKey, type: metadataType } in structure.metadata"
+          v-for="{
+            label: metadataLabel,
+            key: metadataKey,
+            type: metadataType,
+          } in structure.metadata"
           :key="`${idx}-${metadataKey}`"
         >
           <MetaEditDataField
@@ -18,7 +22,7 @@
           :meta="value.linkedEntity.teaserMetadata"
           :thumb-icon="Unicons.NoImage.name"
         />
-        <div class="delete">
+        <div v-if="!structure.disabled" class="delete">
           <BaseButton
             :icon="Unicons.Trash.name"
             class="h-full"
@@ -30,6 +34,7 @@
     </div>
   </div>
   <MetaAdd
+    v-if="!structure.disabled"
     :label="label"
     @addMetadata="openPickAssetModal(structure.acceptedEntityTypes)"
   />
@@ -73,13 +78,19 @@
             //@ts-ignore  Error when passing value object in vee-validate
             teaserMetadata: [
               // @ts-ignore Possible undefined
-              { value: getTeaserMetaDataByKey(value.teaserMetadata, 'title').value  , key: 'titel' },
+              {
+                value: getTeaserMetaDataByKey(value.teaserMetadata, 'title').value,
+                key: 'titel',
+              },
             ],
           }),
         );
       };
 
-      const getTeaserMetaDataByKey = (teaserMetaData: MetadataFragment[], key: string): MetadataFragment | undefined => {
+      const getTeaserMetaDataByKey = (
+        teaserMetaData: MetadataFragment[],
+        key: string,
+      ): MetadataFragment | undefined => {
         return teaserMetaData.find((x: MetadataFragment) => x.key === key);
       };
 
