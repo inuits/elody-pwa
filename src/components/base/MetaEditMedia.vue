@@ -7,7 +7,7 @@
       >
         <MetaEditDataField
           v-if="field && field.__typename === 'MetadataField'"
-          :fieldKey="field.key"
+          :field-key="field.key"
           :label="field.label"
           :type="field.type"
           :active="field.active"
@@ -60,13 +60,13 @@
       //});
 
       watch(
-        mediafileSelectionState.value,
+        mediafileSelectionState,
         () => {
-          if (mediafileSelectionState.value.selectedMediafile?.metadata) {
+          if (mediafileSelectionState.selectedMediafile?.metadata) {
             setValues(
               buildInitialValues(
                 //@ts-ignore
-                mediafileSelectionState.value.selectedMediafile.metadata,
+                mediafileSelectionState.selectedMediafile.metadata,
               ),
             );
           }
@@ -77,7 +77,7 @@
       addSaveCallback(
         useSubmitForm<IntialValues>(async (values) => {
           await mutate({
-            mediafileId: mediafileSelectionState.value.selectedMediafile?._id.replace(
+            mediafileId: mediafileSelectionState.selectedMediafile?._id.replace(
               'mediafiles/',
               '',
             ),
