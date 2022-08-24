@@ -78,12 +78,12 @@
         v-if="editMode === 'edit'"
         @click="openUploadModal(modalChoices.DROPZONE)"
       />
-    </div>
+    </div>    
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, onMounted, PropType, reactive, ref, watch } from 'vue';
-  import { useMutation, useQuery } from '@vue/apollo-composable';
+  import { defineComponent, onMounted, PropType, ref, watch } from 'vue';
+  import { useMutation } from '@vue/apollo-composable';
   import {
     MediaFile,
     DeleteDataDocument,
@@ -94,7 +94,8 @@
   import TrashIcon from '../components/base/TrashIcon.vue';
   import PlusCircleIcon from '../components/base/PlusCircleIcon.vue';
   import { useEditMode } from '@/components/EditToggle.vue';
-import { useUploadModal } from './UploadModal.vue';
+  import { useUploadModal } from './UploadModal.vue';
+  import useDropzoneHelper from '../composables/useDropzoneHelper';
 
   export const toBeDeleted = ref<string[]>([]);
 
@@ -134,6 +135,7 @@ import { useUploadModal } from './UploadModal.vue';
     },
     emits: ['refetchMediafiles'],
     setup(props, { emit }) {
+      const { selectedFiles } = useDropzoneHelper();
       const { updateSelectedEntityMediafile } = useEntityMediafileSelector();
       const { openUploadModal, uploadModalState, modalChoices } = useUploadModal();
       const selectImage = (mediafile: MediaFile) => {
@@ -170,7 +172,8 @@ import { useUploadModal } from './UploadModal.vue';
         addToSaveCallback,
         toBeDeleted,
         openUploadModal,
-        modalChoices
+        modalChoices,
+        selectedFiles
       };
     },
   });
