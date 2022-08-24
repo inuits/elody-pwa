@@ -10,6 +10,10 @@ const useMediaAssetLinkHelper = () => {
   const { mutate } = useMutation<LinkMediafileToEntityMutation>(LinkMediafileToEntityDocument);
   const route = useRoute();
 
+  const removeMediaFileFromLinkList = (id: string) => {
+    linkList.value = linkList.value.filter((link: MediaFile) => link._id !== id);
+  };
+
   const clearMediaFilesToLinkToEntity = () => {
     linkList.value = [];
   };
@@ -19,7 +23,6 @@ const useMediaAssetLinkHelper = () => {
   };
 
   const linkMediaFilesToEntity = () => {
-    console.log('mediafiles to link towards entity: ', linkList.value);
     linkList.value.forEach((mediaFile: MediaFile) => {
 
       mediaFile.metadata?.forEach((meta: any) => {
@@ -36,10 +39,22 @@ const useMediaAssetLinkHelper = () => {
     clearMediaFilesToLinkToEntity();
   };
 
+  const isMediaFileInLinkList = (id: string) => {
+    return linkList.value.some((link: MediaFile) => {
+      if (link._id === id) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  };
+
   return {
+    removeMediaFileFromLinkList,
     clearMediaFilesToLinkToEntity,
     linkMediaFilesToEntity,
     addMediaFileToLinkList,
+    isMediaFileInLinkList,
     linkList
   };
 };

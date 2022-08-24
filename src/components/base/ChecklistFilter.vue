@@ -105,7 +105,6 @@
               inputFieldMulti.value = props.acceptedEntityTypes;
             }
             if (props.listValue) {
-              console.log('LISTVALUE: ', props.listValue);
               emit(
                 'update:listValue',
                 defaultReturnMultiSelectObject(props.filterkey, {
