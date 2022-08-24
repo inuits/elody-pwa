@@ -2,7 +2,6 @@
   <div class="lg:flex">
     <FilterSideBar
       v-show="!showDrawer"
-      ref="advancedFilterBarRef"
       v-model:activeFilters="queryVariables.advancedSearchValue"
       :accepted-entity-types="acceptedEntityTypes ? acceptedEntityTypes : []"
     />
@@ -162,7 +161,6 @@
       });
       // routeHelper.getPaginationInfoFromUrl(paginationInfo);
       const { t } = useI18n();
-      const advancedFilterBarRef = ref<InstanceType<typeof FilterSideBar> | null>(null);
 
       const showDrawer = ref(props.acceptedEntityTypes.length === 0 ? true : false);
 
@@ -186,12 +184,6 @@
           : SearchInputType.AdvancedInputType;
       });
 
-      onUpdated(() => {
-        if (queryVariables.advancedSearchValue) {
-          advancedFilterBarRef.value && advancedFilterBarRef.value.applyFilters();
-        }
-      });
-
       const { result, loading, refetch } = useQuery(GetEntitiesDocument, queryVariables, {
         notifyOnNetworkStatusChange: true,
       });
@@ -207,7 +199,7 @@
         Unicons,
         queryVariables,
         addSelection,
-        advancedFilterBarRef,
+        // advancedFilterBarRef,
         paginationLimits,
         showDrawer,
         result,
