@@ -205,8 +205,6 @@
       });
 
       document.addEventListener('discard', () => {
-        // linkList.value.filter((a: MediaFile) => !mediafiles.value.map(b=>b.id).includes(a.id))
-        console.log('DISCARD');
         refetch();
       });
 
