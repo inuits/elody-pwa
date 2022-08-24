@@ -61,7 +61,7 @@
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, watch, ref, reactive, onMounted } from 'vue';
+  import { computed, defineComponent, watch, ref, reactive } from 'vue';
   import { useMutation, useQuery } from '@vue/apollo-composable';
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import Meta from '@/components/Meta.vue';
@@ -84,7 +84,8 @@
   import VideoPlayer from '@/components/base/VideoPlayer.vue';
   import AudioPlayer from '@/components/base/AudioPlayer.vue';
   import PDFViewer from '@/components/base/PDFViewer.vue';
-import useDropzoneHelper from '@/composables/useDropzoneHelper';
+  import useDropzoneHelper from '@/composables/useDropzoneHelper';
+  import useMediaAssetLinkHelper from '@/composables/useMediaAssetLinkHelper';
 
   export default defineComponent({
     name: 'SingleEntity',
@@ -98,12 +99,13 @@ import useDropzoneHelper from '@/composables/useDropzoneHelper';
     },
     setup() {
       const { myDropzone, isUploading, selectedFiles, increaseSuccessCounter } = useDropzoneHelper();
+      const { addMediaFileToLinkList, linkMediaFilesToEntity, linkList } = useMediaAssetLinkHelper();
       const id = asString(useRoute().params['id']);
       const loading = ref<boolean>(true);
       const { mediafileSelectionState } = useEntityMediafileSelector();
 
       const mediafiles = ref<MediaFile[]>([]);
-      const { editMode, showEditToggle, hideEditToggle } = useEditMode();
+      const { editMode, showEditToggle } = useEditMode();
       const { updatePageTitle } = usePageTitle();
 
       const queryVariables = reactive<GetEntityByIdQueryVariables>({
@@ -132,17 +134,11 @@ import useDropzoneHelper from '@/composables/useDropzoneHelper';
         value && updatePageTitle(value, 'entityTitle');
       });
 
-      const md = [
-          {"key": "rights", "value": "CC0 1.0"},
-          {"key": "source", "value": "Archief Gent"},
-          {"key": "publication_status", "value": "niet-publiek"},
-      ];
-
       watch(() => isUploading.value, () => {
         if (isUploading.value) {
           selectedFiles.value.forEach((file: any) => {
             mutate({
-              mediaFileInput: { filename: file.upload.filename, metadata: md},
+              mediaFileInput: { filename: file.upload.filename },
               file: file,
             });
           });
@@ -154,6 +150,7 @@ import useDropzoneHelper from '@/composables/useDropzoneHelper';
       onDone((value) => {
         if (value.data && value.data.postMediaFile) {
           mediafiles.value.push(value.data.postMediaFile);
+          addMediaFileToLinkList(value.data.postMediaFile);
         }        
         increaseSuccessCounter();
       });
@@ -195,6 +192,13 @@ import useDropzoneHelper from '@/composables/useDropzoneHelper';
       });
 
       document.addEventListener('save', () => {
+        linkMediaFilesToEntity();
+        refetch();
+      });
+
+      document.addEventListener('discard', () => {
+        // linkList.value.filter((a: MediaFile) => !mediafiles.value.map(b=>b.id).includes(a.id))
+        console.log('DISCARD');
         refetch();
       });
 

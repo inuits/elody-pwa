@@ -143,16 +143,15 @@
 <script lang="ts">
   import { PostMediaFileDocument, PostMediaFileMutation } from '@/queries';
   import useDropzoneHelper from '../composables/useDropzoneHelper';
-  import { onMounted, ref, defineComponent, PropType } from 'vue';
+  import { onMounted, ref, defineComponent } from 'vue';
   import { useMutation } from '@vue/apollo-composable';
   import Dropzone from 'dropzone';
-  import { useRoute } from 'vue-router';
 
   export default defineComponent({
     name: 'Dropzone',
     setup(props, { emit }) {
       const { myDropzone, isUploading, selectedFiles, errorMessages, total, failed, success, increaseSuccessCounter, clearDropzoneErrorMessages, clearDropzoneCounters, getDropzoneSettings, setTotalCounter } = useDropzoneHelper();
-      const { mutate, onDone } = useMutation<PostMediaFileMutation>(PostMediaFileDocument);
+      const { onDone } = useMutation<PostMediaFileMutation>(PostMediaFileDocument);
       const dropzonePreviewDiv = ref<HTMLDivElement | undefined>(undefined);
       const dropzoneDiv = ref<HTMLDivElement | undefined>(undefined);
       const triggerUpload = ref<() => void | undefined>();
@@ -187,7 +186,6 @@
             isUploading.value = true;
             selectedFiles.value = myDropzone.value.files;
             setTotalCounter(myDropzone.value.files.length);
-            // myDropzone.removeAllFiles();
           };
         }
       });

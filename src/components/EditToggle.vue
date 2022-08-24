@@ -30,8 +30,8 @@
     const addSaveCallback = (input: callback) => saveCallbacks.value.push(input);
     const showEditToggle = () => (isEditToggleVisible.value = true);
     const hideEditToggle = () => (isEditToggleVisible.value = false);
-    const Router = useRouter();
     const saveEvent = new Event('save');
+    const discardEvent = new Event('discard');
     const save = () => {
       saveCallbacks.value.forEach((callback: callback) => {
         callback().then(() => {
@@ -47,6 +47,7 @@
       disableEditMode();
       saveCallbacks.value = [];
       toBeDeleted.value = [];
+      document.dispatchEvent(discardEvent);
     };
 
     return {
