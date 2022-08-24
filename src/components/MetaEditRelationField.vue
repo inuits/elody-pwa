@@ -73,14 +73,17 @@
         props.structure.relationType,
       );
       const addRelation = (value: Entity) => {
+        console.log({ value });
+        const teaserMetadataKey: string = value.type === 'person' ? 'fullname' : 'title';
         push(
           getEmptyMetadatRelationObject(props.structure, value.uuid, {
             //@ts-ignore  Error when passing value object in vee-validate
             teaserMetadata: [
               {
-                // @ts-ignore Possible undefined
-                value: getTeaserMetaDataByKey(value.teaserMetadata, 'title').value,
-                key: 'titel',
+                //@ts-ignore
+                value: getTeaserMetaDataByKey(value.teaserMetadata, teaserMetadataKey)
+                  .value,
+                key: teaserMetadataKey,
               },
             ],
           }),
