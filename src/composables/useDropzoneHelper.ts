@@ -1,9 +1,12 @@
 import { ref } from 'vue';
 
+const myDropzone = ref<any>();
 const errorMessages = ref<Array<String>>([]);
 const total = ref<number>(0);
 const success = ref<number>(0);
 const failed = ref<number>(0);
+const selectedFiles = ref<any>([]);
+const isUploading = ref<boolean>(false);
 
 const useDropzoneHelper = () => {
   const setDropzoneErrorMessages = (errorMessage: string): void => {
@@ -55,7 +58,10 @@ const useDropzoneHelper = () => {
     total,
     failed,
     success,
-    errorMessages
+    errorMessages,
+    selectedFiles,
+    isUploading,
+    myDropzone
   };
 };
 

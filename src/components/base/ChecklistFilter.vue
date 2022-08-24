@@ -90,31 +90,36 @@
       });
 
       const inputFieldMulti = ref<string[]>([]);
+      const isClearingInputFieldMulti = ref<boolean>(false);
 
       const clearInputFieldMulti = () => {
+        isClearingInputFieldMulti.value = true;
         inputFieldMulti.value = [];
       };
 
-      watch(() => inputFieldMulti.value, () => {
-        if (props.acceptedEntityTypes.length > 0) {
-          inputFieldMulti.value = props.acceptedEntityTypes;
-        }
-        if (props.listValue) {
-          emit(
-            'update:listValue',
-            defaultReturnMultiSelectObject(props.filterkey, {
-              value: inputFieldMulti.value,
-              AndOrValue: isAnd.value,
-            }),
-          );
-        }
-      });
+      watch(
+        () => inputFieldMulti.value,
+        () => {
+          if (isClearingInputFieldMulti.value === false) {
+            if (props.acceptedEntityTypes.length > 0) {
+              inputFieldMulti.value = props.acceptedEntityTypes;
+            }
+            if (props.listValue) {
+              console.log('LISTVALUE: ', props.listValue);
+              emit(
+                'update:listValue',
+                defaultReturnMultiSelectObject(props.filterkey, {
+                  value: inputFieldMulti.value,
+                  AndOrValue: isAnd.value,
+                }),
+              );
+            }
+          }
 
-      watch(() => props.listValue, () => {
-        if (props.listValue && !props.listValue.isActive) {
-          clearInputFieldMulti();
-        }
-      });
+        isClearingInputFieldMulti.value = false;
+
+        },
+      );
 
       if (props.acceptedEntityTypes.length > 0 && props.filterkey === 'type') {
         emit(
@@ -125,6 +130,12 @@
           }),
         );
       }
+
+      watch(() => props.listValue, () => {
+        if (props.listValue && props.listValue.isActive === false) {
+          clearInputFieldMulti();
+        }
+      });
 
       return { options, inputFieldMulti, isAnd, clearInputFieldMulti };
     },

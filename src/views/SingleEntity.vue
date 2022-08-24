@@ -9,8 +9,6 @@
       :loading="loading"
       :mediafiles="mediafiles"
       v-model:selectedImage="mediafileSelectionState.selectedMediafile"
-      @refetchMediafiles="refetchMediafiles()"
-
     />
     <div
       v-show="!loading && mediafiles.length > 0"
@@ -73,6 +71,8 @@
     Maybe,
     MediaFile,
     GetEntityByIdQueryVariables,
+    PostMediaFileMutation,
+    PostMediaFileDocument,
   } from '@/queries';
   import { usePageTitle } from '@/components/TheHeader.vue';
   import { useEditMode } from '@/components/EditToggle.vue';
@@ -84,6 +84,7 @@
   import VideoPlayer from '@/components/base/VideoPlayer.vue';
   import AudioPlayer from '@/components/base/AudioPlayer.vue';
   import PDFViewer from '@/components/base/PDFViewer.vue';
+import useDropzoneHelper from '@/composables/useDropzoneHelper';
 
   export default defineComponent({
     name: 'SingleEntity',
@@ -96,6 +97,7 @@
       PDFViewer,
     },
     setup() {
+      const { myDropzone, isUploading, selectedFiles, increaseSuccessCounter } = useDropzoneHelper();
       const id = asString(useRoute().params['id']);
       const loading = ref<boolean>(true);
       const { mediafileSelectionState } = useEntityMediafileSelector();
@@ -124,8 +126,36 @@
         return undefined;
       });
 
+      const { mutate, onDone } = useMutation<PostMediaFileMutation>(PostMediaFileDocument);
+
       watch(title, (value: Maybe<string> | undefined) => {
         value && updatePageTitle(value, 'entityTitle');
+      });
+
+      const md = [
+          {"key": "rights", "value": "CC0 1.0"},
+          {"key": "source", "value": "Archief Gent"},
+          {"key": "publication_status", "value": "niet-publiek"},
+      ];
+
+      watch(() => isUploading.value, () => {
+        if (isUploading.value) {
+          selectedFiles.value.forEach((file: any) => {
+            mutate({
+              mediaFileInput: { filename: file.upload.filename, metadata: md},
+              file: file,
+            });
+          });
+          myDropzone.value.removeAllFiles();
+          isUploading.value = false;
+        }
+      });
+
+      onDone((value) => {
+        if (value.data && value.data.postMediaFile) {
+          mediafiles.value.push(value.data.postMediaFile);
+        }        
+        increaseSuccessCounter();
       });
 
       onBeforeRouteUpdate(async (to, from) => {
@@ -168,10 +198,6 @@
         refetch();
       });
 
-      const refetchMediafiles = () => {
-        refetch();
-      };
-
       return {
         result,
         loading,
@@ -179,7 +205,6 @@
         mediafiles,
         editMode,
         mediafileSelectionState,
-        refetchMediafiles
       };
     },
   });

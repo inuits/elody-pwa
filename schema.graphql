@@ -374,7 +374,8 @@ type Mutation {
   replaceRelationsAndMetaData(id: String!, form: MetadataFormInput): Entity
   deleteData(id: String!, path: deletePaths!): String
   createEntity(entity: EntityInput!): Entity
-  postMediaFile(entityId: String!, mediaFileInput: MediaFileInput!, file: Upload!): String
+  postMediaFile(mediaFileInput: MediaFileInput!, file: Upload!): MediaFile
+  linkMediafileToEntity(entityId: String!, mediaFileInput: MediaFileInput!): String
   patchMediaFileMetadata(
     MediafileId: String!
     MediaFileMetadata: [MediaFileMetadataInput]!
