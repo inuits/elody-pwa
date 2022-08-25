@@ -82,7 +82,7 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, onMounted, PropType, ref, watch } from 'vue';
+  import { defineComponent, onMounted, PropType, ref, watch,reactive } from 'vue';
   import { useMutation } from '@vue/apollo-composable';
   import {
     MediaFile,
@@ -134,7 +134,6 @@
         default: false,
       },
     },
-    emits: ['refetchMediafiles'],
     setup(props, { emit }) {
       const { selectedFiles } = useDropzoneHelper();
       const { updateSelectedEntityMediafile } = useEntityMediafileSelector();
@@ -164,12 +163,6 @@
       onMounted(() => {
         if (props.selectedImage) {
           updateSelectedEntityMediafile(props.selectedImage);
-        }
-      });
-
-      watch(uploadModalState, () => {
-        if (uploadModalState.value.state === 'hide') {
-          emit('refetchMediafiles', true);
         }
       });
 
