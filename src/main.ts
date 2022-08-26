@@ -50,7 +50,6 @@ const graphqlErrorInterceptor = onError((error: any) => {
   const errorHandler = useGraphqlErrors(error);
   errorHandler.logFormattedErrors();
   if (errorHandler.checkForDuplicateFileUpload() === true) {
-    console.log('TRUE OUTCOME');
     new Promise(async (resolve) => {
       resolve;
     });

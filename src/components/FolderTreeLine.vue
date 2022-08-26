@@ -156,7 +156,6 @@
 
       onResult((value) => {
         if (value.data) {
-          console.log(value.data.Directories);
           subDirectories.value = value.data.Directories as Directory[];
         }
       });
