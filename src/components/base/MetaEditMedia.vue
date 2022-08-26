@@ -33,6 +33,7 @@
   import { useEditMode } from '../EditToggle.vue';
   import MetaEditDataField from '../MetaEditDataField.vue';
   import useFormHelper, { IntialValues } from '@/composables/useFormHelpers';
+  import useMetaDataHelper from '@/composables/useMetaDataHelper';
   import { useEntityMediafileSelector } from '../EntityImageSelection.vue';
 
   export default defineComponent({
@@ -50,8 +51,9 @@
         props.form,
         props.entityTitle,
       );
-      const { setValues, resetForm } = useForm<IntialValues>({});
-      const { mutate, onDone } = useMutation<PatchMediaFileMetadataMutation>(
+      const { addOrUpdateList, metaDataPatchList, clearMediaFilesToPatch } = useMetaDataHelper();
+      const { setValues, values: metadata } = useForm<IntialValues>({});
+      const { mutate } = useMutation<PatchMediaFileMetadataMutation>(
         PatchMediaFileMetadataDocument,
       );
 
@@ -74,15 +76,18 @@
         { immediate: true, deep: true },
       );
 
+      watch(() => metadata, () => {
+        if (mediafileSelectionState.selectedMediafile) {
+          addOrUpdateList( mediafileSelectionState.selectedMediafile._id.replace('mediafiles/','',), serialzeFormToInput(metadata).Metadata);
+        }
+      }, { deep: true });
+
       addSaveCallback(
-        useSubmitForm<IntialValues>(async (values) => {
-          await mutate({
-            mediafileId: mediafileSelectionState.selectedMediafile?._id.replace(
-              'mediafiles/',
-              '',
-            ),
-            mediaFileInput: serialzeFormToInput(values).Metadata,
-          });
+        useSubmitForm<IntialValues>(async () => {
+          for (const metaData in metaDataPatchList.value) {
+              await mutate(metaDataPatchList.value[metaData]);
+          }
+          clearMediaFilesToPatch();
         }),
       );
     },

@@ -89,7 +89,7 @@
   import PDFViewer from '@/components/base/PDFViewer.vue';
   import useDropzoneHelper from '@/composables/useDropzoneHelper';
   import useMediaAssetLinkHelper from '@/composables/useMediaAssetLinkHelper';
-
+  import useMetaDataHelper from '@/composables/useMetaDataHelper';
   export default defineComponent({
     name: 'SingleEntity',
     components: {
@@ -102,7 +102,8 @@
     },
     setup() {
       const { myDropzone, isUploading, selectedFiles, increaseSuccessCounter } = useDropzoneHelper();
-      const { addMediaFileToLinkList, linkMediaFilesToEntity, linkList } = useMediaAssetLinkHelper();
+      const { addMediaFileToLinkList, linkMediaFilesToEntity } = useMediaAssetLinkHelper();
+      const { lastAdjustedMediaFileMetaData } = useMetaDataHelper();
       const id = asString(useRoute().params['id']);
       const loading = ref<boolean>(true);
       const { mediafileSelectionState, updateSelectedEntityMediafile } =
@@ -150,6 +151,19 @@
           isUploading.value = false;
         }
       });
+
+      const updateListWhenChanges = (newValue: any, oldValue: any) => {
+        if (lastAdjustedMediaFileMetaData.value && oldValue && (JSON.stringify(newValue) !== JSON.stringify(oldValue))) {
+          const index = mediafiles.value.findIndex((x: MediaFile) => x._id.replace('mediafiles/','',) === lastAdjustedMediaFileMetaData.value.mediafileId);
+          if (mediafiles.value[index] && mediafiles.value[index].metadata) {
+            mediafiles.value[index].metadata = lastAdjustedMediaFileMetaData.value.mediaFileInput;
+          }
+        }
+      };
+
+      watch(() => lastAdjustedMediaFileMetaData.value, (newValue: any, oldValue: any) => {
+        updateListWhenChanges(newValue, oldValue);
+      }, { deep: true });
 
       onDone((value) => {
         if (value.data && value.data.postMediaFile) {
