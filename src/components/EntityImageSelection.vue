@@ -97,7 +97,7 @@
   import { useUploadModal } from './UploadModal.vue';
   import useDropzoneHelper from '../composables/useDropzoneHelper';
   import useMediaAssetLinkHelper from '../composables/useMediaAssetLinkHelper';
-
+  import useMetaDataHelper from '../composables/useMetaDataHelper';
   export const toBeDeleted = ref<string[]>([]);
 
   type MediafileSelectionState = {
@@ -138,6 +138,7 @@
       const { selectedFiles } = useDropzoneHelper();
       const { updateSelectedEntityMediafile } = useEntityMediafileSelector();
       const { isMediaFileInLinkList, removeMediaFileFromLinkList } = useMediaAssetLinkHelper();
+      const { removeFromMetaDataPatchList } = useMetaDataHelper();
       const { openUploadModal, uploadModalState, modalChoices } = useUploadModal();
       const selectImage = (mediafile: MediaFile) => {
         updateSelectedEntityMediafile(mediafile);
@@ -150,6 +151,7 @@
       const addToSaveCallback = (id: string, arrayKey: string) => {
 
         const parsedId = id.replace('mediafiles/', '');
+        removeFromMetaDataPatchList(parsedId);
         toBeDeleted.value.push(id);
         if (!isMediaFileInLinkList(id)) {
           addSaveCallback(async () => {
