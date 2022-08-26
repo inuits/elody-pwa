@@ -73,7 +73,6 @@
         props.structure.relationType,
       );
       const addRelation = (value: Entity) => {
-        console.log({ value });
         const teaserMetadataKey: string = value.type === 'person' ? 'fullname' : 'title';
         push(
           getEmptyMetadatRelationObject(props.structure, value.uuid, {
