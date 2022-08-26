@@ -88,7 +88,6 @@
       watch(
         () => props.selectedId,
         () => {
-          console.log('watcher');
           showParents.value = false;
         },
       );

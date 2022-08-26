@@ -33,15 +33,12 @@ const useFormHelper = (form: Form, entityTitle: string) => {
     metadata: MetadataAndRelation[],
     structure: MetadataOrRelationField[] = formStructure,
   ) => {
-    console.log(metadata);
     const intialValues: IntialValues = {};
     structure.forEach((field: Maybe<MetadataOrRelationField>) => {
       if (field && field?.__typename === 'MetadataField') {
-        console.log(findFields(field.key, metadata));
         findFields(field.key, metadata).forEach((metadata: { value: string }) => {
           intialValues[field.key] = metadata.value;
         });
-        console.log(intialValues[field.key]);
       }
 
       if (field && field?.__typename === 'RelationField') {
@@ -62,7 +59,6 @@ const useFormHelper = (form: Form, entityTitle: string) => {
         intialValues[field.relationType] = relationArray;
       }
     });
-    console.log(intialValues);
     return intialValues;
   };
 
@@ -102,7 +98,6 @@ const useFormHelper = (form: Form, entityTitle: string) => {
       Metadata: [],
       relations: [],
     };
-    console.log(values);
     Object.entries(values).forEach((value: [string, string | relationValues[]]) => {
       if (typeof value[1] === 'string') {
         input.Metadata?.push({ key: value[0], value: value[1] });

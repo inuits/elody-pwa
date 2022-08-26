@@ -15,7 +15,7 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, PropType, watch } from 'vue';
+  import { defineComponent, PropType } from 'vue';
   import { useRouter } from 'vue-router';
 
   export default defineComponent({
@@ -27,14 +27,7 @@
         required: true,
       },
     },
-    setup(props) {
-      watch(
-        () => props.entities,
-        () => {
-          console.log('Entities', props.entities);
-        },
-        { immediate: true },
-      );
+    setup() {
       return {
         router: useRouter(),
       };
