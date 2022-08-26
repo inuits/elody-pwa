@@ -34,6 +34,7 @@
         required: true,
         default: () => [],
       },
+      hasDropzone: Boolean
     },
     setup() {
       const { mutate } = useMutation(PostStartImportDocument);

@@ -134,8 +134,13 @@ type MediaFile {
 }
 
 input MediaFileInput {
+  _id: String
+  original_file_location: String
+  thumbnail_file_location: String
   filename: String
+  entities: [String]
   metadata: [MediaFileMetadataInput]
+  mimetype: String
 }
 
 input MediaFileMetadataInput {
@@ -392,6 +397,7 @@ type Mutation {
   deleteData(id: String!, path: deletePaths!): String
   createEntity(entity: EntityInput!): Entity
   postMediaFile(mediaFileInput: MediaFileInput!, file: Upload!): MediaFile
+  linkMediafileToEntity(entityId: String!, mediaFileInput: MediaFileInput!): MediaFile
   patchMediaFileMetadata(
     MediafileId: String!
     MediaFileMetadata: [MediaFileMetadataInput]!

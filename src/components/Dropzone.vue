@@ -39,7 +39,7 @@
       </div>
     </div>
     <button
-      v-if="doUpload"
+      v-if="triggerUpload"
       type="button"
       class="
         py-2
@@ -55,7 +55,7 @@
       :class="fileCount === 0 ? 'opacity-25 cursor-none' : 'cursor-pointer'"
       tabindex="-1"
       :disabled="fileCount === 0"
-      @click="doUpload"
+      @click="triggerUpload"
     >
       <div class="flex justify-center" v-if="total !== failed + success">
         <div class="flex" style="width: fit-content">
@@ -143,44 +143,36 @@
 <script lang="ts">
   import { PostMediaFileDocument, PostMediaFileMutation } from '@/queries';
   import useDropzoneHelper from '../composables/useDropzoneHelper';
-  import { onMounted, ref, defineComponent, PropType } from 'vue';
+  import { onMounted, ref, defineComponent } from 'vue';
   import { useMutation } from '@vue/apollo-composable';
   import Dropzone from 'dropzone';
 
   export default defineComponent({
     name: 'Dropzone',
-    props: {
-      progress: {
-        type: [String, Number, Object] as PropType<any>,
-        require: false,
-        default: undefined,
-      },
-    },
-    emits: ['update:progress'],
     setup(props, { emit }) {
-      const { errorMessages, total, failed, success, increaseSuccessCounter, clearDropzoneErrorMessages, clearDropzoneCounters, getDropzoneSettings, increaseFailedCounter, setTotalCounter } = useDropzoneHelper();
-      const { mutate, onDone, onError } = useMutation<PostMediaFileMutation>(PostMediaFileDocument);
+      const { myDropzone, isUploading, selectedFiles, errorMessages, total, failed, success, increaseSuccessCounter, clearDropzoneErrorMessages, clearDropzoneCounters, getDropzoneSettings, setTotalCounter } = useDropzoneHelper();
+      const { onDone } = useMutation<PostMediaFileMutation>(PostMediaFileDocument);
       const dropzonePreviewDiv = ref<HTMLDivElement | undefined>(undefined);
       const dropzoneDiv = ref<HTMLDivElement | undefined>(undefined);
-      const doUpload = ref<() => void | undefined>();
-      const uploading = ref<boolean>(false);
+      const triggerUpload = ref<() => void | undefined>();
       const fileCount = ref<number>(0);
-
+      clearDropzoneErrorMessages();
+      
       onMounted(async () => {
         if (dropzoneDiv.value && dropzonePreviewDiv) {
-          const myDropzone = new Dropzone(dropzoneDiv.value, getDropzoneSettings(dropzonePreviewDiv));
+          myDropzone.value = new Dropzone(dropzoneDiv.value, getDropzoneSettings(dropzonePreviewDiv));
 
           const updateFileCount = () => {
-            if (myDropzone) {
-              fileCount.value = myDropzone?.files.length;
+            if (myDropzone.value) {
+              fileCount.value = myDropzone.value?.files.length;
             }
           };
 
-          myDropzone.on('removedfile', (value: any) => {
+          myDropzone.value.on('removedfile', (value: any) => {
             updateFileCount();
           });
 
-          myDropzone.on('addedfile', (value: any) => {
+          myDropzone.value.on('addedfile', (value: any) => {
             clearDropzoneCounters();
             clearDropzoneErrorMessages();
             updateFileCount();
@@ -190,16 +182,10 @@
             increaseSuccessCounter();
           });
 
-          doUpload.value = () => {
-            uploading.value = true;
-            setTotalCounter(myDropzone.files.length);
-            myDropzone.files.forEach((file: any) => {
-              mutate({
-                mediaFileInput: { filename: file.upload.filename, metadata: [] },
-                file: file,
-              });
-            });
-            myDropzone.removeAllFiles();
+          triggerUpload.value = () => {
+            isUploading.value = true;
+            selectedFiles.value = myDropzone.value.files;
+            setTotalCounter(myDropzone.value.files.length);
           };
         }
       });
@@ -209,7 +195,7 @@
         errorMessages,
         dropzoneDiv,
         fileCount,
-        doUpload,
+        triggerUpload,
         success,
         failed,
         total,

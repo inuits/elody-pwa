@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, watch, ref, reactive, onMounted } from 'vue';
+  import { computed, defineComponent, watch, ref, reactive } from 'vue';
   import { useMutation, useQuery } from '@vue/apollo-composable';
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import Meta from '@/components/Meta.vue';
@@ -74,6 +74,8 @@
     Maybe,
     MediaFile,
     GetEntityByIdQueryVariables,
+    PostMediaFileMutation,
+    PostMediaFileDocument,
   } from '@/queries';
   import { usePageTitle } from '@/components/TheHeader.vue';
   import { useEditMode } from '@/components/EditToggle.vue';
@@ -85,7 +87,9 @@
   import VideoPlayer from '@/components/base/VideoPlayer.vue';
   import AudioPlayer from '@/components/base/AudioPlayer.vue';
   import PDFViewer from '@/components/base/PDFViewer.vue';
-
+  import useDropzoneHelper from '@/composables/useDropzoneHelper';
+  import useMediaAssetLinkHelper from '@/composables/useMediaAssetLinkHelper';
+  import useMetaDataHelper from '@/composables/useMetaDataHelper';
   export default defineComponent({
     name: 'SingleEntity',
     components: {
@@ -97,13 +101,16 @@
       PDFViewer,
     },
     setup() {
+      const { myDropzone, isUploading, selectedFiles, increaseSuccessCounter } = useDropzoneHelper();
+      const { addMediaFileToLinkList, linkMediaFilesToEntity } = useMediaAssetLinkHelper();
+      const { lastAdjustedMediaFileMetaData } = useMetaDataHelper();
       const id = asString(useRoute().params['id']);
       const loading = ref<boolean>(true);
       const { mediafileSelectionState, updateSelectedEntityMediafile } =
         useEntityMediafileSelector();
 
       const mediafiles = ref<MediaFile[]>([]);
-      const { editMode, showEditToggle, hideEditToggle } = useEditMode();
+      const { editMode, showEditToggle } = useEditMode();
       const { updatePageTitle } = usePageTitle();
 
       const queryVariables = reactive<GetEntityByIdQueryVariables>({
@@ -126,8 +133,49 @@
         return undefined;
       });
 
+      const { mutate, onDone } = useMutation<PostMediaFileMutation>(PostMediaFileDocument);
+
       watch(title, (value: Maybe<string> | undefined) => {
         value && updatePageTitle(value, 'entityTitle');
+      });
+
+      watch(() => isUploading.value, () => {
+        if (isUploading.value) {
+          selectedFiles.value.forEach((file: any) => {
+            mutate({
+              mediaFileInput: { filename: file.upload.filename },
+              file: file,
+            });
+          });
+          myDropzone.value.removeAllFiles();
+          isUploading.value = false;
+        }
+      });
+
+      const updateListWhenChanges = (newValue: any, oldValue: any) => {
+        if (lastAdjustedMediaFileMetaData.value && oldValue && (JSON.stringify(newValue) !== JSON.stringify(oldValue))) {
+          const index = mediafiles.value.findIndex((x: MediaFile) => x._id.replace('mediafiles/','',) === lastAdjustedMediaFileMetaData.value.mediafileId);
+          if (mediafiles.value[index] && mediafiles.value[index].metadata) {
+            mediafiles.value[index].metadata = lastAdjustedMediaFileMetaData.value.mediaFileInput;
+          }
+        }
+      };
+
+      watch(() => lastAdjustedMediaFileMetaData.value, (newValue: any, oldValue: any) => {
+        updateListWhenChanges(newValue, oldValue);
+      }, { deep: true });
+
+      onDone((value) => {
+        if (value.data && value.data.postMediaFile) {
+          mediafiles.value.push(value.data.postMediaFile);
+          addMediaFileToLinkList(value.data.postMediaFile);
+        }        
+        increaseSuccessCounter();
+      });
+
+      onBeforeRouteUpdate(async (to, from) => {
+        //@ts-ignore
+        queryVariables.id = to.params.id;
       });
 
       onResult((queryResult) => {
@@ -164,6 +212,11 @@
       });
 
       document.addEventListener('save', () => {
+        linkMediaFilesToEntity();
+        refetch();
+      });
+
+      document.addEventListener('discard', () => {
         refetch();
       });
 

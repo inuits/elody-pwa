@@ -1,0 +1,34 @@
+import { ref } from 'vue';
+
+const metaDataPatchList = ref<any>({});
+const lastAdjustedMediaFileMetaData = ref<any>();
+
+const useMetaDataHelper = () => {
+
+  const clearMediaFilesToPatch = (): void => {
+    metaDataPatchList.value = {};
+    lastAdjustedMediaFileMetaData.value = {};
+  };
+
+  const addOrUpdateList = (mediafileId: string, mediaFileInput: any) => {
+    if (mediafileId && mediaFileInput && mediaFileInput.length > 0) {
+      const adjustedMediaFileInput = [...mediaFileInput].map((x:any) => Object.assign({}, x, { __typename: "MediaFileMetadata" }));
+      lastAdjustedMediaFileMetaData.value  = {mediafileId:mediafileId, mediaFileInput:adjustedMediaFileInput};
+      metaDataPatchList.value[mediafileId] = {mediafileId:mediafileId, mediaFileInput:mediaFileInput};
+    }
+  };
+
+  const removeFromMetaDataPatchList = (mediafileId: string) => {
+    delete metaDataPatchList.value[mediafileId];
+  };
+
+  return {
+    clearMediaFilesToPatch,
+    metaDataPatchList,
+    addOrUpdateList,
+    removeFromMetaDataPatchList,
+    lastAdjustedMediaFileMetaData
+  };
+};
+
+export default useMetaDataHelper;
