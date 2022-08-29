@@ -130,9 +130,9 @@ type MediaFile {
   entities: [String]
   metadata: [MediaFileMetadata]
   mimetype: String
-  is_primary: Boolean
-  is_thumbnail: Boolean
   isPublic: Boolean
+  is_primary: Boolean
+  is_primary_thumbnail: Boolean
 }
 
 input MediaFileInput {
@@ -354,7 +354,6 @@ input Filters {
 
 type Query {
   Entity(id: String!): Entity
-  SetMediaPrimaire(entity_id: String!, mediafile_id: String!): String
   Entities(
     limit: Int
     skip: Int
