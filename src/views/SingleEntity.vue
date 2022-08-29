@@ -213,6 +213,11 @@
       });
 
       document.addEventListener('save', () => {
+        linkMediaFilesToEntity();
+        refetch();
+      });
+
+      document.addEventListener('discard', () => {
         refetch();
       });
 
