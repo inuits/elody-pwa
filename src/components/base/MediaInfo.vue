@@ -24,7 +24,7 @@
 
         <div class="label">{{t('media-info.thumbnail')}}</div>
         <div class="value h-5 w-5">
-          <Icon v-if="mediafileSelectionState.selectedMediafile.is_thumbnail" :name="Unicons.Check.name" />
+          <Icon v-if="mediafileSelectionState.selectedMediafile.is_primary_thumbnail" :name="Unicons.Check.name" />
           <Icon v-else :name="Unicons.Cross.name" />
         </div>
       </div>
@@ -49,7 +49,7 @@
       <div class="flex justify-between">
         <span class="ml-1 text-neutral-700 text-sm">{{t('media-info.thumbnail')}}</span>
         <div class="value h-5 w-5">
-          <Icon v-if="mediafileSelectionState.selectedMediafile.is_thumbnail" :name="Unicons.Check.name" />
+          <Icon v-if="mediafileSelectionState.selectedMediafile.is_primary_thumbnail" :name="Unicons.Check.name" />
           <Icon v-else :name="Unicons.Cross.name" />
         </div>
       </div>
@@ -107,7 +107,7 @@
 
       const setIsThumbnailPrimaireFalse = () => {
         mediafiles.value.forEach((mediafile: MediaFile) => {
-          mediafile.is_thumbnail = false;
+          mediafile.is_primary_thumbnail = false;
         });
       };
 
@@ -125,7 +125,7 @@
 
       const setMediaThumbnail = async (input: any) => {
         setIsThumbnailPrimaireFalse();
-        input.is_thumbnail = true;
+        input.is_primary_thumbnail = true;
         addSaveCallback(async () => {
             await mutateThumbnail({
             entity_id: route.params['id'],

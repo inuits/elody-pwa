@@ -105,7 +105,7 @@ fragment fullEntity on Entity {
         value
       }
       is_primary
-      is_thumbnail
+      is_primary_thumbnail
     }
   }
 }

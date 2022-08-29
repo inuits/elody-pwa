@@ -44,8 +44,8 @@ import useMetaDataHelper from '@/composables/useMetaDataHelper';
     const discardEvent = new Event('discard');
     const save = () => {
       linkMediaFilesToEntity(addSaveCallback);
-      saveCallbacks.value.forEach(async (callback: callback) => {
-        await callback().then(() => {
+      saveCallbacks.value.forEach((callback: callback) => {
+        callback().then(() => {
           if (isEdit.value) {
             saveCallbacks.value = [];
             disableEditMode();
