@@ -6,7 +6,6 @@ import { useRoute } from 'vue-router';
 const linkList = ref<Array<MediaFile>>([]);
 
 const useMediaAssetLinkHelper = () => {
-
   const { mutate } = useMutation<LinkMediafileToEntityMutation>(LinkMediafileToEntityDocument);
   const route = useRoute();
 
@@ -22,7 +21,7 @@ const useMediaAssetLinkHelper = () => {
     linkList.value.push(mediaFile);
   };
 
-  const linkMediaFilesToEntity = () => {
+  const linkMediaFilesToEntity = (addSaveCallback: any) => {
     linkList.value.forEach((mediaFile: MediaFile) => {
 
       mediaFile.metadata?.forEach((meta: any) => {
@@ -31,11 +30,14 @@ const useMediaAssetLinkHelper = () => {
 
       delete mediaFile['__typename'];
 
-      mutate({
-        entityId: route.params['id'],
-        mediaFileInput: mediaFile
-      });
-    });
+      addSaveCallback(async () => {
+        await mutate({
+          entityId: route.params['id'],
+          mediaFileInput: mediaFile
+        });
+      }, true);
+      
+    }, true);
     clearMediaFilesToLinkToEntity();
   };
 

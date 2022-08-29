@@ -90,6 +90,8 @@
   import useDropzoneHelper from '@/composables/useDropzoneHelper';
   import useMediaAssetLinkHelper from '@/composables/useMediaAssetLinkHelper';
   import useMetaDataHelper from '@/composables/useMetaDataHelper';
+  export const mediafiles = ref<MediaFile[]>([]);
+  
   export default defineComponent({
     name: 'SingleEntity',
     components: {
@@ -102,14 +104,13 @@
     },
     setup() {
       const { myDropzone, isUploading, selectedFiles, increaseSuccessCounter } = useDropzoneHelper();
-      const { addMediaFileToLinkList, linkMediaFilesToEntity } = useMediaAssetLinkHelper();
+      const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
       const { lastAdjustedMediaFileMetaData } = useMetaDataHelper();
       const id = asString(useRoute().params['id']);
       const loading = ref<boolean>(true);
       const { mediafileSelectionState, updateSelectedEntityMediafile } =
         useEntityMediafileSelector();
 
-      const mediafiles = ref<MediaFile[]>([]);
       const { editMode, showEditToggle } = useEditMode();
       const { updatePageTitle } = usePageTitle();
 
@@ -212,7 +213,6 @@
       });
 
       document.addEventListener('save', () => {
-        linkMediaFilesToEntity();
         refetch();
       });
 

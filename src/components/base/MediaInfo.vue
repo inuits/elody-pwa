@@ -61,11 +61,11 @@
         @click="setMediaThumbnail(mediafileSelectionState.selectedMediafile)"
       />
     </div>
-    <meta-edit-media v-if="isEdit && form?.Form" :form="form?.Form" />
+    <meta-edit-media v-if="isEdit && form?.Form" :form="form?.Form" :entityTitle="''" />
   </div>
 </template>
 <script lang="ts">
-  import { GetFormsDocument, SetMediaPrimaireDocument, SetMediaPrimaireMutation, SetThumbnailPrimaireDocument, SetThumbnailPrimaireMutation} from '@/queries';
+  import { GetFormsDocument, MediaFile, SetMediaPrimaireDocument, SetMediaPrimaireMutation, SetThumbnailPrimaireDocument, SetThumbnailPrimaireMutation} from '@/queries';
   import { useQuery } from '@vue/apollo-composable';
   import BaseButton from '../base/BaseButton.vue';
   import { defineComponent } from 'vue';
@@ -76,8 +76,9 @@
   import { Unicons } from '@/types';
   import { useI18n } from 'vue-i18n';
   import { useMutation } from '@vue/apollo-composable';
+  import { mediafiles } from '@/views/SingleEntity.vue';
   import { useRoute } from 'vue-router';
-  const { isEdit } = useEditMode();
+  const { isEdit, addSaveCallback } = useEditMode();
 
   export default defineComponent({
     name: 'MediaInfo',
@@ -98,20 +99,42 @@
         SetThumbnailPrimaireDocument,
       );
 
-      const setMediaPrimaire = async (input: any) => {
-        await mutatePrimary({
-          entity_id: route.params['id'],
-          mediafile_id: input._id.replace('mediafiles/','')         
+      const setMediaPrimaireFalse = () => {
+        mediafiles.value.forEach((mediafile: MediaFile) => {
+          mediafile.is_primary = false;
         });
       };
 
-      const setMediaThumbnail = async (input: any) => {
-       
-        await mutateThumbnail({
-          entity_id: route.params['id'],
-          mediafile_id:  input._id.replace('mediafiles/','')    
+      const setIsThumbnailPrimaireFalse = () => {
+        mediafiles.value.forEach((mediafile: MediaFile) => {
+          mediafile.is_thumbnail = false;
         });
       };
+
+      const setMediaPrimaire = async (input: any) => {
+        setMediaPrimaireFalse();
+        input.is_primary = true;
+        addSaveCallback(async () => {
+          await mutatePrimary({
+            entity_id: route.params['id'],
+            mediafile_id: input._id.replace('mediafiles/','')         
+          });
+        });
+        
+      };
+
+      const setMediaThumbnail = async (input: any) => {
+        setIsThumbnailPrimaireFalse();
+        input.is_thumbnail = true;
+        addSaveCallback(async () => {
+            await mutateThumbnail({
+            entity_id: route.params['id'],
+            mediafile_id:  input._id.replace('mediafiles/','')    
+          });
+        });
+      };
+
+      
 
       return { isEdit, form, mediafileSelectionState, Unicons, setMediaPrimaire, setMediaThumbnail, t };
     },

@@ -16,6 +16,8 @@
   import { Unicons } from '@/types';
   import { toBeDeleted } from '@/components/EntityImageSelection.vue';
   import { useRouter } from 'vue-router';
+  import useMediaAssetLinkHelper from '@/composables/useMediaAssetLinkHelper';
+import useMetaDataHelper from '@/composables/useMetaDataHelper';
   export type EditModes = 'edit' | 'view' | 'loading';
   export type callback = (e?: Event | undefined) => Promise<unknown>;
 
@@ -24,17 +26,26 @@
   const isEditToggleVisible = ref<boolean>(false);
 
   export const useEditMode = () => {
+    const { linkMediaFilesToEntity, clearMediaFilesToLinkToEntity } = useMediaAssetLinkHelper();
+      const { clearMediaFilesToPatch } = useMetaDataHelper();
     const setEditMode = () => (editMode.value = 'edit');
     const disableEditMode = () => (editMode.value = 'view');
     const isEdit = computed<boolean>(() => editMode.value === 'edit');
-    const addSaveCallback = (input: callback) => saveCallbacks.value.push(input);
+    const addSaveCallback = (input: callback, first?: boolean) => {
+      if (first) {
+        saveCallbacks.value.unshift(input);
+      } else {
+        saveCallbacks.value.push(input);
+      }
+    };
     const showEditToggle = () => (isEditToggleVisible.value = true);
     const hideEditToggle = () => (isEditToggleVisible.value = false);
     const saveEvent = new Event('save');
     const discardEvent = new Event('discard');
     const save = () => {
-      saveCallbacks.value.forEach((callback: callback) => {
-        callback().then(() => {
+      linkMediaFilesToEntity(addSaveCallback);
+      saveCallbacks.value.forEach(async (callback: callback) => {
+        await callback().then(() => {
           if (isEdit.value) {
             saveCallbacks.value = [];
             disableEditMode();
@@ -49,6 +60,8 @@
       saveCallbacks.value = [];
       toBeDeleted.value = [];
       document.dispatchEvent(discardEvent);
+      clearMediaFilesToLinkToEntity();
+      clearMediaFilesToPatch();
     };
 
     return {
