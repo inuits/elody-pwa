@@ -58,14 +58,14 @@
         bg-color="neutral-100"
         bg-hover-color="neutral-400"
         txt-color="neutral-0"
-        @click="setMediaThumbnail()"
+        @click="setMediaThumbnail(mediafileSelectionState.selectedMediafile)"
       />
     </div>
     <meta-edit-media v-if="isEdit && form?.Form" :form="form?.Form" />
   </div>
 </template>
 <script lang="ts">
-  import { GetFormsDocument, SetMediaPrimaireDocument, SetMediaPrimaireMutation } from '@/queries';
+  import { GetFormsDocument, SetMediaPrimaireDocument, SetMediaPrimaireMutation, SetThumbnailPrimaireDocument, SetThumbnailPrimaireMutation} from '@/queries';
   import { useQuery } from '@vue/apollo-composable';
   import BaseButton from '../base/BaseButton.vue';
   import { defineComponent } from 'vue';
@@ -90,26 +90,26 @@
         type: 'media',
       });
 
-      const { mutate } = useMutation<SetMediaPrimaireMutation>(
+      const { mutate: mutatePrimary } = useMutation<SetMediaPrimaireMutation>(
         SetMediaPrimaireDocument,
       );
 
+      const { mutate: mutateThumbnail } = useMutation<SetThumbnailPrimaireMutation>(
+        SetThumbnailPrimaireDocument,
+      );
+
       const setMediaPrimaire = async (input: any) => {
-        console.log('INPUT: ', input);
-        await mutate({
+        await mutatePrimary({
           entity_id: route.params['id'],
           mediafile_id: input._id.replace('mediafiles/','')         
         });
       };
 
-      const setMediaThumbnail = async () => {
-        const { mutate } = useMutation<SetMediaPrimaireMutation>(
-          SetMediaPrimaireDocument,
-        );
-        console.log('SET MEDIA THUMBNAIL');
-        await mutate({
-          entity_id: 'ID1',
-          mediafile_id: "input._id.replace('mediafiles/','')"   
+      const setMediaThumbnail = async (input: any) => {
+       
+        await mutateThumbnail({
+          entity_id: route.params['id'],
+          mediafile_id:  input._id.replace('mediafiles/','')    
         });
       };
 

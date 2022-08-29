@@ -496,6 +496,9 @@ mutation setMediaPrimaire($entity_id: String!, $mediafile_id: String!) {
   setMediaPrimaire(entity_id: $entity_id, mediafile_id: $mediafile_id)
 }
 
+mutation setThumbnailPrimaire($entity_id: String!, $mediafile_id: String!) {
+  setThumbnailPrimaire(entity_id: $entity_id, mediafile_id: $mediafile_id)
+}
 
 query GetForms($type: String!) {
   Form(type: $type) {
