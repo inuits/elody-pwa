@@ -383,7 +383,8 @@ type Mutation {
     MediaFileMetadata: [MediaFileMetadataInput]!
   ): MediaFile
   uploadFile(id: String!, file: Upload!): String,
-  setMediaPrimaire(entity_id: String!, mediafile_id: String!): String
+  setMediaPrimaire(entity_id: String!, mediafile_id: String!): String,
+  setThumbnailPrimaire(entity_id: String!, mediafile_id: String!): String
 }
 
 enum deletePaths {
