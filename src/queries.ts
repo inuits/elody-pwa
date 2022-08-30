@@ -480,6 +480,7 @@ export type SearchFilter = {
 };
 
 export enum SearchInputType {
+  AdvancedInputMediaFilesType = 'AdvancedInputMediaFilesType',
   AdvancedInputType = 'AdvancedInputType',
   SimpleInputtype = 'SimpleInputtype'
 }
