@@ -10,7 +10,6 @@ interface Entity {
   uuid: String!
   type: String!
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
-  media: Media
   form: Form
 }
 
@@ -21,6 +20,16 @@ type BaseEntity implements Entity {
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
   media: Media
   form: Form
+}
+
+type MediaFileEntity implements Entity {
+  id: String!
+  uuid: String!
+  type: String!
+  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
+  media: Media
+  form: Form
+  teaserMetadata: [MetadataAndRelation]
 }
 
 type Asset implements Entity {
@@ -54,6 +63,14 @@ type Frame implements Entity {
   form: Form
 }
 
+type Testimony implements Entity {
+  id: String!
+  uuid: String!
+  type: String!
+  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
+  form: Form
+}
+
 type boxEntity implements Entity {
   id: String!
   uuid: String!
@@ -68,20 +85,10 @@ type person implements Entity {
   uuid: String!
   type: String!
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
-  media: Media
   form: Form
 }
 
-type museum implements Entity {
-  id: String!
-  uuid: String!
-  type: String!
-  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
-  media: Media
-  form: Form
-}
-
-type thesaurus implements Entity {
+type SimpleEntity implements Entity {
   id: String!
   uuid: String!
   type: String!
@@ -202,6 +209,7 @@ input MultiSelectInput {
 }
 
 enum SearchInputType {
+  AdvancedInputMediaFilesType
   AdvancedInputType
   SimpleInputtype
 }
@@ -406,8 +414,8 @@ type Mutation {
     MediafileId: String!
     MediaFileMetadata: [MediaFileMetadataInput]!
   ): MediaFile
-  uploadFile(id: String!, file: Upload!): String,
-  setMediaPrimaire(entity_id: String!, mediafile_id: String!): String,
+  uploadFile(id: String!, file: Upload!): String
+  setMediaPrimaire(entity_id: String!, mediafile_id: String!): String
   setThumbnailPrimaire(entity_id: String!, mediafile_id: String!): String
 }
 
