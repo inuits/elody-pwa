@@ -42,26 +42,26 @@ import useMetaDataHelper from '@/composables/useMetaDataHelper';
     const hideEditToggle = () => (isEditToggleVisible.value = false);
     const saveEvent = new Event('save');
     const discardEvent = new Event('discard');
-    const save = () => {
+    const save = async () => {
       linkMediaFilesToEntity(addSaveCallback);
-      saveCallbacks.value.forEach((callback: callback) => {
-        callback().then(() => {
+      for (const callback of saveCallbacks.value) {
+        await callback().then(() => {
           if (isEdit.value) {
             saveCallbacks.value = [];
             disableEditMode();
-            document.dispatchEvent(saveEvent);
           }
         });
-      });
+      }
+      document.dispatchEvent(saveEvent);
     };
 
     const discard = () => {
       disableEditMode();
       saveCallbacks.value = [];
       toBeDeleted.value = [];
-      document.dispatchEvent(discardEvent);
       clearMediaFilesToLinkToEntity();
       clearMediaFilesToPatch();
+      document.dispatchEvent(discardEvent);
     };
 
     return {
