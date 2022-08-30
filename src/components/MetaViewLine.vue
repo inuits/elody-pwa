@@ -1,11 +1,6 @@
 <template>
   <div v-for="item in metadata" :key="item.label" class="flex flex-col mb-2 mt-2">
-    <div
-      v-if="item.label && item.label != item.key"
-      class="label"
-      :class="{ loading }"
-      data-test="meta-label"
-    >
+    <div v-if="item.label" class="label" :class="{ loading }" data-test="meta-label">
       {{ checkTranslationForlabel(item.label) }}
     </div>
     <div v-else-if="item.label != item.key" class="label" :class="{ loading }">
