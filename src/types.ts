@@ -27,7 +27,9 @@ import {
   uniFilter,
   uniVolume,
   uniCreateDashboard,
-  uniImageRedo
+  uniImageRedo,
+  uniCheck,
+  uniTimes
 } from 'vue-unicons/dist/icons';
 
 export enum Unicons {
@@ -59,4 +61,6 @@ export enum Unicons {
   Filter = uniFilter,
   AudioThumbnail = uniVolume,
   Create = uniCreateDashboard,
+  Check = uniCheck,
+  Cross = uniTimes
 }

@@ -104,6 +104,8 @@ fragment fullEntity on Entity {
         key
         value
       }
+      is_primary
+      is_primary_thumbnail
     }
   }
 }
@@ -548,6 +550,14 @@ mutation createEntity($data: EntityInput!) {
   createEntity(entity: $data) {
     ...fullEntity
   }
+}
+
+mutation setMediaPrimaire($entity_id: String!, $mediafile_id: String!) {
+  setMediaPrimaire(entity_id: $entity_id, mediafile_id: $mediafile_id)
+}
+
+mutation setThumbnailPrimaire($entity_id: String!, $mediafile_id: String!) {
+  setThumbnailPrimaire(entity_id: $entity_id, mediafile_id: $mediafile_id)
 }
 
 query GetForms($type: String!) {

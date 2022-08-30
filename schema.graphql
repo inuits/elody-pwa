@@ -131,6 +131,8 @@ type MediaFile {
   metadata: [MediaFileMetadata]
   mimetype: String
   isPublic: Boolean
+  is_primary: Boolean
+  is_primary_thumbnail: Boolean
 }
 
 input MediaFileInput {
@@ -402,7 +404,9 @@ type Mutation {
     MediafileId: String!
     MediaFileMetadata: [MediaFileMetadataInput]!
   ): MediaFile
-  uploadFile(id: String!, file: Upload!): String
+  uploadFile(id: String!, file: Upload!): String,
+  setMediaPrimaire(entity_id: String!, mediafile_id: String!): String,
+  setThumbnailPrimaire(entity_id: String!, mediafile_id: String!): String
 }
 
 enum deletePaths {
