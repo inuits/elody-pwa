@@ -23,6 +23,16 @@ type BaseEntity implements Entity {
   form: Form
 }
 
+type MediaFileEntity implements Entity {
+  id: String!
+  uuid: String!
+  type: String!
+  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
+  media: Media
+  form: Form
+  teaserMetadata: [MetadataAndRelation]
+}
+
 type Asset implements Entity {
   id: String!
   uuid: String!
