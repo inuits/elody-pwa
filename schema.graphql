@@ -32,6 +32,16 @@ type MediaFileEntity implements Entity {
   teaserMetadata: [MetadataAndRelation]
 }
 
+type MediaFileEntity implements Entity {
+  id: String!
+  uuid: String!
+  type: String!
+  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
+  media: Media
+  form: Form
+  teaserMetadata: [MetadataAndRelation]
+}
+
 type Asset implements Entity {
   id: String!
   uuid: String!
@@ -76,11 +86,10 @@ type boxEntity implements Entity {
   uuid: String!
   type: String!
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
-  media: Media
   form: Form
 }
 
-type person implements Entity {
+type boxEntity implements Entity {
   id: String!
   uuid: String!
   type: String!
@@ -93,7 +102,6 @@ type SimpleEntity implements Entity {
   uuid: String!
   type: String!
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
-  media: Media
   form: Form
 }
 
@@ -423,8 +431,8 @@ type Mutation {
     MediafileId: String!
     MediaFileMetadata: [MediaFileMetadataInput]!
   ): MediaFile
-  uploadFile(id: String!, file: Upload!): String,
-  setMediaPrimaire(entity_id: String!, mediafile_id: String!): String,
+  uploadFile(id: String!, file: Upload!): String
+  setMediaPrimaire(entity_id: String!, mediafile_id: String!): String
   setThumbnailPrimaire(entity_id: String!, mediafile_id: String!): String
 }
 
