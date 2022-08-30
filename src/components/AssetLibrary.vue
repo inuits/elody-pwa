@@ -82,6 +82,7 @@
             "
           >
             <template #actions>
+              {{entity}}
               <BaseButton
                 v-if="enableSelection"
                 :loading="loading"
