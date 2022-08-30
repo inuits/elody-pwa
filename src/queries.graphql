@@ -209,7 +209,7 @@ fragment fullEntityRecursive on Entity {
         }
         ... on person {
           ...minimalBaseEntity
-          teaserMetadata: metadata(keys: ["fullname"], excludeOrInclude: include) {
+          teaserMetadata: metadata(keys: ["description"], excludeOrInclude: include) {
             __typename
             ... on Metadata {
               ...metadata
@@ -221,7 +221,7 @@ fragment fullEntityRecursive on Entity {
         }
         ... on SimpleEntity {
           ...minimalBaseEntity
-          teaserMetadata: metadata(keys: ["title"], excludeOrInclude: include) {
+          teaserMetadata: metadata(keys: ["fullname"], excludeOrInclude: include) {
             __typename
             ... on Metadata {
               ...metadata
@@ -347,7 +347,19 @@ fragment fullEntityRecursive on Entity {
                   ... on MetadataRelation {
                     ...metadataRelation
                     linkedEntity {
-                      ...fullEntity
+                      ... on MediaFileEntity {
+          ...minimalBaseEntity
+          teaserMetadata: metadata(keys: ["filename"], excludeOrInclude: include) {
+            __typename
+            ... on Metadata {
+              ...metadata
+            }
+            ... on MetadataRelation {
+              ...metadataRelation
+            }
+          }
+        }
+        ...fullEntity
                       ... on Asset {
                         ...minimalBaseEntity
                         media {
@@ -651,6 +663,27 @@ query getEntities(
       }
       ... on IntermediateEntity {
         teaserMetadata: metadata(keys: ["title"], excludeOrInclude: include) {
+          __typename
+          ... on Metadata {
+            key
+            value
+            label
+            immutable
+          }
+          ... on MetadataRelation {
+            key
+            value
+            label
+            type
+            metadataOnRelation {
+              key
+              value
+            }
+          }
+        }
+      }
+      ... on MediaFileEntity {
+        teaserMetadata: metadata(keys: ["filename"], excludeOrInclude: include) {
           __typename
           ... on Metadata {
             key
