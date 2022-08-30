@@ -91,7 +91,7 @@
   import useMediaAssetLinkHelper from '@/composables/useMediaAssetLinkHelper';
   import useMetaDataHelper from '@/composables/useMetaDataHelper';
   export const mediafiles = ref<MediaFile[]>([]);
-  
+
   export default defineComponent({
     name: 'SingleEntity',
     components: {
@@ -103,7 +103,8 @@
       PDFViewer,
     },
     setup() {
-      const { myDropzone, isUploading, selectedFiles, increaseSuccessCounter } = useDropzoneHelper();
+      const { myDropzone, isUploading, selectedFiles, increaseSuccessCounter } =
+        useDropzoneHelper();
       const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
       const { lastAdjustedMediaFileMetaData } = useMetaDataHelper();
       const id = asString(useRoute().params['id']);
@@ -134,43 +135,60 @@
         return undefined;
       });
 
-      const { mutate, onDone } = useMutation<PostMediaFileMutation>(PostMediaFileDocument);
+      const { mutate, onDone } =
+        useMutation<PostMediaFileMutation>(PostMediaFileDocument);
 
       watch(title, (value: Maybe<string> | undefined) => {
         value && updatePageTitle(value, 'entityTitle');
       });
 
-      watch(() => isUploading.value, () => {
-        if (isUploading.value) {
-          selectedFiles.value.forEach((file: any) => {
-            mutate({
-              mediaFileInput: { filename: file.upload.filename },
-              file: file,
+      watch(
+        () => isUploading.value,
+        () => {
+          if (isUploading.value) {
+            selectedFiles.value.forEach((file: any) => {
+              mutate({
+                mediaFileInput: { filename: file.upload.filename },
+                file: file,
+              });
             });
-          });
-          myDropzone.value.removeAllFiles();
-          isUploading.value = false;
-        }
-      });
+            myDropzone.value.removeAllFiles();
+            isUploading.value = false;
+          }
+        },
+      );
 
       const updateListWhenChanges = (newValue: any, oldValue: any) => {
-        if (lastAdjustedMediaFileMetaData.value && oldValue && (JSON.stringify(newValue) !== JSON.stringify(oldValue))) {
-          const index = mediafiles.value.findIndex((x: MediaFile) => x._id.replace('mediafiles/','',) === lastAdjustedMediaFileMetaData.value.mediafileId);
+        if (
+          lastAdjustedMediaFileMetaData.value &&
+          oldValue &&
+          JSON.stringify(newValue) !== JSON.stringify(oldValue)
+        ) {
+          const index = mediafiles.value.findIndex(
+            (x: MediaFile) =>
+              x._id.replace('mediafiles/', '') ===
+              lastAdjustedMediaFileMetaData.value.mediafileId,
+          );
           if (mediafiles.value[index] && mediafiles.value[index].metadata) {
-            mediafiles.value[index].metadata = lastAdjustedMediaFileMetaData.value.mediaFileInput;
+            mediafiles.value[index].metadata =
+              lastAdjustedMediaFileMetaData.value.mediaFileInput;
           }
         }
       };
 
-      watch(() => lastAdjustedMediaFileMetaData.value, (newValue: any, oldValue: any) => {
-        updateListWhenChanges(newValue, oldValue);
-      }, { deep: true });
+      watch(
+        () => lastAdjustedMediaFileMetaData.value,
+        (newValue: any, oldValue: any) => {
+          updateListWhenChanges(newValue, oldValue);
+        },
+        { deep: true },
+      );
 
       onDone((value) => {
         if (value.data && value.data.postMediaFile) {
           mediafiles.value.push(value.data.postMediaFile);
           addMediaFileToLinkList(value.data.postMediaFile);
-        }        
+        }
         increaseSuccessCounter();
       });
 
@@ -213,7 +231,6 @@
       });
 
       document.addEventListener('save', () => {
-        linkMediaFilesToEntity();
         refetch();
       });
 
