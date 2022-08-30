@@ -200,6 +200,7 @@
       onResult((queryResult) => {
         if (
           queryResult.data &&
+          queryResult.data.Entity?.__typename === 'Asset' &&
           queryResult.data.Entity?.media?.mediafiles &&
           queryResult.data.Entity?.media?.mediafiles?.length > 0
         ) {
