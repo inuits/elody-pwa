@@ -78,7 +78,7 @@
             :thumb-icon="Unicons.NoImage.name"
             @click="
               !enableSelection &&
-                router.push({ name: 'SingleEntity', params: { id: entity.id } })
+                router.push({ name: listItemRouteName, params: { id: entity.id } })
             "
           >
             <template #actions>
@@ -95,7 +95,7 @@
                 :loading="loading"
                 class="ml-2"
                 :icon="Unicons.Eye.name"
-                @click="router.push({ name: 'SingleEntity', params: { id: entity.id } })"
+                @click="router.push({ name: listItemRouteName, params: { id: entity.id } })"
               />
             </template>
           </ListItem>
@@ -123,6 +123,7 @@
     GetEntitiesDocument,
     SearchInputType,
     GetEntitiesQueryVariables,
+    Maybe,
   } from '@/queries';
   import FilterSideBar from '@/components/FilterSideBar.vue';
   import IconToggle from '@/components/base/IconToggle.vue';
@@ -141,12 +142,16 @@
       InputField
     },
     props: {
+      listItemRouteName: {
+        type: String,
+        required: true,
+      },
       hasSimpleSearch: Boolean,
       SearchInputTypeOnDrawer: {
-        type: String
+        type: Object as PropType<Maybe<SearchInputType>>,
       },
       SearchInputType: {
-        type: String
+        type: Object as PropType<Maybe<SearchInputType>>,
       },
       enableSelection: {
         type: Boolean,
