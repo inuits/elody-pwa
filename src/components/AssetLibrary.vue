@@ -75,7 +75,7 @@
             :key="entity.id"
             :meta="entity.teaserMetadata"
             :media="entity.media ? entity.media.primaryMediafile : null"
-            :thumb-icon="Unicons.NoImage.name"
+            :thumb-icon="entity.media ? Unicons.NoImage.name : null"
             @click="
               !enableSelection &&
                 router.push({ name: 'SingleEntity', params: { id: entity.id } })
