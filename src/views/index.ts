@@ -26,7 +26,7 @@ export const routes: RouteRecordRaw[] = [
     component: Mediafiles,
     children: [
       {
-        path: '/:id',
+        path: ':id',
         name: 'SingleMediafile',
         meta: { title: 'Single Mediafile', requiresAuth: true, showEntityTitle: true },
         component: () => import(/* webpackChunkName: "about" */ './SingleEntity.vue'),

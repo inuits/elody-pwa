@@ -2,7 +2,8 @@
   <Library 
     :hasSimpleSearch="false" 
     :SearchInputTypeOnDrawer="SearchInputType.AdvancedInputType" 
-    :SearchInputType="SearchInputType.SimpleInputtype" 
+    :SearchInputType="SearchInputType.SimpleInputtype"
+    :listItemRouteName="'SingleEntity'"
   />
 </template>
 
