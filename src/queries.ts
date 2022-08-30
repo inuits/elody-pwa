@@ -229,6 +229,8 @@ export type MediaFileInput = {
   entities?: Maybe<Array<Maybe<Scalars['String']>>>;
   metadata?: Maybe<Array<Maybe<MediaFileMetadataInput>>>;
   mimetype?: Maybe<Scalars['String']>;
+  is_primary?: Maybe<Scalars['Boolean']>;
+  is_primary_thumbnail?: Maybe<Scalars['Boolean']>;
 };
 
 export type MediaFileMetadata = {

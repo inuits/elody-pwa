@@ -35,6 +35,11 @@
       bg-color="neutral-30"
       @click="forceDisableEditModalHome"
     />
+     <BaseButton
+      :icon="Unicons.FileAlt.name"
+      bg-color="neutral-30"
+      @click="forceDisableEditMediafiles"
+    />
     <BaseButton
       :icon="Unicons.History.name"
       bg-color="neutral-30"
@@ -83,6 +88,11 @@
         disableEditMode();
       };
 
+      const forceDisableEditMediafiles = () => {
+        router.push({ name: 'Mediafiles' });
+        disableEditMode();
+      };
+
       const forceDisableEditModalUpload = () => {
         useUploadModal();
         disableEditMode();
@@ -96,7 +106,8 @@
         forceDisableEditModalHistory,
         forceDisableEditModalUpload,
         openCreateModal,
-        modalChoices
+        modalChoices,
+        forceDisableEditMediafiles
       };
     },
   });
