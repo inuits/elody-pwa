@@ -143,6 +143,8 @@ input MediaFileInput {
   entities: [String]
   metadata: [MediaFileMetadataInput]
   mimetype: String
+  is_primary: Boolean
+  is_primary_thumbnail: Boolean
 }
 
 input MediaFileMetadataInput {
