@@ -15,10 +15,10 @@
           />
         </div>
         <InputField
-          v-show="acceptedEntityTypes.length === 0"
+          v-show="acceptedEntityTypes.length === 0 && hasSimpleSearch"
           v-model="queryVariables.searchValue.value"
           :debounce="true"
-          placeholder="Search Asset Library..."
+          :placeholder="searchPlaceholder"
           label="Search"
           :is-disabled="loading"
           :bg-color="'neutral-20'"
@@ -142,16 +142,20 @@
       InputField
     },
     props: {
+      searchPlaceholder: {
+        type: String,
+        default: 'Search...'
+      },
       listItemRouteName: {
         type: String,
         required: true,
       },
       hasSimpleSearch: Boolean,
       SearchInputTypeOnDrawer: {
-        type: Object as PropType<Maybe<SearchInputType>>,
+        type: String as PropType<Maybe<SearchInputType>>,
       },
       SearchInputType: {
-        type: Object as PropType<Maybe<SearchInputType>>,
+        type: String as PropType<Maybe<SearchInputType>>,
       },
       enableSelection: {
         type: Boolean,
@@ -173,6 +177,10 @@
       });
 
       const showDrawer = ref(props.acceptedEntityTypes.length === 0 ? true : false);
+      
+      if (props.hasSimpleSearch === false) {
+        showDrawer.value = false;
+      }
 
       const queryVariables = reactive<GetEntitiesQueryVariables>({
         limit: paginationInfo.limit,

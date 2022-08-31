@@ -3,17 +3,18 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent } from 'vue';
   import BaseSingleEntity from '@/components/base/BaseSingleEntity.vue';
+  import { defineComponent } from 'vue';
 
   export default defineComponent({
-    name: 'SingleEntity',
+    name: 'SingleMediaFile',
     components: {
       BaseSingleEntity
     },
-    setup() {
-      
+    setup: () => {
+
       return {
+
       };
     },
   });

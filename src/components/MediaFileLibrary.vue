@@ -4,6 +4,7 @@
     :SearchInputTypeOnDrawer="SearchInputType.AdvancedInputMediaFilesType" 
     :SearchInputType="SearchInputType.AdvancedInputMediaFilesType"
     :listItemRouteName="'SingleMediafile'"
+    :searchPlaceholder="'Search Mediafiles...'"
   />
 </template>
 
