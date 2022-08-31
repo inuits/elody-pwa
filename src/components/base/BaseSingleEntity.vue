@@ -93,7 +93,7 @@
   export const mediafiles = ref<MediaFile[]>([]);
 
   export default defineComponent({
-    name: 'BaseSingleEntity',
+    name: 'SingleEntity',
     components: {
       IIIFViewer,
       EntityImageSelection,
@@ -231,10 +231,6 @@
       });
 
       document.addEventListener('save', () => {
-        refetch();
-      });
-
-      document.addEventListener('discard', () => {
         refetch();
       });
 
