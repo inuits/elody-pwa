@@ -5,7 +5,10 @@
     :SearchInputType="SearchInputType.AdvancedInputMediaFilesType"
     :listItemRouteName="'SingleMediafile'"
     :searchPlaceholder="'Search Mediafiles...'"
+<<<<<<< HEAD
     :advancedFiltersChoice="'mediaFileFilters'"
+=======
+>>>>>>> WIP Ref: #97062, fix base library props and made BaseSingleEntity component
   />
 </template>
 
