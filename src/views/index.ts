@@ -29,7 +29,7 @@ export const routes: RouteRecordRaw[] = [
         path: ':id',
         name: 'SingleMediafile',
         meta: { title: 'Single Mediafile', requiresAuth: true, showEntityTitle: true },
-        component: () => import(/* webpackChunkName: "about" */ './SingleEntity.vue'),
+        component: () => import(/* webpackChunkName: "about" */ './SingleMediaFile.vue'),
       },
     ],
   },

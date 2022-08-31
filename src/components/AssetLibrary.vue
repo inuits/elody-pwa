@@ -1,9 +1,10 @@
 <template>
   <Library 
-    :hasSimpleSearch="false" 
+    :hasSimpleSearch="true" 
     :SearchInputTypeOnDrawer="SearchInputType.AdvancedInputType" 
     :SearchInputType="SearchInputType.SimpleInputtype"
     :listItemRouteName="'SingleEntity'"
+    :searchPlaceholder="'Search Asset Library...'"
   />
 </template>
 
