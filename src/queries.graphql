@@ -441,6 +441,24 @@ query getEntities(
 #   }
 # }
 
+query getMediaFileById($id: String!) {
+  MediaFile(id: $id) {
+    _id
+    filename
+    original_file_location
+    transcode_filename
+    thumbnail_file_location
+    mimetype
+    isPublic
+    metadata {
+      key
+      value
+    }
+    is_primary
+    is_primary_thumbnail
+  }
+}
+
 query getEntityById($id: String!) {
   Entity(id: $id) {
     ...fullEntityRecursive
