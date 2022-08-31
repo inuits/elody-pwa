@@ -142,10 +142,13 @@
       InputField
     },
     props: {
+<<<<<<< HEAD
       advancedFiltersChoice: {
         type: String,
         default: 'entityFilters'
       },
+=======
+>>>>>>> WIP Ref: #97062, fix base library props and made BaseSingleEntity component
       searchPlaceholder: {
         type: String,
         default: 'Search...'

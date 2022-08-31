@@ -4,15 +4,24 @@
     class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0"
   >
     <entity-image-selection
+<<<<<<< HEAD
       v-show="(loading || mediafiles.length > 0) && isSelectionDisplayed"
+=======
+      v-show="loading || mediafiles.length > 0"
+>>>>>>> WIP Ref: #97062, fix base library props and made BaseSingleEntity component
       v-model:selectedImage="mediafileSelectionState.selectedMediafile"
       class="w-40"
       :loading="loading"
       :mediafiles="mediafiles"
     />
     <div
+<<<<<<< HEAD
       v-show="!loading"
       :class="['justify-center ', { checkboard: loading }, entityType === 'MediaFile' ? 'w-full' : 'flex w-4/6']"
+=======
+      v-show="!loading && mediafiles.length > 0"
+      :class="['flex w-4/6 justify-center ', { checkboard: loading }]"
+>>>>>>> WIP Ref: #97062, fix base library props and made BaseSingleEntity component
     >
       <IIIFViewer
         v-if="
@@ -53,7 +62,10 @@
     </div>
     <!-- meta is metadata form-->
     <Meta
+<<<<<<< HEAD
       v-if="isMetaDisplayed"
+=======
+>>>>>>> WIP Ref: #97062, fix base library props and made BaseSingleEntity component
       :class="!loading && mediafiles.length > 0 ? 'w-2/6' : 'w-full'"
       :loading="loading"
       :entity-id="result ? result.Entity.id : undefined"
@@ -91,9 +103,16 @@
   import useDropzoneHelper from '@/composables/useDropzoneHelper';
   import useMediaAssetLinkHelper from '@/composables/useMediaAssetLinkHelper';
   import useMetaDataHelper from '@/composables/useMetaDataHelper';
+<<<<<<< HEAD
 
   export default defineComponent({
     name: 'SingleEntity',
+=======
+  export const mediafiles = ref<MediaFile[]>([]);
+
+  export default defineComponent({
+    name: 'BaseSingleEntity',
+>>>>>>> WIP Ref: #97062, fix base library props and made BaseSingleEntity component
     components: {
       IIIFViewer,
       EntityImageSelection,
@@ -102,6 +121,7 @@
       AudioPlayer,
       PDFViewer,
     },
+<<<<<<< HEAD
     props: {
       isMetaDisplayed: Boolean,
       isSelectionDisplayed: Boolean,
@@ -115,6 +135,13 @@
         useDropzoneHelper();
       const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
       const { lastAdjustedMediaFileMetaData, mediafiles } = useMetaDataHelper();
+=======
+    setup() {
+      const { myDropzone, isUploading, selectedFiles, increaseSuccessCounter } =
+        useDropzoneHelper();
+      const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
+      const { lastAdjustedMediaFileMetaData } = useMetaDataHelper();
+>>>>>>> WIP Ref: #97062, fix base library props and made BaseSingleEntity component
       const id = asString(useRoute().params['id']);
       const loading = ref<boolean>(true);
       const { mediafileSelectionState, updateSelectedEntityMediafile } =
@@ -125,7 +152,10 @@
 
       const queryVariables = reactive<GetEntityByIdQueryVariables>({
         id: id,
+<<<<<<< HEAD
         type: props.entityType
+=======
+>>>>>>> WIP Ref: #97062, fix base library props and made BaseSingleEntity component
       });
 
       const { result, refetch, onResult } = useQuery<GetEntityByIdQuery>(
@@ -136,7 +166,10 @@
           fetchPolicy: 'no-cache',
         },
       );
+<<<<<<< HEAD
 
+=======
+>>>>>>> WIP Ref: #97062, fix base library props and made BaseSingleEntity component
       const title = computed(() => {
         if (result.value && result.value.Entity?.title[0]?.__typename === 'Metadata') {
           const tileMetada = result.value.Entity?.title[0];
@@ -202,12 +235,20 @@
         increaseSuccessCounter();
       });
 
+<<<<<<< HEAD
       onBeforeRouteUpdate(async (to: any, from: any) => {
+=======
+      onBeforeRouteUpdate(async (to, from) => {
+>>>>>>> WIP Ref: #97062, fix base library props and made BaseSingleEntity component
         //@ts-ignore
         queryVariables.id = to.params.id;
       });
 
+<<<<<<< HEAD
       onResult((queryResult: any) => {
+=======
+      onResult((queryResult) => {
+>>>>>>> WIP Ref: #97062, fix base library props and made BaseSingleEntity component
         if (
           queryResult.data &&
           queryResult.data.Entity?.media?.mediafiles &&
@@ -215,7 +256,12 @@
         ) {
           mediafiles.value = [];
           let mediaFileChanged: boolean = false;
+<<<<<<< HEAD
           queryResult.data.Entity.media.mediafiles?.forEach((mediafile: any, index: any) => {
+=======
+
+          queryResult.data.Entity.media.mediafiles?.forEach((mediafile, index) => {
+>>>>>>> WIP Ref: #97062, fix base library props and made BaseSingleEntity component
             if (mediafile?.__typename === 'MediaFile') {
               if (mediafile._id == mediafileSelectionState.selectedMediafile?._id) {
                 updateSelectedEntityMediafile(mediafile);
@@ -235,6 +281,10 @@
         } else if (queryResult.data && queryResult.data?.Entity) {
           showEditToggle();
         }
+<<<<<<< HEAD
+=======
+
+>>>>>>> WIP Ref: #97062, fix base library props and made BaseSingleEntity component
         loading.value = false;
       });
 
@@ -246,6 +296,13 @@
         refetch();
       });
 
+<<<<<<< HEAD
+=======
+      document.addEventListener('discard', () => {
+        refetch();
+      });
+
+>>>>>>> WIP Ref: #97062, fix base library props and made BaseSingleEntity component
       return {
         result,
         loading,
