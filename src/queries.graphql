@@ -178,7 +178,7 @@ fragment fullEntityRecursive on Entity {
         }
         ... on Testimony {
           ...minimalBaseEntity
-          teaserMetadata: metadata(keys: ["title"], excludeOrInclude: include) {
+          teaserMetadata: metadata(keys: ["description"], excludeOrInclude: include) {
             __typename
             ... on Metadata {
               ...metadata
@@ -337,7 +337,7 @@ query getEntities(
         }
       }
       ... on Testimony {
-        teaserMetadata: metadata(keys: ["type", "title"], excludeOrInclude: include) {
+        teaserMetadata: metadata(keys: ["description"], excludeOrInclude: include) {
           __typename
           ... on Metadata {
             key
