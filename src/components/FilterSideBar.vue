@@ -96,6 +96,10 @@
       // AndOrToggle,
     },
     props: {
+      advancedFiltersChoice: {
+        type: String,
+        default: 'entityFilters'
+      },
       acceptedEntityTypes: {
         type: Array as PropType<string[]>,
         default: () => [],
@@ -107,7 +111,9 @@
       const initialFilters = ref<FilterInList[]>([]);
       const activeCount = computed(() => getActiveFilters(initialFilters.value).length);
       const AndOrChoice = ref<boolean>(true);
-      const { result: filters } = useQuery(GetAdvancedFiltersDocument);
+      const { result: filters } = useQuery(GetAdvancedFiltersDocument, {
+        choice: props.advancedFiltersChoice
+      });
 
       const applyFilters = () => {
         const returnArray = initialFilters.value.map((filter: FilterInList) => {

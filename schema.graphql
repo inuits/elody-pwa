@@ -380,7 +380,7 @@ type Query {
   Directories(dir: String): [Directory]
   Jobs(paginationInfo: PaginationInfo, filters: Filters): JobsResults
   Job(id: String!): Job
-  advancedFilters: [advancedFilter]
+  advancedFilters(choice: String!): [advancedFilter]
   FilterOptions(key: String!): [filterOption]
   Form(type: String!): Form
 }

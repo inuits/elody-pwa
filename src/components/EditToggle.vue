@@ -15,9 +15,8 @@
   import useRouteHelpers from '@/composables/useRouteHelpers';
   import { Unicons } from '@/types';
   import { toBeDeleted } from '@/components/EntityImageSelection.vue';
-  import { useRouter } from 'vue-router';
   import useMediaAssetLinkHelper from '@/composables/useMediaAssetLinkHelper';
-import useMetaDataHelper from '@/composables/useMetaDataHelper';
+  import useMetaDataHelper from '@/composables/useMetaDataHelper';
   export type EditModes = 'edit' | 'view' | 'loading';
   export type callback = (e?: Event | undefined) => Promise<unknown>;
 

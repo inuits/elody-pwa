@@ -4,6 +4,7 @@
       v-show="!showDrawer"
       v-model:activeFilters="queryVariables.advancedSearchValue"
       :accepted-entity-types="acceptedEntityTypes ? acceptedEntityTypes : []"
+      :advancedFiltersChoice="advancedFiltersChoice"
     />
     <div class="p-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
@@ -82,7 +83,6 @@
             "
           >
             <template #actions>
-              {{entity}}
               <BaseButton
                 v-if="enableSelection"
                 :loading="loading"
@@ -142,6 +142,10 @@
       InputField
     },
     props: {
+      advancedFiltersChoice: {
+        type: String,
+        default: 'entityFilters'
+      },
       searchPlaceholder: {
         type: String,
         default: 'Search...'
