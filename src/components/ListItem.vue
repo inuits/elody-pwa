@@ -1,10 +1,10 @@
 <template>
-  <li class="row" :class="{ loading }" data-test="meta-row">
-    <div class="flex w-full">
+  <li class="row" :class="{ loading, 'mb-2': !small }" data-test="meta-row">
+    <div class="flex w-full" :class="{ 'flex-col': small }">
       <img
         v-if="media"
         class="h-10 w-10 obtain-cover mr-4 rounded-sm outline-none shadow-sm self-center"
-        :src="`${config.iiifLink}/iiif/3/${media}/square/100,/0/default.jpg`"
+        :src="`/api/iiif/3/${media}/square/100,/0/default.jpg`"
         @error="setNoImage()"
       />
       <unicon
@@ -76,7 +76,7 @@
   .row {
     @apply flex justify-between px-8 py-4;
     @apply bg-neutral-0 hover:bg-neutral-10;
-    @apply border border-neutral-30 mb-2 rounded cursor-pointer;
+    @apply border border-neutral-30 rounded cursor-pointer;
     @apply transition-colors duration-300 hover:shadow-sm;
   }
   .col {
