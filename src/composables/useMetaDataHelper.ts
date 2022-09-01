@@ -1,7 +1,10 @@
+import { MediaFile } from '@/queries';
 import { ref } from 'vue';
 
 const metaDataPatchList = ref<any>({});
 const lastAdjustedMediaFileMetaData = ref<any>();
+const mediafiles = ref<MediaFile[]>([]);
+
 
 const useMetaDataHelper = () => {
 
@@ -27,7 +30,8 @@ const useMetaDataHelper = () => {
     metaDataPatchList,
     addOrUpdateList,
     removeFromMetaDataPatchList,
-    lastAdjustedMediaFileMetaData
+    lastAdjustedMediaFileMetaData,
+    mediafiles
   };
 };
 

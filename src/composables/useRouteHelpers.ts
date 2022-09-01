@@ -15,7 +15,7 @@ const useRouteHelpers = (): {
 } => {
   const router = useRouter();
   const route = useRoute();
-  const isSingle = computed<boolean>(() => route.name === 'SingleEntity');
+  const isSingle = computed<boolean>(() => (route.name === 'SingleEntity' || route.name === 'SingleMediafile'));
 
   const getParam = (input: urlParams) => {
     const param = useRoute().params[input];

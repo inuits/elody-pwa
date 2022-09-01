@@ -28,7 +28,6 @@
   import { defineComponent, inject, onMounted, PropType, ref, watch } from 'vue';
   import OpenSeadragon from 'openseadragon';
   import ViewerToolbar from './ViewerToolbar.vue';
-  import { MediaFileMetadata } from '@/queries';
 
   export default defineComponent({
     name: 'IIIFViewer',

@@ -5,6 +5,7 @@
     :SearchInputType="SearchInputType.AdvancedInputMediaFilesType"
     :listItemRouteName="'SingleMediafile'"
     :searchPlaceholder="'Search Mediafiles...'"
+    :advancedFiltersChoice="'mediaFileFilters'"
   />
 </template>
 

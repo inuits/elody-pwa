@@ -5,6 +5,7 @@
     :SearchInputType="SearchInputType.SimpleInputtype"
     :listItemRouteName="'SingleEntity'"
     :searchPlaceholder="'Search Asset Library...'"
+    :advancedFiltersChoice="'entityFilters'"
   />
 </template>
 

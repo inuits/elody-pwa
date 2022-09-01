@@ -20,16 +20,18 @@ export const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: '/mediafile/:id',
-    name: 'SingleMediafile',
-    meta: { title: 'Single Mediafile', requiresAuth: true, showEntityTitle: true },
-    component: () => import(/* webpackChunkName: "about" */ './SingleMediaFile.vue'),
-  },
-  {
     path: '/mediafiles',
     name: 'Mediafiles',
     meta: { title: 'Mediafiles', requiresAuth: true },
     component: Mediafiles,
+    children: [
+      {
+        path: ':id',
+        name: 'SingleMediafile',
+        meta: { title: 'Single Mediafile', requiresAuth: true, showEntityTitle: true },
+        component: () => import(/* webpackChunkName: "about" */ './SingleMediaFile.vue'),
+      },
+    ],
   },
   {
     path: '/history',

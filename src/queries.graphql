@@ -520,8 +520,8 @@ query getJob($id: String!) {
   }
 }
 
-query getAdvancedFilters {
-  advancedFilters {
+query getAdvancedFilters($choice: String!) {
+  advancedFilters(choice: $choice) {
     label
     type
     key
