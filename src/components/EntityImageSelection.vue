@@ -7,7 +7,10 @@
       },
     ]"
   >
-    <div v-if="!loading && selectedImage" class="flex flex-col items-end mt-2 overflow-y-auto">
+    <div
+      v-if="!loading && selectedImage"
+      class="flex flex-col items-end mt-2 overflow-y-auto"
+    >
       <div
         v-for="(mediaFile, arrayKey) in mediafiles"
         :key="mediaFile.filename ? mediaFile.filename : 'no-filename'"
@@ -30,7 +33,7 @@
               'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full',
               toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
             ]"
-            :src="mediaFile.thumbnail_file_location"
+            :src="`/api/iiif/3/${mediaFile.filename}/square/100,/0/default.jpg`"
             @click="selectImage(mediaFile)"
           />
           <img
@@ -44,7 +47,7 @@
               'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2 border-blue-500',
               toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
             ]"
-            :src="mediaFile.thumbnail_file_location"
+            :src="`/api/iiif/3/${mediaFile.filename}/square/100,/0/default.jpg`"
             @click="selectImage(mediaFile)"
           />
           <AudioThumbnail
@@ -78,11 +81,11 @@
         v-if="editMode === 'edit'"
         @click="openUploadModal(modalChoices.DROPZONE)"
       />
-    </div>    
+    </div>
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, onMounted, PropType, ref, watch,reactive } from 'vue';
+  import { defineComponent, onMounted, PropType, ref, watch, reactive } from 'vue';
   import { useMutation } from '@vue/apollo-composable';
   import {
     MediaFile,
@@ -137,7 +140,8 @@
     setup(props, { emit }) {
       const { selectedFiles } = useDropzoneHelper();
       const { updateSelectedEntityMediafile } = useEntityMediafileSelector();
-      const { isMediaFileInLinkList, removeMediaFileFromLinkList } = useMediaAssetLinkHelper();
+      const { isMediaFileInLinkList, removeMediaFileFromLinkList } =
+        useMediaAssetLinkHelper();
       const { removeFromMetaDataPatchList } = useMetaDataHelper();
       const { openUploadModal, uploadModalState, modalChoices } = useUploadModal();
       const selectImage = (mediafile: MediaFile) => {
@@ -149,7 +153,6 @@
       const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 
       const addToSaveCallback = (id: string, arrayKey: string) => {
-
         const parsedId = id.replace('mediafiles/', '');
         removeFromMetaDataPatchList(parsedId);
         toBeDeleted.value.push(id);
@@ -175,7 +178,7 @@
         toBeDeleted,
         openUploadModal,
         modalChoices,
-        selectedFiles
+        selectedFiles,
       };
     },
   });
