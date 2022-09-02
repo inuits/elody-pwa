@@ -4,7 +4,7 @@
     :class="{ loading, 'mb-2 px-8 ': !small, 'px-2': small }"
     data-test="meta-row"
   >
-    <div class="flex w-full" :class="{ 'flex-col': small }">
+    <div class="flex w-full" :class="{ 'flex-col': small && !thumbIcon }">
       <img
         v-if="media"
         class="h-10 w-10 obtain-cover mr-4 rounded-sm outline-none shadow-sm self-center"
