@@ -19,6 +19,11 @@
           metadata.linkedEntity.__typename !== 'IntermediateEntity'
         "
         :meta="metadata.linkedEntity.teaserMetadata"
+        :media="
+          metadata.linkedEntity.media
+            ? metadata.linkedEntity.media.primaryMediafile
+            : null
+        "
         :thumb-icon="metadata.linkedEntity.media ? Unicons.NoImage.name : null"
         :small="true"
         @click="

@@ -20,7 +20,10 @@
         <ListItem
           v-if="value.linkedEntity && value.linkedEntity.teaserMetadata"
           :meta="value.linkedEntity.teaserMetadata"
-          :thumb-icon="Unicons.NoImage.name"
+          :media="
+            value.linkedEntity.media ? value.linkedEntity.media.primaryMediafile : null
+          "
+          :thumb-icon="value.linkedEntity.media ? Unicons.NoImage.name : null"
         />
         <div v-if="!structure.disabled" class="delete">
           <BaseButton
