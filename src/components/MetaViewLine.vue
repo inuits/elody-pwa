@@ -7,27 +7,7 @@
       no label
     </div>
 
-    <meta-viewline-relation
-      v-if="
-        item.linkedEntity &&
-        ['asset', 'story', 'box', 'frame'].includes(item.linkedEntity.type) &&
-        item.label != item.key
-      "
-      :metadata="item"
-    />
-
-    <meta-view-line
-      v-if="
-        item.linkedEntity &&
-        item.linkedEntity.metadata &&
-        item.linkedEntity.type !== 'asset' &&
-        item.linkedEntity.type !== 'box' &&
-        item.linkedEntity.type !== 'story' &&
-        item.linkedEntity.type !== 'frame'
-      "
-      :metadata="item.linkedEntity.metadata"
-      :loading="loading"
-    />
+    <meta-viewline-relation v-if="item.linkedEntity" :metadata="item" />
 
     <div
       v-if="!item.linkedEntity"

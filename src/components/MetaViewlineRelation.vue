@@ -1,9 +1,10 @@
 <template>
   <div class="my-2">
-    <div :class="[inputContainerStyle, ' input-container p-4 gap-3 flex-col']">
+    <div :class="[inputContainerStyle, ' input-container  gap-3 flex-col']">
       <div
         v-for="{ value: metadataValue, key: metadataKey } in metadata.metadataOnRelation"
         :key="`${metadata.id}-${metadataKey}`"
+        class="px-8 pt-2"
       >
         <div class="label" :class="{ loading }" data-test="meta-label">
           {{ metadataKey }}
@@ -13,14 +14,62 @@
         </div>
       </div>
       <ListItem
-        v-if="metadata.linkedEntity"
+        v-if="
+          metadata.linkedEntity &&
+          metadata.linkedEntity.__typename !== 'IntermediateEntity'
+        "
         :meta="metadata.linkedEntity.teaserMetadata"
-        :thumb-icon="Unicons.NoImage.name"
+        :thumb-icon="metadata.linkedEntity.media ? Unicons.NoImage.name : null"
         :small="true"
         @click="
           router.push({ name: 'SingleEntity', params: { id: metadata.linkedEntity.id } })
         "
       />
+      <div
+        v-if="
+          metadata.linkedEntity &&
+          metadata.linkedEntity.__typename === 'IntermediateEntity'
+        "
+      >
+        <div
+          v-for="metadataFromLinkedEntity in metadata.linkedEntity.metadata"
+          :key="metadataFromLinkedEntity.key"
+          :metadata="metadataFromLinkedEntity"
+          class="p-2"
+        >
+          <div
+            v-if="metadataFromLinkedEntity.label"
+            class="label"
+            :class="{ loading }"
+            data-test="meta-label"
+          >
+            {{ checkTranslationForlabel(metadataFromLinkedEntity.label) }}
+          </div>
+          <div
+            v-else-if="metadataFromLinkedEntity.label != metadataFromLinkedEntity.key"
+            class="label"
+            :class="{ loading }"
+          >
+            no label
+          </div>
+
+          <meta-viewline-relation
+            v-if="metadataFromLinkedEntity.linkedEntity"
+            :metadata="metadataFromLinkedEntity"
+          />
+
+          <div
+            v-if="!metadataFromLinkedEntity.linkedEntity"
+            class="value"
+            :class="{ loading }"
+            data-test="meta-info"
+          >
+            {{
+              metadataFromLinkedEntity.value ? metadataFromLinkedEntity.value : 'no data'
+            }}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>

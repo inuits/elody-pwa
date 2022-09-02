@@ -1,5 +1,9 @@
 <template>
-  <li class="row" :class="{ loading, 'mb-2': !small }" data-test="meta-row">
+  <li
+    class="row"
+    :class="{ loading, 'mb-2 px-8 ': !small, 'px-2': small }"
+    data-test="meta-row"
+  >
     <div class="flex w-full" :class="{ 'flex-col': small }">
       <img
         v-if="media"
@@ -74,7 +78,7 @@
 
 <style lang="postcss" scoped>
   .row {
-    @apply flex justify-between px-8 py-4;
+    @apply flex justify-between py-4;
     @apply bg-neutral-0 hover:bg-neutral-10;
     @apply border border-neutral-30 rounded cursor-pointer;
     @apply transition-colors duration-300 hover:shadow-sm;
