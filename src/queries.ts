@@ -162,6 +162,22 @@ export enum InputFieldTypes {
   Dropdown = 'dropdown'
 }
 
+export type IntermediateEntity = Entity & {
+  __typename?: 'IntermediateEntity';
+  id: Scalars['String'];
+  uuid: Scalars['String'];
+  type: Scalars['String'];
+  metadata: Array<Maybe<MetadataAndRelation>>;
+  media?: Maybe<Media>;
+  form?: Maybe<Form>;
+};
+
+
+export type IntermediateEntityMetadataArgs = {
+  keys: Array<Maybe<Scalars['String']>>;
+  excludeOrInclude: ExcludeOrInclude;
+};
+
 export type Job = {
   __typename?: 'Job';
   job_type?: Maybe<Scalars['String']>;
@@ -649,6 +665,8 @@ type MinimalBaseEntity_BaseEntity_Fragment = { __typename?: 'BaseEntity', id: st
 
 type MinimalBaseEntity_Frame_Fragment = { __typename?: 'Frame', id: string, uuid: string, type: string };
 
+type MinimalBaseEntity_IntermediateEntity_Fragment = { __typename?: 'IntermediateEntity', id: string, uuid: string, type: string };
+
 type MinimalBaseEntity_MediaFileEntity_Fragment = { __typename?: 'MediaFileEntity', id: string, uuid: string, type: string };
 
 type MinimalBaseEntity_SimpleEntity_Fragment = { __typename?: 'SimpleEntity', id: string, uuid: string, type: string };
@@ -661,7 +679,7 @@ type MinimalBaseEntity_BoxEntity_Fragment = { __typename?: 'boxEntity', id: stri
 
 type MinimalBaseEntity_Person_Fragment = { __typename?: 'person', id: string, uuid: string, type: string };
 
-export type MinimalBaseEntityFragment = MinimalBaseEntity_Asset_Fragment | MinimalBaseEntity_BaseEntity_Fragment | MinimalBaseEntity_Frame_Fragment | MinimalBaseEntity_MediaFileEntity_Fragment | MinimalBaseEntity_SimpleEntity_Fragment | MinimalBaseEntity_Story_Fragment | MinimalBaseEntity_Testimony_Fragment | MinimalBaseEntity_BoxEntity_Fragment | MinimalBaseEntity_Person_Fragment;
+export type MinimalBaseEntityFragment = MinimalBaseEntity_Asset_Fragment | MinimalBaseEntity_BaseEntity_Fragment | MinimalBaseEntity_Frame_Fragment | MinimalBaseEntity_IntermediateEntity_Fragment | MinimalBaseEntity_MediaFileEntity_Fragment | MinimalBaseEntity_SimpleEntity_Fragment | MinimalBaseEntity_Story_Fragment | MinimalBaseEntity_Testimony_Fragment | MinimalBaseEntity_BoxEntity_Fragment | MinimalBaseEntity_Person_Fragment;
 
 export type EditFormFragment = { __typename?: 'Form', fields: Array<Maybe<{ __typename: 'MetadataField', label?: Maybe<string>, key: string, type: InputFieldTypes, options?: Maybe<Array<Maybe<{ __typename?: 'MetadataFieldOption', value: string, label?: Maybe<string> }>>> } | { __typename: 'RelationField', label?: Maybe<string>, relationType: string, disabled?: Maybe<boolean>, acceptedEntityTypes: Array<Maybe<string>>, metadata?: Maybe<Array<Maybe<{ __typename?: 'MetadataField', key: string, type: InputFieldTypes, label?: Maybe<string> }>>> }>> };
 
@@ -697,6 +715,11 @@ type FullEntity_Frame_Fragment = { __typename?: 'Frame', id: string, type: strin
     & EditFormFragment
   )>, title: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation' }>> };
 
+type FullEntity_IntermediateEntity_Fragment = { __typename?: 'IntermediateEntity', id: string, type: string, form?: Maybe<(
+    { __typename?: 'Form' }
+    & EditFormFragment
+  )>, title: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation' }>> };
+
 type FullEntity_MediaFileEntity_Fragment = { __typename?: 'MediaFileEntity', id: string, type: string, form?: Maybe<(
     { __typename?: 'Form' }
     & EditFormFragment
@@ -727,7 +750,7 @@ type FullEntity_Person_Fragment = { __typename?: 'person', id: string, type: str
     & EditFormFragment
   )>, title: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation' }>> };
 
-export type FullEntityFragment = FullEntity_Asset_Fragment | FullEntity_BaseEntity_Fragment | FullEntity_Frame_Fragment | FullEntity_MediaFileEntity_Fragment | FullEntity_SimpleEntity_Fragment | FullEntity_Story_Fragment | FullEntity_Testimony_Fragment | FullEntity_BoxEntity_Fragment | FullEntity_Person_Fragment;
+export type FullEntityFragment = FullEntity_Asset_Fragment | FullEntity_BaseEntity_Fragment | FullEntity_Frame_Fragment | FullEntity_IntermediateEntity_Fragment | FullEntity_MediaFileEntity_Fragment | FullEntity_SimpleEntity_Fragment | FullEntity_Story_Fragment | FullEntity_Testimony_Fragment | FullEntity_BoxEntity_Fragment | FullEntity_Person_Fragment;
 
 type FullEntityRecursive_Asset_Fragment = (
   { __typename?: 'Asset', metadata: Array<Maybe<(
@@ -741,32 +764,10 @@ type FullEntityRecursive_Asset_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Asset_Fragment
-      & FullEntity_Asset_Fragment
-    ) | (
-      { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>> }
-      & FullEntity_BaseEntity_Fragment
-    ) | (
+    ) | { __typename?: 'BaseEntity' } | (
       { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -774,24 +775,1657 @@ type FullEntityRecursive_Asset_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Frame_Fragment
-      & FullEntity_Frame_Fragment
     ) | (
-      { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+      { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation' }
+        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+          { __typename?: 'Asset', media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }>, teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Asset_Fragment
+          & FullEntity_Asset_Fragment
+        ) | (
+          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_BaseEntity_Fragment
+        ) | (
+          { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Frame_Fragment
+          & FullEntity_Frame_Fragment
+        ) | (
+          { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_IntermediateEntity_Fragment
+        ) | (
+          { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_MediaFileEntity_Fragment
+        ) | (
+          { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_SimpleEntity_Fragment
+          & FullEntity_SimpleEntity_Fragment
+        ) | (
+          { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Story_Fragment
+          & FullEntity_Story_Fragment
+        ) | (
+          { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Testimony_Fragment
+          & FullEntity_Testimony_Fragment
+        ) | (
+          { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_BoxEntity_Fragment
+          & FullEntity_BoxEntity_Fragment
+        ) | (
+          { __typename?: 'person', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Person_Fragment
+          & FullEntity_Person_Fragment
+        )> }
         & MetadataRelationFragment
       )>> }
-      & FullEntity_MediaFileEntity_Fragment
-    ) | (
+      & MinimalBaseEntity_IntermediateEntity_Fragment
+      & FullEntity_IntermediateEntity_Fragment
+    ) | { __typename?: 'MediaFileEntity' } | (
       { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -799,7 +2433,6 @@ type FullEntityRecursive_Asset_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_SimpleEntity_Fragment
-      & FullEntity_SimpleEntity_Fragment
     ) | (
       { __typename?: 'Story', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -807,15 +2440,8 @@ type FullEntityRecursive_Asset_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Story_Fragment
-      & FullEntity_Story_Fragment
     ) | (
       { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -823,15 +2449,8 @@ type FullEntityRecursive_Asset_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Testimony_Fragment
-      & FullEntity_Testimony_Fragment
     ) | (
       { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -839,15 +2458,8 @@ type FullEntityRecursive_Asset_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_BoxEntity_Fragment
-      & FullEntity_BoxEntity_Fragment
     ) | (
       { __typename?: 'person', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -855,15 +2467,8 @@ type FullEntityRecursive_Asset_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Person_Fragment
-      & FullEntity_Person_Fragment
     )> }
     & MetadataRelationFragment
   )>> }
@@ -882,32 +2487,10 @@ type FullEntityRecursive_BaseEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Asset_Fragment
-      & FullEntity_Asset_Fragment
-    ) | (
-      { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>> }
-      & FullEntity_BaseEntity_Fragment
-    ) | (
+    ) | { __typename?: 'BaseEntity' } | (
       { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -915,24 +2498,1657 @@ type FullEntityRecursive_BaseEntity_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Frame_Fragment
-      & FullEntity_Frame_Fragment
     ) | (
-      { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+      { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation' }
+        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+          { __typename?: 'Asset', media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }>, teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Asset_Fragment
+          & FullEntity_Asset_Fragment
+        ) | (
+          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_BaseEntity_Fragment
+        ) | (
+          { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Frame_Fragment
+          & FullEntity_Frame_Fragment
+        ) | (
+          { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_IntermediateEntity_Fragment
+        ) | (
+          { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_MediaFileEntity_Fragment
+        ) | (
+          { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_SimpleEntity_Fragment
+          & FullEntity_SimpleEntity_Fragment
+        ) | (
+          { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Story_Fragment
+          & FullEntity_Story_Fragment
+        ) | (
+          { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Testimony_Fragment
+          & FullEntity_Testimony_Fragment
+        ) | (
+          { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_BoxEntity_Fragment
+          & FullEntity_BoxEntity_Fragment
+        ) | (
+          { __typename?: 'person', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Person_Fragment
+          & FullEntity_Person_Fragment
+        )> }
         & MetadataRelationFragment
       )>> }
-      & FullEntity_MediaFileEntity_Fragment
-    ) | (
+      & MinimalBaseEntity_IntermediateEntity_Fragment
+      & FullEntity_IntermediateEntity_Fragment
+    ) | { __typename?: 'MediaFileEntity' } | (
       { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -940,7 +4156,6 @@ type FullEntityRecursive_BaseEntity_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_SimpleEntity_Fragment
-      & FullEntity_SimpleEntity_Fragment
     ) | (
       { __typename?: 'Story', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -948,15 +4163,8 @@ type FullEntityRecursive_BaseEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Story_Fragment
-      & FullEntity_Story_Fragment
     ) | (
       { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -964,15 +4172,8 @@ type FullEntityRecursive_BaseEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Testimony_Fragment
-      & FullEntity_Testimony_Fragment
     ) | (
       { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -980,15 +4181,8 @@ type FullEntityRecursive_BaseEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_BoxEntity_Fragment
-      & FullEntity_BoxEntity_Fragment
     ) | (
       { __typename?: 'person', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -996,15 +4190,8 @@ type FullEntityRecursive_BaseEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Person_Fragment
-      & FullEntity_Person_Fragment
     )> }
     & MetadataRelationFragment
   )>> }
@@ -1023,32 +4210,10 @@ type FullEntityRecursive_Frame_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Asset_Fragment
-      & FullEntity_Asset_Fragment
-    ) | (
-      { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>> }
-      & FullEntity_BaseEntity_Fragment
-    ) | (
+    ) | { __typename?: 'BaseEntity' } | (
       { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -1056,24 +4221,1657 @@ type FullEntityRecursive_Frame_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Frame_Fragment
-      & FullEntity_Frame_Fragment
     ) | (
-      { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+      { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation' }
+        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+          { __typename?: 'Asset', media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }>, teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Asset_Fragment
+          & FullEntity_Asset_Fragment
+        ) | (
+          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_BaseEntity_Fragment
+        ) | (
+          { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Frame_Fragment
+          & FullEntity_Frame_Fragment
+        ) | (
+          { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_IntermediateEntity_Fragment
+        ) | (
+          { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_MediaFileEntity_Fragment
+        ) | (
+          { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_SimpleEntity_Fragment
+          & FullEntity_SimpleEntity_Fragment
+        ) | (
+          { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Story_Fragment
+          & FullEntity_Story_Fragment
+        ) | (
+          { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Testimony_Fragment
+          & FullEntity_Testimony_Fragment
+        ) | (
+          { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_BoxEntity_Fragment
+          & FullEntity_BoxEntity_Fragment
+        ) | (
+          { __typename?: 'person', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Person_Fragment
+          & FullEntity_Person_Fragment
+        )> }
         & MetadataRelationFragment
       )>> }
-      & FullEntity_MediaFileEntity_Fragment
-    ) | (
+      & MinimalBaseEntity_IntermediateEntity_Fragment
+      & FullEntity_IntermediateEntity_Fragment
+    ) | { __typename?: 'MediaFileEntity' } | (
       { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -1081,7 +5879,6 @@ type FullEntityRecursive_Frame_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_SimpleEntity_Fragment
-      & FullEntity_SimpleEntity_Fragment
     ) | (
       { __typename?: 'Story', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1089,15 +5886,8 @@ type FullEntityRecursive_Frame_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Story_Fragment
-      & FullEntity_Story_Fragment
     ) | (
       { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1105,15 +5895,8 @@ type FullEntityRecursive_Frame_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Testimony_Fragment
-      & FullEntity_Testimony_Fragment
     ) | (
       { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1121,15 +5904,8 @@ type FullEntityRecursive_Frame_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_BoxEntity_Fragment
-      & FullEntity_BoxEntity_Fragment
     ) | (
       { __typename?: 'person', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1137,7 +5913,1724 @@ type FullEntityRecursive_Frame_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
+      )>> }
+      & MinimalBaseEntity_Person_Fragment
+    )> }
+    & MetadataRelationFragment
+  )>> }
+  & FullEntity_Frame_Fragment
+);
+
+type FullEntityRecursive_IntermediateEntity_Fragment = (
+  { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
+    { __typename: 'Metadata' }
+    & MetadataFragment
+  ) | (
+    { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+      { __typename?: 'Asset', media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }>, teaserMetadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>> }
+      & MinimalBaseEntity_Asset_Fragment
+    ) | { __typename?: 'BaseEntity' } | (
+      { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>> }
+      & MinimalBaseEntity_Frame_Fragment
+    ) | (
+      { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+          { __typename?: 'Asset', media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }>, teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Asset_Fragment
+          & FullEntity_Asset_Fragment
+        ) | (
+          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_BaseEntity_Fragment
+        ) | (
+          { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Frame_Fragment
+          & FullEntity_Frame_Fragment
+        ) | (
+          { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_IntermediateEntity_Fragment
+        ) | (
+          { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_MediaFileEntity_Fragment
+        ) | (
+          { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_SimpleEntity_Fragment
+          & FullEntity_SimpleEntity_Fragment
+        ) | (
+          { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Story_Fragment
+          & FullEntity_Story_Fragment
+        ) | (
+          { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Testimony_Fragment
+          & FullEntity_Testimony_Fragment
+        ) | (
+          { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_BoxEntity_Fragment
+          & FullEntity_BoxEntity_Fragment
+        ) | (
+          { __typename?: 'person', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Person_Fragment
+          & FullEntity_Person_Fragment
+        )> }
+        & MetadataRelationFragment
+      )>> }
+      & MinimalBaseEntity_IntermediateEntity_Fragment
+      & FullEntity_IntermediateEntity_Fragment
+    ) | { __typename?: 'MediaFileEntity' } | (
+      { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>> }
+      & MinimalBaseEntity_SimpleEntity_Fragment
+    ) | (
+      { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>> }
+      & MinimalBaseEntity_Story_Fragment
+    ) | (
+      { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>> }
+      & MinimalBaseEntity_Testimony_Fragment
+    ) | (
+      { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+        { __typename: 'Metadata' }
+        & MetadataFragment
+      ) | (
+        { __typename: 'MetadataRelation' }
+        & MetadataRelationFragment
+      )>> }
+      & MinimalBaseEntity_BoxEntity_Fragment
+    ) | (
+      { __typename?: 'person', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -1145,11 +7638,10 @@ type FullEntityRecursive_Frame_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Person_Fragment
-      & FullEntity_Person_Fragment
     )> }
     & MetadataRelationFragment
   )>> }
-  & FullEntity_Frame_Fragment
+  & FullEntity_IntermediateEntity_Fragment
 );
 
 type FullEntityRecursive_MediaFileEntity_Fragment = (
@@ -1164,32 +7656,10 @@ type FullEntityRecursive_MediaFileEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Asset_Fragment
-      & FullEntity_Asset_Fragment
-    ) | (
-      { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>> }
-      & FullEntity_BaseEntity_Fragment
-    ) | (
+    ) | { __typename?: 'BaseEntity' } | (
       { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -1197,24 +7667,1657 @@ type FullEntityRecursive_MediaFileEntity_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Frame_Fragment
-      & FullEntity_Frame_Fragment
     ) | (
-      { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+      { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation' }
+        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+          { __typename?: 'Asset', media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }>, teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Asset_Fragment
+          & FullEntity_Asset_Fragment
+        ) | (
+          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_BaseEntity_Fragment
+        ) | (
+          { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Frame_Fragment
+          & FullEntity_Frame_Fragment
+        ) | (
+          { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_IntermediateEntity_Fragment
+        ) | (
+          { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_MediaFileEntity_Fragment
+        ) | (
+          { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_SimpleEntity_Fragment
+          & FullEntity_SimpleEntity_Fragment
+        ) | (
+          { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Story_Fragment
+          & FullEntity_Story_Fragment
+        ) | (
+          { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Testimony_Fragment
+          & FullEntity_Testimony_Fragment
+        ) | (
+          { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_BoxEntity_Fragment
+          & FullEntity_BoxEntity_Fragment
+        ) | (
+          { __typename?: 'person', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Person_Fragment
+          & FullEntity_Person_Fragment
+        )> }
         & MetadataRelationFragment
       )>> }
-      & FullEntity_MediaFileEntity_Fragment
-    ) | (
+      & MinimalBaseEntity_IntermediateEntity_Fragment
+      & FullEntity_IntermediateEntity_Fragment
+    ) | { __typename?: 'MediaFileEntity' } | (
       { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -1222,7 +9325,6 @@ type FullEntityRecursive_MediaFileEntity_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_SimpleEntity_Fragment
-      & FullEntity_SimpleEntity_Fragment
     ) | (
       { __typename?: 'Story', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1230,15 +9332,8 @@ type FullEntityRecursive_MediaFileEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Story_Fragment
-      & FullEntity_Story_Fragment
     ) | (
       { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1246,15 +9341,8 @@ type FullEntityRecursive_MediaFileEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Testimony_Fragment
-      & FullEntity_Testimony_Fragment
     ) | (
       { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1262,15 +9350,8 @@ type FullEntityRecursive_MediaFileEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_BoxEntity_Fragment
-      & FullEntity_BoxEntity_Fragment
     ) | (
       { __typename?: 'person', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1278,15 +9359,8 @@ type FullEntityRecursive_MediaFileEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Person_Fragment
-      & FullEntity_Person_Fragment
     )> }
     & MetadataRelationFragment
   )>> }
@@ -1305,32 +9379,10 @@ type FullEntityRecursive_SimpleEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Asset_Fragment
-      & FullEntity_Asset_Fragment
-    ) | (
-      { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>> }
-      & FullEntity_BaseEntity_Fragment
-    ) | (
+    ) | { __typename?: 'BaseEntity' } | (
       { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -1338,24 +9390,1657 @@ type FullEntityRecursive_SimpleEntity_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Frame_Fragment
-      & FullEntity_Frame_Fragment
     ) | (
-      { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+      { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation' }
+        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+          { __typename?: 'Asset', media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }>, teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Asset_Fragment
+          & FullEntity_Asset_Fragment
+        ) | (
+          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_BaseEntity_Fragment
+        ) | (
+          { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Frame_Fragment
+          & FullEntity_Frame_Fragment
+        ) | (
+          { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_IntermediateEntity_Fragment
+        ) | (
+          { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_MediaFileEntity_Fragment
+        ) | (
+          { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_SimpleEntity_Fragment
+          & FullEntity_SimpleEntity_Fragment
+        ) | (
+          { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Story_Fragment
+          & FullEntity_Story_Fragment
+        ) | (
+          { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Testimony_Fragment
+          & FullEntity_Testimony_Fragment
+        ) | (
+          { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_BoxEntity_Fragment
+          & FullEntity_BoxEntity_Fragment
+        ) | (
+          { __typename?: 'person', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Person_Fragment
+          & FullEntity_Person_Fragment
+        )> }
         & MetadataRelationFragment
       )>> }
-      & FullEntity_MediaFileEntity_Fragment
-    ) | (
+      & MinimalBaseEntity_IntermediateEntity_Fragment
+      & FullEntity_IntermediateEntity_Fragment
+    ) | { __typename?: 'MediaFileEntity' } | (
       { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -1363,7 +11048,6 @@ type FullEntityRecursive_SimpleEntity_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_SimpleEntity_Fragment
-      & FullEntity_SimpleEntity_Fragment
     ) | (
       { __typename?: 'Story', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1371,15 +11055,8 @@ type FullEntityRecursive_SimpleEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Story_Fragment
-      & FullEntity_Story_Fragment
     ) | (
       { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1387,15 +11064,8 @@ type FullEntityRecursive_SimpleEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Testimony_Fragment
-      & FullEntity_Testimony_Fragment
     ) | (
       { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1403,15 +11073,8 @@ type FullEntityRecursive_SimpleEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_BoxEntity_Fragment
-      & FullEntity_BoxEntity_Fragment
     ) | (
       { __typename?: 'person', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1419,15 +11082,8 @@ type FullEntityRecursive_SimpleEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Person_Fragment
-      & FullEntity_Person_Fragment
     )> }
     & MetadataRelationFragment
   )>> }
@@ -1446,32 +11102,10 @@ type FullEntityRecursive_Story_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Asset_Fragment
-      & FullEntity_Asset_Fragment
-    ) | (
-      { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>> }
-      & FullEntity_BaseEntity_Fragment
-    ) | (
+    ) | { __typename?: 'BaseEntity' } | (
       { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -1479,24 +11113,1657 @@ type FullEntityRecursive_Story_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Frame_Fragment
-      & FullEntity_Frame_Fragment
     ) | (
-      { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+      { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation' }
+        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+          { __typename?: 'Asset', media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }>, teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Asset_Fragment
+          & FullEntity_Asset_Fragment
+        ) | (
+          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_BaseEntity_Fragment
+        ) | (
+          { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Frame_Fragment
+          & FullEntity_Frame_Fragment
+        ) | (
+          { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_IntermediateEntity_Fragment
+        ) | (
+          { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_MediaFileEntity_Fragment
+        ) | (
+          { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_SimpleEntity_Fragment
+          & FullEntity_SimpleEntity_Fragment
+        ) | (
+          { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Story_Fragment
+          & FullEntity_Story_Fragment
+        ) | (
+          { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Testimony_Fragment
+          & FullEntity_Testimony_Fragment
+        ) | (
+          { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_BoxEntity_Fragment
+          & FullEntity_BoxEntity_Fragment
+        ) | (
+          { __typename?: 'person', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Person_Fragment
+          & FullEntity_Person_Fragment
+        )> }
         & MetadataRelationFragment
       )>> }
-      & FullEntity_MediaFileEntity_Fragment
-    ) | (
+      & MinimalBaseEntity_IntermediateEntity_Fragment
+      & FullEntity_IntermediateEntity_Fragment
+    ) | { __typename?: 'MediaFileEntity' } | (
       { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -1504,7 +12771,6 @@ type FullEntityRecursive_Story_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_SimpleEntity_Fragment
-      & FullEntity_SimpleEntity_Fragment
     ) | (
       { __typename?: 'Story', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1512,15 +12778,8 @@ type FullEntityRecursive_Story_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Story_Fragment
-      & FullEntity_Story_Fragment
     ) | (
       { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1528,15 +12787,8 @@ type FullEntityRecursive_Story_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Testimony_Fragment
-      & FullEntity_Testimony_Fragment
     ) | (
       { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1544,15 +12796,8 @@ type FullEntityRecursive_Story_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_BoxEntity_Fragment
-      & FullEntity_BoxEntity_Fragment
     ) | (
       { __typename?: 'person', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1560,15 +12805,8 @@ type FullEntityRecursive_Story_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Person_Fragment
-      & FullEntity_Person_Fragment
     )> }
     & MetadataRelationFragment
   )>> }
@@ -1587,32 +12825,10 @@ type FullEntityRecursive_Testimony_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Asset_Fragment
-      & FullEntity_Asset_Fragment
-    ) | (
-      { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>> }
-      & FullEntity_BaseEntity_Fragment
-    ) | (
+    ) | { __typename?: 'BaseEntity' } | (
       { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -1620,24 +12836,1657 @@ type FullEntityRecursive_Testimony_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Frame_Fragment
-      & FullEntity_Frame_Fragment
     ) | (
-      { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+      { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation' }
+        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+          { __typename?: 'Asset', media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }>, teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Asset_Fragment
+          & FullEntity_Asset_Fragment
+        ) | (
+          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_BaseEntity_Fragment
+        ) | (
+          { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Frame_Fragment
+          & FullEntity_Frame_Fragment
+        ) | (
+          { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_IntermediateEntity_Fragment
+        ) | (
+          { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_MediaFileEntity_Fragment
+        ) | (
+          { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_SimpleEntity_Fragment
+          & FullEntity_SimpleEntity_Fragment
+        ) | (
+          { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Story_Fragment
+          & FullEntity_Story_Fragment
+        ) | (
+          { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Testimony_Fragment
+          & FullEntity_Testimony_Fragment
+        ) | (
+          { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_BoxEntity_Fragment
+          & FullEntity_BoxEntity_Fragment
+        ) | (
+          { __typename?: 'person', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Person_Fragment
+          & FullEntity_Person_Fragment
+        )> }
         & MetadataRelationFragment
       )>> }
-      & FullEntity_MediaFileEntity_Fragment
-    ) | (
+      & MinimalBaseEntity_IntermediateEntity_Fragment
+      & FullEntity_IntermediateEntity_Fragment
+    ) | { __typename?: 'MediaFileEntity' } | (
       { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -1645,7 +14494,6 @@ type FullEntityRecursive_Testimony_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_SimpleEntity_Fragment
-      & FullEntity_SimpleEntity_Fragment
     ) | (
       { __typename?: 'Story', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1653,15 +14501,8 @@ type FullEntityRecursive_Testimony_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Story_Fragment
-      & FullEntity_Story_Fragment
     ) | (
       { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1669,15 +14510,8 @@ type FullEntityRecursive_Testimony_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Testimony_Fragment
-      & FullEntity_Testimony_Fragment
     ) | (
       { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1685,15 +14519,8 @@ type FullEntityRecursive_Testimony_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_BoxEntity_Fragment
-      & FullEntity_BoxEntity_Fragment
     ) | (
       { __typename?: 'person', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1701,15 +14528,8 @@ type FullEntityRecursive_Testimony_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Person_Fragment
-      & FullEntity_Person_Fragment
     )> }
     & MetadataRelationFragment
   )>> }
@@ -1728,32 +14548,10 @@ type FullEntityRecursive_BoxEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Asset_Fragment
-      & FullEntity_Asset_Fragment
-    ) | (
-      { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>> }
-      & FullEntity_BaseEntity_Fragment
-    ) | (
+    ) | { __typename?: 'BaseEntity' } | (
       { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -1761,24 +14559,1657 @@ type FullEntityRecursive_BoxEntity_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Frame_Fragment
-      & FullEntity_Frame_Fragment
     ) | (
-      { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+      { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation' }
+        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+          { __typename?: 'Asset', media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }>, teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Asset_Fragment
+          & FullEntity_Asset_Fragment
+        ) | (
+          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_BaseEntity_Fragment
+        ) | (
+          { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Frame_Fragment
+          & FullEntity_Frame_Fragment
+        ) | (
+          { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_IntermediateEntity_Fragment
+        ) | (
+          { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_MediaFileEntity_Fragment
+        ) | (
+          { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_SimpleEntity_Fragment
+          & FullEntity_SimpleEntity_Fragment
+        ) | (
+          { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Story_Fragment
+          & FullEntity_Story_Fragment
+        ) | (
+          { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Testimony_Fragment
+          & FullEntity_Testimony_Fragment
+        ) | (
+          { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_BoxEntity_Fragment
+          & FullEntity_BoxEntity_Fragment
+        ) | (
+          { __typename?: 'person', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Person_Fragment
+          & FullEntity_Person_Fragment
+        )> }
         & MetadataRelationFragment
       )>> }
-      & FullEntity_MediaFileEntity_Fragment
-    ) | (
+      & MinimalBaseEntity_IntermediateEntity_Fragment
+      & FullEntity_IntermediateEntity_Fragment
+    ) | { __typename?: 'MediaFileEntity' } | (
       { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -1786,7 +16217,6 @@ type FullEntityRecursive_BoxEntity_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_SimpleEntity_Fragment
-      & FullEntity_SimpleEntity_Fragment
     ) | (
       { __typename?: 'Story', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1794,15 +16224,8 @@ type FullEntityRecursive_BoxEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Story_Fragment
-      & FullEntity_Story_Fragment
     ) | (
       { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1810,15 +16233,8 @@ type FullEntityRecursive_BoxEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Testimony_Fragment
-      & FullEntity_Testimony_Fragment
     ) | (
       { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1826,15 +16242,8 @@ type FullEntityRecursive_BoxEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_BoxEntity_Fragment
-      & FullEntity_BoxEntity_Fragment
     ) | (
       { __typename?: 'person', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1842,15 +16251,8 @@ type FullEntityRecursive_BoxEntity_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Person_Fragment
-      & FullEntity_Person_Fragment
     )> }
     & MetadataRelationFragment
   )>> }
@@ -1869,32 +16271,10 @@ type FullEntityRecursive_Person_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Asset_Fragment
-      & FullEntity_Asset_Fragment
-    ) | (
-      { __typename?: 'BaseEntity', metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>> }
-      & FullEntity_BaseEntity_Fragment
-    ) | (
+    ) | { __typename?: 'BaseEntity' } | (
       { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -1902,24 +16282,1657 @@ type FullEntityRecursive_Person_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Frame_Fragment
-      & FullEntity_Frame_Fragment
     ) | (
-      { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+      { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
-        { __typename: 'MetadataRelation' }
+        { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+          { __typename?: 'Asset', media?: Maybe<{ __typename?: 'Media', primaryMediafile?: Maybe<string> }>, teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Asset_Fragment
+          & FullEntity_Asset_Fragment
+        ) | (
+          { __typename?: 'BaseEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_BaseEntity_Fragment
+        ) | (
+          { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Frame_Fragment
+          & FullEntity_Frame_Fragment
+        ) | (
+          { __typename?: 'IntermediateEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_IntermediateEntity_Fragment
+        ) | (
+          { __typename?: 'MediaFileEntity', metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & FullEntity_MediaFileEntity_Fragment
+        ) | (
+          { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_SimpleEntity_Fragment
+          & FullEntity_SimpleEntity_Fragment
+        ) | (
+          { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Story_Fragment
+          & FullEntity_Story_Fragment
+        ) | (
+          { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Testimony_Fragment
+          & FullEntity_Testimony_Fragment
+        ) | (
+          { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_BoxEntity_Fragment
+          & FullEntity_BoxEntity_Fragment
+        ) | (
+          { __typename?: 'person', teaserMetadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation' }
+            & MetadataRelationFragment
+          )>>, metadata: Array<Maybe<(
+            { __typename: 'Metadata' }
+            & MetadataFragment
+          ) | (
+            { __typename: 'MetadataRelation', linkedEntity?: Maybe<(
+              { __typename?: 'Asset', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Asset_Fragment
+            ) | (
+              { __typename?: 'BaseEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BaseEntity_Fragment
+            ) | (
+              { __typename?: 'Frame', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Frame_Fragment
+            ) | (
+              { __typename?: 'IntermediateEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_IntermediateEntity_Fragment
+            ) | (
+              { __typename?: 'MediaFileEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_MediaFileEntity_Fragment
+            ) | (
+              { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_SimpleEntity_Fragment
+            ) | (
+              { __typename?: 'Story', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Story_Fragment
+            ) | (
+              { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Testimony_Fragment
+            ) | (
+              { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_BoxEntity_Fragment
+            ) | (
+              { __typename?: 'person', teaserMetadata: Array<Maybe<(
+                { __typename: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>>, metadata: Array<Maybe<(
+                { __typename?: 'Metadata' }
+                & MetadataFragment
+              ) | (
+                { __typename?: 'MetadataRelation' }
+                & MetadataRelationFragment
+              )>> }
+              & FullEntity_Person_Fragment
+            )> }
+            & MetadataRelationFragment
+          )>> }
+          & MinimalBaseEntity_Person_Fragment
+          & FullEntity_Person_Fragment
+        )> }
         & MetadataRelationFragment
       )>> }
-      & FullEntity_MediaFileEntity_Fragment
-    ) | (
+      & MinimalBaseEntity_IntermediateEntity_Fragment
+      & FullEntity_IntermediateEntity_Fragment
+    ) | { __typename?: 'MediaFileEntity' } | (
       { __typename?: 'SimpleEntity', teaserMetadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
         { __typename: 'Metadata' }
         & MetadataFragment
       ) | (
@@ -1927,7 +17940,6 @@ type FullEntityRecursive_Person_Fragment = (
         & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_SimpleEntity_Fragment
-      & FullEntity_SimpleEntity_Fragment
     ) | (
       { __typename?: 'Story', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1935,15 +17947,8 @@ type FullEntityRecursive_Person_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Story_Fragment
-      & FullEntity_Story_Fragment
     ) | (
       { __typename?: 'Testimony', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1951,15 +17956,8 @@ type FullEntityRecursive_Person_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Testimony_Fragment
-      & FullEntity_Testimony_Fragment
     ) | (
       { __typename?: 'boxEntity', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1967,15 +17965,8 @@ type FullEntityRecursive_Person_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_BoxEntity_Fragment
-      & FullEntity_BoxEntity_Fragment
     ) | (
       { __typename?: 'person', teaserMetadata: Array<Maybe<(
         { __typename: 'Metadata' }
@@ -1983,22 +17974,15 @@ type FullEntityRecursive_Person_Fragment = (
       ) | (
         { __typename: 'MetadataRelation' }
         & MetadataRelationFragment
-      )>>, metadata: Array<Maybe<(
-        { __typename: 'Metadata' }
-        & MetadataFragment
-      ) | (
-        { __typename: 'MetadataRelation' }
-        & MetadataRelationFragment
       )>> }
       & MinimalBaseEntity_Person_Fragment
-      & FullEntity_Person_Fragment
     )> }
     & MetadataRelationFragment
   )>> }
   & FullEntity_Person_Fragment
 );
 
-export type FullEntityRecursiveFragment = FullEntityRecursive_Asset_Fragment | FullEntityRecursive_BaseEntity_Fragment | FullEntityRecursive_Frame_Fragment | FullEntityRecursive_MediaFileEntity_Fragment | FullEntityRecursive_SimpleEntity_Fragment | FullEntityRecursive_Story_Fragment | FullEntityRecursive_Testimony_Fragment | FullEntityRecursive_BoxEntity_Fragment | FullEntityRecursive_Person_Fragment;
+export type FullEntityRecursiveFragment = FullEntityRecursive_Asset_Fragment | FullEntityRecursive_BaseEntity_Fragment | FullEntityRecursive_Frame_Fragment | FullEntityRecursive_IntermediateEntity_Fragment | FullEntityRecursive_MediaFileEntity_Fragment | FullEntityRecursive_SimpleEntity_Fragment | FullEntityRecursive_Story_Fragment | FullEntityRecursive_Testimony_Fragment | FullEntityRecursive_BoxEntity_Fragment | FullEntityRecursive_Person_Fragment;
 
 export type GetEntitiesQueryVariables = Exact<{
   limit?: Maybe<Scalars['Int']>;
@@ -2012,7 +17996,7 @@ export type GetEntitiesQueryVariables = Exact<{
 export type GetEntitiesQuery = { __typename?: 'Query', Entities?: Maybe<{ __typename?: 'EntitiesResults', count?: Maybe<number>, limit?: Maybe<number>, results?: Maybe<Array<Maybe<(
       { __typename?: 'Asset', id: string, uuid: string, type: string }
       & MinimalAssetFragment
-    ) | { __typename?: 'BaseEntity', id: string, uuid: string, type: string } | { __typename?: 'Frame', id: string, uuid: string, type: string, teaserMetadata: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation', key: string, value: string, label: string, type?: Maybe<string>, metadataOnRelation?: Maybe<Array<Maybe<{ __typename?: 'RelationMetaData', key: string, value: string }>>> }>> } | { __typename?: 'MediaFileEntity', id: string, uuid: string, type: string } | { __typename?: 'SimpleEntity', id: string, uuid: string, type: string, teaserMetadata: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation', key: string, value: string, label: string, type?: Maybe<string>, metadataOnRelation?: Maybe<Array<Maybe<{ __typename?: 'RelationMetaData', key: string, value: string }>>> }>> } | { __typename?: 'Story', id: string, uuid: string, type: string, teaserMetadata: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation', key: string, value: string, label: string, type?: Maybe<string>, metadataOnRelation?: Maybe<Array<Maybe<{ __typename?: 'RelationMetaData', key: string, value: string }>>> }>> } | { __typename?: 'Testimony', id: string, uuid: string, type: string, teaserMetadata: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation', key: string, value: string, label: string, type?: Maybe<string>, metadataOnRelation?: Maybe<Array<Maybe<{ __typename?: 'RelationMetaData', key: string, value: string }>>> }>> } | { __typename?: 'boxEntity', id: string, uuid: string, type: string, teaserMetadata: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation', key: string, value: string, label: string, type?: Maybe<string>, metadataOnRelation?: Maybe<Array<Maybe<{ __typename?: 'RelationMetaData', key: string, value: string }>>> }>> } | { __typename?: 'person', id: string, uuid: string, type: string, teaserMetadata: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation', key: string, value: string, label: string, type?: Maybe<string>, metadataOnRelation?: Maybe<Array<Maybe<{ __typename?: 'RelationMetaData', key: string, value: string }>>> }>> }>>> }> };
+    ) | { __typename?: 'BaseEntity', id: string, uuid: string, type: string } | { __typename?: 'Frame', id: string, uuid: string, type: string, teaserMetadata: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation', key: string, value: string, label: string, type?: Maybe<string>, metadataOnRelation?: Maybe<Array<Maybe<{ __typename?: 'RelationMetaData', key: string, value: string }>>> }>> } | { __typename?: 'IntermediateEntity', id: string, uuid: string, type: string, teaserMetadata: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation', key: string, value: string, label: string, type?: Maybe<string>, metadataOnRelation?: Maybe<Array<Maybe<{ __typename?: 'RelationMetaData', key: string, value: string }>>> }>> } | { __typename?: 'MediaFileEntity', id: string, uuid: string, type: string } | { __typename?: 'SimpleEntity', id: string, uuid: string, type: string, teaserMetadata: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation', key: string, value: string, label: string, type?: Maybe<string>, metadataOnRelation?: Maybe<Array<Maybe<{ __typename?: 'RelationMetaData', key: string, value: string }>>> }>> } | { __typename?: 'Story', id: string, uuid: string, type: string, teaserMetadata: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation', key: string, value: string, label: string, type?: Maybe<string>, metadataOnRelation?: Maybe<Array<Maybe<{ __typename?: 'RelationMetaData', key: string, value: string }>>> }>> } | { __typename?: 'Testimony', id: string, uuid: string, type: string, teaserMetadata: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation', key: string, value: string, label: string, type?: Maybe<string>, metadataOnRelation?: Maybe<Array<Maybe<{ __typename?: 'RelationMetaData', key: string, value: string }>>> }>> } | { __typename?: 'boxEntity', id: string, uuid: string, type: string, teaserMetadata: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation', key: string, value: string, label: string, type?: Maybe<string>, metadataOnRelation?: Maybe<Array<Maybe<{ __typename?: 'RelationMetaData', key: string, value: string }>>> }>> } | { __typename?: 'person', id: string, uuid: string, type: string, teaserMetadata: Array<Maybe<{ __typename: 'Metadata', key: string, value: string, label: string, immutable?: Maybe<boolean> } | { __typename: 'MetadataRelation', key: string, value: string, label: string, type?: Maybe<string>, metadataOnRelation?: Maybe<Array<Maybe<{ __typename?: 'RelationMetaData', key: string, value: string }>>> }>> }>>> }> };
 
 export type GetEntityByIdQueryVariables = Exact<{
   id: Scalars['String'];
@@ -2028,6 +18012,9 @@ export type GetEntityByIdQuery = { __typename?: 'Query', Entity?: Maybe<(
   ) | (
     { __typename?: 'Frame' }
     & FullEntityRecursive_Frame_Fragment
+  ) | (
+    { __typename?: 'IntermediateEntity' }
+    & FullEntityRecursive_IntermediateEntity_Fragment
   ) | (
     { __typename?: 'MediaFileEntity' }
     & FullEntityRecursive_MediaFileEntity_Fragment
@@ -2153,6 +18140,9 @@ export type ReplaceRelationsAndMetaDataMutation = { __typename?: 'Mutation', rep
     { __typename?: 'Frame' }
     & FullEntityRecursive_Frame_Fragment
   ) | (
+    { __typename?: 'IntermediateEntity' }
+    & FullEntityRecursive_IntermediateEntity_Fragment
+  ) | (
     { __typename?: 'MediaFileEntity' }
     & FullEntityRecursive_MediaFileEntity_Fragment
   ) | (
@@ -2194,6 +18184,9 @@ export type CreateEntityMutation = { __typename?: 'Mutation', createEntity?: May
   ) | (
     { __typename?: 'Frame' }
     & FullEntity_Frame_Fragment
+  ) | (
+    { __typename?: 'IntermediateEntity' }
+    & FullEntity_IntermediateEntity_Fragment
   ) | (
     { __typename?: 'MediaFileEntity' }
     & FullEntity_MediaFileEntity_Fragment
@@ -2243,10 +18236,10 @@ export const MetadataRelationFragmentDoc = {"kind":"Document","definitions":[{"k
 export const MinimalAssetFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"minimalAsset"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Asset"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","name":{"kind":"Name","value":"media"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"primaryMediafile"}}]}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"type","block":false},{"kind":"StringValue","value":"title","block":false},{"kind":"StringValue","value":"object_number","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}},{"kind":"Field","alias":{"kind":"Name","value":"title"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},...MinimalBaseEntityFragmentDoc.definitions,...MetadataFragmentDoc.definitions,...MetadataRelationFragmentDoc.definitions]} as unknown as DocumentNode<MinimalAssetFragment, unknown>;
 export const EditFormFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"editForm"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Form"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataField"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"options"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RelationField"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"relationType"}},{"kind":"Field","name":{"kind":"Name","value":"disabled"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"label"}}]}},{"kind":"Field","name":{"kind":"Name","value":"acceptedEntityTypes"}}]}}]}}]}}]} as unknown as DocumentNode<EditFormFragment, unknown>;
 export const FullEntityFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"fullEntity"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Entity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"form"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"editForm"}}]}},{"kind":"Field","alias":{"kind":"Name","value":"title"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Asset"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"media"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"mediafiles"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"filename"}},{"kind":"Field","name":{"kind":"Name","value":"original_file_location"}},{"kind":"Field","name":{"kind":"Name","value":"transcode_filename"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnail_file_location"}},{"kind":"Field","name":{"kind":"Name","value":"mimetype"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}},{"kind":"Field","name":{"kind":"Name","value":"is_primary"}},{"kind":"Field","name":{"kind":"Name","value":"is_primary_thumbnail"}}]}}]}}]}}]}},...EditFormFragmentDoc.definitions]} as unknown as DocumentNode<FullEntityFragment, unknown>;
-export const FullEntityRecursiveFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"fullEntityRecursive"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Entity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"fullEntity"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"exclude"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}},{"kind":"Field","name":{"kind":"Name","value":"linkedEntity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Asset"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","name":{"kind":"Name","value":"media"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"primaryMediafile"}}]}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false},{"kind":"StringValue","value":"object_number","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Frame"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Story"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"boxEntity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Testimony"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"description","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"person"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"fullname","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SimpleEntity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"fullEntity"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"exclude"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}}]}}]}}]}},...FullEntityFragmentDoc.definitions,...MetadataFragmentDoc.definitions,...MetadataRelationFragmentDoc.definitions,...MinimalBaseEntityFragmentDoc.definitions]} as unknown as DocumentNode<FullEntityRecursiveFragment, unknown>;
+export const FullEntityRecursiveFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"fullEntityRecursive"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Entity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"fullEntity"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"exclude"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}},{"kind":"Field","name":{"kind":"Name","value":"linkedEntity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Asset"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","name":{"kind":"Name","value":"media"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"primaryMediafile"}}]}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false},{"kind":"StringValue","value":"object_number","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Frame"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Story"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"boxEntity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Testimony"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"description","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"person"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"fullname","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SimpleEntity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"IntermediateEntity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"fullEntity"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"exclude"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}},{"kind":"Field","name":{"kind":"Name","value":"linkedEntity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"fullEntity"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Asset"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","name":{"kind":"Name","value":"media"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"primaryMediafile"}}]}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false},{"kind":"StringValue","value":"object_number","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Frame"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Story"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"boxEntity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Testimony"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"description","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"person"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"fullname","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SimpleEntity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalBaseEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"exclude"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}},{"kind":"Field","name":{"kind":"Name","value":"linkedEntity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"fullEntity"}},{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"exclude"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"metadataRelation"}}]}}]}}]}}]}}]}}]}}]}}]}}]}}]}}]}}]}}]}},...FullEntityFragmentDoc.definitions,...MetadataFragmentDoc.definitions,...MetadataRelationFragmentDoc.definitions,...MinimalBaseEntityFragmentDoc.definitions]} as unknown as DocumentNode<FullEntityRecursiveFragment, unknown>;
 export const JobFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"job"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Job"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"job_type"}},{"kind":"Field","name":{"kind":"Name","value":"job_type"}},{"kind":"Field","name":{"kind":"Name","value":"job_info"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"user"}},{"kind":"Field","name":{"kind":"Name","value":"asset_id"}},{"kind":"Field","name":{"kind":"Name","value":"mediafile_id"}},{"kind":"Field","name":{"kind":"Name","value":"parent_job_id"}},{"kind":"Field","name":{"kind":"Name","value":"end_time"}},{"kind":"Field","name":{"kind":"Name","value":"start_time"}},{"kind":"Field","name":{"kind":"Name","value":"amount_of_jobs"}},{"kind":"Field","name":{"kind":"Name","value":"completed_jobs"}},{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"_key"}},{"kind":"Field","name":{"kind":"Name","value":"_rev"}},{"kind":"Field","name":{"kind":"Name","value":"error_message"}}]}}]} as unknown as DocumentNode<JobFragment, unknown>;
 export const JobWithSubJobsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"jobWithSubJobs"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Job"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"job"}},{"kind":"Field","name":{"kind":"Name","value":"sub_jobs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"results"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"job"}}]}}]}}]}},...JobFragmentDoc.definitions]} as unknown as DocumentNode<JobWithSubJobsFragment, unknown>;
-export const GetEntitiesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getEntities"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"skip"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"searchValue"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"SearchFilter"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"advancedSearchValue"}},"type":{"kind":"ListType","type":{"kind":"NamedType","name":{"kind":"Name","value":"FilterInput"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"searchInputType"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"SearchInputType"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Entities"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"skip"},"value":{"kind":"Variable","name":{"kind":"Name","value":"skip"}}},{"kind":"Argument","name":{"kind":"Name","value":"searchValue"},"value":{"kind":"Variable","name":{"kind":"Name","value":"searchValue"}}},{"kind":"Argument","name":{"kind":"Name","value":"advancedSearchValue"},"value":{"kind":"Variable","name":{"kind":"Name","value":"advancedSearchValue"}}},{"kind":"Argument","name":{"kind":"Name","value":"searchInputType"},"value":{"kind":"Variable","name":{"kind":"Name","value":"searchInputType"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"limit"}},{"kind":"Field","name":{"kind":"Name","value":"results"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"uuid"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Asset"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalAsset"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Frame"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"type","block":false},{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"metadataOnRelation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Story"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"type","block":false},{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"metadataOnRelation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"boxEntity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"type","block":false},{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"metadataOnRelation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Testimony"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"description","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"metadataOnRelation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"person"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"fullname","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"metadataOnRelation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SimpleEntity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"metadataOnRelation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}}]}}]}}]}},...MinimalAssetFragmentDoc.definitions]} as unknown as DocumentNode<GetEntitiesQuery, GetEntitiesQueryVariables>;
+export const GetEntitiesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getEntities"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"skip"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"searchValue"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"SearchFilter"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"advancedSearchValue"}},"type":{"kind":"ListType","type":{"kind":"NamedType","name":{"kind":"Name","value":"FilterInput"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"searchInputType"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"SearchInputType"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Entities"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"skip"},"value":{"kind":"Variable","name":{"kind":"Name","value":"skip"}}},{"kind":"Argument","name":{"kind":"Name","value":"searchValue"},"value":{"kind":"Variable","name":{"kind":"Name","value":"searchValue"}}},{"kind":"Argument","name":{"kind":"Name","value":"advancedSearchValue"},"value":{"kind":"Variable","name":{"kind":"Name","value":"advancedSearchValue"}}},{"kind":"Argument","name":{"kind":"Name","value":"searchInputType"},"value":{"kind":"Variable","name":{"kind":"Name","value":"searchInputType"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"limit"}},{"kind":"Field","name":{"kind":"Name","value":"results"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"uuid"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Asset"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"minimalAsset"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Frame"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"type","block":false},{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"metadataOnRelation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Story"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"type","block":false},{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"metadataOnRelation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"boxEntity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"type","block":false},{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"metadataOnRelation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Testimony"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"description","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"metadataOnRelation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"person"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"fullname","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"metadataOnRelation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SimpleEntity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"metadataOnRelation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"IntermediateEntity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"teaserMetadata"},"name":{"kind":"Name","value":"metadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"keys"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"title","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"excludeOrInclude"},"value":{"kind":"EnumValue","value":"include"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Metadata"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"immutable"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataRelation"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"metadataOnRelation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}}]}}]}}]}},...MinimalAssetFragmentDoc.definitions]} as unknown as DocumentNode<GetEntitiesQuery, GetEntitiesQueryVariables>;
 export const GetEntityByIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getEntityById"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Entity"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"fullEntityRecursive"}}]}}]}},...FullEntityRecursiveFragmentDoc.definitions]} as unknown as DocumentNode<GetEntityByIdQuery, GetEntityByIdQueryVariables>;
 export const GetDirectoriesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getDirectories"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"dir"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Directories"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"dir"},"value":{"kind":"Variable","name":{"kind":"Name","value":"dir"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"dir"}},{"kind":"Field","name":{"kind":"Name","value":"has_subdirs"}},{"kind":"Field","name":{"kind":"Name","value":"parent"}}]}}]}}]} as unknown as DocumentNode<GetDirectoriesQuery, GetDirectoriesQueryVariables>;
 export const GetJobsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getJobs"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"paginationInfo"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"PaginationInfo"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Filters"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Jobs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"paginationInfo"},"value":{"kind":"Variable","name":{"kind":"Name","value":"paginationInfo"}}},{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"results"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"job"}}]}},{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"limit"}},{"kind":"Field","name":{"kind":"Name","value":"next"}}]}}]}},...JobFragmentDoc.definitions]} as unknown as DocumentNode<GetJobsQuery, GetJobsQueryVariables>;
