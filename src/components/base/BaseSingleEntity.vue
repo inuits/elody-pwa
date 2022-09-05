@@ -4,14 +4,14 @@
     class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0"
   >
     <entity-image-selection
-      v-show="loading || mediafiles.length > 0"
+      v-show="(loading || mediafiles.length > 0) && isSelectionDisplayed"
       v-model:selectedImage="mediafileSelectionState.selectedMediafile"
       class="w-40"
       :loading="loading"
       :mediafiles="mediafiles"
     />
     <div
-      v-show="!loading && mediafiles.length > 0"
+      v-show="!loading"
       :class="['flex w-4/6 justify-center ', { checkboard: loading }]"
     >
       <IIIFViewer
@@ -53,6 +53,7 @@
     </div>
     <!-- meta is metadata form-->
     <Meta
+      v-if="isMetaDisplayed"
       :class="!loading && mediafiles.length > 0 ? 'w-2/6' : 'w-full'"
       :loading="loading"
       :entity-id="result ? result.Entity.id : undefined"
@@ -101,7 +102,15 @@
       AudioPlayer,
       PDFViewer,
     },
-    setup() {
+    props: {
+      isMetaDisplayed: Boolean,
+      isSelectionDisplayed: Boolean,
+      entityType: {
+        type: String,
+        required: true,
+      }
+    },
+    setup(props) {
       const { myDropzone, isUploading, selectedFiles, increaseSuccessCounter } =
         useDropzoneHelper();
       const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
@@ -116,6 +125,7 @@
 
       const queryVariables = reactive<GetEntityByIdQueryVariables>({
         id: id,
+        type: props.entityType
       });
 
       const { result, refetch, onResult } = useQuery<GetEntityByIdQuery>(
@@ -126,6 +136,7 @@
           fetchPolicy: 'no-cache',
         },
       );
+
       const title = computed(() => {
         if (result.value && result.value.Entity?.title[0]?.__typename === 'Metadata') {
           const tileMetada = result.value.Entity?.title[0];
@@ -191,43 +202,57 @@
         increaseSuccessCounter();
       });
 
-      onBeforeRouteUpdate(async (to, from) => {
+      onBeforeRouteUpdate(async (to: any, from: any) => {
         //@ts-ignore
         queryVariables.id = to.params.id;
       });
 
-      onResult((queryResult) => {
-        if (
-          queryResult.data &&
-          queryResult.data.Entity?.media?.mediafiles &&
-          queryResult.data.Entity?.media?.mediafiles?.length > 0
-        ) {
-          mediafiles.value = [];
-          let mediaFileChanged: boolean = false;
-
-          queryResult.data.Entity.media.mediafiles?.forEach((mediafile, index) => {
-            if (mediafile?.__typename === 'MediaFile') {
-              if (mediafile._id == mediafileSelectionState.selectedMediafile?._id) {
-                updateSelectedEntityMediafile(mediafile);
-                mediaFileChanged = true;
+      if (props.entityType === "Entity") {
+        onResult((queryResult: any) => {
+          if (
+            queryResult.data &&
+            queryResult.data.Entity?.media?.mediafiles &&
+            queryResult.data.Entity?.media?.mediafiles?.length > 0
+          ) {
+            mediafiles.value = [];
+            let mediaFileChanged: boolean = false;
+            queryResult.data.Entity.media.mediafiles?.forEach((mediafile: any, index: any) => {
+              if (mediafile?.__typename === 'MediaFile') {
+                if (mediafile._id == mediafileSelectionState.selectedMediafile?._id) {
+                  updateSelectedEntityMediafile(mediafile);
+                  mediaFileChanged = true;
+                }
+                mediafiles.value.push(mediafile);
               }
-              mediafiles.value.push(mediafile);
-            }
-          });
-          if (!mediaFileChanged && mediafiles.value[0])
-            updateSelectedEntityMediafile(mediafiles.value[0]);
-          if (!mediaFileChanged && !mediafiles.value[0])
-            updateSelectedEntityMediafile(undefined);
-        }
-        //If form show edit togle
-        if (queryResult.data && queryResult.data.Entity?.form) {
-          showEditToggle();
-        } else if (queryResult.data && queryResult.data?.Entity) {
-          showEditToggle();
-        }
+            });
+            if (!mediaFileChanged && mediafiles.value[0])
+              updateSelectedEntityMediafile(mediafiles.value[0]);
+            if (!mediaFileChanged && !mediafiles.value[0])
+              updateSelectedEntityMediafile(undefined);
+          }
+          //If form show edit togle
+          if (queryResult.data && queryResult.data.Entity?.form) {
+            showEditToggle();
+          } else if (queryResult.data && queryResult.data?.Entity) {
+            showEditToggle();
+          }
+          loading.value = false;
+        });
+      }
 
-        loading.value = false;
-      });
+      if (props.entityType === 'MediaFile') {
+        onResult((r: any) => {
+          showEditToggle();
+          loading.value = false;
+          if (r?.data.Entity.media.mediafiles) {
+            mediafileSelectionState.selectedMediafile = r.data.Entity.media.mediafiles[0];
+            updateSelectedEntityMediafile(r.data.Entity.media.mediafiles[0]);
+            if (r.data.Entity.media.mediafiles[0].filename) {
+              updatePageTitle(r.data.Entity.media.mediafiles[0].filename, 'entityTitle');
+            }
+          }
+        });
+      }
 
       document.addEventListener('save', () => {
         refetch();

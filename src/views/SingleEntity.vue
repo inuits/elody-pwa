@@ -1,5 +1,5 @@
 <template>
-  <BaseSingleEntity />
+  <BaseSingleEntity :isSelectionDisplayed="true" :isMetaDisplayed="true" :isMediaFileSingle="false" :entityType="'Entity'" />
 </template>
 
 <script lang="ts">
