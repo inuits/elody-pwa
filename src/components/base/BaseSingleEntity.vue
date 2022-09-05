@@ -60,6 +60,7 @@
     </div>
     <!-- meta is metadata form-->
     <Meta
+      v-if="isMetaDisplayed"
       :class="!loading && mediafiles.length > 0 ? 'w-2/6' : 'w-full'"
       :loading="loading"
       :entity-id="result ? result.Entity.id : undefined"
@@ -129,7 +130,7 @@
       const { myDropzone, isUploading, selectedFiles, increaseSuccessCounter } =
         useDropzoneHelper();
       const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
-      const { lastAdjustedMediaFileMetaData } = useMetaDataHelper();
+      const { lastAdjustedMediaFileMetaData, mediafiles } = useMetaDataHelper();
       const id = asString(useRoute().params['id']);
       const loading = ref<boolean>(true);
       const { mediafileSelectionState, updateSelectedEntityMediafile } =
@@ -140,6 +141,7 @@
 
       const queryVariables = reactive<GetEntityByIdQueryVariables>({
         id: id,
+        type: props.entityType
       });
 
       const { result, refetch, onResult } = useQuery<GetEntityByIdQuery>(
@@ -150,6 +152,7 @@
           fetchPolicy: 'no-cache',
         },
       );
+
       const title = computed(() => {
         if (result.value && result.value.Entity?.title[0]?.__typename === 'Metadata') {
           const tileMetada = result.value.Entity?.title[0];
@@ -259,8 +262,19 @@
           showEditToggle();
         }
 
-        loading.value = false;
-      });
+      if (props.entityType === 'MediaFile') {
+        onResult((r: any) => {
+          showEditToggle();
+          loading.value = false;
+          if (r?.data.Entity.media.mediafiles) {
+            mediafileSelectionState.selectedMediafile = r.data.Entity.media.mediafiles[0];
+            updateSelectedEntityMediafile(r.data.Entity.media.mediafiles[0]);
+            if (r.data.Entity.media.mediafiles[0].filename) {
+              updatePageTitle(r.data.Entity.media.mediafiles[0].filename, 'entityTitle');
+            }
+          }
+        });
+      }
 
       document.addEventListener('save', () => {
         refetch();

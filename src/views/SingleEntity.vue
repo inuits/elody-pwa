@@ -1,9 +1,5 @@
 <template>
-<<<<<<< HEAD
   <BaseSingleEntity :isSelectionDisplayed="true" :isMetaDisplayed="true" :isMediaFileSingle="false" :entityType="'Entity'" />
-=======
-  <BaseSingleEntity />
->>>>>>> WIP Ref: #97062, fix base library props and made BaseSingleEntity component
 </template>
 
 <script lang="ts">
