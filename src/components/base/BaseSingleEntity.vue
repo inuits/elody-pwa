@@ -12,7 +12,7 @@
     />
     <div
       v-show="!loading"
-      :class="['flex w-4/6 justify-center ', { checkboard: loading }]"
+      :class="['justify-center ', { checkboard: loading }, entityType === 'MediaFile' ? 'w-full' : 'flex w-4/6']"
     >
       <IIIFViewer
         v-if="
