@@ -207,52 +207,36 @@
         queryVariables.id = to.params.id;
       });
 
-      if (props.entityType === "Entity") {
-        onResult((queryResult: any) => {
-          if (
-            queryResult.data &&
-            queryResult.data.Entity?.media?.mediafiles &&
-            queryResult.data.Entity?.media?.mediafiles?.length > 0
-          ) {
-            mediafiles.value = [];
-            let mediaFileChanged: boolean = false;
-            queryResult.data.Entity.media.mediafiles?.forEach((mediafile: any, index: any) => {
-              if (mediafile?.__typename === 'MediaFile') {
-                if (mediafile._id == mediafileSelectionState.selectedMediafile?._id) {
-                  updateSelectedEntityMediafile(mediafile);
-                  mediaFileChanged = true;
-                }
-                mediafiles.value.push(mediafile);
+      onResult((queryResult: any) => {
+        if (
+          queryResult.data &&
+          queryResult.data.Entity?.media?.mediafiles &&
+          queryResult.data.Entity?.media?.mediafiles?.length > 0
+        ) {
+          mediafiles.value = [];
+          let mediaFileChanged: boolean = false;
+          queryResult.data.Entity.media.mediafiles?.forEach((mediafile: any, index: any) => {
+            if (mediafile?.__typename === 'MediaFile') {
+              if (mediafile._id == mediafileSelectionState.selectedMediafile?._id) {
+                updateSelectedEntityMediafile(mediafile);
+                mediaFileChanged = true;
               }
-            });
-            if (!mediaFileChanged && mediafiles.value[0])
-              updateSelectedEntityMediafile(mediafiles.value[0]);
-            if (!mediaFileChanged && !mediafiles.value[0])
-              updateSelectedEntityMediafile(undefined);
-          }
-          //If form show edit togle
-          if (queryResult.data && queryResult.data.Entity?.form) {
-            showEditToggle();
-          } else if (queryResult.data && queryResult.data?.Entity) {
-            showEditToggle();
-          }
-          loading.value = false;
-        });
-      }
-
-      if (props.entityType === 'MediaFile') {
-        onResult((r: any) => {
-          showEditToggle();
-          loading.value = false;
-          if (r?.data.Entity.media.mediafiles) {
-            mediafileSelectionState.selectedMediafile = r.data.Entity.media.mediafiles[0];
-            updateSelectedEntityMediafile(r.data.Entity.media.mediafiles[0]);
-            if (r.data.Entity.media.mediafiles[0].filename) {
-              updatePageTitle(r.data.Entity.media.mediafiles[0].filename, 'entityTitle');
+              mediafiles.value.push(mediafile);
             }
-          }
-        });
-      }
+          });
+          if (!mediaFileChanged && mediafiles.value[0])
+            updateSelectedEntityMediafile(mediafiles.value[0]);
+          if (!mediaFileChanged && !mediafiles.value[0])
+            updateSelectedEntityMediafile(undefined);
+        }
+        //If form show edit togle
+        if (queryResult.data && queryResult.data.Entity?.form) {
+          showEditToggle();
+        } else if (queryResult.data && queryResult.data?.Entity) {
+          showEditToggle();
+        }
+        loading.value = false;
+      });
 
       document.addEventListener('save', () => {
         refetch();
