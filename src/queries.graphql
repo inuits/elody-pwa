@@ -231,6 +231,18 @@ fragment fullEntityRecursive on Entity {
             }
           }
         }
+        ... on SimpleEntity {
+          ...minimalBaseEntity
+          teaserMetadata: metadata(keys: ["title"], excludeOrInclude: include) {
+            __typename
+            ... on Metadata {
+              ...metadata
+            }
+            ... on MetadataRelation {
+              ...metadataRelation
+            }
+          }
+        }
         ... on IntermediateEntity {
           ...minimalBaseEntity
           ...fullEntity
@@ -347,18 +359,131 @@ fragment fullEntityRecursive on Entity {
                   ... on MetadataRelation {
                     ...metadataRelation
                     linkedEntity {
-                      ... on MediaFileEntity {
-          ...minimalBaseEntity
-          teaserMetadata: metadata(keys: ["filename"], excludeOrInclude: include) {
-            __typename
-            ... on Metadata {
-              ...metadata
-            }
-            ... on MetadataRelation {
-              ...metadataRelation
+                      ...fullEntity
+                      ... on Asset {
+                        ...minimalBaseEntity
+                        media {
+                          primaryMediafile
+                        }
+                        teaserMetadata: metadata(
+                          keys: ["title", "object_number"]
+                          excludeOrInclude: include
+                        ) {
+                          __typename
+                          ... on Metadata {
+                            ...metadata
+                          }
+                          ... on MetadataRelation {
+                            ...metadataRelation
+                          }
+                        }
+                      }
+                      ... on Frame {
+                        ...minimalBaseEntity
+                        teaserMetadata: metadata(
+                          keys: ["title"]
+                          excludeOrInclude: include
+                        ) {
+                          __typename
+                          ... on Metadata {
+                            ...metadata
+                          }
+                          ... on MetadataRelation {
+                            ...metadataRelation
+                          }
+                        }
+                      }
+                      ... on Story {
+                        ...minimalBaseEntity
+                        teaserMetadata: metadata(
+                          keys: ["title"]
+                          excludeOrInclude: include
+                        ) {
+                          __typename
+                          ... on Metadata {
+                            ...metadata
+                          }
+                          ... on MetadataRelation {
+                            ...metadataRelation
+                          }
+                        }
+                      }
+                      ... on boxEntity {
+                        ...minimalBaseEntity
+                        teaserMetadata: metadata(
+                          keys: ["title"]
+                          excludeOrInclude: include
+                        ) {
+                          __typename
+                          ... on Metadata {
+                            ...metadata
+                          }
+                          ... on MetadataRelation {
+                            ...metadataRelation
+                          }
+                        }
+                      }
+                      ... on Testimony {
+                        ...minimalBaseEntity
+                        teaserMetadata: metadata(
+                          keys: ["description"]
+                          excludeOrInclude: include
+                        ) {
+                          __typename
+                          ... on Metadata {
+                            ...metadata
+                          }
+                          ... on MetadataRelation {
+                            ...metadataRelation
+                          }
+                        }
+                      }
+                      ... on person {
+                        ...minimalBaseEntity
+                        teaserMetadata: metadata(
+                          keys: ["fullname"]
+                          excludeOrInclude: include
+                        ) {
+                          __typename
+                          ... on Metadata {
+                            ...metadata
+                          }
+                          ... on MetadataRelation {
+                            ...metadataRelation
+                          }
+                        }
+                      }
+                      ... on SimpleEntity {
+                        ...minimalBaseEntity
+                        teaserMetadata: metadata(
+                          keys: ["title"]
+                          excludeOrInclude: include
+                        ) {
+                          __typename
+                          ... on Metadata {
+                            ...metadata
+                          }
+                          ... on MetadataRelation {
+                            ...metadataRelation
+                          }
+                        }
+                      }
+                      metadata(keys: [], excludeOrInclude: exclude) {
+                        ... on Metadata {
+                          ...metadata
+                        }
+                        ... on MetadataRelation {
+                          ...metadataRelation
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }
+<<<<<<< HEAD
         ...fullEntity
                       ... on Asset {
                         ...minimalBaseEntity
@@ -483,6 +608,8 @@ fragment fullEntityRecursive on Entity {
             }
           }
         }
+=======
+>>>>>>> WIP Ref: #97062, Mediafile browser
       }
     }
   }
@@ -682,8 +809,8 @@ query getEntities(
           }
         }
       }
-      ... on MediaFileEntity {
-        teaserMetadata: metadata(keys: ["filename"], excludeOrInclude: include) {
+      ... on IntermediateEntity {
+        teaserMetadata: metadata(keys: ["title"], excludeOrInclude: include) {
           __typename
           ... on Metadata {
             key
