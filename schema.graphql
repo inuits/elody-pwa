@@ -10,7 +10,6 @@ interface Entity {
   uuid: String!
   type: String!
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
-  media: Media
   form: Form
 }
 
@@ -64,6 +63,14 @@ type Frame implements Entity {
   form: Form
 }
 
+type Testimony implements Entity {
+  id: String!
+  uuid: String!
+  type: String!
+  metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
+  form: Form
+}
+
 type boxEntity implements Entity {
   id: String!
   uuid: String!
@@ -78,11 +85,10 @@ type person implements Entity {
   uuid: String!
   type: String!
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
-  media: Media
   form: Form
 }
 
-type museum implements Entity {
+type SimpleEntity implements Entity {
   id: String!
   uuid: String!
   type: String!
@@ -91,7 +97,7 @@ type museum implements Entity {
   form: Form
 }
 
-type thesaurus implements Entity {
+type IntermediateEntity implements Entity {
   id: String!
   uuid: String!
   type: String!
@@ -366,8 +372,7 @@ input Filters {
 }
 
 type Query {
-  MediaFile(id: String!): MediaFile
-  Entity(id: String!): Entity
+  Entity(id: String!, type: String!): Entity
   Entities(
     limit: Int
     skip: Int
