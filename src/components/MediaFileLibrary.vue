@@ -1,7 +1,7 @@
 <template>
   <Library 
-    :hasSimpleSearch="false" 
-    :SearchInputTypeOnDrawer="SearchInputType.AdvancedInputMediaFilesType" 
+    :hasSimpleSearch="false"
+    :SearchInputTypeOnDrawer="SearchInputType.AdvancedInputMediaFilesType"
     :SearchInputType="SearchInputType.AdvancedInputMediaFilesType"
     :listItemRouteName="'SingleMediafile'"
     :searchPlaceholder="'Search Mediafiles...'"
