@@ -1,11 +1,11 @@
 <template>
   <Library 
-    :hasSimpleSearch="true" 
-    :SearchInputTypeOnDrawer="SearchInputType.AdvancedInputType" 
-    :SearchInputType="SearchInputType.SimpleInputtype"
-    :listItemRouteName="'SingleEntity'"
-    :searchPlaceholder="'Search Asset Library...'"
-    :advancedFiltersChoice="'entityFilters'"
+    :hasSimpleSearch="false" 
+    :SearchInputTypeOnDrawer="SearchInputType.AdvancedInputMediaFilesType" 
+    :SearchInputType="SearchInputType.AdvancedInputMediaFilesType"
+    :listItemRouteName="'SingleMediafile'"
+    :searchPlaceholder="'Search Mediafiles...'"
+    :advancedFiltersChoice="'mediaFileFilters'"
   />
 </template>
 
@@ -15,11 +15,12 @@
   import { SearchInputType } from '@/queries';
 
   export default defineComponent({
-    name: 'AssetLibrary',
+    name: 'MediaFileLibrary',
     components: {
       Library
     },
     setup: () => {
+
       return {
         SearchInputType,
       };

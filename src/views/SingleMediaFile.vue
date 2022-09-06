@@ -1,5 +1,5 @@
 <template>
-  <BaseSingleEntity :isSelectionDisplayed="true" :isMetaDisplayed="true" :isMediaFileSingle="false" :entityType="'Entity'" />
+  <BaseSingleEntity :isSelectionDisplayed="false" :isMetaDisplayed="false" :isMediaFileSingle="true" :entityType="'MediaFile'" />
 </template>
 
 <script lang="ts">
@@ -7,7 +7,7 @@
   import BaseSingleEntity from '@/components/base/BaseSingleEntity.vue';
 
   export default defineComponent({
-    name: 'SingleEntity',
+    name: 'SingleMediaFile',
     components: {
       BaseSingleEntity
     },

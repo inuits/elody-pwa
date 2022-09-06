@@ -15,13 +15,12 @@
     </div>
     <a ref="homeRef" class="text-sm mr-2 text-neutral-700">Reset view</a>
   </div>
-  <media-info />
+  <MediaInfo />
 </template>
 
 <script lang="ts">
   import { defineComponent, onMounted, ref, PropType } from 'vue';
   import { Unicons } from '@/types';
-  import { MediaFileMetadata } from '@/queries';
   import MediaInfo from './base/MediaInfo.vue';
   export default defineComponent({
     name: 'ViewerToolbar',

@@ -1,6 +1,6 @@
 <template>
   <div
-    v-show="mediafileSelectionState.selectedMediafile.metadata.length > 0"
+    v-if="mediafileSelectionState.selectedMediafile.metadata.length > 0"
     class="metainfo absolute bg-neutral-0 z-20 mx-4 mt-7 p-4 shadow-sm bottom-0"
   >
     <h3 class="text-sm text-neutral-700 font-semibold">Mediainfo</h3>
@@ -15,7 +15,7 @@
           {{ item.value }}
         </div>
       </div>
-      <div>
+      <div v-if="hasPrimaryFunctionality()">
         <div class="label">{{t('media-info.primaire-media')}}</div>
         <div class="value h-5 w-5">
           <Icon v-if="mediafileSelectionState.selectedMediafile.is_primary" :name="Unicons.Check.name" />
@@ -29,8 +29,7 @@
         </div>
       </div>
     </div>
-    <div v-if="isEdit" class="flex flex-col px-6 -mb-5 w-64 -ml-1">
-      <!-- PRIMAIR MEDIA-->
+    <div v-if="isEdit && hasPrimaryFunctionality()" class="flex flex-col px-6 -mb-5 w-64 -ml-1">
       <div class="flex justify-between">
         <span class="ml-1 text-neutral-700 text-sm">{{t('media-info.primaire-media')}}</span>
         <div class="value h-5 w-5">
@@ -45,7 +44,6 @@
         txt-color="neutral-0"
         @click="setMediaPrimaire(mediafileSelectionState.selectedMediafile)"
       />
-      <!-- THUMBNAIL MEDIA -->
       <div class="flex justify-between">
         <span class="ml-1 text-neutral-700 text-sm">{{t('media-info.thumbnail')}}</span>
         <div class="value h-5 w-5">
@@ -76,14 +74,17 @@
   import { Unicons } from '@/types';
   import { useI18n } from 'vue-i18n';
   import { useMutation } from '@vue/apollo-composable';
-  import { mediafiles } from '@/views/SingleEntity.vue';
   import { useRoute } from 'vue-router';
+  import useMetaDataHelper from '@/composables/useMetaDataHelper';
+  import useMediaInfoHelper from '@/composables/useMediaInfoHelper';
   const { isEdit, addSaveCallback } = useEditMode();
 
   export default defineComponent({
     name: 'MediaInfo',
     components: { MetaEditMedia, Icon, BaseButton },
     setup() {
+      const { mediafiles } = useMetaDataHelper();
+      const { hasPrimaryFunctionality } = useMediaInfoHelper();
       const { t } = useI18n();
       const route = useRoute();
       const { mediafileSelectionState } = useEntityMediafileSelector();
@@ -134,9 +135,16 @@
         });
       };
 
-      
-
-      return { isEdit, form, mediafileSelectionState, Unicons, setMediaPrimaire, setMediaThumbnail, t };
+      return { 
+        isEdit,
+        form,
+        mediafileSelectionState,
+        Unicons,
+        setMediaPrimaire,
+        setMediaThumbnail,
+        hasPrimaryFunctionality,
+        t
+      };
     },
   });
 </script>
