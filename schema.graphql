@@ -372,7 +372,7 @@ input Filters {
 }
 
 type Query {
-  Entity(id: String!): Entity
+  Entity(id: String!, type: String!): Entity
   Entities(
     limit: Int
     skip: Int
@@ -385,7 +385,7 @@ type Query {
   Directories(dir: String): [Directory]
   Jobs(paginationInfo: PaginationInfo, filters: Filters): JobsResults
   Job(id: String!): Job
-  advancedFilters: [advancedFilter]
+  advancedFilters(choice: String!): [advancedFilter]
   FilterOptions(key: String!): [filterOption]
   Form(type: String!): Form
 }

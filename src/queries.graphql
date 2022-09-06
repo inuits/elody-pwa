@@ -110,6 +110,25 @@ fragment fullEntity on Entity {
       }
     }
   }
+  ... on MediaFileEntity {
+    media {
+      mediafiles {
+        _id
+        filename
+        original_file_location
+        transcode_filename
+        thumbnail_file_location
+        mimetype
+        isPublic
+        metadata {
+          key
+          value
+        }
+        is_primary
+        is_primary_thumbnail
+      }
+    }
+  }
 }
 
 fragment fullEntityRecursive on Entity {
@@ -480,6 +499,30 @@ query getEntities(
       ... on Asset {
         ...minimalAsset
       }
+      ... on MediaFileEntity {
+        media {
+          primaryMediafile
+        }
+        teaserMetadata: metadata(keys: ["filename"], excludeOrInclude: include) {
+          __typename
+         ... on Metadata {
+            key
+            value
+            label
+            immutable
+          }
+          ... on MetadataRelation {
+            key
+            value
+            label
+            type
+            metadataOnRelation {
+              key
+              value
+            }
+          }
+        }
+      }
       ... on Frame {
         teaserMetadata: metadata(keys: ["type", "title"], excludeOrInclude: include) {
           __typename
@@ -638,8 +681,8 @@ query getEntities(
 #   }
 # }
 
-query getEntityById($id: String!) {
-  Entity(id: $id) {
+query getEntityById($id: String!, $type: String!) {
+  Entity(id: $id, type: $type) {
     ...fullEntityRecursive
   }
 }
@@ -699,8 +742,8 @@ query getJob($id: String!) {
   }
 }
 
-query getAdvancedFilters {
-  advancedFilters {
+query getAdvancedFilters($choice: String!) {
+  advancedFilters(choice: $choice) {
     label
     type
     key
