@@ -155,10 +155,10 @@
         required: true,
       },
       hasSimpleSearch: Boolean,
-      SearchInputTypeOnDrawer: {
+      searchInputTypeOnDrawer: {
         type: String as PropType<Maybe<SearchInputType>>,
       },
-      SearchInputType: {
+      searchInputType: {
         type: String as PropType<Maybe<SearchInputType>>,
       },
       enableSelection: {
@@ -196,14 +196,14 @@
         },
         advancedSearchValue: [],
         searchInputType: showDrawer.value
-          ? props.SearchInputTypeOnDrawer
-          : props.SearchInputType
+          ? props.searchInputTypeOnDrawer
+          : props.searchInputType
       });
 
       watch(showDrawer, () => {
         queryVariables.searchInputType = showDrawer.value
-          ? props.SearchInputTypeOnDrawer
-          : props.SearchInputType;
+          ? props.searchInputTypeOnDrawer
+          : props.searchInputType;
       });
 
       const { result, loading } = useQuery(GetEntitiesDocument, queryVariables, {
