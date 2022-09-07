@@ -1,5 +1,6 @@
 <template>
   <MediaFileLibrary />
+  <router-view />
 </template>
 
 <script lang="ts">

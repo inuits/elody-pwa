@@ -12,7 +12,6 @@
       BaseSingleEntity
     },
     setup() {
-      
       return {
       };
     },

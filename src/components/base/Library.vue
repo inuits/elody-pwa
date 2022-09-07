@@ -210,8 +210,8 @@
         notifyOnNetworkStatusChange: true,
       });
 
-      const addSelection = (id: string) => {
-        emit('addSelection', id);
+      const addSelection = (entity: any) => {
+        emit('addSelection', entity);
       };
 
       return {
