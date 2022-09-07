@@ -197,7 +197,6 @@
       onDone((value) => {
         if (value.data && value.data.postMediaFile) {
           mediafiles.value.push(value.data.postMediaFile);
-          console.log('mediafiles: ', mediafiles.value);
           addMediaFileToLinkList(value.data.postMediaFile);
         }
         increaseSuccessCounter();
