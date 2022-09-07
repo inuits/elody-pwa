@@ -38,8 +38,8 @@ import { useUploadModal } from './UploadModal.vue';
 
       const addSelection = (entity: any) => {
         console.log('ADD SELECTION: ', entity.media.mediafiles[0]);
-        mediafiles.value.push(entity.media.mediafiles[0]);
-        addMediaFileToLinkList(entity.media.mediafiles[0]);
+        mediafiles.value.push({...entity.media.mediafiles[0]});
+        addMediaFileToLinkList({...entity.media.mediafiles[0]});
         closeUploadModal();
       };
 
