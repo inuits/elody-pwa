@@ -1,13 +1,24 @@
 <template>
   <modal
     :large="true"
-    :scroll="true"
+    :scroll="false"
     :modal-state="uploadModalState.state"
     @hide-modal="closeUploadModal"
   >
-    <div class="bg-neutral-20 w-full h-full flex flex-col">
+    <div class="bg-neutral-20 w-full h-full flex flex-col overflow-auto">
       <upload-modal-import v-if="modalToOpen === modalChoices.IMPORT" :directories="result" />
-      <upload-modal-dropzone v-if="modalToOpen === modalChoices.DROPZONE" />
+      <tabs v-if="modalToOpen === modalChoices.DROPZONE">
+        <tab title="Upload files">
+          <div class="p-3 h-full">
+            <upload-modal-dropzone v-if="modalToOpen === modalChoices.DROPZONE" />
+          </div>
+        </tab>
+        <tab title="Select file">
+          <div class="p-3 h-full">
+            <MediaFileLibrary :enable-selection="true" />
+          </div>
+        </tab>
+      </tabs>
     </div>
   </modal>
 </template>
@@ -18,15 +29,18 @@
   import UploadModalDropzone from './UploadModalDropzone.vue';
   import { useQuery } from '@vue/apollo-composable';
   import { GetDirectoriesDocument } from '@/queries';
+  import Tabs from './Tabs.vue';
+  import Tab from './Tab.vue';
+  import MediaFileLibrary from '@/components/MediaFileLibrary.vue';
 
   export type UploadModalType = {
     state: ModalState;
   };
 
   enum modalChoices {
-  IMPORT = 'IMPORT',
-  DROPZONE = 'DROPZONE'
-}
+    IMPORT = 'IMPORT',
+    DROPZONE = 'DROPZONE'
+  }
 
   const modalToOpen = ref<modalChoices>(modalChoices.DROPZONE);
 
@@ -66,7 +80,10 @@
     components: {
       Modal,
       UploadModalImport,
-      UploadModalDropzone
+      UploadModalDropzone,
+      Tabs,
+      Tab,
+      MediaFileLibrary
     },
     setup() {
       const { closeUploadModal, uploadModalState, modalToOpen, modalChoices } = useUploadModal();
