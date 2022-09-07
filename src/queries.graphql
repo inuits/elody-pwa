@@ -502,6 +502,21 @@ query getEntities(
       ... on MediaFileEntity {
         media {
           primaryMediafile
+          mediafiles {
+            _id
+            filename
+            original_file_location
+            transcode_filename
+            thumbnail_file_location
+            mimetype
+            isPublic
+            metadata {
+              key
+              value
+            }
+            is_primary
+            is_primary_thumbnail
+          }
         }
         teaserMetadata: metadata(keys: ["filename"], excludeOrInclude: include) {
           __typename
