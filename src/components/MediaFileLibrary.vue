@@ -1,11 +1,11 @@
 <template>
   <Library 
-    :hasSimpleSearch="false"
-    :SearchInputTypeOnDrawer="SearchInputType.AdvancedInputMediaFilesType"
-    :SearchInputType="SearchInputType.AdvancedInputMediaFilesType"
-    :listItemRouteName="'SingleMediafile'"
-    :searchPlaceholder="'Search Mediafiles...'"
-    :advancedFiltersChoice="'mediaFileFilters'"
+    :has-simple-search="false"
+    :search-input-type-on-drawer="SearchInputType.AdvancedInputMediaFilesType"
+    :search-input-type="SearchInputType.AdvancedInputMediaFilesType"
+    :list-item-route-name="'SingleMediafile'"
+    :search-placeholder="'Search Mediafiles...'"
+    :advanced-filters-choice="'mediaFileFilters'"
     :enable-selection="enableSelection"
     @add-selection="addSelection"
   />
