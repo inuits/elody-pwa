@@ -80,7 +80,7 @@
 </template>
 
 <script lang="ts">
-  import { MetadataAndRelation } from '@/queries';
+  import { MetadataRelation } from '@/queries';
   import { defineComponent, PropType } from 'vue';
   import { useI18n } from 'vue-i18n';
   import { useRouter } from 'vue-router';
@@ -94,9 +94,9 @@
     props: {
       loading: { type: Boolean, default: false },
       metadata: {
-        type: Array as PropType<MetadataAndRelation[]>,
+        type: Object as PropType<MetadataRelation>,
         required: false,
-        default: () => [],
+        default: () => {},
       },
     },
     setup() {
