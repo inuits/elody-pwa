@@ -6,6 +6,8 @@
     :listItemRouteName="'SingleMediafile'"
     :searchPlaceholder="'Search Mediafiles...'"
     :advancedFiltersChoice="'mediaFileFilters'"
+    :enable-selection="enableSelection"
+    @add-selection="addSelection"
   />
 </template>
 
@@ -19,10 +21,22 @@
     components: {
       Library
     },
-    setup: () => {
+    props: {
+      enableSelection: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    setup: (props, { emit }) => {
+
+      const addSelection = (mediaFile: any) => {
+        console.log('ADD SELECTION: ', mediaFile);
+        emit('addSelection', mediaFile);
+      };
 
       return {
         SearchInputType,
+        addSelection
       };
     },
   });
