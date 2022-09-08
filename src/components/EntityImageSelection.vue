@@ -145,6 +145,7 @@
       const { removeFromMetaDataPatchList } = useMetaDataHelper();
       const { openUploadModal, uploadModalState, modalChoices } = useUploadModal();
       const selectImage = (mediafile: MediaFile) => {
+        console.log('SELECTED: ', mediafile);
         updateSelectedEntityMediafile(mediafile);
       };
 
