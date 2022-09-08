@@ -25,10 +25,16 @@ const useMediaAssetLinkHelper = () => {
     linkList.value.forEach((mediaFile: MediaFile) => {
 
       mediaFile.metadata?.forEach((meta: any) => {
-        delete meta['__typename'];
+        if (meta.__typename) {
+          meta.__typename = undefined;
+        }
       });
 
-      delete mediaFile['__typename'];
+      if (mediaFile.__typename) {
+        mediaFile.__typename = undefined;
+        mediaFile.isPublic = undefined;
+        mediaFile.transcode_filename = undefined;
+      }
 
       addSaveCallback(async () => {
         await mutate({
