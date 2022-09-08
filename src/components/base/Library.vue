@@ -1,7 +1,7 @@
 <template>
   <div class="lg:flex">
     <FilterSideBar
-      v-show="!showDrawer"
+      v-show="!isDrawerHiding"
       v-model:activeFilters="queryVariables.advancedSearchValue"
       :accepted-entity-types="acceptedEntityTypes ? acceptedEntityTypes : []"
       :advancedFiltersChoice="advancedFiltersChoice"
@@ -10,7 +10,7 @@
       <div class="flex flex-row flex-wrap gap-y-4">
         <div v-show="acceptedEntityTypes.length === 0" class="mt-8 mr-4">
           <IconToggle
-            v-model:checked="showDrawer"
+            v-model:checked="isDrawerHiding"
             :icon-on="Unicons.SearchGlass.name"
             :icon-off="Unicons.Filter.name"
           />
@@ -23,7 +23,7 @@
           label="Search"
           :is-disabled="loading"
           :bg-color="'neutral-20'"
-          :disabled="!showDrawer"
+          :disabled="!isDrawerHiding"
         />
         <div
           v-show="acceptedEntityTypes.length === 0"
@@ -180,10 +180,10 @@
         skip: 1,
       });
 
-      const showDrawer = ref(props.acceptedEntityTypes.length === 0 ? true : false);
+      const isDrawerHiding = ref(props.acceptedEntityTypes.length === 0 ? true : false);
       
       if (props.hasSimpleSearch === false) {
-        showDrawer.value = false;
+        isDrawerHiding.value = false;
       }
 
       const queryVariables = reactive<GetEntitiesQueryVariables>({
@@ -195,15 +195,15 @@
           key: 'title',
         },
         advancedSearchValue: [],
-        searchInputType: showDrawer.value
-          ? props.searchInputTypeOnDrawer
-          : props.searchInputType
+        searchInputType: isDrawerHiding.value
+          ? props.searchInputType
+          : props.searchInputTypeOnDrawer
       });
 
-      watch(showDrawer, () => {
-        queryVariables.searchInputType = showDrawer.value
-          ? props.searchInputTypeOnDrawer
-          : props.searchInputType;
+      watch(isDrawerHiding, () => {
+        queryVariables.searchInputType = isDrawerHiding.value
+          ? props.searchInputType
+          : props.searchInputTypeOnDrawer;
       });
 
       const { result, loading } = useQuery(GetEntitiesDocument, queryVariables, {
@@ -218,7 +218,7 @@
         paginationLimits,
         queryVariables,
         addSelection,
-        showDrawer,
+        isDrawerHiding,
         loading,
         Unicons,
         router,
