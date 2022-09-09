@@ -8,7 +8,7 @@
     ]"
   >
     <div
-      v-if="!loading && selectedImage"
+      v-if="!loading && mediafiles.length > 0"
       class="flex flex-col items-end mt-2 overflow-y-auto"
     >
       <div
@@ -23,60 +23,28 @@
             @click="addToSaveCallback(mediaFile._id, arrayKey)"
           />
           <img
-            v-if="
-              mediaFile.thumbnail_file_location &&
-              mediaFile.filename &&
-              mediaFile.filename !== selectedImage.filename &&
-              !mediaFile.mimetype.includes('audio')
-            "
+            v-if="mediaFile.thumbnail_file_location && !mediaFile.mimetype.includes('audio')"
             :class="[
-              'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full',
+              'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
               toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
-            ]"
-            :src="`/api/iiif/3/${mediaFile.filename}/square/100,/0/default.jpg`"
-            @click="selectImage(mediaFile)"
-          />
-          <img
-            v-if="
-              mediaFile.thumbnail_file_location &&
-              mediaFile.filename &&
-              mediaFile.filename === selectedImage.filename &&
-              !mediaFile.mimetype.includes('audio')
-            "
-            :class="[
-              'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2 border-blue-500',
-              toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
+              selectedImage && (mediaFile.filename === selectedImage.filename) ? 'border-2 border-blue-500' : ''
             ]"
             :src="`/api/iiif/3/${mediaFile.filename}/square/100,/0/default.jpg`"
             @click="selectImage(mediaFile)"
           />
           <AudioThumbnail
-            v-if="
-              mediaFile.filename !== selectedImage.filename &&
-              mediaFile.thumbnail_file_location &&
-              mediaFile?.mimetype.includes('audio')
-            "
+            v-if="mediaFile.thumbnail_file_location && mediaFile?.mimetype.includes('audio')"
             :class="[
-              'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2',
+              'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
               toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
-            ]"
-            @click="selectImage(mediaFile)"
-          />
-          <AudioThumbnail
-            v-if="
-              mediaFile.filename === selectedImage.filename &&
-              mediaFile?.mimetype.includes('audio')
-            "
-            :class="[
-              'obtain-cover rounded-sm outline-none shadow-sm rounded cursor-pointer w-full border-2 border-blue-500',
-              toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
+              selectedImage && (mediaFile.filename === selectedImage.filename) ? 'border-2 border-blue-500' : ''
             ]"
             @click="selectImage(mediaFile)"
           />
         </div>
       </div>
     </div>
-    <div class="mt-3">
+    <div class="mt-5">
       <plus-circle-icon
         v-if="editMode === 'edit'"
         @click="openUploadModal(modalChoices.DROPZONE)"
@@ -145,7 +113,6 @@
       const { removeFromMetaDataPatchList } = useMetaDataHelper();
       const { openUploadModal, uploadModalState, modalChoices } = useUploadModal();
       const selectImage = (mediafile: MediaFile) => {
-        console.log('SELECTED: ', mediafile);
         updateSelectedEntityMediafile(mediafile);
       };
 
