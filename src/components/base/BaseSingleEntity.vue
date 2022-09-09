@@ -4,9 +4,9 @@
     class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0"
   >
     <entity-image-selection
-      v-show="(loading || mediafiles.length > 0) && isSelectionDisplayed"
+      v-show="(!loading) && isSelectionDisplayed"
       v-model:selectedImage="mediafileSelectionState.selectedMediafile"
-      class="w-40"
+      :class="['w-40', editMode === 'edit' ? 'shadow-md' : '']"
       :loading="loading"
       :mediafiles="mediafiles"
     />
