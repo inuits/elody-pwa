@@ -41,9 +41,9 @@ const useMediaAssetLinkHelper = () => {
           entityId: route.params['id'],
           mediaFileInput: mediaFile
         });
-      }, true);
+      }, false);
       
-    }, true);
+    });
     clearMediaFilesToLinkToEntity();
   };
 
