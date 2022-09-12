@@ -44,7 +44,7 @@
         </div>
       </div>
     </div>
-    <div class="mt-5">
+    <div :class="editMode === 'edit' ? 'pb-20 pt-5' : ''">
       <plus-circle-icon
         v-if="editMode === 'edit'"
         @click="openUploadModal(modalChoices.DROPZONE)"
