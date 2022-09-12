@@ -91,6 +91,7 @@
   import useDropzoneHelper from '@/composables/useDropzoneHelper';
   import useMediaAssetLinkHelper from '@/composables/useMediaAssetLinkHelper';
   import useMetaDataHelper from '@/composables/useMetaDataHelper';
+import { useUploadModal } from '../UploadModal.vue';
 
   export default defineComponent({
     name: 'SingleEntity',
@@ -111,7 +112,7 @@
       }
     },
     setup(props) {
-      const { myDropzone, isUploading, selectedFiles, increaseSuccessCounter } =
+      const { myDropzone, isUploading, selectedFiles, increaseSuccessCounter, errorMessages } =
         useDropzoneHelper();
       const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
       const { lastAdjustedMediaFileMetaData, mediafiles } = useMetaDataHelper();
@@ -122,6 +123,7 @@
 
       const { editMode, showEditToggle } = useEditMode();
       const { updatePageTitle } = usePageTitle();
+      const { closeUploadModal } = useUploadModal();
 
       const queryVariables = reactive<GetEntityByIdQueryVariables>({
         id: id,
@@ -154,16 +156,21 @@
 
       watch(
         () => isUploading.value,
-        () => {
+        async () => {
           if (isUploading.value) {
-            selectedFiles.value.forEach((file: any) => {
-              mutate({
+            for (const file of selectedFiles.value) {
+              await mutate({
                 mediaFileInput: { filename: file.upload.filename },
                 file: file,
+              }).catch(() => {
+                return true;
               });
-            });
+            }
             myDropzone.value.removeAllFiles();
             isUploading.value = false;
+            if (errorMessages.value.length === 0) {
+              closeUploadModal();
+            }
           }
         },
       );
