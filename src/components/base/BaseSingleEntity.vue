@@ -61,11 +61,12 @@
       :entity-title="title"
       :form="result?.Entity?.form"
     />
+    <linked-assets-list :linked-assets="linkedAssets" />
   </div>
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, watch, ref, reactive } from 'vue';
+  import { computed, defineComponent, watch, ref, reactive, PropType } from 'vue';
   import { useMutation, useQuery } from '@vue/apollo-composable';
   import IIIFViewer from '@/components/IIIFViewer.vue';
   import Meta from '@/components/Meta.vue';
@@ -77,6 +78,7 @@
     GetEntityByIdQueryVariables,
     PostMediaFileMutation,
     PostMediaFileDocument,
+    Entity,
   } from '@/queries';
   import { usePageTitle } from '@/components/TheHeader.vue';
   import { useEditMode } from '@/components/EditToggle.vue';
@@ -91,7 +93,8 @@
   import useDropzoneHelper from '@/composables/useDropzoneHelper';
   import useMediaAssetLinkHelper from '@/composables/useMediaAssetLinkHelper';
   import useMetaDataHelper from '@/composables/useMetaDataHelper';
-import { useUploadModal } from '../UploadModal.vue';
+  import { useUploadModal } from '../UploadModal.vue';
+  import LinkedAssetsList from '@/components/LinkedAssetsList.vue';
 
   export default defineComponent({
     name: 'SingleEntity',
@@ -102,6 +105,7 @@ import { useUploadModal } from '../UploadModal.vue';
       VideoPlayer,
       AudioPlayer,
       PDFViewer,
+      LinkedAssetsList
     },
     props: {
       isMetaDisplayed: Boolean,
@@ -109,6 +113,11 @@ import { useUploadModal } from '../UploadModal.vue';
       entityType: {
         type: String,
         required: true,
+      },
+      linkedAssets: {
+        type: Array as PropType<Entity[]>,
+        required: false,
+        default: () => { return []; },
       }
     },
     setup(props) {

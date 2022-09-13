@@ -360,6 +360,7 @@ export type Mutation = {
   uploadFile?: Maybe<Scalars['String']>;
   setMediaPrimaire?: Maybe<Scalars['String']>;
   setThumbnailPrimaire?: Maybe<Scalars['String']>;
+  getAssetsRelationedWithMediafFile?: Maybe<Array<Maybe<Entity>>>;
 };
 
 
@@ -424,6 +425,11 @@ export type MutationSetMediaPrimaireArgs = {
 export type MutationSetThumbnailPrimaireArgs = {
   entity_id: Scalars['String'];
   mediafile_id: Scalars['String'];
+};
+
+
+export type MutationGetAssetsRelationedWithMediafFileArgs = {
+  mediaFileId: Scalars['String'];
 };
 
 export type PaginationInfo = {
@@ -17025,6 +17031,43 @@ export type PatchMediaFileMetadataMutationVariables = Exact<{
 
 export type PatchMediaFileMetadataMutation = { __typename?: 'Mutation', patchMediaFileMetadata?: Maybe<{ __typename?: 'MediaFile', _id: string, filename?: Maybe<string> }> };
 
+export type GetAssetsRelationedWithMediafFileMutationVariables = Exact<{
+  mediaFileId: Scalars['String'];
+}>;
+
+
+export type GetAssetsRelationedWithMediafFileMutation = { __typename?: 'Mutation', getAssetsRelationedWithMediafFile?: Maybe<Array<Maybe<(
+    { __typename?: 'Asset' }
+    & FullEntityRecursive_Asset_Fragment
+  ) | (
+    { __typename?: 'BaseEntity' }
+    & FullEntityRecursive_BaseEntity_Fragment
+  ) | (
+    { __typename?: 'Frame' }
+    & FullEntityRecursive_Frame_Fragment
+  ) | (
+    { __typename?: 'IntermediateEntity' }
+    & FullEntityRecursive_IntermediateEntity_Fragment
+  ) | (
+    { __typename?: 'MediaFileEntity' }
+    & FullEntityRecursive_MediaFileEntity_Fragment
+  ) | (
+    { __typename?: 'SimpleEntity' }
+    & FullEntityRecursive_SimpleEntity_Fragment
+  ) | (
+    { __typename?: 'Story' }
+    & FullEntityRecursive_Story_Fragment
+  ) | (
+    { __typename?: 'Testimony' }
+    & FullEntityRecursive_Testimony_Fragment
+  ) | (
+    { __typename?: 'boxEntity' }
+    & FullEntityRecursive_BoxEntity_Fragment
+  ) | (
+    { __typename?: 'person' }
+    & FullEntityRecursive_Person_Fragment
+  )>>> };
+
 export type EditMetadataMutationVariables = Exact<{
   id: Scalars['String'];
   metadata: Array<MetadataInput> | MetadataInput;
@@ -17159,6 +17202,7 @@ export const PostStartImportDocument = {"kind":"Document","definitions":[{"kind"
 export const PostMediaFileDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"postMediaFile"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"mediaFileInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MediaFileInput"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"file"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Upload"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"postMediaFile"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"mediaFileInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"mediaFileInput"}}},{"kind":"Argument","name":{"kind":"Name","value":"file"},"value":{"kind":"Variable","name":{"kind":"Name","value":"file"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"filename"}},{"kind":"Field","name":{"kind":"Name","value":"original_file_location"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnail_file_location"}},{"kind":"Field","name":{"kind":"Name","value":"mimetype"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]} as unknown as DocumentNode<PostMediaFileMutation, PostMediaFileMutationVariables>;
 export const LinkMediafileToEntityDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"linkMediafileToEntity"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"entityId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"mediaFileInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MediaFileInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"linkMediafileToEntity"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"entityId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"entityId"}}},{"kind":"Argument","name":{"kind":"Name","value":"mediaFileInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"mediaFileInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"filename"}},{"kind":"Field","name":{"kind":"Name","value":"original_file_location"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnail_file_location"}},{"kind":"Field","name":{"kind":"Name","value":"mimetype"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]} as unknown as DocumentNode<LinkMediafileToEntityMutation, LinkMediafileToEntityMutationVariables>;
 export const PatchMediaFileMetadataDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"patchMediaFileMetadata"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"mediafileId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"mediaFileInput"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MediaFileMetadataInput"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"patchMediaFileMetadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"MediafileId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"mediafileId"}}},{"kind":"Argument","name":{"kind":"Name","value":"MediaFileMetadata"},"value":{"kind":"Variable","name":{"kind":"Name","value":"mediaFileInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"filename"}}]}}]}}]} as unknown as DocumentNode<PatchMediaFileMetadataMutation, PatchMediaFileMetadataMutationVariables>;
+export const GetAssetsRelationedWithMediafFileDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"getAssetsRelationedWithMediafFile"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"mediaFileId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getAssetsRelationedWithMediafFile"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"mediaFileId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"mediaFileId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"fullEntityRecursive"}}]}}]}},...FullEntityRecursiveFragmentDoc.definitions]} as unknown as DocumentNode<GetAssetsRelationedWithMediafFileMutation, GetAssetsRelationedWithMediafFileMutationVariables>;
 export const EditMetadataDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"editMetadata"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"metadata"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataInput"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"replaceMetadata"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"metadata"},"value":{"kind":"Variable","name":{"kind":"Name","value":"metadata"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"lang"}}]}}]}}]} as unknown as DocumentNode<EditMetadataMutation, EditMetadataMutationVariables>;
 export const ReplaceRelationsAndMetaDataDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"replaceRelationsAndMetaData"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"form"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataFormInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"replaceRelationsAndMetaData"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"form"},"value":{"kind":"Variable","name":{"kind":"Name","value":"form"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"fullEntityRecursive"}}]}}]}},...FullEntityRecursiveFragmentDoc.definitions]} as unknown as DocumentNode<ReplaceRelationsAndMetaDataMutation, ReplaceRelationsAndMetaDataMutationVariables>;
 export const DeleteDataDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"deleteData"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"path"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"deletePaths"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteData"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"path"},"value":{"kind":"Variable","name":{"kind":"Name","value":"path"}}}]}]}}]} as unknown as DocumentNode<DeleteDataMutation, DeleteDataMutationVariables>;
