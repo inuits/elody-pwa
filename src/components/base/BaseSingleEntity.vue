@@ -4,14 +4,14 @@
     class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0"
   >
     <entity-image-selection
-      v-show="(!loading) && isSelectionDisplayed"
+      v-show="((!loading) && isSelectionDisplayed && mediafiles.length > 0) || editMode === 'edit'"
       v-model:selectedImage="mediafileSelectionState.selectedMediafile"
       :class="['w-40', editMode === 'edit' ? 'shadow-md' : '']"
       :loading="loading"
       :mediafiles="mediafiles"
     />
     <div
-      v-show="!loading"
+      v-show="!loading && mediafileSelectionState.selectedMediafile"
       :class="['justify-center ', { checkboard: loading }, entityType === 'MediaFile' ? 'w-full' : 'flex w-4/6']"
     >
       <IIIFViewer
@@ -54,7 +54,7 @@
     <!-- meta is metadata form-->
     <Meta
       v-if="isMetaDisplayed"
-      :class="!loading && mediafiles.length > 0 ? 'w-2/6' : 'w-full'"
+      :class="!loading && mediafileSelectionState.selectedMediafile ? 'w-2/6' : 'w-full'"
       :loading="loading"
       :entity-id="result ? result.Entity.id : undefined"
       :metadata="result ? result.Entity.metadata : []"
