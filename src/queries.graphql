@@ -816,6 +816,14 @@ mutation patchMediaFileMetadata(
   }
 }
 
+mutation getAssetsRelationedWithMediafFile(
+  $mediaFileId: String!
+) {
+  getAssetsRelationedWithMediafFile(mediaFileId: $mediaFileId) {
+    ...fullEntityRecursive
+  }
+}
+
 mutation editMetadata($id: String!, $metadata: [MetadataInput!]!) {
   replaceMetadata(id: $id, metadata: $metadata) {
     key
