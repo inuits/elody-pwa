@@ -4,7 +4,9 @@
     class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0"
   >
     <entity-image-selection
-      v-show="((!loading) && isSelectionDisplayed && mediafiles.length > 0) || editMode === 'edit'"
+      v-show="
+        (!loading && isSelectionDisplayed && mediafiles.length > 0) || editMode === 'edit'
+      "
       v-model:selectedImage="mediafileSelectionState.selectedMediafile"
       :class="['w-40', editMode === 'edit' ? 'shadow-md' : '']"
       :loading="loading"
@@ -12,7 +14,11 @@
     />
     <div
       v-show="!loading && mediafileSelectionState.selectedMediafile"
-      :class="['justify-center ', { checkboard: loading }, entityType === 'MediaFile' ? 'w-full' : 'flex w-4/6']"
+      :class="[
+        'justify-center ',
+        { checkboard: loading },
+        entityType === 'MediaFile' ? 'w-full' : 'flex w-4/6',
+      ]"
     >
       <IIIFViewer
         v-if="
@@ -62,6 +68,23 @@
       :form="result?.Entity?.form"
     />
   </div>
+  <div
+    v-else
+    class="
+      h-full
+      w-full
+      flex
+      fixed
+      top-0
+      bg-neutral-0
+      pt-24
+      pl-20
+      left-0
+      animate-pulse
+      bg-neutral-20
+      text-neutral-20
+    "
+  />
 </template>
 
 <script lang="ts">
@@ -91,7 +114,7 @@
   import useDropzoneHelper from '@/composables/useDropzoneHelper';
   import useMediaAssetLinkHelper from '@/composables/useMediaAssetLinkHelper';
   import useMetaDataHelper from '@/composables/useMetaDataHelper';
-import { useUploadModal } from '../UploadModal.vue';
+  import { useUploadModal } from '../UploadModal.vue';
 
   export default defineComponent({
     name: 'SingleEntity',
@@ -109,11 +132,16 @@ import { useUploadModal } from '../UploadModal.vue';
       entityType: {
         type: String,
         required: true,
-      }
+      },
     },
     setup(props) {
-      const { myDropzone, isUploading, selectedFiles, increaseSuccessCounter, errorMessages } =
-        useDropzoneHelper();
+      const {
+        myDropzone,
+        isUploading,
+        selectedFiles,
+        increaseSuccessCounter,
+        errorMessages,
+      } = useDropzoneHelper();
       const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
       const { lastAdjustedMediaFileMetaData, mediafiles } = useMetaDataHelper();
       const id = asString(useRoute().params['id']);
@@ -127,7 +155,7 @@ import { useUploadModal } from '../UploadModal.vue';
 
       const queryVariables = reactive<GetEntityByIdQueryVariables>({
         id: id,
-        type: props.entityType
+        type: props.entityType,
       });
 
       const { result, refetch, onResult } = useQuery<GetEntityByIdQuery>(
@@ -222,15 +250,17 @@ import { useUploadModal } from '../UploadModal.vue';
         ) {
           mediafiles.value = [];
           let mediaFileChanged: boolean = false;
-          queryResult.data.Entity.media.mediafiles?.forEach((mediafile: any, index: any) => {
-            if (mediafile?.__typename === 'MediaFile') {
-              if (mediafile._id == mediafileSelectionState.selectedMediafile?._id) {
-                updateSelectedEntityMediafile(mediafile);
-                mediaFileChanged = true;
+          queryResult.data.Entity.media.mediafiles?.forEach(
+            (mediafile: any, index: any) => {
+              if (mediafile?.__typename === 'MediaFile') {
+                if (mediafile._id == mediafileSelectionState.selectedMediafile?._id) {
+                  updateSelectedEntityMediafile(mediafile);
+                  mediaFileChanged = true;
+                }
+                mediafiles.value.push(mediafile);
               }
-              mediafiles.value.push(mediafile);
-            }
-          });
+            },
+          );
           if (!mediaFileChanged && mediafiles.value[0])
             updateSelectedEntityMediafile(mediafiles.value[0]);
           if (!mediaFileChanged && !mediafiles.value[0])
