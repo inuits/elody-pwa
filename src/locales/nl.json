@@ -21,5 +21,10 @@
     "thumbnail": "primaire thumbnail",
     "set-primair": "stel als primaire",
     "set-thumbnail": "stel als thumbnail"
+  },
+  "media-files": {
+    "linked-assets": {
+      "related-assets": "Related assets"
+    }
   }
 }

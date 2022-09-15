@@ -76,6 +76,25 @@ fragment minimalAsset on Asset {
   }
 }
 
+fragment minimalLinkedAsset on Asset {
+  ...minimalBaseEntity
+  media {
+    primaryMediafile
+  }
+  teaserMetadata: metadata(
+    keys: ["title"]
+    excludeOrInclude: include
+  ) {
+    __typename
+    ... on Metadata {
+      ...metadata
+    }
+    ... on MetadataRelation {
+      ...metadataRelation
+    }
+  }
+}
+
 fragment fullEntity on Entity {
   id
   type
@@ -814,6 +833,14 @@ mutation patchMediaFileMetadata(
   patchMediaFileMetadata(MediafileId: $mediafileId, MediaFileMetadata: $mediaFileInput) {
     _id
     filename
+  }
+}
+
+mutation getAssetsRelationedWithMediafFile(
+  $mediaFileId: String!
+) {
+  getAssetsRelationedWithMediafFile(mediaFileId: $mediaFileId) {
+    ...minimalLinkedAsset
   }
 }
 
