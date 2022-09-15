@@ -75,7 +75,6 @@
 
       addSaveCallback(
         useSubmitForm<IntialValues>(async (values) => {
-          console.log('values: ', values);
           await mutate({ id, form: serialzeFormToInput(values) });
         }), true
       );
