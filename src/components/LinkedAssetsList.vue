@@ -1,5 +1,5 @@
 <template>
-    <div v-if="linkedAssets.length > 0" :class="'w-3/6 pt-3 overflow-y-auto'">
+    <div :class="'w-3/6 pt-3 overflow-y-auto'">
       <div class="px-2 mb-1">
         <span class="ml-1 text-neutral-700 text-sm">{{t('media-files.linked-assets.related-assets')}}</span>
       </div>

@@ -67,7 +67,7 @@
       :entity-title="title"
       :form="result?.Entity?.form"
     />
-    <linked-assets-list :linked-assets="linkedAssets" />
+    <linked-assets-list v-if="linkedAssets.length > 0" :linked-assets="linkedAssets" />
   </div>
   <div
     v-else
