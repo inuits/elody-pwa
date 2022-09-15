@@ -30,10 +30,13 @@
     const setEditMode = () => (editMode.value = 'edit');
     const disableEditMode = () => (editMode.value = 'view');
     const isEdit = computed<boolean>(() => editMode.value === 'edit');
-    const addSaveCallback = (input: callback, first?: boolean) => {
-      if (first) {
+    const addSaveCallback = (input: callback, order?: string) => {
+      if (order === 'first') {
         saveCallbacks.value.unshift(input);
-      } else {
+      } else if (order === 'second') {
+        saveCallbacks.value.splice(1, 0, input);
+      }
+      else {
         saveCallbacks.value.push(input);
       }
     };
