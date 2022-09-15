@@ -1,10 +1,17 @@
 <template>
-  <BaseSingleEntity :isSelectionDisplayed="false" :isMetaDisplayed="false" :isMediaFileSingle="true" :entityType="'MediaFile'" />
+  <BaseSingleEntity :isSelectionDisplayed="false" :isMetaDisplayed="false" :isMediaFileSingle="true" :entityType="'MediaFile'" :linkedAssets="linkedAssets" />
 </template>
 
 <script lang="ts">
-  import { defineComponent } from 'vue';
+  import { defineComponent, ref } from 'vue';
   import BaseSingleEntity from '@/components/base/BaseSingleEntity.vue';
+  import { useMutation } from '@vue/apollo-composable';
+  import {
+    GetAssetsRelationedWithMediafFileMutation,
+    GetAssetsRelationedWithMediafFileDocument,
+    Entity,
+  } from '@/queries';
+  import { useRoute } from 'vue-router';
 
   export default defineComponent({
     name: 'SingleMediaFile',
@@ -12,7 +19,16 @@
       BaseSingleEntity
     },
     setup() {
+      const route = useRoute();
+      const linkedAssets = ref<Array<Entity>>([]);
+      const { mutate, onDone } = useMutation<GetAssetsRelationedWithMediafFileMutation>(GetAssetsRelationedWithMediafFileDocument); 
+      mutate({mediaFileId: route.params['id']});
+
+      onDone((result: any) => {
+        linkedAssets.value = result.data.getAssetsRelationedWithMediafFile;
+      });
       return {
+        linkedAssets
       };
     },
   });

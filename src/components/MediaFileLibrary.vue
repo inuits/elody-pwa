@@ -31,7 +31,6 @@ import { useUploadModal } from './UploadModal.vue';
       },
     },
     setup: () => {
-      console.log('Logging console...');
       const { mediafiles } = useMetaDataHelper();
       const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
       const { closeUploadModal } = useUploadModal();
