@@ -30,7 +30,7 @@ import useGraphqlErrors from './composables/useGraphqlErrors';
 Unicon.add(Object.values(Unicons));
 
 const config = await fetch(
-  process.env.VUE_APP_CONFIG_URL ? process.env.VUE_APP_CONFIG_URL : '../config.json',
+  process.env.VUE_APP_CONFIG_URL ? process.env.VUE_APP_CONFIG_URL : '/api/config',
 ).then((r) => r.json());
 let auth: typeof OpenIdConnectClient | null;
 auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
