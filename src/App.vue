@@ -9,7 +9,7 @@
     </div>
     <upload-modal />
     <edit-modal />
-    <pick-asset-modal />
+    <pick-entity-modal />
     <create-modal />
   </div>
 </template>
@@ -25,7 +25,7 @@
   import useRouteHelpers from './composables/useRouteHelpers';
   import { useHead } from '@vueuse/head';
   import { environment as _ } from './environment';
-  import PickAssetModal from '@/components/PickAssetModal.vue';
+  import PickEntityModal from '@/components/PickEntityModal.vue';
 
   export default defineComponent({
     name: 'App',
@@ -34,7 +34,7 @@
       TheNavigation,
       TheHeader,
       EditModal,
-      PickAssetModal,
+      PickEntityModal,
       CreateModal,
     },
     inject: { DefaultOIDC },
