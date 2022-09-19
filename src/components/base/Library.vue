@@ -2,7 +2,7 @@
   <div class="lg:flex">
     <FilterSideBar
       v-show="!isDrawerHiding"
-      v-model:activeFilters="queryVariables.advancedSearchValue"
+      @activeFilters="setFilters"
       :accepted-entity-types="acceptedEntityTypes ? acceptedEntityTypes : []"
       :advancedFiltersChoice="advancedFiltersChoice"
     />
@@ -187,6 +187,12 @@
         isDrawerHiding.value = false;
       }
 
+      const setFilters = (value: any) => {
+        queryVariables.advancedSearchValue = value;
+        queryVariables.limit = paginationInfo.limit;
+        queryVariables.skip = paginationInfo.skip;
+      };
+
       const queryVariables = reactive<GetEntitiesQueryVariables>({
         limit: paginationInfo.limit,
         skip: paginationInfo.skip,
@@ -225,6 +231,7 @@
         router,
         result,
         t,
+        setFilters
       };
     },
   });
