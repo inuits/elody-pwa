@@ -39,7 +39,7 @@
   <MetaAdd
     v-if="!structure.disabled"
     :label="label"
-    @addMetadata="openPickAssetModal(structure.acceptedEntityTypes)"
+    @addMetadata="openPickEntityModal(structure.acceptedEntityTypes)"
   />
 </template>
 
@@ -52,7 +52,7 @@
   import { Unicons } from '@/types';
   import BaseButton from './base/BaseButton.vue';
   import MetaAdd from '@/components/MetaAdd.vue';
-  import { PickAssetModalType, usePickAssetModal } from './PickAssetModal.vue';
+  import { PickEntityModalType, usePickEntityModal } from './PickEntityModal.vue';
 
   import {
     getEmptyMetadatRelationObject,
@@ -99,13 +99,13 @@
         return teaserMetaData.find((x: MetadataFragment) => x.key === key);
       };
 
-      const { openPickAssetModal, closePickAssetModal, pickAssetModalState } =
-        usePickAssetModal(addRelation);
+      const { openPickEntityModal, closePickEntityModal, pickEntityModalState } =
+        usePickEntityModal(addRelation);
 
-      watch(pickAssetModalState, (value: PickAssetModalType) => {
-        if (value.pickedAsset) {
-          addRelation(value.pickedAsset);
-          closePickAssetModal();
+      watch(pickEntityModalState, (value: PickEntityModalType) => {
+        if (value.pickedEntity) {
+          addRelation(value.pickedEntity);
+          closePickEntityModal();
         }
       });
 
@@ -117,7 +117,7 @@
         Unicons,
         lableStyle,
         addRelation,
-        openPickAssetModal,
+        openPickEntityModal,
         inputContainerStyle,
       };
     },
