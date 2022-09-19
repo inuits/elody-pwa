@@ -106,7 +106,7 @@
         required: false,
       },
     },
-    emits: ['update:activeFilters'],
+    emits: ['activeFilters'],
     setup(props, { emit }) {
       const initialFilters = ref<FilterInList[]>([]);
       const activeCount = computed(() => getActiveFilters(initialFilters.value).length);
@@ -119,7 +119,8 @@
         const returnArray = initialFilters.value.map((filter: FilterInList) => {
           return filter.input;
         });
-        emit('update:activeFilters', returnArray);
+        console.log('ARRAY: ', returnArray);
+        emit('activeFilters', returnArray);
       };
 
       const clearFilters = () => {
