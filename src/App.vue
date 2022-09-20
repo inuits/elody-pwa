@@ -1,7 +1,7 @@
 <template>
   <div id="font-body">
-    <the-navigation />
-    <div class="pl-24 h-screen flex flex-col">
+    <the-navigation class="navbar" />
+    <div :class="[`h-screen flex flex-col`, `content`]">
       <the-header />
       <div :class="['flex-grow', { 'h-full overflow-hidden': isSingle }]">
         <router-view />
@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent } from 'vue';
+  import { defineComponent, ref } from 'vue';
   import { DefaultOIDC, useAuth } from 'session-vue-3-oidc-library';
   import UploadModal from '@/components/UploadModal.vue';
   import CreateModal from '@/components/CreateModal.vue';
@@ -41,6 +41,7 @@
     setup() {
       const auth = useAuth();
       const { isSingle } = useRouteHelpers();
+      const contentPadding = ref('24');
 
       const getIndexValue = () => {
         let indexStr = '';
@@ -64,6 +65,7 @@
       return {
         auth,
         isSingle,
+        contentPadding,
       };
     },
   });
@@ -72,5 +74,21 @@
 <style scoped>
   .logo {
     writing-mode: vertical-lr;
+  }
+
+  .content {
+    padding-left: 6rem;
+    -webkit-transition: padding-left 300ms ease-in-out;
+    -moz-transition: padding-left 300ms ease-in-out;
+    -o-transition: padding-left 300ms ease-in-out;
+    transition: padding-left 300ms ease-in-out;
+  }
+
+  .navbar:hover ~ .content {
+    -webkit-transition: padding-left 300ms ease-in-out;
+    -moz-transition: padding-left 300ms ease-in-out;
+    -o-transition: padding-left 300ms ease-in-out;
+    transition: padding-left 300ms ease-in-out;
+    padding-left: 20rem;
   }
 </style>
