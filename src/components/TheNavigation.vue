@@ -9,12 +9,12 @@
     >
       DAMS
     </router-link>
-    <div class="flex flex-row items-center" id="assets-item">
+    <div class="flex flex-row items-center menu-item">
       <BaseButton
         :icon="Unicons.BookOpen.name"
         bg-color="neutral-30"
+        class="menu-btn"
         @click="forceDisableEditModalHome"
-        id="assets-btn"
       />
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
@@ -22,12 +22,12 @@
         >Assets</span
       >
     </div>
-    <div class="flex flex-row items-center" id="media-item">
+    <div class="flex flex-row items-center menu-item">
       <BaseButton
         :icon="Unicons.FileAlt.name"
         bg-color="neutral-30"
+        class="menu-btn"
         @click="forceDisableEditMediafiles"
-        id="media-btn"
       />
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
@@ -36,13 +36,12 @@
         Mediafiles
       </span>
     </div>
-    <div class="flex flex-row items-center" id="jobs-item">
+    <div class="flex flex-row items-center menu-item">
       <BaseButton
         :icon="Unicons.History.name"
         bg-color="neutral-30"
-        class="mt-1"
+        class="mt-1 menu-btn"
         @click="forceDisableEditModalHistory"
-        id="jobs-btn"
       />
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
@@ -50,13 +49,12 @@
         >Jobs</span
       >
     </div>
-    <div class="flex flex-row items-center" id="import-item">
+    <div class="flex flex-row items-center menu-item">
       <BaseButton
         :icon="Unicons.Upload.name"
-        class="mt-1"
+        class="mt-1 menu-btn"
         bg-color="neutral-30"
         @click="openUploadModal(modalChoices.IMPORT)"
-        id="import-btn"
       />
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
@@ -64,13 +62,12 @@
         >Import</span
       >
     </div>
-    <div class="flex flex-row items-center" id="create-item">
+    <div class="flex flex-row items-center menu-item">
       <BaseButton
         :icon="Unicons.Create.name"
-        class="mt-1"
+        class="mt-1 menu-btn"
         bg-color="neutral-30"
         @click="openCreateModal"
-        id="create-btn"
       />
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
@@ -140,28 +137,7 @@
     transition-duration: 300ms;
   }
 
-  /* neutral-70 */
-  #assets-item:hover #assets-btn {
-    --tw-bg-opacity: 1;
-    background-color: rgb(165 173 186 / var(--tw-bg-opacity));
-  }
-
-  #media-item:hover #media-btn {
-    --tw-bg-opacity: 1;
-    background-color: rgb(165 173 186 / var(--tw-bg-opacity));
-  }
-
-  #jobs-item:hover #jobs-btn {
-    --tw-bg-opacity: 1;
-    background-color: rgb(165 173 186 / var(--tw-bg-opacity));
-  }
-
-  #import-item:hover #import-btn {
-    --tw-bg-opacity: 1;
-    background-color: rgb(165 173 186 / var(--tw-bg-opacity));
-  }
-
-  #create-item:hover #create-btn {
+  .menu-item:hover .menu-btn {
     --tw-bg-opacity: 1;
     background-color: rgb(165 173 186 / var(--tw-bg-opacity));
   }
