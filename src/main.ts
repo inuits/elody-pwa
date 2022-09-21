@@ -116,10 +116,10 @@ const app = createApp(App)
 
 Sentry.init({
   app,
+  sendClientReports: false, 
   integrations: [
     new BrowserTracing({
       routingInstrumentation: Sentry.vueRouterInstrumentation(router),
-      tracingOrigins: ['*'],
     }),
   ],
   dsn: 'https://00370fd19c5a47a8b2afd25fef8f3fa0@sentry.inuits.io/100',
