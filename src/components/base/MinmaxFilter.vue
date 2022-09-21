@@ -38,6 +38,11 @@
         type: [String],
         required: true,
       },
+      isRelation: {
+        type: Boolean,
+        required: false,
+        default: false,
+      },
     },
     emits: ['update:minmaxValue'],
     setup(props, { emit }) {
@@ -57,6 +62,7 @@
             defaultReturnMinMaxObject(props.filterkey, {
               min: value,
               max: inputFieldMax.value,
+              isRelation: props.isRelation,
             }),
           );
         },
@@ -76,6 +82,7 @@
             defaultReturnMinMaxObject(props.filterkey, {
               min: inputFieldMin.value,
               max: value,
+              isRelation: props.isRelation,
             }),
           );
         },

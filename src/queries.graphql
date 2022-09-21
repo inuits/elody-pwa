@@ -81,10 +81,7 @@ fragment minimalLinkedAsset on Asset {
   media {
     primaryMediafile
   }
-  teaserMetadata: metadata(
-    keys: ["title"]
-    excludeOrInclude: include
-  ) {
+  teaserMetadata: metadata(keys: ["title"], excludeOrInclude: include) {
     __typename
     ... on Metadata {
       ...metadata
@@ -539,7 +536,7 @@ query getEntities(
         }
         teaserMetadata: metadata(keys: ["filename"], excludeOrInclude: include) {
           __typename
-         ... on Metadata {
+          ... on Metadata {
             key
             value
             label
@@ -781,6 +778,7 @@ query getAdvancedFilters($choice: String!) {
     label
     type
     key
+    isRelation
   }
 }
 
@@ -836,9 +834,7 @@ mutation patchMediaFileMetadata(
   }
 }
 
-mutation getAssetsRelationedWithMediafFile(
-  $mediaFileId: String!
-) {
+mutation getAssetsRelationedWithMediafFile($mediaFileId: String!) {
   getAssetsRelationedWithMediafFile(mediaFileId: $mediaFileId) {
     ...minimalLinkedAsset
   }

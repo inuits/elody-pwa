@@ -56,6 +56,7 @@
             v-if="filter.type === AdvancedFilterTypes.Minmax"
             v-model:minmaxValue="initialFilters[i]"
             :filterkey="filter.key"
+            :is-relation="filter.isRelation"
           />
           <MultiFilter
             v-if="filter.type === AdvancedFilterTypes.Multiselect"
@@ -98,7 +99,7 @@
     props: {
       advancedFiltersChoice: {
         type: String,
-        default: 'entityFilters'
+        default: 'entityFilters',
       },
       acceptedEntityTypes: {
         type: Array as PropType<string[]>,
@@ -112,7 +113,7 @@
       const activeCount = computed(() => getActiveFilters(initialFilters.value).length);
       const AndOrChoice = ref<boolean>(true);
       const { result: filters } = useQuery(GetAdvancedFiltersDocument, {
-        choice: props.advancedFiltersChoice
+        choice: props.advancedFiltersChoice,
       });
 
       const applyFilters = () => {
