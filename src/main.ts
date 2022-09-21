@@ -27,6 +27,20 @@ import { environment as _ } from './environment';
 import { onError } from '@apollo/client/link/error';
 import useGraphqlErrors from './composables/useGraphqlErrors';
 
+import * as Sentry from '@sentry/vue';
+import { BrowserTracing } from '@sentry/tracing';
+
+/*
+import Vue from 'vue';
+import * as Sentry from '@sentry/browser';
+import * as Integrations from '@sentry/integrations';
+
+Sentry.init({
+  dsn: 'https://00370fd19c5a47a8b2afd25fef8f3fa0@sentry.inuits.io/100',
+  integrations: [new Integrations.Vue({ Vue, attachProps: true })],
+});
+*/
+
 Unicon.add(Object.values(Unicons));
 
 const config = await fetch(
@@ -79,7 +93,7 @@ if (authCode) {
   auth.processAuthCode(authCode, router);
 }
 
-createApp(App)
+const app = createApp(App)
   .use(Unicon, {
     fill: 'currentColor',
   })
@@ -98,5 +112,17 @@ createApp(App)
       ),
       cache: new InMemoryCache(),
     }),
-  )
-  .mount('#app');
+  );
+
+Sentry.init({
+  app,
+  integrations: [
+    new BrowserTracing({
+      routingInstrumentation: Sentry.vueRouterInstrumentation(router),
+      tracingOrigins: ['*'],
+    }),
+  ],
+  dsn: 'https://00370fd19c5a47a8b2afd25fef8f3fa0@sentry.inuits.io/100',
+});
+
+app.mount('#app');
