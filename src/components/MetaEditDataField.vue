@@ -19,8 +19,7 @@
   import InputField from '@/components/base/InputField.vue';
   import Dropdown from '@/components/base/Dropdown.vue';
   import { useField } from 'vee-validate';
-  import { MetadataField, MetadataFieldOption } from '@/queries';
-  import { useEntityMediafileSelector } from './EntityImageSelection.vue';
+  import { MetadataFieldOption } from '@/queries';
 
   export default defineComponent({
     name: 'MetaEditDataField',
