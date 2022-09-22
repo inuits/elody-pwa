@@ -13,7 +13,7 @@
         >
           <MetaEditDataField
             :label="metadataLabel"
-            :field-key="`${structure.relationType}[${idx}].metadata.${metadataKey}`"
+            :field-key="`${structure.label}[${idx}].metadata.${metadataKey}`"
             :type="metadataType"
           />
         </div>

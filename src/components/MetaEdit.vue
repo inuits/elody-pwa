@@ -5,7 +5,6 @@
         v-for="field in form.fields"
         :key="field.__typename === 'MetadataField' ? field.key : 'no key'"
       >
-        <!-- {{field}} -->
         <MetaEditDataField
           v-if="field && field.__typename === 'MetadataField'"
           :field-key="field.key"
@@ -74,21 +73,16 @@
 
       addSaveCallback(
         useSubmitForm<IntialValues>(async (values) => {
-
           //SEARCH ARRAYS AND COMBINED
           props.form.fields.forEach((field: any) => {
             if (values[field.label]) {
               if (Array.isArray(values.components) && Array.isArray(values[field.label])) {
                 const arr: any = [...values[field.label]];
-                // console.log('arr: ', arr);
                 values.components = arr;
                 delete values[field.label];
               }
             }
           });
-
-          console.log('VALUES: ', values);
-          console.log('serialzeFormToInput(values): ', serialzeFormToInput(values));
           await mutate({ id, form: serialzeFormToInput(values) });
         }), 'first'
       );
