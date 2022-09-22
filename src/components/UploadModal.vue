@@ -15,7 +15,7 @@
         </tab>
         <tab title="Select file">
           <div class="p-3 h-full">
-            <MediaFileLibrary :enable-selection="true" />
+            <MediaFileLibrary :enable-selection="true" @add-selection="addSelection" />
           </div>
         </tab>
       </tabs>
@@ -32,6 +32,8 @@
   import Tabs from './Tabs.vue';
   import Tab from './Tab.vue';
   import MediaFileLibrary from '@/components/MediaFileLibrary.vue';
+import useMetaDataHelper from '@/composables/useMetaDataHelper';
+import useMediaAssetLinkHelper from '@/composables/useMediaAssetLinkHelper';
 
   export type UploadModalType = {
     state: ModalState;
@@ -86,6 +88,8 @@
       MediaFileLibrary
     },
     setup() {
+      const { mediafiles } = useMetaDataHelper();
+      const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
       const { closeUploadModal, uploadModalState, modalToOpen, modalChoices } = useUploadModal();
       const fetchEnabled = ref(false);
       const { result, refetch } = useQuery(GetDirectoriesDocument, undefined, () => ({
@@ -108,12 +112,20 @@
         }
       };
 
+      const addSelection = (entity: any) => {
+        const mediafile = JSON.parse(JSON.stringify(entity.media.mediafiles[0]));
+        mediafiles.value.push(mediafile);
+        addMediaFileToLinkList(mediafile);
+        closeUploadModal();
+      };
+
       return {
         modalChoices,
         modalToOpen,
         uploadModalState,
         closeUploadModal,
         result,
+        addSelection
       };
     },
   });

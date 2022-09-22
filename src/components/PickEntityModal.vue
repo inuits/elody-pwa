@@ -6,11 +6,11 @@
     @hide-modal="closePickEntityModal"
   >
     <div
-      v-if="pickEntityModalState.state !== 'hide'"
+      v-if="pickEntityModalState.state === 'show'"
       class="bg-neutral-20 w-full h-full flex flex-col overflow-auto"
     >
       <MediaFileLibrary
-        v-if="pickEntityModalState.acceptedEntityTypes.includes('mediafile')"
+        v-if="pickEntityModalState.acceptedEntityTypes.includes('MediaFile')"
         :enable-selection="true"
         :accepted-entity-types="pickEntityModalState.acceptedEntityTypes"
         @add-selection="addItem"
@@ -19,7 +19,7 @@
         v-else
         :enable-selection="true"
         :accepted-entity-types="pickEntityModalState.acceptedEntityTypes"
-        @add-selection="addItem"
+        @add-selection="addItem($event)"
       />
       
     </div>
@@ -88,8 +88,8 @@
     },
     setup() {
       const { pickEntity, closePickEntityModal, pickEntityModalState } = usePickEntityModal();
-      const addItem = async (Entity: Entity) => {
-        pickEntity(Entity);
+      const addItem = (entity: Entity) => {
+        pickEntity(entity);
       };
 
       return {

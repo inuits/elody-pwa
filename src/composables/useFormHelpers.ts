@@ -1,3 +1,4 @@
+import { ref } from 'vue';
 import {
   Entity,
   Form,
@@ -14,12 +15,14 @@ import {
 } from '@/queries';
 
 export const LINKED_ENTITY: string = 'linkedEntity';
+export const selectedRelationField = ref<RelationField>();
 
 export type relationValues = {
   linkedEntity: Maybe<Entity> | undefined;
   key: string;
   label: string;
   metadata: IntialValues;
+  relationType: string;
 };
 
 export type IntialValues = Record<string, string | relationValues[]>;
@@ -34,31 +37,36 @@ const useFormHelper = (form: Form, entityTitle: string) => {
     structure: MetadataOrRelationField[] = formStructure,
   ) => {
     const intialValues: IntialValues = {};
-    structure.forEach((field: Maybe<MetadataOrRelationField>) => {
-      if (field && field?.__typename === 'MetadataField') {
-        findFields(field.key, metadata).forEach((metadata: { value: string }) => {
-          intialValues[field.key] = metadata.value;
-        });
-      }
-
-      if (field && field?.__typename === 'RelationField') {
-        const relationArray: relationValues[] = [];
-        findRelations(field.relationType, metadata).forEach(
-          (relationMetaData: MetadataRelation) => {
-            relationArray.push({
-              linkedEntity: relationMetaData.linkedEntity,
-              key: relationMetaData.key,
-              label: field.label ? field.label : relationMetaData.key,
-              metadata: buildInitialValues(
-                relationMetaData.metadataOnRelation as MetadataAndRelation[],
-                field.metadata as MetadataOrRelationField[],
-              ),
-            });
-          },
-        );
-        intialValues[field.relationType] = relationArray;
-      }
-    });
+    if (structure) {
+      structure.forEach((field: Maybe<MetadataOrRelationField>) => {
+        if (field && field?.__typename === 'MetadataField') {
+          findFields(field.key, metadata).forEach((metadata: { value: string }) => {
+            intialValues[field.key] = metadata.value;
+          });
+        }
+  
+        if (field && field?.__typename === 'RelationField') {
+          const relationArray: relationValues[] = [];
+          findRelations(field.relationType, metadata).forEach(
+            (relationMetaData: MetadataRelation) => {
+              if (relationMetaData.label === field.label) {
+                relationArray.push({
+                  linkedEntity: relationMetaData.linkedEntity,
+                  key: relationMetaData.key,
+                  label: field.label ? field.label : relationMetaData.key,
+                  metadata: buildInitialValues(
+                    relationMetaData.metadataOnRelation as MetadataAndRelation[],
+                    field.metadata as MetadataOrRelationField[],
+                  ),
+                  relationType: field.relationType ? field.relationType : ''
+                });
+              }
+            },
+          );
+          intialValues[field.label ? field.label : field.relationType] = relationArray;
+        }
+      });
+    }
     return intialValues;
   };
 
@@ -93,7 +101,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
     }) as MetadataRelation[];
   };
 
-  const serialzeFormToInput = (values: IntialValues): MetadataFormInput => {
+  const serialzeFormToInput = (values: IntialValues,): MetadataFormInput => {
     const input: MetadataFormInput = {
       Metadata: [],
       relations: [],
@@ -105,7 +113,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
       if (typeof value[1] === 'object') {
         value[1].forEach((relationValue) => {
           input.relations?.push({
-            relationType: value[0],
+            relationType: relationValue.relationType,
             linkedEntityId: relationValue.key,
             label: relationValue.label,
             metadata: Object.entries(relationValue.metadata).map((value) => {
@@ -134,6 +142,7 @@ export const getEmptyMetadatRelationObject = (
     key: id,
     label: fields.label ? fields.label : '',
     metadata: {},
+    relationType: fields.relationType ? fields.relationType : '',
   };
   if (fields.metadata) {
     fields.metadata?.forEach((field: Maybe<MetadataField>) => {

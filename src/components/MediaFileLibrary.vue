@@ -15,31 +15,23 @@
   import Library from '@/components/base/Library.vue';
   import { defineComponent } from 'vue';
   import { SearchInputType } from '@/queries';
-import useMetaDataHelper from '@/composables/useMetaDataHelper';
-import useMediaAssetLinkHelper from '@/composables/useMediaAssetLinkHelper';
-import { useUploadModal } from './UploadModal.vue';
 
   export default defineComponent({
     name: 'MediaFileLibrary',
     components: {
       Library
     },
+    emits: ['addSelection'],
     props: {
       enableSelection: {
         type: Boolean,
         default: false,
       },
     },
-    setup: () => {
-      const { mediafiles } = useMetaDataHelper();
-      const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
-      const { closeUploadModal } = useUploadModal();
+    setup: (props, { emit }) => {
 
       const addSelection = (entity: any) => {
-        const mediafile = JSON.parse(JSON.stringify(entity.media.mediafiles[0]));
-        mediafiles.value.push(mediafile);
-        addMediaFileToLinkList(mediafile);
-        closeUploadModal();
+        emit('addSelection', entity);
       };
 
       return {
