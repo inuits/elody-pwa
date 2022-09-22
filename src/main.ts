@@ -35,7 +35,6 @@ Unicon.add(Object.values(Unicons));
 const config = await fetch(
   process.env.VUE_APP_CONFIG_URL ? process.env.VUE_APP_CONFIG_URL : '/api/config',
 ).then((r) => r.json());
-console.log(config);
 let auth: typeof OpenIdConnectClient | null;
 auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
 console.log(`session-vue-3-oidc-library: v0.1.7`);
@@ -104,7 +103,7 @@ const app = createApp(App)
     }),
   );
 
-if (process.env.SENTRY_ENABLED){
+if (config.SENTRY_ENABLED){
   Sentry.init({
     app,
     sendClientReports: false,
@@ -114,7 +113,7 @@ if (process.env.SENTRY_ENABLED){
         tracingOrigins: ['*']
       }),
     ],
-    dsn: process.env.SENTRY_DSN,
+    dsn: config.SENTRY_DSN_FRONTEND,
   });
 }  
   
