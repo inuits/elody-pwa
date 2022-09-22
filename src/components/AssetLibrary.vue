@@ -30,6 +30,7 @@
         required: false,
       },
     },
+    emits: ['addSelection'],
     components: {
       Library
     },

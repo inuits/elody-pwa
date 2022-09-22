@@ -119,7 +119,6 @@
         const returnArray = initialFilters.value.map((filter: FilterInList) => {
           return filter.input;
         });
-        console.log('ARRAY: ', returnArray);
         emit('activeFilters', returnArray);
       };
 

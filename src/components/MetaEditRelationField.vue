@@ -39,12 +39,12 @@
   <MetaAdd
     v-if="!structure.disabled"
     :label="label"
-    @addMetadata="openPickEntityModal(structure.acceptedEntityTypes)"
+    @addMetadata="openModal(structure.acceptedEntityTypes)"
   />
 </template>
 
 <script lang="ts">
-  import { Entity, MetadataFragment, RelationField } from '@/queries';
+  import { Entity, RelationField } from '@/queries';
   import { defineComponent, PropType, watch } from 'vue';
   import MetaEditDataField from './MetaEditDataField.vue';
   import { useFieldArray } from 'vee-validate';
@@ -55,6 +55,7 @@
   import { PickEntityModalType, usePickEntityModal } from './PickEntityModal.vue';
 
   import {
+    selectedRelationField,
     getEmptyMetadatRelationObject,
     relationValues,
   } from '@/composables/useFormHelpers';
@@ -62,7 +63,12 @@
 
   export default defineComponent({
     name: 'MetaEditRelationField',
-    components: { MetaEditDataField, BaseButton, MetaAdd, ListItem },
+    components: { 
+      MetaEditDataField,
+      BaseButton,
+      MetaAdd,
+      ListItem
+    },
     props: {
       structure: { type: Object as PropType<RelationField>, required: true },
       label: {
@@ -73,39 +79,34 @@
     },
     setup: (props) => {
       const { remove, push, fields, update } = useFieldArray<relationValues>(
-        props.structure.relationType,
+        props.label ? props.label : props.structure.relationType, //MAKING UNIQUE ARRAY FOR EACH COMPONENT DEPENDING ON THE LABEL...
       );
+
       const addRelation = (value: Entity) => {
-        const teaserMetadataKey: string = value.type === 'person' ? 'fullname' : 'title';
         push(
           getEmptyMetadatRelationObject(props.structure, value.uuid, {
             //@ts-ignore  Error when passing value object in vee-validate
-            teaserMetadata: [
-              {
-                //@ts-ignore
-                value: getTeaserMetaDataByKey(value.teaserMetadata, teaserMetadataKey)
-                  .value,
-                key: teaserMetadataKey,
-              },
-            ],
+            media: structuredClone(value.media),
+            //@ts-ignore  Error when passing value object in vee-validate
+            teaserMetadata: [...value.teaserMetadata],
           }),
         );
       };
 
-      const getTeaserMetaDataByKey = (
-        teaserMetaData: MetadataFragment[],
-        key: string,
-      ): MetadataFragment | undefined => {
-        return teaserMetaData.find((x: MetadataFragment) => x.key === key);
+      const openModal = (acceptedEntityTypes: string[]) => {
+        selectedRelationField.value = props.structure;
+        openPickEntityModal(acceptedEntityTypes);
       };
 
       const { openPickEntityModal, closePickEntityModal, pickEntityModalState } =
         usePickEntityModal(addRelation);
 
       watch(pickEntityModalState, (value: PickEntityModalType) => {
-        if (value.pickedEntity) {
-          addRelation(value.pickedEntity);
-          closePickEntityModal();
+        if (value.pickedEntity && value.pickedEntity) {
+          if (selectedRelationField.value && (props.structure.label === selectedRelationField.value.label)) {
+            addRelation(value.pickedEntity);
+            closePickEntityModal();
+          }
         }
       });
 
@@ -119,6 +120,7 @@
         addRelation,
         openPickEntityModal,
         inputContainerStyle,
+        openModal
       };
     },
   });
