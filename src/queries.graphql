@@ -126,6 +126,25 @@ fragment fullEntity on Entity {
       }
     }
   }
+  ... on Frame {
+    media {
+      mediafiles {
+        _id
+        filename
+        original_file_location
+        transcode_filename
+        thumbnail_file_location
+        mimetype
+        isPublic
+        metadata {
+          key
+          value
+        }
+        is_primary
+        is_primary_thumbnail
+      }
+    }
+  }
   ... on MediaFileEntity {
     media {
       mediafiles {
@@ -158,6 +177,24 @@ fragment fullEntityRecursive on Entity {
       ...metadataRelation
       linkedEntity {
         ... on Asset {
+          ...minimalBaseEntity
+          media {
+            primaryMediafile
+          }
+          teaserMetadata: metadata(
+            keys: ["title", "object_number"]
+            excludeOrInclude: include
+          ) {
+            __typename
+            ... on Metadata {
+              ...metadata
+            }
+            ... on MetadataRelation {
+              ...metadataRelation
+            }
+          }
+        }
+        ... on MediaFileEntity {
           ...minimalBaseEntity
           media {
             primaryMediafile
