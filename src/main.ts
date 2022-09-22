@@ -27,25 +27,12 @@ import { environment as _ } from './environment';
 import { onError } from '@apollo/client/link/error';
 import useGraphqlErrors from './composables/useGraphqlErrors';
 
-import * as Sentry from '@sentry/vue';
-import { BrowserTracing } from '@sentry/tracing';
-
-/*
-import Vue from 'vue';
-import * as Sentry from '@sentry/browser';
-import * as Integrations from '@sentry/integrations';
-
-Sentry.init({
-  dsn: 'https://00370fd19c5a47a8b2afd25fef8f3fa0@sentry.inuits.io/100',
-  integrations: [new Integrations.Vue({ Vue, attachProps: true })],
-});
-*/
-
 Unicon.add(Object.values(Unicons));
 
 const config = await fetch(
   process.env.VUE_APP_CONFIG_URL ? process.env.VUE_APP_CONFIG_URL : '/api/config',
 ).then((r) => r.json());
+console.log(config);
 let auth: typeof OpenIdConnectClient | null;
 auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
 console.log(`session-vue-3-oidc-library: v0.1.7`);
@@ -114,17 +101,23 @@ const app = createApp(App)
     }),
   );
 
-Sentry.init({
-  app,
-  sendClientReports: false,
-  integrations: [
-    new BrowserTracing({
-      routingInstrumentation: Sentry.vueRouterInstrumentation(router),
-      tracingOrigins: ['*']
-    }),
-  ],
-  debug: true,
-  dsn: 'https://00370fd19c5a47a8b2afd25fef8f3fa0@sentry.inuits.io/100',
-});
+if (process.env.SENTRY_ENABLED){
+  import * as Sentry from '@sentry/vue';
+  import { BrowserTracing } from '@sentry/tracing';
+
+  Sentry.init({
+    app,
+    sendClientReports: false,
+    integrations: [
+      new BrowserTracing({
+        routingInstrumentation: Sentry.vueRouterInstrumentation(router),
+        tracingOrigins: ['*']
+      }),
+    ],
+    debug: true,
+    dsn: process.env.SENTRY_DSN,
+  });
+}  
+  
 
 app.mount('#app');
