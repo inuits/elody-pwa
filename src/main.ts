@@ -27,6 +27,9 @@ import { environment as _ } from './environment';
 import { onError } from '@apollo/client/link/error';
 import useGraphqlErrors from './composables/useGraphqlErrors';
 
+import * as Sentry from '@sentry/vue';
+import { BrowserTracing } from '@sentry/tracing';
+
 Unicon.add(Object.values(Unicons));
 
 const config = await fetch(
@@ -102,9 +105,6 @@ const app = createApp(App)
   );
 
 if (process.env.SENTRY_ENABLED){
-  import * as Sentry from '@sentry/vue';
-  import { BrowserTracing } from '@sentry/tracing';
-
   Sentry.init({
     app,
     sendClientReports: false,
@@ -114,7 +114,6 @@ if (process.env.SENTRY_ENABLED){
         tracingOrigins: ['*']
       }),
     ],
-    debug: true,
     dsn: process.env.SENTRY_DSN,
   });
 }  
