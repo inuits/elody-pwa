@@ -1,14 +1,10 @@
 <template>
   <div class="p-6 bg-neutral-0 pb-20">
-    <!-- <pre>
-      {{modelValue}}
-    </pre> -->
     <form v-if="form.fields" novalidate>
       <div
         v-for="field in form.fields"
         :key="field.__typename === 'MetadataField' ? field.key : 'no key'"
       >
-        <!-- {{field}} -->
         <MetaEditDataField
           v-if="field && field.__typename === 'MetadataField'"
           :field-key="field.key"
