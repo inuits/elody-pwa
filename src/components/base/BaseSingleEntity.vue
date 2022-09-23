@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="!loading"
-    class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0"
+    class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 left-0 move-by-nav"
   >
     <entity-image-selection
       v-show="
