@@ -1,7 +1,7 @@
 <template>
   <div id="font-body">
     <the-navigation class="navbar" />
-    <div :class="[`h-screen flex flex-col`, `content`]">
+    <div :class="[`h-screen flex flex-col`, `move-by-nav`]">
       <the-header />
       <div :class="['flex-grow', { 'h-full overflow-hidden': isSingle }]">
         <router-view />
@@ -75,20 +75,23 @@
   .logo {
     writing-mode: vertical-lr;
   }
+</style>
 
-  .content {
+<style>
+
+  .move-by-nav {
     padding-left: 6rem;
     -webkit-transition: padding-left 300ms ease-in-out;
     -moz-transition: padding-left 300ms ease-in-out;
     -o-transition: padding-left 300ms ease-in-out;
     transition: padding-left 300ms ease-in-out;
   }
-
-  .navbar:hover ~ .content {
+  
+  .navbar:hover ~ .move-by-nav, .navbar:hover + .move-by-nav .move-by-nav{
     -webkit-transition: padding-left 300ms ease-in-out;
     -moz-transition: padding-left 300ms ease-in-out;
     -o-transition: padding-left 300ms ease-in-out;
     transition: padding-left 300ms ease-in-out;
-    padding-left: 20rem;
+    padding-left: 20rem; 
   }
 </style>
