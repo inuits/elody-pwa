@@ -37,12 +37,14 @@ const useFormHelper = (form: Form, entityTitle: string) => {
     structure: MetadataOrRelationField[] = formStructure,
   ) => {
     const intialValues: IntialValues = {};
+    let additionalIndex: number = 0;
     if (structure) {
       structure.forEach((field: Maybe<MetadataOrRelationField>) => {
         if (field && field?.__typename === 'MetadataField') {
           findFields(field.key, metadata).forEach((metadata: { value: string }) => {
             intialValues[field.key] = metadata.value;
           });
+          additionalIndex++;
         }
   
         if (field && field?.__typename === 'RelationField') {
