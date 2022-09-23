@@ -8,41 +8,46 @@
     ]"
   >
     <div
-      v-if="!loading && mediafiles.length > 0"
+      v-if="!loading && mediafilesState.length > 0"
       class="flex flex-col items-end mt-2 overflow-y-auto"
     >
-      <div
-        v-for="(mediaFile, arrayKey) in mediafiles"
-        :key="mediaFile.filename ? mediaFile.filename : 'no-filename'"
-        :class="[' px-5 py-2 flex flex-col justify-end']"
-      >
-        <div class="relative group">
-          <trash-icon
-            v-if="editMode === 'edit' && !toBeDeleted.includes(mediaFile._id)"
-            class="hidden group-hover:block"
-            @click="addToSaveCallback(mediaFile._id, arrayKey)"
-          />
-          <img
-            v-if="mediaFile.thumbnail_file_location && !mediaFile.mimetype.includes('audio')"
-            :class="[
-              'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
-              toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
-              selectedImage && (mediaFile.filename === selectedImage.filename) ? 'border-2 border-blue-500' : ''
-            ]"
-            :src="`/api/iiif/3/${mediaFile.filename}/square/100,/0/default.jpg`"
-            @click="selectImage(mediaFile)"
-          />
-          <AudioThumbnail
-            v-if="mediaFile.thumbnail_file_location && mediaFile?.mimetype.includes('audio')"
-            :class="[
-              'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
-              toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
-              selectedImage && (mediaFile.filename === selectedImage.filename) ? 'border-2 border-blue-500' : ''
-            ]"
-            @click="selectImage(mediaFile)"
-          />
-        </div>
-      </div>
+      <draggable v-model="mediafilesState" item-key="id" group="mediafiles">
+        <template #item="{element}">  
+          <div
+          :key="element.filename ? element.filename : 'no-filename'"
+          :class="[' px-5 py-2 flex flex-col justify-end']"
+          >
+            <div class="relative group">
+              <trash-icon
+                v-if="editMode === 'edit' && !toBeDeleted.includes(element._id)"
+                class="hidden group-hover:block"
+                @click="addToSaveCallback(element._id, arrayKey)"
+              />
+              <img
+                v-if="element.thumbnail_file_location && !element.mimetype.includes('audio')"
+                :class="[
+                  'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
+                  toBeDeleted.includes(element._id) ? 'filter blur-xs grayscale' : '',
+                  selectedImage && (element.filename === selectedImage.filename) ? 'border-2 border-blue-500' : ''
+                ]"
+                :src="`/api/iiif/3/${element.filename}/square/100,/0/default.jpg`"
+                @click="selectImage(element)"
+              />
+              <AudioThumbnail
+                v-if="element.thumbnail_file_location && element?.mimetype.includes('audio')"
+                :class="[
+                  'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
+                  toBeDeleted.includes(element._id) ? 'filter blur-xs grayscale' : '',
+                  selectedImage && (element.filename === selectedImage.filename) ? 'border-2 border-blue-500' : ''
+                ]"
+                @click="selectImage(element)"
+              />
+            </div>
+          </div>
+        </template>
+        
+      </draggable>
+      
     </div>
     <div :class="editMode === 'edit' ? 'pb-20 pt-5' : ''">
       <plus-circle-icon
@@ -69,6 +74,7 @@
   import useDropzoneHelper from '../composables/useDropzoneHelper';
   import useMediaAssetLinkHelper from '../composables/useMediaAssetLinkHelper';
   import useMetaDataHelper from '../composables/useMetaDataHelper';
+  import Draggable from 'vuedraggable';
   export const toBeDeleted = ref<string[]>([]);
 
   type MediafileSelectionState = {
@@ -93,6 +99,7 @@
       AudioThumbnail,
       PlusCircleIcon,
       TrashIcon,
+      Draggable,
     },
     props: {
       mediafiles: { type: Array as PropType<MediaFile[]>, required: true },
@@ -133,6 +140,8 @@
         }
       };
 
+      const mediafilesState = ref(props.mediafiles);
+
       onMounted(() => {
         if (props.selectedImage) {
           updateSelectedEntityMediafile(props.selectedImage);
@@ -147,6 +156,7 @@
         openUploadModal,
         modalChoices,
         selectedFiles,
+        mediafilesState,
       };
     },
   });
