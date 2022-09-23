@@ -86,7 +86,7 @@
         push(
           getEmptyMetadatRelationObject(props.structure, value.uuid, {
             //@ts-ignore  Error when passing value object in vee-validate
-            media: structuredClone(value.media),
+            media: JSON.parse(JSON.stringify(value.media)),
             //@ts-ignore  Error when passing value object in vee-validate
             teaserMetadata: [...value.teaserMetadata],
           }),
