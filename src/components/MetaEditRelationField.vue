@@ -83,10 +83,11 @@
       );
 
       const addRelation = (value: Entity) => {
+        console.log(value);
         push(
           getEmptyMetadatRelationObject(props.structure, value.uuid, {
             //@ts-ignore  Error when passing value object in vee-validate
-            media: JSON.parse(JSON.stringify(value.media)),
+            media: value.media ? JSON.parse(JSON.stringify(value.media)) : undefined,
             //@ts-ignore  Error when passing value object in vee-validate
             teaserMetadata: [...value.teaserMetadata],
           }),
