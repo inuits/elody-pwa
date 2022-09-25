@@ -56,6 +56,14 @@
         "
         :source="mediafileSelectionState.selectedMediafile"
       />
+      <SrtViewer
+        v-if="
+          !loading &&
+          mediafileSelectionState.selectedMediafile !== undefined &&
+          mediafileSelectionState.selectedMediafile.mimetype.includes('text/plain')
+        "
+        :source="mediafileSelectionState.selectedMediafile"
+      />
     </div>
     <!-- meta is metadata form-->
     <Meta
@@ -117,6 +125,7 @@
   import useMediaAssetLinkHelper from '@/composables/useMediaAssetLinkHelper';
   import useMetaDataHelper from '@/composables/useMetaDataHelper';
   import { useUploadModal } from '../UploadModal.vue';
+  import SrtViewer from '@/components/base/SrtViewer.vue';
   import LinkedAssetsList from '@/components/LinkedAssetsList.vue';
 
   export default defineComponent({
@@ -128,7 +137,8 @@
       VideoPlayer,
       AudioPlayer,
       PDFViewer,
-      LinkedAssetsList
+      LinkedAssetsList,
+      SrtViewer,
     },
     props: {
       isMetaDisplayed: Boolean,
