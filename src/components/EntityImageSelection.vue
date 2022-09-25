@@ -23,7 +23,7 @@
             @click="addToSaveCallback(mediaFile._id, arrayKey)"
           />
           <img
-            v-if="mediaFile.thumbnail_file_location && !mediaFile.mimetype.includes('audio')"
+            v-if="mediaFile.thumbnail_file_location && !mediaFile.mimetype.includes('audio') && !mediaFile.mimetype.includes('text/plain')"
             :class="[
               'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
               toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
@@ -35,6 +35,15 @@
           <AudioThumbnail
             v-if="mediaFile.thumbnail_file_location && mediaFile?.mimetype.includes('audio')"
             :class="[
+              'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
+              toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
+              selectedImage && (mediaFile.filename === selectedImage.filename) ? 'border-2 border-blue-500' : ''
+            ]"
+            @click="selectImage(mediaFile)"
+          />
+          <SvgThumbnail 
+             v-if="mediaFile.thumbnail_file_location && mediaFile?.mimetype.includes('text/plain')"
+             :class="[
               'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
               toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
               selectedImage && (mediaFile.filename === selectedImage.filename) ? 'border-2 border-blue-500' : ''
@@ -62,6 +71,7 @@
     DeletePaths,
   } from '@/queries';
   import AudioThumbnail from '../components/base/audiothumbnail.vue';
+  import SvgThumbnail from './base/svgThumbnail.vue';
   import TrashIcon from '../components/base/TrashIcon.vue';
   import PlusCircleIcon from '../components/base/PlusCircleIcon.vue';
   import { useEditMode } from '@/components/EditToggle.vue';
@@ -93,6 +103,7 @@
       AudioThumbnail,
       PlusCircleIcon,
       TrashIcon,
+      SvgThumbnail
     },
     props: {
       mediafiles: { type: Array as PropType<MediaFile[]>, required: true },
