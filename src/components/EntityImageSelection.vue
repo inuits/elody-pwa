@@ -11,8 +11,8 @@
       v-if="!loading && mediafilesState.length > 0"
       class="flex flex-col items-end mt-2 overflow-y-auto"
     >
-      <draggable v-model="mediafilesState" item-key="mediafiles-container" group="mediafiles"
-      @end="endDrag">
+      <draggable v-model="mediafilesState" item-key="mediafiles-container"
+      @end="endDrag" class="sortable" :disabled=!setDraggable()>
         <template #item="{element}">  
           <div
           :key="element.filename ? element.filename : 'no-filename'"
@@ -23,7 +23,7 @@
                 v-if="editMode === 'edit' && !toBeDeleted.includes(element._id)"
                 class="hidden group-hover:block"
                 @click="addToSaveCallback(element._id, arrayKey)"
-              />
+              />  
               <img
                 v-if="element.thumbnail_file_location && !element.mimetype.includes('audio')"
                 :class="[
@@ -158,6 +158,16 @@
         console.log(compareMediafileOrder(props.mediafiles, mediafilesState.value));
       };
 
+      const setDraggable = (): boolean => {
+        if (editMode.value === 'edit'){
+          console.log('setDraggable() => true');
+          return true;
+        } else {
+          console.log('setDraggable() => false');
+          return false;
+        }
+      };
+
       return {
         selectImage,
         editMode,
@@ -168,7 +178,14 @@
         selectedFiles,
         mediafilesState,
         endDrag,
+        setDraggable,
       };
     },
   });
 </script>
+
+<style scoped>
+  .sortable-drag {
+    opacity: 0;
+  }
+</style>
