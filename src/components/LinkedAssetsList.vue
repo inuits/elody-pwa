@@ -7,7 +7,7 @@
           <ListItem
             :meta="entity.teaserMetadata"
             :media="entity.media ? entity.media.primaryMediafile : null"
-            :thumb-icon="Unicons.NoImage.name"
+            :thumb-icon="getThumbnail(entity)"
             @click="
               !enableSelection &&
                 router.push({ name: 'SingleEntity', params: { id: entity.id } })
@@ -34,6 +34,7 @@
   import { defineComponent, PropType } from 'vue';
   import { useRouter } from 'vue-router';
   import { useI18n } from 'vue-i18n';
+  import useThumbnailHelper from '@/composables/useThumbnailHelper';
 
   export default defineComponent({
     name: 'LinkedAssetsList',
@@ -48,13 +49,15 @@
       }
     },
     setup() {
+      const { getThumbnail } = useThumbnailHelper();
       const { t } = useI18n();
       const router = useRouter();
 
       return {
         Unicons,
         router,
-        t
+        t,
+        getThumbnail
       };
     },
   });
