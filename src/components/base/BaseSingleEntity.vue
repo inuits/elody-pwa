@@ -162,7 +162,7 @@
         errorMessages,
       } = useDropzoneHelper();
       const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
-      const { lastAdjustedMediaFileMetaData, mediafiles } = useMetaDataHelper();
+      const { lastAdjustedMediaFileMetaData, mediafiles, clearMediafiles } = useMetaDataHelper();
       const id = asString(useRoute().params['id']);
       const loading = ref<boolean>(true);
       const { mediafileSelectionState, updateSelectedEntityMediafile } =
@@ -262,12 +262,12 @@
       });
 
       onResult((queryResult: any) => {
+        clearMediafiles();
         if (
           queryResult.data &&
           queryResult.data.Entity?.media?.mediafiles &&
           queryResult.data.Entity?.media?.mediafiles?.length > 0
         ) {
-          mediafiles.value = [];
           let mediaFileChanged: boolean = false;
           queryResult.data.Entity.media.mediafiles?.forEach(
             (mediafile: any, index: any) => {
@@ -280,10 +280,11 @@
               }
             },
           );
-          if (!mediaFileChanged && mediafiles.value[0])
+          if (!mediaFileChanged && mediafiles.value[0]) {
             updateSelectedEntityMediafile(mediafiles.value[0]);
-          if (!mediaFileChanged && !mediafiles.value[0])
-            updateSelectedEntityMediafile(undefined);
+          }
+        } else {
+          updateSelectedEntityMediafile(undefined);
         }
         //If form show edit togle
         if (queryResult.data && queryResult.data.Entity?.form) {
