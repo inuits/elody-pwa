@@ -27,10 +27,11 @@ import {
   uniFilter,
   uniVolume,
   uniCreateDashboard,
-  uniImageRedo,
   uniCheck,
   uniTimes,
-  uniFileAlt
+  uniFileAlt,
+  uniMusic,
+  uniText
 } from 'vue-unicons/dist/icons';
 
 export enum Unicons {
@@ -64,5 +65,7 @@ export enum Unicons {
   Create = uniCreateDashboard,
   Check = uniCheck,
   Cross = uniTimes,
-  FileAlt = uniFileAlt
+  FileAlt = uniFileAlt,
+  Music = uniMusic,
+  Text = uniText
 }
