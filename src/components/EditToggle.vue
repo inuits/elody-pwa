@@ -17,6 +17,7 @@
   import { toBeDeleted } from '@/components/EntityImageSelection.vue';
   import useMediaAssetLinkHelper from '@/composables/useMediaAssetLinkHelper';
   import useMetaDataHelper from '@/composables/useMetaDataHelper';
+  import { getDiffArray, removeMediafilesFromOrdering } from '../composables/useMediafilesOrderHelpers';
   export type EditModes = 'edit' | 'view' | 'loading';
   export type callback = (e?: Event | undefined) => Promise<unknown>;
 
@@ -45,6 +46,8 @@
     const saveEvent = new Event('save');
     const discardEvent = new Event('discard');
     const save = async () => {
+      removeMediafilesFromOrdering(toBeDeleted.value);
+      console.log(getDiffArray());
       linkMediaFilesToEntity(addSaveCallback);
       for (const callback of saveCallbacks.value) {
         await callback().then(() => {
