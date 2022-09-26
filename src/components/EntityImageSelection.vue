@@ -11,7 +11,8 @@
       v-if="!loading && mediafilesState.length > 0"
       class="flex flex-col items-end mt-2 overflow-y-auto"
     >
-      <draggable v-model="mediafilesState" item-key="id" group="mediafiles">
+      <draggable v-model="mediafilesState" item-key="mediafiles-container" group="mediafiles"
+      @end="endDrag">
         <template #item="{element}">  
           <div
           :key="element.filename ? element.filename : 'no-filename'"
@@ -74,6 +75,7 @@
   import useDropzoneHelper from '../composables/useDropzoneHelper';
   import useMediaAssetLinkHelper from '../composables/useMediaAssetLinkHelper';
   import useMetaDataHelper from '../composables/useMetaDataHelper';
+  import useMediafilesOrderHelpers from '../composables/useMediafilesOrderHelpers';
   import Draggable from 'vuedraggable';
   export const toBeDeleted = ref<string[]>([]);
 
@@ -123,6 +125,8 @@
         updateSelectedEntityMediafile(mediafile);
       };
 
+      const {compareMediafileOrder} = useMediafilesOrderHelpers();
+
       const { editMode, addSaveCallback } = useEditMode();
 
       const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
@@ -148,6 +152,12 @@
         }
       });
 
+      const endDrag = (e:any) => {
+        console.log(`Old index: ${e.oldIndex}`);
+        console.log(`New index: ${e.newIndex}`);
+        console.log(compareMediafileOrder(props.mediafiles, mediafilesState.value));
+      };
+
       return {
         selectImage,
         editMode,
@@ -157,6 +167,7 @@
         modalChoices,
         selectedFiles,
         mediafilesState,
+        endDrag,
       };
     },
   });
