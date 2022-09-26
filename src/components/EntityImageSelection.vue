@@ -160,10 +160,8 @@
 
       const setDraggable = (): boolean => {
         if (editMode.value === 'edit'){
-          console.log('setDraggable() => true');
           return true;
         } else {
-          console.log('setDraggable() => false');
           return false;
         }
       };
