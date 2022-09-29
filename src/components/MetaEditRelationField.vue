@@ -86,7 +86,6 @@ import useThumbnailHelper from '@/composables/useThumbnailHelper';
       const { getThumbnail } = useThumbnailHelper();
 
       const addRelation = (value: Entity) => {
-        console.log(value);
         push(
           getEmptyMetadatRelationObject(props.structure, value.uuid, {
             //@ts-ignore  Error when passing value object in vee-validate
