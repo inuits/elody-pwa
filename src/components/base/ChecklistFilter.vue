@@ -3,7 +3,7 @@
     <AndOrToggle v-model:AndOrValue="isAnd" texton="En" textoff="Of" />
   </div> -->
   <div>
-    {{inputFieldMulti}}
+    <!-- {{inputFieldMulti}} -->
     <ul v-for="option in options?.FilterOptions" :key="option">
       <li v-if="acceptedEntityTypes.length == 0 || filterkey !== 'type'">
         <input
