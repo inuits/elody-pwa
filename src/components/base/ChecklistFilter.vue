@@ -3,7 +3,6 @@
     <AndOrToggle v-model:AndOrValue="isAnd" texton="En" textoff="Of" />
   </div> -->
   <div>
-    <!-- {{inputFieldMulti}} -->
     <ul v-for="option in options?.FilterOptions" :key="option">
       <li v-if="acceptedEntityTypes.length == 0 || filterkey !== 'type'">
         <input
@@ -103,8 +102,6 @@
         () => inputFieldMulti.value,
         (newVal: any, oldVal:any) => {
           if (newVal !== oldVal) {
-            console.log('newVal', newVal);
-            console.log('oldVal', oldVal);
             emit(
               'update:listValue',
               defaultReturnMultiSelectObject(props.filterkey, {
