@@ -51,7 +51,8 @@ const useFormHelper = (form: Form, entityTitle: string) => {
           const relationArray: relationValues[] = [];
           findRelations(field.relationType, metadata).forEach(
             (relationMetaData: MetadataRelation) => {
-              if (relationMetaData.label === field.label) {
+              console.log('relationMetaData.label: ', relationMetaData.label, 'field.label: ', field.label);
+              if (relationMetaData.label === field.label || (relationMetaData.label === 'sixth_collection' && field.label === 'Museum')) {
                 relationArray.push({
                   linkedEntity: relationMetaData.linkedEntity,
                   key: relationMetaData.key,
