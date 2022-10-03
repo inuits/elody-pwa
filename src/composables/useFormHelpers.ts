@@ -51,9 +51,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
           const relationArray: relationValues[] = [];
           findRelations(field.relationType, metadata).forEach(
             (relationMetaData: MetadataRelation) => {
-              console.log('relationMetaData.label', relationMetaData);
-              console.log('field.label', field);
-              // if (relationMetaData.label === field.label) {
+              if (relationMetaData.label === field.label) {
                 relationArray.push({
                   linkedEntity: relationMetaData.linkedEntity,
                   key: relationMetaData.key,
@@ -64,7 +62,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
                   ),
                   relationType: field.relationType ? field.relationType : ''
                 });
-              // }
+              }
             },
           );
           intialValues[field.label ? field.label : field.relationType] = relationArray;
