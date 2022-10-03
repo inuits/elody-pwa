@@ -41,6 +41,7 @@
     "vue-i18n": "^9.1.7",
     "vue-router": "^4.0.10",
     "vue-unicons": "^3.2.1",
+    "vuedraggable": "^4.1.0",
     "vuex": "^4.0.2"
   },
   "devDependencies": {

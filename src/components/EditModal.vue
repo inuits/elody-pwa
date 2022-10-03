@@ -25,6 +25,7 @@
   import { defineComponent, provide, ref } from 'vue';
   import { useEditMode } from './EditToggle.vue';
   import BaseButton from '@/components/base/BaseButton.vue';
+  import { toBeDeleted } from '@/components/EntityImageSelection.vue';
 
   export default defineComponent({
     name: 'EditModal',
