@@ -8,6 +8,10 @@ const mediafiles = ref<MediaFile[]>([]);
 
 const useMetaDataHelper = () => {
 
+  const clearMediafiles = (): void => {
+    mediafiles.value = [];
+  };
+
   const clearMediaFilesToPatch = (): void => {
     metaDataPatchList.value = {};
     lastAdjustedMediaFileMetaData.value = {};
@@ -26,6 +30,7 @@ const useMetaDataHelper = () => {
   };
 
   return {
+    clearMediafiles,
     clearMediaFilesToPatch,
     metaDataPatchList,
     addOrUpdateList,

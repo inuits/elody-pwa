@@ -23,7 +23,7 @@
           :media="
             value.linkedEntity.media ? value.linkedEntity.media.primaryMediafile : null
           "
-          :thumb-icon="value.linkedEntity.media ? Unicons.NoImage.name : null"
+          :thumb-icon="getThumbnail(value)"
         />
         <div v-if="!structure.disabled" class="delete">
           <BaseButton
@@ -60,6 +60,7 @@
     relationValues,
   } from '@/composables/useFormHelpers';
   import ListItem from '@/components/ListItem.vue';
+import useThumbnailHelper from '@/composables/useThumbnailHelper';
 
   export default defineComponent({
     name: 'MetaEditRelationField',
@@ -82,11 +83,13 @@
         props.label ? props.label : props.structure.relationType, //MAKING UNIQUE ARRAY FOR EACH COMPONENT DEPENDING ON THE LABEL...
       );
 
+      const { getThumbnail } = useThumbnailHelper();
+
       const addRelation = (value: Entity) => {
         push(
           getEmptyMetadatRelationObject(props.structure, value.uuid, {
             //@ts-ignore  Error when passing value object in vee-validate
-            media: JSON.parse(JSON.stringify(value.media)),
+            media: value.media ? JSON.parse(JSON.stringify(value.media)) : undefined,
             //@ts-ignore  Error when passing value object in vee-validate
             teaserMetadata: [...value.teaserMetadata],
           }),
@@ -120,7 +123,8 @@
         addRelation,
         openPickEntityModal,
         inputContainerStyle,
-        openModal
+        openModal,
+        getThumbnail
       };
     },
   });

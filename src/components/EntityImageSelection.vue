@@ -11,6 +11,7 @@
       v-if="!loading && mediafilesState.length > 0"
       class="flex flex-col items-end mt-2 overflow-y-auto"
     >
+<<<<<<< src/components/EntityImageSelection.vue
       <draggable v-model="mediafilesState" item-key="mediafiles-container"
       @end="endDrag" class="sortable" :disabled=!setDraggable()>
         <template #item="{element}">  
@@ -43,12 +44,65 @@
                 ]"
                 @click="selectImage(element)"
               />
+              <SvgThumbnail 
+                v-if="mediaFile.thumbnail_file_location && mediaFile?.mimetype.includes('text/plain')"
+                :class="[
+                  'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
+                  toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
+                  selectedImage && (mediaFile.filename === selectedImage.filename) ? 'border-2 border-blue-500' : ''
+                ]"
+                @click="selectImage(mediaFile)"
+              />
+
             </div>
           </div>
         </template>
         
       </draggable>
       
+=======
+      <div
+        v-for="(mediaFile, arrayKey) in mediafiles"
+        :key="mediaFile.filename ? mediaFile.filename : 'no-filename'"
+        :class="[' px-5 py-2 flex flex-col justify-end']"
+      >
+        <div class="relative group">
+          <trash-icon
+            v-if="editMode === 'edit' && !toBeDeleted.includes(mediaFile._id)"
+            class="hidden group-hover:block"
+            @click="addToSaveCallback(mediaFile._id, arrayKey)"
+          />
+          <img
+            v-if="mediaFile.thumbnail_file_location && !mediaFile.mimetype.includes('audio') && !mediaFile.mimetype.includes('text/plain')"
+            :class="[
+              'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
+              toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
+              selectedImage && (mediaFile.filename === selectedImage.filename) ? 'border-2 border-blue-500' : ''
+            ]"
+            :src="`/api/iiif/3/${mediaFile.filename}/square/100,/0/default.jpg`"
+            @click="selectImage(mediaFile)"
+          />
+          <AudioThumbnail
+            v-if="mediaFile.thumbnail_file_location && mediaFile?.mimetype.includes('audio')"
+            :class="[
+              'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
+              toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
+              selectedImage && (mediaFile.filename === selectedImage.filename) ? 'border-2 border-blue-500' : ''
+            ]"
+            @click="selectImage(mediaFile)"
+          />
+          <SvgThumbnail 
+             v-if="mediaFile.thumbnail_file_location && mediaFile?.mimetype.includes('text/plain')"
+             :class="[
+              'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
+              toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
+              selectedImage && (mediaFile.filename === selectedImage.filename) ? 'border-2 border-blue-500' : ''
+            ]"
+            @click="selectImage(mediaFile)"
+          />
+        </div>
+      </div>
+>>>>>>> src/components/EntityImageSelection.vue
     </div>
     <div :class="editMode === 'edit' ? 'pb-20 pt-5' : ''">
       <plus-circle-icon
@@ -68,6 +122,7 @@
     DeletePaths,
   } from '@/queries';
   import AudioThumbnail from '../components/base/audiothumbnail.vue';
+  import SvgThumbnail from './base/svgThumbnail.vue';
   import TrashIcon from '../components/base/TrashIcon.vue';
   import PlusCircleIcon from '../components/base/PlusCircleIcon.vue';
   import { useEditMode } from '@/components/EditToggle.vue';
@@ -101,7 +156,11 @@
       AudioThumbnail,
       PlusCircleIcon,
       TrashIcon,
+<<<<<<< src/components/EntityImageSelection.vue
       Draggable,
+=======
+      SvgThumbnail
+>>>>>>> src/components/EntityImageSelection.vue
     },
     props: {
       mediafiles: { type: Array as PropType<MediaFile[]>, required: true },

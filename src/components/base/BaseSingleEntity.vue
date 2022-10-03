@@ -56,6 +56,14 @@
         "
         :source="mediafileSelectionState.selectedMediafile"
       />
+      <SrtViewer
+        v-if="
+          !loading &&
+          mediafileSelectionState.selectedMediafile !== undefined &&
+          mediafileSelectionState.selectedMediafile.mimetype.includes('text/plain')
+        "
+        :source="mediafileSelectionState.selectedMediafile"
+      />
     </div>
     <!-- meta is metadata form-->
     <Meta
@@ -117,6 +125,7 @@
   import useMediaAssetLinkHelper from '@/composables/useMediaAssetLinkHelper';
   import useMetaDataHelper from '@/composables/useMetaDataHelper';
   import { useUploadModal } from '../UploadModal.vue';
+  import SrtViewer from '@/components/base/SrtViewer.vue';
   import LinkedAssetsList from '@/components/LinkedAssetsList.vue';
 
   export default defineComponent({
@@ -128,7 +137,8 @@
       VideoPlayer,
       AudioPlayer,
       PDFViewer,
-      LinkedAssetsList
+      LinkedAssetsList,
+      SrtViewer,
     },
     props: {
       isMetaDisplayed: Boolean,
@@ -152,7 +162,7 @@
         errorMessages,
       } = useDropzoneHelper();
       const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
-      const { lastAdjustedMediaFileMetaData, mediafiles } = useMetaDataHelper();
+      const { lastAdjustedMediaFileMetaData, mediafiles, clearMediafiles } = useMetaDataHelper();
       const id = asString(useRoute().params['id']);
       const loading = ref<boolean>(true);
       const { mediafileSelectionState, updateSelectedEntityMediafile } =
@@ -252,12 +262,12 @@
       });
 
       onResult((queryResult: any) => {
+        clearMediafiles();
         if (
           queryResult.data &&
           queryResult.data.Entity?.media?.mediafiles &&
           queryResult.data.Entity?.media?.mediafiles?.length > 0
         ) {
-          mediafiles.value = [];
           let mediaFileChanged: boolean = false;
           queryResult.data.Entity.media.mediafiles?.forEach(
             (mediafile: any, index: any) => {
@@ -270,10 +280,11 @@
               }
             },
           );
-          if (!mediaFileChanged && mediafiles.value[0])
+          if (!mediaFileChanged && mediafiles.value[0]) {
             updateSelectedEntityMediafile(mediafiles.value[0]);
-          if (!mediaFileChanged && !mediafiles.value[0])
-            updateSelectedEntityMediafile(undefined);
+          }
+        } else {
+          updateSelectedEntityMediafile(undefined);
         }
         //If form show edit togle
         if (queryResult.data && queryResult.data.Entity?.form) {
