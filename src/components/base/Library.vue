@@ -77,7 +77,7 @@
             :key="entity.id"
             :meta="entity.teaserMetadata"
             :media="entity.media ? entity.media.primaryMediafile : null"
-            :thumb-icon="Unicons.NoImage.name"
+            :thumb-icon="getThumbnail(entity)"
             @click="
               !enableSelection &&
                 router.push({ name: listItemRouteName, params: { id: entity.id } })
@@ -129,6 +129,7 @@
   import FilterSideBar from '@/components/FilterSideBar.vue';
   import IconToggle from '@/components/base/IconToggle.vue';
   import { useI18n } from 'vue-i18n';
+import useThumbnailHelper from '@/composables/useThumbnailHelper';
 
   export default defineComponent({
     name: 'Library',
@@ -174,6 +175,7 @@
     },
     emits: ['addSelection'],
     setup: (props, { emit }) => {
+      const { getThumbnail } = useThumbnailHelper();
       const { t } = useI18n();
       const router = useRouter();
       const paginationInfo = reactive({
@@ -231,7 +233,8 @@
         router,
         result,
         t,
-        setFilters
+        setFilters,
+        getThumbnail
       };
     },
   });

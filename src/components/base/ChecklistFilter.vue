@@ -61,6 +61,7 @@
     },
     emits: ['update:listValue'],
     setup(props, { emit }) {
+
       emit('update:listValue', defaultReturnMultiSelectObject(props.filterkey));
       const { result: options } = useQuery(GetFilterOptionsDocument, {
         key: props.filterkey,
@@ -89,34 +90,26 @@
         },
       });
 
-      const inputFieldMulti = ref<string[]>([]);
-      const isClearingInputFieldMulti = ref<boolean>(false);
+      const inputFieldMulti = ref<Maybe<Maybe<string>[]> | undefined>([]);
 
-      const clearInputFieldMulti = () => {
-        isClearingInputFieldMulti.value = true;
-        inputFieldMulti.value = [];
-      };
+      watch(() => props.listValue, () => {
+        if (props.listValue && props.listValue.input.multiSelectInput) {
+          inputFieldMulti.value = props.listValue.input.multiSelectInput.value;
+        }
+      });
 
       watch(
         () => inputFieldMulti.value,
-        () => {
-          if (isClearingInputFieldMulti.value === false) {
-            if (props.acceptedEntityTypes.length > 0) {
-              inputFieldMulti.value = props.acceptedEntityTypes;
-            }
-            if (props.listValue) {
-              emit(
-                'update:listValue',
-                defaultReturnMultiSelectObject(props.filterkey, {
-                  value: inputFieldMulti.value,
-                  AndOrValue: isAnd.value,
-                }),
-              );
-            }
+        (newVal: any, oldVal:any) => {
+          if (newVal !== oldVal) {
+            emit(
+              'update:listValue',
+              defaultReturnMultiSelectObject(props.filterkey, {
+                value: inputFieldMulti.value,
+                AndOrValue: isAnd.value,
+              }),
+            );
           }
-
-        isClearingInputFieldMulti.value = false;
-
         },
       );
 
@@ -130,13 +123,7 @@
         );
       }
 
-      watch(() => props.listValue, () => {
-        if (props.listValue && props.listValue.isActive === false) {
-          clearInputFieldMulti();
-        }
-      });
-
-      return { options, inputFieldMulti, isAnd, clearInputFieldMulti };
+      return { options, inputFieldMulti, isAnd };
     },
   });
 </script>

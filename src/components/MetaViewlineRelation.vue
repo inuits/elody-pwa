@@ -24,7 +24,7 @@
             ? metadata.linkedEntity.media.primaryMediafile
             : null
         "
-        :thumb-icon="metadata.linkedEntity.media ? Unicons.NoImage.name : null"
+        :thumb-icon="getThumbnail(metadata)"
         :small="true"
         @click="
           router.push({ name: 'SingleEntity', params: { id: metadata.linkedEntity.id } })
@@ -87,6 +87,7 @@
   import { Unicons } from '@/types';
   import { inputContainerStyle, lableStyle } from './base/InputField.vue';
   import ListItem from '@/components/ListItem.vue';
+  import useThumbnailHelper from '@/composables/useThumbnailHelper';
 
   export default defineComponent({
     name: 'MetaViewlineRelation',
@@ -102,7 +103,7 @@
     setup() {
       const router = useRouter();
       const { t } = useI18n();
-
+      const { getThumbnail } = useThumbnailHelper();
       const checkTranslationForlabel = (input: string) => {
         const translationKey = `metadata.${input}`;
         const translation = t(translationKey);
@@ -116,6 +117,7 @@
         Unicons,
         inputContainerStyle,
         checkTranslationForlabel,
+        getThumbnail
       };
     },
   });
