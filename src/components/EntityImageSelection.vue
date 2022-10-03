@@ -44,13 +44,13 @@
                 @click="selectImage(element)"
               />
               <SvgThumbnail 
-                v-if="mediaFile.thumbnail_file_location && mediaFile?.mimetype.includes('text/plain')"
+                v-if="element.thumbnail_file_location && element?.mimetype.includes('text/plain')"
                 :class="[
                   'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
-                  toBeDeleted.includes(mediaFile._id) ? 'filter blur-xs grayscale' : '',
-                  selectedImage && (mediaFile.filename === selectedImage.filename) ? 'border-2 border-blue-500' : ''
+                  toBeDeleted.includes(element._id) ? 'filter blur-xs grayscale' : '',
+                  selectedImage && (element.filename === selectedImage.filename) ? 'border-2 border-blue-500' : ''
                 ]"
-                @click="selectImage(mediaFile)"
+                @click="selectImage(element)"
               />
 
             </div>
