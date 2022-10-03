@@ -18,6 +18,8 @@
   import useMediaAssetLinkHelper from '@/composables/useMediaAssetLinkHelper';
   import useMetaDataHelper from '@/composables/useMetaDataHelper';
   import { getDiffArray, removeMediafilesFromOrdering } from '../composables/useMediafilesOrderHelpers';
+  import { useMutation } from '@vue/apollo-composable';
+  import { UpdateMediafilesOrderMutation, UpdateMediafilesOrderDocument } from '@/queries';
   export type EditModes = 'edit' | 'view' | 'loading';
   export type callback = (e?: Event | undefined) => Promise<unknown>;
 
@@ -45,10 +47,13 @@
     const hideEditToggle = () => (isEditToggleVisible.value = false);
     const saveEvent = new Event('save');
     const discardEvent = new Event('discard');
+    const { mutate } = useMutation<UpdateMediafilesOrderMutation>(UpdateMediafilesOrderDocument);
     const save = async () => {
       removeMediafilesFromOrdering(toBeDeleted.value);
-      console.log(getDiffArray());
       linkMediaFilesToEntity(addSaveCallback);
+      addSaveCallback(async () => {
+        await mutate(getDiffArray());
+      });
       for (const callback of saveCallbacks.value) {
         await callback().then(() => {
           if (isEdit.value) {

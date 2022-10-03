@@ -2,7 +2,6 @@ import { MediaFile } from "@/queries";
 
 type orderDiff = {
     id: string,
-    index: number,
     order: number,
 };
 
@@ -17,8 +16,7 @@ export const compareMediafileOrder = (originalArray: MediaFile[], newArray: Medi
 
     newArray.forEach((mediafile: MediaFile) => {
         const order: number = newArray.indexOf(mediafile);
-        const index: number = originalArray.indexOf(mediafile);
-        diff.push({id: mediafile._id, index, order});
+        diff.push({id: mediafile._id, order});
     });
     diffArray = diff;
     return diff;
