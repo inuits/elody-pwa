@@ -13,9 +13,8 @@ export enum Status {
 }
 
 export const jobTypeLabels: Record<string, string> = {
-  all: '',
-  'csv row': 'csv_row_import',
   'csv import': 'csv_import',
+  'csv row': 'csv_row_import',
   'csv read': 'csv_read',
   'upload file': 'upload_file',
   'upload transcode': 'upload_transcode',

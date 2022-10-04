@@ -72,7 +72,7 @@
       });
       routeHelper.getPaginationInfoFromUrl(paginationInfo);
       const searchQuery = ref('');
-      const showAll = ref('all');
+      const showAll = ref('csv import');
       const queryVariables = reactive<QueryVariables>({
         pagination: paginationInfo,
         filters: {
