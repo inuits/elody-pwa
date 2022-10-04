@@ -38,18 +38,26 @@
           <ProgressBar :progress="50" />
         </div>
       </div>
-      <div v-if="job.amount_of_jobs > 1">
+      <div>
         <BaseButton
           v-if="isCollapsed == true"
+          :class="{
+            'opacity-0': !hasSubJobs,
+            'cursor-default-important': !hasSubJobs,
+          }"
           label="Expand"
           :icon="Unicons.Plus.name"
-          @click="toggleCollapse"
+          @click="toggleCollapse()"
         />
         <BaseButton
           v-if="isCollapsed != true"
+          :class="{
+            'opacity-0': !hasSubJobs,
+            'cursor-default-important': !hasSubJobs,
+          }"
           label="Collaps"
           :icon="Unicons.Minus.name"
-          @click="toggleCollapse"
+          @click="toggleCollapse()"
         />
       </div>
     </div>
@@ -121,9 +129,13 @@
       );
       const subjobLimit = ref<number>(10);
 
+      const hasSubJobs = computed<boolean>(() =>
+        props.job.amount_of_jobs && props.job.amount_of_jobs > 1 ? true : false,
+      );
+
       const toggleCollapse = () => {
         isCollapsed.value = !isCollapsed.value;
-        if (!isCollapsed.value) {
+        if (!isCollapsed.value && hasSubJobs.value) {
           fetchingSubJobs.value = true;
           subjobLimit.value = 10;
           updateSubJobs();
@@ -156,8 +168,14 @@
         state,
         increaseSubjobs,
         subjobLimit,
+        hasSubJobs,
         loading,
       };
     },
   });
 </script>
+<style scoped>
+  .cursor-default-important {
+    cursor: default !important;
+  }
+</style>
