@@ -8,10 +8,10 @@
     ]"
   >
     <div
-      v-if="!loading && mediafilesState.length > 0"
+      v-if="!loading && mediafiles.length > 0"
       class="flex flex-col items-end mt-2 overflow-y-auto"
     >
-      <draggable v-model="mediafilesState" item-key="mediafiles-container"
+      <draggable v-model="mediafiles" item-key="mediafiles-container"
       @end="endDrag" class="sortable" :disabled=!setDraggable()>
         <template #item="{element}">  
           <div
@@ -116,7 +116,6 @@
       SvgThumbnail
     },
     props: {
-      mediafiles: { type: Array as PropType<MediaFile[]>, required: true },
       selectedImage: {
         type: Object as PropType<MediaFile | null>,
         required: true,
@@ -128,6 +127,7 @@
     },
     setup(props, { emit }) {
       const { selectedFiles } = useDropzoneHelper();
+      const { mediafiles } = useMetaDataHelper();
       const { updateSelectedEntityMediafile } = useEntityMediafileSelector();
       const { isMediaFileInLinkList, removeMediaFileFromLinkList } =
         useMediaAssetLinkHelper();
@@ -156,18 +156,14 @@
         }
       };
 
-      const mediafilesState = ref(props.mediafiles);
-
       onMounted(() => {
         if (props.selectedImage) {
           updateSelectedEntityMediafile(props.selectedImage);
         }
       });
 
-      const endDrag = (e:any) => {
-        console.log(`Old index: ${e.oldIndex}`);
-        console.log(`New index: ${e.newIndex}`);
-        console.log(compareMediafileOrder(props.mediafiles, mediafilesState.value));
+      const endDrag = () => {
+        compareMediafileOrder(mediafiles.value);
       };
 
       const setDraggable = (): boolean => {
@@ -186,9 +182,9 @@
         openUploadModal,
         modalChoices,
         selectedFiles,
-        mediafilesState,
         endDrag,
         setDraggable,
+        mediafiles,
       };
     },
   });

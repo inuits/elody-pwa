@@ -10,7 +10,6 @@
       v-model:selectedImage="mediafileSelectionState.selectedMediafile"
       :class="['w-40', editMode === 'edit' ? 'shadow-md' : '']"
       :loading="loading"
-      :mediafiles="mediafiles"
     />
     <div
       v-show="!loading && mediafileSelectionState.selectedMediafile"
