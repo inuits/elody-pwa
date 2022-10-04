@@ -11,9 +11,8 @@ export const getDiffArray = (): orderDiff[] => {
     return diffArray;
 };
 
-export const compareMediafileOrder = (originalArray: MediaFile[], newArray: MediaFile[]): orderDiff[] => {
+export const compareMediafileOrder = (newArray: MediaFile[]): orderDiff[] => {
     const diff: orderDiff[] = [];
-
     newArray.forEach((mediafile: MediaFile) => {
         const order: number = newArray.indexOf(mediafile);
         diff.push({id: mediafile._id, order});
