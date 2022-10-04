@@ -72,7 +72,7 @@
       });
       routeHelper.getPaginationInfoFromUrl(paginationInfo);
       const searchQuery = ref('');
-      const showAll = ref('All');
+      const showAll = ref('all');
       const queryVariables = reactive<QueryVariables>({
         pagination: paginationInfo,
         filters: {

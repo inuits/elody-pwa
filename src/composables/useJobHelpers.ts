@@ -12,18 +12,13 @@ export enum Status {
   Pending = 'pending',
 }
 
-export enum JobType {
-  All = '',
-  Mediafile = 'mediafile',
-  CSVImport = 'import csv',
-  FileUpload = 'file_upload',
-}
-
 export const jobTypeLabels: Record<string, string> = {
-  All: '',
-  Mediafile: 'mediafile',
-  CSVImport: 'import csv',
-  FileUpload: 'file_upload',
+  all: '',
+  'csv row': 'csv_row_import',
+  'csv import': 'csv_import',
+  'csv read': 'csv_read',
+  'upload file': 'upload_file',
+  'upload transcode': 'upload_transcode',
 };
 
 const useJobHelpers = (): {
@@ -55,7 +50,7 @@ const useJobHelpers = (): {
   };
 
   const getJobTypes = () => {
-    return Object.keys(JobType);
+    return Object.keys(jobTypeLabels);
   };
 
   const getFormatedDate = (dateString: string) => {

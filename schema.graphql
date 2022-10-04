@@ -263,10 +263,12 @@ type Directory {
 #Jobs
 
 enum JobType {
-  All
-  MediaFile
-  CSVImport
-  FileUpload
+  all
+  csv_row_import
+  csv_import
+  csv_read
+  upload_file
+  upload_transcode
 }
 
 input PaginationInfo {
@@ -413,7 +415,7 @@ enum Entitytyping {
   asset
 }
 
-input updateOrderNode {
+input UpdateMediaFileNodeInput {
   id: String!
   order: Int!
 }

@@ -199,10 +199,12 @@ export type Job = {
 };
 
 export enum JobType {
-  All = 'All',
-  MediaFile = 'MediaFile',
-  CsvImport = 'CSVImport',
-  FileUpload = 'FileUpload'
+  All = 'all',
+  CsvRowImport = 'csv_row_import',
+  CsvImport = 'csv_import',
+  CsvRead = 'csv_read',
+  UploadFile = 'upload_file',
+  UploadTranscode = 'upload_transcode'
 }
 
 export type JobsResults = {
