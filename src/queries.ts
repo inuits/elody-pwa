@@ -438,11 +438,11 @@ export type MutationGetAssetsRelationedWithMediafFileArgs = {
 
 
 export type MutationUpdateMediafilesOrderArgs = {
-  payload?: Maybe<OrderArrayInput>;
+  value: OrderArrayInput;
 };
 
 export type OrderArrayInput = {
-  payload?: Maybe<Array<Maybe<UpdateMediaFileNodeInput>>>;
+  value: Array<UpdateOrderNode>;
 };
 
 export type PaginationInfo = {
@@ -601,11 +601,6 @@ export type TextInput = {
   value?: Maybe<Scalars['String']>;
 };
 
-export type UpdateMediaFileNodeInput = {
-  id: Scalars['String'];
-  order: Scalars['Int'];
-};
-
 
 export type User = {
   __typename?: 'User';
@@ -679,6 +674,11 @@ export type RelationInput = {
   metadata?: Maybe<Array<Maybe<MetadataFieldInput>>>;
   linkedEntityId?: Maybe<Scalars['String']>;
   label?: Maybe<Scalars['String']>;
+};
+
+export type UpdateOrderNode = {
+  id: Scalars['String'];
+  order: Scalars['Int'];
 };
 
 export enum Validation {
@@ -17269,7 +17269,7 @@ export type SetThumbnailPrimaireMutationVariables = Exact<{
 export type SetThumbnailPrimaireMutation = { __typename?: 'Mutation', setThumbnailPrimaire?: Maybe<string> };
 
 export type UpdateMediafilesOrderMutationVariables = Exact<{
-  payload?: Maybe<OrderArrayInput>;
+  value: OrderArrayInput;
 }>;
 
 
@@ -17310,5 +17310,5 @@ export const DeleteDataDocument = {"kind":"Document","definitions":[{"kind":"Ope
 export const CreateEntityDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"createEntity"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"data"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"EntityInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createEntity"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"entity"},"value":{"kind":"Variable","name":{"kind":"Name","value":"data"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"fullEntity"}}]}}]}},...FullEntityFragmentDoc.definitions]} as unknown as DocumentNode<CreateEntityMutation, CreateEntityMutationVariables>;
 export const SetMediaPrimaireDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"setMediaPrimaire"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"entity_id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"mediafile_id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"setMediaPrimaire"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"entity_id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"entity_id"}}},{"kind":"Argument","name":{"kind":"Name","value":"mediafile_id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"mediafile_id"}}}]}]}}]} as unknown as DocumentNode<SetMediaPrimaireMutation, SetMediaPrimaireMutationVariables>;
 export const SetThumbnailPrimaireDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"setThumbnailPrimaire"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"entity_id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"mediafile_id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"setThumbnailPrimaire"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"entity_id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"entity_id"}}},{"kind":"Argument","name":{"kind":"Name","value":"mediafile_id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"mediafile_id"}}}]}]}}]} as unknown as DocumentNode<SetThumbnailPrimaireMutation, SetThumbnailPrimaireMutationVariables>;
-export const UpdateMediafilesOrderDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"updateMediafilesOrder"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"payload"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"OrderArrayInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateMediafilesOrder"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"payload"},"value":{"kind":"Variable","name":{"kind":"Name","value":"payload"}}}]}]}}]} as unknown as DocumentNode<UpdateMediafilesOrderMutation, UpdateMediafilesOrderMutationVariables>;
+export const UpdateMediafilesOrderDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"updateMediafilesOrder"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"value"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"OrderArrayInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateMediafilesOrder"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"value"},"value":{"kind":"Variable","name":{"kind":"Name","value":"value"}}}]}]}}]} as unknown as DocumentNode<UpdateMediafilesOrderMutation, UpdateMediafilesOrderMutationVariables>;
 export const GetFormsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetForms"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"type"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Form"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"type"},"value":{"kind":"Variable","name":{"kind":"Name","value":"type"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MetadataField"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"options"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"label"}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RelationField"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"relationType"}},{"kind":"Field","name":{"kind":"Name","value":"disabled"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"label"}}]}},{"kind":"Field","name":{"kind":"Name","value":"acceptedEntityTypes"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetFormsQuery, GetFormsQueryVariables>;

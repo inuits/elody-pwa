@@ -909,8 +909,8 @@ mutation setThumbnailPrimaire($entity_id: String!, $mediafile_id: String!) {
   setThumbnailPrimaire(entity_id: $entity_id, mediafile_id: $mediafile_id)
 }
 
-mutation updateMediafilesOrder($payload: OrderArrayInput) {
-  updateMediafilesOrder(payload: $payload)
+mutation updateMediafilesOrder($value: OrderArrayInput!) {
+  updateMediafilesOrder(value: $value)
 }
 
 query GetForms($type: String!) {

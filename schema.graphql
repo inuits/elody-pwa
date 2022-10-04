@@ -413,12 +413,13 @@ enum Entitytyping {
   asset
 }
 
-input UpdateMediaFileNodeInput {
-  id: String!, order: Int!
+input updateOrderNode {
+  id: String!
+  order: Int!
 }
 
 input OrderArrayInput {
-  payload: [UpdateMediaFileNodeInput]
+  value: [updateOrderNode!]!
 }
 
 #Mutations
@@ -439,7 +440,7 @@ type Mutation {
   setMediaPrimaire(entity_id: String!, mediafile_id: String!): String,
   setThumbnailPrimaire(entity_id: String!, mediafile_id: String!): String,
   getAssetsRelationedWithMediafFile(mediaFileId: String!): [Asset]
-  updateMediafilesOrder(payload: OrderArrayInput): String
+  updateMediafilesOrder(value: OrderArrayInput!): String
 }
 
 enum deletePaths {
