@@ -52,7 +52,7 @@
       removeMediafilesFromOrdering(toBeDeleted.value);
       linkMediaFilesToEntity(addSaveCallback);
       addSaveCallback(async () => {
-        await mutate(getDiffArray());
+        await mutate({value: {value: getDiffArray()}});
       });
       for (const callback of saveCallbacks.value) {
         await callback().then(() => {
