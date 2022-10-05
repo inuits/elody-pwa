@@ -124,7 +124,7 @@
       };
 
       const clearFilters = () => {
-        initialFilters.value = clearAdvancedSearchInput(initialFilters.value);
+        initialFilters.value = clearAdvancedSearchInput(initialFilters.value, props.acceptedEntityTypes);
       };
 
       applyFilters();
