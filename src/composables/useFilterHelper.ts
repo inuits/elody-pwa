@@ -59,14 +59,20 @@ export const defaultReturnMinMaxObject = (
   };
 };
 
-export const clearAdvancedSearchInput = (input: FilterInList[]): FilterInList[] => {
+export const clearAdvancedSearchInput = (input: FilterInList[], acceptedEntityTypes: string[]): FilterInList[] => {
   input.forEach((filter: FilterInList, index: number) => {
     switch (filter.input.type) {
       case AdvancedInputType.MinMaxInput:
         input[index] = defaultReturnMinMaxObject(filter.input.key);
         break;
       case AdvancedInputType.MultiSelectInput:
-        input[index] = defaultReturnMultiSelectObject(filter.input.key);
+        // @ts-ignore
+        if (input[index]?.input?.multiSelectInput?.value) {
+          // @ts-ignore
+          if (input[index].input?.multiSelectInput.value !== acceptedEntityTypes) {
+            input[index] = defaultReturnMultiSelectObject(filter.input.key);
+          }
+        }
         break;
       default:
         input[index] = defaultReturnTextObject(filter.input.key);
@@ -74,6 +80,7 @@ export const clearAdvancedSearchInput = (input: FilterInList[]): FilterInList[] 
     }
   });
 
+  console.log('CLEAR: ', input);
   return input;
 };
 
