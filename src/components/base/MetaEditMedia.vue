@@ -19,20 +19,16 @@
 </template>
 
 <script lang="ts">
-import {
-  Form,
-  MediaFileMetadata,
-  PatchMediaFileMetadataMutation,
-  PatchMediaFileMetadataDocument,
-  MetadataAndRelation,
-} from "@/queries";
-import { defineComponent, PropType, watch } from "vue";
+import { PatchMediaFileMetadataDocument } from "@/queries";
+import type { Form, PatchMediaFileMetadataMutation } from "@/queries";
+import { defineComponent, watch } from "vue";
+import type { PropType } from "vue";
 import { useForm, useSubmitForm } from "vee-validate";
-
 import { useMutation } from "@vue/apollo-composable";
 import { useEditMode } from "@/composables/useEdit";
 import MetaEditDataField from "../MetaEditDataField.vue";
-import useFormHelper, { IntialValues } from "@/composables/useFormHelpers";
+import useFormHelper from "@/composables/useFormHelpers";
+import type { IntialValues } from "@/composables/useFormHelpers";
 import useMetaDataHelper from "@/composables/useMetaDataHelper";
 import { useEntityMediafileSelector } from "../EntityImageSelection.vue";
 
@@ -44,7 +40,7 @@ export default defineComponent({
     entityTitle: { type: String, required: true },
   },
   emits: ["update:modelValue"],
-  setup(props, { emit }) {
+  setup(props) {
     const { addSaveCallback } = useEditMode();
     const { mediafileSelectionState } = useEntityMediafileSelector();
     const { buildInitialValues, serialzeFormToInput } = useFormHelper(

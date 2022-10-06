@@ -41,7 +41,7 @@ export default defineComponent({
 
     const { source } = toRefs(props);
 
-    watch(source, (newSrc: source[] | undefined) => {
+    watch(source, (newSrc: unknown[] | undefined) => {
       loading.value = true;
       if (pdfViewer.value && newSrc?.content) {
         pdfjsLib

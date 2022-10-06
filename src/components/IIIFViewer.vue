@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, onMounted, PropType, ref, watch } from "vue";
+import { defineComponent, onMounted, ref, watch } from "vue";
 import OpenSeadragon from "openseadragon";
 import ViewerToolbar from "./ViewerToolbar.vue";
 
@@ -41,7 +41,6 @@ export default defineComponent({
   },
   setup: (props) => {
     const OpenSeadragonDiv = ref<HTMLDivElement | undefined>(undefined);
-    const config: any = inject("config");
     const zoomInDiv = ref<string | undefined>(undefined);
     const zoomOutDiv = ref<string | undefined>(undefined);
     const fullPageButtonDiv = ref<string | undefined>(undefined);

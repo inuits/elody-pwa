@@ -4,8 +4,7 @@
   </div>
 </template>
 <script lang="ts">
-import { MediaFileMetadata } from "@/queries";
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 import MediaInfo from "./MediaInfo.vue";
 
 export default defineComponent({

@@ -24,14 +24,14 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, watch } from "vue";
+import { defineComponent, PropType, ref, watch } from "vue";
 import MetaEdit from "@/components/MetaEdit.vue";
 import MetaView from "@/components/MetaView.vue";
 import { useEditMode } from "@/composables/useEdit";
 import { Form, MetadataAndRelation } from "@/queries";
 
 export default defineComponent({
-  name: "Meta",
+  name: "MetaWindow",
   components: { MetaView, MetaEdit },
   props: {
     metadata: {

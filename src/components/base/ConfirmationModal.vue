@@ -25,7 +25,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent } from "vue";
 import BaseButton from "./BaseButton.vue";
 
 export default defineComponent({

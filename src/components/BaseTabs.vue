@@ -35,7 +35,7 @@ interface TabProps {
 }
 
 export default defineComponent({
-  name: "Tabs",
+  name: "BaseTabs",
   setup(props, { slots }) {
     const state = reactive({
       selectedIndex: 0,

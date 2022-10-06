@@ -22,8 +22,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, computed, ref, watch } from "vue";
-import { Unicons } from "@/types";
+import { defineComponent, computed } from "vue";
+import type { PropType } from "vue";
+import type { Unicons } from "@/types";
 import { debounce } from "ts-debounce";
 export const lableStyle = 'ml-1 text-neutral-700 text-sm"';
 export const inputContainerStyle =

@@ -95,7 +95,7 @@ import { defineComponent, PropType } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { Unicons } from "@/types";
-import { inputContainerStyle, lableStyle } from "./base/InputField.vue";
+import { inputContainerStyle } from "./base/InputField.vue";
 import ListItem from "@/components/ListItem.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 

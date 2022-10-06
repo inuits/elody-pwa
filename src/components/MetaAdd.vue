@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 import BaseButton from "@/components/base/BaseButton.vue";
 import { Unicons } from "@/types";
 

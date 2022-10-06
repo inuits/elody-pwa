@@ -1,5 +1,5 @@
 <template>
-  <Library
+  <BaseLibrary
     :has-simple-search="true"
     :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
     :search-input-type="SearchInputType.SimpleInputtype"
@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts">
-import Library from "@/components/base/Library.vue";
+import BaseLibrary from "@/components/base/BaseLibrary.vue";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import { SearchInputType } from "@/queries";
@@ -33,7 +33,7 @@ export default defineComponent({
   },
   emits: ["addSelection"],
   components: {
-    Library,
+    BaseLibrary,
   },
   setup: (props, { emit }) => {
     const addSelection = (id: string) => {

@@ -2,7 +2,7 @@
   <div class="bg-neutral-20 rounded px-1 py-1 text-sm text-neutral-700">
     <div class="bg-neutral-0 flex flex-row rounded-t-lg px-4 py-2 items-center">
       <div class="p-1 rounded flex justify-center items-center bg-neutral-20">
-        <Icon :name="Unicons.Export.name" height="18" :fill="`blue-500`" />
+        <BaseIcon :name="Unicons.Export.name" height="18" :fill="`blue-500`" />
       </div>
       <div class="my-1 mx-6 w-2/6">
         <span class="text-neutral-100"
@@ -31,10 +31,10 @@
 
       <div class="w-3/6">
         <div v-if="job.status != 'pending'" class="flex flex-row mx-2">
-          <Label :name="state.name" :color="state.color" />
+          <BaseLabel :name="state.name" :color="state.color" />
         </div>
         <div v-if="job.status == 'pending'">
-          <Label :name="'50%'" />
+          <BaseLabel :name="'50%'" />
           <ProgressBar :progress="50" />
         </div>
       </div>
@@ -68,7 +68,7 @@
           v-for="subJob in subJobs.results.slice(0, subjobLimit)"
           :key="subJob.job_id"
         >
-          <JobComp :job="subJob" />
+          <SingleJob :job="subJob" />
         </div>
         <div class="flex w-full justify-center">
           <button
@@ -87,12 +87,12 @@
 <script lang="ts">
 import { computed, defineComponent, onBeforeUpdate, PropType, ref } from "vue";
 import { Unicons } from "@/types";
-import Icon from "@/components/base/Icon.vue";
+import BaseIcon from "@/components/base/BaseIcon.vue";
 import LoadingList from "@/components/base/LoadingList.vue";
 import BaseButton from "@/components/base/BaseButton.vue";
 import ProgressBar from "@/components/base/ProgressBar.vue";
-import Label from "@/components/base/Label.vue";
-import JobComp from "@/components/Job.vue";
+import BaseLabel from "@/components/base/BaseLabel.vue";
+import SingleJob from "@/components/SingleJob.vue";
 import { GetJobDocument, Job } from "@/queries";
 import { useQuery } from "@vue/apollo-composable";
 import useJobHelpers from "@/composables/useJobHelpers";
@@ -101,11 +101,11 @@ import ListContainer from "@/components/ListContainer.vue";
 export default defineComponent({
   name: "ParentJob",
   components: {
-    JobComp,
-    Icon,
+    SingleJob,
+    BaseIcon,
     ProgressBar,
     BaseButton,
-    Label,
+    BaseLabel,
     ListContainer,
     LoadingList,
   },

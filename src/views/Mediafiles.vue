@@ -8,7 +8,7 @@ import { defineComponent } from "vue";
 import MediaFileLibrary from "@/components/MediaFileLibrary.vue";
 
 export default defineComponent({
-  name: "Mediafiles",
+  name: "mediaFiles",
   components: { MediaFileLibrary },
 });
 </script>

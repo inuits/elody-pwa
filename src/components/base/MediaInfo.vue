@@ -18,22 +18,22 @@
       <div v-if="hasPrimaryFunctionality()">
         <div class="label">{{ t("media-info.primaire-media") }}</div>
         <div class="value h-5 w-5">
-          <Icon
+          <BaseIcon
             v-if="mediafileSelectionState.selectedMediafile.is_primary"
             :name="Unicons.Check.name"
           />
-          <Icon v-else :name="Unicons.Cross.name" />
+          <BaseIcon v-else :name="Unicons.Cross.name" />
         </div>
 
         <div class="label">{{ t("media-info.thumbnail") }}</div>
         <div class="value h-5 w-5">
-          <Icon
+          <BaseIcon
             v-if="
               mediafileSelectionState.selectedMediafile.is_primary_thumbnail
             "
             :name="Unicons.Check.name"
           />
-          <Icon v-else :name="Unicons.Cross.name" />
+          <BaseIcon v-else :name="Unicons.Cross.name" />
         </div>
       </div>
     </div>
@@ -46,11 +46,11 @@
           t("media-info.primaire-media")
         }}</span>
         <div class="value h-5 w-5">
-          <Icon
+          <BaseIcon
             v-if="mediafileSelectionState.selectedMediafile.is_primary"
             :name="Unicons.Check.name"
           />
-          <Icon v-else :name="Unicons.Cross.name" />
+          <BaseIcon v-else :name="Unicons.Cross.name" />
         </div>
       </div>
       <BaseButton
@@ -65,13 +65,13 @@
           t("media-info.thumbnail")
         }}</span>
         <div class="value h-5 w-5">
-          <Icon
+          <BaseIcon
             v-if="
               mediafileSelectionState.selectedMediafile.is_primary_thumbnail
             "
             :name="Unicons.Check.name"
           />
-          <Icon v-else :name="Unicons.Cross.name" />
+          <BaseIcon v-else :name="Unicons.Cross.name" />
         </div>
       </div>
       <BaseButton
@@ -104,7 +104,7 @@ import { defineComponent } from "vue";
 import { useEditMode } from "@/composables/useEdit";
 import MetaEditMedia from "@/components/base/MetaEditMedia.vue";
 import { useEntityMediafileSelector } from "../EntityImageSelection.vue";
-import Icon from "@/components/base/Icon.vue";
+import BaseIcon from "@/components/base/BaseIcon.vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { useMutation } from "@vue/apollo-composable";
@@ -115,7 +115,7 @@ const { isEdit, addSaveCallback } = useEditMode();
 
 export default defineComponent({
   name: "MediaInfo",
-  components: { MetaEditMedia, Icon, BaseButton },
+  components: { MetaEditMedia, BaseIcon, BaseButton },
   setup() {
     const { mediafiles } = useMetaDataHelper();
     const { hasPrimaryFunctionality } = useMediaInfoHelper();

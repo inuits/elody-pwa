@@ -68,7 +68,7 @@
       />
     </div>
     <!-- meta is metadata form-->
-    <Meta
+    <MetaWindow
       v-if="isMetaDisplayed"
       :class="
         !loading && mediafileSelectionState.selectedMediafile
@@ -96,7 +96,7 @@
 import { computed, defineComponent, watch, ref, reactive, PropType } from "vue";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import IIIFViewer from "@/components/IIIFViewer.vue";
-import Meta from "@/components/Meta.vue";
+import MetaWindow from "@/components/MetaWindow.vue";
 import {
   GetEntityByIdDocument,
   GetEntityByIdQuery,
@@ -129,7 +129,7 @@ export default defineComponent({
   name: "SingleEntity",
   components: {
     IIIFViewer,
-    Meta,
+    MetaWindow,
     VideoPlayer,
     AudioPlayer,
     // PDFViewer,

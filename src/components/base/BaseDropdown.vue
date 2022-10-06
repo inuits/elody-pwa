@@ -20,11 +20,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUpdated, ref, watch } from "vue";
+import { defineComponent, onUpdated, ref, watch } from "vue";
 import { Unicons } from "@/types";
 
 export default defineComponent({
-  name: "Dropdown",
+  name: "BaseDropdown",
   props: {
     label: { type: String, default: "" },
     options: { type: Array, required: true },

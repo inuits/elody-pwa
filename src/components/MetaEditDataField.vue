@@ -5,7 +5,7 @@
     :label="label === undefined ? fieldKey : label"
     :is-disabled="active === false ? true : false"
   />
-  <Dropdown
+  <BaseDropdown
     v-else
     v-model="value"
     :label="label === undefined ? fieldKey : label"
@@ -15,15 +15,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, PropType, watch } from "vue";
+import { defineComponent, PropType } from "vue";
 import InputField from "@/components/base/InputField.vue";
-import Dropdown from "@/components/base/Dropdown.vue";
+import BaseDropdown from "@/components/base/BaseDropdown.vue";
 import { useField } from "vee-validate";
 import { MetadataFieldOption } from "@/queries";
 
 export default defineComponent({
   name: "MetaEditDataField",
-  components: { InputField, Dropdown },
+  components: { InputField, BaseDropdown },
   props: {
     fieldKey: { type: String, required: true },
     label: {

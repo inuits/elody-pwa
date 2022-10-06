@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, provide, ref } from "vue";
+import { defineComponent } from "vue";
 import { useEditMode } from "@/composables/useEdit";
 import BaseButton from "@/components/base/BaseButton.vue";
 

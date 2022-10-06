@@ -5,7 +5,7 @@
       :class="props.active == true ? 'bg-blue-50' : ''"
       @click="toggleAccordion"
     >
-      <Label
+      <BaseLabel
         :name="props.label"
         :color="props.active == true ? 'blue-50' : 'bg-neutral-10'"
         class="text-neutral-900"
@@ -34,13 +34,13 @@
   </div>
 </template>
 <script>
-import { defineComponent, ref, computed } from "vue";
+import { defineComponent, ref } from "vue";
 import { Unicons } from "@/types";
-import Label from "@/components/base/Label.vue";
+import BaseLabel from "@/components/base/BaseLabel.vue";
 export default defineComponent({
   name: "FilterAccordion",
   components: {
-    Label,
+    BaseLabel,
   },
   props: {
     active: {

@@ -1,27 +1,6 @@
-import { useQuery } from "@vue/apollo-composable";
 // import { GetEnumsByNameDocument } from './queries';
 import { createI18n } from "vue-i18n";
-import type { LocaleMessages, VueMessageType } from "vue-i18n";
-export const getFromObjectArrayByKey = <T>(
-  array: T[],
-  key: string,
-  value: number | string
-): T[] => {
-  const filter = array.filter((obj: T) => {
-    if (typeof obj === "object" && hasOwnProperty(obj, key)) {
-      return obj[key] === value;
-    }
-  });
-
-  return filter;
-};
-
-export const hasOwnProperty = <X extends {}, Y extends PropertyKey>(
-  obj: X,
-  prop: Y
-): obj is X & Record<Y, unknown> => {
-  return obj.hasOwnProperty(prop);
-};
+// import type { LocaleMessages, VueMessageType } from "vue-i18n";
 
 export const asString = (x: string | string[]) => (Array.isArray(x) ? x[0] : x);
 

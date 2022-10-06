@@ -42,7 +42,7 @@ import type { PropType } from "vue";
 export type ModalState = "initial" | "show" | "hide" | "loading";
 
 export default defineComponent({
-  name: "Modal",
+  name: "BaseModal",
   props: {
     modalState: {
       type: String as PropType<ModalState>,
