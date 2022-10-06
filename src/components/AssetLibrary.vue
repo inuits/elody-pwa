@@ -14,7 +14,8 @@
 
 <script lang="ts">
 import Library from "@/components/base/Library.vue";
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
+import type { PropType } from "vue";
 import { SearchInputType } from "@/queries";
 
 export default defineComponent({

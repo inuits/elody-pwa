@@ -20,11 +20,12 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, PropType, ref, watch } from "vue";
+import { defineComponent,ref, watch } from "vue";
+import type { PropType } from "vue"; 
 import MetaEditDataField from "./MetaEditDataField.vue";
 import {
   CreateEntityDocument,
-  CreateEntityMutation,
+  ,
   Entitytyping,
   GetFormsDocument,
 } from "@/queries";

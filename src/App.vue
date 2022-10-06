@@ -1,5 +1,5 @@
 <template>
-  <div id="font-body">
+  <div>
     <the-navigation class="navbar" />
     <div :class="[`h-screen flex flex-col`, `move-by-nav`]">
       <the-header />

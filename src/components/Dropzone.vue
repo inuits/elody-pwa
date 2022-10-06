@@ -110,7 +110,7 @@
         />
       </svg>
 
-      <div class="dz-filename text-blue font-body text-sm mt-3 w-full">
+      <div class="dz-filename text-blue text-sm mt-3 w-full">
         <span
           class="inline-block w-full text-center break-words"
           data-dz-name
