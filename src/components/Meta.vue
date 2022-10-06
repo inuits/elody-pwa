@@ -27,7 +27,7 @@
   import { computed, defineComponent, PropType, ref, watch } from 'vue';
   import MetaEdit from '@/components/MetaEdit.vue';
   import MetaView from '@/components/MetaView.vue';
-  import { useEditMode } from './EditToggle.vue';
+  import { useEditMode } from '@/composables/useEdit';
   import { Form, MetadataAndRelation } from '@/queries';
 
   export default defineComponent({

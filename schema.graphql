@@ -5,12 +5,20 @@ enum ExcludeOrInclude {
   include
 }
 
+enum Permission {
+  canget
+  canput
+  canpatch
+  candelete
+}
+
 interface Entity {
   id: String!
   uuid: String!
   type: String!
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
   form: Form
+  permission: [Permission]
 }
 
 type BaseEntity implements Entity {
@@ -20,6 +28,7 @@ type BaseEntity implements Entity {
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
   media: Media
   form: Form
+  permission: [Permission]
 }
 
 type MediaFileEntity implements Entity {
@@ -30,6 +39,7 @@ type MediaFileEntity implements Entity {
   media: Media
   form: Form
   teaserMetadata: [MetadataAndRelation]
+  permission: [Permission]
 }
 
 type Asset implements Entity {
@@ -41,6 +51,7 @@ type Asset implements Entity {
   teaserMetadata: [MetadataAndRelation]
   title: [MetadataAndRelation]
   form: Form
+  permission: [Permission]
 }
 
 type Story implements Entity {
@@ -52,6 +63,7 @@ type Story implements Entity {
   teaserMetadata: [MetadataAndRelation]
   title: [MetadataAndRelation]
   form: Form
+  permission: [Permission]
 }
 
 type Frame implements Entity {
@@ -61,6 +73,7 @@ type Frame implements Entity {
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
   media: Media
   form: Form
+  permission: [Permission]
 }
 
 type Testimony implements Entity {
@@ -69,6 +82,7 @@ type Testimony implements Entity {
   type: String!
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
   form: Form
+  permission: [Permission]
 }
 
 type boxEntity implements Entity {
@@ -78,6 +92,7 @@ type boxEntity implements Entity {
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
   media: Media
   form: Form
+  permission: [Permission]
 }
 
 type person implements Entity {
@@ -86,6 +101,7 @@ type person implements Entity {
   type: String!
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
   form: Form
+  permission: [Permission]
 }
 
 type SimpleEntity implements Entity {
@@ -95,6 +111,7 @@ type SimpleEntity implements Entity {
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
   media: Media
   form: Form
+  permission: [Permission]
 }
 
 type IntermediateEntity implements Entity {
@@ -104,6 +121,7 @@ type IntermediateEntity implements Entity {
   metadata(keys: [String]!, excludeOrInclude: ExcludeOrInclude!): [MetadataAndRelation]!
   media: Media
   form: Form
+  permission: [Permission]
 }
 
 type RelationMetaData {
@@ -415,7 +433,7 @@ enum Entitytyping {
   asset
 }
 
-input UpdateMediaFileNodeInput {
+input updateOrderNode {
   id: String!
   order: Int!
 }
@@ -438,9 +456,9 @@ type Mutation {
     MediafileId: String!
     MediaFileMetadata: [MediaFileMetadataInput]!
   ): MediaFile
-  uploadFile(id: String!, file: Upload!): String,
-  setMediaPrimaire(entity_id: String!, mediafile_id: String!): String,
-  setThumbnailPrimaire(entity_id: String!, mediafile_id: String!): String,
+  uploadFile(id: String!, file: Upload!): String
+  setMediaPrimaire(entity_id: String!, mediafile_id: String!): String
+  setThumbnailPrimaire(entity_id: String!, mediafile_id: String!): String
   getAssetsRelationedWithMediafFile(mediaFileId: String!): [Asset]
   updateMediafilesOrder(value: OrderArrayInput!): String
 }
