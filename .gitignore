@@ -20,6 +20,7 @@ coverage
 /cypress/screenshots/
 
 /src/queries.ts
+session-vue-3-oidc-library
 
 # Editor directories and files
 .vscode/*
