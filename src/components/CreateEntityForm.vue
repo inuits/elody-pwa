@@ -20,15 +20,15 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent,ref, watch } from "vue";
-import type { PropType } from "vue"; 
+import { defineComponent, ref, watch } from "vue";
+import type { PropType } from "vue";
 import MetaEditDataField from "./MetaEditDataField.vue";
 import {
   CreateEntityDocument,
-  ,
   Entitytyping,
   GetFormsDocument,
 } from "@/queries";
+import type { CreateEntityMutation } from "@/queries";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import BaseButton from "./base/BaseButton.vue";
 import urlSlug from "url-slug";
