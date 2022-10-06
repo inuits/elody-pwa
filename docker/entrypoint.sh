@@ -3,4 +3,4 @@
 set -e
 
 echo "Starting dashboard"
-exec npm run dev
+exec npm run dev-only
