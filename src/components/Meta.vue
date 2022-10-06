@@ -24,39 +24,42 @@
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, PropType, ref, watch } from 'vue';
-  import MetaEdit from '@/components/MetaEdit.vue';
-  import MetaView from '@/components/MetaView.vue';
-  import { useEditMode } from '@/composables/useEdit';
-  import { Form, MetadataAndRelation } from '@/queries';
+import { computed, defineComponent, PropType, ref, watch } from "vue";
+import MetaEdit from "@/components/MetaEdit.vue";
+import MetaView from "@/components/MetaView.vue";
+import { useEditMode } from "@/composables/useEdit";
+import { Form, MetadataAndRelation } from "@/queries";
 
-  export default defineComponent({
-    name: 'Meta',
-    components: { MetaView, MetaEdit },
-    props: {
-      metadata: { type: Array as PropType<MetadataAndRelation[]>, required: true },
-      form: { type: Object as PropType<Form>, required: false },
-      entityTitle: { type: String, required: false, default: undefined },
-      loading: {
-        type: Boolean,
-        default: false,
-      },
+export default defineComponent({
+  name: "Meta",
+  components: { MetaView, MetaEdit },
+  props: {
+    metadata: {
+      type: Array as PropType<MetadataAndRelation[]>,
+      required: true,
     },
-    setup(props) {
-      const { isEdit } = useEditMode();
-      const metadataComputed = ref<MetadataAndRelation[]>(props.metadata);
-
-      watch(
-        () => props.metadata,
-        (value) => {
-          metadataComputed.value = value;
-        },
-      );
-
-      return {
-        isEdit,
-        metadataComputed,
-      };
+    form: { type: Object as PropType<Form>, required: false },
+    entityTitle: { type: String, required: false, default: undefined },
+    loading: {
+      type: Boolean,
+      default: false,
     },
-  });
+  },
+  setup(props) {
+    const { isEdit } = useEditMode();
+    const metadataComputed = ref<MetadataAndRelation[]>(props.metadata);
+
+    watch(
+      () => props.metadata,
+      (value) => {
+        metadataComputed.value = value;
+      }
+    );
+
+    return {
+      isEdit,
+      metadataComputed,
+    };
+  },
+});
 </script>

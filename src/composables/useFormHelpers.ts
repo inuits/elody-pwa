@@ -1,5 +1,5 @@
-import { ref } from 'vue';
-import {
+import { ref } from "vue";
+import type {
   Entity,
   Form,
   Maybe,
@@ -11,10 +11,11 @@ import {
   MetadataOrRelationField,
   MetadataRelation,
   RelationField,
-  RelationMetaData,
-} from '@/queries';
+} from "@/queries";
 
-export const LINKED_ENTITY: string = 'linkedEntity';
+import type { RelationMetaData } from "@/queries";
+
+export const LINKED_ENTITY: string = "linkedEntity";
 export const selectedRelationField = ref<RelationField>();
 
 export type relationValues = {
@@ -34,20 +35,22 @@ const useFormHelper = (form: Form, entityTitle: string) => {
 
   const buildInitialValues = (
     metadata: MetadataAndRelation[],
-    structure: MetadataOrRelationField[] = formStructure,
+    structure: MetadataOrRelationField[] = formStructure
   ) => {
     const intialValues: IntialValues = {};
     let additionalIndex: number = 0;
     if (structure) {
       structure.forEach((field: Maybe<MetadataOrRelationField>) => {
-        if (field && field?.__typename === 'MetadataField') {
-          findFields(field.key, metadata).forEach((metadata: { value: string }) => {
-            intialValues[field.key] = metadata.value;
-          });
-          additionalIndex++;
+        if (field && field?.__typename === "MetadataField") {
+          findFields(field.key, metadata).forEach(
+            (metadata: { value: string }) => {
+              intialValues[field.key] = metadata.value;
+            }
+          );
+          additionalIndex = additionalIndex + 1;
         }
 
-        if (field && field?.__typename === 'RelationField') {
+        if (field && field?.__typename === "RelationField") {
           const relationArray: relationValues[] = [];
           findRelations(field.relationType, metadata).forEach(
             (relationMetaData: MetadataRelation) => {
@@ -61,14 +64,15 @@ const useFormHelper = (form: Form, entityTitle: string) => {
                   label: field.label ? field.label : relationMetaData.key,
                   metadata: buildInitialValues(
                     relationMetaData.metadataOnRelation as MetadataAndRelation[],
-                    field.metadata as MetadataOrRelationField[],
+                    field.metadata as MetadataOrRelationField[]
                   ),
-                  relationType: field.relationType ? field.relationType : '',
+                  relationType: field.relationType ? field.relationType : "",
                 });
               }
-            },
+            }
           );
-          intialValues[field.label ? field.label : field.relationType] = relationArray;
+          intialValues[field.label ? field.label : field.relationType] =
+            relationArray;
         }
       });
     }
@@ -78,30 +82,38 @@ const useFormHelper = (form: Form, entityTitle: string) => {
   //Todo typename `RelationMetaData` not checked properly
   const findFields = (
     key: string,
-    metadata: MetadataAndRelation[],
+    metadata: MetadataAndRelation[]
   ): { value: string }[] => {
     // Special case
-    if (key === 'title') {
+    if (key === "title") {
       return [{ value: title }];
     }
     //Search in metadata
     return metadata?.filter(
-      (element: RelationMetaData | Metadata | MetadataRelation | MediaFileMetadata) => {
+      (
+        element:
+          | RelationMetaData
+          | Metadata
+          | MetadataRelation
+          | MediaFileMetadata
+      ) => {
         return (
           element &&
-          (element.__typename === 'Metadata' ||
-            element.__typename === 'MediaFileMetadata' ||
-            element.__typename === 'RelationMetaData') &&
+          (element.__typename === "Metadata" ||
+            element.__typename === "MediaFileMetadata" ||
+            element.__typename === "RelationMetaData") &&
           element.key === key
         );
-      },
+      }
     );
   };
 
   const findRelations = (type: string, metadata: MetadataAndRelation[]) => {
     return metadata?.filter((element) => {
       return (
-        element && element.__typename === 'MetadataRelation' && element.type === type
+        element &&
+        element.__typename === "MetadataRelation" &&
+        element.type === type
       );
     }) as MetadataRelation[];
   };
@@ -111,26 +123,28 @@ const useFormHelper = (form: Form, entityTitle: string) => {
       Metadata: [],
       relations: [],
     };
-    Object.entries(values).forEach((value: [string, string | relationValues[]]) => {
-      if (typeof value[1] === 'string') {
-        input.Metadata?.push({ key: value[0], value: value[1] });
-      }
-      if (typeof value[1] === 'object') {
-        value[1].forEach((relationValue) => {
-          input.relations?.push({
-            relationType: relationValue.relationType,
-            linkedEntityId: relationValue.key,
-            label: relationValue.label,
-            metadata: Object.entries(relationValue.metadata).map((value) => {
-              if (typeof value[1] === 'string') {
-                return { key: value[0], value: value[1] };
-              }
-              return { key: '', value: '' };
-            }),
+    Object.entries(values).forEach(
+      (value: [string, string | relationValues[]]) => {
+        if (typeof value[1] === "string") {
+          input.Metadata?.push({ key: value[0], value: value[1] });
+        }
+        if (typeof value[1] === "object") {
+          value[1].forEach((relationValue) => {
+            input.relations?.push({
+              relationType: relationValue.relationType,
+              linkedEntityId: relationValue.key,
+              label: relationValue.label,
+              metadata: Object.entries(relationValue.metadata).map((value) => {
+                if (typeof value[1] === "string") {
+                  return { key: value[0], value: value[1] };
+                }
+                return { key: "", value: "" };
+              }),
+            });
           });
-        });
+        }
       }
-    });
+    );
     return input;
   };
 
@@ -140,19 +154,19 @@ const useFormHelper = (form: Form, entityTitle: string) => {
 export const getEmptyMetadatRelationObject = (
   fields: RelationField,
   id: string,
-  linkedEntity: Entity | undefined = undefined,
+  linkedEntity: Entity | undefined = undefined
 ) => {
   const intialValue: relationValues = {
     linkedEntity: linkedEntity,
     key: id,
-    label: fields.label ? fields.label : '',
+    label: fields.label ? fields.label : "",
     metadata: {},
-    relationType: fields.relationType ? fields.relationType : '',
+    relationType: fields.relationType ? fields.relationType : "",
   };
   if (fields.metadata) {
     fields.metadata?.forEach((field: Maybe<MetadataField>) => {
-      if (field?.type === 'boolean') intialValue.metadata[field.key] = 'false';
-      if (field?.type === 'text') intialValue.metadata[field.key] = '';
+      if (field?.type === "boolean") intialValue.metadata[field.key] = "false";
+      if (field?.type === "text") intialValue.metadata[field.key] = "";
     });
   }
   return intialValue;

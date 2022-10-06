@@ -15,47 +15,47 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref, PropType, watch } from 'vue';
-  import InputField from '@/components/base/InputField.vue';
-  import Dropdown from '@/components/base/Dropdown.vue';
-  import { useField } from 'vee-validate';
-  import { MetadataFieldOption } from '@/queries';
+import { defineComponent, ref, PropType, watch } from "vue";
+import InputField from "@/components/base/InputField.vue";
+import Dropdown from "@/components/base/Dropdown.vue";
+import { useField } from "vee-validate";
+import { MetadataFieldOption } from "@/queries";
 
-  export default defineComponent({
-    name: 'MetaEditDataField',
-    components: { InputField, Dropdown },
-    props: {
-      fieldKey: { type: String, required: true },
-      label: {
-        type: String,
-        required: false,
-        default: undefined,
-      },
-      type: { type: String, required: false, default: 'text' },
-      options: {
-        type: Array as PropType<MetadataFieldOption[]>,
-        required: false,
-        default: () => [],
-      },
-      active: { type: Boolean, required: false, default: true },
+export default defineComponent({
+  name: "MetaEditDataField",
+  components: { InputField, Dropdown },
+  props: {
+    fieldKey: { type: String, required: true },
+    label: {
+      type: String,
+      required: false,
+      default: undefined,
     },
-    setup: (props) => {
-      const { value } = useField<string>(props.fieldKey, {});
-
-      const stringifyOption = (input: MetadataFieldOption[]) => {
-        let returnArray: string[] = [];
-
-        input.forEach((metaDataFieldObject: MetadataFieldOption) => {
-          returnArray.push(metaDataFieldObject.value);
-        });
-
-        return returnArray;
-      };
-
-      return {
-        value,
-        stringifyOption,
-      };
+    type: { type: String, required: false, default: "text" },
+    options: {
+      type: Array as PropType<MetadataFieldOption[]>,
+      required: false,
+      default: () => [],
     },
-  });
+    active: { type: Boolean, required: false, default: true },
+  },
+  setup: (props) => {
+    const { value } = useField<string>(props.fieldKey, {});
+
+    const stringifyOption = (input: MetadataFieldOption[]) => {
+      let returnArray: string[] = [];
+
+      input.forEach((metaDataFieldObject: MetadataFieldOption) => {
+        returnArray.push(metaDataFieldObject.value);
+      });
+
+      return returnArray;
+    };
+
+    return {
+      value,
+      stringifyOption,
+    };
+  },
+});
 </script>

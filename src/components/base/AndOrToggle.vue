@@ -19,31 +19,31 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, ref } from 'vue';
+import { defineComponent, ref } from "vue";
 
-  export default defineComponent({
-    name: 'AndOrToggle',
-    props: {
-      texton: {
-        type: String,
-        default: '',
-        required: true,
-      },
-      textoff: {
-        type: String,
-        default: '',
-        required: true,
-      },
+export default defineComponent({
+  name: "AndOrToggle",
+  props: {
+    texton: {
+      type: String,
+      default: "",
+      required: true,
     },
-    emits: ['update:AndOrValue'],
-    setup: (props, { emit }) => {
-      const AndOrState = ref<boolean>(true);
-      const switched = (value: boolean) => {
-        AndOrState.value = value;
-        emit('update:AndOrValue', value);
-      };
+    textoff: {
+      type: String,
+      default: "",
+      required: true,
+    },
+  },
+  emits: ["update:AndOrValue"],
+  setup: (props, { emit }) => {
+    const AndOrState = ref<boolean>(true);
+    const switched = (value: boolean) => {
+      AndOrState.value = value;
+      emit("update:AndOrValue", value);
+    };
 
-      return { switched, AndOrState };
-    },
-  });
+    return { switched, AndOrState };
+  },
+});
 </script>

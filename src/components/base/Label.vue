@@ -9,23 +9,23 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent } from 'vue';
+import { defineComponent } from "vue";
 
-  export default defineComponent({
-    name: 'Label',
-    props: {
-      name: {
-        type: String,
-        required: true,
-      },
-      color: {
-        type: String,
-        default: 'neutral-700',
-        required: false,
-      },
+export default defineComponent({
+  name: "Label",
+  props: {
+    name: {
+      type: String,
+      required: true,
     },
-    setup() {
-      return {};
+    color: {
+      type: String,
+      default: "neutral-700",
+      required: false,
     },
-  });
+  },
+  setup() {
+    return {};
+  },
+});
 </script>

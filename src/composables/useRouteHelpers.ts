@@ -1,11 +1,12 @@
-import { useRoute } from 'vue-router';
-import { computed, ComputedRef } from 'vue';
-import { urlParams } from '@/views';
-import { asString } from '@/helpers';
-import { PaginationInfo } from '@/queries';
-import { useRouter } from 'vue-router';
+import { useRoute } from "vue-router";
+import { computed } from "vue";
+import type { ComputedRef } from "vue";
+import type { urlParams } from "@/views";
+import { asString } from "@/helpers";
+import type { PaginationInfo } from "@/queries";
+import { useRouter } from "vue-router";
 
-export type noId = 'NOID';
+export type noId = "NOID";
 
 const useRouteHelpers = (): {
   getParam: (input: urlParams) => string | noId;
@@ -15,7 +16,9 @@ const useRouteHelpers = (): {
 } => {
   const router = useRouter();
   const route = useRoute();
-  const isSingle = computed<boolean>(() => (route.name === 'SingleEntity' || route.name === 'SingleMediafile'));
+  const isSingle = computed<boolean>(
+    () => route.name === "SingleEntity" || route.name === "SingleMediafile"
+  );
 
   const getParam = (input: urlParams) => {
     const param = useRoute().params[input];
@@ -23,7 +26,7 @@ const useRouteHelpers = (): {
     if (param) {
       return asString(param);
     } else {
-      return 'NOID';
+      return "NOID";
     }
   };
 

@@ -8,29 +8,29 @@
   </div>
 </template>
 <script lang="ts">
-  import { computed, defineComponent } from 'vue';
+import { computed, defineComponent } from "vue";
 
-  export default defineComponent({
-    name: 'ProgressBar',
-    props: {
-      progress: {
-        type: Number,
-        default: 100,
-        required: true,
-      },
-      color: {
-        type: String,
-        default: 'neutral-700',
-      },
+export default defineComponent({
+  name: "ProgressBar",
+  props: {
+    progress: {
+      type: Number,
+      default: 100,
+      required: true,
     },
-    setup(props) {
-      const progressValue = computed(() => {
-        if (props.progress > 100 || props.progress < 0) return 0;
-        else return props.progress;
-      });
-      return {
-        progressValue,
-      };
+    color: {
+      type: String,
+      default: "neutral-700",
     },
-  });
+  },
+  setup(props) {
+    const progressValue = computed(() => {
+      if (props.progress > 100 || props.progress < 0) return 0;
+      else return props.progress;
+    });
+    return {
+      progressValue,
+    };
+  },
+});
 </script>

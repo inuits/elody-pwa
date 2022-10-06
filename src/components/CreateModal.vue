@@ -19,57 +19,57 @@
   </modal>
 </template>
 <script lang="ts">
-  import Dropdown from '@/components/base/Dropdown.vue';
-  import Modal, { ModalState } from '@/components/base/Modal.vue';
-  import { Entitytyping } from '@/queries';
-  import { defineComponent, ref } from 'vue';
-  import CreateEntityForm from './CreateEntityForm.vue';
+import Dropdown from "@/components/base/Dropdown.vue";
+import Modal, { ModalState } from "@/components/base/Modal.vue";
+import { Entitytyping } from "@/queries";
+import { defineComponent, ref } from "vue";
+import CreateEntityForm from "./CreateEntityForm.vue";
 
-  export type CreateModalType = {
-    state: ModalState;
+export type CreateModalType = {
+  state: ModalState;
+};
+
+const createModalState = ref<CreateModalType>({
+  state: "hide",
+});
+
+export const useCreateModal = () => {
+  const updateCreateModal = (CreateModalInput: CreateModalType) => {
+    createModalState.value = CreateModalInput;
   };
 
-  const createModalState = ref<CreateModalType>({
-    state: 'hide',
-  });
+  const closeCreateModal = () => {
+    updateCreateModal({
+      state: "hide",
+    });
+  };
 
-  export const useCreateModal = () => {
-    const updateCreateModal = (CreateModalInput: CreateModalType) => {
-      createModalState.value = CreateModalInput;
-    };
+  const openCreateModal = () => {
+    updateCreateModal({
+      state: "show",
+    });
+  };
 
-    const closeCreateModal = () => {
-      updateCreateModal({
-        state: 'hide',
-      });
-    };
+  return {
+    closeCreateModal,
+    openCreateModal,
+    createModalState,
+  };
+};
 
-    const openCreateModal = () => {
-      updateCreateModal({
-        state: 'show',
-      });
-    };
+export default defineComponent({
+  name: "CreateEntity",
+  components: { CreateEntityForm, Dropdown, Modal },
+  setup() {
+    const { closeCreateModal, createModalState } = useCreateModal();
+    const selected = ref<Entitytyping>(Entitytyping.Story);
 
     return {
+      selected,
+      Entitytyping,
       closeCreateModal,
-      openCreateModal,
       createModalState,
     };
-  };
-
-  export default defineComponent({
-    name: 'CreateEntity',
-    components: { CreateEntityForm, Dropdown, Modal },
-    setup() {
-      const { closeCreateModal, createModalState } = useCreateModal();
-      const selected = ref<Entitytyping>(Entitytyping.Story);
-
-      return {
-        selected,
-        Entitytyping,
-        closeCreateModal,
-        createModalState,
-      };
-    },
-  });
+  },
+});
 </script>

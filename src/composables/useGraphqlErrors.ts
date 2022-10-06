@@ -1,5 +1,5 @@
-import { ErrorResponse } from '@apollo/client/link/error';
-import useDropzoneHelper from '../composables/useDropzoneHelper';
+import type { ErrorResponse } from "@apollo/client/link/error";
+import useDropzoneHelper from "../composables/useDropzoneHelper";
 
 const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
   const checkForUnauthorized = () => {
@@ -26,8 +26,12 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
     const gqlErrors = _errorResponse.graphQLErrors;
     if (gqlErrors) {
       authErrors = gqlErrors.map((graphQLError: any) => {
-        if (graphQLError?.extensions?.response?.status === 409 && graphQLError?.extensions?.response?.body?.includes('Duplicate file')) {
-          const { setDropzoneErrorMessages, increaseFailedCounter } = useDropzoneHelper();
+        if (
+          graphQLError?.extensions?.response?.status === 409 &&
+          graphQLError?.extensions?.response?.body?.includes("Duplicate file")
+        ) {
+          const { setDropzoneErrorMessages, increaseFailedCounter } =
+            useDropzoneHelper();
           setDropzoneErrorMessages(graphQLError.extensions.response.body);
           increaseFailedCounter();
           return true;
@@ -45,11 +49,13 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
           console.log(`Graphql error:`);
           console.log(
             `Status:`,
-            error.extensions?.statusCode ? error.extensions?.statusCode : undefined,
+            error.extensions?.statusCode
+              ? error.extensions?.statusCode
+              : undefined
           );
           console.log(
             `Code:`,
-            error.extensions?.code ? error.extensions?.code : undefined,
+            error.extensions?.code ? error.extensions?.code : undefined
           );
           console.log(`Message:`, error.message);
           console.log(`---`);

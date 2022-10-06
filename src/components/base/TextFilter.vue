@@ -9,49 +9,52 @@
   </div>
 </template>
 <script lang="ts">
-  import { computed, defineComponent, PropType } from 'vue';
-  import InputField from '@/components/base/InputField.vue';
-  import {
-    defaultReturnTextObject,
-    FilterInList,
-  } from '../../composables/useFilterHelper';
-  export default defineComponent({
-    name: 'TextFilter',
-    components: {
-      InputField,
+import { computed, defineComponent, PropType } from "vue";
+import InputField from "@/components/base/InputField.vue";
+import {
+  defaultReturnTextObject,
+  FilterInList,
+} from "../../composables/useFilterHelper";
+export default defineComponent({
+  name: "TextFilter",
+  components: {
+    InputField,
+  },
+  props: {
+    inputValue: {
+      type: Object as PropType<FilterInList>,
+      required: false,
+      default: undefined,
     },
-    props: {
-      inputValue: {
-        type: Object as PropType<FilterInList>,
-        required: false,
-        default: undefined,
-      },
-      filterkey: {
-        type: String,
-        required: true,
-      },
-      placeholderText: {
-        type: String,
-        required: false,
-        default: '',
-      },
+    filterkey: {
+      type: String,
+      required: true,
     },
-    emits: ['update:inputValue'],
-    setup(props, { emit }) {
-      emit('update:inputValue', defaultReturnTextObject(props.filterkey));
+    placeholderText: {
+      type: String,
+      required: false,
+      default: "",
+    },
+  },
+  emits: ["update:inputValue"],
+  setup(props, { emit }) {
+    emit("update:inputValue", defaultReturnTextObject(props.filterkey));
 
-      const inputField = computed<string | undefined | null>({
-        get() {
-          return props.inputValue && props.inputValue.input.textInput
-            ? props.inputValue.input.textInput.value
-            : undefined;
-        },
-        set(value) {
-          emit('update:inputValue', defaultReturnTextObject(props.filterkey, value));
-        },
-      });
+    const inputField = computed<string | undefined | null>({
+      get() {
+        return props.inputValue && props.inputValue.input.textInput
+          ? props.inputValue.input.textInput.value
+          : undefined;
+      },
+      set(value) {
+        emit(
+          "update:inputValue",
+          defaultReturnTextObject(props.filterkey, value)
+        );
+      },
+    });
 
-      return { inputField };
-    },
-  });
+    return { inputField };
+  },
+});
 </script>

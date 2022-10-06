@@ -8,23 +8,23 @@
   </div>
 </template>
 <script lang="ts">
-  import { MediaFileMetadata } from '@/queries';
-  import { defineComponent, PropType } from 'vue';
-  import MediaInfo from './MediaInfo.vue';
+import { MediaFileMetadata } from "@/queries";
+import { defineComponent, PropType } from "vue";
+import MediaInfo from "./MediaInfo.vue";
 
-  export default defineComponent({
-    name: 'AudioPlayer',
-    components: {
-      MediaInfo,
+export default defineComponent({
+  name: "AudioPlayer",
+  components: {
+    MediaInfo,
+  },
+  props: {
+    source: {
+      type: Array as PropType<MediaFileMetadata[]>,
+      required: true,
     },
-    props: {
-      source: {
-        type: Array as PropType<MediaFileMetadata[]>,
-        required: true,
-      },
-    },
-    setup() {
-      return {};
-    },
-  });
+  },
+  setup() {
+    return {};
+  },
+});
 </script>

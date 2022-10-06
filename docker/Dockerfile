@@ -1,5 +1,5 @@
 ### Development stage
-FROM node:14-alpine as development-stage
+FROM node:16-alpine as development-stage
 
 ARG NPM_CONFIG_ALWAYS_AUTH
 ARG NPM_CONFIG_REGISTRY
@@ -11,7 +11,7 @@ ENTRYPOINT ["/entrypoint.sh"]
 COPY docker/entrypoint*.sh /
 COPY .npmrc package*.json ./
 
-RUN npm set progress=false && npm config set depth 0 && npm install && npm cache clean --force
+RUN npm set progress=false && npm config set depth 0 && npm ci 
 
 EXPOSE 8080
 

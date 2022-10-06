@@ -5,27 +5,27 @@
   >
     <span class="text-neutral-0 font-bold"> {{ progress.progress }}% </span>
   </div>
-  <div
-    v-if="progress.status === 'hasError' || progress.status === 'success'"
-  >
+  <div v-if="progress.status === 'hasError' || progress.status === 'success'">
     <span
       class="text-base text-neutral-0 font-light"
       v-show="progress.successFiles > 0"
       >{{ progress.successFiles }} documents successful uploaded</span
     >
-    <span class="text-base text-red-default font-light" v-show="progress.errorFiles > 0"
+    <span
+      class="text-base text-red-default font-light"
+      v-show="progress.errorFiles > 0"
       >{{ progress.errorFiles }} documents failed uploaded</span
     >
   </div>
 </template>
 
 <script lang="ts">
-  import { defineComponent, PropType } from 'vue';
+import { defineComponent, PropType } from "vue";
 
-  export default defineComponent({
-    name: 'DropzoneProgress',
-    props: {
-      progress: { type: Object as PropType<any>, required: true },
-    },
-  });
+export default defineComponent({
+  name: "DropzoneProgress",
+  props: {
+    progress: { type: Object as PropType<any>, required: true },
+  },
+});
 </script>

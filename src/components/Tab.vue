@@ -1,12 +1,12 @@
 <template>
-  <div v-show="isActive" style="height: -webkit-calc(100% - 40px);">
+  <div v-show="isActive" style="height: -webkit-calc(100% - 40px)">
     <slot></slot>
   </div>
 </template>
 
 <script lang="ts">
-  import { ref, watch, onBeforeMount, defineComponent, inject } from 'vue';
-  export default defineComponent({
+import { ref, watch, onBeforeMount, defineComponent, inject } from "vue";
+export default defineComponent({
   name: "Tab",
   setup() {
     const index = ref(0);
@@ -26,7 +26,7 @@
       tabs.count++;
       isActive.value = index.value === tabs.selectedIndex;
     });
-    return {index, isActive};
-  }
+    return { index, isActive };
+  },
 });
 </script>

@@ -36,7 +36,10 @@
             label="Items"
           />
           <Dropdown
-            v-if="result?.Entities.count > 1 && queryVariables.searchValue.value != ''"
+            v-if="
+              result?.Entities.count > 1 &&
+              queryVariables.searchValue.value != ''
+            "
             v-model="queryVariables.sort"
             :options="['Title', 'object_number']"
             label="Sort"
@@ -66,7 +69,11 @@
             ]"
           >
             <template #actions>
-              <BaseButton :loading="true" class="ml-2" :icon="Unicons.Eye.name" />
+              <BaseButton
+                :loading="true"
+                class="ml-2"
+                :icon="Unicons.Eye.name"
+              />
             </template>
           </ListItem>
         </div>
@@ -80,7 +87,10 @@
             :thumb-icon="getThumbnail(entity)"
             @click="
               !enableSelection &&
-                router.push({ name: listItemRouteName, params: { id: entity.id } })
+                router.push({
+                  name: listItemRouteName,
+                  params: { id: entity.id },
+                })
             "
           >
             <template #actions>
@@ -96,12 +106,17 @@
                 :loading="loading"
                 class="ml-2"
                 :icon="Unicons.Eye.name"
-                @click="router.push({ name: listItemRouteName, params: { id: entity.id } })"
+                @click="
+                  router.push({
+                    name: listItemRouteName,
+                    params: { id: entity.id },
+                  })
+                "
               />
             </template>
           </ListItem>
           <div v-if="result?.Entities.results.length === 0" class="p-4">
-            {{ t('search.noresult') }}
+            {{ t("search.noresult") }}
           </div>
         </div>
       </ListContainer>
@@ -110,132 +125,134 @@
 </template>
 
 <script lang="ts">
-  import Pagination, { paginationLimits } from '@/components/base/Pagination.vue';
-  import { defineComponent, watch, reactive, ref, PropType } from 'vue';
-  import ListContainer from '@/components/ListContainer.vue';
-  import BaseButton from '@/components/base/BaseButton.vue';
-  import InputField from '@/components/base/InputField.vue';
-  import Dropdown from '@/components/base/Dropdown.vue';
-  import { useQuery } from '@vue/apollo-composable';
-  import ListItem from '@/components/ListItem.vue';
-  import { useRouter } from 'vue-router';
-  import { Unicons } from '@/types';
-  import {
-    GetEntitiesDocument,
-    SearchInputType,
-    GetEntitiesQueryVariables,
-    Maybe,
-  } from '@/queries';
-  import FilterSideBar from '@/components/FilterSideBar.vue';
-  import IconToggle from '@/components/base/IconToggle.vue';
-  import { useI18n } from 'vue-i18n';
-import useThumbnailHelper from '@/composables/useThumbnailHelper';
+import Pagination, { paginationLimits } from "@/components/base/Pagination.vue";
+import { defineComponent, watch, reactive, ref, PropType } from "vue";
+import ListContainer from "@/components/ListContainer.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
+import InputField from "@/components/base/InputField.vue";
+import Dropdown from "@/components/base/Dropdown.vue";
+import { useQuery } from "@vue/apollo-composable";
+import ListItem from "@/components/ListItem.vue";
+import { useRouter } from "vue-router";
+import { Unicons } from "@/types";
+import {
+  GetEntitiesDocument,
+  SearchInputType,
+  GetEntitiesQueryVariables,
+  Maybe,
+} from "@/queries";
+import FilterSideBar from "@/components/FilterSideBar.vue";
+import IconToggle from "@/components/base/IconToggle.vue";
+import { useI18n } from "vue-i18n";
+import useThumbnailHelper from "@/composables/useThumbnailHelper";
 
-  export default defineComponent({
-    name: 'Library',
-    components: {
-      ListContainer,
-      ListItem,
-      Pagination,
-      BaseButton,
-      Dropdown,
-      FilterSideBar,
-      IconToggle,
-      InputField
+export default defineComponent({
+  name: "Library",
+  components: {
+    ListContainer,
+    ListItem,
+    Pagination,
+    BaseButton,
+    Dropdown,
+    FilterSideBar,
+    IconToggle,
+    InputField,
+  },
+  props: {
+    advancedFiltersChoice: {
+      type: String,
+      default: "entityFilters",
     },
-    props: {
-      advancedFiltersChoice: {
-        type: String,
-        default: 'entityFilters'
-      },
-      searchPlaceholder: {
-        type: String,
-        default: 'Search...'
-      },
-      listItemRouteName: {
-        type: String,
-        required: true,
-      },
-      hasSimpleSearch: Boolean,
-      searchInputTypeOnDrawer: {
-        type: String as PropType<Maybe<SearchInputType>>,
-      },
-      searchInputType: {
-        type: String as PropType<Maybe<SearchInputType>>,
-      },
-      enableSelection: {
-        type: Boolean,
-        default: false,
-      },
-      acceptedEntityTypes: {
-        type: Array as PropType<string[]>,
-        default: () => [],
-        required: false,
-      },
+    searchPlaceholder: {
+      type: String,
+      default: "Search...",
     },
-    emits: ['addSelection'],
-    setup: (props, { emit }) => {
-      const { getThumbnail } = useThumbnailHelper();
-      const { t } = useI18n();
-      const router = useRouter();
-      const paginationInfo = reactive({
-        limit: 20,
-        skip: 1,
-      });
-
-      const isDrawerHiding = ref(props.acceptedEntityTypes.length === 0 ? true : false);
-      
-      if (props.hasSimpleSearch === false) {
-        isDrawerHiding.value = false;
-      }
-
-      const setFilters = (value: any) => {
-        queryVariables.advancedSearchValue = value;
-        queryVariables.limit = paginationInfo.limit;
-        queryVariables.skip = paginationInfo.skip;
-      };
-
-      const queryVariables = reactive<GetEntitiesQueryVariables>({
-        limit: paginationInfo.limit,
-        skip: paginationInfo.skip,
-        searchValue: {
-          value: '',
-          isAsc: false,
-          key: 'title',
-        },
-        advancedSearchValue: [],
-        searchInputType: isDrawerHiding.value
-          ? props.searchInputType
-          : props.searchInputTypeOnDrawer
-      });
-
-      watch(isDrawerHiding, () => {
-        queryVariables.searchInputType = isDrawerHiding.value
-          ? props.searchInputType
-          : props.searchInputTypeOnDrawer;
-      });
-
-      const { result, loading } = useQuery(GetEntitiesDocument, queryVariables, {
-        notifyOnNetworkStatusChange: true,
-      });
-
-      const addSelection = (entity: any) => {
-        emit('addSelection', entity);
-      };
-
-      return {
-        paginationLimits,
-        queryVariables,
-        addSelection,
-        isDrawerHiding,
-        loading,
-        Unicons,
-        router,
-        result,
-        t,
-        setFilters,
-        getThumbnail
-      };
+    listItemRouteName: {
+      type: String,
+      required: true,
     },
-  });
+    hasSimpleSearch: Boolean,
+    searchInputTypeOnDrawer: {
+      type: String as PropType<Maybe<SearchInputType>>,
+    },
+    searchInputType: {
+      type: String as PropType<Maybe<SearchInputType>>,
+    },
+    enableSelection: {
+      type: Boolean,
+      default: false,
+    },
+    acceptedEntityTypes: {
+      type: Array as PropType<string[]>,
+      default: () => [],
+      required: false,
+    },
+  },
+  emits: ["addSelection"],
+  setup: (props, { emit }) => {
+    const { getThumbnail } = useThumbnailHelper();
+    const { t } = useI18n();
+    const router = useRouter();
+    const paginationInfo = reactive({
+      limit: 20,
+      skip: 1,
+    });
+
+    const isDrawerHiding = ref(
+      props.acceptedEntityTypes.length === 0 ? true : false
+    );
+
+    if (props.hasSimpleSearch === false) {
+      isDrawerHiding.value = false;
+    }
+
+    const setFilters = (value: any) => {
+      queryVariables.advancedSearchValue = value;
+      queryVariables.limit = paginationInfo.limit;
+      queryVariables.skip = paginationInfo.skip;
+    };
+
+    const queryVariables = reactive<GetEntitiesQueryVariables>({
+      limit: paginationInfo.limit,
+      skip: paginationInfo.skip,
+      searchValue: {
+        value: "",
+        isAsc: false,
+        key: "title",
+      },
+      advancedSearchValue: [],
+      searchInputType: isDrawerHiding.value
+        ? props.searchInputType
+        : props.searchInputTypeOnDrawer,
+    });
+
+    watch(isDrawerHiding, () => {
+      queryVariables.searchInputType = isDrawerHiding.value
+        ? props.searchInputType
+        : props.searchInputTypeOnDrawer;
+    });
+
+    const { result, loading } = useQuery(GetEntitiesDocument, queryVariables, {
+      notifyOnNetworkStatusChange: true,
+    });
+
+    const addSelection = (entity: any) => {
+      emit("addSelection", entity);
+    };
+
+    return {
+      paginationLimits,
+      queryVariables,
+      addSelection,
+      isDrawerHiding,
+      loading,
+      Unicons,
+      router,
+      result,
+      t,
+      setFilters,
+      getThumbnail,
+    };
+  },
+});
 </script>

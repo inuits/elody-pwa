@@ -6,7 +6,11 @@
         :key="index"
         @click="selectTab(index)"
         class="text-center w-full cursor-pointer py-2"
-        :class="index === selectedIndex ? 'bg-neutral-800 text-neutral-0' : 'text-neutral-800 bg-neutral-0'"
+        :class="
+          index === selectedIndex
+            ? 'bg-neutral-800 text-neutral-0'
+            : 'text-neutral-800 bg-neutral-0'
+        "
       >
         {{ tab.props.title }}
       </div>
@@ -16,7 +20,15 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, reactive, provide, onMounted, onBeforeMount, toRefs, VNode} from "vue";
+import {
+  defineComponent,
+  reactive,
+  provide,
+  onMounted,
+  onBeforeMount,
+  toRefs,
+  VNode,
+} from "vue";
 
 interface TabProps {
   title?: string;
@@ -24,11 +36,11 @@ interface TabProps {
 
 export default defineComponent({
   name: "Tabs",
-  setup(props, {slots}) {
+  setup(props, { slots }) {
     const state = reactive({
       selectedIndex: 0,
       tabs: [] as VNode<TabProps>[],
-      count: 0
+      count: 0,
     });
 
     provide("TabsProvider", state);
@@ -39,7 +51,9 @@ export default defineComponent({
 
     onBeforeMount(() => {
       if (slots.default) {
-        state.tabs = slots.default().filter((child: any) => child.type.name === "Tab");
+        state.tabs = slots
+          .default()
+          .filter((child: any) => child.type.name === "Tab");
       }
     });
 
@@ -47,7 +61,7 @@ export default defineComponent({
       selectTab(0);
     });
 
-    return {...toRefs(state), selectTab};
-  }
+    return { ...toRefs(state), selectTab };
+  },
 });
 </script>

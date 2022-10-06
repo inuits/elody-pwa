@@ -1,23 +1,23 @@
-import { Job } from '@/queries';
+import type { Job } from "@/queries";
 
 export type State = {
-  name: 'failed' | 'pending' | 'finished';
-  color: 'red-default' | 'neutral-700' | 'green-default';
+  name: "failed" | "pending" | "finished";
+  color: "red-default" | "neutral-700" | "green-default";
   message?: string;
 };
 
 export enum Status {
-  Finished = 'finished',
-  Failed = 'failed',
-  Pending = 'pending',
+  Finished = "finished",
+  Failed = "failed",
+  Pending = "pending",
 }
 
 export const jobTypeLabels: Record<string, string> = {
-  'csv import': 'csv_import',
-  'csv row': 'csv_row_import',
-  'csv read': 'csv_read',
-  'upload file': 'upload_file',
-  'upload transcode': 'upload_transcode',
+  "csv import": "csv_import",
+  "csv row": "csv_row_import",
+  "csv read": "csv_read",
+  "upload file": "upload_file",
+  "upload transcode": "upload_transcode",
 };
 
 const useJobHelpers = (): {
@@ -30,20 +30,20 @@ const useJobHelpers = (): {
       case Status.Finished:
         return {
           name: Status.Finished,
-          color: 'green-default',
+          color: "green-default",
           message: `finished`,
         } as State;
       case Status.Failed:
         return {
           name: Status.Failed,
-          color: 'red-default',
-          message: 'failed',
+          color: "red-default",
+          message: "failed",
         } as State;
       default:
         return {
           name: Status.Pending,
-          color: 'neutral-700',
-          message: 'pending',
+          color: "neutral-700",
+          message: "pending",
         } as State;
     }
   };

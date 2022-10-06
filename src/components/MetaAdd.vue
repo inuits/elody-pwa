@@ -13,29 +13,29 @@
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, ref } from 'vue';
-  import BaseButton from '@/components/base/BaseButton.vue';
-  import { Unicons } from '@/types';
+import { computed, defineComponent, ref } from "vue";
+import BaseButton from "@/components/base/BaseButton.vue";
+import { Unicons } from "@/types";
 
-  export default defineComponent({
-    name: 'MetaAdd',
-    components: { BaseButton },
-    props: {
-      label: {
-        type: String,
-        required: false,
-      },
+export default defineComponent({
+  name: "MetaAdd",
+  components: { BaseButton },
+  props: {
+    label: {
+      type: String,
+      required: false,
     },
-    emits: ['addMetadata'],
-    setup(props, { emit }) {
-      const add = () => {
-        emit('addMetadata');
-      };
+  },
+  emits: ["addMetadata"],
+  setup(props, { emit }) {
+    const add = () => {
+      emit("addMetadata");
+    };
 
-      return {
-        add,
-        Unicons,
-      };
-    },
-  });
+    return {
+      add,
+      Unicons,
+    };
+  },
+});
 </script>

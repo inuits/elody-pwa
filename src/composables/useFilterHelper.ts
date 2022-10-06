@@ -1,13 +1,14 @@
-import { AdvancedInputType, FilterInput, MinMaxInput, MultiSelectInput } from '@/queries';
+import { AdvancedInputType } from "@/queries";
+import type { FilterInput, MinMaxInput, MultiSelectInput } from "@/queries";
 
 export type FilterInList = { isActive: boolean; input: FilterInput };
 
 export const defaultReturnTextObject = (
   key: string,
-  value: string | undefined | null = undefined,
+  value: string | undefined | null = undefined
 ): FilterInList => {
   return {
-    isActive: value && value != '' ? true : false,
+    isActive: value && value != "" ? true : false,
     input: {
       type: AdvancedInputType.TextInput,
       key,
@@ -18,7 +19,7 @@ export const defaultReturnTextObject = (
 
 export const defaultReturnMultiSelectObject = (
   key: string,
-  value: MultiSelectInput = { value: [], AndOrValue: true },
+  value: MultiSelectInput = { value: [], AndOrValue: true }
 ): FilterInList => {
   const filterObj: FilterInList = {
     isActive: value.value && value.value.length !== 0 ? true : false,
@@ -47,7 +48,7 @@ const checkIfMinMaxActive = (value: MinMaxInput | undefined): boolean => {
 
 export const defaultReturnMinMaxObject = (
   key: string,
-  value: MinMaxInput = { min: undefined, max: undefined },
+  value: MinMaxInput = { min: undefined, max: undefined }
 ) => {
   return {
     isActive: checkIfMinMaxActive(value),
@@ -59,7 +60,10 @@ export const defaultReturnMinMaxObject = (
   };
 };
 
-export const clearAdvancedSearchInput = (input: FilterInList[], acceptedEntityTypes: string[]): FilterInList[] => {
+export const clearAdvancedSearchInput = (
+  input: FilterInList[],
+  acceptedEntityTypes: string[]
+): FilterInList[] => {
   input.forEach((filter: FilterInList, index: number) => {
     switch (filter.input.type) {
       case AdvancedInputType.MinMaxInput:
@@ -69,7 +73,9 @@ export const clearAdvancedSearchInput = (input: FilterInList[], acceptedEntityTy
         // @ts-ignore
         if (input[index]?.input?.multiSelectInput?.value) {
           // @ts-ignore
-          if (input[index].input?.multiSelectInput.value !== acceptedEntityTypes) {
+          if (
+            input[index].input?.multiSelectInput.value !== acceptedEntityTypes
+          ) {
             input[index] = defaultReturnMultiSelectObject(filter.input.key);
           }
         }
@@ -80,7 +86,7 @@ export const clearAdvancedSearchInput = (input: FilterInList[], acceptedEntityTy
     }
   });
 
-  console.log('CLEAR: ', input);
+  console.log("CLEAR: ", input);
   return input;
 };
 

@@ -1,9 +1,10 @@
-import { Permission } from '@/queries';
+import { Permission } from "@/queries";
 
 const usePermissions = () => {
   const canEdit = (permissions: Permission[]) => {
     return (
-      permissions.includes(Permission.Canput) && permissions.includes(Permission.Canpatch)
+      permissions.includes(Permission.Canput) &&
+      permissions.includes(Permission.Canpatch)
     );
   };
 

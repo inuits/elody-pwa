@@ -19,79 +19,82 @@
   </div>
 </template>
 <script lang="ts">
-  import { computed, defineComponent, PropType } from 'vue';
-  import MinMaxField from '@/components/base/MinMaxField.vue';
-  import { defaultReturnMinMaxObject, FilterInList } from '@/composables/useFilterHelper';
+import { computed, defineComponent, PropType } from "vue";
+import MinMaxField from "@/components/base/MinMaxField.vue";
+import {
+  defaultReturnMinMaxObject,
+  FilterInList,
+} from "@/composables/useFilterHelper";
 
-  export default defineComponent({
-    name: 'MinmaxFilter',
-    components: {
-      MinMaxField,
+export default defineComponent({
+  name: "MinmaxFilter",
+  components: {
+    MinMaxField,
+  },
+  props: {
+    minmaxValue: {
+      type: Object as PropType<FilterInList>,
+      required: false,
+      default: undefined,
     },
-    props: {
-      minmaxValue: {
-        type: Object as PropType<FilterInList>,
-        required: false,
-        default: undefined,
-      },
-      filterkey: {
-        type: [String],
-        required: true,
-      },
-      isRelation: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
+    filterkey: {
+      type: [String],
+      required: true,
     },
-    emits: ['update:minmaxValue'],
-    setup(props, { emit }) {
-      emit('update:minmaxValue', defaultReturnMinMaxObject(props.filterkey));
-
-      const inputFieldMin = computed<number | undefined>({
-        get() {
-          return props.minmaxValue &&
-            props.minmaxValue.input.minMaxInput &&
-            props.minmaxValue.input.minMaxInput.min
-            ? props.minmaxValue.input.minMaxInput.min
-            : undefined;
-        },
-        set(value) {
-          emit(
-            'update:minmaxValue',
-            defaultReturnMinMaxObject(props.filterkey, {
-              min: value,
-              max: inputFieldMax.value,
-              isRelation: props.isRelation,
-            }),
-          );
-        },
-      });
-
-      const inputFieldMax = computed<number | undefined>({
-        get() {
-          return props.minmaxValue &&
-            props.minmaxValue.input.minMaxInput &&
-            props.minmaxValue.input.minMaxInput.max
-            ? props.minmaxValue.input.minMaxInput.max
-            : undefined;
-        },
-        set(value) {
-          emit(
-            'update:minmaxValue',
-            defaultReturnMinMaxObject(props.filterkey, {
-              min: inputFieldMin.value,
-              max: value,
-              isRelation: props.isRelation,
-            }),
-          );
-        },
-      });
-
-      return { inputFieldMin, inputFieldMax };
+    isRelation: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
-  });
+  },
+  emits: ["update:minmaxValue"],
+  setup(props, { emit }) {
+    emit("update:minmaxValue", defaultReturnMinMaxObject(props.filterkey));
+
+    const inputFieldMin = computed<number | undefined>({
+      get() {
+        return props.minmaxValue &&
+          props.minmaxValue.input.minMaxInput &&
+          props.minmaxValue.input.minMaxInput.min
+          ? props.minmaxValue.input.minMaxInput.min
+          : undefined;
+      },
+      set(value) {
+        emit(
+          "update:minmaxValue",
+          defaultReturnMinMaxObject(props.filterkey, {
+            min: value,
+            max: inputFieldMax.value,
+            isRelation: props.isRelation,
+          })
+        );
+      },
+    });
+
+    const inputFieldMax = computed<number | undefined>({
+      get() {
+        return props.minmaxValue &&
+          props.minmaxValue.input.minMaxInput &&
+          props.minmaxValue.input.minMaxInput.max
+          ? props.minmaxValue.input.minMaxInput.max
+          : undefined;
+      },
+      set(value) {
+        emit(
+          "update:minmaxValue",
+          defaultReturnMinMaxObject(props.filterkey, {
+            min: inputFieldMin.value,
+            max: value,
+            isRelation: props.isRelation,
+          })
+        );
+      },
+    });
+
+    return { inputFieldMin, inputFieldMax };
+  },
+});
 </script>
 
-/* function isInteger(value: MinMaxInput|undefined) { throw new Error('Function not
-implemented.'); } */
+/* function isInteger(value: MinMaxInput|undefined) { throw new Error('Function
+not implemented.'); } */

@@ -16,7 +16,7 @@
         </div>
       </div>
       <div v-if="hasPrimaryFunctionality()">
-        <div class="label">{{ t('media-info.primaire-media') }}</div>
+        <div class="label">{{ t("media-info.primaire-media") }}</div>
         <div class="value h-5 w-5">
           <Icon
             v-if="mediafileSelectionState.selectedMediafile.is_primary"
@@ -25,10 +25,12 @@
           <Icon v-else :name="Unicons.Cross.name" />
         </div>
 
-        <div class="label">{{ t('media-info.thumbnail') }}</div>
+        <div class="label">{{ t("media-info.thumbnail") }}</div>
         <div class="value h-5 w-5">
           <Icon
-            v-if="mediafileSelectionState.selectedMediafile.is_primary_thumbnail"
+            v-if="
+              mediafileSelectionState.selectedMediafile.is_primary_thumbnail
+            "
             :name="Unicons.Check.name"
           />
           <Icon v-else :name="Unicons.Cross.name" />
@@ -41,7 +43,7 @@
     >
       <div class="flex justify-between">
         <span class="ml-1 text-neutral-700 text-sm">{{
-          t('media-info.primaire-media')
+          t("media-info.primaire-media")
         }}</span>
         <div class="value h-5 w-5">
           <Icon
@@ -59,10 +61,14 @@
         @click="setMediaPrimaire(mediafileSelectionState.selectedMediafile)"
       />
       <div class="flex justify-between">
-        <span class="ml-1 text-neutral-700 text-sm">{{ t('media-info.thumbnail') }}</span>
+        <span class="ml-1 text-neutral-700 text-sm">{{
+          t("media-info.thumbnail")
+        }}</span>
         <div class="value h-5 w-5">
           <Icon
-            v-if="mediafileSelectionState.selectedMediafile.is_primary_thumbnail"
+            v-if="
+              mediafileSelectionState.selectedMediafile.is_primary_thumbnail
+            "
             :name="Unicons.Check.name"
           />
           <Icon v-else :name="Unicons.Cross.name" />
@@ -76,114 +82,117 @@
         @click="setMediaThumbnail(mediafileSelectionState.selectedMediafile)"
       />
     </div>
-    <meta-edit-media v-if="isEdit && form?.Form" :form="form?.Form" :entity-title="''" />
+    <meta-edit-media
+      v-if="isEdit && form?.Form"
+      :form="form?.Form"
+      :entity-title="''"
+    />
   </div>
 </template>
 <script lang="ts">
-  import {
-    GetFormsDocument,
-    MediaFile,
-    SetMediaPrimaireDocument,
-    SetMediaPrimaireMutation,
-    SetThumbnailPrimaireDocument,
-    SetThumbnailPrimaireMutation,
-  } from '@/queries';
-  import { useQuery } from '@vue/apollo-composable';
-  import BaseButton from '../base/BaseButton.vue';
-  import { defineComponent } from 'vue';
-  import { useEditMode } from '@/composables/useEdit';
-  import MetaEditMedia from '@/components/base/MetaEditMedia.vue';
-  import { useEntityMediafileSelector } from '../EntityImageSelection.vue';
-  import Icon from '@/components/base/Icon.vue';
-  import { Unicons } from '@/types';
-  import { useI18n } from 'vue-i18n';
-  import { useMutation } from '@vue/apollo-composable';
-  import { useRoute } from 'vue-router';
-  import useMetaDataHelper from '@/composables/useMetaDataHelper';
-  import useMediaInfoHelper from '@/composables/useMediaInfoHelper';
-  const { isEdit, addSaveCallback } = useEditMode();
+import {
+  GetFormsDocument,
+  MediaFile,
+  SetMediaPrimaireDocument,
+  SetMediaPrimaireMutation,
+  SetThumbnailPrimaireDocument,
+  SetThumbnailPrimaireMutation,
+} from "@/queries";
+import { useQuery } from "@vue/apollo-composable";
+import BaseButton from "../base/BaseButton.vue";
+import { defineComponent } from "vue";
+import { useEditMode } from "@/composables/useEdit";
+import MetaEditMedia from "@/components/base/MetaEditMedia.vue";
+import { useEntityMediafileSelector } from "../EntityImageSelection.vue";
+import Icon from "@/components/base/Icon.vue";
+import { Unicons } from "@/types";
+import { useI18n } from "vue-i18n";
+import { useMutation } from "@vue/apollo-composable";
+import { useRoute } from "vue-router";
+import useMetaDataHelper from "@/composables/useMetaDataHelper";
+import useMediaInfoHelper from "@/composables/useMediaInfoHelper";
+const { isEdit, addSaveCallback } = useEditMode();
 
-  export default defineComponent({
-    name: 'MediaInfo',
-    components: { MetaEditMedia, Icon, BaseButton },
-    setup() {
-      const { mediafiles } = useMetaDataHelper();
-      const { hasPrimaryFunctionality } = useMediaInfoHelper();
-      const { t } = useI18n();
-      const route = useRoute();
-      const { mediafileSelectionState } = useEntityMediafileSelector();
-      const { result: form } = useQuery(GetFormsDocument, {
-        type: 'media',
+export default defineComponent({
+  name: "MediaInfo",
+  components: { MetaEditMedia, Icon, BaseButton },
+  setup() {
+    const { mediafiles } = useMetaDataHelper();
+    const { hasPrimaryFunctionality } = useMediaInfoHelper();
+    const { t } = useI18n();
+    const route = useRoute();
+    const { mediafileSelectionState } = useEntityMediafileSelector();
+    const { result: form } = useQuery(GetFormsDocument, {
+      type: "media",
+    });
+
+    const { mutate: mutatePrimary } = useMutation<SetMediaPrimaireMutation>(
+      SetMediaPrimaireDocument
+    );
+
+    const { mutate: mutateThumbnail } =
+      useMutation<SetThumbnailPrimaireMutation>(SetThumbnailPrimaireDocument);
+
+    const setMediaPrimaireFalse = () => {
+      mediafiles.value.forEach((mediafile: MediaFile) => {
+        mediafile.is_primary = false;
       });
+    };
 
-      const { mutate: mutatePrimary } = useMutation<SetMediaPrimaireMutation>(
-        SetMediaPrimaireDocument,
-      );
+    const setIsThumbnailPrimaireFalse = () => {
+      mediafiles.value.forEach((mediafile: MediaFile) => {
+        mediafile.is_primary_thumbnail = false;
+      });
+    };
 
-      const { mutate: mutateThumbnail } = useMutation<SetThumbnailPrimaireMutation>(
-        SetThumbnailPrimaireDocument,
-      );
-
-      const setMediaPrimaireFalse = () => {
-        mediafiles.value.forEach((mediafile: MediaFile) => {
-          mediafile.is_primary = false;
+    const setMediaPrimaire = async (input: any) => {
+      setMediaPrimaireFalse();
+      input.is_primary = true;
+      addSaveCallback(async () => {
+        await mutatePrimary({
+          entity_id: route.params["id"],
+          mediafile_id: input._id.replace("mediafiles/", ""),
         });
-      };
+      });
+    };
 
-      const setIsThumbnailPrimaireFalse = () => {
-        mediafiles.value.forEach((mediafile: MediaFile) => {
-          mediafile.is_primary_thumbnail = false;
+    const setMediaThumbnail = async (input: any) => {
+      setIsThumbnailPrimaireFalse();
+      input.is_primary_thumbnail = true;
+      addSaveCallback(async () => {
+        await mutateThumbnail({
+          entity_id: route.params["id"],
+          mediafile_id: input._id.replace("mediafiles/", ""),
         });
-      };
+      });
+    };
 
-      const setMediaPrimaire = async (input: any) => {
-        setMediaPrimaireFalse();
-        input.is_primary = true;
-        addSaveCallback(async () => {
-          await mutatePrimary({
-            entity_id: route.params['id'],
-            mediafile_id: input._id.replace('mediafiles/', ''),
-          });
-        });
-      };
-
-      const setMediaThumbnail = async (input: any) => {
-        setIsThumbnailPrimaireFalse();
-        input.is_primary_thumbnail = true;
-        addSaveCallback(async () => {
-          await mutateThumbnail({
-            entity_id: route.params['id'],
-            mediafile_id: input._id.replace('mediafiles/', ''),
-          });
-        });
-      };
-
-      return {
-        isEdit,
-        form,
-        mediafileSelectionState,
-        Unicons,
-        setMediaPrimaire,
-        setMediaThumbnail,
-        hasPrimaryFunctionality,
-        t,
-      };
-    },
-  });
+    return {
+      isEdit,
+      form,
+      mediafileSelectionState,
+      Unicons,
+      setMediaPrimaire,
+      setMediaThumbnail,
+      hasPrimaryFunctionality,
+      t,
+    };
+  },
+});
 </script>
 <style lang="postcss" scoped>
-  .label {
-    @apply rounded font-body text-xs text-neutral-60;
-  }
-  .value {
-    @apply rounded font-body text-sm text-neutral-700 mt-0.5;
-  }
-  .label.loading,
-  .value.loading {
-    @apply bg-neutral-20 text-neutral-20;
-  }
+.label {
+  @apply rounded font-body text-xs text-neutral-60;
+}
+.value {
+  @apply rounded font-body text-sm text-neutral-700 mt-0.5;
+}
+.label.loading,
+.value.loading {
+  @apply bg-neutral-20 text-neutral-20;
+}
 
-  .metainfo {
-    bottom: 1rem;
-  }
+.metainfo {
+  bottom: 1rem;
+}
 </style>
