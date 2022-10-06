@@ -2,9 +2,9 @@
   "name": "dams",
   "version": "0.0.0",
   "scripts": {
-    "dev": "run-p generate dev-only",
+    "dev": "run-s generate dev-only",
     "dev-only": "vite",
-    "build": "run-p generate build-only",
+    "build": "run-s generate build-only",
     "preview": "vite preview --port 4173",
     "test:unit": "vitest --environment jsdom",
     "build-only": "vite build",
