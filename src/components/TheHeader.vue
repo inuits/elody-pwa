@@ -38,12 +38,12 @@ import { useEditMode } from "@/composables/useEdit";
 
 type titleTypes = "routerTitle" | "entityTitle";
 
-type pageTitle = {
+type PageTitle = {
   routerTitle: string;
   entityTitle: string;
 };
 
-const pageTitle = ref<pageTitle>({
+const pageTitle = ref<PageTitle>({
   routerTitle: "",
   entityTitle: "",
 });
@@ -61,7 +61,7 @@ export const usePageTitle = () => {
     next();
   });
 
-  router.afterEach((to, _from, _failure) => {
+  router.afterEach((to) => {
     updatePageTitle(to.meta.title as string);
   });
 
@@ -79,7 +79,7 @@ export default defineComponent({
     const { pageTitle } = usePageTitle();
     const route = useRoute();
 
-    const { editMode, disableEditMode } = useEditMode();
+    const { editMode } = useEditMode();
 
     return {
       route,

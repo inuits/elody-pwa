@@ -9,8 +9,8 @@
         @change="$emit('update:checked', $event.target.checked)"
       />
       <div class="dot"></div>
-      <Icon :name="iconOff" class="iconOff" />
-      <Icon :name="iconOn" class="iconOn" />
+      <BaseIcon :name="iconOff" class="iconOff" />
+      <BaseIcon :name="iconOn" class="iconOn" />
     </div>
     <div v-if="label" class="ml-3 text-gray-700 font-medium">{{ label }}</div>
   </label>
@@ -19,11 +19,11 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import { Unicons } from "@/types";
-import Icon from "@/components/base/Icon.vue";
+import BaseIcon from "@/components/base/BaseIcon.vue";
 
 export default defineComponent({
   name: "IconToggle",
-  components: { Icon },
+  components: { BaseIcon },
   inheritAttrs: false,
   props: {
     label: { type: String, default: "" },

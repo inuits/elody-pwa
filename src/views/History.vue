@@ -10,16 +10,19 @@
         :bg-color="'neutral-20'"
       />
       <div class="my-2 flex flex-row justify-left">
-        <Dropdown v-model="queryVariables.filters.type" :options="jobTypes" />
+        <BaseDropdown
+          v-model="queryVariables.filters.type"
+          :options="jobTypes"
+        />
       </div>
       <div class="my-2 flex flex-row justify-left">
-        <Dropdown
+        <BaseDropdown
           v-model="queryVariables.pagination.limit"
           :options="paginationLimits"
         />
       </div>
       <div class="flex-grow"></div>
-      <Pagination
+      <BasePagination
         v-if="jobs.count > 0"
         v-model:skip="queryVariables.pagination.skip"
         v-model:limit="queryVariables.pagination.limit"
@@ -39,22 +42,15 @@
 <script lang="ts">
 import { GetJobsDocument } from "@/queries";
 import { useQuery } from "@vue/apollo-composable";
-import {
-  computed,
-  defineComponent,
-  ref,
-  watch,
-  reactive,
-  onMounted,
-} from "vue";
+import { computed, defineComponent, ref, watch, reactive } from "vue";
 import ParentJob from "@/components/ParentJob.vue";
-import Dropdown from "@/components/base/Dropdown.vue";
+import BaseDropdown from "@/components/base/BaseDropdown.vue";
 import InputField from "@/components/base/InputField.vue";
-
-import Pagination, {
-  PaginationInfo,
+import BasePagination from "@/components/base/BasePagination.vue";
+import type {
   paginationLimits,
-} from "@/components/base/Pagination.vue";
+  PaginationInfo,
+} from "@/components/base/BasePagination.vue";
 import useJobHelpers, { jobTypeLabels } from "@/composables/useJobHelpers";
 import ListContainer from "@/components/ListContainer.vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
@@ -70,8 +66,14 @@ type QueryVariables = {
 };
 
 export default defineComponent({
-  name: "History",
-  components: { ParentJob, Dropdown, Pagination, InputField, ListContainer },
+  name: "HistoryView",
+  components: {
+    ParentJob,
+    BaseDropdown,
+    BasePagination,
+    InputField,
+    ListContainer,
+  },
   setup() {
     const jobhelper = useJobHelpers();
     const jobTypes = jobhelper.getJobTypes();

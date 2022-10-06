@@ -121,15 +121,16 @@
 </template>
 
 <script lang="ts">
-import { PostMediaFileDocument, PostMediaFileMutation } from "@/queries";
+import { PostMediaFileDocument } from "@/queries";
+import type { PostMediaFileMutation } from "@/queries";
 import useDropzoneHelper from "../composables/useDropzoneHelper";
 import { onMounted, ref, defineComponent } from "vue";
 import { useMutation } from "@vue/apollo-composable";
 import Dropzone from "dropzone";
 
 export default defineComponent({
-  name: "Dropzone",
-  setup(props, { emit }) {
+  name: "DropZone",
+  setup() {
     const {
       myDropzone,
       isUploading,
@@ -166,11 +167,11 @@ export default defineComponent({
           }
         };
 
-        myDropzone.value.on("removedfile", (value: any) => {
+        myDropzone.value.on("removedfile", () => {
           updateFileCount();
         });
 
-        myDropzone.value.on("addedfile", (value: any) => {
+        myDropzone.value.on("addedfile", () => {
           clearDropzoneCounters();
           clearDropzoneErrorMessages();
           updateFileCount();

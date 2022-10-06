@@ -29,13 +29,13 @@
           v-show="acceptedEntityTypes.length === 0"
           class="pl-4 my-2 flex flex-row justify-left"
         >
-          <Dropdown
+          <BaseDropdown
             v-if="result?.Entities.count > 0"
             v-model="queryVariables.limit"
             :options="paginationLimits"
             label="Items"
           />
-          <Dropdown
+          <BaseDropdown
             v-if="
               result?.Entities.count > 1 &&
               queryVariables.searchValue.value != ''
@@ -46,7 +46,7 @@
           />
         </div>
         <div class="flex-grow"></div>
-        <Pagination
+        <BasePagination
           v-if="result?.Entities.count > 0"
           v-model:skip="queryVariables.skip"
           v-model:limit="queryVariables.limit"
@@ -125,35 +125,34 @@
 </template>
 
 <script lang="ts">
-import Pagination, { paginationLimits } from "@/components/base/Pagination.vue";
-import { defineComponent, watch, reactive, ref, PropType } from "vue";
+import BasePagination, {
+  paginationLimits,
+} from "@/components/base/BasePagination.vue";
+import { defineComponent, watch, reactive, ref } from "vue";
+import type { PropType } from "vue";
 import ListContainer from "@/components/ListContainer.vue";
 import BaseButton from "@/components/base/BaseButton.vue";
 import InputField from "@/components/base/InputField.vue";
-import Dropdown from "@/components/base/Dropdown.vue";
+import BaseDropdown from "@/components/base/BaseDropdown.vue";
 import { useQuery } from "@vue/apollo-composable";
 import ListItem from "@/components/ListItem.vue";
 import { useRouter } from "vue-router";
 import { Unicons } from "@/types";
-import {
-  GetEntitiesDocument,
-  SearchInputType,
-  GetEntitiesQueryVariables,
-  Maybe,
-} from "@/queries";
+import { GetEntitiesDocument, SearchInputType } from "@/queries";
+import type { GetEntitiesQueryVariables, Maybe } from "@/queries";
 import FilterSideBar from "@/components/FilterSideBar.vue";
 import IconToggle from "@/components/base/IconToggle.vue";
 import { useI18n } from "vue-i18n";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 
 export default defineComponent({
-  name: "Library",
+  name: "BaseLibrary",
   components: {
     ListContainer,
     ListItem,
-    Pagination,
+    BasePagination,
     BaseButton,
-    Dropdown,
+    BaseDropdown,
     FilterSideBar,
     IconToggle,
     InputField,

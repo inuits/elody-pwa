@@ -7,7 +7,7 @@
 <script lang="ts">
 import { ref, watch, onBeforeMount, defineComponent, inject } from "vue";
 export default defineComponent({
-  name: "Tab",
+  name: "BaseTab",
   setup() {
     const index = ref(0);
     const isActive = ref(false);

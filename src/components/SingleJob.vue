@@ -3,10 +3,10 @@
     class="px-4 py-2 flex flex-row bg-neutral-0 rounded my-2 mx-4 items-center text-neutral-700"
   >
     <div class="p-2 rounded flex justify-center items-center bg-neutral-20">
-      <Icon :name="Unicons.Image.name" height="16" :fill="`blue-500`" />
+      <BaseIcon :name="Unicons.Image.name" height="16" :fill="`blue-500`" />
     </div>
     <p class="w-2/6 mx-4 flex items-center">{{ job.job_info }}</p>
-    <Label :name="state.name" :color="state.color" />
+    <BaseLabel :name="state.name" :color="state.color" />
     <div class="flex-grow p-10">
       {{ job.error_message ? job.error_message : "" }}
     </div>
@@ -25,15 +25,15 @@
 import { defineComponent, PropType } from "vue";
 import { useRouter } from "vue-router";
 import { Unicons } from "@/types";
-import Icon from "@/components/base/Icon.vue";
+import BaseIcon from "@/components/base/BaseIcon.vue";
 import BaseButton from "@/components/base/BaseButton.vue";
-import Label from "@/components/base/Label.vue";
+import BaseLabel from "@/components/base/BaseLabel.vue";
 import { Job } from "@/queries";
 import useJobHelpers from "@/composables/useJobHelpers";
 
 export default defineComponent({
-  name: "Job",
-  components: { Icon, BaseButton, Label },
+  name: "SingleJob",
+  components: { BaseIcon, BaseButton, BaseLabel },
   props: {
     job: {
       type: Object as PropType<Job>,

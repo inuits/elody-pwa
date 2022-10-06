@@ -1,5 +1,5 @@
 <template>
-  <modal
+  <BaseModal
     :large="true"
     :scroll="false"
     :modal-state="uploadModalState.state"
@@ -10,35 +10,36 @@
         v-if="modalToOpen === modalChoices.IMPORT"
         :directories="result"
       />
-      <tabs v-if="modalToOpen === modalChoices.DROPZONE">
-        <tab title="Upload files">
+      <BaseTabs v-if="modalToOpen === modalChoices.DROPZONE">
+        <BaseTab title="Upload files">
           <div class="p-3 h-full">
             <upload-modal-dropzone
               v-if="modalToOpen === modalChoices.DROPZONE"
             />
           </div>
-        </tab>
-        <tab title="Select file">
+        </BaseTab>
+        <BaseTab title="Select file">
           <div class="p-3 h-full">
             <MediaFileLibrary
               :enable-selection="true"
               @add-selection="addSelection"
             />
           </div>
-        </tab>
-      </tabs>
+        </BaseTab>
+      </BaseTabs>
     </div>
-  </modal>
+  </BaseModal>
 </template>
 <script lang="ts">
-import Modal, { ModalState } from "./base/Modal.vue";
+import BaseModal from "./base/BaseModal.vue";
+import type { ModalState } from "./base/BaseModal.vue";
 import { defineComponent, ref, watch } from "vue";
 import UploadModalImport from "./UploadModalImport.vue";
 import UploadModalDropzone from "./UploadModalDropzone.vue";
 import { useQuery } from "@vue/apollo-composable";
 import { GetDirectoriesDocument } from "@/queries";
-import Tabs from "./Tabs.vue";
-import Tab from "./Tab.vue";
+import BaseTabs from "./BaseTabs.vue";
+import BaseTab from "./BaseTab.vue";
 import MediaFileLibrary from "@/components/MediaFileLibrary.vue";
 import useMetaDataHelper from "@/composables/useMetaDataHelper";
 import useMediaAssetLinkHelper from "@/composables/useMediaAssetLinkHelper";
@@ -88,11 +89,11 @@ export const useUploadModal = () => {
 export default defineComponent({
   name: "UploadModal",
   components: {
-    Modal,
+    BaseModal,
     UploadModalImport,
     UploadModalDropzone,
-    Tabs,
-    Tab,
+    BaseTabs,
+    BaseTab,
     MediaFileLibrary,
   },
   setup() {

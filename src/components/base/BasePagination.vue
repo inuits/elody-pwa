@@ -40,7 +40,6 @@
 <script lang="ts">
 import { defineComponent, computed, reactive } from "vue";
 import { Unicons } from "@/types";
-import useRouteHelpers from "@/composables/useRouteHelpers";
 
 export type PaginationInfo = {
   limit: number;
@@ -50,7 +49,7 @@ export type PaginationInfo = {
 export const paginationLimits = [5, 10, 15, 20];
 
 export default defineComponent({
-  name: "Pagination",
+  name: "BasePagination",
   props: {
     loading: { type: Boolean, default: false },
     limit: { type: Number, default: 20 },

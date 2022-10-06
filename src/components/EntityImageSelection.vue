@@ -92,14 +92,7 @@
   </div>
 </template>
 <script lang="ts">
-import {
-  defineComponent,
-  onMounted,
-  PropType,
-  ref,
-  watch,
-  reactive,
-} from "vue";
+import { defineComponent, onMounted, PropType, ref, reactive } from "vue";
 import { useMutation } from "@vue/apollo-composable";
 import {
   MediaFile,
@@ -155,15 +148,14 @@ export default defineComponent({
       default: false,
     },
   },
-  setup(props, { emit }) {
+  setup(props) {
     const { selectedFiles } = useDropzoneHelper();
     const { mediafiles } = useMetaDataHelper();
     const { updateSelectedEntityMediafile } = useEntityMediafileSelector();
     const { isMediaFileInLinkList, removeMediaFileFromLinkList } =
       useMediaAssetLinkHelper();
     const { removeFromMetaDataPatchList } = useMetaDataHelper();
-    const { openUploadModal, uploadModalState, modalChoices } =
-      useUploadModal();
+    const { openUploadModal, modalChoices } = useUploadModal();
     const selectImage = (mediafile: MediaFile) => {
       updateSelectedEntityMediafile(mediafile);
     };
@@ -174,7 +166,7 @@ export default defineComponent({
 
     const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 
-    const addToSaveCallback = (id: string, arrayKey: string) => {
+    const addToSaveCallback = (id: string) => {
       const parsedId = id.replace("mediafiles/", "");
       removeFromMetaDataPatchList(parsedId);
       toBeDeleted.value.push(id);

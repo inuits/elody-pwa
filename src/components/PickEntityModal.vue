@@ -1,5 +1,5 @@
 <template>
-  <modal
+  <BaseModal
     :large="true"
     :scroll="false"
     :modal-state="pickEntityModalState.state"
@@ -22,14 +22,15 @@
         @add-selection="addItem($event)"
       />
     </div>
-  </modal>
+  </BaseModal>
 </template>
 <script lang="ts">
-import Modal, { ModalState } from "./base/Modal.vue";
+import BaseModal from "./base/BaseModal.vue";
+import type { ModalState } from "./base/BaseModal.vue";
 import { defineComponent, ref } from "vue";
 import AssetLibrary from "@/components/AssetLibrary.vue";
 import MediaFileLibrary from "@/components/MediaFileLibrary.vue";
-import { Entity } from "@/queries";
+import type { Entity } from "@/queries";
 
 export type PickEntityModalType = {
   state: ModalState;
@@ -43,7 +44,7 @@ const pickEntityModalState = ref<PickEntityModalType>({
   acceptedEntityTypes: [],
 });
 
-export const usePickEntityModal = (cb?: (_value: Entity) => void) => {
+export const usePickEntityModal = () => {
   const updatePickEntityModal = (uploadModalInput: PickEntityModalType) => {
     pickEntityModalState.value = uploadModalInput;
   };
@@ -81,7 +82,7 @@ export const usePickEntityModal = (cb?: (_value: Entity) => void) => {
 export default defineComponent({
   name: "PickEntityModal",
   components: {
-    Modal,
+    BaseModal,
     AssetLibrary,
     MediaFileLibrary,
   },

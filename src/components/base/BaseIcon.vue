@@ -4,7 +4,7 @@
     xmlns="http://www.w3.org/2000/svg"
     :viewBox.camel="viewBox"
     v-html="icon"
-  />
+  ></svg>
 </template>
 
 <script lang="ts">
@@ -13,7 +13,7 @@ import { Unicon } from "vue-unicons";
 import { Unicons } from "@/types";
 
 export default defineComponent({
-  name: "Unicon",
+  name: "BaseIcon",
   props: {
     name: { type: String as PropType<keyof Unicons>, required: true },
     iconStyle: { type: String, default: "line" },

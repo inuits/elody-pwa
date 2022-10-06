@@ -46,17 +46,18 @@ const start = async () => {
     const errorHandler = useGraphqlErrors(error);
     errorHandler.logFormattedErrors();
     if (errorHandler.checkForDuplicateFileUpload() === true) {
-      new Promise(async (resolve) => {
+      new Promise((resolve) => {
         resolve;
       });
     }
 
     if (errorHandler.checkForUnauthorized() === true) {
-      new Promise(async (resolve, reject) => {
-        await fetch("/api/logout");
-        auth.resetAuthProperties();
-        auth.redirectToLogin(router.currentRoute?.value.fullPath);
-        resolve;
+      new Promise((resolve) => {
+        fetch("/api/logout").then(() => {
+          auth.resetAuthProperties();
+          auth.redirectToLogin(router.currentRoute?.value.fullPath);
+          resolve;
+        });
       });
     }
   });

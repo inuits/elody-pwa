@@ -1,5 +1,5 @@
 <template>
-  <modal
+  <base-modal
     :scroll="true"
     :modal-state="createModalState.state"
     @hide-modal="closeCreateModal"
@@ -7,7 +7,7 @@
     <div class="bg-neutral-0 w-full">
       <div class="p-6 pb-0">
         <h1>Create Entity</h1>
-        <Dropdown
+        <BaseDropdown
           v-model="selected"
           :options="Object.values(Entitytyping)"
           label="Type"
@@ -16,11 +16,12 @@
       </div>
       <CreateEntityForm v-if="selected" :entity-type="selected" />
     </div>
-  </modal>
+  </base-modal>
 </template>
 <script lang="ts">
-import Dropdown from "@/components/base/Dropdown.vue";
-import Modal, { ModalState } from "@/components/base/Modal.vue";
+import BaseDropdown from "@/components/base/BaseDropdown.vue";
+import BaseModal from "@/components/base/BaseModal.vue";
+import type { ModalState } from "@/components/base/BaseModal.vue";
 import { Entitytyping } from "@/queries";
 import { defineComponent, ref } from "vue";
 import CreateEntityForm from "./CreateEntityForm.vue";
@@ -59,7 +60,7 @@ export const useCreateModal = () => {
 
 export default defineComponent({
   name: "CreateEntity",
-  components: { CreateEntityForm, Dropdown, Modal },
+  components: { CreateEntityForm, BaseDropdown, BaseModal },
   setup() {
     const { closeCreateModal, createModalState } = useCreateModal();
     const selected = ref<Entitytyping>(Entitytyping.Story);
