@@ -182,10 +182,10 @@ export default defineComponent({
 </script>
 <style lang="postcss" scoped>
 .label {
-  @apply rounded font-body text-xs text-neutral-60;
+  @apply rounded  text-xs text-neutral-60;
 }
 .value {
-  @apply rounded font-body text-sm text-neutral-700 mt-0.5;
+  @apply rounded  text-sm text-neutral-700 mt-0.5;
 }
 .label.loading,
 .value.loading {

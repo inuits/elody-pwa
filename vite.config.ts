@@ -25,4 +25,9 @@ export default defineConfig({
       usePolling: true,
     },
   },
+  build: {
+    rollupOptions: {
+      external: ["pdfjs-dist/types/src/display/api"],
+    },
+  },
 });
