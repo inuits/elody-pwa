@@ -2,13 +2,15 @@
   "name": "dams",
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite",
-    "build": "run-p build-only",
+    "dev": "run-p generate dev-only",
+    "dev-only": "vite",
+    "build": "run-p generate build-only",
     "preview": "vite preview --port 4173",
     "test:unit": "vitest --environment jsdom",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "generate": "graphql-codegen"
   },
   "dependencies": {
     "@apollo/client": "^3.7.0",
@@ -41,6 +43,11 @@
     "vuex": "^4.0.2"
   },
   "devDependencies": {
+    "@graphql-codegen/add": "^3.2.1",
+    "@graphql-codegen/cli": "^2.13.5",
+    "@graphql-codegen/typed-document-node": "^2.3.3",
+    "@graphql-codegen/typescript": "^2.7.3",
+    "@graphql-codegen/typescript-operations": "^2.5.3",
     "@rushstack/eslint-patch": "^1.1.4",
     "@types/jsdom": "^20.0.0",
     "@types/node": "^16.11.56",

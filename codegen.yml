@@ -1,0 +1,16 @@
+schema: schema.graphql
+documents: src/queries.graphql
+generates:
+  src/queries.ts:
+    plugins:
+      - add:
+          content: |
+            /* eslint-disable */
+            // THIS FILE IS GENERATED, DO NOT EDIT!
+      - typescript
+      - typescript-operations
+      - typed-document-node
+    config:
+      preResolveTypes: true
+      scalars:
+        Void: void
