@@ -10,8 +10,10 @@ WORKDIR /app
 ENTRYPOINT ["/entrypoint.sh"]
 COPY docker/entrypoint*.sh /
 COPY .npmrc package*.json ./
+COPY codegen.yml schema.graphql ./
+COPY src/queries.graphql ./src/queries.graphql
 
-RUN npm set progress=false && npm config set depth 0 && npm ci 
+RUN npm set progress=false && npm config set depth 0 && npm ci && npm run generate 
 
 EXPOSE 8080
 
