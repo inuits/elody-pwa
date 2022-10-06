@@ -23,77 +23,83 @@
 </template>
 
 <script lang="ts">
-  import {
-    Form,
-    MetadataAndRelation,
-    ReplaceRelationsAndMetaDataDocument,
-    ReplaceRelationsAndMetaDataMutation,
-  } from '@/queries';
-  import { defineComponent, Prop, PropType, ref } from 'vue';
-  import { useForm, useSubmitForm } from 'vee-validate';
+import {
+  Form,
+  MetadataAndRelation,
+  ReplaceRelationsAndMetaDataDocument,
+  ReplaceRelationsAndMetaDataMutation,
+} from "@/queries";
+import { defineComponent, Prop, PropType, ref } from "vue";
+import { useForm, useSubmitForm } from "vee-validate";
 
-  import { useMutation } from '@vue/apollo-composable';
-  import useRouteHelpers from '@/composables/useRouteHelpers';
-  import { useEditMode } from '@/composables/useEdit';
-  import MetaEditRelationField from './MetaEditRelationField.vue';
-  import MetaEditDataField from './MetaEditDataField.vue';
-  import useFormHelper, {
-    IntialValues,
-    relationValues,
-  } from '@/composables/useFormHelpers';
+import { useMutation } from "@vue/apollo-composable";
+import useRouteHelpers from "@/composables/useRouteHelpers";
+import { useEditMode } from "@/composables/useEdit";
+import MetaEditRelationField from "./MetaEditRelationField.vue";
+import MetaEditDataField from "./MetaEditDataField.vue";
+import useFormHelper, {
+  IntialValues,
+  relationValues,
+} from "@/composables/useFormHelpers";
 
-  export default defineComponent({
-    name: 'MetaEdit',
-    components: { MetaEditDataField, MetaEditRelationField },
-    props: {
-      entityTitle: { type: String, required: true },
-      modelValue: { type: Array as PropType<MetadataAndRelation[]>, required: true },
-      form: { type: Object as PropType<Form>, required: true },
+export default defineComponent({
+  name: "MetaEdit",
+  components: { MetaEditDataField, MetaEditRelationField },
+  props: {
+    entityTitle: { type: String, required: true },
+    modelValue: {
+      type: Array as PropType<MetadataAndRelation[]>,
+      required: true,
     },
-    emits: ['update:modelValue'],
-    setup(props, { emit }) {
-      const { getParam } = useRouteHelpers();
-      const id = getParam('id');
-      const { addSaveCallback } = useEditMode();
-      const { buildInitialValues, serialzeFormToInput } = useFormHelper(
-        props.form,
-        props.entityTitle,
+    form: { type: Object as PropType<Form>, required: true },
+  },
+  emits: ["update:modelValue"],
+  setup(props, { emit }) {
+    const { getParam } = useRouteHelpers();
+    const id = getParam("id");
+    const { addSaveCallback } = useEditMode();
+    const { buildInitialValues, serialzeFormToInput } = useFormHelper(
+      props.form,
+      props.entityTitle
+    );
+    const { mutate, onDone } = useMutation<ReplaceRelationsAndMetaDataMutation>(
+      ReplaceRelationsAndMetaDataDocument
+    );
+
+    onDone((value) => {
+      emit(
+        "update:modelValue",
+        value.data?.replaceRelationsAndMetaData?.metadata
       );
-      const { mutate, onDone } = useMutation<ReplaceRelationsAndMetaDataMutation>(
-        ReplaceRelationsAndMetaDataDocument,
-      );
+    });
 
-      onDone((value) => {
-        emit('update:modelValue', value.data?.replaceRelationsAndMetaData?.metadata);
-      });
+    const { values } = useForm<IntialValues>({
+      initialValues: buildInitialValues(props.modelValue),
+    });
 
-      const { values } = useForm<IntialValues>({
-        initialValues: buildInitialValues(props.modelValue),
-      });
-
-      addSaveCallback(
-        useSubmitForm<IntialValues>(async (values) => {
-          //SEARCH ARRAYS AND COMBINED
-          props.form.fields.forEach((field: any) => {
-            if (values[field.label]) {
-              if (
-                Array.isArray(values.components) &&
-                Array.isArray(values[field.label])
-              ) {
-                const arr: any = [...values[field.label]];
-                values.components = arr;
-                delete values[field.label];
-              }
+    addSaveCallback(
+      useSubmitForm<IntialValues>(async (values) => {
+        //SEARCH ARRAYS AND COMBINED
+        props.form.fields.forEach((field: any) => {
+          if (values[field.label]) {
+            if (
+              Array.isArray(values.components) &&
+              Array.isArray(values[field.label])
+            ) {
+              const arr: any = [...values[field.label]];
+              values.components = arr;
+              delete values[field.label];
             }
-          });
-          await mutate({ id, form: serialzeFormToInput(values) });
-        }),
-        'first',
-      );
+          }
+        });
+        await mutate({ id, form: serialzeFormToInput(values) });
+      }),
+      "first"
+    );
 
-      return {
-        values,
-      };
-    },
-  });
+    return {
+      values,
+    };
+  },
+});
 </script>

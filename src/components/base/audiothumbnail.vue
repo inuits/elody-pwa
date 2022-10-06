@@ -34,7 +34,7 @@
   </svg>
 </template>
 <script lang="ts">
-  export default {
-    name: 'AudioThumbnail',
-  };
+export default {
+  name: "AudioThumbnail",
+};
 </script>

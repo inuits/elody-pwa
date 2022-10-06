@@ -64,7 +64,10 @@
     <div v-if="!isCollapsed && subJobs && subJobs.results">
       <ListContainer>
         <loading-list v-if="loading" />
-        <div v-for="subJob in subJobs.results.slice(0, subjobLimit)" :key="subJob.job_id">
+        <div
+          v-for="subJob in subJobs.results.slice(0, subjobLimit)"
+          :key="subJob.job_id"
+        >
           <JobComp :job="subJob" />
         </div>
         <div class="flex w-full justify-center">
@@ -82,100 +85,102 @@
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, onBeforeUpdate, PropType, ref } from 'vue';
-  import { Unicons } from '@/types';
-  import Icon from '@/components/base/Icon.vue';
-  import LoadingList from '@/components/base/LoadingList.vue';
-  import BaseButton from '@/components/base/BaseButton.vue';
-  import ProgressBar from '@/components/base/ProgressBar.vue';
-  import Label from '@/components/base/Label.vue';
-  import JobComp from '@/components/Job.vue';
-  import { GetJobDocument, Job } from '@/queries';
-  import { useQuery } from '@vue/apollo-composable';
-  import useJobHelpers from '@/composables/useJobHelpers';
-  import ListContainer from '@/components/ListContainer.vue';
+import { computed, defineComponent, onBeforeUpdate, PropType, ref } from "vue";
+import { Unicons } from "@/types";
+import Icon from "@/components/base/Icon.vue";
+import LoadingList from "@/components/base/LoadingList.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
+import ProgressBar from "@/components/base/ProgressBar.vue";
+import Label from "@/components/base/Label.vue";
+import JobComp from "@/components/Job.vue";
+import { GetJobDocument, Job } from "@/queries";
+import { useQuery } from "@vue/apollo-composable";
+import useJobHelpers from "@/composables/useJobHelpers";
+import ListContainer from "@/components/ListContainer.vue";
 
-  export default defineComponent({
-    name: 'ParentJob',
-    components: {
-      JobComp,
-      Icon,
-      ProgressBar,
-      BaseButton,
-      Label,
-      ListContainer,
-      LoadingList,
+export default defineComponent({
+  name: "ParentJob",
+  components: {
+    JobComp,
+    Icon,
+    ProgressBar,
+    BaseButton,
+    Label,
+    ListContainer,
+    LoadingList,
+  },
+  props: {
+    job: {
+      type: Object as PropType<Job>,
+      required: true,
     },
-    props: {
-      job: {
-        type: Object as PropType<Job>,
-        required: true,
+  },
+  setup(props) {
+    const jobHelper = useJobHelpers();
+    const state = jobHelper.getJobStatus(props.job);
+    const isCollapsed = ref<Boolean>(true);
+    const fetchingSubJobs = ref<Boolean>(false);
+    const queryOptions = ref({
+      enabled: false,
+    });
+    const { result, refetch, loading } = useQuery(
+      GetJobDocument,
+      {
+        id: props.job._key || "",
       },
-    },
-    setup(props) {
-      const jobHelper = useJobHelpers();
-      const state = jobHelper.getJobStatus(props.job);
-      const isCollapsed = ref<Boolean>(true);
-      const fetchingSubJobs = ref<Boolean>(false);
-      const queryOptions = ref({
-        enabled: false,
-      });
-      const { result, refetch, loading } = useQuery(
-        GetJobDocument,
-        {
-          id: props.job._key || '',
-        },
-        queryOptions,
-      );
-      const subjobLimit = ref<number>(10);
+      queryOptions
+    );
+    const subjobLimit = ref<number>(10);
 
-      const hasSubJobs = computed<boolean>(() =>
-        props.job.amount_of_jobs && props.job.amount_of_jobs > 1 ? true : false,
-      );
+    const hasSubJobs = computed<boolean>(() =>
+      props.job.amount_of_jobs && props.job.amount_of_jobs > 1 ? true : false
+    );
 
-      const toggleCollapse = () => {
-        isCollapsed.value = !isCollapsed.value;
-        if (!isCollapsed.value && hasSubJobs.value) {
-          fetchingSubJobs.value = true;
-          subjobLimit.value = 10;
-          updateSubJobs();
-        }
+    const toggleCollapse = () => {
+      isCollapsed.value = !isCollapsed.value;
+      if (!isCollapsed.value && hasSubJobs.value) {
+        fetchingSubJobs.value = true;
+        subjobLimit.value = 10;
+        updateSubJobs();
+      }
+    };
+    const jobStartDate = jobHelper.getFormatedDate(
+      props.job.start_time as string
+    );
+    const updateSubJobs = () => {
+      queryOptions.value = {
+        enabled: true,
       };
-      const jobStartDate = jobHelper.getFormatedDate(props.job.start_time as string);
-      const updateSubJobs = () => {
-        queryOptions.value = {
-          enabled: true,
-        };
-        refetch();
-      };
+      refetch();
+    };
 
-      onBeforeUpdate(() => {
-        if (!fetchingSubJobs.value) isCollapsed.value = true;
-      });
+    onBeforeUpdate(() => {
+      if (!fetchingSubJobs.value) isCollapsed.value = true;
+    });
 
-      const increaseSubjobs = () => {
-        subjobLimit.value += 5;
-      };
+    const increaseSubjobs = () => {
+      subjobLimit.value += 5;
+    };
 
-      return {
-        subJobs: computed(() => {
-          return result.value?.Job?.sub_jobs;
-        }),
-        Unicons,
-        toggleCollapse,
-        isCollapsed,
-        jobStartDate,
-        state,
-        increaseSubjobs,
-        subjobLimit,
-        hasSubJobs,
-        loading,
-      };
-    },
-  });
+    return {
+      subJobs: computed(() => {
+        return result.value?.Job?.sub_jobs;
+      }),
+      Unicons,
+      toggleCollapse,
+      isCollapsed,
+      jobStartDate,
+      state,
+      increaseSubjobs,
+      subjobLimit,
+      hasSubJobs,
+      loading,
+    };
+  },
+});
 </script>
 <style scoped>
-  .cursor-default-important {
-    cursor: default !important;
-  }
+.cursor-default-important {
+  cursor: default !important;
+}
 </style>

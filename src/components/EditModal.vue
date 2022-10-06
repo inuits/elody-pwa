@@ -22,23 +22,23 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, provide, ref } from 'vue';
-  import { useEditMode } from '@/composables/useEdit';
-  import BaseButton from '@/components/base/BaseButton.vue';
+import { defineComponent, provide, ref } from "vue";
+import { useEditMode } from "@/composables/useEdit";
+import BaseButton from "@/components/base/BaseButton.vue";
 
-  export default defineComponent({
-    name: 'EditModal',
-    components: {
-      BaseButton,
-    },
-    setup() {
-      const { isEdit, save, discard } = useEditMode();
+export default defineComponent({
+  name: "EditModal",
+  components: {
+    BaseButton,
+  },
+  setup() {
+    const { isEdit, save, discard } = useEditMode();
 
-      return {
-        save,
-        isEdit,
-        discard,
-      };
-    },
-  });
+    return {
+      save,
+      isEdit,
+      discard,
+    };
+  },
+});
 </script>

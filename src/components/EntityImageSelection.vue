@@ -31,11 +31,14 @@
               />
               <img
                 v-if="
-                  element.thumbnail_file_location && !element.mimetype.includes('audio')
+                  element.thumbnail_file_location &&
+                  !element.mimetype.includes('audio')
                 "
                 :class="[
                   'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
-                  toBeDeleted.includes(element._id) ? 'filter blur-xs grayscale' : '',
+                  toBeDeleted.includes(element._id)
+                    ? 'filter blur-xs grayscale'
+                    : '',
                   selectedImage && element.filename === selectedImage.filename
                     ? 'border-2 border-blue-500'
                     : '',
@@ -45,11 +48,14 @@
               />
               <AudioThumbnail
                 v-if="
-                  element.thumbnail_file_location && element?.mimetype.includes('audio')
+                  element.thumbnail_file_location &&
+                  element?.mimetype.includes('audio')
                 "
                 :class="[
                   'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
-                  toBeDeleted.includes(element._id) ? 'filter blur-xs grayscale' : '',
+                  toBeDeleted.includes(element._id)
+                    ? 'filter blur-xs grayscale'
+                    : '',
                   selectedImage && element.filename === selectedImage.filename
                     ? 'border-2 border-blue-500'
                     : '',
@@ -63,7 +69,9 @@
                 "
                 :class="[
                   'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
-                  toBeDeleted.includes(element._id) ? 'filter blur-xs grayscale' : '',
+                  toBeDeleted.includes(element._id)
+                    ? 'filter blur-xs grayscale'
+                    : '',
                   selectedImage && element.filename === selectedImage.filename
                     ? 'border-2 border-blue-500'
                     : '',
@@ -84,129 +92,137 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, onMounted, PropType, ref, watch, reactive } from 'vue';
-  import { useMutation } from '@vue/apollo-composable';
-  import {
-    MediaFile,
-    DeleteDataDocument,
-    DeleteDataMutation,
-    DeletePaths,
-  } from '@/queries';
-  import AudioThumbnail from '../components/base/audiothumbnail.vue';
-  import SvgThumbnail from './base/svgThumbnail.vue';
-  import TrashIcon from '../components/base/TrashIcon.vue';
-  import PlusCircleIcon from '../components/base/PlusCircleIcon.vue';
-  import { useEditMode } from '@/composables/useEdit';
-  import { useUploadModal } from './UploadModal.vue';
-  import useDropzoneHelper from '../composables/useDropzoneHelper';
-  import useMediaAssetLinkHelper from '../composables/useMediaAssetLinkHelper';
-  import useMetaDataHelper from '../composables/useMetaDataHelper';
-  import useMediafilesOrderHelpers from '../composables/useMediafilesOrderHelpers';
-  import Draggable from 'vuedraggable';
-  export const toBeDeleted = ref<string[]>([]);
+import {
+  defineComponent,
+  onMounted,
+  PropType,
+  ref,
+  watch,
+  reactive,
+} from "vue";
+import { useMutation } from "@vue/apollo-composable";
+import {
+  MediaFile,
+  DeleteDataDocument,
+  DeleteDataMutation,
+  DeletePaths,
+} from "@/queries";
+import AudioThumbnail from "../components/base/audiothumbnail.vue";
+import SvgThumbnail from "./base/svgThumbnail.vue";
+import TrashIcon from "../components/base/TrashIcon.vue";
+import PlusCircleIcon from "../components/base/PlusCircleIcon.vue";
+import { useEditMode } from "@/composables/useEdit";
+import { useUploadModal } from "./UploadModal.vue";
+import useDropzoneHelper from "../composables/useDropzoneHelper";
+import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
+import useMetaDataHelper from "../composables/useMetaDataHelper";
+import useMediafilesOrderHelpers from "../composables/useMediafilesOrderHelpers";
+import draggable from "vuedraggable/src/vuedraggable";
+export const toBeDeleted = ref<string[]>([]);
 
-  type MediafileSelectionState = {
-    selectedMediafile: MediaFile | undefined;
+type MediafileSelectionState = {
+  selectedMediafile: MediaFile | undefined;
+};
+
+const mediafileSelectionState = reactive<MediafileSelectionState>({
+  selectedMediafile: undefined,
+});
+
+export const useEntityMediafileSelector = () => {
+  const updateSelectedEntityMediafile = (mediafile: MediaFile | undefined) => {
+    mediafileSelectionState.selectedMediafile = mediafile;
   };
 
-  const mediafileSelectionState = reactive<MediafileSelectionState>({
-    selectedMediafile: undefined,
-  });
+  return { mediafileSelectionState, updateSelectedEntityMediafile };
+};
 
-  export const useEntityMediafileSelector = () => {
-    const updateSelectedEntityMediafile = (mediafile: MediaFile | undefined) => {
-      mediafileSelectionState.selectedMediafile = mediafile;
+export default defineComponent({
+  name: "EntityImageSelection",
+  components: {
+    AudioThumbnail,
+    PlusCircleIcon,
+    TrashIcon,
+    draggable,
+    SvgThumbnail,
+  },
+  props: {
+    selectedImage: {
+      type: Object as PropType<MediaFile | null>,
+      required: true,
+    },
+    loading: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  setup(props, { emit }) {
+    const { selectedFiles } = useDropzoneHelper();
+    const { mediafiles } = useMetaDataHelper();
+    const { updateSelectedEntityMediafile } = useEntityMediafileSelector();
+    const { isMediaFileInLinkList, removeMediaFileFromLinkList } =
+      useMediaAssetLinkHelper();
+    const { removeFromMetaDataPatchList } = useMetaDataHelper();
+    const { openUploadModal, uploadModalState, modalChoices } =
+      useUploadModal();
+    const selectImage = (mediafile: MediaFile) => {
+      updateSelectedEntityMediafile(mediafile);
     };
 
-    return { mediafileSelectionState, updateSelectedEntityMediafile };
-  };
+    const { compareMediafileOrder } = useMediafilesOrderHelpers();
 
-  export default defineComponent({
-    name: 'EntityImageSelection',
-    components: {
-      AudioThumbnail,
-      PlusCircleIcon,
-      TrashIcon,
-      Draggable,
-      SvgThumbnail,
-    },
-    props: {
-      selectedImage: {
-        type: Object as PropType<MediaFile | null>,
-        required: true,
-      },
-      loading: {
-        type: Boolean,
-        default: false,
-      },
-    },
-    setup(props, { emit }) {
-      const { selectedFiles } = useDropzoneHelper();
-      const { mediafiles } = useMetaDataHelper();
-      const { updateSelectedEntityMediafile } = useEntityMediafileSelector();
-      const { isMediaFileInLinkList, removeMediaFileFromLinkList } =
-        useMediaAssetLinkHelper();
-      const { removeFromMetaDataPatchList } = useMetaDataHelper();
-      const { openUploadModal, uploadModalState, modalChoices } = useUploadModal();
-      const selectImage = (mediafile: MediaFile) => {
-        updateSelectedEntityMediafile(mediafile);
-      };
+    const { editMode, addSaveCallback } = useEditMode();
 
-      const { compareMediafileOrder } = useMediafilesOrderHelpers();
+    const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 
-      const { editMode, addSaveCallback } = useEditMode();
+    const addToSaveCallback = (id: string, arrayKey: string) => {
+      const parsedId = id.replace("mediafiles/", "");
+      removeFromMetaDataPatchList(parsedId);
+      toBeDeleted.value.push(id);
+      if (!isMediaFileInLinkList(id)) {
+        addSaveCallback(async () => {
+          await mutate({ id: parsedId, path: DeletePaths.Mediafiles });
+        });
+      } else {
+        removeMediaFileFromLinkList(id);
+      }
+    };
 
-      const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
+    onMounted(() => {
+      if (props.selectedImage) {
+        updateSelectedEntityMediafile(props.selectedImage);
+      }
+    });
 
-      const addToSaveCallback = (id: string, arrayKey: string) => {
-        const parsedId = id.replace('mediafiles/', '');
-        removeFromMetaDataPatchList(parsedId);
-        toBeDeleted.value.push(id);
-        if (!isMediaFileInLinkList(id)) {
-          addSaveCallback(async () => {
-            await mutate({ id: parsedId, path: DeletePaths.Mediafiles });
-          });
-        } else {
-          removeMediaFileFromLinkList(id);
-        }
-      };
+    const endDrag = () => {
+      compareMediafileOrder(mediafiles.value);
+    };
 
-      onMounted(() => {
-        if (props.selectedImage) {
-          updateSelectedEntityMediafile(props.selectedImage);
-        }
-      });
+    const setDraggable = (): boolean => {
+      if (editMode.value === "edit") {
+        return true;
+      } else {
+        return false;
+      }
+    };
 
-      const endDrag = () => {
-        compareMediafileOrder(mediafiles.value);
-      };
-
-      const setDraggable = (): boolean => {
-        if (editMode.value === 'edit') {
-          return true;
-        } else {
-          return false;
-        }
-      };
-
-      return {
-        selectImage,
-        editMode,
-        addToSaveCallback,
-        toBeDeleted,
-        openUploadModal,
-        modalChoices,
-        selectedFiles,
-        endDrag,
-        setDraggable,
-        mediafiles,
-      };
-    },
-  });
+    return {
+      selectImage,
+      editMode,
+      addToSaveCallback,
+      toBeDeleted,
+      openUploadModal,
+      modalChoices,
+      selectedFiles,
+      endDrag,
+      setDraggable,
+      mediafiles,
+    };
+  },
+});
 </script>
 
 <style scoped>
-  .sortable-drag {
-    opacity: 0;
-  }
+.sortable-drag {
+  opacity: 0;
+}
 </style>

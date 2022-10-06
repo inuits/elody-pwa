@@ -17,46 +17,46 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, PropType } from 'vue';
-  import { Unicons } from '@/types';
-  import Icon from '@/components/base/Icon.vue';
+import { defineComponent, PropType } from "vue";
+import { Unicons } from "@/types";
+import Icon from "@/components/base/Icon.vue";
 
-  export default defineComponent({
-    name: 'IconToggle',
-    components: { Icon },
-    inheritAttrs: false,
-    props: {
-      label: { type: String, default: '' },
-      checked: { type: Boolean, default: false },
-      iconOff: { type: String as PropType<keyof Unicons>, required: true },
-      iconOn: { type: String as PropType<keyof Unicons>, required: true },
-    },
-    emits: ['update:checked'],
-  });
+export default defineComponent({
+  name: "IconToggle",
+  components: { Icon },
+  inheritAttrs: false,
+  props: {
+    label: { type: String, default: "" },
+    checked: { type: Boolean, default: false },
+    iconOff: { type: String as PropType<keyof Unicons>, required: true },
+    iconOn: { type: String as PropType<keyof Unicons>, required: true },
+  },
+  emits: ["update:checked"],
+});
 </script>
 
 <style lang="postcss" scoped>
-  .box {
-    @apply block relative bg-neutral-20 rounded;
-  }
-  .iconOn,
-  .iconOff {
-    @apply inline-block relative align-top h-9 p-2;
-  }
-  .dot {
-    @apply absolute left-1 top-1 bg-neutral-20 w-9 rounded transition;
-  }
-  /* :checked doesn't work for whatever reason, as Vue doesn't apply the
+.box {
+  @apply block relative bg-neutral-20 rounded;
+}
+.iconOn,
+.iconOff {
+  @apply inline-block relative align-top h-9 p-2;
+}
+.dot {
+  @apply absolute left-1 top-1 bg-neutral-20 w-9 rounded transition;
+}
+/* :checked doesn't work for whatever reason, as Vue doesn't apply the
      attribute at all */
-  .input.checked ~ .iconOn,
-  .input:not(.checked) ~ .iconOff {
-    fill: var(--color-main-dark);
-  }
-  .input:not(.checked) ~ .iconOn,
-  .input.checked ~ .iconOff {
-    fill: var(--color-neutral-700);
-  }
-  .input.checked ~ .dot {
-    transform: translateX(100%);
-  }
+.input.checked ~ .iconOn,
+.input:not(.checked) ~ .iconOff {
+  fill: var(--color-main-dark);
+}
+.input:not(.checked) ~ .iconOn,
+.input.checked ~ .iconOff {
+  fill: var(--color-neutral-700);
+}
+.input.checked ~ .dot {
+  transform: translateX(100%);
+}
 </style>

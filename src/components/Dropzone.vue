@@ -2,36 +2,39 @@
   <div class="flex flex-col w-full h-full">
     <div
       ref="dropzoneDiv"
-      class="
-        bg-white-background
-        w-full
-        bg-blue
-        inline-block
-        border-dashed border-4 border-blue-light
-        rounded
-        p-5
-      "
+      class="bg-white-background w-full bg-blue inline-block border-dashed border-4 border-blue-light rounded p-5"
       :class="{
         'flex  justify-center items-center cursor-pointer': fileCount === 0,
         'justify-items-center grid grid-cols-6 place-content-start gap-4 ':
           fileCount !== 0,
       }"
-      style="height: -webkit-calc(100% - 40px);"
+      style="height: -webkit-calc(100% - 40px)"
     >
-      <div
-        v-show="fileCount === 0"
-        class="inline-block w-9/12 text-center"
-      >
-        <div class="dz-message"  data-dz-message>
-          <span v-if="total === 0">Drag your files, or click here to add your files</span>
+      <div v-show="fileCount === 0" class="inline-block w-9/12 text-center">
+        <div class="dz-message" data-dz-message>
+          <span v-if="total === 0"
+            >Drag your files, or click here to add your files</span
+          >
           <div v-else>
-            <div v-show="total === failed + success" style="width: fit-content" class="px-5 text-left border-4 border-neutral-100 py-5 rounded-md">
+            <div
+              v-show="total === failed + success"
+              style="width: fit-content"
+              class="px-5 text-left border-4 border-neutral-500 py-5 rounded-md"
+            >
               <div class="flex justify-between">
-                <div class="text-lg text-center pb-8 text-red-dark">{{failed}} file(s) failed to upload.</div>
-                <div class="text-lg text-center pb-8 text-green-default">{{success}} file(s) successfully uploaded.</div>
+                <div class="text-lg text-center pb-8 text-red-dark">
+                  {{ failed }} file(s) failed to upload.
+                </div>
+                <div class="text-lg text-center pb-8 text-green-default">
+                  {{ success }} file(s) successfully uploaded.
+                </div>
               </div>
-              <div class="text-red-dark truncate" v-for="errorMessage in errorMessages" :key="errorMessage">
-                - {{errorMessage}}
+              <div
+                class="text-red-dark truncate"
+                v-for="errorMessage in errorMessages"
+                :key="errorMessage"
+              >
+                - {{ errorMessage }}
               </div>
             </div>
           </div>
@@ -41,17 +44,7 @@
     <button
       v-if="triggerUpload"
       type="button"
-      class="
-        py-2
-        mt-3
-        px-4
-        w-full
-        bg-blue-400
-        text-neutral-0
-        rounded-sm
-        hover:shadow-xl
-        text-sm
-      "
+      class="py-2 mt-3 px-4 w-full bg-blue-400 text-neutral-0 rounded-sm hover:shadow-xl text-sm"
       :class="fileCount === 0 ? 'opacity-25 cursor-none' : 'cursor-pointer'"
       tabindex="-1"
       :disabled="fileCount === 0"
@@ -60,50 +53,34 @@
       <div class="flex justify-center" v-if="total !== failed + success">
         <div class="flex" style="width: fit-content">
           <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="white" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="white"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
           </svg>
           Uploading...
         </div>
       </div>
-      <div v-else>
-        upload
-      </div>
+      <div v-else>upload</div>
     </button>
   </div>
   <div class="hidden">
     <div
       ref="dropzonePreviewDiv"
-      class="
-        dz-preview dz-file-preview
-        w-40
-        mi-h-28
-        flex flex-col
-        justify-center
-        items-center
-        hover:bg-blue-default10
-        p-3
-        rounded
-        relative
-      "
+      class="dz-preview dz-file-preview w-40 mi-h-28 flex flex-col justify-center items-center hover:bg-blue-default10 p-3 rounded relative"
     >
       <a
         data-dz-remove
-        class="
-          cursor-pointer
-          absolute
-          flex
-          justify-center
-          items-center
-          top-2
-          right-2
-          bg-red-default
-          rounded-full
-          w-6
-          h-6
-          shadow
-          hover:shadow-xl
-        "
+        class="cursor-pointer absolute flex justify-center items-center top-2 right-2 bg-red-default rounded-full w-6 h-6 shadow hover:shadow-xl"
       >
         <svg
           width="9"
@@ -134,80 +111,101 @@
       </svg>
 
       <div class="dz-filename text-blue font-body text-sm mt-3 w-full">
-        <span class="inline-block w-full text-center break-words" data-dz-name></span>
+        <span
+          class="inline-block w-full text-center break-words"
+          data-dz-name
+        ></span>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-  import { PostMediaFileDocument, PostMediaFileMutation } from '@/queries';
-  import useDropzoneHelper from '../composables/useDropzoneHelper';
-  import { onMounted, ref, defineComponent } from 'vue';
-  import { useMutation } from '@vue/apollo-composable';
-  import Dropzone from 'dropzone';
+import { PostMediaFileDocument, PostMediaFileMutation } from "@/queries";
+import useDropzoneHelper from "../composables/useDropzoneHelper";
+import { onMounted, ref, defineComponent } from "vue";
+import { useMutation } from "@vue/apollo-composable";
+import Dropzone from "dropzone";
 
-  export default defineComponent({
-    name: 'Dropzone',
-    setup(props, { emit }) {
-      const { myDropzone, isUploading, selectedFiles, errorMessages, total, failed, success, increaseSuccessCounter, clearDropzoneErrorMessages, clearDropzoneCounters, getDropzoneSettings, setTotalCounter } = useDropzoneHelper();
-      const { onDone } = useMutation<PostMediaFileMutation>(PostMediaFileDocument);
-      const dropzonePreviewDiv = ref<HTMLDivElement | undefined>(undefined);
-      const dropzoneDiv = ref<HTMLDivElement | undefined>(undefined);
-      const triggerUpload = ref<() => void | undefined>();
-      const fileCount = ref<number>(0);
-      clearDropzoneErrorMessages();
-      
-      onMounted(async () => {
-        if (dropzoneDiv.value && dropzonePreviewDiv) {
-          myDropzone.value = new Dropzone(dropzoneDiv.value, getDropzoneSettings(dropzonePreviewDiv));
+export default defineComponent({
+  name: "Dropzone",
+  setup(props, { emit }) {
+    const {
+      myDropzone,
+      isUploading,
+      selectedFiles,
+      errorMessages,
+      total,
+      failed,
+      success,
+      increaseSuccessCounter,
+      clearDropzoneErrorMessages,
+      clearDropzoneCounters,
+      getDropzoneSettings,
+      setTotalCounter,
+    } = useDropzoneHelper();
+    const { onDone } = useMutation<PostMediaFileMutation>(
+      PostMediaFileDocument
+    );
+    const dropzonePreviewDiv = ref<HTMLDivElement | undefined>(undefined);
+    const dropzoneDiv = ref<HTMLDivElement | undefined>(undefined);
+    const triggerUpload = ref<() => void | undefined>();
+    const fileCount = ref<number>(0);
+    clearDropzoneErrorMessages();
 
-          const updateFileCount = () => {
-            if (myDropzone.value) {
-              fileCount.value = myDropzone.value?.files.length;
-            }
-          };
+    onMounted(async () => {
+      if (dropzoneDiv.value && dropzonePreviewDiv) {
+        myDropzone.value = new Dropzone(
+          dropzoneDiv.value,
+          getDropzoneSettings(dropzonePreviewDiv)
+        );
 
-          myDropzone.value.on('removedfile', (value: any) => {
-            updateFileCount();
-          });
+        const updateFileCount = () => {
+          if (myDropzone.value) {
+            fileCount.value = myDropzone.value?.files.length;
+          }
+        };
 
-          myDropzone.value.on('addedfile', (value: any) => {
-            clearDropzoneCounters();
-            clearDropzoneErrorMessages();
-            updateFileCount();
-          });
+        myDropzone.value.on("removedfile", (value: any) => {
+          updateFileCount();
+        });
 
-          onDone(() => {
-            increaseSuccessCounter();
-          });
+        myDropzone.value.on("addedfile", (value: any) => {
+          clearDropzoneCounters();
+          clearDropzoneErrorMessages();
+          updateFileCount();
+        });
 
-          triggerUpload.value = () => {
-            isUploading.value = true;
-            selectedFiles.value = myDropzone.value.files;
-            setTotalCounter(myDropzone.value.files.length);
-          };
-        }
-      });
+        onDone(() => {
+          increaseSuccessCounter();
+        });
 
-      return {
-        dropzonePreviewDiv,
-        errorMessages,
-        dropzoneDiv,
-        fileCount,
-        triggerUpload,
-        success,
-        failed,
-        total,
-      };
-    },
-  });
+        triggerUpload.value = () => {
+          isUploading.value = true;
+          selectedFiles.value = myDropzone.value.files;
+          setTotalCounter(myDropzone.value.files.length);
+        };
+      }
+    });
+
+    return {
+      dropzonePreviewDiv,
+      errorMessages,
+      dropzoneDiv,
+      fileCount,
+      triggerUpload,
+      success,
+      failed,
+      total,
+    };
+  },
+});
 </script>
 <style scoped>
-  .dz-preview a {
-    display: none;
-  }
-  .dz-preview:hover a {
-    display: flex;
-  }
+.dz-preview a {
+  display: none;
+}
+.dz-preview:hover a {
+  display: flex;
+}
 </style>

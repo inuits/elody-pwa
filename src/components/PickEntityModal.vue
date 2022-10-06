@@ -21,82 +21,82 @@
         :accepted-entity-types="pickEntityModalState.acceptedEntityTypes"
         @add-selection="addItem($event)"
       />
-      
     </div>
   </modal>
 </template>
 <script lang="ts">
-  import Modal, { ModalState } from './base/Modal.vue';
-  import { defineComponent, ref } from 'vue';
-  import AssetLibrary from '@/components/AssetLibrary.vue';
-  import MediaFileLibrary from '@/components/MediaFileLibrary.vue';
-  import { Entity } from '@/queries';
+import Modal, { ModalState } from "./base/Modal.vue";
+import { defineComponent, ref } from "vue";
+import AssetLibrary from "@/components/AssetLibrary.vue";
+import MediaFileLibrary from "@/components/MediaFileLibrary.vue";
+import { Entity } from "@/queries";
 
-  export type PickEntityModalType = {
-    state: ModalState;
-    pickedEntity: Entity | undefined;
-    acceptedEntityTypes?: string[];
+export type PickEntityModalType = {
+  state: ModalState;
+  pickedEntity: Entity | undefined;
+  acceptedEntityTypes?: string[];
+};
+
+const pickEntityModalState = ref<PickEntityModalType>({
+  state: "hide",
+  pickedEntity: undefined,
+  acceptedEntityTypes: [],
+});
+
+export const usePickEntityModal = (cb?: (_value: Entity) => void) => {
+  const updatePickEntityModal = (uploadModalInput: PickEntityModalType) => {
+    pickEntityModalState.value = uploadModalInput;
   };
 
-  const pickEntityModalState = ref<PickEntityModalType>({
-    state: 'hide',
-    pickedEntity: undefined,
-    acceptedEntityTypes: [],
-  });
+  const pickEntity = (pickedEntity: Entity) => {
+    updatePickEntityModal({
+      state: "hide",
+      pickedEntity: pickedEntity,
+    });
+  };
 
-  export const usePickEntityModal = (cb?: (_value: Entity) => void) => {
-    const updatePickEntityModal = (uploadModalInput: PickEntityModalType) => {
-      pickEntityModalState.value = uploadModalInput;
-    };
+  const closePickEntityModal = () => {
+    updatePickEntityModal({
+      state: "hide",
+      pickedEntity: undefined,
+    });
+  };
 
-    const pickEntity = (pickedEntity: Entity) => {
-      updatePickEntityModal({
-        state: 'hide',
-        pickedEntity: pickedEntity,
-      });
-    };
+  const openPickEntityModal = (acceptedEntityTypes: string[]) => {
+    updatePickEntityModal({
+      state: "show",
+      pickedEntity: undefined,
+      acceptedEntityTypes: acceptedEntityTypes,
+    });
+  };
 
-    const closePickEntityModal = () => {
-      updatePickEntityModal({
-        state: 'hide',
-        pickedEntity: undefined,
-      });
-    };
+  return {
+    pickEntity,
+    closePickEntityModal,
+    openPickEntityModal,
+    pickEntityModalState,
+  };
+};
 
-    const openPickEntityModal = (acceptedEntityTypes: string[]) => {
-      updatePickEntityModal({
-        state: 'show',
-        pickedEntity: undefined,
-        acceptedEntityTypes: acceptedEntityTypes,
-      });
+export default defineComponent({
+  name: "PickEntityModal",
+  components: {
+    Modal,
+    AssetLibrary,
+    MediaFileLibrary,
+  },
+  setup() {
+    const { pickEntity, closePickEntityModal, pickEntityModalState } =
+      usePickEntityModal();
+    const addItem = (entity: Entity) => {
+      pickEntity(entity);
     };
 
     return {
-      pickEntity,
-      closePickEntityModal,
-      openPickEntityModal,
+      addItem,
       pickEntityModalState,
+      closePickEntityModal,
     };
-  };
-
-  export default defineComponent({
-    name: 'PickEntityModal',
-    components: {
-      Modal,
-      AssetLibrary,
-      MediaFileLibrary
-    },
-    setup() {
-      const { pickEntity, closePickEntityModal, pickEntityModalState } = usePickEntityModal();
-      const addItem = (entity: Entity) => {
-        pickEntity(entity);
-      };
-
-      return {
-        addItem,
-        pickEntityModalState,
-        closePickEntityModal,
-      };
-    },
-  });
+  },
+});
 </script>

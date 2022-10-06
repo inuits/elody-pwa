@@ -1,16 +1,6 @@
 <template>
   <div
-    class="
-      w-full
-      px-6
-      py-8
-      border-b border-neutral-30
-      z-10
-      flex
-      items-center
-      justify-between
-      bg-neutral-0
-    "
+    class="w-full px-6 py-8 border-b border-neutral-50 z-10 flex items-center justify-between bg-neutral-0"
   >
     <div class="flex w-full items-center">
       <h1 class="text-lg font-semibold text-neutral-800 float-left">
@@ -40,62 +30,62 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref } from 'vue';
-  import { useRoute, useRouter } from 'vue-router';
-  import { Unicons } from '@/types';
-  import EditToggle from './EditButtons.vue';
-  import { useEditMode } from '@/composables/useEdit';
+import { defineComponent, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { Unicons } from "@/types";
+import EditToggle from "./EditButtons.vue";
+import { useEditMode } from "@/composables/useEdit";
 
-  type titleTypes = 'routerTitle' | 'entityTitle';
+type titleTypes = "routerTitle" | "entityTitle";
 
-  type pageTitle = {
-    routerTitle: string;
-    entityTitle: string;
+type pageTitle = {
+  routerTitle: string;
+  entityTitle: string;
+};
+
+const pageTitle = ref<pageTitle>({
+  routerTitle: "",
+  entityTitle: "",
+});
+
+export const usePageTitle = () => {
+  const router = useRouter();
+
+  const updatePageTitle = (input: string, type: titleTypes = "routerTitle") => {
+    pageTitle.value[type] = input;
   };
 
-  const pageTitle = ref<pageTitle>({
-    routerTitle: '',
-    entityTitle: '',
+  router.beforeEach((to, _from, next) => {
+    updatePageTitle("", "entityTitle");
+
+    next();
   });
 
-  export const usePageTitle = () => {
-    const router = useRouter();
+  router.afterEach((to, _from, _failure) => {
+    updatePageTitle(to.meta.title as string);
+  });
 
-    const updatePageTitle = (input: string, type: titleTypes = 'routerTitle') => {
-      pageTitle.value[type] = input;
-    };
+  return {
+    Unicons,
+    pageTitle,
+    updatePageTitle,
+  };
+};
 
-    router.beforeEach((to, _from, next) => {
-      updatePageTitle('', 'entityTitle');
+export default defineComponent({
+  name: "TheHeader",
+  components: { EditToggle },
+  setup() {
+    const { pageTitle } = usePageTitle();
+    const route = useRoute();
 
-      next();
-    });
-
-    router.afterEach((to, _from, _failure) => {
-      updatePageTitle(to.meta.title as string);
-    });
+    const { editMode, disableEditMode } = useEditMode();
 
     return {
-      Unicons,
+      route,
       pageTitle,
-      updatePageTitle,
+      editMode,
     };
-  };
-
-  export default defineComponent({
-    name: 'TheHeader',
-    components: { EditToggle },
-    setup() {
-      const { pageTitle } = usePageTitle();
-      const route = useRoute();
-
-      const { editMode, disableEditMode } = useEditMode();
-
-      return {
-        route,
-        pageTitle,
-        editMode,
-      };
-    },
-  });
+  },
+});
 </script>

@@ -11,30 +11,33 @@
 </template>
 
 <script lang="ts">
-  import { MetadataAndRelation } from '@/queries';
-  import { defineComponent, PropType } from 'vue';
-  import MetaViewLine from './MetaViewLine.vue';
+import { MetadataAndRelation } from "@/queries";
+import { defineComponent, PropType } from "vue";
+import MetaViewLine from "./MetaViewLine.vue";
 
-  export default defineComponent({
-    name: 'MetaView',
-    components: { MetaViewLine },
-    props: {
-      loading: { type: Boolean, default: false },
-      metadata: { type: Array as PropType<MetadataAndRelation[]>, required: true },
+export default defineComponent({
+  name: "MetaView",
+  components: { MetaViewLine },
+  props: {
+    loading: { type: Boolean, default: false },
+    metadata: {
+      type: Array as PropType<MetadataAndRelation[]>,
+      required: true,
     },
-    setup() {},
-  });
+  },
+  setup() {},
+});
 </script>
 
 <style lang="postcss" scoped>
-  .label {
-    @apply rounded font-body text-xs text-neutral-60;
-  }
-  .value {
-    @apply rounded font-body text-sm text-neutral-700 mt-0.5;
-  }
-  .label.loading,
-  .value.loading {
-    @apply bg-neutral-20 text-neutral-20;
-  }
+.label {
+  @apply rounded font-body text-xs text-neutral-60;
+}
+.value {
+  @apply rounded font-body text-sm text-neutral-700 mt-0.5;
+}
+.label.loading,
+.value.loading {
+  @apply bg-neutral-20 text-neutral-20;
+}
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="lg:w-2/6 md:w-full lg:border-l-2 lg:border-r-2 border-solid border-neutral-30"
+    class="lg:w-2/6 md:w-full lg:border-l-2 lg:border-r-2 border-solid border-neutral-50"
   >
     <div>
       <div class="flex justify-between m-3">
@@ -10,7 +10,7 @@
         </p>
       </div>
       <div
-        class="flex justify-between border-solid border-b-2 border-neutral-30 px-3 pb-3"
+        class="flex justify-between border-solid border-b-2 border-neutral-50 px-3 pb-3"
       >
         <!-- <AndOrToggle v-model:AndOrValue="AndOrChoice" texton="En" textoff="Of" /> -->
         <BaseButton
@@ -69,81 +69,86 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, ref, computed, PropType, onMounted } from 'vue';
-  import FilterAccordion from '@/components/base/FilterAccordion.vue';
-  import { useQuery } from '@vue/apollo-composable';
-  import { AdvancedFilterTypes, GetAdvancedFiltersDocument } from '@/queries';
-  import BaseButton from '@/components/base/BaseButton.vue';
-  import MinmaxFilter from '@/components/base/MinmaxFilter.vue';
-  import TextFilter from '@/components/base/TextFilter.vue';
-  import ChecklistFilter from '@/components/base/ChecklistFilter.vue';
-  import MultiFilter from '@/components/base/MultiFilter.vue';
-  // import AndOrToggle from './base/AndOrToggle.vue';
-  import {
-    clearAdvancedSearchInput,
-    FilterInList,
-    getActiveFilters,
-  } from '@/composables/useFilterHelper';
+import { defineComponent, ref, computed, PropType, onMounted } from "vue";
+import FilterAccordion from "@/components/base/FilterAccordion.vue";
+import { useQuery } from "@vue/apollo-composable";
+import { AdvancedFilterTypes, GetAdvancedFiltersDocument } from "@/queries";
+import BaseButton from "@/components/base/BaseButton.vue";
+import MinmaxFilter from "@/components/base/MinmaxFilter.vue";
+import TextFilter from "@/components/base/TextFilter.vue";
+import ChecklistFilter from "@/components/base/ChecklistFilter.vue";
+import MultiFilter from "@/components/base/MultiFilter.vue";
+// import AndOrToggle from './base/AndOrToggle.vue';
+import {
+  clearAdvancedSearchInput,
+  FilterInList,
+  getActiveFilters,
+} from "@/composables/useFilterHelper";
 
-  export default defineComponent({
-    name: 'FilterSideBar',
-    components: {
-      FilterAccordion,
-      BaseButton,
-      MinmaxFilter,
-      TextFilter,
-      ChecklistFilter,
-      MultiFilter,
-      // AndOrToggle,
+export default defineComponent({
+  name: "FilterSideBar",
+  components: {
+    FilterAccordion,
+    BaseButton,
+    MinmaxFilter,
+    TextFilter,
+    ChecklistFilter,
+    MultiFilter,
+    // AndOrToggle,
+  },
+  props: {
+    advancedFiltersChoice: {
+      type: String,
+      default: "entityFilters",
     },
-    props: {
-      advancedFiltersChoice: {
-        type: String,
-        default: 'entityFilters',
-      },
-      acceptedEntityTypes: {
-        type: Array as PropType<string[]>,
-        default: () => [],
-        required: false,
-      },
+    acceptedEntityTypes: {
+      type: Array as PropType<string[]>,
+      default: () => [],
+      required: false,
     },
-    emits: ['activeFilters'],
-    setup(props, { emit }) {
-      const initialFilters = ref<FilterInList[]>([]);
-      const activeCount = computed(() => getActiveFilters(initialFilters.value).length);
-      const AndOrChoice = ref<boolean>(true);
-      const { result: filters } = useQuery(GetAdvancedFiltersDocument, {
-        choice: props.advancedFiltersChoice,
+  },
+  emits: ["activeFilters"],
+  setup(props, { emit }) {
+    const initialFilters = ref<FilterInList[]>([]);
+    const activeCount = computed(
+      () => getActiveFilters(initialFilters.value).length
+    );
+    const AndOrChoice = ref<boolean>(true);
+    const { result: filters } = useQuery(GetAdvancedFiltersDocument, {
+      choice: props.advancedFiltersChoice,
+    });
+
+    const applyFilters = () => {
+      const returnArray = initialFilters.value.map((filter: FilterInList) => {
+        return filter.input;
       });
+      emit("activeFilters", returnArray);
+    };
 
-      const applyFilters = () => {
-        const returnArray = initialFilters.value.map((filter: FilterInList) => {
-          return filter.input;
-        });
-        emit('activeFilters', returnArray);
-      };
+    const clearFilters = () => {
+      initialFilters.value = clearAdvancedSearchInput(
+        initialFilters.value,
+        props.acceptedEntityTypes
+      );
+    };
 
-      const clearFilters = () => {
-        initialFilters.value = clearAdvancedSearchInput(initialFilters.value, props.acceptedEntityTypes);
-      };
+    applyFilters();
 
-      applyFilters();
+    onMounted(() => {
+      if (props.acceptedEntityTypes.length > 0) {
+        applyFilters();
+      }
+    });
 
-      onMounted(() => {
-        if (props.acceptedEntityTypes.length > 0) {
-          applyFilters();
-        }
-      });
-
-      return {
-        filters,
-        activeCount,
-        applyFilters,
-        initialFilters,
-        clearFilters,
-        AdvancedFilterTypes,
-        AndOrChoice,
-      };
-    },
-  });
+    return {
+      filters,
+      activeCount,
+      applyFilters,
+      initialFilters,
+      clearFilters,
+      AdvancedFilterTypes,
+      AndOrChoice,
+    };
+  },
+});
 </script>

@@ -9,22 +9,22 @@
   </div>
 </template>
 <script lang="ts">
-  import { Directory } from '@/queries';
-  import { defineComponent, PropType } from 'vue';
-  import FolderTreeLine from './FolderTreeLine.vue';
+import { Directory } from "@/queries";
+import { defineComponent, PropType } from "vue";
+import FolderTreeLine from "./FolderTreeLine.vue";
 
-  export default defineComponent({
-    name: 'FolderTree',
-    components: {
-      FolderTreeLine,
+export default defineComponent({
+  name: "FolderTree",
+  components: {
+    FolderTreeLine,
+  },
+  props: {
+    data: {
+      type: Array as PropType<Directory[]>,
+      required: true,
+      default: () => [],
     },
-    props: {
-      data: {
-        type: Array as PropType<Directory[]>,
-        required: true,
-        default: () => [],
-      },
-    },
-    setup() {},
-  });
+  },
+  setup() {},
+});
 </script>

@@ -1,33 +1,10 @@
 <template>
   <nav
-    class="
-      navbar
-      fixed
-      left-0
-      top-0
-      w-24
-      h-screen
-      flex flex-col
-      justify-start
-      align-center
-      pt-10
-      bg-neutral-20
-      px-5
-      z-50
-    "
+    class="navbar fixed left-0 top-0 w-24 h-screen flex flex-col justify-start align-center pt-10 bg-neutral-20 px-5 z-50"
   >
     <router-link
       :to="{ name: 'Home' }"
-      class="
-        logo
-        router-link
-        text-base text-neutral-700
-        font-semibold
-        flex
-        justify-center
-        items-center
-        mb-8
-      "
+      class="logo router-link text-base text-neutral-700 font-semibold flex justify-center items-center mb-8"
       @click="forceDisableEditModalHome"
     >
       DAMS
@@ -102,97 +79,97 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent } from 'vue';
-  import BaseButton from './base/BaseButton.vue';
-  import { useUploadModal } from './UploadModal.vue';
-  import { Unicons } from '@/types';
-  import { useRouter } from 'vue-router';
-  import { useEditMode } from '@/composables/useEdit';
-  import { useCreateModal } from './CreateModal.vue';
-  export default defineComponent({
-    name: 'TheNavigation',
-    components: { BaseButton },
-    setup: () => {
-      const { openUploadModal, modalChoices } = useUploadModal();
-      const { openCreateModal } = useCreateModal();
-      const router = useRouter();
-      const { disableEditMode } = useEditMode();
+import { defineComponent } from "vue";
+import BaseButton from "./base/BaseButton.vue";
+import { useUploadModal } from "./UploadModal.vue";
+import { Unicons } from "@/types";
+import { useRouter } from "vue-router";
+import { useEditMode } from "@/composables/useEdit";
+import { useCreateModal } from "./CreateModal.vue";
+export default defineComponent({
+  name: "TheNavigation",
+  components: { BaseButton },
+  setup: () => {
+    const { openUploadModal, modalChoices } = useUploadModal();
+    const { openCreateModal } = useCreateModal();
+    const router = useRouter();
+    const { disableEditMode } = useEditMode();
 
-      const forceDisableEditModalHome = () => {
-        router.push({ name: 'Home' });
-        disableEditMode();
-      };
+    const forceDisableEditModalHome = () => {
+      router.push({ name: "Home" });
+      disableEditMode();
+    };
 
-      const forceDisableEditModalHistory = () => {
-        router.push({ name: 'History' });
-        disableEditMode();
-      };
+    const forceDisableEditModalHistory = () => {
+      router.push({ name: "History" });
+      disableEditMode();
+    };
 
-      const forceDisableEditMediafiles = () => {
-        router.push({ name: 'Mediafiles' });
-        disableEditMode();
-      };
+    const forceDisableEditMediafiles = () => {
+      router.push({ name: "Mediafiles" });
+      disableEditMode();
+    };
 
-      const forceDisableEditModalUpload = () => {
-        useUploadModal();
-        disableEditMode();
-      };
+    const forceDisableEditModalUpload = () => {
+      useUploadModal();
+      disableEditMode();
+    };
 
-      return {
-        Unicons,
-        openUploadModal,
-        router,
-        forceDisableEditModalHome,
-        forceDisableEditModalHistory,
-        forceDisableEditModalUpload,
-        openCreateModal,
-        modalChoices,
-        forceDisableEditMediafiles,
-      };
-    },
-  });
+    return {
+      Unicons,
+      openUploadModal,
+      router,
+      forceDisableEditModalHome,
+      forceDisableEditModalHistory,
+      forceDisableEditModalUpload,
+      openCreateModal,
+      modalChoices,
+      forceDisableEditMediafiles,
+    };
+  },
+});
 </script>
 
 <style scoped>
-  .navbar {
-    transition-property: all;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 300ms;
-  }
+.navbar {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
 
-  .menu-item:hover .menu-btn {
-    --tw-bg-opacity: 1;
-    background-color: rgb(165 173 186 / var(--tw-bg-opacity));
-  }
+.menu-item:hover .menu-btn {
+  --tw-bg-opacity: 1;
+  background-color: rgb(165 173 186 / var(--tw-bg-opacity));
+}
 
-  .navbar:hover {
-    width: 20rem;
-  }
+.navbar:hover {
+  width: 20rem;
+}
 
-  .navbar:hover .router-link {
-    padding-left: 0.3rem;
-    justify-content: flex-start;
-  }
+.navbar:hover .router-link {
+  padding-left: 0.3rem;
+  justify-content: flex-start;
+}
 
-  .navbar:hover .nav-item-label {
-    animation: showText 0.1s ease-in 0.2s forwards;
-    -moz-animation: showText 0.1s ease-in 0.2s forwards;
-    -webkit-animation: showText 0.1s ease-in 0.2s forwards;
-    -o-animation: showText 0.1s ease-in 0.2s forwards;
-    animation-fill-mode: forwards;
-  }
+.navbar:hover .nav-item-label {
+  animation: showText 0.1s ease-in 0.2s forwards;
+  -moz-animation: showText 0.1s ease-in 0.2s forwards;
+  -webkit-animation: showText 0.1s ease-in 0.2s forwards;
+  -o-animation: showText 0.1s ease-in 0.2s forwards;
+  animation-fill-mode: forwards;
+}
 
-  @keyframes showText {
-    100% {
-      width: auto;
-      height: auto;
-    }
+@keyframes showText {
+  100% {
+    width: auto;
+    height: auto;
   }
+}
 
-  @-webkit-keyframes showText {
-    100% {
-      width: auto;
-      height: auto;
-    }
+@-webkit-keyframes showText {
+  100% {
+    width: auto;
+    height: auto;
   }
+}
 </style>

@@ -2,7 +2,10 @@
   <div class="my-2">
     <div :class="[inputContainerStyle, ' input-container  gap-3 flex-col']">
       <div
-        v-for="{ value: metadataValue, key: metadataKey } in metadata.metadataOnRelation"
+        v-for="{
+          value: metadataValue,
+          key: metadataKey,
+        } in metadata.metadataOnRelation"
         :key="`${metadata.id}-${metadataKey}`"
         class="px-8 pt-2"
       >
@@ -10,7 +13,7 @@
           {{ metadataKey }}
         </div>
         <div class="value" :class="{ loading }" data-test="meta-info">
-          {{ metadataValue ? metadataValue : 'no data' }}
+          {{ metadataValue ? metadataValue : "no data" }}
         </div>
       </div>
       <ListItem
@@ -27,7 +30,10 @@
         :thumb-icon="getThumbnail(metadata)"
         :small="true"
         @click="
-          router.push({ name: 'SingleEntity', params: { id: metadata.linkedEntity.id } })
+          router.push({
+            name: 'SingleEntity',
+            params: { id: metadata.linkedEntity.id },
+          })
         "
       />
       <div
@@ -51,7 +57,9 @@
             {{ checkTranslationForlabel(metadataFromLinkedEntity.label) }}
           </div>
           <div
-            v-else-if="metadataFromLinkedEntity.label != metadataFromLinkedEntity.key"
+            v-else-if="
+              metadataFromLinkedEntity.label != metadataFromLinkedEntity.key
+            "
             class="label"
             :class="{ loading }"
           >
@@ -70,7 +78,9 @@
             data-test="meta-info"
           >
             {{
-              metadataFromLinkedEntity.value ? metadataFromLinkedEntity.value : 'no data'
+              metadataFromLinkedEntity.value
+                ? metadataFromLinkedEntity.value
+                : "no data"
             }}
           </div>
         </div>
@@ -80,58 +90,58 @@
 </template>
 
 <script lang="ts">
-  import { MetadataRelation } from '@/queries';
-  import { defineComponent, PropType } from 'vue';
-  import { useI18n } from 'vue-i18n';
-  import { useRouter } from 'vue-router';
-  import { Unicons } from '@/types';
-  import { inputContainerStyle, lableStyle } from './base/InputField.vue';
-  import ListItem from '@/components/ListItem.vue';
-  import useThumbnailHelper from '@/composables/useThumbnailHelper';
+import { MetadataRelation } from "@/queries";
+import { defineComponent, PropType } from "vue";
+import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
+import { Unicons } from "@/types";
+import { inputContainerStyle, lableStyle } from "./base/InputField.vue";
+import ListItem from "@/components/ListItem.vue";
+import useThumbnailHelper from "@/composables/useThumbnailHelper";
 
-  export default defineComponent({
-    name: 'MetaViewlineRelation',
-    components: { ListItem },
-    props: {
-      loading: { type: Boolean, default: false },
-      metadata: {
-        type: Object as PropType<MetadataRelation>,
-        required: false,
-        default: () => {},
-      },
+export default defineComponent({
+  name: "MetaViewlineRelation",
+  components: { ListItem },
+  props: {
+    loading: { type: Boolean, default: false },
+    metadata: {
+      type: Object as PropType<MetadataRelation>,
+      required: false,
+      default: () => {},
     },
-    setup() {
-      const router = useRouter();
-      const { t } = useI18n();
-      const { getThumbnail } = useThumbnailHelper();
-      const checkTranslationForlabel = (input: string) => {
-        const translationKey = `metadata.${input}`;
-        const translation = t(translationKey);
+  },
+  setup() {
+    const router = useRouter();
+    const { t } = useI18n();
+    const { getThumbnail } = useThumbnailHelper();
+    const checkTranslationForlabel = (input: string) => {
+      const translationKey = `metadata.${input}`;
+      const translation = t(translationKey);
 
-        return translation === translationKey ? input : translation;
-      };
+      return translation === translationKey ? input : translation;
+    };
 
-      return {
-        t,
-        router,
-        Unicons,
-        inputContainerStyle,
-        checkTranslationForlabel,
-        getThumbnail
-      };
-    },
-  });
+    return {
+      t,
+      router,
+      Unicons,
+      inputContainerStyle,
+      checkTranslationForlabel,
+      getThumbnail,
+    };
+  },
+});
 </script>
 
 <style lang="postcss" scoped>
-  .label {
-    @apply rounded font-body text-xs text-neutral-60;
-  }
-  .value {
-    @apply rounded font-body text-sm text-neutral-700 mt-0.5;
-  }
-  .label.loading,
-  .value.loading {
-    @apply bg-neutral-20 text-neutral-20;
-  }
+.label {
+  @apply rounded font-body text-xs text-neutral-60;
+}
+.value {
+  @apply rounded font-body text-sm text-neutral-700 mt-0.5;
+}
+.label.loading,
+.value.loading {
+  @apply bg-neutral-20 text-neutral-20;
+}
 </style>

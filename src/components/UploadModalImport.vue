@@ -15,55 +15,55 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, provide, ref, Ref } from 'vue';
-  import FolderTree from './FolderTree.vue';
-  import BaseButton from './base/BaseButton.vue';
-  import { useMutation } from '@vue/apollo-composable';
-  import { Directory, PostStartImportDocument } from '@/queries';
-  import { useUploadModal } from './UploadModal.vue';
+import { defineComponent, provide, ref, Ref } from "vue";
+import FolderTree from "./FolderTree.vue";
+import BaseButton from "./base/BaseButton.vue";
+import { useMutation } from "@vue/apollo-composable";
+import { Directory, PostStartImportDocument } from "@/queries";
+import { useUploadModal } from "./UploadModal.vue";
 
-  export default defineComponent({
-    name: 'UploadModalImport',
-    components: {
-      FolderTree,
-      BaseButton,
+export default defineComponent({
+  name: "UploadModalImport",
+  components: {
+    FolderTree,
+    BaseButton,
+  },
+  props: {
+    directories: {
+      type: Array,
+      required: true,
+      default: () => [],
     },
-    props: {
-      directories: {
-        type: Array,
-        required: true,
-        default: () => [],
-      },
-      hasDropzone: Boolean
-    },
-    setup() {
-      const { mutate } = useMutation(PostStartImportDocument);
-      const selectedDirectory = ref<Directory | undefined>();
-      const uploadModal = useUploadModal();
+    hasDropzone: Boolean,
+  },
+  setup() {
+    const { mutate } = useMutation(PostStartImportDocument);
+    const selectedDirectory = ref<Directory | undefined>();
+    const uploadModal = useUploadModal();
 
-      const updateSelectedDirectory = (directory: Directory) => {
-        selectedDirectory.value = directory;
-      };
+    const updateSelectedDirectory = (directory: Directory) => {
+      selectedDirectory.value = directory;
+    };
 
-      provide<(directory: Directory) => void>(
-        'updateSelectedDirectory',
-        updateSelectedDirectory,
-      );
+    provide<(directory: Directory) => void>(
+      "updateSelectedDirectory",
+      updateSelectedDirectory
+    );
 
-      provide<Ref<Directory | undefined>>('selectedDirectory', selectedDirectory);
+    provide<Ref<Directory | undefined>>("selectedDirectory", selectedDirectory);
 
-      const doImport = () => {
-        if (selectedDirectory.value && selectedDirectory.value.id) {
-          mutate({
-            folder: selectedDirectory.value.id,
-          });
-          uploadModal.closeUploadModal();
-        }
-      };
+    const doImport = () => {
+      if (selectedDirectory.value && selectedDirectory.value.id) {
+        mutate({
+          folder: selectedDirectory.value.id,
+        });
+        uploadModal.closeUploadModal();
+      }
+    };
 
-      return {
-        doImport,
-      };
-    },
-  });
+    return {
+      doImport,
+    };
+  },
+});
 </script>

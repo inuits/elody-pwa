@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref } from "vue";
 
 const myDropzone = ref<any>();
 const errorMessages = ref<Array<String>>([]);
@@ -37,9 +37,9 @@ const useDropzoneHelper = () => {
 
   const getDropzoneSettings = (dropzonePreviewDiv: any): any => {
     return {
-      url: '/upload',
+      url: "/upload",
       autoProcessQueue: false,
-      acceptedFiles: '.jpg',
+      acceptedFiles: ".jpg",
       previewTemplate: dropzonePreviewDiv.value?.outerHTML,
       uploadMultiple: true,
       parallelUploads: 99,
@@ -61,7 +61,7 @@ const useDropzoneHelper = () => {
     errorMessages,
     selectedFiles,
     isUploading,
-    myDropzone
+    myDropzone,
   };
 };
 

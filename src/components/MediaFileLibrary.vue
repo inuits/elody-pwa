@@ -1,5 +1,5 @@
 <template>
-  <Library 
+  <Library
     :hasSimpleSearch="false"
     :search-input-type-on-drawer="SearchInputType.AdvancedInputMediaFilesType"
     :search-input-type="SearchInputType.AdvancedInputMediaFilesType"
@@ -12,32 +12,31 @@
 </template>
 
 <script lang="ts">
-  import Library from '@/components/base/Library.vue';
-  import { defineComponent } from 'vue';
-  import { SearchInputType } from '@/queries';
+import Library from "@/components/base/Library.vue";
+import { defineComponent } from "vue";
+import { SearchInputType } from "@/queries";
 
-  export default defineComponent({
-    name: 'MediaFileLibrary',
-    components: {
-      Library
+export default defineComponent({
+  name: "MediaFileLibrary",
+  components: {
+    Library,
+  },
+  emits: ["addSelection"],
+  props: {
+    enableSelection: {
+      type: Boolean,
+      default: false,
     },
-    emits: ['addSelection'],
-    props: {
-      enableSelection: {
-        type: Boolean,
-        default: false,
-      },
-    },
-    setup: (props, { emit }) => {
+  },
+  setup: (props, { emit }) => {
+    const addSelection = (entity: any) => {
+      emit("addSelection", entity);
+    };
 
-      const addSelection = (entity: any) => {
-        emit('addSelection', entity);
-      };
-
-      return {
-        SearchInputType,
-        addSelection
-      };
-    },
-  });
+    return {
+      SearchInputType,
+      addSelection,
+    };
+  },
+});
 </script>

@@ -1,16 +1,22 @@
-import { ref } from 'vue';
-import { LinkMediafileToEntityDocument, LinkMediafileToEntityMutation, MediaFile } from '@/queries';
-import { useMutation } from '@vue/apollo-composable';
-import { useRoute } from 'vue-router';
+import { ref } from "vue";
+import { LinkMediafileToEntityDocument } from "@/queries";
+import type { LinkMediafileToEntityMutation, MediaFile } from "@/queries";
+
+import { useMutation } from "@vue/apollo-composable";
+import { useRoute } from "vue-router";
 
 const linkList = ref<Array<MediaFile>>([]);
 
 const useMediaAssetLinkHelper = () => {
-  const { mutate } = useMutation<LinkMediafileToEntityMutation>(LinkMediafileToEntityDocument);
+  const { mutate } = useMutation<LinkMediafileToEntityMutation>(
+    LinkMediafileToEntityDocument
+  );
   const route = useRoute();
 
   const removeMediaFileFromLinkList = (id: string) => {
-    linkList.value = linkList.value.filter((link: MediaFile) => link._id !== id);
+    linkList.value = linkList.value.filter(
+      (link: MediaFile) => link._id !== id
+    );
   };
 
   const clearMediaFilesToLinkToEntity = () => {
@@ -23,7 +29,6 @@ const useMediaAssetLinkHelper = () => {
 
   const linkMediaFilesToEntity = (addSaveCallback: any) => {
     linkList.value.forEach((mediaFile: MediaFile) => {
-
       mediaFile.metadata?.forEach((meta: any) => {
         if (meta.__typename) {
           meta.__typename = undefined;
@@ -38,11 +43,10 @@ const useMediaAssetLinkHelper = () => {
 
       addSaveCallback(async () => {
         await mutate({
-          entityId: route.params['id'],
-          mediaFileInput: mediaFile
+          entityId: route.params["id"],
+          mediaFileInput: mediaFile,
         });
-      }, 'second');
-      
+      }, "second");
     });
     clearMediaFilesToLinkToEntity();
   };
@@ -63,7 +67,7 @@ const useMediaAssetLinkHelper = () => {
     linkMediaFilesToEntity,
     addMediaFileToLinkList,
     isMediaFileInLinkList,
-    linkList
+    linkList,
   };
 };
 

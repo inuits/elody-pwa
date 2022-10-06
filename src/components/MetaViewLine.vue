@@ -1,6 +1,15 @@
 <template>
-  <div v-for="item in metadata" :key="item.label" class="flex flex-col mb-2 mt-2">
-    <div v-if="item.label" class="label" :class="{ loading }" data-test="meta-label">
+  <div
+    v-for="item in metadata"
+    :key="item.label"
+    class="flex flex-col mb-2 mt-2"
+  >
+    <div
+      v-if="item.label"
+      class="label"
+      :class="{ loading }"
+      data-test="meta-label"
+    >
       {{ checkTranslationForlabel(item.label) }}
     </div>
     <div v-else-if="item.label != item.key" class="label" :class="{ loading }">
@@ -15,7 +24,7 @@
       :class="{ loading }"
       data-test="meta-info"
     >
-      {{ item.value ? item.value : 'no data' }}
+      {{ item.value ? item.value : "no data" }}
     </div>
   </div>
   <div
@@ -25,54 +34,54 @@
 </template>
 
 <script lang="ts">
-  import { MetadataAndRelation } from '@/queries';
-  import { defineComponent, PropType } from 'vue';
-  import { useI18n } from 'vue-i18n';
-  import { useRouter } from 'vue-router';
-  import { Unicons } from '@/types';
-  import MetaViewlineRelation from './MetaViewlineRelation.vue';
+import { MetadataAndRelation } from "@/queries";
+import { defineComponent, PropType } from "vue";
+import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
+import { Unicons } from "@/types";
+import MetaViewlineRelation from "./MetaViewlineRelation.vue";
 
-  export default defineComponent({
-    name: 'MetaViewLine',
-    components: { MetaViewlineRelation },
-    props: {
-      loading: { type: Boolean, default: false },
-      metadata: {
-        type: Array as PropType<MetadataAndRelation[]>,
-        required: false,
-        default: () => [],
-      },
+export default defineComponent({
+  name: "MetaViewLine",
+  components: { MetaViewlineRelation },
+  props: {
+    loading: { type: Boolean, default: false },
+    metadata: {
+      type: Array as PropType<MetadataAndRelation[]>,
+      required: false,
+      default: () => [],
     },
-    setup() {
-      const router = useRouter();
-      const { t } = useI18n();
+  },
+  setup() {
+    const router = useRouter();
+    const { t } = useI18n();
 
-      const checkTranslationForlabel = (input: string) => {
-        const translationKey = `metadata.${input}`;
-        const translation = t(translationKey);
+    const checkTranslationForlabel = (input: string) => {
+      const translationKey = `metadata.${input}`;
+      const translation = t(translationKey);
 
-        return translation === translationKey ? input : translation;
-      };
+      return translation === translationKey ? input : translation;
+    };
 
-      return {
-        t,
-        router,
-        Unicons,
-        checkTranslationForlabel,
-      };
-    },
-  });
+    return {
+      t,
+      router,
+      Unicons,
+      checkTranslationForlabel,
+    };
+  },
+});
 </script>
 
 <style lang="postcss" scoped>
-  .label {
-    @apply rounded font-body text-xs text-neutral-60;
-  }
-  .value {
-    @apply rounded font-body text-sm text-neutral-700 mt-0.5;
-  }
-  .label.loading,
-  .value.loading {
-    @apply bg-neutral-20 text-neutral-20;
-  }
+.label {
+  @apply rounded font-body text-xs text-neutral-60;
+}
+.value {
+  @apply rounded font-body text-sm text-neutral-700 mt-0.5;
+}
+.label.loading,
+.value.loading {
+  @apply bg-neutral-20 text-neutral-20;
+}
 </style>

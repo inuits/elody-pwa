@@ -1,7 +1,7 @@
 <template>
-  <Library 
-    :has-simple-search="true" 
-    :search-input-type-on-drawer="SearchInputType.AdvancedInputType" 
+  <Library
+    :has-simple-search="true"
+    :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
     :search-input-type="SearchInputType.SimpleInputtype"
     :list-item-route-name="'SingleEntity'"
     :search-placeholder="'Search Asset Library...'"
@@ -13,37 +13,36 @@
 </template>
 
 <script lang="ts">
-  import Library from '@/components/base/Library.vue';
-  import { defineComponent, PropType } from 'vue';
-  import { SearchInputType } from '@/queries';
+import Library from "@/components/base/Library.vue";
+import { defineComponent, PropType } from "vue";
+import { SearchInputType } from "@/queries";
 
-  export default defineComponent({
-    name: 'AssetLibrary',
-    props: {
-      enableSelection: {
-        type: Boolean,
-        default: false,
-      },
-      acceptedEntityTypes: {
-        type: Array as PropType<string[]>,
-        default: () => [],
-        required: false,
-      },
+export default defineComponent({
+  name: "AssetLibrary",
+  props: {
+    enableSelection: {
+      type: Boolean,
+      default: false,
     },
-    emits: ['addSelection'],
-    components: {
-      Library
+    acceptedEntityTypes: {
+      type: Array as PropType<string[]>,
+      default: () => [],
+      required: false,
     },
-    setup: (props, { emit }) => {
+  },
+  emits: ["addSelection"],
+  components: {
+    Library,
+  },
+  setup: (props, { emit }) => {
+    const addSelection = (id: string) => {
+      emit("addSelection", id);
+    };
 
-      const addSelection = (id: string) => {
-        emit('addSelection', id);
-      };
-
-      return {
-        SearchInputType,
-        addSelection
-      };
-    },
-  });
+    return {
+      SearchInputType,
+      addSelection,
+    };
+  },
+});
 </script>

@@ -1,13 +1,11 @@
-import { MediaFile } from '@/queries';
-import { ref } from 'vue';
+import type { MediaFile } from "@/queries";
+import { ref } from "vue";
 
 const metaDataPatchList = ref<any>({});
 const lastAdjustedMediaFileMetaData = ref<any>();
 const mediafiles = ref<MediaFile[]>([]);
 
-
 const useMetaDataHelper = () => {
-
   const clearMediafiles = (): void => {
     mediafiles.value = [];
   };
@@ -19,9 +17,17 @@ const useMetaDataHelper = () => {
 
   const addOrUpdateList = (mediafileId: string, mediaFileInput: any) => {
     if (mediafileId && mediaFileInput && mediaFileInput.length > 0) {
-      const adjustedMediaFileInput = [...mediaFileInput].map((x:any) => Object.assign({}, x, { __typename: "MediaFileMetadata" }));
-      lastAdjustedMediaFileMetaData.value  = {mediafileId:mediafileId, mediaFileInput:adjustedMediaFileInput};
-      metaDataPatchList.value[mediafileId] = {mediafileId:mediafileId, mediaFileInput:mediaFileInput};
+      const adjustedMediaFileInput = [...mediaFileInput].map((x: any) =>
+        Object.assign({}, x, { __typename: "MediaFileMetadata" })
+      );
+      lastAdjustedMediaFileMetaData.value = {
+        mediafileId: mediafileId,
+        mediaFileInput: adjustedMediaFileInput,
+      };
+      metaDataPatchList.value[mediafileId] = {
+        mediafileId: mediafileId,
+        mediaFileInput: mediaFileInput,
+      };
     }
   };
 
@@ -36,7 +42,7 @@ const useMetaDataHelper = () => {
     addOrUpdateList,
     removeFromMetaDataPatchList,
     lastAdjustedMediaFileMetaData,
-    mediafiles
+    mediafiles,
   };
 };
 
