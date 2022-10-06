@@ -48,14 +48,14 @@
         "
         :source="mediafileSelectionState.selectedMediafile"
       />
-      <PDFViewer
+      <!-- <PDFViewer
         v-if="
           !loading &&
           mediafileSelectionState.selectedMediafile !== undefined &&
           mediafileSelectionState.selectedMediafile.mimetype.includes('pdf')
         "
         :source="mediafileSelectionState.selectedMediafile"
-      />
+      /> -->
       <SrtViewer
         v-if="
           !loading &&
@@ -116,7 +116,7 @@ import { useRoute, onBeforeRouteUpdate } from "vue-router";
 import { asString } from "@/helpers";
 import VideoPlayer from "@/components/base/VideoPlayer.vue";
 import AudioPlayer from "@/components/base/AudioPlayer.vue";
-import PDFViewer from "@/components/base/PDFViewer.vue";
+// import PDFViewer from "@/components/base/PDFViewer.vue";
 import useDropzoneHelper from "@/composables/useDropzoneHelper";
 import useMediaAssetLinkHelper from "@/composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "@/composables/useMetaDataHelper";
@@ -132,7 +132,7 @@ export default defineComponent({
     Meta,
     VideoPlayer,
     AudioPlayer,
-    PDFViewer,
+    // PDFViewer,
     LinkedAssetsList,
     SrtViewer,
     EntityImageSelection,
