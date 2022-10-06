@@ -31,8 +31,8 @@ import {
   uniTimes,
   uniFileAlt,
   uniMusic,
-  uniText
-} from 'vue-unicons/dist/icons';
+  uniText,
+} from "vue-unicons/dist/icons";
 
 export enum Unicons {
   Edit = uniEdit,
@@ -67,5 +67,5 @@ export enum Unicons {
   Cross = uniTimes,
   FileAlt = uniFileAlt,
   Music = uniMusic,
-  Text = uniText
+  Text = uniText,
 }

@@ -19,6 +19,8 @@ coverage
 /cypress/videos/
 /cypress/screenshots/
 
+/src/queries.ts
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -29,4 +31,3 @@ coverage
 *.sln
 *.sw?
 
-session-vue-3-oidc-library

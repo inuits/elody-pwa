@@ -13,7 +13,10 @@
         <Dropdown v-model="queryVariables.filters.type" :options="jobTypes" />
       </div>
       <div class="my-2 flex flex-row justify-left">
-        <Dropdown v-model="queryVariables.pagination.limit" :options="paginationLimits" />
+        <Dropdown
+          v-model="queryVariables.pagination.limit"
+          :options="paginationLimits"
+        />
       </div>
       <div class="flex-grow"></div>
       <Pagination
@@ -34,102 +37,109 @@
 </template>
 
 <script lang="ts">
-  import { GetJobsDocument } from '@/queries';
-  import { useQuery } from '@vue/apollo-composable';
-  import { computed, defineComponent, ref, watch, reactive, onMounted } from 'vue';
-  import ParentJob from '@/components/ParentJob.vue';
-  import Dropdown from '@/components/base/Dropdown.vue';
-  import InputField from '@/components/base/InputField.vue';
+import { GetJobsDocument } from "@/queries";
+import { useQuery } from "@vue/apollo-composable";
+import {
+  computed,
+  defineComponent,
+  ref,
+  watch,
+  reactive,
+  onMounted,
+} from "vue";
+import ParentJob from "@/components/ParentJob.vue";
+import Dropdown from "@/components/base/Dropdown.vue";
+import InputField from "@/components/base/InputField.vue";
 
-  import Pagination, {
-    PaginationInfo,
-    paginationLimits,
-  } from '@/components/base/Pagination.vue';
-  import useJobHelpers, { jobTypeLabels } from '@/composables/useJobHelpers';
-  import ListContainer from '@/components/ListContainer.vue';
-  import useRouteHelpers from '@/composables/useRouteHelpers';
+import Pagination, {
+  PaginationInfo,
+  paginationLimits,
+} from "@/components/base/Pagination.vue";
+import useJobHelpers, { jobTypeLabels } from "@/composables/useJobHelpers";
+import ListContainer from "@/components/ListContainer.vue";
+import useRouteHelpers from "@/composables/useRouteHelpers";
 
-  type Filter = {
-    query: string;
-    type: string;
-  };
+type Filter = {
+  query: string;
+  type: string;
+};
 
-  type QueryVariables = {
-    pagination: PaginationInfo;
-    filters: Filter;
-  };
+type QueryVariables = {
+  pagination: PaginationInfo;
+  filters: Filter;
+};
 
-  export default defineComponent({
-    name: 'History',
-    components: { ParentJob, Dropdown, Pagination, InputField, ListContainer },
-    setup() {
-      const jobhelper = useJobHelpers();
-      const jobTypes = jobhelper.getJobTypes();
-      const routeHelper = useRouteHelpers();
-      const paginationInfo = reactive({
-        limit: 20,
-        skip: 1,
-      });
-      routeHelper.getPaginationInfoFromUrl(paginationInfo);
-      const searchQuery = ref('');
-      const showAll = ref('csv import');
-      const queryVariables = reactive<QueryVariables>({
-        pagination: paginationInfo,
-        filters: {
-          query: searchQuery.value,
-          type: showAll.value,
-        },
-      });
+export default defineComponent({
+  name: "History",
+  components: { ParentJob, Dropdown, Pagination, InputField, ListContainer },
+  setup() {
+    const jobhelper = useJobHelpers();
+    const jobTypes = jobhelper.getJobTypes();
+    const routeHelper = useRouteHelpers();
+    const paginationInfo = reactive({
+      limit: 20,
+      skip: 1,
+    });
+    routeHelper.getPaginationInfoFromUrl(paginationInfo);
+    const searchQuery = ref("");
+    const showAll = ref("csv import");
+    const queryVariables = reactive<QueryVariables>({
+      pagination: paginationInfo,
+      filters: {
+        query: searchQuery.value,
+        type: showAll.value,
+      },
+    });
 
-      const { result, fetchMore } = useQuery(GetJobsDocument, {
-        paginationInfo: {
-          limit: queryVariables.pagination.limit,
-          skip: queryVariables.pagination.skip - 1,
-        },
-        filters: {
-          query: queryVariables.filters.query,
-          type: jobTypeLabels[queryVariables.filters.type],
-        },
-      });
+    const { result, fetchMore } = useQuery(GetJobsDocument, {
+      paginationInfo: {
+        limit: queryVariables.pagination.limit,
+        skip: queryVariables.pagination.skip - 1,
+      },
+      filters: {
+        query: queryVariables.filters.query,
+        type: jobTypeLabels[queryVariables.filters.type],
+      },
+    });
 
-      watch(queryVariables, () => {
-        routeHelper.updatePaginationInfoQueryParams(queryVariables.pagination);
-        getData();
-      });
+    watch(queryVariables, () => {
+      routeHelper.updatePaginationInfoQueryParams(queryVariables.pagination);
+      getData();
+    });
 
-      const getData = () => {
-        fetchMore({
-          variables: {
-            paginationInfo: {
-              limit: Number(queryVariables.pagination.limit),
-              skip:
-                Number(queryVariables.pagination.skip - 1) *
-                Number(queryVariables.pagination.limit),
-            },
-            filters: {
-              query: queryVariables.filters.query,
-              type: jobTypeLabels[queryVariables.filters.type],
-            },
+    const getData = () => {
+      fetchMore({
+        variables: {
+          paginationInfo: {
+            limit: Number(queryVariables.pagination.limit),
+            skip:
+              Number(queryVariables.pagination.skip - 1) *
+              Number(queryVariables.pagination.limit),
           },
-          updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
-        });
-      };
-
-      watch(searchQuery, () => {
-        queryVariables.filters.query = searchQuery.value;
-        getData();
+          filters: {
+            query: queryVariables.filters.query,
+            type: jobTypeLabels[queryVariables.filters.type],
+          },
+        },
+        updateQuery: (prev, { fetchMoreResult: res }) => res || prev,
       });
+    };
 
-      return {
-        jobs: computed(() => {
-          return result.value?.Jobs || [];
-        }),
-        result,
-        searchQuery,
-        queryVariables,
-        jobTypes,
-        paginationLimits,
-      };
-    },
-  });
+    watch(searchQuery, () => {
+      queryVariables.filters.query = searchQuery.value;
+      getData();
+    });
+
+    return {
+      jobs: computed(() => {
+        return result.value?.Jobs || [];
+      }),
+      result,
+      searchQuery,
+      queryVariables,
+      jobTypes,
+      paginationLimits,
+    };
+  },
+});
 </script>
