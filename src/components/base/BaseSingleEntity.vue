@@ -111,7 +111,7 @@
     Entity,
   } from '@/queries';
   import { usePageTitle } from '@/components/TheHeader.vue';
-  import { useEditMode } from '@/components/EditToggle.vue';
+  import { useEditMode } from '@/composables/useEdit';
   import EntityImageSelection, {
     useEntityMediafileSelector,
   } from '@/components/EntityImageSelection.vue';
@@ -126,6 +126,7 @@
   import { useUploadModal } from '../UploadModal.vue';
   import SrtViewer from '@/components/base/SrtViewer.vue';
   import LinkedAssetsList from '@/components/LinkedAssetsList.vue';
+  import usePermissions from '@/composables/usePermissions';
 
   export default defineComponent({
     name: 'SingleEntity',
@@ -149,8 +150,10 @@
       linkedAssets: {
         type: Array as PropType<Entity[]>,
         required: false,
-        default: () => { return []; },
-      }
+        default: () => {
+          return [];
+        },
+      },
     },
     setup(props) {
       const {
@@ -161,7 +164,8 @@
         errorMessages,
       } = useDropzoneHelper();
       const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
-      const { lastAdjustedMediaFileMetaData, mediafiles, clearMediafiles } = useMetaDataHelper();
+      const { lastAdjustedMediaFileMetaData, mediafiles, clearMediafiles } =
+        useMetaDataHelper();
       const id = asString(useRoute().params['id']);
       const loading = ref<boolean>(true);
       const { mediafileSelectionState, updateSelectedEntityMediafile } =
@@ -170,6 +174,7 @@
       const { editMode, showEditToggle } = useEditMode();
       const { updatePageTitle } = usePageTitle();
       const { closeUploadModal } = useUploadModal();
+      const { canEdit, canDelete } = usePermissions();
 
       const queryVariables = reactive<GetEntityByIdQueryVariables>({
         id: id,
@@ -286,11 +291,18 @@
           updateSelectedEntityMediafile(undefined);
         }
         //If form show edit togle
-        if (queryResult.data && queryResult.data.Entity?.form) {
-          showEditToggle();
-        } else if (queryResult.data && queryResult.data?.Entity) {
-          showEditToggle();
+        if (
+          queryResult.data.Entity.permission &&
+          canDelete(queryResult.data.Entity.permission)
+        ) {
+          showEditToggle('delete');
+        } else if (
+          queryResult.data.Entity.permission &&
+          canEdit(queryResult.data.Entity.permission)
+        ) {
+          showEditToggle('edit');
         }
+
         loading.value = false;
       });
 

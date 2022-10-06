@@ -23,14 +23,6 @@
         >
       </h1>
       <edit-toggle />
-      <BaseButton
-        v-if="editMode === 'edit'"
-        label="Delete"
-        bg-color="red-default"
-        bg-hover-color="red-dark"
-        txt-color="neutral-0"
-        @click="showConfirmation()"
-      />
     </div>
     <!-- <div class="float-right">
       <BaseButton
@@ -44,25 +36,15 @@
         <BaseButton :icon="Unicons.User.name" bg-color="neutral-30" />
       </div>
     </div> -->
-    <ConfirmationModal
-      v-show="confirmState === 'show'"
-      v-model:confirmState="confirmState"
-      :function="deleteAsset"
-    />
   </div>
 </template>
 
 <script lang="ts">
   import { defineComponent, ref } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  import BaseButton from './base/BaseButton.vue';
   import { Unicons } from '@/types';
-  import EditToggle from './EditToggle.vue';
-  import { DeleteDataDocument, DeleteDataMutation, DeletePaths } from '@/queries';
-  import { useMutation, useQuery } from '@vue/apollo-composable';
-  import { useEditMode } from '@/components/EditToggle.vue';
-  import { asString } from '@/helpers';
-  import ConfirmationModal from '@/components/base/ConfirmationModal.vue';
+  import EditToggle from './EditButtons.vue';
+  import { useEditMode } from '@/composables/useEdit';
 
   type titleTypes = 'routerTitle' | 'entityTitle';
 
@@ -102,36 +84,17 @@
 
   export default defineComponent({
     name: 'TheHeader',
-    components: { BaseButton, EditToggle, ConfirmationModal },
+    components: { EditToggle },
     setup() {
       const { pageTitle } = usePageTitle();
       const route = useRoute();
-      const router = useRouter();
 
       const { editMode, disableEditMode } = useEditMode();
-
-      const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
-
-      const deleteAsset = async () => {
-        const id = asString(route.params['id']);
-        await mutate({ id, path: DeletePaths.Entities });
-        disableEditMode();
-        router.push({ name: 'Home' });
-      };
-
-      const confirmState = ref<'hidden' | 'show'>('hidden');
-
-      const showConfirmation = () => {
-        confirmState.value = confirmState.value === 'show' ? 'hidden' : 'show';
-      };
 
       return {
         route,
         pageTitle,
         editMode,
-        deleteAsset,
-        showConfirmation,
-        confirmState,
       };
     },
   });

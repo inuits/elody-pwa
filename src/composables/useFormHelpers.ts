@@ -46,12 +46,15 @@ const useFormHelper = (form: Form, entityTitle: string) => {
           });
           additionalIndex++;
         }
-  
+
         if (field && field?.__typename === 'RelationField') {
           const relationArray: relationValues[] = [];
           findRelations(field.relationType, metadata).forEach(
             (relationMetaData: MetadataRelation) => {
-              if ((relationMetaData.label === field.label) || (relationMetaData.type === field.relationType)) {
+              if (
+                relationMetaData.label === field.label ||
+                relationMetaData.type === field.relationType
+              ) {
                 relationArray.push({
                   linkedEntity: relationMetaData.linkedEntity,
                   key: relationMetaData.key,
@@ -60,7 +63,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
                     relationMetaData.metadataOnRelation as MetadataAndRelation[],
                     field.metadata as MetadataOrRelationField[],
                   ),
-                  relationType: field.relationType ? field.relationType : ''
+                  relationType: field.relationType ? field.relationType : '',
                 });
               }
             },
@@ -103,7 +106,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
     }) as MetadataRelation[];
   };
 
-  const serialzeFormToInput = (values: IntialValues,): MetadataFormInput => {
+  const serialzeFormToInput = (values: IntialValues): MetadataFormInput => {
     const input: MetadataFormInput = {
       Metadata: [],
       relations: [],

@@ -30,7 +30,7 @@
   import { useForm, useSubmitForm } from 'vee-validate';
 
   import { useMutation } from '@vue/apollo-composable';
-  import { useEditMode } from '../EditToggle.vue';
+  import { useEditMode } from '@/composables/useEdit';
   import MetaEditDataField from '../MetaEditDataField.vue';
   import useFormHelper, { IntialValues } from '@/composables/useFormHelpers';
   import useMetaDataHelper from '@/composables/useMetaDataHelper';
@@ -51,7 +51,8 @@
         props.form,
         props.entityTitle,
       );
-      const { addOrUpdateList, metaDataPatchList, clearMediaFilesToPatch } = useMetaDataHelper();
+      const { addOrUpdateList, metaDataPatchList, clearMediaFilesToPatch } =
+        useMetaDataHelper();
       const { setValues, values: metadata } = useForm<IntialValues>({});
       const { mutate } = useMutation<PatchMediaFileMetadataMutation>(
         PatchMediaFileMetadataDocument,
@@ -76,16 +77,23 @@
         { immediate: true, deep: true },
       );
 
-      watch(() => metadata, () => {
-        if (mediafileSelectionState.selectedMediafile) {
-          addOrUpdateList( mediafileSelectionState.selectedMediafile._id.replace('mediafiles/','',), serialzeFormToInput(metadata).Metadata);
-        }
-      }, { deep: true });
+      watch(
+        () => metadata,
+        () => {
+          if (mediafileSelectionState.selectedMediafile) {
+            addOrUpdateList(
+              mediafileSelectionState.selectedMediafile._id.replace('mediafiles/', ''),
+              serialzeFormToInput(metadata).Metadata,
+            );
+          }
+        },
+        { deep: true },
+      );
 
       addSaveCallback(
         useSubmitForm<IntialValues>(async () => {
           for (const metaData in metaDataPatchList.value) {
-              await mutate(metaDataPatchList.value[metaData]);
+            await mutate(metaDataPatchList.value[metaData]);
           }
           clearMediaFilesToPatch();
         }),

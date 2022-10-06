@@ -95,6 +95,7 @@ fragment minimalLinkedAsset on Asset {
 fragment fullEntity on Entity {
   id
   type
+  permission
   form {
     ...editForm
   }
