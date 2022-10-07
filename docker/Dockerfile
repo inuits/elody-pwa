@@ -15,10 +15,12 @@ COPY src/queries.graphql ./src/queries.graphql
 
 RUN npm set progress=false && npm config set depth 0 && npm ci && npm run generate 
 
+COPY src/queries.ts ./src/queries.ts
+
 EXPOSE 8080
 
 ### Build stage
-FROM node:14-alpine as build-stage
+FROM node:16-alpine as build-stage
 
 ARG NPM_CONFIG_ALWAYS_AUTH
 ARG NPM_CONFIG_REGISTRY
