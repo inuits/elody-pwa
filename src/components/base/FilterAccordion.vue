@@ -29,11 +29,11 @@
       v-show="isOpen"
       class="border-solid border-b-2 border-neutral-50 px-3 py-5"
     >
-      <slot name="content" />
+      <slot name="content"></slot>
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import { defineComponent, ref } from "vue";
 import { Unicons } from "@/types";
 import BaseLabel from "@/components/base/BaseLabel.vue";

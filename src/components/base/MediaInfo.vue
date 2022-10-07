@@ -1,39 +1,44 @@
 <template>
   <div
-    v-if="mediafileSelectionState.selectedMediafile.metadata.length > 0"
+    v-if="
+      mediafileSelectionState.selectedMediafile &&
+      mediafileSelectionState.selectedMediafile.metadata &&
+      mediafileSelectionState.selectedMediafile.metadata.length > 0
+    "
     class="metainfo absolute bg-neutral-0 z-20 mx-4 mt-7 p-4 shadow-sm bottom-0"
   >
     <h3 class="text-sm text-neutral-700 font-semibold">Mediainfo</h3>
-    <div v-if="!isEdit">
+    <div v-if="!isEdit && mediafileSelectionState.selectedMediafile.metadata">
       <div
         v-for="item in mediafileSelectionState.selectedMediafile.metadata"
-        :key="item.key"
-        class="flex flex-col mb-2 mt-2"
+        :key="item && item.key ? item.key : 'no-key'"
       >
-        <div class="label">{{ item.key }}</div>
-        <div v-if="item.value" class="value">
-          {{ item.value }}
+        <div v-if="item" class="flex flex-col mb-2 mt-2">
+          <div class="label">{{ item.key }}</div>
+          <div v-if="item.value" class="value">
+            {{ item.value }}
+          </div>
         </div>
-      </div>
-      <div v-if="hasPrimaryFunctionality()">
-        <div class="label">{{ t("media-info.primaire-media") }}</div>
-        <div class="value h-5 w-5">
-          <BaseIcon
-            v-if="mediafileSelectionState.selectedMediafile.is_primary"
-            :name="Unicons.Check.name"
-          />
-          <BaseIcon v-else :name="Unicons.Cross.name" />
-        </div>
+        <div v-if="hasPrimaryFunctionality()">
+          <div class="label">{{ t("media-info.primaire-media") }}</div>
+          <div class="value h-5 w-5">
+            <BaseIcon
+              v-if="mediafileSelectionState.selectedMediafile.is_primary"
+              :name="Unicons.Check.name"
+            />
+            <BaseIcon v-else :name="Unicons.Cross.name" />
+          </div>
 
-        <div class="label">{{ t("media-info.thumbnail") }}</div>
-        <div class="value h-5 w-5">
-          <BaseIcon
-            v-if="
-              mediafileSelectionState.selectedMediafile.is_primary_thumbnail
-            "
-            :name="Unicons.Check.name"
-          />
-          <BaseIcon v-else :name="Unicons.Cross.name" />
+          <div class="label">{{ t("media-info.thumbnail") }}</div>
+          <div class="value h-5 w-5">
+            <BaseIcon
+              v-if="
+                mediafileSelectionState.selectedMediafile.is_primary_thumbnail
+              "
+              :name="Unicons.Check.name"
+            />
+            <BaseIcon v-else :name="Unicons.Cross.name" />
+          </div>
         </div>
       </div>
     </div>
