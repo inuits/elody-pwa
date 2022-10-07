@@ -15,11 +15,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
+import type { PropType } from "vue";
 import InputField from "@/components/base/InputField.vue";
 import BaseDropdown from "@/components/base/BaseDropdown.vue";
 import { useField } from "vee-validate";
-import { MetadataFieldOption } from "@/queries";
+import type { MetadataFieldOption } from "@/queries";
 
 export default defineComponent({
   name: "MetaEditDataField",

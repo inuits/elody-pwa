@@ -84,8 +84,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, PropType, ref } from "vue";
-import { Directory, GetDirectoriesDocument } from "@/queries";
+import { defineComponent, inject, ref } from "vue";
+import type { PropType } from "vue";
+import { GetDirectoriesDocument } from "@/queries";
+import type { Directory } from "@/queries";
+
 import { useQuery } from "@vue/apollo-composable";
 import LoadingList from "@/components/base/LoadingList.vue";
 

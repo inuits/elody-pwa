@@ -92,14 +92,12 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, PropType, ref, reactive } from "vue";
+import { defineComponent, onMounted, ref, reactive } from "vue";
+import type { PropType } from "vue";
 import { useMutation } from "@vue/apollo-composable";
-import {
-  MediaFile,
-  DeleteDataDocument,
-  DeleteDataMutation,
-  DeletePaths,
-} from "@/queries";
+import { DeleteDataDocument, DeletePaths } from "@/queries";
+import type { MediaFile } from "@/queries";
+import type { DeleteDataMutation } from "@/queries";
 import AudioThumbnail from "../components/base/audiothumbnail.vue";
 import SvgThumbnail from "./base/svgThumbnail.vue";
 import TrashIcon from "../components/base/TrashIcon.vue";

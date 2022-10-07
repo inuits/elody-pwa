@@ -9,12 +9,11 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, PropType } from "vue";
+import { computed, defineComponent } from "vue";
+import type { PropType } from "vue";
 import InputField from "@/components/base/InputField.vue";
-import {
-  defaultReturnTextObject,
-  FilterInList,
-} from "../../composables/useFilterHelper";
+import { defaultReturnTextObject } from "../../composables/useFilterHelper";
+import type { FilterInList } from "../../composables/useFilterHelper";
 export default defineComponent({
   name: "TextFilter",
   components: {

@@ -12,9 +12,9 @@
 import { defineComponent, ref } from "vue";
 import BaseSingleEntity from "@/components/base/BaseSingleEntity.vue";
 import { useMutation } from "@vue/apollo-composable";
-import {
+import { GetAssetsRelationedWithMediafFileDocument } from "@/queries";
+import type {
   GetAssetsRelationedWithMediafFileMutation,
-  GetAssetsRelationedWithMediafFileDocument,
   Entity,
 } from "@/queries";
 import { useRoute } from "vue-router";

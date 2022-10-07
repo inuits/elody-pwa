@@ -22,13 +22,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
+import type { PropType } from "vue";
 import { useRouter } from "vue-router";
 import { Unicons } from "@/types";
 import BaseIcon from "@/components/base/BaseIcon.vue";
 import BaseButton from "@/components/base/BaseButton.vue";
 import BaseLabel from "@/components/base/BaseLabel.vue";
-import { Job } from "@/queries";
+import type { Job } from "@/queries";
 import useJobHelpers from "@/composables/useJobHelpers";
 
 export default defineComponent({

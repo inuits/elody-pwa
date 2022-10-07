@@ -36,17 +36,19 @@
 </template>
 
 <script lang="ts">
-import { GetFilterOptionsDocument, Maybe } from "@/queries";
+import { GetFilterOptionsDocument } from "@/queries";
+import type { Maybe } from "@/queries";
 import { useQuery } from "@vue/apollo-composable";
-import { ref, defineComponent, computed, PropType } from "vue";
+import { ref, defineComponent, computed } from "vue";
+import type { PropType } from "vue";
 import Multiselect from "@vueform/multiselect";
 // import AndOrToggle from './AndOrToggle.vue';
 import InputField from "@/components/base/InputField.vue";
 import {
   defaultReturnMultiSelectObject,
   defaultReturnTextObject,
-  FilterInList,
 } from "@/composables/useFilterHelper";
+import type { FilterInList } from "@/composables/useFilterHelper";
 
 export default defineComponent({
   name: "MultiFilter",

@@ -38,9 +38,10 @@
 </template>
 
 <script lang="ts">
-import { Metadata } from "@/queries";
-import { defineComponent, inject, PropType } from "vue";
-import { Unicons } from "@/types";
+import type { Metadata } from "@/queries";
+import { defineComponent, inject } from "vue";
+import type { PropType } from "vue";
+import type { Unicons } from "@/types";
 
 export default defineComponent({
   name: "ListItem",

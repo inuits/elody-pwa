@@ -92,10 +92,12 @@
 <script lang="ts">
 import {
   GetFormsDocument,
-  MediaFile,
   SetMediaPrimaireDocument,
-  SetMediaPrimaireMutation,
   SetThumbnailPrimaireDocument,
+} from "@/queries";
+import type {
+  MediaFile,
+  SetMediaPrimaireMutation,
   SetThumbnailPrimaireMutation,
 } from "@/queries";
 import { useQuery } from "@vue/apollo-composable";

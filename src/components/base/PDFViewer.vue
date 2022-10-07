@@ -8,8 +8,8 @@
 
 <script lang="ts">
 // @ts-nocheck
-import { defineComponent, onMounted, watch, ref, PropType, toRefs } from "vue";
-
+import { defineComponent, onMounted, watch, ref, toRefs } from "vue";
+import type { PropType } from "vue";
 //PDFJS imports
 import * as pdfjsLibImport from "pdfjs-dist";
 const pdfjsLib: typeof import("pdfjs-dist") = pdfjsLibImport;

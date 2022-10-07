@@ -17,8 +17,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
-import { Unicons } from "@/types";
+import { defineComponent } from "vue";
+import type { PropType } from "vue";
+import type { Unicons } from "@/types";
 import BaseIcon from "@/components/base/BaseIcon.vue";
 
 export default defineComponent({

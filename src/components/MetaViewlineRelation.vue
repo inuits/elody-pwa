@@ -90,8 +90,9 @@
 </template>
 
 <script lang="ts">
-import { MetadataRelation } from "@/queries";
-import { defineComponent, PropType } from "vue";
+import type { MetadataRelation } from "@/queries";
+import { defineComponent } from "vue";
+import type { PropType } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { Unicons } from "@/types";

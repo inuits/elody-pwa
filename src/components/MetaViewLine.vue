@@ -34,8 +34,9 @@
 </template>
 
 <script lang="ts">
-import { MetadataAndRelation } from "@/queries";
-import { defineComponent, PropType } from "vue";
+import type { MetadataAndRelation } from "@/queries";
+import { defineComponent } from "vue";
+import type { PropType } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { Unicons } from "@/types";

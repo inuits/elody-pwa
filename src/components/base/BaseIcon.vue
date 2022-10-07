@@ -8,9 +8,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
+import type { PropType } from "vue";
 import { Unicon } from "vue-unicons";
-import { Unicons } from "@/types";
+import type { Unicons } from "@/types";
 
 export default defineComponent({
   name: "BaseIcon",
