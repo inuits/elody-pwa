@@ -24,11 +24,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, watch } from "vue";
+import { defineComponent, ref, watch } from "vue";
+import type { PropType } from "vue";
 import MetaEdit from "@/components/MetaEdit.vue";
 import MetaView from "@/components/MetaView.vue";
 import { useEditMode } from "@/composables/useEdit";
-import { Form, MetadataAndRelation } from "@/queries";
+import type { Form, MetadataAndRelation } from "@/queries";
 
 export default defineComponent({
   name: "MetaWindow",

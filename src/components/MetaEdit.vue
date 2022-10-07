@@ -23,13 +23,14 @@
 </template>
 
 <script lang="ts">
-import {
+import { ReplaceRelationsAndMetaDataDocument } from "@/queries";
+import type {
   Form,
   MetadataAndRelation,
-  ReplaceRelationsAndMetaDataDocument,
   ReplaceRelationsAndMetaDataMutation,
 } from "@/queries";
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
+import type { PropType } from "vue";
 import { useForm, useSubmitForm } from "vee-validate";
 
 import { useMutation } from "@vue/apollo-composable";
@@ -37,7 +38,8 @@ import useRouteHelpers from "@/composables/useRouteHelpers";
 import { useEditMode } from "@/composables/useEdit";
 import MetaEditRelationField from "./MetaEditRelationField.vue";
 import MetaEditDataField from "./MetaEditDataField.vue";
-import useFormHelper, { IntialValues } from "@/composables/useFormHelpers";
+import useFormHelper from "@/composables/useFormHelpers";
+import type { IntialValues } from "@/composables/useFormHelpers";
 
 export default defineComponent({
   name: "MetaEdit",

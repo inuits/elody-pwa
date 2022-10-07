@@ -27,8 +27,8 @@ import {
   onMounted,
   onBeforeMount,
   toRefs,
-  VNode,
 } from "vue";
+import type { VNode } from "vue";
 
 interface TabProps {
   title?: string;

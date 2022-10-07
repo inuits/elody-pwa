@@ -36,7 +36,8 @@ import BaseButton from "./base/BaseButton.vue";
 import { useRoute, useRouter } from "vue-router";
 import { asString } from "@/helpers";
 import { useMutation } from "@vue/apollo-composable";
-import { DeleteDataMutation, DeleteDataDocument, DeletePaths } from "@/queries";
+import { DeleteDataDocument, DeletePaths } from "@/queries";
+import type { DeleteDataMutation } from "@/queries";
 import ConfirmationModal from "@/components/base/ConfirmationModal.vue";
 import useEditMode from "@/composables/useEdit";
 

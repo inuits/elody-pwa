@@ -11,8 +11,9 @@
 </template>
 
 <script lang="ts">
-import { MetadataAndRelation } from "@/queries";
-import { defineComponent, PropType } from "vue";
+import type { MetadataAndRelation } from "@/queries";
+import { defineComponent } from "vue";
+import type { PropType } from "vue";
 import MetaViewLine from "./MetaViewLine.vue";
 
 export default defineComponent({

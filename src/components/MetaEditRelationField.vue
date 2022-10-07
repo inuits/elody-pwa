@@ -48,21 +48,22 @@
 </template>
 
 <script lang="ts">
-import { Entity, RelationField } from "@/queries";
-import { defineComponent, PropType, watch } from "vue";
+import type { Entity, RelationField } from "@/queries";
+import { defineComponent, watch } from "vue";
+import type { PropType } from "vue";
 import MetaEditDataField from "./MetaEditDataField.vue";
 import { useFieldArray } from "vee-validate";
 import { inputContainerStyle, lableStyle } from "./base/InputField.vue";
 import { Unicons } from "@/types";
 import BaseButton from "./base/BaseButton.vue";
 import MetaAdd from "@/components/MetaAdd.vue";
-import { PickEntityModalType, usePickEntityModal } from "./PickEntityModal.vue";
-
+import { usePickEntityModal } from "./PickEntityModal.vue";
+import type { PickEntityModalType } from "./PickEntityModal.vue";
 import {
   selectedRelationField,
   getEmptyMetadatRelationObject,
-  relationValues,
 } from "@/composables/useFormHelpers";
+import type { relationValues } from "@/composables/useFormHelpers";
 import ListItem from "@/components/ListItem.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 

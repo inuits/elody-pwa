@@ -85,7 +85,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeUpdate, PropType, ref } from "vue";
+import { computed, defineComponent, onBeforeUpdate, ref } from "vue";
+import type { PropType } from "vue";
 import { Unicons } from "@/types";
 import BaseIcon from "@/components/base/BaseIcon.vue";
 import LoadingList from "@/components/base/LoadingList.vue";
@@ -93,7 +94,8 @@ import BaseButton from "@/components/base/BaseButton.vue";
 import ProgressBar from "@/components/base/ProgressBar.vue";
 import BaseLabel from "@/components/base/BaseLabel.vue";
 import SingleJob from "@/components/SingleJob.vue";
-import { GetJobDocument, Job } from "@/queries";
+import { GetJobDocument } from "@/queries";
+import type { Job } from "@/queries";
 import { useQuery } from "@vue/apollo-composable";
 import useJobHelpers from "@/composables/useJobHelpers";
 import ListContainer from "@/components/ListContainer.vue";

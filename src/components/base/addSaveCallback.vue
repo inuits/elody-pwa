@@ -1,5 +1,6 @@
 <script lang="ts">
-import { defineComponent, inject, PropType } from "vue";
+import { defineComponent, inject } from "vue";
+import type { PropType } from "vue";
 
 export default defineComponent({
   name: "AddSaveCallback",

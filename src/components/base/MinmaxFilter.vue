@@ -19,12 +19,11 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, PropType } from "vue";
+import { computed, defineComponent } from "vue";
+import type { PropType } from "vue";
 import MinMaxField from "@/components/base/MinMaxField.vue";
-import {
-  defaultReturnMinMaxObject,
-  FilterInList,
-} from "@/composables/useFilterHelper";
+import { defaultReturnMinMaxObject } from "@/composables/useFilterHelper";
+import type { FilterInList } from "@/composables/useFilterHelper";
 
 export default defineComponent({
   name: "MinmaxFilter",

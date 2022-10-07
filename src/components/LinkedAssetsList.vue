@@ -33,9 +33,10 @@
 <script lang="ts">
 import BaseButton from "@/components/base/BaseButton.vue";
 import ListItem from "@/components/ListItem.vue";
-import { Entity } from "@/queries";
+import type { Entity } from "@/queries";
 import { Unicons } from "@/types";
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
+import type { PropType } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";

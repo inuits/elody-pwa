@@ -44,13 +44,14 @@
   </div>
 </template>
 <script lang="ts">
-import {
-  defaultReturnMultiSelectObject,
-  FilterInList,
-} from "@/composables/useFilterHelper";
-import { GetFilterOptionsDocument, Maybe } from "@/queries";
+import { defaultReturnMultiSelectObject } from "@/composables/useFilterHelper";
+import type { FilterInList } from "@/composables/useFilterHelper";
+import { GetFilterOptionsDocument } from "@/queries";
+import type { Maybe } from "@/queries";
 import { useQuery } from "@vue/apollo-composable";
-import { computed, defineComponent, PropType, ref, watch } from "vue";
+import { computed, defineComponent, ref, watch } from "vue";
+import type { PropType } from "vue";
+
 // import AndOrToggle from './AndOrToggle.vue';
 export default defineComponent({
   name: "ChecklistFilter",

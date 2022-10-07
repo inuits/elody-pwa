@@ -69,7 +69,8 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, computed, PropType, onMounted } from "vue";
+import { defineComponent, ref, computed, onMounted } from "vue";
+import type { PropType } from "vue";
 import FilterAccordion from "@/components/base/FilterAccordion.vue";
 import { useQuery } from "@vue/apollo-composable";
 import { AdvancedFilterTypes, GetAdvancedFiltersDocument } from "@/queries";
@@ -81,9 +82,9 @@ import MultiFilter from "@/components/base/MultiFilter.vue";
 // import AndOrToggle from './base/AndOrToggle.vue';
 import {
   clearAdvancedSearchInput,
-  FilterInList,
   getActiveFilters,
 } from "@/composables/useFilterHelper";
+import type { FilterInList } from "@/composables/useFilterHelper";
 
 export default defineComponent({
   name: "FilterSideBar",

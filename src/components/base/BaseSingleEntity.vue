@@ -93,18 +93,17 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, watch, ref, reactive, PropType } from "vue";
+import { computed, defineComponent, watch, ref, reactive } from "vue";
+import type { PropType } from "vue";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import IIIFViewer from "@/components/IIIFViewer.vue";
 import MetaWindow from "@/components/MetaWindow.vue";
-import {
-  GetEntityByIdDocument,
+import { GetEntityByIdDocument, PostMediaFileDocument } from "@/queries";
+import type {
   GetEntityByIdQuery,
   Maybe,
   MediaFile,
   GetEntityByIdQueryVariables,
-  PostMediaFileMutation,
-  PostMediaFileDocument,
   Entity,
 } from "@/queries";
 import { usePageTitle } from "@/components/TheHeader.vue";

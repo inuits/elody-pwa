@@ -15,11 +15,13 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, provide, ref, Ref } from "vue";
+import { defineComponent, provide, ref } from "vue";
+import type { Ref } from "vue";
 import FolderTree from "./FolderTree.vue";
 import BaseButton from "./base/BaseButton.vue";
 import { useMutation } from "@vue/apollo-composable";
-import { Directory, PostStartImportDocument } from "@/queries";
+import { PostStartImportDocument } from "@/queries";
+import type { Directory } from "@/queries";
 import { useUploadModal } from "./UploadModal.vue";
 
 export default defineComponent({
