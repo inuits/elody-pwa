@@ -4,7 +4,11 @@
   </div> -->
   <div>
     <ul v-for="option in options?.FilterOptions" :key="option">
-      <li v-if="acceptedEntityTypes.length == 0 || filterkey !== 'type'">
+      <li
+        v-if="
+          option && (acceptedEntityTypes.length == 0 || filterkey !== 'type')
+        "
+      >
         <input
           :id="option.label"
           v-model="inputFieldMulti"

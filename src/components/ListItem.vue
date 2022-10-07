@@ -62,7 +62,12 @@ export default defineComponent({
       imageSrcError = true;
     };
 
-    const only4Meta = (input: Metadata[]) => {
+    const only4Meta = (
+      input: {
+        key: string;
+        value: string;
+      }[]
+    ) => {
       return input.filter((value) => value.value !== "").slice(0, 4);
     };
     return { setNoImage, imageSrcError, only4Meta, config };

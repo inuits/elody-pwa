@@ -5,7 +5,7 @@
     <BaseIcon :name="Unicons.Trash.name" />
   </div>
 </template>
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { Unicons } from "@/types";
 import BaseIcon from "@/components/base/BaseIcon.vue";

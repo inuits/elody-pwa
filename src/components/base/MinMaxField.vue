@@ -34,7 +34,6 @@ export const inputStyle =
 
 export default defineComponent({
   name: "InputField",
-
   inheritAttrs: false,
   props: {
     label: { type: String, default: "" },
