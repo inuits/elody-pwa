@@ -15,8 +15,6 @@ COPY src/queries.graphql ./src/queries.graphql
 
 RUN npm set progress=false && npm config set depth 0 && npm ci && npm run generate 
 
-COPY src/queries.ts ./src/queries.ts
-
 EXPOSE 8080
 
 ### Build stage
