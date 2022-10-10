@@ -14,12 +14,14 @@
         :enable-selection="true"
         :accepted-entity-types="pickEntityModalState.acceptedEntityTypes"
         @add-selection="addItem"
+        :already-added-metadata="selectedRelationFieldMetadata"
       />
       <AssetLibrary
         v-else
         :enable-selection="true"
         :accepted-entity-types="pickEntityModalState.acceptedEntityTypes"
         @add-selection="addItem($event)"
+        :already-added-metadata="selectedRelationFieldMetadata"
       />
     </div>
   </BaseModal>
