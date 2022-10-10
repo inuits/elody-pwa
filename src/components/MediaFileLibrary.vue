@@ -7,6 +7,7 @@
     :search-placeholder="'Search Mediafiles...'"
     :advanced-filters-choice="'mediaFileFilters'"
     :enable-selection="enableSelection"
+    :already-added-metadata="selectedRelationFieldMetadata"
     @add-selection="addSelection"
   />
 </template>
@@ -15,6 +16,7 @@
 import BaseLibrary from "@/components/base/BaseLibrary.vue";
 import { defineComponent } from "vue";
 import { SearchInputType } from "@/queries";
+import selectedRelationFieldMetadata from './../composables/useFormHelpers';
 
 export default defineComponent({
   name: "MediaFileLibrary",
@@ -36,6 +38,7 @@ export default defineComponent({
     return {
       SearchInputType,
       addSelection,
+      selectedRelationFieldMetadata
     };
   },
 });

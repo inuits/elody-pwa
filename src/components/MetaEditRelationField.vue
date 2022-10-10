@@ -62,6 +62,7 @@ import type { PickEntityModalType } from "./PickEntityModal.vue";
 import {
   selectedRelationField,
   getEmptyMetadatRelationObject,
+  selectedRelationFieldMetadata
 } from "@/composables/useFormHelpers";
 import type { relationValues } from "@/composables/useFormHelpers";
 import ListItem from "@/components/ListItem.vue";
@@ -105,6 +106,7 @@ export default defineComponent({
 
     const openModal = (acceptedEntityTypes: string[]) => {
       selectedRelationField.value = props.structure;
+      selectedRelationFieldMetadata.value = fields;
       openPickEntityModal(acceptedEntityTypes);
     };
 

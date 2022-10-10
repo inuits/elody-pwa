@@ -60,7 +60,7 @@
             v-for="n in queryVariables.limit"
             :key="n"
             title="loading"
-            :loading="true"
+            :loading="true" 
             :meta="[
               { key: '/', value: '/' },
               { key: '/', value: '/' },
@@ -95,7 +95,7 @@
           >
             <template #actions>
               <BaseButton
-                v-if="enableSelection"
+                v-if="determineIfNotAdded(entity) && enableSelection"
                 :loading="loading"
                 class="ml-2"
                 :icon="Unicons.PlusCircle.name"
@@ -144,6 +144,7 @@ import FilterSideBar from "@/components/FilterSideBar.vue";
 import IconToggle from "@/components/base/IconToggle.vue";
 import { useI18n } from "vue-i18n";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
+import { selectedRelationFieldMetadata } from "@/composables/useFormHelpers";
 
 export default defineComponent({
   name: "BaseLibrary",
@@ -239,6 +240,24 @@ export default defineComponent({
       emit("addSelection", entity);
     };
 
+    const determineIfNotAdded = (entity: any): boolean => {
+      if (selectedRelationFieldMetadata.value.length === 0) {
+        return true;
+      }
+      const id = entity.uuid;
+      const arr = Object.values(selectedRelationFieldMetadata.value);
+      if (! (arr[3] && arr[3][0])){
+        return true;
+      }
+      for (let i = 0; i < arr[3].length; i++){
+        if (id === arr[3][i].value.key){
+          return false;
+        }
+      }
+      return true;
+    }
+
+
     return {
       paginationLimits,
       queryVariables,
@@ -251,6 +270,8 @@ export default defineComponent({
       t,
       setFilters,
       getThumbnail,
+      determineIfNotAdded,
+      selectedRelationFieldMetadata
     };
   },
 });

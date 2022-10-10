@@ -17,6 +17,7 @@ import type { RelationMetaData } from "@/queries";
 
 export const LINKED_ENTITY: string = "linkedEntity";
 export const selectedRelationField = ref<RelationField>();
+export const selectedRelationFieldMetadata = ref([]);
 
 export type relationValues = {
   linkedEntity: Maybe<Entity> | undefined;
