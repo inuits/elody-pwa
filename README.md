@@ -41,6 +41,8 @@ npm run build
 
 ### Run Unit Tests with [Vitest](https://vitest.dev/)
 
+Unit tests are implemented in the folder `tests`, please keep fake data seperate in the file `fakeData.ts` or seperate files to keep the written test readable. In the root the folder `coverage` is available and will generate new files each time you re-run test so you can easiliy view results in your terminal but also in your browser `http://dashboard.dams.localhost:8100/coverage/index.html`.
+
 ```sh
 npm run test:unit
 ```
