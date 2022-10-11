@@ -53,33 +53,27 @@ const useFormHelper = (form: Form, entityTitle: string) => {
 
         if (field && field?.__typename === "RelationField") {
           const relationArray: relationValues[] = [];
+
+          const pushIntoRelationArray = (relationMetaData: MetadataRelation) => {
+            relationArray.push({
+              linkedEntity: relationMetaData.linkedEntity,
+              key: relationMetaData.key,
+              label: field.label ? field.label : relationMetaData.key,
+              metadata: buildInitialValues(
+                relationMetaData.metadataOnRelation as MetadataAndRelation[],
+                field.metadata as MetadataOrRelationField[]
+              ),
+              relationType: field.relationType ? field.relationType : "",
+            });
+          }
+          
           findRelations(field.relationType, metadata).forEach(
             (relationMetaData: MetadataRelation) => {
-              if (
-                (field.key) && (relationMetaData.label === field.label)
-              ) {
-                relationArray.push({
-                  linkedEntity: relationMetaData.linkedEntity,
-                  key: relationMetaData.key,
-                  label: field.label ? field.label : relationMetaData.key,
-                  metadata: buildInitialValues(
-                    relationMetaData.metadataOnRelation as MetadataAndRelation[],
-                    field.metadata as MetadataOrRelationField[]
-                  ),
-                  relationType: field.relationType ? field.relationType : "",
-                });
+              if ((field.key) && (relationMetaData.label === field.label)) {
+                pushIntoRelationArray(relationMetaData);
               }
               else if (field.key === noKey) {
-                relationArray.push({
-                  linkedEntity: relationMetaData.linkedEntity,
-                  key: relationMetaData.key,
-                  label: field.label ? field.label : relationMetaData.key,
-                  metadata: buildInitialValues(
-                    relationMetaData.metadataOnRelation as MetadataAndRelation[],
-                    field.metadata as MetadataOrRelationField[]
-                  ),
-                  relationType: field.relationType ? field.relationType : "",
-                });
+                pushIntoRelationArray(relationMetaData);
               }
             }
           );
