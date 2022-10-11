@@ -103,7 +103,7 @@ import SvgThumbnail from "./base/svgThumbnail.vue";
 import TrashIcon from "../components/base/TrashIcon.vue";
 import PlusCircleIcon from "../components/base/PlusCircleIcon.vue";
 import { useEditMode } from "@/composables/useEdit";
-import { useUploadModal } from "./UploadModal.vue";
+import { useUploadModal, modalChoices } from "./UploadModal.vue";
 import useDropzoneHelper from "../composables/useDropzoneHelper";
 import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "../composables/useMetaDataHelper";
@@ -153,7 +153,7 @@ export default defineComponent({
     const { isMediaFileInLinkList, removeMediaFileFromLinkList } =
       useMediaAssetLinkHelper();
     const { removeFromMetaDataPatchList } = useMetaDataHelper();
-    const { openUploadModal, modalChoices } = useUploadModal();
+    const { openUploadModal } = useUploadModal();
     const selectImage = (mediafile: MediaFile) => {
       updateSelectedEntityMediafile(mediafile);
     };
