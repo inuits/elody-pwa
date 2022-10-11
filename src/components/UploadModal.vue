@@ -1,29 +1,16 @@
 <template>
-  <BaseModal
-    :large="true"
-    :scroll="false"
-    :modal-state="uploadModalState.state"
-    @hide-modal="closeUploadModal"
-  >
+  <BaseModal :large="true" :scroll="false" :modal-state="uploadModalState.state" @hide-modal="closeUploadModal">
     <div class="bg-neutral-20 w-full h-full flex flex-col overflow-auto">
-      <upload-modal-import
-        v-if="modalToOpen === modalChoices.IMPORT"
-        :directories="result"
-      />
+      <upload-modal-import v-if="modalToOpen === modalChoices.IMPORT" :directories="result" />
       <BaseTabs v-if="modalToOpen === modalChoices.DROPZONE">
         <BaseTab title="Upload files">
           <div class="p-3 h-full">
-            <upload-modal-dropzone
-              v-if="modalToOpen === modalChoices.DROPZONE"
-            />
+            <upload-modal-dropzone v-if="modalToOpen === modalChoices.DROPZONE" />
           </div>
         </BaseTab>
         <BaseTab title="Select file">
           <div class="p-3 h-full">
-            <MediaFileLibrary
-              :enable-selection="true"
-              @add-selection="addSelection"
-            />
+            <MediaFileLibrary :enable-selection="true" @add-selection="addSelection" />
           </div>
         </BaseTab>
       </BaseTabs>
@@ -139,6 +126,7 @@ export default defineComponent({
       closeUploadModal,
       result,
       addSelection,
+      modalChoices
     };
   },
 });
