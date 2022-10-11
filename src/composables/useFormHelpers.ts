@@ -38,7 +38,6 @@ const useFormHelper = (form: Form, entityTitle: string) => {
     metadata: MetadataAndRelation[],
     structure: MetadataOrRelationField[] = formStructure
   ) => {
-    console.log('md: ', metadata);
     const intialValues: IntialValues = {};
     let additionalIndex: number = 0;
     if (structure) {
@@ -89,7 +88,6 @@ const useFormHelper = (form: Form, entityTitle: string) => {
         }
       });
     }
-    console.log('intialValues:', intialValues);
     return intialValues;
   };
 
