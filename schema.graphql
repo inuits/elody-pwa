@@ -388,6 +388,7 @@ type MetadataFieldOption {
 }
 
 type RelationField {
+  key: String!
   label: String
   relationType: String!
   metadata: [MetadataField]
