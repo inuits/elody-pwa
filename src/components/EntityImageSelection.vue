@@ -27,7 +27,7 @@
               <trash-icon
                 v-if="editMode === 'edit' && !toBeDeleted.includes(element._id)"
                 class="hidden group-hover:block"
-                @click="addToSaveCallback(element._id, arrayKey)"
+                @click="addToSaveCallback(element._id)"
               />
               <img
                 v-if="
@@ -43,7 +43,7 @@
                     ? 'border-2 border-blue-500'
                     : '',
                 ]"
-                :src="`/api/iiif/3/${element.filename}/square/100,/0/default.jpg`"
+                :src="`/api/iiif/3/${element.transcode_filename}/square/100,/0/default.jpg`"
                 @click="selectImage(element)"
               />
               <AudioThumbnail

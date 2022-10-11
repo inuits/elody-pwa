@@ -24,7 +24,7 @@
           :meta="value.linkedEntity.teaserMetadata"
           :media="
             value.linkedEntity.media
-              ? value.linkedEntity.media.primaryMediafile
+              ? value.linkedEntity.media.primary_transcode
               : null
           "
           :thumb-icon="getThumbnail(value)"
@@ -62,7 +62,7 @@ import type { PickEntityModalType } from "./PickEntityModal.vue";
 import {
   selectedRelationField,
   getEmptyMetadatRelationObject,
-  selectedRelationFieldMetadata
+  selectedRelationFieldMetadata,
 } from "@/composables/useFormHelpers";
 import type { relationValues } from "@/composables/useFormHelpers";
 import ListItem from "@/components/ListItem.vue";

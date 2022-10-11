@@ -55,7 +55,7 @@ export default defineComponent({
           prefixUrl: "/static/openseadragon/images/",
           // @ts-ignore
           toolbar: document.getElementById("OpenSeadragon-toolbar"),
-          tileSources: `/api/iiif/3/${props.imageUrl}/info.json`,
+          tileSources: `/api/iiif/3/${props.imageTranscodeUrl}/info.json`,
         };
 
         if (zoomInDiv.value !== null) {

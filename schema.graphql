@@ -183,6 +183,7 @@ union MetadataAndRelation = Metadata | MetadataRelation
 
 type Media {
   primaryMediafile: String
+  primary_transcode: String
   primaryMediafileLocation: String
   primaryThumbnailLocation: String
   mediafiles: [MediaFile]

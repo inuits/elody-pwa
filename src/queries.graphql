@@ -51,7 +51,7 @@ fragment editForm on Form {
 fragment minimalAsset on Asset {
   ...minimalBaseEntity
   media {
-    primaryMediafile
+    primary_transcode
   }
   teaserMetadata: metadata(
     keys: ["type", "title", "object_number"]
@@ -79,7 +79,7 @@ fragment minimalAsset on Asset {
 fragment minimalLinkedAsset on Asset {
   ...minimalBaseEntity
   media {
-    primaryMediafile
+    primary_transcode
   }
   teaserMetadata: metadata(keys: ["title"], excludeOrInclude: include) {
     __typename
@@ -180,7 +180,7 @@ fragment fullEntityRecursive on Entity {
         ... on Asset {
           ...minimalBaseEntity
           media {
-            primaryMediafile
+            primary_transcode
           }
           teaserMetadata: metadata(
             keys: ["title", "object_number"]
@@ -198,7 +198,7 @@ fragment fullEntityRecursive on Entity {
         ... on MediaFileEntity {
           ...minimalBaseEntity
           media {
-            primaryMediafile
+            primary_transcode
           }
           teaserMetadata: metadata(
             keys: ["title", "object_number"]
@@ -251,7 +251,10 @@ fragment fullEntityRecursive on Entity {
         }
         ... on Testimony {
           ...minimalBaseEntity
-          teaserMetadata: metadata(keys: ["description"], excludeOrInclude: include) {
+          teaserMetadata: metadata(
+            keys: ["description"]
+            excludeOrInclude: include
+          ) {
             __typename
             ... on Metadata {
               ...metadata
@@ -263,7 +266,10 @@ fragment fullEntityRecursive on Entity {
         }
         ... on person {
           ...minimalBaseEntity
-          teaserMetadata: metadata(keys: ["fullname"], excludeOrInclude: include) {
+          teaserMetadata: metadata(
+            keys: ["fullname"]
+            excludeOrInclude: include
+          ) {
             __typename
             ... on Metadata {
               ...metadata
@@ -300,7 +306,7 @@ fragment fullEntityRecursive on Entity {
                 ... on Asset {
                   ...minimalBaseEntity
                   media {
-                    primaryMediafile
+                    primary_transcode
                   }
                   teaserMetadata: metadata(
                     keys: ["title", "object_number"]
@@ -317,7 +323,10 @@ fragment fullEntityRecursive on Entity {
                 }
                 ... on Frame {
                   ...minimalBaseEntity
-                  teaserMetadata: metadata(keys: ["title"], excludeOrInclude: include) {
+                  teaserMetadata: metadata(
+                    keys: ["title"]
+                    excludeOrInclude: include
+                  ) {
                     __typename
                     ... on Metadata {
                       ...metadata
@@ -329,7 +338,10 @@ fragment fullEntityRecursive on Entity {
                 }
                 ... on Story {
                   ...minimalBaseEntity
-                  teaserMetadata: metadata(keys: ["title"], excludeOrInclude: include) {
+                  teaserMetadata: metadata(
+                    keys: ["title"]
+                    excludeOrInclude: include
+                  ) {
                     __typename
                     ... on Metadata {
                       ...metadata
@@ -341,7 +353,10 @@ fragment fullEntityRecursive on Entity {
                 }
                 ... on boxEntity {
                   ...minimalBaseEntity
-                  teaserMetadata: metadata(keys: ["title"], excludeOrInclude: include) {
+                  teaserMetadata: metadata(
+                    keys: ["title"]
+                    excludeOrInclude: include
+                  ) {
                     __typename
                     ... on Metadata {
                       ...metadata
@@ -383,7 +398,10 @@ fragment fullEntityRecursive on Entity {
                 }
                 ... on SimpleEntity {
                   ...minimalBaseEntity
-                  teaserMetadata: metadata(keys: ["title"], excludeOrInclude: include) {
+                  teaserMetadata: metadata(
+                    keys: ["title"]
+                    excludeOrInclude: include
+                  ) {
                     __typename
                     ... on Metadata {
                       ...metadata
@@ -405,7 +423,7 @@ fragment fullEntityRecursive on Entity {
                       ... on Asset {
                         ...minimalBaseEntity
                         media {
-                          primaryMediafile
+                          primary_transcode
                         }
                         teaserMetadata: metadata(
                           keys: ["title", "object_number"]
@@ -555,7 +573,7 @@ query getEntities(
       }
       ... on MediaFileEntity {
         media {
-          primaryMediafile
+          primary_transcode
           mediafiles {
             _id
             filename
@@ -572,7 +590,10 @@ query getEntities(
             is_primary_thumbnail
           }
         }
-        teaserMetadata: metadata(keys: ["filename"], excludeOrInclude: include) {
+        teaserMetadata: metadata(
+          keys: ["filename"]
+          excludeOrInclude: include
+        ) {
           __typename
           ... on Metadata {
             key
@@ -593,7 +614,10 @@ query getEntities(
         }
       }
       ... on Frame {
-        teaserMetadata: metadata(keys: ["type", "title"], excludeOrInclude: include) {
+        teaserMetadata: metadata(
+          keys: ["type", "title"]
+          excludeOrInclude: include
+        ) {
           __typename
           ... on Metadata {
             key
@@ -614,7 +638,10 @@ query getEntities(
         }
       }
       ... on Story {
-        teaserMetadata: metadata(keys: ["type", "title"], excludeOrInclude: include) {
+        teaserMetadata: metadata(
+          keys: ["type", "title"]
+          excludeOrInclude: include
+        ) {
           __typename
           ... on Metadata {
             key
@@ -635,7 +662,10 @@ query getEntities(
         }
       }
       ... on boxEntity {
-        teaserMetadata: metadata(keys: ["type", "title"], excludeOrInclude: include) {
+        teaserMetadata: metadata(
+          keys: ["type", "title"]
+          excludeOrInclude: include
+        ) {
           __typename
           ... on Metadata {
             key
@@ -656,7 +686,10 @@ query getEntities(
         }
       }
       ... on Testimony {
-        teaserMetadata: metadata(keys: ["description"], excludeOrInclude: include) {
+        teaserMetadata: metadata(
+          keys: ["description"]
+          excludeOrInclude: include
+        ) {
           __typename
           ... on Metadata {
             key
@@ -677,7 +710,10 @@ query getEntities(
         }
       }
       ... on person {
-        teaserMetadata: metadata(keys: ["fullname"], excludeOrInclude: include) {
+        teaserMetadata: metadata(
+          keys: ["fullname"]
+          excludeOrInclude: include
+        ) {
           __typename
           ... on Metadata {
             key
@@ -848,7 +884,10 @@ mutation postMediaFile($mediaFileInput: MediaFileInput!, $file: Upload!) {
   }
 }
 
-mutation linkMediafileToEntity($entityId: String!, $mediaFileInput: MediaFileInput!) {
+mutation linkMediafileToEntity(
+  $entityId: String!
+  $mediaFileInput: MediaFileInput!
+) {
   linkMediafileToEntity(entityId: $entityId, mediaFileInput: $mediaFileInput) {
     _id
     filename
@@ -866,7 +905,10 @@ mutation patchMediaFileMetadata(
   $mediafileId: String!
   $mediaFileInput: [MediaFileMetadataInput]!
 ) {
-  patchMediaFileMetadata(MediafileId: $mediafileId, MediaFileMetadata: $mediaFileInput) {
+  patchMediaFileMetadata(
+    MediafileId: $mediafileId
+    MediaFileMetadata: $mediaFileInput
+  ) {
     _id
     filename
   }
