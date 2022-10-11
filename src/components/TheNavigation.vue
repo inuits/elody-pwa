@@ -81,7 +81,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import BaseButton from "./base/BaseButton.vue";
-import { useUploadModal } from "./UploadModal.vue";
+import { useUploadModal, modalChoices } from "./UploadModal.vue";
 import { Unicons } from "@/types";
 import { useRouter } from "vue-router";
 import { useEditMode } from "@/composables/useEdit";
@@ -90,7 +90,7 @@ export default defineComponent({
   name: "TheNavigation",
   components: { BaseButton },
   setup: () => {
-    const { openUploadModal, modalChoices } = useUploadModal();
+    const { openUploadModal } = useUploadModal();
     const { openCreateModal } = useCreateModal();
     const router = useRouter();
     const { disableEditMode } = useEditMode();
