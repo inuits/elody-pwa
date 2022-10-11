@@ -126,6 +126,7 @@ export default defineComponent({
       closeUploadModal,
       result,
       addSelection,
+      modalChoices
     };
   },
 });
