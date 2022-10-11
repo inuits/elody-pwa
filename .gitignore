@@ -21,6 +21,7 @@ coverage
 
 /src/queries.ts
 session-vue-3-oidc-library
+.vite
 
 # Editor directories and files
 .vscode/*
