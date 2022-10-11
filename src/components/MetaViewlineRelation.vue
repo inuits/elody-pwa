@@ -24,7 +24,7 @@
         :meta="metadata.linkedEntity.teaserMetadata"
         :media="
           metadata.linkedEntity.media
-            ? metadata.linkedEntity.media.primaryMediafile
+            ? metadata.linkedEntity.media.primary_transcode
             : null
         "
         :thumb-icon="getThumbnail(metadata)"

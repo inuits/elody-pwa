@@ -60,7 +60,7 @@
             v-for="n in queryVariables.limit"
             :key="n"
             title="loading"
-            :loading="true" 
+            :loading="true"
             :meta="[
               { key: '/', value: '/' },
               { key: '/', value: '/' },
@@ -83,7 +83,7 @@
             v-for="entity in result.Entities.results"
             :key="entity.id"
             :meta="entity.teaserMetadata"
-            :media="entity.media ? entity.media.primaryMediafile : null"
+            :media="entity.media ? entity.media.primary_transcode : null"
             :thumb-icon="getThumbnail(entity)"
             @click="
               !enableSelection &&
@@ -246,17 +246,16 @@ export default defineComponent({
       }
       const id = entity.uuid;
       const arr = Object.values(selectedRelationFieldMetadata.value);
-      if (! (arr[3] && arr[3][0])){
+      if (!(arr[3] && arr[3][0])) {
         return true;
       }
-      for (let i = 0; i < arr[3].length; i++){
-        if (id === arr[3][i].value.key){
+      for (let i = 0; i < arr[3].length; i++) {
+        if (id === arr[3][i].value.key) {
           return false;
         }
       }
       return true;
-    }
-
+    };
 
     return {
       paginationLimits,
@@ -271,7 +270,7 @@ export default defineComponent({
       setFilters,
       getThumbnail,
       determineIfNotAdded,
-      selectedRelationFieldMetadata
+      selectedRelationFieldMetadata,
     };
   },
 });

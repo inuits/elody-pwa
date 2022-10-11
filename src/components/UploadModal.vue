@@ -48,7 +48,7 @@ export type UploadModalType = {
   state: ModalState;
 };
 
-enum modalChoices {
+export enum modalChoices {
   IMPORT = "IMPORT",
   DROPZONE = "DROPZONE",
 }
@@ -134,7 +134,6 @@ export default defineComponent({
     };
 
     return {
-      modalChoices,
       modalToOpen,
       uploadModalState,
       closeUploadModal,

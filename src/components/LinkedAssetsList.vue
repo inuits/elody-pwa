@@ -8,7 +8,7 @@
     <div v-for="entity in linkedAssets" :key="entity.id" class="px-2 mb-1">
       <ListItem
         :meta="entity.teaserMetadata"
-        :media="entity.media ? entity.media.primaryMediafile : null"
+        :media="entity.media ? entity.media.primary_transcode : null"
         :thumb-icon="getThumbnail(entity)"
         @click="
           !enableSelection &&
@@ -33,7 +33,7 @@
 <script lang="ts">
 import BaseButton from "@/components/base/BaseButton.vue";
 import ListItem from "@/components/ListItem.vue";
-import type { Entity } from "@/queries";
+import type { MediaFileEntity } from "@/queries";
 import { Unicons } from "@/types";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
@@ -49,7 +49,7 @@ export default defineComponent({
   },
   props: {
     linkedAssets: {
-      type: Array as PropType<Entity[]>,
+      type: Array as PropType<MediaFileEntity[]>,
       required: true,
     },
   },
