@@ -7,7 +7,7 @@ include:
   - project: 'inuits/gitlab-ci/pipeline-templates'
     file: 'npm-pipeline.yml'
     ref: 'v1.5.4'
-  - project: 'inuits/gitlab-ci/pipeline-deploy-targets'
+  - project: 'rnd/inuits/dams/pipeline-deploy-targets'
     file: 'extra-targets.yml'
     ref: 'main'
 
