@@ -78,7 +78,6 @@ export const useUploadModal = () => {
   };
 
   return {
-    modalChoices,
     closeUploadModal,
     openUploadModal,
     uploadModalState,
@@ -99,7 +98,7 @@ export default defineComponent({
   setup() {
     const { mediafiles } = useMetaDataHelper();
     const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
-    const { closeUploadModal, uploadModalState, modalToOpen, modalChoices } =
+    const { closeUploadModal, uploadModalState, modalToOpen } =
       useUploadModal();
     const fetchEnabled = ref(false);
     const { result, refetch } = useQuery(
@@ -134,6 +133,7 @@ export default defineComponent({
     };
 
     return {
+      modalChoices,
       modalToOpen,
       uploadModalState,
       closeUploadModal,
