@@ -30,4 +30,10 @@ export default defineConfig({
       external: ["pdfjs-dist/types/src/display/api"],
     },
   },
+  test: {
+    globals: true,
+    coverage : {
+      reporter: ['text', 'html']
+    }
+  }
 });
