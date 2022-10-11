@@ -1,6 +1,9 @@
 <template>
   <span v-if="label" class="ml-1 text-neutral-700 text-sm">{{ label }}</span>
   <div>
+    <div v-if="!fields || fields.length === 0" class="ml-1 text-neutral-100 text-sm italic pb-2">
+      No {{ label }} available.
+    </div>
     <div v-for="({ value, key }, idx) in fields" :key="key" class="my-2">
       <div
         :class="[inputContainerStyle, ' input-container p-4 gap-3 flex-col']"
