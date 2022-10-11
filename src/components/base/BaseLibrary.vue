@@ -145,6 +145,7 @@ import IconToggle from "@/components/base/IconToggle.vue";
 import { useI18n } from "vue-i18n";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import { selectedRelationFieldMetadata } from "@/composables/useFormHelpers";
+import { MetadataField } from "@/queries";
 
 export default defineComponent({
   name: "BaseLibrary",
@@ -245,12 +246,12 @@ export default defineComponent({
         return true;
       }
       const id = entity.uuid;
-      const arr = Object.values(selectedRelationFieldMetadata.value);
-      if (!(arr[3] && arr[3][0])) {
+      const addedMetaData: MetadataField[] = Object.values(selectedRelationFieldMetadata.value)[3];
+      if (!(addedMetaData && addedMetaData[0])) {
         return true;
       }
-      for (let i = 0; i < arr[3].length; i++) {
-        if (id === arr[3][i].value.key) {
+      for (let i = 0; i < addedMetaData.length; i++) {
+        if (id === addedMetaData[i].value.key) {
           return false;
         }
       }
