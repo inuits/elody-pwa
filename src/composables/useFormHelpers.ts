@@ -18,7 +18,7 @@ import type { RelationMetaData } from "@/queries";
 export const LINKED_ENTITY: string = "linkedEntity";
 export const selectedRelationField = ref<RelationField>();
 export const selectedRelationFieldMetadata = ref([]);
-
+const noKey = 'no-key';
 export type relationValues = {
   linkedEntity: Maybe<Entity> | undefined;
   key: string;
@@ -38,6 +38,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
     metadata: MetadataAndRelation[],
     structure: MetadataOrRelationField[] = formStructure
   ) => {
+    console.log('md: ', metadata);
     const intialValues: IntialValues = {};
     let additionalIndex: number = 0;
     if (structure) {
@@ -56,9 +57,20 @@ const useFormHelper = (form: Form, entityTitle: string) => {
           findRelations(field.relationType, metadata).forEach(
             (relationMetaData: MetadataRelation) => {
               if (
-                relationMetaData.label === field.label ||
-                relationMetaData.type === field.relationType
+                (field.key) && (relationMetaData.label === field.label)
               ) {
+                relationArray.push({
+                  linkedEntity: relationMetaData.linkedEntity,
+                  key: relationMetaData.key,
+                  label: field.label ? field.label : relationMetaData.key,
+                  metadata: buildInitialValues(
+                    relationMetaData.metadataOnRelation as MetadataAndRelation[],
+                    field.metadata as MetadataOrRelationField[]
+                  ),
+                  relationType: field.relationType ? field.relationType : "",
+                });
+              }
+              else if (field.key === noKey) {
                 relationArray.push({
                   linkedEntity: relationMetaData.linkedEntity,
                   key: relationMetaData.key,
@@ -77,6 +89,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
         }
       });
     }
+    console.log('intialValues:', intialValues);
     return intialValues;
   };
 
