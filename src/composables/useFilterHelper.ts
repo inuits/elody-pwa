@@ -86,7 +86,6 @@ export const clearAdvancedSearchInput = (
     }
   });
 
-  console.log("CLEAR: ", input);
   return input;
 };
 

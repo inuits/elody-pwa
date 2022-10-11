@@ -560,4 +560,423 @@ export const dataSetBuildInitialValues: dataSet[] = [
       "Testimony": []
     }
   },
+  {
+    entityTitle: 'user-uploaded-het seteen',
+    form: {
+      "fields": [
+          {
+              "__typename": "MetadataField",
+              "label": "Status",
+              "key": "publication_status",
+              "type": "dropdown",
+              "options": [
+                  {
+                      "value": "niets-geselecteerd",
+                      "label": "Niets-Geselecteerd",
+                      "__typename": "MetadataFieldOption"
+                  },
+                  {
+                      "value": "publiek",
+                      "label": "Gepubliceerd",
+                      "__typename": "MetadataFieldOption"
+                  },
+                  {
+                      "value": "te valideren",
+                      "label": "In behandeling",
+                      "__typename": "MetadataFieldOption"
+                  },
+                  {
+                      "value": "afgekeurd",
+                      "label": "Afgekeurd",
+                      "__typename": "MetadataFieldOption"
+                  }
+              ]
+          },
+          {
+              "__typename": "MetadataField",
+              "label": "Titel",
+              "key": "title",
+              "type": "text",
+              "options": null
+          },
+          {
+              "__typename": "MetadataField",
+              "label": "Beschrijving",
+              "key": "description",
+              "type": "text",
+              "options": null
+          },
+          {
+              "__typename": "MetadataField",
+              "label": "periode",
+              "key": "periode",
+              "type": "text",
+              "options": null
+          },
+          {
+              "__typename": "MetadataField",
+              "label": "maker",
+              "key": "maker",
+              "type": "text",
+              "options": null
+          },
+          {
+              "__typename": "RelationField",
+              "key": "no-key",
+              "label": "component",
+              "relationType": "components",
+              "disabled": false,
+              "metadata": [],
+              "acceptedEntityTypes": [
+                  "person",
+                  "thesaurus"
+              ]
+          },
+          {
+              "__typename": "RelationField",
+              "key": "no-key",
+              "label": "Museum",
+              "relationType": "isIn",
+              "disabled": true,
+              "metadata": [],
+              "acceptedEntityTypes": [
+                  "museum"
+              ]
+          },
+          {
+              "__typename": "RelationField",
+              "key": "no-key",
+              "label": "Testimony",
+              "relationType": "hasTestimony",
+              "disabled": true,
+              "metadata": [],
+              "acceptedEntityTypes": [
+                  "testimony"
+              ]
+          }
+      ],
+      "__typename": "Form"
+    },
+    dataInput: [
+      {
+          "__typename": "Metadata",
+          "key": "description",
+          "value": "test",
+          "label": "description",
+          "immutable": null
+      },
+      {
+          "__typename": "Metadata",
+          "key": "maker",
+          "value": "test",
+          "label": "maker",
+          "immutable": null
+      },
+      {
+          "__typename": "Metadata",
+          "key": "periode",
+          "value": "test",
+          "label": "periode",
+          "immutable": null
+      },
+      {
+          "__typename": "Metadata",
+          "key": "user_action",
+          "value": "created",
+          "label": "user_action",
+          "immutable": null
+      },
+      {
+          "__typename": "Metadata",
+          "key": "publication_status",
+          "value": "te valideren",
+          "label": "publication_status",
+          "immutable": null
+      },
+      {
+          "__typename": "MetadataRelation",
+          "key": "entities/b09d75fb-46ce-4730-a54d-252a662be37b",
+          "value": "",
+          "label": "sixth_collection",
+          "type": "isIn",
+          "metadataOnRelation": [],
+          "linkedEntity": {
+              "id": "sixth_collection",
+              "uuid": "entities/b09d75fb-46ce-4730-a54d-252a662be37b",
+              "type": "museum",
+              "__typename": "SimpleEntity",
+              "teaserMetadata": [
+                  {
+                      "__typename": "Metadata",
+                      "key": "title",
+                      "value": "De Zesde Collectie",
+                      "label": "title",
+                      "immutable": null
+                  }
+              ]
+          }
+      },
+      {
+          "__typename": "MetadataRelation",
+          "key": "entities/bc4e5459-c130-4ccc-a3ba-d6053253f708",
+          "value": "piano",
+          "label": "entities/bc4e5459-c130-4ccc-a3ba-d6053253f708",
+          "type": "components",
+          "metadataOnRelation": [],
+          "linkedEntity": {
+              "id": "aHR0cHM6Ly9zdGFkLmdlbnQvaWQvY29uY2VwdC80NzAwMDAwMDM=",
+              "uuid": "entities/bc4e5459-c130-4ccc-a3ba-d6053253f708",
+              "type": "thesaurus",
+              "__typename": "SimpleEntity",
+              "teaserMetadata": [
+                  {
+                      "__typename": "Metadata",
+                      "key": "title",
+                      "value": "piano",
+                      "label": "MensgemaaktObject.titel",
+                      "immutable": null
+                  }
+              ]
+          }
+      }
+    ],
+    expectedResult: {
+      "publication_status": "te valideren",
+      "title": "user-uploaded-het seteen",
+      "description": "test",
+      "periode": "test",
+      "maker": "test",
+      "component": [
+          {
+              "linkedEntity": {
+                  "id": "aHR0cHM6Ly9zdGFkLmdlbnQvaWQvY29uY2VwdC80NzAwMDAwMDM=",
+                  "uuid": "entities/bc4e5459-c130-4ccc-a3ba-d6053253f708",
+                  "type": "thesaurus",
+                  "__typename": "SimpleEntity",
+                  "teaserMetadata": [
+                      {
+                          "__typename": "Metadata",
+                          "key": "title",
+                          "value": "piano",
+                          "label": "MensgemaaktObject.titel",
+                          "immutable": null
+                      }
+                  ]
+              },
+              "key": "entities/bc4e5459-c130-4ccc-a3ba-d6053253f708",
+              "label": "component",
+              "metadata": {},
+              "relationType": "components"
+          }
+      ],
+      "Museum": [
+          {
+              "linkedEntity": {
+                  "id": "sixth_collection",
+                  "uuid": "entities/b09d75fb-46ce-4730-a54d-252a662be37b",
+                  "type": "museum",
+                  "__typename": "SimpleEntity",
+                  "teaserMetadata": [
+                      {
+                          "__typename": "Metadata",
+                          "key": "title",
+                          "value": "De Zesde Collectie",
+                          "label": "title",
+                          "immutable": null
+                      }
+                  ]
+              },
+              "key": "entities/b09d75fb-46ce-4730-a54d-252a662be37b",
+              "label": "Museum",
+              "metadata": {},
+              "relationType": "isIn"
+          }
+      ],
+      "Testimony": []
+  }
+  },
+  {
+    entityTitle: 'ricardo-new-story-1',
+    form: {
+      "fields": [
+          {
+              "__typename": "MetadataField",
+              "label": "Titel",
+              "key": "title",
+              "type": "text",
+              "options": null
+          },
+          {
+              "__typename": "MetadataField",
+              "label": "Description",
+              "key": "description",
+              "type": "text",
+              "options": null
+          },
+          {
+              "__typename": "RelationField",
+              "key": "no-key",
+              "label": "Frame",
+              "relationType": "frames",
+              "disabled": false,
+              "metadata": [],
+              "acceptedEntityTypes": [
+                  "frame"
+              ]
+          }
+      ],
+      "__typename": "Form"
+    },
+    dataInput: [
+      {
+          "__typename": "Metadata",
+          "key": "description",
+          "value": "description",
+          "label": "description",
+          "immutable": null
+      },
+      {
+          "__typename": "MetadataRelation",
+          "key": "entities/88a73239-13f9-478f-b160-72a014c676fb",
+          "value": "",
+          "label": "Frame",
+          "type": "frames",
+          "metadataOnRelation": [],
+          "linkedEntity": {
+              "id": "88a73239-13f9-478f-b160-72a014c676fb",
+              "uuid": "entities/88a73239-13f9-478f-b160-72a014c676fb",
+              "type": "frame",
+              "__typename": "Frame",
+              "teaserMetadata": [
+                  {
+                      "__typename": "Metadata",
+                      "key": "title",
+                      "value": "ricardo-new-frame-1",
+                      "label": "title",
+                      "immutable": null
+                  }
+              ]
+          }
+      }
+  ],
+    expectedResult: {
+      "title": "ricardo-new-story-1",
+      "description": "description",
+      "Frame": [
+          {
+              "linkedEntity": {
+                  "id": "88a73239-13f9-478f-b160-72a014c676fb",
+                  "uuid": "entities/88a73239-13f9-478f-b160-72a014c676fb",
+                  "type": "frame",
+                  "__typename": "Frame",
+                  "teaserMetadata": [
+                      {
+                          "__typename": "Metadata",
+                          "key": "title",
+                          "value": "ricardo-new-frame-1",
+                          "label": "title",
+                          "immutable": null
+                      }
+                  ]
+              },
+              "key": "entities/88a73239-13f9-478f-b160-72a014c676fb",
+              "label": "Frame",
+              "metadata": {},
+              "relationType": "frames"
+          }
+      ]
+  }
+  },
+  {
+    entityTitle: 'matej-box-test',
+    form: {
+      "fields": [
+          {
+              "__typename": "MetadataField",
+              "label": "Titel",
+              "key": "title",
+              "type": "text",
+              "options": null
+          },
+          {
+              "__typename": "RelationField",
+              "key": "no-key",
+              "label": "Story",
+              "relationType": "box_stories",
+              "disabled": null,
+              "metadata": [
+                  {
+                      "key": "active",
+                      "type": "boolean",
+                      "label": "Active",
+                      "__typename": "MetadataField"
+                  }
+              ],
+              "acceptedEntityTypes": [
+                  "story"
+              ]
+          }
+      ],
+      "__typename": "Form"
+  },
+    dataInput: [
+      {
+          "__typename": "MetadataRelation",
+          "key": "entities/3846f110-0498-4e22-abff-487392fafeea",
+          "value": "",
+          "label": "Story",
+          "type": "box_stories",
+          "metadataOnRelation": [
+              {
+                  "key": "active",
+                  "value": "false",
+                  "__typename": "RelationMetaData"
+              }
+          ],
+          "linkedEntity": {
+              "id": "3846f110-0498-4e22-abff-487392fafeea",
+              "uuid": "entities/3846f110-0498-4e22-abff-487392fafeea",
+              "type": "story",
+              "__typename": "Story",
+              "teaserMetadata": [
+                  {
+                      "__typename": "Metadata",
+                      "key": "title",
+                      "value": "ricardo-new-story-1",
+                      "label": "title",
+                      "immutable": null
+                  }
+              ]
+          }
+      }
+    ],
+    expectedResult: {
+      "title": "matej-box-test",
+      "Story": [
+          {
+              "linkedEntity": {
+                  "id": "3846f110-0498-4e22-abff-487392fafeea",
+                  "uuid": "entities/3846f110-0498-4e22-abff-487392fafeea",
+                  "type": "story",
+                  "__typename": "Story",
+                  "teaserMetadata": [
+                      {
+                          "__typename": "Metadata",
+                          "key": "title",
+                          "value": "ricardo-new-story-1",
+                          "label": "title",
+                          "immutable": null
+                      }
+                  ]
+              },
+              "key": "entities/3846f110-0498-4e22-abff-487392fafeea",
+              "label": "Story",
+              "metadata": {
+                  "active": "false"
+              },
+              "relationType": "box_stories"
+          }
+      ]
+  }
+  },
 ];
