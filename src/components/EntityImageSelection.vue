@@ -86,7 +86,7 @@
     <div :class="editMode === 'edit' ? 'pb-20 pt-5' : ''">
       <plus-circle-icon
         v-if="editMode === 'edit'"
-        @click="openUploadModal(modalChoices.DROPZONE)"
+        @click="openUploadModalWrapper()"
       />
     </div>
   </div>
@@ -148,7 +148,7 @@ export default defineComponent({
   },
   setup(props) {
     const { selectedFiles } = useDropzoneHelper();
-    const { mediafiles } = useMetaDataHelper();
+    const { mediafiles, beingAdded } = useMetaDataHelper();
     const { updateSelectedEntityMediafile } = useEntityMediafileSelector();
     const { isMediaFileInLinkList, removeMediaFileFromLinkList } =
       useMediaAssetLinkHelper();
@@ -195,12 +195,17 @@ export default defineComponent({
       }
     };
 
+    const openUploadModalWrapper = () => {
+      beingAdded.value = "mediafile";
+      openUploadModal(modalChoices.DROPZONE);
+    }
+
     return {
       selectImage,
       editMode,
       addToSaveCallback,
       toBeDeleted,
-      openUploadModal,
+      openUploadModalWrapper,
       modalChoices,
       selectedFiles,
       endDrag,
