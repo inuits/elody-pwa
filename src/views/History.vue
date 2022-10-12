@@ -23,16 +23,24 @@
       </div>
       <div class="flex-grow"></div>
       <BasePagination
-        v-if="jobs.count > 0"
+        v-if="
+          jobs !== 'no-jobs' &&
+          jobs.Jobs &&
+          jobs.Jobs.count &&
+          jobs.Jobs.count > 0
+        "
         v-model:skip="queryVariables.pagination.skip"
         v-model:limit="queryVariables.pagination.limit"
-        :total-items="jobs.count"
+        :total-items="jobs.Jobs.count === null ? undefined : jobs.Jobs.count"
       />
     </div>
     <ListContainer>
-      <div v-if="jobs.results">
-        <div v-for="job in jobs.results" :key="job.job_key">
-          <ParentJob :job="job" />
+      <div v-if="jobs !== 'no-jobs' && jobs.Jobs && jobs.Jobs.results">
+        <div
+          v-for="job in jobs.Jobs.results"
+          :key="job && job._id ? job._id : 'no-id'"
+        >
+          <ParentJob v-if="job" :job="job" />
         </div>
       </div>
     </ListContainer>
@@ -41,6 +49,7 @@
 
 <script lang="ts">
 import { GetJobsDocument } from "@/queries";
+import type { GetJobsQuery } from "@/queries";
 import { useQuery } from "@vue/apollo-composable";
 import { computed, defineComponent, ref, watch, reactive } from "vue";
 import ParentJob from "@/components/ParentJob.vue";
@@ -49,7 +58,7 @@ import InputField from "@/components/base/InputField.vue";
 import BasePagination from "@/components/base/BasePagination.vue";
 import { paginationLimits } from "@/components/base/BasePagination.vue";
 import type { PaginationInfo } from "@/components/base/BasePagination.vue";
-import useJobHelpers, { jobTypeLabels } from "@/composables/useJobHelpers";
+import { getJobTypes, jobTypeLabels } from "@/composables/useJobHelpers";
 import ListContainer from "@/components/ListContainer.vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
 
@@ -73,8 +82,7 @@ export default defineComponent({
     ListContainer,
   },
   setup() {
-    const jobhelper = useJobHelpers();
-    const jobTypes = jobhelper.getJobTypes();
+    const jobTypes = getJobTypes();
     const routeHelper = useRouteHelpers();
     const paginationInfo = reactive({
       limit: 20,
@@ -131,10 +139,9 @@ export default defineComponent({
     });
 
     return {
-      jobs: computed(() => {
-        return result.value?.Jobs || [];
+      jobs: computed<GetJobsQuery | "no-jobs">(() => {
+        return result.value || "no-jobs";
       }),
-      result,
       searchQuery,
       queryVariables,
       jobTypes,

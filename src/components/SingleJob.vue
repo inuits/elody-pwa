@@ -6,7 +6,7 @@
       <BaseIcon :name="Unicons.Image.name" height="16" :fill="`blue-500`" />
     </div>
     <p class="w-2/6 mx-4 flex items-center">{{ job.job_info }}</p>
-    <BaseLabel :name="state.name" :color="state.color" />
+    <BaseLabel :name="getJobStatus.name" :color="getJobStatus.color" />
     <div class="flex-grow p-10">
       {{ job.error_message ? job.error_message : "" }}
     </div>
@@ -42,10 +42,9 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const jobHelper = useJobHelpers();
-    const state = jobHelper.getJobStatus(props.job);
+    const { getJobStatus } = useJobHelpers(props.job);
     const router = useRouter();
-    return { Unicons, router, state };
+    return { Unicons, router, getJobStatus };
   },
 });
 </script>
