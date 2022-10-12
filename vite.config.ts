@@ -6,6 +6,11 @@ const parsePort = (port: string) => {
   return parseInt(port) ? parseInt(port) : 8080;
 };
 
+const cacheDir =
+  process.env.NODE_ENV === "development-docker"
+    ? "/app/node_modules/.vite"
+    : "node_modules/.vite";
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
@@ -25,6 +30,7 @@ export default defineConfig({
       usePolling: true,
     },
   },
+  cacheDir,
   build: {
     rollupOptions: {
       external: ["pdfjs-dist/types/src/display/api"],
@@ -32,8 +38,8 @@ export default defineConfig({
   },
   test: {
     globals: true,
-    coverage : {
-      reporter: ['text', 'html']
-    }
-  }
+    coverage: {
+      reporter: ["text", "html"],
+    },
+  },
 });
