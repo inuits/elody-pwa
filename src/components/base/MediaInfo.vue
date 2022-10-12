@@ -9,17 +9,7 @@
   >
     <h3 class="text-sm text-neutral-700 font-semibold">Mediainfo</h3>
     <div v-if="!isEdit && mediafileSelectionState.selectedMediafile.metadata">
-      <div
-        v-for="item in mediafileSelectionState.selectedMediafile.metadata"
-        :key="item && item.key ? item.key : 'no-key'"
-      >
-        <div v-if="item" class="flex flex-col mb-2 mt-2">
-          <div class="label">{{ item.key }}</div>
-          <div v-if="item.value" class="value">
-            {{ item.value }}
-          </div>
-        </div>
-        <div v-if="hasPrimaryFunctionality()">
+      <div v-if="hasPrimaryFunctionality()">
           <div class="label">{{ t("media-info.primaire-media") }}</div>
           <div class="value h-5 w-5">
             <BaseIcon
@@ -38,6 +28,16 @@
               :name="Unicons.Check.name"
             />
             <BaseIcon v-else :name="Unicons.Cross.name" />
+          </div>
+        </div>
+      <div
+        v-for="item in mediafileSelectionState.selectedMediafile.metadata"
+        :key="item && item.key ? item.key : 'no-key'"
+      >
+        <div v-if="item" class="flex flex-col mb-2 mt-2">
+          <div class="label">{{ item.key }}</div>
+          <div v-if="item.value" class="value">
+            {{ item.value }}
           </div>
         </div>
       </div>
@@ -59,6 +59,7 @@
         </div>
       </div>
       <BaseButton
+        style="background-color: #7A869A !important"
         :label="t('media-info.set-primair')"
         bg-color="neutral-100"
         bg-hover-color="neutral-400"
@@ -80,6 +81,7 @@
         </div>
       </div>
       <BaseButton
+        style="background-color: #7A869A !important"
         :label="t('media-info.set-thumbnail')"
         bg-color="neutral-100"
         bg-hover-color="neutral-400"
