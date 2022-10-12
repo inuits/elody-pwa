@@ -13,7 +13,7 @@
       <div class="my-1 mx-6 w-1/6">
         <span class="text-neutral-100"
           >Date
-          <p class="text-neutral-700">{{ jobStartDate }}</p>
+          <p class="text-neutral-700">{{ getFormatedDate }}</p>
         </span>
       </div>
       <div class="my-1 mx-6">
@@ -31,7 +31,7 @@
 
       <div class="w-3/6">
         <div v-if="job.status != 'pending'" class="flex flex-row mx-2">
-          <BaseLabel :name="state.name" :color="state.color" />
+          <BaseLabel :name="getJobStatus.name" :color="getJobStatus.color" />
         </div>
         <div v-if="job.status == 'pending'">
           <BaseLabel :name="'50%'" />
@@ -63,12 +63,12 @@
     </div>
     <div v-if="!isCollapsed && subJobs && subJobs.results">
       <ListContainer>
-        <loading-list v-if="loading" />
+        <LoadingList v-if="loading" />
         <div
           v-for="subJob in subJobs.results.slice(0, subjobLimit)"
-          :key="subJob.job_id"
+          :key="subJob && subJob._id ? subJob._id : 'no-id'"
         >
-          <SingleJob :job="subJob" />
+          <SingleJob v-if="subJob" :job="subJob" />
         </div>
         <div class="flex w-full justify-center">
           <button
@@ -118,8 +118,7 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const jobHelper = useJobHelpers();
-    const state = jobHelper.getJobStatus(props.job);
+    const { getFormatedDate, getJobStatus } = useJobHelpers(props.job);
     const isCollapsed = ref<Boolean>(true);
     const fetchingSubJobs = ref<Boolean>(false);
     const queryOptions = ref({
@@ -146,9 +145,6 @@ export default defineComponent({
         updateSubJobs();
       }
     };
-    const jobStartDate = jobHelper.getFormatedDate(
-      props.job.start_time as string
-    );
     const updateSubJobs = () => {
       queryOptions.value = {
         enabled: true,
@@ -171,8 +167,8 @@ export default defineComponent({
       Unicons,
       toggleCollapse,
       isCollapsed,
-      jobStartDate,
-      state,
+      getFormatedDate,
+      getJobStatus,
       increaseSubjobs,
       subjobLimit,
       hasSubJobs,

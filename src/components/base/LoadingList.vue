@@ -20,9 +20,5 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "LoadingList",
-  props: {},
-  setup() {
-    return {};
-  },
 });
 </script>

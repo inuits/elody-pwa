@@ -1,4 +1,5 @@
 import type { Job } from "@/queries";
+import { computed, type ComputedRef } from "vue";
 
 export type State = {
   name: "failed" | "pending" | "finished";
@@ -20,12 +21,18 @@ export const jobTypeLabels: Record<string, string> = {
   "upload transcode": "upload_transcode",
 };
 
-const useJobHelpers = (): {
-  getJobStatus: (job: Job) => State;
+export const getJobTypes = () => {
+  return Object.keys(jobTypeLabels);
+};
+
+const useJobHelpers = (
+  job: Job
+): {
+  getJobStatus: ComputedRef<State>;
   getJobTypes: () => string[];
-  getFormatedDate: (dateString: string) => string;
+  getFormatedDate: ComputedRef<string>;
 } => {
-  const getJobStatus = (job: Job) => {
+  const getJobStatus = computed<State>(() => {
     switch (job.status) {
       case Status.Finished:
         return {
@@ -46,15 +53,11 @@ const useJobHelpers = (): {
           message: "pending",
         } as State;
     }
-  };
+  });
 
-  const getJobTypes = () => {
-    return Object.keys(jobTypeLabels);
-  };
-
-  const getFormatedDate = (dateString: string) => {
-    return new Date(dateString as string).toLocaleString();
-  };
+  const getFormatedDate = computed<string>(() => {
+    return new Date(job.start_time as string).toLocaleString();
+  });
 
   return {
     getJobStatus,
