@@ -62,12 +62,12 @@ import BaseButton from "./base/BaseButton.vue";
 import MetaAdd from "@/components/MetaAdd.vue";
 import { usePickEntityModal } from "./PickEntityModal.vue";
 import type { PickEntityModalType } from "./PickEntityModal.vue";
-import {
+import useFormHelper, {
   selectedRelationField,
   getEmptyMetadatRelationObject,
-  selectedRelationFieldMetadata,
 } from "@/composables/useFormHelpers";
 import type { relationValues } from "@/composables/useFormHelpers";
+import useMetaDataHelper from '@/composables/useMetaDataHelper';
 import ListItem from "@/components/ListItem.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 
@@ -92,6 +92,8 @@ export default defineComponent({
       props.label ? props.label : props.structure.relationType //MAKING UNIQUE ARRAY FOR EACH COMPONENT DEPENDING ON THE LABEL...
     );
 
+    const { selectedRelationFieldMetadata, beingAdded } = useMetaDataHelper(); 
+
     const { getThumbnail } = useThumbnailHelper();
 
     const addRelation = (value: Entity) => {
@@ -110,6 +112,7 @@ export default defineComponent({
     const openModal = (acceptedEntityTypes: string[]) => {
       selectedRelationField.value = props.structure;
       selectedRelationFieldMetadata.value = fields;
+      beingAdded.value = "metadata";
       openPickEntityModal(acceptedEntityTypes);
     };
 

@@ -95,12 +95,15 @@
           >
             <template #actions>
               <BaseButton
-                v-if="determineIfNotAdded(entity) && enableSelection"
+                v-if="determineIfNotAdded(entity, mediafiles, selectedRelationFieldMetadata) && enableSelection"
                 :loading="loading"
                 class="ml-2"
                 :icon="Unicons.PlusCircle.name"
                 @click="addSelection(entity)"
               />
+              <BaseIcon v-else-if="enableSelection" :name="Unicons.Check.name" fill="green" width="40px"
+              class="mr-3"/>
+
               <BaseButton
                 v-else
                 :loading="loading"
@@ -138,14 +141,15 @@ import { useQuery } from "@vue/apollo-composable";
 import ListItem from "@/components/ListItem.vue";
 import { useRouter } from "vue-router";
 import { Unicons } from "@/types";
-import { GetEntitiesDocument, SearchInputType } from "@/queries";
+import { GetEntitiesDocument, MediaFile, Metadata, SearchInputType } from "@/queries";
 import type { GetEntitiesQueryVariables, Maybe } from "@/queries";
 import FilterSideBar from "@/components/FilterSideBar.vue";
 import IconToggle from "@/components/base/IconToggle.vue";
 import { useI18n } from "vue-i18n";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
-import { selectedRelationFieldMetadata } from "@/composables/useFormHelpers";
 import { MetadataField } from "@/queries";
+import useMetaDataHelper, { beingAdded } from "@/composables/useMetaDataHelper";
+import BaseIcon from "./BaseIcon.vue";
 
 export default defineComponent({
   name: "BaseLibrary",
@@ -158,7 +162,8 @@ export default defineComponent({
     FilterSideBar,
     IconToggle,
     InputField,
-  },
+    BaseIcon
+},
   props: {
     advancedFiltersChoice: {
       type: String,
@@ -194,6 +199,7 @@ export default defineComponent({
     const { getThumbnail } = useThumbnailHelper();
     const { t } = useI18n();
     const router = useRouter();
+    const { determineIfNotAdded, mediafiles, selectedRelationFieldMetadata } = useMetaDataHelper();
     const paginationInfo = reactive({
       limit: 20,
       skip: 1,
@@ -238,24 +244,8 @@ export default defineComponent({
     });
 
     const addSelection = (entity: any) => {
+      beingAdded.value = "";
       emit("addSelection", entity);
-    };
-
-    const determineIfNotAdded = (entity: any): boolean => {
-      if (selectedRelationFieldMetadata.value.length === 0) {
-        return true;
-      }
-      const id = entity.uuid;
-      const addedMetaData: MetadataField[] = Object.values(selectedRelationFieldMetadata.value)[3];
-      if (!(addedMetaData && addedMetaData[0])) {
-        return true;
-      }
-      for (let i = 0; i < addedMetaData.length; i++) {
-        if (id === addedMetaData[i].value.key) {
-          return false;
-        }
-      }
-      return true;
     };
 
     return {
@@ -271,7 +261,8 @@ export default defineComponent({
       setFilters,
       getThumbnail,
       determineIfNotAdded,
-      selectedRelationFieldMetadata,
+      mediafiles,
+      selectedRelationFieldMetadata
     };
   },
 });
