@@ -1,11 +1,17 @@
-type dataSet = {
+type dataSet_BuildInitialValues = {
   entityTitle: string
   form: any
   dataInput: any
   expectedResult: any
 }
 
-export const dataSetBuildInitialValues: dataSet[] = [
+type dataSet_I18n = {
+  messages: any
+  langs: String[]
+  expectedResult: any
+}
+
+export const dataSet_BuildInitialValues: dataSet_BuildInitialValues[] = [
   {
     entityTitle: 'ricardo-frame-10',
     form: {
@@ -980,3 +986,51 @@ export const dataSetBuildInitialValues: dataSet[] = [
   }
   },
 ];
+
+export const dataSet_I18n: dataSet_I18n[] = [{
+  langs: ['nl', 'fr'],
+  messages: {
+    "fr.api": {
+        "api": {}
+    },
+    "fr.local": {
+        "search": {},
+        "metadata": {},
+        "media-info": {},
+        "media-files": {
+            "linked-assets": {}
+        }
+    },
+    "nl.api": {
+        "api": {}
+    },
+    "nl.local": {
+        "search": {},
+        "metadata": {},
+        "media-info": {},
+        "media-files": {
+            "linked-assets": {}
+        }
+    }
+  },
+  expectedResult: {
+    "nl": {
+        "api": {},
+        "search": {},
+        "metadata": {},
+        "media-info": {},
+        "media-files": {
+            "linked-assets": {}
+        }
+    },
+    "fr": {
+        "api": {},
+        "search": {},
+        "metadata": {},
+        "media-info": {},
+        "media-files": {
+            "linked-assets": {}
+        }
+    }
+  }
+}]
