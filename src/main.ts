@@ -106,6 +106,7 @@ const start = async () => {
         }),
       ],
       dsn: config.SENTRY_DSN_FRONTEND,
+      environment: config.NOMAD_NAMESPACE,
     });
   }
   app.mount("#app");
