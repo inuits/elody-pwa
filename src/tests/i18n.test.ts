@@ -3,7 +3,7 @@ import { mergeLanguageJsonFiles } from "@/helpers";
 import { dataSet_I18n } from './fakeData';
 
 describe('#i18nHelper', () => {
-    it.each(dataSet_I18n)('Should map all values depending on the given form', ({ langs, messages, expectedResult }) => {
+    it.each(dataSet_I18n)('Should merge json data for each language', ({ langs, messages, expectedResult }) => {
         //ACT
         const result = mergeLanguageJsonFiles(messages, langs);
         //ASSERT
