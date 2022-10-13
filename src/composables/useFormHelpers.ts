@@ -154,6 +154,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
                 }
                 return { key: "", value: "" };
               }),
+              value: relationValue.value ? relationValue.value : undefined
             });
           });
         }
@@ -176,6 +177,7 @@ export const getEmptyMetadatRelationObject = (
     label: fields.label ? fields.label : "",
     metadata: {},
     relationType: fields.relationType ? fields.relationType : "",
+    value: undefined
   };
   if (fields.metadata) {
     fields.metadata?.forEach((field: Maybe<MetadataField>) => {

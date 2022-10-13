@@ -417,6 +417,7 @@ input relationInput {
   metadata: [MetadataFieldInput]
   linkedEntityId: String
   label: String
+  value: String
 }
 
 input MetadataFormInput {
