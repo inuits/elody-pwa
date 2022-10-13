@@ -1,5 +1,49 @@
 {
-  "api": {
-    "noresult": "Geen resultaten"
+  "metadata": {
+    "objectnummer": "Objectnummer",
+    "no-metadata": "Geen metadata beschikbaar",
+    "beheerder": "Instelling",
+    "verwerving": {
+      "plaats": "Plaats van verwerving",
+      "methode": "Verwervingsmethode"
+    },
+    "Periode":{
+      "begin": "Begin periode",
+      "einde": "Einde periode"
+    },
+    "MaterieelDing.productie": "Productie",
+    "Gebeurtenis.tijd": "Productiedatum",
+    "vervaardiging.plaats": "Plaats van vervaardiging",
+    "vervaardiger.rol": "Rol",
+    "Entiteit.maaktDeelUitVan": "Tentoonstellingen",
+    "Entiteit": {
+      "beschrijving": "Beschrijving",
+      "classificatie": "Classificatie"
+    },
+    "type": "Type",
+    "material": "Material",
+    "creation_date": "Creation date",
+    "height": "Hoogte",
+    "width": "Breedte",
+    "depth": "Diepte",
+    "length": "Lengte",
+    "diameter": "Diameter",
+    "MaterieelDing": {
+      "beheerder": "Beheerder",
+      "isOvergedragenBijVerwerving": "Herkomst"
+    },
+    "collectie": "Collectie",
+    "MensgemaaktObject": {
+      "draagt": "Draagt"
+    },
+    "GecureerdeCollectie": {
+      "bestaatUit": "Bestaat uit"
+    },
+    "object_category": "Object categorie",
+    "objectnaam": "Object naam",
+    "associatie": {
+      "onderwerp": "Onderwerp",
+      "persoon": "Persoon"
+    }
   }
 }
