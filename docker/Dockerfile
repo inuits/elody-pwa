@@ -15,6 +15,9 @@ COPY src/queries.graphql ./src/queries.graphql
 
 RUN npm set progress=false && npm config set depth 0 && npm ci && npm run generate 
 
+RUN mkdir /app/node_modules/.vite \
+    && chown -R node:node /app/node_modules/.vite
+
 EXPOSE 8080
 
 ### Build stage
