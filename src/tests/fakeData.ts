@@ -400,7 +400,7 @@ export const dataSet_BuildInitialValues: dataSet_BuildInitialValues[] = [
         },
         {
           "__typename": "RelationField",
-          "key": "no-key",
+          "key": "MaterieelDing.beheerder",
           "label": "Museum",
           "relationType": "isIn",
           "disabled": true,
@@ -428,7 +428,7 @@ export const dataSet_BuildInitialValues: dataSet_BuildInitialValues[] = [
         "__typename": "MetadataRelation",
         "key": "entities/84df5f81-6072-4ee7-b02f-9b705f69f292",
         "value": "",
-        "label": "Museum",
+        "label": "MaterieelDing.beheerder",
         "type": "isIn",
         "metadataOnRelation": [],
         "linkedEntity": {
@@ -558,7 +558,7 @@ export const dataSet_BuildInitialValues: dataSet_BuildInitialValues[] = [
             ]
           },
           "key": "entities/84df5f81-6072-4ee7-b02f-9b705f69f292",
-          "label": "Museum",
+          "label": "MaterieelDing.beheerder",
           "metadata": {},
           "relationType": "isIn"
         }
@@ -770,7 +770,7 @@ export const dataSet_BuildInitialValues: dataSet_BuildInitialValues[] = [
                   ]
               },
               "key": "entities/bc4e5459-c130-4ccc-a3ba-d6053253f708",
-              "label": "component",
+              "label": "entities/bc4e5459-c130-4ccc-a3ba-d6053253f708",
               "metadata": {},
               "relationType": "components"
           }
@@ -793,7 +793,7 @@ export const dataSet_BuildInitialValues: dataSet_BuildInitialValues[] = [
                   ]
               },
               "key": "entities/b09d75fb-46ce-4730-a54d-252a662be37b",
-              "label": "Museum",
+              "label": "sixth_collection",
               "metadata": {},
               "relationType": "isIn"
           }

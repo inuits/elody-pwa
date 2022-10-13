@@ -58,7 +58,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
             relationArray.push({
               linkedEntity: relationMetaData.linkedEntity,
               key: relationMetaData.key,
-              label: field.label ? field.label : relationMetaData.key,
+              label: relationMetaData.label ? relationMetaData.label : relationMetaData.key,
               metadata: buildInitialValues(
                 relationMetaData.metadataOnRelation as MetadataAndRelation[],
                 field.metadata as MetadataOrRelationField[]
@@ -69,7 +69,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
           
           findRelations(field.relationType, metadata).forEach(
             (relationMetaData: MetadataRelation) => {
-              if ((field.key) && (relationMetaData.label === field.label)) {
+              if ((field.key) && (relationMetaData.label === field.key) || (relationMetaData.label === field.label)) {
                 pushIntoRelationArray(relationMetaData);
               }
               else if (field.key === noKey) {
