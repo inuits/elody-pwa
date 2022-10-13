@@ -25,6 +25,7 @@ export type relationValues = {
   label: string;
   metadata: IntialValues;
   relationType: string;
+  value: string;
 };
 
 export type IntialValues = Record<string, string | relationValues[]>;
@@ -55,6 +56,12 @@ const useFormHelper = (form: Form, entityTitle: string) => {
           const relationArray: relationValues[] = [];
 
           const pushIntoRelationArray = (relationMetaData: MetadataRelation) => {
+
+            const getValue = (): string => {
+              //@ts-ignore
+              return relationMetaData.linkedEntity.teaserMetadata.length > 0 ? relationMetaData.linkedEntity.teaserMetadata[0].value : undefined
+            }
+
             relationArray.push({
               linkedEntity: relationMetaData.linkedEntity,
               key: relationMetaData.key,
@@ -64,6 +71,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
                 field.metadata as MetadataOrRelationField[]
               ),
               relationType: field.relationType ? field.relationType : "",
+              value: getValue()
             });
           }
           

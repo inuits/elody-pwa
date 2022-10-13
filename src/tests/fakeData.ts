@@ -258,7 +258,8 @@ export const dataSet_BuildInitialValues: dataSet_BuildInitialValues[] = [
           "key": "mediafiles/29d6bac2-36d8-4a48-8701-f2fc88e172c4",
           "label": "subtitle",
           "metadata": {},
-          "relationType": "components"
+          "relationType": "components",
+          "value": "4677bc924449cef1ea793621774330e6-30273.srt"
         }
       ],
       "audio": [
@@ -285,7 +286,8 @@ export const dataSet_BuildInitialValues: dataSet_BuildInitialValues[] = [
           "key": "mediafiles/3dd088e1-e39a-4460-913f-5e8671572c02",
           "label": "audio",
           "metadata": {},
-          "relationType": "components"
+          "relationType": "components",
+          "value": "2b4ec9e3a6e259d58b7eae24eda56edd-Rick Astley - Never Gonna Give You Up (Official Music Video).mp3",
         }
       ],
       "Assets": [
@@ -321,7 +323,8 @@ export const dataSet_BuildInitialValues: dataSet_BuildInitialValues[] = [
             "scale": "1",
             "setMediafile": "1"
           },
-          "relationType": "components"
+          "relationType": "components",
+          "value": "ricardo-asset-3"
         }
       ]
     }
@@ -516,7 +519,8 @@ export const dataSet_BuildInitialValues: dataSet_BuildInitialValues[] = [
           "key": "entities/6ea56c6b-e048-4d9f-8081-d7b6aac8db28",
           "label": "component",
           "metadata": {},
-          "relationType": "components"
+          "relationType": "components",
+          "value": "Wiener, Jacques"
         },
         {
           "linkedEntity": {
@@ -537,7 +541,8 @@ export const dataSet_BuildInitialValues: dataSet_BuildInitialValues[] = [
           "key": "entities/a7f94289-6328-4d80-af01-4bc633276fb0",
           "label": "component",
           "metadata": {},
-          "relationType": "components"
+          "relationType": "components",
+          "value": "Nova"
         }
       ],
       "Museum": [
@@ -560,7 +565,9 @@ export const dataSet_BuildInitialValues: dataSet_BuildInitialValues[] = [
           "key": "entities/84df5f81-6072-4ee7-b02f-9b705f69f292",
           "label": "MaterieelDing.beheerder",
           "metadata": {},
-          "relationType": "isIn"
+          "relationType": "isIn",
+          "value": "De Zesde Collectie"
+
         }
       ],
       "Testimony": []
@@ -772,7 +779,8 @@ export const dataSet_BuildInitialValues: dataSet_BuildInitialValues[] = [
               "key": "entities/bc4e5459-c130-4ccc-a3ba-d6053253f708",
               "label": "entities/bc4e5459-c130-4ccc-a3ba-d6053253f708",
               "metadata": {},
-              "relationType": "components"
+              "relationType": "components",
+              "value": "piano"
           }
       ],
       "Museum": [
@@ -795,7 +803,8 @@ export const dataSet_BuildInitialValues: dataSet_BuildInitialValues[] = [
               "key": "entities/b09d75fb-46ce-4730-a54d-252a662be37b",
               "label": "sixth_collection",
               "metadata": {},
-              "relationType": "isIn"
+              "relationType": "isIn",
+              "value": "De Zesde Collectie"
           }
       ],
       "Testimony": []
@@ -888,7 +897,8 @@ export const dataSet_BuildInitialValues: dataSet_BuildInitialValues[] = [
               "key": "entities/88a73239-13f9-478f-b160-72a014c676fb",
               "label": "Frame",
               "metadata": {},
-              "relationType": "frames"
+              "relationType": "frames",
+              "value": "ricardo-new-frame-1"
           }
       ]
   }
@@ -980,7 +990,8 @@ export const dataSet_BuildInitialValues: dataSet_BuildInitialValues[] = [
               "metadata": {
                   "active": "false"
               },
-              "relationType": "box_stories"
+              "relationType": "box_stories",
+              "value": "ricardo-new-story-1",
           }
       ]
   }
