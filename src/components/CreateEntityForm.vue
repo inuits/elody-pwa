@@ -5,7 +5,7 @@
         <MetaEditDataField
           v-model="EntityTitle"
           field-key="title"
-          label="Title"
+          :label="$t('form.title')"
         />
         <input
           v-model="manualID"
@@ -14,7 +14,7 @@
           class="w-full px-3 py-2"
           placeholder="id"
         />
-        <BaseButton label="create" @click="create" />
+        <BaseButton :label="$t('form.create')" @click="create" />
       </form>
     </div>
   </div>

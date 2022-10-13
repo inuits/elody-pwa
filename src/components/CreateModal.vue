@@ -6,11 +6,11 @@
   >
     <div class="bg-neutral-0 w-full">
       <div class="p-6 pb-0">
-        <h1>Create Entity</h1>
+        <h1>{{$t('entity.create')}}</h1>
         <BaseDropdown
           v-model="selected"
           :options="Object.values(Entitytyping)"
-          label="Type"
+          :label="$t('entity.type')"
           class="w-full"
         />
       </div>
