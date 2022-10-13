@@ -13,10 +13,12 @@ COPY .npmrc package*.json ./
 COPY codegen.yml schema.graphql ./
 COPY src/queries.graphql ./src/queries.graphql
 
-RUN npm set progress=false && npm config set depth 0 && npm ci && npm run generate 
-
 RUN mkdir /app/node_modules/.vite \
     && chown -R node:node /app/node_modules/.vite
+USER NODE
+
+RUN npm set progress=false && npm config set depth 0 && npm ci && npm run generate 
+
 
 EXPOSE 8080
 
