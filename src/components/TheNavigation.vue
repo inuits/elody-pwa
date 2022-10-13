@@ -75,6 +75,19 @@
         >Create</span
       >
     </div>
+    <div class="flex flex-row items-center menu-item">
+      <BaseButton
+        :icon="Unicons.SignOut.name"
+        class="mt-1 menu-btn"
+        bg-color="neutral-30"
+        @click="logout"
+      />
+      <span
+        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
+        @click="logout"
+        >Log out</span
+      >
+    </div>
   </nav>
 </template>
 
@@ -89,7 +102,8 @@ import { useCreateModal } from "./CreateModal.vue";
 export default defineComponent({
   name: "TheNavigation",
   components: { BaseButton },
-  setup: () => {
+  props: {auth: {required: true}},
+  setup: (props) => {
     const { openUploadModal } = useUploadModal();
     const { openCreateModal } = useCreateModal();
     const router = useRouter();
@@ -115,6 +129,16 @@ export default defineComponent({
       disableEditMode();
     };
 
+    const logout = () => {
+      new Promise((resolve) => {
+        fetch("/api/logout").then(() => {
+          props.auth.resetAuthProperties();
+          props.auth.redirectToLogin(router.currentRoute?.value.fullPath);
+          resolve;
+        });
+      });
+    };
+
     return {
       Unicons,
       openUploadModal,
@@ -125,6 +149,7 @@ export default defineComponent({
       openCreateModal,
       modalChoices,
       forceDisableEditMediafiles,
+      logout
     };
   },
 });
