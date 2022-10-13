@@ -995,7 +995,6 @@ export const dataSet_I18n: dataSet_I18n[] = [{
     },
     "fr.local": {
         "search": {},
-        "metadata": {},
         "media-info": {},
         "media-files": {
             "linked-assets": {}
@@ -1006,7 +1005,6 @@ export const dataSet_I18n: dataSet_I18n[] = [{
     },
     "nl.local": {
         "search": {},
-        "metadata": {},
         "media-info": {},
         "media-files": {
             "linked-assets": {}
@@ -1017,7 +1015,6 @@ export const dataSet_I18n: dataSet_I18n[] = [{
     "nl": {
         "api": {},
         "search": {},
-        "metadata": {},
         "media-info": {},
         "media-files": {
             "linked-assets": {}
@@ -1026,7 +1023,6 @@ export const dataSet_I18n: dataSet_I18n[] = [{
     "fr": {
         "api": {},
         "search": {},
-        "metadata": {},
         "media-info": {},
         "media-files": {
             "linked-assets": {}
