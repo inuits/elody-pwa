@@ -14,7 +14,7 @@
   </div>
   <BaseButton
     v-if="editMode === 'edit' && isEditToggleVisible === 'edit-delete'"
-    label="Delete"
+    :label="$t('buttons.delete')"
     bg-color="red-default"
     bg-hover-color="red-dark"
     txt-color="neutral-0"

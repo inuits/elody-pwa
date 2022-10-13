@@ -13,7 +13,7 @@
       <div v-show="fileCount === 0" class="inline-block w-9/12 text-center">
         <div class="dz-message" data-dz-message>
           <span v-if="total === 0"
-            >Drag your files, or click here to add your files</span
+            >{{$t('dropzone.drag-add')}}</span
           >
           <div v-else>
             <div
@@ -23,10 +23,10 @@
             >
               <div class="flex justify-between">
                 <div class="text-lg text-center pb-8 text-red-dark">
-                  {{ failed }} file(s) failed to upload.
+                  {{ failed }} {{$t('dropzone.failed')}}
                 </div>
                 <div class="text-lg text-center pb-8 text-green-default">
-                  {{ success }} file(s) successfully uploaded.
+                  {{ success }} {{$t('dropzone.success')}}
                 </div>
               </div>
               <div
@@ -67,10 +67,10 @@
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             ></path>
           </svg>
-          Uploading...
+          {{$t('dropzone.uploading')}}
         </div>
       </div>
-      <div v-else>upload</div>
+      <div v-else>{{$t('dropzone.upload')}}</div>
     </button>
   </div>
   <div class="hidden">

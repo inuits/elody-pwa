@@ -1,16 +1,35 @@
 {
+  "form": {
+    "title": "title",
+    "create": "Create"
+  },
   "search": {
-    "noresult": "Geen resultaten"
+    "noresult": "Geen resultaten",
+    "asset-library": "Search Asset Library..."
   },
   "media-info": {
-    "primaire-media": "primaire media",
-    "thumbnail": "primaire thumbnail",
-    "set-primair": "stel als primaire",
-    "set-thumbnail": "stel als thumbnail"
+    "primaire-media": "Primaire media",
+    "thumbnail": "Primaire thumbnail",
+    "set-primair": "Stel als primaire",
+    "set-thumbnail": "Stel als thumbnail"
   },
   "media-files": {
     "linked-assets": {
       "related-assets": "Related assets"
     }
+  },
+  "entity": {
+    "create": "Create entity",
+    "type": "Type"
+  },
+  "dropzone": {
+    "drag-add": "Drag your files, or click here to add your files",
+    "failed": "File(s) failed to upload.",
+    "success": "File(s) successfully uploaded.",
+    "uploading": "Uploading...",
+    "upload": "Upload"
+  },
+  "buttons": {
+    "delete": "Delete"
   }
 }

@@ -17,6 +17,7 @@ export const mergeLanguageJsonFiles = (messages: any, langs: string[]): any => {
 }
   
 export const i18n = createI18n({
+  globalInjection: true,
   locale: 'nl',
   fallbackLocale: "nl",
   messages: mergeLanguageJsonFiles(messages, langs)
