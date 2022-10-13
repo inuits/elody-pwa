@@ -2,6 +2,7 @@ import { createI18n } from 'vue-i18n';
 import messages from '@intlify/vite-plugin-vue-i18n/messages'
 
 export const langs: string[] = ['nl', 'fr'];
+
 export const mergeLanguageJsonFiles = (messages: any, langs: string[]): any => {
   const newMessages = {};
   langs.forEach((lang: string) => {
