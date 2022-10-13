@@ -1,4 +1,4 @@
 module.exports = {
-  "*.ts": ["eslint --fix", "tsc-files --noEmit"],
-  "*.vue": ["eslint --fix", "tsc-files --noEmit"],
+  "*.ts": ["eslint --fix", "tsc-files --noEmit", "git add"],
+  "*.vue": ["eslint --fix", "tsc-files --noEmit", "git add"],
 };
