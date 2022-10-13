@@ -30,6 +30,15 @@
     "upload": "Upload"
   },
   "buttons": {
-    "delete": "Delete"
+    "delete": "Delete",
+    "save": "Save",
+    "discard": "Discard"
+  },
+  "filter": {
+    "filter": "Filter",
+    "active": "Actief",
+    "clear": "Clear all",
+    "apply": "Apply filter(s)"
+
   }
 }

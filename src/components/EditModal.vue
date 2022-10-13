@@ -7,11 +7,11 @@
       <BaseButton
         :bg-color="'blue-400'"
         :txt-color="'neutral-0'"
-        label="Save"
+        :label="$t('buttons.save')"
         @click="save()"
       />
       <BaseButton
-        label="Discard"
+        :label="$t('buttons.discard')"
         bg-color="'neutral-0'"
         :border-color="'red-default'"
         :txt-color="'red-default'"

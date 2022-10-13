@@ -4,9 +4,9 @@
   >
     <div>
       <div class="flex justify-between m-3">
-        <p class="text-xl font-medium">Filter</p>
+        <p class="text-xl font-medium">{{$t('filter.filter')}}</p>
         <p class="bg-blue-50 text-blue-300 rounded-md px-2 py-1">
-          {{ activeCount }} actief
+          {{ activeCount }} {{$t('filter.active')}}
         </p>
       </div>
       <div
@@ -16,7 +16,7 @@
         <BaseButton
           bg-color="blue-50"
           bg-hover-color="blue-75"
-          label="Clear All"
+          :label="$t('filter.clear')"
           txt-color="blue-300"
           class="disabled:cursor-not-allowed disabled:opacity-50"
           @click="clearFilters"
@@ -25,7 +25,7 @@
           bg-color="blue-400"
           bg-hover-color="blue-300"
           txt-color="neutral-0"
-          label="Apply Filter(s)"
+          :label="$t('filter.apply')"
           @click="applyFilters"
         />
       </div>
