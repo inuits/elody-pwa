@@ -1,6 +1,9 @@
 <template>
   <div class="p-6 bg-neutral-0 pb-20">
     <form v-if="form.fields" novalidate>
+      <!-- <pre>
+        {{values}}
+      </pre> -->
       <div
         v-for="field in form.fields"
         :key="field.__typename === 'MetadataField' ? field.key : 'no key'"
