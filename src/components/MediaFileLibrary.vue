@@ -4,7 +4,7 @@
     :search-input-type-on-drawer="SearchInputType.AdvancedInputMediaFilesType"
     :search-input-type="SearchInputType.AdvancedInputMediaFilesType"
     :list-item-route-name="'SingleMediafile'"
-    :search-placeholder="'Search Mediafiles...'"
+    :search-placeholder="$t('search.mediafile-library')"
     :advanced-filters-choice="'mediaFileFilters'"
     :enable-selection="enableSelection"
     :already-added-metadata="selectedRelationFieldMetadata"

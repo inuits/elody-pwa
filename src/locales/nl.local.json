@@ -5,7 +5,8 @@
   },
   "search": {
     "noresult": "Geen resultaten",
-    "asset-library": "Search Asset Library..."
+    "asset-library": "Search Asset Library...",
+    "mediafile-library": "Search Mediafiles..."
   },
   "media-info": {
     "primaire-media": "Primaire media",
@@ -32,13 +33,26 @@
   "buttons": {
     "delete": "Delete",
     "save": "Save",
-    "discard": "Discard"
+    "discard": "Discard",
+    "add": "Add"
   },
   "filter": {
     "filter": "Filter",
     "active": "Actief",
     "clear": "Clear all",
     "apply": "Apply filter(s)"
-
+  },
+  "loading": "Loading...",
+  "meta": {
+    "no-metadata": "No metadata available",
+    "no-label": "no label",
+    "no-data": "no data"
+  },
+  "parent": {
+    "id": "ID",
+    "date": "Date",
+    "type": "Type",
+    "user": "User",
+    "load-more": "Load more"
   }
 }

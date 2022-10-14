@@ -6,7 +6,7 @@
     v-if="metadata.length == 0"
     class="justify-center items-center flex mt-4 text-neutral-700 font-bold"
   >
-    No metadata available
+    {{$t('meta.no-metadata')}}
   </div>
 </template>
 

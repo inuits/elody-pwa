@@ -18,7 +18,7 @@
       v-show="loading"
       class="absolute flex h-full items-center justify-center text-center w-full z-40"
     >
-      Loading ...
+      {{$t('loading')}}
     </div>
     <div ref="OpenSeadragonDiv" class="w-full h-full z-0 checkboard" />
   </div>
