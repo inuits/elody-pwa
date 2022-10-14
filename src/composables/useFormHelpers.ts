@@ -22,7 +22,7 @@ const noKey = 'no-key';
 export type relationValues = {
   linkedEntity: Maybe<Entity> | undefined;
   key: string;
-  label: string;
+  label?: string;
   metadata: IntialValues;
   relationType: string;
   value: string;
@@ -65,7 +65,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
             relationArray.push({
               linkedEntity: relationMetaData.linkedEntity,
               key: relationMetaData.key,
-              label: relationMetaData.label ? relationMetaData.label : relationMetaData.key,
+              label: relationMetaData.label ? relationMetaData.label : undefined,
               metadata: buildInitialValues(
                 relationMetaData.metadataOnRelation as MetadataAndRelation[],
                 field.metadata as MetadataOrRelationField[]
@@ -174,7 +174,6 @@ export const getEmptyMetadatRelationObject = (
   const intialValue: relationValues = {
     linkedEntity: linkedEntity,
     key: id,
-    label: fields.label ? fields.label : "",
     metadata: {},
     relationType: fields.relationType ? fields.relationType : "",
     value: undefined
