@@ -2,7 +2,7 @@
   <div class="p-6 bg-neutral-20 w-full">
     <h2>Add {{ label }}</h2>
     <BaseButton
-      label="Add"
+      :label="$t('buttons.add')"
       :icon="Unicons.PlusCircle.name"
       :icon-color="'var(--color-neutral-10)'"
       :bg-color="'blue-400'"

@@ -63,7 +63,7 @@
             class="label"
             :class="{ loading }"
           >
-            no label
+          {{$t('meta.no-label')}}
           </div>
 
           <meta-viewline-relation
@@ -80,7 +80,7 @@
             {{
               metadataFromLinkedEntity.value
                 ? metadataFromLinkedEntity.value
-                : "no data"
+                : $t('meta.no-data')
             }}
           </div>
         </div>

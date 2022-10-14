@@ -13,7 +13,7 @@
       {{ checkTranslationForlabel(item.label) }}
     </div>
     <div v-else-if="item.label != item.key" class="label" :class="{ loading }">
-      no label
+      {{$t('meta.no-label')}}
     </div>
 
     <meta-viewline-relation v-if="item.linkedEntity" :metadata="item" />

@@ -76,7 +76,7 @@
             class="w-full mx-4 px-3 py-2 hover:bg-neutral-30 rounded"
             @click="increaseSubjobs()"
           >
-            Load more
+            {{ $t('parent.load-more') }}
           </button>
         </div>
       </ListContainer>
