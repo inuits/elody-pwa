@@ -2,7 +2,7 @@
   <div class="flex w-full h-full justify-center items-center">
     <audio controls class="w-full">
       <source :src="source?.original_file_location" :type="source?.mimetype" />
-      Your browser does not support the audio element.
+      {{$t('audio.no-support')}}
     </audio>
     <media-info class="" :meta-data="source.metadata" />
   </div>

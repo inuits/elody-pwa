@@ -24,7 +24,7 @@
       :class="{ loading }"
       data-test="meta-info"
     >
-      {{ item.value ? item.value : "no data" }}
+      {{ item.value ? item.value : $t('meta.no-data') }}
     </div>
   </div>
   <div

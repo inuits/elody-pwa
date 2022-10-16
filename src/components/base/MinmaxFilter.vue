@@ -4,16 +4,16 @@
       id="inputBox"
       v-model="inputFieldMin"
       :debounce="true"
-      placeholder="min"
+      :placeholder="$t('filter.min')"
       :bg-color="'neutral-20'"
-      label="min"
+      :label="$t('filter.min')"
     />
     <MinMaxField
       v-model="inputFieldMax"
       :debounce="true"
-      placeholder="max"
+      :placeholder="$t('filter.max')"
       :bg-color="'neutral-20'"
-      label="max"
+      :label="$t('filter.max')"
       :min="inputFieldMin + 1"
     />
   </div>

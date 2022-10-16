@@ -54,10 +54,6 @@ export default defineComponent({
       PatchMediaFileMetadataDocument
     );
 
-    //onDone((value) => {
-    //   emit('update:modelValue', value.data?.patchMediaFileMetadata?.metadata);
-    //});
-
     watch(
       mediafileSelectionState,
       () => {

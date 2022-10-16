@@ -17,11 +17,11 @@
       :searchable="true"
       :close-on-select="false"
       :options="result?.FilterOptions"
-      label="label"
+      :label="$('filter.label')"
       track-by="label"
       value-prop="label"
-      placeholder="choose your filters"
-      no-results-text="no filter with that name found"
+      :placeholder="$('filter.choose')"
+      :no-results-text="$('filter.not-with-that-name')"
     />
   </div>
   <div>
@@ -29,7 +29,7 @@
       v-if="!isMulti"
       v-model="inputField"
       :debounce="true"
-      placeholder="Fuzzy Search..."
+      :placeholder="$t('filter.fuzzy')"
       :bg-color="'neutral-20'"
     />
   </div>

@@ -19,7 +19,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
-import type { Unicons } from "@/types";
 import BaseIcon from "@/components/base/BaseIcon.vue";
 
 export default defineComponent({

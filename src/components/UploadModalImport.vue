@@ -8,7 +8,7 @@
     <BaseButton
       bg-color="blue-400"
       txt-color="neutral-0"
-      label="Import"
+      :label="$t('upload.import')"
       bg-hover-color="blue-100"
       @click="doImport()"
     />

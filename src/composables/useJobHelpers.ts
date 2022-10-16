@@ -1,5 +1,6 @@
 import type { Job } from "@/queries";
 import { computed, type ComputedRef } from "vue";
+import { useI18n } from "vue-i18n";
 
 export type State = {
   name: "failed" | "pending" | "finished";
@@ -31,26 +32,27 @@ const useJobHelpers = (
   getJobStatus: ComputedRef<State>;
   getJobTypes: () => string[];
   getFormatedDate: ComputedRef<string>;
-} => {
+  } => {
+  const { t } = useI18n();
   const getJobStatus = computed<State>(() => {
     switch (job.status) {
       case Status.Finished:
         return {
           name: Status.Finished,
           color: "green-default",
-          message: `finished`,
+          message: t('job-helper.finished'),
         } as State;
       case Status.Failed:
         return {
           name: Status.Failed,
           color: "red-default",
-          message: "failed",
+          message: t('job-helper.failed'),
         } as State;
       default:
         return {
           name: Status.Pending,
           color: "neutral-700",
-          message: "pending",
+          message: t('job-helper.pending'),
         } as State;
     }
   });

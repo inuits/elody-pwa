@@ -11,7 +11,6 @@
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import { Unicon } from "vue-unicons";
-import type { Unicons } from "@/types";
 
 export default defineComponent({
   name: "BaseIcon",

@@ -24,7 +24,7 @@
         />
       </a>
     </div>
-    <a ref="homeRef" class="text-sm mr-2 text-neutral-700">Reset view</a>
+    <a ref="homeRef" class="text-sm mr-2 text-neutral-700">{{$t('upload.reset')}}</a>
   </div>
   <MediaInfo />
 </template>

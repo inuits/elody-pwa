@@ -1,9 +1,6 @@
 <template>
   <div class="p-6 bg-neutral-0 pb-20">
     <form v-if="form.fields" novalidate>
-      <!-- <pre>
-        {{values}}
-      </pre> -->
       <div
         v-for="field in form.fields"
         :key="field.__typename === 'MetadataField' ? field.key : 'no key'"
@@ -35,7 +32,6 @@ import type {
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import { useForm, useSubmitForm } from "vee-validate";
-
 import { useMutation } from "@vue/apollo-composable";
 import useRouteHelpers from "@/composables/useRouteHelpers";
 import { useEditMode } from "@/composables/useEdit";

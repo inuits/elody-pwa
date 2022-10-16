@@ -18,7 +18,7 @@
       class="flex text-sm mx-3 flex-row items-center w-1-6"
       data-test="page-count-label"
     >
-      Page {{ currentPage }} of {{ maxPage() }}
+      {{$t('partials.page')}} {{ currentPage }} {{$t('partials.of')}} {{ maxPage() }}
     </div>
     <unicon
       class="cursor-pointer"
