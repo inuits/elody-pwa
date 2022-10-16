@@ -5,7 +5,7 @@
         v-if="false"
         v-model="searchQuery"
         :debounce="true"
-        placeholder="Search History"
+        :placeholder="$t('history-view.search')"
         label=""
         :bg-color="'neutral-20'"
       />

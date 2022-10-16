@@ -7,7 +7,7 @@
       class="logo router-link text-base text-neutral-700 font-semibold flex justify-center items-center mb-8"
       @click="forceDisableEditModalHome"
     >
-      DAMS
+      {{$t('navigation.title')}}
     </router-link>
     <div class="flex flex-row items-center menu-item">
       <BaseButton
@@ -19,7 +19,7 @@
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
         @click="forceDisableEditModalHome"
-        >Assets</span
+        >{{$t('navigation.assets')}}</span
       >
     </div>
     <div class="flex flex-row items-center menu-item">
@@ -33,7 +33,7 @@
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
         @click="forceDisableEditMediafiles"
       >
-        Mediafiles
+      {{$t('navigation.mediafiles')}}
       </span>
     </div>
     <div class="flex flex-row items-center menu-item">
@@ -46,7 +46,7 @@
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
         @click="forceDisableEditModalHistory"
-        >Jobs</span
+        >{{$t('navigation.jobs')}}</span
       >
     </div>
     <div class="flex flex-row items-center menu-item">
@@ -59,7 +59,7 @@
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
         @click="openUploadModal(modalChoices.IMPORT)"
-        >Import</span
+        >{{$t('navigation.import')}}</span
       >
     </div>
     <div class="flex flex-row items-center menu-item">
@@ -72,7 +72,7 @@
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
         @click="openCreateModal"
-        >Create</span
+        >{{$t('navigation.create')}}</span
       >
     </div>
     <div class="flex flex-row items-center menu-item">
@@ -85,7 +85,7 @@
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
         @click="logout"
-        >Log out</span
+        >{{$t('navigation.log-out')}}</span
       >
     </div>
   </nav>

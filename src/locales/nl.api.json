@@ -44,6 +44,10 @@
     "associatie": {
       "onderwerp": "Onderwerp",
       "persoon": "Persoon"
-    }
+    },
+    "dams": {
+      "csv_import": "CSV IMPORT"
+    },
+    "default_uploader": "DEFAULT UPLOADER"
   }
 }

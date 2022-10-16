@@ -6,26 +6,26 @@
       </div>
       <div class="my-1 mx-6 w-2/6">
         <span class="text-neutral-100"
-          >ID
+          >{{$t('parent.id')}}
           <p class="text-neutral-700 flex-wrap">{{ job._key }}</p>
         </span>
       </div>
       <div class="my-1 mx-6 w-1/6">
         <span class="text-neutral-100"
-          >Date
+          >{{$t('parent.date')}}
           <p class="text-neutral-700">{{ getFormatedDate }}</p>
         </span>
       </div>
       <div class="my-1 mx-6">
         <span class="text-neutral-100"
-          >Type
-          <p class="text-neutral-700">{{ job.job_type }}</p>
+          >{{$t('parent.type')}}
+          <p class="text-neutral-700">{{ $t('metadata.' + job.job_type) }}</p>
         </span>
       </div>
       <div class="my-1 mx-6">
         <span class="text-neutral-100"
-          >User
-          <p class="text-neutral-700">{{ job.user }}</p>
+          >{{$t('parent.user')}}
+          <p class="text-neutral-700">{{ $t('metadata.' + job.user ) }}</p>
         </span>
       </div>
 

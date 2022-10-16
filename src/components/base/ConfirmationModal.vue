@@ -4,20 +4,20 @@
     <div
       class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-neutral-30 p-4 rounded"
     >
-      <p class="m-2">Are you sure you want to delete this?</p>
+      <p class="m-2">{{$t('confirmation.sure-message')}}</p>
       <div class="m-2 flex justify-around">
         <BaseButton
           bg-color="neutral-100"
           bg-hover-color="neutral-200"
           txt-color="neutral-0"
-          label="Cancel"
+          :label="$t('confirmation.cancel')"
           @click="cancel"
         />
         <BaseButton
           bg-color="red-default"
           bg-hover-color="red-dark"
           txt-color="neutral-0"
-          label="Confirm"
+          :label="$t('confirmation.confirm')"
           @click="confirm"
         />
       </div>

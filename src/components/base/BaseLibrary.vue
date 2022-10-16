@@ -20,7 +20,7 @@
           v-model="queryVariables.searchValue.value"
           :debounce="true"
           :placeholder="searchPlaceholder"
-          label="Search"
+          :label="$t('library.search')"
           :is-disabled="loading"
           :bg-color="'neutral-20'"
           :disabled="!isDrawerHiding"
@@ -33,7 +33,7 @@
             v-if="result?.Entities.count > 0"
             v-model="queryVariables.limit"
             :options="paginationLimits"
-            label="Items"
+            :label="$t('library.items')"
           />
           <BaseDropdown
             v-if="
@@ -42,7 +42,7 @@
             "
             v-model="queryVariables.sort"
             :options="['Title', 'object_number']"
-            label="Sort"
+            :label="$t('library.sort')"
           />
         </div>
         <div class="flex-grow"></div>
@@ -59,7 +59,7 @@
           <ListItem
             v-for="n in queryVariables.limit"
             :key="n"
-            title="loading"
+            :title="$t('library.loading')"
             :loading="true"
             :meta="[
               { key: '/', value: '/' },
@@ -119,7 +119,7 @@
             </template>
           </ListItem>
           <div v-if="result?.Entities.results.length === 0" class="p-4">
-            {{ t("search.noresult") }}
+            {{ $t("search.noresult") }}
           </div>
         </div>
       </ListContainer>
@@ -141,13 +141,11 @@ import { useQuery } from "@vue/apollo-composable";
 import ListItem from "@/components/ListItem.vue";
 import { useRouter } from "vue-router";
 import { Unicons } from "@/types";
-import { GetEntitiesDocument, MediaFile, Metadata, SearchInputType } from "@/queries";
+import { GetEntitiesDocument, SearchInputType } from "@/queries";
 import type { GetEntitiesQueryVariables, Maybe } from "@/queries";
 import FilterSideBar from "@/components/FilterSideBar.vue";
 import IconToggle from "@/components/base/IconToggle.vue";
-import { useI18n } from "vue-i18n";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
-import { MetadataField } from "@/queries";
 import useMetaDataHelper, { beingAdded } from "@/composables/useMetaDataHelper";
 import BaseIcon from "./BaseIcon.vue";
 
@@ -197,7 +195,6 @@ export default defineComponent({
   emits: ["addSelection"],
   setup: (props, { emit }) => {
     const { getThumbnail } = useThumbnailHelper();
-    const { t } = useI18n();
     const router = useRouter();
     const { determineIfNotAdded, mediafiles, selectedRelationFieldMetadata } = useMetaDataHelper();
     const paginationInfo = reactive({
@@ -257,7 +254,6 @@ export default defineComponent({
       Unicons,
       router,
       result,
-      t,
       setFilters,
       getThumbnail,
       determineIfNotAdded,

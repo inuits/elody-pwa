@@ -10,7 +10,7 @@
     <h3 class="text-sm text-neutral-700 font-semibold">Mediainfo</h3>
     <div v-if="!isEdit && mediafileSelectionState.selectedMediafile.metadata">
       <div v-if="hasPrimaryFunctionality()">
-          <div class="label">{{ t("media-info.primaire-media") }}</div>
+          <div class="label">{{ $t("media-info.primaire-media") }}</div>
           <div class="value h-5 w-5">
             <BaseIcon
               v-if="mediafileSelectionState.selectedMediafile.is_primary"
@@ -19,7 +19,7 @@
             <BaseIcon v-else :name="Unicons.Cross.name" />
           </div>
 
-          <div class="label">{{ t("media-info.thumbnail") }}</div>
+          <div class="label">{{ $t("media-info.thumbnail") }}</div>
           <div class="value h-5 w-5">
             <BaseIcon
               v-if="
@@ -48,7 +48,7 @@
     >
       <div class="flex justify-between">
         <span class="ml-1 text-neutral-700 text-sm">{{
-          t("media-info.primaire-media")
+          $t("media-info.primaire-media")
         }}</span>
         <div class="value h-5 w-5">
           <BaseIcon
@@ -60,7 +60,7 @@
       </div>
       <BaseButton
         style="background-color: #7A869A !important"
-        :label="t('media-info.set-primair')"
+        :label="$t('media-info.set-primair')"
         bg-color="neutral-100"
         bg-hover-color="neutral-400"
         txt-color="neutral-0"
@@ -82,7 +82,7 @@
       </div>
       <BaseButton
         style="background-color: #7A869A !important"
-        :label="t('media-info.set-thumbnail')"
+        :label="$t('media-info.set-thumbnail')"
         bg-color="neutral-100"
         bg-hover-color="neutral-400"
         txt-color="neutral-0"
@@ -115,7 +115,6 @@ import MetaEditMedia from "@/components/base/MetaEditMedia.vue";
 import { useEntityMediafileSelector } from "../EntityImageSelection.vue";
 import BaseIcon from "@/components/base/BaseIcon.vue";
 import { Unicons } from "@/types";
-import { useI18n } from "vue-i18n";
 import { useMutation } from "@vue/apollo-composable";
 import { useRoute } from "vue-router";
 import useMetaDataHelper from "@/composables/useMetaDataHelper";
@@ -128,7 +127,6 @@ export default defineComponent({
   setup() {
     const { mediafiles } = useMetaDataHelper();
     const { hasPrimaryFunctionality } = useMediaInfoHelper();
-    const { t } = useI18n();
     const route = useRoute();
     const { mediafileSelectionState } = useEntityMediafileSelector();
     const { result: form } = useQuery(GetFormsDocument, {
@@ -184,7 +182,6 @@ export default defineComponent({
       setMediaPrimaire,
       setMediaThumbnail,
       hasPrimaryFunctionality,
-      t,
     };
   },
 });

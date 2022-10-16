@@ -2,7 +2,7 @@
   <span v-if="label" class="ml-1 text-neutral-700 text-sm">{{ label }}</span>
   <div>
     <div v-if="!fields || fields.length === 0" class="ml-1 text-neutral-100 text-sm italic pb-2">
-      No {{ label }} available.
+     {{$t("partials-no")}} {{ label }} {{$t("partials-available")}}.
     </div>
     <div v-for="({ value, key }, idx) in fields" :key="key" class="my-2">
       <div
@@ -62,7 +62,7 @@ import BaseButton from "./base/BaseButton.vue";
 import MetaAdd from "@/components/MetaAdd.vue";
 import { usePickEntityModal } from "./PickEntityModal.vue";
 import type { PickEntityModalType } from "./PickEntityModal.vue";
-import useFormHelper, {
+import {
   selectedRelationField,
   getEmptyMetadatRelationObject,
 } from "@/composables/useFormHelpers";
