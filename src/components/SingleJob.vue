@@ -8,7 +8,7 @@
     <p class="w-2/6 mx-4 flex items-center">{{ job.job_info }}</p>
     <BaseLabel :name="getJobStatus.name" :color="getJobStatus.color" />
     <div class="flex-grow p-10">
-      {{ job.error_message ? job.error_message : "" }}
+      {{ job.message ? job.message : "" }}
     </div>
     <BaseButton
       v-if="job.asset_id"

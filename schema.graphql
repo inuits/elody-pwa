@@ -344,7 +344,7 @@ type Job {
   _key: String
   _rev: String
   sub_jobs: SubJobResults
-  error_message: String
+  message: String
 }
 
 type SubJobResults {
