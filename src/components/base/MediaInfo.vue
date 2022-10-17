@@ -68,7 +68,7 @@
       />
       <div class="flex justify-between">
         <span class="ml-1 text-neutral-700 text-sm">{{
-          t("media-info.thumbnail")
+          $t("media-info.thumbnail")
         }}</span>
         <div class="value h-5 w-5">
           <BaseIcon
