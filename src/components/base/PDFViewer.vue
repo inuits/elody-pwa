@@ -40,6 +40,7 @@ export default defineComponent({
     const container = ref<HTMLDivElement | undefined>(undefined);
 
     const { source } = toRefs(props);
+    console.log(source.value);
 
     watch(source, (newSrc: unknown[] | undefined) => {
       loading.value = true;
