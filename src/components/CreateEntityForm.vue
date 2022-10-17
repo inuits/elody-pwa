@@ -62,7 +62,7 @@ export default defineComponent({
     });
 
     const create = async () => {
-      await mutate({
+      const createResult = await mutate({
         data: {
           type: props.entityType,
           id: "",
@@ -72,7 +72,12 @@ export default defineComponent({
         },
       });
       closeCreateModal();
-      router.push({ name: "SingleEntity", params: { id: manualID.value } });
+      if (createResult && createResult.data?.createEntity?.id) {
+        router.push({
+          name: "SingleEntity",
+          params: { id: createResult.data.createEntity.id },
+        });
+      }
     };
     return { result, create, EntityTitle, manualID };
   },
