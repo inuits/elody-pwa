@@ -30,6 +30,14 @@ export type relationValues = {
 
 export type IntialValues = Record<string, string | relationValues[]>;
 
+const setLabel = (field:  Maybe<MetadataOrRelationField>) => {
+  if (field.key !== noKey) {
+    return field.key
+  } else {
+    return undefined
+  }
+}
+
 const useFormHelper = (form: Form, entityTitle: string) => {
   const formStructure: MetadataOrRelationField[] =
     form.fields as MetadataOrRelationField[];
@@ -174,6 +182,7 @@ export const getEmptyMetadatRelationObject = (
   const intialValue: relationValues = {
     linkedEntity: linkedEntity,
     key: id,
+    label: setLabel(fields),
     metadata: {},
     relationType: fields.relationType ? fields.relationType : "",
     value: undefined
