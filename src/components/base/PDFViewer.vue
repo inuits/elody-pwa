@@ -1,10 +1,50 @@
-<template>
-  <object
-    class="h-full w-full object-contain"
-    :data="source?.original_file_location"
-    :type="source?.mimetype"
-  ></object>
+<template>  
+    <div
+    class="relative w-full"
+    :class="{
+      'animated-pulse bg-blue-default10': loading,
+      'bg-white-background': !loading,
+    }"
+  >
+    <div v-if="loading" class="text-center pt-5 italic">
+      loading
+    </div>
+
+    <div>
+      <button :onclick="() => onPrevPage(canvas, ctx)">Previous</button>
+      <button :onclick="() => onNextPage(canvas, ctx)">Next</button>
+      &nbsp; &nbsp;
+      <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
+    </div>
+
+    <a
+      v-show="!loading"
+      class="cursor-pointer absolute w-8 h-8 bg-blue rounded-full top-3 right-5 flex flex-col justify-center transform shadow hover:shadow-2xl items-center z-10"
+      @click="() => zoomIn(canvas, ctx)"
+    >
+      <span class="rounded-full w-3 h-0.5 bg-white block"></span>
+      <span
+        class="rounded-full w-3 h-0.5 transform rotate-90 bg-white block absolute"
+      ></span>
+    </a>
+    <a
+      v-show="!loading"
+      class="cursor-pointer absolute w-8 h-8 bg-blue rounded-full top-12 right-5 flex flex-col justify-center transform shadow hover:shadow-2xl items-center z-10"
+      @click="() => zoomOut(canvas, ctx)"
+    >
+      <span class="rounded-full w-3 h-0.5 bg-white block"></span>
+    </a>
+    <div
+      class="h-screen-90 w-full overflow-scroll relative"
+      :class="{ 'opacity-0': loading }"
+    >
+      <div id="viewerContainer" ref="container" class="absolute w-full flex content-center items-center">
+        <canvas id="viewer" class="pdfViewer border-2"></canvas>
+      </div>
+    </div>
+  </div>
 </template>
+
 
 <script lang="ts">
 // @ts-nocheck
@@ -14,8 +54,6 @@ import type { PropType } from "vue";
 import * as pdfjsLibImport from "pdfjs-dist";
 const pdfjsLib: typeof import("pdfjs-dist") = pdfjsLibImport;
 import "pdfjs-dist/build/pdf.worker.entry";
-import { PDFViewer, EventBus } from "pdfjs-dist/web/pdf_viewer.js";
-import { PDFDocumentProxy } from "pdfjs-dist/types/src/display/api";
 import { MediaFileMetadata } from "@/queries";
 
 export default defineComponent({
@@ -23,78 +61,115 @@ export default defineComponent({
   components: {},
   props: {
     source: {
-      type: Array as PropType<MediaFileMetadata[]>,
+      type: Object as PropType<MediaFileMetadata>,
       required: true,
     },
   },
   setup(props) {
     const loading = ref<boolean>(true);
-    const pdfViewer = ref<
-      | {
-          setDocument: (input: PDFDocumentProxy) => void;
-          currentScaleValue: number;
-        }
-      | undefined
-    >();
-    const zoomLevel = ref<number>(0.5);
-    const container = ref<HTMLDivElement | undefined>(undefined);
-
     const { source } = toRefs(props);
-    console.log(source.value);
+    const pageNum = ref<number>(1);
+    let pdfDoc = null;
+    const pageRendering = ref<boolean>(false);
+    const pageNumPending = ref(null);
+    const scale = ref<number>(1.2);
+    const url = ref<String>(source.value.original_file_location);
+    const canvas = ref(null);
+    const ctx = ref(null);
 
-    watch(source, (newSrc: unknown[] | undefined) => {
-      loading.value = true;
-      if (pdfViewer.value && newSrc?.content) {
-        pdfjsLib
-          .getDocument({
-            url: newSrc?.content,
-          })
-          .promise.then((pdfDocument: PDFDocumentProxy) => {
-            if (pdfViewer.value) {
-              pdfViewer.value.setDocument(pdfDocument);
-            }
-          });
-      }
-    });
+    function renderPage(num, canvas, ctx) {
+      pageRendering.value = true;
+      // Using promise to fetch the page
+      pdfDoc.getPage(num).then(function(page) {
+        let viewport = page.getViewport({scale: scale.value});
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        // Render PDF page into canvas context
+        let renderContext = {
+          canvasContext: ctx,
+          viewport: viewport
+        };
+        let renderTask = page.render(renderContext);
+
+        // Wait for rendering to finish
+        renderTask.promise.then(function() {
+          pageRendering.value = false;
+          if (pageNumPending.value !== null) {
+            // New page rendering is pending
+            renderPage(pageNumPending.value);
+            pageNumPending.value = null;
+          }
+        });
+      // Update page counters
+      document.getElementById('page_num').textContent = num;
+      })};
+
+      function queueRenderPage(num, canvas, ctx) {
+        if (pageRendering.value) {
+          pageNumPending.value = num;
+        } else {
+          renderPage(num, canvas, ctx);
+        }
+      };
+
+      function onPrevPage(canvas, ctx) {
+        if (pageNum.value <= 1) {
+          return;
+        }
+        pageNum.value--;
+        queueRenderPage(pageNum.value, canvas, ctx);
+      };
+
+      function onNextPage(canvas, ctx) {
+        if (pageNum.value >= pdfDoc.numPages) {
+          return;
+        }
+        pageNum.value++;
+        queueRenderPage(pageNum.value, canvas, ctx);
+      };
+    
 
     onMounted(async () => {
-      // Init viewer with event-bus
-      var eventBus = new EventBus();
-      pdfViewer.value = new PDFViewer({
-        container: container.value,
-        eventBus,
-      });
+      canvas.value = document.getElementById('viewer');
+      ctx.value = canvas.value.getContext('2d');
 
-      eventBus.on("pagesinit", function () {
-        if (pdfViewer.value) {
-          pdfViewer.value.currentScaleValue = zoomLevel.value;
-          loading.value = false;
-        }
+      pdfjsLib.getDocument(url.value).promise.then(function(pdfDoc_) {
+        pdfDoc = pdfDoc_;
+        document.getElementById('page_count').textContent = pdfDoc.numPages;
+
+        // Initial/first page rendering
+        renderPage(pageNum.value, canvas.value, ctx.value);
+        loading.value = false;
       });
     });
 
-    const zoomIn = () => {
-      if (pdfViewer.value) {
-        zoomLevel.value = zoomLevel.value + 0.5;
-        pdfViewer.value.currentScaleValue = zoomLevel.value;
-      }
+    const zoomIn = (canvas, ctx) => {
+      scale.value += 0.2;
+      queueRenderPage(pageNum.value, canvas, ctx);
     };
 
-    const zoomOut = () => {
-      if (pdfViewer.value && zoomLevel.value != 0.5) {
-        zoomLevel.value = zoomLevel.value - 0.5;
-        pdfViewer.value.currentScaleValue = zoomLevel.value;
-      }
+    const zoomOut = (canvas, ctx) => {
+      scale.value -= 0.2;
+      queueRenderPage(pageNum.value, canvas, ctx);
     };
+
+    watch(source, (oldSrc, newSrc) => {
+      console.log("Source changed");
+    })
 
     return {
       zoomIn,
       zoomOut,
       loading,
-      container,
+      canvas,
+      ctx,
+      onPrevPage,
+      onNextPage,
     };
-  },
+  }
 });
+
 </script>
 <style>
 .h-screen-90 {
