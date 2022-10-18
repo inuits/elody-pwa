@@ -73,7 +73,7 @@ export default defineComponent({
     const pageRendering = ref<boolean>(false);
     const pageNumPending = ref(null);
     const scale = ref<number>(1.2);
-    const url = ref<String>(source.value.original_file_location);
+    const url = ref<String>("");
     const canvas = ref(null);
     const ctx = ref(null);
 
@@ -134,14 +134,7 @@ export default defineComponent({
       canvas.value = document.getElementById('viewer');
       ctx.value = canvas.value.getContext('2d');
 
-      pdfjsLib.getDocument(url.value).promise.then(function(pdfDoc_) {
-        pdfDoc = pdfDoc_;
-        document.getElementById('page_count').textContent = pdfDoc.numPages;
-
-        // Initial/first page rendering
-        renderPage(pageNum.value, canvas.value, ctx.value);
-        loading.value = false;
-      });
+      initialRender();
     });
 
     const zoomIn = (canvas, ctx) => {
@@ -154,8 +147,22 @@ export default defineComponent({
       queueRenderPage(pageNum.value, canvas, ctx);
     };
 
+    const initialRender = () => {
+      url.value = source.value.original_file_location;
+      pageNum.value = 1;
+      pdfjsLib.getDocument(url.value).promise.then(function(pdfDoc_) {
+        pdfDoc = pdfDoc_;
+        document.getElementById('page_count').textContent = pdfDoc.numPages;
+
+        // Initial/first page rendering
+        renderPage(pageNum.value, canvas.value, ctx.value);
+        loading.value = false;
+      });
+    }
+
     watch(source, (oldSrc, newSrc) => {
       console.log("Source changed");
+      initialRender();
     })
 
     return {
