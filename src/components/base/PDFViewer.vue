@@ -1,6 +1,6 @@
 <template>  
     <div
-    class="relative w-full"
+    class="relative w-full mt-10"
     :class="{
       'animated-pulse bg-blue-default10': loading,
       'bg-white-background': !loading,
@@ -10,12 +10,14 @@
       loading
     </div>
 
-    <div>
+    <!-- <div>
       <button :onclick="() => onPrevPage(canvas, ctx)">Previous</button>
       <button :onclick="() => onNextPage(canvas, ctx)">Next</button>
       &nbsp; &nbsp;
       <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
-    </div>
+    </div> -->
+
+    <ViewerToolbar/>
 
     <a
       v-show="!loading"
@@ -35,10 +37,10 @@
       <span class="rounded-full w-3 h-0.5 bg-white block"></span>
     </a>
     <div
-      class="h-screen-90 w-full overflow-scroll relative"
+      class="h-screen-90 flex items-center justify-center w-full overflow-scroll relative"
       :class="{ 'opacity-0': loading }"
     >
-      <div id="viewerContainer" ref="container" class="absolute w-full flex content-center items-center">
+      <div id="viewerContainer" ref="container" class="absolute w-full flex justify-center items-center">
         <canvas id="viewer" class="pdfViewer border-2"></canvas>
       </div>
     </div>
@@ -55,10 +57,11 @@ import * as pdfjsLibImport from "pdfjs-dist";
 const pdfjsLib: typeof import("pdfjs-dist") = pdfjsLibImport;
 import "pdfjs-dist/build/pdf.worker.entry";
 import { MediaFileMetadata } from "@/queries";
+import ViewerToolbar from '../ViewerToolbar.vue';
 
 export default defineComponent({
   name: "PdfViewer",
-  components: {},
+  components: {ViewerToolbar},
   props: {
     source: {
       type: Object as PropType<MediaFileMetadata>,
@@ -152,7 +155,7 @@ export default defineComponent({
       pageNum.value = 1;
       pdfjsLib.getDocument(url.value).promise.then(function(pdfDoc_) {
         pdfDoc = pdfDoc_;
-        document.getElementById('page_count').textContent = pdfDoc.numPages;
+        //document.getElementById('page_count').textContent = pdfDoc.numPages;
 
         // Initial/first page rendering
         renderPage(pageNum.value, canvas.value, ctx.value);
@@ -161,7 +164,6 @@ export default defineComponent({
     }
 
     watch(source, (oldSrc, newSrc) => {
-      console.log("Source changed");
       initialRender();
     })
 
@@ -176,8 +178,8 @@ export default defineComponent({
     };
   }
 });
-
 </script>
+
 <style>
 .h-screen-90 {
   height: 90vh;
