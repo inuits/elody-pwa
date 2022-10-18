@@ -1,6 +1,6 @@
 <template>  
     <div
-    class="relative w-full mt-10"
+    class="relative w-full"
     :class="{
       'animated-pulse bg-blue-default10': loading,
       'bg-white-background': !loading,
@@ -9,28 +9,17 @@
     <div v-if="loading" class="text-center pt-5 italic">
       loading
     </div>
-
-    <!-- <div>
-      <button :onclick="() => onPrevPage(canvas, ctx)">Previous</button>
-      <button :onclick="() => onNextPage(canvas, ctx)">Next</button>
-      &nbsp; &nbsp;
-      <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
-    </div> -->
-
-    <ViewerToolbar/>
-
-    <a
+    <PdfToolbar 
       v-show="!loading"
-      class="cursor-pointer absolute w-8 h-8 bg-blue rounded-full top-3 right-5 flex flex-col justify-center transform shadow hover:shadow-2xl items-center z-10"
-      @click="() => zoomIn(canvas, ctx)"
-    >
-      <span class="rounded-full w-3 h-0.5 bg-white block"></span>
-      <span
-        class="rounded-full w-3 h-0.5 transform rotate-90 bg-white block absolute"
-      ></span>
-    </a>
+      v-on:zoomIn="zoomIn(canvas, ctx)"
+      v-on:zoomOut="zoomOut(canvas, ctx)"
+      v-on:nextPage="onNextPage(canvas, ctx)"
+      v-on:prevPage="onPrevPage(canvas, ctx)"
+      :pageNum="pageNum"
+      :pageCount="numPages"
+    />
     <a
-      v-show="!loading"
+      v-show="!loading" 
       class="cursor-pointer absolute w-8 h-8 bg-blue rounded-full top-12 right-5 flex flex-col justify-center transform shadow hover:shadow-2xl items-center z-10"
       @click="() => zoomOut(canvas, ctx)"
     >
@@ -57,11 +46,13 @@ import * as pdfjsLibImport from "pdfjs-dist";
 const pdfjsLib: typeof import("pdfjs-dist") = pdfjsLibImport;
 import "pdfjs-dist/build/pdf.worker.entry";
 import { MediaFileMetadata } from "@/queries";
-import ViewerToolbar from '../ViewerToolbar.vue';
+import { Unicons } from '../../types';
+import PdfToolbar from '../PdfToolbar.vue';
+import PdfToolbar from '../PdfToolbar.vue';
 
 export default defineComponent({
   name: "PdfViewer",
-  components: {ViewerToolbar},
+  components: { PdfToolbar },
   props: {
     source: {
       type: Object as PropType<MediaFileMetadata>,
@@ -72,10 +63,11 @@ export default defineComponent({
     const loading = ref<boolean>(true);
     const { source } = toRefs(props);
     const pageNum = ref<number>(1);
+    const numPages = ref<number>(0);
     let pdfDoc = null;
     const pageRendering = ref<boolean>(false);
     const pageNumPending = ref(null);
-    const scale = ref<number>(1.2);
+    const scale = ref<number>(1);
     const url = ref<String>("");
     const canvas = ref(null);
     const ctx = ref(null);
@@ -83,7 +75,7 @@ export default defineComponent({
     function renderPage(num, canvas, ctx) {
       pageRendering.value = true;
       // Using promise to fetch the page
-      pdfDoc.getPage(num).then(function(page) {
+      pdfDoc?.getPage(num).then(function(page) {
         let viewport = page.getViewport({scale: scale.value});
         canvas.height = viewport.height;
         canvas.width = viewport.width;
@@ -105,7 +97,8 @@ export default defineComponent({
           }
         });
       // Update page counters
-      document.getElementById('page_num').textContent = num;
+
+      // document.getElementById('page_num').textContent = num;
       })};
 
       function queueRenderPage(num, canvas, ctx) {
@@ -155,9 +148,9 @@ export default defineComponent({
       pageNum.value = 1;
       pdfjsLib.getDocument(url.value).promise.then(function(pdfDoc_) {
         pdfDoc = pdfDoc_;
-        //document.getElementById('page_count').textContent = pdfDoc.numPages;
-
+        numPages.value = pdfDoc.numPages;
         // Initial/first page rendering
+        
         renderPage(pageNum.value, canvas.value, ctx.value);
         loading.value = false;
       });
@@ -168,13 +161,17 @@ export default defineComponent({
     })
 
     return {
-      zoomIn,
-      zoomOut,
       loading,
       canvas,
       ctx,
-      onPrevPage,
+      Unicons,
+      pageNum,
+      numPages,
+      pdfDoc,
+      zoomIn,
+      zoomOut,
       onNextPage,
+      onPrevPage
     };
   }
 });
