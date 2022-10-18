@@ -12,6 +12,14 @@ const relationsToBeDeleted = ref<{ entityId: string, relations: Array<any>}>({
 });
 
 const useMetaDataHelper = () => {
+
+  const resetRelationsToBeDeleted = () => {
+    relationsToBeDeleted.value = {
+      entityId: '',
+      relations: []
+    }
+  }
+
   const clearMediafiles = (): void => {
     mediafiles.value = [];
   };
@@ -93,7 +101,8 @@ const useMetaDataHelper = () => {
     determineIfNotAdded,
     selectedRelationFieldMetadata,
     beingAdded,
-    relationsToBeDeleted
+    relationsToBeDeleted,
+    resetRelationsToBeDeleted
   };
 };
 

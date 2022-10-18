@@ -78,14 +78,19 @@ const useFormHelper = (form: Form, entityTitle: string) => {
           
           findRelations(field.relationType, metadata).forEach(
             (relationMetaData: MetadataRelation) => {
-              console.log('field', field);
-              console.log('relationMetaData', relationMetaData);
+              // console.log('field', field);
+              // console.log('relationMetaData', relationMetaData);
               if ((field.key) && (relationMetaData.label === field.key) || (relationMetaData.label === field.label)) {
                 pushIntoRelationArray(relationMetaData);
               }
               else if (field.key === noKey) {
                 pushIntoRelationArray(relationMetaData);
               }
+              // CHECK IF RELATION TYPE ONLY OCCURS ONCE --> AVOID TO SET MULTIPLE TIMES AS FOR EXAMPLE IN A FRAME.
+              // else if (structure.filter((f: Maybe<MetadataOrRelationField>) => { return (f?.__typename === "RelationField" && (f.relationType === field.relationType)) }).length === 1)
+              // {
+              //   pushIntoRelationArray(relationMetaData);
+              // }
             }
           );
           intialValues[field.label ? field.label : field.relationType] =
@@ -163,35 +168,6 @@ const useFormHelper = (form: Form, entityTitle: string) => {
         }
       }
     );
-    console.log('ORIGINAL STRUCTURE: ', originalStructure);
-    console.log('INPUT: ', input);
-
-    // CHECK FOR MISSING META DATA RELATIONS
-    // const missingRelations: RelationInput[] = [];
-    // originalStructure.forEach((metaData: any) => {
-    //   if (metaData.__typename === 'MetadataRelation') {
-
-    //     const result = input.relations.some((relation) => {
-    //       return relation.linkedEntityId === ('entities/' + metaData.linkedEntity.id)
-    //     });
-
-    //     if (!result) {
-    //       missingRelations.push(
-    //         {
-    //           relationType: metaData.type,
-    //           linkedEntityId: metaData.key,
-    //           label: metaData.label,
-    //           value: metaData.value ? metaData.value : '',
-    //           metadata: []
-    //         }
-    //       )
-    //     }
-    //   }
-    // })
-
-    // console.log('MISSING RELATIONS: ', missingRelations);
-    // input.relations.push(...missingRelations);
-    // console.log('input: ', input);
     return input;
   };
 
