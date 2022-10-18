@@ -6,6 +6,10 @@ const lastAdjustedMediaFileMetaData = ref<any>();
 const mediafiles = ref<MediaFile[]>([]);
 export const selectedRelationFieldMetadata = ref([]);
 export const beingAdded = ref<string>("");
+const relationsToBeDeleted = ref<{ entityId: string, relations: Array<any>}>({
+  entityId: '',
+  relations: []
+});
 
 const useMetaDataHelper = () => {
   const clearMediafiles = (): void => {
@@ -88,7 +92,8 @@ const useMetaDataHelper = () => {
     mediafiles,
     determineIfNotAdded,
     selectedRelationFieldMetadata,
-    beingAdded
+    beingAdded,
+    relationsToBeDeleted
   };
 };
 

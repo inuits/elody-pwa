@@ -935,6 +935,12 @@ mutation replaceRelationsAndMetaData($id: String!, $form: MetadataFormInput!) {
   }
 }
 
+mutation deleteRelations($id: String!, $metadata: [MetadataInput!]!) {
+  deleteRelations(id: $id, metadata: $metadata) {
+    key
+  }
+}
+
 mutation deleteData($id: String!, $path: deletePaths!) {
   deleteData(id: $id, path: $path)
 }

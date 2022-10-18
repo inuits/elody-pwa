@@ -75,25 +75,25 @@ export default defineComponent({
       initialValues: buildInitialValues(props.modelValue),
     });
 
-    addSaveCallback(
-      useSubmitForm<IntialValues>(async (values) => {
-        //SEARCH ARRAYS AND COMBINED
-        props.form.fields.forEach((field: any) => {
-          if (values[field.label]) {
-            if (
-              Array.isArray(values.components) &&
-              Array.isArray(values[field.label])
-            ) {
-              const arr: any = [...values[field.label]];
-              values.components = arr;
-              delete values[field.label];
-            }
-          }
-        });
-        await mutate({ id, form: serialzeFormToInput(values) });
-      }),
-      "first"
-    );
+    // addSaveCallback(
+    //   useSubmitForm<IntialValues>(async (values) => {
+    //     //SEARCH ARRAYS AND COMBINED
+    //     props.form.fields.forEach((field: any) => {
+    //       if (values[field.label]) {
+    //         if (
+    //           Array.isArray(values.components) &&
+    //           Array.isArray(values[field.label])
+    //         ) {
+    //           const arr: any = [...values[field.label]];
+    //           values.components = arr;
+    //           delete values[field.label];
+    //         }
+    //       }
+    //     });
+    //     await mutate({ id, form: serialzeFormToInput(values, props.modelValue) });
+    //   }),
+    //   "first"
+    // );
 
     return {
       values,
