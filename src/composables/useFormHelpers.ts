@@ -11,6 +11,7 @@ import type {
   MetadataOrRelationField,
   MetadataRelation,
   RelationField,
+RelationInput,
 } from "@/queries";
 
 import type { RelationMetaData } from "@/queries";
@@ -77,6 +78,8 @@ const useFormHelper = (form: Form, entityTitle: string) => {
           
           findRelations(field.relationType, metadata).forEach(
             (relationMetaData: MetadataRelation) => {
+              console.log('field', field);
+              console.log('relationMetaData', relationMetaData);
               if ((field.key) && (relationMetaData.label === field.key) || (relationMetaData.label === field.label)) {
                 pushIntoRelationArray(relationMetaData);
               }
@@ -132,7 +135,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
     }) as MetadataRelation[];
   };
 
-  const serialzeFormToInput = (values: IntialValues): MetadataFormInput => {
+  const serialzeFormToInput = (values: IntialValues, originalStructure: MetadataAndRelation[]): MetadataFormInput => {
     const input: MetadataFormInput = {
       Metadata: [],
       relations: [],
@@ -160,6 +163,35 @@ const useFormHelper = (form: Form, entityTitle: string) => {
         }
       }
     );
+    console.log('ORIGINAL STRUCTURE: ', originalStructure);
+    console.log('INPUT: ', input);
+
+    // CHECK FOR MISSING META DATA RELATIONS
+    // const missingRelations: RelationInput[] = [];
+    // originalStructure.forEach((metaData: any) => {
+    //   if (metaData.__typename === 'MetadataRelation') {
+
+    //     const result = input.relations.some((relation) => {
+    //       return relation.linkedEntityId === ('entities/' + metaData.linkedEntity.id)
+    //     });
+
+    //     if (!result) {
+    //       missingRelations.push(
+    //         {
+    //           relationType: metaData.type,
+    //           linkedEntityId: metaData.key,
+    //           label: metaData.label,
+    //           value: metaData.value ? metaData.value : '',
+    //           metadata: []
+    //         }
+    //       )
+    //     }
+    //   }
+    // })
+
+    // console.log('MISSING RELATIONS: ', missingRelations);
+    // input.relations.push(...missingRelations);
+    // console.log('input: ', input);
     return input;
   };
 
