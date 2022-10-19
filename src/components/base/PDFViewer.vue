@@ -1,5 +1,5 @@
 <template>  
-    <div
+  <div
     class="relative w-full"
     :class="{
       'animated-pulse bg-blue-default10': loading,
@@ -13,18 +13,10 @@
       v-show="!loading"
       v-on:zoomIn="zoomIn(canvas, ctx)"
       v-on:zoomOut="zoomOut(canvas, ctx)"
-      v-on:nextPage="onNextPage(canvas, ctx)"
-      v-on:prevPage="onPrevPage(canvas, ctx)"
+      v-on:changePage="onChangePage($event.num, canvas, ctx)"
       :pageNum="pageNum"
       :pageCount="numPages"
     />
-    <a
-      v-show="!loading" 
-      class="cursor-pointer absolute w-8 h-8 bg-blue rounded-full top-12 right-5 flex flex-col justify-center transform shadow hover:shadow-2xl items-center z-10"
-      @click="() => zoomOut(canvas, ctx)"
-    >
-      <span class="rounded-full w-3 h-0.5 bg-white block"></span>
-    </a>
     <div
       class="h-screen-90 flex items-center justify-center w-full overflow-scroll relative"
       :class="{ 'opacity-0': loading }"
@@ -109,22 +101,10 @@ export default defineComponent({
         }
       };
 
-      function onPrevPage(canvas, ctx) {
-        if (pageNum.value <= 1) {
-          return;
-        }
-        pageNum.value--;
-        queueRenderPage(pageNum.value, canvas, ctx);
-      };
-
-      function onNextPage(canvas, ctx) {
-        if (pageNum.value >= pdfDoc.numPages) {
-          return;
-        }
-        pageNum.value++;
-        queueRenderPage(pageNum.value, canvas, ctx);
-      };
-    
+      function onChangePage(num, canvas, ctx) {
+        pageNum.value = num;
+        queueRenderPage(parseInt(num), canvas, ctx);
+      }
 
     onMounted(async () => {
       canvas.value = document.getElementById('viewer');
@@ -170,8 +150,7 @@ export default defineComponent({
       pdfDoc,
       zoomIn,
       zoomOut,
-      onNextPage,
-      onPrevPage
+      onChangePage
     };
   }
 });
