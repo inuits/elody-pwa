@@ -20,7 +20,7 @@ const isEditToggleVisible = ref<"no-edit" | "edit" | "edit-delete">("no-edit");
 export const useEditMode = () => {
   const { linkMediaFilesToEntity, clearMediaFilesToLinkToEntity } =
     useMediaAssetLinkHelper();
-  const { clearMediaFilesToPatch, relationsToBeDeleted, resetRelationsToBeDeleted } = useMetaDataHelper();
+  const { clearMediaFilesToPatch, relationsToBeDeleted, resetRelationsToBeDeleted, resetMetadataToBePatched } = useMetaDataHelper();
   const setEditMode = () => (editMode.value = "edit");
   const disableEditMode = () => (editMode.value = "view");
   const isEdit = computed<boolean>(() => editMode.value === "edit");
@@ -80,6 +80,7 @@ export const useEditMode = () => {
     saveCallbacks.value = [];
     toBeDeleted.value = [];
     resetRelationsToBeDeleted();
+    resetMetadataToBePatched();
     clearMediaFilesToLinkToEntity();
     clearMediaFilesToPatch();
     document.dispatchEvent(discardEvent);
