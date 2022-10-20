@@ -2,14 +2,7 @@
   <div
     class="absolute w-11/12 bg-neutral-0 z-20 mx-4 mt-7 p-2 shadow-sm flex justify-between h-10"
   >
-    <div>
-      <a class="mr-2 ml-2">
-        <unicon
-          :name="Unicons.Desktop.name"
-          height="20"
-          class="text-neutral-700 cursor-pointer"
-        />
-      </a>
+    <div class="select-none">
       <a ref="zoomInRef" class="mr-1">
         <unicon
           :onclick="() => $emit('zoomIn', {})"
@@ -39,7 +32,7 @@
           type="number"
           :value="props.pageNum" 
           style="direction:rtl" 
-          class="h-6 w-8 p-0"
+          class="h-6 w-8 p-0 border-none rounded focus:border-2 focus:border-black"
           min="1"
           :max="props.pageCount"
           v-on:change="(e) => {changePageWrapper(e.target.value)}"/>  /  
@@ -65,11 +58,11 @@ export default defineComponent({
     MediaInfo,
   },
   props: ["pageNum", "pageCount"],
-  emits: ["zoomIn", "zoomOut", "fullPage", "changePage"],
+  emits: ["zoomIn", "zoomOut", "changePage"],
   setup: (props, {emit}) => {  
     const input = ref<HTMLInputElement | undefined>(undefined)
 
-    const changePageWrapper = (num) => {
+    const changePageWrapper = (num: number): void => {
       if (num > props.pageCount){
         num = props.pageCount;
       } else if (num < 1){
@@ -93,18 +86,13 @@ export default defineComponent({
 </script>
   
 <style scoped>
-  input {
-    border: none;
-    border-radius: 4px;
-  }
-
-  input:focus {
-    outline: none;
-  }
-
   input::-webkit-outer-spin-button,
   input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+  }
+
+  input[type = 'number']{
+    --tw-ring-shadow: none;
   }
 </style>

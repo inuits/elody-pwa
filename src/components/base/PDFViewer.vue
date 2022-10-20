@@ -11,18 +11,26 @@
     </div>
     <PdfToolbar 
       v-show="!loading"
-      v-on:zoomIn="zoomIn(canvas, ctx)"
-      v-on:zoomOut="zoomOut(canvas, ctx)"
-      v-on:changePage="onChangePage($event.num, canvas, ctx)"
+      v-on:zoomIn="zoomIn()"
+      v-on:zoomOut="zoomOut()"
+      v-on:changePage="onChangePage($event.num)"
       :pageNum="pageNum"
       :pageCount="numPages"
     />
     <div
-      class="h-screen-90 flex items-center justify-center w-full overflow-scroll relative"
-      :class="{ 'opacity-0': loading }"
+      ref="spaceForPage"
+      :class="['h-screen-90 flex justify-center items center w-full overflow-scroll relative',
+        {'opacity-0': loading}]"
     >
-      <div id="viewerContainer" ref="container" class="absolute w-full flex justify-center items-center">
-        <canvas id="viewer" class="pdfViewer border-2"></canvas>
+      <div 
+        id="viewerContainer" 
+        ref="pageContainer" 
+        :class="
+          ['absolute w-full flex',
+           decentralizeFromLeft ? 'ml-8' : 'justify-center']">
+        <div>
+          <canvas id="viewer" class="pdfViewer border-2 pb-6 pr-6" ref="canvas"></canvas>
+        </div>
       </div>
     </div>
   </div>
@@ -40,7 +48,7 @@ import "pdfjs-dist/build/pdf.worker.entry";
 import { MediaFileMetadata } from "@/queries";
 import { Unicons } from '../../types';
 import PdfToolbar from '../PdfToolbar.vue';
-import PdfToolbar from '../PdfToolbar.vue';
+import PdfToolbar from '../PdfToolbar.vue'
 
 export default defineComponent({
   name: "PdfViewer",
@@ -61,22 +69,34 @@ export default defineComponent({
     const pageNumPending = ref(null);
     const scale = ref<number>(1);
     const url = ref<String>("");
-    const canvas = ref(null);
+    const canvas = ref<HTMLCanvasElement | undefined>(undefined);
+    const spaceForPage = ref<HTMLDivElement | undefined>(undefined);
+    const pageContainer = ref<HTMLDivElement | undefined>(undefined);
     const ctx = ref(null);
+    const decentralizeFromLeft = ref<boolean>(false);
+    const decentralizeFromTop = ref<boolean>(false);
 
-    function renderPage(num, canvas, ctx) {
+    const determineDecentralization = ():void => {
+      decentralizeFromLeft.value = spaceForPage.value.clientWidth < canvas.value.clientWidth 
+        ? true : false;
+      decentralizeFromTop.value = spaceForPage.value.offsetHeight < pageContainer.value.offsetHeight
+        ? true : false;
+    }
+
+    function renderPage(num) {
       pageRendering.value = true;
       // Using promise to fetch the page
       pdfDoc?.getPage(num).then(function(page) {
         let viewport = page.getViewport({scale: scale.value});
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
+        canvas.value.height = viewport.height;
+        canvas.value.width = viewport.width;
 
         // Render PDF page into canvas context
         let renderContext = {
-          canvasContext: ctx,
+          canvasContext: ctx.value,
           viewport: viewport
         };
+        determineDecentralization();
         let renderTask = page.render(renderContext);
 
         // Wait for rendering to finish
@@ -88,39 +108,34 @@ export default defineComponent({
             pageNumPending.value = null;
           }
         });
-      // Update page counters
-
-      // document.getElementById('page_num').textContent = num;
       })};
 
-      function queueRenderPage(num, canvas, ctx) {
+      function queueRenderPage(num) {
         if (pageRendering.value) {
           pageNumPending.value = num;
         } else {
-          renderPage(num, canvas, ctx);
+          renderPage(num);
         }
       };
 
-      function onChangePage(num, canvas, ctx) {
+      function onChangePage(num) {
         pageNum.value = num;
-        queueRenderPage(parseInt(num), canvas, ctx);
+        queueRenderPage(parseInt(num));
       }
 
     onMounted(async () => {
-      canvas.value = document.getElementById('viewer');
       ctx.value = canvas.value.getContext('2d');
-
       initialRender();
     });
 
-    const zoomIn = (canvas, ctx) => {
+    const zoomIn = () => {
       scale.value += 0.2;
-      queueRenderPage(pageNum.value, canvas, ctx);
+      queueRenderPage(pageNum.value);
     };
 
-    const zoomOut = (canvas, ctx) => {
+    const zoomOut = () => {
       scale.value -= 0.2;
-      queueRenderPage(pageNum.value, canvas, ctx);
+      queueRenderPage(pageNum.value);
     };
 
     const initialRender = () => {
@@ -131,7 +146,7 @@ export default defineComponent({
         numPages.value = pdfDoc.numPages;
         // Initial/first page rendering
         
-        renderPage(pageNum.value, canvas.value, ctx.value);
+        renderPage(pageNum.value);
         loading.value = false;
       });
     }
@@ -150,7 +165,12 @@ export default defineComponent({
       pdfDoc,
       zoomIn,
       zoomOut,
-      onChangePage
+      onChangePage,
+      canvas,
+      pageContainer,
+      spaceForPage,
+      decentralizeFromLeft,
+      decentralizeFromTop
     };
   }
 });
