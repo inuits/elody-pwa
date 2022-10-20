@@ -11,12 +11,31 @@ const relationsToBeDeleted = ref<{ entityId: string, relations: Array<any>}>({
   relations: []
 });
 
+const metadataToBePatched = ref<{ entityId: string, metadata: Array<any>}>({
+  entityId: '',
+  metadata: []
+});
+
 const useMetaDataHelper = () => {
 
   const resetRelationsToBeDeleted = () => {
     relationsToBeDeleted.value = {
       entityId: '',
       relations: []
+    }
+  }
+
+  const resetMetadataToBePatched = () => {
+    metadataToBePatched.value = {
+      entityId: '',
+      metadata: []
+    }
+  }
+
+  const addTowardsMetadataToBePatched = (entityId: string, metadataEntityUuid: any) => {
+    if (!metadataToBePatched.value.metadata.some((v: any) => v === metadataEntityUuid)) {
+      metadataToBePatched.value.entityId = entityId;
+      metadataToBePatched.value.metadata.push(metadataEntityUuid);
     }
   }
 
@@ -102,7 +121,10 @@ const useMetaDataHelper = () => {
     selectedRelationFieldMetadata,
     beingAdded,
     relationsToBeDeleted,
-    resetRelationsToBeDeleted
+    resetRelationsToBeDeleted,
+    metadataToBePatched,
+    resetMetadataToBePatched,
+    addTowardsMetadataToBePatched
   };
 };
 

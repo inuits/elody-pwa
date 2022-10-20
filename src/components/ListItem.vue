@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import type { Metadata } from "@/queries";
+import type { Metadata, Maybe, MetadataAndRelation } from "@/queries";
 import { defineComponent, inject } from "vue";
 import type { PropType } from "vue";
 import type { Unicons } from "@/types";
@@ -48,10 +48,10 @@ export default defineComponent({
   props: {
     loading: { type: Boolean, default: false },
     meta: {
-      type: Array as PropType<{ key: string; value: string }[]>,
+      type: Array as PropType<Maybe<MetadataAndRelation>[]>,
       default: () => [],
     },
-    media: { type: String, default: undefined },
+    media: { type: Object as PropType<Maybe<String>>, default: undefined },
     thumbIcon: { type: String as PropType<keyof Unicons>, default: "" },
     small: { type: Boolean, default: false },
   },

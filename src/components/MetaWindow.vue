@@ -40,7 +40,7 @@ export default defineComponent({
       required: true,
     },
     form: { type: Object as PropType<Form>, required: false },
-    entityTitle: { type: String, required: false, default: undefined },
+    entityTitle: { type: String, required: true },
     loading: {
       type: Boolean,
       default: false,

@@ -3,6 +3,7 @@ import type {
   Entity,
   Form,
   Maybe,
+  MediaFileEntity,
   MediaFileMetadata,
   Metadata,
   MetadataAndRelation,
@@ -11,17 +12,16 @@ import type {
   MetadataOrRelationField,
   MetadataRelation,
   RelationField,
-RelationInput,
 } from "@/queries";
-
 import type { RelationMetaData } from "@/queries";
+import useMetaDataHelper from '@/composables/useMetaDataHelper';
 
 export const LINKED_ENTITY: string = "linkedEntity";
 export const selectedRelationField = ref<RelationField>();
 const noKey = 'no-key';
 
 export type relationValues = {
-  linkedEntity: Maybe<Entity> | undefined;
+  linkedEntity: Maybe<MediaFileEntity> | undefined;
   key: string;
   label?: string;
   metadata: IntialValues;
@@ -148,6 +148,8 @@ const useFormHelper = (form: Form, entityTitle: string) => {
     }) as MetadataRelation[];
   };
 
+  const { metadataToBePatched } = useMetaDataHelper();
+
   const serialzeFormToInput = (values: IntialValues, originalStructure: MetadataAndRelation[]): MetadataFormInput => {
     const input: MetadataFormInput = {
       Metadata: [],
@@ -176,6 +178,8 @@ const useFormHelper = (form: Form, entityTitle: string) => {
         }
       }
     );
+
+    input.relations.filter((r: any) => { return (metadataToBePatched.value.metadata.some((s: any) => s === r.linkedEntityId))})
     return input;
   };
 
