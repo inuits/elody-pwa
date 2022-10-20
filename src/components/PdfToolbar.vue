@@ -26,7 +26,7 @@
         />
       </a>
     </div>
-    <div class="flex">
+    <div class="flex select-none">
       <div class="flex items-center mr-2 pb-0.5">
         <span>Page</span>
       </div>
@@ -45,13 +45,13 @@
           v-on:change="(e) => {changePageWrapper(e.target.value)}"/>  /  
         <span class="inline-block w-8">{{props.pageCount}}</span>
       </span>
-      <a v-on:click="changePageWrapper(props.pageNum + 1)" class="cursor-pointer mr-1">
+      <a v-on:click="changePageWrapper(props.pageNum + 1)" class="cursor-pointer mr-1 ml-1">
         <unicon :name="Unicons.AngleRight.name"/>
       </a>
     </div>
   </div>
   <div>
-    <MediaInfo />
+    <MediaInfo/>
   </div>
 </template>
 
