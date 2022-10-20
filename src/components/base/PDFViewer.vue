@@ -19,7 +19,8 @@
     />
     <div
       ref="spaceForPage"
-      :class="['h-screen-90 flex justify-center items center w-full overflow-scroll relative',
+      :class="['h-screen-86 flex justify-center mt-10 w-full overflow-scroll relative',
+        decentralizeFromTop ? 'mt-10' : 'items-center',
         {'opacity-0': loading}]"
     >
       <div 
@@ -27,9 +28,9 @@
         ref="pageContainer" 
         :class="
           ['absolute w-full flex',
-           decentralizeFromLeft ? 'ml-8' : 'justify-center']">
+           decentralizeFromLeft ? '' : 'justify-center']">
         <div>
-          <canvas id="viewer" class="pdfViewer border-2 pb-6 pr-6" ref="canvas"></canvas>
+          <canvas id="viewer" class="pdfViewer border-2 m-10" ref="canvas"></canvas>
         </div>
       </div>
     </div>
@@ -177,8 +178,8 @@ export default defineComponent({
 </script>
 
 <style>
-.h-screen-90 {
-  height: 90vh;
+.h-screen-86 {
+  height: 86vh;
 }
 
 .textLayer {
