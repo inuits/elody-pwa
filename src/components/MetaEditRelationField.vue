@@ -9,27 +9,21 @@
         :class="[inputContainerStyle, ' input-container p-4 gap-3 flex-col']"
       >
         <div
-          v-for="{
-            label: metadataLabel,
-            key: metadataKey,
-            type: metadataType,
-          } in structure.metadata"
-          :key="`${idx}-${metadataKey}`"
+          v-for=" s in structure.metadata"
+          :key="`${idx}-${s ? s.key : 'empty'}`"
         >
           <MetaEditDataField
-            :label="metadataLabel"
-            :field-key="`${structure.label}[${idx}].metadata.${metadataKey}`"
-            :type="metadataType"
+            v-if="s"
+            @onChange="onChangeMetaEditDataField(value)"
+            :label="s.label"
+            :field-key="`${structure.label}[${idx}].metadata.${s.key}`"
+            :type="s.type"
           />
         </div>
         <ListItem
           v-if="value.linkedEntity && value.linkedEntity.teaserMetadata"
           :meta="value.linkedEntity.teaserMetadata"
-          :media="
-            value.linkedEntity.media
-              ? value.linkedEntity.media.primary_transcode
-              : null
-          "
+          :media="value.linkedEntity.media ? value.linkedEntity.media.primary_transcode : undefined"
           :thumb-icon="getThumbnail(value)"
         />
         <div v-if="!structure.disabled" class="delete">
@@ -37,7 +31,7 @@
             :icon="Unicons.Trash.name"
             class="h-full"
             bg-color="neutral-30 "
-            @click="remove(idx)"
+            @click="removeRelation(value, idx)"
           />
         </div>
       </div>
@@ -51,7 +45,7 @@
 </template>
 
 <script lang="ts">
-import type { Entity, RelationField } from "@/queries";
+import type { RelationField, Maybe, BaseEntity } from "@/queries";
 import { defineComponent, watch } from "vue";
 import type { PropType } from "vue";
 import MetaEditDataField from "./MetaEditDataField.vue";
@@ -70,6 +64,7 @@ import type { relationValues } from "@/composables/useFormHelpers";
 import useMetaDataHelper from '@/composables/useMetaDataHelper';
 import ListItem from "@/components/ListItem.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
+import useRouteHelpers from "@/composables/useRouteHelpers";
 
 export default defineComponent({
   name: "MetaEditRelationField",
@@ -82,7 +77,7 @@ export default defineComponent({
   props: {
     structure: { type: Object as PropType<RelationField>, required: true },
     label: {
-      type: String,
+      type: Object as PropType<Maybe<string | undefined>>,
       required: false,
       default: undefined,
     },
@@ -91,12 +86,12 @@ export default defineComponent({
     const { remove, push, fields, update } = useFieldArray<relationValues>(
       props.label ? props.label : props.structure.relationType //MAKING UNIQUE ARRAY FOR EACH COMPONENT DEPENDING ON THE LABEL...
     );
-
-    const { selectedRelationFieldMetadata, beingAdded } = useMetaDataHelper(); 
-
+    const { getParam } = useRouteHelpers();
+    const { selectedRelationFieldMetadata, beingAdded, relationsToBeDeleted, metadataToBePatched, addTowardsMetadataToBePatched } = useMetaDataHelper(); 
     const { getThumbnail } = useThumbnailHelper();
+    const id = getParam("id");
 
-    const addRelation = (value: Entity) => {
+    const addRelation = (value: BaseEntity) => {
       push(
         getEmptyMetadatRelationObject(props.structure, value.uuid, {
           //@ts-ignore  Error when passing value object in vee-validate
@@ -109,7 +104,9 @@ export default defineComponent({
       );
     };
 
-    const openModal = (acceptedEntityTypes: string[]) => {
+    const openModal = (acceptedEntityTypes: Maybe<string>[]) => {
+      console.log('selectedRelationFieldMetadata.value: ', selectedRelationFieldMetadata.value);
+      console.log('fields: ', fields);
       selectedRelationField.value = props.structure;
       selectedRelationFieldMetadata.value = fields;
       beingAdded.value = "metadata";
@@ -117,7 +114,17 @@ export default defineComponent({
     };
 
     const { openPickEntityModal, closePickEntityModal, pickEntityModalState } =
-      usePickEntityModal(addRelation);
+      usePickEntityModal();
+
+    const removeRelation = (relation: relationValues, idx: number) => {
+      remove(idx);
+      relationsToBeDeleted.value.entityId = id;
+      relationsToBeDeleted.value.relations.push({ key: relation.key, type: relation.relationType });
+    }
+
+    const onChangeMetaEditDataField = (fieldValue: any) => {
+      addTowardsMetadataToBePatched(id, fieldValue.linkedEntity.uuid);
+    }
 
     watch(pickEntityModalState, (value: PickEntityModalType) => {
       if (value.pickedEntity && value.pickedEntity) {
@@ -125,6 +132,7 @@ export default defineComponent({
           selectedRelationField.value &&
           props.structure.label === selectedRelationField.value.label
         ) {
+          addTowardsMetadataToBePatched(id, value.pickedEntity.uuid);
           addRelation(value.pickedEntity);
           closePickEntityModal();
         }
@@ -138,11 +146,12 @@ export default defineComponent({
       fields,
       Unicons,
       lableStyle,
-      addRelation,
       openPickEntityModal,
       inputContainerStyle,
       openModal,
       getThumbnail,
+      removeRelation,
+      onChangeMetaEditDataField
     };
   },
 });
