@@ -14,18 +14,15 @@
     <meta-edit
       v-if="!loading && isEdit && form"
       v-model="metadataComputed"
-      :error="error"
       :loading="loading"
-      :discard="discard"
       :entity-title="entityTitle"
       :form="form"
     />
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, watch } from "vue";
-import type { PropType } from "vue";
+<script lang="ts" setup>
+import { ref, watch } from "vue";
 import MetaEdit from "@/components/MetaEdit.vue";
 import MetaView from "@/components/MetaView.vue";
 import { useEditMode } from "@/composables/useEdit";
@@ -50,17 +47,10 @@ export default defineComponent({
     const { isEdit } = useEditMode();
     const metadataComputed = ref<MetadataAndRelation[]>(props.metadata);
 
-    watch(
-      () => props.metadata,
-      (value) => {
-        metadataComputed.value = value;
-      }
-    );
-
-    return {
-      isEdit,
-      metadataComputed,
-    };
-  },
-});
+watch(
+  () => props.metadata,
+  (value) => {
+    metadataComputed.value = value;
+  }
+);
 </script>
