@@ -500,6 +500,7 @@ type Mutation {
   setThumbnailPrimaire(entity_id: String!, mediafile_id: String!): String
   getAssetsRelationedWithMediafFile(mediaFileId: String!): [Asset]
   updateMediafilesOrder(value: OrderArrayInput!): String
+  deleteRelations(id: String!, metadata: [MetadataInput!]!): String
 }
 
 enum deletePaths {
@@ -511,6 +512,7 @@ input MetadataInput {
   key: String!
   value: String
   lang: String
+  type: String
 }
 
 type ImportReturn {

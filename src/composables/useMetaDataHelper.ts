@@ -6,8 +6,39 @@ const lastAdjustedMediaFileMetaData = ref<any>();
 const mediafiles = ref<MediaFile[]>([]);
 export const selectedRelationFieldMetadata = ref([]);
 export const beingAdded = ref<string>("");
+const relationsToBeDeleted = ref<{ entityId: string, relations: Array<any>}>({
+  entityId: '',
+  relations: []
+});
+
+const metadataToBePatched = ref<{ entityId: string, metadata: Array<any>}>({
+  entityId: '',
+  metadata: []
+});
 
 const useMetaDataHelper = () => {
+
+  const resetRelationsToBeDeleted = () => {
+    relationsToBeDeleted.value = {
+      entityId: '',
+      relations: []
+    }
+  }
+
+  const resetMetadataToBePatched = () => {
+    metadataToBePatched.value = {
+      entityId: '',
+      metadata: []
+    }
+  }
+
+  const addTowardsMetadataToBePatched = (entityId: string, metadataEntityUuid: any) => {
+    if (!metadataToBePatched.value.metadata.some((v: any) => v === metadataEntityUuid)) {
+      metadataToBePatched.value.entityId = entityId;
+      metadataToBePatched.value.metadata.push(metadataEntityUuid);
+    }
+  }
+
   const clearMediafiles = (): void => {
     mediafiles.value = [];
   };
@@ -88,7 +119,12 @@ const useMetaDataHelper = () => {
     mediafiles,
     determineIfNotAdded,
     selectedRelationFieldMetadata,
-    beingAdded
+    beingAdded,
+    relationsToBeDeleted,
+    resetRelationsToBeDeleted,
+    metadataToBePatched,
+    resetMetadataToBePatched,
+    addTowardsMetadataToBePatched
   };
 };
 

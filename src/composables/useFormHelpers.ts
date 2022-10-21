@@ -3,6 +3,7 @@ import type {
   Entity,
   Form,
   Maybe,
+  MediaFileEntity,
   MediaFileMetadata,
   Metadata,
   MetadataAndRelation,
@@ -12,15 +13,15 @@ import type {
   MetadataRelation,
   RelationField,
 } from "@/queries";
-
 import type { RelationMetaData } from "@/queries";
+import useMetaDataHelper from '@/composables/useMetaDataHelper';
 
 export const LINKED_ENTITY: string = "linkedEntity";
 export const selectedRelationField = ref<RelationField>();
 const noKey = 'no-key';
 
 export type relationValues = {
-  linkedEntity: Maybe<Entity> | undefined;
+  linkedEntity: Maybe<MediaFileEntity> | undefined;
   key: string;
   label?: string;
   metadata: IntialValues;
@@ -85,12 +86,19 @@ const useFormHelper = (form: Form, entityTitle: string) => {
           
           findRelations(field.relationType, metadata).forEach(
             (relationMetaData: MetadataRelation) => {
+              // console.log('field', field);
+              // console.log('relationMetaData', relationMetaData);
               if ((field.key) && (relationMetaData.label === field.key) || (relationMetaData.label === field.label)) {
                 pushIntoRelationArray(relationMetaData);
               }
               else if (field.key === noKey) {
                 pushIntoRelationArray(relationMetaData);
               }
+              // CHECK IF RELATION TYPE ONLY OCCURS ONCE --> AVOID TO SET MULTIPLE TIMES AS FOR EXAMPLE IN A FRAME.
+              // else if (structure.filter((f: Maybe<MetadataOrRelationField>) => { return (f?.__typename === "RelationField" && (f.relationType === field.relationType)) }).length === 1)
+              // {
+              //   pushIntoRelationArray(relationMetaData);
+              // }
             }
           );
           intialValues[field.label ? field.label : field.relationType] =
@@ -140,7 +148,9 @@ const useFormHelper = (form: Form, entityTitle: string) => {
     }) as MetadataRelation[];
   };
 
-  const serialzeFormToInput = (values: IntialValues): MetadataFormInput => {
+  const { metadataToBePatched } = useMetaDataHelper();
+
+  const serialzeFormToInput = (values: IntialValues, originalStructure: MetadataAndRelation[]): MetadataFormInput => {
     const input: MetadataFormInput = {
       Metadata: [],
       relations: [],
@@ -168,6 +178,8 @@ const useFormHelper = (form: Form, entityTitle: string) => {
         }
       }
     );
+
+    input.relations.filter((r: any) => { return (metadataToBePatched.value.metadata.some((s: any) => s === r.linkedEntityId))})
     return input;
   };
 
