@@ -1,10 +1,42 @@
-<template>
-  <object
-    class="h-full w-full object-contain"
-    :data="source?.original_file_location"
-    :type="source?.mimetype"
-  ></object>
+<template>  
+  <div
+    class="relative w-full"
+    :class="{
+      'animated-pulse bg-blue-default10': loading,
+      'bg-white-background': !loading,
+    }"
+  >
+    <div v-if="loading" class="text-center pt-5 italic">
+      loading
+    </div>
+    <PdfToolbar 
+      v-show="!loading"
+      v-on:zoomIn="zoomIn()"
+      v-on:zoomOut="zoomOut()"
+      v-on:changePage="onChangePage($event.num)"
+      :pageNum="pageNum"
+      :pageCount="numPages"
+    />
+    <div
+      ref="spaceForPage"
+      :class="['h-screen-86 flex justify-center mt-10 w-full overflow-scroll relative',
+        decentralizeFromTop ? 'mt-10' : 'items-center',
+        {'opacity-0': loading}]"
+    >
+      <div 
+        id="viewerContainer" 
+        ref="pageContainer" 
+        :class="
+          ['absolute w-full flex',
+           decentralizeFromLeft ? '' : 'justify-center']">
+        <div>
+          <canvas id="viewer" class="pdfViewer border-2 m-10" ref="canvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
+
 
 <script lang="ts">
 // @ts-nocheck
@@ -14,90 +46,140 @@ import type { PropType } from "vue";
 import * as pdfjsLibImport from "pdfjs-dist";
 const pdfjsLib: typeof import("pdfjs-dist") = pdfjsLibImport;
 import "pdfjs-dist/build/pdf.worker.entry";
-import { PDFViewer, EventBus } from "pdfjs-dist/web/pdf_viewer.js";
-import { PDFDocumentProxy } from "pdfjs-dist/types/src/display/api";
 import { MediaFileMetadata } from "@/queries";
+import { Unicons } from '../../types';
+import PdfToolbar from '../PdfToolbar.vue';
 
 export default defineComponent({
   name: "PdfViewer",
-  components: {},
+  components: { PdfToolbar },
   props: {
     source: {
-      type: Array as PropType<MediaFileMetadata[]>,
+      type: Object as PropType<MediaFileMetadata>,
       required: true,
     },
   },
   setup(props) {
     const loading = ref<boolean>(true);
-    const pdfViewer = ref<
-      | {
-          setDocument: (input: PDFDocumentProxy) => void;
-          currentScaleValue: number;
-        }
-      | undefined
-    >();
-    const zoomLevel = ref<number>(0.5);
-    const container = ref<HTMLDivElement | undefined>(undefined);
-
     const { source } = toRefs(props);
+    const pageNum = ref<number>(1);
+    const numPages = ref<number>(0);
+    let pdfDoc = null;
+    const pageRendering = ref<boolean>(false);
+    const pageNumPending = ref(null);
+    const scale = ref<number>(1);
+    const url = ref<String>("");
+    const canvas = ref<HTMLCanvasElement | undefined>(undefined);
+    const spaceForPage = ref<HTMLDivElement | undefined>(undefined);
+    const pageContainer = ref<HTMLDivElement | undefined>(undefined);
+    const ctx = ref(null);
+    const decentralizeFromLeft = ref<boolean>(false);
+    const decentralizeFromTop = ref<boolean>(false);
 
-    watch(source, (newSrc: unknown[] | undefined) => {
-      loading.value = true;
-      if (pdfViewer.value && newSrc?.content) {
-        pdfjsLib
-          .getDocument({
-            url: newSrc?.content,
-          })
-          .promise.then((pdfDocument: PDFDocumentProxy) => {
-            if (pdfViewer.value) {
-              pdfViewer.value.setDocument(pdfDocument);
-            }
-          });
-      }
-    });
+    const determineDecentralization = ():void => {
+      decentralizeFromLeft.value = spaceForPage.value.clientWidth < canvas.value.clientWidth 
+        ? true : false;
+      decentralizeFromTop.value = spaceForPage.value.offsetHeight < pageContainer.value.offsetHeight
+        ? true : false;
+    }
 
-    onMounted(async () => {
-      // Init viewer with event-bus
-      var eventBus = new EventBus();
-      pdfViewer.value = new PDFViewer({
-        container: container.value,
-        eventBus,
-      });
+    function renderPage(num: number): void {
+      pageRendering.value = true;
+      // Using promise to fetch the page
+      pdfDoc?.getPage(num).then(function(page) {
+        let viewport = page.getViewport({scale: scale.value});
+        canvas.value.height = viewport.height;
+        canvas.value.width = viewport.width;
 
-      eventBus.on("pagesinit", function () {
-        if (pdfViewer.value) {
-          pdfViewer.value.currentScaleValue = zoomLevel.value;
-          loading.value = false;
+        // Render PDF page into canvas context
+        let renderContext = {
+          canvasContext: ctx.value,
+          viewport: viewport
+        };
+        determineDecentralization();
+        let renderTask = page.render(renderContext);
+
+        // Wait for rendering to finish
+        renderTask.promise.then(function() {
+          pageRendering.value = false;
+          if (pageNumPending.value !== null) {
+            // New page rendering is pending
+            renderPage(pageNumPending.value);
+            pageNumPending.value = null;
+          }
+        });
+      })};
+
+      function queueRenderPage(num: number): void {
+        if (pageRendering.value) {
+          pageNumPending.value = num;
+        } else {
+          renderPage(num);
         }
-      });
+      };
+
+      function onChangePage(num: number): void {
+        pageNum.value = num;
+        queueRenderPage(parseInt(num));
+      }
+
+    onMounted(async (): void => {
+      ctx.value = canvas.value.getContext('2d');
+      initialRender();
     });
 
-    const zoomIn = () => {
-      if (pdfViewer.value) {
-        zoomLevel.value = zoomLevel.value + 0.5;
-        pdfViewer.value.currentScaleValue = zoomLevel.value;
-      }
+    const zoomIn = (): void => {
+      scale.value += 0.2;
+      queueRenderPage(pageNum.value);
     };
 
-    const zoomOut = () => {
-      if (pdfViewer.value && zoomLevel.value != 0.5) {
-        zoomLevel.value = zoomLevel.value - 0.5;
-        pdfViewer.value.currentScaleValue = zoomLevel.value;
-      }
+    const zoomOut = (): void => {
+      scale.value -= 0.2;
+      queueRenderPage(pageNum.value);
     };
+
+    const initialRender = (): void => {
+      url.value = source.value.original_file_location;
+      pageNum.value = 1;
+      scale.value = 1;
+      pdfjsLib.getDocument(url.value).promise.then(function(pdfDoc_) {
+        pdfDoc = pdfDoc_;
+        numPages.value = pdfDoc.numPages;
+        // Initial/first page rendering
+        
+        renderPage(pageNum.value);
+        loading.value = false;
+      });
+    }
+
+    watch(source, (oldSrc, newSrc) => {
+      initialRender()
+    })
 
     return {
+      loading,
+      canvas,
+      ctx,
+      Unicons,
+      pageNum,
+      numPages,
+      pdfDoc,
       zoomIn,
       zoomOut,
-      loading,
-      container,
+      onChangePage,
+      canvas,
+      pageContainer,
+      spaceForPage,
+      decentralizeFromLeft,
+      decentralizeFromTop
     };
-  },
+  }
 });
 </script>
+
 <style>
-.h-screen-90 {
-  height: 90vh;
+.h-screen-86 {
+  height: 86vh;
 }
 
 .textLayer {
