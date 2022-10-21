@@ -60,7 +60,7 @@ export default defineComponent({
   props: ["pageNum", "pageCount"],
   emits: ["zoomIn", "zoomOut", "changePage"],
   setup: (props, {emit}) => {  
-    const input = ref<HTMLInputElement | undefined>(undefined)
+    const input = ref<HTMLInputElement | undefined>(undefined);
 
     const changePageWrapper = (num: number): void => {
       if (num > props.pageCount){

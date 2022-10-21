@@ -49,7 +49,6 @@ import "pdfjs-dist/build/pdf.worker.entry";
 import { MediaFileMetadata } from "@/queries";
 import { Unicons } from '../../types';
 import PdfToolbar from '../PdfToolbar.vue';
-import PdfToolbar from '../PdfToolbar.vue'
 
 export default defineComponent({
   name: "PdfViewer",
@@ -84,7 +83,7 @@ export default defineComponent({
         ? true : false;
     }
 
-    function renderPage(num) {
+    function renderPage(num: number): void {
       pageRendering.value = true;
       // Using promise to fetch the page
       pdfDoc?.getPage(num).then(function(page) {
@@ -111,7 +110,7 @@ export default defineComponent({
         });
       })};
 
-      function queueRenderPage(num) {
+      function queueRenderPage(num: number): void {
         if (pageRendering.value) {
           pageNumPending.value = num;
         } else {
@@ -119,29 +118,30 @@ export default defineComponent({
         }
       };
 
-      function onChangePage(num) {
+      function onChangePage(num: number): void {
         pageNum.value = num;
         queueRenderPage(parseInt(num));
       }
 
-    onMounted(async () => {
+    onMounted(async (): void => {
       ctx.value = canvas.value.getContext('2d');
       initialRender();
     });
 
-    const zoomIn = () => {
+    const zoomIn = (): void => {
       scale.value += 0.2;
       queueRenderPage(pageNum.value);
     };
 
-    const zoomOut = () => {
+    const zoomOut = (): void => {
       scale.value -= 0.2;
       queueRenderPage(pageNum.value);
     };
 
-    const initialRender = () => {
+    const initialRender = (): void => {
       url.value = source.value.original_file_location;
       pageNum.value = 1;
+      scale.value = 1;
       pdfjsLib.getDocument(url.value).promise.then(function(pdfDoc_) {
         pdfDoc = pdfDoc_;
         numPages.value = pdfDoc.numPages;
@@ -153,7 +153,7 @@ export default defineComponent({
     }
 
     watch(source, (oldSrc, newSrc) => {
-      initialRender();
+      initialRender()
     })
 
     return {
