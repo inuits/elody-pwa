@@ -21,13 +21,12 @@ import type { PropType } from "vue";
 import InputField from "@/components/base/InputField.vue";
 import BaseDropdown from "@/components/base/BaseDropdown.vue";
 import { useField } from "vee-validate";
-import { InputFieldTypes, Maybe, MetadataFieldOption } from "@/queries";
-
+import type { InputFieldTypes, Maybe, MetadataFieldOption } from '@/queries';
 export default defineComponent({
   name: "MetaEditDataField",
   components: { InputField, BaseDropdown },
   props: {
-    fieldKey: { type: InputFieldTypes, required: true },
+    fieldKey: { type: Object as PropType<InputFieldTypes>, required: true },
     label: {
       type: Object as PropType<Maybe<string | undefined>>,
       required: false,
@@ -45,8 +44,8 @@ export default defineComponent({
     },
   },
   emits: ["onChange"],
-  setup: (props, { emit }) => {
-    const { value } = useField<string>(props.fieldKey, {});
+  setup: ({ fieldKey}, { emit }) => {
+    const { value } = useField<string>(fieldKey, {});
 
     const stringifyOption = (input: Maybe<Maybe<MetadataFieldOption>[]> | undefined) => {
       let returnArray: string[] = [];
