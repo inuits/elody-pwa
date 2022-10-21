@@ -28,24 +28,21 @@ import MetaView from "@/components/MetaView.vue";
 import { useEditMode } from "@/composables/useEdit";
 import type { Form, MetadataAndRelation } from "@/queries";
 
-export default defineComponent({
-  name: "MetaWindow",
-  components: { MetaView, MetaEdit },
-  props: {
-    metadata: {
-      type: Array as PropType<MetadataAndRelation[]>,
-      required: true,
-    },
-    form: { type: Object as PropType<Form>, required: false },
-    entityTitle: { type: String, required: true },
-    loading: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  setup(props) {
-    const { isEdit } = useEditMode();
-    const metadataComputed = ref<MetadataAndRelation[]>(props.metadata);
+const props = withDefaults(
+  defineProps<{
+    metadata: MetadataAndRelation[];
+    form: Form;
+    entityTitle: string;
+    loading: boolean;
+  }>(),
+  {
+    entityTitle: "",
+    loading: false,
+  }
+);
+
+const { isEdit } = useEditMode();
+const metadataComputed = ref<MetadataAndRelation[]>(props.metadata);
 
 watch(
   () => props.metadata,
