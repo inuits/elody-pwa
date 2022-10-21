@@ -13,7 +13,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
+import type { PropType } from "vue";
 import BaseButton from "@/components/base/BaseButton.vue";
 import { Unicons } from "@/types";
 import type { Maybe } from "@/queries";
