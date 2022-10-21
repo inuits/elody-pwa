@@ -41,8 +41,13 @@ const setLabel = (field:  Maybe<MetadataOrRelationField>) => {
 
 const useFormHelper = (form: Form, entityTitle: string) => {
   const formStructure: MetadataOrRelationField[] =
-    form.fields as MetadataOrRelationField[];
+  form.fields as MetadataOrRelationField[];
   const title: string = entityTitle;
+
+  const getValue = (rmd: MetadataRelation): string => {
+    //@ts-ignore
+    return rmd.linkedEntity.teaserMetadata.length > 0 ? rmd.linkedEntity.teaserMetadata[0].value : undefined
+  }
 
   const buildInitialValues = (
     metadata: MetadataAndRelation[],
@@ -66,11 +71,6 @@ const useFormHelper = (form: Form, entityTitle: string) => {
 
           const pushIntoRelationArray = (relationMetaData: MetadataRelation) => {
 
-            const getValue = (): string => {
-              //@ts-ignore
-              return relationMetaData.linkedEntity.teaserMetadata.length > 0 ? relationMetaData.linkedEntity.teaserMetadata[0].value : undefined
-            }
-
             relationArray.push({
               linkedEntity: relationMetaData.linkedEntity,
               key: relationMetaData.key,
@@ -80,7 +80,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
                 field.metadata as MetadataOrRelationField[]
               ),
               relationType: field.relationType ? field.relationType : "",
-              value: getValue()
+              value: getValue(relationMetaData)
             });
           }
           
@@ -161,6 +161,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
           input.Metadata?.push({ key: value[0], value: value[1] });
         }
         if (typeof value[1] === "object") {
+          console.log(value[1]);
           value[1].forEach((relationValue) => {
             input.relations?.push({
               relationType: relationValue.relationType,
@@ -172,7 +173,8 @@ const useFormHelper = (form: Form, entityTitle: string) => {
                 }
                 return { key: "", value: "" };
               }),
-              value: relationValue.value ? relationValue.value : undefined
+              //@ts-ignore
+              value: relationValue.value ? relationValue.value : getValue(relationValue)
             });
           });
         }
