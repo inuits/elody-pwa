@@ -1,21 +1,26 @@
 <template>
   <div class="my-2">
     <div :class="[inputContainerStyle, ' input-container  gap-3 flex-col']">
+      <!-- <pre>
+        {{metadata}}
+      </pre> -->
       <div
-        v-for="{
-          value: metadataValue,
-          key: metadataKey,
-        } in metadata.metadataOnRelation"
-        :key="`${metadata.id}-${metadataKey}`"
+        v-for="m in metadata.metadataOnRelation"
+        :key="`${metadata.key}-${m ? m.key : 'no-key'}`"
         class="px-8 pt-2"
       >
+      <div v-if="m">
         <div class="label" :class="{ loading }" data-test="meta-label">
-          {{ metadataKey }}
+          {{ m.key }}
         </div>
         <div class="value" :class="{ loading }" data-test="meta-info">
-          {{ metadataValue ? metadataValue : "no data" }}
+          {{ m.value ? m.value : "no data" }}
         </div>
       </div>
+      </div>
+      <pre>
+        {{metadata}}
+      </pre>
       <ListItem
         v-if="
           metadata.linkedEntity &&
@@ -44,44 +49,46 @@
       >
         <div
           v-for="metadataFromLinkedEntity in metadata.linkedEntity.metadata"
-          :key="metadataFromLinkedEntity.key"
+          :key="metadataFromLinkedEntity ? metadataFromLinkedEntity.key : 'no-key'"
           :metadata="metadataFromLinkedEntity"
           class="p-2"
         >
-          <div
-            v-if="metadataFromLinkedEntity.label"
-            class="label"
-            :class="{ loading }"
-            data-test="meta-label"
-          >
-            {{ checkTranslationForlabel(metadataFromLinkedEntity.label) }}
-          </div>
-          <div
-            v-else-if="
-              metadataFromLinkedEntity.label != metadataFromLinkedEntity.key
-            "
-            class="label"
-            :class="{ loading }"
-          >
-          {{$t('meta.no-label')}}
-          </div>
+          <div v-if="metadataFromLinkedEntity">
+            <div
+              v-if="metadataFromLinkedEntity.label"
+              class="label"
+              :class="{ loading }"
+              data-test="meta-label"
+            >
+              {{ checkTranslationForlabel(metadataFromLinkedEntity.label) }}
+            </div>
+            <div
+              v-else-if="
+                metadataFromLinkedEntity.label != metadataFromLinkedEntity.key
+              "
+              class="label"
+              :class="{ loading }"
+            >
+            {{$t('meta.no-label')}}
+            </div>
 
-          <meta-viewline-relation
-            v-if="metadataFromLinkedEntity.linkedEntity"
-            :metadata="metadataFromLinkedEntity"
-          />
+            <meta-viewline-relation
+              v-if="metadataFromLinkedEntity.linkedEntity"
+              :metadata="metadataFromLinkedEntity"
+            />
 
-          <div
-            v-if="!metadataFromLinkedEntity.linkedEntity"
-            class="value"
-            :class="{ loading }"
-            data-test="meta-info"
-          >
-            {{
-              metadataFromLinkedEntity.value
-                ? metadataFromLinkedEntity.value
-                : $t('meta.no-data')
-            }}
+            <div
+              v-if="!metadataFromLinkedEntity.linkedEntity"
+              class="value"
+              :class="{ loading }"
+              data-test="meta-info"
+            >
+              {{
+                metadataFromLinkedEntity.value
+                  ? metadataFromLinkedEntity.value
+                  : $t('meta.no-data')
+              }}
+            </div>
           </div>
         </div>
       </div>

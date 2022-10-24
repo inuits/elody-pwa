@@ -1,7 +1,7 @@
 <template>
   <div class="w-full relative">
     <video class="w-full h-full" controls>
-      <source :src="source?.original_file_location" :type="source?.mimetype" />
+      <source :src="source && source?.original_file_location ? source?.original_file_location : 'no-src'" :type="source && source?.mimetype ? source?.mimetype : 'no-type'" />
     </video>
     <media-info class="right-0 mb-16" :meta-data="source.metadata" />
   </div>
@@ -19,7 +19,7 @@ export default defineComponent({
   },
   props: {
     source: {
-      type: Array as PropType<MediaFile[]>,
+      type: Object as PropType<MediaFile>,
       required: true,
     },
   },

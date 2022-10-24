@@ -11,11 +11,12 @@
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import { Unicon } from "vue-unicons";
+import type { Unicons } from "../../types";
 
 export default defineComponent({
   name: "BaseIcon",
   props: {
-    name: { type: String as PropType<keyof Unicons>, required: true },
+    name: { type: Object as PropType<typeof Unicons | string>, required: true },
     iconStyle: { type: String, default: "line" },
     viewBox: { type: String, default: "0 0 24 24" },
   },

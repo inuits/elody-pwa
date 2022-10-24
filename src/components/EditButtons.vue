@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="
-      (isEditToggleVisible === 'edit') | (isEditToggleVisible === 'edit-delete')
+      (isEditToggleVisible === 'edit') || (isEditToggleVisible === 'edit-delete')
     "
     class="mx-4"
   >

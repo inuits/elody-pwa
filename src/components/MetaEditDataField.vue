@@ -26,7 +26,7 @@ export default defineComponent({
   name: "MetaEditDataField",
   components: { InputField, BaseDropdown },
   props: {
-    fieldKey: { type: Object as PropType<InputFieldTypes>, required: true },
+    fieldKey: { type: Object as PropType<InputFieldTypes | string>, required: true },
     label: {
       type: Object as PropType<Maybe<string | undefined>>,
       required: false,
