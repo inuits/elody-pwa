@@ -105,10 +105,10 @@ export default defineComponent({
     };
 
     const openModal = (acceptedEntityTypes: Maybe<string>[]) => {
-      console.log('selectedRelationFieldMetadata.value: ', selectedRelationFieldMetadata.value);
-      console.log('fields: ', fields);
       selectedRelationField.value = props.structure;
-      selectedRelationFieldMetadata.value = fields;
+      fields.value.forEach((field) => {
+        selectedRelationFieldMetadata.value.push(field.value)
+      });
       beingAdded.value = "metadata";
       openPickEntityModal(acceptedEntityTypes);
     };
