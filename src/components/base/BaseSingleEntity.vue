@@ -98,7 +98,7 @@ import type { PropType } from "vue";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import IIIFViewer from "@/components/IIIFViewer.vue";
 import MetaWindow from "@/components/MetaWindow.vue";
-import { GetEntityByIdDocument, PostMediaFileDocument } from "@/queries";
+import type { GetEntityByIdDocument, PostMediaFileDocument, PostMediaFileMutation } from "@/queries";
 import type {
   GetEntityByIdQuery,
   Maybe,

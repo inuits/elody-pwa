@@ -181,7 +181,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
       }
     );
 
-    input?.relations.filter((r: any) => { return (metadataToBePatched.value.metadata.some((s: any) => s === r.linkedEntityId))})
+    input?.relations?.filter((r: any) => { return (metadataToBePatched.value.metadata.some((s: any) => s === r.linkedEntityId))})
     return input;
   };
 

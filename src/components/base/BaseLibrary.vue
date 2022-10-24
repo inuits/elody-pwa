@@ -81,15 +81,15 @@
           <ListItem
             :small="listItemRouteName === 'SingleMediafile'"
             v-for="entity in result.Entities.results"
-            :key="entity.id"
-            :meta="entity.teaserMetadata"
-            :media="entity.media ? entity.media.primary_transcode : null"
+            :key="entity?.id"
+            :meta="entity?.teaserMetadata"
+            :media="entity?.media ? entity?.media.primary_transcode : null"
             :thumb-icon="getThumbnail(entity)"
             @click="
               !enableSelection &&
                 router.push({
                   name: listItemRouteName,
-                  params: { id: entity.id },
+                  params: { id: entity?.id },
                 })
             "
           >
@@ -112,7 +112,7 @@
                 @click="
                   router.push({
                     name: listItemRouteName,
-                    params: { id: entity.id },
+                    params: { id: entity?.id },
                   })
                 "
               />

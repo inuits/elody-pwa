@@ -74,7 +74,7 @@ export const clearAdvancedSearchInput = (
         if (input[index]?.input?.multiSelectInput?.value) {
           // @ts-ignore
           if (
-            input[index].input?.multiSelectInput.value !== acceptedEntityTypes
+            input[index]?.input?.multiSelectInput?.value !== acceptedEntityTypes
           ) {
             input[index] = defaultReturnMultiSelectObject(filter.input.key);
           }
