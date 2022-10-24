@@ -23,7 +23,7 @@
       <div class="flex items-center mr-2 pb-0.5">
         <span>Page</span>
       </div>
-      <a v-on:click="changePageWrapper(props.pageNum - 1)" class="cursor-pointer">
+      <a v-on:click="changePageWrapper((props.pageNum - 1).toString())" class="cursor-pointer">
         <unicon :name="Unicons.AngleLeft.name"/>
       </a>
       <span class="mr-1 ml-1 select-none">
@@ -35,7 +35,7 @@
           class="h-6 w-8 p-0 border-none rounded focus:border-2 focus:border-black"
           min="1"
           :max="props.pageCount"
-          v-on:change="(e) => {changePageWrapper(e.target.value)}"/>  /  
+          v-on:change="(e) => {changePageWrapper((e.target as HTMLInputElement).value)}"/>  /  
         <span class="inline-block w-8">{{props.pageCount}}</span>
       </span>
       <a v-on:click="changePageWrapper(props.pageNum + 1)" class="cursor-pointer mr-1 ml-1">
@@ -50,6 +50,7 @@
 
 <script lang="ts">
 import { defineComponent, ref} from "vue";
+import type { PropType } from "vue";
 import { Unicons } from "@/types";
 import MediaInfo from "./base/MediaInfo.vue";
 export default defineComponent({
@@ -62,14 +63,17 @@ export default defineComponent({
   setup: (props, {emit}) => {  
     const input = ref<HTMLInputElement | undefined>(undefined);
 
-    const changePageWrapper = (num: number): void => {
+    const changePageWrapper = (page: string): void => {
+      let num = parseInt(page);
       if (num > props.pageCount){
         num = props.pageCount;
       } else if (num < 1){
         num = 1;
       }
-      input.value.value = num;
-      emit('changePage', {num: num});
+      if (input.value){
+        input.value.value = num.toString();
+        emit('changePage', {num: num});
+      }
     }
 
     return {

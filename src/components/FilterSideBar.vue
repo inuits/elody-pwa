@@ -32,36 +32,36 @@
     </div>
     <div
       v-for="(filter, i) in filters?.advancedFilters"
-      :key="filter.key"
+      :key="filter?.key"
       class="filters w-full lg:h-1770"
     >
       <FilterAccordion
         :active="initialFilters[i] && initialFilters[i].isActive"
-        :label="filter.label"
+        :label="filter?.label"
       >
         <template #content>
           <TextFilter
-            v-if="filter.type === AdvancedFilterTypes.Tekst"
+            v-if="filter?.type === AdvancedFilterTypes.Tekst"
             v-model:inputValue="initialFilters[i]"
-            :filterkey="filter.key"
-            :text="filter.label"
+            :filterkey="filter?.key"
+            :text="filter?.label"
           />
           <ChecklistFilter
-            v-if="filter.type === AdvancedFilterTypes.Checklist"
+            v-if="filter?.type === AdvancedFilterTypes.Checklist"
             v-model:listValue="initialFilters[i]"
-            :filterkey="filter.key"
+            :filterkey="filter?.key"
             :accepted-entity-types="acceptedEntityTypes"
           />
           <MinmaxFilter
-            v-if="filter.type === AdvancedFilterTypes.Minmax"
+            v-if="filter?.type === AdvancedFilterTypes.Minmax"
             v-model:minmaxValue="initialFilters[i]"
-            :filterkey="filter.key"
-            :is-relation="filter.isRelation"
+            :filterkey="filter?.key"
+            :is-relation="filter?.isRelation"
           />
           <MultiFilter
-            v-if="filter.type === AdvancedFilterTypes.Multiselect"
+            v-if="filter?.type === AdvancedFilterTypes.Multiselect"
             v-model:multiSelectValue="initialFilters[i]"
-            :filterkey="filter.key"
+            :filterkey="filter?.key"
           />
         </template>
       </FilterAccordion>

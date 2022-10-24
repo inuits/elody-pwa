@@ -41,11 +41,11 @@ export default defineComponent({
       required: true,
     },
     isRelation: {
-      type: Boolean,
+      type: Object as PropType<Boolean | null>,
       required: false,
       default: false,
     },
-  },
+  }, 
   emits: ["update:minmaxValue"],
   setup(props, { emit }) {
     emit("update:minmaxValue", defaultReturnMinMaxObject(props.filterkey));
