@@ -56,7 +56,7 @@
             v-if="filter?.type === AdvancedFilterTypes.Minmax"
             v-model:minmaxValue="initialFilters[i]"
             :filterkey="filter?.key"
-            :is-relation="filter?.isRelation"
+            :is-relation="filter?.isRelation ? filter?.isRelation : false"
           />
           <MultiFilter
             v-if="filter?.type === AdvancedFilterTypes.Multiselect"

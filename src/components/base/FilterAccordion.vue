@@ -6,6 +6,7 @@
       @click="toggleAccordion"
     >
       <BaseLabel
+        v-if="props.label"
         :name="props.label"
         :color="props.active == true ? 'blue-50' : 'bg-neutral-10'"
         class="text-neutral-900"

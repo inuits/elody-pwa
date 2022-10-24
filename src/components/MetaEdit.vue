@@ -92,7 +92,7 @@ export default defineComponent({
             }
           }
         });
-        await mutate({ id, form: serialzeFormToInput(values, props.modelValue) });
+        await mutate({ id, form: serialzeFormToInput(values) });
         resetMetadataToBePatched();
       }),
       "first"

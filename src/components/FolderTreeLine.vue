@@ -67,9 +67,9 @@
     </li>
     <loading-list v-if="loading" />
     <contractor-tree-line
-      v-for="subDirectory in subDirectories"
+      v-for="(subDirectory, index) in subDirectories"
       v-show="open"
-      :key="subDirectory.id"
+      :key="subDirectory.id ? subDirectory.id : 'no-key'"
       :directory="subDirectory"
       :dictionary="dictionary"
       :default-open="false"

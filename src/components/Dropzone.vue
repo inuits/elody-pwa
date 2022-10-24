@@ -32,7 +32,7 @@
               <div
                 class="text-red-dark truncate"
                 v-for="errorMessage in errorMessages"
-                :key="errorMessage"
+                :key="errorMessage.toString()"
               >
                 - {{ errorMessage }}
               </div>

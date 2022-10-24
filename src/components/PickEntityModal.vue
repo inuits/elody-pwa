@@ -35,7 +35,7 @@ import type { Entity, Maybe } from "@/queries";
 export type PickEntityModalType = {
   state: ModalState;
   pickedEntity: Entity | undefined;
-  acceptedEntityTypes?: string[];
+  acceptedEntityTypes?: Maybe<string>[];
 };
 
 const pickEntityModalState = ref<PickEntityModalType>({
@@ -63,7 +63,7 @@ export const usePickEntityModal = () => {
     });
   };
 
-  const openPickEntityModal = (acceptedEntityTypes: string[]) => {
+  const openPickEntityModal = (acceptedEntityTypes: Maybe<string>[]) => {
     updatePickEntityModal({
       state: "show",
       pickedEntity: undefined,

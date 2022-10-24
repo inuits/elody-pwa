@@ -16,7 +16,7 @@
 import BaseLibrary from "@/components/base/BaseLibrary.vue";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
-import { SearchInputType } from "@/queries";
+import { SearchInputType, type Maybe } from "@/queries";
 
 export default defineComponent({
   name: "AssetLibrary",
@@ -26,7 +26,7 @@ export default defineComponent({
       default: false,
     },
     acceptedEntityTypes: {
-      type: Array as PropType<string[]>,
+      type: Array as PropType<Maybe<string>[]>,
       default: () => [],
       required: false,
     },

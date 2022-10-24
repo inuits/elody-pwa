@@ -22,12 +22,14 @@
       <div class="flex w-full" :class="small ? 'flex-col' : ''">
         <div
           v-for="metaItem in only4Meta(meta)"
-          :key="metaItem.value"
+          :key="metaItem ? metaItem.value : 'no-key'"
           class="col"
           :class="small ? ' w-full' : 'w-1/4'"
         >
-          <span class="label" data-test="meta-label">{{ metaItem.key }}</span>
-          <span class="info" data-test="meta-info">{{ metaItem.value }}</span>
+          <template v-if="metaItem">
+            <span class="label" data-test="meta-label">{{ metaItem.key }}</span>
+            <span class="info" data-test="meta-info">{{ metaItem.value }}</span>
+          </template>
         </div>
       </div>
     </div>
@@ -38,7 +40,7 @@
 </template>
 
 <script lang="ts">
-import type { Maybe, MetadataAndRelation } from "@/queries";
+import type { Maybe, Media, MetadataAndRelation } from "@/queries";
 import { defineComponent, inject } from "vue";
 import type { PropType } from "vue";
 
@@ -50,7 +52,7 @@ export default defineComponent({
       type: Array as PropType<Maybe<Maybe<MetadataAndRelation>[]>>,
       default: () => [],
     },
-    media: { type: String, default: undefined },
+    media: { type: Object as PropType<Maybe<String>>, default: undefined },
     thumbIcon: { type: String, default: "" },
     small: { type: Boolean, default: false },
   },
@@ -62,12 +64,9 @@ export default defineComponent({
     };
 
     const only4Meta = (
-      input: {
-        key: string;
-        value: string;
-      }[]
+      input: Maybe<Maybe<MetadataAndRelation>[]>
     ) => {
-      return input.filter((value) => value.value !== "").slice(0, 4);
+      return input?.filter((value) => value?.value !== "").slice(0, 4);
     };
     return { setNoImage, imageSrcError, only4Meta, config };
   },

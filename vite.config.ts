@@ -2,7 +2,7 @@ import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import vueI18n from '@intlify/vite-plugin-vue-i18n'
-import { resolve, dirname } from 'node:path'
+import path, { resolve, dirname } from 'node:path'
 
 const parsePort = (port: string) => {
   return parseInt(port) ? parseInt(port) : 8080;
