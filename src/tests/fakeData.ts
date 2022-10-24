@@ -7,7 +7,7 @@ type dataSet_BuildInitialValues = {
 
 type dataSet_I18n = {
   messages: any
-  langs: String[]
+  langs: string[]
   expectedResult: any
 }
 

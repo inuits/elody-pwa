@@ -26,14 +26,14 @@ export type relationValues = {
   label?: string;
   metadata: IntialValues;
   relationType: string;
-  value: string;
+  value: string | undefined;
 };
 
 export type IntialValues = Record<string, string | relationValues[]>;
 
 const setLabel = (field:  Maybe<MetadataOrRelationField>) => {
-  if (field.key !== noKey) {
-    return field.key
+  if (field?.key !== noKey) {
+    return field?.key
   } else {
     return undefined
   }
@@ -181,7 +181,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
       }
     );
 
-    input.relations.filter((r: any) => { return (metadataToBePatched.value.metadata.some((s: any) => s === r.linkedEntityId))})
+    input?.relations.filter((r: any) => { return (metadataToBePatched.value.metadata.some((s: any) => s === r.linkedEntityId))})
     return input;
   };
 
