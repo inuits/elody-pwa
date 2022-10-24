@@ -7,24 +7,33 @@
         <unicon
           :name="Unicons.Desktop.name"
           height="20"
-          class="text-neutral-700"
+          class="text-neutral-700 cursor-pointer"
         />
       </a>
       <a ref="zoomInRef" class="mr-2"
         ><unicon
           :name="Unicons.SearchPlus.name"
           height="20"
-          class="text-neutral-700"
+          class="text-neutral-700 cursor-pointer"
       /></a>
       <a ref="zoomOutRef">
         <unicon
           :name="Unicons.SearchMinus.name"
           height="20"
-          class="text-neutral-700"
+          class="text-neutral-700 cursor-pointer"
+        />
+      </a>
+      <a v-if="downloadLocation" @click="downloadImage">
+        <unicon
+          :name="Unicons.Download.name"
+          height="20"
+          class="text-neutral-700 cursor-pointer ml-1"
         />
       </a>
     </div>
-    <a ref="homeRef" class="text-sm mr-2 text-neutral-700">{{$t('upload.reset')}}</a>
+    <a ref="homeRef" class="text-sm mr-2 text-neutral-700 cursor-pointer">{{
+      $t("upload.reset")
+    }}</a>
   </div>
   <MediaInfo />
 </template>
@@ -34,6 +43,7 @@ import { defineComponent, onMounted, ref } from "vue";
 import type { PropType } from "vue";
 import { Unicons } from "@/types";
 import MediaInfo from "./base/MediaInfo.vue";
+import { propsToAttrMap } from "@vue/shared";
 export default defineComponent({
   name: "ViewerToolbar",
   components: {
@@ -56,6 +66,10 @@ export default defineComponent({
       type: Object as PropType<HTMLDivElement | string | null>,
       default: null,
     },
+    downloadLocation: {
+      type: String,
+      default: "",
+    },
   },
   emits: ["update:zoomIn", "update:zoomOut", "update:fullPage", "update:home"],
   setup: (_props, { emit }) => {
@@ -71,12 +85,19 @@ export default defineComponent({
       emit("update:home", homeRef.value);
     });
 
+    const downloadImage = () => {
+      if (_props.downloadLocation) {
+        window.open(_props.downloadLocation, "_blank");
+      }
+    };
+
     return {
       Unicons,
       zoomInRef,
       zoomOutRef,
       fullPageRef,
       homeRef,
+      downloadImage,
     };
   },
 });

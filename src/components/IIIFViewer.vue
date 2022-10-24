@@ -13,12 +13,13 @@
       v-model:zoomOut="zoomOutDiv"
       v-model:fullPage="fullPageButtonDiv"
       v-model:home="homeDiv"
+      :downloadLocation="downloadLocation"
     />
     <div
       v-show="loading"
       class="absolute flex h-full items-center justify-center text-center w-full z-40"
     >
-      {{$t('loading')}}
+      {{ $t("loading") }}
     </div>
     <div ref="OpenSeadragonDiv" class="w-full h-full z-0 checkboard" />
   </div>
@@ -38,6 +39,7 @@ export default defineComponent({
     imageUrl: { type: String, default: "" },
     imageTranscodeUrl: { type: String, default: "" },
     isPublic: { type: Boolean, default: true },
+    downloadLocation: { type: String },
   },
   setup: (props) => {
     const OpenSeadragonDiv = ref<HTMLDivElement | undefined>(undefined);
