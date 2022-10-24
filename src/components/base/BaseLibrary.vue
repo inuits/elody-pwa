@@ -30,14 +30,14 @@
           class="pl-4 my-2 flex flex-row justify-left"
         >
           <BaseDropdown
-            v-if="result?.Entities.count > 0"
+            v-if="result?.Entities?.count > 0"
             v-model="queryVariables.limit"
             :options="paginationLimits"
             :label="$t('library.items')"
           />
           <BaseDropdown
             v-if="
-              result?.Entities.count > 1 &&
+              result?.Entities?.count > 1 &&
               queryVariables.searchValue.value != ''
             "
             v-model="queryVariables.sort"
@@ -47,11 +47,11 @@
         </div>
         <div class="flex-grow"></div>
         <BasePagination
-          v-if="result?.Entities.count > 0"
+          v-if="result?.Entities?.count > 0"
           v-model:skip="queryVariables.skip"
           v-model:limit="queryVariables.limit"
           :loading="loading"
-          :total-items="result?.Entities.count"
+          :total-items="result?.Entities?.count"
         />
       </div>
       <ListContainer>
@@ -80,7 +80,7 @@
         <div v-else-if="result?.Entities?.results">
           <ListItem
             :small="listItemRouteName === 'SingleMediafile'"
-            v-for="entity in result.Entities.results"
+            v-for="entity in result.Entities?.results"
             :key="entity?.id"
             :meta="entity?.teaserMetadata"
             :media="entity?.media ? entity?.media.primary_transcode : null"
@@ -118,7 +118,7 @@
               />
             </template>
           </ListItem>
-          <div v-if="result?.Entities.results.length === 0" class="p-4">
+          <div v-if="result?.Entities?.results.length === 0" class="p-4">
             {{ $t("search.noresult") }}
           </div>
         </div>
