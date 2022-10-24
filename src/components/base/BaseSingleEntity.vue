@@ -76,8 +76,8 @@
           : 'w-full'
       "
       :loading="loading"
-      :entity-id="result ? result.Entity.id : undefined"
-      :metadata="result ? result.Entity.metadata : []"
+      :entity-id="result ? result?.Entity?.id : undefined"
+      :metadata="result ? result?.Entity?.metadata : []"
       :entity-title="title"
       :form="result?.Entity?.form"
     />
@@ -98,7 +98,8 @@ import type { PropType } from "vue";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import IIIFViewer from "@/components/IIIFViewer.vue";
 import MetaWindow from "@/components/MetaWindow.vue";
-import type { GetEntityByIdDocument, PostMediaFileDocument, PostMediaFileMutation } from "@/queries";
+import { GetEntityByIdDocument, PostMediaFileDocument } from "@/queries";
+import type {PostMediaFileMutation} from "@/queries";
 import type {
   GetEntityByIdQuery,
   Maybe,

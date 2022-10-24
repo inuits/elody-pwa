@@ -77,7 +77,7 @@
             </template>
           </ListItem>
         </div>
-        <div v-else-if="result?.Entities.results">
+        <div v-else-if="result?.Entities?.results">
           <ListItem
             :small="listItemRouteName === 'SingleMediafile'"
             v-for="entity in result.Entities.results"
