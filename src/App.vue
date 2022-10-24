@@ -38,7 +38,7 @@ export default defineComponent({
   },
   inject: { DefaultOIDC },
   setup() {
-    const auth = useAuth();
+    const auth: Object = useAuth();
     const { isSingle } = useRouteHelpers();
     const contentPadding = ref("24");
 
