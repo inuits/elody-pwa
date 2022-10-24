@@ -31,6 +31,11 @@
         :image-transcode-url="
           mediafileSelectionState.selectedMediafile.transcode_filename
         "
+        :downloadLocation="
+          canGet(result?.Entity?.permission)
+            ? mediafileSelectionState.selectedMediafile.original_file_location
+            : ''
+        "
       />
       <VideoPlayer
         v-if="
@@ -171,7 +176,7 @@ export default defineComponent({
     const { editMode, showEditToggle } = useEditMode();
     const { updatePageTitle } = usePageTitle();
     const { closeUploadModal } = useUploadModal();
-    const { canEdit, canDelete } = usePermissions();
+    const { canEdit, canDelete, canGet } = usePermissions();
 
     const queryVariables = reactive<GetEntityByIdQueryVariables>({
       id: id,
@@ -322,6 +327,7 @@ export default defineComponent({
       mediafiles,
       editMode,
       mediafileSelectionState,
+      canGet,
     };
   },
 });
