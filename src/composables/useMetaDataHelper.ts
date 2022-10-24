@@ -81,7 +81,8 @@ const useMetaDataHelper = () => {
     return true;
   }
 
-  const shouldAddMetaData = (id: string, alreadyAdded: MetadataField[] | MediaFile[]): boolean => {
+  const shouldAddMetaData = (id: string, alreadyAdded: MetadataField): boolean => {
+    console.log(alreadyAdded);
     if (!(alreadyAdded && alreadyAdded[0])) {
       return true;
     }
@@ -93,19 +94,15 @@ const useMetaDataHelper = () => {
     return true;
   }
 
-  const determineIfNotAdded = (entity: any, mediafiles: MediaFile[], metadata: MetadataField[]): boolean => {
-    let alreadyAdded: MediaFile[] | MetadataField[];
-
+  const determineIfNotAdded = (entity: any, mediafiles: MediaFile[], metadata: MetadataField): boolean => {
     if (beingAdded.value === "") {
       return true;
     }
 
     if (beingAdded.value === "mediafile"){
-      alreadyAdded = mediafiles;
-      return shouldAddMediafile(entity.uuid, alreadyAdded);
+      return shouldAddMediafile(entity.uuid, mediafiles);
     } else {
-      alreadyAdded = Object.values(metadata)[3];
-      return shouldAddMetaData(entity.uuid, alreadyAdded);
+      return shouldAddMetaData(entity.uuid, Object.values(metadata)[3]);
     }
   };
 
