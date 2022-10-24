@@ -6,7 +6,7 @@
         class="input sr-only"
         :class="{ checked }"
         :checked="checked"
-        @change="$emit('update:checked', $event.target.checked)"
+        @change="$emit('update:checked', $event?.target?.checked)"
       />
       <div class="dot"></div>
       <BaseIcon :name="iconOff" class="iconOff" />
@@ -20,6 +20,7 @@
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import BaseIcon from "@/components/base/BaseIcon.vue";
+import type { Unicons } from "../../types";
 
 export default defineComponent({
   name: "IconToggle",
@@ -28,8 +29,8 @@ export default defineComponent({
   props: {
     label: { type: String, default: "" },
     checked: { type: Boolean, default: false },
-    iconOff: { type: String as PropType<keyof Unicons>, required: true },
-    iconOn: { type: String as PropType<keyof Unicons>, required: true },
+    iconOff: { type: Object as PropType<typeof Unicons>, required: true },
+    iconOn: { type: Object as PropType<typeof Unicons>, required: true },
   },
   emits: ["update:checked"],
 });

@@ -1,9 +1,9 @@
 <template>
-  <div v-for="directory in data?.Directories" :key="directory.id">
+  <div v-for="directory in directories" :key="`key-${directory.id}`">
     <folder-tree-line
-      v-if="data?.Directories && directory && directory.parent === '/'"
+      v-if="directories && directory && directory.parent === '/'"
       :directory="directory"
-      :dictionary="data?.Directories"
+      :dictionary="directories"
       :default-open="false"
     />
   </div>
@@ -20,8 +20,8 @@ export default defineComponent({
     FolderTreeLine,
   },
   props: {
-    data: {
-      type: Array as PropType<Directory[]>,
+    directories: {
+      type: Object as PropType<Directory[]>,
       required: true,
       default: () => [],
     },

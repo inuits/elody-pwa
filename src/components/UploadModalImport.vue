@@ -16,7 +16,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, provide, ref } from "vue";
-import type { Ref } from "vue";
+import type { Ref, PropType } from "vue";
 import FolderTree from "./FolderTree.vue";
 import BaseButton from "./base/BaseButton.vue";
 import { useMutation } from "@vue/apollo-composable";
@@ -32,7 +32,7 @@ export default defineComponent({
   },
   props: {
     directories: {
-      type: Array,
+      type: Array as PropType<Directory[]>,
       required: true,
       default: () => [],
     },

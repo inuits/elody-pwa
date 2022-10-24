@@ -12,7 +12,7 @@
             : 'text-neutral-800 bg-neutral-0'
         "
       >
-        {{ tab.props.title }}
+        {{ tab?.props?.title }}
       </div>
     </div>
     <slot></slot>

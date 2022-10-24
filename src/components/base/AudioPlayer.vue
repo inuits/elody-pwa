@@ -1,14 +1,14 @@
 <template>
   <div class="flex w-full h-full justify-center items-center">
     <audio controls class="w-full">
-      <source :src="source?.original_file_location" :type="source?.mimetype" />
+      <source :src="source && source?.original_file_location ? source?.original_file_location : 'no-src'" :type="source && source?.mimetype ? source?.mimetype : 'no-type'" />
       {{$t('audio.no-support')}}
     </audio>
     <media-info class="" :meta-data="source.metadata" />
   </div>
 </template>
 <script lang="ts">
-import type { MediaFileMetadata } from "@/queries";
+import type { MediaFile, MediaFileMetadata } from "@/queries";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import MediaInfo from "./MediaInfo.vue";
@@ -20,7 +20,7 @@ export default defineComponent({
   },
   props: {
     source: {
-      type: Array as PropType<MediaFileMetadata[]>,
+      type: Object as PropType<MediaFile>,
       required: true,
     },
   },
