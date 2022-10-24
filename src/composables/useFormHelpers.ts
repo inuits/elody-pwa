@@ -150,7 +150,7 @@ const useFormHelper = (form: Form, entityTitle: string) => {
 
   const { metadataToBePatched } = useMetaDataHelper();
 
-  const serialzeFormToInput = (values: IntialValues, originalStructure: MetadataAndRelation[]): MetadataFormInput => {
+  const serialzeFormToInput = (values: IntialValues): MetadataFormInput => {
     const input: MetadataFormInput = {
       Metadata: [],
       relations: [],

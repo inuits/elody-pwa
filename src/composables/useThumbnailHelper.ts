@@ -1,9 +1,9 @@
 import { Unicons } from "@/types";
-import type { Metadata } from "@/queries";
+import type { MediaFileEntity } from "@/queries";
 
 
 const useThumbnailHelper = (): {
-  getThumbnail: (metadata: Metadata) => string;
+  getThumbnail: (entity: any) => string;
 } => {
   const getThumbnail = (data: any) => {
     if (

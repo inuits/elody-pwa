@@ -48,11 +48,11 @@ export default defineComponent({
   props: {
     loading: { type: Boolean, default: false },
     meta: {
-      type: Array as PropType<Maybe<MetadataAndRelation>[]>,
+      type: Array as PropType<Maybe<Maybe<MetadataAndRelation>[]>>,
       default: () => [],
     },
     media: { type: Object as PropType<Maybe<String>>, default: undefined },
-    thumbIcon: { type: String as PropType<keyof Unicons>, default: "" },
+    thumbIcon: { type: String, default: "" },
     small: { type: Boolean, default: false },
   },
   setup() {

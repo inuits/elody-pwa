@@ -18,9 +18,6 @@
         </div>
       </div>
       </div>
-      <pre>
-        {{metadata}}
-      </pre>
       <ListItem
         v-if="
           metadata.linkedEntity &&
