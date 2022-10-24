@@ -16,7 +16,7 @@ import type { Unicons } from "../../types";
 export default defineComponent({
   name: "BaseIcon",
   props: {
-    name: { type: Object as PropType<typeof Unicons | string>, required: true },
+    name: { type: String, required: true },
     iconStyle: { type: String, default: "line" },
     viewBox: { type: String, default: "0 0 24 24" },
   },

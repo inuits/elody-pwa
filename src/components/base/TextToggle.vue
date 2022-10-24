@@ -6,7 +6,7 @@
         class="input sr-only"
         :class="{ checked }"
         :checked="checked"
-        @change="$emit('update:checked', $event.target.checked)"
+        @change="$emit('update:checked', ($event.target as HTMLInputElement).checked)"
       />
       <div class="dot"></div>
       <p :name="textOff" class="textOf">{{ textOff }}</p>
