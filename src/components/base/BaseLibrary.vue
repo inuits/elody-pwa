@@ -187,7 +187,7 @@ export default defineComponent({
       default: false,
     },
     acceptedEntityTypes: {
-      type: Array as PropType<string[]>,
+      type: Array as PropType<Maybe<string>[]>,
       default: () => [],
       required: false,
     },

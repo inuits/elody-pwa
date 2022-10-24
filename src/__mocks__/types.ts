@@ -5,3 +5,5 @@ module.exports = {
     SearchGlass: { name: "search-glass" },
   },
 };
+
+export {}

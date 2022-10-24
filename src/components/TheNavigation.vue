@@ -92,7 +92,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, type PropType } from "vue";
 import BaseButton from "./base/BaseButton.vue";
 import { useUploadModal, modalChoices } from "./UploadModal.vue";
 import { Unicons } from "@/types";
@@ -102,7 +102,9 @@ import { useCreateModal } from "./CreateModal.vue";
 export default defineComponent({
   name: "TheNavigation",
   components: { BaseButton },
-  props: {auth: {required: true}},
+  props: {
+    auth: { type: Object as PropType<any>, required: true }
+  },
   setup: (props) => {
     const { openUploadModal } = useUploadModal();
     const { openCreateModal } = useCreateModal();

@@ -54,7 +54,7 @@ export default defineComponent({
       emitValue = debounce(emitValue, props.debounceWait);
     }
 
-    const inputValue = computed({
+    const inputValue = computed<any>({
       get() {
         return props.modelValue;
       },

@@ -10,9 +10,7 @@
         :meta="entity.teaserMetadata"
         :media="entity.media ? entity.media.primary_transcode : null"
         :thumb-icon="getThumbnail(entity)"
-        @click="
-          !enableSelection &&
-            router.push({ name: 'SingleEntity', params: { id: entity.id } })
+        @click="router.push({ name: 'SingleEntity', params: { id: entity.id } })
         "
         :small="true"
       >
