@@ -50,7 +50,7 @@ export default defineComponent({
       default: false,
     },
     label: {
-      type: Object as PropType<string | null>,
+      type: String as PropType<string | null>,
       required: false,
     },
   },
