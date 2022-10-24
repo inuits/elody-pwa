@@ -2,31 +2,30 @@
   <!-- <div>
     <AndOrToggle v-model:AndOrValue="isAnd" texton="En" textoff="Of" />
   </div> -->
-  <div>
-    <ul v-for="option in options?.FilterOptions" :key="option">
+  <div v-if="options">
+    <ul v-for="(option, index) in options.FilterOptions" :key="option && option.label ? `${option.label}-${index}` : 'no-key'">
       <li
-        v-if="
-          option && (acceptedEntityTypes.length == 0 || filterkey !== 'type')
-        "
+        v-if="option && option.label && (acceptedEntityTypes.length == 0 || filterkey !== 'type')"
       >
-        <input
-          :id="option.label"
-          v-model="inputFieldMulti"
-          type="checkbox"
-          :name="option.label"
-          :value="option.value"
-        />
-        <label
-          :for="option.label"
-          class="ml-2 align-center p-10px cursor-pointer display-inline-block"
-        >
-          {{
-            option.label.charAt(0).toUpperCase() + option.label.slice(1)
-          }}</label
-        >
+          <input
+            :id="option.label"
+            v-model="inputFieldMulti"
+            type="checkbox"
+            :name="option.label"
+            :value="option.value"
+          />
+          <label
+            :for="option.label"
+            class="ml-2 align-center p-10px cursor-pointer display-inline-block"
+          >
+            {{
+              option.label.charAt(0).toUpperCase() + option.label.slice(1)
+            }}
+          </label
+          >  
       </li>
       <li
-        v-if="acceptedEntityTypes.includes(option.value) && filterkey == 'type'"
+        v-if="option && option.label && option.value && acceptedEntityTypes.includes(option.value) && filterkey == 'type'"
       >
         <input
           :id="option.value"
@@ -51,7 +50,6 @@
 import { defaultReturnMultiSelectObject } from "@/composables/useFilterHelper";
 import type { FilterInList } from "@/composables/useFilterHelper";
 import { GetFilterOptionsDocument } from "@/queries";
-import type { Maybe } from "@/queries";
 import { useQuery } from "@vue/apollo-composable";
 import { computed, defineComponent, ref, watch } from "vue";
 import type { PropType } from "vue";
@@ -106,13 +104,13 @@ export default defineComponent({
       },
     });
 
-    const inputFieldMulti = ref<Maybe<Maybe<string>[]> | undefined>([]);
+    const inputFieldMulti = ref<any[]>([]);
 
     watch(
       () => props.listValue,
       () => {
         if (props.listValue && props.listValue.input.multiSelectInput) {
-          inputFieldMulti.value = props.listValue.input.multiSelectInput.value;
+          inputFieldMulti.value = props.listValue.input.multiSelectInput.value ? props.listValue.input.multiSelectInput.value : [];
         }
       }
     );
