@@ -1,9 +1,9 @@
 import { Unicons } from "@/types";
-import type { relationValues } from "@/composables/useFormHelpers";
+import type { Metadata } from "@/queries";
 
 
 const useThumbnailHelper = (): {
-  getThumbnail: (metadata: Me) => string;
+  getThumbnail: (metadata: Metadata) => string;
 } => {
   const getThumbnail = (data: any) => {
     if (

@@ -81,7 +81,7 @@ const useMetaDataHelper = () => {
     return true;
   }
 
-  const shouldAddMetaData = (id: string, alreadyAdded: MetadataField[]): boolean => {
+  const shouldAddMetaData = (id: string, alreadyAdded: MetadataField[] | MediaFile[]): boolean => {
     if (!(alreadyAdded && alreadyAdded[0])) {
       return true;
     }
