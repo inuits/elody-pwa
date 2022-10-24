@@ -1,10 +1,10 @@
-import type { MediaFile, MetadataField } from "@/queries";
+import type { MediaFile, MetadataField, MetadataRelation, RelationField } from "@/queries";
 import { ref } from "vue";
 
 const metaDataPatchList = ref<any>({});
 const lastAdjustedMediaFileMetaData = ref<any>();
 const mediafiles = ref<MediaFile[]>([]);
-export const selectedRelationFieldMetadata = ref([]);
+export const selectedRelationFieldMetadata = ref<any[]>([]);
 export const beingAdded = ref<string>("");
 const relationsToBeDeleted = ref<{ entityId: string, relations: Array<any>}>({
   entityId: '',
@@ -81,20 +81,19 @@ const useMetaDataHelper = () => {
     return true;
   }
 
-  const shouldAddMetaData = (id: string, alreadyAdded: MetadataField): boolean => {
-    console.log(alreadyAdded);
+  const shouldAddMetaData = (id: string, alreadyAdded: MetadataRelation[]): boolean => {
     if (!(alreadyAdded && alreadyAdded[0])) {
       return true;
     }
     for (let i = 0; i < alreadyAdded.length; i++) {
-      if (id === alreadyAdded[i].value.key) {
+      if (id === alreadyAdded[i].key) {
         return false;
       }
     }
     return true;
   }
 
-  const determineIfNotAdded = (entity: any, mediafiles: MediaFile[], metadata: MetadataField): boolean => {
+  const determineIfNotAdded = (entity: any, mediafiles: MediaFile[], relations: MetadataRelation[]): boolean => {
     if (beingAdded.value === "") {
       return true;
     }
@@ -102,7 +101,7 @@ const useMetaDataHelper = () => {
     if (beingAdded.value === "mediafile"){
       return shouldAddMediafile(entity.uuid, mediafiles);
     } else {
-      return shouldAddMetaData(entity.uuid, Object.values(metadata)[3]);
+      return shouldAddMetaData(entity.uuid, relations);
     }
   };
 
