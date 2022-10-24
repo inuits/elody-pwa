@@ -13,7 +13,7 @@
       {{ checkTranslationForlabel(item.label) }}
     </div>
     <div v-else-if="item.label != item.key" class="label" :class="{ loading }">
-      {{$t('meta.no-label')}}
+      {{ $t("meta.no-label") }}
     </div>
 
     <meta-viewline-relation v-if="item.linkedEntity" :metadata="item" />
@@ -24,7 +24,15 @@
       :class="{ loading }"
       data-test="meta-info"
     >
-      {{ item.value ? item.value : $t('meta.no-data') }}
+      <p v-if="item.value && !stringIsUrl(item.value)">{{ item.value }}</p>
+      <a
+        v-if="item.value && stringIsUrl(item.value)"
+        :href="item.value"
+        target="_blank"
+        class="underline"
+        >{{ item.value }}</a
+      >
+      <p v-else>{{ $t("meta.no-data") }}</p>
     </div>
   </div>
   <div
@@ -41,6 +49,7 @@ import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { Unicons } from "@/types";
 import MetaViewlineRelation from "./MetaViewlineRelation.vue";
+import { stringIsUrl } from "@/helpers";
 
 export default defineComponent({
   name: "MetaViewLine",
@@ -69,6 +78,7 @@ export default defineComponent({
       router,
       Unicons,
       checkTranslationForlabel,
+      stringIsUrl,
     };
   },
 });
