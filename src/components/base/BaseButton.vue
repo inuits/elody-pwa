@@ -37,7 +37,7 @@ export default defineComponent({
       default: false,
     },
     icon: {
-      type: Object as PropType<typeof Unicons | string>,
+      type: String,
       required: false,
       default: undefined,
     },
