@@ -43,8 +43,8 @@ export default defineComponent({
     bgColor: { type: String, default: "neutral-0" },
     name: { type: String, default: "", required: false },
     isDisabled: { type: true || false, default: false, required: false },
-    min: { type: String, default: "", required: false },
-    max: { type: String, default: "", required: false },
+    min: { type: Number, required: false },
+    max: { type: Number, required: false },
   },
   emits: ["update:modelValue"],
   setup(props, { emit }) {
