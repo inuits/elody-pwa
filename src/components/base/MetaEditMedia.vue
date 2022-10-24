@@ -3,7 +3,7 @@
     <form v-if="form.fields" novalidate>
       <div
         v-for="field in form.fields"
-        :key="field.__typename === 'MetadataField' ? field.key : 'no key'"
+        :key="field && field.__typename === 'MetadataField' ? field.key : 'no key'"
       >
         <MetaEditDataField
           v-if="field && field.__typename === 'MetadataField'"

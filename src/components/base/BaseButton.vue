@@ -22,6 +22,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
+import type { Unicons } from "@/types";
 
 export default defineComponent({
   name: "BaseButton",
@@ -36,7 +37,7 @@ export default defineComponent({
       default: false,
     },
     icon: {
-      type: String as PropType<keyof Unicons>,
+      type: Object as PropType<typeof Unicons | string>,
       required: false,
       default: undefined,
     },

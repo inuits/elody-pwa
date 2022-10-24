@@ -37,10 +37,10 @@ export default defineComponent({
   inheritAttrs: false,
   props: {
     label: { type: String, default: "" },
-    modelValue: { type: String, default: "" },
+    modelValue: { type: Object as PropType<string | undefined | null>, default: "" },
     debounce: { type: Boolean, default: false },
     debounceWait: { type: Number, default: 400 },
-    icon: { type: String as PropType<keyof Unicons>, default: undefined },
+    icon: { type: String, default: undefined },
     bgColor: { type: String, default: "neutral-0" },
     name: { type: String, default: "", required: false },
     isDisabled: { type: true || false, default: false, required: false },

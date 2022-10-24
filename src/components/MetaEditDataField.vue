@@ -39,7 +39,7 @@ export default defineComponent({
       default: () => [],
     },
     active: {
-      type: Boolean,
+      type: Object as PropType<Maybe<Boolean> | undefined | null>,
       default: () => true
     },
   },

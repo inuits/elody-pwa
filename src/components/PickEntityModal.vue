@@ -10,7 +10,7 @@
       class="bg-neutral-20 w-full h-full flex flex-col overflow-auto"
     >
       <MediaFileLibrary
-        v-if="pickEntityModalState.acceptedEntityTypes.includes('MediaFile')"
+        v-if="pickEntityModalState?.acceptedEntityTypes?.includes('MediaFile')"
         :enable-selection="true"
         :accepted-entity-types="pickEntityModalState.acceptedEntityTypes"
         @add-selection="addItem"
@@ -63,7 +63,7 @@ export const usePickEntityModal = () => {
     });
   };
 
-  const openPickEntityModal = (acceptedEntityTypes: Maybe<string>[]) => {
+  const openPickEntityModal = (acceptedEntityTypes: string[]) => {
     updatePickEntityModal({
       state: "show",
       pickedEntity: undefined,

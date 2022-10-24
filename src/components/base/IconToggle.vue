@@ -6,7 +6,7 @@
         class="input sr-only"
         :class="{ checked }"
         :checked="checked"
-        @change="$emit('update:checked', $event?.target?.checked)"
+        @change="$emit('update:checked', handleInputChange($event))"
       />
       <div class="dot"></div>
       <BaseIcon :name="iconOff" class="iconOff" />
@@ -29,10 +29,19 @@ export default defineComponent({
   props: {
     label: { type: String, default: "" },
     checked: { type: Boolean, default: false },
-    iconOff: { type: Object as PropType<typeof Unicons>, required: true },
-    iconOn: { type: Object as PropType<typeof Unicons>, required: true },
+    iconOff: { type: String, required: true },
+    iconOn: { type: String, required: true },
   },
   emits: ["update:checked"],
+  setup() {
+
+    const handleInputChange = (event: Event) => 
+      (event.target as HTMLInputElement).checked
+
+    return {
+      handleInputChange
+    }
+  }
 });
 </script>
 
