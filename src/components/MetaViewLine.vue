@@ -16,10 +16,10 @@
       {{ $t("meta.no-label") }}
     </div>
 
-    <meta-viewline-relation v-if="item.linkedEntity" :metadata="item" />
+    <meta-viewline-relation v-if="(item as MetadataRelation).linkedEntity" :metadata="(item as MetadataRelation)" />
 
     <div
-      v-if="!item.linkedEntity"
+      v-if="!(item as MetadataRelation).linkedEntity"
       class="value"
       :class="{ loading }"
       data-test="meta-info"
@@ -57,7 +57,7 @@ export default defineComponent({
   props: {
     loading: { type: Boolean, default: false },
     metadata: {
-      type: Array as PropType<MetadataRelation[]>,
+      type: Array as PropType<MetadataAndRelation[]>,
       required: false,
       default: () => [],
     },
