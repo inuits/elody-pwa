@@ -51,7 +51,7 @@ export const usePickEntityModal = () => {
 
   const pickEntity = (pickedEntity: Entity) => {
     updatePickEntityModal({
-      state: "hide",
+      state: "show",
       pickedEntity: pickedEntity,
     });
   };
