@@ -17,11 +17,11 @@
       :searchable="true"
       :close-on-select="false"
       :options="result?.FilterOptions"
-      :label="$('filter.label')"
+      :label="$t('filter.label')"
       track-by="label"
       value-prop="label"
-      :placeholder="$('filter.choose')"
-      :no-results-text="$('filter.not-with-that-name')"
+      :placeholder="$t('filter.choose')"
+      :no-results-text="$t('filter.not-with-that-name')"
     />
   </div>
   <div>

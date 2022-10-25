@@ -3,7 +3,7 @@
     <FilterSideBar
       v-show="!isDrawerHiding"
       @activeFilters="setFilters"
-      :accepted-entity-types="acceptedEntityTypes ? acceptedEntityTypes : []"
+      :accepted-entity-types="acceptedEntityTypes ? (acceptedEntityTypes as string[]): []"
       :advancedFiltersChoice="advancedFiltersChoice"
     />
     <div class="p-6 w-full">
@@ -17,7 +17,7 @@
         </div>
         <InputField
           v-show="acceptedEntityTypes.length === 0 && hasSimpleSearch"
-          v-model="queryVariables.searchValue.value"
+          v-model="queryVariables?.searchValue.value"
           :debounce="true"
           :placeholder="searchPlaceholder"
           :label="$t('library.search')"
