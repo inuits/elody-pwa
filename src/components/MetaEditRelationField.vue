@@ -134,7 +134,7 @@ export default defineComponent({
         ) {
           addTowardsMetadataToBePatched(id, value.pickedEntity.uuid);
           addRelation(value.pickedEntity);
-          closePickEntityModal();
+          openModal(props.structure.acceptedEntityTypes);
         }
       }
     });
