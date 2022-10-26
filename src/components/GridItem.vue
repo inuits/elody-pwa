@@ -32,7 +32,7 @@
           :key="metaItem ? metaItem.value : 'no-key'"
           class="w-full h-6"
           >
-            <template v-if="metaItem" >
+            <template v-if="metaItem && metaItem.key !== 'object_number'" >
               <span 
                 :class="['text-neutral-700 w-fit h-6 handleOverflow', metaItem.key === 'title' ? 'metaTitle' : 'metaType']" 
                 data-test="meta-info">{{ metaItem.value }}</span>
