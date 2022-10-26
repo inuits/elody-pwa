@@ -66,7 +66,6 @@ export default defineComponent({
   },
   setup(props) {
     const config: any = inject("config");
-    console.log(props.meta);
     let imageSrcError = false;
     const setNoImage = () => {
       imageSrcError = true;
