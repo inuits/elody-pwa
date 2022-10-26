@@ -12,80 +12,43 @@
           / {{ pageTitle.entityTitle }}</span
         >
       </h1>
-      <edit-toggle />
+      <EditToggle v-if="auth.isAuthenticated.value === true" />
     </div>
-    <!-- <div class="float-right">
+    <div class="float-right">
       <BaseButton
-        v-if="auth && !auth.isAuthenticated"
+        v-if="auth.isAuthenticated.value === false"
         label="Log in"
         bg-color="main-light"
         txt-color="main-dark"
-        @click="auth && auth.login()"
+        class="whitespace-nowrap"
+        @click="auth.redirectToLogin()"
       />
-      <div v-if="auth?.isAuthenticated">
-        <BaseButton :icon="Unicons.User.name" bg-color="neutral-30" />
-      </div>
-    </div> -->
+      <BaseButton
+        v-if="auth.isAuthenticated.value === true"
+        label="Log out"
+        bg-color="main-light"
+        txt-color="main-dark"
+        class="whitespace-nowrap"
+        @click="logout()"
+      />
+    </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from "vue";
+<script lang="ts" setup>
 import { useRoute, useRouter } from "vue-router";
-import { Unicons } from "@/types";
+import { usePageTitle } from "@/composables/usePageTitle";
+import { useAuth } from "session-vue-3-oidc-library";
+import BaseButton from "@/components/base/BaseButton.vue";
 import EditToggle from "./EditButtons.vue";
-import { useEditMode } from "@/composables/useEdit";
 
-type titleTypes = "routerTitle" | "entityTitle";
+const { pageTitle } = usePageTitle();
+const auth = useAuth();
+const route = useRoute();
+const router = useRouter();
 
-type PageTitle = {
-  routerTitle: string;
-  entityTitle: string;
+const logout = async () => {
+  await auth.logout();
+  router.push({ name: "Home" });
 };
-
-const pageTitle = ref<PageTitle>({
-  routerTitle: "",
-  entityTitle: "",
-});
-
-export const usePageTitle = () => {
-  const router = useRouter();
-
-  const updatePageTitle = (input: string, type: titleTypes = "routerTitle") => {
-    pageTitle.value[type] = input;
-  };
-
-  router.beforeEach((to, _from, next) => {
-    updatePageTitle("", "entityTitle");
-
-    next();
-  });
-
-  router.afterEach((to) => {
-    updatePageTitle(to.meta.title as string);
-  });
-
-  return {
-    Unicons,
-    pageTitle,
-    updatePageTitle,
-  };
-};
-
-export default defineComponent({
-  name: "TheHeader",
-  components: { EditToggle },
-  setup() {
-    const { pageTitle } = usePageTitle();
-    const route = useRoute();
-
-    const { editMode } = useEditMode();
-
-    return {
-      route,
-      pageTitle,
-      editMode,
-    };
-  },
-});
 </script>

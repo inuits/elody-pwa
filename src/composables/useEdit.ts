@@ -1,5 +1,11 @@
-import { UpdateMediafilesOrderDocument, DeleteRelationsDocument } from "@/queries";
-import type { UpdateMediafilesOrderMutation, DeleteRelationsMutation } from "@/queries";
+import {
+  UpdateMediafilesOrderDocument,
+  DeleteRelationsDocument,
+} from "@/queries";
+import type {
+  UpdateMediafilesOrderMutation,
+  DeleteRelationsMutation,
+} from "@/queries";
 import { useMutation } from "@vue/apollo-composable";
 import { computed, ref } from "vue";
 import useMediaAssetLinkHelper from "./useMediaAssetLinkHelper";
@@ -20,7 +26,12 @@ const isEditToggleVisible = ref<"no-edit" | "edit" | "edit-delete">("no-edit");
 export const useEditMode = () => {
   const { linkMediaFilesToEntity, clearMediaFilesToLinkToEntity } =
     useMediaAssetLinkHelper();
-  const { clearMediaFilesToPatch, relationsToBeDeleted, resetRelationsToBeDeleted, resetMetadataToBePatched } = useMetaDataHelper();
+  const {
+    clearMediaFilesToPatch,
+    relationsToBeDeleted,
+    resetRelationsToBeDeleted,
+    resetMetadataToBePatched,
+  } = useMetaDataHelper();
   const setEditMode = () => (editMode.value = "edit");
   const disableEditMode = () => (editMode.value = "view");
   const isEdit = computed<boolean>(() => editMode.value === "edit");
@@ -48,7 +59,9 @@ export const useEditMode = () => {
   const { mutate } = useMutation<UpdateMediafilesOrderMutation>(
     UpdateMediafilesOrderDocument
   );
-  const { mutate: deleteRelationMutate } = useMutation<DeleteRelationsMutation>(DeleteRelationsDocument);
+  const { mutate: deleteRelationMutate } = useMutation<DeleteRelationsMutation>(
+    DeleteRelationsDocument
+  );
 
   const save = async () => {
     removeMediafilesFromOrdering(toBeDeleted.value);
@@ -56,14 +69,17 @@ export const useEditMode = () => {
 
     if (relationsToBeDeleted.value.relations.length > 0) {
       addSaveCallback(async () => {
-        await deleteRelationMutate({ id: relationsToBeDeleted.value.entityId, metadata: relationsToBeDeleted.value.relations });
+        await deleteRelationMutate({
+          id: relationsToBeDeleted.value.entityId,
+          metadata: relationsToBeDeleted.value.relations,
+        });
       });
     }
 
     addSaveCallback(async () => {
       await mutate({ value: { value: getDiffArray() } });
     });
-    
+
     for (const callback of saveCallbacks.value) {
       await callback().then(() => {
         if (isEdit.value) {
