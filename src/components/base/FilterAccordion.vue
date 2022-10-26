@@ -35,6 +35,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, ref } from "vue";
+import type { PropType } from "vue";
 import { Unicons } from "@/types";
 import BaseLabel from "@/components/base/BaseLabel.vue";
 export default defineComponent({
@@ -49,8 +50,8 @@ export default defineComponent({
       default: false,
     },
     label: {
-      type: String,
-      required: true,
+      type: Object as PropType<string | null>,
+      required: false,
     },
   },
   setup(props) {
