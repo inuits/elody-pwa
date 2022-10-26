@@ -7,7 +7,7 @@
       class="logo router-link text-base text-neutral-700 font-semibold flex justify-center items-center mb-8"
       @click="forceDisableEditModalHome"
     >
-      {{$t('navigation.title')}}
+      {{ $t("navigation.title") }}
     </router-link>
     <div class="flex flex-row items-center menu-item">
       <BaseButton
@@ -19,10 +19,13 @@
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
         @click="forceDisableEditModalHome"
-        >{{$t('navigation.assets')}}</span
+        >{{ $t("navigation.assets") }}</span
       >
     </div>
-    <div class="flex flex-row items-center menu-item">
+    <div
+      v-show="auth.isAuthenticated.value === true"
+      class="flex flex-row items-center menu-item"
+    >
       <BaseButton
         :icon="Unicons.FileAlt.name"
         bg-color="neutral-30"
@@ -33,10 +36,13 @@
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
         @click="forceDisableEditMediafiles"
       >
-      {{$t('navigation.mediafiles')}}
+        {{ $t("navigation.mediafiles") }}
       </span>
     </div>
-    <div class="flex flex-row items-center menu-item">
+    <div
+      v-show="auth.isAuthenticated.value === true"
+      class="flex flex-row items-center menu-item"
+    >
       <BaseButton
         :icon="Unicons.History.name"
         bg-color="neutral-30"
@@ -46,10 +52,13 @@
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
         @click="forceDisableEditModalHistory"
-        >{{$t('navigation.jobs')}}</span
+        >{{ $t("navigation.jobs") }}</span
       >
     </div>
-    <div class="flex flex-row items-center menu-item">
+    <div
+      v-show="auth.isAuthenticated.value === true"
+      class="flex flex-row items-center menu-item"
+    >
       <BaseButton
         :icon="Unicons.Upload.name"
         class="mt-1 menu-btn"
@@ -59,10 +68,13 @@
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
         @click="openUploadModal(modalChoices.IMPORT)"
-        >{{$t('navigation.import')}}</span
+        >{{ $t("navigation.import") }}</span
       >
     </div>
-    <div class="flex flex-row items-center menu-item">
+    <div
+      v-show="auth.isAuthenticated.value === true"
+      class="flex flex-row items-center menu-item"
+    >
       <BaseButton
         :icon="Unicons.Create.name"
         class="mt-1 menu-btn"
@@ -72,10 +84,10 @@
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
         @click="openCreateModal"
-        >{{$t('navigation.create')}}</span
+        >{{ $t("navigation.create") }}</span
       >
     </div>
-    <div class="flex flex-row items-center menu-item">
+    <!-- <div class="flex flex-row items-center menu-item">
       <BaseButton
         :icon="Unicons.SignOut.name"
         class="mt-1 menu-btn"
@@ -85,76 +97,41 @@
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
         @click="logout"
-        >{{$t('navigation.log-out')}}</span
+        >{{ $t("navigation.log-out") }}</span
       >
-    </div>
+    </div> -->
   </nav>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from "vue";
+<script lang="ts" setup>
 import BaseButton from "./base/BaseButton.vue";
 import { useUploadModal, modalChoices } from "./UploadModal.vue";
 import { Unicons } from "@/types";
 import { useRouter } from "vue-router";
 import { useEditMode } from "@/composables/useEdit";
 import { useCreateModal } from "./CreateModal.vue";
-export default defineComponent({
-  name: "TheNavigation",
-  components: { BaseButton },
-  props: {
-    auth: { type: Object as PropType<any>, required: true }
-  },
-  setup: (props) => {
-    const { openUploadModal } = useUploadModal();
-    const { openCreateModal } = useCreateModal();
-    const router = useRouter();
-    const { disableEditMode } = useEditMode();
+import { useAuth } from "session-vue-3-oidc-library";
 
-    const forceDisableEditModalHome = () => {
-      router.push({ name: "Home" });
-      disableEditMode();
-    };
+const auth = useAuth();
+const { openUploadModal } = useUploadModal();
+const { openCreateModal } = useCreateModal();
+const router = useRouter();
+const { disableEditMode } = useEditMode();
 
-    const forceDisableEditModalHistory = () => {
-      router.push({ name: "History" });
-      disableEditMode();
-    };
+const forceDisableEditModalHome = () => {
+  router.push({ name: "Home" });
+  disableEditMode();
+};
 
-    const forceDisableEditMediafiles = () => {
-      router.push({ name: "Mediafiles" });
-      disableEditMode();
-    };
+const forceDisableEditModalHistory = () => {
+  router.push({ name: "History" });
+  disableEditMode();
+};
 
-    const forceDisableEditModalUpload = () => {
-      useUploadModal();
-      disableEditMode();
-    };
-
-    const logout = () => {
-      new Promise((resolve) => {
-        fetch("/api/logout").then(() => {
-          props.auth.resetAuthProperties();
-          props.auth.redirectToLogin(router.currentRoute?.value.fullPath);
-          resolve;
-        });
-      });
-    };
-
-    return {
-      Unicons,
-      openUploadModal,
-      router,
-      forceDisableEditModalHome,
-      forceDisableEditModalHistory,
-      forceDisableEditModalUpload,
-      openCreateModal,
-      modalChoices,
-      forceDisableEditMediafiles,
-      logout
-    };
-  },
-});
+const forceDisableEditMediafiles = () => {
+  router.push({ name: "Mediafiles" });
+  disableEditMode();
+};
 </script>
 
 <style scoped>

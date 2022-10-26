@@ -48,12 +48,12 @@ export default defineConfig({
       external: ["pdfjs-dist/types/src/display/api"],
     },
   },
-  test: {
-    globals: true,
-    coverage: {
-      reporter: ["text", "html"],
-    },
-  },
+  // test: {
+  //   globals: true,
+  //   coverage: {
+  //     reporter: ["text", "html"],
+  //   },
+  // },
   optimizeDeps: {
     exclude: ["session-vue-3-oidc-library"],
   },
