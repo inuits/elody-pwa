@@ -8,7 +8,7 @@ export const routes: RouteRecordRaw[] = [
   {
     path: "/",
     name: "Home",
-    meta: { title: "Home", requiresAuth: true },
+    meta: { title: "Home", requiresAuth: false },
     component: () => import(/* webpackChunkName: "about" */ "./Home.vue"),
     children: [
       {
@@ -16,7 +16,7 @@ export const routes: RouteRecordRaw[] = [
         name: "SingleEntity",
         meta: {
           title: "Single Asset",
-          requiresAuth: true,
+          requiresAuth: false,
           showEntityTitle: true,
         },
         component: () =>

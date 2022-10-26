@@ -104,7 +104,7 @@ import { useMutation, useQuery } from "@vue/apollo-composable";
 import IIIFViewer from "@/components/IIIFViewer.vue";
 import MetaWindow from "@/components/MetaWindow.vue";
 import { GetEntityByIdDocument, PostMediaFileDocument } from "@/queries";
-import type {PostMediaFileMutation} from "@/queries";
+import type { PostMediaFileMutation } from "@/queries";
 import type {
   GetEntityByIdQuery,
   Maybe,
@@ -112,7 +112,7 @@ import type {
   GetEntityByIdQueryVariables,
   Entity,
 } from "@/queries";
-import { usePageTitle } from "@/components/TheHeader.vue";
+import { usePageTitle } from "@/composables/usePageTitle";
 import { useEditMode } from "@/composables/useEdit";
 import EntityImageSelection, {
   useEntityMediafileSelector,
