@@ -1,33 +1,45 @@
 <template>
   <li
-    class="row border-none"
-    :class="{ loading, 'px-8 ': !small, 'px-2': small }"
+    class="row border-none h-72 w-80"
     data-test="meta-row"
   >
     <div
-      class="flex items-center flex-col"
+      class="flex items-center flex-col w-full"
       :class="{ 'flex-col': small && !thumbIcon }"
     >
-      <div>
-        <img
-        v-if="media"
-        class="h-64 w-64"
-        :src="`/api/iiif/3/${media}/square/100,/0/default.jpg`"
-        @error="setNoImage()"
-        />
-        <div v-if="(thumbIcon && !media) || (imageSrcError && thumbIcon)" 
-          class="w-64 h-64 flex items-center justify-center flex-col">
-          <unicon
-            :name="thumbIcon"
-            class="h-10 w-10 p-1 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
-          />  
-          <div>
-            No media
+      <div class="w-full">
+        <div class="flex justify-center items-center">
+          <img
+            v-if="media"
+            class="h-48 w-48"
+            :src="`/api/iiif/3/${media}/square/100,/0/default.jpg`"
+            @error="setNoImage()"
+          />
+          <div v-if="(thumbIcon && !media) || (imageSrcError && thumbIcon)" 
+            class="w-48 h-48 flex items-center justify-center flex-col">  
+            <unicon
+              :name="thumbIcon"
+              class="h-10 w-10 p-1 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
+            />  
+            <div>
+              No media
+            </div>
           </div>
         </div>
+        <div class="w-full h-16 mt-3 pl-2 flex flex-col-reverse border-t-2 border-neutral-20">
+          <div
+          v-for="metaItem in only4Meta(meta)"
+          :key="metaItem ? metaItem.value : 'no-key'"
+          class="w-full h-6"
+          >
+            <template v-if="metaItem" >
+              <span 
+                :class="['text-neutral-700 w-fit h-6 handleOverflow', metaItem.key === 'title' ? 'metaTitle' : 'metaType']" 
+                data-test="meta-info">{{ metaItem.value }}</span>
+            </template>
+        </div>
+        </div>
       </div>
-      <hr>
-      <div class="flex w-full pl-3 h-5 mt-2">RICARDO ROCKS</div>
     </div>
     <div class="flex flex-row" data-test="action-slot">
       <slot name="actions"></slot>
@@ -36,7 +48,7 @@
 </template>
 
 <script lang="ts">
-import type { Maybe, Media, MetadataAndRelation } from "@/queries";
+import type { Maybe, MetadataAndRelation } from "@/queries";
 import { defineComponent, inject } from "vue";
 import type { PropType } from "vue";
 
@@ -52,8 +64,9 @@ export default defineComponent({
     thumbIcon: { type: String, default: "" },
     small: { type: Boolean, default: false },
   },
-  setup() {
+  setup(props) {
     const config: any = inject("config");
+    console.log(props.meta);
     let imageSrcError = false;
     const setNoImage = () => {
       imageSrcError = true;
@@ -76,19 +89,25 @@ export default defineComponent({
   @apply border border-neutral-50 rounded cursor-pointer;
   @apply transition-colors duration-300 hover:shadow-sm;
 }
-.col {
-  @apply flex justify-start flex-col px-1;
-}
 .label {
   @apply rounded text-xs text-neutral-60;
 }
-.info {
-  @apply mt-0.5 rounded text-sm text-neutral-700;
-}
 .row.loading {
   @apply animate-pulse;
-  .col span {
-    @apply bg-neutral-20 text-neutral-20;
-  }
+}
+
+.metaTitle {
+  @apply font-bold;
+}
+
+.metaType {
+  @apply text-neutral-70;
+}
+.handleOverflow {
+    width: 275px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    display: inline-block;
 }
 </style>
