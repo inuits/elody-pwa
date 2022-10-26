@@ -513,6 +513,8 @@ input MetadataInput {
   value: String
   lang: String
   type: String
+  label: String
+  immutable: Boolean
 }
 
 type ImportReturn {
