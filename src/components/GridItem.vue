@@ -1,37 +1,33 @@
 <template>
   <li
-    class="row"
-    :class="{ loading, 'mb-2 px-8 ': !small, 'px-2': small }"
+    class="row border-none"
+    :class="{ loading, 'px-8 ': !small, 'px-2': small }"
     data-test="meta-row"
   >
     <div
-      class="flex w-full items-center"
+      class="flex items-center flex-col"
       :class="{ 'flex-col': small && !thumbIcon }"
     >
-      <img
+      <div>
+        <img
         v-if="media"
-        class="h-10 w-10 obtain-cover mr-4 rounded-sm outline-none shadow-sm self-center"
+        class="h-64 w-64"
         :src="`/api/iiif/3/${media}/square/100,/0/default.jpg`"
         @error="setNoImage()"
-      />
-      <unicon
-        v-if="(thumbIcon && !media) || (imageSrcError && thumbIcon)"
-        :name="thumbIcon"
-        class="h-10 w-10 p-1 text-neutral-700 mr-4 rounded-sm outline-none shadow-sm self-center"
-      />
-      <div class="flex w-full" :class="small ? 'flex-col' : ''">
-        <div
-          v-for="metaItem in only4Meta(meta)"
-          :key="metaItem ? metaItem.value : 'no-key'"
-          class="col"
-          :class="small ? ' w-full' : 'w-1/4'"
-        >
-          <template v-if="metaItem">
-            <span class="label" data-test="meta-label">{{ metaItem.key }}</span>
-            <span class="info" data-test="meta-info">{{ metaItem.value }}</span>
-          </template>
+        />
+        <div v-if="(thumbIcon && !media) || (imageSrcError && thumbIcon)" 
+          class="w-64 h-64 flex items-center justify-center flex-col">
+          <unicon
+            :name="thumbIcon"
+            class="h-10 w-10 p-1 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
+          />  
+          <div>
+            No media
+          </div>
         </div>
       </div>
+      <hr>
+      <div class="flex w-full pl-3 h-5 mt-2">RICARDO ROCKS</div>
     </div>
     <div class="flex flex-row" data-test="action-slot">
       <slot name="actions"></slot>
@@ -45,7 +41,7 @@ import { defineComponent, inject } from "vue";
 import type { PropType } from "vue";
 
 export default defineComponent({
-  name: "ListItem",
+  name: "GridItem",
   props: {
     loading: { type: Boolean, default: false },
     meta: {
