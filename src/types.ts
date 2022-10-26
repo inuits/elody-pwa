@@ -32,7 +32,9 @@ import {
   uniFileAlt,
   uniMusic,
   uniText,
-  uniSignout
+  uniSignout, 
+  uniApps, 
+  uniListUl
 } from "vue-unicons/dist/icons";
 
 export const Unicons: Record<string, { name: string }> = {
@@ -70,4 +72,6 @@ export const Unicons: Record<string, { name: string }> = {
   Music: uniMusic,
   Text: uniText,
   SignOut: uniSignout,
+  Apps: uniApps,
+  ListUl: uniListUl
 };

@@ -8,12 +8,20 @@
     />
     <div class="p-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
-        <div v-show="acceptedEntityTypes.length === 0" class="mt-8 mr-4">
+        <div v-show="acceptedEntityTypes.length === 0" class="mt-8 mr-4 flex">
           <IconToggle
             v-model:checked="isDrawerHiding"
             :icon-on="Unicons.SearchGlass.name"
             :icon-off="Unicons.Filter.name"
           />
+          <div class="ml-2 mt-1.5">
+            <IconToggle
+            v-model:checked="displayGrid"
+            :icon-on="Unicons.Apps.name"
+            :icon-off="Unicons.ListUl.name"
+            class="ml-2"
+          />
+          </div>
         </div>
         <InputField
           v-show="acceptedEntityTypes.length === 0 && hasSimpleSearch"
@@ -54,7 +62,9 @@
           :total-items="result?.Entities?.count"
         />
       </div>
-      <ListContainer>
+      <ListContainer :class="displayGrid ? 'p-5' : 'p-1'">
+
+
         <div v-if="loading">
           <ListItem
             v-for="n in queryVariables.limit"
@@ -77,7 +87,9 @@
             </template>
           </ListItem>
         </div>
-        <div v-else-if="result?.Entities?.results">
+
+
+        <div v-else-if="!displayGrid && result?.Entities?.results">
           <ListItem
             :small="listItemRouteName === 'SingleMediafile'"
             v-for="entity in result.Entities?.results"
@@ -122,6 +134,28 @@
             {{ $t("search.noresult") }}
           </div>
         </div>
+        <div v-else-if="displayGrid && result?.Entities?.results">
+          <div class="flex flex-row flex-wrap gap-2 justify-center items-center">
+            <GridItem
+             v-for="entity in result.Entities?.results"
+             :key="entity?.id"
+            :meta="entity?.teaserMetadata"
+            :media="entity?.media ? entity?.media.primary_transcode : null"
+            :thumb-icon="getThumbnail(entity)"
+            @click="
+              !enableSelection &&
+                router.push({
+                  name: listItemRouteName,
+                  params: { id: entity?.id },
+                })
+            "></GridItem>
+          </div>
+          <div v-if="result?.Entities?.results.length === 0" class="p-4">
+            {{ $t("search.noresult") }}
+          </div>
+        </div>
+
+
       </ListContainer>
     </div>
   </div>
@@ -148,6 +182,7 @@ import IconToggle from "@/components/base/IconToggle.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import useMetaDataHelper, { beingAdded } from "@/composables/useMetaDataHelper";
 import BaseIcon from "./BaseIcon.vue";
+import GridItem from '../GridItem.vue';
 
 export default defineComponent({
   name: "BaseLibrary",
@@ -160,7 +195,8 @@ export default defineComponent({
     FilterSideBar,
     IconToggle,
     InputField,
-    BaseIcon
+    BaseIcon,
+    GridItem
 },
   props: {
     advancedFiltersChoice: {
@@ -201,6 +237,7 @@ export default defineComponent({
       limit: 20,
       skip: 1,
     });
+    const displayGrid = ref<boolean>(false);
 
     const isDrawerHiding = ref(
       props.acceptedEntityTypes.length === 0 ? true : false
@@ -258,7 +295,8 @@ export default defineComponent({
       getThumbnail,
       determineIfNotAdded,
       mediafiles,
-      selectedRelationFieldMetadata
+      selectedRelationFieldMetadata,
+      displayGrid
     };
   },
 });
