@@ -6,7 +6,6 @@
       @click="toggleAccordion"
     >
       <BaseLabel
-        v-if="props.label"
         :name="props.label"
         :color="props.active == true ? 'blue-50' : 'bg-neutral-10'"
         class="text-neutral-900"
@@ -36,7 +35,6 @@
 </template>
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import type { PropType } from "vue";
 import { Unicons } from "@/types";
 import BaseLabel from "@/components/base/BaseLabel.vue";
 export default defineComponent({
@@ -51,8 +49,8 @@ export default defineComponent({
       default: false,
     },
     label: {
-      type: String as PropType<string | null>,
-      required: false,
+      type: String,
+      required: true,
     },
   },
   setup(props) {

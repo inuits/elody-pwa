@@ -53,10 +53,10 @@
             :accepted-entity-types="acceptedEntityTypes"
           />
           <MinmaxFilter
-            v-if="filter?.type === AdvancedFilterTypes.Minmax"
+            v-if="filter.type === AdvancedFilterTypes.Minmax"
             v-model:minmaxValue="initialFilters[i]"
-            :filterkey="filter?.key"
-            :is-relation="filter?.isRelation ? filter?.isRelation : false"
+            :filterkey="filter.key"
+            :is-relation="filter.isRelation ? filter.isRelation : false"
           />
           <MultiFilter
             v-if="filter?.type === AdvancedFilterTypes.Multiselect"
