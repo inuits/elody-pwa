@@ -1,6 +1,6 @@
 <template>
   <div>
-    <the-navigation class="navbar" :auth="auth"/>
+    <the-navigation class="navbar" :auth="auth" />
     <div :class="[`h-screen flex flex-col`, `move-by-nav`]">
       <the-header />
       <div :class="['flex-grow', { 'h-full overflow-hidden': isSingle }]">

@@ -1,7 +1,7 @@
 import { useRoute } from "vue-router";
 import { computed } from "vue";
 import type { ComputedRef } from "vue";
-import type { urlParams } from "@/views";
+import type { urlParams } from "@/views/router";
 import { asString } from "@/helpers";
 import type { PaginationInfo } from "@/queries";
 import { useRouter } from "vue-router";
