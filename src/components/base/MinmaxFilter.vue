@@ -1,5 +1,5 @@
 <template>
-  <div v-if="inputFieldMin" class="flex md:justify-around">
+  <div class="flex md:justify-around">
     <MinMaxField
       id="inputBox"
       v-model="inputFieldMin"
@@ -41,7 +41,7 @@ export default defineComponent({
       required: true,
     },
     isRelation: {
-      type: Boolean,
+      type: Object as PropType<Boolean | null>,
       required: false,
       default: false,
     },
