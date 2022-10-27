@@ -76,21 +76,18 @@ export default defineComponent({
     };
     const hasFileName = ref<boolean>(false);
 
-    const meta = ref<boolean>(props.meta);
-    //meta.value.splice(1, 1);
-
     const only4Meta = (
       input: Maybe<Maybe<MetadataAndRelation>[]>
     ) => {
       return input?.filter((value) => {
-        if (value.key === "filename"){
+        if (value?.key === "filename"){
           hasFileName.value = true;
         }
-        return value?.value !== "" && value.key !== 'object_number';
+        return value?.value !== "" && value?.key !== 'object_number';
       }).slice(0, 4);
     };
 
-    return { setNoImage, imageSrcError, only4Meta, config, meta, hasFileName};
+    return { setNoImage, imageSrcError, only4Meta, config, hasFileName};
   },
 });
 </script>
