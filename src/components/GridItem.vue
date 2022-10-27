@@ -89,7 +89,6 @@ export default defineComponent({
         return value?.value !== "" && value.key !== 'object_number';
       }).slice(0, 4);
     };
-    console.log(only4Meta(meta.value));
 
     return { setNoImage, imageSrcError, only4Meta, config, meta, hasFileName};
   },
