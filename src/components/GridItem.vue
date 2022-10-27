@@ -19,14 +19,16 @@
             class="w-48 h-48 flex items-center justify-center flex-col">  
             <unicon
               :name="thumbIcon"
-              class="h-10 w-10 p-1 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
+              class="h-10 w-10 p-1 text-neutral-70 rounded-sm outline-none shadow-sm self-center"
             />  
-            <div>
+            <div class="text-neutral-70">
               No media
             </div>
           </div>
         </div>
-        <div class="w-full h-16 mt-3 pl-2 flex flex-col-reverse border-t-2 border-neutral-20">
+        <div :class="['w-full h-16 mt-3 pl-2 flex border-t-2 border-neutral-20',
+          hasFileName ? 'flex-col' : 'flex-col-reverse'
+        ]">
           <div
           v-for="metaItem in only4Meta(meta)"
           :key="metaItem ? metaItem.value : 'no-key'"
@@ -34,7 +36,9 @@
           >
             <template v-if="metaItem" >
               <span 
-                :class="['text-neutral-700 w-fit h-6 handleOverflow', metaItem.key === 'title' ? 'metaTitle' : 'metaType']" 
+                :class="['text-neutral-700 w-fit',
+                  metaItem.key === 'title' || hasFileName ? 'metaTitle' : 'metaType',
+                  hasFileName ? 'h-12' : 'h-6 handleOverflow']" 
                 data-test="meta-info">{{ metaItem.value }}</span>
             </template>
         </div>
@@ -70,6 +74,7 @@ export default defineComponent({
     const setNoImage = () => {
       imageSrcError = true;
     };
+    const hasFileName = ref<boolean>(false);
 
     const meta = ref<boolean>(props.meta);
     //meta.value.splice(1, 1);
@@ -78,12 +83,15 @@ export default defineComponent({
       input: Maybe<Maybe<MetadataAndRelation>[]>
     ) => {
       return input?.filter((value) => {
+        if (value.key === "filename"){
+          hasFileName.value = true;
+        }
         return value?.value !== "" && value.key !== 'object_number';
       }).slice(0, 4);
     };
     console.log(only4Meta(meta.value));
 
-    return { setNoImage, imageSrcError, only4Meta, config, meta};
+    return { setNoImage, imageSrcError, only4Meta, config, meta, hasFileName};
   },
 });
 </script>
