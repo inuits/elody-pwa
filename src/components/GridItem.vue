@@ -77,9 +77,8 @@ export default defineComponent({
     const only4Meta = (
       input: Maybe<Maybe<MetadataAndRelation>[]>
     ) => {
-      return input?.filter((key, value) => {
-        console.log(`key: ${key.value}`);
-        return value?.value !== "" && key.value !== 'object_number'
+      return input?.filter((value) => {
+        return value?.value !== "" && value.key !== 'object_number';
       }).slice(0, 4);
     };
     console.log(only4Meta(meta.value));
