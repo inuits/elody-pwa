@@ -49,7 +49,7 @@
 
 <script lang="ts">
 import type { Maybe, MetadataAndRelation } from "@/queries";
-import { defineComponent, inject } from "vue";
+import { defineComponent, inject, ref } from "vue";
 import type { PropType } from "vue";
 
 export default defineComponent({
@@ -71,12 +71,17 @@ export default defineComponent({
       imageSrcError = true;
     };
 
+    const meta = ref<boolean>(props.meta);
+    //meta.value.splice(1, 1);
+
     const only4Meta = (
       input: Maybe<Maybe<MetadataAndRelation>[]>
     ) => {
       return input?.filter((value) => value?.value !== "").slice(0, 4);
     };
-    return { setNoImage, imageSrcError, only4Meta, config };
+    console.log(only4Meta(meta.value));
+
+    return { setNoImage, imageSrcError, only4Meta, config, meta};
   },
 });
 </script>
