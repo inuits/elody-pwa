@@ -117,7 +117,13 @@ import { useQuery } from "@vue/apollo-composable";
 
 const { result, loading } = useQuery(GetUserPermissionsDocument);
 
+//Only use in local env before the permissions work properly there.
+const IGNORE_PERMISSIONS = false;
+
 const determinePermission = (arr: any, perm: string) => {
+  if (IGNORE_PERMISSIONS) {
+    return true;
+  }
   if (arr) {
     return arr.includes(perm);
   }
