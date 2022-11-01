@@ -431,6 +431,10 @@ input Filters {
   type: String!
 }
 
+type userPermissions {
+  payload: [String]
+}
+
 type Query {
   Entity(id: String!, type: String!): Entity
   Entities(
@@ -448,6 +452,7 @@ type Query {
   advancedFilters(choice: String!): [advancedFilter]
   FilterOptions(key: String!): [filterOption]
   Form(type: String!): Form
+  UserPermissions: userPermissions
 }
 
 input AdvancedSearchInput {
@@ -513,8 +518,6 @@ input MetadataInput {
   value: String
   lang: String
   type: String
-  label: String
-  immutable: Boolean
 }
 
 type ImportReturn {

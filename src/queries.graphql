@@ -857,6 +857,12 @@ query getAdvancedFilters($choice: String!) {
   }
 }
 
+query getUserPermissions {
+  UserPermissions {
+    payload
+  }
+}
+
 query getFilterOptions($key: String!) {
   FilterOptions(key: $key) {
     value
