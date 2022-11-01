@@ -1,6 +1,7 @@
 <template>
   <nav
     class="navbar fixed left-0 top-0 w-24 h-screen flex flex-col justify-start align-center pt-10 bg-neutral-20 px-5 z-50"
+    v-show="!loading"
   >
     <router-link
       :to="{ name: 'Home' }"
@@ -56,7 +57,7 @@
       >
     </div>
     <div
-      v-show="auth.isAuthenticated.value === true"
+      v-show="auth.isAuthenticated.value === true && determinePermission(result?.UserPermissions?.payload, 'can-start-import')"
       class="flex flex-row items-center menu-item"
     >
       <BaseButton
@@ -72,7 +73,7 @@
       >
     </div>
     <div
-      v-show="auth.isAuthenticated.value === true"
+      v-show="auth.isAuthenticated.value === true && determinePermission(result?.UserPermissions?.payload, 'create-entity')"
       class="flex flex-row items-center menu-item"
     >
       <BaseButton
@@ -111,9 +112,20 @@ import { useRouter } from "vue-router";
 import { useEditMode } from "@/composables/useEdit";
 import { useCreateModal } from "./CreateModal.vue";
 import { useAuth } from "session-vue-3-oidc-library";
+import { GetUserPermissionsDocument } from "@/queries";
+import { useQuery } from "@vue/apollo-composable";
+
+const { result, loading } = useQuery(GetUserPermissionsDocument);
+
+const determinePermission = (arr: any, perm: string) => {
+  if (arr) {
+    return arr.includes(perm);
+  }
+  return false;
+}
 
 const auth = useAuth();
-const { openUploadModal } = useUploadModal();
+const { openUploadModal } = useUploadModal(); 
 const { openCreateModal } = useCreateModal();
 const router = useRouter();
 const { disableEditMode } = useEditMode();
