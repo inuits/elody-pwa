@@ -16,7 +16,6 @@ import { onError } from "@apollo/client/link/error";
 import useGraphqlErrors from "./composables/useGraphqlErrors";
 import * as Sentry from "@sentry/vue";
 import { BrowserTracing } from "@sentry/tracing";
-import { setIgnorePermissions } from "./composables/usePermissions";
 
 export let auth: typeof OpenIdConnectClient | null;
 
@@ -107,9 +106,6 @@ const start = async () => {
       environment: config.NOMAD_NAMESPACE,
     });
   }
-
-  //only for create and import buttons
-  setIgnorePermissions(config.IGNORE_PERMISSIONS);
   app.mount("#app");
 };
 start();
