@@ -14,10 +14,21 @@ const usePermissions = () => {
   const canDelete = (permissions: Permission[]) =>
     permissions.includes(Permission.Candelete);
 
+  const determinePermission = (arr: any, perm: string, ignore: boolean) => {
+    if (ignore) {
+      return true;
+    }
+    if (arr) {
+      return arr.includes(perm);
+    }
+    return false;
+  }
+
   return {
     canGet,
     canDelete,
     canEdit,
+    determinePermission
   };
 };
 
