@@ -58,7 +58,7 @@
     </div>
     <div
       v-show="auth.isAuthenticated.value === true &&
-        determinePermission(result?.UserPermissions?.payload, 'can-start-import', IGNORE_PERMISSIONS)"
+        determinePermission('can-start-import', IGNORE_PERMISSIONS)"
       class="flex flex-row items-center menu-item"
     >
       <BaseButton
@@ -75,7 +75,7 @@
     </div>
     <div
       v-show="auth.isAuthenticated.value === true && 
-        determinePermission(result?.UserPermissions?.payload, 'create-entity', IGNORE_PERMISSIONS)"
+        determinePermission('create-entity', IGNORE_PERMISSIONS)"
       class="flex flex-row items-center menu-item"
     >
       <BaseButton
@@ -114,17 +114,13 @@ import { useRouter } from "vue-router";
 import { useEditMode } from "@/composables/useEdit";
 import { useCreateModal } from "./CreateModal.vue";
 import { useAuth } from "session-vue-3-oidc-library";
-import { GetUserPermissionsDocument } from "@/queries";
-import { useQuery } from "@vue/apollo-composable";
 import usePermissions from "@/composables/usePermissions";
-
-const { result, loading } = useQuery(GetUserPermissionsDocument);
 
 //Only use in local env before the permissions work properly there.
 const IGNORE_PERMISSIONS = false;
 
 const auth = useAuth();
-const { determinePermission } = usePermissions();
+const { determinePermission, loading } = usePermissions();
 const { openUploadModal } = useUploadModal(); 
 const { openCreateModal } = useCreateModal();
 const router = useRouter();
