@@ -107,6 +107,7 @@
 </template>
 
 <script lang="ts" setup>
+import { inject } from 'vue';
 import BaseButton from "./base/BaseButton.vue";
 import { useUploadModal, modalChoices } from "./UploadModal.vue";
 import { Unicons } from "@/types";
@@ -114,17 +115,17 @@ import { useRouter } from "vue-router";
 import { useEditMode } from "@/composables/useEdit";
 import { useCreateModal } from "./CreateModal.vue";
 import { useAuth } from "session-vue-3-oidc-library";
-import { usePermissions } from "@/composables/usePermissions";
+import usePermissions from "@/composables/usePermissions";
 
-//Only use in local env before the permissions work properly there.
-const IGNORE_PERMISSIONS = false;
-
+const config: any = inject("config");
 const auth = useAuth();
-const { determinePermission, loading } = usePermissions();
+const { determinePermission, loading, setIgnorePermissions } = usePermissions();
 const { openUploadModal } = useUploadModal(); 
 const { openCreateModal } = useCreateModal();
 const router = useRouter();
 const { disableEditMode } = useEditMode();
+
+setIgnorePermissions(config.IGNORE_PERMISSIONS);
 
 const forceDisableEditModalHome = () => {
   router.push({ name: "Home" });
