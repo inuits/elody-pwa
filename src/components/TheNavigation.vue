@@ -114,7 +114,7 @@ import { useRouter } from "vue-router";
 import { useEditMode } from "@/composables/useEdit";
 import { useCreateModal } from "./CreateModal.vue";
 import { useAuth } from "session-vue-3-oidc-library";
-import usePermissions from "@/composables/usePermissions";
+import { usePermissions } from "@/composables/usePermissions";
 
 //Only use in local env before the permissions work properly there.
 const IGNORE_PERMISSIONS = false;

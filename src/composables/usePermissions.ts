@@ -1,5 +1,11 @@
 import { Permission, GetUserPermissionsDocument } from "@/queries";
 import { useQuery } from "@vue/apollo-composable";
+import { ref } from 'vue';
+
+const ignorePermissions = ref<boolean>(false);
+const setIgnorePermissions = (value: boolean) => {
+  ignorePermissions.value = value;
+}
 
 const usePermissions = () => {
   const { result, loading } = useQuery(GetUserPermissionsDocument);
@@ -17,8 +23,8 @@ const usePermissions = () => {
   const canDelete = (permissions: Permission[]) =>
     permissions.includes(Permission.Candelete);
 
-  const determinePermission = (perm: string, ignore: boolean) => {
-    if (ignore) {
+  const determinePermission = (perm: string) => {
+    if (ignorePermissions) {
       return true;
     }
     if (result) {
@@ -33,8 +39,8 @@ const usePermissions = () => {
     canEdit,
     determinePermission,
     loading,
-
+    setIgnorePermissions
   };
 };
 
-export default usePermissions;
+export{ usePermissions, setIgnorePermissions };
