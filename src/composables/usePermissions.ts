@@ -4,12 +4,11 @@ import { ref } from 'vue';
 
 const UserPermissions = ref<string[] | "no-permissions">("no-permissions");
 const ignorePermissions = ref<boolean>(false);
+const setIgnorePermissions = (value: boolean) => {
+  ignorePermissions.value = value;
+}
 
 const usePermissions = () => {
-  const setIgnorePermissions = (value: boolean) => {
-    ignorePermissions.value = value;
-  }
-
   const { loading, refetch, onResult } = useQuery(
     GetUserPermissionsDocument,
     () => ({
@@ -54,4 +53,4 @@ const usePermissions = () => {
   };
 };
 
-export default usePermissions;
+export {usePermissions, setIgnorePermissions } ;
