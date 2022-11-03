@@ -21,6 +21,13 @@
           :options="paginationLimits"
         />
       </div>
+      <div class="my-2 flex flex-row justify-left">
+        <IconToggle
+          v-model:checked="showFailedOnly"
+          :icon-on="Unicons.ExclamationTriangle.name"
+          :icon-off="Unicons.CheckCircle.name"
+        />
+      </div>
       <div class="flex-grow"></div>
       <BasePagination
         v-if="
@@ -40,7 +47,7 @@
           v-for="job in jobs.Jobs.results"
           :key="job && job._id ? job._id : 'no-id'"
         >
-          <ParentJob v-if="job" :job="job" />
+          <ParentJob v-if="job && determineIfShow(job)" :job="job" />
         </div>
       </div>
     </ListContainer>
@@ -48,7 +55,7 @@
 </template>
 
 <script lang="ts">
-import { GetJobsDocument } from "@/queries";
+import { GetJobsDocument, Job } from "@/queries";
 import type { GetJobsQuery } from "@/queries";
 import { useQuery } from "@vue/apollo-composable";
 import { computed, defineComponent, ref, watch, reactive } from "vue";
@@ -61,6 +68,8 @@ import type { PaginationInfo } from "@/components/base/BasePagination.vue";
 import { getJobTypes, jobTypeLabels } from "@/composables/useJobHelpers";
 import ListContainer from "@/components/ListContainer.vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
+import IconToggle from '../components/base/IconToggle.vue';
+import { Unicons } from '../types'; 
 
 type Filter = {
   query: string;
@@ -80,6 +89,7 @@ export default defineComponent({
     BasePagination,
     InputField,
     ListContainer,
+    IconToggle
   },
   setup() {
     const jobTypes = getJobTypes();
@@ -98,6 +108,7 @@ export default defineComponent({
         type: showAll.value,
       },
     });
+    const showFailedOnly = ref<boolean>(false);
 
     const { result, fetchMore } = useQuery(GetJobsDocument, {
       paginationInfo: {
@@ -114,6 +125,17 @@ export default defineComponent({
       routeHelper.updatePaginationInfoQueryParams(queryVariables.pagination);
       getData();
     });
+
+    const determineIfShow = (job: Job): boolean => {
+      if (!showFailedOnly.value){
+        return true;
+      }
+
+      if (job.status === 'finished'){
+        return false;
+      }
+      return true;
+    }
 
     const getData = () => {
       fetchMore({
@@ -146,6 +168,9 @@ export default defineComponent({
       queryVariables,
       jobTypes,
       paginationLimits,
+      determineIfShow,
+      showFailedOnly,
+      Unicons
     };
   },
 });
