@@ -128,7 +128,7 @@ import useMetaDataHelper from "@/composables/useMetaDataHelper";
 import { useUploadModal } from "../UploadModal.vue";
 import SrtViewer from "@/components/base/SrtViewer.vue";
 import LinkedAssetsList from "@/components/LinkedAssetsList.vue";
-import usePermissions from "@/composables/usePermissions";
+import { usePermissions } from "@/composables/usePermissions";
 
 export default defineComponent({
   name: "SingleEntity",
