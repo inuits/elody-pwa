@@ -34,7 +34,9 @@ import {
   uniText,
   uniSignout, 
   uniApps, 
-  uniListUl
+  uniListUl,
+  uniExclamationTriangle,
+  uniCheckCircle,
 } from "vue-unicons/dist/icons";
 
 export const Unicons: Record<string, { name: string }> = {
@@ -73,5 +75,7 @@ export const Unicons: Record<string, { name: string }> = {
   Text: uniText,
   SignOut: uniSignout,
   Apps: uniApps,
-  ListUl: uniListUl
+  ListUl: uniListUl,
+  ExclamationTriangle: uniExclamationTriangle,
+  CheckCircle: uniCheckCircle,
 };
