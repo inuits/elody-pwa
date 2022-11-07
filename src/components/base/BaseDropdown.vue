@@ -20,18 +20,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onUpdated, ref, watch } from "vue";
-import type { PropType } from "vue";
-import { Unicons } from "../../types";
+import { defineComponent, onUpdated, ref, watch, type PropType } from "vue";
+import { Unicons } from "@/types";
 
 export default defineComponent({
   name: "BaseDropdown",
   props: {
     label: { type: String, default: "" },
-    options: {
-      type: Array as PropType<Array<string | number>>,
-      required: true,
-    },
+    options: { type: Array as PropType<Array<string | number>>, required: true },
     isDisabled: { type: Boolean, required: false },
     modelValue: { type: [String, Number], default: undefined },
     bgColor: {

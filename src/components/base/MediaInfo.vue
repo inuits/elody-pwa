@@ -10,26 +10,26 @@
     <h3 class="text-sm text-neutral-700 font-semibold">Mediainfo</h3>
     <div v-if="!isEdit && mediafileSelectionState.selectedMediafile.metadata">
       <div v-if="hasPrimaryFunctionality()">
-        <div class="label">{{ $t("media-info.primaire-media") }}</div>
-        <div class="value h-5 w-5">
-          <BaseIcon
-            v-if="mediafileSelectionState.selectedMediafile.is_primary"
-            :name="Unicons.Check.name"
-          />
-          <BaseIcon v-else :name="Unicons.Cross.name" />
-        </div>
+          <div class="label">{{ $t("media-info.primaire-media") }}</div>
+          <div class="value h-5 w-5">
+            <BaseIcon
+              v-if="mediafileSelectionState.selectedMediafile.is_primary"
+              :name="Unicons.Check.name"
+            />
+            <BaseIcon v-else :name="Unicons.Cross.name" />
+          </div>
 
-        <div class="label">{{ $t("media-info.thumbnail") }}</div>
-        <div class="value h-5 w-5">
-          <BaseIcon
-            v-if="
-              mediafileSelectionState.selectedMediafile.is_primary_thumbnail
-            "
-            :name="Unicons.Check.name"
-          />
-          <BaseIcon v-else :name="Unicons.Cross.name" />
+          <div class="label">{{ $t("media-info.thumbnail") }}</div>
+          <div class="value h-5 w-5">
+            <BaseIcon
+              v-if="
+                mediafileSelectionState.selectedMediafile.is_primary_thumbnail
+              "
+              :name="Unicons.Check.name"
+            />
+            <BaseIcon v-else :name="Unicons.Cross.name" />
+          </div>
         </div>
-      </div>
       <div
         v-for="item in mediafileSelectionState.selectedMediafile.metadata"
         :key="item && item.key ? item.key : 'no-key'"
@@ -59,7 +59,7 @@
         </div>
       </div>
       <BaseButton
-        style="background-color: #7a869a !important"
+        style="background-color: #7A869A !important"
         :label="$t('media-info.set-primair')"
         bg-color="neutral-100"
         bg-hover-color="neutral-400"
@@ -81,7 +81,7 @@
         </div>
       </div>
       <BaseButton
-        style="background-color: #7a869a !important"
+        style="background-color: #7A869A !important"
         :label="$t('media-info.set-thumbnail')"
         bg-color="neutral-100"
         bg-hover-color="neutral-400"
@@ -101,24 +101,24 @@ import {
   GetFormsDocument,
   SetMediaPrimaireDocument,
   SetThumbnailPrimaireDocument,
-} from "../../queries";
+} from "@/queries";
 import type {
   MediaFile,
   SetMediaPrimaireMutation,
   SetThumbnailPrimaireMutation,
-} from "../../queries";
+} from "@/queries";
 import { useQuery } from "@vue/apollo-composable";
 import BaseButton from "../base/BaseButton.vue";
 import { defineComponent } from "vue";
-import { useEditMode } from "../../composables/useEdit";
-import MetaEditMedia from "./MetaEditMedia.vue";
+import { useEditMode } from "@/composables/useEdit";
+import MetaEditMedia from "@/components/base/MetaEditMedia.vue";
 import { useEntityMediafileSelector } from "../EntityImageSelection.vue";
-import BaseIcon from "./BaseIcon.vue";
-import { Unicons } from "../../types";
+import BaseIcon from "@/components/base/BaseIcon.vue";
+import { Unicons } from "@/types";
 import { useMutation } from "@vue/apollo-composable";
 import { useRoute } from "vue-router";
-import useMetaDataHelper from "../../composables/useMetaDataHelper";
-import useMediaInfoHelper from "../../composables/useMediaInfoHelper";
+import useMetaDataHelper from "@/composables/useMetaDataHelper";
+import useMediaInfoHelper from "@/composables/useMediaInfoHelper";
 const { isEdit, addSaveCallback } = useEditMode();
 
 export default defineComponent({
