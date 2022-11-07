@@ -101,34 +101,34 @@
 import { computed, defineComponent, watch, ref, reactive } from "vue";
 import type { PropType } from "vue";
 import { useMutation, useQuery } from "@vue/apollo-composable";
-import IIIFViewer from "@/components/IIIFViewer.vue";
-import MetaWindow from "@/components/MetaWindow.vue";
-import { GetEntityByIdDocument, PostMediaFileDocument } from "@/queries";
-import type { PostMediaFileMutation } from "@/queries";
+import IIIFViewer from "../IIIFViewer.vue";
+import MetaWindow from "../MetaWindow.vue";
+import { GetEntityByIdDocument, PostMediaFileDocument } from "../../queries";
 import type {
   GetEntityByIdQuery,
   Maybe,
   MediaFile,
   GetEntityByIdQueryVariables,
   Entity,
-} from "@/queries";
-import { usePageTitle } from "@/composables/usePageTitle";
-import { useEditMode } from "@/composables/useEdit";
+  PostMediaFileMutation,
+} from "../../queries";
+import { usePageTitle } from "../../composables/usePageTitle";
+import { useEditMode } from "../../composables/useEdit";
 import EntityImageSelection, {
   useEntityMediafileSelector,
-} from "@/components/EntityImageSelection.vue";
+} from "../EntityImageSelection.vue";
 import { useRoute, onBeforeRouteUpdate } from "vue-router";
-import { asString } from "@/helpers";
-import VideoPlayer from "@/components/base/VideoPlayer.vue";
-import AudioPlayer from "@/components/base/AudioPlayer.vue";
-import PDFViewer from "@/components/base/PDFViewer.vue";
-import useDropzoneHelper from "@/composables/useDropzoneHelper";
-import useMediaAssetLinkHelper from "@/composables/useMediaAssetLinkHelper";
-import useMetaDataHelper from "@/composables/useMetaDataHelper";
+import { asString } from "../../helpers";
+import VideoPlayer from "./VideoPlayer.vue";
+import AudioPlayer from "./AudioPlayer.vue";
+import PDFViewer from "./PDFViewer.vue";
+import useDropzoneHelper from "../../composables/useDropzoneHelper";
+import useMediaAssetLinkHelper from "../../composables/useMediaAssetLinkHelper";
+import useMetaDataHelper from "../../composables/useMetaDataHelper";
 import { useUploadModal } from "../UploadModal.vue";
-import SrtViewer from "@/components/base/SrtViewer.vue";
-import LinkedAssetsList from "@/components/LinkedAssetsList.vue";
-import { usePermissions } from "@/composables/usePermissions";
+import SrtViewer from "./SrtViewer.vue";
+import LinkedAssetsList from "../LinkedAssetsList.vue";
+import { usePermissions } from "../../composables/usePermissions";
 
 export default defineComponent({
   name: "SingleEntity",
