@@ -13,10 +13,10 @@
 </template>
 
 <script lang="ts">
-import BaseLibrary from "@/components/base/BaseLibrary.vue";
+import BaseLibrary from "./base/BaseLibrary.vue";
 import { defineComponent } from "vue";
-import { SearchInputType } from "@/queries";
-import selectedRelationFieldMetadata from './../composables/useFormHelpers';
+import { SearchInputType } from "../queries";
+import selectedRelationFieldMetadata from "./../composables/useFormHelpers";
 
 export default defineComponent({
   name: "MediaFileLibrary",
@@ -38,7 +38,7 @@ export default defineComponent({
     return {
       SearchInputType,
       addSelection,
-      selectedRelationFieldMetadata
+      selectedRelationFieldMetadata,
     };
   },
 });
