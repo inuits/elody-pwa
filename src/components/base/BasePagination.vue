@@ -18,8 +18,7 @@
       class="flex text-sm mx-3 flex-row items-center w-1-6"
       data-test="page-count-label"
     >
-      {{ $t("partials.page") }} {{ currentPage }} {{ $t("partials.of") }}
-      {{ maxPage() }}
+      {{$t('partials.page')}} {{ currentPage }} {{$t('partials.of')}} {{ maxPage() }}
     </div>
     <unicon
       class="cursor-pointer"
@@ -40,7 +39,7 @@
 
 <script lang="ts">
 import { defineComponent, computed, reactive } from "vue";
-import { Unicons } from "../../types";
+import { Unicons } from "@/types";
 
 export type PaginationInfo = {
   limit: number;

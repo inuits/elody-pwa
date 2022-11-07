@@ -11,7 +11,7 @@
 <script lang="ts">
 import { computed, defineComponent } from "vue";
 import type { PropType } from "vue";
-import InputField from "./InputField.vue";
+import InputField from "@/components/base/InputField.vue";
 import { defaultReturnTextObject } from "../../composables/useFilterHelper";
 import type { FilterInList } from "../../composables/useFilterHelper";
 export default defineComponent({

@@ -20,7 +20,9 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import BaseIcon from "./BaseIcon.vue";
+import type { PropType } from "vue";
+import BaseIcon from "@/components/base/BaseIcon.vue";
+import type { Unicons } from "../../types";
 
 export default defineComponent({
   name: "IconToggle",
@@ -35,13 +37,14 @@ export default defineComponent({
   },
   emits: ["update:checked"],
   setup() {
-    const handleInputChange = (event: Event) =>
-      (event.target as HTMLInputElement).checked;
+
+    const handleInputChange = (event: Event) => 
+      (event.target as HTMLInputElement).checked
 
     return {
-      handleInputChange,
-    };
-  },
+      handleInputChange
+    }
+  }
 });
 </script>
 

@@ -23,6 +23,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from "vue";
+import type { PropType } from "vue";
 import { debounce } from "ts-debounce";
 export const lableStyle = 'ml-1 text-neutral-700 text-sm"';
 export const inputContainerStyle =
@@ -41,7 +42,7 @@ export default defineComponent({
     icon: { type: String, default: undefined },
     bgColor: { type: String, default: "neutral-0" },
     name: { type: String, default: "", required: false },
-    isDisabled: { type: Boolean, default: false, required: false },
+    isDisabled: { type: true || false, default: false, required: false },
     min: { type: Number, required: false },
     max: { type: Number, required: false },
   },
