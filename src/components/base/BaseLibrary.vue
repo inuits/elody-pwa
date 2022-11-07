@@ -16,11 +16,11 @@
           />
           <div class="ml-2 mt-1.5">
             <IconToggle
-            v-model:checked="displayGrid"
-            :icon-on="Unicons.Apps.name"
-            :icon-off="Unicons.ListUl.name"
-            class="ml-2"
-          />
+              v-model:checked="displayGrid"
+              :icon-on="Unicons.Apps.name"
+              :icon-off="Unicons.ListUl.name"
+              class="ml-2"
+            />
           </div>
         </div>
         <InputField
@@ -63,8 +63,6 @@
         />
       </div>
       <ListContainer :class="displayGrid ? 'p-5' : 'p-1'">
-
-
         <div v-if="loading">
           <ListItem
             v-for="n in queryVariables.limit"
@@ -88,7 +86,6 @@
           </ListItem>
         </div>
 
-
         <div v-else-if="!displayGrid && result?.Entities?.results">
           <ListItem
             :small="listItemRouteName === 'SingleMediafile'"
@@ -107,14 +104,25 @@
           >
             <template #actions>
               <BaseButton
-                v-if="determineIfNotAdded(entity, mediafiles, selectedRelationFieldMetadata) && enableSelection"
+                v-if="
+                  determineIfNotAdded(
+                    entity,
+                    mediafiles,
+                    selectedRelationFieldMetadata
+                  ) && enableSelection
+                "
                 :loading="loading"
                 class="ml-2"
                 :icon="Unicons.PlusCircle.name"
                 @click="addSelection(entity)"
               />
-              <BaseIcon v-else-if="enableSelection" :name="Unicons.Check.name" fill="green" width="40px"
-              class="mr-3"/>
+              <BaseIcon
+                v-else-if="enableSelection"
+                :name="Unicons.Check.name"
+                fill="green"
+                width="40px"
+                class="mr-3"
+              />
 
               <BaseButton
                 v-else
@@ -135,54 +143,55 @@
           </div>
         </div>
         <div v-else-if="displayGrid && result?.Entities?.results">
-          <div class="flex flex-row flex-wrap gap-2 justify-center items-center">
+          <div
+            class="flex flex-row flex-wrap gap-2 justify-center items-center"
+          >
             <GridItem
-             v-for="entity in result.Entities?.results"
-             :key="entity?.id"
-            :meta="entity?.teaserMetadata"
-            :media="entity?.media ? entity?.media.primary_transcode : null"
-            :thumb-icon="getThumbnail(entity)"
-            @click="
-              !enableSelection &&
-                router.push({
-                  name: listItemRouteName,
-                  params: { id: entity?.id },
-                })
-            "></GridItem>
+              v-for="entity in result.Entities?.results"
+              :key="entity?.id"
+              :meta="entity?.teaserMetadata"
+              :media="entity?.media ? entity?.media.primary_transcode : null"
+              :thumb-icon="getThumbnail(entity)"
+              @click="
+                !enableSelection &&
+                  router.push({
+                    name: listItemRouteName,
+                    params: { id: entity?.id },
+                  })
+              "
+            ></GridItem>
           </div>
           <div v-if="result?.Entities?.results.length === 0" class="p-4">
             {{ $t("search.noresult") }}
           </div>
         </div>
-
-
       </ListContainer>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import BasePagination, {
-  paginationLimits,
-} from "@/components/base/BasePagination.vue";
+import BasePagination, { paginationLimits } from "./BasePagination.vue";
 import { defineComponent, watch, reactive, ref } from "vue";
 import type { PropType } from "vue";
-import ListContainer from "@/components/ListContainer.vue";
-import BaseButton from "@/components/base/BaseButton.vue";
-import InputField from "@/components/base/InputField.vue";
-import BaseDropdown from "@/components/base/BaseDropdown.vue";
+import ListContainer from "../ListContainer.vue";
+import BaseButton from "./BaseButton.vue";
+import InputField from "./InputField.vue";
+import BaseDropdown from "./BaseDropdown.vue";
 import { useQuery } from "@vue/apollo-composable";
-import ListItem from "@/components/ListItem.vue";
+import ListItem from "../ListItem.vue";
 import { useRouter } from "vue-router";
-import { Unicons } from "@/types";
-import { GetEntitiesDocument, SearchInputType } from "@/queries";
-import type { GetEntitiesQueryVariables, Maybe } from "@/queries";
-import FilterSideBar from "@/components/FilterSideBar.vue";
-import IconToggle from "@/components/base/IconToggle.vue";
-import useThumbnailHelper from "@/composables/useThumbnailHelper";
-import useMetaDataHelper, { beingAdded } from "@/composables/useMetaDataHelper";
+import { Unicons } from "../../types";
+import { GetEntitiesDocument, SearchInputType } from "../../queries";
+import type { GetEntitiesQueryVariables, Maybe } from "../../queries";
+import FilterSideBar from "../FilterSideBar.vue";
+import IconToggle from "./IconToggle.vue";
+import useThumbnailHelper from "../../composables/useThumbnailHelper";
+import useMetaDataHelper, {
+  beingAdded,
+} from "../../composables/useMetaDataHelper";
 import BaseIcon from "./BaseIcon.vue";
-import GridItem from '../GridItem.vue';
+import GridItem from "../GridItem.vue";
 
 export default defineComponent({
   name: "BaseLibrary",
@@ -196,8 +205,8 @@ export default defineComponent({
     IconToggle,
     InputField,
     BaseIcon,
-    GridItem
-},
+    GridItem,
+  },
   props: {
     advancedFiltersChoice: {
       type: String,
@@ -232,7 +241,8 @@ export default defineComponent({
   setup: (props, { emit }) => {
     const { getThumbnail } = useThumbnailHelper();
     const router = useRouter();
-    const { determineIfNotAdded, mediafiles, selectedRelationFieldMetadata } = useMetaDataHelper();
+    const { determineIfNotAdded, mediafiles, selectedRelationFieldMetadata } =
+      useMetaDataHelper();
     const paginationInfo = reactive({
       limit: 20,
       skip: 1,
@@ -296,7 +306,7 @@ export default defineComponent({
       determineIfNotAdded,
       mediafiles,
       selectedRelationFieldMetadata,
-      displayGrid
+      displayGrid,
     };
   },
 });
