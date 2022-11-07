@@ -5,8 +5,8 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import { Unicons } from "@/types";
-import BaseIcon from "@/components/base/BaseIcon.vue";
+import { Unicons } from "../../types";
+import BaseIcon from "../../components/base/BaseIcon.vue";
 
 export default defineComponent({
   name: "PlusCircleIcon",
