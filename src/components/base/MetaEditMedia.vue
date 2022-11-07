@@ -3,7 +3,9 @@
     <form v-if="form.fields" novalidate>
       <div
         v-for="field in form.fields"
-        :key="field && field.__typename === 'MetadataField' ? field.key : 'no key'"
+        :key="
+          field && field.__typename === 'MetadataField' ? field.key : 'no key'
+        "
       >
         <MetaEditDataField
           v-if="field && field.__typename === 'MetadataField'"
@@ -19,17 +21,17 @@
 </template>
 
 <script lang="ts">
-import { PatchMediaFileMetadataDocument } from "@/queries";
-import type { Form, PatchMediaFileMetadataMutation } from "@/queries";
+import { PatchMediaFileMetadataDocument } from "../../queries";
+import type { Form, PatchMediaFileMetadataMutation } from "../../queries";
 import { defineComponent, watch } from "vue";
 import type { PropType } from "vue";
 import { useForm, useSubmitForm } from "vee-validate";
 import { useMutation } from "@vue/apollo-composable";
-import { useEditMode } from "@/composables/useEdit";
+import { useEditMode } from "../../composables/useEdit";
 import MetaEditDataField from "../MetaEditDataField.vue";
-import useFormHelper from "@/composables/useFormHelpers";
-import type { IntialValues } from "@/composables/useFormHelpers";
-import useMetaDataHelper from "@/composables/useMetaDataHelper";
+import useFormHelper from "../../composables/useFormHelpers";
+import type { IntialValues } from "../../composables/useFormHelpers";
+import useMetaDataHelper from "../../composables/useMetaDataHelper";
 import { useEntityMediafileSelector } from "../EntityImageSelection.vue";
 
 export default defineComponent({

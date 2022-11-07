@@ -21,9 +21,9 @@
 <script lang="ts">
 import { computed, defineComponent } from "vue";
 import type { PropType } from "vue";
-import MinMaxField from "@/components/base/MinMaxField.vue";
-import { defaultReturnMinMaxObject } from "@/composables/useFilterHelper";
-import type { FilterInList } from "@/composables/useFilterHelper";
+import MinMaxField from "../../components/base/MinMaxField.vue";
+import { defaultReturnMinMaxObject } from "../../composables/useFilterHelper";
+import type { FilterInList } from "../../composables/useFilterHelper";
 
 export default defineComponent({
   name: "MinmaxFilter",
@@ -41,11 +41,11 @@ export default defineComponent({
       required: true,
     },
     isRelation: {
-      type: Object as PropType<Boolean | null>,
+      type: Boolean,
       required: false,
       default: false,
     },
-  }, 
+  },
   emits: ["update:minmaxValue"],
   setup(props, { emit }) {
     emit("update:minmaxValue", defaultReturnMinMaxObject(props.filterkey));
