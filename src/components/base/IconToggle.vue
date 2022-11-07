@@ -1,6 +1,8 @@
 <template>
   <label class="toggle flex items-center cursor-pointer">
-    <div class="box">
+    <!-- the IconToggle for some reason puts the icons in a column instead of row in SingleJob instance, I can't 
+    figure out why so I am forcing it to use flex to overwrite display: block for now until I figure it out-->
+    <div :class="['box', forceFlexClass ? 'forceFlex' : '']">
       <input
         type="checkbox"
         class="input sr-only"
@@ -31,6 +33,7 @@ export default defineComponent({
     checked: { type: Boolean, default: false },
     iconOff: { type: String, required: true },
     iconOn: { type: String, required: true },
+    forceFlexClass: {type: Boolean, required: false, default: false}
   },
   emits: ["update:checked"],
   setup() {
@@ -48,6 +51,10 @@ export default defineComponent({
 <style lang="postcss" scoped>
 .box {
   @apply block relative bg-neutral-20 rounded;
+}
+
+.forceFlex {
+  @apply flex
 }
 .iconOn,
 .iconOff {

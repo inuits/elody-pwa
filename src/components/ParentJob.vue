@@ -38,6 +38,16 @@
           <ProgressBar :progress="50" />
         </div>
       </div>
+      <div class="flex mr-4 flex-row">
+        <IconToggle
+          class="flex flex-row"
+          v-if="!isCollapsed"
+          v-model:checked="showFailedOnly"
+          :icon-on="Unicons.ExclamationTriangle.name"
+          :icon-off="Unicons.CheckCircle.name"
+          forceFlexClass="true"
+        />
+      </div>
       <div>
         <BaseButton
           v-if="isCollapsed == true"
@@ -68,7 +78,7 @@
           v-for="subJob in subJobs.results.slice(0, subjobLimit)"
           :key="subJob && subJob._id ? subJob._id : 'no-id'"
         >
-          <SingleJob v-if="subJob" :job="subJob" />
+          <SingleJob v-if="subJob && determineIfShow(subJob)" :job="subJob" />
         </div>
         <div class="flex w-full justify-center">
           <button
@@ -99,6 +109,7 @@ import type { Job } from "@/queries";
 import { useQuery } from "@vue/apollo-composable";
 import useJobHelpers from "@/composables/useJobHelpers";
 import ListContainer from "@/components/ListContainer.vue";
+import IconToggle from "./base/IconToggle.vue";
 
 export default defineComponent({
   name: "ParentJob",
@@ -110,6 +121,7 @@ export default defineComponent({
     BaseLabel,
     ListContainer,
     LoadingList,
+    IconToggle
   },
   props: {
     job: {
@@ -120,6 +132,7 @@ export default defineComponent({
   setup(props) {
     const { getFormatedDate, getJobStatus } = useJobHelpers(props.job);
     const isCollapsed = ref<Boolean>(true);
+    const showFailedOnly = ref<Boolean>(false);
     const fetchingSubJobs = ref<Boolean>(false);
     const queryOptions = ref({
       enabled: false,
@@ -160,6 +173,17 @@ export default defineComponent({
       subjobLimit.value += 5;
     };
 
+    const determineIfShow = (job: Job): boolean => {
+      if (!showFailedOnly.value){
+        return true;
+      }
+
+      if (job.status === 'finished'){
+        return false;
+      }
+      return true;
+    }
+
     return {
       subJobs: computed(() => {
         return result.value?.Job?.sub_jobs;
@@ -173,6 +197,8 @@ export default defineComponent({
       subjobLimit,
       hasSubJobs,
       loading,
+      showFailedOnly,
+      determineIfShow
     };
   },
 });
