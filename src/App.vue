@@ -1,7 +1,7 @@
 <template>
   <div>
     <the-navigation class="navbar"/>
-    <div :class="[`h-screen flex flex-col`, `move-by-nav`]">
+    <div :class="[`h-screen flex flex-col`]">
       <the-header />
       <div :class="['flex-grow', { 'h-full overflow-hidden': isSingle }]">
         <router-view />
