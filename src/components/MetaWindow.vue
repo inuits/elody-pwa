@@ -23,10 +23,10 @@
 
 <script lang="ts" setup>
 import { ref, watch } from "vue";
-import MetaEdit from "@/components/MetaEdit.vue";
-import MetaView from "@/components/MetaView.vue";
-import { useEditMode } from "@/composables/useEdit";
-import type { Form, MetadataAndRelation } from "@/queries";
+import MetaEdit from "./MetaEdit.vue";
+import MetaView from "./MetaView.vue";
+import { useEditMode } from "../composables/useEdit";
+import type { Form, MetadataAndRelation } from "../queries";
 
 const props = withDefaults(
   defineProps<{
