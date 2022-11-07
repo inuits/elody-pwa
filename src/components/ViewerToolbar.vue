@@ -41,9 +41,8 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref } from "vue";
 import type { PropType } from "vue";
-import { Unicons } from "@/types";
+import { Unicons } from "../types";
 import MediaInfo from "./base/MediaInfo.vue";
-import { propsToAttrMap } from "@vue/shared";
 export default defineComponent({
   name: "ViewerToolbar",
   components: {
