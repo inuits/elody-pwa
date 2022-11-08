@@ -4,7 +4,7 @@ import { createApp } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
 import Unicon from "vue-unicons";
 import { DefaultApolloClient } from "@vue/apollo-composable";
-import { OpenIdConnectClient } from "session-vue-3-oidc-library";
+import { OpenIdConnectClient, OpenIdConnect } from "session-vue-3-oidc-library";
 import App from "./App.vue";
 import { routes } from "./views/router";
 import { store } from "./store";
@@ -18,7 +18,7 @@ import * as Sentry from "@sentry/vue";
 import { BrowserTracing } from "@sentry/tracing";
 import { setIgnorePermissions } from "./composables/usePermissions";
 
-export let auth: typeof OpenIdConnectClient | null;
+export let auth: typeof OpenIdConnect | null;
 
 const start = async () => {
   Unicon.add(Object.values(Unicons));
@@ -45,24 +45,30 @@ const start = async () => {
       });
     }
 
-    if (errorHandler.checkForUnauthorized() === true) {
-      new Promise((resolve) => {
-        fetch("/api/logout").then(() => {
-          auth.resetAuthProperties();
-          auth.redirectToLogin(router.currentRoute?.value.fullPath);
-          resolve;
-        });
-      });
-    }
+    // if (errorHandler.checkForUnauthorized() === true) {
+    //   new Promise((resolve) => {
+    //     fetch("/api/logout").then(() => {
+    //       auth.resetAuthProperties();
+    //       auth.changeRedirectRoute(
+    //         window.location.origin + window.location.pathname
+    //       );
+    //       auth.redirectToLogin(router.currentRoute?.value.fullPath);
+    //       resolve;
+    //     });
+    //   });
+    // }
   });
 
   router.beforeEach(async (to, _from, next) => {
-    auth.changeRedirectRoute(window.location.origin + to.fullPath);
     await auth.verifyServerAuth();
     if (!to.matched.some((route) => route.meta.requiresAuth)) {
+      await auth.assertIsAuthenticated(to.fullPath, next);
+    } else {
       return next();
     }
-    await auth.assertIsAuthenticated(to.fullPath, next);
+  });
+  router.afterEach(() => {
+    auth.changeRedirectRoute(window.location.origin + window.location.pathname);
   });
 
   auth.changeRedirectRoute(window.location.origin + window.location.pathname);

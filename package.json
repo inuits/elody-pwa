@@ -35,7 +35,7 @@
     "openseadragon": "^2.4.2",
     "pdfjs-dist": "^2.13.216",
     "pdfvuer": "^2.0.1",
-    "session-vue-3-oidc-library": "^0.1.40",
+    "session-vue-3-oidc-library": "^0.1.43",
     "url-slug": "^3.0.4",
     "vee-validate": "^4.5.2",
     "vue": "^3.2.38",
