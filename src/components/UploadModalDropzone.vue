@@ -6,7 +6,7 @@
 <script lang="ts">
 const { clearDropzoneErrorMessages, clearDropzoneCounters } =
   useDropzoneHelper();
-import useDropzoneHelper from "@/composables/useDropzoneHelper";
+import useDropzoneHelper from "../composables/useDropzoneHelper";
 import { useUploadModal } from "./UploadModal.vue";
 import { defineComponent, watch } from "vue";
 import Dropzone from "./Dropzone.vue";

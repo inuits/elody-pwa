@@ -3,7 +3,9 @@
     <form v-if="form.fields" novalidate>
       <div
         v-for="field in form.fields"
-        :key="field && field.__typename === 'MetadataField' ? field.key : 'no key'"
+        :key="
+          field && field.__typename === 'MetadataField' ? field.key : 'no key'
+        "
       >
         <MetaEditDataField
           v-if="field && field.__typename === 'MetadataField'"
@@ -23,29 +25,29 @@
 </template>
 
 <script lang="ts">
-import { ReplaceRelationsAndMetaDataDocument } from "@/queries";
+import { ReplaceRelationsAndMetaDataDocument } from "../queries";
 import type {
   Form,
   MetadataAndRelation,
-  ReplaceRelationsAndMetaDataMutation
-} from "@/queries";
+  ReplaceRelationsAndMetaDataMutation,
+} from "../queries";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import { useForm, useSubmitForm } from "vee-validate";
 import { useMutation } from "@vue/apollo-composable";
-import useRouteHelpers from "@/composables/useRouteHelpers";
-import { useEditMode } from "@/composables/useEdit";
+import useRouteHelpers from "../composables/useRouteHelpers";
+import { useEditMode } from "../composables/useEdit";
 import MetaEditRelationField from "./MetaEditRelationField.vue";
 import MetaEditDataField from "./MetaEditDataField.vue";
-import useFormHelper from "@/composables/useFormHelpers";
-import type { IntialValues } from "@/composables/useFormHelpers";
-import useMetaDataHelper from '@/composables/useMetaDataHelper';
+import useFormHelper from "../composables/useFormHelpers";
+import type { IntialValues } from "../composables/useFormHelpers";
+import useMetaDataHelper from "../composables/useMetaDataHelper";
 
 export default defineComponent({
   name: "MetaEdit",
   components: { MetaEditDataField, MetaEditRelationField },
   props: {
-    entityTitle: { type: String, required: true, default: '' },
+    entityTitle: { type: String, required: true, default: "" },
     modelValue: {
       type: Array as PropType<MetadataAndRelation[]>,
       required: true,
