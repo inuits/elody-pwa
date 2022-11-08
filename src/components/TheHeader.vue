@@ -37,9 +37,9 @@
 
 <script lang="ts" setup>
 import { useRoute, useRouter } from "vue-router";
-import { usePageTitle } from "@/composables/usePageTitle";
+import { usePageTitle } from "../composables/usePageTitle";
 import { useAuth } from "session-vue-3-oidc-library";
-import BaseButton from "@/components/base/BaseButton.vue";
+import BaseButton from "../components/base/BaseButton.vue";
 import EditToggle from "./EditButtons.vue";
 
 const { pageTitle } = usePageTitle();
