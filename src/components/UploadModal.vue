@@ -8,29 +8,25 @@
     <div class="bg-neutral-20 w-full h-full flex flex-col overflow-auto">
       <BaseTabs v-if="modalToOpen === modalChoices.IMPORT">
         <BaseTab :title="$t('upload.import')">
-          <div class="p-3 h-full">
-            <upload-modal-import
-              v-if="modalToOpen === modalChoices.IMPORT"
-              :directories="result"
-            />
-          </div>
+          <upload-modal-import
+            v-if="modalToOpen === modalChoices.IMPORT"
+            :directories="result"
+          />
         </BaseTab>
         <BaseTab :title="$t('upload.upload-files')">
-          <div class="p-3">
-            <upload-modal-dropzone v-if="modalToOpen === modalChoices.IMPORT" />
-          </div>
+          <upload-modal-dropzone v-if="modalToOpen === modalChoices.IMPORT" />
         </BaseTab>
       </BaseTabs>
       <BaseTabs v-if="modalToOpen === modalChoices.DROPZONE">
         <BaseTab :title="$t('upload.upload-files')">
-          <div class="p-3">
+          <div class="h-full">
             <upload-modal-dropzone
               v-if="modalToOpen === modalChoices.DROPZONE"
             />
           </div>
         </BaseTab>
         <BaseTab title="Select file">
-          <div class="p-3 h-full">
+          <div class="h-full">
             <MediaFileLibrary
               :enable-selection="true"
               @add-selection="addSelection"

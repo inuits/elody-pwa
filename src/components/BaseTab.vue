@@ -1,5 +1,5 @@
 <template>
-  <div v-show="isActive" style="height: -webkit-calc(100% - 40px)">
+  <div v-show="isActive" class="w-full h-full">
     <slot></slot>
   </div>
 </template>
@@ -30,3 +30,5 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped></style>

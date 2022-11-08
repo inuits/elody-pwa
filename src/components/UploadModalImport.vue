@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col w-full my-2 p-5 flex-grow">
-    <div class="bg-neutral-0 mb-4 rounded py-5 pl-5 h-full">
+    <div class="bg-neutral-0 mb-4 rounded py-5 pl-5">
       <folder-tree :data="directories" />
     </div>
   </div>

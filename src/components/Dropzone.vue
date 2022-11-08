@@ -2,7 +2,7 @@
   <div class="flex flex-col w-full h-full">
     <div
       ref="dropzoneDiv"
-      class="bg-white-background w-full bg-blue inline-block border-dashed border-4 border-blue-light rounded p-5"
+      class="bg-white-background w-full bg-blue inline-block border-dashed border-4 border-blue-light rounded p-5 h-full"
       :class="{
         'flex  justify-center items-center cursor-pointer': fileCount === 0,
         'justify-items-center grid grid-cols-6 place-content-start gap-4 ':
@@ -12,9 +12,7 @@
     >
       <div v-show="fileCount === 0" class="inline-block w-9/12 text-center">
         <div class="dz-message" data-dz-message>
-          <span v-if="total === 0"
-            >{{$t('dropzone.drag-add')}}</span
-          >
+          <span v-if="total === 0">{{ $t("dropzone.drag-add") }}</span>
           <div v-else>
             <div
               v-show="total === failed + success"
@@ -23,10 +21,10 @@
             >
               <div class="flex justify-between">
                 <div class="text-lg text-center pb-8 text-red-dark">
-                  {{ failed }} {{$t('dropzone.failed')}}
+                  {{ failed }} {{ $t("dropzone.failed") }}
                 </div>
                 <div class="text-lg text-center pb-8 text-green-default">
-                  {{ success }} {{$t('dropzone.success')}}
+                  {{ success }} {{ $t("dropzone.success") }}
                 </div>
               </div>
               <div
@@ -45,7 +43,9 @@
       v-if="triggerUpload"
       type="button"
       class="py-2 mt-3 px-4 w-full bg-blue-400 text-neutral-0 rounded-sm hover:shadow-xl text-sm"
-      :class="fileCount === 0 ? 'opacity-25 cursor-none' : 'cursor-pointer'"
+      :class="
+        fileCount === 0 ? 'opacity-25 cursor-not-allowed' : 'cursor-pointer'
+      "
       tabindex="-1"
       :disabled="fileCount === 0"
       @click="triggerUpload"
@@ -67,10 +67,10 @@
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             ></path>
           </svg>
-          {{$t('dropzone.uploading')}}
+          {{ $t("dropzone.uploading") }}
         </div>
       </div>
-      <div v-else>{{$t('dropzone.upload')}}</div>
+      <div v-else>{{ $t("dropzone.upload") }}</div>
     </button>
   </div>
   <div class="hidden">
@@ -121,8 +121,8 @@
 </template>
 
 <script lang="ts">
-import { PostMediaFileDocument } from "@/queries";
-import type { PostMediaFileMutation } from "@/queries";
+import { PostMediaFileDocument } from "../queries";
+import type { PostMediaFileMutation } from "../queries";
 import useDropzoneHelper from "../composables/useDropzoneHelper";
 import { onMounted, ref, defineComponent } from "vue";
 import { useMutation } from "@vue/apollo-composable";

@@ -51,11 +51,9 @@ export default defineComponent({
 
     onBeforeMount(() => {
       if (slots.default) {
-        state.tabs = slots
-          .default()
-          .filter((child: any) => {
-            return child.type.name === "BaseTab"
-          });
+        state.tabs = slots.default().filter((child: any) => {
+          return child.type.name === "BaseTab";
+        });
       }
     });
 
