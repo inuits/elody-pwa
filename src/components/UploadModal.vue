@@ -1,16 +1,40 @@
 <template>
-  <BaseModal :large="true" :scroll="false" :modal-state="uploadModalState.state" @hide-modal="closeUploadModal">
+  <BaseModal
+    :large="true"
+    :scroll="false"
+    :modal-state="uploadModalState.state"
+    @hide-modal="closeUploadModal"
+  >
     <div class="bg-neutral-20 w-full h-full flex flex-col overflow-auto">
-      <upload-modal-import v-if="modalToOpen === modalChoices.IMPORT" :directories="result" />
+      <BaseTabs v-if="modalToOpen === modalChoices.IMPORT">
+        <BaseTab :title="$t('upload.import')">
+          <div class="p-3 h-full">
+            <upload-modal-import
+              v-if="modalToOpen === modalChoices.IMPORT"
+              :directories="result"
+            />
+          </div>
+        </BaseTab>
+        <BaseTab :title="$t('upload.upload-files')">
+          <div class="p-3">
+            <upload-modal-dropzone v-if="modalToOpen === modalChoices.IMPORT" />
+          </div>
+        </BaseTab>
+      </BaseTabs>
       <BaseTabs v-if="modalToOpen === modalChoices.DROPZONE">
         <BaseTab :title="$t('upload.upload-files')">
-          <div class="p-3 h-full">
-            <upload-modal-dropzone v-if="modalToOpen === modalChoices.DROPZONE" />
+          <div class="p-3">
+            <upload-modal-dropzone
+              v-if="modalToOpen === modalChoices.DROPZONE"
+            />
           </div>
         </BaseTab>
         <BaseTab title="Select file">
           <div class="p-3 h-full">
-            <MediaFileLibrary :enable-selection="true" @add-selection="addSelection" />
+            <MediaFileLibrary
+              :enable-selection="true"
+              @add-selection="addSelection"
+            />
           </div>
         </BaseTab>
       </BaseTabs>
@@ -24,12 +48,12 @@ import { defineComponent, ref, watch } from "vue";
 import UploadModalImport from "./UploadModalImport.vue";
 import UploadModalDropzone from "./UploadModalDropzone.vue";
 import { useQuery } from "@vue/apollo-composable";
-import { GetDirectoriesDocument } from "@/queries";
+import { GetDirectoriesDocument } from "../queries";
 import BaseTabs from "./BaseTabs.vue";
 import BaseTab from "./BaseTab.vue";
-import MediaFileLibrary from "@/components/MediaFileLibrary.vue";
-import useMetaDataHelper from "@/composables/useMetaDataHelper";
-import useMediaAssetLinkHelper from "@/composables/useMediaAssetLinkHelper";
+import MediaFileLibrary from "./MediaFileLibrary.vue";
+import useMetaDataHelper from "../composables/useMetaDataHelper";
+import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
 
 export type UploadModalType = {
   state: ModalState;
