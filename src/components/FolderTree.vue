@@ -9,7 +9,7 @@
   </div>
 </template>
 <script lang="ts">
-import type { Directory } from "@/queries";
+import type { Directory } from "../queries";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import FolderTreeLine from "./FolderTreeLine.vue";
@@ -21,7 +21,7 @@ export default defineComponent({
   },
   props: {
     directories: {
-      type: Object as PropType<Directory[]>,
+      type: Array as PropType<Directory[]>,
       required: true,
       default: () => [],
     },
