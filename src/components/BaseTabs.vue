@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full">
+  <div class="h-full flex flex-col flex-shrink">
     <div class="flex justify-around">
       <div
         v-for="(tab, index) in tabs"
