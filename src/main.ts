@@ -1,4 +1,8 @@
-import { ApolloClient, InMemoryCache } from "@apollo/client/core";
+import {
+  ApolloClient,
+  InMemoryCache,
+  type NormalizedCacheObject,
+} from "@apollo/client/core";
 import { createUploadLink } from "apollo-upload-client";
 import { createApp } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
@@ -19,6 +23,7 @@ import { BrowserTracing } from "@sentry/tracing";
 import { setIgnorePermissions } from "./composables/usePermissions";
 
 export let auth: typeof OpenIdConnectClient | null;
+export let apolloClient: ApolloClient<NormalizedCacheObject>;
 
 const start = async () => {
   Unicon.add(Object.values(Unicons));
@@ -77,6 +82,13 @@ const start = async () => {
     auth.processAuthCode(authCode, router);
   }
 
+  apolloClient = new ApolloClient({
+    link: graphqlErrorInterceptor.concat(
+      createUploadLink({ uri: config.graphQlLink || "/api/graphql" })
+    ),
+    cache: new InMemoryCache(),
+  });
+
   const app = createApp(App)
     .use(i18n)
     .use(Unicon, {
@@ -87,15 +99,7 @@ const start = async () => {
     .use(auth)
     .use(head)
     .provide("config", config)
-    .provide(
-      DefaultApolloClient,
-      new ApolloClient({
-        link: graphqlErrorInterceptor.concat(
-          createUploadLink({ uri: config.graphQlLink || "/api/graphql" })
-        ),
-        cache: new InMemoryCache(),
-      })
-    );
+    .provide(DefaultApolloClient, apolloClient);
 
   if (config.SENTRY_ENABLED) {
     Sentry.init({

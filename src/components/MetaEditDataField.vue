@@ -18,15 +18,18 @@
 <script lang="ts">
 import { defineComponent, watch } from "vue";
 import type { PropType } from "vue";
-import InputField from "@/components/base/InputField.vue";
-import BaseDropdown from "@/components/base/BaseDropdown.vue";
+import InputField from "./base/InputField.vue";
+import BaseDropdown from "./base/BaseDropdown.vue";
 import { useField } from "vee-validate";
-import type { InputFieldTypes, Maybe, MetadataFieldOption } from '@/queries';
+import type { InputFieldTypes, Maybe, MetadataFieldOption } from "../queries";
 export default defineComponent({
   name: "MetaEditDataField",
   components: { InputField, BaseDropdown },
   props: {
-    fieldKey: { type: Object as PropType<InputFieldTypes | string>, required: true },
+    fieldKey: {
+      type: String as PropType<InputFieldTypes | string>,
+      required: true,
+    },
     label: {
       type: Object as PropType<Maybe<string | undefined>>,
       required: false,
@@ -39,15 +42,17 @@ export default defineComponent({
       default: () => [],
     },
     active: {
-      type: Object as PropType<Maybe<Boolean> | undefined | null>,
-      default: () => true
+      type: Boolean as PropType<Maybe<Boolean> | undefined | null>,
+      default: true,
     },
   },
   emits: ["onChange"],
-  setup: ({ fieldKey}, { emit }) => {
+  setup: ({ fieldKey }, { emit }) => {
     const { value } = useField<string>(fieldKey, {});
 
-    const stringifyOption = (input: Maybe<Maybe<MetadataFieldOption>[]> | undefined) => {
+    const stringifyOption = (
+      input: Maybe<Maybe<MetadataFieldOption>[]> | undefined
+    ) => {
       let returnArray: string[] = [];
       if (input) {
         input.forEach((metaDataFieldObject: Maybe<MetadataFieldOption>) => {
@@ -60,9 +65,8 @@ export default defineComponent({
     };
 
     watch(value, () => {
-      emit('onChange', true);
+      emit("onChange", true);
     });
-
 
     return {
       value,
