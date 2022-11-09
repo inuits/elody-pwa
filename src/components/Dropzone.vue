@@ -145,7 +145,7 @@ export default defineComponent({
       getDropzoneSettings,
       setTotalCounter,
     } = useDropzoneHelper();
-    const { onDone } = useMutation<PostMediaFileMutation>(
+    const { onDone, mutate } = useMutation<PostMediaFileMutation>(
       PostMediaFileDocument
     );
     const dropzonePreviewDiv = ref<HTMLDivElement | undefined>(undefined);
@@ -181,10 +181,21 @@ export default defineComponent({
           increaseSuccessCounter();
         });
 
+        const uploadFiles = () => {
+          const reader = new FileReader();
+          selectedFiles.value.forEach((file: any) => {
+            mutate({
+              mediaFileInput: { filename: file.name, mimetype: file.type },
+              file,
+            });
+          });
+        };
+
         triggerUpload.value = () => {
           isUploading.value = true;
           selectedFiles.value = myDropzone.value.files;
           setTotalCounter(myDropzone.value.files.length);
+          uploadFiles();
         };
       }
     });
