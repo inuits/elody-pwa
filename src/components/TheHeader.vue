@@ -36,6 +36,7 @@
 </template>
 
 <script lang="ts" setup>
+import { watch } from 'vue';
 import { useRoute, useRouter } from "vue-router";
 import { usePageTitle } from "../composables/usePageTitle";
 import { useAuth } from "session-vue-3-oidc-library";
@@ -46,6 +47,14 @@ const { pageTitle } = usePageTitle();
 const auth = useAuth();
 const route = useRoute();
 const router = useRouter();
+
+watch(pageTitle, () => {
+  if (pageTitle.value.entityTitle !== ''){
+    document.title = pageTitle.value.entityTitle;
+    return;
+  }
+  document.title = pageTitle.value.routerTitle;
+}, {deep: true})
 
 const logout = async () => {
   await auth.logout();
