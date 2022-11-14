@@ -68,8 +68,6 @@ const start = async () => {
     auth.changeRedirectRoute(window.location.origin + window.location.pathname);
     await auth.verifyServerAuth();
     if (!to.matched.some((route) => route.meta.requiresAuth)) {
-      await auth.assertIsAuthenticated(to.fullPath, next);
-    } else {
       return next();
     }
   });
