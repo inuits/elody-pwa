@@ -7,6 +7,7 @@ const success = ref<number>(0);
 const failed = ref<number>(0);
 const selectedFiles = ref<any>([]);
 const isUploading = ref<boolean>(false);
+const finishedUploading = ref<boolean>(false);
 
 const useDropzoneHelper = () => {
   const setDropzoneErrorMessages = (errorMessage: string): void => {
@@ -19,10 +20,12 @@ const useDropzoneHelper = () => {
 
   const increaseFailedCounter = (): void => {
     failed.value++;
+    detectFinishedUploading();
   };
 
   const increaseSuccessCounter = (): void => {
     success.value++;
+    detectFinishedUploading();
   };
 
   const setTotalCounter = (t: number): void => {
@@ -33,6 +36,19 @@ const useDropzoneHelper = () => {
     total.value = 0;
     success.value = 0;
     failed.value = 0;
+  };
+
+  const setSelectedMediafiles = (files: any[]) => {
+    setTotalCounter(files.length);
+    selectedFiles.value = files;
+  };
+
+  const detectFinishedUploading = () => {
+    if (total.value === failed.value + success.value && total.value !== 0) {
+      finishedUploading.value = true;
+    } else {
+      finishedUploading.value = false;
+    }
   };
 
   const getDropzoneSettings = (dropzonePreviewDiv: any): any => {
@@ -55,9 +71,11 @@ const useDropzoneHelper = () => {
     setTotalCounter,
     clearDropzoneCounters,
     getDropzoneSettings,
+    setSelectedMediafiles,
     total,
     failed,
     success,
+    finishedUploading,
     errorMessages,
     selectedFiles,
     isUploading,
