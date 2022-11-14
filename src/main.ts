@@ -69,6 +69,8 @@ const start = async () => {
     await auth.verifyServerAuth();
     if (!to.matched.some((route) => route.meta.requiresAuth)) {
       return next();
+    } else {
+      await auth.assertIsAuthenticated(to.fullPath, next);
     }
   });
 
