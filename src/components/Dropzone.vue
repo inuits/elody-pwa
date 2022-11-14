@@ -4,38 +4,35 @@
       ref="dropzoneDiv"
       class="bg-white-background w-full bg-blue inline-block border-dashed border-4 border-blue-light rounded p-5 h-full"
       :class="{
-        'flex  justify-center items-center cursor-pointer': fileCount === 0,
+        'flex  justify-center items-center cursor-pointer':
+          total === success + failed && fileCount === O,
         'justify-items-center grid grid-cols-6 place-content-start gap-4 ':
-          fileCount !== 0,
+          fileCount !== 0 && total !== success + failed,
       }"
-      style="height: -webkit-calc(100% - 40px)"
     >
       <div v-show="fileCount === 0" class="inline-block w-9/12 text-center">
         <div class="dz-message" data-dz-message>
           <span v-if="total === 0">{{ $t("dropzone.drag-add") }}</span>
-          <div v-else>
-            <div
-              v-show="total === failed + success"
-              style="width: fit-content"
-              class="px-5 text-left border-4 border-neutral-500 py-5 rounded-md"
-            >
-              <div class="flex justify-between">
-                <div class="text-lg text-center pb-8 text-red-dark">
-                  {{ failed }} {{ $t("dropzone.failed") }}
-                </div>
-                <div class="text-lg text-center pb-8 text-green-default">
-                  {{ success }} {{ $t("dropzone.success") }}
-                </div>
-              </div>
-              <div
-                class="text-red-dark truncate"
-                v-for="errorMessage in errorMessages"
-                :key="errorMessage.toString()"
-              >
-                - {{ errorMessage }}
-              </div>
-            </div>
+        </div>
+      </div>
+      <div
+        v-if="finishedUploading && total !== 0"
+        class="w-full px-5 text-left border-4 border-neutral-500 py-5 rounded-md"
+      >
+        <div class="flex justify-between">
+          <div class="text-lg text-center pb-8 text-red-dark">
+            {{ failed }} {{ $t("dropzone.failed") }}
           </div>
+          <div class="text-lg text-center pb-8 text-green-default">
+            {{ success }} {{ $t("dropzone.success") }}
+          </div>
+        </div>
+        <div
+          class="text-red-dark truncate"
+          v-for="errorMessage in errorMessages"
+          :key="errorMessage.toString()"
+        >
+          - {{ errorMessage }}
         </div>
       </div>
     </div>
@@ -50,7 +47,10 @@
       :disabled="fileCount === 0"
       @click="triggerUpload"
     >
-      <div class="flex justify-center" v-if="total !== failed + success">
+      <div
+        class="flex justify-center"
+        v-if="total !== success + failed && fileCount !== 0"
+      >
         <div class="flex" style="width: fit-content">
           <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
             <circle
@@ -139,11 +139,12 @@ export default defineComponent({
       total,
       failed,
       success,
+      finishedUploading,
       increaseSuccessCounter,
       clearDropzoneErrorMessages,
       clearDropzoneCounters,
       getDropzoneSettings,
-      setTotalCounter,
+      setSelectedMediafiles,
     } = useDropzoneHelper();
     const { onDone, mutate } = useMutation<PostMediaFileMutation>(
       PostMediaFileDocument
@@ -182,7 +183,6 @@ export default defineComponent({
         });
 
         const uploadFiles = () => {
-          const reader = new FileReader();
           selectedFiles.value.forEach((file: any) => {
             mutate({
               mediaFileInput: { filename: file.name, mimetype: file.type },
@@ -193,8 +193,7 @@ export default defineComponent({
 
         triggerUpload.value = () => {
           isUploading.value = true;
-          selectedFiles.value = myDropzone.value.files;
-          setTotalCounter(myDropzone.value.files.length);
+          setSelectedMediafiles(myDropzone.value.files);
           uploadFiles();
         };
       }
@@ -209,6 +208,7 @@ export default defineComponent({
       success,
       failed,
       total,
+      finishedUploading,
     };
   },
 });
