@@ -20,12 +20,12 @@ const useDropzoneHelper = () => {
 
   const increaseFailedCounter = (): void => {
     failed.value++;
-    detectFinishedUploading();
+    detectUploadingState();
   };
 
   const increaseSuccessCounter = (): void => {
     success.value++;
-    detectFinishedUploading();
+    detectUploadingState();
   };
 
   const setTotalCounter = (t: number): void => {
@@ -43,7 +43,7 @@ const useDropzoneHelper = () => {
     selectedFiles.value = files;
   };
 
-  const detectFinishedUploading = () => {
+  const detectUploadingState = () => {
     if (total.value === failed.value + success.value && total.value !== 0) {
       finishedUploading.value = true;
     } else {
