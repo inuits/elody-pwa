@@ -4,10 +4,10 @@
       ref="dropzoneDiv"
       class="bg-white-background w-full bg-blue inline-block border-dashed border-4 border-blue-light rounded p-5 h-full"
       :class="{
-        'flex  justify-center items-center cursor-pointer':
-          total === success + failed && fileCount === O,
-        'justify-items-center grid grid-cols-6 place-content-start gap-4 ':
-          fileCount !== 0 && total !== success + failed,
+        'flex justify-center items-center cursor-pointer':
+          !finishedUploading && !fileCount,
+        'grid grid-cols-6 place-content-start': !finishedUploading && fileCount,
+        '': finishedUploading && fileCount,
       }"
     >
       <div v-show="fileCount === 0" class="inline-block w-9/12 text-center">
