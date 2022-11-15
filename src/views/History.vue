@@ -47,7 +47,7 @@
           v-for="job in jobs.Jobs.results"
           :key="job && job._id ? job._id : 'no-id'"
         >
-          <ParentJob v-if="job && determineIfShow(job)" :job="job" />
+          <ParentJob v-if="job" :job="job" />
         </div>
       </div>
     </ListContainer>
@@ -119,6 +119,7 @@ export default defineComponent({
         query: queryVariables.filters.query,
         type: jobTypeLabels[queryVariables.filters.type],
       },
+      failed: showFailedOnly
     });
 
     watch(queryVariables, () => {
@@ -126,16 +127,9 @@ export default defineComponent({
       getData();
     });
 
-    const determineIfShow = (job: Job): boolean => {
-      if (!showFailedOnly.value){
-        return true;
-      }
-
-      if (job.status === 'finished'){
-        return false;
-      }
-      return true;
-    }
+    watch(showFailedOnly, () => {
+      getData();
+    })
 
     const getData = () => {
       fetchMore({
@@ -168,7 +162,6 @@ export default defineComponent({
       queryVariables,
       jobTypes,
       paginationLimits,
-      determineIfShow,
       showFailedOnly,
       Unicons
     };
