@@ -172,7 +172,7 @@
 
 <script lang="ts">
 import BasePagination, { paginationLimits } from "./BasePagination.vue";
-import { defineComponent, watch, reactive, ref } from "vue";
+import { defineComponent, watch, reactive, ref, onMounted } from "vue";
 import type { PropType } from "vue";
 import ListContainer from "../ListContainer.vue";
 import BaseButton from "./BaseButton.vue";
@@ -192,6 +192,7 @@ import useMetaDataHelper, {
 } from "../../composables/useMetaDataHelper";
 import BaseIcon from "./BaseIcon.vue";
 import GridItem from "../GridItem.vue";
+import { setCookie, getCookie } from "tiny-cookie";
 
 export default defineComponent({
   name: "BaseLibrary",
@@ -249,6 +250,13 @@ export default defineComponent({
     });
     const displayGrid = ref<boolean>(false);
 
+    onMounted(() => {
+      const displayPreference = getCookie("_displayPreference");
+      if (displayPreference) {
+        displayGrid.value = JSON.parse(displayPreference).grid;
+      }
+    });
+
     const isDrawerHiding = ref(
       props.acceptedEntityTypes.length === 0 ? true : false
     );
@@ -281,6 +289,16 @@ export default defineComponent({
       queryVariables.searchInputType = isDrawerHiding.value
         ? props.searchInputType
         : props.searchInputTypeOnDrawer;
+    });
+
+    watch(displayGrid, () => {
+      setCookie(
+        "_displayPreference",
+        JSON.stringify({ grid: displayGrid.value }),
+        {
+          expires: "1Y",
+        }
+      );
     });
 
     const { result, loading } = useQuery(GetEntitiesDocument, queryVariables, {
