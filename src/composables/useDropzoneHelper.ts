@@ -51,6 +51,12 @@ const useDropzoneHelper = () => {
     }
   };
 
+  const resetDropzone = () => {
+    myDropzone.value.removeAllFiles();
+    finishedUploading.value = false;
+    clearDropzoneCounters();
+  };
+
   const getDropzoneSettings = (dropzonePreviewDiv: any): any => {
     return {
       url: "/upload",
@@ -80,6 +86,7 @@ const useDropzoneHelper = () => {
     selectedFiles,
     isUploading,
     myDropzone,
+    resetDropzone,
   };
 };
 

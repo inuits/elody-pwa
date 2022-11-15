@@ -50,6 +50,7 @@ import BaseTab from "./BaseTab.vue";
 import MediaFileLibrary from "./MediaFileLibrary.vue";
 import useMetaDataHelper from "../composables/useMetaDataHelper";
 import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
+import useDropzoneHelper from "../composables/useDropzoneHelper";
 
 export type UploadModalType = {
   state: ModalState;
@@ -82,6 +83,7 @@ export const useUploadModal = () => {
     updateUploadModal({
       state: "show",
     });
+    useDropzoneHelper().resetDropzone();
   };
 
   return {
