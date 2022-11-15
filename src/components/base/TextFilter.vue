@@ -14,6 +14,8 @@ import type { PropType } from "vue";
 import InputField from "@/components/base/InputField.vue";
 import { defaultReturnTextObject } from "../../composables/useFilterHelper";
 import type { FilterInList } from "../../composables/useFilterHelper";
+import type { AdvancedFilter } from '@/queries';
+
 export default defineComponent({
   name: "TextFilter",
   components: {
@@ -25,8 +27,8 @@ export default defineComponent({
       required: false,
       default: undefined,
     },
-    filterkey: {
-      type: String,
+    filter: {
+      type: Object as PropType<AdvancedFilter>,
       required: true,
     },
     placeholderText: {
@@ -37,7 +39,7 @@ export default defineComponent({
   },
   emits: ["update:inputValue"],
   setup(props, { emit }) {
-    emit("update:inputValue", defaultReturnTextObject(props.filterkey));
+    emit("update:inputValue", defaultReturnTextObject(props.filter?.key));
 
     const inputField = computed<string | undefined | null>({
       get() {
@@ -48,7 +50,7 @@ export default defineComponent({
       set(value) {
         emit(
           "update:inputValue",
-          defaultReturnTextObject(props.filterkey, value)
+          defaultReturnTextObject(props.filter?.key, value)
         );
       },
     });

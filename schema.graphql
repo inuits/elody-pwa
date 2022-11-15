@@ -247,6 +247,7 @@ type advancedFilter {
   label: String
   type: advancedFilterTypes!
   isRelation: Boolean
+  options: [filterOption]
 }
 
 type filterOption {
@@ -447,8 +448,8 @@ type Query {
   ): EntitiesResults
   User: User
   Directories(dir: String): [Directory]
-  Jobs(paginationInfo: PaginationInfo, filters: Filters): JobsResults
-  Job(id: String!): Job
+  Jobs(paginationInfo: PaginationInfo, filters: Filters, failed: Boolean!): JobsResults
+  Job(id: String!, failed: Boolean!): Job
   advancedFilters(choice: String!): [advancedFilter]
   FilterOptions(key: String!): [filterOption]
   Form(type: String!): Form
@@ -518,6 +519,8 @@ input MetadataInput {
   value: String
   lang: String
   type: String
+  label: String
+  immutable: Boolean
 }
 
 type ImportReturn {

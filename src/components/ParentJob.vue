@@ -78,7 +78,7 @@
           v-for="subJob in subJobs.results.slice(0, subjobLimit)"
           :key="subJob && subJob._id ? subJob._id : 'no-id'"
         >
-          <SingleJob v-if="subJob && determineIfShow(subJob)" :job="subJob" />
+          <SingleJob v-if="subJob" :job="subJob" />
         </div>
         <div class="flex w-full justify-center">
           <button
@@ -95,7 +95,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeUpdate, ref } from "vue";
+import { computed, defineComponent, onBeforeUpdate, ref, watch } from "vue";
 import type { PropType } from "vue";
 import { Unicons } from "@/types";
 import BaseIcon from "@/components/base/BaseIcon.vue";
@@ -141,6 +141,7 @@ export default defineComponent({
       GetJobDocument,
       {
         id: props.job._key || "",
+        failed: showFailedOnly
       },
       queryOptions
     );
@@ -173,16 +174,9 @@ export default defineComponent({
       subjobLimit.value += 5;
     };
 
-    const determineIfShow = (job: Job): boolean => {
-      if (!showFailedOnly.value){
-        return true;
-      }
-
-      if (job.status === 'finished'){
-        return false;
-      }
-      return true;
-    }
+    watch(showFailedOnly, () => {
+      updateSubJobs();
+    })
 
     return {
       subJobs: computed(() => {
@@ -198,7 +192,6 @@ export default defineComponent({
       hasSubJobs,
       loading,
       showFailedOnly,
-      determineIfShow
     };
   },
 });
