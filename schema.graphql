@@ -247,6 +247,7 @@ type advancedFilter {
   label: String
   type: advancedFilterTypes!
   isRelation: Boolean
+  options: [filterOption]
 }
 
 type filterOption {

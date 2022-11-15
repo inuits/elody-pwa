@@ -854,6 +854,10 @@ query getAdvancedFilters($choice: String!) {
     type
     key
     isRelation
+    options {
+      value
+      label
+    }
   }
 }
 
