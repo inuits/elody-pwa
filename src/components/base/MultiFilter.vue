@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts">
-import { GetFilterOptionsDocument } from "@/queries";
+import { AdvancedFilter, GetFilterOptionsDocument } from "@/queries";
 import type { Maybe } from "@/queries";
 import { useQuery } from "@vue/apollo-composable";
 import { ref, defineComponent, computed } from "vue";
@@ -63,8 +63,8 @@ export default defineComponent({
       required: false,
       default: undefined,
     },
-    filterkey: {
-      type: [String],
+    filter: {
+      type: Object as PropType<AdvancedFilter>,
       required: true,
     },
   },
@@ -72,7 +72,7 @@ export default defineComponent({
   setup(props, { emit }) {
     emit(
       "update:multiSelectValue",
-      defaultReturnMultiSelectObject(props.filterkey)
+      defaultReturnMultiSelectObject(props.filter?.key)
     );
     const andOr = ref<"and" | "or">("and");
     const isAnd = computed<boolean>({
@@ -89,7 +89,7 @@ export default defineComponent({
           props.multiSelectValue.input.multiSelectInput &&
           emit(
             "update:multiSelectValue",
-            defaultReturnMultiSelectObject(props.filterkey, {
+            defaultReturnMultiSelectObject(props.filter?.key, {
               value: props.multiSelectValue.input.multiSelectInput.value,
               AndOrValue: newValue,
             })
@@ -121,7 +121,7 @@ export default defineComponent({
         if (props.multiSelectValue) {
           emit(
             "update:multiSelectValue",
-            defaultReturnMultiSelectObject(props.filterkey, {
+            defaultReturnMultiSelectObject(props.filter?.key, {
               value: value,
               AndOrValue: isAnd.value,
             })
@@ -139,14 +139,21 @@ export default defineComponent({
       set(value) {
         emit(
           "update:multiSelectValue",
-          defaultReturnTextObject(props.filterkey, value)
+          defaultReturnTextObject(props.filter?.key, value)
         );
       },
     });
 
-    const { result } = useQuery(GetFilterOptionsDocument, {
-      key: props.filterkey,
-    });
+    type FilterOptions = {label: string, value: string}[];
+
+    let result: {FilterOptions: FilterOptions} = {FilterOptions: props.filter?.options};
+
+    if (!result){
+      result = useQuery(GetFilterOptionsDocument, {
+        key: props.filter?.key,
+      });
+    }
+    
 
     return { result, isMulti, isAnd, inputFieldMulti, inputField };
   },

@@ -43,25 +43,25 @@
           <TextFilter
             v-if="filter?.type === AdvancedFilterTypes.Tekst"
             v-model:inputValue="initialFilters[i]"
-            :filterkey="filter?.key"
+            :filter="filter"
             :text="filter?.label"
           />
           <ChecklistFilter
             v-if="filter?.type === AdvancedFilterTypes.Checklist"
             v-model:listValue="initialFilters[i]"
-            :filterkey="filter?.key"
+            :filter="filter"
             :accepted-entity-types="acceptedEntityTypes"
           />
           <MinmaxFilter
             v-if="filter?.type === AdvancedFilterTypes.Minmax"
             v-model:minmaxValue="initialFilters[i]"
-            :filterkey="filter?.key"
+            :filter="filter"
             :is-relation="filter?.isRelation"
           />
           <MultiFilter
             v-if="filter?.type === AdvancedFilterTypes.Multiselect"
             v-model:multiSelectValue="initialFilters[i]"
-            :filterkey="filter?.key"
+            :filter="filter"
           />
         </template>
       </FilterAccordion>
