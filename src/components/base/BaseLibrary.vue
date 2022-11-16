@@ -250,7 +250,6 @@ export default defineComponent({
     });
     const displayGrid = ref<boolean>(false);
     const gridColAmount = ref<number>(5);
-    const gridContainerDiv = ref(undefined);
 
     onMounted(() => {
       const displayPreference = getCookie("_displayPreference");
@@ -348,7 +347,6 @@ export default defineComponent({
       displayGrid,
       gridColAmount,
       calculateGridColumns,
-      gridContainerDiv,
     };
   },
 });
