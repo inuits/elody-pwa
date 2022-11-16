@@ -949,7 +949,7 @@ mutation deleteRelations($id: String!, $metadata: [MetadataInput!]!) {
   deleteRelations(id: $id, metadata: $metadata)
 }
 
-mutation deleteData($id: String!, $path: deletePaths!) {
+mutation deleteData($id: String!, $path: Collection!) {
   deleteData(id: $id, path: $path)
 }
 

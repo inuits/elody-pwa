@@ -242,17 +242,17 @@ enum advancedFilterTypes {
   minmax
 }
 
+type filterOption {
+  value: String
+  label: String
+}
+
 type advancedFilter {
   key: String!
   label: String
   type: advancedFilterTypes!
   isRelation: Boolean
   options: [filterOption]
-}
-
-type filterOption {
-  value: String
-  label: String
 }
 
 input SearchFilter {
@@ -373,6 +373,7 @@ enum validation {
   optional
 }
 
+
 type MetadataField {
   label: String
   key: String!
@@ -381,6 +382,7 @@ type MetadataField {
   active: Boolean
   validation: validation
   options: [MetadataFieldOption]
+  config_key: String
 }
 
 type MetadataFieldOption {
@@ -490,7 +492,7 @@ type Mutation {
   StartImport(folder: String!): ImportReturn
   # addRelations(id: String!, relations: [RelationInput!]!): [Relation]!
   replaceRelationsAndMetaData(id: String!, form: MetadataFormInput): Entity
-  deleteData(id: String!, path: deletePaths!): String
+  deleteData(id: String!, path: Collection!): String
   createEntity(entity: EntityInput!): Entity
   postMediaFile(mediaFileInput: MediaFileInput!, file: Upload!): MediaFile
   linkMediafileToEntity(
@@ -509,7 +511,7 @@ type Mutation {
   deleteRelations(id: String!, metadata: [MetadataInput!]!): String
 }
 
-enum deletePaths {
+enum Collection {
   entities
   mediafiles
 }
