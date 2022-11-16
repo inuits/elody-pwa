@@ -92,7 +92,7 @@
             v-for="entity in result.Entities?.results"
             :key="entity?.id"
             :meta="entity?.teaserMetadata"
-            :media="entity?.media ? entity?.media.primary_transcode : null"
+            :media="getMediaFilenameFromEntity(entity)"
             :thumb-icon="getThumbnail(entity)"
             @click="
               !enableSelection &&
@@ -148,7 +148,7 @@
               v-for="entity in result.Entities?.results"
               :key="entity?.id"
               :meta="entity?.teaserMetadata"
-              :media="entity?.media ? entity?.media.primary_transcode : null"
+              :media="getMediaFilenameFromEntity(entity)"
               :thumb-icon="getThumbnail(entity)"
               @click="
                 !enableSelection &&
@@ -170,7 +170,14 @@
 
 <script lang="ts">
 import BasePagination, { paginationLimits } from "./BasePagination.vue";
-import { defineComponent, watch, reactive, ref, onMounted } from "vue";
+import {
+  defineComponent,
+  watch,
+  reactive,
+  ref,
+  onMounted,
+  nextTick,
+} from "vue";
 import type { PropType } from "vue";
 import ListContainer from "../ListContainer.vue";
 import BaseButton from "./BaseButton.vue";
@@ -191,6 +198,7 @@ import useMetaDataHelper, {
 import BaseIcon from "./BaseIcon.vue";
 import GridItem from "../GridItem.vue";
 import { setCookie, getCookie } from "tiny-cookie";
+import useListItemHelper from "../../composables/useListItemHelper";
 
 export default defineComponent({
   name: "BaseLibrary",
@@ -239,6 +247,7 @@ export default defineComponent({
   emits: ["addSelection"],
   setup: (props, { emit }) => {
     const { getThumbnail } = useThumbnailHelper();
+    const { getMediaFilenameFromEntity } = useListItemHelper();
     const router = useRouter();
     const { determineIfNotAdded, mediafiles, selectedRelationFieldMetadata } =
       useMetaDataHelper();
@@ -288,6 +297,9 @@ export default defineComponent({
       queryVariables.searchInputType = isDrawerHiding.value
         ? props.searchInputType
         : props.searchInputTypeOnDrawer;
+      nextTick(() => {
+        calculateGridColumns();
+      });
     });
 
     watch(displayGrid, () => {
@@ -347,6 +359,7 @@ export default defineComponent({
       selectedRelationFieldMetadata,
       displayGrid,
       calculateGridColumns,
+      getMediaFilenameFromEntity,
     };
   },
 });

@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="
-      (isEditToggleVisible === 'edit') || (isEditToggleVisible === 'edit-delete')
+      isEditToggleVisible === 'edit' || isEditToggleVisible === 'edit-delete'
     "
     class="mx-4"
   >
@@ -30,16 +30,16 @@
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
 import IconToggle from "./base/IconToggle.vue";
-import useRouteHelpers from "@/composables/useRouteHelpers";
-import { Unicons } from "@/types";
+import useRouteHelpers from "../composables/useRouteHelpers";
+import { Unicons } from "../types";
 import BaseButton from "./base/BaseButton.vue";
 import { useRoute, useRouter } from "vue-router";
-import { asString } from "@/helpers";
+import { asString } from "../helpers";
 import { useMutation } from "@vue/apollo-composable";
-import { DeleteDataDocument, Collection } from "@/queries";
-import type { DeleteDataMutation } from "@/queries";
-import ConfirmationModal from "@/components/base/ConfirmationModal.vue";
-import useEditMode from "@/composables/useEdit";
+import { DeleteDataDocument, Collection } from "../queries";
+import type { DeleteDataMutation } from "../queries";
+import ConfirmationModal from "./base/ConfirmationModal.vue";
+import useEditMode from "../composables/useEdit";
 
 export default defineComponent({
   name: "EditToggle",

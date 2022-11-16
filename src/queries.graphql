@@ -831,7 +831,11 @@ query getDirectories($dir: String) {
   }
 }
 
-query getJobs($paginationInfo: PaginationInfo, $filters: Filters, $failed: Boolean!) {
+query getJobs(
+  $paginationInfo: PaginationInfo
+  $filters: Filters
+  $failed: Boolean!
+) {
   Jobs(paginationInfo: $paginationInfo, filters: $filters, failed: $failed) {
     results {
       ...job
