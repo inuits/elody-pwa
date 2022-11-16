@@ -62,7 +62,7 @@
           :total-items="result?.Entities?.count"
         />
       </div>
-      <ListContainer :class="displayGrid ? 'p-5' : 'p-1'">
+      <ListContainer id="gridContainer" :class="displayGrid ? 'p-5' : 'p-1'">
         <div v-if="loading">
           <ListItem
             v-for="n in queryVariables.limit"
@@ -144,7 +144,7 @@
         </div>
         <div v-else-if="displayGrid && result?.Entities?.results">
           <div
-            class="flex flex-row flex-wrap gap-2 justify-center items-center"
+            :class="`grid grid-cols-${gridColAmount} gap-2 justify-items-center`"
           >
             <GridItem
               v-for="entity in result.Entities?.results"
@@ -249,12 +249,15 @@ export default defineComponent({
       skip: 1,
     });
     const displayGrid = ref<boolean>(false);
+    const gridColAmount = ref<number>(5);
+    const gridContainerDiv = ref(undefined);
 
     onMounted(() => {
       const displayPreference = getCookie("_displayPreference");
       if (displayPreference) {
         displayGrid.value = JSON.parse(displayPreference).grid;
       }
+      calculateGridColumns();
     });
 
     const isDrawerHiding = ref(
@@ -310,6 +313,24 @@ export default defineComponent({
       emit("addSelection", entity);
     };
 
+    const calculateGridColumns = () => {
+      const gridContainerWidth =
+        document.getElementById("gridContainer")?.offsetWidth;
+      const gridItemWidth = 320;
+      let colAmount = 0;
+      if (gridContainerWidth) {
+        colAmount = Math.floor(gridContainerWidth / gridItemWidth);
+        gridColAmount.value = colAmount;
+      }
+      return colAmount;
+    };
+
+    window.addEventListener("resize", () => {
+      if (displayGrid.value) {
+        calculateGridColumns();
+      }
+    });
+
     return {
       paginationLimits,
       queryVariables,
@@ -325,6 +346,9 @@ export default defineComponent({
       mediafiles,
       selectedRelationFieldMetadata,
       displayGrid,
+      gridColAmount,
+      calculateGridColumns,
+      gridContainerDiv,
     };
   },
 });
