@@ -170,7 +170,14 @@
 
 <script lang="ts">
 import BasePagination, { paginationLimits } from "./BasePagination.vue";
-import { defineComponent, watch, reactive, ref, onMounted } from "vue";
+import {
+  defineComponent,
+  watch,
+  reactive,
+  ref,
+  onMounted,
+  nextTick,
+} from "vue";
 import type { PropType } from "vue";
 import ListContainer from "../ListContainer.vue";
 import BaseButton from "./BaseButton.vue";
@@ -288,6 +295,9 @@ export default defineComponent({
       queryVariables.searchInputType = isDrawerHiding.value
         ? props.searchInputType
         : props.searchInputTypeOnDrawer;
+      nextTick(() => {
+        calculateGridColumns();
+      });
     });
 
     watch(displayGrid, () => {
