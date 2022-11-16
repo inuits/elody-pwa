@@ -97,7 +97,7 @@
 import { defineComponent, onMounted, ref, reactive } from "vue";
 import type { PropType } from "vue";
 import { useMutation } from "@vue/apollo-composable";
-import { DeleteDataDocument, DeletePaths } from "@/queries";
+import { DeleteDataDocument, Collection } from "@/queries";
 import type { MediaFile } from "@/queries";
 import type { DeleteDataMutation } from "@/queries";
 import AudioThumbnail from "../components/base/audiothumbnail.vue";
@@ -172,7 +172,7 @@ export default defineComponent({
       toBeDeleted.value.push(id);
       if (!isMediaFileInLinkList(id)) {
         addSaveCallback(async () => {
-          await mutate({ id: parsedId, path: DeletePaths.Mediafiles });
+          await mutate({ id: parsedId, path: Collection.Mediafiles });
         });
       } else {
         removeMediaFileFromLinkList(id);

@@ -36,7 +36,7 @@ import BaseButton from "./base/BaseButton.vue";
 import { useRoute, useRouter } from "vue-router";
 import { asString } from "@/helpers";
 import { useMutation } from "@vue/apollo-composable";
-import { DeleteDataDocument, DeletePaths } from "@/queries";
+import { DeleteDataDocument, Collection } from "@/queries";
 import type { DeleteDataMutation } from "@/queries";
 import ConfirmationModal from "@/components/base/ConfirmationModal.vue";
 import useEditMode from "@/composables/useEdit";
@@ -83,7 +83,7 @@ export default defineComponent({
     const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
     const deleteAsset = async () => {
       const id = asString(route.params["id"]);
-      await mutate({ id, path: DeletePaths.Entities });
+      await mutate({ id, path: Collection.Entities });
       disableEditMode();
       router.push({ name: "Home" });
     };
