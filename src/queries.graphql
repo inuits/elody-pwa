@@ -831,7 +831,11 @@ query getDirectories($dir: String) {
   }
 }
 
-query getJobs($paginationInfo: PaginationInfo, $filters: Filters, $failed: Boolean!) {
+query getJobs(
+  $paginationInfo: PaginationInfo
+  $filters: Filters
+  $failed: Boolean!
+) {
   Jobs(paginationInfo: $paginationInfo, filters: $filters, failed: $failed) {
     results {
       ...job
@@ -949,7 +953,7 @@ mutation deleteRelations($id: String!, $metadata: [MetadataInput!]!) {
   deleteRelations(id: $id, metadata: $metadata)
 }
 
-mutation deleteData($id: String!, $path: deletePaths!) {
+mutation deleteData($id: String!, $path: Collection!) {
   deleteData(id: $id, path: $path)
 }
 

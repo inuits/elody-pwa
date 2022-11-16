@@ -448,7 +448,11 @@ type Query {
   ): EntitiesResults
   User: User
   Directories(dir: String): [Directory]
-  Jobs(paginationInfo: PaginationInfo, filters: Filters, failed: Boolean!): JobsResults
+  Jobs(
+    paginationInfo: PaginationInfo
+    filters: Filters
+    failed: Boolean!
+  ): JobsResults
   Job(id: String!, failed: Boolean!): Job
   advancedFilters(choice: String!): [advancedFilter]
   FilterOptions(key: String!): [filterOption]
@@ -490,7 +494,7 @@ type Mutation {
   StartImport(folder: String!): ImportReturn
   # addRelations(id: String!, relations: [RelationInput!]!): [Relation]!
   replaceRelationsAndMetaData(id: String!, form: MetadataFormInput): Entity
-  deleteData(id: String!, path: deletePaths!): String
+  deleteData(id: String!, path: Collection!): String
   createEntity(entity: EntityInput!): Entity
   postMediaFile(mediaFileInput: MediaFileInput!, file: Upload!): MediaFile
   linkMediafileToEntity(
@@ -509,7 +513,7 @@ type Mutation {
   deleteRelations(id: String!, metadata: [MetadataInput!]!): String
 }
 
-enum deletePaths {
+enum Collection {
   entities
   mediafiles
 }
