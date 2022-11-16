@@ -242,17 +242,17 @@ enum advancedFilterTypes {
   minmax
 }
 
+type filterOption {
+  value: String
+  label: String
+}
+
 type advancedFilter {
   key: String!
   label: String
   type: advancedFilterTypes!
   isRelation: Boolean
   options: [filterOption]
-}
-
-type filterOption {
-  value: String
-  label: String
 }
 
 input SearchFilter {
@@ -373,6 +373,7 @@ enum validation {
   optional
 }
 
+
 type MetadataField {
   label: String
   key: String!
@@ -381,6 +382,7 @@ type MetadataField {
   active: Boolean
   validation: validation
   options: [MetadataFieldOption]
+  config_key: String
 }
 
 type MetadataFieldOption {
