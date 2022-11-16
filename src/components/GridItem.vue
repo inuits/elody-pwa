@@ -35,7 +35,11 @@
             class="w-full h-6"
           >
             <template
-              v-if="metaItem.key === 'title' || metaItem.key === 'type'"
+              v-if="
+                metaItem.key === 'title' ||
+                metaItem.key === 'type' ||
+                metaItem.key === 'filename'
+              "
             >
               <span
                 :class="[
@@ -83,6 +87,8 @@ export default defineComponent({
       imageSrcError = true;
     };
     const hasFileName = ref<boolean>(false);
+
+    console.log(props.meta);
 
     const only4Meta = (input: Maybe<Maybe<MetadataAndRelation>[]>) => {
       return input
