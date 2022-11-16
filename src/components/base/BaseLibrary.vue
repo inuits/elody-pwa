@@ -143,9 +143,7 @@
           </div>
         </div>
         <div v-else-if="displayGrid && result?.Entities?.results">
-          <div
-            :class="`grid grid-cols-${gridColAmount} gap-2 justify-items-center`"
-          >
+          <div :class="`grid grid_cols gap-2 justify-items-center`">
             <GridItem
               v-for="entity in result.Entities?.results"
               :key="entity?.id"
@@ -249,7 +247,6 @@ export default defineComponent({
       skip: 1,
     });
     const displayGrid = ref<boolean>(false);
-    const gridColAmount = ref<number>(5);
 
     onMounted(() => {
       const displayPreference = getCookie("_displayPreference");
@@ -312,16 +309,20 @@ export default defineComponent({
       emit("addSelection", entity);
     };
 
+    const setCssVariable = (colAmount: number = 5) => {
+      const root = document.querySelector(":root") as HTMLElement;
+      root.style.setProperty("--grid-cols", colAmount.toString());
+    };
+
     const calculateGridColumns = () => {
       const gridContainerWidth =
         document.getElementById("gridContainer")?.offsetWidth;
-      const gridItemWidth = 320;
+      const gridItemWidth = 330;
       let colAmount = 0;
       if (gridContainerWidth) {
         colAmount = Math.floor(gridContainerWidth / gridItemWidth);
-        gridColAmount.value = colAmount;
       }
-      return colAmount;
+      setCssVariable(colAmount);
     };
 
     window.addEventListener("resize", () => {
@@ -345,9 +346,14 @@ export default defineComponent({
       mediafiles,
       selectedRelationFieldMetadata,
       displayGrid,
-      gridColAmount,
       calculateGridColumns,
     };
   },
 });
 </script>
+
+<style scoped>
+.grid_cols {
+  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+}
+</style>
