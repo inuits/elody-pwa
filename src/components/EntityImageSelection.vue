@@ -43,9 +43,11 @@
                     ? 'border-2 border-blue-500'
                     : '',
                 ]"
-                :src="!element.mimetype.includes('pdf')
-                 ? `/api/iiif/3/${element.transcode_filename}/square/100,/0/default.jpg`
-                 : element.thumbnail_file_location"
+                :src="
+                  !element.mimetype.includes('pdf')
+                    ? `/api/iiif/3/${element.transcode_filename}/square/100,/0/default.jpg`
+                    : element.thumbnail_file_location
+                "
                 @click="selectImage(element)"
               />
               <AudioThumbnail
@@ -97,14 +99,14 @@
 import { defineComponent, onMounted, ref, reactive } from "vue";
 import type { PropType } from "vue";
 import { useMutation } from "@vue/apollo-composable";
-import { DeleteDataDocument, Collection } from "@/queries";
-import type { MediaFile } from "@/queries";
-import type { DeleteDataMutation } from "@/queries";
+import { DeleteDataDocument, Collection } from "../queries";
+import type { MediaFile } from "../queries";
+import type { DeleteDataMutation } from "../queries";
 import AudioThumbnail from "../components/base/audiothumbnail.vue";
 import SvgThumbnail from "./base/svgThumbnail.vue";
 import TrashIcon from "../components/base/TrashIcon.vue";
 import PlusCircleIcon from "../components/base/PlusCircleIcon.vue";
-import { useEditMode } from "@/composables/useEdit";
+import { useEditMode } from "../composables/useEdit";
 import { useUploadModal, modalChoices } from "./UploadModal.vue";
 import useDropzoneHelper from "../composables/useDropzoneHelper";
 import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
@@ -200,7 +202,7 @@ export default defineComponent({
     const openUploadModalWrapper = () => {
       beingAdded.value = "mediafile";
       openUploadModal(modalChoices.DROPZONE);
-    }
+    };
 
     return {
       selectImage,
