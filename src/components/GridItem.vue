@@ -88,8 +88,6 @@ export default defineComponent({
     };
     const hasFileName = ref<boolean>(false);
 
-    console.log(props.meta);
-
     const only4Meta = (input: Maybe<Maybe<MetadataAndRelation>[]>) => {
       return input
         ?.filter((value) => {
