@@ -1,5 +1,5 @@
 <template>
-  <li class="row border-none h-72 w-80" data-test="meta-row">
+  <li class="row border-none h-72 w-full" data-test="meta-row">
     <div
       class="flex items-center flex-col w-full"
       :class="{ 'flex-col': small && !thumbIcon }"
