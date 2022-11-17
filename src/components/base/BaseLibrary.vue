@@ -157,7 +157,30 @@
                     params: { id: entity?.id },
                   })
               "
-            ></GridItem>
+            >
+              <template #actions>
+                <BaseButton
+                  v-if="
+                    determineIfNotAdded(
+                      entity,
+                      mediafiles,
+                      selectedRelationFieldMetadata
+                    ) && enableSelection
+                  "
+                  :loading="loading"
+                  class="ml-2"
+                  :icon="Unicons.PlusCircle.name"
+                  @click="addSelection(entity)"
+                />
+                <BaseIcon
+                  v-else-if="enableSelection"
+                  :name="Unicons.Check.name"
+                  fill="green"
+                  width="40px"
+                  class="mr-3"
+                />
+              </template>
+            </GridItem>
           </div>
           <div v-if="result?.Entities?.results.length === 0" class="p-4">
             {{ $t("search.noresult") }}

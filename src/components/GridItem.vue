@@ -1,5 +1,8 @@
 <template>
-  <li class="row border-none h-72 w-full" data-test="meta-row">
+  <li class="relative row border-none h-72 w-full" data-test="meta-row">
+    <div class="absolute right-0 top-0 w-min h-min" data-test="action-slot">
+      <slot name="actions"></slot>
+    </div>
     <div
       class="flex items-center flex-col w-full"
       :class="{ 'flex-col': small && !thumbIcon }"
@@ -56,9 +59,6 @@
           </div>
         </div>
       </div>
-    </div>
-    <div class="flex flex-row" data-test="action-slot">
-      <slot name="actions"></slot>
     </div>
   </li>
 </template>
