@@ -4,12 +4,12 @@
   >
     <div class="flex w-full items-center">
       <h1 class="text-lg font-semibold text-neutral-800 float-left">
-        {{ pageTitle.routerTitle
+        {{ pageInfo.routerTitle
         }}<span
-          v-if="pageTitle.entityTitle !== '' && route.meta.showEntityTitle"
+          v-if="pageInfo.entityTitle !== '' && route.meta.showEntityTitle"
           class="text-neutral-400"
         >
-          / {{ pageTitle.entityTitle }}</span
+          / {{ pageInfo.entityTitle }}</span
         >
       </h1>
       <EditToggle v-if="auth.isAuthenticated.value === true" />
@@ -36,25 +36,29 @@
 </template>
 
 <script lang="ts" setup>
-import { watch } from 'vue';
+import { watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { usePageTitle } from "../composables/usePageTitle";
+import { usePageInfo } from "../composables/usePageInfo";
 import { useAuth } from "session-vue-3-oidc-library";
 import BaseButton from "../components/base/BaseButton.vue";
 import EditToggle from "./EditButtons.vue";
 
-const { pageTitle } = usePageTitle();
+const { pageInfo } = usePageInfo();
 const auth = useAuth();
 const route = useRoute();
 const router = useRouter();
 
-watch(pageTitle, () => {
-  if (pageTitle.value.entityTitle !== ''){
-    document.title = pageTitle.value.entityTitle;
-    return;
-  }
-  document.title = pageTitle.value.routerTitle;
-}, {deep: true})
+watch(
+  pageInfo,
+  () => {
+    if (pageInfo.value.entityTitle !== "") {
+      document.title = pageInfo.value.entityTitle;
+      return;
+    }
+    document.title = pageInfo.value.routerTitle;
+  },
+  { deep: true }
+);
 
 const logout = async () => {
   await auth.logout();

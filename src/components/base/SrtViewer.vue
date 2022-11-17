@@ -1,6 +1,6 @@
 <template>
   <div class="flex w-full h-full justify-center items-center">
-    <media-info class="" :meta-data="source.metadata" />
+    <media-info :meta-data="source.metadata" />
   </div>
 </template>
 <script lang="ts">

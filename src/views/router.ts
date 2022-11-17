@@ -1,6 +1,7 @@
 import type { RouteRecordRaw } from "vue-router";
 import History from "./History.vue";
 import Mediafiles from "./MediaFiles.vue";
+import { Collection } from "../queries";
 
 export type urlParams = "id";
 
@@ -8,7 +9,7 @@ export const routes: RouteRecordRaw[] = [
   {
     path: "/",
     name: "Home",
-    meta: { title: "Home", requiresAuth: false },
+    meta: { title: "Home", type: Collection.Entities, requiresAuth: false },
     component: () => import(/* webpackChunkName: "about" */ "./Home.vue"),
     children: [
       {
@@ -18,6 +19,7 @@ export const routes: RouteRecordRaw[] = [
           title: "Single Asset",
           requiresAuth: false,
           showEntityTitle: true,
+          type: Collection.Entities,
         },
         component: () =>
           import(/* webpackChunkName: "about" */ "./SingleEntity.vue"),
@@ -27,7 +29,11 @@ export const routes: RouteRecordRaw[] = [
   {
     path: "/mediafiles",
     name: "Mediafiles",
-    meta: { title: "Mediafiles", requiresAuth: true },
+    meta: {
+      title: "Mediafiles",
+      type: Collection.Mediafiles,
+      requiresAuth: true,
+    },
     component: Mediafiles,
     children: [
       {
@@ -37,6 +43,7 @@ export const routes: RouteRecordRaw[] = [
           title: "Single Mediafile",
           requiresAuth: true,
           showEntityTitle: true,
+          type: Collection.Mediafiles,
         },
         component: () =>
           import(/* webpackChunkName: "about" */ "./SingleMediaFile.vue"),
