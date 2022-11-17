@@ -50,7 +50,7 @@
                   metaItem.key === 'title' || hasFileName
                     ? 'metaTitle'
                     : 'metaType',
-                  hasFileName ? 'h-12' : 'h-6 handleOverflow',
+                  hasFileName ? 'h-12 handleOverflow' : 'h-6 handleOverflow',
                 ]"
                 data-test="meta-info"
                 >{{ metaItem.value }}</span
@@ -126,7 +126,7 @@ export default defineComponent({
   @apply text-neutral-70;
 }
 .handleOverflow {
-  width: 275px;
+  width: 95%;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
