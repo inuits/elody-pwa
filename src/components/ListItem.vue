@@ -40,7 +40,7 @@
 </template>
 
 <script lang="ts">
-import type { Maybe, Media, MetadataAndRelation } from "@/queries";
+import type { Maybe, Media, MetadataAndRelation } from "../queries";
 import { defineComponent, inject } from "vue";
 import type { PropType } from "vue";
 
@@ -52,7 +52,7 @@ export default defineComponent({
       type: Array as PropType<Maybe<Maybe<MetadataAndRelation>[]>>,
       default: () => [],
     },
-    media: { type: Object as PropType<Maybe<String>>, default: undefined },
+    media: { type: String, default: "" },
     thumbIcon: { type: String, default: "" },
     small: { type: Boolean, default: false },
   },
@@ -63,9 +63,7 @@ export default defineComponent({
       imageSrcError = true;
     };
 
-    const only4Meta = (
-      input: Maybe<Maybe<MetadataAndRelation>[]>
-    ) => {
+    const only4Meta = (input: Maybe<Maybe<MetadataAndRelation>[]>) => {
       return input?.filter((value) => value?.value !== "").slice(0, 4);
     };
     return { setNoImage, imageSrcError, only4Meta, config };
