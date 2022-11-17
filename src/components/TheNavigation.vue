@@ -120,7 +120,6 @@ import { useEditMode } from "../composables/useEdit";
 import { useCreateModal } from "./CreateModal.vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { usePermissions } from "../composables/usePermissions";
-import { changeDocumentTitle } from "../composables/usePageTitle";
 
 const auth = useAuth();
 const { determinePermission, loading } = usePermissions();

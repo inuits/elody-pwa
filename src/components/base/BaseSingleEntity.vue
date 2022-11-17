@@ -112,7 +112,7 @@ import type {
   Entity,
   PostMediaFileMutation,
 } from "../../queries";
-import { usePageTitle } from "../../composables/usePageTitle";
+import { usePageInfo } from "../../composables/usePageInfo";
 import { useEditMode } from "../../composables/useEdit";
 import EntityImageSelection, {
   useEntityMediafileSelector,
@@ -174,7 +174,7 @@ export default defineComponent({
       useEntityMediafileSelector();
 
     const { editMode, showEditToggle } = useEditMode();
-    const { updatePageTitle } = usePageTitle();
+    const { updatePageInfo } = usePageInfo();
     const { closeUploadModal } = useUploadModal();
     const { canEdit, canDelete, canGet } = usePermissions();
 
@@ -208,7 +208,7 @@ export default defineComponent({
     );
 
     watch(title, (value: Maybe<string> | undefined) => {
-      value && updatePageTitle(value, "entityTitle");
+      value && updatePageInfo(value, "entityTitle");
     });
 
     watch(

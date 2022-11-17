@@ -10,26 +10,26 @@
     <h3 class="text-sm text-neutral-700 font-semibold">Mediainfo</h3>
     <div v-if="!isEdit && mediafileSelectionState.selectedMediafile.metadata">
       <div v-if="hasPrimaryFunctionality()">
-          <div class="label">{{ $t("media-info.primaire-media") }}</div>
-          <div class="value h-5 w-5">
-            <BaseIcon
-              v-if="mediafileSelectionState.selectedMediafile.is_primary"
-              :name="Unicons.Check.name"
-            />
-            <BaseIcon v-else :name="Unicons.Cross.name" />
-          </div>
-
-          <div class="label">{{ $t("media-info.thumbnail") }}</div>
-          <div class="value h-5 w-5">
-            <BaseIcon
-              v-if="
-                mediafileSelectionState.selectedMediafile.is_primary_thumbnail
-              "
-              :name="Unicons.Check.name"
-            />
-            <BaseIcon v-else :name="Unicons.Cross.name" />
-          </div>
+        <div class="label">{{ $t("media-info.primaire-media") }}</div>
+        <div class="value h-5 w-5">
+          <BaseIcon
+            v-if="mediafileSelectionState.selectedMediafile.is_primary"
+            :name="Unicons.Check.name"
+          />
+          <BaseIcon v-else :name="Unicons.Cross.name" />
         </div>
+
+        <div class="label">{{ $t("media-info.thumbnail") }}</div>
+        <div class="value h-5 w-5">
+          <BaseIcon
+            v-if="
+              mediafileSelectionState.selectedMediafile.is_primary_thumbnail
+            "
+            :name="Unicons.Check.name"
+          />
+          <BaseIcon v-else :name="Unicons.Cross.name" />
+        </div>
+      </div>
       <div
         v-for="item in mediafileSelectionState.selectedMediafile.metadata"
         :key="item && item.key ? item.key : 'no-key'"
@@ -59,7 +59,7 @@
         </div>
       </div>
       <BaseButton
-        style="background-color: #7A869A !important"
+        style="background-color: #7a869a !important"
         :label="$t('media-info.set-primair')"
         bg-color="neutral-100"
         bg-hover-color="neutral-400"
@@ -81,7 +81,7 @@
         </div>
       </div>
       <BaseButton
-        style="background-color: #7A869A !important"
+        style="background-color: #7a869a !important"
         :label="$t('media-info.set-thumbnail')"
         bg-color="neutral-100"
         bg-hover-color="neutral-400"
