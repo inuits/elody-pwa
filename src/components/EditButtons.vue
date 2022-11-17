@@ -88,7 +88,7 @@ export default defineComponent({
       const collection: Collection = pageInfo.value.routeType as Collection;
       await mutate({ id, path: collection });
       disableEditMode();
-      router.push({ name: "Home" });
+      router.push({ name: pageInfo.value.parentRouteName });
     };
     const confirmState = ref<"hidden" | "show">("hidden");
 

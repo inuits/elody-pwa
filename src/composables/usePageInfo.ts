@@ -1,18 +1,24 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
-type infoTypes = "routerTitle" | "entityTitle" | "routeType";
+type infoTypes =
+  | "routerTitle"
+  | "entityTitle"
+  | "routeType"
+  | "parentRouteName";
 
 type PageInfo = {
   routerTitle: string;
   entityTitle: string;
   routeType: string;
+  parentRouteName: string;
 };
 
 const pageInfo = ref<PageInfo>({
   routerTitle: "",
   entityTitle: "",
   routeType: "",
+  parentRouteName: "",
 });
 
 export const usePageInfo = () => {
@@ -29,6 +35,7 @@ export const usePageInfo = () => {
   });
 
   router.afterEach((to) => {
+    updatePageInfo(to.matched[0].name?.toString() || "Home", "parentRouteName");
     updatePageInfo(to.meta.type as string, "routeType");
     updatePageInfo(to.meta.title as string);
   });
