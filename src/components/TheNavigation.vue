@@ -57,8 +57,10 @@
       >
     </div>
     <div
-      v-show="auth.isAuthenticated.value === true &&
-        determinePermission('can-start-import', IGNORE_PERMISSIONS)"
+      v-show="
+        auth.isAuthenticated.value === true &&
+        determinePermission('can-start-import')
+      "
       class="flex flex-row items-center menu-item"
     >
       <BaseButton
@@ -74,8 +76,10 @@
       >
     </div>
     <div
-      v-show="auth.isAuthenticated.value === true && 
-        determinePermission('create-entity', IGNORE_PERMISSIONS)"
+      v-show="
+        auth.isAuthenticated.value === true &&
+        determinePermission('create-entity')
+      "
       class="flex flex-row items-center menu-item"
     >
       <BaseButton
@@ -107,20 +111,20 @@
 </template>
 
 <script lang="ts" setup>
-import { inject } from 'vue';
+import { inject } from "vue";
 import BaseButton from "./base/BaseButton.vue";
 import { useUploadModal, modalChoices } from "./UploadModal.vue";
-import { Unicons } from "@/types";
+import { Unicons } from "../types";
 import { useRouter } from "vue-router";
-import { useEditMode } from "@/composables/useEdit";
+import { useEditMode } from "../composables/useEdit";
 import { useCreateModal } from "./CreateModal.vue";
 import { useAuth } from "session-vue-3-oidc-library";
-import { usePermissions } from "@/composables/usePermissions";
-import { changeDocumentTitle } from '@/composables/usePageTitle';
+import { usePermissions } from "../composables/usePermissions";
+import { changeDocumentTitle } from "../composables/usePageTitle";
 
 const auth = useAuth();
 const { determinePermission, loading } = usePermissions();
-const { openUploadModal } = useUploadModal(); 
+const { openUploadModal } = useUploadModal();
 const { openCreateModal } = useCreateModal();
 const router = useRouter();
 const { disableEditMode } = useEditMode();
