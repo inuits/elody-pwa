@@ -76,7 +76,7 @@ export default defineComponent({
       type: Array as PropType<Maybe<Maybe<MetadataAndRelation>[]>>,
       default: () => [],
     },
-    media: { type: Object as PropType<Maybe<String>>, default: undefined },
+    media: { type: String, default: "" },
     thumbIcon: { type: String, default: "" },
     small: { type: Boolean, default: false },
   },
