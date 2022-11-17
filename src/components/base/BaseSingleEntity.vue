@@ -24,7 +24,7 @@
         v-if="
           !loading &&
           mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype.includes('image')
+          mediafileSelectionState.selectedMediafile.mimetype?.includes('image')
         "
         :is-public="mediafileSelectionState.selectedMediafile.isPublic"
         :image-url="mediafileSelectionState.selectedMediafile.filename"
@@ -41,7 +41,7 @@
         v-if="
           !loading &&
           mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype.includes('video')
+          mediafileSelectionState.selectedMediafile.mimetype?.includes('video')
         "
         :source="mediafileSelectionState.selectedMediafile"
       />
@@ -49,7 +49,7 @@
         v-if="
           !loading &&
           mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype.includes('audio')
+          mediafileSelectionState.selectedMediafile.mimetype?.includes('audio')
         "
         :source="mediafileSelectionState.selectedMediafile"
       />
@@ -57,7 +57,7 @@
         v-if="
           !loading &&
           mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype.includes('pdf')
+          mediafileSelectionState.selectedMediafile.mimetype?.includes('pdf')
         "
         :source="mediafileSelectionState.selectedMediafile"
       />
@@ -65,7 +65,7 @@
         v-if="
           !loading &&
           mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype.includes(
+          mediafileSelectionState.selectedMediafile.mimetype?.includes(
             'text/plain'
           )
         "
