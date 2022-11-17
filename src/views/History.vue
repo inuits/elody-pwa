@@ -55,21 +55,21 @@
 </template>
 
 <script lang="ts">
-import { GetJobsDocument, Job } from "@/queries";
-import type { GetJobsQuery } from "@/queries";
+import { GetJobsDocument, Job } from "../queries";
+import type { GetJobsQuery } from "../queries";
 import { useQuery } from "@vue/apollo-composable";
 import { computed, defineComponent, ref, watch, reactive } from "vue";
-import ParentJob from "@/components/ParentJob.vue";
-import BaseDropdown from "@/components/base/BaseDropdown.vue";
-import InputField from "@/components/base/InputField.vue";
-import BasePagination from "@/components/base/BasePagination.vue";
-import { paginationLimits } from "@/components/base/BasePagination.vue";
-import type { PaginationInfo } from "@/components/base/BasePagination.vue";
-import { getJobTypes, jobTypeLabels } from "@/composables/useJobHelpers";
-import ListContainer from "@/components/ListContainer.vue";
-import useRouteHelpers from "@/composables/useRouteHelpers";
-import IconToggle from '../components/base/IconToggle.vue';
-import { Unicons } from '../types'; 
+import ParentJob from "../components/ParentJob.vue";
+import BaseDropdown from "../components/base/BaseDropdown.vue";
+import InputField from "../components/base/InputField.vue";
+import BasePagination from "../components/base/BasePagination.vue";
+import { paginationLimits } from "../components/base/BasePagination.vue";
+import type { PaginationInfo } from "../components/base/BasePagination.vue";
+import { getJobTypes, jobTypeLabels } from "../composables/useJobHelpers";
+import ListContainer from "../components/ListContainer.vue";
+import useRouteHelpers from "../composables/useRouteHelpers";
+import IconToggle from "../components/base/IconToggle.vue";
+import { Unicons } from "../types";
 
 type Filter = {
   query: string;
@@ -89,7 +89,7 @@ export default defineComponent({
     BasePagination,
     InputField,
     ListContainer,
-    IconToggle
+    IconToggle,
   },
   setup() {
     const jobTypes = getJobTypes();
@@ -119,7 +119,7 @@ export default defineComponent({
         query: queryVariables.filters.query,
         type: jobTypeLabels[queryVariables.filters.type],
       },
-      failed: showFailedOnly
+      failed: showFailedOnly.value,
     });
 
     watch(queryVariables, () => {
@@ -129,11 +129,12 @@ export default defineComponent({
 
     watch(showFailedOnly, () => {
       getData();
-    })
+    });
 
     const getData = () => {
       fetchMore({
         variables: {
+          failed: showFailedOnly.value,
           paginationInfo: {
             limit: Number(queryVariables.pagination.limit),
             skip:
@@ -163,7 +164,7 @@ export default defineComponent({
       jobTypes,
       paginationLimits,
       showFailedOnly,
-      Unicons
+      Unicons,
     };
   },
 });
