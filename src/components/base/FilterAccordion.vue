@@ -36,8 +36,8 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import type { PropType } from "vue";
-import { Unicons } from "@/types";
-import BaseLabel from "@/components/base/BaseLabel.vue";
+import { Unicons } from "../../types";
+import BaseLabel from "./BaseLabel.vue";
 export default defineComponent({
   name: "FilterAccordion",
   components: {
@@ -50,7 +50,7 @@ export default defineComponent({
       default: false,
     },
     label: {
-      type: Object as PropType<string | null>,
+      type: String,
       required: false,
     },
   },
