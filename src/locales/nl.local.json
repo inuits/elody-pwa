@@ -102,5 +102,8 @@
   },
   "history-view": {
     "search": "Search History"
+  },
+  "saved-searches": {
+    "new": "Save as new"
   }
 }

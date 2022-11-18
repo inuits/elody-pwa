@@ -3,11 +3,25 @@
     class="lg:w-2/6 md:w-full lg:border-l-2 lg:border-r-2 border-solid border-neutral-50"
   >
     <div>
-      <div class="flex justify-between m-3">
-        <p class="text-xl font-medium">{{$t('filter.filter')}}</p>
-        <p class="bg-blue-50 text-blue-300 rounded-md px-2 py-1">
-          {{ activeCount }} {{$t('filter.active')}}
-        </p>
+      <div class="flex justify-between py-3 px-3 align-center">
+        <div>
+          <p class="pl-1 text-xl font-medium">{{ $t("filter.filter") }}</p>
+        </div>
+
+        <div class="flex justify-between gap-3">
+          <p class="bg-blue-50 text-blue-300 rounded-md px-2 py-1 my-1">
+            {{ activeCount }} {{ $t("filter.active") }}
+          </p>
+
+          <p
+            v-if="pickedSavedSearch"
+            class="bg-blue-50 text-blue-300 rounded-md px-2 py-1 my-1"
+          >
+            {{ pickedSavedSearch.metadata[0].value }}
+          </p>
+
+          <saved-searches :initialFilters="initialFilters" />
+        </div>
       </div>
       <div
         class="flex justify-between border-solid border-b-2 border-neutral-50 px-3 pb-3"
@@ -58,6 +72,7 @@
             :filterkey="filter?.key"
             :is-relation="filter?.isRelation"
           />
+          <!-- {{initialFilters[i]}} -->
           <MultiFilter
             v-if="filter?.type === AdvancedFilterTypes.Multiselect"
             v-model:multiSelectValue="initialFilters[i]"
@@ -66,10 +81,13 @@
         </template>
       </FilterAccordion>
     </div>
+    <!-- <pre>
+      {{initialFilters}}
+    </pre> -->
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted } from "vue";
+import { defineComponent, ref, computed, onMounted, watch } from "vue";
 import type { PropType } from "vue";
 import FilterAccordion from "@/components/base/FilterAccordion.vue";
 import { useQuery } from "@vue/apollo-composable";
@@ -79,7 +97,11 @@ import MinmaxFilter from "@/components/base/MinmaxFilter.vue";
 import TextFilter from "@/components/base/TextFilter.vue";
 import ChecklistFilter from "@/components/base/ChecklistFilter.vue";
 import MultiFilter from "@/components/base/MultiFilter.vue";
+import { Unicons } from "@/types";
+import SavedSearches from "@/components/SavedSearches.vue";
 // import AndOrToggle from './base/AndOrToggle.vue';
+import { useSavedSearchHelper } from "../composables/useSavedSearchHelper";
+
 import {
   clearAdvancedSearchInput,
   getActiveFilters,
@@ -95,6 +117,7 @@ export default defineComponent({
     TextFilter,
     ChecklistFilter,
     MultiFilter,
+    SavedSearches,
     // AndOrToggle,
   },
   props: {
@@ -121,6 +144,13 @@ export default defineComponent({
 
     const applyFilters = () => {
       const returnArray = initialFilters.value.map((filter: FilterInList) => {
+        if (filter.input.minMaxInput)
+          filter.input.minMaxInput["__typename"] = undefined;
+        if (filter.input.multiSelectInput)
+          filter.input.multiSelectInput["__typename"] = undefined;
+        if (filter.input.textInput)
+          filter.input.textInput["__typename"] = undefined;
+        if (filter.input) filter.input["__typename"] = undefined;
         return filter.input;
       });
       emit("activeFilters", returnArray);
@@ -131,6 +161,7 @@ export default defineComponent({
         initialFilters.value,
         props.acceptedEntityTypes
       );
+      pickedSavedSearch.value = undefined;
     };
 
     applyFilters();
@@ -141,6 +172,25 @@ export default defineComponent({
       }
     });
 
+    const { pickedSavedSearch } = useSavedSearchHelper();
+
+    watch(
+      () => pickedSavedSearch.value,
+      () => {
+        if (pickedSavedSearch.value) {
+          pickedSavedSearch.value.definition.forEach((filter) => {
+            initialFilters.value.forEach((inFilter) => {
+              console.log(filter.key, inFilter.input.key);
+              if (filter.key === inFilter.input.key) {
+                inFilter.input = filter;
+                inFilter.isActive = true;
+              }
+            });
+          });
+        }
+      }
+    );
+
     return {
       filters,
       activeCount,
@@ -149,6 +199,8 @@ export default defineComponent({
       clearFilters,
       AdvancedFilterTypes,
       AndOrChoice,
+      Unicons,
+      pickedSavedSearch,
     };
   },
 });

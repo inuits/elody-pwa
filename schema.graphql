@@ -265,10 +265,27 @@ input MinMaxInput {
   max: Int
   isRelation: Boolean
 }
+
+type MinMax {
+  min: Int
+  max: Int
+  isRelation: Boolean
+}
+
 input TextInput {
   value: String
 }
+
+type Text {
+  value: String
+}
+
 input MultiSelectInput {
+  value: [String]
+  AndOrValue: Boolean
+}
+
+type MultiSelect {
   value: [String]
   AndOrValue: Boolean
 }
@@ -506,6 +523,9 @@ type Mutation {
   getAssetsRelationedWithMediafFile(mediaFileId: String!): [Asset]
   updateMediafilesOrder(value: OrderArrayInput!): String
   deleteRelations(id: String!, metadata: [MetadataInput!]!): String
+  savedSearches: SavedSearchesResults
+  createSavedSearch(savedSearchInput: SavedSearchInput!): SavedSearchedEntity
+  deleteSavedSearch(uuid: String!): String
 }
 
 enum deletePaths {
@@ -533,3 +553,45 @@ type File {
   mimetype: String!
   encoding: String!
 }
+
+type SavedSearchesResults {
+  results: [SavedSearchedEntity]
+  count: Int
+  limit: Int
+}
+
+type SavedSearchedEntity {
+  _key: String
+  definition: [Definition]
+  metadata: [SavedSearchesMetadata]!
+  user: String
+}
+
+type SavedSearchesMetadata {
+  key: String
+  value: String
+  lang: String
+}
+
+type Definition {
+  _id: String
+  type: String
+  minMaxInput: MinMax
+  textInput: Text
+  multiSelectInput: MultiSelect
+  key: String
+}
+
+input SavedSearchMetadataInput {
+  lang: String,
+  value: String,
+  key: String
+}
+
+input SavedSearchInput {
+  type: String
+  private: Boolean,
+  metadata: [SavedSearchMetadataInput],
+  definition: [FilterInput!]!
+}
+
