@@ -967,6 +967,68 @@ mutation updateMediafilesOrder($value: OrderArrayInput!) {
   updateMediafilesOrder(value: $value)
 }
 
+mutation savedSearches {
+  savedSearches {
+    results {
+      _key
+      definition {
+        key
+        type
+        minMaxInput {
+          min
+          max
+          isRelation
+        }
+        textInput {
+          value
+        }
+        multiSelectInput {
+          value
+          AndOrValue
+        }
+      }
+      user
+      metadata {
+        key
+        value
+        lang
+      }
+    }
+  }
+}
+
+mutation createSavedSearch($savedSearchInput: SavedSearchInput!) {
+  createSavedSearch(savedSearchInput: $savedSearchInput) {
+    _key
+    definition {
+      key
+      type
+      minMaxInput {
+        min
+        max
+        isRelation
+      }
+      textInput {
+        value
+      }
+      multiSelectInput {
+        value
+        AndOrValue
+      }
+    }
+    user
+    metadata {
+      key
+      value
+      lang
+    }
+  }
+}
+
+mutation deleteSavedSearch($uuid: String!) {
+  deleteSavedSearch(uuid: $uuid) 
+}
+
 query GetForms($type: String!) {
   Form(type: $type) {
     fields {
