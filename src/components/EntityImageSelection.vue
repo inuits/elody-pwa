@@ -45,7 +45,9 @@
                 ]"
                 :src="
                   !element.mimetype.includes('pdf')
-                    ? `/api/iiif/3/${element.transcode_filename}/square/100,/0/default.jpg`
+                    ? `/api/iiif/3/${
+                        element.transcode_filename || element.filename
+                      }/square/100,/0/default.jpg`
                     : element.thumbnail_file_location
                 "
                 @click="selectImage(element)"

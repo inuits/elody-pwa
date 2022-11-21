@@ -127,6 +127,9 @@ import useDropzoneHelper from "../composables/useDropzoneHelper";
 import { onMounted, ref, defineComponent } from "vue";
 import { useMutation } from "@vue/apollo-composable";
 import Dropzone from "dropzone";
+import { useUploadModal } from "./UploadModal.vue";
+import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
+import useMetaDataHelper from "../composables/useMetaDataHelper";
 
 export default defineComponent({
   name: "DropZone",
@@ -153,6 +156,9 @@ export default defineComponent({
     const dropzoneDiv = ref<HTMLDivElement | undefined>(undefined);
     const triggerUpload = ref<() => void | undefined>();
     const fileCount = ref<number>(0);
+    const { closeUploadModal } = useUploadModal();
+    const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
+    const { mediafiles } = useMetaDataHelper();
     clearDropzoneErrorMessages();
 
     onMounted(async () => {
@@ -178,7 +184,11 @@ export default defineComponent({
           updateFileCount();
         });
 
-        onDone(() => {
+        onDone((value) => {
+          if (value.data && value.data.postMediaFile) {
+            mediafiles.value.push(value.data.postMediaFile);
+            addMediaFileToLinkList(value.data.postMediaFile);
+          }
           increaseSuccessCounter();
         });
 
@@ -189,6 +199,10 @@ export default defineComponent({
               file,
             });
           });
+          isUploading.value = false;
+          if (!errorMessages.value.length) {
+            closeUploadModal();
+          }
         };
 
         triggerUpload.value = () => {

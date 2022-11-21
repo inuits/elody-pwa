@@ -8,7 +8,7 @@ import { defineComponent } from "vue";
 import MediaInfo from "./MediaInfo.vue";
 
 export default defineComponent({
-  name: "SrtViewer",
+  name: "TextViewer",
   components: {
     MediaInfo,
   },
