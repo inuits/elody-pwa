@@ -32,3 +32,11 @@ export const stringIsUrl = (value: string): Boolean => {
   }
   return isUrl;
 };
+
+export const getIdFromKey = (prefix: string = "entities", key: string) => {
+  if (key.includes(prefix + "/")) {
+    return key.replace(prefix + "/", "");
+  } else {
+    return key;
+  }
+};

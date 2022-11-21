@@ -10,13 +10,13 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import BaseSingleEntity from "@/components/base/BaseSingleEntity.vue";
+import BaseSingleEntity from "../components/base/BaseSingleEntity.vue";
 import { useMutation } from "@vue/apollo-composable";
-import { GetAssetsRelationedWithMediafFileDocument } from "@/queries";
+import { GetAssetsRelationedWithMediafFileDocument } from "../queries";
 import type {
   GetAssetsRelationedWithMediafFileMutation,
   Entity,
-} from "@/queries";
+} from "../queries";
 import { useRoute } from "vue-router";
 
 export default defineComponent({

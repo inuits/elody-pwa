@@ -61,7 +61,7 @@
         "
         :source="mediafileSelectionState.selectedMediafile"
       />
-      <SrtViewer
+      <TextViewer
         v-if="
           !loading &&
           mediafileSelectionState.selectedMediafile !== undefined &&
@@ -126,7 +126,7 @@ import useDropzoneHelper from "../../composables/useDropzoneHelper";
 import useMediaAssetLinkHelper from "../../composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "../../composables/useMetaDataHelper";
 import { useUploadModal } from "../UploadModal.vue";
-import SrtViewer from "./SrtViewer.vue";
+import TextViewer from "./TextViewer.vue";
 import LinkedAssetsList from "../LinkedAssetsList.vue";
 import { usePermissions } from "../../composables/usePermissions";
 
@@ -139,7 +139,7 @@ export default defineComponent({
     AudioPlayer,
     PDFViewer,
     LinkedAssetsList,
-    SrtViewer,
+    TextViewer,
     EntityImageSelection,
   },
   props: {
@@ -158,14 +158,6 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const {
-      myDropzone,
-      isUploading,
-      selectedFiles,
-      increaseSuccessCounter,
-      errorMessages,
-    } = useDropzoneHelper();
-    const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
     const { lastAdjustedMediaFileMetaData, mediafiles, clearMediafiles } =
       useMetaDataHelper();
     const id = asString(useRoute().params["id"]);
@@ -175,7 +167,6 @@ export default defineComponent({
 
     const { editMode, showEditToggle } = useEditMode();
     const { updatePageInfo } = usePageInfo();
-    const { closeUploadModal } = useUploadModal();
     const { canEdit, canDelete, canGet } = usePermissions();
 
     const queryVariables = reactive<GetEntityByIdQueryVariables>({
@@ -203,34 +194,9 @@ export default defineComponent({
       return undefined;
     });
 
-    const { mutate, onDone } = useMutation<PostMediaFileMutation>(
-      PostMediaFileDocument
-    );
-
     watch(title, (value: Maybe<string> | undefined) => {
       value && updatePageInfo(value, "entityTitle");
     });
-
-    watch(
-      () => isUploading.value,
-      async () => {
-        if (isUploading.value) {
-          for (const file of selectedFiles.value) {
-            await mutate({
-              mediaFileInput: { filename: file.upload.filename },
-              file: file,
-            }).catch(() => {
-              return true;
-            });
-          }
-          myDropzone.value.removeAllFiles();
-          isUploading.value = false;
-          if (errorMessages.value.length === 0) {
-            closeUploadModal();
-          }
-        }
-      }
-    );
 
     const updateListWhenChanges = (newValue: any, oldValue: any) => {
       if (
@@ -257,14 +223,6 @@ export default defineComponent({
       },
       { deep: true }
     );
-
-    onDone((value) => {
-      if (value.data && value.data.postMediaFile) {
-        mediafiles.value.push(value.data.postMediaFile);
-        addMediaFileToLinkList(value.data.postMediaFile);
-      }
-      increaseSuccessCounter();
-    });
 
     onBeforeRouteUpdate(async (to: any) => {
       //@ts-ignore
