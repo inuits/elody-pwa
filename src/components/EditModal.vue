@@ -23,8 +23,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { useEditMode } from "@/composables/useEdit";
-import BaseButton from "@/components/base/BaseButton.vue";
+import { useEditMode } from "../composables/useEdit";
+import BaseButton from "../components/base/BaseButton.vue";
 
 export default defineComponent({
   name: "EditModal",

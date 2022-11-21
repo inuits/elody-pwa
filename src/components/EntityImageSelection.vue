@@ -29,29 +29,6 @@
                 class="hidden group-hover:block"
                 @click="addToSaveCallback(element._id)"
               />
-              <img
-                v-if="
-                  element.thumbnail_file_location &&
-                  !element.mimetype.includes('audio')
-                "
-                :class="[
-                  'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
-                  toBeDeleted.includes(element._id)
-                    ? 'filter blur-xs grayscale'
-                    : '',
-                  selectedImage && element.filename === selectedImage.filename
-                    ? 'border-2 border-blue-500'
-                    : '',
-                ]"
-                :src="
-                  !element.mimetype.includes('pdf')
-                    ? `/api/iiif/3/${
-                        element.transcode_filename || element.filename
-                      }/square/100,/0/default.jpg`
-                    : element.thumbnail_file_location
-                "
-                @click="selectImage(element)"
-              />
               <AudioThumbnail
                 v-if="
                   element.thumbnail_file_location &&
@@ -69,7 +46,7 @@
                 @click="selectImage(element)"
               />
               <SvgThumbnail
-                v-if="
+                v-else-if="
                   element.thumbnail_file_location &&
                   element?.mimetype.includes('text/plain')
                 "
@@ -82,6 +59,26 @@
                     ? 'border-2 border-blue-500'
                     : '',
                 ]"
+                @click="selectImage(element)"
+              />
+              <img
+                v-else-if="element.thumbnail_file_location"
+                :class="[
+                  'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
+                  toBeDeleted.includes(element._id)
+                    ? 'filter blur-xs grayscale'
+                    : '',
+                  selectedImage && element.filename === selectedImage.filename
+                    ? 'border-2 border-blue-500'
+                    : '',
+                ]"
+                :src="
+                  !element.mimetype.includes('pdf')
+                    ? `/api/iiif/3/${
+                        element.transcode_filename || element.filename
+                      }/square/100,/0/default.jpg`
+                    : element.thumbnail_file_location
+                "
                 @click="selectImage(element)"
               />
             </div>
