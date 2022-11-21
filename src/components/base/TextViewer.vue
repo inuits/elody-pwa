@@ -1,10 +1,13 @@
 <template>
-  <div class="flex w-full h-full justify-center items-center">
-    <media-info :meta-data="source.metadata" />
+  <div class="flex w-full h-full relative">
+    <div class="w-full h-full p-4 bg-neutral-20">
+      <p>{{ fileContent }}</p>
+    </div>
+    <media-info class="" :meta-data="source.metadata" />
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, onMounted, ref } from "vue";
 import MediaInfo from "./MediaInfo.vue";
 
 export default defineComponent({
@@ -18,8 +21,17 @@ export default defineComponent({
       required: true,
     },
   },
-  setup() {
-    return {};
+  setup(props) {
+    const fileContent = ref<string>();
+    console.log(props.source);
+
+    onMounted(() => {
+      fetch("/api/mediafile/" + props.source.filename).then(async (res) => {
+        fileContent.value = await res.text();
+      });
+    });
+
+    return { fileContent };
   },
 });
 </script>
