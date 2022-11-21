@@ -61,7 +61,7 @@ const useDropzoneHelper = () => {
     return {
       url: "/upload",
       autoProcessQueue: false,
-      acceptedFiles: ".jpg, .jpeg, .mp3, .srt, .png, .tiff",
+      acceptedFiles: ".jpg, .jpeg, .mp3, .srt, .png, .tiff, .mp4",
       previewTemplate: dropzonePreviewDiv.value?.outerHTML,
       uploadMultiple: true,
       parallelUploads: 99,
