@@ -38,6 +38,8 @@ import {
   uniExclamationTriangle,
   uniCheckCircle,
   uniEllipsisV,
+  uniSave,
+  uniRedo,
 } from "vue-unicons/dist/icons";
 
 export const Unicons: Record<string, { name: string }> = {
@@ -80,4 +82,6 @@ export const Unicons: Record<string, { name: string }> = {
   ExclamationTriangle: uniExclamationTriangle,
   CheckCircle: uniCheckCircle,
   EllipsisV: uniEllipsisV,
+  Save: uniSave,
+  Redo: uniRedo,
 };

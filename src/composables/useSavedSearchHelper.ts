@@ -1,11 +1,15 @@
 import { ref } from "vue";
 type ModalState = "initial" | "show" | "hide" | "loading";
-export type CreateModalType = {
+type ModalActions = "create" | "edit";
+
+export type ModalType = {
   state: ModalState;
+  action: ModalActions;
 };
 
-const createModalState = ref<CreateModalType>({
+const createModalState = ref<ModalType>({
   state: "hide",
+  action: "create",
 });
 
 const isDisplayingContextMenu = ref<Boolean>(false);
@@ -29,19 +33,28 @@ export const useSavedSearchHelper = () => {
     isDisplayingContextMenu.value = !isDisplayingContextMenu.value;
   };
 
-  const updateCreateModal = (CreateModalInput: CreateModalType) => {
+  const updateCreateModal = (CreateModalInput: ModalType) => {
     createModalState.value = CreateModalInput;
   };
 
   const closeCreateModal = () => {
     updateCreateModal({
       state: "hide",
+      action: "create",
     });
   };
 
   const openCreateModal = () => {
     updateCreateModal({
       state: "show",
+      action: "create",
+    });
+  };
+
+  const openEditModal = () => {
+    updateCreateModal({
+      state: "show",
+      action: "edit",
     });
   };
 
@@ -70,6 +83,7 @@ export const useSavedSearchHelper = () => {
     createModalState,
     closeCreateModal,
     openCreateModal,
+    openEditModal,
     isDisplayingContextMenu,
     toggleContextMenu,
     savedSearches,

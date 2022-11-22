@@ -527,6 +527,9 @@ type Mutation {
   savedSearches: EntitiesResults
   createSavedSearch(savedSearchInput: SavedSearchInput!): SavedSearchedEntity
   deleteSavedSearch(uuid: String!): String
+  patchSavedSearchTitle(uuid: String!, title: String!): SavedSearchedEntity
+  patchSavedSearchDefinition(uuid: String!, definition: [FilterInput!]!): SavedSearchedEntity
+  getSavedSearchById(uuid: String!): SavedSearchedEntity
 }
 
 enum deletePaths {

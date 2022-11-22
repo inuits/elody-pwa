@@ -999,47 +999,7 @@ mutation updateMediafilesOrder($value: OrderArrayInput!) {
   updateMediafilesOrder(value: $value)
 }
 
-mutation savedSearches {
-    savedSearches {
-      results {
-        ... on SavedSearchedEntity {
-          _key
-          definition {
-            key
-            type
-            minMaxInput {
-              min
-              max
-              isRelation
-            }
-            textInput {
-              value
-            }
-            multiSelectInput {
-              value
-              AndOrValue
-            }
-          }
-          user
-          metadata(
-            keys: []
-            excludeOrInclude: include
-          ) {
-            __typename
-            ... on Metadata {
-              key
-              value
-              label
-              immutable
-            }
-          }
-        }  
-      }
-    }
-}
-
-mutation createSavedSearch($savedSearchInput: SavedSearchInput!) {
-  createSavedSearch(savedSearchInput: $savedSearchInput) {
+fragment savedSearch on SavedSearchedEntity {
     _key
     definition {
       key
@@ -1070,11 +1030,42 @@ mutation createSavedSearch($savedSearchInput: SavedSearchInput!) {
         immutable
       }
     }  
+}
+
+mutation savedSearches {
+    savedSearches {
+      results {
+        ...savedSearch
+      }
+    }
+}
+
+mutation createSavedSearch($savedSearchInput: SavedSearchInput!) {
+  createSavedSearch(savedSearchInput: $savedSearchInput) {
+    ...savedSearch
   }
 }
 
 mutation deleteSavedSearch($uuid: String!) {
   deleteSavedSearch(uuid: $uuid) 
+}
+
+mutation patchSavedSearchTitle($uuid: String!, $title: String!) {
+  patchSavedSearchTitle(uuid: $uuid, title: $title) {
+    ...savedSearch
+  }
+}
+
+mutation patchSavedSearchDefinition($uuid: String!, $definition: [FilterInput!]!) {
+  patchSavedSearchDefinition(uuid: $uuid, definition: $definition) {
+    ...savedSearch
+  }
+}
+
+mutation getSavedSearchById($uuid: String!) {
+  getSavedSearchById(uuid: $uuid) {
+    ...savedSearch
+  }
 }
 
 query GetForms($type: String!) {

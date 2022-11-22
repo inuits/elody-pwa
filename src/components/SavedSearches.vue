@@ -18,7 +18,23 @@
   >
     <div role="none">
       <a
-        @click="open()"
+        @click="updateSelectedSearch()"
+        :class="
+          !pickedSavedSearch
+            ? 'opacity-40 cursor-default'
+            : 'hover:bg-neutral-50 cursor-pointer'
+        "
+        class="text-gray-700 block px-4 py-2 text-sm flex items-center gap-2"
+        role="menuitem"
+        tabindex="-1"
+        id="menu-item-add"
+      >
+        <BaseIcon class="w-6 h-6 cursor-pointer" :name="Unicons.Save.name" />
+        Save changes
+      </a>
+
+      <a
+        @click="openCreate()"
         :class="
           initialFilters.every((e) => {
             return e.isActive === false;
@@ -35,6 +51,7 @@
         {{ $t("saved-searches.new") }}
       </a>
       <a
+        @click="openEdit()"
         :class="
           !pickedSavedSearch
             ? 'opacity-40 cursor-default'
@@ -48,6 +65,23 @@
         <BaseIcon class="w-6 h-6 cursor-pointer" :name="Unicons.Edit.name" />
         Edit label
       </a>
+
+      <a
+        @click="resetSelectedSavedSearch()"
+        :class="
+          !pickedSavedSearch
+            ? 'opacity-40 cursor-default'
+            : 'hover:bg-neutral-50 cursor-pointer'
+        "
+        class="text-gray-700 block px-4 py-2 text-sm flex items-center gap-2"
+        role="menuitem"
+        tabindex="-1"
+        id="menu-item-add"
+      >
+        <BaseIcon class="w-6 h-6 cursor-pointer" :name="Unicons.Redo.name" />
+        Reset
+      </a>
+
       <a
         @click="showConfirmation"
         :class="
@@ -120,10 +154,17 @@ import BaseButton from "../components/base/BaseButton.vue";
 import { Unicons } from "@/types";
 import PlusCircleIcon from "../components/base/PlusCircleIcon.vue";
 import { useMutation } from "@vue/apollo-composable";
-import { SavedSearchesDocument, DeleteSavedSearchDocument } from "@/queries";
+import {
+  SavedSearchesDocument,
+  DeleteSavedSearchDocument,
+  PatchSavedSearchDefinitionDocument,
+  GetSavedSearchByIdDocument,
+} from "@/queries";
 import type {
   SavedSearchesMutation,
   DeleteSavedSearchMutation,
+  PatchSavedSearchDefinitionMutation,
+  GetSavedSearchByIdMutation,
 } from "@/queries";
 import { useSavedSearchHelper } from "../composables/useSavedSearchHelper";
 import CreateSavedSearchModal from "@/components/CreateSavedSearchModal.vue";
@@ -143,6 +184,7 @@ const props = withDefaults(
 );
 
 const {
+  openEditModal,
   openCreateModal,
   toggleContextMenu,
   isDisplayingContextMenu,
@@ -154,8 +196,19 @@ const {
 const { mutate, onDone } = useMutation<SavedSearchesMutation>(
   SavedSearchesDocument
 );
+
 const { mutate: deleteSavedSearchMutate, onDone: onDoneDelete } =
   useMutation<DeleteSavedSearchMutation>(DeleteSavedSearchDocument);
+
+const {
+  mutate: patchSavedSearchDefinitionMutate,
+  onDone: onDonePatchDefinition,
+} = useMutation<PatchSavedSearchDefinitionMutation>(
+  PatchSavedSearchDefinitionDocument
+);
+
+const { mutate: getByIdMutate, onDone: onDoneGetById } =
+  useMutation<GetSavedSearchByIdMutation>(GetSavedSearchByIdDocument);
 
 mutate();
 
@@ -167,7 +220,7 @@ const refetchSavedSearches = () => {
   mutate();
 };
 
-const open = () => {
+const openCreate = () => {
   if (
     !props.initialFilters.every((e) => {
       return e.isActive === false;
@@ -177,7 +230,13 @@ const open = () => {
   }
 };
 
-const deleteSavedSearch = async () => {
+const openEdit = () => {
+  if (pickedSavedSearch.value) {
+    openEditModal();
+  }
+};
+
+const deleteSavedSearch = () => {
   deleteSavedSearchMutate({ uuid: pickedSavedSearch.value._key });
   onDoneDelete(() => {
     pickedSavedSearch.value = undefined;
@@ -195,6 +254,46 @@ const showConfirmation = () => {
 const pick = (savedSearch: any) => {
   pickedSavedSearch.value = savedSearch;
   isDisplayingContextMenu.value = false;
+};
+
+const resetSelectedSavedSearch = () => {
+  getByIdMutate({ uuid: pickedSavedSearch.value._key });
+  onDoneGetById((res) => {
+    pick(res.data.getSavedSearchById);
+  });
+};
+
+function clearTypename(o) {
+  Object.keys(o).forEach(function (k) {
+    if (o[k] !== null && typeof o[k] === "object") {
+      clearTypename(o[k]);
+      return;
+    }
+    if (typeof o[k] === "string") {
+      if (k === "__typename") {
+        o[k] = undefined;
+      }
+    }
+  });
+}
+
+const updateSelectedSearch = () => {
+  if (pickedSavedSearch.value) {
+    var definition = [];
+    props.initialFilters.forEach((filter: FilterInList) => {
+      if (filter.isActive) {
+        clearTypename(filter.input);
+        definition.push(filter.input);
+      }
+    });
+    patchSavedSearchDefinitionMutate({
+      uuid: pickedSavedSearch.value._key,
+      definition: definition,
+    });
+    onDonePatchDefinition((res: any) => {
+      pickedSavedSearch.value = res.data.patchSavedSearchDefinition;
+    });
+  }
 };
 
 window.addEventListener("click", function (e) {

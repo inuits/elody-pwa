@@ -19,7 +19,9 @@
             searchTitle.length > 0 ? 'mt-2 opacity-100' : 'mt-2 opacity-40'
           "
           style="margin-left: -1px"
-          :label="$t('form.create')"
+          :label="
+            createModalState.action === 'create' ? $t('form.create') : 'Edit'
+          "
           @click="create"
         />
       </div>
@@ -29,13 +31,19 @@
 <script lang="ts">
 import BaseModal from "@/components/base/BaseModal.vue";
 import { Entitytyping } from "@/queries";
-import { defineComponent, ref, PropType } from "vue";
+import { defineComponent, ref, PropType, watch } from "vue";
 import BaseButton from "./base/BaseButton.vue";
 import { useSavedSearchHelper } from "../composables/useSavedSearchHelper";
 import { FilterInList } from "@/composables/useFilterHelper";
 import { useMutation } from "@vue/apollo-composable";
-import { CreateSavedSearchDocument } from "@/queries";
-import type { CreateSavedSearchMutation } from "@/queries";
+import {
+  CreateSavedSearchDocument,
+  PatchSavedSearchTitleDocument,
+} from "@/queries";
+import type {
+  CreateSavedSearchMutation,
+  PatchSavedSearchTitleMutation,
+} from "@/queries";
 export default defineComponent({
   name: "CreateEntity",
   components: { BaseButton, BaseModal },
@@ -50,6 +58,17 @@ export default defineComponent({
       useSavedSearchHelper();
     const searchTitle = ref<string>("");
     const savedSearch = ref<any>();
+
+    watch(
+      () => createModalState.value.action,
+      () => {
+        if (createModalState.value.action === "edit") {
+          searchTitle.value = pickedSavedSearch.value.metadata[0].value;
+        } else {
+          searchTitle.value = "";
+        }
+      }
+    );
 
     const initSavedSearch = () => {
       savedSearch.value = {
@@ -72,18 +91,40 @@ export default defineComponent({
       CreateSavedSearchDocument
     );
 
+    const { mutate: mutatePatchTitle, onDone: onDonePatchTitle } =
+      useMutation<PatchSavedSearchTitleMutation>(PatchSavedSearchTitleDocument);
+
     const create = () => {
-      initSavedSearch();
-      savedSearch.value.metadata[0].value = searchTitle.value;
-      props.initialFilters.forEach((filter: FilterInList) => {
-        if (filter.isActive) {
-          savedSearch.value.definition.push(filter.input);
+      if (createModalState.value.action === "create") {
+        initSavedSearch();
+        savedSearch.value.metadata[0].value = searchTitle.value;
+        props.initialFilters.forEach((filter: FilterInList) => {
+          if (filter.isActive) {
+            savedSearch.value.definition.push(filter.input);
+          }
+        });
+        if (searchTitle.value.length > 0) {
+          mutate({ savedSearchInput: savedSearch.value });
+          onDone((res: any) => {
+            pickedSavedSearch.value = res.data.createSavedSearch;
+            emit("refetchSavedSearches", true);
+            searchTitle.value = "";
+            closeCreateModal();
+          });
         }
-      });
-      if (searchTitle.value.length > 0) {
-        mutate({ savedSearchInput: savedSearch.value });
-        onDone((res: any) => {
-          pickedSavedSearch.value = res.data.createSavedSearch;
+      }
+
+      if (
+        createModalState.value.action === "edit" &&
+        searchTitle.value.length > 0
+      ) {
+        mutatePatchTitle({
+          uuid: pickedSavedSearch.value._key,
+          title: searchTitle.value,
+        });
+        onDonePatchTitle((res) => {
+          pickedSavedSearch.value.metadata[0].value =
+            res.data.patchSavedSearchTitle.metadata[0].value;
           emit("refetchSavedSearches", true);
           searchTitle.value = "";
           closeCreateModal();
@@ -92,6 +133,7 @@ export default defineComponent({
     };
 
     return {
+      pickedSavedSearch,
       create,
       searchTitle,
       Entitytyping,
