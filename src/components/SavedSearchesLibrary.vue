@@ -5,7 +5,7 @@
     :has-simple-search="true"
     :search-input-type="SearchInputType.AdvancedSavedSearchType"
     :list-item-route-name="'SavedSearch'"
-    :search-placeholder="'Search Saved Searches...'"
+    :search-placeholder="$t('saved-searches.search-saved-searches')"
     :advanced-filters-choice="'entityFilters'"
     @add-selection="addSelection"
     :enable-selection="enableSelection"
@@ -30,7 +30,7 @@ export default defineComponent({
   components: {
     BaseLibrary,
   },
-  setup: (props, { emit }) => {
+  setup: () => {
     const { pickedSavedSearch, closeSearchSavedSearchesModal } =
       useSavedSearchHelper();
 

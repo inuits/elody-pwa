@@ -30,7 +30,7 @@
         id="menu-item-add"
       >
         <BaseIcon class="w-6 h-6 cursor-pointer" :name="Unicons.Save.name" />
-        Save changes
+        {{ $t("saved-searches.save-changes") }}
       </a>
 
       <a
@@ -63,7 +63,7 @@
         id="menu-item-add"
       >
         <BaseIcon class="w-6 h-6 cursor-pointer" :name="Unicons.Edit.name" />
-        Edit label
+        {{ $t("saved-searches.edit-label") }}
       </a>
 
       <a
@@ -79,7 +79,7 @@
         id="menu-item-add"
       >
         <BaseIcon class="w-6 h-6 cursor-pointer" :name="Unicons.Redo.name" />
-        Reset
+        {{ $t("saved-searches.reset") }}
       </a>
 
       <a
@@ -95,7 +95,7 @@
         id="menu-item-add"
       >
         <BaseIcon class="w-6 h-6 cursor-pointer" :name="Unicons.Trash.name" />
-        Delete
+        {{ $t("saved-searches.delete") }}
       </a>
 
       <hr class="border-t-1 border-neutral-50" />
@@ -129,7 +129,7 @@
           class="w-6 h-6 cursor-pointer"
           :name="Unicons.SearchGlass.name"
         />
-        All filters
+        {{ $t("saved-searches.all-filters") }}
       </a>
     </div>
   </div>
@@ -144,8 +144,6 @@
     @refetchSavedSearches="refetchSavedSearches"
     :initialFilters="initialFilters"
   />
-
-  <!-- <search-saved-searches-modal /> -->
 </template>
 
 <script lang="ts" setup>
@@ -182,6 +180,8 @@ const props = withDefaults(
     },
   }
 );
+
+const emit = defineEmits(["removedSelectedSearch"]);
 
 const {
   openEditModal,
@@ -241,6 +241,7 @@ const deleteSavedSearch = () => {
   onDoneDelete(() => {
     pickedSavedSearch.value = undefined;
     mutate();
+    emit("removedSelectedSearch");
   });
 };
 const confirmState = ref<"hidden" | "show">("hidden");

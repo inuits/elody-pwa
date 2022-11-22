@@ -2,11 +2,13 @@
   <base-modal
     :scroll="true"
     :modal-state="createModalState.state"
-    @hide-modal="closeCreateModal"
+    @hide-modal="closeModal"
   >
     <div class="bg-neutral-0 w-full">
       <div class="p-6">
-        <h1>Search title</h1>
+        <h1>
+          {{ $t("saved-searches.search-title") }}
+        </h1>
 
         <input
           v-model="searchTitle"
@@ -15,12 +17,15 @@
         />
 
         <BaseButton
+          bg-color="neutral-30"
           :class="
             searchTitle.length > 0 ? 'mt-2 opacity-100' : 'mt-2 opacity-40'
           "
           style="margin-left: -1px"
           :label="
-            createModalState.action === 'create' ? $t('form.create') : 'Edit'
+            createModalState.action === 'create'
+              ? $t('form.create')
+              : $t('saved-searches.edit')
           "
           @click="create"
         />
@@ -45,7 +50,7 @@ import type {
   PatchSavedSearchTitleMutation,
 } from "@/queries";
 export default defineComponent({
-  name: "CreateEntity",
+  name: "CreateSavedSearchModal",
   components: { BaseButton, BaseModal },
   props: {
     initialFilters: {
@@ -59,13 +64,17 @@ export default defineComponent({
     const searchTitle = ref<string>("");
     const savedSearch = ref<any>();
 
+    const emptySearchTitle = () => {
+      searchTitle.value = "";
+    };
+
     watch(
       () => createModalState.value.action,
       () => {
         if (createModalState.value.action === "edit") {
           searchTitle.value = pickedSavedSearch.value.metadata[0].value;
         } else {
-          searchTitle.value = "";
+          emptySearchTitle();
         }
       }
     );
@@ -108,7 +117,7 @@ export default defineComponent({
           onDone((res: any) => {
             pickedSavedSearch.value = res.data.createSavedSearch;
             emit("refetchSavedSearches", true);
-            searchTitle.value = "";
+            emptySearchTitle();
             closeCreateModal();
           });
         }
@@ -126,12 +135,16 @@ export default defineComponent({
           pickedSavedSearch.value.metadata[0].value =
             res.data.patchSavedSearchTitle.metadata[0].value;
           emit("refetchSavedSearches", true);
-          searchTitle.value = "";
+          emptySearchTitle();
           closeCreateModal();
         });
       }
     };
 
+    const closeModal = () => {
+      closeCreateModal();
+      emptySearchTitle();
+    };
     return {
       pickedSavedSearch,
       create,
@@ -139,6 +152,7 @@ export default defineComponent({
       Entitytyping,
       closeCreateModal,
       createModalState,
+      closeModal,
     };
   },
 });
