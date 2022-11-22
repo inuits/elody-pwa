@@ -23,7 +23,6 @@ export default defineComponent({
   },
   setup(props) {
     const fileContent = ref<string>();
-    console.log(props.source);
 
     onMounted(() => {
       fetch("/api/mediafile/" + props.source.filename).then(async (res) => {
