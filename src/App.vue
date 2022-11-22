@@ -1,6 +1,6 @@
 <template>
   <div>
-    <the-navigation class="navbar"/>
+    <the-navigation class="navbar" />
     <div :class="[`pl-24 h-screen flex flex-col`]">
       <the-header />
       <div :class="['flex-grow', { 'h-full overflow-hidden': isSingle }]">
@@ -11,6 +11,7 @@
     <edit-modal />
     <pick-entity-modal />
     <create-modal />
+    <search-saved-searches-modal />
   </div>
 </template>
 
@@ -25,6 +26,7 @@ import EditModal from "@/components/EditModal.vue";
 import useRouteHelpers from "./composables/useRouteHelpers";
 import { useHead } from "@vueuse/head";
 import PickEntityModal from "@/components/PickEntityModal.vue";
+import SearchSavedSearchesModal from "@/components/searchSavedSearchesModal.vue";
 
 export default defineComponent({
   name: "App",
@@ -35,6 +37,7 @@ export default defineComponent({
     EditModal,
     PickEntityModal,
     CreateModal,
+    SearchSavedSearchesModal,
   },
   inject: { DefaultOIDC },
   setup() {

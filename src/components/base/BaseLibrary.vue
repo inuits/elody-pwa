@@ -1,14 +1,17 @@
 <template>
   <div class="lg:flex">
     <FilterSideBar
-      v-show="!isDrawerHiding"
+      v-show="!isDrawerHiding && !isSavedSearches"
       @activeFilters="setFilters"
       :accepted-entity-types="acceptedEntityTypes ? acceptedEntityTypes : []"
       :advancedFiltersChoice="advancedFiltersChoice"
     />
     <div class="p-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
-        <div v-show="acceptedEntityTypes.length === 0" class="mt-8 mr-4 flex">
+        <div
+          v-show="acceptedEntityTypes.length === 0 && !isSavedSearches"
+          class="mt-8 mr-4 flex"
+        >
           <IconToggle
             v-model:checked="isDrawerHiding"
             :icon-on="Unicons.SearchGlass.name"
@@ -87,57 +90,71 @@
         </div>
 
         <div v-else-if="!displayGrid && result?.Entities?.results">
-          <ListItem
-            :small="listItemRouteName === 'SingleMediafile'"
-            v-for="entity in result.Entities?.results"
-            :key="entity?.id"
-            :meta="entity?.teaserMetadata"
-            :media="entity?.media ? entity?.media.primary_transcode : null"
-            :thumb-icon="getThumbnail(entity)"
-            @click="
-              !enableSelection &&
-                router.push({
-                  name: listItemRouteName,
-                  params: { id: entity?.id },
-                })
-            "
-          >
-            <template #actions>
-              <BaseButton
-                v-if="
-                  determineIfNotAdded(
-                    entity,
-                    mediafiles,
-                    selectedRelationFieldMetadata
-                  ) && enableSelection
-                "
-                :loading="loading"
-                class="ml-2"
-                :icon="Unicons.PlusCircle.name"
-                @click="addSelection(entity)"
-              />
-              <BaseIcon
-                v-else-if="enableSelection"
-                :name="Unicons.Check.name"
-                fill="green"
-                width="40px"
-                class="mr-3"
-              />
-
-              <BaseButton
-                v-else
-                :loading="loading"
-                class="ml-2"
-                :icon="Unicons.Eye.name"
-                @click="
+          <div v-if="!isSavedSearches">
+            <ListItem
+              :small="listItemRouteName === 'SingleMediafile'"
+              v-for="entity in result.Entities?.results"
+              :key="entity?.id"
+              :meta="entity?.teaserMetadata"
+              :media="entity?.media ? entity?.media.primary_transcode : null"
+              :thumb-icon="getThumbnail(entity)"
+              @click="
+                !enableSelection &&
                   router.push({
                     name: listItemRouteName,
                     params: { id: entity?.id },
                   })
-                "
-              />
-            </template>
-          </ListItem>
+              "
+            >
+              <template #actions>
+                <BaseButton
+                  v-if="
+                    determineIfNotAdded(
+                      entity,
+                      mediafiles,
+                      selectedRelationFieldMetadata
+                    ) && enableSelection
+                  "
+                  :loading="loading"
+                  class="ml-2"
+                  :icon="Unicons.PlusCircle.name"
+                  @click="addSelection(entity)"
+                />
+                <BaseIcon
+                  v-else-if="enableSelection"
+                  :name="Unicons.Check.name"
+                  fill="green"
+                  width="40px"
+                  class="mr-3"
+                />
+
+                <BaseButton
+                  v-else
+                  :loading="loading"
+                  class="ml-2"
+                  :icon="Unicons.Eye.name"
+                  @click="
+                    router.push({
+                      name: listItemRouteName,
+                      params: { id: entity?.id },
+                    })
+                  "
+                />
+              </template>
+            </ListItem>
+          </div>
+
+          <div v-if="isSavedSearches">
+            <div
+              @click="addSelection(entity)"
+              v-for="entity in result.Entities?.results"
+              :key="entity?.id"
+              class="p-2 m-2 cursor-pointer bg-neutral-0 hover:bg-neutral-20 border border-neutral-50"
+            >
+              {{ entity.metadata[0].value }}
+            </div>
+          </div>
+
           <div v-if="result?.Entities?.results.length === 0" class="p-4">
             {{ $t("search.noresult") }}
           </div>
@@ -235,6 +252,10 @@ export default defineComponent({
       type: Array as PropType<Maybe<string>[]>,
       default: () => [],
       required: false,
+    },
+    isSavedSearches: {
+      type: Boolean,
+      default: false,
     },
   },
   emits: ["addSelection"],

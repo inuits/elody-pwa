@@ -294,6 +294,7 @@ enum SearchInputType {
   AdvancedInputMediaFilesType
   AdvancedInputType
   SimpleInputtype
+  AdvancedSavedSearchType
 }
 
 enum AdvancedInputType {
@@ -523,7 +524,7 @@ type Mutation {
   getAssetsRelationedWithMediafFile(mediaFileId: String!): [Asset]
   updateMediafilesOrder(value: OrderArrayInput!): String
   deleteRelations(id: String!, metadata: [MetadataInput!]!): String
-  savedSearches: SavedSearchesResults
+  savedSearches: EntitiesResults
   createSavedSearch(savedSearchInput: SavedSearchInput!): SavedSearchedEntity
   deleteSavedSearch(uuid: String!): String
 }
@@ -560,11 +561,22 @@ type SavedSearchesResults {
   limit: Int
 }
 
-type SavedSearchedEntity {
+type SavedSearchedEntity implements Entity {
   _key: String
   definition: [Definition]
-  metadata: [SavedSearchesMetadata]!
+  # metadata: [Metadata]!
   user: String
+  id: String!
+  uuid: String!
+  type: String!
+  metadata(
+    keys: [String]!
+    excludeOrInclude: ExcludeOrInclude!
+  ): [Metadata]!
+  media: Media
+  form: Form
+  teaserMetadata: [MetadataAndRelation]
+  permission: [Permission]
 }
 
 type SavedSearchesMetadata {

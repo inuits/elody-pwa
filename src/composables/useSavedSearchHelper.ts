@@ -12,6 +12,18 @@ const isDisplayingContextMenu = ref<Boolean>(false);
 const savedSearches = ref<any>([]);
 const pickedSavedSearch = ref<any>();
 
+export type PickEntityModalType = {
+  state: ModalState;
+  pickedEntity: any;
+  acceptedEntityTypes?: any;
+};
+
+const SearchSavedSearchesModalState = ref<PickEntityModalType>({
+  state: "hide",
+  pickedEntity: undefined,
+  acceptedEntityTypes: [],
+});
+
 export const useSavedSearchHelper = () => {
   const toggleContextMenu = () => {
     isDisplayingContextMenu.value = !isDisplayingContextMenu.value;
@@ -33,6 +45,27 @@ export const useSavedSearchHelper = () => {
     });
   };
 
+  const updateSearchSavedSearchesModal = (
+    SearchSavedSearchesModalInput: PickEntityModalType
+  ) => {
+    SearchSavedSearchesModalState.value = SearchSavedSearchesModalInput;
+  };
+
+  const closeSearchSavedSearchesModal = () => {
+    updateSearchSavedSearchesModal({
+      state: "hide",
+      pickedEntity: undefined,
+    });
+  };
+
+  const openSearchSavedSearchesModal = (acceptedEntityTypes: any) => {
+    updateSearchSavedSearchesModal({
+      state: "show",
+      pickedEntity: undefined,
+      acceptedEntityTypes: acceptedEntityTypes,
+    });
+  };
+
   return {
     createModalState,
     closeCreateModal,
@@ -41,5 +74,8 @@ export const useSavedSearchHelper = () => {
     toggleContextMenu,
     savedSearches,
     pickedSavedSearch,
+    closeSearchSavedSearchesModal,
+    openSearchSavedSearchesModal,
+    SearchSavedSearchesModalState,
   };
 };
