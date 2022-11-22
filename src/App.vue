@@ -1,6 +1,7 @@
 <template>
   <div>
-    <the-navigation class="navbar"/>
+    <BaseNotification />
+    <the-navigation class="navbar" />
     <div :class="[`pl-24 h-screen flex flex-col`]">
       <the-header />
       <div :class="['flex-grow', { 'h-full overflow-hidden': isSingle }]">
@@ -17,14 +18,15 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { DefaultOIDC, useAuth } from "session-vue-3-oidc-library";
-import UploadModal from "@/components/UploadModal.vue";
-import CreateModal from "@/components/CreateModal.vue";
+import UploadModal from "./components/UploadModal.vue";
+import CreateModal from "./components/CreateModal.vue";
 import TheNavigation from "@/components/TheNavigation.vue";
 import TheHeader from "@/components/TheHeader.vue";
-import EditModal from "@/components/EditModal.vue";
+import EditModal from "./components/EditModal.vue";
 import useRouteHelpers from "./composables/useRouteHelpers";
 import { useHead } from "@vueuse/head";
-import PickEntityModal from "@/components/PickEntityModal.vue";
+import PickEntityModal from "./components/PickEntityModal.vue";
+import BaseNotification from "./components/base/BaseNotification.vue";
 
 export default defineComponent({
   name: "App",
@@ -35,6 +37,7 @@ export default defineComponent({
     EditModal,
     PickEntityModal,
     CreateModal,
+    BaseNotification,
   },
   inject: { DefaultOIDC },
   setup() {
