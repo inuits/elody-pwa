@@ -101,6 +101,7 @@ import { Unicons } from "@/types";
 import SavedSearches from "@/components/SavedSearches.vue";
 // import AndOrToggle from './base/AndOrToggle.vue';
 import { useSavedSearchHelper } from "../composables/useSavedSearchHelper";
+import { useRouter } from "vue-router";
 
 import {
   clearAdvancedSearchInput,
@@ -134,6 +135,7 @@ export default defineComponent({
   emits: ["activeFilters"],
   setup(props, { emit }) {
     const initialFilters = ref<FilterInList[]>([]);
+
     const activeCount = computed(
       () => getActiveFilters(initialFilters.value).length
     );
@@ -142,25 +144,39 @@ export default defineComponent({
       choice: props.advancedFiltersChoice,
     });
 
+    function clearTypename(o) {
+      Object.keys(o).forEach(function (k) {
+        if (o[k] !== null && typeof o[k] === "object") {
+          clearTypename(o[k]);
+          return;
+        }
+        if (typeof o[k] === "string") {
+          if (k === "__typename") {
+            o[k] = undefined;
+          }
+        }
+      });
+    }
+
     const applyFilters = () => {
       const returnArray = initialFilters.value.map((filter: FilterInList) => {
-        if (filter.input.minMaxInput)
-          filter.input.minMaxInput["__typename"] = undefined;
-        if (filter.input.multiSelectInput)
-          filter.input.multiSelectInput["__typename"] = undefined;
-        if (filter.input.textInput)
-          filter.input.textInput["__typename"] = undefined;
+        filter = JSON.parse(JSON.stringify(filter));
+        clearTypename(filter.input);
         if (filter.input) filter.input["__typename"] = undefined;
         return filter.input;
       });
       emit("activeFilters", returnArray);
     };
 
-    const clearFilters = () => {
+    const clearInitialFilters = () => {
       initialFilters.value = clearAdvancedSearchInput(
         initialFilters.value,
         props.acceptedEntityTypes
       );
+    };
+
+    const clearFilters = () => {
+      clearInitialFilters();
       pickedSavedSearch.value = undefined;
     };
 
@@ -178,9 +194,9 @@ export default defineComponent({
       () => pickedSavedSearch.value,
       () => {
         if (pickedSavedSearch.value) {
+          clearInitialFilters();
           pickedSavedSearch.value.definition.forEach((filter) => {
             initialFilters.value.forEach((inFilter) => {
-              console.log(filter.key, inFilter.input.key);
               if (filter.key === inFilter.input.key) {
                 inFilter.input = filter;
                 inFilter.isActive = true;
@@ -190,6 +206,13 @@ export default defineComponent({
         }
       }
     );
+
+    const router = useRouter();
+
+    router.beforeEach((to, _from, next) => {
+      pickedSavedSearch.value = undefined;
+      next();
+    });
 
     return {
       filters,

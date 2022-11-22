@@ -6,9 +6,10 @@
     txt-color="blue-300"
     class="disabled:cursor-not-allowed disabled:opacity-50 w-10"
     @click="toggleContextMenu"
+    id="contextSavedSearches"
   />
   <div
-    v-if="isDisplayingContextMenu"
+    v-show="isDisplayingContextMenu"
     class="absolute top-40 left-76 z-10 mt-2 w-56 origin-top-right bg-neutral-0 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
     role="menu"
     aria-orientation="vertical"
@@ -64,7 +65,6 @@
       </a>
 
       <hr class="border-t-1 border-neutral-50" />
-
       <a
         v-for="(savedSearch, index) in savedSearches.slice(0, 5)"
         @click="pick(savedSearch)"
@@ -85,6 +85,7 @@
       <hr class="border-t-1 border-neutral-50" />
 
       <a
+        @click="openSearchSavedSearchesModal"
         class="hover:bg-neutral-50 cursor-pointer text-gray-700 block px-4 py-2 text-sm flex items-center gap-2"
         role="menuitem"
         tabindex="-1"
@@ -109,6 +110,8 @@
     @refetchSavedSearches="refetchSavedSearches"
     :initialFilters="initialFilters"
   />
+
+  <!-- <search-saved-searches-modal /> -->
 </template>
 
 <script lang="ts" setup>
@@ -145,6 +148,7 @@ const {
   isDisplayingContextMenu,
   pickedSavedSearch,
   savedSearches,
+  openSearchSavedSearchesModal,
 } = useSavedSearchHelper();
 
 const { mutate, onDone } = useMutation<SavedSearchesMutation>(
@@ -183,11 +187,24 @@ const deleteSavedSearch = async () => {
 const confirmState = ref<"hidden" | "show">("hidden");
 
 const showConfirmation = () => {
-  confirmState.value = confirmState.value === "show" ? "hidden" : "show";
+  if (pickedSavedSearch.value) {
+    confirmState.value = confirmState.value === "show" ? "hidden" : "show";
+  }
 };
 
 const pick = (savedSearch: any) => {
   pickedSavedSearch.value = savedSearch;
   isDisplayingContextMenu.value = false;
 };
+
+window.addEventListener("click", function (e) {
+  if (
+    !(
+      document.getElementById("contextSavedSearches") &&
+      document.getElementById("contextSavedSearches").contains(e.target)
+    )
+  ) {
+    isDisplayingContextMenu.value = false;
+  }
+});
 </script>
