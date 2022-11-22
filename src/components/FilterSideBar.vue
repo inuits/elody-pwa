@@ -20,7 +20,10 @@
             {{ pickedSavedSearch.metadata[0].value }}
           </p>
 
-          <saved-searches :initialFilters="initialFilters" />
+          <saved-searches
+            :initialFilters="initialFilters"
+            @removedSelectedSearch="removedSelectedSearch()"
+          />
         </div>
       </div>
       <div
@@ -72,7 +75,6 @@
             :filterkey="filter?.key"
             :is-relation="filter?.isRelation"
           />
-          <!-- {{initialFilters[i]}} -->
           <MultiFilter
             v-if="filter?.type === AdvancedFilterTypes.Multiselect"
             v-model:multiSelectValue="initialFilters[i]"
@@ -81,9 +83,6 @@
         </template>
       </FilterAccordion>
     </div>
-    <!-- <pre>
-      {{initialFilters}}
-    </pre> -->
   </div>
 </template>
 <script lang="ts">
@@ -180,6 +179,10 @@ export default defineComponent({
       pickedSavedSearch.value = undefined;
     };
 
+    const removedSelectedSearch = () => {
+      clearFilters();
+    };
+
     applyFilters();
 
     onMounted(() => {
@@ -224,6 +227,7 @@ export default defineComponent({
       AndOrChoice,
       Unicons,
       pickedSavedSearch,
+      removedSelectedSearch,
     };
   },
 });

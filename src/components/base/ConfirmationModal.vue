@@ -2,14 +2,14 @@
   <div class="fixed w-full h-full top-0 left-0 z-[51]">
     <div class="fixed w-full h-full bg-tag-selected top-0 left-0 opacity-50" />
     <div
-      class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-neutral-30 p-4 rounded"
+      class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-neutral-0 p-4 rounded"
     >
       <p class="m-2">{{ $t("confirmation.sure-message") }}</p>
       <div class="m-2 flex justify-around">
         <BaseButton
-          bg-color="neutral-900"
+          bg-color="neutral-30"
           bg-hover-color="neutral-200"
-          txt-color="neutral-0"
+          txt-color="text-neutral-700"
           :label="$t('confirmation.cancel')"
           @click="cancel"
         />

@@ -304,14 +304,20 @@ export default defineComponent({
         : props.searchInputTypeOnDrawer;
     });
 
-    const { result, loading } = useQuery(GetEntitiesDocument, queryVariables, {
-      notifyOnNetworkStatusChange: true,
-    });
+    const { result, loading, refetch } = useQuery(
+      GetEntitiesDocument,
+      queryVariables,
+      {
+        notifyOnNetworkStatusChange: true,
+      }
+    );
 
     const addSelection = (entity: any) => {
       beingAdded.value = "";
       emit("addSelection", entity);
     };
+
+    refetch();
 
     return {
       paginationLimits,
