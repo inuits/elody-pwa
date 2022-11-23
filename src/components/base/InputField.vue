@@ -1,7 +1,7 @@
 <template>
   <label
     class="block my-2"
-    :class="type === 'checkbox' ? 'justify-end flex flex-row-reverse' : ''"
+    :class="{ 'justify-end flex flex-row-reverse gap-2': type === 'checkbox' }"
   >
     <span v-if="label" class="ml-1 text-neutral-700 text-sm">{{ label }}</span>
     <div :class="[{ 'mr-4': icon }, inputContainerStyle]">
@@ -24,7 +24,6 @@
 
 <script lang="ts">
 import { computed, defineComponent } from "vue";
-import type { PropType } from "vue";
 import { debounce } from "ts-debounce";
 export const lableStyle = 'ml-1 text-neutral-700 text-sm"';
 export const inputContainerStyle =
