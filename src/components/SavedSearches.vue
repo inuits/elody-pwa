@@ -293,6 +293,7 @@ const updateSelectedSearch = () => {
     });
     onDonePatchDefinition((res: any) => {
       pickedSavedSearch.value = res.data.patchSavedSearchDefinition;
+      refetchSavedSearches();
     });
   }
 };
