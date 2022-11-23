@@ -1,6 +1,6 @@
 <template>
   <div class="flex w-full h-full relative">
-    <div class="w-full h-full p-4 bg-neutral-20">
+    <div class="w-full h-full p-4 bg-neutral-20 overflow-y-scroll">
       <p v-html="fileContent"></p>
     </div>
     <media-info class="" :meta-data="source.metadata" />
