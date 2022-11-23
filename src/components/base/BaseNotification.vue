@@ -5,9 +5,13 @@
       class="absolute m-4 p-4 w-2/12 bg-neutral-20 top-0 right-0 rounded-md z-50"
     >
       <div
-        :class="`w-full border-b-2 mb-2 font-bold border-${typeColors[type]}`"
+        :class="`w-full border-b-2 mb-2 font-bold border-${
+          typeColors[notification.type]
+        }`"
       >
-        <h2 :class="`text-${typeColors[type]}`">{{ notification.title }}</h2>
+        <h2 :class="`text-${typeColors[notification.type]}`">
+          {{ notification.title }}
+        </h2>
       </div>
       <div>
         <p>{{ notification.description }}</p>
@@ -20,7 +24,7 @@
 import { createContext } from "vm";
 import { defineComponent, onMounted, PropType, ref, watch } from "vue";
 
-enum NotificationType {
+export enum NotificationType {
   default = "default",
   warning = "warning",
   error = "error",
@@ -28,6 +32,7 @@ enum NotificationType {
 
 type Notification = {
   displayTime: number;
+  type: NotificationType;
   title: string;
   description: string;
   shown: boolean;
@@ -35,6 +40,7 @@ type Notification = {
 
 const notification = ref<Notification>({
   displayTime: 10,
+  type: NotificationType.error,
   title: "",
   description: "",
   shown: false,
@@ -51,12 +57,7 @@ export const useNotification = () => {
 export default defineComponent({
   name: "BaseNotification",
   components: {},
-  props: {
-    type: {
-      type: String as PropType<NotificationType>,
-      default: NotificationType.error,
-    },
-  },
+  props: {},
   setup() {
     const { notification } = useNotification();
     const typeColors = {
