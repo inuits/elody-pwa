@@ -49,7 +49,7 @@ import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { Unicons } from "../types";
 import MetaViewlineRelation from "./MetaViewlineRelation.vue";
-import { stringIsUrl } from "@/helpers";
+import { stringIsUrl } from "../helpers";
 
 export default defineComponent({
   name: "MetaViewLine",

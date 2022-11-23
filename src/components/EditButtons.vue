@@ -34,7 +34,7 @@ import useRouteHelpers from "../composables/useRouteHelpers";
 import { Unicons } from "../types";
 import BaseButton from "./base/BaseButton.vue";
 import { useRoute, useRouter } from "vue-router";
-import { asString } from "@/helpers";
+import { asString } from "../helpers";
 import { useMutation } from "@vue/apollo-composable";
 import { DeleteDataDocument, Collection } from "../queries";
 import type { DeleteDataMutation } from "../queries";
