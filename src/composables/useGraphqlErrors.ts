@@ -2,6 +2,7 @@ import type { ErrorResponse } from "@apollo/client/link/error";
 import useDropzoneHelper from "../composables/useDropzoneHelper";
 import BaseNotification, {
   useNotification,
+  NotificationType,
 } from "../components/base/BaseNotification.vue";
 
 const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
@@ -65,8 +66,9 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
           if (error.extensions.statusCode != 401) {
             useNotification().createNotification({
               displayTime: 10,
-              title: (error.extensions.code as string) || "Error",
-              description: error.message,
+              type: NotificationType.error,
+              title: "Error",
+              description: "Something went wrong",
               shown: true,
             });
           }
