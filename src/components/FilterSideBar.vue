@@ -163,6 +163,7 @@ export default defineComponent({
     const clearFilters = () => {
       clearInitialFilters();
       pickedSavedSearch.value = undefined;
+      applyFilters();
     };
 
     const removedSelectedSearch = () => {
