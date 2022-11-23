@@ -191,6 +191,7 @@ const {
   pickedSavedSearch,
   savedSearches,
   openSearchSavedSearchesModal,
+  clearTypename
 } = useSavedSearchHelper();
 
 const { mutate, onDone } = useMutation<SavedSearchesMutation>(
@@ -263,20 +264,6 @@ const resetSelectedSavedSearch = () => {
     pick(res.data.getSavedSearchById);
   });
 };
-
-function clearTypename(o) {
-  Object.keys(o).forEach(function (k) {
-    if (o[k] !== null && typeof o[k] === "object") {
-      clearTypename(o[k]);
-      return;
-    }
-    if (typeof o[k] === "string") {
-      if (k === "__typename") {
-        o[k] = undefined;
-      }
-    }
-  });
-}
 
 const updateSelectedSearch = () => {
   if (pickedSavedSearch.value) {

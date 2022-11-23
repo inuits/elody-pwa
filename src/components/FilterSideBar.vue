@@ -134,7 +134,7 @@ export default defineComponent({
   emits: ["activeFilters"],
   setup(props, { emit }) {
     const initialFilters = ref<FilterInList[]>([]);
-
+    const { pickedSavedSearch, clearTypename  } = useSavedSearchHelper();
     const activeCount = computed(
       () => getActiveFilters(initialFilters.value).length
     );
@@ -142,20 +142,6 @@ export default defineComponent({
     const { result: filters } = useQuery(GetAdvancedFiltersDocument, {
       choice: props.advancedFiltersChoice,
     });
-
-    function clearTypename(o) {
-      Object.keys(o).forEach(function (k) {
-        if (o[k] !== null && typeof o[k] === "object") {
-          clearTypename(o[k]);
-          return;
-        }
-        if (typeof o[k] === "string") {
-          if (k === "__typename") {
-            o[k] = undefined;
-          }
-        }
-      });
-    }
 
     const applyFilters = () => {
       const returnArray = initialFilters.value.map((filter: FilterInList) => {
@@ -191,8 +177,6 @@ export default defineComponent({
       }
     });
 
-    const { pickedSavedSearch } = useSavedSearchHelper();
-
     watch(
       () => pickedSavedSearch.value,
       () => {
@@ -206,6 +190,7 @@ export default defineComponent({
               }
             });
           });
+          applyFilters();
         }
       }
     );

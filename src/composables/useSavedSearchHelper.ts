@@ -79,6 +79,20 @@ export const useSavedSearchHelper = () => {
     });
   };
 
+  function clearTypename(o) {
+    Object.keys(o).forEach(function (k) {
+      if (o[k] !== null && typeof o[k] === "object") {
+        clearTypename(o[k]);
+        return;
+      }
+      if (typeof o[k] === "string") {
+        if (k === "__typename") {
+          o[k] = undefined;
+        }
+      }
+    });
+  }
+
   return {
     createModalState,
     closeCreateModal,
@@ -91,5 +105,6 @@ export const useSavedSearchHelper = () => {
     closeSearchSavedSearchesModal,
     openSearchSavedSearchesModal,
     SearchSavedSearchesModalState,
+    clearTypename
   };
 };
