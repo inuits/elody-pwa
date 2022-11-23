@@ -59,7 +59,7 @@ export default defineComponent({
   },
   emits: ["refetchSavedSearches"],
   setup(props, { emit }) {
-    const { closeCreateModal, createModalState, pickedSavedSearch } =
+    const { closeCreateModal, createModalState, pickedSavedSearch, clearTypename } =
       useSavedSearchHelper();
     const searchTitle = ref<string>("");
     const savedSearch = ref<any>();
@@ -113,6 +113,9 @@ export default defineComponent({
           }
         });
         if (searchTitle.value.length > 0) {
+          savedSearch.value.definition.forEach((def) => {
+            clearTypename(def);
+          })
           mutate({ savedSearchInput: savedSearch.value });
           onDone((res: any) => {
             pickedSavedSearch.value = res.data.createSavedSearch;
