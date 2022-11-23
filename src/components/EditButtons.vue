@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="
-      (isEditToggleVisible === 'edit') || (isEditToggleVisible === 'edit-delete')
+      isEditToggleVisible === 'edit' || isEditToggleVisible === 'edit-delete'
     "
     class="mx-4"
   >
@@ -30,16 +30,17 @@
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
 import IconToggle from "./base/IconToggle.vue";
-import useRouteHelpers from "@/composables/useRouteHelpers";
-import { Unicons } from "@/types";
+import useRouteHelpers from "../composables/useRouteHelpers";
+import { Unicons } from "../types";
 import BaseButton from "./base/BaseButton.vue";
 import { useRoute, useRouter } from "vue-router";
 import { asString } from "@/helpers";
 import { useMutation } from "@vue/apollo-composable";
-import { DeleteDataDocument, DeletePaths } from "@/queries";
-import type { DeleteDataMutation } from "@/queries";
-import ConfirmationModal from "@/components/base/ConfirmationModal.vue";
-import useEditMode from "@/composables/useEdit";
+import { DeleteDataDocument, Collection } from "../queries";
+import type { DeleteDataMutation } from "../queries";
+import ConfirmationModal from "./base/ConfirmationModal.vue";
+import useEditMode from "../composables/useEdit";
+import { usePageInfo } from "../composables/usePageInfo";
 
 export default defineComponent({
   name: "EditToggle",
@@ -55,6 +56,7 @@ export default defineComponent({
       isEditToggleVisible,
     } = useEditMode();
     const { isSingle } = useRouteHelpers();
+    const { pageInfo } = usePageInfo();
 
     watch(toggleBoolean, (value: boolean) => {
       if (value) {
@@ -83,9 +85,10 @@ export default defineComponent({
     const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
     const deleteAsset = async () => {
       const id = asString(route.params["id"]);
-      await mutate({ id, path: DeletePaths.Entities });
+      const collection: Collection = pageInfo.value.routeType as Collection;
+      await mutate({ id, path: collection });
       disableEditMode();
-      router.push({ name: "Home" });
+      router.push({ name: pageInfo.value.parentRouteName });
     };
     const confirmState = ref<"hidden" | "show">("hidden");
 
@@ -103,6 +106,7 @@ export default defineComponent({
       toggleBoolean,
       showConfirmation,
       isEditToggleVisible,
+      pageInfo,
     };
   },
 });

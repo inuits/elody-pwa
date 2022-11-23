@@ -6,26 +6,26 @@
       </div>
       <div class="my-1 mx-6 w-2/6">
         <span class="text-neutral-100"
-          >{{$t('parent.id')}}
+          >{{ $t("parent.id") }}
           <p class="text-neutral-700 flex-wrap">{{ job._key }}</p>
         </span>
       </div>
       <div class="my-1 mx-6 w-1/6">
         <span class="text-neutral-100"
-          >{{$t('parent.date')}}
+          >{{ $t("parent.date") }}
           <p class="text-neutral-700">{{ getFormatedDate }}</p>
         </span>
       </div>
       <div class="my-1 mx-6">
         <span class="text-neutral-100"
-          >{{$t('parent.type')}}
-          <p class="text-neutral-700">{{ $t('metadata.' + job.job_type) }}</p>
+          >{{ $t("parent.type") }}
+          <p class="text-neutral-700">{{ $t("metadata." + job.job_type) }}</p>
         </span>
       </div>
       <div class="my-1 mx-6">
         <span class="text-neutral-100"
-          >{{$t('parent.user')}}
-          <p class="text-neutral-700">{{ $t('metadata.' + job.user ) }}</p>
+          >{{ $t("parent.user") }}
+          <p class="text-neutral-700">{{ $t("metadata." + job.user) }}</p>
         </span>
       </div>
 
@@ -65,7 +65,7 @@
             'opacity-0': !hasSubJobs,
             'cursor-default-important': !hasSubJobs,
           }"
-          label="Collaps"
+          label="Collapse"
           :icon="Unicons.Minus.name"
           @click="toggleCollapse()"
         />
@@ -78,7 +78,7 @@
           v-for="subJob in subJobs.results.slice(0, subjobLimit)"
           :key="subJob && subJob._id ? subJob._id : 'no-id'"
         >
-          <SingleJob v-if="subJob && determineIfShow(subJob)" :job="subJob" />
+          <SingleJob v-if="subJob" :job="subJob" />
         </div>
         <div class="flex w-full justify-center">
           <button
@@ -86,7 +86,7 @@
             class="w-full mx-4 px-3 py-2 hover:bg-neutral-30 rounded"
             @click="increaseSubjobs()"
           >
-            {{ $t('parent.load-more') }}
+            {{ $t("parent.load-more") }}
           </button>
         </div>
       </ListContainer>
@@ -95,20 +95,25 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeUpdate, ref } from "vue";
-import type { PropType } from "vue";
-import { Unicons } from "@/types";
-import BaseIcon from "@/components/base/BaseIcon.vue";
-import LoadingList from "@/components/base/LoadingList.vue";
-import BaseButton from "@/components/base/BaseButton.vue";
-import ProgressBar from "@/components/base/ProgressBar.vue";
-import BaseLabel from "@/components/base/BaseLabel.vue";
-import SingleJob from "@/components/SingleJob.vue";
-import { GetJobDocument } from "@/queries";
-import type { Job } from "@/queries";
+import {
+  computed,
+  defineComponent,
+  onBeforeUpdate,
+  ref,
+  watch,
+  PropType,
+} from "vue";
+import { Unicons } from "../types";
+import BaseIcon from "./base/BaseIcon.vue";
+import LoadingList from "./base/LoadingList.vue";
+import BaseButton from "./base/BaseButton.vue";
+import ProgressBar from "./base/ProgressBar.vue";
+import BaseLabel from "./base/BaseLabel.vue";
+import SingleJob from "./SingleJob.vue";
+import { GetJobDocument, Job } from "../queries";
 import { useQuery } from "@vue/apollo-composable";
-import useJobHelpers from "@/composables/useJobHelpers";
-import ListContainer from "@/components/ListContainer.vue";
+import useJobHelpers from "../composables/useJobHelpers";
+import ListContainer from "./ListContainer.vue";
 import IconToggle from "./base/IconToggle.vue";
 
 export default defineComponent({
@@ -121,7 +126,7 @@ export default defineComponent({
     BaseLabel,
     ListContainer,
     LoadingList,
-    IconToggle
+    IconToggle,
   },
   props: {
     job: {
@@ -141,6 +146,7 @@ export default defineComponent({
       GetJobDocument,
       {
         id: props.job._key || "",
+        failed: showFailedOnly.value,
       },
       queryOptions
     );
@@ -173,16 +179,9 @@ export default defineComponent({
       subjobLimit.value += 5;
     };
 
-    const determineIfShow = (job: Job): boolean => {
-      if (!showFailedOnly.value){
-        return true;
-      }
-
-      if (job.status === 'finished'){
-        return false;
-      }
-      return true;
-    }
+    watch(showFailedOnly, () => {
+      updateSubJobs();
+    });
 
     return {
       subJobs: computed(() => {
@@ -198,7 +197,6 @@ export default defineComponent({
       hasSubJobs,
       loading,
       showFailedOnly,
-      determineIfShow
     };
   },
 });

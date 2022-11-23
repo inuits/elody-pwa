@@ -4,6 +4,7 @@ import type { LinkMediafileToEntityMutation, MediaFile } from "@/queries";
 
 import { useMutation } from "@vue/apollo-composable";
 import { useRoute } from "vue-router";
+import { getIdFromKey } from "@/helpers";
 
 const linkList = ref<Array<MediaFile>>([]);
 
@@ -29,6 +30,7 @@ const useMediaAssetLinkHelper = () => {
 
   const linkMediaFilesToEntity = (addSaveCallback: any) => {
     linkList.value.forEach((mediaFile: MediaFile) => {
+      mediaFile._id = getIdFromKey("mediafiles", mediaFile._id);
       mediaFile.metadata?.forEach((meta: any) => {
         if (meta.__typename) {
           meta.__typename = undefined;

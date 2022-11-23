@@ -56,7 +56,7 @@
 <script lang="ts">
 import { defaultReturnMultiSelectObject } from "@/composables/useFilterHelper";
 import type { FilterInList } from "@/composables/useFilterHelper";
-import { GetFilterOptionsDocument } from "@/queries";
+import { AdvancedFilter, GetFilterOptionsDocument } from "@/queries";
 import { useQuery } from "@vue/apollo-composable";
 import { computed, defineComponent, ref, watch } from "vue";
 import type { PropType } from "vue";
@@ -72,8 +72,8 @@ export default defineComponent({
       required: false,
       default: undefined,
     },
-    filterkey: {
-      type: [String],
+    filter: {
+      type: Object as PropType<AdvancedFilter>,
       required: true,
     },
     acceptedEntityTypes: {
@@ -84,11 +84,18 @@ export default defineComponent({
   },
   emits: ["update:listValue"],
   setup(props, { emit }) {
-    emit("update:listValue", defaultReturnMultiSelectObject(props.filterkey));
-    const { result: options } = useQuery(GetFilterOptionsDocument, {
-      key: props.filterkey,
-    });
+    emit("update:listValue", defaultReturnMultiSelectObject(props.filter?.key));
+    type FilterOptions = {label: string, value: string}[];
 
+    let options: {FilterOptions: FilterOptions} = {FilterOptions: props.filter?.options};
+
+    if (!options.FilterOptions) {
+      const { result } = useQuery(GetFilterOptionsDocument, {
+        key: props.filter?.key,
+      });
+      options = result;
+    }
+    
     const andOr = ref<"and" | "or">("and");
     const isAnd = computed<boolean>({
       get() {
@@ -104,7 +111,7 @@ export default defineComponent({
           props.listValue.input.multiSelectInput &&
           emit(
             "update:listValue",
-            defaultReturnMultiSelectObject(props.filterkey, {
+            defaultReturnMultiSelectObject(props.filter?.key, {
               value: props.listValue.input.multiSelectInput.value,
               AndOrValue: newValue,
             })
@@ -132,7 +139,7 @@ export default defineComponent({
         if (newVal !== oldVal) {
           emit(
             "update:listValue",
-            defaultReturnMultiSelectObject(props.filterkey, {
+            defaultReturnMultiSelectObject(props.filter?.key, {
               value: inputFieldMulti.value,
               AndOrValue: isAnd.value,
             })
@@ -141,7 +148,7 @@ export default defineComponent({
       }
     );
 
-    if (props.acceptedEntityTypes.length > 0 && props.filterkey === "type") {
+    if (props.acceptedEntityTypes.length > 0 && props.filter?.key === "type") {
       emit(
         "update:listValue",
         defaultReturnMultiSelectObject("type", {

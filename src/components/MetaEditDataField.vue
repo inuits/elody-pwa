@@ -31,13 +31,13 @@ export default defineComponent({
       required: true,
     },
     label: {
-      type: Object as PropType<Maybe<string | undefined>>,
+      type: String,
       required: false,
       default: undefined,
     },
     type: { type: String, required: false, default: "text" },
     options: {
-      type: Object as PropType<Maybe<Maybe<MetadataFieldOption>[]> | undefined>,
+      type: Array as PropType<Maybe<Maybe<MetadataFieldOption>[]> | undefined>,
       required: false,
       default: () => [],
     },
@@ -47,8 +47,8 @@ export default defineComponent({
     },
   },
   emits: ["onChange"],
-  setup: ({ fieldKey }, { emit }) => {
-    const { value } = useField<string>(fieldKey, {});
+  setup: (props, { emit }) => {
+    const { value } = useField<string>(props.fieldKey, {});
 
     const stringifyOption = (
       input: Maybe<Maybe<MetadataFieldOption>[]> | undefined

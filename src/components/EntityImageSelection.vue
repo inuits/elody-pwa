@@ -29,25 +29,6 @@
                 class="hidden group-hover:block"
                 @click="addToSaveCallback(element._id)"
               />
-              <img
-                v-if="
-                  element.thumbnail_file_location &&
-                  !element.mimetype.includes('audio')
-                "
-                :class="[
-                  'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
-                  toBeDeleted.includes(element._id)
-                    ? 'filter blur-xs grayscale'
-                    : '',
-                  selectedImage && element.filename === selectedImage.filename
-                    ? 'border-2 border-blue-500'
-                    : '',
-                ]"
-                :src="!element.mimetype.includes('pdf')
-                 ? `/api/iiif/3/${element.transcode_filename}/square/100,/0/default.jpg`
-                 : element.thumbnail_file_location"
-                @click="selectImage(element)"
-              />
               <AudioThumbnail
                 v-if="
                   element.thumbnail_file_location &&
@@ -65,7 +46,7 @@
                 @click="selectImage(element)"
               />
               <SvgThumbnail
-                v-if="
+                v-else-if="
                   element.thumbnail_file_location &&
                   element?.mimetype.includes('text/plain')
                 "
@@ -78,6 +59,26 @@
                     ? 'border-2 border-blue-500'
                     : '',
                 ]"
+                @click="selectImage(element)"
+              />
+              <img
+                v-else-if="element.thumbnail_file_location"
+                :class="[
+                  'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
+                  toBeDeleted.includes(element._id)
+                    ? 'filter blur-xs grayscale'
+                    : '',
+                  selectedImage && element.filename === selectedImage.filename
+                    ? 'border-2 border-blue-500'
+                    : '',
+                ]"
+                :src="
+                  !element.mimetype.includes('pdf')
+                    ? `/api/iiif/3/${
+                        element.transcode_filename || element.filename
+                      }/square/100,/0/default.jpg`
+                    : element.thumbnail_file_location
+                "
                 @click="selectImage(element)"
               />
             </div>
@@ -97,14 +98,14 @@
 import { defineComponent, onMounted, ref, reactive } from "vue";
 import type { PropType } from "vue";
 import { useMutation } from "@vue/apollo-composable";
-import { DeleteDataDocument, DeletePaths } from "@/queries";
-import type { MediaFile } from "@/queries";
-import type { DeleteDataMutation } from "@/queries";
+import { DeleteDataDocument, Collection } from "../queries";
+import type { MediaFile } from "../queries";
+import type { DeleteDataMutation } from "../queries";
 import AudioThumbnail from "../components/base/audiothumbnail.vue";
 import SvgThumbnail from "./base/svgThumbnail.vue";
 import TrashIcon from "../components/base/TrashIcon.vue";
 import PlusCircleIcon from "../components/base/PlusCircleIcon.vue";
-import { useEditMode } from "@/composables/useEdit";
+import { useEditMode } from "../composables/useEdit";
 import { useUploadModal, modalChoices } from "./UploadModal.vue";
 import useDropzoneHelper from "../composables/useDropzoneHelper";
 import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
@@ -172,7 +173,7 @@ export default defineComponent({
       toBeDeleted.value.push(id);
       if (!isMediaFileInLinkList(id)) {
         addSaveCallback(async () => {
-          await mutate({ id: parsedId, path: DeletePaths.Mediafiles });
+          await mutate({ id: parsedId, path: Collection.Mediafiles });
         });
       } else {
         removeMediaFileFromLinkList(id);
@@ -200,7 +201,7 @@ export default defineComponent({
     const openUploadModalWrapper = () => {
       beingAdded.value = "mediafile";
       openUploadModal(modalChoices.DROPZONE);
-    }
+    };
 
     return {
       selectImage,

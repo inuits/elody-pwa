@@ -1,8 +1,8 @@
 <template>
-  <li
-    class="row border-none h-72 w-80"
-    data-test="meta-row"
-  >
+  <li class="relative row border-none h-72 w-full" data-test="meta-row">
+    <div class="absolute right-0 top-0 w-min h-min" data-test="action-slot">
+      <slot name="actions"></slot>
+    </div>
     <div
       class="flex items-center flex-col w-full"
       :class="{ 'flex-col': small && !thumbIcon }"
@@ -15,44 +15,56 @@
             :src="`/api/iiif/3/${media}/square/100,/0/default.jpg`"
             @error="setNoImage()"
           />
-          <div v-if="(thumbIcon && !media) || (imageSrcError && thumbIcon)" 
-            class="w-48 h-48 flex items-center justify-center flex-col">  
+          <div
+            v-if="(thumbIcon && !media) || (imageSrcError && thumbIcon)"
+            class="w-48 h-48 flex items-center justify-center flex-col"
+          >
             <unicon
               :name="thumbIcon"
               class="h-10 w-10 p-1 text-neutral-70 rounded-sm outline-none shadow-sm self-center"
-            />  
-            <div class="text-neutral-70">
-              No media
-            </div>
+            />
+            <div class="text-neutral-70">No media</div>
           </div>
         </div>
-        <div :class="['w-full h-16 mt-3 pl-2 flex border-t-2 border-neutral-20',
-          hasFileName ? 'flex-col' : 'flex-col-reverse'
-        ]">
+        <div
+          :class="[
+            'w-full h-16 mt-3 pl-2 flex border-t-2 border-neutral-20',
+            hasFileName ? 'flex-col' : 'flex-col-reverse',
+          ]"
+        >
           <div
-          v-for="metaItem in only4Meta(meta)"
-          :key="metaItem ? metaItem.value : 'no-key'"
-          class="w-full h-6"
+            v-for="metaItem in only4Meta(meta)"
+            :key="metaItem ? metaItem.value : 'no-key'"
+            class="w-full h-6"
           >
-            <template v-if="metaItem.key === 'title' || metaItem.key === 'type'" >
-              <span 
-                :class="['text-neutral-700 w-fit',
-                  metaItem.key === 'title' || hasFileName ? 'metaTitle' : 'metaType',
-                  hasFileName ? 'h-12' : 'h-6 handleOverflow']" 
-                data-test="meta-info">{{ metaItem.value }}</span>
+            <template
+              v-if="
+                metaItem.key === 'title' ||
+                metaItem.key === 'type' ||
+                metaItem.key === 'filename'
+              "
+            >
+              <span
+                :class="[
+                  'text-neutral-700 w-fit',
+                  metaItem.key === 'title' || hasFileName
+                    ? 'metaTitle'
+                    : 'metaType',
+                  hasFileName ? 'h-12 handleOverflow' : 'h-6 handleOverflow',
+                ]"
+                data-test="meta-info"
+                >{{ metaItem.value }}</span
+              >
             </template>
-        </div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="flex flex-row" data-test="action-slot">
-      <slot name="actions"></slot>
     </div>
   </li>
 </template>
 
 <script lang="ts">
-import type { Maybe, MetadataAndRelation } from "@/queries";
+import type { Maybe, MetadataAndRelation } from "../queries";
 import { defineComponent, inject, ref } from "vue";
 import type { PropType } from "vue";
 
@@ -64,7 +76,7 @@ export default defineComponent({
       type: Array as PropType<Maybe<Maybe<MetadataAndRelation>[]>>,
       default: () => [],
     },
-    media: { type: Object as PropType<Maybe<String>>, default: undefined },
+    media: { type: String, default: "" },
     thumbIcon: { type: String, default: "" },
     small: { type: Boolean, default: false },
   },
@@ -76,18 +88,18 @@ export default defineComponent({
     };
     const hasFileName = ref<boolean>(false);
 
-    const only4Meta = (
-      input: Maybe<Maybe<MetadataAndRelation>[]>
-    ) => {
-      return input?.filter((value) => {
-        if (value?.key === "filename"){
-          hasFileName.value = true;
-        }
-        return value?.value !== "" && value?.key !== 'object_number';
-      }).slice(0, 4);
+    const only4Meta = (input: Maybe<Maybe<MetadataAndRelation>[]>) => {
+      return input
+        ?.filter((value) => {
+          if (value?.key === "filename") {
+            hasFileName.value = true;
+          }
+          return value?.value !== "" && value?.key !== "object_number";
+        })
+        .slice(0, 4);
     };
 
-    return { setNoImage, imageSrcError, only4Meta, config, hasFileName};
+    return { setNoImage, imageSrcError, only4Meta, config, hasFileName };
   },
 });
 </script>
@@ -114,10 +126,10 @@ export default defineComponent({
   @apply text-neutral-70;
 }
 .handleOverflow {
-    width: 275px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    display: inline-block;
+  width: 95%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  display: inline-block;
 }
 </style>

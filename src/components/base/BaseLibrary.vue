@@ -65,7 +65,7 @@
           :total-items="result?.Entities?.count"
         />
       </div>
-      <ListContainer :class="displayGrid ? 'p-5' : 'p-1'">
+      <ListContainer id="gridContainer" :class="displayGrid ? 'p-5' : 'p-1'">
         <div v-if="loading">
           <ListItem
             v-for="n in queryVariables.limit"
@@ -96,7 +96,7 @@
               v-for="entity in result.Entities?.results"
               :key="entity?.id"
               :meta="entity?.teaserMetadata"
-              :media="entity?.media ? entity?.media.primary_transcode : null"
+              :media="getMediaFilenameFromEntity(entity)"
               :thumb-icon="getThumbnail(entity)"
               @click="
                 !enableSelection &&
@@ -160,14 +160,12 @@
           </div>
         </div>
         <div v-else-if="displayGrid && result?.Entities?.results">
-          <div
-            class="flex flex-row flex-wrap gap-2 justify-center items-center"
-          >
+          <div :class="`grid grid_cols gap-2 justify-items-center`">
             <GridItem
               v-for="entity in result.Entities?.results"
               :key="entity?.id"
               :meta="entity?.teaserMetadata"
-              :media="entity?.media ? entity?.media.primary_transcode : null"
+              :media="getMediaFilenameFromEntity(entity)"
               :thumb-icon="getThumbnail(entity)"
               @click="
                 !enableSelection &&
@@ -176,7 +174,30 @@
                     params: { id: entity?.id },
                   })
               "
-            ></GridItem>
+            >
+              <template #actions>
+                <BaseButton
+                  v-if="
+                    determineIfNotAdded(
+                      entity,
+                      mediafiles,
+                      selectedRelationFieldMetadata
+                    ) && enableSelection
+                  "
+                  :loading="loading"
+                  class="ml-2"
+                  :icon="Unicons.PlusCircle.name"
+                  @click="addSelection(entity)"
+                />
+                <BaseIcon
+                  v-else-if="enableSelection"
+                  :name="Unicons.Check.name"
+                  fill="green"
+                  width="40px"
+                  class="mr-3"
+                />
+              </template>
+            </GridItem>
           </div>
           <div v-if="result?.Entities?.results.length === 0" class="p-4">
             {{ $t("search.noresult") }}
@@ -189,7 +210,14 @@
 
 <script lang="ts">
 import BasePagination, { paginationLimits } from "./BasePagination.vue";
-import { defineComponent, watch, reactive, ref } from "vue";
+import {
+  defineComponent,
+  watch,
+  reactive,
+  ref,
+  onMounted,
+  nextTick,
+} from "vue";
 import type { PropType } from "vue";
 import ListContainer from "../ListContainer.vue";
 import BaseButton from "./BaseButton.vue";
@@ -209,6 +237,8 @@ import useMetaDataHelper, {
 } from "../../composables/useMetaDataHelper";
 import BaseIcon from "./BaseIcon.vue";
 import GridItem from "../GridItem.vue";
+import { setCookie, getCookie } from "tiny-cookie";
+import useListItemHelper from "../../composables/useListItemHelper";
 
 export default defineComponent({
   name: "BaseLibrary",
@@ -261,6 +291,7 @@ export default defineComponent({
   emits: ["addSelection"],
   setup: (props, { emit }) => {
     const { getThumbnail } = useThumbnailHelper();
+    const { getMediaFilenameFromEntity } = useListItemHelper();
     const router = useRouter();
     const { determineIfNotAdded, mediafiles, selectedRelationFieldMetadata } =
       useMetaDataHelper();
@@ -269,6 +300,14 @@ export default defineComponent({
       skip: 1,
     });
     const displayGrid = ref<boolean>(false);
+
+    onMounted(() => {
+      const displayPreference = getCookie("_displayPreference");
+      if (displayPreference) {
+        displayGrid.value = JSON.parse(displayPreference).grid;
+      }
+      calculateGridColumns();
+    });
 
     const isDrawerHiding = ref(
       props.acceptedEntityTypes.length === 0 ? true : false
@@ -302,6 +341,19 @@ export default defineComponent({
       queryVariables.searchInputType = isDrawerHiding.value
         ? props.searchInputType
         : props.searchInputTypeOnDrawer;
+      nextTick(() => {
+        calculateGridColumns();
+      });
+    });
+
+    watch(displayGrid, () => {
+      setCookie(
+        "_displayPreference",
+        JSON.stringify({ grid: displayGrid.value }),
+        {
+          expires: "1Y",
+        }
+      );
     });
 
     const { result, loading, refetch } = useQuery(
@@ -316,6 +368,28 @@ export default defineComponent({
       beingAdded.value = "";
       emit("addSelection", entity);
     };
+
+    const setCssVariable = (colAmount: number = 5) => {
+      const root = document.querySelector(":root") as HTMLElement;
+      root.style.setProperty("--grid-cols", colAmount.toString());
+    };
+
+    const calculateGridColumns = () => {
+      const gridContainerWidth =
+        document.getElementById("gridContainer")?.offsetWidth;
+      const gridItemWidth = 330;
+      let colAmount = 0;
+      if (gridContainerWidth) {
+        colAmount = Math.floor(gridContainerWidth / gridItemWidth);
+      }
+      setCssVariable(colAmount);
+    };
+
+    window.addEventListener("resize", () => {
+      if (displayGrid.value) {
+        calculateGridColumns();
+      }
+    });
 
     refetch();
 
@@ -334,7 +408,15 @@ export default defineComponent({
       mediafiles,
       selectedRelationFieldMetadata,
       displayGrid,
+      calculateGridColumns,
+      getMediaFilenameFromEntity,
     };
   },
 });
 </script>
+
+<style scoped>
+.grid_cols {
+  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+}
+</style>

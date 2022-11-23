@@ -1,5 +1,5 @@
 import { assert, describe, it } from 'vitest';
-import { mergeLanguageJsonFiles } from "@/helpers";
+import { mergeLanguageJsonFiles } from "../helpers";
 import { dataSet_I18n } from './fakeData';
 
 describe('#i18nHelper', () => {

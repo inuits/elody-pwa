@@ -32,3 +32,27 @@ export const stringIsUrl = (value: string): Boolean => {
   }
   return isUrl;
 };
+
+export const getIdFromKey = (prefix: string = "entities", key: string) => {
+  if (key.includes(prefix + "/")) {
+    return key.replace(prefix + "/", "");
+  } else {
+    return key;
+  }
+};
+
+export const customSort = (
+  customSortOrder: string[],
+  arrayToSort: any[],
+  sortKey: string
+) => {
+  let ordering: any = {};
+  for (let i = 0; i < customSortOrder.length; i++) {
+    ordering[customSortOrder[i]] = i;
+  }
+
+  arrayToSort.sort(function (a: any, b: any) {
+    return ordering[a[sortKey]] - ordering[b[sortKey]];
+  });
+  return arrayToSort;
+};

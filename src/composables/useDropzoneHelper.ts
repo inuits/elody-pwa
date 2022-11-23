@@ -51,11 +51,17 @@ const useDropzoneHelper = () => {
     }
   };
 
+  const resetDropzone = () => {
+    myDropzone.value.removeAllFiles();
+    finishedUploading.value = false;
+    clearDropzoneCounters();
+  };
+
   const getDropzoneSettings = (dropzonePreviewDiv: any): any => {
     return {
       url: "/upload",
       autoProcessQueue: false,
-      acceptedFiles: ".jpg, .jpeg, .mp3, .srt, .png, .tiff",
+      acceptedFiles: ".jpg, .jpeg, .mp3, .srt, .png, .tiff, .mp4",
       previewTemplate: dropzonePreviewDiv.value?.outerHTML,
       uploadMultiple: true,
       parallelUploads: 99,
@@ -80,6 +86,7 @@ const useDropzoneHelper = () => {
     selectedFiles,
     isUploading,
     myDropzone,
+    resetDropzone,
   };
 };
 

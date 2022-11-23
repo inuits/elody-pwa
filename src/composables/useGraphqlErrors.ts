@@ -1,5 +1,9 @@
 import type { ErrorResponse } from "@apollo/client/link/error";
 import useDropzoneHelper from "../composables/useDropzoneHelper";
+import BaseNotification, {
+  useNotification,
+  NotificationType,
+} from "../components/base/BaseNotification.vue";
 
 const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
   const checkForUnauthorized = () => {
@@ -59,6 +63,15 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
           );
           console.log(`Message:`, error.message);
           console.log(`---`);
+          if (error.extensions.statusCode != 401) {
+            useNotification().createNotification({
+              displayTime: 10,
+              type: NotificationType.error,
+              title: "Error",
+              description: "Something went wrong",
+              shown: true,
+            });
+          }
         }
       }
     }

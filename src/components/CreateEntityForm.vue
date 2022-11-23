@@ -27,8 +27,8 @@ import {
   CreateEntityDocument,
   Entitytyping,
   GetFormsDocument,
-} from "@/queries";
-import type { CreateEntityMutation } from "@/queries";
+} from "../queries";
+import type { CreateEntityMutation } from "../queries";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import BaseButton from "./base/BaseButton.vue";
 import urlSlug from "url-slug";
