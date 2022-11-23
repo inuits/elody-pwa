@@ -37,13 +37,16 @@ export default defineComponent({
   inheritAttrs: false,
   props: {
     label: { type: String, default: "" },
-    modelValue: { type: Object as PropType<string | undefined | null>, default: "" },
+    modelValue: {
+      type: String,
+      default: "",
+    },
     debounce: { type: Boolean, default: false },
     debounceWait: { type: Number, default: 400 },
     icon: { type: String, default: undefined },
     bgColor: { type: String, default: "neutral-0" },
     name: { type: String, default: "", required: false },
-    isDisabled: { type: true || false, default: false, required: false },
+    isDisabled: { type: Boolean, default: false, required: false },
     type: { type: String, required: false, default: "text" },
   },
   emits: ["update:modelValue"],

@@ -24,7 +24,7 @@
         v-if="
           !loading &&
           mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype.includes('image')
+          mediafileSelectionState.selectedMediafile.mimetype?.includes('image')
         "
         :is-public="mediafileSelectionState.selectedMediafile.isPublic"
         :image-url="mediafileSelectionState.selectedMediafile.filename"
@@ -41,7 +41,7 @@
         v-if="
           !loading &&
           mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype.includes('video')
+          mediafileSelectionState.selectedMediafile.mimetype?.includes('video')
         "
         :source="mediafileSelectionState.selectedMediafile"
       />
@@ -49,7 +49,7 @@
         v-if="
           !loading &&
           mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype.includes('audio')
+          mediafileSelectionState.selectedMediafile.mimetype?.includes('audio')
         "
         :source="mediafileSelectionState.selectedMediafile"
       />
@@ -57,15 +57,15 @@
         v-if="
           !loading &&
           mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype.includes('pdf')
+          mediafileSelectionState.selectedMediafile.mimetype?.includes('pdf')
         "
         :source="mediafileSelectionState.selectedMediafile"
       />
-      <SrtViewer
+      <TextViewer
         v-if="
           !loading &&
           mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype.includes(
+          mediafileSelectionState.selectedMediafile.mimetype?.includes(
             'text/plain'
           )
         "
@@ -112,13 +112,13 @@ import type {
   Entity,
   PostMediaFileMutation,
 } from "../../queries";
-import { usePageTitle } from "../../composables/usePageTitle";
+import { usePageInfo } from "../../composables/usePageInfo";
 import { useEditMode } from "../../composables/useEdit";
 import EntityImageSelection, {
   useEntityMediafileSelector,
 } from "../EntityImageSelection.vue";
 import { useRoute, onBeforeRouteUpdate } from "vue-router";
-import { asString } from "../../helpers";
+import { asString } from "@/helpers";
 import VideoPlayer from "./VideoPlayer.vue";
 import AudioPlayer from "./AudioPlayer.vue";
 import PDFViewer from "./PDFViewer.vue";
@@ -126,7 +126,7 @@ import useDropzoneHelper from "../../composables/useDropzoneHelper";
 import useMediaAssetLinkHelper from "../../composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "../../composables/useMetaDataHelper";
 import { useUploadModal } from "../UploadModal.vue";
-import SrtViewer from "./SrtViewer.vue";
+import TextViewer from "./TextViewer.vue";
 import LinkedAssetsList from "../LinkedAssetsList.vue";
 import { usePermissions } from "../../composables/usePermissions";
 
@@ -139,7 +139,7 @@ export default defineComponent({
     AudioPlayer,
     PDFViewer,
     LinkedAssetsList,
-    SrtViewer,
+    TextViewer,
     EntityImageSelection,
   },
   props: {
@@ -158,14 +158,6 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const {
-      myDropzone,
-      isUploading,
-      selectedFiles,
-      increaseSuccessCounter,
-      errorMessages,
-    } = useDropzoneHelper();
-    const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
     const { lastAdjustedMediaFileMetaData, mediafiles, clearMediafiles } =
       useMetaDataHelper();
     const id = asString(useRoute().params["id"]);
@@ -174,8 +166,7 @@ export default defineComponent({
       useEntityMediafileSelector();
 
     const { editMode, showEditToggle } = useEditMode();
-    const { updatePageTitle } = usePageTitle();
-    const { closeUploadModal } = useUploadModal();
+    const { updatePageInfo } = usePageInfo();
     const { canEdit, canDelete, canGet } = usePermissions();
 
     const queryVariables = reactive<GetEntityByIdQueryVariables>({
@@ -203,34 +194,9 @@ export default defineComponent({
       return undefined;
     });
 
-    const { mutate, onDone } = useMutation<PostMediaFileMutation>(
-      PostMediaFileDocument
-    );
-
     watch(title, (value: Maybe<string> | undefined) => {
-      value && updatePageTitle(value, "entityTitle");
+      value && updatePageInfo(value, "entityTitle");
     });
-
-    watch(
-      () => isUploading.value,
-      async () => {
-        if (isUploading.value) {
-          for (const file of selectedFiles.value) {
-            await mutate({
-              mediaFileInput: { filename: file.upload.filename },
-              file: file,
-            }).catch(() => {
-              return true;
-            });
-          }
-          myDropzone.value.removeAllFiles();
-          isUploading.value = false;
-          if (errorMessages.value.length === 0) {
-            closeUploadModal();
-          }
-        }
-      }
-    );
 
     const updateListWhenChanges = (newValue: any, oldValue: any) => {
       if (
@@ -257,14 +223,6 @@ export default defineComponent({
       },
       { deep: true }
     );
-
-    onDone((value) => {
-      if (value.data && value.data.postMediaFile) {
-        mediafiles.value.push(value.data.postMediaFile);
-        addMediaFileToLinkList(value.data.postMediaFile);
-      }
-      increaseSuccessCounter();
-    });
 
     onBeforeRouteUpdate(async (to: any) => {
       //@ts-ignore

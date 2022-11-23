@@ -242,16 +242,17 @@ enum advancedFilterTypes {
   minmax
 }
 
+type filterOption {
+  value: String
+  label: String
+}
+
 type advancedFilter {
   key: String!
   label: String
   type: advancedFilterTypes!
   isRelation: Boolean
-}
-
-type filterOption {
-  value: String
-  label: String
+  options: [filterOption]
 }
 
 input SearchFilter {
@@ -390,6 +391,7 @@ enum validation {
   optional
 }
 
+
 type MetadataField {
   label: String
   key: String!
@@ -398,6 +400,7 @@ type MetadataField {
   active: Boolean
   validation: validation
   options: [MetadataFieldOption]
+  config_key: String
 }
 
 type MetadataFieldOption {
@@ -465,8 +468,12 @@ type Query {
   ): EntitiesResults
   User: User
   Directories(dir: String): [Directory]
-  Jobs(paginationInfo: PaginationInfo, filters: Filters): JobsResults
-  Job(id: String!): Job
+  Jobs(
+    paginationInfo: PaginationInfo
+    filters: Filters
+    failed: Boolean!
+  ): JobsResults
+  Job(id: String!, failed: Boolean!): Job
   advancedFilters(choice: String!): [advancedFilter]
   FilterOptions(key: String!): [filterOption]
   Form(type: String!): Form
@@ -507,7 +514,7 @@ type Mutation {
   StartImport(folder: String!): ImportReturn
   # addRelations(id: String!, relations: [RelationInput!]!): [Relation]!
   replaceRelationsAndMetaData(id: String!, form: MetadataFormInput): Entity
-  deleteData(id: String!, path: deletePaths!): String
+  deleteData(id: String!, path: Collection!): String
   createEntity(entity: EntityInput!): Entity
   postMediaFile(mediaFileInput: MediaFileInput!, file: Upload!): MediaFile
   linkMediafileToEntity(
@@ -532,7 +539,7 @@ type Mutation {
   getSavedSearchById(uuid: String!): SavedSearchedEntity
 }
 
-enum deletePaths {
+enum Collection {
   entities
   mediafiles
 }
@@ -542,6 +549,8 @@ input MetadataInput {
   value: String
   lang: String
   type: String
+  label: String
+  immutable: Boolean
 }
 
 type ImportReturn {

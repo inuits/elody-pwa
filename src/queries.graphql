@@ -863,8 +863,12 @@ query getDirectories($dir: String) {
   }
 }
 
-query getJobs($paginationInfo: PaginationInfo, $filters: Filters) {
-  Jobs(paginationInfo: $paginationInfo, filters: $filters) {
+query getJobs(
+  $paginationInfo: PaginationInfo
+  $filters: Filters
+  $failed: Boolean!
+) {
+  Jobs(paginationInfo: $paginationInfo, filters: $filters, failed: $failed) {
     results {
       ...job
     }
@@ -874,8 +878,8 @@ query getJobs($paginationInfo: PaginationInfo, $filters: Filters) {
   }
 }
 
-query getJob($id: String!) {
-  Job(id: $id) {
+query getJob($id: String!, $failed: Boolean!) {
+  Job(id: $id, failed: $failed) {
     ...jobWithSubJobs
   }
 }
@@ -886,6 +890,10 @@ query getAdvancedFilters($choice: String!) {
     type
     key
     isRelation
+    options {
+      value
+      label
+    }
   }
 }
 
@@ -977,7 +985,7 @@ mutation deleteRelations($id: String!, $metadata: [MetadataInput!]!) {
   deleteRelations(id: $id, metadata: $metadata)
 }
 
-mutation deleteData($id: String!, $path: deletePaths!) {
+mutation deleteData($id: String!, $path: Collection!) {
   deleteData(id: $id, path: $path)
 }
 

@@ -13,7 +13,7 @@ import App from "./App.vue";
 import { routes } from "./views/router";
 import { store } from "./store";
 import { Unicons } from "./types";
-import { i18n } from "./helpers";
+import { i18n } from "@/helpers";
 import { createHead } from "@vueuse/head";
 import "./assets/base.css";
 import { onError } from "@apollo/client/link/error";

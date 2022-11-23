@@ -21,9 +21,10 @@
 <script lang="ts">
 import { computed, defineComponent } from "vue";
 import type { PropType } from "vue";
-import MinMaxField from "@/components/base/MinMaxField.vue";
-import { defaultReturnMinMaxObject } from "@/composables/useFilterHelper";
-import type { FilterInList } from "@/composables/useFilterHelper";
+import MinMaxField from "./MinMaxField.vue";
+import { defaultReturnMinMaxObject } from "../../composables/useFilterHelper";
+import type { FilterInList } from "../../composables/useFilterHelper";
+import type { AdvancedFilter } from "../../queries";
 
 export default defineComponent({
   name: "MinmaxFilter",
@@ -36,19 +37,19 @@ export default defineComponent({
       required: false,
       default: undefined,
     },
-    filterkey: {
-      type: [String],
+    filter: {
+      type: Object as PropType<AdvancedFilter>,
       required: true,
     },
     isRelation: {
-      type: Object as PropType<Boolean | null>,
+      type: Boolean,
       required: false,
       default: false,
     },
-  }, 
+  },
   emits: ["update:minmaxValue"],
   setup(props, { emit }) {
-    emit("update:minmaxValue", defaultReturnMinMaxObject(props.filterkey));
+    emit("update:minmaxValue", defaultReturnMinMaxObject(props.filter?.key));
 
     const inputFieldMin = computed<number | undefined>({
       get() {
@@ -61,7 +62,7 @@ export default defineComponent({
       set(value) {
         emit(
           "update:minmaxValue",
-          defaultReturnMinMaxObject(props.filterkey, {
+          defaultReturnMinMaxObject(props.filter?.key, {
             min: value,
             max: inputFieldMax.value,
             isRelation: props.isRelation,
@@ -81,7 +82,7 @@ export default defineComponent({
       set(value) {
         emit(
           "update:minmaxValue",
-          defaultReturnMinMaxObject(props.filterkey, {
+          defaultReturnMinMaxObject(props.filter?.key, {
             min: inputFieldMin.value,
             max: value,
             isRelation: props.isRelation,

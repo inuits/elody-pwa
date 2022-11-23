@@ -16,17 +16,17 @@
       {{ $t("meta.no-label") }}
     </div>
 
-    <meta-viewline-relation v-if="(item as MetadataRelation).linkedEntity" :metadata="(item as MetadataRelation)" />
+    <meta-viewline-relation v-if="item.linkedEntity" :metadata="item" />
 
     <div
-      v-if="!(item as MetadataRelation).linkedEntity"
+      v-if="!item.linkedEntity"
       class="value"
       :class="{ loading }"
       data-test="meta-info"
     >
       <p v-if="item.value && !stringIsUrl(item.value)">{{ item.value }}</p>
       <a
-        v-if="item.value && stringIsUrl(item.value)"
+        v-else-if="item.value && stringIsUrl(item.value)"
         :href="item.value"
         target="_blank"
         class="underline"
@@ -42,12 +42,12 @@
 </template>
 
 <script lang="ts">
-import type { MetadataAndRelation, MetadataRelation } from "@/queries";
+import type { MetadataAndRelation, MetadataRelation } from "../queries";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import { Unicons } from "@/types";
+import { Unicons } from "../types";
 import MetaViewlineRelation from "./MetaViewlineRelation.vue";
 import { stringIsUrl } from "@/helpers";
 
