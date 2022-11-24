@@ -130,6 +130,11 @@ import Dropzone from "dropzone";
 import { useUploadModal } from "./UploadModal.vue";
 import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "../composables/useMetaDataHelper";
+import {
+  NotificationType,
+  useNotification,
+} from "../components/base/BaseNotification.vue";
+import { useI18n } from "vue-i18n";
 
 export default defineComponent({
   name: "DropZone",
@@ -159,6 +164,8 @@ export default defineComponent({
     const { closeUploadModal } = useUploadModal();
     const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
     const { mediafiles } = useMetaDataHelper();
+    const { createNotification } = useNotification();
+    const { t } = useI18n();
     clearDropzoneErrorMessages();
 
     onMounted(async () => {
@@ -201,6 +208,13 @@ export default defineComponent({
           });
           isUploading.value = false;
           if (!errorMessages.value.length) {
+            createNotification({
+              displayTime: 10,
+              type: NotificationType.default,
+              title: t("dropzone.successNotification.title"),
+              description: t("dropzone.successNotification.description"),
+              shown: true,
+            });
             closeUploadModal();
           }
         };
