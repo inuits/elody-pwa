@@ -28,7 +28,11 @@
     "failed": "File(s) failed to upload.",
     "success": "File(s) successfully uploaded.",
     "uploading": "Uploading...",
-    "upload": "Upload"
+    "upload": "Upload",
+    "successNotification": {
+      "title": "Upload finished",
+      "description": "All files were succesfully uploaded"
+    }
   },
   "buttons": {
     "delete": "Delete",
