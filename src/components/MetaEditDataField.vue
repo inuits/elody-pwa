@@ -8,7 +8,7 @@
   />
   <!-- :label="label === undefined ? fieldKey : label" -->
   <BaseDropdown
-    v-if="type === 'dropdown'"
+    v-else
     v-model="value"
     :label="label ? label : fieldKey"
     :options="stringifyOption(options)"
