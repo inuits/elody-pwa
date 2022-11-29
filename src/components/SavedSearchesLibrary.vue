@@ -1,6 +1,5 @@
 <template>
   <BaseLibrary
-    :isSavedSearches="true"
     :hasFilters="false"
     :has-simple-search="true"
     :search-input-type="SearchInputType.AdvancedSavedSearchType"
