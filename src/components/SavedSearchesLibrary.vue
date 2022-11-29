@@ -8,7 +8,8 @@
     :search-placeholder="$t('saved-searches.search-saved-searches')"
     :advanced-filters-choice="'entityFilters'"
     @add-selection="addSelection"
-    :enable-selection="enableSelection"
+    :enable-selection="true"
+    :isHideFilters="true"
   />
 </template>
 
@@ -31,11 +32,11 @@ export default defineComponent({
     BaseLibrary,
   },
   setup: () => {
-    const { pickedSavedSearch, closeSearchSavedSearchesModal } =
+    const { closeSearchSavedSearchesModal, setPickedSavedSearch } =
       useSavedSearchHelper();
 
     const addSelection = (entity: any) => {
-      pickedSavedSearch.value = entity;
+      setPickedSavedSearch(entity);
       closeSearchSavedSearchesModal();
     };
 

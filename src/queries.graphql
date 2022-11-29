@@ -777,36 +777,7 @@ query getEntities(
         }
       }
       ... on SavedSearchedEntity {
-        _key
-        definition {
-          key
-          type
-          minMaxInput {
-            min
-            max
-            isRelation
-          }
-          textInput {
-            value
-          }
-          multiSelectInput {
-            value
-            AndOrValue
-          }
-        }
-        user
-        metadata(
-          keys: []
-          excludeOrInclude: include
-        ) {
-          __typename
-          ... on Metadata {
-            key
-            value
-            label
-            immutable
-          }
-        }  
+        ...savedSearch
       }
     }
   }
@@ -1026,6 +997,18 @@ fragment savedSearch on SavedSearchedEntity {
       }
     }
     user
+    teaserMetadata: metadata(
+      keys: []
+      excludeOrInclude: include
+    ) {
+      __typename
+      ... on Metadata {
+        key
+        value
+        label
+        immutable
+      }
+    }
     metadata(
       keys: []
       excludeOrInclude: include

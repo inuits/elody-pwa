@@ -35,11 +35,10 @@
 </template>
 <script lang="ts">
 import BaseModal from "@/components/base/BaseModal.vue";
-import { Entitytyping } from "@/queries";
-import { defineComponent, ref, PropType, watch } from "vue";
+import { Entitytyping, type SavedSearchInput } from "@/queries";
+import { defineComponent, ref, watch, type PropType } from "vue";
 import BaseButton from "./base/BaseButton.vue";
 import { useSavedSearchHelper } from "../composables/useSavedSearchHelper";
-import { FilterInList } from "@/composables/useFilterHelper";
 import { useMutation } from "@vue/apollo-composable";
 import {
   CreateSavedSearchDocument,
@@ -49,6 +48,7 @@ import type {
   CreateSavedSearchMutation,
   PatchSavedSearchTitleMutation,
 } from "@/queries";
+import type { FilterInList } from "@/composables/useFilterHelper";
 export default defineComponent({
   name: "CreateSavedSearchModal",
   components: { BaseButton, BaseModal },
@@ -59,10 +59,12 @@ export default defineComponent({
   },
   emits: ["refetchSavedSearches"],
   setup(props, { emit }) {
-    const { closeCreateModal, createModalState, pickedSavedSearch, clearTypename } =
+    const { closeCreateModal, createModalState, pickedSavedSearch, clearTypename, setPickedSavedSearch, initSavedSearch } =
       useSavedSearchHelper();
     const searchTitle = ref<string>("");
-    const savedSearch = ref<any>();
+    const savedSearch = ref<SavedSearchInput>(
+      initSavedSearch()
+    );
 
     const emptySearchTitle = () => {
       searchTitle.value = "";
@@ -71,30 +73,15 @@ export default defineComponent({
     watch(
       () => createModalState.value.action,
       () => {
-        if (createModalState.value.action === "edit") {
-          searchTitle.value = pickedSavedSearch.value.metadata[0].value;
+        if (createModalState.value.action === "edit" && pickedSavedSearch?.value?.metadata[0]?.value) {
+          searchTitle.value = pickedSavedSearch?.value?.metadata[0]?.value;
         } else {
           emptySearchTitle();
         }
       }
     );
 
-    const initSavedSearch = () => {
-      savedSearch.value = {
-        definition: [],
-        metadata: [
-          {
-            key: "title",
-            value: "",
-            lang: "nl",
-          },
-        ],
-        private: true,
-        type: "saved_search",
-      };
-    };
-
-    initSavedSearch();
+    savedSearch.value = initSavedSearch();
 
     const { mutate, onDone } = useMutation<CreateSavedSearchMutation>(
       CreateSavedSearchDocument
@@ -105,9 +92,11 @@ export default defineComponent({
 
     const create = () => {
       if (createModalState.value.action === "create") {
-        initSavedSearch();
-        savedSearch.value.metadata[0].value = searchTitle.value;
-        props.initialFilters.forEach((filter: FilterInList) => {
+        savedSearch.value = initSavedSearch();
+        if (savedSearch.value && savedSearch.value.metadata && savedSearch.value.metadata[0]) {
+          savedSearch.value.metadata[0].value = searchTitle.value;
+        }
+        props.initialFilters?.forEach((filter: FilterInList) => {
           if (filter.isActive) {
             savedSearch.value.definition.push(filter.input);
           }
@@ -118,7 +107,7 @@ export default defineComponent({
           })
           mutate({ savedSearchInput: savedSearch.value });
           onDone((res: any) => {
-            pickedSavedSearch.value = res.data.createSavedSearch;
+            setPickedSavedSearch(res.data.createSavedSearch)
             emit("refetchSavedSearches", true);
             emptySearchTitle();
             closeCreateModal();
@@ -131,12 +120,14 @@ export default defineComponent({
         searchTitle.value.length > 0
       ) {
         mutatePatchTitle({
-          uuid: pickedSavedSearch.value._key,
+          uuid: pickedSavedSearch.value?._key,
           title: searchTitle.value,
         });
         onDonePatchTitle((res) => {
-          pickedSavedSearch.value.metadata[0].value =
+          if (res?.data?.patchSavedSearchTitle?.metadata[0] && pickedSavedSearch.value?.metadata[0]) {
+            pickedSavedSearch.value.metadata[0].value =
             res.data.patchSavedSearchTitle.metadata[0].value;
+          }
           emit("refetchSavedSearches", true);
           emptySearchTitle();
           closeCreateModal();
