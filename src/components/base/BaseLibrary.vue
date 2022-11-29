@@ -1,7 +1,7 @@
 <template>
   <div class="lg:flex">
     <FilterSideBar
-      v-show="!isDrawerHiding && !isSavedSearches"
+      v-show="!isDrawerHiding && !isHideFilters"
       @activeFilters="setFilters"
       :accepted-entity-types="acceptedEntityTypes ? acceptedEntityTypes : []"
       :advancedFiltersChoice="advancedFiltersChoice"
@@ -9,7 +9,7 @@
     <div class="p-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
         <div
-          v-show="acceptedEntityTypes.length === 0 && !isSavedSearches"
+          v-show="acceptedEntityTypes.length === 0 && !isHideFilters"
           class="mt-8 mr-4 flex"
         >
           <IconToggle
@@ -90,7 +90,7 @@
         </div>
 
         <div v-else-if="!displayGrid && result?.Entities?.results">
-          <div v-if="!isSavedSearches">
+          <div>
             <ListItem
               :small="listItemRouteName === 'SingleMediafile'"
               v-for="entity in result.Entities?.results"
@@ -142,17 +142,6 @@
                 />
               </template>
             </ListItem>
-          </div>
-
-          <div v-if="isSavedSearches">
-            <div
-              @click="addSelection(entity)"
-              v-for="entity in result.Entities?.results"
-              :key="entity?.id"
-              class="p-2 m-2 cursor-pointer bg-neutral-0 hover:bg-neutral-20 border border-neutral-50"
-            >
-              {{ entity.metadata[0].value }}
-            </div>
           </div>
 
           <div v-if="result?.Entities?.results.length === 0" class="p-4">
@@ -283,10 +272,8 @@ export default defineComponent({
       default: () => [],
       required: false,
     },
-    isSavedSearches: {
-      type: Boolean,
-      default: false,
-    },
+    isHideFilters: Boolean,
+
   },
   emits: ["addSelection"],
   setup: (props, { emit }) => {

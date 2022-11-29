@@ -134,7 +134,7 @@ export default defineComponent({
   emits: ["activeFilters"],
   setup(props, { emit }) {
     const initialFilters = ref<FilterInList[]>([]);
-    const { pickedSavedSearch, clearTypename  } = useSavedSearchHelper();
+    const { pickedSavedSearch, clearTypename, setPickedSavedSearch  } = useSavedSearchHelper();
     const activeCount = computed(
       () => getActiveFilters(initialFilters.value).length
     );
@@ -162,7 +162,7 @@ export default defineComponent({
 
     const clearFilters = () => {
       clearInitialFilters();
-      pickedSavedSearch.value = undefined;
+      setPickedSavedSearch(undefined)
       applyFilters();
     };
 
@@ -199,7 +199,7 @@ export default defineComponent({
     const router = useRouter();
 
     router.beforeEach((to, _from, next) => {
-      pickedSavedSearch.value = undefined;
+      setPickedSavedSearch(undefined)
       next();
     });
 
