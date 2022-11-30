@@ -35,6 +35,7 @@ export const useEditMode = () => {
   const setEditMode = () => (editMode.value = "edit");
   const disableEditMode = () => (editMode.value = "view");
   const isEdit = computed<boolean>(() => editMode.value === "edit");
+  const { clearMediafiles } = useMetaDataHelper();
 
   const addSaveCallback = (input: callback, order?: string) => {
     if (order === "first") {
@@ -66,6 +67,7 @@ export const useEditMode = () => {
   const save = async () => {
     removeMediafilesFromOrdering(toBeDeleted.value);
     linkMediaFilesToEntity(addSaveCallback);
+    clearMediafiles();
 
     if (relationsToBeDeleted.value.relations.length > 0) {
       addSaveCallback(async () => {
