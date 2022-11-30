@@ -1,11 +1,29 @@
 import type { ErrorResponse } from "@apollo/client/link/error";
 import useDropzoneHelper from "../composables/useDropzoneHelper";
-import BaseNotification, {
+import {
   useNotification,
   NotificationType,
 } from "../components/base/BaseNotification.vue";
+import { useRouter } from "vue-router";
+
+const baseGraphQLError = {
+  displayTime: 10,
+  type: NotificationType.error,
+  shown: true,
+};
 
 const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
+  const handleErrorByCode = (errorCode: Number) => {
+    if (errorCode === 403) {
+      useNotification().createNotification({
+        title: "Forbidden",
+        description: "You don't have access to this page/action",
+        ...baseGraphQLError,
+      });
+      useRouter().go(-1);
+    }
+  };
+
   const checkForUnauthorized = () => {
     const gqlErrors = _errorResponse.graphQLErrors;
     let authErrors: Array<Boolean | undefined> = [];
@@ -63,6 +81,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
           );
           console.log(`Message:`, error.message);
           console.log(`---`);
+          handleErrorByCode(Number(error.extensions.statusCode));
           // if (error.extensions.statusCode != 401) {
           //   useNotification().createNotification({
           //     displayTime: 10,
