@@ -3,11 +3,28 @@
     class="lg:w-2/6 md:w-full lg:border-l-2 lg:border-r-2 border-solid border-neutral-50"
   >
     <div>
-      <div class="flex justify-between m-3">
-        <p class="text-xl font-medium">{{$t('filter.filter')}}</p>
-        <p class="bg-blue-50 text-blue-300 rounded-md px-2 py-1">
-          {{ activeCount }} {{$t('filter.active')}}
-        </p>
+      <div class="flex justify-between py-3 px-3 align-center">
+        <div>
+          <p class="pl-1 text-xl font-medium">{{ $t("filter.filter") }}</p>
+        </div>
+
+        <div class="flex justify-between gap-3">
+          <p class="bg-blue-50 text-blue-300 rounded-md px-2 py-1 my-1">
+            {{ activeCount }} {{ $t("filter.active") }}
+          </p>
+
+          <p
+            v-if="pickedSavedSearch"
+            class="bg-blue-50 text-blue-300 rounded-md px-2 py-1 my-1"
+          >
+            {{ pickedSavedSearch.metadata[0].value }}
+          </p>
+
+          <saved-searches
+            :initialFilters="initialFilters"
+            @removedSelectedSearch="removedSelectedSearch()"
+          />
+        </div>
       </div>
       <div
         class="flex justify-between border-solid border-b-2 border-neutral-50 px-3 pb-3"
@@ -69,7 +86,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted } from "vue";
+import { defineComponent, ref, computed, onMounted, watch } from "vue";
 import type { PropType } from "vue";
 import FilterAccordion from "@/components/base/FilterAccordion.vue";
 import { useQuery } from "@vue/apollo-composable";
@@ -79,7 +96,12 @@ import MinmaxFilter from "@/components/base/MinmaxFilter.vue";
 import TextFilter from "@/components/base/TextFilter.vue";
 import ChecklistFilter from "@/components/base/ChecklistFilter.vue";
 import MultiFilter from "@/components/base/MultiFilter.vue";
+import { Unicons } from "@/types";
+import SavedSearches from "@/components/SavedSearches.vue";
 // import AndOrToggle from './base/AndOrToggle.vue';
+import { useSavedSearchHelper } from "../composables/useSavedSearchHelper";
+import { useRouter } from "vue-router";
+
 import {
   clearAdvancedSearchInput,
   getActiveFilters,
@@ -95,6 +117,7 @@ export default defineComponent({
     TextFilter,
     ChecklistFilter,
     MultiFilter,
+    SavedSearches,
     // AndOrToggle,
   },
   props: {
@@ -111,6 +134,7 @@ export default defineComponent({
   emits: ["activeFilters"],
   setup(props, { emit }) {
     const initialFilters = ref<FilterInList[]>([]);
+    const { pickedSavedSearch, clearTypename, setPickedSavedSearch  } = useSavedSearchHelper();
     const activeCount = computed(
       () => getActiveFilters(initialFilters.value).length
     );
@@ -121,16 +145,29 @@ export default defineComponent({
 
     const applyFilters = () => {
       const returnArray = initialFilters.value.map((filter: FilterInList) => {
+        filter = JSON.parse(JSON.stringify(filter));
+        clearTypename(filter.input);
+        if (filter.input) filter.input["__typename"] = undefined;
         return filter.input;
       });
       emit("activeFilters", returnArray);
     };
 
-    const clearFilters = () => {
+    const clearInitialFilters = () => {
       initialFilters.value = clearAdvancedSearchInput(
         initialFilters.value,
         props.acceptedEntityTypes
       );
+    };
+
+    const clearFilters = () => {
+      clearInitialFilters();
+      setPickedSavedSearch(undefined)
+      applyFilters();
+    };
+
+    const removedSelectedSearch = () => {
+      clearFilters();
     };
 
     applyFilters();
@@ -141,6 +178,31 @@ export default defineComponent({
       }
     });
 
+    watch(
+      () => pickedSavedSearch.value,
+      () => {
+        if (pickedSavedSearch.value) {
+          clearInitialFilters();
+          pickedSavedSearch.value.definition.forEach((filter) => {
+            initialFilters.value.forEach((inFilter) => {
+              if (filter.key === inFilter.input.key) {
+                inFilter.input = filter;
+                inFilter.isActive = true;
+              }
+            });
+          });
+          applyFilters();
+        }
+      }
+    );
+
+    const router = useRouter();
+
+    router.beforeEach((to, _from, next) => {
+      setPickedSavedSearch(undefined)
+      next();
+    });
+
     return {
       filters,
       activeCount,
@@ -149,6 +211,9 @@ export default defineComponent({
       clearFilters,
       AdvancedFilterTypes,
       AndOrChoice,
+      Unicons,
+      pickedSavedSearch,
+      removedSelectedSearch,
     };
   },
 });

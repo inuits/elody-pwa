@@ -43,7 +43,7 @@
 import type { Maybe, Media, MetadataAndRelation } from "../queries";
 import { defineComponent, inject } from "vue";
 import type { PropType } from "vue";
-import { customSort } from "../helpers";
+import { customSort } from "@/helpers";
 
 export default defineComponent({
   name: "ListItem",

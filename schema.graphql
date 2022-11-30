@@ -266,10 +266,27 @@ input MinMaxInput {
   max: Int
   isRelation: Boolean
 }
+
+type MinMax {
+  min: Int
+  max: Int
+  isRelation: Boolean
+}
+
 input TextInput {
   value: String
 }
+
+type Text {
+  value: String
+}
+
 input MultiSelectInput {
+  value: [String]
+  AndOrValue: Boolean
+}
+
+type MultiSelect {
   value: [String]
   AndOrValue: Boolean
 }
@@ -278,6 +295,7 @@ enum SearchInputType {
   AdvancedInputMediaFilesType
   AdvancedInputType
   SimpleInputtype
+  AdvancedSavedSearchType
 }
 
 enum AdvancedInputType {
@@ -512,6 +530,12 @@ type Mutation {
   getAssetsRelationedWithMediafFile(mediaFileId: String!): [Asset]
   updateMediafilesOrder(value: OrderArrayInput!): String
   deleteRelations(id: String!, metadata: [MetadataInput!]!): String
+  savedSearches: EntitiesResults
+  createSavedSearch(savedSearchInput: SavedSearchInput!): SavedSearchedEntity
+  deleteSavedSearch(uuid: String!): String
+  patchSavedSearchTitle(uuid: String!, title: String!): SavedSearchedEntity
+  patchSavedSearchDefinition(uuid: String!, definition: [FilterInput!]!): SavedSearchedEntity
+  getSavedSearchById(uuid: String!): SavedSearchedEntity
 }
 
 enum Collection {
@@ -541,3 +565,56 @@ type File {
   mimetype: String!
   encoding: String!
 }
+
+type SavedSearchesResults {
+  results: [SavedSearchedEntity]
+  count: Int
+  limit: Int
+}
+
+type SavedSearchedEntity implements Entity {
+  _key: String
+  definition: [Definition]
+  # metadata: [Metadata]!
+  user: String
+  id: String!
+  uuid: String!
+  type: String!
+  metadata(
+    keys: [String]!
+    excludeOrInclude: ExcludeOrInclude!
+  ): [Metadata]!
+  media: Media
+  form: Form
+  teaserMetadata: [MetadataAndRelation]
+  permission: [Permission]
+}
+
+type SavedSearchesMetadata {
+  key: String
+  value: String
+  lang: String
+}
+
+type Definition {
+  _id: String
+  type: String
+  minMaxInput: MinMax
+  textInput: Text
+  multiSelectInput: MultiSelect
+  key: String
+}
+
+input SavedSearchMetadataInput {
+  lang: String,
+  value: String,
+  key: String
+}
+
+input SavedSearchInput {
+  type: String
+  private: Boolean,
+  metadata: [SavedSearchMetadataInput],
+  definition: [FilterInput!]!
+}
+
