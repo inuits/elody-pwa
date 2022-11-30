@@ -55,7 +55,11 @@ module.exports = {
         dark: "#0052CC",
       },
     },
-    extend: {},
+    extend: {
+      spacing: {
+        '76': '305px',
+      }
+    },
   },
   variants: {
     extend: {

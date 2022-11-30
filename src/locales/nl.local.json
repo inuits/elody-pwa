@@ -106,5 +106,16 @@
   },
   "history-view": {
     "search": "Search History"
+  },
+  "saved-searches": {
+    "new": "Save as new",
+    "save-changes": "Save changes",
+    "edit-label": "Edit label",
+    "reset": "Reset",
+    "delete": "Delete",
+    "all-filters": "All filters",
+    "search-title": "Search title",
+    "edit": "Edit",
+    "search-saved-searches": "Search Saved Searches"
   }
 }

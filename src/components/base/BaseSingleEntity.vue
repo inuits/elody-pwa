@@ -118,7 +118,7 @@ import EntityImageSelection, {
   useEntityMediafileSelector,
 } from "../EntityImageSelection.vue";
 import { useRoute, onBeforeRouteUpdate } from "vue-router";
-import { asString } from "../../helpers";
+import { asString } from "@/helpers";
 import VideoPlayer from "./VideoPlayer.vue";
 import AudioPlayer from "./AudioPlayer.vue";
 import PDFViewer from "./PDFViewer.vue";

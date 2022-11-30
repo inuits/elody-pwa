@@ -1,14 +1,17 @@
 <template>
   <div class="lg:flex">
     <FilterSideBar
-      v-show="!isDrawerHiding"
+      v-show="!isDrawerHiding && !isHideFilters"
       @activeFilters="setFilters"
       :accepted-entity-types="acceptedEntityTypes ? acceptedEntityTypes : []"
       :advancedFiltersChoice="advancedFiltersChoice"
     />
     <div class="p-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
-        <div v-show="acceptedEntityTypes.length === 0" class="mt-8 mr-4 flex">
+        <div
+          v-show="acceptedEntityTypes.length === 0 && !isHideFilters"
+          class="mt-8 mr-4 flex"
+        >
           <IconToggle
             v-model:checked="isDrawerHiding"
             :icon-on="Unicons.SearchGlass.name"
@@ -87,57 +90,60 @@
         </div>
 
         <div v-else-if="!displayGrid && result?.Entities?.results">
-          <ListItem
-            :small="listItemRouteName === 'SingleMediafile'"
-            v-for="entity in result.Entities?.results"
-            :key="entity?.id"
-            :meta="entity?.teaserMetadata"
-            :media="getMediaFilenameFromEntity(entity)"
-            :thumb-icon="getThumbnail(entity)"
-            @click="
-              !enableSelection &&
-                router.push({
-                  name: listItemRouteName,
-                  params: { id: entity?.id },
-                })
-            "
-          >
-            <template #actions>
-              <BaseButton
-                v-if="
-                  determineIfNotAdded(
-                    entity,
-                    mediafiles,
-                    selectedRelationFieldMetadata
-                  ) && enableSelection
-                "
-                :loading="loading"
-                class="ml-2"
-                :icon="Unicons.PlusCircle.name"
-                @click="addSelection(entity)"
-              />
-              <BaseIcon
-                v-else-if="enableSelection"
-                :name="Unicons.Check.name"
-                fill="green"
-                width="40px"
-                class="mr-3"
-              />
-
-              <BaseButton
-                v-else
-                :loading="loading"
-                class="ml-2"
-                :icon="Unicons.Eye.name"
-                @click="
+          <div>
+            <ListItem
+              :small="listItemRouteName === 'SingleMediafile'"
+              v-for="entity in result.Entities?.results"
+              :key="entity?.id"
+              :meta="entity?.teaserMetadata"
+              :media="getMediaFilenameFromEntity(entity)"
+              :thumb-icon="getThumbnail(entity)"
+              @click="
+                !enableSelection &&
                   router.push({
                     name: listItemRouteName,
                     params: { id: entity?.id },
                   })
-                "
-              />
-            </template>
-          </ListItem>
+              "
+            >
+              <template #actions>
+                <BaseButton
+                  v-if="
+                    determineIfNotAdded(
+                      entity,
+                      mediafiles,
+                      selectedRelationFieldMetadata
+                    ) && enableSelection
+                  "
+                  :loading="loading"
+                  class="ml-2"
+                  :icon="Unicons.PlusCircle.name"
+                  @click="addSelection(entity)"
+                />
+                <BaseIcon
+                  v-else-if="enableSelection"
+                  :name="Unicons.Check.name"
+                  fill="green"
+                  width="40px"
+                  class="mr-3"
+                />
+
+                <BaseButton
+                  v-else
+                  :loading="loading"
+                  class="ml-2"
+                  :icon="Unicons.Eye.name"
+                  @click="
+                    router.push({
+                      name: listItemRouteName,
+                      params: { id: entity?.id },
+                    })
+                  "
+                />
+              </template>
+            </ListItem>
+          </div>
+
           <div v-if="result?.Entities?.results.length === 0" class="p-4">
             {{ $t("search.noresult") }}
           </div>
@@ -266,6 +272,8 @@ export default defineComponent({
       default: () => [],
       required: false,
     },
+    isHideFilters: Boolean,
+
   },
   emits: ["addSelection"],
   setup: (props, { emit }) => {
@@ -335,9 +343,13 @@ export default defineComponent({
       );
     });
 
-    const { result, loading } = useQuery(GetEntitiesDocument, queryVariables, {
-      notifyOnNetworkStatusChange: true,
-    });
+    const { result, loading, refetch } = useQuery(
+      GetEntitiesDocument,
+      queryVariables,
+      {
+        notifyOnNetworkStatusChange: true,
+      }
+    );
 
     const addSelection = (entity: any) => {
       beingAdded.value = "";
@@ -365,6 +377,8 @@ export default defineComponent({
         calculateGridColumns();
       }
     });
+
+    refetch();
 
     return {
       paginationLimits,
