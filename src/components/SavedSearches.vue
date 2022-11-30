@@ -21,7 +21,7 @@
         " />
 
         <base-context-menu-item @clicked="openEditModal()" :label="$t('saved-searches.edit-label')" :icon="Unicons.Edit.name"
-          :disable="!pickedSavedSearch" 
+          :disable="!pickedSavedSearch" v-show="auth.isAuthenticated.value === true && determinePermission('patch-saved-search')"
           
           />
 
@@ -30,7 +30,7 @@
           />
 
           <base-context-menu-item @clicked="showConfirmation()" :label="$t('saved-searches.delete')" :icon="Unicons.Trash.name"
-          :disable="!pickedSavedSearch" 
+          :disable="!pickedSavedSearch" v-show="auth.isAuthenticated.value === true && determinePermission('create-saved-search')"
           />
 
         <hr class="border-t-1 border-neutral-50" />
