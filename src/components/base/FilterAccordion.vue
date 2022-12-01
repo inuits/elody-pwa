@@ -62,7 +62,6 @@ export default defineComponent({
     const toggleAccordion = () => {
       isOpen.value = !isOpen.value;
     };
-
     return { isOpen, toggleAccordion, Unicons, props };
   },
 });

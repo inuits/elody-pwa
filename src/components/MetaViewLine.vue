@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import type { MetadataAndRelation, MetadataRelation } from "../queries";
+import type { MetadataRelation } from "../queries";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import { useI18n } from "vue-i18n";
@@ -57,7 +57,7 @@ export default defineComponent({
   props: {
     loading: { type: Boolean, default: false },
     metadata: {
-      type: Array as PropType<MetadataAndRelation[]>,
+      type: Array as PropType<MetadataRelation[]>,
       required: false,
       default: () => [],
     },

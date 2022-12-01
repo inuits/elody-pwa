@@ -1,6 +1,7 @@
 <template>
   <div>
     <InputField
+      v-if="inputField"
       v-model:modelValue="inputField"
       :debounce="true"
       :placeholder="placeholderText"
@@ -14,7 +15,7 @@ import type { PropType } from "vue";
 import InputField from "@/components/base/InputField.vue";
 import { defaultReturnTextObject } from "../../composables/useFilterHelper";
 import type { FilterInList } from "../../composables/useFilterHelper";
-import type { AdvancedFilter } from '@/queries';
+import type { AdvancedFilter } from "@/queries";
 
 export default defineComponent({
   name: "TextFilter",
