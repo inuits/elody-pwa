@@ -39,9 +39,9 @@
           >
             <template
               v-if="
-                metaItem.key === 'title' ||
-                metaItem.key === 'type' ||
-                metaItem.key === 'filename'
+                metaItem?.key === 'title' ||
+                metaItem?.key === 'type' ||
+                metaItem?.key === 'filename'
               "
             >
               <span

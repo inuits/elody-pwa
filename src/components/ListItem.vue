@@ -53,7 +53,12 @@ export default defineComponent({
       type: Array as PropType<Maybe<Maybe<MetadataAndRelation>[]>>,
       default: () => [],
     },
-    media: { type: String, default: "" },
+    media: {
+      type: String as PropType<Maybe<string>>,
+      default: () => {
+        return "";
+      },
+    },
     thumbIcon: { type: String, default: "" },
     small: { type: Boolean, default: false },
   },
@@ -66,11 +71,15 @@ export default defineComponent({
 
     const only4Meta = (input: Maybe<Maybe<MetadataAndRelation>[]>) => {
       const sortOrder: string[] = ["object_number", "type", "title"];
-      return customSort(
-        sortOrder,
-        input?.filter((value) => value?.value !== ""),
-        "key"
-      );
+      if (input) {
+        return customSort(
+          sortOrder,
+          input?.filter((value) => value?.value !== ""),
+          "key"
+        );
+      } else {
+        return [];
+      }
     };
     return { setNoImage, imageSrcError, only4Meta, config };
   },

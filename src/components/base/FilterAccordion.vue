@@ -52,6 +52,9 @@ export default defineComponent({
     label: {
       type: String,
       required: false,
+      default: () => {
+        return "";
+      },
     },
   },
   setup(props) {

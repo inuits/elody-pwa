@@ -1,62 +1,107 @@
 <template>
-  <div v-show="
-    !loading &&
-    auth.isAuthenticated.value === true &&
-    determinePermission('read-saved-search')
-  ">
-    <base-context-menu extra-class="absolute top-40 left-76 z-10" id="context-saved-search">
+  <div
+    v-show="
+      false &&
+      !loading &&
+      auth.isAuthenticated.value === true &&
+      determinePermission('read-saved-search')
+    "
+  >
+    <base-context-menu
+      extra-class="absolute top-40 left-76 z-10"
+      id="context-saved-search"
+    >
       <div role="none">
-        <base-context-menu-item @clicked="updateSelectedSearch()" :label="$t('saved-searches.save-changes')"
-          :icon="Unicons.Save.name" :disable="isNoChangesOriginal(pickedSavedSearch, initialFilters)" v-show="
+        <base-context-menu-item
+          @clicked="updateSelectedSearch()"
+          :label="$t('saved-searches.save-changes')"
+          :icon="Unicons.Save.name"
+          :disable="isNoChangesOriginal(pickedSavedSearch, initialFilters)"
+          v-show="
             auth.isAuthenticated.value === true &&
             determinePermission('patch-saved-search')
-          " />
+          "
+        />
 
-        <base-context-menu-item @clicked="openCreateModal()" :label="$t('saved-searches.new')" :icon="Unicons.PlusCircle.name"
-          :disable="initialFilters.every((e) => {
-                    return e.isActive === false;
-                  })" v-show="
-          auth.isAuthenticated.value === true &&
-          determinePermission('create-saved-search')
-        " />
+        <base-context-menu-item
+          @clicked="openCreateModal()"
+          :label="$t('saved-searches.new')"
+          :icon="Unicons.PlusCircle.name"
+          :disable="
+            initialFilters.every((e) => {
+              return e.isActive === false;
+            })
+          "
+          v-show="
+            auth.isAuthenticated.value === true &&
+            determinePermission('create-saved-search')
+          "
+        />
 
-        <base-context-menu-item @clicked="openEditModal()" :label="$t('saved-searches.edit-label')" :icon="Unicons.Edit.name"
-          :disable="!pickedSavedSearch" v-show="auth.isAuthenticated.value === true && determinePermission('patch-saved-search')"
-          
-          />
+        <base-context-menu-item
+          @clicked="openEditModal()"
+          :label="$t('saved-searches.edit-label')"
+          :icon="Unicons.Edit.name"
+          :disable="!pickedSavedSearch"
+          v-show="
+            auth.isAuthenticated.value === true &&
+            determinePermission('patch-saved-search')
+          "
+        />
 
-          <base-context-menu-item @clicked="resetSelectedSavedSearch()" :label="$t('saved-searches.reset')" :icon="Unicons.Redo.name"
-          :disable="!pickedSavedSearch" 
-          />
+        <base-context-menu-item
+          @clicked="resetSelectedSavedSearch()"
+          :label="$t('saved-searches.reset')"
+          :icon="Unicons.Redo.name"
+          :disable="!pickedSavedSearch"
+        />
 
-          <base-context-menu-item @clicked="showConfirmation()" :label="$t('saved-searches.delete')" :icon="Unicons.Trash.name"
-          :disable="!pickedSavedSearch" v-show="auth.isAuthenticated.value === true && determinePermission('create-saved-search')"
-          />
-
-        <hr class="border-t-1 border-neutral-50" />
-
-        <base-context-menu-item 
-            v-for="(savedSearch, index) in savedSearches.slice(0, 5)" :key="index"
-            @clicked="pick(savedSearch)" 
-            :label="savedSearch.metadata[0]?.value" 
-            :highlight="(pickedSavedSearch ? (pickedSavedSearch._key === savedSearch._key) : false)" 
+        <base-context-menu-item
+          @clicked="showConfirmation()"
+          :label="$t('saved-searches.delete')"
+          :icon="Unicons.Trash.name"
+          :disable="!pickedSavedSearch"
+          v-show="
+            auth.isAuthenticated.value === true &&
+            determinePermission('create-saved-search')
+          "
         />
 
         <hr class="border-t-1 border-neutral-50" />
 
-        <base-context-menu-item 
-            @clicked="openSearchSavedSearchesModal()"
-            :icon="Unicons.SearchGlass.name"
-            :label="$t('saved-searches.all-filters')" 
+        <base-context-menu-item
+          v-for="(savedSearch, index) in savedSearches.slice(0, 5)"
+          :key="index"
+          @clicked="pick(savedSearch)"
+          :label="savedSearch.metadata[0]?.value"
+          :highlight="
+            pickedSavedSearch
+              ? pickedSavedSearch._key === savedSearch._key
+              : false
+          "
+        />
+
+        <hr class="border-t-1 border-neutral-50" />
+
+        <base-context-menu-item
+          @clicked="openSearchSavedSearchesModal()"
+          :icon="Unicons.SearchGlass.name"
+          :label="$t('saved-searches.all-filters')"
         />
       </div>
     </base-context-menu>
   </div>
 
-  <ConfirmationModal v-show="confirmState === 'show'" v-model:confirmState="confirmState"
-    :function="deleteSavedSearch" />
+  <ConfirmationModal
+    v-show="confirmState === 'show'"
+    v-model:confirmState="confirmState"
+    :function="deleteSavedSearch"
+  />
 
-  <create-saved-search-modal @refetchSavedSearches="refetchSavedSearches" :initialFilters="initialFilters" />
+  <create-saved-search-modal
+    @refetchSavedSearches="refetchSavedSearches"
+    :initialFilters="initialFilters"
+  />
 </template>
 
 <script lang="ts" setup>
