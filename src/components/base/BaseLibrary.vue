@@ -273,7 +273,6 @@ export default defineComponent({
       required: false,
     },
     isHideFilters: Boolean,
-
   },
   emits: ["addSelection"],
   setup: (props, { emit }) => {
