@@ -1,4 +1,9 @@
-import type { MediaFile, MetadataField, MetadataRelation, RelationField } from "@/queries";
+import type {
+  MediaFile,
+  MetadataField,
+  MetadataRelation,
+  RelationField,
+} from "@/queries";
 import { ref } from "vue";
 
 const metaDataPatchList = ref<any>({});
@@ -6,38 +11,44 @@ const lastAdjustedMediaFileMetaData = ref<any>();
 const mediafiles = ref<MediaFile[]>([]);
 export const selectedRelationFieldMetadata = ref<any[]>([]);
 export const beingAdded = ref<string>("");
-const relationsToBeDeleted = ref<{ entityId: string, relations: Array<any>}>({
-  entityId: '',
-  relations: []
+const relationsToBeDeleted = ref<{ entityId: string; relations: Array<any> }>({
+  entityId: "",
+  relations: [],
 });
 
-const metadataToBePatched = ref<{ entityId: string, metadata: Array<any>}>({
-  entityId: '',
-  metadata: []
+const metadataToBePatched = ref<{ entityId: string; metadata: Array<any> }>({
+  entityId: "",
+  metadata: [],
 });
 
 const useMetaDataHelper = () => {
-
   const resetRelationsToBeDeleted = () => {
     relationsToBeDeleted.value = {
-      entityId: '',
-      relations: []
-    }
-  }
+      entityId: "",
+      relations: [],
+    };
+  };
 
   const resetMetadataToBePatched = () => {
     metadataToBePatched.value = {
-      entityId: '',
-      metadata: []
-    }
-  }
+      entityId: "",
+      metadata: [],
+    };
+  };
 
-  const addTowardsMetadataToBePatched = (entityId: string, metadataEntityUuid: any) => {
-    if (!metadataToBePatched.value.metadata.some((v: any) => v === metadataEntityUuid)) {
+  const addTowardsMetadataToBePatched = (
+    entityId: string,
+    metadataEntityUuid: any
+  ) => {
+    if (
+      !metadataToBePatched.value.metadata.some(
+        (v: any) => v === metadataEntityUuid
+      )
+    ) {
       metadataToBePatched.value.entityId = entityId;
       metadataToBePatched.value.metadata.push(metadataEntityUuid);
     }
-  }
+  };
 
   const clearMediafiles = (): void => {
     mediafiles.value = [];
@@ -68,7 +79,10 @@ const useMetaDataHelper = () => {
     delete metaDataPatchList.value[mediafileId];
   };
 
-  const shouldAddMediafile = (id: string, alreadyAdded: MediaFile[]):boolean => {
+  const shouldAddMediafile = (
+    id: string,
+    alreadyAdded: MediaFile[]
+  ): boolean => {
     if (!(alreadyAdded && alreadyAdded[0])) {
       return true;
     }
@@ -79,9 +93,12 @@ const useMetaDataHelper = () => {
       }
     }
     return true;
-  }
+  };
 
-  const shouldAddMetaData = (id: string, alreadyAdded: MetadataRelation[]): boolean => {
+  const shouldAddMetaData = (
+    id: string,
+    alreadyAdded: MetadataRelation[]
+  ): boolean => {
     if (!(alreadyAdded && alreadyAdded[0])) {
       return true;
     }
@@ -91,15 +108,18 @@ const useMetaDataHelper = () => {
       }
     }
     return true;
-  }
+  };
 
-  const determineIfNotAdded = (entity: any, mediafiles: MediaFile[], relations: MetadataRelation[]): boolean => {
+  const determineIfNotAdded = (
+    entity: any,
+    relations: MetadataRelation[]
+  ): boolean => {
     if (beingAdded.value === "") {
       return true;
     }
 
-    if (beingAdded.value === "mediafile"){
-      return shouldAddMediafile(entity.uuid, mediafiles);
+    if (beingAdded.value === "mediafile") {
+      return shouldAddMediafile(entity.uuid, mediafiles.value);
     } else {
       return shouldAddMetaData(entity.uuid, relations);
     }
@@ -120,7 +140,7 @@ const useMetaDataHelper = () => {
     resetRelationsToBeDeleted,
     metadataToBePatched,
     resetMetadataToBePatched,
-    addTowardsMetadataToBePatched
+    addTowardsMetadataToBePatched,
   };
 };
 
