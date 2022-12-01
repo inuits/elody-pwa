@@ -6,7 +6,9 @@
         class="input sr-only"
         :class="{ checked }"
         :checked="checked"
-        @change="$emit('update:checked', ($event.target as HTMLInputElement).checked)"
+        @change="
+          $emit('update:checked', ($event.target as HTMLInputElement).checked)
+        "
       />
       <div class="dot"></div>
       <p :name="textOff" class="textOf">{{ textOff }}</p>
@@ -26,7 +28,7 @@ export default defineComponent({
     label: { type: String, default: "" },
     checked: { type: Boolean, default: false },
     textOn: { type: String, required: true },
-    textOf: { type: String, required: true },
+    textOff: { type: String, required: true },
   },
   emits: ["update:checked"],
 });

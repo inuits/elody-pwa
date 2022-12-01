@@ -29,7 +29,6 @@
       <div
         class="flex justify-between border-solid border-b-2 border-neutral-50 px-3 pb-3"
       >
-        <!-- <AndOrToggle v-model:AndOrValue="AndOrChoice" texton="En" textoff="Of" /> -->
         <BaseButton
           bg-color="blue-50"
           bg-hover-color="blue-75"
@@ -98,7 +97,6 @@ import ChecklistFilter from "@/components/base/ChecklistFilter.vue";
 import MultiFilter from "@/components/base/MultiFilter.vue";
 import { Unicons } from "@/types";
 import SavedSearches from "@/components/SavedSearches.vue";
-// import AndOrToggle from './base/AndOrToggle.vue';
 import { useSavedSearchHelper } from "../composables/useSavedSearchHelper";
 import { useRouter } from "vue-router";
 
@@ -118,7 +116,6 @@ export default defineComponent({
     ChecklistFilter,
     MultiFilter,
     SavedSearches,
-    // AndOrToggle,
   },
   props: {
     advancedFiltersChoice: {
@@ -134,7 +131,8 @@ export default defineComponent({
   emits: ["activeFilters"],
   setup(props, { emit }) {
     const initialFilters = ref<FilterInList[]>([]);
-    const { pickedSavedSearch, clearTypename, setPickedSavedSearch  } = useSavedSearchHelper();
+    const { pickedSavedSearch, clearTypename, setPickedSavedSearch } =
+      useSavedSearchHelper();
     const activeCount = computed(
       () => getActiveFilters(initialFilters.value).length
     );
@@ -162,7 +160,7 @@ export default defineComponent({
 
     const clearFilters = () => {
       clearInitialFilters();
-      setPickedSavedSearch(undefined)
+      setPickedSavedSearch(undefined);
       applyFilters();
     };
 
@@ -199,7 +197,7 @@ export default defineComponent({
     const router = useRouter();
 
     router.beforeEach((to, _from, next) => {
-      setPickedSavedSearch(undefined)
+      setPickedSavedSearch(undefined);
       next();
     });
 

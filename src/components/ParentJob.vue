@@ -45,7 +45,7 @@
           v-model:checked="showFailedOnly"
           :icon-on="Unicons.ExclamationTriangle.name"
           :icon-off="Unicons.CheckCircle.name"
-          forceFlexClass="true"
+          :forceFlexClass="true"
         />
       </div>
       <div>
@@ -101,7 +101,7 @@ import {
   onBeforeUpdate,
   ref,
   watch,
-  PropType,
+  type PropType,
 } from "vue";
 import { Unicons } from "../types";
 import BaseIcon from "./base/BaseIcon.vue";
@@ -110,7 +110,7 @@ import BaseButton from "./base/BaseButton.vue";
 import ProgressBar from "./base/ProgressBar.vue";
 import BaseLabel from "./base/BaseLabel.vue";
 import SingleJob from "./SingleJob.vue";
-import { GetJobDocument, Job } from "../queries";
+import { GetJobDocument, type Job } from "../queries";
 import { useQuery } from "@vue/apollo-composable";
 import useJobHelpers from "../composables/useJobHelpers";
 import ListContainer from "./ListContainer.vue";
@@ -137,7 +137,7 @@ export default defineComponent({
   setup(props) {
     const { getFormatedDate, getJobStatus } = useJobHelpers(props.job);
     const isCollapsed = ref<Boolean>(true);
-    const showFailedOnly = ref<Boolean>(false);
+    const showFailedOnly = ref<boolean>(false);
     const fetchingSubJobs = ref<Boolean>(false);
     const queryOptions = ref({
       enabled: false,
@@ -148,7 +148,7 @@ export default defineComponent({
         id: props.job._key || "",
         failed: showFailedOnly.value,
       },
-      queryOptions
+      queryOptions.value
     );
     const subjobLimit = ref<number>(10);
 

@@ -21,8 +21,7 @@
 </template>
 
 <script lang="ts">
-import { createContext } from "vm";
-import { defineComponent, onMounted, PropType, ref, watch } from "vue";
+import { defineComponent, ref, watch } from "vue";
 
 export enum NotificationType {
   default = "default",

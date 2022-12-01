@@ -1,14 +1,4 @@
 <template>
-  <!-- <div class="mb-1 flex">
-    <AndOrToggle
-      v-model:AndOrValue="isMulti"
-      texton="Multi"
-      textoff="Fuzzy"
-      class="mr-1"
-    />
-    <AndOrToggle v-if="isMulti" v-model:AndOrValue="isAnd" texton="En" textoff="Of" />
-  </div> -->
-
   <div>
     <Multiselect
       v-if="isMulti"
@@ -36,13 +26,12 @@
 </template>
 
 <script lang="ts">
-import { AdvancedFilter, GetFilterOptionsDocument } from "@/queries";
+import { GetFilterOptionsDocument, type AdvancedFilter } from "@/queries";
 import type { Maybe } from "@/queries";
 import { useQuery } from "@vue/apollo-composable";
 import { ref, defineComponent, computed } from "vue";
 import type { PropType } from "vue";
 import Multiselect from "@vueform/multiselect";
-// import AndOrToggle from './AndOrToggle.vue';
 import InputField from "@/components/base/InputField.vue";
 import {
   defaultReturnMultiSelectObject,
@@ -54,7 +43,6 @@ export default defineComponent({
   name: "MultiFilter",
   components: {
     Multiselect,
-    // AndOrToggle,
     InputField,
   },
   props: {
@@ -144,16 +132,17 @@ export default defineComponent({
       },
     });
 
-    type FilterOptions = {label: string, value: string}[];
+    type FilterOptions = { label: string; value: string }[];
 
-    let result: {FilterOptions: FilterOptions} = {FilterOptions: props.filter?.options};
+    let result: { FilterOptions: FilterOptions } = {
+      FilterOptions: props.filter?.options,
+    };
 
-    if (!result){
+    if (!result) {
       result = useQuery(GetFilterOptionsDocument, {
         key: props.filter?.key,
       });
     }
-    
 
     return { result, isMulti, isAnd, inputFieldMulti, inputField };
   },

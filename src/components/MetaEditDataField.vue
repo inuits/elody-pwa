@@ -32,7 +32,7 @@ export default defineComponent({
       required: true,
     },
     label: {
-      type: String,
+      type: Object as PropType<Maybe<string>>,
       required: false,
       default: undefined,
     },
