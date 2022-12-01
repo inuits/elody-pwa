@@ -14,7 +14,7 @@
       :placeholder="$t('filter.max')"
       :bg-color="'neutral-20'"
       :label="$t('filter.max')"
-      :min="inputFieldMin + 1"
+      :min="inputFieldMin ? inputFieldMin + 1 : undefined"
     />
   </div>
 </template>

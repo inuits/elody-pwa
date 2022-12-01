@@ -17,7 +17,7 @@
             v-if="pickedSavedSearch"
             class="bg-blue-50 text-blue-300 rounded-md px-2 py-1 my-1"
           >
-            {{ pickedSavedSearch.metadata[0].value }}
+            {{ pickedSavedSearch?.metadata[0]?.value }}
           </p>
 
           <saved-searches
@@ -53,7 +53,7 @@
     >
       <FilterAccordion
         :active="initialFilters[i] && initialFilters[i].isActive"
-        :label="filter?.label"
+        :label="filter?.label ? filter?.label : ''"
       >
         <template #content>
           <TextFilter
@@ -72,7 +72,7 @@
             v-if="filter?.type === AdvancedFilterTypes.Minmax"
             v-model:minmaxValue="initialFilters[i]"
             :filter="filter"
-            :is-relation="filter?.isRelation"
+            :is-relation="filter.isRelation ? filter.isRelation : false"
           />
           <MultiFilter
             v-if="filter?.type === AdvancedFilterTypes.Multiselect"
@@ -145,8 +145,11 @@ export default defineComponent({
       const returnArray = initialFilters.value.map((filter: FilterInList) => {
         filter = JSON.parse(JSON.stringify(filter));
         clearTypename(filter.input);
-        if (filter.input) filter.input["__typename"] = undefined;
-        return filter.input;
+        if (filter.input) {
+          // filter.input["__typename"] = undefined;
+        } else {
+          return filter.input;
+        }
       });
       emit("activeFilters", returnArray);
     };
@@ -181,9 +184,9 @@ export default defineComponent({
       () => {
         if (pickedSavedSearch.value) {
           clearInitialFilters();
-          pickedSavedSearch.value.definition.forEach((filter) => {
+          pickedSavedSearch.value?.definition?.forEach((filter) => {
             initialFilters.value.forEach((inFilter) => {
-              if (filter.key === inFilter.input.key) {
+              if (filter?.key === inFilter.input.key) {
                 inFilter.input = filter;
                 inFilter.isActive = true;
               }
