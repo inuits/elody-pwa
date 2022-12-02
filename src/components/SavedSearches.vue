@@ -1,8 +1,6 @@
 <template>
   <div
-    v-show="
-      false &&
-      !loading &&
+    v-show="!loading &&
       auth.isAuthenticated.value === true &&
       determinePermission('read-saved-search')
     "

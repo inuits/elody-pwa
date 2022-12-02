@@ -34,7 +34,7 @@
         @click="
           router.push({
             name: 'SingleEntity',
-            params: { id: metadata?.linkedEntity.id },
+            params: { id: metadata?.linkedEntity?.id },
           })
         "
       />

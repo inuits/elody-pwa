@@ -380,6 +380,7 @@ type JobsResults {
 
 #Forms
 enum InputFieldTypes {
+  boolean
   text
   number
   checkbox
@@ -597,12 +598,12 @@ type SavedSearchesMetadata {
 }
 
 type Definition {
-  _id: String
-  type: String
+  _id: String!
+  type: String!
   minMaxInput: MinMax
   textInput: Text
   multiSelectInput: MultiSelect
-  key: String
+  key: String!
 }
 
 input SavedSearchMetadataInput {

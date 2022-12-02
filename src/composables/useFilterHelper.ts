@@ -1,5 +1,6 @@
-import { AdvancedInputType } from "@/queries";
+import { AdvancedInputType, type Definition } from "@/queries";
 import type { FilterInput, MinMaxInput, MultiSelectInput } from "@/queries";
+import { useSavedSearchHelper } from "./useSavedSearchHelper";
 
 export type FilterInList = { isActive: boolean; input: FilterInput };
 
@@ -99,3 +100,37 @@ export const clearAdvancedSearchInput = (
 
 export const getActiveFilters = (input: FilterInList[]) =>
   input.filter((filter: FilterInList) => filter.isActive === true);
+
+export const setSelectedSavedSearchOnFilters = (filters: FilterInList[]) => {
+  const { pickedSavedSearch } = useSavedSearchHelper();
+
+  pickedSavedSearch.value?.definition?.forEach((filter) => {
+    filters.forEach((inFilter) => {
+      if (filter?.key === inFilter.input.key) {
+        inFilter.input = filterToInputFilter(filter);
+        inFilter.isActive = true;
+      }
+    });
+  });
+}
+
+const filterToInputFilter = (filter: Definition): FilterInput => {
+  let filterInput: FilterInput = {
+    key: filter.key,
+    type: AdvancedInputType[filter.type as keyof typeof AdvancedInputType]
+  }
+  switch (AdvancedInputType[filter.type as keyof typeof AdvancedInputType]) {
+    case AdvancedInputType.TextInput:
+        filterInput.textInput = filter.textInput
+      break;
+    case AdvancedInputType.MultiSelectInput:
+        filterInput.multiSelectInput = filter.multiSelectInput
+      break;
+    case AdvancedInputType.MinMaxInput:
+        filterInput.minMaxInput = filter.minMaxInput
+      break;
+    default:
+      break;
+  }
+  return filterInput
+}
