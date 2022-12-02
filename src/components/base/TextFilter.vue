@@ -1,7 +1,6 @@
 <template>
   <div>
     <InputField
-      v-if="inputField"
       v-model:modelValue="inputField"
       :debounce="true"
       :placeholder="placeholderText"

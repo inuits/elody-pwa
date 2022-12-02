@@ -89,7 +89,7 @@ import { defineComponent, ref, computed, onMounted, watch } from "vue";
 import type { PropType } from "vue";
 import FilterAccordion from "@/components/base/FilterAccordion.vue";
 import { useQuery } from "@vue/apollo-composable";
-import { AdvancedFilterTypes, GetAdvancedFiltersDocument } from "@/queries";
+import { AdvancedFilterTypes, GetAdvancedFiltersDocument, type Definition } from "@/queries";
 import BaseButton from "@/components/base/BaseButton.vue";
 import MinmaxFilter from "@/components/base/MinmaxFilter.vue";
 import TextFilter from "@/components/base/TextFilter.vue";
@@ -103,6 +103,7 @@ import { useRouter } from "vue-router";
 import {
   clearAdvancedSearchInput,
   getActiveFilters,
+  setSelectedSavedSearchOnFilters
 } from "@/composables/useFilterHelper";
 import type { FilterInList } from "@/composables/useFilterHelper";
 
@@ -184,14 +185,7 @@ export default defineComponent({
       () => {
         if (pickedSavedSearch.value) {
           clearInitialFilters();
-          pickedSavedSearch.value?.definition?.forEach((filter) => {
-            initialFilters.value.forEach((inFilter) => {
-              if (filter?.key === inFilter.input.key) {
-                inFilter.input = filter;
-                inFilter.isActive = true;
-              }
-            });
-          });
+          setSelectedSavedSearchOnFilters(initialFilters.value)
           applyFilters();
         }
       }
