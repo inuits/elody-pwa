@@ -12,7 +12,7 @@
           <img
             v-if="media"
             class="h-48 w-48"
-            :src="`/api/iiif/3/${media}/square/100,/0/default.jpg`"
+            :src="`/api/iiif/3/${media}/square/500,/0/default.jpg`"
             @error="setNoImage()"
           />
           <div
