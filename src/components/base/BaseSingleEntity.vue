@@ -6,7 +6,7 @@
     <entity-image-selection
       v-show="
         (!loading && isSelectionDisplayed && mediafiles.length > 0) ||
-        editMode === 'edit'
+        (editMode === 'edit' && !result.Entity.type === 'frame')
       "
       v-model:selectedImage="mediafileSelectionState.selectedMediafile"
       :class="['w-40', editMode === 'edit' ? 'shadow-md' : '']"
@@ -103,14 +103,13 @@ import type { PropType } from "vue";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import IIIFViewer from "../IIIFViewer.vue";
 import MetaWindow from "../MetaWindow.vue";
-import { GetEntityByIdDocument, PostMediaFileDocument } from "../../queries";
+import { GetEntityByIdDocument } from "../../queries";
 import type {
   GetEntityByIdQuery,
   Maybe,
   MediaFile,
   GetEntityByIdQueryVariables,
   Entity,
-  PostMediaFileMutation,
 } from "../../queries";
 import { usePageInfo } from "../../composables/usePageInfo";
 import { useEditMode } from "../../composables/useEdit";
@@ -122,10 +121,7 @@ import { asString } from "@/helpers";
 import VideoPlayer from "./VideoPlayer.vue";
 import AudioPlayer from "./AudioPlayer.vue";
 import PDFViewer from "./PDFViewer.vue";
-import useDropzoneHelper from "../../composables/useDropzoneHelper";
-import useMediaAssetLinkHelper from "../../composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "../../composables/useMetaDataHelper";
-import { useUploadModal } from "../UploadModal.vue";
 import TextViewer from "./TextViewer.vue";
 import LinkedAssetsList from "../LinkedAssetsList.vue";
 import { usePermissions } from "../../composables/usePermissions";
