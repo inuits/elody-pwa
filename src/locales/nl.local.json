@@ -117,5 +117,17 @@
     "search-title": "Search title",
     "edit": "Edit",
     "search-saved-searches": "Search Saved Searches"
+  },
+  "graphql-errors": {
+    "notifications": {
+      "duplicate": {
+        "title": "Duplicate",
+        "description": "Duplicate file detected, upload reverted"
+      },
+      "forbidden":{
+        "title": "Forbidden",
+        "description": "You don't have access to this page/action"
+      }
+    }
   }
 }

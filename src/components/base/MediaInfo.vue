@@ -133,9 +133,12 @@ export default defineComponent({
       type: "media",
     });
 
-    const { mutate: mutatePrimary } = useMutation<SetMediaPrimaireMutation>(
-      SetMediaPrimaireDocument
-    );
+    const { mutate: mutatePrimary, onError } =
+      useMutation<SetMediaPrimaireMutation>(SetMediaPrimaireDocument);
+
+    onError(() => {
+      mediafileSelectionState.selectedMediafile.is_primary = false;
+    });
 
     const { mutate: mutateThumbnail } =
       useMutation<SetThumbnailPrimaireMutation>(SetThumbnailPrimaireDocument);

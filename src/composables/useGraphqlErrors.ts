@@ -56,6 +56,11 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
             useDropzoneHelper();
           setDropzoneErrorMessages(graphQLError.extensions.response.body);
           increaseFailedCounter();
+          useNotification().createNotification({
+            title: "Duplicate",
+            description: "Duplicate file detected, upload reverted",
+            ...baseGraphQLError,
+          });
           return true;
         }
       });
