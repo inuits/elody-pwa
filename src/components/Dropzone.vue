@@ -200,8 +200,8 @@ export default defineComponent({
         });
 
         const uploadFiles = () => {
-          selectedFiles.value.forEach((file: any) => {
-            mutate({
+          selectedFiles.value.forEach(async (file: any) => {
+            await mutate({
               mediaFileInput: { filename: file.name, mimetype: file.type },
               file,
             });

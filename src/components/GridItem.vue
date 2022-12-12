@@ -67,6 +67,7 @@
 import type { Maybe, MetadataAndRelation } from "../queries";
 import { defineComponent, inject, ref } from "vue";
 import type { PropType } from "vue";
+import { customSort } from "../helpers";
 
 export default defineComponent({
   name: "GridItem",
@@ -89,14 +90,12 @@ export default defineComponent({
     const hasFileName = ref<boolean>(false);
 
     const only4Meta = (input: Maybe<Maybe<MetadataAndRelation>[]>) => {
-      return input
-        ?.filter((value) => {
-          if (value?.key === "filename") {
-            hasFileName.value = true;
-          }
-          return value?.value !== "" && value?.key !== "object_number";
-        })
-        .slice(0, 4);
+      const sortOrder: string[] = ["object_number", "type", "title"];
+      return customSort(
+        sortOrder,
+        input?.filter((value) => value?.value !== ""),
+        "key"
+      );
     };
 
     return { setNoImage, imageSrcError, only4Meta, config, hasFileName };

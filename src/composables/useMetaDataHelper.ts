@@ -112,6 +112,7 @@ const useMetaDataHelper = () => {
 
   const determineIfNotAdded = (
     entity: any,
+    mediafiles: MediaFile[],
     relations: MetadataRelation[]
   ): boolean => {
     if (beingAdded.value === "") {
@@ -119,7 +120,7 @@ const useMetaDataHelper = () => {
     }
 
     if (beingAdded.value === "mediafile") {
-      return shouldAddMediafile(entity.uuid, mediafiles.value);
+      return shouldAddMediafile(entity.uuid, mediafiles);
     } else {
       return shouldAddMetaData(entity.uuid, relations);
     }
