@@ -2,37 +2,38 @@
   <div class="flex items-center">
     <unicon
       class="cursor-pointer"
-      :name="Unicons.AngleLeft.name"
-      height="16"
-      :fill="loading ? 'var(--color-neutral-20)' : 'var(--color-neutral-700)'"
-      @click="prev(1)"
-    />
-    <unicon
-      class="cursor-pointer"
       :name="Unicons.AngleDoubleLeft.name"
       height="16"
       :fill="loading ? 'var(--color-neutral-20)' : 'var(--color-neutral-700)'"
       @click="prev(5)"
     />
+    <unicon
+      class="cursor-pointer"
+      :name="Unicons.AngleLeft.name"
+      height="16"
+      :fill="loading ? 'var(--color-neutral-20)' : 'var(--color-neutral-700)'"
+      @click="prev(1)"
+    />
     <div
       class="flex text-sm mx-3 flex-row items-center w-1-6"
       data-test="page-count-label"
     >
-      {{$t('partials.page')}} {{ currentPage }} {{$t('partials.of')}} {{ maxPage() }}
+      {{ $t("partials.page") }} {{ currentPage }} {{ $t("partials.of") }}
+      {{ maxPage() }}
     </div>
-    <unicon
-      class="cursor-pointer"
-      :name="Unicons.AngleDoubleRight.name"
-      height="16"
-      :fill="loading ? 'var(--color-neutral-20)' : 'var(--color-neutral-700)'"
-      @click="next(5)"
-    />
     <unicon
       class="cursor-pointer"
       :name="Unicons.AngleRight.name"
       height="16"
       :fill="loading ? 'var(--color-neutral-20)' : 'var(--colors-neutral-700)'"
       @click="next(1)"
+    />
+    <unicon
+      class="cursor-pointer"
+      :name="Unicons.AngleDoubleRight.name"
+      height="16"
+      :fill="loading ? 'var(--color-neutral-20)' : 'var(--color-neutral-700)'"
+      @click="next(5)"
     />
   </div>
 </template>
