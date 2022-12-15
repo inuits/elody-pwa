@@ -10,7 +10,6 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",
     "lint": "eslint . --ext .vue,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "generate": "graphql-codegen",
     "prepare": "husky install"
   },
   "dependencies": {
@@ -35,7 +34,7 @@
     "openseadragon": "^2.4.2",
     "pdfjs-dist": "^2.13.216",
     "pdfvuer": "^2.0.1",
-    "session-vue-3-oidc-library": "^0.1.46",
+    "session-vue-3-oidc-library": "^0.1.47",
     "tiny-cookie": "^2.3.2",
     "url-slug": "^3.0.4",
     "vee-validate": "^4.5.2",
@@ -47,11 +46,6 @@
     "vuex": "^4.0.2"
   },
   "devDependencies": {
-    "@graphql-codegen/add": "^3.2.1",
-    "@graphql-codegen/cli": "^2.13.5",
-    "@graphql-codegen/typed-document-node": "^2.3.3",
-    "@graphql-codegen/typescript": "^2.7.3",
-    "@graphql-codegen/typescript-operations": "^2.5.3",
     "@intlify/vite-plugin-vue-i18n": "^6.0.3",
     "@rushstack/eslint-patch": "^1.1.4",
     "@types/apollo-upload-client": "^17.0.2",
@@ -65,7 +59,6 @@
     "autoprefixer": "^10.4.12",
     "eslint": "^8.22.0",
     "eslint-plugin-vue": "^9.3.0",
-    "graphql-codegen": "^0.4.0",
     "husky": "^8.0.1",
     "jsdom": "^20.0.0",
     "lint-staged": "^13.0.3",
