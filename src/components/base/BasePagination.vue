@@ -47,7 +47,7 @@ export type PaginationInfo = {
   skip: number;
 };
 
-export const paginationLimits = [5, 10, 15, 20];
+export const paginationLimits = [20, 50, 100];
 
 export default defineComponent({
   name: "BasePagination",
