@@ -66,6 +66,7 @@ const useDropzoneHelper = () => {
       uploadMultiple: true,
       parallelUploads: 99,
       maxFiles: 99,
+      maxFilesize: 50,
     };
   };
 
