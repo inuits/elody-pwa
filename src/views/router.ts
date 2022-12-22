@@ -1,4 +1,4 @@
-import type { RouteRecordRaw } from "vue-router";
+import { routerKey, type RouteRecordRaw } from "vue-router";
 import History from "./History.vue";
 import Mediafiles from "./MediaFiles.vue";
 import { Collection } from "../queries";
