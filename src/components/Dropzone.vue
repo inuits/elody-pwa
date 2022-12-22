@@ -14,7 +14,7 @@
         <div class="dz-message" data-dz-message>
           <div v-if="total === 0">
           <span>{{ $t("dropzone.drag-add") }}</span>
-          <span>(max {{getDropzoneSettings().maxFilesize}}mb)</span>
+          <span>(max {{getDropzoneSettings(dropzonePreviewDiv).maxFilesize}}mb)</span>
           </div>
         </div>
       </div>
