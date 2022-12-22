@@ -98,7 +98,7 @@
 import { defineComponent, onMounted, ref, reactive } from "vue";
 import type { PropType } from "vue";
 import { useMutation } from "@vue/apollo-composable";
-import { DeleteDataDocument, Collection } from "../queries";
+import { DeleteDataDocument, Collection, Entity } from "../queries";
 import type { MediaFile } from "../queries";
 import type { DeleteDataMutation } from "../queries";
 import AudioThumbnail from "../components/base/audiothumbnail.vue";
@@ -127,7 +127,16 @@ export const useEntityMediafileSelector = () => {
     mediafileSelectionState.selectedMediafile = mediafile;
   };
 
-  return { mediafileSelectionState, updateSelectedEntityMediafile };
+  const mustShowEntityMediafileSelector = (entity: Entity): boolean => {
+    let show = true;
+    return show;
+  };
+
+  return {
+    mediafileSelectionState,
+    updateSelectedEntityMediafile,
+    mustShowEntityMediafileSelector,
+  };
 };
 
 export default defineComponent({

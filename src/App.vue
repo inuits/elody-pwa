@@ -28,7 +28,7 @@ import useRouteHelpers from "./composables/useRouteHelpers";
 import { useHead } from "@vueuse/head";
 import PickEntityModal from "./components/PickEntityModal.vue";
 import BaseNotification from "./components/base/BaseNotification.vue";
-import SearchSavedSearchesModal from "@/components/searchSavedSearchesModal.vue";
+import SearchSavedSearchesModal from "./components/searchSavedSearchesModal.vue";
 
 export default defineComponent({
   name: "App",
