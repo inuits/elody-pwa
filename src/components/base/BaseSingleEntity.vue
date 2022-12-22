@@ -6,7 +6,7 @@
     <entity-image-selection
       v-show="
         (!loading && isSelectionDisplayed && mediafiles.length > 0) ||
-        (editMode === 'edit' && !result.Entity.type === 'frame')
+        (editMode === 'edit' && mustShowEntityMediafileSelector(result.Entity))
       "
       v-model:selectedImage="mediafileSelectionState.selectedMediafile"
       :class="['w-40', editMode === 'edit' ? 'shadow-md' : '']"
@@ -158,8 +158,11 @@ export default defineComponent({
       useMetaDataHelper();
     const id = asString(useRoute().params["id"]);
     const loading = ref<boolean>(true);
-    const { mediafileSelectionState, updateSelectedEntityMediafile } =
-      useEntityMediafileSelector();
+    const {
+      mediafileSelectionState,
+      updateSelectedEntityMediafile,
+      mustShowEntityMediafileSelector,
+    } = useEntityMediafileSelector();
 
     const { editMode, showEditToggle } = useEditMode();
     const { updatePageInfo } = usePageInfo();
@@ -282,6 +285,7 @@ export default defineComponent({
       editMode,
       mediafileSelectionState,
       canGet,
+      mustShowEntityMediafileSelector,
     };
   },
 });
