@@ -12,10 +12,7 @@
     >
       <div v-show="fileCount === 0" class="inline-block w-9/12 text-center">
         <div class="dz-message" data-dz-message>
-          <div v-if="total === 0">
-          <span>{{ $t("dropzone.drag-add") }}</span>
-          <span>(max {{getDropzoneSettings(dropzonePreviewDiv).maxFilesize}}mb)</span>
-          </div>
+          <span v-if="total === 0">{{ $t("dropzone.drag-add") }}</span>
         </div>
       </div>
       <div
