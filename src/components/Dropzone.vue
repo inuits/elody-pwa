@@ -15,7 +15,7 @@
           <div v-if="total === 0">
           <span>{{ $t("dropzone.drag-add") }}</span>
           <span>(max {{getDropzoneSettings().maxFilesize}}mb)</span>
-          <div/>
+          </div>
         </div>
       </div>
       <div
