@@ -3,8 +3,8 @@
     <video class="w-full h-full" controls>
       <source
         :src="
-          source && source?.filename
-            ? '/api/mediafile/' + source.filename
+          source && (source?.transcode_filename || source?.filename)
+            ? '/api/mediafile/' + source.transcode_filename || source.filename
             : 'no-src'
         "
         :type="source && source?.mimetype ? source?.mimetype : 'no-type'"
