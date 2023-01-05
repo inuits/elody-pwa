@@ -9,7 +9,7 @@
       :class="{ 'flex-col': small && !thumbIcon }"
     >
       <img
-        v-if="media"
+        v-if="media && !imageSrcError"
         class="h-10 w-10 obtain-cover mr-4 rounded-sm outline-none shadow-sm self-center"
         :src="`/api/iiif/3/${media}/square/100,/0/default.jpg`"
         @error="setNoImage()"
