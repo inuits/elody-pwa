@@ -9,7 +9,7 @@ const useThumbnailHelper = (): {
     if (
       data?.label === "audio" ||
       (data?.media?.mediafiles?.length > 0 &&
-        data?.media?.mediafiles[0]?.mimetype === "audio/mpeg")
+        data?.media?.mediafiles[0]?.mimetype.includes('audio'))
     ) {
       // @ts-ignore
       return Unicons.Music.name;
@@ -18,7 +18,7 @@ const useThumbnailHelper = (): {
     if (
       data?.label === "subtitle" ||
       (data?.media?.mediafiles?.length > 0 &&
-        data?.media?.mediafiles[0]?.mimetype === "text/plain")
+        data?.media?.mediafiles[0]?.mimetype.includes('text'))
     ) {
       // @ts-ignore
       return Unicons.Text.name;
