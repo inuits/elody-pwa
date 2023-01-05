@@ -41,7 +41,7 @@
 
 <script lang="ts">
 import type { Maybe, Media, MetadataAndRelation } from "../queries";
-import { defineComponent, inject } from "vue";
+import { defineComponent, inject, ref } from "vue";
 import type { PropType } from "vue";
 import { customSort } from "@/helpers";
 
@@ -64,9 +64,9 @@ export default defineComponent({
   },
   setup() {
     const config: any = inject("config");
-    let imageSrcError = false;
+    const imageSrcError = ref<Boolean>(false);
     const setNoImage = () => {
-      imageSrcError = true;
+      imageSrcError.value = true;
     };
 
     const only4Meta = (input: Maybe<Maybe<MetadataAndRelation>[]>) => {
