@@ -1,27 +1,29 @@
 <template>
   <div>
-    <Multiselect
-      v-if="isMulti"
-      v-model="inputFieldMulti"
-      mode="tags"
-      :searchable="true"
-      :close-on-select="false"
-      :options="result?.FilterOptions"
-      :label="$t('filter.label')"
-      track-by="label"
-      value-prop="label"
-      :placeholder="$t('filter.choose')"
-      :no-results-text="$t('filter.not-with-that-name')"
-    />
-  </div>
-  <div>
-    <InputField
-      v-if="!isMulti"
-      v-model="inputField"
-      :debounce="true"
-      :placeholder="$t('filter.fuzzy')"
-      :bg-color="'neutral-20'"
-    />
+    <div>
+      <Multiselect
+        v-if="isMulti"
+        v-model="inputFieldMulti"
+        mode="tags"
+        :searchable="true"
+        :close-on-select="false"
+        :options="result?.FilterOptions"
+        :label="$t('filter.label')"
+        track-by="label"
+        value-prop="label"
+        :placeholder="$t('filter.choose')"
+        :no-results-text="$t('filter.not-with-that-name')"
+      />
+    </div>
+    <div>
+      <InputField
+        v-if="!isMulti"
+        v-model="inputField"
+        :debounce="true"
+        :placeholder="$t('filter.fuzzy')"
+        :bg-color="'neutral-20'"
+      />
+    </div>
   </div>
 </template>
 
@@ -137,12 +139,6 @@ export default defineComponent({
     let result: { FilterOptions: FilterOptions } = {
       FilterOptions: props.filter?.options,
     };
-
-    if (!result) {
-      result = useQuery(GetFilterOptionsDocument, {
-        key: props.filter?.key,
-      });
-    }
 
     return { result, isMulti, isAnd, inputFieldMulti, inputField };
   },

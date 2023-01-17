@@ -85,17 +85,12 @@ export default defineComponent({
   emits: ["update:listValue"],
   setup(props, { emit }) {
     emit("update:listValue", defaultReturnMultiSelectObject(props.filter?.key));
-    type FilterOptions = {label: string, value: string}[];
+    type FilterOptions = { label: string; value: string }[];
 
-    let options: {FilterOptions: FilterOptions} = {FilterOptions: props.filter?.options};
+    let options: { FilterOptions: FilterOptions } = {
+      FilterOptions: props.filter?.options,
+    };
 
-    if (!options.FilterOptions) {
-      const { result } = useQuery(GetFilterOptionsDocument, {
-        key: props.filter?.key,
-      });
-      options = result;
-    }
-    
     const andOr = ref<"and" | "or">("and");
     const isAnd = computed<boolean>({
       get() {
