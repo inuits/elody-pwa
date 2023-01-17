@@ -66,7 +66,6 @@ const start = async () => {
 
   router.afterEach(async (to, _from, next) => {
     auth.changeRedirectRoute(window.location.origin + window.location.pathname);
-    console.log(auth);
     await auth.verifyServerAuth();
     if (!to.matched.some((route) => route.meta.requiresAuth)) {
       return;
