@@ -14,13 +14,21 @@ const baseGraphQLError = {
 
 const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
   const handleErrorByCode = (errorCode: Number) => {
-    if (errorCode === 403) {
-      useNotification().createNotification({
-        title: "Forbidden",
-        description: "You don't have access to this page/action",
-        ...baseGraphQLError,
-      });
-      useRouter().go(-1);
+    switch (errorCode) {
+      case 403:
+        useNotification().createNotification({
+          title: "Forbidden",
+          description: "You don't have access to this page/action",
+          ...baseGraphQLError,
+        });
+        useRouter().go(-1);
+        break;
+      default:
+        useNotification().createNotification({
+          title: "Error",
+          description: "Something went wrong, please try again later",
+          ...baseGraphQLError,
+        });
     }
   };
 
