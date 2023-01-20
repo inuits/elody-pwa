@@ -12,23 +12,37 @@ const baseGraphQLError = {
   shown: true,
 };
 
+const createErrorNotification = (title: string, description: string) => {
+  useNotification().createNotification({
+    title,
+    description,
+    ...baseGraphQLError,
+  });
+};
+
 const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
   const handleErrorByCode = (errorCode: Number) => {
+    const { increaseFailedCounter } = useDropzoneHelper();
     switch (errorCode) {
       case 403:
-        useNotification().createNotification({
-          title: "Forbidden",
-          description: "You don't have access to this page/action",
-          ...baseGraphQLError,
-        });
+        createErrorNotification(
+          "Forbidden",
+          "You don't have access to this page/action"
+        );
         useRouter().go(-1);
         break;
+      case 409:
+        increaseFailedCounter();
+        createErrorNotification(
+          "Duplicate",
+          "Duplicate file detected, upload reverted"
+        );
+        break;
       default:
-        useNotification().createNotification({
-          title: "Error",
-          description: "Something went wrong, please try again later",
-          ...baseGraphQLError,
-        });
+        createErrorNotification(
+          "Error",
+          "Something went wrong, please try again later"
+        );
     }
   };
 
@@ -45,31 +59,6 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
             error.extensions?.response.status === 401
           )
             return true;
-        }
-      });
-    }
-    return authErrors.some((errors) => errors);
-  };
-
-  const checkForDuplicateFileUpload = () => {
-    let authErrors: Array<Boolean | undefined> = [];
-    const gqlErrors = _errorResponse.graphQLErrors;
-    if (gqlErrors) {
-      authErrors = gqlErrors.map((graphQLError: any) => {
-        if (
-          graphQLError?.extensions?.response?.status === 409 &&
-          graphQLError?.extensions?.response?.body?.includes("Duplicate file")
-        ) {
-          const { setDropzoneErrorMessages, increaseFailedCounter } =
-            useDropzoneHelper();
-          setDropzoneErrorMessages(graphQLError.extensions.response.body);
-          increaseFailedCounter();
-          useNotification().createNotification({
-            title: "Duplicate",
-            description: "Duplicate file detected, upload reverted",
-            ...baseGraphQLError,
-          });
-          return true;
         }
       });
     }
@@ -110,7 +99,6 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
   };
 
   return {
-    checkForDuplicateFileUpload,
     checkForUnauthorized,
     logFormattedErrors,
   };

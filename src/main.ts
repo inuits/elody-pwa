@@ -44,11 +44,6 @@ const start = async () => {
   const graphqlErrorInterceptor = onError((error: any) => {
     const errorHandler = useGraphqlErrors(error);
     errorHandler.logFormattedErrors();
-    if (errorHandler.checkForDuplicateFileUpload() === true) {
-      new Promise((resolve) => {
-        resolve;
-      });
-    }
 
     // if (errorHandler.checkForUnauthorized() === true) {
     //   new Promise((resolve) => {
