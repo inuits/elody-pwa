@@ -356,6 +356,7 @@ export default defineComponent({
 
     const addSelection = (entity: any) => {
       beingAdded.value = "";
+      removeFromRelationsToBeDeletedList(entity.uuid);
       emit("addSelection", entity);
     };
 
