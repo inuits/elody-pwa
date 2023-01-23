@@ -73,10 +73,10 @@
             :title="$t('library.loading')"
             :loading="true"
             :meta="[
-              { key: '/', value: '/' },
-              { key: '/', value: '/' },
-              { key: '/', value: '/' },
-              { key: '/', value: '/' },
+              { key: '/', value: '/', label: '/' },
+              { key: '/', value: '/', label: '/' },
+              { key: '/', value: '/', label: '/' },
+              { key: '/', value: '/', label: '/' },
             ]"
           >
             <template #actions>
@@ -109,7 +109,7 @@
               <template #actions>
                 <BaseButton
                   v-if="
-                    determineIfNotAdded(
+                    isNotAlreadyAdded(
                       entity,
                       mediafiles,
                       selectedRelationFieldMetadata
@@ -167,7 +167,7 @@
               <template #actions>
                 <BaseButton
                   v-if="
-                    determineIfNotAdded(
+                    isNotAlreadyAdded(
                       entity,
                       mediafiles,
                       selectedRelationFieldMetadata
@@ -279,8 +279,12 @@ export default defineComponent({
     const { getThumbnail } = useThumbnailHelper();
     const { getMediaFilenameFromEntity } = useListItemHelper();
     const router = useRouter();
-    const { determineIfNotAdded, mediafiles, selectedRelationFieldMetadata } =
-      useMetaDataHelper();
+    const {
+      isNotAlreadyAdded,
+      mediafiles,
+      selectedRelationFieldMetadata,
+      removeFromRelationsToBeDeletedList,
+    } = useMetaDataHelper();
     const paginationInfo = reactive({
       limit: 20,
       skip: 1,
@@ -355,7 +359,7 @@ export default defineComponent({
       emit("addSelection", entity);
     };
 
-    const setCssVariable = (colAmount: number = 5) => {
+    const setCssGridVariable = (colAmount: number = 5) => {
       const root = document.querySelector(":root") as HTMLElement;
       root.style.setProperty("--grid-cols", colAmount.toString());
     };
@@ -368,7 +372,7 @@ export default defineComponent({
       if (gridContainerWidth) {
         colAmount = Math.floor(gridContainerWidth / gridItemWidth);
       }
-      setCssVariable(colAmount);
+      setCssGridVariable(colAmount);
     };
 
     window.addEventListener("resize", () => {
@@ -390,7 +394,7 @@ export default defineComponent({
       result,
       setFilters,
       getThumbnail,
-      determineIfNotAdded,
+      isNotAlreadyAdded,
       mediafiles,
       selectedRelationFieldMetadata,
       displayGrid,
