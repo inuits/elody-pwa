@@ -75,20 +75,31 @@ const useMetaDataHelper = () => {
     }
   };
 
+  const removeFromRelationsToBeDeletedList = (relationId: string) => {
+    const relation = relationsToBeDeleted.value.relations.find(
+      (rel: any) => rel.key === relationId
+    );
+    if (relation) {
+      relationsToBeDeleted.value.relations.filter(
+        (rel: any) => rel !== relation
+      );
+    }
+  };
+
   const removeFromMetaDataPatchList = (mediafileId: string) => {
     delete metaDataPatchList.value[mediafileId];
   };
 
   const shouldAddMediafile = (
     id: string,
-    alreadyAdded: MediaFile[]
+    relatedMediafiles: MediaFile[]
   ): boolean => {
-    if (!(alreadyAdded && alreadyAdded[0])) {
+    if (!(relatedMediafiles && relatedMediafiles[0])) {
       return true;
     }
 
-    for (let i = 0; i < alreadyAdded.length; i++) {
-      if (id === alreadyAdded[i]._id) {
+    for (let i = 0; i < relatedMediafiles.length; i++) {
+      if (id === relatedMediafiles[i]._id) {
         return false;
       }
     }
@@ -97,20 +108,25 @@ const useMetaDataHelper = () => {
 
   const shouldAddMetaData = (
     id: string,
-    alreadyAdded: MetadataRelation[]
+    relatedMetadata: MetadataRelation[]
   ): boolean => {
-    if (!(alreadyAdded && alreadyAdded[0])) {
+    if (!(relatedMetadata && relatedMetadata[0])) {
       return true;
     }
-    for (let i = 0; i < alreadyAdded.length; i++) {
-      if (id === alreadyAdded[i].key) {
+    for (let i = 0; i < relatedMetadata.length; i++) {
+      if (
+        id === relatedMetadata[i].key &&
+        !relationsToBeDeleted.value.relations.find(
+          (rel) => rel.key === relatedMetadata[i].key
+        )
+      ) {
         return false;
       }
     }
     return true;
   };
 
-  const determineIfNotAdded = (
+  const isNotAlreadyAdded = (
     entity: any,
     mediafiles: MediaFile[],
     relations: MetadataRelation[]
@@ -132,9 +148,10 @@ const useMetaDataHelper = () => {
     metaDataPatchList,
     addOrUpdateList,
     removeFromMetaDataPatchList,
+    removeFromRelationsToBeDeletedList,
     lastAdjustedMediaFileMetaData,
     mediafiles,
-    determineIfNotAdded,
+    isNotAlreadyAdded,
     selectedRelationFieldMetadata,
     beingAdded,
     relationsToBeDeleted,
