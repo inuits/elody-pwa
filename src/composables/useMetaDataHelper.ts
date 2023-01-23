@@ -1,9 +1,4 @@
-import type {
-  MediaFile,
-  MetadataField,
-  MetadataRelation,
-  RelationField,
-} from "@/queries";
+import type { MediaFile, MetadataRelation } from "@/queries";
 import { ref } from "vue";
 
 const metaDataPatchList = ref<any>({});
@@ -76,13 +71,15 @@ const useMetaDataHelper = () => {
   };
 
   const removeFromRelationsToBeDeletedList = (relationId: string) => {
-    const relation = relationsToBeDeleted.value.relations.find(
+    const relationsToDelete = relationsToBeDeleted.value.relations;
+    const relation = relationsToDelete.find(
       (rel: any) => rel.key === relationId
     );
     if (relation) {
-      relationsToBeDeleted.value.relations.filter(
+      relationsToBeDeleted.value.relations = relationsToDelete.filter(
         (rel: any) => rel !== relation
       );
+      console.log(relationsToBeDeleted.value.relations);
     }
   };
 

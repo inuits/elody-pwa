@@ -1,15 +1,18 @@
 <template>
   <span v-if="label" class="ml-1 text-neutral-700 text-sm">{{ label }}</span>
   <div>
-    <div v-if="!fields || fields.length === 0" class="ml-1 text-neutral-100 text-sm italic pb-2">
-     {{$t("partials.no")}} {{ label }} {{$t("partials.available")}}.
+    <div
+      v-if="!fields || fields.length === 0"
+      class="ml-1 text-neutral-100 text-sm italic pb-2"
+    >
+      {{ $t("partials.no") }} {{ label }} {{ $t("partials.available") }}.
     </div>
     <div v-for="({ value, key }, idx) in fields" :key="key" class="my-2">
       <div
         :class="[inputContainerStyle, ' input-container p-4 gap-3 flex-col']"
       >
         <div
-          v-for=" s in structure.metadata"
+          v-for="s in structure.metadata"
           :key="`${idx}-${s ? s.key : 'empty'}`"
         >
           <MetaEditDataField
@@ -23,7 +26,11 @@
         <ListItem
           v-if="value.linkedEntity && value.linkedEntity.teaserMetadata"
           :meta="value.linkedEntity.teaserMetadata"
-          :media="value.linkedEntity.media ? value.linkedEntity.media.primary_transcode : undefined"
+          :media="
+            value.linkedEntity.media
+              ? value.linkedEntity.media.primary_transcode
+              : undefined
+          "
           :thumb-icon="getThumbnail(value)"
         />
         <div v-if="!structure.disabled" class="delete">
@@ -61,10 +68,11 @@ import {
   getEmptyMetadatRelationObject,
 } from "@/composables/useFormHelpers";
 import type { relationValues } from "@/composables/useFormHelpers";
-import useMetaDataHelper from '@/composables/useMetaDataHelper';
+import useMetaDataHelper from "@/composables/useMetaDataHelper";
 import ListItem from "@/components/ListItem.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import useRouteHelpers from "@/composables/useRouteHelpers";
+import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
 
 export default defineComponent({
   name: "MetaEditRelationField",
@@ -87,7 +95,13 @@ export default defineComponent({
       props.label ? props.label : props.structure.relationType //MAKING UNIQUE ARRAY FOR EACH COMPONENT DEPENDING ON THE LABEL...
     );
     const { getParam } = useRouteHelpers();
-    const { selectedRelationFieldMetadata, beingAdded, relationsToBeDeleted, metadataToBePatched, addTowardsMetadataToBePatched } = useMetaDataHelper(); 
+    const {
+      selectedRelationFieldMetadata,
+      beingAdded,
+      relationsToBeDeleted,
+      metadataToBePatched,
+      addTowardsMetadataToBePatched,
+    } = useMetaDataHelper();
     const { getThumbnail } = useThumbnailHelper();
     const id = getParam("id");
 
@@ -107,7 +121,7 @@ export default defineComponent({
     const openModal = (acceptedEntityTypes: Maybe<string>[]) => {
       selectedRelationField.value = props.structure;
       fields.value.forEach((field) => {
-        selectedRelationFieldMetadata.value.push(field.value)
+        selectedRelationFieldMetadata.value.push(field.value);
       });
       beingAdded.value = "metadata";
       openPickEntityModal(acceptedEntityTypes);
@@ -119,12 +133,15 @@ export default defineComponent({
     const removeRelation = (relation: relationValues, idx: number) => {
       remove(idx);
       relationsToBeDeleted.value.entityId = id;
-      relationsToBeDeleted.value.relations.push({ key: relation.key, type: relation.relationType });
-    }
+      relationsToBeDeleted.value.relations.push({
+        key: relation.key,
+        type: relation.relationType,
+      });
+    };
 
     const onChangeMetaEditDataField = (fieldValue: any) => {
       addTowardsMetadataToBePatched(id, fieldValue.linkedEntity.uuid);
-    }
+    };
 
     watch(pickEntityModalState, (value: PickEntityModalType) => {
       if (value.pickedEntity && value.pickedEntity) {
@@ -151,7 +168,7 @@ export default defineComponent({
       openModal,
       getThumbnail,
       removeRelation,
-      onChangeMetaEditDataField
+      onChangeMetaEditDataField,
     };
   },
 });
