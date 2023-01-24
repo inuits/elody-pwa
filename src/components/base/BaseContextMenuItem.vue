@@ -23,10 +23,10 @@ const emit = defineEmits(["clicked"]);
 
 const props = withDefaults(
   defineProps<{
-    icon: string;
-    label: string;
-    disable: boolean;
-    highlight: boolean;
+    icon?: string;
+    label?: string;
+    disable?: boolean;
+    highlight?: boolean;
   }>(),
   {
     icon: () => {
