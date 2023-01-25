@@ -29,11 +29,11 @@ ARG NPM_CONFIG_ALWAYS_AUTH
 ARG NPM_CONFIG_REGISTRY
 ARG NPM_CONFIG__AUTH_TOKEN
 
-COPY inuits-dams-frontend/ ./app/
+COPY ./ ./app/
 
 RUN pnpm i
 
-WORKDIR /app/inuits-dams-pwa
+WORKDIR /app/
 
 RUN pnpm i && pnpm cache clean --force
 
