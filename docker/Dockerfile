@@ -7,9 +7,7 @@ ARG NPM_CONFIG__AUTH_TOKEN
 
 RUN corepack enable && corepack prepare pnpm@7.26.0 --activate
 
-COPY ../ ./app/
-
-RUN pnpm i
+COPY ./ ./app/
 
 WORKDIR /app/
 
