@@ -1,6 +1,7 @@
 <template>
   <div
     class="lg:w-2/6 md:w-full lg:border-l-2 lg:border-r-2 border-solid border-neutral-50"
+    v-on:keydown.enter="applyFilters"
   >
     <div>
       <div class="flex justify-between py-3 px-3 align-center">
