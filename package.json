@@ -35,7 +35,7 @@
     "openseadragon": "^2.4.2",
     "pdfjs-dist": "^2.13.216",
     "pdfvuer": "^2.0.1",
-    "session-vue-3-oidc-library": "workspace:^0.1.47",
+    "session-vue-3-oidc-library": "^0.1.47",
     "tiny-cookie": "^2.3.2",
     "ts-debounce": "^3.0.0",
     "url-slug": "^3.0.4",
