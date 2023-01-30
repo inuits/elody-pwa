@@ -216,8 +216,14 @@ import { useQuery } from "@vue/apollo-composable";
 import ListItem from "../ListItem.vue";
 import { useRouter } from "vue-router";
 import { Unicons } from "../../types";
-import { GetEntitiesDocument, SearchInputType } from "../../queries";
-import type { GetEntitiesQueryVariables, Maybe } from "../../queries";
+import {
+  GetEntitiesDocument,
+  SearchInputType,
+} from "../../generated-types/queries";
+import type {
+  GetEntitiesQueryVariables,
+  Maybe,
+} from "../../generated-types/queries";
 import FilterSideBar from "../FilterSideBar.vue";
 import IconToggle from "./IconToggle.vue";
 import useThumbnailHelper from "../../composables/useThumbnailHelper";

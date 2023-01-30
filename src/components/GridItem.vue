@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts">
-import type { Maybe, MetadataAndRelation } from "../queries";
+import type { Maybe, MetadataAndRelation } from "../generated-types/queries";
 import { defineComponent, inject, ref } from "vue";
 import type { PropType } from "vue";
 import { customSort } from "../helpers";

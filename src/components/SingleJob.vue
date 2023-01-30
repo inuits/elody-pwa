@@ -29,7 +29,7 @@ import { Unicons } from "@/types";
 import BaseIcon from "@/components/base/BaseIcon.vue";
 import BaseButton from "@/components/base/BaseButton.vue";
 import BaseLabel from "@/components/base/BaseLabel.vue";
-import type { Job } from "@/queries";
+import type { Job } from "@/generated-types/queries";
 import useJobHelpers from "@/composables/useJobHelpers";
 
 export default defineComponent({

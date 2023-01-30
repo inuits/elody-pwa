@@ -10,7 +10,8 @@
         :meta="entity.teaserMetadata"
         :media="entity.media ? entity.media.primary_transcode : null"
         :thumb-icon="getThumbnail(entity)"
-        @click="router.push({ name: 'SingleEntity', params: { id: entity.id } })
+        @click="
+          router.push({ name: 'SingleEntity', params: { id: entity.id } })
         "
         :small="true"
       >
@@ -31,7 +32,7 @@
 <script lang="ts">
 import BaseButton from "@/components/base/BaseButton.vue";
 import ListItem from "@/components/ListItem.vue";
-import type { MediaFileEntity } from "@/queries";
+import type { MediaFileEntity } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";

@@ -14,7 +14,7 @@ import type { PropType } from "vue";
 import InputField from "@/components/base/InputField.vue";
 import { defaultReturnTextObject } from "../../composables/useFilterHelper";
 import type { FilterInList } from "../../composables/useFilterHelper";
-import type { AdvancedFilter } from "@/queries";
+import type { AdvancedFilter } from "@/generated-types/queries";
 
 export default defineComponent({
   name: "TextFilter",

@@ -17,7 +17,7 @@ import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import BaseButton from "@/components/base/BaseButton.vue";
 import { Unicons } from "@/types";
-import type { Maybe } from "@/queries";
+import type { Maybe } from "@/generated-types/queries";
 
 export default defineComponent({
   name: "MetaAdd",

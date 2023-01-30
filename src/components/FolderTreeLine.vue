@@ -86,8 +86,8 @@
 <script lang="ts">
 import { defineComponent, inject, ref } from "vue";
 import type { PropType } from "vue";
-import { GetDirectoriesDocument } from "@/queries";
-import type { Directory } from "@/queries";
+import { GetDirectoriesDocument } from "@/generated-types/queries";
+import type { Directory } from "@/generated-types/queries";
 
 import { useQuery } from "@vue/apollo-composable";
 import LoadingList from "@/components/base/LoadingList.vue";

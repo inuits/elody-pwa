@@ -1,11 +1,11 @@
 import {
   UpdateMediafilesOrderDocument,
   DeleteRelationsDocument,
-} from "@/queries";
+} from "@/generated-types/queries";
 import type {
   UpdateMediafilesOrderMutation,
   DeleteRelationsMutation,
-} from "@/queries";
+} from "@/generated-types/queries";
 import { useMutation } from "@vue/apollo-composable";
 import { computed, ref } from "vue";
 import useMediaAssetLinkHelper from "./useMediaAssetLinkHelper";

@@ -15,7 +15,10 @@
   </div>
 </template>
 <script lang="ts">
-import type { MediaFile, MediaFileMetadata } from "../../queries";
+import type {
+  MediaFile,
+  MediaFileMetadata,
+} from "../../generated-types/queries";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import MediaInfo from "./MediaInfo.vue";

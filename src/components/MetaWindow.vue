@@ -26,7 +26,7 @@ import { ref, watch } from "vue";
 import MetaEdit from "./MetaEdit.vue";
 import MetaView from "./MetaView.vue";
 import { useEditMode } from "../composables/useEdit";
-import type { Form, MetadataAndRelation } from "../queries";
+import type { Form, MetadataAndRelation } from "../generated-types/queries";
 
 const props = withDefaults(
   defineProps<{

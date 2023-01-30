@@ -1,6 +1,7 @@
 <template>
   <div
-    v-show="!loading &&
+    v-show="
+      !loading &&
       auth.isAuthenticated.value === true &&
       determinePermission('read-saved-search')
     "
@@ -112,13 +113,13 @@ import {
   PatchSavedSearchDefinitionDocument,
   GetSavedSearchByIdDocument,
   type Definition,
-} from "@/queries";
+} from "@/generated-types/queries";
 import type {
   SavedSearchesMutation,
   DeleteSavedSearchMutation,
   PatchSavedSearchDefinitionMutation,
   GetSavedSearchByIdMutation,
-} from "@/queries";
+} from "@/generated-types/queries";
 import { useSavedSearchHelper } from "../composables/useSavedSearchHelper";
 import CreateSavedSearchModal from "@/components/CreateSavedSearchModal.vue";
 import ConfirmationModal from "@/components/base/ConfirmationModal.vue";

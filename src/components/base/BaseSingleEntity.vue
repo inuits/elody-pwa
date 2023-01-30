@@ -103,14 +103,14 @@ import type { PropType } from "vue";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import IIIFViewer from "../IIIFViewer.vue";
 import MetaWindow from "../MetaWindow.vue";
-import { GetEntityByIdDocument } from "../../queries";
+import { GetEntityByIdDocument } from "../../generated-types/queries";
 import type {
   GetEntityByIdQuery,
   Maybe,
   MediaFile,
   GetEntityByIdQueryVariables,
   Entity,
-} from "../../queries";
+} from "../../generated-types/queries";
 import { usePageInfo } from "../../composables/usePageInfo";
 import { useEditMode } from "../../composables/useEdit";
 import EntityImageSelection, {

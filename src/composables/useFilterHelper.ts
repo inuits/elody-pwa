@@ -1,15 +1,19 @@
-import { AdvancedInputType, type Definition } from "@/queries";
-import type { FilterInput, MinMaxInput, MultiSelectInput } from "@/queries";
+import { AdvancedInputType, type Definition } from "@/generated-types/queries";
+import type {
+  FilterInput,
+  MinMaxInput,
+  MultiSelectInput,
+} from "@/generated-types/queries";
 import { useSavedSearchHelper } from "./useSavedSearchHelper";
 
 export type FilterInList = { isActive: boolean; input: FilterInput };
 
 export type AdvancedFilter = {
-  key: string
-  label: string
-  type: 'tekst' | 'multiselect' | 'checklist' | 'minmax'
-  isRelation: boolean
-  options: {label: string, value: string}[]
+  key: string;
+  label: string;
+  type: "tekst" | "multiselect" | "checklist" | "minmax";
+  isRelation: boolean;
+  options: { label: string; value: string }[];
 };
 
 export const defaultReturnTextObject = (
@@ -112,25 +116,25 @@ export const setSelectedSavedSearchOnFilters = (filters: FilterInList[]) => {
       }
     });
   });
-}
+};
 
 const filterToInputFilter = (filter: Definition): FilterInput => {
-  let filterInput: FilterInput = {
+  const filterInput: FilterInput = {
     key: filter.key,
-    type: AdvancedInputType[filter.type as keyof typeof AdvancedInputType]
-  }
+    type: AdvancedInputType[filter.type as keyof typeof AdvancedInputType],
+  };
   switch (AdvancedInputType[filter.type as keyof typeof AdvancedInputType]) {
     case AdvancedInputType.TextInput:
-        filterInput.textInput = filter.textInput
+      filterInput.textInput = filter.textInput;
       break;
     case AdvancedInputType.MultiSelectInput:
-        filterInput.multiSelectInput = filter.multiSelectInput
+      filterInput.multiSelectInput = filter.multiSelectInput;
       break;
     case AdvancedInputType.MinMaxInput:
-        filterInput.minMaxInput = filter.minMaxInput
+      filterInput.minMaxInput = filter.minMaxInput;
       break;
     default:
       break;
   }
-  return filterInput
-}
+  return filterInput;
+};

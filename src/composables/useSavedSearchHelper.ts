@@ -1,4 +1,10 @@
-import type { Definition, Entity, Maybe, SavedSearchedEntity, SavedSearchInput } from "@/queries";
+import type {
+  Definition,
+  Entity,
+  Maybe,
+  SavedSearchedEntity,
+  SavedSearchInput,
+} from "@/generated-types/queries";
 import { ref } from "vue";
 import type { FilterInList } from "./useFilterHelper";
 type ModalState = "initial" | "show" | "hide" | "loading";
@@ -21,8 +27,8 @@ const initSavedSearch = () => {
     ],
     private: true,
     type: "saved_search",
-  }
-}
+  };
+};
 
 const createModalState = ref<ModalType>({
   state: "hide",
@@ -60,11 +66,11 @@ function clearTypename(o: any) {
 
 const setPickedSavedSearch = (res: SavedSearchedEntity | undefined) => {
   if (res) {
-    res = JSON.parse(JSON.stringify(res))
+    res = JSON.parse(JSON.stringify(res));
     clearTypename(res);
   }
   pickedSavedSearch.value = res;
-}
+};
 
 const SearchSavedSearchesModalState = ref<PickEntityModalType>({
   state: "hide",
@@ -124,16 +130,21 @@ export const useSavedSearchHelper = () => {
   };
 
   function sortObj(obj: any) {
-      return Object.keys(obj).sort().reduce(function (result: any, key) {
+    return Object.keys(obj)
+      .sort()
+      .reduce(function (result: any, key) {
         result[key] = obj[key];
         return result;
       }, {});
-    }
+  }
 
-  const isNoChangesOriginal = (original: SavedSearchedEntity | undefined, change: Array<FilterInList>) => {
+  const isNoChangesOriginal = (
+    original: SavedSearchedEntity | undefined,
+    change: Array<FilterInList>
+  ) => {
     if (original?.definition) {
       const tmp = ref<SavedSearchInput>(initSavedSearch());
-    
+
       change.forEach((filter: FilterInList) => {
         if (filter.isActive) {
           tmp.value.definition.push(filter.input);
@@ -142,22 +153,28 @@ export const useSavedSearchHelper = () => {
 
       tmp.value.definition.forEach((def: Definition) => {
         clearTypename(def);
-      })
-
+      });
 
       original.definition.forEach((def: Maybe<Definition>) => {
         clearTypename(def);
-      })
-      
-      if (JSON.stringify(original?.definition.map((def:Maybe<Definition>) => sortObj(def))) === JSON.stringify(tmp.value.definition.map((def:Definition) => sortObj(def)))) {
-        return true
+      });
+
+      if (
+        JSON.stringify(
+          original?.definition.map((def: Maybe<Definition>) => sortObj(def))
+        ) ===
+        JSON.stringify(
+          tmp.value.definition.map((def: Definition) => sortObj(def))
+        )
+      ) {
+        return true;
       } else {
-        return false
+        return false;
       }
     } else {
-      return true
+      return true;
     }
-  }
+  };
 
   return {
     createModalState,
@@ -174,6 +191,6 @@ export const useSavedSearchHelper = () => {
     clearTypename,
     setPickedSavedSearch,
     isNoChangesOriginal,
-    initSavedSearch
+    initSavedSearch,
   };
 };

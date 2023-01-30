@@ -44,7 +44,7 @@ import { defineComponent, ref, watch } from "vue";
 import UploadModalImport from "./UploadModalImport.vue";
 import UploadModalDropzone from "./UploadModalDropzone.vue";
 import { useQuery } from "@vue/apollo-composable";
-import { GetDirectoriesDocument } from "../queries";
+import { GetDirectoriesDocument } from "../generated-types/queries";
 import BaseTabs from "./BaseTabs.vue";
 import BaseTab from "./BaseTab.vue";
 import MediaFileLibrary from "./MediaFileLibrary.vue";

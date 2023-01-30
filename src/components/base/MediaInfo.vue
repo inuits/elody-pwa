@@ -101,12 +101,12 @@ import {
   GetFormsDocument,
   SetMediaPrimaireDocument,
   SetThumbnailPrimaireDocument,
-} from "@/queries";
+} from "@/generated-types/queries";
 import type {
   MediaFile,
   SetMediaPrimaireMutation,
   SetThumbnailPrimaireMutation,
-} from "@/queries";
+} from "@/generated-types/queries";
 import { useQuery } from "@vue/apollo-composable";
 import BaseButton from "../base/BaseButton.vue";
 import { defineComponent } from "vue";

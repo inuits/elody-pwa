@@ -6,7 +6,7 @@
   >
     <div class="bg-neutral-0 w-full">
       <div class="p-6 pb-0">
-        <h1>{{$t('entity.create')}}</h1>
+        <h1>{{ $t("entity.create") }}</h1>
         <BaseDropdown
           v-model="selected"
           :options="Object.values(Entitytyping)"
@@ -22,7 +22,7 @@
 import BaseDropdown from "@/components/base/BaseDropdown.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import type { ModalState } from "@/components/base/BaseModal.vue";
-import { Entitytyping } from "@/queries";
+import { Entitytyping } from "@/generated-types/generated-types/queries";
 import { defineComponent, ref } from "vue";
 import CreateEntityForm from "./CreateEntityForm.vue";
 

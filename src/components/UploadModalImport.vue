@@ -20,8 +20,8 @@ import type { Ref, PropType } from "vue";
 import FolderTree from "./FolderTree.vue";
 import BaseButton from "./base/BaseButton.vue";
 import { useMutation } from "@vue/apollo-composable";
-import { PostStartImportDocument } from "../queries";
-import type { Directory } from "../queries";
+import { PostStartImportDocument } from "../generated-types/queries";
+import type { Directory } from "../generated-types/queries";
 import { useUploadModal } from "./UploadModal.vue";
 
 export default defineComponent({

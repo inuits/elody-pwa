@@ -35,7 +35,7 @@
 </template>
 <script lang="ts">
 import BaseModal from "@/components/base/BaseModal.vue";
-import { Entitytyping, type SavedSearchInput } from "@/queries";
+import { Entitytyping, type SavedSearchInput } from "@/generated-types/queries";
 import { defineComponent, ref, watch, type PropType } from "vue";
 import BaseButton from "./base/BaseButton.vue";
 import { useSavedSearchHelper } from "../composables/useSavedSearchHelper";
@@ -43,11 +43,11 @@ import { useMutation } from "@vue/apollo-composable";
 import {
   CreateSavedSearchDocument,
   PatchSavedSearchTitleDocument,
-} from "@/queries";
+} from "@/generated-types/queries";
 import type {
   CreateSavedSearchMutation,
   PatchSavedSearchTitleMutation,
-} from "@/queries";
+} from "@/generated-types/queries";
 import type { FilterInList } from "@/composables/useFilterHelper";
 export default defineComponent({
   name: "CreateSavedSearchModal",
@@ -59,12 +59,16 @@ export default defineComponent({
   },
   emits: ["refetchSavedSearches"],
   setup(props, { emit }) {
-    const { closeCreateModal, createModalState, pickedSavedSearch, clearTypename, setPickedSavedSearch, initSavedSearch } =
-      useSavedSearchHelper();
+    const {
+      closeCreateModal,
+      createModalState,
+      pickedSavedSearch,
+      clearTypename,
+      setPickedSavedSearch,
+      initSavedSearch,
+    } = useSavedSearchHelper();
     const searchTitle = ref<string>("");
-    const savedSearch = ref<SavedSearchInput>(
-      initSavedSearch()
-    );
+    const savedSearch = ref<SavedSearchInput>(initSavedSearch());
 
     const emptySearchTitle = () => {
       searchTitle.value = "";
@@ -73,7 +77,10 @@ export default defineComponent({
     watch(
       () => createModalState.value.action,
       () => {
-        if (createModalState.value.action === "edit" && pickedSavedSearch?.value?.metadata[0]?.value) {
+        if (
+          createModalState.value.action === "edit" &&
+          pickedSavedSearch?.value?.metadata[0]?.value
+        ) {
           searchTitle.value = pickedSavedSearch?.value?.metadata[0]?.value;
         } else {
           emptySearchTitle();
@@ -93,7 +100,11 @@ export default defineComponent({
     const create = () => {
       if (createModalState.value.action === "create") {
         savedSearch.value = initSavedSearch();
-        if (savedSearch.value && savedSearch.value.metadata && savedSearch.value.metadata[0]) {
+        if (
+          savedSearch.value &&
+          savedSearch.value.metadata &&
+          savedSearch.value.metadata[0]
+        ) {
           savedSearch.value.metadata[0].value = searchTitle.value;
         }
         props.initialFilters?.forEach((filter: FilterInList) => {
@@ -104,10 +115,10 @@ export default defineComponent({
         if (searchTitle.value.length > 0) {
           savedSearch.value.definition.forEach((def) => {
             clearTypename(def);
-          })
+          });
           mutate({ savedSearchInput: savedSearch.value });
           onDone((res: any) => {
-            setPickedSavedSearch(res.data.createSavedSearch)
+            setPickedSavedSearch(res.data.createSavedSearch);
             emit("refetchSavedSearches", true);
             emptySearchTitle();
             closeCreateModal();
@@ -124,9 +135,12 @@ export default defineComponent({
           title: searchTitle.value,
         });
         onDonePatchTitle((res) => {
-          if (res?.data?.patchSavedSearchTitle?.metadata[0] && pickedSavedSearch.value?.metadata[0]) {
+          if (
+            res?.data?.patchSavedSearchTitle?.metadata[0] &&
+            pickedSavedSearch.value?.metadata[0]
+          ) {
             pickedSavedSearch.value.metadata[0].value =
-            res.data.patchSavedSearchTitle.metadata[0].value;
+              res.data.patchSavedSearchTitle.metadata[0].value;
           }
           emit("refetchSavedSearches", true);
           emptySearchTitle();

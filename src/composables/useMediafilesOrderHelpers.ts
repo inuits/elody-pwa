@@ -1,4 +1,4 @@
-import type { MediaFile } from "@/queries";
+import type { MediaFile } from "@/generated-types/queries";
 
 type orderDiff = {
   id: string;

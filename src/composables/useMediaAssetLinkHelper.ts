@@ -1,6 +1,9 @@
 import { ref } from "vue";
-import { LinkMediafileToEntityDocument } from "@/queries";
-import type { LinkMediafileToEntityMutation, MediaFile } from "@/queries";
+import { LinkMediafileToEntityDocument } from "@/generated-types/queries";
+import type {
+  LinkMediafileToEntityMutation,
+  MediaFile,
+} from "@/generated-types/queries";
 
 import { useMutation } from "@vue/apollo-composable";
 import { useRoute } from "vue-router";

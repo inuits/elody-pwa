@@ -14,7 +14,7 @@
   </div>
 </template>
 <script lang="ts">
-import type { MediaFile } from "../../queries";
+import type { MediaFile } from "../../generated-types/queries";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import MediaInfo from "./MediaInfo.vue";

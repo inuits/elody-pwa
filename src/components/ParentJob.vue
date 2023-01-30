@@ -110,7 +110,7 @@ import BaseButton from "./base/BaseButton.vue";
 import ProgressBar from "./base/ProgressBar.vue";
 import BaseLabel from "./base/BaseLabel.vue";
 import SingleJob from "./SingleJob.vue";
-import { GetJobDocument, type Job } from "../queries";
+import { GetJobDocument, type Job } from "../generated-types/queries";
 import { useQuery } from "@vue/apollo-composable";
 import useJobHelpers from "../composables/useJobHelpers";
 import ListContainer from "./ListContainer.vue";
