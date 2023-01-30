@@ -16,10 +16,7 @@
 import BaseLibrary from "@/components/base/BaseLibrary.vue";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
-import {
-  SearchInputType,
-  type Maybe,
-} from "@/generated-types/generated-types/queries";
+import { SearchInputType, type Maybe } from "@/generated-types/queries";
 
 export default defineComponent({
   name: "AssetLibrary",

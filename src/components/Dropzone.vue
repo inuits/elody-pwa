@@ -121,8 +121,8 @@
 </template>
 
 <script lang="ts">
-import { PostMediaFileDocument } from "../generated-types/generated-types/queries";
-import type { PostMediaFileMutation } from "../generated-types/generated-types/queries";
+import { PostMediaFileDocument } from "../generated-types/queries";
+import type { PostMediaFileMutation } from "../generated-types/queries";
 import useDropzoneHelper from "../composables/useDropzoneHelper";
 import { onMounted, ref, defineComponent } from "vue";
 import { useMutation } from "@vue/apollo-composable";
