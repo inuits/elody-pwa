@@ -30,7 +30,7 @@ import type { ModalState } from "./base/BaseModal.vue";
 import { defineComponent, ref } from "vue";
 import AssetLibrary from "@/components/AssetLibrary.vue";
 import MediaFileLibrary from "@/components/MediaFileLibrary.vue";
-import type { Entity, Maybe } from "@/queries";
+import type { Entity, Maybe } from "@/generated-types/queries";
 
 export type PickEntityModalType = {
   state: ModalState;

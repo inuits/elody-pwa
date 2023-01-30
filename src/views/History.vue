@@ -55,8 +55,8 @@
 </template>
 
 <script lang="ts">
-import { GetJobsDocument } from "../queries";
-import type { GetJobsQuery } from "../queries";
+import { GetJobsDocument } from "../generated-types/queries";
+import type { GetJobsQuery } from "../generated-types/queries";
 import { useQuery } from "@vue/apollo-composable";
 import { computed, defineComponent, ref, watch, reactive } from "vue";
 import ParentJob from "../components/ParentJob.vue";

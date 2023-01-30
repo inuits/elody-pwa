@@ -1,4 +1,4 @@
-import type { BaseEntity, Entity } from "../queries";
+import type { BaseEntity, Entity } from "../generated-types/queries";
 
 const useListItemHelper = () => {
   const getMediaFilenameFromEntity = (entity: BaseEntity) => {

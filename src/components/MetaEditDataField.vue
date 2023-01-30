@@ -22,7 +22,11 @@ import type { PropType } from "vue";
 import InputField from "./base/InputField.vue";
 import BaseDropdown from "./base/BaseDropdown.vue";
 import { useField } from "vee-validate";
-import type { InputFieldTypes, Maybe, MetadataFieldOption } from "../queries";
+import type {
+  InputFieldTypes,
+  Maybe,
+  MetadataFieldOption,
+} from "../generated-types/queries";
 export default defineComponent({
   name: "MetaEditDataField",
   components: { InputField, BaseDropdown },

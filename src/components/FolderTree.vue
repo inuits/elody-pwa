@@ -9,7 +9,7 @@
   </div>
 </template>
 <script lang="ts">
-import type { Directory } from "../queries";
+import type { Directory } from "../generated-types/queries";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import FolderTreeLine from "./FolderTreeLine.vue";

@@ -1,4 +1,4 @@
-import type { MediaFile, MetadataRelation } from "@/queries";
+import type { MediaFile, MetadataRelation } from "@/generated-types/queries";
 import { ref } from "vue";
 
 const metaDataPatchList = ref<any>({});

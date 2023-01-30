@@ -1,4 +1,4 @@
-import type { Job } from "@/queries";
+import type { Job } from "@/generated-types/queries";
 import { computed, type ComputedRef } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -32,7 +32,7 @@ const useJobHelpers = (
   getJobStatus: ComputedRef<State>;
   getJobTypes: () => string[];
   getFormatedDate: ComputedRef<string>;
-  } => {
+} => {
   const { t } = useI18n();
   const getJobStatus = computed<State>(() => {
     switch (job.status) {
@@ -40,19 +40,19 @@ const useJobHelpers = (
         return {
           name: Status.Finished,
           color: "green-default",
-          message: t('job-helper.finished'),
+          message: t("job-helper.finished"),
         } as State;
       case Status.Failed:
         return {
           name: Status.Failed,
           color: "red-default",
-          message: t('job-helper.failed'),
+          message: t("job-helper.failed"),
         } as State;
       default:
         return {
           name: Status.Pending,
           color: "neutral-700",
-          message: t('job-helper.pending'),
+          message: t("job-helper.pending"),
         } as State;
     }
   });

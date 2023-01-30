@@ -52,7 +52,11 @@
 </template>
 
 <script lang="ts">
-import type { RelationField, Maybe, BaseEntity } from "@/queries";
+import type {
+  RelationField,
+  Maybe,
+  BaseEntity,
+} from "@/generated-types/queries";
 import { defineComponent, watch } from "vue";
 import type { PropType } from "vue";
 import MetaEditDataField from "./MetaEditDataField.vue";

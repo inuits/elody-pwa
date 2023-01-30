@@ -1,4 +1,4 @@
-<template>  
+<template>
   <div
     class="relative w-full"
     :class="{
@@ -6,10 +6,8 @@
       'bg-white-background': !loading,
     }"
   >
-    <div v-if="loading" class="text-center pt-5 italic">
-      loading
-    </div>
-    <PdfToolbar 
+    <div v-if="loading" class="text-center pt-5 italic">loading</div>
+    <PdfToolbar
       v-show="!loading"
       v-on:zoomIn="zoomIn()"
       v-on:zoomOut="zoomOut()"
@@ -19,24 +17,31 @@
     />
     <div
       ref="spaceForPage"
-      :class="['h-screen-86 flex justify-center mt-10 w-full overflow-scroll relative',
+      :class="[
+        'h-screen-86 flex justify-center mt-10 w-full overflow-scroll relative',
         decentralizeFromTop ? 'mt-10' : 'items-center',
-        {'opacity-0': loading}]"
+        { 'opacity-0': loading },
+      ]"
     >
-      <div 
-        id="viewerContainer" 
-        ref="pageContainer" 
-        :class="
-          ['absolute w-full flex',
-           decentralizeFromLeft ? '' : 'justify-center']">
+      <div
+        id="viewerContainer"
+        ref="pageContainer"
+        :class="[
+          'absolute w-full flex',
+          decentralizeFromLeft ? '' : 'justify-center',
+        ]"
+      >
         <div>
-          <canvas id="viewer" class="pdfViewer border-2 m-10" ref="canvas"></canvas>
+          <canvas
+            id="viewer"
+            class="pdfViewer border-2 m-10"
+            ref="canvas"
+          ></canvas>
         </div>
       </div>
     </div>
   </div>
 </template>
-
 
 <script lang="ts">
 // @ts-nocheck
@@ -46,9 +51,9 @@ import type { PropType } from "vue";
 import * as pdfjsLibImport from "pdfjs-dist";
 const pdfjsLib: typeof import("pdfjs-dist") = pdfjsLibImport;
 import "pdfjs-dist/build/pdf.worker.entry";
-import { MediaFileMetadata } from "@/queries";
-import { Unicons } from '../../types';
-import PdfToolbar from '../PdfToolbar.vue';
+import { MediaFileMetadata } from "@/generated-types/queries";
+import { Unicons } from "../../types";
+import PdfToolbar from "../PdfToolbar.vue";
 
 export default defineComponent({
   name: "PdfViewer",
@@ -76,31 +81,35 @@ export default defineComponent({
     const decentralizeFromLeft = ref<boolean>(false);
     const decentralizeFromTop = ref<boolean>(false);
 
-    const determineDecentralization = ():void => {
-      decentralizeFromLeft.value = spaceForPage.value.clientWidth < canvas.value.clientWidth 
-        ? true : false;
-      decentralizeFromTop.value = spaceForPage.value.offsetHeight < pageContainer.value.offsetHeight
-        ? true : false;
-    }
+    const determineDecentralization = (): void => {
+      decentralizeFromLeft.value =
+        spaceForPage.value.clientWidth < canvas.value.clientWidth
+          ? true
+          : false;
+      decentralizeFromTop.value =
+        spaceForPage.value.offsetHeight < pageContainer.value.offsetHeight
+          ? true
+          : false;
+    };
 
     function renderPage(num: number): void {
       pageRendering.value = true;
       // Using promise to fetch the page
-      pdfDoc?.getPage(num).then(function(page) {
-        let viewport = page.getViewport({scale: scale.value});
+      pdfDoc?.getPage(num).then(function (page) {
+        let viewport = page.getViewport({ scale: scale.value });
         canvas.value.height = viewport.height;
         canvas.value.width = viewport.width;
 
         // Render PDF page into canvas context
         let renderContext = {
           canvasContext: ctx.value,
-          viewport: viewport
+          viewport: viewport,
         };
         determineDecentralization();
         let renderTask = page.render(renderContext);
 
         // Wait for rendering to finish
-        renderTask.promise.then(function() {
+        renderTask.promise.then(function () {
           pageRendering.value = false;
           if (pageNumPending.value !== null) {
             // New page rendering is pending
@@ -108,23 +117,24 @@ export default defineComponent({
             pageNumPending.value = null;
           }
         });
-      })};
+      });
+    }
 
-      function queueRenderPage(num: number): void {
-        if (pageRendering.value) {
-          pageNumPending.value = num;
-        } else {
-          renderPage(num);
-        }
-      };
-
-      function onChangePage(num: number): void {
-        pageNum.value = num;
-        queueRenderPage(parseInt(num));
+    function queueRenderPage(num: number): void {
+      if (pageRendering.value) {
+        pageNumPending.value = num;
+      } else {
+        renderPage(num);
       }
+    }
+
+    function onChangePage(num: number): void {
+      pageNum.value = num;
+      queueRenderPage(parseInt(num));
+    }
 
     onMounted(async (): void => {
-      ctx.value = canvas.value.getContext('2d');
+      ctx.value = canvas.value.getContext("2d");
       initialRender();
     });
 
@@ -142,23 +152,22 @@ export default defineComponent({
       url.value = source.value.original_file_location;
       pageNum.value = 1;
       scale.value = 1;
-      pdfjsLib.getDocument(url.value).promise.then(function(pdfDoc_) {
+      pdfjsLib.getDocument(url.value).promise.then(function (pdfDoc_) {
         pdfDoc = pdfDoc_;
         numPages.value = pdfDoc.numPages;
         // Initial/first page rendering
-        
+
         renderPage(pageNum.value);
         loading.value = false;
       });
-    }
+    };
 
     watch(source, (oldSrc, newSrc) => {
-      initialRender()
-    })
+      initialRender();
+    });
 
     return {
       loading,
-      canvas,
       ctx,
       Unicons,
       pageNum,
@@ -171,9 +180,9 @@ export default defineComponent({
       pageContainer,
       spaceForPage,
       decentralizeFromLeft,
-      decentralizeFromTop
+      decentralizeFromTop,
     };
-  }
+  },
 });
 </script>
 

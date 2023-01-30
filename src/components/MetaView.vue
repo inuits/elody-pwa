@@ -6,12 +6,12 @@
     v-if="metadata.length == 0"
     class="justify-center items-center flex mt-4 text-neutral-700 font-bold"
   >
-    {{$t('meta.no-metadata')}}
+    {{ $t("meta.no-metadata") }}
   </div>
 </template>
 
 <script lang="ts">
-import type { MetadataAndRelation } from "@/queries";
+import type { MetadataAndRelation } from "@/generated-types/queries";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import MetaViewLine from "./MetaViewLine.vue";

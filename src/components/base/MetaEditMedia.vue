@@ -3,7 +3,9 @@
     <form v-if="form.fields" novalidate>
       <div
         v-for="field in form.fields"
-        :key="field && field.__typename === 'MetadataField' ? field.key : 'no key'"
+        :key="
+          field && field.__typename === 'MetadataField' ? field.key : 'no key'
+        "
       >
         <MetaEditDataField
           v-if="field && field.__typename === 'MetadataField'"
@@ -19,8 +21,11 @@
 </template>
 
 <script lang="ts">
-import { PatchMediaFileMetadataDocument } from "@/queries";
-import type { Form, PatchMediaFileMetadataMutation } from "@/queries";
+import { PatchMediaFileMetadataDocument } from "@/generated-types/queries";
+import type {
+  Form,
+  PatchMediaFileMetadataMutation,
+} from "@/generated-types/queries";
 import { defineComponent, watch } from "vue";
 import type { PropType } from "vue";
 import { useForm, useSubmitForm } from "vee-validate";

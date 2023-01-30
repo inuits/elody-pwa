@@ -9,14 +9,14 @@
         :key="`${metadata.key}-${m ? m.key : 'no-key'}`"
         class="px-8 pt-2"
       >
-      <div v-if="m">
-        <div class="label" :class="{ loading }" data-test="meta-label">
-          {{ m.key }}
+        <div v-if="m">
+          <div class="label" :class="{ loading }" data-test="meta-label">
+            {{ m.key }}
+          </div>
+          <div class="value" :class="{ loading }" data-test="meta-info">
+            {{ m.value ? m.value : "no data" }}
+          </div>
         </div>
-        <div class="value" :class="{ loading }" data-test="meta-info">
-          {{ m.value ? m.value : "no data" }}
-        </div>
-      </div>
       </div>
       <ListItem
         v-if="
@@ -46,7 +46,9 @@
       >
         <div
           v-for="metadataFromLinkedEntity in metadata.linkedEntity.metadata"
-          :key="metadataFromLinkedEntity ? metadataFromLinkedEntity.key : 'no-key'"
+          :key="
+            metadataFromLinkedEntity ? metadataFromLinkedEntity.key : 'no-key'
+          "
           :metadata="metadataFromLinkedEntity"
           class="p-2"
         >
@@ -66,7 +68,7 @@
               class="label"
               :class="{ loading }"
             >
-            {{$t('meta.no-label')}}
+              {{ $t("meta.no-label") }}
             </div>
 
             <meta-viewline-relation
@@ -83,7 +85,7 @@
               {{
                 metadataFromLinkedEntity.value
                   ? metadataFromLinkedEntity.value
-                  : $t('meta.no-data')
+                  : $t("meta.no-data")
               }}
             </div>
           </div>
@@ -94,7 +96,7 @@
 </template>
 
 <script lang="ts">
-import type { MetadataRelation } from "@/queries";
+import type { MetadataRelation } from "@/generated-types/queries";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import { useI18n } from "vue-i18n";

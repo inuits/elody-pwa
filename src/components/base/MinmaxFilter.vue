@@ -24,7 +24,7 @@ import type { PropType } from "vue";
 import MinMaxField from "./MinMaxField.vue";
 import { defaultReturnMinMaxObject } from "../../composables/useFilterHelper";
 import type { FilterInList } from "../../composables/useFilterHelper";
-import type { AdvancedFilter } from "../../queries";
+import type { AdvancedFilter } from "../../generated-types/queries";
 
 export default defineComponent({
   name: "MinmaxFilter",

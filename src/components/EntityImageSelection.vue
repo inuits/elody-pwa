@@ -98,9 +98,13 @@
 import { defineComponent, onMounted, ref, reactive } from "vue";
 import type { PropType } from "vue";
 import { useMutation } from "@vue/apollo-composable";
-import { DeleteDataDocument, Collection, Entity } from "../queries";
-import type { MediaFile } from "../queries";
-import type { DeleteDataMutation } from "../queries";
+import {
+  DeleteDataDocument,
+  Collection,
+  type Entity,
+} from "../generated-types/queries";
+import type { MediaFile } from "../generated-types/queries";
+import type { DeleteDataMutation } from "../generated-types/queries";
 import AudioThumbnail from "../components/base/audiothumbnail.vue";
 import SvgThumbnail from "./base/svgThumbnail.vue";
 import TrashIcon from "../components/base/TrashIcon.vue";

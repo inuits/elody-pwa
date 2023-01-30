@@ -15,7 +15,7 @@
 <script lang="ts">
 import BaseLibrary from "./base/BaseLibrary.vue";
 import { defineComponent } from "vue";
-import { SearchInputType } from "../queries";
+import { SearchInputType } from "../generated-types/queries";
 import selectedRelationFieldMetadata from "./../composables/useFormHelpers";
 
 export default defineComponent({

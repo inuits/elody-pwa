@@ -12,13 +12,13 @@ import type {
   MetadataOrRelationField,
   MetadataRelation,
   RelationField,
-} from "@/queries";
-import type { RelationMetaData } from "@/queries";
-import useMetaDataHelper from '@/composables/useMetaDataHelper';
+} from "@/generated-types/queries";
+import type { RelationMetaData } from "@/generated-types/queries";
+import useMetaDataHelper from "@/composables/useMetaDataHelper";
 
 export const LINKED_ENTITY: string = "linkedEntity";
 export const selectedRelationField = ref<RelationField>();
-const noKey = 'no-key';
+const noKey = "no-key";
 
 export type relationValues = {
   linkedEntity: Maybe<MediaFileEntity> | undefined;
@@ -31,23 +31,25 @@ export type relationValues = {
 
 export type IntialValues = Record<string, string | relationValues[]>;
 
-const setLabel = (field:  Maybe<MetadataOrRelationField>) => {
+const setLabel = (field: Maybe<MetadataOrRelationField>) => {
   if (field?.key !== noKey) {
-    return field?.key
+    return field?.key;
   } else {
-    return undefined
+    return undefined;
   }
-}
+};
 
 const useFormHelper = (form: Form, entityTitle: string) => {
   const formStructure: MetadataOrRelationField[] =
-  form.fields as MetadataOrRelationField[];
+    form.fields as MetadataOrRelationField[];
   const title: string = entityTitle;
 
   const getValue = (rmd: MetadataRelation): string => {
     //@ts-ignore
-    return rmd.linkedEntity.teaserMetadata.length > 0 ? rmd.linkedEntity.teaserMetadata[0].value : undefined
-  }
+    return rmd.linkedEntity.teaserMetadata.length > 0
+      ? rmd.linkedEntity.teaserMetadata[0].value
+      : undefined;
+  };
 
   const buildInitialValues = (
     metadata: MetadataAndRelation[],
@@ -69,29 +71,34 @@ const useFormHelper = (form: Form, entityTitle: string) => {
         if (field && field?.__typename === "RelationField") {
           const relationArray: relationValues[] = [];
 
-          const pushIntoRelationArray = (relationMetaData: MetadataRelation) => {
-
+          const pushIntoRelationArray = (
+            relationMetaData: MetadataRelation
+          ) => {
             relationArray.push({
               linkedEntity: relationMetaData.linkedEntity,
               key: relationMetaData.key,
-              label: relationMetaData.label ? relationMetaData.label : undefined,
+              label: relationMetaData.label
+                ? relationMetaData.label
+                : undefined,
               metadata: buildInitialValues(
                 relationMetaData.metadataOnRelation as MetadataAndRelation[],
                 field.metadata as MetadataOrRelationField[]
               ),
               relationType: field.relationType ? field.relationType : "",
-              value: getValue(relationMetaData)
+              value: getValue(relationMetaData),
             });
-          }
-          
+          };
+
           findRelations(field.relationType, metadata).forEach(
             (relationMetaData: MetadataRelation) => {
               // console.log('field', field);
               // console.log('relationMetaData', relationMetaData);
-              if ((field.key) && (relationMetaData.label === field.key) || (relationMetaData.label === field.label)) {
+              if (
+                (field.key && relationMetaData.label === field.key) ||
+                relationMetaData.label === field.label
+              ) {
                 pushIntoRelationArray(relationMetaData);
-              }
-              else if (field.key === noKey) {
+              } else if (field.key === noKey) {
                 pushIntoRelationArray(relationMetaData);
               }
               // CHECK IF RELATION TYPE ONLY OCCURS ONCE --> AVOID TO SET MULTIPLE TIMES AS FOR EXAMPLE IN A FRAME.
@@ -174,14 +181,20 @@ const useFormHelper = (form: Form, entityTitle: string) => {
                 return { key: "", value: "" };
               }),
               //@ts-ignore
-              value: relationValue.value ? relationValue.value : getValue(relationValue)
+              value: relationValue.value
+                ? relationValue.value
+                : getValue(relationValue),
             });
           });
         }
       }
     );
 
-    input?.relations?.filter((r: any) => { return (metadataToBePatched.value.metadata.some((s: any) => s === r.linkedEntityId))})
+    input?.relations?.filter((r: any) => {
+      return metadataToBePatched.value.metadata.some(
+        (s: any) => s === r.linkedEntityId
+      );
+    });
     return input;
   };
 
@@ -199,7 +212,7 @@ export const getEmptyMetadatRelationObject = (
     label: setLabel(fields),
     metadata: {},
     relationType: fields.relationType ? fields.relationType : "",
-    value: undefined
+    value: undefined,
   };
   if (fields.metadata) {
     fields.metadata?.forEach((field: Maybe<MetadataField>) => {

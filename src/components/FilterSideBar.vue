@@ -94,7 +94,7 @@ import {
   AdvancedFilterTypes,
   GetAdvancedFiltersDocument,
   type Definition,
-} from "@/queries";
+} from "@/generated-types/queries";
 import BaseButton from "@/components/base/BaseButton.vue";
 import MinmaxFilter from "@/components/base/MinmaxFilter.vue";
 import TextFilter from "@/components/base/TextFilter.vue";

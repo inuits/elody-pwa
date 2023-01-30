@@ -28,8 +28,11 @@
 </template>
 
 <script lang="ts">
-import { GetFilterOptionsDocument, type AdvancedFilter } from "@/queries";
-import type { Maybe } from "@/queries";
+import {
+  GetFilterOptionsDocument,
+  type AdvancedFilter,
+} from "@/generated-types/queries";
+import type { Maybe } from "@/generated-types/queries";
 import { useQuery } from "@vue/apollo-composable";
 import { ref, defineComponent, computed } from "vue";
 import type { PropType } from "vue";

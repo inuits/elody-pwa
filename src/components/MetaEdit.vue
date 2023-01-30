@@ -25,12 +25,12 @@
 </template>
 
 <script lang="ts">
-import { ReplaceRelationsAndMetaDataDocument } from "../queries";
+import { ReplaceRelationsAndMetaDataDocument } from "../generated-types/queries";
 import type {
   Form,
   MetadataAndRelation,
   ReplaceRelationsAndMetaDataMutation,
-} from "../queries";
+} from "../generated-types/queries";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import { useForm, useSubmitForm } from "vee-validate";

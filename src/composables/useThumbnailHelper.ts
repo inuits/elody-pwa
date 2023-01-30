@@ -1,6 +1,5 @@
 import { Unicons } from "@/types";
-import type { MediaFileEntity } from "@/queries";
-
+import type { MediaFileEntity } from "@/generated-types/queries";
 
 const useThumbnailHelper = (): {
   getThumbnail: (entity: any) => string;
@@ -9,7 +8,7 @@ const useThumbnailHelper = (): {
     if (
       data?.label === "audio" ||
       (data?.media?.mediafiles?.length > 0 &&
-        data?.media?.mediafiles[0]?.mimetype.includes('audio'))
+        data?.media?.mediafiles[0]?.mimetype.includes("audio"))
     ) {
       // @ts-ignore
       return Unicons.Music.name;
@@ -18,7 +17,7 @@ const useThumbnailHelper = (): {
     if (
       data?.label === "subtitle" ||
       (data?.media?.mediafiles?.length > 0 &&
-        data?.media?.mediafiles[0]?.mimetype.includes('text'))
+        data?.media?.mediafiles[0]?.mimetype.includes("text"))
     ) {
       // @ts-ignore
       return Unicons.Text.name;

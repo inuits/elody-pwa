@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import type { MetadataRelation } from "../queries";
+import type { MetadataRelation } from "../generated-types/queries";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import { useI18n } from "vue-i18n";

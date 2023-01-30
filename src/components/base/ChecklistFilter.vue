@@ -56,7 +56,10 @@
 <script lang="ts">
 import { defaultReturnMultiSelectObject } from "@/composables/useFilterHelper";
 import type { FilterInList } from "@/composables/useFilterHelper";
-import { AdvancedFilter, GetFilterOptionsDocument } from "@/queries";
+import {
+  AdvancedFilter,
+  GetFilterOptionsDocument,
+} from "@/generated-types/queries";
 import { useQuery } from "@vue/apollo-composable";
 import { computed, defineComponent, ref, watch } from "vue";
 import type { PropType } from "vue";

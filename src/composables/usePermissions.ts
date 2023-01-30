@@ -1,16 +1,17 @@
-import { Permission, GetUserPermissionsDocument } from "@/queries";
+import {
+  Permission,
+  GetUserPermissionsDocument,
+} from "@/generated-types/queries";
 import { useQuery } from "@vue/apollo-composable";
-import { ref } from 'vue';
+import { ref } from "vue";
 
 const ignorePermissions = ref<boolean>(false);
 const setIgnorePermissions = (value: boolean) => {
   ignorePermissions.value = value;
-}
+};
 
 const usePermissions = () => {
-  const { result, loading } = useQuery(
-    GetUserPermissionsDocument
-  );
+  const { result, loading } = useQuery(GetUserPermissionsDocument);
 
   const canGet = (permissions: Permission[]) => {
     return permissions.includes(Permission.Canget);
@@ -26,14 +27,14 @@ const usePermissions = () => {
     permissions.includes(Permission.Candelete);
 
   const determinePermission = (perm: string) => {
-    if (ignorePermissions) {
+    if (ignorePermissions.value) {
       return true;
     }
     if (result.value?.UserPermissions?.payload) {
-      return ['read-saved-search'].includes(perm);
+      return ["read-saved-search"].includes(perm);
     }
     return false;
-  }
+  };
 
   return {
     canGet,
@@ -41,8 +42,8 @@ const usePermissions = () => {
     canEdit,
     determinePermission,
     loading,
-    setIgnorePermissions
+    setIgnorePermissions,
   };
 };
 
-export {usePermissions, setIgnorePermissions } ;
+export { usePermissions, setIgnorePermissions };
