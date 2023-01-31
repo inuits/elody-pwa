@@ -27,9 +27,10 @@
           mediafileSelectionState.selectedMediafile.mimetype?.includes('image')
         "
         :is-public="mediafileSelectionState.selectedMediafile.isPublic"
-        :image-url="mediafileSelectionState.selectedMediafile.filename"
-        :image-transcode-url="
-          mediafileSelectionState.selectedMediafile.transcode_filename
+        :imageFilename="
+          mediafileSelectionState.selectedMediafile.transcode_filename ||
+          mediafileSelectionState.selectedMediafile.filename ||
+          ''
         "
         :downloadLocation="
           canGet(result?.Entity?.permission)
@@ -103,7 +104,10 @@ import type { PropType } from "vue";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import IIIFViewer from "../IIIFViewer.vue";
 import MetaWindow from "../MetaWindow.vue";
-import { GetEntityByIdDocument } from "../../generated-types/queries";
+import {
+  GetEntityByIdDocument,
+  Permission,
+} from "../../generated-types/queries";
 import type {
   GetEntityByIdQuery,
   Maybe,

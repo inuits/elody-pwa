@@ -36,8 +36,7 @@ export default defineComponent({
     ViewerToolbar,
   },
   props: {
-    imageUrl: { type: String, default: "" },
-    imageTranscodeUrl: { type: String, default: "" },
+    imageFilename: { type: String, default: "" },
     isPublic: { type: Boolean, default: true },
     downloadLocation: { type: String },
   },
@@ -51,13 +50,13 @@ export default defineComponent({
     const loading = ref<boolean>(true);
 
     onMounted(() => {
-      if (props.imageUrl) {
+      if (props.imageFilename) {
         const dragonOption: OpenSeadragon.Options = {
           element: OpenSeadragonDiv.value,
           prefixUrl: "/static/openseadragon/images/",
           // @ts-ignore
           toolbar: document.getElementById("OpenSeadragon-toolbar"),
-          tileSources: `/api/iiif/3/${props.imageTranscodeUrl}/info.json`,
+          tileSources: `/api/iiif/3/${props.imageFilename}/info.json`,
         };
 
         if (zoomInDiv.value !== null) {
@@ -76,7 +75,7 @@ export default defineComponent({
         viewer = OpenSeadragon(dragonOption);
 
         watch(
-          () => props.imageUrl,
+          () => props.imageFilename,
           (value: string) => {
             if (value) {
               loading.value = true;
