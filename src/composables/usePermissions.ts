@@ -13,10 +13,12 @@ const setIgnorePermissions = (value: boolean) => {
 const usePermissions = () => {
   const { result, loading } = useQuery(GetUserPermissionsDocument);
 
-  const canGet = (permissions: Permission[]) => {
+  const canGet = (permissions: Permission[] | undefined) => {
+    if (!permissions) return false;
     return permissions.includes(Permission.Canget);
   };
-  const canEdit = (permissions: Permission[]) => {
+  const canEdit = (permissions: Permission[] | undefined) => {
+    if (!permissions) return false;
     return (
       permissions.includes(Permission.Canput) &&
       permissions.includes(Permission.Canpatch)
