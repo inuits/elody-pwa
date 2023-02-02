@@ -5,6 +5,9 @@
 @tailwind utilities;
 
 :root {
+  --color-accent-light: theme("colors.accent.light");
+  --color-accent-normal: theme("colors.accent.normal");
+
   --color-neutral-10: theme("colors.neutral.10");
   --color-neutral-20: theme("colors.neutral.20");
   --color-neutral-30: theme("colors.neutral.30");
@@ -23,6 +26,15 @@
   --color-neutral-700: theme("colors.neutral.700");
   --color-neutral-800: theme("colors.neutral.800");
   --color-neutral-900: theme("colors.neutral.900");
+  --color-neutral-white: theme("colors.neutral.white");
+  --color-neutral-lightest: theme("colors.neutral.lightest");
+  --color-neutral-light: theme("colors.neutral.light");
+
+  --color-text-light: theme("colors.text.light");
+  --color-text-body: theme("colors.text.body");
+
+  --color-background-frosted: theme("colors.background.frosted");
+
   --color-main-light: theme("colors.main.light");
   --color-main-dark: theme("colors.main.dark");
 }

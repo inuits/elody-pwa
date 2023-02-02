@@ -13,6 +13,10 @@ module.exports = {
         neutral: "#e0dfdf",
         selected: "#2d242a",
       },
+      accent: {
+        light: "#DCF4F9",
+        normal: "#02C6F2",
+      },
       neutral: {
         0: "#FFFFFF",
         10: "#FAFBFC",
@@ -33,6 +37,16 @@ module.exports = {
         700: "#253858",
         800: "#172B4D",
         900: "#091E42",
+        white: "#FFFFFF",
+        lightest: "#F2F7F8",
+        light: "#E8EEF0",
+      },
+      text: {
+        light: "#6795A2",
+        body: "#052737",
+      },
+      background: {
+        frosted: "#DCF4F9 25%",
       },
       blue: {
         50: "#DEEBFF",
