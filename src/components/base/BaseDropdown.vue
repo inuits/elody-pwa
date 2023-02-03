@@ -27,7 +27,10 @@ export default defineComponent({
   name: "BaseDropdown",
   props: {
     label: { type: String, default: "" },
-    options: { type: Array as PropType<Array<string | number>>, required: true },
+    options: {
+      type: Array as PropType<Array<string | number>>,
+      required: true,
+    },
     isDisabled: { type: Boolean, required: false },
     modelValue: { type: [String, Number], default: undefined },
     bgColor: {

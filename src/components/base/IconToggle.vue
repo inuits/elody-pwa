@@ -33,18 +33,17 @@ export default defineComponent({
     checked: { type: Boolean, default: false },
     iconOff: { type: String, required: true },
     iconOn: { type: String, required: true },
-    forceFlexClass: {type: Boolean, required: false, default: false}
+    forceFlexClass: { type: Boolean, required: false, default: false },
   },
   emits: ["update:checked"],
   setup() {
-
-    const handleInputChange = (event: Event) => 
-      (event.target as HTMLInputElement).checked
+    const handleInputChange = (event: Event) =>
+      (event.target as HTMLInputElement).checked;
 
     return {
-      handleInputChange
-    }
-  }
+      handleInputChange,
+    };
+  },
 });
 </script>
 
@@ -54,7 +53,7 @@ export default defineComponent({
 }
 
 .forceFlex {
-  @apply flex
+  @apply flex;
 }
 .iconOn,
 .iconOff {
