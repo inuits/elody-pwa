@@ -46,7 +46,7 @@ module.exports = {
         body: "#052737",
       },
       background: {
-        frosted: "#DCF4F9 25%",
+        frosted: "rgba(220, 244, 249, 0.25)",
       },
       blue: {
         50: "#DEEBFF",
