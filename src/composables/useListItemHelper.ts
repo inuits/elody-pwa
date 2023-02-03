@@ -5,7 +5,8 @@ const useListItemHelper = () => {
     return (
       entity?.media?.primary_transcode ||
       entity?.media?.primaryMediafile ||
-      (entity?.media?.mediafiles && entity?.media?.mediafiles[0]?.transcode_filename )||
+      (entity?.media?.mediafiles &&
+        entity?.media?.mediafiles[0]?.transcode_filename) ||
       null
     );
   };

@@ -6,7 +6,7 @@ export const langs: string[] = ["nl", "fr"];
 export const mergeLanguageJsonFiles = (messages: any, langs: string[]): any => {
   const newMessages: any = {};
   langs.forEach((lang: string) => {
-    for (var propt in messages) {
+    for (const propt in messages) {
       if (propt.includes(lang)) {
         newMessages[lang] = { ...newMessages[lang], ...messages[propt] };
       }
@@ -46,7 +46,7 @@ export const customSort = (
   arrayToSort: any[],
   sortKey: string
 ) => {
-  let ordering: any = {};
+  const ordering: any = {};
   for (let i = 0; i < customSortOrder.length; i++) {
     ordering[customSortOrder[i]] = i;
   }

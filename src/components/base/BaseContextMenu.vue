@@ -30,20 +30,20 @@ const isDisplayingContextMenu = ref<Boolean>(false);
 
 const props = withDefaults(
   defineProps<{
-    icon: string
+    icon: string;
     extraClass: string;
     id: string;
   }>(),
   {
     extraClass: () => {
-      return '';
+      return "";
     },
     id: () => {
-      return 'no-id-set';
+      return "no-id-set";
     },
     icon: () => {
-      return Unicons.EllipsisV.name
-    }
+      return Unicons.EllipsisV.name;
+    },
   }
 );
 
@@ -52,10 +52,11 @@ const toggleContextMenu = () => {
 };
 
 window.addEventListener("click", function (e: Event) {
-  if (e &&
+  if (
+    e &&
     !(
       document.getElementById(props.id) &&
-      document.getElementById(props.id)?.contains((e.target as HTMLInputElement))
+      document.getElementById(props.id)?.contains(e.target as HTMLInputElement)
     )
   ) {
     isDisplayingContextMenu.value = false;
