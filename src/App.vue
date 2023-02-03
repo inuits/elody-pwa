@@ -8,7 +8,7 @@
         <router-view />
       </div>
     </div>
-    <upload-modal />
+    <upload-modal :modal-position="'left'" />
     <edit-modal />
     <pick-entity-modal />
     <create-modal />

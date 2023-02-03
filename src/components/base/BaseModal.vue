@@ -1,13 +1,25 @@
 <template>
   <div
     v-show="modalState === 'show' || modalState === 'loading'"
-    class="fixed z-50 inset-0 overflow-y-auto"
+    class="fixed overflow-y-auto"
+    :class="{
+      'inset-0': modalPosition === 'center',
+      'z-10': modalPosition === 'left',
+      'left-24 right-0 inset-y-0': modalPosition !== 'center',
+      'z-50': modalPosition !== 'left',
+    }"
   >
     <div
-      class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+      :class="{
+        'flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0':
+          modalPosition === 'center',
+      }"
     >
       <div
-        class="fixed inset-0 bg-neutral-80 bg-opacity-75 transition-opacity"
+        class="fixed backdrop-blur-sm frosted-background"
+        :class="
+          modalPosition === 'left' ? 'left-24 right-0 inset-y-0' : 'inset-0'
+        "
         aria-hidden="true"
         @click="hideModal"
       ></div>
@@ -18,10 +30,13 @@
         >&#8203;</span
       >
       <div
-        class="inline-block align-bottom bg-neutral-0 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:align-middle sm:my-8 sm:w-11/12"
+        class="inline-block align-bottom bg-neutral-0 text-left overflow-hidden shadow-xl transform transition-all sm:w-11/12"
         :class="{
+          'rounded-lg sm:align-middle sm:my-8': modalPosition === 'center',
+          'h-screen sm:align-top sm:m-0': modalPosition !== 'center',
+          'float-right': modalPosition === 'right',
           'sm:max-w-4xl': !large,
-          'h-screen-90': large,
+          'h-screen-90': large && modalPosition === 'center',
           'overflow-y-scroll': scroll,
         }"
       >
@@ -40,6 +55,7 @@ import { defineComponent, toRefs, watch } from "vue";
 import type { PropType } from "vue";
 
 export type ModalState = "initial" | "show" | "hide" | "loading";
+export type ModalPosition = "center" | "left" | "right";
 
 export default defineComponent({
   name: "BaseModal",
@@ -48,6 +64,11 @@ export default defineComponent({
       type: String as PropType<ModalState>,
       required: true,
       default: "hide",
+    },
+    modalPosition: {
+      type: String as PropType<ModalPosition>,
+      required: false,
+      default: "center",
     },
     large: {
       type: Boolean,
@@ -87,5 +108,9 @@ export default defineComponent({
 <style scoped>
 .h-screen-90 {
   height: 90vh;
+}
+
+.frosted-background {
+  background-color: var(--color-background-frosted);
 }
 </style>
