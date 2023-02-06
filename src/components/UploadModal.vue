@@ -5,7 +5,7 @@
     :modal-state="uploadModalState.state"
     @hide-modal="closeUploadModal"
   >
-    <div class="bg-neutral-20 w-full h-full flex flex-col overflow-auto">
+    <div class="w-full h-full flex flex-col overflow-auto">
       <BaseTabs v-if="modalToOpen === modalChoices.IMPORT && result">
         <BaseTab :title="$t('upload.import')">
           <upload-modal-import

@@ -2,7 +2,7 @@
   <div class="flex flex-col w-full h-full">
     <div
       ref="dropzoneDiv"
-      class="bg-white-background w-full bg-blue inline-block border-dashed border-4 border-blue-light rounded p-5 h-full"
+      class="bg-neutral-lightest w-full inline-block border-dashed border-[3px] border-text-light rounded p-5 h-full"
       :class="{
         'flex justify-center items-center cursor-pointer':
           !finishedUploading && !fileCount,
@@ -12,7 +12,9 @@
     >
       <div v-show="fileCount === 0" class="inline-block w-9/12 text-center">
         <div class="dz-message" data-dz-message>
-          <span v-if="total === 0">{{ $t("dropzone.drag-add") }}</span>
+          <span v-if="total === 0" class="text-body">{{
+            $t("dropzone.drag-add")
+          }}</span>
         </div>
       </div>
       <div
@@ -246,7 +248,20 @@ export default defineComponent({
 .dz-preview a {
   display: none;
 }
+
 .dz-preview:hover a {
   display: flex;
+}
+
+.bg-neutral-lightest {
+  background-color: var(--color-neutral-lightest);
+}
+
+.border-text-light {
+  border-color: var(--color-text-light);
+}
+
+.text-body {
+  color: var(--color-text-body);
 }
 </style>
