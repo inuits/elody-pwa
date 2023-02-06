@@ -82,7 +82,7 @@
   },
   "upload": {
     "upload-files": "Upload files",
-    "import": "Import",
+    "import": "Import from external source",
     "reset": "Reset view"
   },
   "audio": {

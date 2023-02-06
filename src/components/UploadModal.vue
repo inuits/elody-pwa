@@ -7,16 +7,17 @@
   >
     <div class="w-full h-full flex flex-col overflow-auto">
       <BaseTabs v-if="modalToOpen === modalChoices.IMPORT && result">
+        <BaseTab :title="$t('upload.upload-files')">
+          <upload-modal-dropzone v-if="modalToOpen === modalChoices.IMPORT" />
+        </BaseTab>
         <BaseTab :title="$t('upload.import')">
           <upload-modal-import
             v-if="modalToOpen === modalChoices.IMPORT"
             :directories="result.Directories"
           />
         </BaseTab>
-        <BaseTab :title="$t('upload.upload-files')">
-          <upload-modal-dropzone v-if="modalToOpen === modalChoices.IMPORT" />
-        </BaseTab>
       </BaseTabs>
+
       <BaseTabs v-if="modalToOpen === modalChoices.DROPZONE">
         <BaseTab :title="$t('upload.upload-files')">
           <div class="h-full">
