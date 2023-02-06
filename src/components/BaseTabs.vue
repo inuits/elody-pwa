@@ -1,15 +1,15 @@
 <template>
   <div class="h-full flex flex-col flex-shrink">
-    <div class="flex justify-around">
+    <div class="flex gap-3 shadow">
       <div
         v-for="(tab, index) in tabs"
         :key="index"
         @click="selectTab(index)"
-        class="text-center w-full cursor-pointer py-2"
+        class="text-center cursor-pointer p-3"
         :class="
           index === selectedIndex
-            ? 'text-body bg-neutral-0 font-bold border-b-2'
-            : 'text-body bg-neutral-0 text-light'
+            ? 'text-body font-bold border-b-2'
+            : 'text-light'
         "
       >
         {{ tab?.props?.title }}
