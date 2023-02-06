@@ -8,8 +8,8 @@
         class="text-center w-full cursor-pointer py-2"
         :class="
           index === selectedIndex
-            ? 'bg-neutral-800 text-neutral-0'
-            : 'text-neutral-800 bg-neutral-0'
+            ? 'text-body bg-neutral-0 font-bold border-b-2'
+            : 'text-body bg-neutral-0 text-light'
         "
       >
         {{ tab?.props?.title }}
@@ -65,3 +65,13 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.text-light {
+  color: var(--color-text-light);
+}
+
+.text-body {
+  color: var(--color-text-body);
+}
+</style>
