@@ -2,9 +2,9 @@ import type { CodegenConfig } from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
   overwrite: true,
-  schema: "http://dashboard.dams.localhost:8100/api/graphql",
+  schema: import.meta.env.BASE_URL + "/api/graphql",
   generates: {
-    "generated-types/queries.ts": {
+    "src/generated-types/queries.ts": {
       plugins: [
         {
           add: {
