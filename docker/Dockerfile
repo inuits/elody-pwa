@@ -11,7 +11,7 @@ COPY ./ ./app/
 
 WORKDIR /app/
 
-RUN pnpm i && pnpm cache clean --force
+RUN pnpm i
 
 RUN pnpm run build
 
