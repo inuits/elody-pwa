@@ -1,5 +1,8 @@
 <template>
-  <div v-show="isActive" class="flex flex-col flex-grow p-3">
+  <div
+    v-show="isActive"
+    class="flex flex-col flex-grow p-3 bg-[var(--color-neutral-lightest)]"
+  >
     <slot></slot>
   </div>
 </template>
@@ -30,5 +33,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped></style>
