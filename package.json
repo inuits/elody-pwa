@@ -11,7 +11,7 @@
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",
     "lint": "eslint . --ext .vue,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "prepare": "husky install",
-    "generate": "pnpm graphql-code-generator --config ./codegen.yml"
+    "generate": "pnpm graphql-code-generator --config ./codegen.ts"
   },
   "dependencies": {
     "@graphql-codegen/cli": "^2.16.1",
