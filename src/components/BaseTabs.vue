@@ -8,8 +8,8 @@
         class="text-center cursor-pointer p-3"
         :class="
           index === selectedIndex
-            ? 'text-body font-bold border-b-2'
-            : 'text-light'
+            ? 'text-[var(--color-text-body)] font-bold border-b-2'
+            : 'text-[var(--color-text-light)]'
         "
       >
         {{ tab?.props?.title }}
@@ -65,13 +65,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-.text-light {
-  color: var(--color-text-light);
-}
-
-.text-body {
-  color: var(--color-text-body);
-}
-</style>
