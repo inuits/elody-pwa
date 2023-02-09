@@ -81,7 +81,7 @@ export default defineComponent({
 @import "@/assets/base.css";
 
 .logo {
-  writing-mode: vertical-lr;
+  writing-mode: horizontal-lr;
 }
 
 .move-by-nav {

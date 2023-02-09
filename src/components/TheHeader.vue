@@ -12,25 +12,6 @@
           / {{ pageInfo.entityTitle }}</span
         >
       </h1>
-      <EditToggle v-if="auth.isAuthenticated.value === true" />
-    </div>
-    <div class="float-right">
-      <BaseButton
-        v-if="auth.isAuthenticated.value === false"
-        label="Log in"
-        bg-color="main-light"
-        txt-color="main-dark"
-        class="whitespace-nowrap"
-        @click="auth.redirectToLogin()"
-      />
-      <BaseButton
-        v-if="auth.isAuthenticated.value === true"
-        label="Log out"
-        bg-color="main-light"
-        txt-color="main-dark"
-        class="whitespace-nowrap"
-        @click="logout()"
-      />
     </div>
   </div>
 </template>
@@ -39,12 +20,10 @@
 import { watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { usePageInfo } from "../composables/usePageInfo";
-import { useAuth } from "session-vue-3-oidc-library";
 import BaseButton from "../components/base/BaseButton.vue";
 import EditToggle from "./EditButtons.vue";
 
 const { pageInfo } = usePageInfo();
-const auth = useAuth();
 const route = useRoute();
 const router = useRouter();
 

@@ -103,6 +103,7 @@
         class="mt-1 menu-btn"
         bg-color="neutral-30"
         @click="auth.redirectToLogin()"
+        
       />
       <span
       v-if="auth.isAuthenticated.value === false"
@@ -177,7 +178,7 @@ const logout = async () => {
   transition-duration: 300ms;
 }
 
-.menu-item:hover .menu-btn {
+.menu-item:hover .menu-btn{
   --tw-bg-opacity: 1;
   background-color: rgb(165 173 186 / var(--tw-bg-opacity));
 }
@@ -187,7 +188,6 @@ const logout = async () => {
 }
 
 .navbar:hover .router-link {
-  padding-left: 0.3rem;
   justify-content: flex-start;
 }
 
