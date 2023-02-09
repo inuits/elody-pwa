@@ -30,6 +30,8 @@
   --color-neutral-lightest: theme("colors.neutral.lightest");
   --color-neutral-light: theme("colors.neutral.light");
 
+  --color-blue-100: theme("colors.blue.100");
+  
   --color-text-light: theme("colors.text.light");
   --color-text-body: theme("colors.text.body");
 
@@ -37,6 +39,8 @@
 
   --color-main-light: theme("colors.main.light");
   --color-main-dark: theme("colors.main.dark");
+
+  
 }
 
 .checkboard {

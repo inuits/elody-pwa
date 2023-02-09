@@ -74,11 +74,12 @@
   "navigation": {
     "title": "DAMS",
     "assets": "Assets",
-    "mediafiles": "Mediafiles",
+    "mediafile": "Mediafile",
     "jobs": "Jobs",
-    "import": "Import",
-    "create": "Create",
-    "log-out": "Log out"
+    "upload": "Upload",
+    "nieuw": "Nieuw",
+    "log-out": "Log out",
+    "log-in": "Log in"
   },
   "upload": {
     "upload-files": "Upload files",

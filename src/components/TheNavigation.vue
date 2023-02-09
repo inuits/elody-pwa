@@ -18,7 +18,7 @@
         @click="forceDisableEditModalHome"
       />
       <span
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
+        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
         @click="forceDisableEditModalHome"
         >{{ $t("navigation.assets") }}</span
       >
@@ -28,33 +28,17 @@
       class="flex flex-row items-center menu-item"
     >
       <BaseButton
-        :icon="Unicons.FileAlt.name"
+        :icon="Unicons.Image.name"
         bg-color="neutral-30"
         class="menu-btn"
         @click="forceDisableEditMediafiles"
       />
       <span
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
+        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
         @click="forceDisableEditMediafiles"
       >
-        {{ $t("navigation.mediafiles") }}
+        {{ $t("navigation.mediafile") }}
       </span>
-    </div>
-    <div
-      v-show="auth.isAuthenticated.value === true"
-      class="flex flex-row items-center menu-item"
-    >
-      <BaseButton
-        :icon="Unicons.History.name"
-        bg-color="neutral-30"
-        class="mt-1 menu-btn"
-        @click="forceDisableEditModalHistory"
-      />
-      <span
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
-        @click="forceDisableEditModalHistory"
-        >{{ $t("navigation.jobs") }}</span
-      >
     </div>
     <div
       v-show="
@@ -70,9 +54,9 @@
         @click="openUploadModal(modalChoices.IMPORT)"
       />
       <span
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
+        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
         @click="openUploadModal(modalChoices.IMPORT)"
-        >{{ $t("navigation.import") }}</span
+        >{{ $t("navigation.upload") }}</span
       >
     </div>
     <div
@@ -89,24 +73,58 @@
         @click="openCreateModal"
       />
       <span
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
+        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
         @click="openCreateModal"
-        >{{ $t("navigation.create") }}</span
+        >{{ $t("navigation.nieuw") }}</span
       >
     </div>
-    <!-- <div class="flex flex-row items-center menu-item">
+    <div
+    v-show="auth.isAuthenticated.value === true"
+    class="flex flex-row items-center menu-item"
+  >
+    <BaseButton
+      :icon="Unicons.History.name"
+      bg-color="neutral-30"
+      class="mt-1 menu-btn"
+      @click="forceDisableEditModalHistory"
+    />
+    <span
+      class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+      @click="forceDisableEditModalHistory"
+      >{{ $t("navigation.jobs") }}</span
+    >
+  </div>
+  <EditToggle v-if="auth.isAuthenticated.value === true" />
+    <div class="flex flex-row items-center menu-item">
+      
       <BaseButton
-        :icon="Unicons.SignOut.name"
+        v-if="auth.isAuthenticated.value === false"
+        :icon="Unicons.User.name"
         class="mt-1 menu-btn"
         bg-color="neutral-30"
-        @click="logout"
+        @click="auth.redirectToLogin()"
       />
       <span
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
-        @click="logout"
-        >{{ $t("navigation.log-out") }}</span
-      >
-    </div> -->
+      v-if="auth.isAuthenticated.value === false"
+      class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+      @click="auth.redirectToLogin()"
+      >{{ $t("navigation.log-in") }}</span>
+     
+    </div>    
+    <div class="flex flex-row items-center menu-item">
+      <BaseButton
+      v-if="auth.isAuthenticated.value === true"
+      :icon="Unicons.SignOut.name"
+      class="mt-1 menu-btn"
+      bg-color="neutral-30"
+      @click="logout()"
+    />
+    <span
+    v-if="auth.isAuthenticated.value === true"
+      class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+      @click="auth.redirectToLogin()"
+      >{{ $t("navigation.log-out") }}</span>
+    </div>
   </nav>
 </template>
 
@@ -120,6 +138,8 @@ import { useEditMode } from "../composables/useEdit";
 import { useCreateModal } from "./CreateModal.vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { usePermissions } from "../composables/usePermissions";
+import EditToggle from "./EditButtons.vue";
+
 
 const auth = useAuth();
 const { determinePermission, loading } = usePermissions();
@@ -127,6 +147,7 @@ const { openUploadModal } = useUploadModal();
 const { openCreateModal } = useCreateModal();
 const router = useRouter();
 const { disableEditMode } = useEditMode();
+
 
 const forceDisableEditModalHome = () => {
   router.push({ name: "Home" });
@@ -141,6 +162,11 @@ const forceDisableEditModalHistory = () => {
 const forceDisableEditMediafiles = () => {
   router.push({ name: "Mediafiles" });
   disableEditMode();
+};
+
+const logout = async () => {
+  await auth.logout();
+  router.push({ name: "Home" });
 };
 </script>
 
