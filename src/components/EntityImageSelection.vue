@@ -11,80 +11,83 @@
       v-if="!loading && mediafiles.length > 0"
       class="flex flex-col items-end mt-2 overflow-y-auto"
     >
-      <draggable
+      <!-- <draggable
         v-model="mediafiles"
         item-key="mediafiles-container"
         class="sortable"
         :disabled="!setDraggable()"
         @end="endDrag"
-      >
-        <template #item="{ element }">
-          <div
-            :key="element.filename ? element.filename : 'no-filename'"
-            :class="[' px-5 py-2 flex flex-col justify-end']"
-          >
-            <div class="relative group">
-              <trash-icon
-                v-if="editMode === 'edit' && !toBeDeleted.includes(element._id)"
-                class="hidden group-hover:block"
-                @click="addToSaveCallback(element._id)"
-              />
-              <AudioThumbnail
-                v-if="
-                  element.thumbnail_file_location &&
-                  element?.mimetype.includes('audio')
-                "
-                :class="[
-                  'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
-                  toBeDeleted.includes(element._id)
-                    ? 'filter blur-xs grayscale'
-                    : '',
-                  selectedImage && element.filename === selectedImage.filename
-                    ? 'border-2 border-blue-500'
-                    : '',
-                ]"
-                @click="selectImage(element)"
-              />
-              <SvgThumbnail
-                v-else-if="
-                  element.thumbnail_file_location &&
-                  element?.mimetype.includes('text/plain')
-                "
-                :class="[
-                  'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
-                  toBeDeleted.includes(element._id)
-                    ? 'filter blur-xs grayscale'
-                    : '',
-                  selectedImage && element.filename === selectedImage.filename
-                    ? 'border-2 border-blue-500'
-                    : '',
-                ]"
-                @click="selectImage(element)"
-              />
-              <img
-                v-else-if="element.thumbnail_file_location"
-                :class="[
-                  'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
-                  toBeDeleted.includes(element._id)
-                    ? 'filter blur-xs grayscale'
-                    : '',
-                  selectedImage && element.filename === selectedImage.filename
-                    ? 'border-2 border-blue-500'
-                    : '',
-                ]"
-                :src="
-                  !element.mimetype.includes('pdf')
-                    ? `/api/iiif/3/${
-                        element.transcode_filename || element.filename
-                      }/square/100,/0/default.jpg`
-                    : element.thumbnail_file_location
-                "
-                @click="selectImage(element)"
-              />
-            </div>
+      > -->
+      <div v-for="element in mediafiles" :key="element._id">
+        <!-- <template #item="{ element }"> -->
+        <div
+          :key="element.filename ? element.filename : 'no-filename'"
+          :class="[' px-5 py-2 flex flex-col justify-end']"
+        >
+          <div class="relative group">
+            <trash-icon
+              v-if="editMode === 'edit' && !toBeDeleted.includes(element._id)"
+              class="hidden group-hover:block"
+              @click="addToSaveCallback(element._id)"
+            />
+            <AudioThumbnail
+              v-if="
+                element.thumbnail_file_location &&
+                element?.mimetype &&
+                element?.mimetype.includes('audio')
+              "
+              :class="[
+                'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
+                toBeDeleted.includes(element._id)
+                  ? 'filter blur-xs grayscale'
+                  : '',
+                selectedImage && element.filename === selectedImage.filename
+                  ? 'border-2 border-blue-500'
+                  : '',
+              ]"
+              @click="selectImage(element)"
+            />
+            <SvgThumbnail
+              v-else-if="
+                element.thumbnail_file_location &&
+                element?.mimetype &&
+                element?.mimetype.includes('text/plain')
+              "
+              :class="[
+                'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
+                toBeDeleted.includes(element._id)
+                  ? 'filter blur-xs grayscale'
+                  : '',
+                selectedImage && element.filename === selectedImage.filename
+                  ? 'border-2 border-blue-500'
+                  : '',
+              ]"
+              @click="selectImage(element)"
+            />
+            <img
+              v-else-if="element.thumbnail_file_location"
+              :class="[
+                'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
+                toBeDeleted.includes(element._id)
+                  ? 'filter blur-xs grayscale'
+                  : '',
+                selectedImage && element.filename === selectedImage.filename
+                  ? 'border-2 border-blue-500'
+                  : '',
+              ]"
+              :src="
+                element?.mimetype && !element.mimetype.includes('pdf')
+                  ? `/api/iiif/3/${
+                      element.transcode_filename || element.filename
+                    }/square/100,/0/default.jpg`
+                  : element.thumbnail_file_location
+              "
+              @click="selectImage(element)"
+            />
           </div>
-        </template>
-      </draggable>
+        </div>
+        <!-- </template> -->
+      </div>
     </div>
     <div :class="editMode === 'edit' ? 'pb-20 pt-5' : ''">
       <plus-circle-icon
@@ -115,7 +118,7 @@ import useDropzoneHelper from "../composables/useDropzoneHelper";
 import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "../composables/useMetaDataHelper";
 import useMediafilesOrderHelpers from "../composables/useMediafilesOrderHelpers";
-import draggable from "vuedraggable/src/vuedraggable";
+// import draggable from "vuedraggable/src/vuedraggable";
 export const toBeDeleted = ref<string[]>([]);
 
 type MediafileSelectionState = {
@@ -149,7 +152,7 @@ export default defineComponent({
     AudioThumbnail,
     PlusCircleIcon,
     TrashIcon,
-    draggable,
+    // draggable,
     SvgThumbnail,
   },
   props: {
