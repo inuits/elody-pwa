@@ -73,7 +73,7 @@
   },
   "navigation": {
     "title": "DAMS",
-    "assets": "Assets",
+    "entities": "Entitities",
     "mediafile": "Mediafile",
     "jobs": "Jobs",
     "upload": "Upload",

@@ -13,7 +13,7 @@
       v-if="icon"
       :name="icon"
       height="16"
-      :fill="loading ? 'var(--color-neutral-20)' : `hover:--color-blue-100`"
+      :fill="loading ? 'var(--color-neutral-20)' : `active:--color-blue-100`"
     />
     <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
   </button>

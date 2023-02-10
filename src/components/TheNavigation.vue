@@ -10,18 +10,18 @@
     >
       {{ $t("navigation.title") }}
     </router-link>
-    <div class="flex flex-row items-center menu-item">
+    <div class="flex flex-row items-center menu-item"
+      @click="toggleEntitiesSubmenu">
       <BaseButton
         :icon="Unicons.BookOpen.name"
         bg-color="neutral-30"
         class="menu-btn"
-        @click="forceDisableEditModalHome"
-      />
+        @click="forceDisableEditModalHome">
+      </BaseButton> 
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
         @click="forceDisableEditModalHome"
-        >{{ $t("navigation.assets") }}</span
-      >
+        >{{ $t("navigation.entities") }}</span>
     </div>
     <div
       v-show="auth.isAuthenticated.value === true"
@@ -95,7 +95,7 @@
     >
   </div>
   <EditToggle v-if="auth.isAuthenticated.value === true" />
-    <div class="flex flex-row items-center menu-item">
+    <div class="flex flex-row items-center menu-item  login-out">
       
       <BaseButton
         v-if="auth.isAuthenticated.value === false"
@@ -112,7 +112,7 @@
       >{{ $t("navigation.log-in") }}</span>
      
     </div>    
-    <div class="flex flex-row items-center menu-item">
+    <div class="flex flex-row items-center menu-item  login-out">
       <BaseButton
       v-if="auth.isAuthenticated.value === true"
       :icon="Unicons.SignOut.name"
@@ -141,14 +141,12 @@ import { useAuth } from "session-vue-3-oidc-library";
 import { usePermissions } from "../composables/usePermissions";
 import EditToggle from "./EditButtons.vue";
 
-
 const auth = useAuth();
 const { determinePermission, loading } = usePermissions();
 const { openUploadModal } = useUploadModal();
 const { openCreateModal } = useCreateModal();
 const router = useRouter();
 const { disableEditMode } = useEditMode();
-
 
 const forceDisableEditModalHome = () => {
   router.push({ name: "Home" });
@@ -169,6 +167,7 @@ const logout = async () => {
   await auth.logout();
   router.push({ name: "Home" });
 };
+
 </script>
 
 <style scoped>
@@ -176,6 +175,7 @@ const logout = async () => {
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 300ms;
+  overflow-x: hidden;
 }
 
 .menu-item:hover .menu-btn{
@@ -190,7 +190,11 @@ const logout = async () => {
 .navbar:hover .router-link {
   justify-content: flex-start;
 }
-
+.login-out {
+  position: fixed;
+  bottom: 3%;
+  left:1%
+}
 .navbar:hover .nav-item-label {
   animation: showText 0.1s ease-in 0.2s forwards;
   -moz-animation: showText 0.1s ease-in 0.2s forwards;
@@ -198,6 +202,7 @@ const logout = async () => {
   -o-animation: showText 0.1s ease-in 0.2s forwards;
   animation-fill-mode: forwards;
 }
+
 
 @keyframes showText {
   100% {
