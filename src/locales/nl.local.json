@@ -74,6 +74,9 @@
   "navigation": {
     "title": "DAMS",
     "entities": "Entitities",
+    "asset":"Asset",
+    "boeken":"Boeken",
+    "tijdschriften":"Tijdschrijften",
     "mediafile": "Mediafile",
     "jobs": "Jobs",
     "upload": "Upload",
