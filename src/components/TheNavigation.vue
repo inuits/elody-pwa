@@ -12,6 +12,8 @@
         {{ $t("navigation.entities") }}
       </span>
     </div>
+    
+    <div :class="{ dropdownMenu: showDropdown }">
     <div class="flex flex-column items-center dropdownMenu-item" v-if="showDropdown==true">
       <span>{{ $t("navigation.asset") }}</span>
     </div>
@@ -22,8 +24,7 @@
     <div class="flex flex-column items-center dropdownMenu-item" v-if="showDropdown==true">
       <span @click="openCreateModal">{{ $t("navigation.tijdschriften") }}</span>
     </div>
-      
-    
+  </div>
     <!-- Mediafile -->
     <div v-show="auth.isAuthenticated.value === true" class="flex flex-row items-center menu-item" @click="forceDisableEditMediafiles">
       <BaseButton :icon="Unicons.Image.name" bg-color="neutral-30" class="menu-btn" @click="forceDisableEditMediafiles"/>
@@ -166,21 +167,18 @@ const toggleDropDown = () => {
   animation-fill-mode: forwards;
 }
 
-a{
-  color: black;
-}
 .dropdownMenu-item {
-  
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 300ms;
-  margin-left: 2rem;
-  margin-top: 0.5rem;
-
+  margin-left: 4.5rem;
+  margin-top: 0.3rem;
 }
 
 .dropdownMenu-item:hover{
   color:'var(--color-blue-100)'
+}
+
+.dropdownMenu {
+  animation: dropdown 1.5s 1;
+
 }
 
 @keyframes showText {
@@ -190,10 +188,25 @@ a{
   }
 }
 
+@keyframes dropdown {
+  0%   
+  {
+    margin-top: -2rem;
+    transition: opacity 0.1 0.5s ease-in-out; 
+   }
+  100% {
+    margin-top: 0.3rem;
+    transition: opacity 1 0.5s ease-in-out;
+  }
+}
+
 @-webkit-keyframes showText {
   100% {
     width: auto;
     height: auto;
   }
 }
+
+
+
 </style>
