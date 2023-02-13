@@ -38,15 +38,50 @@
       </div>
     </div>
     <div class="p-3 bg-[var(--color-neutral-white)] rounded">
-      <BaseButtonNew
-        v-if="triggerUpload"
-        class="w-full"
-        :label="$t('dropzone.upload')"
-        :disable="fileCount === 0"
-        :icon="Unicons.PlusCircle.name"
-        tabindex="-1"
-        @click="triggerUpload"
-      />
+      <div class="flex">
+        <div
+          @click="() => (createAsset = !createAsset)"
+          class="w-1/3 mr-2 flex rounded cursor-pointer"
+          :class="[
+            createAsset
+              ? `bg-[var(--color-accent-light)] text-[var(--color-accent-normal)]`
+              : `bg-[var(--color-neutral-lightest)] text-[var(--color-text-light)]`,
+          ]"
+        >
+          <unicon
+            :name="
+              createAsset ? Unicons.CheckSquare.name : Unicons.SquareFull.name
+            "
+            height="16"
+            class="inline"
+            :fill="
+              createAsset
+                ? `var(--color-accent-normal)`
+                : `var(--color-text-light)`
+            "
+          />
+          <span class="inline text-sm ml-1 pt-0.5">creëer asset</span>
+        </div>
+        <div class="w-2/3">
+          <InputField
+            class="h-7"
+            v-model="uploadedCsv"
+            type="file"
+            accept=".csv"
+            :icon="Unicons.Link.name"
+          />
+        </div>
+      </div>
+      <div class="mt-3">
+        <BaseButtonNew
+          v-if="triggerUpload"
+          class="w-full"
+          :label="$t('dropzone.upload')"
+          :disable="fileCount === 0"
+          :icon="Unicons.PlusCircle.name"
+          @click="triggerUpload"
+        />
+      </div>
     </div>
   </div>
   <div class="hidden">
@@ -109,11 +144,14 @@ import {
 import { useI18n } from "vue-i18n";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { Unicons } from "@/types";
+import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
+import InputField from "../components/base/InputField.vue";
 
 export default defineComponent({
   name: "DropZone",
   components: {
     BaseButtonNew,
+    InputField,
   },
   setup() {
     const {
@@ -143,6 +181,9 @@ export default defineComponent({
     const { mediafiles } = useMetaDataHelper();
     const { createNotification } = useNotification();
     const { t } = useI18n();
+    const createAsset = ref<boolean>(false);
+    const uploadedCsv = ref<any>();
+
     clearDropzoneErrorMessages();
 
     onMounted(async () => {
@@ -216,6 +257,8 @@ export default defineComponent({
       total,
       finishedUploading,
       getDropzoneSettings,
+      createAsset,
+      uploadedCsv,
     };
   },
 });
