@@ -1,81 +1,179 @@
 <template>
-  <nav class="navbar fixed left-0 top-0 w-24 h-screen flex flex-col justify-start align-center pt-10 bg-neutral-20 px-5 z-50" v-show="!loading">
-    <router-link :to="{ name: 'Home' }" class="logo router-link text-base text-neutral-700 font-semibold flex justify-center items-center mb-8" @click="forceDisableEditModalHome">
+  <nav
+    class="navbar fixed left-0 top-0 w-24 h-screen flex flex-col justify-start align-center pt-10 bg-neutral-20 px-5 z-50"
+    v-show="!loading"
+  >
+    <router-link
+      :to="{ name: 'Home' }"
+      class="logo router-link text-base text-neutral-700 font-semibold flex justify-center items-center mb-8"
+      @click="forceDisableEditModalHome"
+    >
       {{ $t("navigation.title") }}
     </router-link>
-    
-    
+
     <!-- Entities -->
-    <div class="flex flex-row items-center"  @click="toggleDropDown">
-      <BaseButton :icon="Unicons.BookOpen.name" bg-color="neutral-30" class="menu-btn"  @click="forceDisableEditModalHome"/>
-      <span class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold" @click="forceDisableEditModalHome">
+    <div class="flex flex-row items-center" @click="toggleDropDown">
+      <BaseButton
+        :icon="Unicons.BookOpen.name"
+        bg-color="neutral-30"
+        class="menu-btn"
+        @click="forceDisableEditModalHome"
+      />
+      <span
+        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+        @click="forceDisableEditModalHome"
+      >
         {{ $t("navigation.entities") }}
       </span>
     </div>
-    
-    <div :class="{ dropdownMenu: showDropdown }">
-    <div class="flex flex-column items-center dropdownMenu-item" v-if="showDropdown==true">
-      <span>{{ $t("navigation.asset") }}</span>
+
+    <div class="pl-13">
+      <div
+        class="flex flex-column items-center dropdownMenu-item"
+        v-if="showDropdown == true"
+      >
+        <span
+          class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+          >{{ $t("navigation.asset") }}</span
+        >
+      </div>
+
+      <div
+        class="flex flex-column items-center dropdownMenu-item"
+        v-if="showDropdown == true"
+      >
+        <span
+          class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+          @click="forceDisableEditMediafiles"
+          >{{ $t("navigation.boeken") }}</span
+        >
+      </div>
+      <div
+        class="flex flex-column items-center dropdownMenu-item"
+        v-if="showDropdown == true"
+      >
+        <span
+          class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+          @click="openCreateModal"
+          >{{ $t("navigation.tijdschriften") }}</span
+        >
+      </div>
     </div>
-    
-    <div class="flex flex-column items-center dropdownMenu-item" v-if="showDropdown==true">
-      <span @click="forceDisableEditMediafiles">{{ $t("navigation.boeken") }}</span>
-    </div>
-    <div class="flex flex-column items-center dropdownMenu-item" v-if="showDropdown==true">
-      <span @click="openCreateModal">{{ $t("navigation.tijdschriften") }}</span>
-    </div>
-  </div>
     <!-- Mediafile -->
-    <div v-show="auth.isAuthenticated.value === true" class="flex flex-row items-center menu-item" @click="forceDisableEditMediafiles">
-      <BaseButton :icon="Unicons.Image.name" bg-color="neutral-30" class="menu-btn" @click="forceDisableEditMediafiles"/>
-      <span class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"  @click="forceDisableEditMediafiles">
+    <div
+      v-show="auth.isAuthenticated.value === true"
+      class="flex flex-row items-center menu-item"
+      @click="forceDisableEditMediafiles"
+    >
+      <BaseButton
+        :icon="Unicons.Image.name"
+        bg-color="neutral-30"
+        class="menu-btn"
+        @click="forceDisableEditMediafiles"
+      />
+      <span
+        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+        @click="forceDisableEditMediafiles"
+      >
         {{ $t("navigation.mediafile") }}
       </span>
     </div>
 
-
     <!-- Upload -->
-    <div v-show=" auth.isAuthenticated.value === true && determinePermission('can-start-import')" class="flex flex-row items-center menu-item">
-      <BaseButton :icon="Unicons.Upload.name" class="mt-1 menu-btn" bg-color="neutral-30" @click="openUploadModal(modalChoices.IMPORT)"/>
-      <span class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold" @click="openUploadModal(modalChoices.IMPORT)">
+    <div
+      v-show="
+        auth.isAuthenticated.value === true &&
+        determinePermission('can-start-import')
+      "
+      class="flex flex-row items-center menu-item"
+    >
+      <BaseButton
+        :icon="Unicons.Upload.name"
+        class="mt-1 menu-btn"
+        bg-color="neutral-30"
+        @click="openUploadModal(modalChoices.IMPORT)"
+      />
+      <span
+        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+        @click="openUploadModal(modalChoices.IMPORT)"
+      >
         {{ $t("navigation.upload") }}
       </span>
     </div>
 
-
     <!-- Nieuw -->
-    <div v-show="auth.isAuthenticated.value === true && determinePermission('create-entity')" class="flex flex-row items-center menu-item">
-      <BaseButton :icon="Unicons.Create.name" class="mt-1 menu-btn" bg-color="neutral-30" @click="openCreateModal"/>
-      <span class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold" @click="openCreateModal">
+    <div
+      v-show="
+        auth.isAuthenticated.value === true &&
+        determinePermission('create-entity')
+      "
+      class="flex flex-row items-center menu-item"
+    >
+      <BaseButton
+        :icon="Unicons.Create.name"
+        class="mt-1 menu-btn"
+        bg-color="neutral-30"
+        @click="openCreateModal"
+      />
+      <span
+        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+        @click="openCreateModal"
+      >
         {{ $t("navigation.nieuw") }}
       </span>
     </div>
-    
-    
+
     <!-- Jobs -->
-    <div v-show="auth.isAuthenticated.value === true" class="flex flex-row items-center menu-item">
-      <BaseButton :icon="Unicons.History.name" bg-color="neutral-30" class="mt-1 menu-btn" @click="forceDisableEditModalHistory"/>
+    <div
+      v-show="auth.isAuthenticated.value === true"
+      class="flex flex-row items-center menu-item"
+    >
+      <BaseButton
+        :icon="Unicons.History.name"
+        bg-color="neutral-30"
+        class="mt-1 menu-btn"
+        @click="forceDisableEditModalHistory"
+      />
       <span
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold" @click="forceDisableEditModalHistory">
+        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+        @click="forceDisableEditModalHistory"
+      >
         {{ $t("navigation.jobs") }}
       </span>
     </div>
-    
-    
+
     <EditToggle v-if="auth.isAuthenticated.value === true" />
 
-
     <div class="flex flex-row items-center menu-item login-out">
-      <BaseButton v-if="auth.isAuthenticated.value === false" :icon="Unicons.User.name" class="mt-1 menu-btn" bg-color="neutral-30" @click="auth.redirectToLogin()"/>
-      <span v-if="auth.isAuthenticated.value === false" class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold" @click="auth.redirectToLogin()">
+      <BaseButton
+        v-if="auth.isAuthenticated.value === false"
+        :icon="Unicons.User.name"
+        class="mt-1 menu-btn"
+        bg-color="neutral-30"
+        @click="auth.redirectToLogin()"
+      />
+      <span
+        v-if="auth.isAuthenticated.value === false"
+        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+        @click="auth.redirectToLogin()"
+      >
         {{ $t("navigation.log-in") }}
       </span>
     </div>
 
-
     <div class="flex flex-row items-center menu-item login-out">
-      <BaseButton v-if="auth.isAuthenticated.value === true" :icon="Unicons.SignOut.name" class="mt-1 menu-btn" bg-color="neutral-30" @click="logout()"/>
-      <span v-if="auth.isAuthenticated.value === true" class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold" @click="auth.redirectToLogin()">
+      <BaseButton
+        v-if="auth.isAuthenticated.value === true"
+        :icon="Unicons.SignOut.name"
+        class="mt-1 menu-btn"
+        bg-color="neutral-30"
+        @click="logout()"
+      />
+      <span
+        v-if="auth.isAuthenticated.value === true"
+        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+        @click="auth.redirectToLogin()"
+      >
         {{ $t("navigation.log-out") }}
       </span>
     </div>
@@ -116,19 +214,16 @@ const forceDisableEditMediafiles = () => {
   disableEditMode();
 };
 
-
 const logout = async () => {
   await auth.logout();
   router.push({ name: "Home" });
 };
 
 const toggleDropDown = () => {
-    showDropdown.value = !showDropdown.value;
-    console.log(showDropdown.value)
-}
-
+  showDropdown.value = !showDropdown.value;
+  console.log(showDropdown.value);
+};
 </script>
-
 
 <style scoped>
 .navbar {
@@ -168,17 +263,14 @@ const toggleDropDown = () => {
 }
 
 .dropdownMenu-item {
-  margin-left: 4.5rem;
-  margin-top: 0.3rem;
+  cursor: pointer;
+  margin-left: 3.6rem;
+  margin-top: 0.5rem;
+  animation: dropdown 1s 1;
 }
 
-.dropdownMenu-item:hover{
-  color:'var(--color-blue-100)'
-}
-
-.dropdownMenu {
-  animation: dropdown 1.5s 1;
-
+.dropdownMenu-item:hover {
+  color: "var(--color-blue-100)";
 }
 
 @keyframes showText {
@@ -189,14 +281,12 @@ const toggleDropDown = () => {
 }
 
 @keyframes dropdown {
-  0%   
-  {
-    margin-top: -2rem;
-    transition: opacity 0.1 0.5s ease-in-out; 
-   }
+  0% {
+    margin-top: -1.5rem;
+    transition: opacity 0 0.2s ease-in;
+  }
   100% {
-    margin-top: 0.3rem;
-    transition: opacity 1 0.5s ease-in-out;
+    margin-top: 0.5rem;
   }
 }
 
@@ -206,7 +296,4 @@ const toggleDropDown = () => {
     height: auto;
   }
 }
-
-
-
 </style>
