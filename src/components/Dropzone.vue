@@ -219,22 +219,27 @@ export default defineComponent({
 
         const uploadFiles = () => {
           selectedFiles.value.forEach(async (file: any) => {
-            await mutate({
-              mediaFileInput: { filename: file.name, mimetype: file.type },
-              file,
+            const title = file.name;
+            const form = new FormData();
+            form.append("title", title);
+            form.append("file", file);
+            const uploadUrl = `/api/upload?filename=${title}`;
+            const upload = await fetch(uploadUrl, {
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              method: "POST",
+              body: form,
+            }).then(() => {
+              createNotification({
+                displayTime: 10,
+                type: NotificationType.default,
+                title: t("dropzone.successNotification.title"),
+                description: t("dropzone.successNotification.description"),
+                shown: true,
+              });
+              closeUploadModal();
             });
           });
           isUploading.value = false;
-          if (!errorMessages.value.length) {
-            createNotification({
-              displayTime: 10,
-              type: NotificationType.default,
-              title: t("dropzone.successNotification.title"),
-              description: t("dropzone.successNotification.description"),
-              shown: true,
-            });
-            closeUploadModal();
-          }
         };
 
         triggerUpload.value = () => {
