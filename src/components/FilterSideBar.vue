@@ -41,7 +41,7 @@
         <BaseButton
           bg-color="blue-400"
           bg-hover-color="blue-300"
-          txt-color="neutral-0"
+          txt-color="text-[var(--color-text-body)]"
           :label="$t('filter.apply')"
           @click="applyFilters"
         />
