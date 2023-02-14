@@ -12,7 +12,12 @@
     </router-link>
 
     <!-- Entities -->
-    <div class="flex flex-row items-center" @click="toggleDropDown">
+
+    <div
+      class="flex flex-row items-center"
+      :class="{ OnButtonClicked: showDropdown === true }"
+      @click="toggleDropDown"
+    >
       <BaseButton
         :icon="Unicons.BookOpen.name"
         bg-color="neutral-30"
@@ -25,6 +30,21 @@
       >
         {{ $t("navigation.entities") }}
       </span>
+      <div class="float-right ml-20">
+        <div v-if="showDropdown === true">
+          <BaseButton
+            :icon="Unicons.AngleDown.name"
+            class="OnButtonClicked"
+          ></BaseButton>
+        </div>
+        <div v-else-if="showDropdown === false">
+          <BaseButton
+            :icon="Unicons.AngleDown.name"
+            bg-color="neutral-20"
+            class="rotate-180"
+          ></BaseButton>
+        </div>
+      </div>
     </div>
 
     <div class="pl-13">
@@ -34,6 +54,7 @@
       >
         <span
           class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+          @click="Asset"
           >{{ $t("navigation.asset") }}</span
         >
       </div>
@@ -44,7 +65,7 @@
       >
         <span
           class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-          @click="forceDisableEditMediafiles"
+          @click="Boeken"
           >{{ $t("navigation.boeken") }}</span
         >
       </div>
@@ -54,7 +75,7 @@
       >
         <span
           class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-          @click="openCreateModal"
+          @click="Tijdschriften"
           >{{ $t("navigation.tijdschriften") }}</span
         >
       </div>
@@ -219,6 +240,17 @@ const logout = async () => {
   router.push({ name: "Home" });
 };
 
+const Asset = () => {
+  router.push({ name: "assets" });
+};
+
+const Boeken = () => {
+  router.push({ name: "Boeken" });
+};
+
+const Tijdschriften = () => {
+  router.push({ name: "Tijdschriften" });
+};
 const toggleDropDown = () => {
   showDropdown.value = !showDropdown.value;
   console.log(showDropdown.value);
@@ -270,9 +302,14 @@ const toggleDropDown = () => {
 }
 
 .dropdownMenu-item:hover {
-  color: "var(--color-blue-100)";
+  color: "var(--color-neutral-white)";
 }
 
+.OnButtonClicked {
+  animation: dropdownActive 1s 1;
+  border-radius: 5px;
+  background: var(--color-neutral-40);
+}
 @keyframes showText {
   100% {
     width: auto;
@@ -289,7 +326,14 @@ const toggleDropDown = () => {
     margin-top: 0.5rem;
   }
 }
-
+@keyframes dropdownActive {
+  0% {
+    opacity: 0.1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 @-webkit-keyframes showText {
   100% {
     width: auto;
