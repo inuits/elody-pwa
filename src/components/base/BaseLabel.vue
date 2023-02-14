@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      `text-neutral-0 text-sm rounded block h-2 px-6 py-1 bg-${color} h-full text-center align-middle`,
+      `text-[var(--color-text-body)] text-sm rounded block h-2 px-6 py-1 bg-${color} h-full text-center align-middle`,
     ]"
   >
     {{ name }}
