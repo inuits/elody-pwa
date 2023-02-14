@@ -144,7 +144,6 @@ import {
 import { useI18n } from "vue-i18n";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { Unicons } from "@/types";
-import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import InputField from "../components/base/InputField.vue";
 
 export default defineComponent({
