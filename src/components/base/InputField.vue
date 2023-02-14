@@ -72,7 +72,15 @@ export default defineComponent({
 </script>
 
 <style scoped>
-::-webkit-file-upload-button {
+input[type="file"]::file-selector-button {
+  display: none;
+}
+
+input[type="file"]::-ms-browse {
+  display: none;
+}
+
+input[type="file"]::-webkit-file-upload-button {
   display: none;
 }
 </style>
