@@ -81,7 +81,15 @@ export default defineComponent({
 @import "@/assets/base.css";
 
 .logo {
-  writing-mode: horizontal-lr;
+  writing-mode: vertical-lr;
+  -webkit-transition: writing-mode 300ms ease-in-out;
+  -moz-transition: writing-mode 300ms ease-in-out;
+  -o-transition: writing-mode 300ms ease-in-out;
+  transition: writing-mode 300ms ease-in-out;
+}
+
+.navbar:hover .logo {
+  writing-mode: horizontal-tb;
 }
 
 .move-by-nav {

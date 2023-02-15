@@ -12,42 +12,42 @@
     </router-link>
 
     <!-- Entities -->
-
-    <div
-      class="flex flex-row items-center"
-      :class="{ OnButtonClicked: showDropdown === true }"
-      @click="toggleDropDown"
-    >
-      <BaseButton
-        :icon="Unicons.BookOpen.name"
-        bg-color="neutral-30"
-        class="menu-btn"
-        @click="forceDisableEditModalHome"
-      />
-      <span
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-        @click="forceDisableEditModalHome"
+    <router-link :to="{ name: 'Home' }" @click="forceDisableEditModalHome">
+      <div
+        class="flex flex-row items-center"
+        :class="{ IsActive: showDropdown }"
+        @click="toggleDropDown"
       >
-        {{ $t("navigation.entities") }}
-      </span>
-      <div class="float-right ml-20">
-        <div v-if="showDropdown === true">
-          <BaseButton
-            :icon="Unicons.AngleDown.name"
-            class="OnButtonClicked"
-          ></BaseButton>
-        </div>
-        <div v-else-if="showDropdown === false">
-          <BaseButton
-            :icon="Unicons.AngleDown.name"
-            bg-color="neutral-20"
-            class="rotate-180"
-          ></BaseButton>
+        <BaseButton
+          :icon="Unicons.BookOpen.name"
+          bg-color="neutral-30"
+          class="menu-btn"
+          @click="forceDisableEditModalHome"
+        />
+        <!---:style="{color:showDropdown ? '#02C6F2' : 'var(--color-blue-500)'}"----->
+        <span
+          class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+          @click="forceDisableEditModalHome"
+        >
+          {{ $t("navigation.entities") }}
+        </span>
+        <div class="float-right ml-20">
+          <div v-if="showDropdown === true">
+            <BaseButton
+              :icon="Unicons.AngleDown.name"
+              class="rotate-180"
+              bg-color="var(--color-neutral-40)"
+            >
+            </BaseButton>
+          </div>
+          <div v-else-if="showDropdown === false">
+            <BaseButton :icon="Unicons.AngleDown.name"></BaseButton>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div class="pl-13">
+    </router-link>
+    <!--Sub Menu-->
+    <div class="pl-13 bg-[var(--color-blue-500)]">
       <div
         class="flex flex-column items-center dropdownMenu-item"
         v-if="showDropdown == true"
@@ -55,6 +55,9 @@
         <span
           class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
           @click="Asset"
+          :style="{
+            color: clickedonAsset ? '#02C6F2' : 'var(--color-neutral-900)',
+          }"
           >{{ $t("navigation.asset") }}</span
         >
       </div>
@@ -66,6 +69,9 @@
         <span
           class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
           @click="Boeken"
+          :style="{
+            color: clickedonBoeken ? '#02C6F2' : 'var(--color-neutral-900)',
+          }"
           >{{ $t("navigation.boeken") }}</span
         >
       </div>
@@ -76,31 +82,43 @@
         <span
           class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
           @click="Tijdschriften"
+          :style="{
+            color: clickedonTijdschriften
+              ? '#02C6F2'
+              : 'var(--color-neutral-900)',
+          }"
           >{{ $t("navigation.tijdschriften") }}</span
         >
       </div>
     </div>
+
     <!-- Mediafile -->
-    <div
-      v-show="auth.isAuthenticated.value === true"
-      class="flex flex-row items-center menu-item"
+    <router-link
+      :to="{ name: 'Mediafiles' }"
       @click="forceDisableEditMediafiles"
+      activeClass="IsActive"
     >
-      <BaseButton
-        :icon="Unicons.Image.name"
-        bg-color="neutral-30"
-        class="menu-btn"
-        @click="forceDisableEditMediafiles"
-      />
-      <span
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+      <div
+        v-show="auth.isAuthenticated.value === true"
+        class="flex flex-row items-center menu-item"
         @click="forceDisableEditMediafiles"
       >
-        {{ $t("navigation.mediafile") }}
-      </span>
-    </div>
-
+        <BaseButton
+          :icon="Unicons.Image.name"
+          bg-color="neutral-30"
+          class="menu-btn"
+          @click="forceDisableEditMediafiles"
+        />
+        <span
+          class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+          @click="forceDisableEditMediafiles"
+        >
+          {{ $t("navigation.mediafile") }}
+        </span>
+      </div>
+    </router-link>
     <!-- Upload -->
+
     <div
       v-show="
         auth.isAuthenticated.value === true &&
@@ -145,23 +163,29 @@
     </div>
 
     <!-- Jobs -->
-    <div
-      v-show="auth.isAuthenticated.value === true"
-      class="flex flex-row items-center menu-item"
+    <router-link
+      :to="{ name: 'History' }"
+      @click="forceDisableEditModalHistory"
+      activeClass="IsActive"
     >
-      <BaseButton
-        :icon="Unicons.History.name"
-        bg-color="neutral-30"
-        class="mt-1 menu-btn"
-        @click="forceDisableEditModalHistory"
-      />
-      <span
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-        @click="forceDisableEditModalHistory"
+      <div
+        v-show="auth.isAuthenticated.value === true"
+        class="flex flex-row items-center menu-item"
       >
-        {{ $t("navigation.jobs") }}
-      </span>
-    </div>
+        <BaseButton
+          :icon="Unicons.History.name"
+          bg-color="neutral-30"
+          class="mt-1 menu-btn"
+          @click="forceDisableEditModalHistory"
+        />
+        <span
+          class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+          @click="forceDisableEditModalHistory"
+        >
+          {{ $t("navigation.jobs") }}
+        </span>
+      </div>
+    </router-link>
 
     <EditToggle v-if="auth.isAuthenticated.value === true" />
 
@@ -193,7 +217,7 @@
       <span
         v-if="auth.isAuthenticated.value === true"
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-        @click="auth.redirectToLogin()"
+        @click="auth.logout()"
       >
         {{ $t("navigation.log-out") }}
       </span>
@@ -220,6 +244,10 @@ const { openCreateModal } = useCreateModal();
 const router = useRouter();
 const { disableEditMode } = useEditMode();
 const showDropdown = ref(false);
+const clickedonAsset = ref(false);
+const clickedonBoeken = ref(false);
+const clickedonTijdschriften = ref(false);
+
 const forceDisableEditModalHome = () => {
   router.push({ name: "Home" });
   disableEditMode();
@@ -227,33 +255,68 @@ const forceDisableEditModalHome = () => {
 
 const forceDisableEditModalHistory = () => {
   router.push({ name: "History" });
+  showDropdown.value = false;
   disableEditMode();
 };
 
 const forceDisableEditMediafiles = () => {
   router.push({ name: "Mediafiles" });
+  showDropdown.value = false;
   disableEditMode();
 };
 
 const logout = async () => {
   await auth.logout();
+  showDropdown.value = false;
   router.push({ name: "Home" });
 };
 
 const Asset = () => {
-  router.push({ name: "assets" });
+  clickedonAsset.value = !clickedonAsset.value;
+  if (clickedonAsset.value === true) {
+    if (clickedonBoeken.value === true) {
+      clickedonBoeken.value = false;
+    }
+    if (clickedonTijdschriften.value === true) {
+      clickedonTijdschriften.value = false;
+    }
+  }
+  console.log("Asset :" + clickedonAsset.value);
 };
 
 const Boeken = () => {
-  router.push({ name: "Boeken" });
+  clickedonBoeken.value = !clickedonBoeken.value;
+  console.log("Boeken :" + clickedonBoeken.value);
+  if (clickedonBoeken.value === true) {
+    if (clickedonAsset.value === true) {
+      clickedonAsset.value = false;
+    }
+    if (clickedonTijdschriften.value === true) {
+      clickedonTijdschriften.value = false;
+    }
+  }
 };
 
 const Tijdschriften = () => {
-  router.push({ name: "Tijdschriften" });
+  clickedonTijdschriften.value = !clickedonTijdschriften.value;
+  console.log("Tijdschriften :" + clickedonTijdschriften.value);
+  if (clickedonTijdschriften.value === true) {
+    if (clickedonBoeken.value === true) {
+      clickedonBoeken.value = false;
+    }
+    if (clickedonAsset.value === true) {
+      clickedonAsset.value = false;
+    }
+  }
 };
 const toggleDropDown = () => {
   showDropdown.value = !showDropdown.value;
   console.log(showDropdown.value);
+  if (showDropdown.value === false) {
+    clickedonAsset.value = false;
+    clickedonBoeken.value = false;
+    clickedonTijdschriften.value = false;
+  }
 };
 </script>
 
@@ -267,6 +330,10 @@ const toggleDropDown = () => {
 
 .menu-item {
   margin-top: 1rem;
+}
+
+.Test {
+  background-color: black;
 }
 
 .menu-item:hover .menu-btn {
@@ -309,6 +376,10 @@ const toggleDropDown = () => {
   animation: dropdownActive 1s 1;
   border-radius: 5px;
   background: var(--color-neutral-40);
+}
+.IsActive {
+  fill: #02c6f2;
+  color: #02c6f2;
 }
 @keyframes showText {
   100% {
