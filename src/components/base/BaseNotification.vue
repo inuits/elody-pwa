@@ -29,7 +29,7 @@ export enum NotificationType {
   error = "error",
 }
 
-type Notification = {
+export type Notification = {
   displayTime: number;
   type: NotificationType;
   title: string;
