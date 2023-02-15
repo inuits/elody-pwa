@@ -82,14 +82,12 @@ export default defineComponent({
 
 .logo {
   writing-mode: vertical-lr;
-  -webkit-transition: writing-mode 300ms ease-in-out;
-  -moz-transition: writing-mode 300ms ease-in-out;
-  -o-transition: writing-mode 300ms ease-in-out;
-  transition: writing-mode 300ms ease-in-out;
+  transition: writing-mode 300ms ease-in-out, transform 300ms ease-in-out;
 }
 
 .navbar:hover .logo {
   writing-mode: horizontal-tb;
+  transform: translate(2%, 25%);
 }
 
 .move-by-nav {
@@ -107,5 +105,14 @@ export default defineComponent({
   -o-transition: padding-left 300ms ease-in-out;
   transition: padding-left 300ms ease-in-out;
   padding-left: 20rem;
+}
+
+@keyframes logo-animation {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(90deg);
+  }
 }
 </style>

@@ -5,7 +5,7 @@
   >
     <router-link
       :to="{ name: 'Home' }"
-      class="logo router-link text-base text-neutral-700 font-semibold flex justify-center items-center mb-8"
+      class="logo router-link text-base text-neutral-700 font-semibold flex justify-center items-center mb-8 text-xl"
       @click="forceDisableEditModalHome"
     >
       {{ $t("navigation.title") }}
