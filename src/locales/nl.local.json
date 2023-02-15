@@ -32,6 +32,10 @@
     "successNotification": {
       "title": "Upload finished",
       "description": "All files were succesfully uploaded"
+    },
+    "errorNotification": {
+      "title": "Upload failed",
+      "description": "An error occured while uploading, please try again"
     }
   },
   "buttons": {

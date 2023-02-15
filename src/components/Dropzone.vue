@@ -87,7 +87,7 @@
   <div class="hidden">
     <div
       ref="dropzonePreviewDiv"
-      class="flex dz-file-preview border border-[var(--color-neutral-light)] rounded-md w-full mi-h-28 flex flex-row items-right mb-2 hover:bg-blue-default10 p-3 rounded relative"
+      class="flex dz-file-preview border border-[var(--color-neutral-light)] rounded-md w-full mi-h-28 flex-row items-right mb-2 hover:bg-blue-default10 p-3 relative"
     >
       <div
         class="flex justify-center items-center bg-[var(--color-neutral-light)] rounded-lg w-10 h-8 mt-1 mr-2"
@@ -128,19 +128,17 @@
 </template>
 
 <script lang="ts">
-import { PostMediaFileDocument } from "../generated-types/queries";
-import type { PostMediaFileMutation } from "../generated-types/queries";
 import useDropzoneHelper from "../composables/useDropzoneHelper";
 import { onMounted, ref, defineComponent } from "vue";
-import { useMutation } from "@vue/apollo-composable";
 import Dropzone from "dropzone";
 import { useUploadModal } from "./UploadModal.vue";
 import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "../composables/useMetaDataHelper";
 import {
-  NotificationType,
   useNotification,
+  NotificationType,
 } from "../components/base/BaseNotification.vue";
+import type { Notification } from "../components/base/BaseNotification.vue";
 import { useI18n } from "vue-i18n";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { Unicons } from "@/types";
@@ -168,9 +166,6 @@ export default defineComponent({
       getDropzoneSettings,
       setSelectedMediafiles,
     } = useDropzoneHelper();
-    const { onDone, mutate } = useMutation<PostMediaFileMutation>(
-      PostMediaFileDocument
-    );
     const dropzonePreviewDiv = ref<HTMLDivElement | undefined>(undefined);
     const dropzoneDiv = ref<HTMLDivElement | undefined>(undefined);
     const triggerUpload = ref<() => void | undefined>();
@@ -208,14 +203,6 @@ export default defineComponent({
           updateFileCount();
         });
 
-        onDone((value) => {
-          if (value.data && value.data.postMediaFile) {
-            mediafiles.value.push(value.data.postMediaFile);
-            addMediaFileToLinkList(value.data.postMediaFile);
-          }
-          increaseSuccessCounter();
-        });
-
         const uploadFiles = () => {
           selectedFiles.value.forEach(async (file: any) => {
             const title = file.name;
@@ -223,20 +210,42 @@ export default defineComponent({
             form.append("title", title);
             form.append("file", file);
             const uploadUrl = `/api/upload?filename=${title}`;
-            const upload = await fetch(uploadUrl, {
+            let baseNotification = {
+              displayTime: 10,
+              shown: true,
+            };
+            await fetch(uploadUrl, {
               headers: { "Content-Type": "application/x-www-form-urlencoded" },
               method: "POST",
               body: form,
-            }).then(() => {
-              createNotification({
-                displayTime: 10,
-                type: NotificationType.default,
-                title: t("dropzone.successNotification.title"),
-                description: t("dropzone.successNotification.description"),
-                shown: true,
-              });
-              closeUploadModal();
-            });
+            })
+              .then((res: Response) => {
+                if (res.ok) {
+                  // mediafiles.value.push(value.data.postMediaFile);
+                  // addMediaFileToLinkList(value.data.postMediaFile);
+                  increaseSuccessCounter();
+                  const succesNotificationOverwrites = {
+                    type: NotificationType.default,
+                    title: t("dropzone.successNotification.title"),
+                    description: t("dropzone.successNotification.description"),
+                  };
+                  Object.assign(baseNotification, succesNotificationOverwrites);
+                  createNotification(baseNotification as Notification);
+                  closeUploadModal();
+                } else {
+                  throw res;
+                }
+              })
+              .catch((e) => {
+                const succesNotificationOverwrites = {
+                  type: NotificationType.error,
+                  title: t("dropzone.errorNotification.title"),
+                  description: t("dropzone.errorNotification.description"),
+                };
+                Object.assign(baseNotification, succesNotificationOverwrites);
+                createNotification(baseNotification as Notification);
+              })
+              .finally(() => {});
           });
           isUploading.value = false;
         };
