@@ -24,7 +24,6 @@
           class="menu-btn"
           @click="forceDisableEditModalHome"
         />
-        <!---:style="{color:showDropdown ? '#02C6F2' : 'var(--color-blue-500)'}"----->
         <span
           class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
           @click="forceDisableEditModalHome"
@@ -117,6 +116,7 @@
         </span>
       </div>
     </router-link>
+
     <!-- Upload -->
 
     <div
@@ -125,6 +125,7 @@
         determinePermission('can-start-import')
       "
       class="flex flex-row items-center menu-item"
+      :class="{ IsActive: uploadModalState.state === 'show' }"
     >
       <BaseButton
         :icon="Unicons.Upload.name"
@@ -147,6 +148,7 @@
         determinePermission('create-entity')
       "
       class="flex flex-row items-center menu-item"
+      :class="{ IsActive: createModalState.state === 'show' }"
     >
       <BaseButton
         :icon="Unicons.Create.name"
@@ -239,14 +241,17 @@ import EditToggle from "./EditButtons.vue";
 
 const auth = useAuth();
 const { determinePermission, loading } = usePermissions();
-const { openUploadModal } = useUploadModal();
-const { openCreateModal } = useCreateModal();
+const { openUploadModal, uploadModalState } = useUploadModal();
+const { openCreateModal, createModalState } = useCreateModal();
 const router = useRouter();
 const { disableEditMode } = useEditMode();
 const showDropdown = ref(false);
 const clickedonAsset = ref(false);
 const clickedonBoeken = ref(false);
 const clickedonTijdschriften = ref(false);
+const shownModal = ref(false);
+
+const ShowModal = () => {};
 
 const forceDisableEditModalHome = () => {
   router.push({ name: "Home" });
@@ -332,10 +337,6 @@ const toggleDropDown = () => {
   margin-top: 1rem;
 }
 
-.Test {
-  background-color: black;
-}
-
 .menu-item:hover .menu-btn {
   --tw-bg-opacity: 1;
   background-color: rgb(165 173 186 / var(--tw-bg-opacity));
@@ -372,11 +373,6 @@ const toggleDropDown = () => {
   color: "var(--color-neutral-white)";
 }
 
-.OnButtonClicked {
-  animation: dropdownActive 1s 1;
-  border-radius: 5px;
-  background: var(--color-neutral-40);
-}
 .IsActive {
   fill: #02c6f2;
   color: #02c6f2;
@@ -395,14 +391,6 @@ const toggleDropDown = () => {
   }
   100% {
     margin-top: 0.5rem;
-  }
-}
-@keyframes dropdownActive {
-  0% {
-    opacity: 0.1;
-  }
-  100% {
-    opacity: 1;
   }
 }
 @-webkit-keyframes showText {
