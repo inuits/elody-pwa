@@ -36,7 +36,7 @@ export default defineComponent({
       required: true,
     },
     label: {
-      type: Object as PropType<Maybe<string>>,
+      type: String as PropType<Maybe<string>>,
       required: false,
       default: undefined,
     },
