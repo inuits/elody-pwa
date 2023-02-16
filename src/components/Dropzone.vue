@@ -38,7 +38,7 @@
       </div>
     </div>
     <div class="p-3 bg-[var(--color-neutral-white)] rounded">
-      <div class="flex">
+      <div v-if="!modifyMetadata" class="flex mb-3">
         <div
           @click="() => (createAsset = !createAsset)"
           class="w-1/3 mr-2 flex rounded cursor-pointer"
@@ -60,26 +60,32 @@
                 : `var(--color-text-light)`
             "
           />
-          <span class="inline text-sm ml-1 pt-0.5">creëer asset</span>
+          <span class="inline text-sm ml-1 pt-0.5">{{
+            $t("dropzone.createAsset")
+          }}</span>
         </div>
         <div class="w-2/3">
-          <InputField
-            class="h-7"
-            v-model="uploadedCsv"
-            type="file"
-            accept=".csv"
-            :icon="Unicons.Link.name"
+          <BaseDropdownNew
+            v-model="selectedImportMethod"
+            :options="importMethods"
           />
         </div>
       </div>
-      <div class="mt-3">
+      <div>
         <BaseButtonNew
-          v-if="triggerUpload"
+          v-if="triggerUpload && !modifyMetadata"
           class="w-full"
           :label="$t('dropzone.upload')"
           :disable="fileCount === 0"
           :icon="Unicons.PlusCircle.name"
           @click="triggerUpload"
+        />
+        <BaseButtonNew
+          v-if="modifyMetadata"
+          class="w-full"
+          :disable="false"
+          :label="$t('dropzone.modifyMetadata')"
+          :icon="Unicons.EditAlt.name"
         />
       </div>
     </div>
@@ -142,13 +148,13 @@ import type { Notification } from "../components/base/BaseNotification.vue";
 import { useI18n } from "vue-i18n";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { Unicons } from "@/types";
-import InputField from "../components/base/InputField.vue";
+import BaseDropdownNew from "./base/BaseDropdownNew.vue";
 
 export default defineComponent({
   name: "DropZone",
   components: {
     BaseButtonNew,
-    InputField,
+    BaseDropdownNew,
   },
   setup() {
     const {
@@ -176,7 +182,9 @@ export default defineComponent({
     const { createNotification } = useNotification();
     const { t } = useI18n();
     const createAsset = ref<boolean>(false);
-    const uploadedCsv = ref<any>();
+    const selectedImportMethod = ref<any>();
+    const importMethods = ref<String[]>([]);
+    const modifyMetadata = ref<Boolean>(false);
 
     clearDropzoneErrorMessages();
 
@@ -193,14 +201,33 @@ export default defineComponent({
           }
         };
 
-        myDropzone.value.on("removedfile", () => {
+        const updateUIBasedOnExistenceOfCsv = ({
+          addedFile = undefined,
+          removedFile = undefined,
+        }) => {
+          let files = myDropzone.value.files;
+          modifyMetadata.value =
+            files.length === 1 && files[0].type === "text/csv";
+
+          if (addedFile?.type === "text/csv") {
+            selectedImportMethod.value = addedFile.name;
+            importMethods.value.push(addedFile.name);
+          } else if (removedFile?.type === "text/csv") {
+            selectedImportMethod.value = "";
+            importMethods.value.pop();
+          }
+        };
+
+        myDropzone.value.on("removedfile", (removedFile: File) => {
           updateFileCount();
+          updateUIBasedOnExistenceOfCsv({ removedFile });
         });
 
-        myDropzone.value.on("addedfile", () => {
+        myDropzone.value.on("addedfile", (addedFile: File) => {
           clearDropzoneCounters();
           clearDropzoneErrorMessages();
           updateFileCount();
+          updateUIBasedOnExistenceOfCsv({ addedFile });
         });
 
         const uploadFiles = () => {
@@ -236,7 +263,7 @@ export default defineComponent({
                   throw res;
                 }
               })
-              .catch((e) => {
+              .catch(() => {
                 const succesNotificationOverwrites = {
                   type: NotificationType.error,
                   title: t("dropzone.errorNotification.title"),
@@ -271,7 +298,9 @@ export default defineComponent({
       finishedUploading,
       getDropzoneSettings,
       createAsset,
-      uploadedCsv,
+      selectedImportMethod,
+      importMethods,
+      modifyMetadata,
     };
   },
 });
