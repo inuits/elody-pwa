@@ -30,7 +30,7 @@ const isDisplayingContextMenu = ref<Boolean>(false);
 
 const props = withDefaults(
   defineProps<{
-    icon: string;
+    icon?: string;
     extraClass: string;
     id: string;
   }>(),
