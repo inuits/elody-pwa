@@ -12,39 +12,43 @@
     </router-link>
 
     <!-- Entities -->
-    <router-link :to="{ name: 'Home' }" @click="forceDisableEditModalHome">
-      <div
-        class="flex flex-row items-center"
-        :class="{ IsActive: showDropdown }"
-        @click="toggleDropDown"
+    <router-link
+      :to="{ name: 'Home' }"
+      class="flex flex-row items-center menu-item"
+      :class="{ IsActive: showDropdown }"
+      @click="toggleDropDown"
+    >
+      <BaseButton
+        :icon="Unicons.BookOpen.name"
+        :icon-height="20"
+        class="menu-btn"
+        @click="forceDisableEditModalHome"
+        bg-color="var(--color-neutral)"
+      />
+      <span
+        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+        @click="forceDisableEditModalHome"
       >
-        <BaseButton
-          :icon="Unicons.BookOpen.name"
-          bg-color="neutral-30"
-          class="menu-btn"
-          @click="forceDisableEditModalHome"
-        />
-        <span
-          class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-          @click="forceDisableEditModalHome"
-        >
-          {{ $t("navigation.entities") }}
-        </span>
-        <div class="float-right ml-20">
-          <div v-if="showDropdown === true">
-            <BaseButton
-              :icon="Unicons.AngleDown.name"
-              class="rotate-180"
-              bg-color="var(--color-neutral-40)"
-            >
-            </BaseButton>
-          </div>
-          <div v-else-if="showDropdown === false">
-            <BaseButton :icon="Unicons.AngleDown.name"></BaseButton>
-          </div>
+        {{ $t("navigation.entities") }}
+      </span>
+      <div class="float-right ml-20">
+        <div v-if="showDropdown === true">
+          <BaseButton
+            :icon="Unicons.AngleDown.name"
+            class="rotate-180"
+            bg-color="var(--color-neutral-40)"
+          >
+          </BaseButton>
+        </div>
+        <div v-else-if="showDropdown === false">
+          <BaseButton
+            :icon="Unicons.AngleDown.name"
+            :icon-height="20"
+          ></BaseButton>
         </div>
       </div>
     </router-link>
+
     <!--Sub Menu-->
     <div class="pl-13 bg-[var(--color-blue-500)]">
       <div
@@ -94,27 +98,24 @@
     <!-- Mediafile -->
     <router-link
       :to="{ name: 'Mediafiles' }"
-      @click="forceDisableEditMediafiles"
       activeClass="IsActive"
+      v-show="auth.isAuthenticated.value === true"
+      class="flex flex-row items-center menu-item"
+      @click="forceDisableEditMediafiles"
     >
-      <div
-        v-show="auth.isAuthenticated.value === true"
-        class="flex flex-row items-center menu-item"
+      <BaseButton
+        :icon="Unicons.Image.name"
+        class="menu-btn"
+        @click="forceDisableEditMediafiles"
+        :icon-height="20"
+        bg-color="var(--color-neutral)"
+      />
+      <span
+        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
         @click="forceDisableEditMediafiles"
       >
-        <BaseButton
-          :icon="Unicons.Image.name"
-          bg-color="neutral-30"
-          class="menu-btn"
-          @click="forceDisableEditMediafiles"
-        />
-        <span
-          class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-          @click="forceDisableEditMediafiles"
-        >
-          {{ $t("navigation.mediafile") }}
-        </span>
-      </div>
+        {{ $t("navigation.mediafile") }}
+      </span>
     </router-link>
 
     <!-- Upload -->
@@ -130,8 +131,9 @@
       <BaseButton
         :icon="Unicons.Upload.name"
         class="mt-1 menu-btn"
-        bg-color="neutral-30"
         @click="openUploadModal(modalChoices.IMPORT)"
+        :icon-height="20"
+        bg-color="var(--color-neutral)"
       />
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
@@ -153,8 +155,9 @@
       <BaseButton
         :icon="Unicons.Create.name"
         class="mt-1 menu-btn"
-        bg-color="neutral-30"
         @click="openCreateModal"
+        :icon-height="20"
+        bg-color="var(--color-neutral)"
       />
       <span
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
@@ -169,35 +172,32 @@
       :to="{ name: 'History' }"
       @click="forceDisableEditModalHistory"
       activeClass="IsActive"
+      v-show="auth.isAuthenticated.value === true"
+      class="flex flex-row items-center menu-item"
     >
-      <div
-        v-show="auth.isAuthenticated.value === true"
-        class="flex flex-row items-center menu-item"
+      <BaseButton
+        :icon="Unicons.History.name"
+        class="mt-1 menu-btn"
+        @click="forceDisableEditModalHistory"
+        :icon-height="20"
+        bg-color="var(--color-neutral)"
+      />
+      <span
+        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+        @click="forceDisableEditModalHistory"
       >
-        <BaseButton
-          :icon="Unicons.History.name"
-          bg-color="neutral-30"
-          class="mt-1 menu-btn"
-          @click="forceDisableEditModalHistory"
-        />
-        <span
-          class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-          @click="forceDisableEditModalHistory"
-        >
-          {{ $t("navigation.jobs") }}
-        </span>
-      </div>
+        {{ $t("navigation.jobs") }}
+      </span>
     </router-link>
-
-    <EditToggle v-if="auth.isAuthenticated.value === true" />
 
     <div class="flex flex-row items-center menu-item login-out">
       <BaseButton
         v-if="auth.isAuthenticated.value === false"
         :icon="Unicons.User.name"
         class="mt-1 menu-btn"
-        bg-color="neutral-30"
         @click="auth.redirectToLogin()"
+        :icon-height="20"
+        bg-color="var(--color-neutral)"
       />
       <span
         v-if="auth.isAuthenticated.value === false"
@@ -212,8 +212,9 @@
       <BaseButton
         v-if="auth.isAuthenticated.value === true"
         :icon="Unicons.SignOut.name"
+        :icon-height="20"
         class="mt-1 menu-btn"
-        bg-color="neutral-30"
+        bg-color="var(--color-neutral)"
         @click="logout()"
       />
       <span
@@ -249,9 +250,6 @@ const showDropdown = ref(false);
 const clickedonAsset = ref(false);
 const clickedonBoeken = ref(false);
 const clickedonTijdschriften = ref(false);
-const shownModal = ref(false);
-
-const ShowModal = () => {};
 
 const forceDisableEditModalHome = () => {
   router.push({ name: "Home" });
@@ -339,7 +337,7 @@ const toggleDropDown = () => {
 
 .menu-item:hover .menu-btn {
   --tw-bg-opacity: 1;
-  background-color: rgb(165 173 186 / var(--tw-bg-opacity));
+  fill: #02c6f2;
 }
 
 .navbar:hover {
@@ -365,17 +363,14 @@ const toggleDropDown = () => {
 .dropdownMenu-item {
   cursor: pointer;
   margin-left: 3.6rem;
-  margin-top: 0.5rem;
   animation: dropdown 1s 1;
-}
-
-.dropdownMenu-item:hover {
-  color: "var(--color-neutral-white)";
 }
 
 .IsActive {
   fill: #02c6f2;
   color: #02c6f2;
+  background-color: var(--color-neutral-40);
+  border-radius: 15px;
 }
 @keyframes showText {
   100% {

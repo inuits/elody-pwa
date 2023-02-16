@@ -12,7 +12,7 @@
     <unicon
       v-if="icon"
       :name="icon"
-      height="16"
+      :height="iconHeight"
       :fill="loading ? 'var(--color-neutral-20)' : `var(--color-blue-100)`"
     />
     <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
@@ -61,14 +61,11 @@ export default defineComponent({
       type: String,
       default: "transparent",
     },
+    iconHeight: {
+      type: Number,
+      default: 16,
+    },
   },
 });
 </script>
-<style scoped>
-.IsActive {
-  fill: #02c6f2;
-}
-button:active {
-  fill: #02c6f2;
-}
-</style>
+<style scoped></style>
