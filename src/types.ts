@@ -1,5 +1,6 @@
 import {
   uniEdit,
+  uniEditAlt,
   uniEye,
   uniFileDownload,
   uniSearchPlus,
@@ -47,6 +48,7 @@ import {
 
 export const Unicons: Record<string, { name: string }> = {
   Edit: uniEdit,
+  EditAlt: uniEditAlt,
   Eye: uniEye,
   Download: uniFileDownload,
   SearchPlus: uniSearchPlus,
