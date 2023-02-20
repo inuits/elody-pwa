@@ -29,15 +29,9 @@
     "success": "File(s) successfully uploaded.",
     "uploading": "Uploading...",
     "upload": "Upload",
-    "createAsset": "Creëer asset",
-    "modifyMetadata": "Metadata aanpassen",
     "successNotification": {
       "title": "Upload finished",
       "description": "All files were succesfully uploaded"
-    },
-    "errorNotification": {
-      "title": "Upload failed",
-      "description": "An error occured while uploading, please try again"
     }
   },
   "buttons": {
@@ -79,12 +73,16 @@
   },
   "navigation": {
     "title": "DAMS",
-    "assets": "Assets",
-    "mediafiles": "Mediafiles",
+    "entities": "Entitities",
+    "asset":"Asset",
+    "boeken":"Boeken",
+    "tijdschriften":"Tijdschrijften",
+    "mediafile": "Mediafile",
     "jobs": "Jobs",
-    "import": "Import",
-    "create": "Create",
-    "log-out": "Log out"
+    "upload": "Upload",
+    "nieuw": "Nieuw",
+    "log-out": "Log out",
+    "log-in": "Log in"
   },
   "upload": {
     "upload-files": "Upload files",
