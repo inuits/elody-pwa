@@ -9,7 +9,12 @@
       label ? `pl-1.5` : ``,
     ]"
   >
-    <unicon v-if="icon" :name="icon" height="16" :class="`text-${iconColor}`" />
+    <unicon
+      v-if="icon"
+      :name="icon"
+      :height="iconHeight"
+      :fill="loading ? 'var(--color-neutral-20)' : `var(--color-blue-100)`"
+    />
     <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
   </button>
 </template>
