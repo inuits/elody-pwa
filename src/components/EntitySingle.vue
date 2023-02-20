@@ -24,7 +24,7 @@
 <script lang="ts" setup>
 import { reactive, ref } from "vue";
 import { asString } from "@/helpers";
-import { useRoute } from "vue-router";
+import { useRoute, onBeforeRouteUpdate } from "vue-router";
 import {
   GetEntityByIdDocument,
   type ColumnList,
@@ -64,6 +64,12 @@ const { onResult, refetch } = useQuery<GetEntityByIdQuery>(
     fetchPolicy: "no-cache",
   }
 );
+
+onBeforeRouteUpdate(async (to: any) => {
+  queryVariables.id = to.params.id;
+  intialValues.value = "no-values";
+  columnList.value = "no-values";
+});
 
 const intialValues = ref<IntialValues | "no-values">("no-values");
 const columnList = ref<ColumnList | "no-values">("no-values");
