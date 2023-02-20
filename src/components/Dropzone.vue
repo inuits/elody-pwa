@@ -201,33 +201,37 @@ export default defineComponent({
           }
         };
 
-        const updateUIBasedOnExistenceOfCsv = ({
-          addedFile = undefined,
-          removedFile = undefined,
-        }) => {
+        const updateUIBasedOnExistenceOfCsv = (
+          file: File,
+          action: "added" | "removed"
+        ) => {
           let files = myDropzone.value.files;
           modifyMetadata.value =
             files.length === 1 && files[0].type === "text/csv";
-
-          if (addedFile?.type === "text/csv") {
-            selectedImportMethod.value = addedFile.name;
-            importMethods.value.push(addedFile.name);
-          } else if (removedFile?.type === "text/csv") {
-            selectedImportMethod.value = "";
-            importMethods.value.pop();
+          if (file?.type === "text/csv") {
+            switch (action) {
+              case "added":
+                selectedImportMethod.value = file.name;
+                importMethods.value.push(file.name);
+                break;
+              case "removed":
+                selectedImportMethod.value = "";
+                importMethods.value.pop();
+                break;
+            }
           }
         };
 
         myDropzone.value.on("removedfile", (removedFile: File) => {
           updateFileCount();
-          updateUIBasedOnExistenceOfCsv({ removedFile });
+          updateUIBasedOnExistenceOfCsv(removedFile, "removed");
         });
 
         myDropzone.value.on("addedfile", (addedFile: File) => {
           clearDropzoneCounters();
           clearDropzoneErrorMessages();
           updateFileCount();
-          updateUIBasedOnExistenceOfCsv({ addedFile });
+          updateUIBasedOnExistenceOfCsv(addedFile, "added");
         });
 
         const uploadFiles = () => {
