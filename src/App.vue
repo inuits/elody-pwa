@@ -84,10 +84,13 @@ export default defineComponent({
   writing-mode: vertical-lr;
   font-size: 20px;
   font-weight: bold;
+  transition: writing-mode 300ms ease-in-out, transform 300ms ease-in-out;
 }
 
 .navbar:hover .logo {
   writing-mode: horizontal-tb;
+  margin-left: 0.7rem;
+  transform: translate(2%, 25%);
 }
 
 .move-by-nav {
@@ -105,5 +108,14 @@ export default defineComponent({
   -o-transition: padding-left 300ms ease-in-out;
   transition: padding-left 300ms ease-in-out;
   padding-left: 20rem;
+}
+
+@keyframes logo-animation {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(90deg);
+  }
 }
 </style>
