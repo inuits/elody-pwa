@@ -30,6 +30,19 @@
   --color-neutral-lightest: theme("colors.neutral.lightest");
   --color-neutral-light: theme("colors.neutral.light");
 
+
+ 
+  --color-blue-50: theme("colors.blue.50");
+  --color-blue-75: theme("colors.blue.75");
+  --color-blue-100: theme("colors.blue.100");
+  --color-blue-200: theme("colors.blue.200");
+  --color-blue-300: theme("colors.blue.300");
+  --color-blue-400: theme("colors.blue.400");
+  --color-blue-500: theme("colors.blue.500");
+  --color-blue-600: theme("colors.blue.600");
+
+
+
   --color-text-light: theme("colors.text.light");
   --color-text-body: theme("colors.text.body");
 
@@ -37,6 +50,8 @@
 
   --color-main-light: theme("colors.main.light");
   --color-main-dark: theme("colors.main.dark");
+
+  
 }
 
 .checkboard {
@@ -60,3 +75,4 @@
       #f4f5f7
     );
 }
+
