@@ -4,13 +4,22 @@
   >
     <div class="flex w-full items-center">
       <h1 class="text-lg font-semibold text-neutral-800 float-left">
-        {{ pageInfo.routerTitle
-        }}<span
-          v-if="pageInfo.entityTitle !== '' && route.meta.showEntityTitle"
-          class="text-neutral-400"
-        >
-          / {{ pageInfo.entityTitle }}</span
-        >
+        <ol class="flex text-gray-700 bg-gray-300 rounded py-2 px-2">
+          <li class="px-2">
+            <a href="/" class="hover:underline">{{ pageInfo.routerTitle }}</a>
+          </li>
+          <li class="text-gray-500 select-none">&rsaquo;</li>
+          <li class="px-2">
+            <a href="#" class="hover:underline"
+              ><span
+                v-if="pageInfo.entityTitle !== '' && route.meta.showEntityTitle"
+                class="text-neutral-400"
+              >
+                {{ pageInfo.entityTitle }}</span
+              ></a
+            >
+          </li>
+        </ol>
       </h1>
       <EditToggle v-if="auth.isAuthenticated.value === true" />
     </div>
@@ -41,9 +50,4 @@ watch(
   },
   { deep: true }
 );
-
-const logout = async () => {
-  await auth.logout();
-  router.push({ name: "Home" });
-};
 </script>
