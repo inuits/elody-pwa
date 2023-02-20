@@ -11,7 +11,15 @@
       </template>
       <template v-slot:content>
         <div v-for="(field, idx) in fields" :key="field.key">
-          {{ field.value.teaserMetadata[0]?.value }}
+          <span
+            @click="
+              router.push({
+                name: 'SingleEntity',
+                params: { id: field.value.id },
+              })
+            "
+            >{{ field.value.teaserMetadata[0]?.value }}</span
+          >
           <span
             v-if="isEdit && !field.value.toBeDeleted"
             class="underline ml-2"
@@ -38,7 +46,9 @@ import EntityElementWrapper from "./base/EntityElementWrapper.vue";
 import { usePickEntityModal } from "./PickEntityModal.vue";
 import type { PickEntityModalType } from "./PickEntityModal.vue";
 import useEditMode from "@/composables/useEdit";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const props = defineProps<{
   RelationKey: string;
 }>();
