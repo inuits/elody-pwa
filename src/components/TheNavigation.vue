@@ -111,7 +111,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject } from "vue";
+import { inject, reactive } from "vue";
 import BaseButton from "./base/BaseButton.vue";
 import { useUploadModal, modalChoices } from "./UploadModal.vue";
 import { Unicons } from "../types";
@@ -120,6 +120,12 @@ import { useEditMode } from "../composables/useEdit";
 import { useCreateModal } from "./CreateModal.vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { usePermissions } from "../composables/usePermissions";
+import { useQuery } from "@vue/apollo-composable";
+import {
+  GetMenuDocument,
+  type GetMenuQuery,
+  type GetMenuQueryVariables,
+} from "@/generated-types/queries";
 
 const auth = useAuth();
 const { determinePermission, loading } = usePermissions();
@@ -127,6 +133,14 @@ const { openUploadModal } = useUploadModal();
 const { openCreateModal } = useCreateModal();
 const router = useRouter();
 const { disableEditMode } = useEditMode();
+
+const queryVariables = reactive<GetMenuQueryVariables>({
+  name: "main-menu",
+});
+const { result: menuQueryResult } = useQuery<GetMenuQuery>(
+  GetMenuDocument,
+  queryVariables
+);
 
 const forceDisableEditModalHome = () => {
   router.push({ name: "Home" });
