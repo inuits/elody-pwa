@@ -3,76 +3,14 @@
     v-if="!loading"
     class="pl-24 h-full w-full flex fixed top-0 bg-neutral-0 pt-24 left-0"
   >
-    <entity-image-selection
+    <media-viewer
       v-show="
         (!loading && isSelectionDisplayed && mediafiles.length > 0) ||
         (editMode === 'edit' && mustShowEntityMediafileSelector(result.Entity))
       "
-      v-model:selectedImage="mediafileSelectionState.selectedMediafile"
-      :class="['w-40', editMode === 'edit' ? 'shadow-md' : '']"
       :loading="loading"
+      :entityType="entityType"
     />
-    <div
-      v-show="!loading && mediafileSelectionState.selectedMediafile"
-      :class="[
-        'justify-center ',
-        { checkboard: loading },
-        entityType === 'MediaFile' ? 'w-full' : 'flex w-4/6',
-      ]"
-    >
-      <IIIFViewer
-        v-if="
-          !loading &&
-          mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype?.includes('image')
-        "
-        :is-public="mediafileSelectionState.selectedMediafile.isPublic"
-        :imageFilename="
-          mediafileSelectionState.selectedMediafile.transcode_filename ||
-          mediafileSelectionState.selectedMediafile.filename ||
-          ''
-        "
-        :downloadLocation="
-          canGet(result?.Entity?.permission)
-            ? mediafileSelectionState.selectedMediafile.original_file_location
-            : ''
-        "
-      />
-      <VideoPlayer
-        v-if="
-          !loading &&
-          mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype?.includes('video')
-        "
-        :source="mediafileSelectionState.selectedMediafile"
-      />
-      <AudioPlayer
-        v-if="
-          !loading &&
-          mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype?.includes('audio')
-        "
-        :source="mediafileSelectionState.selectedMediafile"
-      />
-      <PDFViewer
-        v-if="
-          !loading &&
-          mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype?.includes('pdf')
-        "
-        :source="mediafileSelectionState.selectedMediafile"
-      />
-      <TextViewer
-        v-if="
-          !loading &&
-          mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype?.includes(
-            'text/plain'
-          )
-        "
-        :source="mediafileSelectionState.selectedMediafile"
-      />
-    </div>
     <!-- meta is metadata form-->
     <MetaWindow
       v-if="isMetaDisplayed"
@@ -86,6 +24,7 @@
       :metadata="result ? result?.Entity?.metadata : []"
       :entity-title="title"
       :form="result?.Entity?.form"
+      :intial-values="result?.Entity?.intialValues"
     />
     <linked-assets-list
       v-if="linkedAssets.length > 0"
@@ -101,13 +40,10 @@
 <script lang="ts">
 import { computed, defineComponent, watch, ref, reactive } from "vue";
 import type { PropType } from "vue";
-import { useMutation, useQuery } from "@vue/apollo-composable";
-import IIIFViewer from "../IIIFViewer.vue";
+import { useQuery } from "@vue/apollo-composable";
 import MetaWindow from "../MetaWindow.vue";
-import {
-  GetEntityByIdDocument,
-  Permission,
-} from "../../generated-types/queries";
+import MediaViewer from "./Mediaviewer.vue";
+import { GetEntityByIdDocument } from "../../generated-types/queries";
 import type {
   GetEntityByIdQuery,
   Maybe,
@@ -117,30 +53,19 @@ import type {
 } from "../../generated-types/queries";
 import { usePageInfo } from "../../composables/usePageInfo";
 import { useEditMode } from "../../composables/useEdit";
-import EntityImageSelection, {
-  useEntityMediafileSelector,
-} from "../EntityImageSelection.vue";
+import { useEntityMediafileSelector } from "../EntityImageSelection.vue";
 import { useRoute, onBeforeRouteUpdate } from "vue-router";
 import { asString } from "@/helpers";
-import VideoPlayer from "./VideoPlayer.vue";
-import AudioPlayer from "./AudioPlayer.vue";
-import PDFViewer from "./PDFViewer.vue";
 import useMetaDataHelper from "../../composables/useMetaDataHelper";
-import TextViewer from "./TextViewer.vue";
 import LinkedAssetsList from "../LinkedAssetsList.vue";
 import { usePermissions } from "../../composables/usePermissions";
 
 export default defineComponent({
   name: "SingleEntity",
   components: {
-    IIIFViewer,
     MetaWindow,
-    VideoPlayer,
-    AudioPlayer,
-    PDFViewer,
+    MediaViewer,
     LinkedAssetsList,
-    TextViewer,
-    EntityImageSelection,
   },
   props: {
     isMetaDisplayed: Boolean,
@@ -170,7 +95,7 @@ export default defineComponent({
 
     const { editMode, showEditToggle } = useEditMode();
     const { updatePageInfo } = usePageInfo();
-    const { canEdit, canDelete, canGet } = usePermissions();
+    const { canEdit, canDelete } = usePermissions();
 
     const queryVariables = reactive<GetEntityByIdQueryVariables>({
       id: id,
@@ -288,7 +213,6 @@ export default defineComponent({
       mediafiles,
       editMode,
       mediafileSelectionState,
-      canGet,
       mustShowEntityMediafileSelector,
     };
   },
