@@ -22,7 +22,7 @@ import BaseButton from "./base/BaseButton.vue";
 import { useMutation } from "@vue/apollo-composable";
 import { PostStartImportDocument } from "../generated-types/queries";
 import type { Directory } from "../generated-types/queries";
-import { useUploadModal } from "./UploadModal.vue";
+import useUploadModal from "@/composables/useUploadModal";
 
 export default defineComponent({
   name: "UploadModalImport",

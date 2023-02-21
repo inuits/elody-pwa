@@ -59,7 +59,7 @@ export type ModalPosition = "center" | "left" | "right";
 const props = withDefaults(
   defineProps<{
     modalState: ModalState;
-    modalPosition: ModalPosition;
+    modalPosition?: ModalPosition;
     large: boolean;
     scroll: boolean;
   }>(),
