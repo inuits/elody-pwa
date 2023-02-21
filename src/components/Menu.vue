@@ -12,6 +12,7 @@
     </router-link>
 
     <!-- Entities -->
+  
     <router-link
       :to="{ name: 'Home' }"
       class="flex flex-row items-center menu-item"
@@ -196,6 +197,7 @@ import { usePermissions } from "../composables/usePermissions";
 import { GetMenuDocument, GetMenuQuery, GetMenuQueryVariables } from "../generated-types/queries";
 import MenuSubItem from './MenuSubItem.vue'
 import { useQuery } from "@vue/apollo-composable";
+import MenuItem from './MenuItem.vue'
 
 const auth = useAuth();
 const { determinePermission, loading } = usePermissions();
@@ -214,7 +216,6 @@ const { result: menuQueryResult } = useQuery<GetMenuQuery>(
   GetMenuDocument,
   queryVariables
 );
-
 
 const forceDisableEditModalHome = () => {
   router.push({ name: "Home" });
@@ -243,6 +244,7 @@ const logout = async () => {
 const toggleDropDown = () => {
   showDropdown.value = !showDropdown.value;
   console.log(showDropdown.value);
+  console.log('Data a mattie  ' + menuQueryResult.data)
 };
 </script>
 
