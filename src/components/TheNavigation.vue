@@ -113,7 +113,6 @@
 <script lang="ts" setup>
 import { inject, reactive } from "vue";
 import BaseButton from "./base/BaseButton.vue";
-import { useUploadModal, modalChoices } from "./UploadModal.vue";
 import { Unicons } from "../types";
 import { useRouter } from "vue-router";
 import { useEditMode } from "../composables/useEdit";
@@ -126,6 +125,7 @@ import {
   type GetMenuQuery,
   type GetMenuQueryVariables,
 } from "@/generated-types/queries";
+import useUploadModal, { modalChoices } from "@/composables/useUploadModal";
 
 const auth = useAuth();
 const { determinePermission, loading } = usePermissions();

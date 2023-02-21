@@ -137,7 +137,6 @@
 import useDropzoneHelper from "../composables/useDropzoneHelper";
 import { onMounted, ref, defineComponent } from "vue";
 import Dropzone from "dropzone";
-import { useUploadModal } from "./UploadModal.vue";
 import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "../composables/useMetaDataHelper";
 import {
@@ -149,6 +148,7 @@ import { useI18n } from "vue-i18n";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { Unicons } from "@/types";
 import BaseDropdownNew from "./base/BaseDropdownNew.vue";
+import useUploadModal from "@/composables/useUploadModal";
 
 export default defineComponent({
   name: "DropZone",
