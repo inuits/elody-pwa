@@ -21,7 +21,7 @@ import { defineComponent, ref } from "vue";
 import { DefaultOIDC, useAuth } from "session-vue-3-oidc-library";
 import UploadModal from "./components/UploadModal.vue";
 import CreateModal from "./components/CreateModal.vue";
-import TheNavigation from "@/components/TheNavigation.vue";
+import TheNavigation from "@/components/Menu.vue";
 import TheHeader from "@/components/TheHeader.vue";
 import EditModal from "./components/EditModal.vue";
 import useRouteHelpers from "./composables/useRouteHelpers";
@@ -79,7 +79,12 @@ export default defineComponent({
 
 <style>
 @import "@/assets/base.css";
-
+.IsActive {
+  fill: #02c6f2;
+  color: #02c6f2;
+  background-color: var(--color-neutral-40);
+  border-radius: 15px;
+}
 .logo {
   writing-mode: vertical-lr;
   font-size: 20px;

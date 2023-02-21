@@ -15,9 +15,7 @@
     <router-link
       :to="{ name: 'Home' }"
       class="flex flex-row items-center menu-item"
-      :class="{ IsActive: showDropdown }"
-      @click="toggleDropDown"
-    >
+      :class="{ IsActive: showDropdown }" @click="toggleDropDown">
       <BaseButton
         :icon="Unicons.BookOpen.name"
         :icon-height="20"
@@ -50,50 +48,7 @@
     </router-link>
 
     <!--Sub Menu-->
-    <div class="pl-13 bg-[var(--color-blue-500)]">
-      <div
-        class="flex flex-column items-center dropdownMenu-item"
-        v-if="showDropdown == true"
-      >
-        <span
-          class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-          @click="Asset"
-          :style="{
-            color: clickedonAsset ? '#02C6F2' : 'var(--color-neutral-900)',
-          }"
-          >{{ $t("navigation.asset") }}</span
-        >
-      </div>
-
-      <div
-        class="flex flex-column items-center dropdownMenu-item"
-        v-if="showDropdown == true"
-      >
-        <span
-          class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-          @click="Boeken"
-          :style="{
-            color: clickedonBoeken ? '#02C6F2' : 'var(--color-neutral-900)',
-          }"
-          >{{ $t("navigation.boeken") }}</span
-        >
-      </div>
-      <div
-        class="flex flex-column items-center dropdownMenu-item"
-        v-if="showDropdown == true"
-      >
-        <span
-          class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-          @click="Tijdschriften"
-          :style="{
-            color: clickedonTijdschriften
-              ? '#02C6F2'
-              : 'var(--color-neutral-900)',
-          }"
-          >{{ $t("navigation.tijdschriften") }}</span
-        >
-      </div>
-    </div>
+    <MenuSubItem  :show='showDropdown' ></MenuSubItem>
 
     <!-- Mediafile -->
     <router-link
@@ -229,7 +184,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, ref } from "vue";
+import {  reactive, ref } from "vue";
 import BaseButton from "./base/BaseButton.vue";
 import { useUploadModal, modalChoices } from "./UploadModal.vue";
 import { Unicons } from "../types";
@@ -238,7 +193,9 @@ import { useEditMode } from "../composables/useEdit";
 import { useCreateModal } from "./CreateModal.vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { usePermissions } from "../composables/usePermissions";
-import EditToggle from "./EditButtons.vue";
+import { GetMenuDocument, GetMenuQuery, GetMenuQueryVariables } from "../generated-types/queries";
+import MenuSubItem from './MenuSubItem.vue'
+import { useQuery } from "@vue/apollo-composable";
 
 const auth = useAuth();
 const { determinePermission, loading } = usePermissions();
@@ -247,9 +204,17 @@ const { openCreateModal, createModalState } = useCreateModal();
 const router = useRouter();
 const { disableEditMode } = useEditMode();
 const showDropdown = ref(false);
-const clickedonAsset = ref(false);
-const clickedonBoeken = ref(false);
-const clickedonTijdschriften = ref(false);
+
+
+
+const queryVariables = reactive<GetMenuQueryVariables>({
+  name: "main-menu",
+});
+const { result: menuQueryResult } = useQuery<GetMenuQuery>(
+  GetMenuDocument,
+  queryVariables
+);
+
 
 const forceDisableEditModalHome = () => {
   router.push({ name: "Home" });
@@ -274,52 +239,10 @@ const logout = async () => {
   router.push({ name: "Home" });
 };
 
-const Asset = () => {
-  clickedonAsset.value = !clickedonAsset.value;
-  if (clickedonAsset.value === true) {
-    if (clickedonBoeken.value === true) {
-      clickedonBoeken.value = false;
-    }
-    if (clickedonTijdschriften.value === true) {
-      clickedonTijdschriften.value = false;
-    }
-  }
-  console.log("Asset :" + clickedonAsset.value);
-};
 
-const Boeken = () => {
-  clickedonBoeken.value = !clickedonBoeken.value;
-  console.log("Boeken :" + clickedonBoeken.value);
-  if (clickedonBoeken.value === true) {
-    if (clickedonAsset.value === true) {
-      clickedonAsset.value = false;
-    }
-    if (clickedonTijdschriften.value === true) {
-      clickedonTijdschriften.value = false;
-    }
-  }
-};
-
-const Tijdschriften = () => {
-  clickedonTijdschriften.value = !clickedonTijdschriften.value;
-  console.log("Tijdschriften :" + clickedonTijdschriften.value);
-  if (clickedonTijdschriften.value === true) {
-    if (clickedonBoeken.value === true) {
-      clickedonBoeken.value = false;
-    }
-    if (clickedonAsset.value === true) {
-      clickedonAsset.value = false;
-    }
-  }
-};
 const toggleDropDown = () => {
   showDropdown.value = !showDropdown.value;
   console.log(showDropdown.value);
-  if (showDropdown.value === false) {
-    clickedonAsset.value = false;
-    clickedonBoeken.value = false;
-    clickedonTijdschriften.value = false;
-  }
 };
 </script>
 
@@ -360,18 +283,7 @@ const toggleDropDown = () => {
   animation-fill-mode: forwards;
 }
 
-.dropdownMenu-item {
-  cursor: pointer;
-  margin-left: 3.6rem;
-  animation: dropdown 1s 1;
-}
 
-.IsActive {
-  fill: #02c6f2;
-  color: #02c6f2;
-  background-color: var(--color-neutral-40);
-  border-radius: 15px;
-}
 @keyframes showText {
   100% {
     width: auto;
@@ -379,15 +291,6 @@ const toggleDropDown = () => {
   }
 }
 
-@keyframes dropdown {
-  0% {
-    margin-top: -1.5rem;
-    transition: opacity 0 0.2s ease-in;
-  }
-  100% {
-    margin-top: 0.5rem;
-  }
-}
 @-webkit-keyframes showText {
   100% {
     width: auto;

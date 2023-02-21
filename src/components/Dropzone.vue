@@ -93,7 +93,7 @@
 </template>
 
 <script lang="ts">
-import { PostMediaFileDocument } from "../generated-types/queries";
+/*import { PostMediaFileDocument } from "../generated-types/queries";*/
 import type { PostMediaFileMutation } from "../generated-types/queries";
 import useDropzoneHelper from "../composables/useDropzoneHelper";
 import { onMounted, ref, defineComponent } from "vue";
@@ -131,9 +131,9 @@ export default defineComponent({
       getDropzoneSettings,
       setSelectedMediafiles,
     } = useDropzoneHelper();
-    const { onDone, mutate } = useMutation<PostMediaFileMutation>(
+    /*const { onDone, mutate } = useMutation<PostMediaFileMutation>(
       PostMediaFileDocument
-    );
+    );*/
     const dropzonePreviewDiv = ref<HTMLDivElement | undefined>(undefined);
     const dropzoneDiv = ref<HTMLDivElement | undefined>(undefined);
     const triggerUpload = ref<() => void | undefined>();
