@@ -1,23 +1,14 @@
 <template>
-  <BaseSingleEntity
+  <!-- <BaseSingleEntity
     :isSelectionDisplayed="true"
     :isMetaDisplayed="true"
     :isMediaFileSingle="false"
     :entityType="'Entity'"
-  />
+  /> -->
+  <entity-single></entity-single>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script lang="ts" setup>
 import BaseSingleEntity from "@/components/base/BaseSingleEntity.vue";
-
-export default defineComponent({
-  name: "SingleEntity",
-  components: {
-    BaseSingleEntity,
-  },
-  setup() {
-    return {};
-  },
-});
+import EntitySingle from "../components/EntitySingle.vue";
 </script>

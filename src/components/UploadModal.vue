@@ -38,118 +38,53 @@
     </div>
   </BaseModal>
 </template>
-<script lang="ts">
+
+<script lang="ts" setup>
 import BaseModal from "./base/BaseModal.vue";
-import type { ModalState } from "./base/BaseModal.vue";
-import { defineComponent, ref, watch } from "vue";
-import UploadModalImport from "./UploadModalImport.vue";
-import UploadModalDropzone from "./UploadModalDropzone.vue";
-import { useQuery } from "@vue/apollo-composable";
-import { GetDirectoriesDocument } from "../generated-types/queries";
-import BaseTabs from "./BaseTabs.vue";
 import BaseTab from "./BaseTab.vue";
+import BaseTabs from "./BaseTabs.vue";
 import MediaFileLibrary from "./MediaFileLibrary.vue";
-import useMetaDataHelper from "../composables/useMetaDataHelper";
+import UploadModalDropzone from "./UploadModalDropzone.vue";
+import UploadModalImport from "./UploadModalImport.vue";
 import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
-import useDropzoneHelper from "../composables/useDropzoneHelper";
+import useMetaDataHelper from "../composables/useMetaDataHelper";
+import useUploadModal, {
+  modalChoices,
+  uploadModalState,
+} from "@/composables/useUploadModal";
+import { GetDirectoriesDocument } from "../generated-types/queries";
+import { ref, watch } from "vue";
+import { useQuery } from "@vue/apollo-composable";
 
-export type UploadModalType = {
-  state: ModalState;
+const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
+const { mediafiles } = useMetaDataHelper();
+const { modalToOpen, closeUploadModal } = useUploadModal();
+
+const fetchEnabled = ref(false);
+const { result, refetch } = useQuery(GetDirectoriesDocument, undefined, () => ({
+  enabled: fetchEnabled.value,
+}));
+
+const getData = () => {
+  if (modalToOpen.value === modalChoices.IMPORT) {
+    if (fetchEnabled.value === true) {
+      refetch();
+    } else fetchEnabled.value = true;
+  }
 };
 
-export enum modalChoices {
-  IMPORT = "IMPORT",
-  DROPZONE = "DROPZONE",
-}
-
-const modalToOpen = ref<modalChoices>(modalChoices.DROPZONE);
-
-const uploadModalState = ref<UploadModalType>({
-  state: "hide",
-});
-
-export const useUploadModal = () => {
-  const updateUploadModal = (uploadModalInput: UploadModalType) => {
-    uploadModalState.value = uploadModalInput;
-  };
-
-  const closeUploadModal = () => {
-    updateUploadModal({
-      state: "hide",
-    });
-  };
-
-  const openUploadModal = (modal: modalChoices) => {
-    modalToOpen.value = modal;
-    updateUploadModal({
-      state: "show",
-    });
-    useDropzoneHelper().resetDropzone();
-  };
-
-  return {
-    closeUploadModal,
-    openUploadModal,
-    uploadModalState,
-    modalToOpen,
-  };
+const addSelection = (entity: any) => {
+  const mediafile = JSON.parse(JSON.stringify(entity.media.mediafiles[0]));
+  mediafiles.value.push(mediafile);
+  addMediaFileToLinkList(mediafile);
+  closeUploadModal();
 };
 
-export default defineComponent({
-  name: "UploadModal",
-  components: {
-    BaseModal,
-    UploadModalImport,
-    UploadModalDropzone,
-    BaseTabs,
-    BaseTab,
-    MediaFileLibrary,
+watch(
+  () => uploadModalState.value.state,
+  () => {
+    if (uploadModalState.value.state === "show") getData();
   },
-  setup() {
-    const { mediafiles } = useMetaDataHelper();
-    const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
-    const { closeUploadModal, uploadModalState, modalToOpen } =
-      useUploadModal();
-    const fetchEnabled = ref(false);
-    const { result, refetch } = useQuery(
-      GetDirectoriesDocument,
-      undefined,
-      () => ({
-        enabled: fetchEnabled.value,
-      })
-    );
-
-    watch(
-      () => uploadModalState.value.state,
-      () => {
-        if (uploadModalState.value.state === "show") getData();
-      },
-      { immediate: true }
-    );
-
-    const getData = () => {
-      if (modalToOpen.value === modalChoices.IMPORT) {
-        if (fetchEnabled.value === true) {
-          refetch();
-        } else fetchEnabled.value = true;
-      }
-    };
-
-    const addSelection = (entity: any) => {
-      const mediafile = JSON.parse(JSON.stringify(entity.media.mediafiles[0]));
-      mediafiles.value.push(mediafile);
-      addMediaFileToLinkList(mediafile);
-      closeUploadModal();
-    };
-
-    return {
-      modalChoices,
-      modalToOpen,
-      uploadModalState,
-      closeUploadModal,
-      result,
-      addSelection,
-    };
-  },
-});
+  { immediate: true }
+);
 </script>

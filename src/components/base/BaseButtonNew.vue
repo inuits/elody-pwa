@@ -1,88 +1,82 @@
 <template>
   <button
     type="button"
-    :disabled="disable"
+    :disabled="disabled"
     :class="[
       label ? `pl-1.5` : ``,
-      !disable
-        ? `bg-[var(--color-accent-normal)] text-[var(--color-neutral-white)]`
-        : `bg-[var(--color-neutral-lightest)] text-[var(--color-text-light)]`,
+      `${selectedStyle.bgColor} ${selectedStyle.txtColor}`,
       `text-base flex justify-center items-center p-3 rounded transition-colors duration-300`,
     ]"
   >
     <unicon
-      v-if="icon"
+      v-if="props.icon !== 'no-icon'"
       :name="icon"
       height="16"
-      :fill="
-        !disable ? 'var(--color-neutral-white)' : `var(--color-text-light)`
-      "
+      :fill="`${selectedStyle.txtColor}`"
     />
     <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
   </button>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import type { PropType } from "vue";
-import type { Unicons } from "@/types";
+<script lang="ts" setup>
+import type { DamsIcons } from "@/types";
+import { computed } from "vue";
 
-type Button = {
-  bg: string;
-  text: string;
+type ButtonColors = {
+  txtColor: string;
+  bgColor: string;
+  hoverStyle: ButtonColors | "is-hover-style";
 };
 
-export default defineComponent({
-  name: "BaseButton",
-  setup() {
-    const uploadButton: Button = {
-      bg: "var(--color-accent-normal)",
-      text: "var(--color-neutral-white)",
-    };
+type ButtonStyles = "default" | "active" | "disabled";
+type ButtonStylesObject = Record<ButtonStyles, ButtonColors>;
 
-    return {
-      uploadButton,
-    };
-  },
-  props: {
-    label: {
-      type: [String],
-      required: false,
-      default: undefined,
-    },
-    disable: {
-      type: Boolean,
-      default: true,
-    },
-    loading: {
-      type: Boolean,
-      default: false,
-    },
-    icon: {
-      type: String,
-      required: false,
-      default: undefined,
-    },
-    bgColor: {
-      type: String,
-      default: "neutral-20",
-    },
-    bgHoverColor: {
-      type: String,
-      default: "neutral-70",
-    },
-    txtColor: {
-      type: String,
-      default: "neutral-700",
-    },
-    iconColor: {
-      type: String,
-      default: "var(--color-neutral-700)",
-    },
-    borderColor: {
-      type: String,
-      default: "transparent",
-    },
-  },
+const hoverStyle: ButtonColors = {
+  txtColor: "text-accent-light",
+  bgColor: "bg-neutral-lightest",
+  hoverStyle: "is-hover-style",
+};
+const defaultStyle: ButtonColors = {
+  txtColor: "text-text-body",
+  bgColor: "bg-neutral-lightest",
+  hoverStyle: hoverStyle,
+};
+const activeStyle: ButtonColors = {
+  txtColor: "text-text-body",
+  bgColor: "bg-neutral-lightest",
+  hoverStyle: hoverStyle,
+};
+const disabledStyle: ButtonColors = {
+  txtColor: "text-accent-normal",
+  bgColor: "bg-accent-light",
+  hoverStyle: hoverStyle,
+};
+
+const buttonStyles: ButtonStylesObject = {
+  default: defaultStyle,
+  active: activeStyle,
+  disabled: disabledStyle,
+};
+
+const props = withDefaults(
+  defineProps<{
+    label: string;
+    loading: boolean;
+    icon: DamsIcons | "no-icon";
+    buttonStyle: ButtonStyles;
+    disabled: boolean;
+  }>(),
+  {
+    loading: false,
+    icon: "no-icon",
+    buttonStyle: "default",
+    disabled: false,
+  }
+);
+
+const selectedStyle = computed<ButtonColors>(() => {
+  return props.disabled
+    ? buttonStyles.disabled
+    : buttonStyles[props.buttonStyle];
 });
 </script>
