@@ -3,34 +3,21 @@
     <dropzone />
   </div>
 </template>
-<script lang="ts">
+
+<script lang="ts" setup>
+import Dropzone from "./Dropzone.vue";
+import useDropzoneHelper from "../composables/useDropzoneHelper";
+import { uploadModalState } from "@/composables/useUploadModal";
+import { watch } from "vue";
+
 const { clearDropzoneErrorMessages, clearDropzoneCounters } =
   useDropzoneHelper();
-import useDropzoneHelper from "../composables/useDropzoneHelper";
-import { useUploadModal } from "./UploadModal.vue";
-import { defineComponent, watch } from "vue";
-import Dropzone from "./Dropzone.vue";
 
-export default defineComponent({
-  name: "UploadModalImport",
-  components: {
-    Dropzone,
-  },
-  props: {
-    hasDropzone: Boolean,
-  },
-  setup() {
-    const { uploadModalState } = useUploadModal();
-
-    watch(
-      () => uploadModalState.value.state,
-      () => {
-        clearDropzoneCounters();
-        clearDropzoneErrorMessages();
-      }
-    );
-
-    return {};
-  },
-});
+watch(
+  () => uploadModalState.value.state,
+  () => {
+    clearDropzoneCounters();
+    clearDropzoneErrorMessages();
+  }
+);
 </script>

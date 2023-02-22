@@ -14,6 +14,7 @@
     <meta-edit
       v-if="!loading && isEdit && form"
       v-model="metadataComputed"
+      :intial-values="props.intialValues"
       :loading="loading"
       :entity-title="entityTitle"
       :form="form"
@@ -26,12 +27,17 @@ import { ref, watch } from "vue";
 import MetaEdit from "./MetaEdit.vue";
 import MetaView from "./MetaView.vue";
 import { useEditMode } from "../composables/useEdit";
-import type { Form, MetadataAndRelation } from "../generated-types/queries";
+import type {
+  Form,
+  IntialValues,
+  MetadataAndRelation,
+} from "../generated-types/queries";
 
 const props = withDefaults(
   defineProps<{
     metadata: MetadataAndRelation[];
     form: Form;
+    intialValues: IntialValues;
     entityTitle: string;
     loading: boolean;
   }>(),

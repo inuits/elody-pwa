@@ -229,9 +229,8 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, ref } from "vue";
+import { inject, reactive } from "vue";
 import BaseButton from "./base/BaseButton.vue";
-import { useUploadModal, modalChoices } from "./UploadModal.vue";
 import { Unicons } from "../types";
 import { useRouter } from "vue-router";
 import { useEditMode } from "../composables/useEdit";
@@ -239,6 +238,13 @@ import { useCreateModal } from "./CreateModal.vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { usePermissions } from "../composables/usePermissions";
 import EditToggle from "./EditButtons.vue";
+import { useQuery } from "@vue/apollo-composable";
+import {
+  GetMenuDocument,
+  type GetMenuQuery,
+  type GetMenuQueryVariables,
+} from "@/generated-types/queries";
+import useUploadModal, { modalChoices } from "@/composables/useUploadModal";
 
 const auth = useAuth();
 const { determinePermission, loading } = usePermissions();
@@ -250,6 +256,14 @@ const showDropdown = ref(false);
 const clickedonAsset = ref(false);
 const clickedonBoeken = ref(false);
 const clickedonTijdschriften = ref(false);
+
+const queryVariables = reactive<GetMenuQueryVariables>({
+  name: "main-menu",
+});
+const { result: menuQueryResult } = useQuery<GetMenuQuery>(
+  GetMenuDocument,
+  queryVariables
+);
 
 const forceDisableEditModalHome = () => {
   router.push({ name: "Home" });

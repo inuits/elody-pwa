@@ -50,58 +50,42 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, toRefs, watch } from "vue";
-import type { PropType } from "vue";
+<script lang="ts" setup>
+import { toRefs, watch } from "vue";
 
 export type ModalState = "initial" | "show" | "hide" | "loading";
 export type ModalPosition = "center" | "left" | "right";
 
-export default defineComponent({
-  name: "BaseModal",
-  props: {
-    modalState: {
-      type: String as PropType<ModalState>,
-      required: true,
-      default: "hide",
-    },
-    modalPosition: {
-      type: String as PropType<ModalPosition>,
-      required: false,
-      default: "center",
-    },
-    large: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    scroll: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-  },
-  emits: ["update:modalState", "hideModal"],
-  setup(props, { emit }) {
-    const hideModal: () => void = () => {
-      emit("update:modalState", "hide");
-      emit("hideModal", "hide");
-    };
+const props = withDefaults(
+  defineProps<{
+    modalState: ModalState;
+    modalPosition?: ModalPosition;
+    large: boolean;
+    scroll: boolean;
+  }>(),
+  {
+    modalState: "hide",
+    modelPostion: "center",
+    large: false,
+    scroll: false,
+  }
+);
 
-    const { modalState } = toRefs(props);
+const emit = defineEmits(["update:modalState", "hideModal"]);
 
-    watch(modalState, (value: ModalState) => {
-      if (value == "show" || value == "loading") {
-        document.body.classList.add("overflow-hidden");
-      } else {
-        document.body.classList.remove("overflow-hidden");
-      }
-    });
+const hideModal: () => void = () => {
+  emit("update:modalState", "hide");
+  emit("hideModal", "hide");
+};
 
-    return {
-      hideModal,
-    };
-  },
+const { modalState } = toRefs(props);
+
+watch(modalState, (value: ModalState) => {
+  if (value == "show" || value == "loading") {
+    document.body.classList.add("overflow-hidden");
+  } else {
+    document.body.classList.remove("overflow-hidden");
+  }
 });
 </script>
 
