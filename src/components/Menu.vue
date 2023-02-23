@@ -12,11 +12,13 @@
     </router-link>
 
     <!-- Entities -->
-  
+
     <router-link
       :to="{ name: 'Home' }"
       class="flex flex-row items-center menu-item"
-      :class="{ IsActive: showDropdown }" @click="toggleDropDown">
+      :class="{ IsActive: showDropdown }"
+      @click="toggleDropDown"
+    >
       <BaseButton
         :icon="Unicons.BookOpen.name"
         :icon-height="20"
@@ -49,8 +51,12 @@
     </router-link>
 
     <!--Sub Menu-->
-    <MenuSubItem  :show='showDropdown' ></MenuSubItem>
+    <MenuSubItem :show="showDropdown"></MenuSubItem>
 
+    <!-- Menu Item Refactored version -->
+   <div v-for="menuItem in menuItems">
+    <MenuitemS :labelname="menuItem.label" :destination="menuItem.destination"/>
+   </div>
     <!-- Mediafile -->
     <router-link
       :to="{ name: 'Mediafiles' }"
@@ -185,19 +191,23 @@
 </template>
 
 <script lang="ts" setup>
-import {  reactive, ref } from "vue";
+import { reactive, ref } from "vue";
 import BaseButton from "./base/BaseButton.vue";
 import { useUploadModal, modalChoices } from "./UploadModal.vue";
 import { Unicons } from "../types";
-import { useRouter } from "vue-router";
+import { useRouter, RouterLink } from "vue-router";
 import { useEditMode } from "../composables/useEdit";
 import { useCreateModal } from "./CreateModal.vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { usePermissions } from "../composables/usePermissions";
-import { GetMenuDocument, GetMenuQuery, GetMenuQueryVariables } from "../generated-types/queries";
-import MenuSubItem from './MenuSubItem.vue'
+import {
+  GetMenuDocument,
+  GetMenuQuery,
+  GetMenuQueryVariables,
+} from "../generated-types/queries";
+import MenuSubItem from "./MenuSubItem.vue";
+import MenuitemS from "./MenuItem.vue";
 import { useQuery } from "@vue/apollo-composable";
-import MenuItem from './MenuItem.vue'
 
 const auth = useAuth();
 const { determinePermission, loading } = usePermissions();
@@ -206,16 +216,39 @@ const { openCreateModal, createModalState } = useCreateModal();
 const router = useRouter();
 const { disableEditMode } = useEditMode();
 const showDropdown = ref(false);
-
-
+const menuItems = ref<Array<any>>([]);
 
 const queryVariables = reactive<GetMenuQueryVariables>({
   name: "main-menu",
 });
-const { result: menuQueryResult } = useQuery<GetMenuQuery>(
+const { result: menuQueryResult, onResult } = useQuery<GetMenuQuery>(
   GetMenuDocument,
   queryVariables
 );
+onResult((value) => {
+  // if (menuQueryResult.data && menuQueryResult.data.Menu && menuQueryResult.data.Menu.menu) {
+  //   const { menu } = menuQueryResult.data.Menu;
+  //   const subMenuItems = menu.entities.subMenu;
+  //   state.menuItems = [
+  //     ...subMenuItems.assets,
+  //     subMenuItems.boeken,
+  //     subMenuItems.tijdschriften,
+  //     menu.upload
+  //   ];
+  // } else {
+  //   console.error('Error: No data returned from menu query.');
+  // }
+  for (const key in value.data.Menu?.menu) {
+    if (value.data.Menu?.menu.hasOwnProperty(key)) {
+      //@ts-ignore
+      console.log(
+        `${key} LINK TYPE: ${JSON.stringify(value.data.Menu?.menu[key])}`
+      );
+      //@ts-ignore
+      menuItems.value.push(value.data.Menu?.menu[key]);
+    }
+  }
+});
 
 const forceDisableEditModalHome = () => {
   router.push({ name: "Home" });
@@ -234,17 +267,21 @@ const forceDisableEditMediafiles = () => {
   disableEditMode();
 };
 
+const debuggerentjes = () => {
+  console.log("Ik werk");
+};
+
 const logout = async () => {
   await auth.logout();
   showDropdown.value = false;
+  console.log("Clicked on entities");
   router.push({ name: "Home" });
 };
-
 
 const toggleDropDown = () => {
   showDropdown.value = !showDropdown.value;
   console.log(showDropdown.value);
-  console.log('Data a mattie  ' + menuQueryResult.data)
+  // console.log('Data a mattie  ' + menu.entities)
 };
 </script>
 
@@ -256,15 +293,6 @@ const toggleDropDown = () => {
   overflow-x: hidden;
 }
 
-.menu-item {
-  margin-top: 1rem;
-}
-
-.menu-item:hover .menu-btn {
-  --tw-bg-opacity: 1;
-  fill: #02c6f2;
-}
-
 .navbar:hover {
   width: 20rem;
 }
@@ -272,6 +300,7 @@ const toggleDropDown = () => {
 .navbar:hover .router-link {
   justify-content: flex-start;
 }
+
 .login-out {
   position: fixed;
   bottom: 3%;
@@ -284,7 +313,6 @@ const toggleDropDown = () => {
   -o-animation: showText 0.1s ease-in 0.2s forwards;
   animation-fill-mode: forwards;
 }
-
 
 @keyframes showText {
   100% {

@@ -92,6 +92,15 @@ export default defineComponent({
   transition: writing-mode 300ms ease-in-out, transform 300ms ease-in-out;
 }
 
+.menu-item {
+  margin-top: 1rem;
+}
+
+.menu-item:hover .menu-btn {
+  --tw-bg-opacity: 1;
+  fill: #02c6f2;
+}
+ 
 .navbar:hover .logo {
   writing-mode: horizontal-tb;
   margin-left: 0.7rem;
