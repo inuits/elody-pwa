@@ -55,7 +55,8 @@
 
     <!-- Menu Item Refactored version -->
    <div v-for="menuItem in menuItems">
-    <MenuitemS :labelname="menuItem.label" :destination="menuItem.destination"/>
+    <MenuitemS :labelname="menuItem.label" :destination="menuItem.destination" :LinkType="menuItem.linkType"/>
+    {{ menuItem.linkType }}
    </div>
     <!-- Mediafile -->
     <router-link

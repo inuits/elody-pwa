@@ -168,13 +168,13 @@ export default defineComponent({
           updateFileCount();
         });
 
-        onDone((value) => {
-          if (value.data && value.data.postMediaFile) {
-            mediafiles.value.push(value.data.postMediaFile);
-            addMediaFileToLinkList(value.data.postMediaFile);
-          }
-          increaseSuccessCounter();
-        });
+        //  onDone((value) => {
+        //   if (value.data && value.data.postMediaFile) {
+        //     mediafiles.value.push(value.data.postMediaFile);
+        //     addMediaFileToLinkList(value.data.postMediaFile);
+        //   }
+        //   increaseSuccessCounter();
+        // });
 
         const uploadFiles = () => {
           selectedFiles.value.forEach(async (file: any) => {
