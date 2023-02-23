@@ -1,5 +1,5 @@
-<template>
-  <div @click="handleLinkType">
+<template>Hello
+  <div @click="handleLinkType" v-show="auth.isAuthenticated.value === true">
     <BaseButton
         :icon="Unicons.SignOut.name"
         :icon-height="20"
@@ -15,13 +15,17 @@
 </template>
 
 <script lang="ts" setup>
+import {ref} from 'vue'
 import { Unicons } from "../types";
+import { useAuth } from "session-vue-3-oidc-library";
 import { useRouter } from "vue-router";
 import { useUploadModal, modalChoices } from "./UploadModal.vue";
 import { useCreateModal } from "./CreateModal.vue";
+const ToShow = ref(false);
 const { openUploadModal, uploadModalState } = useUploadModal();
 const { openCreateModal, createModalState } = useCreateModal();
 const router = useRouter();
+const auth = useAuth();
   const props = defineProps(
     { 
       labelname: String,
@@ -30,20 +34,34 @@ const router = useRouter();
 
     }
     );
-    function handleLinkType(){
+    
+    const handleLinkType = () => {
       if(props.LinkType==="modal"){
         console.log('I want to open a modal')
         if(props.destination==="Upload")
         {
           openUploadModal(modalChoices.IMPORT)
+          toShow()
         }
       }
       else if(props.LinkType==="route") {
         router.push(`/${props.destination}`)
+        toShow()
       }
     }
+
+    const toShow = ():Boolean => {
+      if (props.labelname==='Upload'){
+        return false;
+        console.log('Dit werkt niet')
+      }
+      else (props.labelname ==='Entities') 
+        return true;
+      }
+    
+    console.log('To show :' + toShow())
 </script>
 
-<style lang="postcss" scoped>
+<style scoped>
 
 </style>

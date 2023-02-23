@@ -49,15 +49,9 @@
         </div>
       </div>
     </router-link>
-
-    <!--Sub Menu-->
-    <MenuSubItem :show="showDropdown"></MenuSubItem>
-
-    <!-- Menu Item Refactored version -->
-   <div v-for="menuItem in menuItems">
-    <MenuitemS :labelname="menuItem.label" :destination="menuItem.destination" :LinkType="menuItem.linkType"/>
-    {{ menuItem.linkType }}
-   </div>
+     <!--Sub Menu-->
+     <MenuSubItem :show="showDropdown"></MenuSubItem>
+    
     <!-- Mediafile -->
     <router-link
       :to="{ name: 'Mediafiles' }"
@@ -129,7 +123,7 @@
         {{ $t("navigation.nieuw") }}
       </span>
     </div>
-
+  
     <!-- Jobs -->
     <router-link
       :to="{ name: 'History' }"
@@ -153,6 +147,10 @@
       </span>
     </router-link>
 
+      <!-- Menu Item Refactored version -->
+   <div v-for="menuItem in menuItems" :key="menuItem.label">
+    <MenuitemS :labelname="menuItem.label" :destination="menuItem.destination" :LinkType="menuItem.linkType"/>
+   </div>
     <div class="flex flex-row items-center menu-item login-out">
       <BaseButton
         v-if="auth.isAuthenticated.value === false"
@@ -181,7 +179,7 @@
         @click="logout()"
       />
       <span
-        v-if="auth.isAuthenticated.value === true"
+       v-if="auth.isAuthenticated.value === true"
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
         @click="auth.logout()"
       >
@@ -239,14 +237,15 @@ onResult((value) => {
   // } else {
   //   console.error('Error: No data returned from menu query.');
   // }
+  menuItems.value=[];
   for (const key in value.data.Menu?.menu) {
     if (value.data.Menu?.menu.hasOwnProperty(key)) {
       //@ts-ignore
-      console.log(
-        `${key} LINK TYPE: ${JSON.stringify(value.data.Menu?.menu[key])}`
-      );
+      console.log(`${key} LINK TYPE: ${JSON.stringify(value.data.Menu?.menu[key])}`);
       //@ts-ignore
-      menuItems.value.push(value.data.Menu?.menu[key]);
+      if (value.data.Menu?.menu[key].linkType === 'route' || value.data.Menu?.menu[key].linkType === 'modal' ) {
+        menuItems.value.push(value.data.Menu?.menu[key]);
+      }
     }
   }
 });
