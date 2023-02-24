@@ -1,3 +1,5 @@
+<!-- TO BE REMOVED -->
+
 <template>
   <div class="flex flex-col w-full h-full">
     <div
@@ -192,7 +194,7 @@ export default defineComponent({
       if (dropzoneDiv.value && dropzonePreviewDiv) {
         myDropzone.value = new Dropzone(
           dropzoneDiv.value,
-          getDropzoneSettings(dropzonePreviewDiv)
+          getDropzoneSettings(dropzonePreviewDiv.value!)
         );
 
         const updateFileCount = () => {
