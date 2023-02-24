@@ -17,8 +17,8 @@
 <script lang="ts" setup>
 const props = defineProps({
   show: {
-    type: Boolean,
-    default: true,
+    type:Boolean,
+    default:false
   },
   linkType: String,
   labelName: String,
@@ -26,19 +26,5 @@ const props = defineProps({
 });
 </script>
 <style scoped>
-.dropdownMenu-item {
-  cursor: pointer;
-  margin-left: 3.6rem;
-  animation: dropdown 1s 1;
-  margin-top: 0.5rem;
-}
-@keyframes dropdown {
-  0% {
-    margin-top: -1.5rem;
-    transition: opacity 0 0.2s ease-in;
-  }
-  100% {
-    margin-top: 0.5rem;
-  }
-}
+
 </style>

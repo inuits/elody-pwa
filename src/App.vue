@@ -124,6 +124,22 @@ export default defineComponent({
   padding-left: 20rem;
 }
 
+.dropdownMenu-item {
+  cursor: pointer;
+  margin-left: 3.6rem;
+  animation: dropdown 1s 1;
+  margin-top: 0.5rem;
+}
+@keyframes dropdown {
+  0% {
+    margin-top: -1.5rem;
+    transition: opacity 0 0.2s ease-in;
+  }
+  100% {
+    margin-top: 0.5rem;
+  }
+}
+
 @keyframes logo-animation {
   from {
     transform: rotate(0);

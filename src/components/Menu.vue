@@ -13,6 +13,14 @@
 
     <!-- Entities -->
 
+          <!-- Menu Item Refactored version -->
+   <div v-for="menuItem in menuItems" :key="menuItem.label">
+    <MenuitemS 
+    :labelname="menuItem.label" 
+    :destination="menuItem.destination" 
+    :LinkType="menuItem.linkType" 
+    :subMenu="menuItem.subMenu"/>
+   </div>
     <router-link
       :to="{ name: 'Home' }"
       class="flex flex-row items-center menu-item"
@@ -49,9 +57,6 @@
         </div>
       </div>
     </router-link>
-     <!--Sub Menu-->
-     <MenuSubItem :show="showDropdown"></MenuSubItem>
-    
     <!-- Mediafile -->
     <router-link
       :to="{ name: 'Mediafiles' }"
@@ -147,14 +152,7 @@
       </span>
     </router-link>
 
-      <!-- Menu Item Refactored version -->
-   <div v-for="menuItem in menuItems" :key="menuItem.label">
-    <MenuitemS 
-    :labelname="menuItem.label" 
-    :destination="menuItem.destination" 
-    :LinkType="menuItem.linkType" 
-    :subMenu="menuItem.subMenu"/>
-   </div>
+
     <div class="flex flex-row items-center menu-item login-out">
       <BaseButton
         v-if="auth.isAuthenticated.value === false"
@@ -254,10 +252,6 @@ const forceDisableEditMediafiles = () => {
   router.push({ name: "Mediafiles" });
   showDropdown.value = false;
   disableEditMode();
-};
-
-const debuggerentjes = () => {
-  console.log("Ik werk");
 };
 
 const logout = async () => {
