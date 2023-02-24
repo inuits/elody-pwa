@@ -13,8 +13,7 @@
     </span>
   </div>
   <div v-for="submenuItem in submenu" :key="submenuItem.label">
-    {{ submenuItem.label }}
-    <MenuSubItem :linkType="submenuItem.linkType" :label="submenuItem.label" :destination="submenuItem.destination" />
+    <MenuSubItem :linkType="submenuItem.linkType" :labelName="submenuItem.label" :destination="submenuItem.destination" />
    </div>
 </template>
 

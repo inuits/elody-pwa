@@ -149,7 +149,11 @@
 
       <!-- Menu Item Refactored version -->
    <div v-for="menuItem in menuItems" :key="menuItem.label">
-    <MenuitemS :labelname="menuItem.label" :destination="menuItem.destination" :LinkType="menuItem.linkType" :subMenu="menuItem.subMenu"/>
+    <MenuitemS 
+    :labelname="menuItem.label" 
+    :destination="menuItem.destination" 
+    :LinkType="menuItem.linkType" 
+    :subMenu="menuItem.subMenu"/>
    </div>
     <div class="flex flex-row items-center menu-item login-out">
       <BaseButton
