@@ -149,7 +149,7 @@
 
       <!-- Menu Item Refactored version -->
    <div v-for="menuItem in menuItems" :key="menuItem.label">
-    <MenuitemS :labelname="menuItem.label" :destination="menuItem.destination" :LinkType="menuItem.linkType"/>
+    <MenuitemS :labelname="menuItem.label" :destination="menuItem.destination" :LinkType="menuItem.linkType" :subMenu="menuItem.subMenu"/>
    </div>
     <div class="flex flex-row items-center menu-item login-out">
       <BaseButton
@@ -199,11 +199,7 @@ import { useEditMode } from "../composables/useEdit";
 import { useCreateModal } from "./CreateModal.vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { usePermissions } from "../composables/usePermissions";
-import {
-  GetMenuDocument,
-  GetMenuQuery,
-  GetMenuQueryVariables,
-} from "../generated-types/queries";
+import {GetMenuDocument,GetMenuQuery,GetMenuQueryVariables} from "../generated-types/queries";
 import MenuSubItem from "./MenuSubItem.vue";
 import MenuitemS from "./MenuItem.vue";
 import { useQuery } from "@vue/apollo-composable";
@@ -225,18 +221,6 @@ const { result: menuQueryResult, onResult } = useQuery<GetMenuQuery>(
   queryVariables
 );
 onResult((value) => {
-  // if (menuQueryResult.data && menuQueryResult.data.Menu && menuQueryResult.data.Menu.menu) {
-  //   const { menu } = menuQueryResult.data.Menu;
-  //   const subMenuItems = menu.entities.subMenu;
-  //   state.menuItems = [
-  //     ...subMenuItems.assets,
-  //     subMenuItems.boeken,
-  //     subMenuItems.tijdschriften,
-  //     menu.upload
-  //   ];
-  // } else {
-  //   console.error('Error: No data returned from menu query.');
-  // }
   menuItems.value=[];
   for (const key in value.data.Menu?.menu) {
     if (value.data.Menu?.menu.hasOwnProperty(key)) {
@@ -245,6 +229,7 @@ onResult((value) => {
       //@ts-ignore
       if (value.data.Menu?.menu[key].linkType === 'route' || value.data.Menu?.menu[key].linkType === 'modal' ) {
         menuItems.value.push(value.data.Menu?.menu[key]);
+        console.log(value.data.Menu?.menu.entities.subMenu)
       }
     }
   }
