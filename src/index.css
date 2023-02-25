@@ -31,7 +31,7 @@
   --color-neutral-light: theme("colors.neutral.light");
 
 
- 
+
   --color-blue-50: theme("colors.blue.50");
   --color-blue-75: theme("colors.blue.75");
   --color-blue-100: theme("colors.blue.100");
@@ -51,36 +51,23 @@
   --color-main-light: theme("colors.main.light");
   --color-main-dark: theme("colors.main.dark");
 
-  
+
 }
 
 .checkboard {
   background-color: #fff;
   background-size: 60px 60px;
   background-position: 0 0, 30px 30px;
-  background-image: linear-gradient(
-      45deg,
+  background-image: linear-gradient(45deg,
       #f4f5f7 25%,
       transparent 25%,
       transparent 75%,
       #f4f5f7 75%,
-      #f4f5f7
-    ),
-    linear-gradient(
-      45deg,
+      #f4f5f7),
+    linear-gradient(45deg,
       #f4f5f7 25%,
       transparent 25%,
       transparent 75%,
       #f4f5f7 75%,
-      #f4f5f7
-    );
+      #f4f5f7);
 }
-.menu-item {
-  margin-top: 1rem;
-}
-
-.menu-item:hover .menu-btn {
-  --tw-bg-opacity: 1;
-  fill: #02c6f2;
-}
-

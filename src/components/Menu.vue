@@ -13,14 +13,15 @@
 
     <!-- Entities -->
 
-          <!-- Menu Item Refactored version -->
-   <div v-for="menuItem in menuItems" :key="menuItem.label">
-    <MenuitemS 
-    :labelname="menuItem.label" 
-    :destination="menuItem.destination" 
-    :LinkType="menuItem.linkType" 
-    :subMenu="menuItem.subMenu"/>
-   </div>
+    <!-- Menu Item Refactored version -->
+    <div v-for="menuItem in menuItems" :key="menuItem.label">
+      <MenuitemS
+        :labelname="menuItem.label"
+        :destination="menuItem.destination"
+        :LinkType="menuItem.linkType"
+        :subMenu="menuItem.subMenu"
+      />
+    </div>
     <router-link
       :to="{ name: 'Home' }"
       class="flex flex-row items-center menu-item"
@@ -128,7 +129,7 @@
         {{ $t("navigation.nieuw") }}
       </span>
     </div>
-  
+
     <!-- Jobs -->
     <router-link
       :to="{ name: 'History' }"
@@ -151,7 +152,6 @@
         {{ $t("navigation.jobs") }}
       </span>
     </router-link>
-
 
     <div class="flex flex-row items-center menu-item login-out">
       <BaseButton
@@ -181,7 +181,7 @@
         @click="logout()"
       />
       <span
-       v-if="auth.isAuthenticated.value === true"
+        v-if="auth.isAuthenticated.value === true"
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
         @click="auth.logout()"
       >
@@ -201,7 +201,11 @@ import { useEditMode } from "../composables/useEdit";
 import { useCreateModal } from "./CreateModal.vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { usePermissions } from "../composables/usePermissions";
-import {GetMenuDocument,GetMenuQuery,GetMenuQueryVariables} from "../generated-types/queries";
+import {
+  GetMenuDocument,
+  GetMenuQuery,
+  GetMenuQueryVariables,
+} from "../generated-types/queries";
 import MenuSubItem from "./MenuSubItem.vue";
 import MenuitemS from "./MenuItem.vue";
 import { useQuery } from "@vue/apollo-composable";
@@ -223,15 +227,20 @@ const { result: menuQueryResult, onResult } = useQuery<GetMenuQuery>(
   queryVariables
 );
 onResult((value) => {
-  menuItems.value=[];
+  menuItems.value = [];
   for (const key in value.data.Menu?.menu) {
     if (value.data.Menu?.menu.hasOwnProperty(key)) {
       //@ts-ignore
-      console.log(`${key} LINK TYPE: ${JSON.stringify(value.data.Menu?.menu[key])}`);
+      console.log(
+        `${key} LINK TYPE: ${JSON.stringify(value.data.Menu?.menu[key])}`
+      );
       //@ts-ignore
-      if (value.data.Menu?.menu[key].linkType === 'route' || value.data.Menu?.menu[key].linkType === 'modal' ) {
+      if (
+        value.data.Menu?.menu[key].linkType === "route" ||
+        value.data.Menu?.menu[key].linkType === "modal"
+      ) {
         menuItems.value.push(value.data.Menu?.menu[key]);
-        console.log(value.data.Menu?.menu.entities.subMenu)
+        console.log(value.data.Menu?.menu.entities.subMenu);
       }
     }
   }
@@ -268,7 +277,7 @@ const toggleDropDown = () => {
 };
 </script>
 
-<style scoped>
+<style>
 .navbar {
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);

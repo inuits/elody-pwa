@@ -17,14 +17,14 @@
 <script lang="ts" setup>
 const props = defineProps({
   show: {
-    type:Boolean,
-    default:false
+    type: Boolean,
+    default: false,
   },
   linkType: String,
   labelName: String,
   destination: String,
 });
 </script>
-<style scoped>
+<style>
 
 </style>

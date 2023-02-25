@@ -100,7 +100,7 @@ export default defineComponent({
   --tw-bg-opacity: 1;
   fill: #02c6f2;
 }
- 
+
 .navbar:hover .logo {
   writing-mode: horizontal-tb;
   margin-left: 0.7rem;
@@ -129,6 +129,7 @@ export default defineComponent({
   margin-left: 3.6rem;
   animation: dropdown 1s 1;
   margin-top: 0.5rem;
+  background-color: red;
 }
 @keyframes dropdown {
   0% {
