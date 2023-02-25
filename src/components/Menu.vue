@@ -12,16 +12,6 @@
     </router-link>
 
     <!-- Entities -->
-
-    <!-- Menu Item Refactored version -->
-    <div v-for="menuItem in menuItems" :key="menuItem.label">
-      <MenuitemS
-        :labelname="menuItem.label"
-        :destination="menuItem.destination"
-        :LinkType="menuItem.linkType"
-        :subMenu="menuItem.subMenu"
-      />
-    </div>
     <router-link
       :to="{ name: 'Home' }"
       class="flex flex-row items-center menu-item"
@@ -58,6 +48,16 @@
         </div>
       </div>
     </router-link>
+
+    <!-- Menu Item Refactored version -->
+    <div v-for="menuItem in menuItems" :key="menuItem.label">
+      <MenuitemS
+        :labelname="menuItem.label"
+        :destination="menuItem.destination"
+        :LinkType="menuItem.linkType"
+        :subMenu="menuItem.subMenu"
+      />
+    </div>
     <!-- Mediafile -->
     <router-link
       :to="{ name: 'Mediafiles' }"

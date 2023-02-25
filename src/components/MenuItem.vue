@@ -1,5 +1,5 @@
 <template>
-  <div @click="handleClick" class="flex flex-row items-center menu-item">
+  <div @click="handleClick" class="flex flex-row items-center menu-item" :class="{ IsActive: showDropdown }">
     <BaseButton
       class="mt-1 menu-btn"
       bg-color="var(--color-neutral)"

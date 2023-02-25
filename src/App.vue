@@ -84,6 +84,7 @@ export default defineComponent({
   color: #02c6f2;
   background-color: var(--color-neutral-40);
   border-radius: 15px;
+  height: 2rem;
 }
 .logo {
   writing-mode: vertical-lr;
@@ -129,8 +130,8 @@ export default defineComponent({
   margin-left: 3.6rem;
   animation: dropdown 1s 1;
   margin-top: 0.5rem;
-  background-color: red;
 }
+
 @keyframes dropdown {
   0% {
     margin-top: -1.5rem;
