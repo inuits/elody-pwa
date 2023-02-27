@@ -12,147 +12,23 @@
     </router-link>
 
     <!-- Entities -->
-    <router-link
-      :to="{ name: 'Home' }"
-      class="flex flex-row items-center menu-item"
-      :class="{ IsActive: showDropdown }"
-      @click="toggleDropDown"
-    >
-      <BaseButton
-        :icon="Unicons.BookOpen.name"
-        :icon-height="20"
-        class="menu-btn"
-        @click="forceDisableEditModalHome"
-        bg-color="var(--color-neutral)"
-      />
-      <span
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-        @click="forceDisableEditModalHome"
-      >
-        {{ $t("navigation.entities") }}
-      </span>
-      <div class="float-right ml-20">
-        <div v-if="showDropdown === true">
-          <BaseButton
-            :icon="Unicons.AngleDown.name"
-            class="rotate-180"
-            bg-color="var(--color-neutral-40)"
-          >
-          </BaseButton>
-        </div>
-        <div v-else-if="showDropdown === false">
-          <BaseButton
-            :icon="Unicons.AngleDown.name"
-            :icon-height="20"
-          ></BaseButton>
-        </div>
-      </div>
-    </router-link>
+   
 
     <!-- Menu Item Refactored version -->
-    <div v-for="menuItem in menuItems" :key="menuItem.label">
+    <div v-for="menuItem in menuItems" :key="menuItem.label" >
       <MenuitemS
         :labelname="menuItem.label"
         :destination="menuItem.destination"
         :LinkType="menuItem.linkType"
         :subMenu="menuItem.subMenu"
+        :Icon="menuItem.icon"
       />
-    </div>
-    <!-- Mediafile -->
-    <router-link
-      :to="{ name: 'Mediafiles' }"
-      activeClass="IsActive"
-      v-show="auth.isAuthenticated.value === true"
-      class="flex flex-row items-center menu-item"
-      @click="forceDisableEditMediafiles"
-    >
-      <BaseButton
-        :icon="Unicons.Image.name"
-        class="menu-btn"
-        @click="forceDisableEditMediafiles"
-        :icon-height="20"
-        bg-color="var(--color-neutral)"
-      />
-      <span
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-        @click="forceDisableEditMediafiles"
-      >
-        {{ $t("navigation.mediafile") }}
-      </span>
-    </router-link>
-
-    <!-- Upload -->
-
-    <div
-      v-show="
-        auth.isAuthenticated.value === true &&
-        determinePermission('can-start-import')
-      "
-      class="flex flex-row items-center menu-item"
-      :class="{ IsActive: uploadModalState.state === 'show' }"
-    >
-      <BaseButton
-        :icon="Unicons.Upload.name"
-        class="mt-1 menu-btn"
-        @click="openUploadModal(modalChoices.IMPORT)"
-        :icon-height="20"
-        bg-color="var(--color-neutral)"
-      />
-      <span
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-        @click="openUploadModal(modalChoices.IMPORT)"
-      >
-        {{ $t("navigation.upload") }}
-      </span>
+      {{ menuItem.icon }}
     </div>
 
-    <!-- Nieuw -->
-    <div
-      v-show="
-        auth.isAuthenticated.value === true &&
-        determinePermission('create-entity')
-      "
-      class="flex flex-row items-center menu-item"
-      :class="{ IsActive: createModalState.state === 'show' }"
-    >
-      <BaseButton
-        :icon="Unicons.Create.name"
-        class="mt-1 menu-btn"
-        @click="openCreateModal"
-        :icon-height="20"
-        bg-color="var(--color-neutral)"
-      />
-      <span
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-        @click="openCreateModal"
-      >
-        {{ $t("navigation.nieuw") }}
-      </span>
-    </div>
 
-    <!-- Jobs -->
-    <router-link
-      :to="{ name: 'History' }"
-      @click="forceDisableEditModalHistory"
-      activeClass="IsActive"
-      v-show="auth.isAuthenticated.value === true"
-      class="flex flex-row items-center menu-item"
-    >
-      <BaseButton
-        :icon="Unicons.History.name"
-        class="mt-1 menu-btn"
-        @click="forceDisableEditModalHistory"
-        :icon-height="20"
-        bg-color="var(--color-neutral)"
-      />
-      <span
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-        @click="forceDisableEditModalHistory"
-      >
-        {{ $t("navigation.jobs") }}
-      </span>
-    </router-link>
 
+    <!-- Login -->
     <div class="flex flex-row items-center menu-item login-out">
       <BaseButton
         v-if="auth.isAuthenticated.value === false"
@@ -170,7 +46,8 @@
         {{ $t("navigation.log-in") }}
       </span>
     </div>
-
+    
+    <!-- Loguit -->
     <div class="flex flex-row items-center menu-item login-out">
       <BaseButton
         v-if="auth.isAuthenticated.value === true"

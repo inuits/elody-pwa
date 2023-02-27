@@ -1,16 +1,19 @@
 <template>
-  <div @click="handleClick" class="flex flex-row items-center menu-item" :class="{ IsActive: showDropdown }">
+  <router-link :to="`${destination}`" @click="handleClick" class="flex flex-row items-center menu-item">
     <BaseButton
       class="mt-1 menu-btn"
+      :class="{ IsActive: showDropdown }"
+      activeClass="IsActive"
       bg-color="var(--color-neutral)"
       @click="handleClick"
+      :icon="Icon"
     />
     <span
       class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
     >
       {{ labelname }}
     </span>
-  </div>
+  </router-link>
   <div v-for="submenuItem in submenu" :key="submenuItem.label">
     <MenuSubItem
       class=""
@@ -42,6 +45,7 @@ const props = defineProps({
   labelname: String,
   destination: String,
   LinkType: String,
+  Icon:String,
   subMenu: {
     type: Object,
     default: null,
