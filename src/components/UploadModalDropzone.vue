@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col w-full h-full p-3">
     <dropzone-new
-      :view-style="'p-3 h-full mb-4'"
+      view-style="p-3 h-full mb-4"
       @update-files-in-dropzone="onUpdateFilesInDropzone"
     />
 
@@ -44,8 +44,8 @@
           v-if="!modifyMetadata"
           class="w-full"
           :label="$t('dropzone.upload')"
-          :icon="Unicons.PlusCircle.name"
-          :button-style="'blue'"
+          icon="PlusCircle"
+          button-style="blue"
           :disabled="isDisabledUploadButton"
           @click="uploadFiles"
         />
@@ -53,8 +53,8 @@
           v-if="modifyMetadata"
           class="w-full"
           :label="$t('dropzone.modifyMetadata')"
-          :icon="Unicons.EditAlt.name"
-          :button-style="'blue'"
+          icon="EditAlt"
+          button-style="blue"
         />
       </div>
     </div>
