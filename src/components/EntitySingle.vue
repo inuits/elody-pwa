@@ -39,11 +39,13 @@ import useEditMode from "@/composables/useEdit";
 import useMetaDataHelper from "@/composables/useMetaDataHelper";
 import { useEntityMediafileSelector } from "./EntityImageSelection.vue";
 import EntityForm from "./EntityForm.vue";
+import { usePageInfo } from "@/composables/usePageInfo";
 
 const id = asString(useRoute().params["id"]);
 const loading = ref<boolean>(true);
 const auth = useAuth();
 const { showEditToggle } = useEditMode();
+const { updatePageInfo } = usePageInfo();
 
 //Old mediafile dependencies
 const { mediafiles, clearMediafiles } = useMetaDataHelper();
@@ -71,7 +73,9 @@ onBeforeRouteUpdate(async (to: any) => {
   columnList.value = "no-values";
 });
 
-const intialValues = ref<IntialValues | "no-values">("no-values");
+const intialValues = ref<Omit<IntialValues, "keyValue"> | "no-values">(
+  "no-values"
+);
 const columnList = ref<ColumnList | "no-values">("no-values");
 
 onResult((queryResults) => {
@@ -87,6 +91,12 @@ onResult((queryResults) => {
       if (auth.isAuthenticated.value === true) {
         showEditToggle("edit");
       }
+
+      //TEMP: set page title
+      updatePageInfo(
+        queryResults.data.Entity.intialValues.title,
+        "entityTitle"
+      );
 
       //Old medafile code
       clearMediafiles();
