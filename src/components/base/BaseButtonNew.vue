@@ -11,13 +11,18 @@
       label ? `pl-1.5` : ``,
     ]"
   >
-    <unicon v-if="props.icon !== 'no-icon'" :name="icon" height="16" />
+    <unicon
+      v-if="props.icon !== 'no-icon'"
+      :name="Unicons[props.icon]"
+      height="16"
+    />
     <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
   </button>
 </template>
 
 <script lang="ts" setup>
 import type { DamsIcons } from "@/types";
+import { Unicons } from "@/types";
 import { computed } from "vue";
 
 type PseudoStyle = {
