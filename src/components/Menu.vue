@@ -15,7 +15,7 @@
    
 
     <!-- Menu Item Refactored version -->
-    <div v-for="menuItem in menuItems" :key="menuItem.label" >
+    <div v-for="menuItem in menuItems" :key="menuItem.label">
       <MenuitemS
         :labelname="menuItem.label"
         :destination="menuItem.destination"
@@ -24,9 +24,6 @@
         :icon="menuItem.icon"
       />
     </div>
-
-
-
     <!-- Login -->
     <div class="flex flex-row items-center menu-item login-out">
       <BaseButton

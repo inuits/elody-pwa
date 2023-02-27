@@ -14,7 +14,6 @@
     <unicon
       v-if="props.icon !== 'no-icon'"
       :name="Unicons[props.icon].name"
-      :height="height"
     />
     <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
   </button>
@@ -77,10 +76,6 @@ const props = withDefaults(
     icon: DamsIcons | "no-icon";
     buttonStyle: ButtonStyle;
     disabled: boolean;
-    height:{
-      type:Number,
-      default:16
-    }
   }>(),
   {
     loading: false,

@@ -1,24 +1,18 @@
 <template>
-  <router-link :to="`${destination}`" @click="handleClick" class="flex flex-row items-center menu-item">
-    <BaseButtonNew
-      class="mt-1 menu-btn"
-      :class="{ IsActive: showDropdown }"
-      activeClass="IsActive"
-      bg-color="var(--color-neutral)"
-      @click="handleClick"
-      :icon="icon || 'no-icon'"
-      :height="17"
+  <div @click="handleClick" class="flex flex-row items-center menu-item ml-3" :class="{IsActive:showDropdown}">
+    <unicon
+      v-if="icon"
+      :name="Unicons[icon].name"
+      height="18"
     />
     <span
       class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
     >
       {{ labelname }}
     </span>
-    
-  </router-link>
+  </div>
   <div v-for="submenuItem in submenu" :key="submenuItem.label">
     <MenuSubItem
-      class=""
       :linkType="submenuItem.linkType"
       :labelName="submenuItem.label"
       :destination="submenuItem.destination"
@@ -28,13 +22,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, defineProps, PropType} from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useRouter } from "vue-router";
 import MenuSubItem from "./MenuSubItem.vue";
 import useUploadModal, { modalChoices }  from "../composables/useUploadModal";
-import BaseButtonNew from "./base/BaseButtonNew.vue";
+import {useCreateModal} from "./CreateModal.vue";
+import { Unicons } from "@/types";
+import type { DamsIcons } from "../types";
+import { MenuLinkType } from "@/generated-types/queries";
 const { openUploadModal } = useUploadModal();
+const {openCreateModal} = useCreateModal()
 const router = useRouter();
 const auth = useAuth();
 const showDropdown = ref(false);
@@ -42,16 +40,17 @@ const submenu = ref<Array<any>>([]);
 const toggleDropDown = () => {
   showDropdown.value = !showDropdown.value;
   console.log(showDropdown.value);
-  // console.log('Data a mattie  ' + menu.entities)
 };
 const props = defineProps({
   labelname: String,
   destination: String,
   LinkType: String,
-  icon:String,
   subMenu: {
     type: Object,
     default: null,
+  },
+  icon:{
+    type:Object as PropType<DamsIcons>
   },
 });
 const handleClick = () => {
@@ -59,12 +58,14 @@ const handleClick = () => {
   toggleDropDown();
 };
 const handleLinkType = () => {
-  if (props.LinkType === "modal") {
-    console.log("I want to open a modal");
+  if (props.LinkType === MenuLinkType.Modal) {
     if (props.destination === "Upload") {
       openUploadModal(modalChoices.DROPZONE);
     }
-  } else if (props.LinkType === "route") {
+    if(props.destination === "Nieuw"){
+      openCreateModal();
+    }
+  } else if (props.LinkType === MenuLinkType.Route) {
     router.push(`/${props.destination}`);
   }
 };
@@ -73,8 +74,8 @@ const handleSubMenu = () => {
     for (const key in props.subMenu) {
       console.log("test", key);
       if (
-        props.subMenu[key].linkType === "route" ||
-        props.subMenu[key].linkType === "modal"
+        props.subMenu[key].linkType === MenuLinkType.Route ||
+        props.subMenu[key].linkType === MenuLinkType.Modal
       ) {
         submenu.value.push(props.subMenu[key]);
       }
@@ -84,5 +85,13 @@ const handleSubMenu = () => {
 handleSubMenu();
 </script>
 <style>
+
+.IsActive {
+  fill: #02c6f2;
+  color: #02c6f2;
+  background-color: var(--color-neutral-40);
+  border-radius: 10px;
+  height: 2.3rem;
+}
 
 </style>

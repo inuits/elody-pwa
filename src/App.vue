@@ -79,13 +79,7 @@ export default defineComponent({
 
 <style>
 @import "@/assets/base.css";
-.IsActive {
-  fill: #02c6f2;
-  color: #02c6f2;
-  background-color: var(--color-neutral-40);
-  border-radius: 15px;
-  height: 2rem;
-}
+
 .logo {
   writing-mode: vertical-lr;
   font-size: 20px;
@@ -94,7 +88,7 @@ export default defineComponent({
 }
 
 .menu-item {
-  margin-top: 1rem;
+  margin-top: 2rem;
 }
 
 .menu-item:hover .menu-btn {
