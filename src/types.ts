@@ -46,49 +46,52 @@ import {
   uniLink,
 } from "vue-unicons/dist/icons";
 
-export type DamsIcons = "Edit" | "EditAlt" | "Eye";
-"Download" |
-  "SearchPlus" |
-  "SearchMinus" |
-  "Desktop" |
-  "AngleLeft" |
-  "AngleRight" |
-  "AngleDoubleLeft" |
-  "AngleDoubleRight" |
-  "AngleDown" |
-  "BookOpen" |
-  "User" |
-  "SearchGlass" |
-  "PlusCircle" |
-  "NoImage" |
-  "Upload" |
-  "History" |
-  "Image" |
-  "Export" |
-  "Minus" |
-  "Plus" |
-  "Trash" |
-  "SortUp" |
-  "SortDown" |
-  "Filter" |
-  "AudioThumbnail" |
-  "Create" |
-  "Check" |
-  "Cross" |
-  "FileAlt" |
-  "Music" |
-  "Text" |
-  "SignOut" |
-  "Apps" |
-  "ListUl" |
-  "ExclamationTriangle" |
-  "CheckCircle" |
-  "CheckSquare" |
-  "SquareFull" |
-  "EllipsisV" |
-  "Save" |
-  "Redo" |
-  "Link";
+export type DamsIcons =
+  | "Edit"
+  | "EditAlt"
+  | "Eye"
+  | "Download"
+  | "SearchPlus"
+  | "SearchMinus"
+  | "Desktop"
+  | "AngleLeft"
+  | "AngleRight"
+  | "AngleDoubleLeft"
+  | "AngleDoubleRight"
+  | "AngleDown"
+  | "BookOpen"
+  | "User"
+  | "SearchGlass"
+  | "PlusCircle"
+  | "NoImage"
+  | "Upload"
+  | "History"
+  | "Image"
+  | "Export"
+  | "Minus"
+  | "Plus"
+  | "Trash"
+  | "SortUp"
+  | "SortDown"
+  | "Filter"
+  | "AudioThumbnail"
+  | "Create"
+  | "Check"
+  | "Cross"
+  | "FileAlt"
+  | "Music"
+  | "Text"
+  | "SignOut"
+  | "Apps"
+  | "ListUl"
+  | "ExclamationTriangle"
+  | "CheckCircle"
+  | "CheckSquare"
+  | "SquareFull"
+  | "EllipsisV"
+  | "Save"
+  | "Redo"
+  | "Link";
 
 export const Unicons: Record<DamsIcons, { name: string }> = {
   Edit: uniEdit,

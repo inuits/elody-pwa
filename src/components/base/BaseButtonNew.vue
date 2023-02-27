@@ -2,18 +2,16 @@
   <button
     type="button"
     :disabled="disabled"
+    class="text-base flex justify-center items-center p-3 rounded transition-colors duration-300 disabled:cursor-auto"
     :class="[
+      `${selectedButtonStyle.bgColor} ${selectedButtonStyle.txtColor}`,
+      `${selectedButtonStyle.hoverStyle.bgColor} ${selectedButtonStyle.hoverStyle.txtColor}`,
+      `${selectedButtonStyle.activeStyle.bgColor} ${selectedButtonStyle.activeStyle.txtColor}`,
+      `${selectedButtonStyle.disabledStyle.bgColor} ${selectedButtonStyle.disabledStyle.txtColor}`,
       label ? `pl-1.5` : ``,
-      `${selectedStyle.bgColor} ${selectedStyle.txtColor}`,
-      `text-base flex justify-center items-center p-3 rounded transition-colors duration-300`,
     ]"
   >
-    <unicon
-      v-if="props.icon !== 'no-icon'"
-      :name="icon"
-      height="16"
-      :fill="`${selectedStyle.txtColor}`"
-    />
+    <unicon v-if="props.icon !== 'no-icon'" :name="icon" height="16" />
     <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
   </button>
 </template>
@@ -22,40 +20,49 @@
 import type { DamsIcons } from "@/types";
 import { computed } from "vue";
 
-type ButtonColors = {
+type PseudoStyle = {
   txtColor: string;
   bgColor: string;
-  hoverStyle: ButtonColors | "is-hover-style";
+};
+const hoverStyle: PseudoStyle = {
+  txtColor: "hover:text-accent-normal",
+  bgColor: "hover:bg-neutral-lightest",
+};
+const activeStyle: PseudoStyle = {
+  txtColor: "active:text-accent-normal",
+  bgColor: "active:bg-accent-light",
+};
+const disabledStyle: PseudoStyle = {
+  txtColor: "disabled:text-text-light",
+  bgColor: "disabled:bg-neutral-lightest",
 };
 
-type ButtonStyles = "default" | "active" | "disabled";
-type ButtonStylesObject = Record<ButtonStyles, ButtonColors>;
-
-const hoverStyle: ButtonColors = {
-  txtColor: "text-accent-light",
-  bgColor: "bg-neutral-lightest",
-  hoverStyle: "is-hover-style",
+type Button = {
+  txtColor: string;
+  bgColor: string;
+  hoverStyle: PseudoStyle;
+  activeStyle: PseudoStyle;
+  disabledStyle: PseudoStyle;
 };
-const defaultStyle: ButtonColors = {
+const defaultButton: Button = {
   txtColor: "text-text-body",
   bgColor: "bg-neutral-lightest",
   hoverStyle: hoverStyle,
+  activeStyle: activeStyle,
+  disabledStyle: disabledStyle,
 };
-const activeStyle: ButtonColors = {
-  txtColor: "text-text-body",
-  bgColor: "bg-neutral-lightest",
+const blueButton: Button = {
+  txtColor: "text-neutral-white",
+  bgColor: "bg-accent-normal",
   hoverStyle: hoverStyle,
-};
-const disabledStyle: ButtonColors = {
-  txtColor: "text-accent-normal",
-  bgColor: "bg-accent-light",
-  hoverStyle: hoverStyle,
+  activeStyle: activeStyle,
+  disabledStyle: disabledStyle,
 };
 
-const buttonStyles: ButtonStylesObject = {
-  default: defaultStyle,
-  active: activeStyle,
-  disabled: disabledStyle,
+type ButtonStyle = "default" | "blue";
+const buttonStyles: Record<ButtonStyle, Button> = {
+  default: defaultButton,
+  blue: blueButton,
 };
 
 const props = withDefaults(
@@ -63,7 +70,7 @@ const props = withDefaults(
     label: string;
     loading: boolean;
     icon: DamsIcons | "no-icon";
-    buttonStyle: ButtonStyles;
+    buttonStyle: ButtonStyle;
     disabled: boolean;
   }>(),
   {
@@ -74,9 +81,7 @@ const props = withDefaults(
   }
 );
 
-const selectedStyle = computed<ButtonColors>(() => {
-  return props.disabled
-    ? buttonStyles.disabled
-    : buttonStyles[props.buttonStyle];
+const selectedButtonStyle = computed<Button>(() => {
+  return buttonStyles[props.buttonStyle];
 });
 </script>
