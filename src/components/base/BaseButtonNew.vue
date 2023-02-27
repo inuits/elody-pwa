@@ -13,7 +13,7 @@
   >
     <unicon
       v-if="props.icon !== 'no-icon'"
-      :name="Unicons[props.icon]"
+      :name="Unicons[props.icon].name"
       height="16"
     />
     <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
