@@ -67,16 +67,25 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import DropzoneNew from "@/components/base/dropzone/DropzoneNew.vue";
 import useDropzoneHelper from "@/composables/useDropzoneHelper";
-import { ref, watch } from "vue";
+import useUploadModal, { uploadModalState } from "@/composables/useUploadModal";
+import {
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
 import { Unicons } from "@/types";
-import { uploadModalState } from "@/composables/useUploadModal";
+import { ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 
 const {
   isUploading,
   setSelectedMediafiles,
+  increaseSuccessCounter,
   clearDropzoneCounters,
   clearDropzoneErrorMessages,
 } = useDropzoneHelper();
+const { closeUploadModal } = useUploadModal();
+const { createNotificationOverwrite } = useNotification();
+const { t } = useI18n();
 const createAsset = ref<boolean>(false);
 const filesInDropzone = ref<DropzoneFile[]>([]);
 const isDisabledUploadButton = ref<boolean>(true);
@@ -105,7 +114,38 @@ const uploadFiles = () => {
   callUploadEndpoint();
 };
 
-const callUploadEndpoint = () => {};
+const callUploadEndpoint = async () => {
+  for (let file of filesInDropzone.value) {
+    const form = new FormData();
+    form.append("title", file.name);
+    form.append("file", file);
+
+    await fetch(`/api/upload?filename=${file.name}`, {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      method: "POST",
+      body: form,
+    })
+      .then((response: Response) => {
+        if (!response.ok) throw response;
+
+        increaseSuccessCounter();
+        createNotificationOverwrite(
+          NotificationType.default,
+          t("dropzone.successNotification.title"),
+          t("dropzone.successNotification.description")
+        );
+        closeUploadModal();
+      })
+      .catch(() => {
+        createNotificationOverwrite(
+          NotificationType.error,
+          t("dropzone.errorNotification.title"),
+          t("dropzone.errorNotification.description")
+        );
+      })
+      .finally(() => (isUploading.value = false));
+  }
+};
 
 watch(
   () => uploadModalState.value.state,
