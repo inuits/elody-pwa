@@ -129,7 +129,7 @@ export default defineComponent({
 @keyframes dropdown {
   0% {
     margin-top: -1.5rem;
-    transition: opacity 0 0.2s ease-in;
+    transition: opacity 0 0.1s ease-in;
   }
   100% {
     margin-top: 0.5rem;

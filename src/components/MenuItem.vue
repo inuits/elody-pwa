@@ -1,5 +1,6 @@
 <template>
-  <div @click="handleClick" class="flex flex-row items-center menu-item ml-3" :class="{IsActive:showDropdown}">
+  <div @click="handleClick" class="flex flex-row items-center menu-item ml-3" :class="{IsActive:showdropdown}">
+    
     <unicon
       v-if="icon"
       :name="Unicons[icon].name"
@@ -10,13 +11,13 @@
     >
       {{ labelname }}
     </span>
-  </div>
-  <div v-for="submenuItem in submenu" :key="submenuItem.label">
+</div>
+<div v-for="submenuItem in submenu" :key="submenuItem.label">
     <MenuSubItem
       :linkType="submenuItem.linkType"
       :labelName="submenuItem.label"
       :destination="submenuItem.destination"
-      :show="showDropdown"
+      :show="showdropdown"
     />
   </div>
 </template>
@@ -35,16 +36,12 @@ const { openUploadModal } = useUploadModal();
 const {openCreateModal} = useCreateModal()
 const router = useRouter();
 const auth = useAuth();
-const showDropdown = ref(false);
+const showdropdown = ref(false);
 const submenu = ref<Array<any>>([]);
-const toggleDropDown = () => {
-  showDropdown.value = !showDropdown.value;
-  console.log(showDropdown.value);
-};
 const props = defineProps({
   labelname: String,
   destination: String,
-  LinkType: String,
+  linkType: String,
   subMenu: {
     type: Object,
     default: null,
@@ -53,19 +50,24 @@ const props = defineProps({
     type:Object as PropType<DamsIcons>
   },
 });
+const toggleDropDown = () => {
+  showdropdown.value = ! showdropdown.value;
+  console.log(showdropdown.value);
+};
+
 const handleClick = () => {
   handleLinkType();
   toggleDropDown();
 };
 const handleLinkType = () => {
-  if (props.LinkType === MenuLinkType.Modal) {
+  if (props.linkType === MenuLinkType.Modal) {
     if (props.destination === "Upload") {
       openUploadModal(modalChoices.DROPZONE);
     }
     if(props.destination === "Nieuw"){
       openCreateModal();
     }
-  } else if (props.LinkType === MenuLinkType.Route) {
+  } else if (props.linkType === MenuLinkType.Route) {
     router.push(`/${props.destination}`);
   }
 };
