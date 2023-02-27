@@ -113,11 +113,11 @@ import SvgThumbnail from "./base/svgThumbnail.vue";
 import TrashIcon from "../components/base/TrashIcon.vue";
 import PlusCircleIcon from "../components/base/PlusCircleIcon.vue";
 import { useEditMode } from "../composables/useEdit";
-import { useUploadModal, modalChoices } from "./UploadModal.vue";
 import useDropzoneHelper from "../composables/useDropzoneHelper";
 import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "../composables/useMetaDataHelper";
 import useMediafilesOrderHelpers from "../composables/useMediafilesOrderHelpers";
+import useUploadModal, { modalChoices } from "@/composables/useUploadModal";
 // import draggable from "vuedraggable/src/vuedraggable";
 export const toBeDeleted = ref<string[]>([]);
 

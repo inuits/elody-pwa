@@ -29,7 +29,7 @@ export enum NotificationType {
   error = "error",
 }
 
-type Notification = {
+export type Notification = {
   displayTime: number;
   type: NotificationType;
   title: string;
@@ -50,7 +50,18 @@ export const useNotification = () => {
     notification.value = newNotifcation;
   };
 
-  return { notification, createNotification };
+  const createNotificationOverwrite = (
+    type: NotificationType,
+    title: string,
+    description: string
+  ) => {
+    const baseNotification = { displayTime: 10, shown: true };
+    const notificationOverwrite = { type, title, description };
+    Object.assign(baseNotification, notificationOverwrite);
+    createNotification(baseNotification as Notification);
+  };
+
+  return { notification, createNotification, createNotificationOverwrite };
 };
 
 export default defineComponent({

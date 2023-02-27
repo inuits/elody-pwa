@@ -1,6 +1,7 @@
+import Dropzone from "dropzone";
 import { ref } from "vue";
 
-const myDropzone = ref<any>();
+const dropzone = ref<Dropzone>();
 const errorMessages = ref<Array<String>>([]);
 const total = ref<number>(0);
 const success = ref<number>(0);
@@ -10,6 +11,20 @@ const isUploading = ref<boolean>(false);
 const finishedUploading = ref<boolean>(false);
 
 const useDropzoneHelper = () => {
+  const initDropzone = (
+    dropzoneView: HTMLDivElement,
+    dropzonePreview: HTMLDivElement
+  ) => {
+    dropzone.value = new Dropzone(
+      dropzoneView,
+      getDropzoneSettings(dropzonePreview)
+    );
+
+    return dropzone.value;
+  };
+
+  const getDropzone = () => dropzone.value;
+
   const setDropzoneErrorMessages = (errorMessage: string): void => {
     errorMessages.value.push(errorMessage);
   };
@@ -28,8 +43,8 @@ const useDropzoneHelper = () => {
     detectUploadingState();
   };
 
-  const setTotalCounter = (t: number): void => {
-    total.value = t;
+  const setTotalCounter = (totalCount: number): void => {
+    total.value = totalCount;
   };
 
   const clearDropzoneCounters = (): void => {
@@ -44,25 +59,22 @@ const useDropzoneHelper = () => {
   };
 
   const detectUploadingState = () => {
-    if (total.value === failed.value + success.value && total.value !== 0) {
-      finishedUploading.value = true;
-    } else {
-      finishedUploading.value = false;
-    }
+    finishedUploading.value =
+      total.value === failed.value + success.value && total.value !== 0;
   };
 
   const resetDropzone = () => {
-    myDropzone.value.removeAllFiles();
+    dropzone.value?.removeAllFiles();
     finishedUploading.value = false;
     clearDropzoneCounters();
   };
 
-  const getDropzoneSettings = (dropzonePreviewDiv: any): any => {
+  const getDropzoneSettings = (dropzonePreviewDiv: HTMLDivElement): any => {
     return {
       url: "/upload",
       autoProcessQueue: false,
-      acceptedFiles: ".jpg, .jpeg, .mp3, .srt, .png, .tiff, .mp4",
-      previewTemplate: dropzonePreviewDiv.value?.outerHTML,
+      acceptedFiles: ".csv, .jpg, .jpeg, .mp3, .srt, .png, .tiff, .mp4",
+      previewTemplate: dropzonePreviewDiv.outerHTML,
       uploadMultiple: true,
       parallelUploads: 99,
       maxFiles: 99,
@@ -71,6 +83,9 @@ const useDropzoneHelper = () => {
   };
 
   return {
+    myDropzone: dropzone, // used in deprecated dropzone component
+    initDropzone,
+    getDropzone,
     setDropzoneErrorMessages,
     clearDropzoneErrorMessages,
     increaseFailedCounter,
@@ -86,7 +101,6 @@ const useDropzoneHelper = () => {
     errorMessages,
     selectedFiles,
     isUploading,
-    myDropzone,
     resetDropzone,
   };
 };

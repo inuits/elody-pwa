@@ -21,9 +21,8 @@
         :destination="menuItem.destination"
         :LinkType="menuItem.linkType"
         :subMenu="menuItem.subMenu"
-        :Icon="menuItem.icon"
+        :icon="menuItem.icon"
       />
-      {{ menuItem.icon }}
     </div>
 
 
@@ -71,7 +70,7 @@
 <script lang="ts" setup>
 import { reactive, ref } from "vue";
 import BaseButton from "./base/BaseButton.vue";
-import { useUploadModal, modalChoices } from "./UploadModal.vue";
+import useUploadModal  from "../composables/useUploadModal";
 import { Unicons } from "../types";
 import { useRouter, RouterLink } from "vue-router";
 import { useEditMode } from "../composables/useEdit";
@@ -89,8 +88,8 @@ import { useQuery } from "@vue/apollo-composable";
 
 const auth = useAuth();
 const { determinePermission, loading } = usePermissions();
-const { openUploadModal, uploadModalState } = useUploadModal();
-const { openCreateModal, createModalState } = useCreateModal();
+const { openUploadModal, } = useUploadModal();
+const { openCreateModal } = useCreateModal();
 const router = useRouter();
 const { disableEditMode } = useEditMode();
 const showDropdown = ref(false);
@@ -122,7 +121,6 @@ onResult((value) => {
     }
   }
 });
-
 const forceDisableEditModalHome = () => {
   router.push({ name: "Home" });
   disableEditMode();

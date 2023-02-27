@@ -1,5 +1,6 @@
 import {
   uniEdit,
+  uniEditAlt,
   uniEye,
   uniFileDownload,
   uniSearchPlus,
@@ -37,13 +38,64 @@ import {
   uniListUl,
   uniExclamationTriangle,
   uniCheckCircle,
+  uniCheckSquare,
+  uniSquareFull,
   uniEllipsisV,
   uniSave,
   uniRedo,
+  uniLink,
 } from "vue-unicons/dist/icons";
 
-export const Unicons: Record<string, { name: string }> = {
+export type DamsIcons =
+  | "Edit"
+  | "EditAlt"
+  | "Eye"
+  | "Download"
+  | "SearchPlus"
+  | "SearchMinus"
+  | "Desktop"
+  | "AngleLeft"
+  | "AngleRight"
+  | "AngleDoubleLeft"
+  | "AngleDoubleRight"
+  | "AngleDown"
+  | "BookOpen"
+  | "User"
+  | "SearchGlass"
+  | "PlusCircle"
+  | "NoImage"
+  | "Upload"
+  | "History"
+  | "Image"
+  | "Export"
+  | "Minus"
+  | "Plus"
+  | "Trash"
+  | "SortUp"
+  | "SortDown"
+  | "Filter"
+  | "AudioThumbnail"
+  | "Create"
+  | "Check"
+  | "Cross"
+  | "FileAlt"
+  | "Music"
+  | "Text"
+  | "SignOut"
+  | "Apps"
+  | "ListUl"
+  | "ExclamationTriangle"
+  | "CheckCircle"
+  | "CheckSquare"
+  | "SquareFull"
+  | "EllipsisV"
+  | "Save"
+  | "Redo"
+  | "Link";
+
+export const Unicons: Record<DamsIcons, { name: string }> = {
   Edit: uniEdit,
+  EditAlt: uniEditAlt,
   Eye: uniEye,
   Download: uniFileDownload,
   SearchPlus: uniSearchPlus,
@@ -81,6 +133,8 @@ export const Unicons: Record<string, { name: string }> = {
   ListUl: uniListUl,
   ExclamationTriangle: uniExclamationTriangle,
   CheckCircle: uniCheckCircle,
+  CheckSquare: uniCheckSquare,
+  SquareFull: uniSquareFull,
   EllipsisV: uniEllipsisV,
   Save: uniSave,
   Redo: uniRedo,

@@ -1,88 +1,96 @@
 <template>
   <button
     type="button"
-    :disabled="disable"
+    :disabled="disabled"
+    class="text-base flex justify-center items-center p-3 rounded transition-colors duration-300 disabled:cursor-auto"
     :class="[
+      `${selectedButtonStyle.bgColor} ${selectedButtonStyle.txtColor}`,
+      `${selectedButtonStyle.hoverStyle.bgColor} ${selectedButtonStyle.hoverStyle.txtColor}`,
+      `${selectedButtonStyle.activeStyle.bgColor} ${selectedButtonStyle.activeStyle.txtColor}`,
+      `${selectedButtonStyle.disabledStyle.bgColor} ${selectedButtonStyle.disabledStyle.txtColor}`,
       label ? `pl-1.5` : ``,
-      !disable
-        ? `bg-[var(--color-accent-normal)] text-[var(--color-neutral-white)]`
-        : `bg-[var(--color-neutral-lightest)] text-[var(--color-text-light)]`,
-      `text-base flex justify-center items-center p-3 rounded transition-colors duration-300`,
     ]"
   >
     <unicon
-      v-if="icon"
-      :name="icon"
-      height="16"
-      :fill="
-        !disable ? 'var(--color-neutral-white)' : `var(--color-text-light)`
-      "
+      v-if="props.icon !== 'no-icon'"
+      :name="Unicons[props.icon].name"
+      :height="height"
     />
     <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
   </button>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import type { PropType } from "vue";
-import type { Unicons } from "@/types";
+<script lang="ts" setup>
+import type { DamsIcons } from "@/types";
+import { Unicons } from "@/types";
+import { computed } from "vue";
 
-type Button = {
-  bg: string;
-  text: string;
+type PseudoStyle = {
+  txtColor: string;
+  bgColor: string;
+};
+const hoverStyle: PseudoStyle = {
+  txtColor: "hover:text-accent-normal",
+  bgColor: "hover:bg-neutral-lightest",
+};
+const activeStyle: PseudoStyle = {
+  txtColor: "active:text-accent-normal",
+  bgColor: "active:bg-accent-light",
+};
+const disabledStyle: PseudoStyle = {
+  txtColor: "disabled:text-text-light",
+  bgColor: "disabled:bg-neutral-lightest",
 };
 
-export default defineComponent({
-  name: "BaseButton",
-  setup() {
-    const uploadButton: Button = {
-      bg: "var(--color-accent-normal)",
-      text: "var(--color-neutral-white)",
-    };
+type Button = {
+  txtColor: string;
+  bgColor: string;
+  hoverStyle: PseudoStyle;
+  activeStyle: PseudoStyle;
+  disabledStyle: PseudoStyle;
+};
+const defaultButton: Button = {
+  txtColor: "text-text-body",
+  bgColor: "bg-neutral-lightest",
+  hoverStyle: hoverStyle,
+  activeStyle: activeStyle,
+  disabledStyle: disabledStyle,
+};
+const blueButton: Button = {
+  txtColor: "text-neutral-white",
+  bgColor: "bg-accent-normal",
+  hoverStyle: hoverStyle,
+  activeStyle: activeStyle,
+  disabledStyle: disabledStyle,
+};
 
-    return {
-      uploadButton,
-    };
-  },
-  props: {
-    label: {
-      type: [String],
-      required: false,
-      default: undefined,
-    },
-    disable: {
-      type: Boolean,
-      default: true,
-    },
-    loading: {
-      type: Boolean,
-      default: false,
-    },
-    icon: {
-      type: String,
-      required: false,
-      default: undefined,
-    },
-    bgColor: {
-      type: String,
-      default: "neutral-20",
-    },
-    bgHoverColor: {
-      type: String,
-      default: "neutral-70",
-    },
-    txtColor: {
-      type: String,
-      default: "neutral-700",
-    },
-    iconColor: {
-      type: String,
-      default: "var(--color-neutral-700)",
-    },
-    borderColor: {
-      type: String,
-      default: "transparent",
-    },
-  },
+type ButtonStyle = "default" | "blue";
+const buttonStyles: Record<ButtonStyle, Button> = {
+  default: defaultButton,
+  blue: blueButton,
+};
+
+const props = withDefaults(
+  defineProps<{
+    label: string;
+    loading: boolean;
+    icon: DamsIcons | "no-icon";
+    buttonStyle: ButtonStyle;
+    disabled: boolean;
+    height:{
+      type:Number,
+      default:16
+    }
+  }>(),
+  {
+    loading: false,
+    icon: "no-icon",
+    buttonStyle: "default",
+    disabled: false,
+  }
+);
+
+const selectedButtonStyle = computed<Button>(() => {
+  return buttonStyles[props.buttonStyle];
 });
 </script>

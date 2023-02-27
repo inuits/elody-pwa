@@ -1,3 +1,5 @@
+<!-- TO BE REMOVED -->
+
 <template>
   <div class="flex flex-col w-full h-full">
     <div
@@ -38,21 +40,62 @@
       </div>
     </div>
     <div class="p-3 bg-[var(--color-neutral-white)] rounded">
-      <BaseButtonNew
-        v-if="triggerUpload"
-        class="w-full"
-        :label="$t('dropzone.upload')"
-        :disable="fileCount === 0"
-        :icon="Unicons.PlusCircle.name"
-        tabindex="-1"
-        @click="triggerUpload"
-      />
+      <div v-if="!modifyMetadata" class="flex mb-3">
+        <div
+          @click="() => (createAsset = !createAsset)"
+          class="w-1/3 mr-2 flex rounded cursor-pointer"
+          :class="[
+            createAsset
+              ? `bg-[var(--color-accent-light)] text-[var(--color-accent-normal)]`
+              : `bg-[var(--color-neutral-lightest)] text-[var(--color-text-light)]`,
+          ]"
+        >
+          <unicon
+            :name="
+              createAsset ? Unicons.CheckSquare.name : Unicons.SquareFull.name
+            "
+            height="16"
+            class="inline"
+            :fill="
+              createAsset
+                ? `var(--color-accent-normal)`
+                : `var(--color-text-light)`
+            "
+          />
+          <span class="inline text-sm ml-1 pt-0.5">{{
+            $t("dropzone.createAsset")
+          }}</span>
+        </div>
+        <div class="w-2/3">
+          <BaseDropdownNew
+            v-model="selectedImportMethod"
+            :options="importMethods"
+          />
+        </div>
+      </div>
+      <div>
+        <BaseButtonNew
+          v-if="triggerUpload && !modifyMetadata"
+          class="w-full"
+          :label="$t('dropzone.upload')"
+          :disable="fileCount === 0"
+          :icon="Unicons.PlusCircle.name"
+          @click="triggerUpload"
+        />
+        <BaseButtonNew
+          v-if="modifyMetadata"
+          class="w-full"
+          :disable="false"
+          :label="$t('dropzone.modifyMetadata')"
+          :icon="Unicons.EditAlt.name"
+        />
+      </div>
     </div>
   </div>
   <div class="hidden">
     <div
       ref="dropzonePreviewDiv"
-      class="flex dz-file-preview border border-[var(--color-neutral-light)] rounded-md w-full mi-h-28 flex flex-row items-right mb-2 hover:bg-blue-default10 p-3 rounded relative"
+      class="flex dz-file-preview border border-[var(--color-neutral-light)] rounded-md w-full mi-h-28 flex-row items-right mb-2 hover:bg-blue-default10 p-3 relative"
     >
       <div
         class="flex justify-center items-center bg-[var(--color-neutral-light)] rounded-lg w-10 h-8 mt-1 mr-2"
@@ -93,27 +136,32 @@
 </template>
 
 <script lang="ts">
+<<<<<<< HEAD
 /*import { PostMediaFileDocument } from "../generated-types/queries";*/
 import type { PostMediaFileMutation } from "../generated-types/queries";
+=======
+>>>>>>> master
 import useDropzoneHelper from "../composables/useDropzoneHelper";
 import { onMounted, ref, defineComponent } from "vue";
-import { useMutation } from "@vue/apollo-composable";
 import Dropzone from "dropzone";
-import { useUploadModal } from "./UploadModal.vue";
 import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "../composables/useMetaDataHelper";
 import {
-  NotificationType,
   useNotification,
+  NotificationType,
 } from "../components/base/BaseNotification.vue";
+import type { Notification } from "../components/base/BaseNotification.vue";
 import { useI18n } from "vue-i18n";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { Unicons } from "@/types";
+import BaseDropdownNew from "./base/BaseDropdownNew.vue";
+import useUploadModal from "@/composables/useUploadModal";
 
 export default defineComponent({
   name: "DropZone",
   components: {
     BaseButtonNew,
+    BaseDropdownNew,
   },
   setup() {
     const {
@@ -131,9 +179,12 @@ export default defineComponent({
       getDropzoneSettings,
       setSelectedMediafiles,
     } = useDropzoneHelper();
+<<<<<<< HEAD
     /*const { onDone, mutate } = useMutation<PostMediaFileMutation>(
       PostMediaFileDocument
     );*/
+=======
+>>>>>>> master
     const dropzonePreviewDiv = ref<HTMLDivElement | undefined>(undefined);
     const dropzoneDiv = ref<HTMLDivElement | undefined>(undefined);
     const triggerUpload = ref<() => void | undefined>();
@@ -143,13 +194,18 @@ export default defineComponent({
     const { mediafiles } = useMetaDataHelper();
     const { createNotification } = useNotification();
     const { t } = useI18n();
+    const createAsset = ref<boolean>(false);
+    const selectedImportMethod = ref<any>();
+    const importMethods = ref<String[]>([]);
+    const modifyMetadata = ref<Boolean>(false);
+
     clearDropzoneErrorMessages();
 
     onMounted(async () => {
       if (dropzoneDiv.value && dropzonePreviewDiv) {
         myDropzone.value = new Dropzone(
           dropzoneDiv.value,
-          getDropzoneSettings(dropzonePreviewDiv)
+          getDropzoneSettings(dropzonePreviewDiv.value!)
         );
 
         const updateFileCount = () => {
@@ -158,14 +214,37 @@ export default defineComponent({
           }
         };
 
-        myDropzone.value.on("removedfile", () => {
+        const updateUIBasedOnExistenceOfCsv = (
+          file: File,
+          action: "added" | "removed"
+        ) => {
+          let files = myDropzone.value.files;
+          modifyMetadata.value =
+            files.length === 1 && files[0].type === "text/csv";
+          if (file?.type === "text/csv") {
+            switch (action) {
+              case "added":
+                selectedImportMethod.value = file.name;
+                importMethods.value.push(file.name);
+                break;
+              case "removed":
+                selectedImportMethod.value = "";
+                importMethods.value.pop();
+                break;
+            }
+          }
+        };
+
+        myDropzone.value.on("removedfile", (removedFile: File) => {
           updateFileCount();
+          updateUIBasedOnExistenceOfCsv(removedFile, "removed");
         });
 
-        myDropzone.value.on("addedfile", () => {
+        myDropzone.value.on("addedfile", (addedFile: File) => {
           clearDropzoneCounters();
           clearDropzoneErrorMessages();
           updateFileCount();
+<<<<<<< HEAD
         });
 
         //  onDone((value) => {
@@ -175,25 +254,56 @@ export default defineComponent({
         //   }
         //   increaseSuccessCounter();
         // });
+=======
+          updateUIBasedOnExistenceOfCsv(addedFile, "added");
+        });
+>>>>>>> master
 
         const uploadFiles = () => {
           selectedFiles.value.forEach(async (file: any) => {
-            await mutate({
-              mediaFileInput: { filename: file.name, mimetype: file.type },
-              file,
-            });
+            const title = file.name;
+            const form = new FormData();
+            form.append("title", title);
+            form.append("file", file);
+            const uploadUrl = `/api/upload?filename=${title}`;
+            let baseNotification = {
+              displayTime: 10,
+              shown: true,
+            };
+            await fetch(uploadUrl, {
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              method: "POST",
+              body: form,
+            })
+              .then((res: Response) => {
+                if (res.ok) {
+                  // mediafiles.value.push(value.data.postMediaFile);
+                  // addMediaFileToLinkList(value.data.postMediaFile);
+                  increaseSuccessCounter();
+                  const succesNotificationOverwrites = {
+                    type: NotificationType.default,
+                    title: t("dropzone.successNotification.title"),
+                    description: t("dropzone.successNotification.description"),
+                  };
+                  Object.assign(baseNotification, succesNotificationOverwrites);
+                  createNotification(baseNotification as Notification);
+                  closeUploadModal();
+                } else {
+                  throw res;
+                }
+              })
+              .catch(() => {
+                const succesNotificationOverwrites = {
+                  type: NotificationType.error,
+                  title: t("dropzone.errorNotification.title"),
+                  description: t("dropzone.errorNotification.description"),
+                };
+                Object.assign(baseNotification, succesNotificationOverwrites);
+                createNotification(baseNotification as Notification);
+              })
+              .finally(() => {});
           });
           isUploading.value = false;
-          if (!errorMessages.value.length) {
-            createNotification({
-              displayTime: 10,
-              type: NotificationType.default,
-              title: t("dropzone.successNotification.title"),
-              description: t("dropzone.successNotification.description"),
-              shown: true,
-            });
-            closeUploadModal();
-          }
         };
 
         triggerUpload.value = () => {
@@ -216,6 +326,10 @@ export default defineComponent({
       total,
       finishedUploading,
       getDropzoneSettings,
+      createAsset,
+      selectedImportMethod,
+      importMethods,
+      modifyMetadata,
     };
   },
 });

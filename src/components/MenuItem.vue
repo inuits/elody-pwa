@@ -1,18 +1,20 @@
 <template>
   <router-link :to="`${destination}`" @click="handleClick" class="flex flex-row items-center menu-item">
-    <BaseButton
+    <BaseButtonNew
       class="mt-1 menu-btn"
       :class="{ IsActive: showDropdown }"
       activeClass="IsActive"
       bg-color="var(--color-neutral)"
       @click="handleClick"
-      :icon="Icon"
+      :icon="icon || 'no-icon'"
+      :height="17"
     />
     <span
       class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
     >
       {{ labelname }}
     </span>
+    
   </router-link>
   <div v-for="submenuItem in submenu" :key="submenuItem.label">
     <MenuSubItem
@@ -29,9 +31,10 @@
 import { ref } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useRouter } from "vue-router";
-import { useUploadModal, modalChoices } from "./UploadModal.vue";
 import MenuSubItem from "./MenuSubItem.vue";
-const { openUploadModal, uploadModalState } = useUploadModal();
+import useUploadModal, { modalChoices }  from "../composables/useUploadModal";
+import BaseButtonNew from "./base/BaseButtonNew.vue";
+const { openUploadModal } = useUploadModal();
 const router = useRouter();
 const auth = useAuth();
 const showDropdown = ref(false);
@@ -45,7 +48,7 @@ const props = defineProps({
   labelname: String,
   destination: String,
   LinkType: String,
-  Icon:String,
+  icon:String,
   subMenu: {
     type: Object,
     default: null,
@@ -59,7 +62,7 @@ const handleLinkType = () => {
   if (props.LinkType === "modal") {
     console.log("I want to open a modal");
     if (props.destination === "Upload") {
-      openUploadModal(modalChoices.IMPORT);
+      openUploadModal(modalChoices.DROPZONE);
     }
   } else if (props.LinkType === "route") {
     router.push(`/${props.destination}`);

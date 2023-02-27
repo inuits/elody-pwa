@@ -79,7 +79,10 @@ const start = async () => {
 
   apolloClient = new ApolloClient({
     link: graphqlErrorInterceptor.concat(
-      createUploadLink({ uri: config.graphQlLink || "/api/graphql" })
+      createUploadLink({
+        uri: config.graphQlLink || "/api/graphql",
+        headers: { "Apollo-Require-Preflight": "true" },
+      })
     ),
     cache: new InMemoryCache(),
   });
