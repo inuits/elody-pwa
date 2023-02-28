@@ -7,19 +7,15 @@
       class="logo router-link text-base text-neutral-700 font-semibold flex justify-center items-center mb-8 text-xl"
       @click="forceDisableEditModalHome">
       {{ $t("navigation.title") }}
-    </router-link>
-    <!-- Menu Item Refactored version -->
+    </router-link> 
     <div v-for="menuItem in menuItems" :key="menuItem.label">
       <MenuitemS
        :linkType="menuItem.linkType"
        :destination="menuItem.destination"
        :labelname="menuItem.label"
        :icon="menuItem.icon"
-       :subMenu="menuItem.subMenu"
-
-      />
+       :subMenu="menuItem.subMenu"/>
     </div>
-    <!-- Login -->
     <div class="flex flex-row items-center menu-item login-out">
       <BaseButton
         v-if="auth.isAuthenticated.value === false"
@@ -109,7 +105,6 @@ const logout = async () => {
 const toggleDropDown = () => {
   showDropdown.value = !showDropdown.value;
   console.log(showDropdown.value);
-  // console.log('Data a mattie  ' + menu.entities)
 };
 </script>
 <style>
@@ -118,6 +113,9 @@ const toggleDropDown = () => {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 300ms;
   overflow-x: hidden;
+}
+.navbar + .menu-item {
+  background-color: none;
 }
 .navbar:hover {
   width: 20rem;

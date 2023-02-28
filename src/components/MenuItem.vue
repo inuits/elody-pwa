@@ -1,6 +1,9 @@
 <template>
-  <div @click="handleClick" class="flex flex-row items-center menu-item ml-3" :class="{IsActive:showdropdown}">
-    
+  <div
+    @click="handleClick"
+    class="flex flex-row items-center menu-item ml-3"
+    :class="{ IsActive: isActive }"
+  >
     <unicon
       v-if="icon"
       :name="Unicons[icon].name"
@@ -11,8 +14,8 @@
     >
       {{ labelname }}
     </span>
-</div>
-<div v-for="submenuItem in submenu" :key="submenuItem.label">
+  </div>
+  <div v-for="submenuItem in submenu" :key="submenuItem.label">
     <MenuSubItem
       :linkType="submenuItem.linkType"
       :labelName="submenuItem.label"
@@ -23,21 +26,24 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, defineProps, PropType} from "vue";
+import { ref, defineProps, PropType, watch } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useRouter } from "vue-router";
 import MenuSubItem from "./MenuSubItem.vue";
-import useUploadModal, { modalChoices }  from "../composables/useUploadModal";
-import {useCreateModal} from "./CreateModal.vue";
+import useUploadModal, { modalChoices } from "../composables/useUploadModal";
+import { useCreateModal } from "./CreateModal.vue";
 import { Unicons } from "@/types";
 import type { DamsIcons } from "../types";
 import { MenuLinkType } from "@/generated-types/queries";
-const { openUploadModal } = useUploadModal();
-const {openCreateModal} = useCreateModal()
+import { MenuItem } from "../generated-types/queries";
+
+const { openUploadModal, closeUploadModal } = useUploadModal();
+const { openCreateModal } = useCreateModal();
 const router = useRouter();
 const auth = useAuth();
 const showdropdown = ref(false);
-const submenu = ref<Array<any>>([]);
+const submenu = ref<Array<MenuItem>>([]);
+
 const props = defineProps({
   labelname: String,
   destination: String,
@@ -46,29 +52,39 @@ const props = defineProps({
     type: Object,
     default: null,
   },
-  icon:{
-    type:Object as PropType<DamsIcons>
+  icon: {
+    type: Object as PropType<DamsIcons>,
   },
 });
-const toggleDropDown = () => {
-  showdropdown.value = ! showdropdown.value;
-  console.log(showdropdown.value);
-};
+
+const isActive = ref(false);
 
 const handleClick = () => {
+  // Set isActive to true when the menu item is clicked
+  isActive.value = true;
+  
+  // Set isActive to false for other menu items
+  const menuItems = document.querySelectorAll('.menu-item');
+  menuItems.forEach(item => {
+    if (item !== event.currentTarget) {
+      item.classList.remove('IsActive');
+    }
+  });
   handleLinkType();
   toggleDropDown();
 };
+
+
 const handleLinkType = () => {
   if (props.linkType === MenuLinkType.Modal) {
     if (props.destination === "Upload") {
       openUploadModal(modalChoices.DROPZONE);
     }
-    if(props.destination === "Nieuw"){
+    if (props.destination === "Nieuw") {
       openCreateModal();
     }
   } else if (props.linkType === MenuLinkType.Route) {
-    router.push(`/${props.destination}`);
+    router.push(`${props.destination}`);
   }
 };
 const handleSubMenu = () => {
@@ -84,16 +100,31 @@ const handleSubMenu = () => {
     }
   }
 };
+
+const toggleDropDown = () => {
+  showdropdown.value = !showdropdown.value;
+  console.log(showdropdown.value);
+};
+
+watch(
+  () => router.currentRoute.value.path,
+  (newValue) => {
+    if (newValue === `/${props.destination}`) {
+      isActive.value = true;
+    } else {
+      isActive.value = false;
+    }
+  },
+  { immediate: true }
+);
 handleSubMenu();
 </script>
 <style>
-
 .IsActive {
   fill: #02c6f2;
   color: #02c6f2;
   background-color: var(--color-neutral-40);
-  border-radius: 10px;
+  border-radius: 8px;
   height: 2.3rem;
 }
-
 </style>

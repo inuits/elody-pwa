@@ -2,8 +2,7 @@
   <router-link
     v-if="show === true"
     :to="`${destination}`"
-    class="flex flex-column items-center dropdownMenu-item"
-    ActiveClass="IsActive"
+    class="flex flex-column items-center dropdownMenu-item IsActive"
   >
     <router-link
       :to="`${destination}`"
@@ -25,5 +24,23 @@ const props = defineProps({
 });
 </script>
 <style>
+.dropdownMenu-item {
+  cursor: pointer;
+  margin-left: 2.7rem;
+  margin-top: 0.3rem;
+  animation: dropdown 300ms ease-in-out forwards;
+  transform-origin: top center;
+}
 
+@keyframes dropdown {
+0% {
+    transform: translateY(0rem)
+}
+80% {
+    transform: translateY(1.1rem)
+}
+100% {
+    transform: translateY(1rem)
+}
+}
 </style>
