@@ -1,5 +1,6 @@
 <template>
-  <div
+
+<div
   v-show="props.menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
     @click="handleClick"
     class="flex flex-row items-center menu-item ml-3"
@@ -12,7 +13,9 @@
   <div v-for="submenuItem in submenu" :key="submenuItem.label"> 
     <MenuSubItem :linkType="submenuItem.linkType" :labelName="submenuItem.label" :destination="submenuItem.destination" :show="showdropdown"/>
   </div>
+
 </template>
+
 <script lang="ts" setup>
 import { ref, defineProps, PropType, watch } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
@@ -22,16 +25,17 @@ import { Unicons } from "@/types";
 import type { DamsIcons } from "../types";
 import { MenuLinkType, MenuItem } from "@/generated-types/queries";
 import useMenuHelper from "@/composables/useMenuHelper";
-const {checkIfRouteOrModal} = useMenuHelper()
+const { checkIfRouteOrModal, showdropdown, isActive, toggleDropDown } =
+  useMenuHelper();
 const router = useRouter();
 const auth = useAuth();
-const showdropdown = ref(false);
 const submenu = ref<Array<MenuItem>>([]);
 const props = defineProps({
-  menuitem:Object as PropType<MenuItem>,
-  subMenu: {type: Object,default: null,},
-  icon: {type: Object as PropType<DamsIcons>,},});
-const isActive = ref(false);
+  menuitem: Object as PropType<MenuItem>,
+  subMenu: { type: Object, default: null },
+  icon: { type: Object as PropType<DamsIcons> },
+});
+
 const handleClick = () => {
   // Set isActive to true when the menu item is clicked
   isActive.value = true;
@@ -45,6 +49,7 @@ const handleClick = () => {
   checkIfRouteOrModal(props.menuitem);
   toggleDropDown();
 };
+
 const handleSubMenu = () => {
   if (props.subMenu) {
     for (const key in props.subMenu) {
@@ -56,17 +61,7 @@ const handleSubMenu = () => {
       }
     }
   }
-};
-const toggleDropDown = () => {
-  showdropdown.value =  ! showdropdown.value;
-  if(showdropdown.value === true){
-    isActive.value = true;
-  }
-  else if(showdropdown.value === false){
-    isActive.value = false
-  }
-  console.log("Entities clicked" + showdropdown.value)  
-};
+}
 watch(
   () => router.currentRoute.value.path,
   (newValue) => {
@@ -79,6 +74,8 @@ watch(
   { immediate: true }
 );
 handleSubMenu();
+
 </script>
+
 <style>
 </style>
