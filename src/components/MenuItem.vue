@@ -1,5 +1,6 @@
 <template>
   <div
+  v-show="props.menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
     @click="handleClick"
     class="flex flex-row items-center menu-item ml-3"
     :class="{ IsActive: isActive }"
@@ -13,6 +14,7 @@
       class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
     >
       {{ props.menuitem?.label }}
+      {{ props.menuitem.isLoggedIn }}
     </span>
   </div>
   <div v-for="submenuItem in submenu" :key="submenuItem.label">
@@ -24,7 +26,6 @@
     />
   </div>
 </template>
-
 <script lang="ts" setup>
 import { ref, defineProps, PropType, watch } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
@@ -53,7 +54,6 @@ const isActive = ref(false);
 const handleClick = () => {
   // Set isActive to true when the menu item is clicked
   isActive.value = true;
-  
   // Set isActive to false for other menu items
   const menuItems = document.querySelectorAll('.menu-item');
   menuItems.forEach(item => {
@@ -67,7 +67,6 @@ const handleClick = () => {
 const handleSubMenu = () => {
   if (props.subMenu) {
     for (const key in props.subMenu) {
-      console.log("test", key);
       if (
         props.subMenu[key].linkType === MenuLinkType.Route ||
         props.subMenu[key].linkType === MenuLinkType.Modal
@@ -78,10 +77,15 @@ const handleSubMenu = () => {
   }
 };
 const toggleDropDown = () => {
-  showdropdown.value = !showdropdown.value;
-  console.log(showdropdown.value);
+  showdropdown.value =  ! showdropdown.value;
+  if(showdropdown.value === true){
+    isActive.value = true;
+  }
+  else if(showdropdown.value === false){
+    isActive.value = false
+  }
+  console.log("Entities clicked" + showdropdown.value)  
 };
-
 watch(
   () => router.currentRoute.value.path,
   (newValue) => {
@@ -96,10 +100,5 @@ watch(
 handleSubMenu();
 </script>
 <style>
-.IsActive {
-  fill: #02c6f2;
-  color: #02c6f2;
-  background-color: var(--color-neutral-40);
-  border-radius: 8px;
-  height: 2.3rem;}
+
 </style>

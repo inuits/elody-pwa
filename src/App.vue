@@ -118,19 +118,13 @@ export default defineComponent({
   transition: padding-left 300ms ease-in-out;
   padding-left: 20rem;
 }
+.IsActive {
+  fill: #02c6f2;
+  color: #02c6f2;
+  background-color: var(--color-neutral-40);
+  border-radius: 8px;
+  height: 2.3rem;}
 
-
-@keyframes dropdown {
-0% {
-    transform: scaleY(0)
-}
-80% {
-    transform: scaleY(1.1)
-}
-100% {
-    transform: scaleY(1)
-}
-}
 @keyframes logo-animation {
   from {
     transform: rotate(0);

@@ -34,13 +34,13 @@ const props = defineProps({
 
 @keyframes dropdown {
 0% {
-    transform: translateY(0rem)
+    transform: translateY(0)
 }
 80% {
-    transform: translateY(1.1rem)
+    transform: translateY(1)
 }
 100% {
-    transform: translateY(1rem)
+    transform: translateY(1)
 }
 }
 </style>

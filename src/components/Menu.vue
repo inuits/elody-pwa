@@ -12,7 +12,8 @@
       <MenuitemS
        :icon="menuItem.icon"
        :menuitem="menuItem"
-       :subMenu="menuItem.subMenu"/>
+       :subMenu="menuItem.subMenu"
+       />
     </div>
     <div class="flex flex-row items-center menu-item login-out">
       <BaseButton
@@ -29,7 +30,6 @@
         {{ $t("navigation.log-in") }}
       </span>
     </div>
-    
     <!-- Loguit -->
     <div class="flex flex-row items-center menu-item login-out">
       <BaseButton
@@ -111,9 +111,6 @@ const toggleDropDown = () => {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 300ms;
   overflow-x: hidden;
-}
-.navbar ~ .menu-item {
-  background-color: black;
 }
 .navbar:hover {
   width: 20rem;
