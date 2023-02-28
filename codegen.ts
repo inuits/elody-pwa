@@ -2,7 +2,7 @@ import type { CodegenConfig } from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
   overwrite: true,
-  schema: process.env.url + "/api/graphql",
+  schema: "https://coghent-web-dev.inuits.dev/api/graphql",
   generates: {
     "src/generated-types/queries.ts": {
       plugins: [
