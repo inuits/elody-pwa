@@ -2,8 +2,8 @@ import type { CodegenConfig } from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
   overwrite: true,
-  schema: "./**/*.schema.ts",
-  documents: "./**/*.queries.ts",
+  schema: "/app/schemas/*.schema.ts",
+  documents: "/app/schemas/*.queries.ts",
   generates: {
     "src/generated-types/queries.ts": {
       plugins: [
