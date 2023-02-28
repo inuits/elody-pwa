@@ -1,10 +1,8 @@
 import type { CodegenConfig } from "@graphql-codegen/cli";
-import * as dotenv from 'dotenv'
-dotenv.config()
 
 const config: CodegenConfig = {
   overwrite: true,
-  schema: process.env.baseUrl + "/api/graphql",
+  schema: process.env.url + "/api/graphql",
   generates: {
     "src/generated-types/queries.ts": {
       plugins: [
