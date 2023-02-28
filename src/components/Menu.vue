@@ -4,20 +4,14 @@
     v-show="!loading">
     <router-link
       :to="{ name: 'Home' }"
-      class="logo router-link text-base text-neutral-700 font-semibold flex justify-center items-center mb-8 text-xl"
-      @click="forceDisableEditModalHome">
+      class="logo router-link text-base text-neutral-700 font-semibold flex justify-center items-center mb-8 text-xl">
       {{ $t("navigation.title") }}
     </router-link> 
     <div v-for="menuItem in menuItems" :key="menuItem.label">
-      <MenuitemS
-       :icon="menuItem.icon"
-       :menuitem="menuItem"
-       :subMenu="menuItem.subMenu"
-       />
+      <MenuitemS :icon="menuItem.icon" :menuitem="menuItem" :subMenu="menuItem.subMenu"/>
     </div>
-    <div class="flex flex-row items-center menu-item login-out">
-      <BaseButton
-        v-if="auth.isAuthenticated.value === false"
+    <div class="flex flex-row items-center menu-item fixed bottom-4 left-3">
+      <BaseButton v-if="auth.isAuthenticated.value === false"
         :icon="Unicons.User.name"
         class="mt-1 menu-btn"
         @click="auth.redirectToLogin()"
@@ -31,21 +25,20 @@
       </span>
     </div>
     <!-- Loguit -->
-    <div class="flex flex-row items-center menu-item login-out">
+    <div class="flex flex-row items-center menu-item fixed bottom-4 left-3">
       <BaseButton
         v-if="auth.isAuthenticated.value === true"
         :icon="Unicons.SignOut.name"
         :icon-height="20"
         class="mt-1 menu-btn"
         bg-color="var(--color-neutral)"
-        @click="logout()"
-      />
+        @click="logout()"/>
       <span
         v-if="auth.isAuthenticated.value === true"
         class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-        @click="auth.logout()"
-      >
-        {{ $t("navigation.log-out") }}</span>
+        @click="auth.logout()">
+        {{ $t("navigation.log-out") }}
+      </span>
     </div>
   </nav>
 </template>
@@ -76,9 +69,7 @@ onResult((value) => {
   for (const key in value.data.Menu?.menu) {
     if (value.data.Menu?.menu.hasOwnProperty(key)) {
       //@ts-ignore
-      console.log(
-        `${key} LINK TYPE: ${JSON.stringify(value.data.Menu?.menu[key])}`
-      );
+      console.log(`${key} LINK TYPE: ${JSON.stringify(value.data.Menu?.menu[key])}`);
       //@ts-ignore
       if (
         value.data.Menu?.menu[key].linkType === "route" ||
@@ -90,20 +81,6 @@ onResult((value) => {
     }
   }
 });
-const forceDisableEditModalHome = () => {
-  router.push({ name: "Home" });
-  disableEditMode();
-};
-const logout = async () => {
-  await auth.logout();
-  showDropdown.value = false;
-  console.log("Clicked on entities");
-  router.push({ name: "Home" });
-};
-const toggleDropDown = () => {
-  showDropdown.value = !showDropdown.value;
-  console.log(showDropdown.value);
-};
 </script>
 <style>
 .navbar {
@@ -117,11 +94,6 @@ const toggleDropDown = () => {
 }
 .navbar:hover .router-link {
   justify-content: flex-start;
-}
-.login-out {
-  position: fixed;
-  bottom: 3%;
-  left: 1%;
 }
 .navbar:hover .nav-item-label {
   animation: showText 0.1s ease-in 0.2s forwards;

@@ -3,27 +3,14 @@
   v-show="props.menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
     @click="handleClick"
     class="flex flex-row items-center menu-item ml-3"
-    :class="{ IsActive: isActive }"
-  >
-    <unicon
-      v-if="icon"
-      :name="Unicons[icon].name"
-      height="18"
-    />
-    <span
-      class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-    >
+    :class="{ IsActive: isActive }">
+    <unicon v-if="icon" :name="Unicons[icon].name" height="18"/>
+    <span class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold">
       {{ props.menuitem?.label }}
-      {{ props.menuitem.isLoggedIn }}
     </span>
   </div>
-  <div v-for="submenuItem in submenu" :key="submenuItem.label">
-    <MenuSubItem
-      :linkType="submenuItem.linkType"
-      :labelName="submenuItem.label"
-      :destination="submenuItem.destination"
-      :show="showdropdown"
-    />
+  <div v-for="submenuItem in submenu" :key="submenuItem.label"> 
+    <MenuSubItem :linkType="submenuItem.linkType" :labelName="submenuItem.label" :destination="submenuItem.destination" :show="showdropdown"/>
   </div>
 </template>
 <script lang="ts" setup>
@@ -31,14 +18,10 @@ import { ref, defineProps, PropType, watch } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useRouter } from "vue-router";
 import MenuSubItem from "./MenuSubItem.vue";
-import useUploadModal, { modalChoices } from "../composables/useUploadModal";
-import { useCreateModal } from "./CreateModal.vue";
 import { Unicons } from "@/types";
 import type { DamsIcons } from "../types";
 import { MenuLinkType, MenuItem } from "@/generated-types/queries";
 import useMenuHelper from "@/composables/useMenuHelper";
-const { openUploadModal, closeUploadModal } = useUploadModal();
-const { openCreateModal, closeCreateModal } = useCreateModal();
 const {checkIfRouteOrModal} = useMenuHelper()
 const router = useRouter();
 const auth = useAuth();
@@ -48,9 +31,7 @@ const props = defineProps({
   menuitem:Object as PropType<MenuItem>,
   subMenu: {type: Object,default: null,},
   icon: {type: Object as PropType<DamsIcons>,},});
-
 const isActive = ref(false);
-
 const handleClick = () => {
   // Set isActive to true when the menu item is clicked
   isActive.value = true;
@@ -100,5 +81,4 @@ watch(
 handleSubMenu();
 </script>
 <style>
-
 </style>

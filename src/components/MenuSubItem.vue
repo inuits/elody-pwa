@@ -24,23 +24,4 @@ const props = defineProps({
 });
 </script>
 <style>
-.dropdownMenu-item {
-  cursor: pointer;
-  margin-left: 2.7rem;
-  margin-top: 0.3rem;
-  animation: dropdown 300ms ease-in-out forwards;
-  transform-origin: top center;
-}
-
-@keyframes dropdown {
-0% {
-    transform: translateY(0)
-}
-80% {
-    transform: translateY(1)
-}
-100% {
-    transform: translateY(1)
-}
-}
 </style>
