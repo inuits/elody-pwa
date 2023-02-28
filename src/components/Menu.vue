@@ -10,10 +10,8 @@
     </router-link> 
     <div v-for="menuItem in menuItems" :key="menuItem.label">
       <MenuitemS
-       :linkType="menuItem.linkType"
-       :destination="menuItem.destination"
-       :labelname="menuItem.label"
        :icon="menuItem.icon"
+       :menuitem="menuItem"
        :subMenu="menuItem.subMenu"/>
     </div>
     <div class="flex flex-row items-center menu-item login-out">

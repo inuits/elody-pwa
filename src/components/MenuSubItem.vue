@@ -2,7 +2,7 @@
   <router-link
     v-if="show === true"
     :to="`${destination}`"
-    class="flex flex-column items-center dropdownMenu-item IsActive"
+    class="flex flex-column items-center dropdownMenu-item"
   >
     <router-link
       :to="`${destination}`"

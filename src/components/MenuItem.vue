@@ -12,7 +12,7 @@
     <span
       class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
     >
-      {{ labelname }}
+      {{ props.menuitem?.label }}
     </span>
   </div>
   <div v-for="submenuItem in submenu" :key="submenuItem.label">
@@ -34,28 +34,19 @@ import useUploadModal, { modalChoices } from "../composables/useUploadModal";
 import { useCreateModal } from "./CreateModal.vue";
 import { Unicons } from "@/types";
 import type { DamsIcons } from "../types";
-import { MenuLinkType } from "@/generated-types/queries";
-import { MenuItem } from "../generated-types/queries";
-
+import { MenuLinkType, MenuItem } from "@/generated-types/queries";
+import useMenuHelper from "@/composables/useMenuHelper";
 const { openUploadModal, closeUploadModal } = useUploadModal();
-const { openCreateModal } = useCreateModal();
+const { openCreateModal, closeCreateModal } = useCreateModal();
+const {checkIfRouteOrModal} = useMenuHelper()
 const router = useRouter();
 const auth = useAuth();
 const showdropdown = ref(false);
 const submenu = ref<Array<MenuItem>>([]);
-
 const props = defineProps({
-  labelname: String,
-  destination: String,
-  linkType: String,
-  subMenu: {
-    type: Object,
-    default: null,
-  },
-  icon: {
-    type: Object as PropType<DamsIcons>,
-  },
-});
+  menuitem:Object as PropType<MenuItem>,
+  subMenu: {type: Object,default: null},
+  icon: {type: Object as PropType<DamsIcons>,},});
 
 const isActive = ref(false);
 
@@ -70,22 +61,8 @@ const handleClick = () => {
       item.classList.remove('IsActive');
     }
   });
-  handleLinkType();
+  checkIfRouteOrModal(props.menuitem)
   toggleDropDown();
-};
-
-
-const handleLinkType = () => {
-  if (props.linkType === MenuLinkType.Modal) {
-    if (props.destination === "Upload") {
-      openUploadModal(modalChoices.DROPZONE);
-    }
-    if (props.destination === "Nieuw") {
-      openCreateModal();
-    }
-  } else if (props.linkType === MenuLinkType.Route) {
-    router.push(`${props.destination}`);
-  }
 };
 const handleSubMenu = () => {
   if (props.subMenu) {
@@ -100,7 +77,6 @@ const handleSubMenu = () => {
     }
   }
 };
-
 const toggleDropDown = () => {
   showdropdown.value = !showdropdown.value;
   console.log(showdropdown.value);
@@ -109,7 +85,7 @@ const toggleDropDown = () => {
 watch(
   () => router.currentRoute.value.path,
   (newValue) => {
-    if (newValue === `/${props.destination}`) {
+    if (newValue === `/${props.menuitem?.destination}`) {
       isActive.value = true;
     } else {
       isActive.value = false;
