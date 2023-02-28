@@ -1,16 +1,15 @@
-import useDropzoneHelper from "@/composables/useDropzoneHelper";
-import { ref } from "vue";
 import  { MenuLinkType}  from "@/generated-types/queries";
 import type { MenuItem } from "@/generated-types/queries";
-import { useRouter } from "vue-router";
+import {useRouter}   from "vue-router";
 import useUploadModal, { modalChoices }  from "../composables/useUploadModal";
 import { useCreateModal } from "@/components/CreateModal.vue";
 const { openUploadModal } = useUploadModal();
 const {openCreateModal} = useCreateModal();
-const router = useRouter();
+
 
 
 const useMenuHelper = () => {
+  const router = useRouter();
     const checkIfRouteOrModal = (_menuItem:MenuItem) =>{
         if (_menuItem.linkType === MenuLinkType.Modal) {
             if (_menuItem.destination === "Upload") {

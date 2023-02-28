@@ -112,8 +112,8 @@ const toggleDropDown = () => {
   transition-duration: 300ms;
   overflow-x: hidden;
 }
-.navbar + .menu-item {
-  background-color: none;
+.navbar ~ .menu-item {
+  background-color: black;
 }
 .navbar:hover {
   width: 20rem;

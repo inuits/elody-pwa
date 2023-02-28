@@ -45,7 +45,7 @@ const showdropdown = ref(false);
 const submenu = ref<Array<MenuItem>>([]);
 const props = defineProps({
   menuitem:Object as PropType<MenuItem>,
-  subMenu: {type: Object,default: null},
+  subMenu: {type: Object,default: null,},
   icon: {type: Object as PropType<DamsIcons>,},});
 
 const isActive = ref(false);
@@ -61,7 +61,7 @@ const handleClick = () => {
       item.classList.remove('IsActive');
     }
   });
-  checkIfRouteOrModal(props.menuitem)
+  checkIfRouteOrModal(props.menuitem);
   toggleDropDown();
 };
 const handleSubMenu = () => {
@@ -101,6 +101,5 @@ handleSubMenu();
   color: #02c6f2;
   background-color: var(--color-neutral-40);
   border-radius: 8px;
-  height: 2.3rem;
-}
+  height: 2.3rem;}
 </style>
