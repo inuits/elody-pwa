@@ -11,6 +11,8 @@ COPY ./ ./app/
 
 WORKDIR /app/
 
+RUN printenv
+
 RUN pnpm i
 
 RUN pnpm run build
