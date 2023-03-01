@@ -1,11 +1,15 @@
-import { mount } from '@vue/test-utils'
-import Menu from '@/components/Menu.vue'
-import { assert, describe, expect, it } from "vitest";
+import { expect, test } from "vitest";
+import useMenuHelper from "@/composables/useMenuHelper";
+const {toggleDropDown, showdropdown} = useMenuHelper();
+test('toggleDropDown toggles showdropdown value', () => {
+  // Arrange
+  // Act
+  toggleDropDown();
+  // Assert
+  expect(showdropdown.value).toBe(true);
 
-describe('Menucomponent', () => {
-    it('renders correctly', () => {
-      const wrapper = mount(Menu)
-      expect(wrapper.exists()).toBe(false)
-    })
-  })
-  
+  // Act
+  toggleDropDown();
+  // Assert 
+  expect(showdropdown.value).toBe(false);
+});

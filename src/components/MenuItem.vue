@@ -65,7 +65,7 @@ const handleSubMenu = () => {
 watch(
   () => uploadModalState.value.state,
   (newValue) => {
-    if (newValue === `hide`) {
+    if (newValue === `hide` ) {
       resetSelectedMenuItem()
     } 
   }
