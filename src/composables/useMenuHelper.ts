@@ -6,13 +6,11 @@ import { useCreateModal } from "@/components/CreateModal.vue";
 import { ref } from "vue";
 const { openUploadModal, closeUploadModal } = useUploadModal();
 const { openCreateModal, closeCreateModal } = useCreateModal();
+const selectedMenuItem = ref<String>("");
 
-
-
-const useMenuHelper = () => {
+export const useMenuHelper = () => {
   const router = useRouter();
   const showdropdown = ref(false);
-  const isActive = ref(false);
   const checkIfRouteOrModal = (_menuItem: MenuItem) => {
     if (_menuItem.linkType === MenuLinkType.Modal) {
       if (_menuItem.destination === "Upload") {
@@ -21,23 +19,34 @@ const useMenuHelper = () => {
       if (_menuItem.destination === "Nieuw") {
         openCreateModal();
       }
-      else {
-      }
     } else if (_menuItem.linkType === MenuLinkType.Route) {
       router.push(`/${_menuItem.destination}`);
     }
   }
   const toggleDropDown = () => {
     showdropdown.value = !showdropdown.value;
-    isActive.value = showdropdown.value;
   };
-
+  const isMenuItemActive = (menuItem:MenuItem):boolean => {
+    if(selectedMenuItem.value === menuItem.destination){
+      return true;
+    }
+    else {
+      showdropdown.value = false;
+      return false;
+    }
+  } 
+  const resetSelectedMenuItem = () => {
+    selectedMenuItem.value = ""
+  }
+ 
   return {
     checkIfRouteOrModal,
     showdropdown,
-    isActive,
-    toggleDropDown
-  }
+    toggleDropDown,
+    selectedMenuItem,
+    isMenuItemActive,
+    resetSelectedMenuItem
+    }
 };
 
 

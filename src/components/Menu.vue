@@ -55,7 +55,6 @@ import { useQuery } from "@vue/apollo-composable";
 const auth = useAuth();
 const { determinePermission, loading } = usePermissions();
 const router = useRouter();
-const showDropdown = ref(false);
 const menuItems = ref<Array<MenuItem>>([]);
 const queryVariables = reactive<GetMenuQueryVariables>({
   name: "main-menu",
@@ -89,8 +88,14 @@ onResult((value) => {
   transition-duration: 300ms;
   overflow-x: hidden;
 }
+.navbar .menu-item {
+  fill: none;
+  color: none;
+}
 .navbar:hover {
   width: 20rem;
+}
+.navbar:hover .menu-item {
 }
 .navbar:hover .router-link {
   justify-content: flex-start;

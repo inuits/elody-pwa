@@ -118,30 +118,24 @@ export default defineComponent({
   transition: padding-left 300ms ease-in-out;
   padding-left: 20rem;
 }
-.IsActive {
-  fill: #02c6f2;
-  color: #02c6f2;
-  background-color: var(--color-neutral-40);
-  border-radius: 8px;
-  height: 2.3rem;
-}
+
 .dropdownMenu-item {
   cursor: pointer;
-  margin-left: 2.7rem;
-  margin-top: 0.3rem;
-  animation: dropdown 300ms ease-in-out forwards;
+  margin-left: 1.2rem;
+  margin-top: 0.4rem;
+  animation: dropdown 1ms ease-in-out forwards;
   transform-origin: top center;
 }
 
 @keyframes dropdown {
   0% {
-    transform: translateY(0);
+    margin-top: 0;
   }
   80% {
-    transform: translateY(1);
+    margin-top: 0.1rem;
   }
   100% {
-    transform: translateY(1);
+    margin-top: 0.3rem;
   }
 }
 
