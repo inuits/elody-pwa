@@ -63,6 +63,7 @@ const { result: menuQueryResult, onResult } = useQuery<GetMenuQuery>(
   GetMenuDocument,
   queryVariables
 );
+
 onResult((value) => {
   menuItems.value = [];
   for (const key in value.data.Menu?.menu) {
@@ -89,7 +90,6 @@ onResult((value) => {
   overflow-x: hidden;
 }
 .navbar .menu-item {
-  fill: none;
   color: none;
 }
 .navbar:hover {
