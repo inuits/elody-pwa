@@ -118,32 +118,49 @@ const callUploadEndpoint = async () => {
   for (let file of filesInDropzone.value) {
     const form = new FormData();
     form.append("title", file.name);
-    form.append("file", file);
 
     await fetch(`/api/upload?filename=${file.name}`, {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       method: "POST",
       body: form,
     })
-      .then((response: Response) => {
-        if (!response.ok) throw response;
+      .then((response: Response) => response.json())
+      .then((json: { url: string }) => {
+        // if (!response.ok) throw response;
+        console.log(file);
+        const formUploadData = new FormData();
+        formUploadData.append("file", file);
 
-        increaseSuccessCounter();
-        createNotificationOverwrite(
-          NotificationType.default,
-          t("dropzone.successNotification.title"),
-          t("dropzone.successNotification.description")
-        );
-        closeUploadModal();
-      })
-      .catch(() => {
-        createNotificationOverwrite(
-          NotificationType.error,
-          t("dropzone.errorNotification.title"),
-          t("dropzone.errorNotification.description")
-        );
-      })
-      .finally(() => (isUploading.value = false));
+        fetch(
+          json.url.replace(
+            "storage-api:5000/",
+            "storage-api.digipolis-dams.localhost:8100"
+          ),
+          {
+            method: "POST",
+            body: formUploadData,
+          }
+        )
+          .then((response: Response) => {
+            if (!response.ok) throw response;
+
+            increaseSuccessCounter();
+            createNotificationOverwrite(
+              NotificationType.default,
+              t("dropzone.successNotification.title"),
+              t("dropzone.successNotification.description")
+            );
+            closeUploadModal();
+          })
+          .catch(() => {
+            createNotificationOverwrite(
+              NotificationType.error,
+              t("dropzone.errorNotification.title"),
+              t("dropzone.errorNotification.description")
+            );
+          })
+          .finally(() => (isUploading.value = false));
+      });
   }
 };
 
