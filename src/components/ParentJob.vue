@@ -148,7 +148,7 @@ export default defineComponent({
         id: props.job._key || "",
         failed: showFailedOnly.value,
       },
-      queryOptions.value
+      queryOptions
     );
     const subjobLimit = ref<number>(10);
 
