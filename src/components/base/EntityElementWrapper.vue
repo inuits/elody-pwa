@@ -1,7 +1,7 @@
 <template>
-  <div class="">
-    <div class="bg-accent-light">
-      <span class="text-text-body">{{ label }}</span>
+  <div class="w-3/4">
+    <div class="bg-accent-light rounded-t-lg">
+      <span class="subtitle">{{ label }}</span>
       <slot name="actions"></slot>
     </div>
 
