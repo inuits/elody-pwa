@@ -1,12 +1,5 @@
 <template>
-  <div
-    :class="[
-      'relative w-full h-full',
-      {
-        checkboard: loading,
-      },
-    ]"
-  >
+  <div :class="['relative w-full h-full']">
     <div ref="OpenSeadragon-toolbar" class="hidden" />
     <viewer-toolbar
       v-model:zoomIn="zoomInDiv"
@@ -21,7 +14,7 @@
     >
       {{ $t("loading") }}
     </div>
-    <div ref="OpenSeadragonDiv" class="w-full h-full z-0 checkboard" />
+    <div ref="OpenSeadragonDiv" class="w-full h-full z-0" />
   </div>
 </template>
 

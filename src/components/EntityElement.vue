@@ -1,6 +1,6 @@
 <template>
-  <div class="py-5 w-full">
-    <div v-for="(element, index) in elements" :key="index">
+  <div class="p-5 w-full bg-tag-neutral h-full">
+    <div v-for="(element, index) in elements" :key="index" class="h-auto">
       <entity-element-list
         v-if="element.__typename === 'EntityListElement'"
         RelationKey="relatie"
