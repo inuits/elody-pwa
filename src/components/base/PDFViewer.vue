@@ -51,7 +51,7 @@ import type { PropType } from "vue";
 import * as pdfjsLibImport from "pdfjs-dist";
 const pdfjsLib: typeof import("pdfjs-dist") = pdfjsLibImport;
 import "pdfjs-dist/build/pdf.worker.entry";
-import { MediaFileMetadata } from "@/generated-types/queries";
+import { MediaFile } from "@/generated-types/queries";
 import { Unicons } from "../../types";
 import PdfToolbar from "../PdfToolbar.vue";
 
@@ -60,7 +60,7 @@ export default defineComponent({
   components: { PdfToolbar },
   props: {
     source: {
-      type: Object as PropType<MediaFileMetadata>,
+      type: Object as PropType<MediaFile>,
       required: true,
     },
   },
