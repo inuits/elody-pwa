@@ -1,6 +1,6 @@
 <template>
-  <div class="py-5 w-full overflow-y-scroll">
-    <div v-for="(column, index) in columns" :key="index">
+  <div class="w-full overflow-y-scroll">
+    <div v-for="(column, index) in columns" :key="index" class="h-full">
       <entity-element :elements="column.elements"></entity-element>
     </div>
   </div>
