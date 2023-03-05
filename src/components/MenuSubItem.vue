@@ -2,7 +2,7 @@
   <router-link
     v-if="show === true"
     :to="`${destination}`"
-    class="flex flex-column items-center dropdownMenu-item"
+    class="flex flex-column items-center cursor-pointer ml-9 mt-2 origin-top-center"
   >
     <router-link
       :to="`${destination}`"
@@ -24,4 +24,5 @@ const props = defineProps({
 });
 </script>
 <style>
+
 </style>

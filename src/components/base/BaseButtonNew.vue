@@ -14,6 +14,7 @@
     <unicon
       v-if="props.icon !== 'no-icon'"
       :name="Unicons[props.icon].name"
+      :height="height"
     />
     <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
   </button>
@@ -22,6 +23,7 @@
 <script lang="ts" setup>
 import type { DamsIcons } from "@/types";
 import { Unicons } from "@/types";
+import { type } from "os";
 import { computed } from "vue";
 
 type PseudoStyle = {
@@ -76,12 +78,15 @@ const props = withDefaults(
     icon: DamsIcons | "no-icon";
     buttonStyle: ButtonStyle;
     disabled: boolean;
+    height:number
+    
   }>(),
   {
     loading: false,
     icon: "no-icon",
     buttonStyle: "default",
     disabled: false,
+    height:18
   }
 );
 

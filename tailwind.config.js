@@ -40,6 +40,7 @@ module.exports = {
         white: "#FFFFFF",
         lightest: "#F2F7F8",
         light: "#E8EEF0",
+        blue: "#22D3EE",
       },
       text: {
         light: "#6795A2",
@@ -57,6 +58,9 @@ module.exports = {
         400: "#0052CC",
         500: "#0747A6",
         600: "#02C6F2"
+      },
+      cyan:{
+        600:"#22D3EE"
       },
       red: {
         default: "#e50000",

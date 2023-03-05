@@ -1,6 +1,6 @@
 <template>
   <div
-    v-show="modalState === 'show' || modalState === 'loading'"
+    v-show="modalState === ModalState.Show || modalState === ModalState.Loading"
     class="fixed overflow-y-auto"
     :class="{
       'inset-0': modalPosition === 'center',
@@ -51,9 +51,10 @@
 </template>
 
 <script lang="ts" setup>
+import { ModalState } from "@/composables/useAvailableModals";
 import { toRefs, watch } from "vue";
 
-export type ModalState = "initial" | "show" | "hide" | "loading";
+
 export type ModalPosition = "center" | "left" | "right";
 
 const props = withDefaults(
@@ -64,7 +65,7 @@ const props = withDefaults(
     scroll: boolean;
   }>(),
   {
-    modalState: "hide",
+    modalState: ModalState.Hide,
     modelPostion: "center",
     large: false,
     scroll: false,
@@ -81,7 +82,7 @@ const hideModal: () => void = () => {
 const { modalState } = toRefs(props);
 
 watch(modalState, (value: ModalState) => {
-  if (value == "show" || value == "loading") {
+  if (value == ModalState.Show|| value == ModalState.Loading) {
     document.body.classList.add("overflow-hidden");
   } else {
     document.body.classList.remove("overflow-hidden");

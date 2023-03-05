@@ -2,60 +2,59 @@
   <nav
     class="navbar fixed left-0 top-0 w-24 h-screen flex flex-col justify-start align-center pt-10 bg-neutral-20 px-5 z-50"
     v-show="!loading">
+
     <router-link
       :to="{ name: 'Home' }"
       class="logo router-link text-base text-neutral-700 font-semibold flex justify-center items-center mb-8 text-xl">
       {{ $t("navigation.title") }}
-    </router-link> 
+    </router-link>
+
     <div v-for="menuItem in menuItems" :key="menuItem.label">
-      <MenuitemS :icon="menuItem.icon" :menuitem="menuItem" :subMenu="menuItem.subMenu"/>
+      <Menuitem :icon="menuItem.icon" :menuitem="menuItem" :subMenu="menuItem.subMenu"/>
     </div>
-    <div class="flex flex-row items-center menu-item fixed bottom-4 left-3">
-      <BaseButton v-if="auth.isAuthenticated.value === false"
-        :icon="Unicons.User.name"
-        class="mt-1 menu-btn"
-        @click="auth.redirectToLogin()"
-        :icon-height="20"
-        bg-color="var(--color-neutral)"/>
-      <span
-        v-if="auth.isAuthenticated.value === false"
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-        @click="auth.redirectToLogin()">
-        {{ $t("navigation.log-in") }}
-      </span>
+
+    <div class="flex flex-row items-center menu-item fixed bottom-4">
+      <BaseButtonNew
+          v-if="auth.isAuthenticated.value === false"
+          class="w-full"
+          :label="$t('navigation.log-in')"
+          icon="User"
+          button-style="default"
+          @click="auth.redirectToLogin()"
+          :height=17
+        />
     </div>
-    <!-- Loguit -->
+
     <div class="flex flex-row items-center menu-item fixed bottom-4 left-3">
-      <BaseButton
-        v-if="auth.isAuthenticated.value === true"
-        :icon="Unicons.SignOut.name"
-        :icon-height="20"
-        class="mt-1 menu-btn"
-        bg-color="var(--color-neutral)"
-        @click="logout()"/>
-      <span
-        v-if="auth.isAuthenticated.value === true"
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-        @click="auth.logout()">
-        {{ $t("navigation.log-out") }}
-      </span>
+      <BaseButtonNew
+          v-if="auth.isAuthenticated.value === true"
+          class="w-full"
+          :label="$t('navigation.log-out')"
+          icon="SignOut"
+          button-style="default"
+          :height=17
+          @click="auth.logout()"
+        />
     </div>
   </nav>
 </template>
+
 <script lang="ts" setup>
 import { reactive, ref } from "vue";
-import BaseButton from "./base/BaseButton.vue";
+import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { Unicons } from "../types";
 import { useRouter, RouterLink } from "vue-router";
 import { useAuth } from "session-vue-3-oidc-library";
 import { usePermissions } from "../composables/usePermissions";
-import {GetMenuDocument,GetMenuQuery,GetMenuQueryVariables,type MenuItem} from "../generated-types/queries";
-import MenuitemS from "./MenuItem.vue";
+import {GetMenuDocument,GetMenuQuery,GetMenuQueryVariables,MenuLinkType,type menuItem} from "../generated-types/queries";
+import Menuitem from "./MenuItem.vue";
 import { useQuery } from "@vue/apollo-composable";
+
+
 const auth = useAuth();
 const { determinePermission, loading } = usePermissions();
 const router = useRouter();
-const menuItems = ref<Array<MenuItem>>([]);
+const menuItems = ref<Array<menuItem>>([]);
 const queryVariables = reactive<GetMenuQueryVariables>({
   name: "main-menu",
 });
@@ -68,15 +67,11 @@ onResult((value) => {
   menuItems.value = [];
   for (const key in value.data.Menu?.menu) {
     if (value.data.Menu?.menu.hasOwnProperty(key)) {
-      //@ts-ignore
-      console.log(`${key} LINK TYPE: ${JSON.stringify(value.data.Menu?.menu[key])}`);
-      //@ts-ignore
       if (
-        value.data.Menu?.menu[key].linkType === "route" ||
-        value.data.Menu?.menu[key].linkType === "modal"
+        value.data.Menu?.menu[key].linkType === MenuLinkType.Route ||
+        value.data.Menu?.menu[key].linkType === MenuLinkType.Modal
       ) {
         menuItems.value.push(value.data.Menu?.menu[key]);
-        console.log(value.data.Menu?.menu.entities.subMenu);
       }
     }
   }
