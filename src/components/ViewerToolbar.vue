@@ -88,6 +88,8 @@ export default defineComponent({
     const zoomOutRef = ref<HTMLDivElement | undefined>(undefined);
     const fullPageRef = ref<HTMLDivElement | undefined>(undefined);
     const homeRef = ref<HTMLDivElement | undefined>(undefined);
+    const previousMediafileRef = ref<HTMLDivElement | undefined>(undefined);
+    const nextMediafileRef = ref<HTMLDivElement | undefined>(undefined);
 
     onMounted(() => {
       emit("update:zoomIn", zoomInRef.value);
@@ -108,6 +110,8 @@ export default defineComponent({
       zoomOutRef,
       fullPageRef,
       homeRef,
+      previousMediafileRef,
+      nextMediafileRef,
       downloadImage,
     };
   },
