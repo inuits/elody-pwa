@@ -1,6 +1,10 @@
 <template>
   <div class="w-full overflow-y-scroll">
-    <div v-for="(column, index) in columns" :key="index" class="h-full">
+    <div
+      v-for="(column, index) in columns"
+      :key="index"
+      :class="'h-full ' + convertSizeToTailwind(column.size)"
+    >
       <entity-element :elements="column.elements"></entity-element>
     </div>
   </div>
@@ -9,6 +13,7 @@
 import { computed } from "vue";
 import type { ColumnList, Column } from "@/generated-types/queries";
 import EntityElement from "./EntityElement.vue";
+import { convertSizeToTailwind } from "@/helpers";
 
 const props = defineProps<{
   columnList: ColumnList;

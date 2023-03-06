@@ -31,23 +31,35 @@
         />
       </a>
     </div>
+    <div>
+      <a ref="previousMediafileRef">
+        <unicon
+          :name="Unicons.ArrowCircleLeft.name"
+          height="20"
+          class="text-neutral-700 cursor-pointer"
+        />
+      </a>
+      <a ref="nextMediafileRef">
+        <unicon
+          :name="Unicons.ArrowCircleRight.name"
+          height="20"
+          class="text-neutral-700 cursor-pointer"
+        />
+      </a>
+    </div>
     <a ref="homeRef" class="text-sm mr-2 text-neutral-700 cursor-pointer">{{
       $t("upload.reset")
     }}</a>
   </div>
-  <MediaInfo />
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted, ref } from "vue";
 import type { PropType } from "vue";
 import { Unicons } from "../types";
-import MediaInfo from "./base/MediaInfo.vue";
 export default defineComponent({
   name: "ViewerToolbar",
-  components: {
-    MediaInfo,
-  },
+  components: {},
   props: {
     zoomIn: {
       type: Object as PropType<HTMLDivElement | string | null>,

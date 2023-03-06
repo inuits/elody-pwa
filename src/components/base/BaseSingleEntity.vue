@@ -33,7 +33,7 @@
   </div>
   <div
     v-else
-    class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0 animate-pulse bg-neutral-20 text-neutral-20"
+    class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0 animate-pulse text-neutral-20"
   />
 </template>
 

@@ -1,6 +1,6 @@
 <template>
-  <div class="p-5 w-full bg-tag-neutral h-full">
-    <div v-for="(element, index) in elements" :key="index" class="h-auto">
+  <div :class="'h-full w-full flex flex-col'">
+    <div v-for="(element, index) in elements" :key="index" class="p-5 flex-1">
       <entity-element-list
         v-if="element.__typename === 'EntityListElement'"
         RelationKey="relatie"
