@@ -94,7 +94,7 @@ watch(
 watch(
   () => modalState.value.state,
   (state) => {
-    if (state === modalState.value.state) {
+    if (state === 'hide') {
       resetSelectedMenuItem();
     }
   }

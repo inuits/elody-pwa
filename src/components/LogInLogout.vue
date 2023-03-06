@@ -1,33 +1,43 @@
 <template>
   <div class="flex flex-row items-center menu-item fixed bottom-4">
-    <BaseButtonNew
+    <unicon
       v-if="auth.isAuthenticated.value === false"
-      class="w-full"
-      :label="$t('navigation.log-in')"
-      icon="User"
-      button-style="default"
       @click="auth.redirectToLogin()"
-      :height="17"
+      :name="Unicons.User.name"
+      height="20"
+      class="mt-1 menu-btn ml-2"
     />
+    <span
+      v-if="auth.isAuthenticated.value === false"
+      @click="auth.redirectToLogin()"
+      class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+    >
+      {{ $t("navigation.log-in") }}
+    </span>
   </div>
 
   <div class="flex flex-row items-center menu-item fixed bottom-4 left-3">
-    <BaseButtonNew
+    <unicon
       v-if="auth.isAuthenticated.value === true"
-      class="w-full"
-      :label="$t('navigation.log-out')"
-      icon="SignOut"
-      button-style="default"
-      :height="17"
       @click="auth.logout()"
+      :name="Unicons.SignOut.name"
+      height="20"
+      class="mt-1 menu-btn ml-2"
     />
+    <span
+      v-if="auth.isAuthenticated.value === true"
+      @click="auth.logout()"
+      class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+    >
+      {{ $t("navigation.log-out") }}
+    </span>
   </div>
 </template>
 
 <script lang="ts" setup>
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { usePermissions } from "@/composables/usePermissions";
+import { Unicons } from "@/types";
 const auth = useAuth();
 const { determinePermission, loading } = usePermissions();
 </script>
