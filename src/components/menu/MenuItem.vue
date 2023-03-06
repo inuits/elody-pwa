@@ -16,7 +16,6 @@
     <div
       v-for="submenuItem in menuSubitem"
       :key="submenuItem.label"
-      class="dropdownMenu-item"
     >
       <MenuSubItem
         :linkType="submenuItem.linkType"
@@ -47,15 +46,19 @@ const {
   selectedMenuItem,
   resetSelectedMenuItem,
 } = useMenuHelper();
+
 const router = useRouter();
+
 const auth = useAuth();
+
 const menuSubitem = ref<Array<MenuItem>>([]);
-const { openModal, closeModal, modalState } =
-  useAvailableModals();
+
+const { openModal, closeModal, modalState } = useAvailableModals();
+
 const props = defineProps<{
   menuitem: MenuItem;
   subMenu: MenuItem;
-  icon: DamsIcon;
+  icon: DamsIcons;
 }>();
 
 const handleClick = () => {
@@ -100,20 +103,7 @@ watch(
 handleSubMenu();
 </script>
 <style>
-.dropdownMenu-item {
-  animation: dropdown 1ms ease-in-out forwards;
-}
-@keyframes dropdown {
-  0% {
-    margin-top: 0;
-  }
-  80% {
-    margin-top: 0.1rem;
-  }
-  100% {
-    margin-top: 0.3rem;
-  }
-}
+
 .IsActive {
   fill: #02c6f2;
   color: #02c6f2;

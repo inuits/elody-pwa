@@ -1,25 +1,36 @@
 <template>
   <nav
     class="navbar fixed left-0 top-0 w-24 h-screen flex flex-col justify-start align-center pt-10 bg-neutral-20 px-5 z-50"
-    v-show="!loading">
-
+    v-show="!loading"
+  >
     <router-link
       :to="{ name: 'Home' }"
-      class="logo router-link text-base text-neutral-700 font-semibold flex justify-center items-center mb-8 text-xl">
+      class="logo router-link text-base text-neutral-700 font-semibold flex justify-center items-center mb-8 text-xl"
+    >
       {{ $t("navigation.title") }}
     </router-link>
 
     <div v-for="menuItem in menuItems" :key="menuItem.label">
-      <Menuitem :icon="menuItem.icon" :menuitem="menuItem" :subMenu="menuItem.subMenu"/>
+      <Menuitem
+        :icon="menuItem.icon"
+        :menuitem="menuItem"
+        :subMenu="menuItem.subMenu"
+      />
     </div>
-    <LogInLogout/>
+    <LogInLogout />
   </nav>
 </template>
 
 <script lang="ts" setup>
 import { reactive, ref } from "vue";
 import { useRouter, RouterLink } from "vue-router";
-import {GetMenuDocument,GetMenuQuery,GetMenuQueryVariables,MenuLinkType,type menuItem} from "@/generated-types/queries";
+import {
+  GetMenuDocument,
+  GetMenuQuery,
+  GetMenuQueryVariables,
+  MenuLinkType,
+  type menuItem,
+} from "@/generated-types/queries";
 import Menuitem from "@/components/menu/MenuItem.vue";
 import { useQuery } from "@vue/apollo-composable";
 import LogInLogout from "@/components/LogInLogout.vue";
