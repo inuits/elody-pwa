@@ -53,7 +53,7 @@ import type {
 } from "../../generated-types/queries";
 import { usePageInfo } from "../../composables/usePageInfo";
 import { useEditMode } from "../../composables/useEdit";
-import { useEntityMediafileSelector } from "../EntityImageSelection.vue";
+import { useEntityMediafileSelector } from "../EntityImageSelectionOld.vue";
 import { useRoute, onBeforeRouteUpdate } from "vue-router";
 import { asString } from "@/helpers";
 import useMetaDataHelper from "../../composables/useMetaDataHelper";
