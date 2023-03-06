@@ -12,6 +12,22 @@
       >
         {{ menuitem?.label }}
       </span>
+      <div v-if="menuitem.subMenu">
+      <unicon
+      v-if="showdropdown"
+      @click="handleClick"
+      :name="Unicons.AngleDown.name"
+      height="20"
+      class="ml-[7.5rem] mt-1"
+    />
+    <unicon
+    v-if="showdropdown === false"
+      @click="handleClick"
+      :name="Unicons.AngleDown.name"
+      height="20"
+      class="rotate-180 ml-[7.5rem] mt-1"
+    />
+    </div>
     </div>
     <div
       v-for="submenuItem in menuSubitem"
