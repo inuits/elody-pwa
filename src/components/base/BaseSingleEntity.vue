@@ -42,7 +42,7 @@ import { computed, defineComponent, watch, ref, reactive } from "vue";
 import type { PropType } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 import MetaWindow from "../MetaWindow.vue";
-import MediaViewer from "./Mediaviewer.vue";
+import MediaViewer from "./MediaViewerOld.vue";
 import { GetEntityByIdDocument } from "../../generated-types/queries";
 import type {
   GetEntityByIdQuery,
