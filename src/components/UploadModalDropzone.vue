@@ -108,10 +108,10 @@ const onUpdateFilesInDropzone = (files: DropzoneFile[]) => {
   selectedImportMethod.value = csvFiles[csvFiles.length - 1]?.name;
 };
 
-const uploadFiles = () => {
+const uploadFiles = async () => {
   isUploading.value = true;
   setSelectedMediafiles(filesInDropzone.value);
-  callUploadEndpoint();
+  await callUploadEndpoint();
 };
 
 const callUploadEndpoint = async () => {
@@ -124,14 +124,15 @@ const callUploadEndpoint = async () => {
       method: "POST",
       body: form,
     })
-      .then((response: Response) => response.json())
-      .then((json: { url: string }) => {
-        // if (!response.ok) throw response;
-        console.log(file);
+      .then((response: Response) => {
+        if (!response.ok) throw response;
+        return response.json();
+      })
+      .then(async (json: { url: string }) => {
         const formUploadData = new FormData();
         formUploadData.append("file", file);
 
-        fetch(
+        await fetch(
           json.url.replace(
             "storage-api:5000/",
             "storage-api.digipolis-dams.localhost:8100"
@@ -152,16 +153,19 @@ const callUploadEndpoint = async () => {
             );
             closeUploadModal();
           })
-          .catch(() => {
-            createNotificationOverwrite(
-              NotificationType.error,
-              t("dropzone.errorNotification.title"),
-              t("dropzone.errorNotification.description")
-            );
-          })
-          .finally(() => (isUploading.value = false));
-      });
+          .catch(() => exceptionHandler());
+      })
+      .catch(() => exceptionHandler())
+      .finally(() => (isUploading.value = false));
   }
+};
+
+const exceptionHandler = () => {
+  createNotificationOverwrite(
+    NotificationType.error,
+    t("dropzone.errorNotification.title"),
+    t("dropzone.errorNotification.description")
+  );
 };
 
 watch(
