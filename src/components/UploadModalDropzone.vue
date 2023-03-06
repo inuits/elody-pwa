@@ -7,29 +7,13 @@
 
     <div class="p-3 bg-neutral-white rounded">
       <div v-if="!modifyMetadata" class="flex mb-3">
-        <!-- START should be a separate base component -->
-        <div
-          @click="() => (createAsset = !createAsset)"
-          class="w-1/3 mr-2 flex rounded cursor-pointer"
-          :class="[
-            createAsset
-              ? `bg-accent-light text-accent-normal`
-              : `bg-neutral-lightest text-text-light`,
-          ]"
-        >
-          <unicon
-            :name="
-              createAsset ? Unicons.CheckSquare.name : Unicons.SquareFull.name
-            "
-            class="inline"
-            :class="createAsset ? `fill-accent-normal` : `fill-text-light`"
-            height="16"
-          />
-          <span class="inline text-sm ml-1 pt-0.5">
-            {{ $t("dropzone.createAsset") }}
-          </span>
-        </div>
-        <!-- END -->
+        <BaseCheckDropdown
+          v-model="selectedEntityToCreate"
+          :check-option="createEntity"
+          :options="entityTypesToCreate"
+          label="creëer"
+          @check-option="handleCheckOptionEvent"
+        />
 
         <div class="w-2/3">
           <BaseDropdownNew
@@ -64,6 +48,7 @@
 <script lang="ts" setup>
 import type { DropzoneFile } from "dropzone";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseCheckDropdown from "@/components/base/BaseCheckDropdown.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import DropzoneNew from "@/components/base/dropzone/DropzoneNew.vue";
 import useDropzoneHelper from "@/composables/useDropzoneHelper";
@@ -72,7 +57,6 @@ import {
   NotificationType,
   useNotification,
 } from "@/components/base/BaseNotification.vue";
-import { Unicons } from "@/types";
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -86,14 +70,18 @@ const {
 const { closeUploadModal } = useUploadModal();
 const { createNotificationOverwrite } = useNotification();
 const { t } = useI18n();
-const createAsset = ref<boolean>(false);
-const filesInDropzone = ref<DropzoneFile[]>([]);
-const isDisabledUploadButton = ref<boolean>(true);
-const modifyMetadata = ref<boolean>(false);
 
+const createEntity = ref<boolean>(false);
+const initialEntityTypesToCreate: string[] = ["assets"];
+const entityTypesToCreate = ref<string[]>(initialEntityTypesToCreate);
+const selectedEntityToCreate = ref<string>(initialEntityTypesToCreate[0]);
 const initialImportMethods: string[] = [];
 const importMethods = ref<string[]>(initialImportMethods);
 const selectedImportMethod = ref<string>();
+
+const filesInDropzone = ref<DropzoneFile[]>([]);
+const isDisabledUploadButton = ref<boolean>(true);
+const modifyMetadata = ref<boolean>(false);
 
 const onUpdateFilesInDropzone = (files: DropzoneFile[]) => {
   filesInDropzone.value = files;
@@ -168,6 +156,7 @@ const exceptionHandler = () => {
   );
 };
 
+const handleCheckOptionEvent = () => (createEntity.value = !createEntity.value);
 watch(
   () => uploadModalState.value.state,
   () => {
