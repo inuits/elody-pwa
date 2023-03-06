@@ -9,6 +9,7 @@ import {
   uniAngleLeft,
   uniAngleRight,
   uniAngleDown,
+  uniAngleUp,
   uniBookOpen,
   uniUser,
   uniSearch,
@@ -61,6 +62,7 @@ export type DamsIcons =
   | "AngleDoubleLeft"
   | "AngleDoubleRight"
   | "AngleDown"
+  | "AngleUp"
   | "BookOpen"
   | "User"
   | "SearchGlass"
@@ -110,6 +112,7 @@ export const Unicons: Record<DamsIcons, { name: string }> = {
   AngleDoubleLeft: uniAngleDoubleLeft,
   AngleDoubleRight: uniAngleDoubleRight,
   AngleDown: uniAngleDown,
+  AngleUp: uniAngleUp,
   BookOpen: uniBookOpen,
   User: uniUser,
   SearchGlass: uniSearch,

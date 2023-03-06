@@ -1,9 +1,9 @@
 <template>
-  <div class="w-full overflow-y-scroll">
+  <div class="w-full flex overflow-y-scroll">
     <div
       v-for="(column, index) in columns"
       :key="index"
-      :class="'h-full ' + convertSizeToTailwind(column.size)"
+      :class="'h-full p-5 ' + convertSizeToTailwind(column.size)"
     >
       <entity-element :elements="column.elements"></entity-element>
     </div>

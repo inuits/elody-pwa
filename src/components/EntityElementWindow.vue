@@ -1,7 +1,12 @@
 <template>
-  <h1>{{ element.label }}</h1>
-  <div v-for="(panel, index) in panels" :key="index">
-    <entity-element-window-panel :panel="panel" />
+  <div class="h-full p-2 bg-neutral-0 rounded-md">
+    <div class="border-b-1 border-b-text-body border-solid">
+      <h1 class="subtitle">{{ element.label }}</h1>
+    </div>
+
+    <div v-for="(panel, index) in panels" :key="index">
+      <entity-element-window-panel :panel="panel" />
+    </div>
   </div>
 </template>
 

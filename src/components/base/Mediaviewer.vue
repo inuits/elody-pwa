@@ -1,25 +1,10 @@
 <template>
   <div class="flex checkboard ml-1">
-    <div class="flex w-1/4 m-5">
+    <div class="w-1/3 m-5">
       <entity-image-selection
         v-model:selectedImage="mediafileSelectionState.selectedMediafile"
         :loading="loading"
-        class="h-auto"
       />
-      <div class="flex items-end">
-        <div
-          class="flex justify-center items-center w-8 h-8 bg-tag-neutral rounded-r-md cursor-pointer"
-          @click="toggleExpandedMediaList"
-        >
-          <unicon
-            :name="
-              useExpandedMediaList
-                ? Unicons.AngleLeft.name
-                : Unicons.AngleRight.name
-            "
-          />
-        </div>
-      </div>
     </div>
     <div
       v-show="!loading && mediafileSelectionState.selectedMediafile"
@@ -112,16 +97,9 @@ export default defineComponent({
   },
   setup(props) {
     const { mediafileSelectionState } = useEntityMediafileSelector();
-    const useExpandedMediaList = ref(false);
     const { canGet } = usePermissions();
 
-    const toggleExpandedMediaList = () => {
-      useExpandedMediaList.value = !useExpandedMediaList.value;
-    };
-
     return {
-      toggleExpandedMediaList,
-      useExpandedMediaList,
       canGet,
       mediafileSelectionState,
       Unicons,

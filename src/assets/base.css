@@ -50,7 +50,6 @@
     font-size: 18px;
     font-weight: bold;
     color: theme("colors.text.body");
-    @apply p-4;
   }
 }
 
