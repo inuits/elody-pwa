@@ -21,7 +21,7 @@ import { defineComponent, ref } from "vue";
 import { DefaultOIDC, useAuth } from "session-vue-3-oidc-library";
 import UploadModal from "./components/UploadModal.vue";
 import CreateModal from "./components/CreateModal.vue";
-import TheNavigation from "@/components/Menu.vue";
+import TheNavigation from "@/components/menu/Menu.vue";
 import TheHeader from "@/components/TheHeader.vue";
 import EditModal from "./components/EditModal.vue";
 import useRouteHelpers from "./composables/useRouteHelpers";

@@ -41,13 +41,13 @@
 
 <script lang="ts" setup>
 import { reactive, ref } from "vue";
-import BaseButtonNew from "./base/BaseButtonNew.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { Unicons } from "../types";
 import { useRouter, RouterLink } from "vue-router";
 import { useAuth } from "session-vue-3-oidc-library";
-import { usePermissions } from "../composables/usePermissions";
-import {GetMenuDocument,GetMenuQuery,GetMenuQueryVariables,MenuLinkType,type menuItem} from "../generated-types/queries";
-import Menuitem from "./MenuItem.vue";
+import { usePermissions } from "@/composables/usePermissions";
+import {GetMenuDocument,GetMenuQuery,GetMenuQueryVariables,MenuLinkType,type menuItem} from "@/generated-types/queries";
+import Menuitem from "@/components/menu/MenuItem.vue";
 import { useQuery } from "@vue/apollo-composable";
 
 
@@ -65,13 +65,14 @@ const { result: menuQueryResult, onResult } = useQuery<GetMenuQuery>(
 
 onResult((value) => {
   menuItems.value = [];
-  for (const key in value.data.Menu?.menu) {
-    if (value.data.Menu?.menu.hasOwnProperty(key)) {
+  const menu = value.data.Menu?.menu;
+  for (const key in menu) {
+    if (menu.hasOwnProperty(key)) {
       if (
-        value.data.Menu?.menu[key].linkType === MenuLinkType.Route ||
-        value.data.Menu?.menu[key].linkType === MenuLinkType.Modal
+        menu[key].linkType === MenuLinkType.Route ||
+        menu[key].linkType === MenuLinkType.Modal
       ) {
-        menuItems.value.push(value.data.Menu?.menu[key]);
+        menuItems.value.push(menu[key]);
       }
     }
   }

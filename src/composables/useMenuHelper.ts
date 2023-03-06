@@ -28,7 +28,7 @@ export const useMenuHelper = () => {
   const toggleDropDown = () => {
     showdropdown.value = !showdropdown.value;
   };
-  const isMenuItemActive = (menuItem: MenuItem): boolean => {
+  const isMenuItemActive = (menuItem: MenuItem) : boolean => {
     if (selectedMenuItem.value === menuItem.destination) {
       return true;
     }
@@ -40,19 +40,6 @@ export const useMenuHelper = () => {
   const resetSelectedMenuItem = () => {
     selectedMenuItem.value = "no-item-selected"
   };
-
-  // const menuHandler = (menu: Menu): MenuItem[] => {
-  //   let newMenu: Array<MenuItem> = [];
-  //   for (const key in menu) {
-  //     if (
-  //       menu[key].linkType === MenuLinkType.Route ||
-  //       menu[key].linkType === MenuLinkType.Modal
-  //     ) {
-  //       newMenu.push(menu[key]);
-  //     }
-  //   }
-  //   return newMenu;
-  // }
 
   return {
     checkIfRouteOrModal,
