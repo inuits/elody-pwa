@@ -1,7 +1,7 @@
 import { MenuLinkType, type Menu } from "@/generated-types/queries";
 import type { MenuItem } from "@/generated-types/queries";
 import { useRouter } from "vue-router";
-import useUploadModal, { modalChoices } from "../composables/useUploadModal";
+import useUploadModal, { modalChoices } from "@/composables/useUploadModal";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { ref } from "vue";
 const { openUploadModal, closeUploadModal } = useUploadModal();

@@ -32,9 +32,8 @@
 import { ref, defineProps, watch } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useRouter } from "vue-router";
-import MenuSubItem from "./MenuSubItem.vue";
-import { Unicons } from "@/types";
-import { DamsIcons } from "../types";
+import MenuSubItem from "@/components/MenuSubItem.vue";
+import { Unicons, DamsIcons } from "@/types";
 import { MenuLinkType, MenuItem } from "@/generated-types/queries";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { uploadModalState } from "@/composables/useUploadModal";
