@@ -12,47 +12,18 @@
     <div v-for="menuItem in menuItems" :key="menuItem.label">
       <Menuitem :icon="menuItem.icon" :menuitem="menuItem" :subMenu="menuItem.subMenu"/>
     </div>
-
-    <div class="flex flex-row items-center menu-item fixed bottom-4">
-      <BaseButtonNew
-          v-if="auth.isAuthenticated.value === false"
-          class="w-full"
-          :label="$t('navigation.log-in')"
-          icon="User"
-          button-style="default"
-          @click="auth.redirectToLogin()"
-          :height=17
-        />
-    </div>
-
-    <div class="flex flex-row items-center menu-item fixed bottom-4 left-3">
-      <BaseButtonNew
-          v-if="auth.isAuthenticated.value === true"
-          class="w-full"
-          :label="$t('navigation.log-out')"
-          icon="SignOut"
-          button-style="default"
-          :height=17
-          @click="auth.logout()"
-        />
-    </div>
+    <LogInLogout/>
   </nav>
 </template>
 
 <script lang="ts" setup>
 import { reactive, ref } from "vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import { Unicons } from "../types";
 import { useRouter, RouterLink } from "vue-router";
-import { useAuth } from "session-vue-3-oidc-library";
-import { usePermissions } from "@/composables/usePermissions";
 import {GetMenuDocument,GetMenuQuery,GetMenuQueryVariables,MenuLinkType,type menuItem} from "@/generated-types/queries";
 import Menuitem from "@/components/menu/MenuItem.vue";
 import { useQuery } from "@vue/apollo-composable";
+import LogInLogout from "@/components/LogInLogout.vue";
 
-
-const auth = useAuth();
-const { determinePermission, loading } = usePermissions();
 const router = useRouter();
 const menuItems = ref<Array<menuItem>>([]);
 const queryVariables = reactive<GetMenuQueryVariables>({
