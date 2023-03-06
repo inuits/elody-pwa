@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'flex flex-col items-center p-2 bg-neutral-0 shadow-md rounded-md',
+      'flex flex-col w-full items-center p-2 bg-neutral-0 shadow-md rounded-md',
       {
         'animate-pulse bg-neutral-20 text-neutral-20': loading,
       },

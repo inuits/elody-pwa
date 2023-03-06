@@ -44,6 +44,8 @@ import {
   uniSave,
   uniRedo,
   uniLink,
+  uniArrowCircleRight,
+  uniArrowCircleLeft,
 } from "vue-unicons/dist/icons";
 
 export type DamsIcons =
@@ -91,7 +93,9 @@ export type DamsIcons =
   | "EllipsisV"
   | "Save"
   | "Redo"
-  | "Link";
+  | "Link"
+  | "ArrowCircleRight"
+  | "ArrowCircleLeft";
 
 export const Unicons: Record<DamsIcons, { name: string }> = {
   Edit: uniEdit,
@@ -139,4 +143,6 @@ export const Unicons: Record<DamsIcons, { name: string }> = {
   Save: uniSave,
   Redo: uniRedo,
   Link: uniLink,
+  ArrowCircleRight: uniArrowCircleRight,
+  ArrowCircleLeft: uniArrowCircleLeft,
 };

@@ -1,8 +1,8 @@
 <template>
-  <entity-element-wrapper :label="label">
+  <entity-element-wrapper :label="label" class="flex flex-col h-full">
     <template v-slot:content>
       <!-- Not yet refactored old component -->
-      <media-viewer :loading="false" entityType="MediaFile" />
+      <media-viewer :loading="false" entityType="MediaFile" class="flex-1" />
     </template>
   </entity-element-wrapper>
 </template>

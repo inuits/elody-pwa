@@ -1,10 +1,26 @@
 <template>
-  <div class="flex relative checkboard ml-1 h-screen">
-    <entity-image-selection
-      v-model:selectedImage="mediafileSelectionState.selectedMediafile"
-      class="w-1/4 m-5"
-      :loading="loading"
-    />
+  <div class="flex checkboard ml-1">
+    <div class="flex w-1/4 m-5">
+      <entity-image-selection
+        v-model:selectedImage="mediafileSelectionState.selectedMediafile"
+        :loading="loading"
+        class="h-auto"
+      />
+      <div class="flex items-end">
+        <div
+          class="flex justify-center items-center w-8 h-8 bg-tag-neutral rounded-r-md cursor-pointer"
+          @click="toggleExpandedMediaList"
+        >
+          <unicon
+            :name="
+              useExpandedMediaList
+                ? Unicons.AngleLeft.name
+                : Unicons.AngleRight.name
+            "
+          />
+        </div>
+      </div>
+    </div>
     <div
       v-show="!loading && mediafileSelectionState.selectedMediafile"
       class="w-full"
@@ -65,7 +81,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import IIIFViewer from "../IIIFViewer.vue";
 import VideoPlayer from "./VideoPlayer.vue";
 import AudioPlayer from "./AudioPlayer.vue";
@@ -75,6 +91,7 @@ import EntityImageSelection, {
   useEntityMediafileSelector,
 } from "../EntityImageSelection.vue";
 import { usePermissions } from "../../composables/usePermissions";
+import { Unicons } from "@/types";
 
 export default defineComponent({
   name: "MediaViewer",
@@ -95,11 +112,19 @@ export default defineComponent({
   },
   setup(props) {
     const { mediafileSelectionState } = useEntityMediafileSelector();
+    const useExpandedMediaList = ref(false);
     const { canGet } = usePermissions();
 
+    const toggleExpandedMediaList = () => {
+      useExpandedMediaList.value = !useExpandedMediaList.value;
+    };
+
     return {
+      toggleExpandedMediaList,
+      useExpandedMediaList,
       canGet,
       mediafileSelectionState,
+      Unicons,
     };
   },
 });

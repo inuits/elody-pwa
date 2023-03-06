@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-accent-light rounded-t-lg w-3/4">
+  <div class="bg-accent-light rounded-t-lg">
     <div>
       <span class="subtitle">{{ label }}</span>
       <slot name="actions"></slot>
