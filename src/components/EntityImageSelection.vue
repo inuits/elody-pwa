@@ -58,7 +58,7 @@
                         : '',
                       selectedImage &&
                       element.filename === selectedImage.filename
-                        ? 'border-2 border-blue-500'
+                        ? selectedThumbnailStyles
                         : '',
                     ]"
                     @click="selectImage(element)"
@@ -76,7 +76,7 @@
                         : '',
                       selectedImage &&
                       element.filename === selectedImage.filename
-                        ? 'border-2 border-blue-500'
+                        ? selectedThumbnailStyles
                         : '',
                     ]"
                     @click="selectImage(element)"
@@ -90,7 +90,7 @@
                         : '',
                       selectedImage &&
                       element.filename === selectedImage.filename
-                        ? 'border-2 border-blue-500'
+                        ? selectedThumbnailStyles
                         : '',
                     ]"
                     :src="
@@ -212,6 +212,7 @@ export default defineComponent({
     const { compareMediafileOrder } = useMediafilesOrderHelpers();
 
     const { editMode, addSaveCallback } = useEditMode();
+    const selectedThumbnailStyles = "p-6 border-2 border-accent-normal";
 
     const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 
@@ -274,6 +275,7 @@ export default defineComponent({
       mediafiles,
       Unicons,
       isCollapsed,
+      selectedThumbnailStyles,
     };
   },
 });
