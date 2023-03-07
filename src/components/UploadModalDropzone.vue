@@ -19,6 +19,7 @@
           <BaseDropdownNew
             v-model="selectedImportMethod"
             :options="importMethods"
+            :disabled="!createEntity"
           />
         </div>
       </div>
@@ -77,7 +78,7 @@ const entityTypesToCreate = ref<string[]>(initialEntityTypesToCreate);
 const selectedEntityToCreate = ref<string>(initialEntityTypesToCreate[0]);
 const initialImportMethods: string[] = [];
 const importMethods = ref<string[]>(initialImportMethods);
-const selectedImportMethod = ref<string>();
+const selectedImportMethod = ref<string>(initialImportMethods[0]);
 
 const filesInDropzone = ref<DropzoneFile[]>([]);
 const isDisabledUploadButton = ref<boolean>(true);
