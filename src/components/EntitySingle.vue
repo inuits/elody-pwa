@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="!loading"
-    class="pl-24 h-full w-full flex fixed top-0 bg-tag-neutral pt-24 left-0"
+    class="pl-24 h-full w-full flex fixed top-0 bg-neutral-lightest pt-24 left-0"
   >
     <entity-form
       v-if="intialValues != 'no-values'"

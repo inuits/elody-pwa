@@ -3,7 +3,7 @@
     <div
       v-for="(element, index) in elements"
       :key="index"
-      class="flex-1 shadow-md"
+      :class="['flex-1', { 'mb-5': index + 1 != elements.length }]"
     >
       <entity-element-list
         v-if="element.__typename === 'EntityListElement'"
