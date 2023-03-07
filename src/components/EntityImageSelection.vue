@@ -2,7 +2,7 @@
   <div class="flex h-auto">
     <div
       :class="[
-        'flex flex-col w-full h-full items-center bg-neutral-0 shadow-md rounded-md',
+        'flex flex-col w-full h-full items-center bg-neutral-0 border-neutral-30 border-solid border-2 rounded-t-md',
         {
           'animate-pulse bg-neutral-20 text-neutral-20': loading,
         },
@@ -116,14 +116,7 @@
         />
       </div>
     </div>
-    <div :class="['flex', 'items-end', { invisible: isCollapsed }]">
-      <div
-        class="flex justify-center items-center w-8 h-8 bg-tag-neutral rounded-r-md cursor-pointer"
-        @click="toggleExpandedMediaList"
-      >
-        <unicon :name="Unicons.AngleRight.name" />
-      </div>
-    </div>
+    <BaseExpandButton :is-hidden="isCollapsed" />
   </div>
 </template>
 <script lang="ts">
@@ -147,6 +140,7 @@ import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "../composables/useMetaDataHelper";
 import useMediafilesOrderHelpers from "../composables/useMediafilesOrderHelpers";
 import useUploadModal, { modalChoices } from "@/composables/useUploadModal";
+import BaseExpandButton from "./base/BaseExpandButton.vue";
 import { Unicons } from "@/types";
 // import draggable from "vuedraggable/src/vuedraggable";
 export const toBeDeleted = ref<string[]>([]);
@@ -184,6 +178,7 @@ export default defineComponent({
     TrashIcon,
     // draggable,
     SvgThumbnail,
+    BaseExpandButton,
   },
   props: {
     selectedImage: {
@@ -229,10 +224,6 @@ export default defineComponent({
       }
     };
 
-    const toggleExpandedMediaList = () => {
-      emit("expandMedialist");
-    };
-
     const toggleIsCollapsed = () => {
       isCollapsed.value = !isCollapsed.value;
     };
@@ -261,7 +252,6 @@ export default defineComponent({
     };
 
     return {
-      toggleExpandedMediaList,
       toggleIsCollapsed,
       selectImage,
       editMode,
