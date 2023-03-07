@@ -1,6 +1,6 @@
 <template>
   <div class="h-full bg-neutral-0 rounded-md">
-    <div class="border-solid border-neutral-30 border-2 pb-2">
+    <div class="border-solid border-neutral-30 border-2 pb-2 rounded-t-md">
       <h1 class="subtitle p-2">{{ element.label }}</h1>
     </div>
 
