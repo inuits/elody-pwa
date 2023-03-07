@@ -107,11 +107,17 @@ const callUploadEndpoint = async () => {
     const form = new FormData();
     form.append("title", file.name);
 
-    await fetch(`/api/upload?filename=${file.name}`, {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      method: "POST",
-      body: form,
-    })
+    await fetch(
+      `/api/upload?filename=${file.name}
+      &entityTypeToCreate=${
+        createEntity.value ? selectedEntityToCreate.value : ""
+      }`,
+      {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        method: "POST",
+        body: form,
+      }
+    )
       .then((response: Response) => {
         if (!response.ok) throw response;
         return response.json();
