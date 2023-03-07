@@ -6,7 +6,7 @@
     <select
       v-model="selectedOption"
       class="block h-7 m-0 py-0 w-full cursor-pointer rounded text-sm"
-      :class="disabled ? 'opacity-40 pointer-events-none' : ''"
+      :class="{ 'opacity-40 pointer-events-none': disabled }"
       :disabled="disabled"
     >
       <option v-for="option in options" :key="option" :value="option">
