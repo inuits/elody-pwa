@@ -1,7 +1,7 @@
 <template>
   <div class="text-sm pl-4">
-    <span class="text-text-light w-full">{{ metadata.label }}</span>
-    <span class="w-full">{{ value }}</span>
+    <p class="text-text-light w-full">{{ metadata.label }}</p>
+    <p class="w-full">{{ value }}</p>
   </div>
 </template>
 
