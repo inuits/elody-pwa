@@ -1,7 +1,7 @@
 <template>
-  <div class="h-full p-2 bg-neutral-0 rounded-md">
-    <div class="">
-      <h1 class="subtitle">{{ element.label }}</h1>
+  <div class="h-full bg-neutral-0 rounded-md">
+    <div class="border-solid border-neutral-30 border-2 pb-2">
+      <h1 class="subtitle p-2">{{ element.label }}</h1>
     </div>
 
     <div v-for="(panel, index) in panels" :key="index">
