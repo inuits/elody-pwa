@@ -1,9 +1,9 @@
 <template>
   <div class="w-full flex overflow-y-scroll">
     <div
-      v-for="(column, index) in columns"
+      v-for="(column, index) in currentColumnConfig"
       :key="index"
-      :class="'h-full p-5 ' + convertSizeToTailwind(column.size)"
+      :class="['h-full p-5', convertSizeToTailwind(column.size)]"
     >
       <entity-element :elements="column.elements"></entity-element>
     </div>
@@ -14,10 +14,13 @@ import { computed } from "vue";
 import type { ColumnList, Column } from "@/generated-types/queries";
 import EntityElement from "./EntityElement.vue";
 import { convertSizeToTailwind } from "@/helpers";
+import useColumnResizeHelper from "../composables/useColumnResizeHelper";
 
 const props = defineProps<{
   columnList: ColumnList;
 }>();
+
+const { setInitialColumns, currentColumnConfig } = useColumnResizeHelper();
 
 const columns = computed<Column[]>(() => {
   const returnArray: Column[] = [];
@@ -30,4 +33,8 @@ const columns = computed<Column[]>(() => {
 
   return returnArray;
 });
+
+if (columns.value) {
+  setInitialColumns(columns.value);
+}
 </script>
