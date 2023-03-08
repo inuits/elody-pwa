@@ -18,24 +18,31 @@
     <select
       v-model="selectedOption"
       class="block h-7 m-0 p-0 pl-1 w-full cursor-pointer bg-transparent border-none outline-none rounded"
+      @click="(event) => event.stopPropagation()"
     >
-      <option v-for="option in options" :key="option" :value="option">
-        {{ option }}
+      <option
+        v-for="option in options"
+        :key="option.value"
+        :value="option"
+        class="text-text-body"
+      >
+        {{ option.label }}
       </option>
     </select>
   </div>
 </template>
 
 <script lang="ts" setup>
+import type { DropdownOption } from "@/components/base/BaseDropdownNew.vue";
 import { onUpdated, ref, watch } from "vue";
 import { Unicons } from "@/types";
 
 const props = withDefaults(
   defineProps<{
-    modelValue: string | number;
+    modelValue: DropdownOption;
+    options: DropdownOption[];
     checkOption: boolean;
     label: string;
-    options: string[] | number[];
   }>(),
   {
     label: "",
@@ -43,7 +50,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (event: "update:modelValue", modelValue: string | number): void;
+  (event: "update:modelValue", modelValue: DropdownOption): void;
   (event: "checkOption"): void;
 }>();
 
