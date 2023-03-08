@@ -1,6 +1,9 @@
 <template>
   <div class="h-full flex flex-1">
-    <base-expand-button orientation="Left" />
+    <base-expand-button
+      orientation="Left"
+      v-on:expand-media-list="resizeColumn()"
+    />
     <div
       class="h-full w-full border-solid border-neutral-30 border-2 bg-neutral-0 rounded-t-md"
     >
@@ -27,6 +30,10 @@ import BaseExpandButton from "./base/BaseExpandButton.vue";
 const props = defineProps<{
   element: WindowElement;
 }>();
+
+const resizeColumn = () => {
+  console.log("Window should be 1/2 of the available screen space");
+};
 
 const panels = computed<WindowElementPanel[]>(() => {
   const returnArray: WindowElementPanel[] = [];
