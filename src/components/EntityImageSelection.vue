@@ -1,14 +1,19 @@
 <template>
-  <div class="flex h-auto">
-    <div
-      :class="[
-        'flex flex-col w-full h-full items-center bg-neutral-0 border-neutral-30 border-solid border-2 rounded-t-md',
+  <div
+    v-if="!loading && mediafiles.length > 0"
+    :class="[
+      'flex h-auto' +
         {
           'animate-pulse bg-neutral-20 text-neutral-20': loading,
         },
+    ]"
+  >
+    <div
+      :class="[
+        'flex flex-col w-full h-full items-center bg-neutral-0 border-neutral-30 border-solid border-2 rounded-t-md',
       ]"
     >
-      <div class="w-full h-full px-2" v-if="!loading && mediafiles.length > 0">
+      <div class="w-full h-full px-2">
         <div class="flex items-center justify-between w-full">
           <h3 class="subtitle">Media</h3>
           <div class="cursor-pointer" @click="toggleIsCollapsed()">
@@ -32,79 +37,11 @@
         @end="endDrag"
       > -->
             <div v-for="element in mediafiles" :key="element._id">
-              <!-- <template #item="{ element }"> -->
-              <div
-                :key="element.filename ? element.filename : 'no-filename'"
-                :class="[' px-5 py-2 flex flex-col justify-end']"
-              >
-                <div class="relative group">
-                  <trash-icon
-                    v-if="
-                      editMode === 'edit' && !toBeDeleted.includes(element._id)
-                    "
-                    class="hidden group-hover:block"
-                    @click="addToSaveCallback(element._id)"
-                  />
-                  <AudioThumbnail
-                    v-if="
-                      element.thumbnail_file_location &&
-                      element?.mimetype &&
-                      element?.mimetype.includes('audio')
-                    "
-                    :class="[
-                      'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
-                      toBeDeleted.includes(element._id)
-                        ? 'filter blur-xs grayscale'
-                        : '',
-                      selectedImage &&
-                      element.filename === selectedImage.filename
-                        ? selectedThumbnailStyles
-                        : '',
-                    ]"
-                    @click="selectImage(element)"
-                  />
-                  <SvgThumbnail
-                    v-else-if="
-                      element.thumbnail_file_location &&
-                      element?.mimetype &&
-                      element?.mimetype.includes('text/plain')
-                    "
-                    :class="[
-                      'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
-                      toBeDeleted.includes(element._id)
-                        ? 'filter blur-xs grayscale'
-                        : '',
-                      selectedImage &&
-                      element.filename === selectedImage.filename
-                        ? selectedThumbnailStyles
-                        : '',
-                    ]"
-                    @click="selectImage(element)"
-                  />
-                  <img
-                    v-else-if="element.thumbnail_file_location"
-                    :class="[
-                      'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
-                      toBeDeleted.includes(element._id)
-                        ? 'filter blur-xs grayscale'
-                        : '',
-                      selectedImage &&
-                      element.filename === selectedImage.filename
-                        ? selectedThumbnailStyles
-                        : '',
-                    ]"
-                    :src="
-                      element?.mimetype && !element.mimetype.includes('pdf')
-                        ? `/api/iiif/3/${
-                            element.transcode_filename || element.filename
-                          }/square/100,/0/default.jpg`
-                        : element.thumbnail_file_location
-                    "
-                    @click="selectImage(element)"
-                  />
-                </div>
-              </div>
-              <!-- </template> -->
+              <EntityImageSelectionItem
+                v-if="mediafiles.length"
+                :element="element"
+                :selected-image="selectedImage"
+              />
             </div>
           </div>
         </transition>
@@ -119,30 +56,23 @@
     <BaseExpandButton :is-hidden="isCollapsed" />
   </div>
 </template>
+
 <script lang="ts">
-import { defineComponent, onMounted, ref, reactive, shallowRef } from "vue";
+import { defineComponent, onMounted, ref, reactive } from "vue";
 import type { PropType } from "vue";
-import { useMutation } from "@vue/apollo-composable";
-import {
-  DeleteDataDocument,
-  Collection,
-  type Entity,
-} from "../generated-types/queries";
+import type { Entity } from "../generated-types/queries";
 import type { MediaFile } from "../generated-types/queries";
-import type { DeleteDataMutation } from "../generated-types/queries";
-import AudioThumbnail from "../components/base/audiothumbnail.vue";
-import SvgThumbnail from "./base/svgThumbnail.vue";
-import TrashIcon from "../components/base/TrashIcon.vue";
 import PlusCircleIcon from "../components/base/PlusCircleIcon.vue";
-import { useEditMode } from "../composables/useEdit";
 import useDropzoneHelper from "../composables/useDropzoneHelper";
-import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "../composables/useMetaDataHelper";
 import useMediafilesOrderHelpers from "../composables/useMediafilesOrderHelpers";
 import useUploadModal, { modalChoices } from "@/composables/useUploadModal";
 import BaseExpandButton from "./base/BaseExpandButton.vue";
+import useEditMode from "@/composables/useEdit";
 import { Unicons } from "@/types";
+import EntityImageSelectionItem from "./EntityImageSelectionItem.vue";
 // import draggable from "vuedraggable/src/vuedraggable";
+
 export const toBeDeleted = ref<string[]>([]);
 
 type MediafileSelectionState = {
@@ -173,12 +103,10 @@ export const useEntityMediafileSelector = () => {
 export default defineComponent({
   name: "EntityImageSelection",
   components: {
-    AudioThumbnail,
     PlusCircleIcon,
-    TrashIcon,
     // draggable,
-    SvgThumbnail,
     BaseExpandButton,
+    EntityImageSelectionItem,
   },
   props: {
     selectedImage: {
@@ -195,34 +123,11 @@ export default defineComponent({
     const { selectedFiles } = useDropzoneHelper();
     const { mediafiles, beingAdded } = useMetaDataHelper();
     const { updateSelectedEntityMediafile } = useEntityMediafileSelector();
-    const { isMediaFileInLinkList, removeMediaFileFromLinkList } =
-      useMediaAssetLinkHelper();
-    const { removeFromMetaDataPatchList } = useMetaDataHelper();
     const { openUploadModal } = useUploadModal();
-    const selectImage = (mediafile: MediaFile) => {
-      updateSelectedEntityMediafile(mediafile);
-    };
+    const { editMode } = useEditMode();
     const isCollapsed = ref<boolean>(false);
 
     const { compareMediafileOrder } = useMediafilesOrderHelpers();
-
-    const { editMode, addSaveCallback } = useEditMode();
-    const selectedThumbnailStyles = "p-6 border-2 border-accent-normal";
-
-    const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
-
-    const addToSaveCallback = (id: string) => {
-      const parsedId = id.replace("mediafiles/", "");
-      removeFromMetaDataPatchList(parsedId);
-      toBeDeleted.value.push(id);
-      if (!isMediaFileInLinkList(id)) {
-        addSaveCallback(async () => {
-          await mutate({ id: parsedId, path: Collection.Mediafiles });
-        });
-      } else {
-        removeMediaFileFromLinkList(id);
-      }
-    };
 
     const toggleIsCollapsed = () => {
       isCollapsed.value = !isCollapsed.value;
@@ -253,10 +158,6 @@ export default defineComponent({
 
     return {
       toggleIsCollapsed,
-      selectImage,
-      editMode,
-      addToSaveCallback,
-      toBeDeleted,
       openUploadModalWrapper,
       modalChoices,
       selectedFiles,
@@ -265,7 +166,7 @@ export default defineComponent({
       mediafiles,
       Unicons,
       isCollapsed,
-      selectedThumbnailStyles,
+      editMode,
     };
   },
 });

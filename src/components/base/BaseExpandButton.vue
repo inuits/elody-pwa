@@ -18,8 +18,8 @@ import { ref, type PropType } from "vue";
 
 const props = withDefaults(
   defineProps<{
-    isHidden: boolean;
-    orientation: "Left" | "Right";
+    isHidden?: boolean;
+    orientation?: "Left" | "Right";
   }>(),
   {
     isHidden: false,

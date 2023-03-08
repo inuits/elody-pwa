@@ -1,6 +1,6 @@
 <template>
   <nav
-    class="navbar fixed left-0 top-0 w-24 h-screen flex flex-col justify-start align-center pt-10 bg-neutral-20 px-5 z-50"
+    class="navbar fixed left-0 top-0 w-24 h-screen flex flex-col justify-start align-center pt-10 bg-neutral-white px-5 z-50"
     v-show="!loading"
   >
     <router-link
