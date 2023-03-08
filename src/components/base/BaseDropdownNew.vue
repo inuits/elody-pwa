@@ -9,8 +9,8 @@
       :class="{ 'opacity-40 pointer-events-none': disabled }"
       :disabled="disabled"
     >
-      <option v-for="option in options" :key="option" :value="option">
-        {{ option }}
+      <option v-for="option in options" :key="option.value" :value="option">
+        {{ option.label }}
       </option>
     </select>
   </label>
@@ -19,10 +19,15 @@
 <script lang="ts" setup>
 import { onUpdated, ref, watch } from "vue";
 
+export type DropdownOption = {
+  label: string;
+  value: string;
+};
+
 const props = withDefaults(
   defineProps<{
-    modelValue: string | number;
-    options: string[] | number[];
+    modelValue: DropdownOption;
+    options: DropdownOption[];
     label: string;
     disabled: boolean;
   }>(),
@@ -33,7 +38,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (event: "update:modelValue", modelValue: string | number): void;
+  (event: "update:modelValue", modelValue: DropdownOption): void;
 }>();
 
 const selectedOption = ref(props.modelValue);

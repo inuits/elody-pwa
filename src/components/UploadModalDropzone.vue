@@ -9,8 +9,8 @@
       <div v-if="!modifyMetadata" class="flex mb-3">
         <BaseCheckDropdown
           v-model="selectedEntityToCreate"
+          :options="entityToCreateOptions"
           :check-option="createEntity"
-          :options="entityTypesToCreate"
           label="creëer"
           @check-option="handleCheckOptionEvent"
         />
@@ -47,10 +47,13 @@
 </template>
 
 <script lang="ts" setup>
+import type { DropzoneEntityToCreate } from "../generated-types/queries";
 import type { DropzoneFile } from "dropzone";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseCheckDropdown from "@/components/base/BaseCheckDropdown.vue";
-import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
+import BaseDropdownNew, {
+  type DropdownOption,
+} from "@/components/base/BaseDropdownNew.vue";
 import DropzoneNew from "@/components/base/dropzone/DropzoneNew.vue";
 import useDropzoneHelper from "@/composables/useDropzoneHelper";
 import useUploadModal, { uploadModalState } from "@/composables/useUploadModal";
@@ -58,7 +61,7 @@ import {
   NotificationType,
   useNotification,
 } from "@/components/base/BaseNotification.vue";
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 const {
@@ -72,13 +75,20 @@ const { closeUploadModal } = useUploadModal();
 const { createNotificationOverwrite } = useNotification();
 const { t } = useI18n();
 
+const props = defineProps<{
+  entityToCreate: DropzoneEntityToCreate;
+}>();
+
 const createEntity = ref<boolean>(false);
-const initialEntityTypesToCreate: string[] = ["assets"];
-const entityTypesToCreate = ref<string[]>(initialEntityTypesToCreate);
-const selectedEntityToCreate = ref<string>(initialEntityTypesToCreate[0]);
-const initialImportMethods: string[] = [];
-const importMethods = ref<string[]>(initialImportMethods);
-const selectedImportMethod = ref<string>(initialImportMethods[0]);
+const entityToCreateOptions = ref<DropdownOption[]>(
+  props.entityToCreate.options
+);
+const selectedEntityToCreate = ref<DropdownOption>(
+  entityToCreateOptions.value[0]
+);
+const initialImportMethods: DropdownOption[] = [];
+const importMethods = ref<DropdownOption[]>(initialImportMethods);
+const selectedImportMethod = ref<DropdownOption>(initialImportMethods[0]);
 
 const filesInDropzone = ref<DropzoneFile[]>([]);
 const isDisabledUploadButton = ref<boolean>(true);
@@ -90,11 +100,19 @@ const onUpdateFilesInDropzone = (files: DropzoneFile[]) => {
 
   const csvFiles = files.filter((file) => file.type === "text/csv");
   modifyMetadata.value = csvFiles.length === 1 && files.length === 1;
+
   importMethods.value = [
-    ...csvFiles.map((file) => file.name),
+    ...csvFiles.map((file) => {
+      return { label: file.name, value: file.name };
+    }),
     ...initialImportMethods,
   ];
-  selectedImportMethod.value = csvFiles[csvFiles.length - 1]?.name;
+
+  const mostRecentlyAddedCsvFileName = csvFiles[csvFiles.length - 1]?.name;
+  selectedImportMethod.value = {
+    label: mostRecentlyAddedCsvFileName,
+    value: mostRecentlyAddedCsvFileName,
+  };
 };
 
 const uploadFiles = async () => {
@@ -110,7 +128,7 @@ const callUploadEndpoint = async () => {
 
     await fetch(
       `/api/upload?filename=${file.name}
-      &entityTypeToCreate=${
+      &entityToCreate=${
         createEntity.value ? selectedEntityToCreate.value : ""
       }`,
       {
