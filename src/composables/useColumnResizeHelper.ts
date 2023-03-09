@@ -58,7 +58,9 @@ const useColumnResizeHelper = () => {
   };
 
   const resetToDefaultSizes = (): Column[] => {
-    currentColumnConfig.value = defaultColumnConfig;
+    currentColumnConfig.value.forEach((column: Column, index: number) => {
+      column.size = defaultColumnConfig[index].size;
+    });
     return currentColumnConfig.value;
   };
 
