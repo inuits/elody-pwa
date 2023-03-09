@@ -33,12 +33,7 @@ const props = defineProps<{
   element: WindowElement;
 }>();
 
-const {
-  setColumnSizes,
-  resetToDefaultSizes,
-  currentColumnConfig,
-  defaultColumnConfig,
-} = useColumnResizeHelper();
+const { setColumnSizes, resetToDefaultSizes } = useColumnResizeHelper();
 
 const resizeColumn = (toggled: Boolean) => {
   if (toggled) {
