@@ -2,12 +2,15 @@
   <div>
     <entity-element-wrapper label="Assets">
       <template v-slot:actions>
-        <span
+        <div
           v-if="isEdit"
-          class="underline ml-2"
-          @click="openPickEntityModal(['assets'])"
-          >select asset</span
+          class="flex items-center text-accent-normal cursor-pointer"
         >
+          <unicon height="16" :name="Unicons.PlusCircle.name" />
+          <p class="underline ml-2" @click="openPickEntityModal(['assets'])">
+            Voeg assets toe
+          </p>
+        </div>
       </template>
       <template v-slot:content>
         <div v-for="(field, idx) in fields" :key="field.key">
@@ -47,6 +50,7 @@ import { usePickEntityModal } from "./PickEntityModal.vue";
 import type { PickEntityModalType } from "./PickEntityModal.vue";
 import useEditMode from "@/composables/useEdit";
 import { useRouter } from "vue-router";
+import { Unicons } from "@/types";
 
 const router = useRouter();
 const props = defineProps<{
