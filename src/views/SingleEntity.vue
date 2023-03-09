@@ -1,11 +1,11 @@
 <template>
-  <BaseSingleEntity
+  <!-- <BaseSingleEntity
     :isSelectionDisplayed="true"
     :isMetaDisplayed="true"
     :isMediaFileSingle="false"
     :entityType="'Entity'"
-  />
-  <!-- <entity-single></entity-single> -->
+  /> -->
+  <entity-single></entity-single>
 </template>
 
 <script lang="ts" setup>

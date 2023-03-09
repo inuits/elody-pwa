@@ -32,9 +32,11 @@ const arrows = [Unicons.AngleRight.name, Unicons.AngleLeft.name];
 let currentArrow = ref<string>(
   props.orientation == "Right" ? arrows[0] : arrows[1]
 );
+const toggled = ref<Boolean>(false);
 
 const toggleExpandedMediaList = () => {
+  toggled.value = !toggled.value;
   currentArrow.value = currentArrow.value == arrows[0] ? arrows[1] : arrows[0];
-  emit("expandMediaList");
+  emit("expandMediaList", toggled.value);
 };
 </script>

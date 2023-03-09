@@ -2,7 +2,7 @@
   <div class="h-full flex flex-1">
     <base-expand-button
       orientation="Left"
-      v-on:expand-media-list="resizeColumn()"
+      v-on:expand-media-list="resizeColumn"
     />
     <div
       class="h-full w-full border-solid border-neutral-30 border-2 bg-neutral-0 rounded-t-md"
@@ -19,20 +19,31 @@
 </template>
 
 <script lang="ts" setup>
-import type {
-  WindowElement,
-  WindowElementPanel,
+import {
+  ColumnSizes,
+  type WindowElement,
+  type WindowElementPanel,
 } from "@/generated-types/queries";
 import EntityElementWindowPanel from "./EntityElementWindowPanel.vue";
 import { computed } from "vue";
 import BaseExpandButton from "./base/BaseExpandButton.vue";
+import useColumnResizeHelper from "@/composables/useColumnResizeHelper";
 
 const props = defineProps<{
   element: WindowElement;
 }>();
 
-const resizeColumn = () => {
-  console.log("Window should be 1/2 of the available screen space");
+const { setColumnSizes, resetToDefaultSizes, currentColumnConfig } =
+  useColumnResizeHelper();
+
+const resizeColumn = (toggled: Boolean) => {
+  if (toggled) {
+    setColumnSizes([ColumnSizes.Fifty, ColumnSizes.Fifty]);
+  } else {
+    // TODO: use resetToDefaultSizes function
+    setColumnSizes([ColumnSizes.Seventy, ColumnSizes.Thirty]);
+  }
+  console.log(currentColumnConfig.value);
 };
 
 const panels = computed<WindowElementPanel[]>(() => {
