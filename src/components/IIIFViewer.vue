@@ -6,8 +6,6 @@
       v-model:zoomOut="zoomOutDiv"
       v-model:fullPage="fullPageButtonDiv"
       v-model:home="homeDiv"
-      v-model:previousMediafile="previousMediafileDiv"
-      v-model:nextMediafile="nextMediafileDiv"
       :downloadLocation="downloadLocation"
     />
     <div
