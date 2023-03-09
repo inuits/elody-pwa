@@ -33,17 +33,19 @@ const props = defineProps<{
   element: WindowElement;
 }>();
 
-const { setColumnSizes, resetToDefaultSizes, currentColumnConfig } =
-  useColumnResizeHelper();
+const {
+  setColumnSizes,
+  resetToDefaultSizes,
+  currentColumnConfig,
+  defaultColumnConfig,
+} = useColumnResizeHelper();
 
 const resizeColumn = (toggled: Boolean) => {
   if (toggled) {
     setColumnSizes([ColumnSizes.Fifty, ColumnSizes.Fifty]);
   } else {
-    // TODO: use resetToDefaultSizes function
-    setColumnSizes([ColumnSizes.Seventy, ColumnSizes.Thirty]);
+    resetToDefaultSizes();
   }
-  console.log(currentColumnConfig.value);
 };
 
 const panels = computed<WindowElementPanel[]>(() => {

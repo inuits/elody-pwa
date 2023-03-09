@@ -2,12 +2,12 @@ import type { Column, ColumnSizes } from "@/generated-types/queries";
 import { convertSizeToTailwind } from "@/helpers";
 import { ref } from "vue";
 
-const defaultColumnConfig = ref<Column[] | []>([]);
+let defaultColumnConfig: Column[] = [];
 const currentColumnConfig = ref<Column[] | []>([]);
 
 const useColumnResizeHelper = () => {
   const setInitialColumns = (columns: Column[]) => {
-    defaultColumnConfig.value = columns;
+    defaultColumnConfig = JSON.parse(JSON.stringify(columns));
     currentColumnConfig.value = columns;
   };
 
@@ -58,7 +58,7 @@ const useColumnResizeHelper = () => {
   };
 
   const resetToDefaultSizes = (): Column[] => {
-    currentColumnConfig.value = defaultColumnConfig.value;
+    currentColumnConfig.value = defaultColumnConfig;
     return currentColumnConfig.value;
   };
 
