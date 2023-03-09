@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full flex overflow-y-scroll">
+  <div :class="['w-full flex overflow-y-scroll', { 'mb-20': isEdit }]">
     <div
       v-for="(column, index) in currentColumnConfig"
       :key="index"
@@ -15,12 +15,14 @@ import type { ColumnList, Column } from "@/generated-types/queries";
 import EntityElement from "./EntityElement.vue";
 import { convertSizeToTailwind } from "@/helpers";
 import useColumnResizeHelper from "../composables/useColumnResizeHelper";
+import { useEditMode } from "@/composables/useEdit";
 
 const props = defineProps<{
   columnList: ColumnList;
 }>();
 
 const { setInitialColumns, currentColumnConfig } = useColumnResizeHelper();
+const { isEdit } = useEditMode();
 
 const columns = computed<Column[]>(() => {
   const returnArray: Column[] = [];

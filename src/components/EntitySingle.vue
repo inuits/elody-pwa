@@ -1,24 +1,26 @@
 <template>
-  <div
-    v-if="!loading"
-    class="pl-24 h-full w-full flex fixed top-0 bg-neutral-lightest pt-24 left-0"
-  >
-    <entity-form
-      v-if="intialValues != 'no-values'"
-      :intialValues="intialValues"
-      :entityId="id"
-      :refetch="refetch"
+  <div>
+    <div
+      v-if="!loading"
+      class="pl-24 h-full w-full flex fixed top-0 bg-neutral-lightest pt-24 left-0"
     >
-      <entity-column
-        v-if="columnList != 'no-values'"
-        :columnList="columnList"
-      ></entity-column>
-    </entity-form>
+      <entity-form
+        v-if="intialValues != 'no-values'"
+        :intialValues="intialValues"
+        :entityId="id"
+        :refetch="refetch"
+      >
+        <entity-column
+          v-if="columnList != 'no-values'"
+          :columnList="columnList"
+        ></entity-column>
+      </entity-form>
+    </div>
+    <div
+      v-else
+      class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0 animate-pulse text-neutral-20"
+    />
   </div>
-  <div
-    v-else
-    class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0 animate-pulse text-neutral-20"
-  />
 </template>
 
 <script lang="ts" setup>

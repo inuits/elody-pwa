@@ -7,9 +7,9 @@
       <div :class="['flex-grow', { 'h-full overflow-hidden': isSingle }]">
         <router-view />
       </div>
+      <edit-modal />
     </div>
     <upload-modal :modal-position="'left'" />
-    <edit-modal />
     <pick-entity-modal />
     <create-modal />
     <search-saved-searches-modal />
