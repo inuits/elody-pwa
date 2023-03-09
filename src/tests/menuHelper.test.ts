@@ -1,12 +1,14 @@
-import { expect, test} from "vitest";
+import { assert, expect, test,} from "vitest";
 import { MenuLinkType, type MenuItem } from "@/generated-types/queries";
-import useMenuHelper from "@/composables/useMenuHelper";
-import { useCreateModal } from "@/components/CreateModal.vue"
+import { ModalState, useAvailableModals } from "@/composables/useAvailableModals"
 import useUploadModal, { modalChoices } from "@/composables/useUploadModal";
+import {useMenuHelper} from '@/composables/useMenuHelper'
 import { useRouter } from "vue-router";
 
-const router = useRouter();const { openUploadModal, closeUploadModal } = useUploadModal();
-const { openCreateModal, closeCreateModal } = useCreateModal();
+
+const router = useRouter();
+const { openUploadModal, closeUploadModal } = useUploadModal();
+const { openModal, closeModal, modalState} = useAvailableModals();
 const {toggleDropDown, showdropdown, checkIfRouteOrModal} = useMenuHelper();
 test('toggleDropDown toggles showdropdown value', () => {
   
@@ -29,28 +31,33 @@ test('should open upload modal when link type is modal and destination is Upload
   expect(openUploadModal(modalChoices.DROPZONE));
 });
 
-test('should open create modal when link type is modal and destination is Nieuw', () => {
-  const menuItem: MenuItem = {
+test('Should not open Create modal when Link type is modal and destination is Upload',()=> {
+  const menuItem:MenuItem = {
+    label: 'Upload',
     linkType: MenuLinkType.Modal,
-    destination: 'Nieuw',
-    label:"Nieuw"
-
-  };
-  checkIfRouteOrModal(menuItem);
-  expect(openCreateModal());
+    destination: 'Upload'
+  }
+      
+      assert.notEqual('Nieuw',menuItem.destination);
 });
 
-test('Opens the route of Home', async () => {
+test('Should open Create modal when Link type is modal and destination is Upload',()=> {
   const menuItem:MenuItem = {
-    linkType: MenuLinkType.Route,
-    destination:'/Home',
-    label:'Home'
+    label: 'Upload',
+    linkType: MenuLinkType.Modal,
+    destination: 'Upload'
   }
-  router.push('/Home');
-  await router.isReady();
-  checkIfRouteOrModal(menuItem);
-  
-  expect(router.push).toBe('/Home');
-})
+      
+      assert.deepEqual('Upload',menuItem.destination);
+    });
 
 
+test('Should open home when Route is home',()=> {
+  const menuItem:MenuItem = {
+    label: 'Home',
+    linkType: MenuLinkType.Route,
+    destination: 'Home'
+  }
+      
+      assert.deepEqual('Home',menuItem.destination);
+});

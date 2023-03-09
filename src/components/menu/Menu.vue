@@ -5,7 +5,7 @@
   >
     <router-link
       :to="{ name: 'Home' }"
-      class="logo router-link text-base text-neutral-700 font-semibold flex justify-center items-center mb-8 text-xl"
+      class="logo ml-3 mt-4 text-neutral-700 font-semibold mb-8 text-xl"
     >
       {{ $t("navigation.title") }}
     </router-link>
@@ -67,13 +67,8 @@ onResult((value) => {
   transition-duration: 300ms;
   overflow-x: hidden;
 }
-.navbar .menu-item {
-  color: none;
-}
 .navbar:hover {
   width: 20rem;
-}
-.navbar:hover .menu-item {
 }
 .navbar:hover .router-link {
   justify-content: flex-start;

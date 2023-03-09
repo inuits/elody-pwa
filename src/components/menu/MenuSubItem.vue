@@ -6,7 +6,7 @@
   >
     <router-link
       :to="`${destination}`"
-      class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+      class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
     >
       {{ labelName }}</router-link
     >
@@ -24,5 +24,4 @@ const props = defineProps({
 });
 </script>
 <style>
-
 </style>

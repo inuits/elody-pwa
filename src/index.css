@@ -29,8 +29,7 @@
   --color-neutral-white: theme("colors.neutral.white");
   --color-neutral-lightest: theme("colors.neutral.lightest");
   --color-neutral-light: theme("colors.neutral.light");
-  --color-neutral-blue: theme("colors.neutral.blue");
-
+  --color-neutral-blue: theme("colors.neutral.blue")
 
 
   --color-blue-50: theme("colors.blue.50");
@@ -40,9 +39,10 @@
   --color-blue-300: theme("colors.blue.300");
   --color-blue-400: theme("colors.blue.400");
   --color-blue-500: theme("colors.blue.500");
-  --color-blue-600: theme("colors.blue.600");
+  
 
 
+  --color-cyan-default: theme("colors.cyan.default");
   --color-cyan-600: theme("colors.cyan.600")
   --color-text-light: theme("colors.text.light");
   --color-text-body: theme("colors.text.body");

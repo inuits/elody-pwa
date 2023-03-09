@@ -1,46 +1,11 @@
 import { ref, type Ref } from "vue";
+import { makeModal, TypeModals } from "./modalFactory";
 
-export enum ModalState {
-    Initial = "initial",
-    Show = "show",
-    Hide = "hide",
-    Loading = "loading",
-}
-
-interface UseAvailableModals {
-    updateModal: (modalInput: ModalType) => void;
-    closeModal: () => void;
-    openModal: () => void;
-    modalState: Ref<ModalType>
-}
-export type ModalType = {
-    state: ModalState;
-    destination?:String
-};
-
-const modalState = ref<ModalType>({ state: ModalState.Initial })
-
-export const useAvailableModals = (): UseAvailableModals => {
-    
-    const updateModal = (modalInput: ModalType) => {
-        modalState.value.state = modalInput.state;
-    };
-
-    const closeModal = () => {
-        updateModal({
-            state: ModalState.Hide,
-        });
-    };
-
-    const openModal = () => {
-        updateModal({
-            state: ModalState.Show,
-        });
-    };
+const createmodal = makeModal(TypeModals.Create)
+const uploadModal = makeModal(TypeModals.Upload)
+export const useAvailableModals = () => {
     return {
-        updateModal,
-        closeModal,
-        openModal,
-        modalState
+        createmodal,
+        uploadModal
     }
 }

@@ -3,8 +3,8 @@
     <div
       v-show="menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
       @click="handleClick"
-      class="flex flex-row items-center menu-item ml-3"
-      :class="{ IsActive: menuitem && isMenuItemActive(menuitem) }"
+      class="flex flex-row items-center ml-3 hover:text-accent-normal m-3"
+      :class="{ 'IsActive text-accent-normal h-9 rounded-lg': menuitem && isMenuItemActive(menuitem) }"
     >
       <unicon v-if="icon" :name="Unicons[icon].name" height="18" />
       <span
@@ -53,6 +53,7 @@ import { MenuLinkType, MenuItem } from "@/generated-types/queries";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { uploadModalState } from "@/composables/useUploadModal";
 import { useAvailableModals } from "@/composables/useAvailableModals";
+import { ModalState } from "@/composables/modalFactory";
 
 const {
   checkIfRouteOrModal,
@@ -69,7 +70,7 @@ const auth = useAuth();
 
 const menuSubitem = ref<Array<MenuItem>>([]);
 
-const { openModal, closeModal, modalState } = useAvailableModals();
+const { createmodal } = useAvailableModals();
 
 const props = defineProps<{
   menuitem: MenuItem;
@@ -101,32 +102,24 @@ const handleSubMenu = () => {
 watch(
   () => uploadModalState.value.state,
   (state) => {
-    if (state === `hide`) {
+    if (state === ModalState.Hide) {
       resetSelectedMenuItem();
     }
   }
 );
 
 watch(
-  () => modalState.value.state,
+  () => createmodal.modalState.value.state,
   (state) => {
-    if (state === 'hide') {
+    if (state === ModalState.Hide) {
       resetSelectedMenuItem();
     }
   }
 );
-
 handleSubMenu();
 </script>
 <style>
-
-.IsActive {
-  fill: #02c6f2;
-  color: #02c6f2;
-  border-radius: 8px;
-  height: 2.3rem;
-}
-.navbar:hover .IsActive {
+.navbar:hover .IsActive{
   background-color: var(--color-neutral-40);
 }
 </style>

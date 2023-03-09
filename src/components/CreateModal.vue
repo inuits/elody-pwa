@@ -1,8 +1,8 @@
 <template>
   <base-modal
     :scroll="true"
-    :modal-state="modalState.state"
-    @hide-modal="closeModal"
+    :modal-state="createmodal.modalState.value.state"
+    @hide-modal="createmodal.closeModal()"
   >
     <div class="bg-neutral-0 w-full">
       <div class="p-6 pb-0">
@@ -24,9 +24,9 @@ import BaseModal from "@/components/base/BaseModal.vue";
 import { Entitytyping } from "@/generated-types/queries";
 import { defineComponent, ref } from "vue";
 import CreateEntityForm from "./CreateEntityForm.vue";
-import { ModalState, useAvailableModals } from "@/composables/useAvailableModals";
+import {  useAvailableModals } from "@/composables/useAvailableModals";
 
-const { closeModal, openModal, modalState } = useAvailableModals();
+const { createmodal } = useAvailableModals();
 const selected = ref<Entitytyping>(Entitytyping.Story);
 
 </script>

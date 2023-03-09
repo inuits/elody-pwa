@@ -51,7 +51,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ModalState } from "@/composables/useAvailableModals";
+import { ModalState } from "@/composables/modalFactory";
 import { toRefs, watch } from "vue";
 
 
