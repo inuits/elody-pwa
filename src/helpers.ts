@@ -69,11 +69,11 @@ export const convertSizeToTailwind = (size: string): string => {
     case "thirty":
       tailwindSize = "w-3/10";
       break;
-    case "fourthy":
+    case "forthy":
       tailwindSize = "w-4/10";
       break;
     case "fifty":
-      tailwindSize = ".w-5/10";
+      tailwindSize = "w-5/10";
       break;
     case "sixty":
       tailwindSize = "w-6/10";
