@@ -185,6 +185,7 @@ const handleCheckOptionEvent = () => (createEntity.value = !createEntity.value);
 watch(
   () => uploadModalState.value.state,
   () => {
+    createEntity.value = false;
     clearDropzoneCounters();
     clearDropzoneErrorMessages();
   }
