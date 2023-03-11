@@ -1,11 +1,12 @@
 import { ref,type Ref } from "vue";
-import useDropzoneHelper from "./useDropzoneHelper";
+import useDropzoneHelper from "@/composables/useDropzoneHelper";
 
 
-export enum TypeModals { 
+export enum TypeModals {
     Upload = "Upload",
-    Create = "Nieuw"
+    Create ="Nieuw"
 }
+
 export enum modalChoices {
     IMPORT = "IMPORT",
     DROPZONE = "DROPZONE",
@@ -25,68 +26,39 @@ export type ModalType = {
 
 
 export interface IBaseModal {
+    openModal: <T,V>(T?: modalChoices, V?: V) => void;
     updateModal: (modalInput: ModalType) => void;
     closeModal: () => void;
-    modalState: Ref<ModalType>
-}
-
-export interface IUploadModal {
-    openModal: (modalChoices: modalChoices) => void;
-    modalToOpen:Ref<modalChoices>;
-
-}
-
-export interface ICreateModal {
-    openModal: () => void;
-}
-
-export class UploadModal implements IUploadModal, IBaseModal {
+    modalState: Ref<ModalType>;
+    modalToOpen?: Ref<modalChoices>;
+  }
+  
+  export class BaseModal implements IBaseModal {
     modalState: Ref<ModalType> = ref<ModalType>({ state: ModalState.Initial });
     modalToOpen: Ref<modalChoices> = ref<modalChoices>(modalChoices.DROPZONE);
-
+  
     updateModal(modalInput: ModalType): void {
-        this.modalState.value = modalInput;
+      this.modalState.value = modalInput;
     }
-
+  
     closeModal(): void {
-        this.updateModal({
-            state: ModalState.Hide,
-        });
+      this.updateModal({
+        state: ModalState.Hide,
+      });
     }
-
-    openModal(modalChoices: modalChoices): void {
-        this.modalToOpen.value = ref(modalChoices || {}).value;
-        this.updateModal({
-            state: ModalState.Show,
-        });
+  
+    openModal(modalChoices?: modalChoices): void {
+      this.updateModal({
+        state: ModalState.Show,
+      });
+      if (modalChoices) {
+        this.modalToOpen.value = ref(modalChoices).value;
         useDropzoneHelper().resetDropzone();
-    }
-}
-
-export class createModal implements ICreateModal, IBaseModal {
-    modalState = ref<ModalType>({ state: ModalState.Initial })
-
-    updateModal(modalInput: ModalType):void {
-        this.modalState.value.state = modalInput.state;
-    }
-    closeModal():void {
-        this.updateModal({
-            state:ModalState.Hide
-        })
-    }
-    openModal():void {
-        this.updateModal({
-            state:ModalState.Show
-        })
-    }    
-}
+      }
+    }  
+  }
 
 export function makeModal (type:TypeModals) {
-    if(type === TypeModals.Create){
-        return new createModal();
-    }
-    if(type=== TypeModals.Upload){
-        return new UploadModal();
-    }
+    return new BaseModal
 }
 

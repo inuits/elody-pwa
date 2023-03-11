@@ -37,13 +37,8 @@ import LogInLogout from "@/components/LogInLogout.vue";
 
 const router = useRouter();
 const menuItems = ref<Array<menuItem>>([]);
-const queryVariables = reactive<GetMenuQueryVariables>({
-  name: "main-menu",
-});
-const { result: menuQueryResult, onResult } = useQuery<GetMenuQuery>(
-  GetMenuDocument,
-  queryVariables
-);
+const queryVariables = reactive<GetMenuQueryVariables>({ name: "main-menu" });
+const { result: menuQueryResult, onResult } = useQuery<GetMenuQuery>( GetMenuDocument, queryVariables);
 
 onResult((value) => {
   menuItems.value = [];
@@ -60,7 +55,9 @@ onResult((value) => {
   }
 });
 </script>
+
 <style>
+
 .navbar {
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);

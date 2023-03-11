@@ -4,7 +4,10 @@
       v-show="menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
       @click="handleClick"
       class="flex flex-row items-center ml-3 hover:text-accent-normal m-3"
-      :class="{ 'IsActive text-accent-normal h-9 rounded-lg': menuitem && isMenuItemActive(menuitem) }"
+      :class="{
+        'IsActive text-accent-normal h-9 rounded-lg':
+          menuitem && isMenuItemActive(menuitem),
+      }"
     >
       <unicon v-if="icon" :name="Unicons[icon].name" height="18" />
       <span
@@ -13,26 +16,23 @@
         {{ menuitem?.label }}
       </span>
       <div v-if="menuitem.subMenu">
-      <unicon
-      v-if="showdropdown"
-      @click="handleClick"
-      :name="Unicons.AngleDown.name"
-      height="20"
-      class="ml-[7.5rem] mt-1"
-    />
-    <unicon
-    v-if="showdropdown === false"
-      @click="handleClick"
-      :name="Unicons.AngleDown.name"
-      height="20"
-      class="rotate-180 ml-[7.5rem] mt-1"
-    />
+        <unicon
+          v-if="showdropdown"
+          @click="handleClick"
+          :name="Unicons.AngleDown.name"
+          height="20"
+          class="ml-[7.5rem] mt-1"
+        />
+        <unicon
+          v-if="showdropdown === false"
+          @click="handleClick"
+          :name="Unicons.AngleDown.name"
+          height="20"
+          class="rotate-180 ml-[7.5rem] mt-1"
+        />
+      </div>
     </div>
-    </div>
-    <div
-      v-for="submenuItem in menuSubitem"
-      :key="submenuItem.label"
-    >
+    <div v-for="submenuItem in menuSubitem" :key="submenuItem.label">
       <MenuSubItem
         :linkType="submenuItem.linkType"
         :labelName="submenuItem.label"
@@ -53,7 +53,7 @@ import { MenuLinkType, MenuItem } from "@/generated-types/queries";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { uploadModalState } from "@/composables/useUploadModal";
 import { useAvailableModals } from "@/composables/useAvailableModals";
-import { ModalState } from "@/composables/modalFactory";
+import { ModalState, TypeModals } from "@/composables/modalFactory";
 
 const {
   checkIfRouteOrModal,
@@ -70,7 +70,7 @@ const auth = useAuth();
 
 const menuSubitem = ref<Array<MenuItem>>([]);
 
-const { createmodal } = useAvailableModals();
+const { getModal } = useAvailableModals();
 
 const props = defineProps<{
   menuitem: MenuItem;
@@ -109,7 +109,7 @@ watch(
 );
 
 watch(
-  () => createmodal.modalState.value.state,
+  () => getModal(TypeModals.Create).modalState.value.state,
   (state) => {
     if (state === ModalState.Hide) {
       resetSelectedMenuItem();
@@ -119,7 +119,7 @@ watch(
 handleSubMenu();
 </script>
 <style>
-.navbar:hover .IsActive{
+.navbar:hover .IsActive {
   background-color: var(--color-neutral-40);
 }
 </style>

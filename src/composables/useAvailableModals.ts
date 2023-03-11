@@ -1,11 +1,23 @@
-import { ref, type Ref } from "vue";
-import { makeModal, TypeModals } from "./modalFactory";
+import { TypeModals, makeModal, type IBaseModal } from "@/composables/modalFactory";
 
-const createmodal = makeModal(TypeModals.Create)
-const uploadModal = makeModal(TypeModals.Upload)
+const modalMap = new Map<TypeModals, IBaseModal>();
+
 export const useAvailableModals = () => {
-    return {
-        createmodal,
-        uploadModal
+  const getModal = (type: TypeModals): IBaseModal => {
+    
+    const existingModal = modalMap.get(type);
+    if (existingModal) {
+      return existingModal;
+    } else {
+      
+      const modal = makeModal(type);
+      modalMap.set(type, modal);
+      return modal;
     }
-}
+  };
+
+  return {
+    getModal,
+    modalMap,
+  };
+};
