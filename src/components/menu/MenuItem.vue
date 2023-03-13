@@ -121,16 +121,24 @@ handleSubMenu();
 }
 .dropdownMenuItem {
   animation-name: dropdown;
-  animation-duration: 1.5s;
+  animation-duration: 1s;
 }
 @keyframes dropdown {
   0% {
-    margin-top: -2rem;
+    margin-top: -0.4rem;
     opacity: 0;
   }
+  25%{
+    margin-top: -0.16rem;
+    opacity: 0.25;
+  }
   50%{
-    margin-top: 0.1rem;
+    margin-top: 0rem;
     opacity: 0.5;
+  }
+  75%{
+    margin-top: 0.16rem;
+    opacity: 0.75;
   }
   100% {
     margin-top: 0.25rem;

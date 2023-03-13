@@ -90,16 +90,6 @@ export default defineComponent({
   writing-mode: horizontal-tb;
 }
 
-.menu-item {
-  margin-top: 2rem;
-}
-
-.menu-item:hover .menu-btn {
-  --tw-bg-opacity: 1;
-  fill: #02c6f2;
-}
-
-
 .move-by-nav {
   padding-left: 6rem;
   -webkit-transition: padding-left 300ms ease-in-out;
