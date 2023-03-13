@@ -8,12 +8,28 @@
     </div>
     <transition>
       <div v-if="!isCollapsed">
-        <div
-          v-for="(metadata, index) in metadataArray"
-          :key="index"
-          class="py-2"
-        >
-          <entity-element-metadata :metadata="metadata" />
+        <div v-if="metadataArray.length">
+          <div
+            v-for="(metadata, index) in metadataArray"
+            :key="index"
+            class="py-2"
+          >
+            <entity-element-metadata :metadata="metadata" />
+          </div>
+        </div>
+        <div v-if="relationArray.length">
+          <div class="pl-2 rounded-sm bg-accent-light">
+            <p class="text-sm text-text-body">Behoort tot</p>
+            <div class="rounded-sm border-solid border-neutral-30 border-2">
+              <div
+                v-for="(relation, index) in relationArray"
+                :key="index"
+                class="bg-neutral-white py-2"
+              >
+                <entity-element-relation :relation="relation" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </transition>
@@ -23,10 +39,13 @@
 <script lang="ts" setup>
 import type {
   PanelMetaData,
+  PanelRelation,
   WindowElementPanel,
 } from "@/generated-types/queries";
+import { PanelType } from "@/generated-types/queries";
 import { computed, ref } from "vue";
 import EntityElementMetadata from "./EntityElementMetadata.vue";
+import EntityElementRelation from "./EntityElementRelation.vue";
 import { Unicons } from "@/types";
 
 const props = defineProps<{
@@ -41,12 +60,27 @@ const toggleIsCollapsed = () => {
 
 const metadataArray = computed<PanelMetaData[]>(() => {
   const returnArray: PanelMetaData[] = [];
+  if (props.panel.panelType !== PanelType.Relation) {
+    Object.values(props.panel).forEach((value, index) => {
+      if (typeof value !== "string") {
+        returnArray.push(value as PanelMetaData);
+      }
+    });
+  }
 
-  Object.values(props.panel).forEach((value) => {
-    if (typeof value !== "string") {
-      returnArray.push(value);
-    }
-  });
+  return returnArray;
+});
+
+const relationArray = computed<PanelRelation[]>(() => {
+  const returnArray: PanelRelation[] = [];
+  if (props.panel.panelType === PanelType.Relation) {
+    Object.values(props.panel).forEach((value, index) => {
+      if (typeof value !== "string") {
+        const relationList = value as [PanelRelation];
+        returnArray.push(...relationList);
+      }
+    });
+  }
 
   return returnArray;
 });
