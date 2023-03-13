@@ -21,18 +21,18 @@
           @click="handleClick"
           :name="Unicons.AngleDown.name"
           height="20"
-          class="ml-[7.5rem] mt-1"
+          class="ml-[7rem] mt-1"
         />
         <unicon
           v-if="showdropdown === false"
           @click="handleClick"
           :name="Unicons.AngleDown.name"
           height="20"
-          class="rotate-180 ml-[7.5rem] mt-1"
+          class="rotate-180 ml-[7rem] mt-1"
         />
       </div>
     </div>
-    <div v-for="submenuItem in menuSubitem" :key="submenuItem.label">
+    <div v-for="submenuItem in menuSubitem" :key="submenuItem.label" :class="{dropdownMenuItem:showdropdown}">
       <MenuSubItem
         :linkType="submenuItem.linkType"
         :labelName="submenuItem.label"
@@ -85,20 +85,17 @@ const handleClick = () => {
     selectedMenuItem.value = props.menuitem?.destination;
   }
 };
-
 const handleSubMenu = () => {
   const submenu = props.subMenu;
   if (props.subMenu) {
-    for (const key in submenu) {
-      if (
-        submenu[key].linkType === MenuLinkType.Route ||
-        submenu[key].linkType === MenuLinkType.Modal
-      ) {
-        menuSubitem.value.push(submenu[key]);
-      }
-    }
+    menuSubitem.value = Object.values(submenu).filter(
+      (menu) =>
+        menu.linkType === MenuLinkType.Route ||
+        menu.linkType === MenuLinkType.Modal
+    );
   }
 };
+
 watch(
   () => uploadModalState.value.state,
   (state) => {
@@ -121,5 +118,23 @@ handleSubMenu();
 <style>
 .navbar:hover .IsActive {
   background-color: var(--color-neutral-40);
+}
+.dropdownMenuItem {
+  animation-name: dropdown;
+  animation-duration: 1.5s;
+}
+@keyframes dropdown {
+  0% {
+    margin-top: -2rem;
+    opacity: 0;
+  }
+  50%{
+    margin-top: 0.1rem;
+    opacity: 0.5;
+  }
+  100% {
+    margin-top: 0.25rem;
+    opacity: 1;
+  }
 }
 </style>

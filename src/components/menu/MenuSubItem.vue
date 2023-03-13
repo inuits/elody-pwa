@@ -2,7 +2,7 @@
   <router-link
     v-if="show === true"
     :to="`${destination}`"
-    class="flex flex-column items-center cursor-pointer ml-9 mt-2 origin-top-center"
+    class="flex flex-column items-center cursor-pointer ml-9 mt-1 origin-top-center"
   >
     <router-link
       :to="`${destination}`"

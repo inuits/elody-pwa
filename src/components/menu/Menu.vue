@@ -38,26 +38,22 @@ import LogInLogout from "@/components/LogInLogout.vue";
 const router = useRouter();
 const menuItems = ref<Array<menuItem>>([]);
 const queryVariables = reactive<GetMenuQueryVariables>({ name: "main-menu" });
-const { result: menuQueryResult, onResult } = useQuery<GetMenuQuery>( GetMenuDocument, queryVariables);
+const { result: menuQueryResult, onResult } = useQuery<GetMenuQuery>(
+  GetMenuDocument,
+  queryVariables
+);
 
 onResult((value) => {
-  menuItems.value = [];
-  const menu = value.data.Menu?.menu;
-  for (const key in menu) {
-    if (menu.hasOwnProperty(key)) {
-      if (
-        menu[key].linkType === MenuLinkType.Route ||
-        menu[key].linkType === MenuLinkType.Modal
-      ) {
-        menuItems.value.push(menu[key]);
-      }
-    }
-  }
+  menuItems.value = Object.values(value.data.Menu?.menu || {}).filter(
+    (menu) =>
+      menu.linkType === MenuLinkType.Route ||
+      menu.linkType === MenuLinkType.Modal
+  );
 });
+
 </script>
 
 <style>
-
 .navbar {
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
