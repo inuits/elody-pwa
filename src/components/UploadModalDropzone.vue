@@ -64,6 +64,11 @@ import {
 import { onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
+type UploadRequestData = {
+  body: object | Array<object>;
+  uri: string;
+};
+
 const {
   isUploading,
   setSelectedMediafiles,
@@ -100,7 +105,6 @@ const onUpdateFilesInDropzone = (files: DropzoneFile[]) => {
 
   const csvFiles = files.filter((file) => file.type === "text/csv");
   modifyMetadata.value = csvFiles.length === 1 && files.length === 1;
-
   importMethods.value = [
     ...csvFiles.map((file) => {
       return { label: file.name, value: file.name };
@@ -118,25 +122,58 @@ const onUpdateFilesInDropzone = (files: DropzoneFile[]) => {
 const uploadFiles = async () => {
   isUploading.value = true;
   setSelectedMediafiles(filesInDropzone.value);
-  await callUploadEndpoint();
+  const uploadRequestData = await getUploadRequestData();
+  await callUploadEndpoint(uploadRequestData);
 };
 
-const callUploadEndpoint = async () => {
-  for (let file of filesInDropzone.value) {
-    const form = new FormData();
-    form.append("title", file.name);
+const getUploadRequestData = async (): Promise<UploadRequestData> => {
+  const csvToBeParsedToEntityBodies = filesInDropzone.value.find(
+    (file) => file.name === selectedImportMethod.value.value
+  );
 
-    await fetch(
-      `/api/upload?filename=${file.name}
-      &entityToCreate=${
-        createEntity.value ? selectedEntityToCreate.value : ""
-      }`,
-      {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        method: "POST",
-        body: form,
-      }
-    )
+  let form: FormData | undefined;
+  if (csvToBeParsedToEntityBodies) {
+    form = new FormData();
+    form.append("title", csvToBeParsedToEntityBodies.name);
+  }
+
+  const response = await fetch(
+    `/api/upload/request-data?filetype=${
+      csvToBeParsedToEntityBodies ? csvToBeParsedToEntityBodies.type : ""
+    }
+  &entityToCreate=${
+    createEntity.value ? selectedEntityToCreate.value.value : ""
+  }`,
+    {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      method: "POST",
+      body: form,
+    }
+  );
+
+  return JSON.parse(await response.text());
+};
+
+const linkUploadRequestDataWithFile = (
+  uploadRequestData: UploadRequestData,
+  file: DropzoneFile
+): UploadRequestData => {
+  if (!Array.isArray(uploadRequestData.body)) return uploadRequestData;
+
+  return uploadRequestData;
+};
+
+const callUploadEndpoint = async (uploadRequestData: UploadRequestData) => {
+  const filesToBeUploaded = filesInDropzone.value.filter(
+    (file) => file.type !== "text/csv"
+  );
+  for (const file of filesToBeUploaded) {
+    const body = linkUploadRequestDataWithFile(uploadRequestData, file);
+    await fetch(`/api/upload?filename=${file.name}`, {
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+      body: JSON.stringify(body),
+    })
       .then((response: Response) => {
         if (!response.ok) throw response;
         return response.json();
@@ -167,9 +204,7 @@ const callUploadEndpoint = async () => {
             closeUploadModal();
           })
           .catch(() => exceptionHandler());
-      })
-      .catch(() => exceptionHandler())
-      .finally(() => (isUploading.value = false));
+      });
   }
 };
 
