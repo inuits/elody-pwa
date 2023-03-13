@@ -1,42 +1,107 @@
-import { ref, computed, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useAuth } from 'session-vue-3-oidc-library';
+import { ref, computed, watchEffect } from "vue";
+import { usePageInfo } from "./usePageInfo";
+import { useRouter } from "vue-router";
 
-export default function useBreadcrumb() {
+export function useBreadcrumb() {
+  const { pageInfo } = usePageInfo();
+
   const router = useRouter();
-  const route = useRoute();
+  const routes = router.options.routes;
 
   const visitedPages = ref([]);
-  const pageInfo = ref({ routerTitle: '', entityTitle: '' });
 
-  watch(
-    route,
-    () => {
-      const routerTitle = route.meta.title || router.currentRoute.value.name || 'Home';
-      const entityTitle = route.meta.entityTitle || '';
+  function addHomePage() {
+    visitedPages.value.unshift({
+      entityTitle: "Home",
+      path: "/",
+    });
+  }
 
-      if (entityTitle) {
-        visitedPages.value.push({ title: entityTitle, path: route.path });
-      }
+  if (visitedPages.value.length === 0) {
+    addHomePage();
+  }
 
-      pageInfo.value.routerTitle = routerTitle;
-      pageInfo.value.entityTitle = entityTitle;
-    },
-    { immediate: true }
-  );
+  const visitedPagesOptions = computed(() => {
+    return visitedPages.value.length > 1
+      ? visitedPages.value
+          .map((page, index) => {
+            return {
+              label: page.entityTitle,
+              value: index,
+            };
+          })
+          .filter((page) => page.label)
+          .reverse()
+      : [];
+  });
 
-  const showEntityTitle = computed(() => pageInfo.value.entityTitle !== '');
-  const routerTitle = computed(() => pageInfo.value.routerTitle);
-  const entityTitle = computed(() => pageInfo.value.entityTitle);
+  const selectedVisitedPage = ref(visitedPages.value.length - 1);
 
-  const auth = useAuth();
-  const isAuthenticated = computed(() => auth.isAuthenticated.value);
+  function addVisitedPage(page) {
+    const existingIndex = visitedPages.value.findIndex(
+      (p) => p.entityTitle === page.entityTitle
+    );
+    if (existingIndex === -1) {
+      visitedPages.value.push({
+        entityTitle: page.entityTitle,
+        path: page.path,
+      });
+    } else {
+      const existingPage = visitedPages.value.splice(existingIndex, 1)[0];
+      visitedPages.value.push(existingPage);
+    }
+  }
+
+  function clearVisitedPages() {
+    visitedPages.value = [];
+    addHomePage();
+  }
+
+  function onVisitedPageChange(index) {
+    const selectedPage = visitedPages.value[index];
+    if (selectedPage) {
+      const { entityTitle, path } = selectedPage;
+      const matchedRoute = routes.find((route) => route.path === path);
+  
+      const routerTitle = matchedRoute?.meta?.title;
+      const routeType = matchedRoute?.meta?.type;
+      const parentRouteName = matchedRoute?.name;
+  
+      pageInfo.value = {
+        routerTitle,
+        entityTitle,
+        routeType,
+        parentRouteName,
+      };
+  
+      visitedPages.value.splice(index + 1);
+      router.push(path);
+    }
+  }
+  
+
+  router.beforeEach((to, from, next) => {
+    if (from.name) {
+      visitedPages.value.pop();
+      selectedVisitedPage.value = visitedPages.value.length - 1;
+    }
+    next();
+  });
+
+  watchEffect(() => {
+    addVisitedPage(pageInfo.value);
+    selectedVisitedPage.value = visitedPages.value.length - 1;
+  });
 
   return {
-    routerTitle,
-    entityTitle,
-    showEntityTitle,
-    isAuthenticated,
-    visitedPages,
+    pageInfo,
+    visitedPagesOptions,
+    selectedVisitedPage,
+    showVisitedPages: computed(() => visitedPages.value.length > 1),
+    entityTitle: computed(() => pageInfo.value.entityTitle),
+    showEntityTitle: computed(() => pageInfo.value.entityTitle !== ""),
+    addVisitedPage,
+    clearVisitedPages,
+    onVisitedPageChange,
   };
 }
