@@ -22,7 +22,7 @@
 import BaseDropdown from "@/components/base/BaseDropdown.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import { Entitytyping } from "@/generated-types/queries";
-import { defineComponent, ref } from "vue";
+import {  ref } from "vue";
 import CreateEntityForm from "@/components/CreateEntityForm.vue";
 import {  useAvailableModals } from "@/composables/useAvailableModals";
 import { TypeModals } from "@/composables/modalFactory";

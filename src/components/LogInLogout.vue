@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-row items-center menu-item fixed bottom-8">
+  <div class="flex flex-row items-center menu-item fixed bottom-8 hover:text-accent-normal">
     <unicon
       v-if="auth.isAuthenticated.value === false"
       @click="auth.redirectToLogin()"
@@ -16,7 +16,7 @@
     </span>
   </div>
 
-  <div class="flex flex-row items-center menu-item fixed bottom-8 left-3">
+  <div class="flex flex-row items-center menu-item fixed bottom-8 left-3 hover:text-accent-normal">
     <unicon
       v-if="auth.isAuthenticated.value === true"
       @click="auth.logout()"

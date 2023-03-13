@@ -136,11 +136,8 @@
 </template>
 
 <script lang="ts">
-<<<<<<< HEAD
 /*import { PostMediaFileDocument } from "../generated-types/queries";*/
 import type { PostMediaFileMutation } from "../generated-types/queries";
-=======
->>>>>>> master
 import useDropzoneHelper from "../composables/useDropzoneHelper";
 import { onMounted, ref, defineComponent } from "vue";
 import Dropzone from "dropzone";
