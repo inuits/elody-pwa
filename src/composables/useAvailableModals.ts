@@ -6,14 +6,12 @@ export const useAvailableModals = () => {
   const getModal = (type: TypeModals): IBaseModal => {
     
     const existingModal = modalMap.get(type);
-    if (existingModal) {
-      return existingModal;
-    } else {
-      
+    if (existingModal) return existingModal;
+     
       const modal = makeModal(type);
       modalMap.set(type, modal);
       return modal;
-    }
+    
   };
 
   return {
