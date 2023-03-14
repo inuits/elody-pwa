@@ -12,6 +12,7 @@
           / {{ pageInfo.entityTitle }}</span
         >
       </h1>
+      <EditToggle v-if="auth.isAuthenticated.value === true" />
     </div>
   </div>
 </template>
@@ -20,10 +21,12 @@
 import { watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { usePageInfo } from "../composables/usePageInfo";
-import BaseButton from "../components/base/BaseButton.vue";
 import EditToggle from "./EditButtons.vue";
+import { useAuth } from "session-vue-3-oidc-library";
 
 const { pageInfo } = usePageInfo();
+const auth = useAuth();
+
 const route = useRoute();
 const router = useRouter();
 
