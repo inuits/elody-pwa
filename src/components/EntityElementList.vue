@@ -7,7 +7,10 @@
           class="flex items-center text-accent-normal cursor-pointer"
         >
           <unicon height="16" :name="Unicons.PlusCircle.name" />
-          <p class="underline ml-2" @click="openPickEntityModal(['assets'])">
+          <p
+            class="underline ml-2"
+            @click="openPickEntityModal([Entitytyping.Asset])"
+          >
             Voeg assets toe
           </p>
         </div>
@@ -43,7 +46,7 @@
 
 <script lang="ts" setup>
 import { watch } from "vue";
-import type { RelationValues } from "@/generated-types/queries";
+import { Entitytyping, type RelationValues } from "@/generated-types/queries";
 import { useFieldArray, type FieldEntry } from "vee-validate";
 import EntityElementWrapper from "./base/EntityElementWrapper.vue";
 import { usePickEntityModal } from "./PickEntityModal.vue";
