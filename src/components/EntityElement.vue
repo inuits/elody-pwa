@@ -1,5 +1,5 @@
 <template>
-  <div :class="'h-full w-full flex flex-col'">
+  <div :class="'max-h-full w-full flex flex-col overflow-y-scroll'">
     <div
       v-for="(element, index) in elements"
       :key="index"

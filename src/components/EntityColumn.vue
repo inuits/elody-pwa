@@ -1,5 +1,5 @@
 <template>
-  <div :class="['w-full flex overflow-y-scroll', { 'mb-20': isEdit }]">
+  <div :class="['w-full flex', { 'mb-20': isEdit }]">
     <div
       v-for="(column, index) in currentColumnConfig"
       :key="index"
