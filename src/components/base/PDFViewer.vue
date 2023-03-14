@@ -149,7 +149,10 @@ export default defineComponent({
     };
 
     const initialRender = (): void => {
-      url.value = source.value.original_file_location;
+      console.log(source.value);
+      url.value = source.value
+        ? "/api/mediafile/" + source.value.filename
+        : "no-src";
       pageNum.value = 1;
       scale.value = 1;
       pdfjsLib.getDocument(url.value).promise.then(function (pdfDoc_) {
