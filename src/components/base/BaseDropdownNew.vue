@@ -1,72 +1,48 @@
 <template>
   <label class="block w-full">
-    <span
-      v-if="label"
-      :class="[
-        `ml-1 text-[var(--color-text-body)] text-sm ${
-          isDisabled ? 'opacity-50' : ''
-        }`,
-      ]"
-      >{{ label }}</span
-    >
+    <span v-if="label" class="m-0 ml-1 py-0.5 px-0 text-sm text-text-body">
+      {{ label }}
+    </span>
     <select
-      v-model="selectedItem"
-      :class="isDisabled ? 'opacity-40 cursor-not-allowed' : ''"
-      :disabled="isDisabled"
+      v-model="selectedOption"
+      class="block h-7 m-0 py-0 w-full cursor-pointer rounded text-sm"
+      :class="{ 'opacity-40 pointer-events-none': disabled }"
+      :disabled="disabled"
     >
-      <option v-for="option in options" :key="option" :value="option">
-        {{ option }}
+      <option v-for="option in options" :key="option.value" :value="option">
+        {{ option.label }}
       </option>
     </select>
   </label>
 </template>
 
-<script lang="ts">
-import { defineComponent, onUpdated, ref, watch, type PropType } from "vue";
-import { Unicons } from "@/types";
+<script lang="ts" setup>
+import { onUpdated, ref, watch } from "vue";
 
-export default defineComponent({
-  name: "BaseDropdownNew",
-  props: {
-    label: { type: String, default: "" },
-    options: {
-      type: Array as PropType<Array<string | number>>,
-      required: true,
-    },
-    isDisabled: { type: Boolean, required: false },
-    modelValue: { type: [String, Number], default: undefined },
-    bgColor: {
-      type: String,
-      default: "neutral-0",
-    },
-    labelColor: {
-      type: String,
-      default: "neutral-600",
-    },
-  },
-  emits: ["update:modelValue"],
-  setup(props, { emit }) {
-    const selectedItem = ref(props.modelValue);
-    watch(selectedItem, (value) => emit("update:modelValue", value));
+export type DropdownOption = {
+  label: string;
+  value: string;
+};
 
-    onUpdated(() => {
-      selectedItem.value = props.modelValue;
-    });
+const props = withDefaults(
+  defineProps<{
+    modelValue: DropdownOption;
+    options: DropdownOption[];
+    label: string;
+    disabled: boolean;
+  }>(),
+  {
+    label: "",
+    disabled: false,
+  }
+);
 
-    return { Unicons, selectedItem };
-  },
-});
+const emit = defineEmits<{
+  (event: "update:modelValue", modelValue: DropdownOption): void;
+}>();
+
+const selectedOption = ref(props.modelValue);
+
+onUpdated(() => (selectedOption.value = props.modelValue));
+watch(selectedOption, (value) => emit("update:modelValue", value));
 </script>
-
-<style lang="postcss" scoped>
-select {
-  @apply block h-7 mr-4 p-0 pl-2 w-full min-w-0 cursor-pointer;
-  @apply border border-[var(--color-text-body)];
-  @apply text-[var(--color-text-body)] text-sm;
-  @apply rounded;
-  @apply focus:outline-none;
-}
-option {
-  @apply rounded py-2 px-4 bg-neutral-20 h-9;
-}
-</style>

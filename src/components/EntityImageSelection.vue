@@ -1,124 +1,78 @@
 <template>
   <div
+    v-if="!loading && mediafiles.length > 0"
     :class="[
-      'flex flex-col items-center p-2',
-      {
-        'animate-pulse bg-neutral-20 text-neutral-20': loading,
-      },
+      'flex h-auto' +
+        {
+          'animate-pulse bg-neutral-20 text-neutral-20': loading,
+        },
     ]"
   >
     <div
-      v-if="!loading && mediafiles.length > 0"
-      class="flex flex-col items-end mt-2 overflow-y-auto"
+      :class="[
+        'flex flex-col w-full h-full items-center bg-neutral-0 border-neutral-30 border-solid border-2 rounded-t-md',
+      ]"
     >
-      <!-- <draggable
+      <div class="w-full h-full px-2">
+        <div class="flex items-center justify-between w-full">
+          <h3 class="subtitle">Media</h3>
+          <div class="cursor-pointer" @click="toggleIsCollapsed()">
+            <unicon
+              :name="
+                !isCollapsed ? Unicons.AngleUp.name : Unicons.AngleDown.name
+              "
+            />
+          </div>
+        </div>
+        <transition>
+          <div
+            v-if="!isCollapsed"
+            class="flex flex-col w-full items-center mt-2 overflow-y-auto"
+          >
+            <!-- <draggable
         v-model="mediafiles"
         item-key="mediafiles-container"
         class="sortable"
         :disabled="!setDraggable()"
         @end="endDrag"
       > -->
-      <div v-for="element in mediafiles" :key="element._id">
-        <!-- <template #item="{ element }"> -->
-        <div
-          :key="element.filename ? element.filename : 'no-filename'"
-          :class="[' px-5 py-2 flex flex-col justify-end']"
-        >
-          <div class="relative group">
-            <trash-icon
-              v-if="editMode === 'edit' && !toBeDeleted.includes(element._id)"
-              class="hidden group-hover:block"
-              @click="addToSaveCallback(element._id)"
-            />
-            <AudioThumbnail
-              v-if="
-                element.thumbnail_file_location &&
-                element?.mimetype &&
-                element?.mimetype.includes('audio')
-              "
-              :class="[
-                'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
-                toBeDeleted.includes(element._id)
-                  ? 'filter blur-xs grayscale'
-                  : '',
-                selectedImage && element.filename === selectedImage.filename
-                  ? 'border-2 border-blue-500'
-                  : '',
-              ]"
-              @click="selectImage(element)"
-            />
-            <SvgThumbnail
-              v-else-if="
-                element.thumbnail_file_location &&
-                element?.mimetype &&
-                element?.mimetype.includes('text/plain')
-              "
-              :class="[
-                'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full border-2',
-                toBeDeleted.includes(element._id)
-                  ? 'filter blur-xs grayscale'
-                  : '',
-                selectedImage && element.filename === selectedImage.filename
-                  ? 'border-2 border-blue-500'
-                  : '',
-              ]"
-              @click="selectImage(element)"
-            />
-            <img
-              v-else-if="element.thumbnail_file_location"
-              :class="[
-                'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
-                toBeDeleted.includes(element._id)
-                  ? 'filter blur-xs grayscale'
-                  : '',
-                selectedImage && element.filename === selectedImage.filename
-                  ? 'border-2 border-blue-500'
-                  : '',
-              ]"
-              :src="
-                element?.mimetype && !element.mimetype.includes('pdf')
-                  ? `/api/iiif/3/${
-                      element.transcode_filename || element.filename
-                    }/square/100,/0/default.jpg`
-                  : element.thumbnail_file_location
-              "
-              @click="selectImage(element)"
-            />
+            <div v-for="element in mediafiles" :key="element._id">
+              <EntityImageSelectionItem
+                v-if="mediafiles.length"
+                :element="element"
+                :selected-image="selectedImage"
+              />
+            </div>
           </div>
-        </div>
-        <!-- </template> -->
+        </transition>
+      </div>
+      <div :class="editMode === 'edit' ? 'pb-20 pt-5' : ''">
+        <plus-circle-icon
+          v-if="editMode === 'edit'"
+          @click="openUploadModalWrapper()"
+        />
       </div>
     </div>
-    <div :class="editMode === 'edit' ? 'pb-20 pt-5' : ''">
-      <plus-circle-icon
-        v-if="editMode === 'edit'"
-        @click="openUploadModalWrapper()"
-      />
-    </div>
+    <BaseExpandButton :is-hidden="isCollapsed" />
   </div>
 </template>
+
 <script lang="ts">
 import { defineComponent, onMounted, ref, reactive } from "vue";
 import type { PropType } from "vue";
-import { useMutation } from "@vue/apollo-composable";
-import {
-  DeleteDataDocument,
-  Collection,
-  type Entity,
-} from "../generated-types/queries";
+import type { Entity } from "../generated-types/queries";
 import type { MediaFile } from "../generated-types/queries";
-import type { DeleteDataMutation } from "../generated-types/queries";
-import AudioThumbnail from "../components/base/audiothumbnail.vue";
-import SvgThumbnail from "./base/svgThumbnail.vue";
-import TrashIcon from "../components/base/TrashIcon.vue";
 import PlusCircleIcon from "../components/base/PlusCircleIcon.vue";
-import { useEditMode } from "../composables/useEdit";
 import useDropzoneHelper from "../composables/useDropzoneHelper";
-import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "../composables/useMetaDataHelper";
 import useMediafilesOrderHelpers from "../composables/useMediafilesOrderHelpers";
 import useUploadModal, { modalChoices } from "@/composables/useUploadModal";
+import BaseExpandButton from "./base/BaseExpandButton.vue";
+import useEditMode from "@/composables/useEdit";
+import { Unicons } from "@/types";
+import EntityImageSelectionItem from "./EntityImageSelectionItem.vue";
 // import draggable from "vuedraggable/src/vuedraggable";
+
 export const toBeDeleted = ref<string[]>([]);
 
 type MediafileSelectionState = {
@@ -149,11 +103,10 @@ export const useEntityMediafileSelector = () => {
 export default defineComponent({
   name: "EntityImageSelection",
   components: {
-    AudioThumbnail,
     PlusCircleIcon,
-    TrashIcon,
     // draggable,
-    SvgThumbnail,
+    BaseExpandButton,
+    EntityImageSelectionItem,
   },
   props: {
     selectedImage: {
@@ -165,35 +118,19 @@ export default defineComponent({
       default: false,
     },
   },
-  setup(props) {
+  emits: ["expandMedialist"],
+  setup(props, { emit }) {
     const { selectedFiles } = useDropzoneHelper();
     const { mediafiles, beingAdded } = useMetaDataHelper();
     const { updateSelectedEntityMediafile } = useEntityMediafileSelector();
-    const { isMediaFileInLinkList, removeMediaFileFromLinkList } =
-      useMediaAssetLinkHelper();
-    const { removeFromMetaDataPatchList } = useMetaDataHelper();
     const { openUploadModal } = useUploadModal();
-    const selectImage = (mediafile: MediaFile) => {
-      updateSelectedEntityMediafile(mediafile);
-    };
+    const { editMode } = useEditMode();
+    const isCollapsed = ref<boolean>(false);
 
     const { compareMediafileOrder } = useMediafilesOrderHelpers();
 
-    const { editMode, addSaveCallback } = useEditMode();
-
-    const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
-
-    const addToSaveCallback = (id: string) => {
-      const parsedId = id.replace("mediafiles/", "");
-      removeFromMetaDataPatchList(parsedId);
-      toBeDeleted.value.push(id);
-      if (!isMediaFileInLinkList(id)) {
-        addSaveCallback(async () => {
-          await mutate({ id: parsedId, path: Collection.Mediafiles });
-        });
-      } else {
-        removeMediaFileFromLinkList(id);
-      }
+    const toggleIsCollapsed = () => {
+      isCollapsed.value = !isCollapsed.value;
     };
 
     onMounted(() => {
@@ -220,22 +157,34 @@ export default defineComponent({
     };
 
     return {
-      selectImage,
-      editMode,
-      addToSaveCallback,
-      toBeDeleted,
+      toggleIsCollapsed,
       openUploadModalWrapper,
       modalChoices,
       selectedFiles,
       endDrag,
       setDraggable,
       mediafiles,
+      Unicons,
+      isCollapsed,
+      editMode,
     };
   },
 });
 </script>
 
 <style scoped>
+.v-enter-active,
+.v-leave-active {
+  overflow: hidden;
+  transition: transform 0.2s linear;
+  transform-origin: top;
+}
+
+.v-enter-from,
+.v-leave-to {
+  transform: scaleY(0);
+}
+
 .sortable-drag {
   opacity: 0;
 }

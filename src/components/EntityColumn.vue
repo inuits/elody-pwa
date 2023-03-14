@@ -1,6 +1,10 @@
 <template>
-  <div class="py-5 w-full overflow-y-scroll">
-    <div v-for="(column, index) in columns" :key="index">
+  <div :class="['w-full flex overflow-y-scroll', { 'mb-20': isEdit }]">
+    <div
+      v-for="(column, index) in currentColumnConfig"
+      :key="index"
+      :class="['h-full p-5', convertSizeToTailwind(column.size)]"
+    >
       <entity-element :elements="column.elements"></entity-element>
     </div>
   </div>
@@ -9,10 +13,16 @@
 import { computed } from "vue";
 import type { ColumnList, Column } from "@/generated-types/queries";
 import EntityElement from "./EntityElement.vue";
+import { convertSizeToTailwind } from "@/helpers";
+import useColumnResizeHelper from "../composables/useColumnResizeHelper";
+import { useEditMode } from "@/composables/useEdit";
 
 const props = defineProps<{
   columnList: ColumnList;
 }>();
+
+const { setInitialColumns, currentColumnConfig } = useColumnResizeHelper();
+const { isEdit } = useEditMode();
 
 const columns = computed<Column[]>(() => {
   const returnArray: Column[] = [];
@@ -25,4 +35,8 @@ const columns = computed<Column[]>(() => {
 
   return returnArray;
 });
+
+if (columns.value) {
+  setInitialColumns(columns.value);
+}
 </script>

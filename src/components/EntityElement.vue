@@ -1,6 +1,10 @@
 <template>
-  <div class="py-5 w-full">
-    <div v-for="(element, index) in elements" :key="index">
+  <div :class="'h-full w-full flex flex-col'">
+    <div
+      v-for="(element, index) in elements"
+      :key="index"
+      :class="['flex-1', { 'mb-5': index + 1 != elements.length }]"
+    >
       <entity-element-list
         v-if="element.__typename === 'EntityListElement'"
         RelationKey="relatie"

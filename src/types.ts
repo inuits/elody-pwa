@@ -9,6 +9,7 @@ import {
   uniAngleLeft,
   uniAngleRight,
   uniAngleDown,
+  uniAngleUp,
   uniBookOpen,
   uniUser,
   uniSearch,
@@ -45,6 +46,8 @@ import {
   uniRedo,
   uniLink,
   uniUserCircle,
+  uniArrowCircleRight,
+  uniArrowCircleLeft,
 } from "vue-unicons/dist/icons";
 
 export type DamsIcons =
@@ -60,6 +63,7 @@ export type DamsIcons =
   | "AngleDoubleLeft"
   | "AngleDoubleRight"
   | "AngleDown"
+  | "AngleUp"
   | "BookOpen"
   | "User"
   | "SearchGlass"
@@ -93,7 +97,9 @@ export type DamsIcons =
   | "Save"
   | "Redo"
   | "Link"
-  | "UserCircle";
+  | "UserCircle"
+  | "ArrowCircleRight"
+  | "ArrowCircleLeft";
 
 export const Unicons: Record<DamsIcons, { name: string }> = {
   Edit: uniEdit,
@@ -108,6 +114,7 @@ export const Unicons: Record<DamsIcons, { name: string }> = {
   AngleDoubleLeft: uniAngleDoubleLeft,
   AngleDoubleRight: uniAngleDoubleRight,
   AngleDown: uniAngleDown,
+  AngleUp: uniAngleUp,
   BookOpen: uniBookOpen,
   User: uniUser,
   SearchGlass: uniSearch,
@@ -140,5 +147,8 @@ export const Unicons: Record<DamsIcons, { name: string }> = {
   EllipsisV: uniEllipsisV,
   Save: uniSave,
   Redo: uniRedo,
-  UserCircle: uniUserCircle
+  UserCircle: uniUserCircle,
+  Link: uniLink,
+  ArrowCircleRight: uniArrowCircleRight,
+  ArrowCircleLeft: uniArrowCircleLeft,
 };

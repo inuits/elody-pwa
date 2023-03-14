@@ -1,10 +1,12 @@
 <template>
-  <span class="w-full">{{ metadata.label }}</span>
-  <span class="w-full">{{ value }}</span>
+  <div class="text-sm pl-4">
+    <p class="text-text-light w-full">{{ metadata.label }}</p>
+    <p class="w-full">{{ value || "-" }}</p>
+  </div>
 </template>
 
 <script lang="ts" setup>
-import type { PanelMetaData } from "@/generated-types/queries";
+import type { PanelMetaData, PanelRelation } from "@/generated-types/queries";
 import { useField } from "vee-validate";
 
 const props = defineProps<{
