@@ -49,7 +49,7 @@ import type {
   WindowElementPanel,
 } from "@/generated-types/queries";
 import { PanelType } from "@/generated-types/queries";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import EntityElementMetadata from "./EntityElementMetadata.vue";
 import EntityElementRelation from "./EntityElementRelation.vue";
 import { Unicons } from "@/types";
@@ -113,13 +113,19 @@ const getMediaInfo = (): MetadataValuesInput[] => {
   return returnArray;
 };
 
-if (panelType.value === PanelType.Metadata) {
-  metadataArray.value = getMetadataForPanel();
-} else if (panelType.value === PanelType.Relation) {
-  relationArray.value = getRelationsForPanel();
-} else if (panelType.value === PanelType.Mediainfo) {
-  metadataArray.value = getMediaInfo();
-}
+watch(
+  () => mediafileSelectionState.selectedMediafile,
+  () => {
+    if (panelType.value === PanelType.Metadata) {
+      metadataArray.value = getMetadataForPanel();
+    } else if (panelType.value === PanelType.Relation) {
+      relationArray.value = getRelationsForPanel();
+    } else if (panelType.value === PanelType.Mediainfo) {
+      metadataArray.value = getMediaInfo();
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>
