@@ -59,7 +59,7 @@
 </template>
 
 <script lang="ts" setup>
-import BaseModal from "./base/BaseModal.vue";
+import BaseModal from "@/components/base/BaseModal.vue";
 import BaseTab from "./BaseTab.vue";
 import BaseTabs from "./BaseTabs.vue";
 import MediaFileLibrary from "./MediaFileLibrary.vue";
