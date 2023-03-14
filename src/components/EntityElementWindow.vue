@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full flex flex-1">
+  <div class="h-full flex overflow-y-scroll flex-1">
     <base-expand-button
       orientation="Left"
       v-on:expand-media-list="resizeColumn"
