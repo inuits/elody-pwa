@@ -32,7 +32,11 @@
         />
       </div>
     </div>
-    <div v-for="submenuItem in menuSubitem" :key="submenuItem.label" :class="{dropdownMenuItem:showdropdown}">
+    <div
+      v-for="submenuItem in menuSubitem"
+      :key="submenuItem.label"
+      :class="{ dropdownMenuItem: showdropdown }"
+    >
       <MenuSubItem
         :linkType="submenuItem.linkType"
         :labelName="submenuItem.label"
@@ -51,10 +55,15 @@ import MenuSubItem from "@/components/menu/MenuSubItem.vue";
 import { Unicons, DamsIcons } from "@/types";
 import { MenuLinkType, MenuItem } from "@/generated-types/queries";
 import useMenuHelper from "@/composables/useMenuHelper";
-import { uploadModalState } from "@/composables/useUploadModal";
+import useUploadModal, { uploadModalState } from "@/composables/useUploadModal";
 import { useAvailableModals } from "@/composables/useAvailableModals";
-import { ModalState, TypeModals } from "@/composables/modalFactory";
+import {
+  modalChoices,
+  ModalState,
+  TypeModals,
+} from "@/composables/modalFactory";
 
+const { openUploadModal } = useUploadModal();
 const {
   checkIfRouteOrModal,
   showdropdown,
@@ -79,10 +88,15 @@ const props = defineProps<{
 }>();
 
 const handleClick = () => {
-  checkIfRouteOrModal(props.menuitem);
-  toggleDropDown();
-  if (props.menuitem) {
-    selectedMenuItem.value = props.menuitem?.destination;
+  // TODO: Fix properly, this is a temporary solution!
+  if (props.menuitem.label === "Upload") {
+    openUploadModal(modalChoices.IMPORT);
+  } else {
+    checkIfRouteOrModal(props.menuitem);
+    toggleDropDown();
+    if (props.menuitem) {
+      selectedMenuItem.value = props.menuitem?.destination;
+    }
   }
 };
 const handleSubMenu = () => {
@@ -115,6 +129,7 @@ watch(
 );
 handleSubMenu();
 </script>
+
 <style>
 .navbar:hover .IsActive {
   background-color: var(--color-neutral-40);
@@ -128,15 +143,15 @@ handleSubMenu();
     margin-top: -0.4rem;
     opacity: 0;
   }
-  25%{
+  25% {
     margin-top: -0.16rem;
     opacity: 0.25;
   }
-  50%{
+  50% {
     margin-top: 0rem;
     opacity: 0.5;
   }
-  75%{
+  75% {
     margin-top: 0.16rem;
     opacity: 0.75;
   }
