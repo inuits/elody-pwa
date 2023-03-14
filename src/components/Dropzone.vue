@@ -238,9 +238,8 @@ export default defineComponent({
           clearDropzoneCounters();
           clearDropzoneErrorMessages();
           updateFileCount();
-<<<<<<< HEAD
         });
-
+        
         //  onDone((value) => {
         //   if (value.data && value.data.postMediaFile) {
         //     mediafiles.value.push(value.data.postMediaFile);
@@ -248,10 +247,6 @@ export default defineComponent({
         //   }
         //   increaseSuccessCounter();
         // });
-=======
-          updateUIBasedOnExistenceOfCsv(addedFile, "added");
-        });
->>>>>>> master
 
         const uploadFiles = () => {
           selectedFiles.value.forEach(async (file: any) => {
