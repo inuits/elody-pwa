@@ -176,12 +176,9 @@ export default defineComponent({
       getDropzoneSettings,
       setSelectedMediafiles,
     } = useDropzoneHelper();
-<<<<<<< HEAD
     /*const { onDone, mutate } = useMutation<PostMediaFileMutation>(
       PostMediaFileDocument
     );*/
-=======
->>>>>>> master
     const dropzonePreviewDiv = ref<HTMLDivElement | undefined>(undefined);
     const dropzoneDiv = ref<HTMLDivElement | undefined>(undefined);
     const triggerUpload = ref<() => void | undefined>();
