@@ -33,7 +33,7 @@ import { useMutation, useQuery } from "@vue/apollo-composable";
 import BaseButton from "./base/BaseButton.vue";
 import urlSlug from "url-slug";
 import { useRouter } from "vue-router";
-import { useCreateModal } from "./CreateModal.vue";
+import { useAvailableModals } from "@/composables/useAvailableModals";
 
 export default defineComponent({
   name: "CreateEntityForm",
@@ -46,7 +46,7 @@ export default defineComponent({
   },
   setup(props) {
     const router = useRouter();
-    const { closeCreateModal } = useCreateModal();
+    const { closeModal } = useAvailableModals();
     const { result } = useQuery(GetFormsDocument, {
       type: props.entityType,
     });
@@ -71,7 +71,7 @@ export default defineComponent({
           identifiers: [manualID.value],
         },
       });
-      closeCreateModal();
+      closeModal();
       if (createResult && createResult.data?.createEntity?.id) {
         router.push({
           name: "SingleEntity",
