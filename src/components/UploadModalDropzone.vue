@@ -131,23 +131,22 @@ const getUploadRequestData = async (): Promise<UploadRequestData> => {
     (file) => file.name === selectedImportMethod.value.value
   );
 
-  let form: FormData | undefined;
-  if (csvToBeParsedToEntityBodies) {
-    form = new FormData();
-    form.append("title", csvToBeParsedToEntityBodies.name);
-  }
+  let blob: Blob | undefined;
+  if (csvToBeParsedToEntityBodies)
+    blob = new Blob([csvToBeParsedToEntityBodies], {
+      type: csvToBeParsedToEntityBodies.type,
+    });
 
   const response = await fetch(
     `/api/upload/request-data?filetype=${
       csvToBeParsedToEntityBodies ? csvToBeParsedToEntityBodies.type : ""
-    }
-  &entityToCreate=${
-    createEntity.value ? selectedEntityToCreate.value.value : ""
-  }`,
+    }&entityToCreate=${
+      createEntity.value ? selectedEntityToCreate.value.value : ""
+    }`,
     {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      headers: { "Content-Type": "text/csv" },
       method: "POST",
-      body: form,
+      body: blob,
     }
   );
 
@@ -157,8 +156,9 @@ const getUploadRequestData = async (): Promise<UploadRequestData> => {
 const linkUploadRequestDataWithFile = (
   uploadRequestData: UploadRequestData,
   file: DropzoneFile
-): UploadRequestData => {
+): UploadRequestData | undefined => {
   if (!Array.isArray(uploadRequestData.body)) return uploadRequestData;
+  if (uploadRequestData.body.length === 0) return undefined;
 
   return uploadRequestData;
 };
@@ -169,6 +169,8 @@ const callUploadEndpoint = async (uploadRequestData: UploadRequestData) => {
   );
   for (const file of filesToBeUploaded) {
     const body = linkUploadRequestDataWithFile(uploadRequestData, file);
+    if (!body) continue;
+
     await fetch(`/api/upload?filename=${file.name}`, {
       headers: { "Content-Type": "application/json" },
       method: "POST",
