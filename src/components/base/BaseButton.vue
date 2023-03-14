@@ -56,6 +56,11 @@ export default defineComponent({
       type: String,
       default: "transparent",
     },
+    iconHeight: {
+      type: Number,
+      default: 16,
+    },
   },
 });
 </script>
+<style scoped></style>

@@ -1,8 +1,8 @@
 <template>
   <base-modal
     :scroll="true"
-    :modal-state="createModalState.state"
-    @hide-modal="closeCreateModal"
+    :modal-state="getModal(TypeModals.Create).modalState.value.state"
+    @hide-modal="getModal(TypeModals.Create).closeModal()"
   >
     <div class="bg-neutral-0 w-full">
       <div class="p-6 pb-0">
@@ -18,59 +18,16 @@
     </div>
   </base-modal>
 </template>
-<script lang="ts">
+<script lang="ts" setup>
 import BaseDropdown from "@/components/base/BaseDropdown.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
-import type { ModalState } from "@/components/base/BaseModal.vue";
 import { Entitytyping } from "@/generated-types/queries";
-import { defineComponent, ref } from "vue";
-import CreateEntityForm from "./CreateEntityForm.vue";
+import {  ref } from "vue";
+import CreateEntityForm from "@/components/CreateEntityForm.vue";
+import {  useAvailableModals } from "@/composables/useAvailableModals";
+import { TypeModals } from "@/composables/modalFactory";
 
-export type CreateModalType = {
-  state: ModalState;
-};
+const {  getModal } = useAvailableModals();
+const selected = ref<Entitytyping>(Entitytyping.Story);
 
-const createModalState = ref<CreateModalType>({
-  state: "hide",
-});
-
-export const useCreateModal = () => {
-  const updateCreateModal = (CreateModalInput: CreateModalType) => {
-    createModalState.value = CreateModalInput;
-  };
-
-  const closeCreateModal = () => {
-    updateCreateModal({
-      state: "hide",
-    });
-  };
-
-  const openCreateModal = () => {
-    updateCreateModal({
-      state: "show",
-    });
-  };
-
-  return {
-    closeCreateModal,
-    openCreateModal,
-    createModalState,
-  };
-};
-
-export default defineComponent({
-  name: "CreateEntity",
-  components: { CreateEntityForm, BaseDropdown, BaseModal },
-  setup() {
-    const { closeCreateModal, createModalState } = useCreateModal();
-    const selected = ref<Entitytyping>(Entitytyping.Story);
-
-    return {
-      selected,
-      Entitytyping,
-      closeCreateModal,
-      createModalState,
-    };
-  },
-});
 </script>
