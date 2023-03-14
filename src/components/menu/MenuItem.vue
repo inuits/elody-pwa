@@ -89,16 +89,13 @@ const props = defineProps<{
 
 const handleClick = () => {
   // TODO: Fix properly, this is a temporary solution!
-  if (props.menuitem.label === "Upload") {
-    openUploadModal(modalChoices.IMPORT);
-  } else {
+
     checkIfRouteOrModal(props.menuitem);
     toggleDropDown();
     if (props.menuitem) {
       selectedMenuItem.value = props.menuitem?.destination;
     }
   }
-};
 const handleSubMenu = () => {
   const submenu = props.subMenu;
   if (props.subMenu) {

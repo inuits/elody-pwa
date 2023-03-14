@@ -60,12 +60,12 @@
 
 <script lang="ts" setup>
 import BaseModal from "@/components/base/BaseModal.vue";
-import BaseTab from "./BaseTab.vue";
-import BaseTabs from "./BaseTabs.vue";
-import MediaFileLibrary from "./MediaFileLibrary.vue";
-import UploadModalDropzone from "./UploadModalDropzone.vue";
-import UploadModalImport from "./UploadModalImport.vue";
-import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
+import BaseTab from "@/components/BaseTab.vue";
+import BaseTabs from "@/components/BaseTabs.vue";
+import MediaFileLibrary from "@/components/MediaFileLibrary.vue";
+import UploadModalDropzone from "@/components/UploadModalDropzone.vue";
+import UploadModalImport from "@/components/UploadModalImport.vue";
+import useMediaAssetLinkHelper from "@/composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "../composables/useMetaDataHelper";
 import useUploadModal, {
   modalChoices,
@@ -78,7 +78,7 @@ import {
   GetDropzoneEntityToCreateDocument,
 } from "../generated-types/queries";
 
-const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
+const { isMediaFileInLinkList } = useMediaAssetLinkHelper();
 const { mediafiles } = useMetaDataHelper();
 const { modalToOpen, closeUploadModal } = useUploadModal();
 
@@ -106,7 +106,7 @@ const getData = () => {
 const addSelection = (entity: any) => {
   const mediafile = JSON.parse(JSON.stringify(entity.media.mediafiles[0]));
   mediafiles.value.push(mediafile);
-  addMediaFileToLinkList(mediafile);
+  isMediaFileInLinkList(mediafile);
   closeUploadModal();
 };
 
