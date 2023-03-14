@@ -1,9 +1,12 @@
 <template>
-  <div :class="'max-h-full w-full flex flex-col overflow-y-scroll'">
+  <div :class="'max-h-full w-full flex flex-col'">
     <div
       v-for="(element, index) in elements"
       :key="index"
-      :class="['flex-1', { 'mb-5': index + 1 != elements.length }]"
+      :class="[
+        'flex-1 overflow-y-scroll',
+        { 'mb-5': index + 1 != elements.length },
+      ]"
     >
       <entity-element-list
         v-if="element.__typename === 'EntityListElement'"
