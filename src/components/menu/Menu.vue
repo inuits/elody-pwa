@@ -50,7 +50,6 @@ onResult((value) => {
       menu.linkType === MenuLinkType.Modal
   );
 });
-
 </script>
 
 <style>

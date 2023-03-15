@@ -106,5 +106,4 @@ export default defineComponent({
   transition: padding-left 300ms ease-in-out;
   padding-left: 20rem;
 }
-
 </style>
