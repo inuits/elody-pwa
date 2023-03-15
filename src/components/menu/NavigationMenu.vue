@@ -26,17 +26,17 @@ import { reactive, ref } from "vue";
 import { useRouter, RouterLink } from "vue-router";
 import {
   GetMenuDocument,
-  GetMenuQuery,
-  GetMenuQueryVariables,
+  type GetMenuQuery,
+  type GetMenuQueryVariables,
   MenuLinkType,
-  type menuItem,
+  type MenuItem,
 } from "@/generated-types/queries";
 import Menuitem from "@/components/menu/MenuItem.vue";
 import { useQuery } from "@vue/apollo-composable";
 import LogInLogout from "@/components/LogInLogout.vue";
 
 const router = useRouter();
-const menuItems = ref<Array<menuItem>>([]);
+const menuItems = ref<Array<MenuItem>>([]);
 const queryVariables = reactive<GetMenuQueryVariables>({ name: "main-menu" });
 const { result: menuQueryResult, onResult } = useQuery<GetMenuQuery>(
   GetMenuDocument,
