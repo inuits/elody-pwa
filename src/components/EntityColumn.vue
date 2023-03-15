@@ -14,7 +14,7 @@ import { computed } from "vue";
 import type { ColumnList, Column } from "@/generated-types/queries";
 import EntityElement from "./EntityElement.vue";
 import { convertSizeToTailwind } from "@/helpers";
-import useColumnResizeHelper from "../composables/useColumnResizeHelper";
+import { useColumnResizeHelper } from "../composables/useResizeHelper";
 import { useEditMode } from "@/composables/useEdit";
 
 const props = defineProps<{
