@@ -234,6 +234,11 @@ import GridItem from "../GridItem.vue";
 import { setCookie, getCookie } from "tiny-cookie";
 import useListItemHelper from "../../composables/useListItemHelper";
 
+export type PredefinedEntities = {
+  usePredefinedEntities: Boolean;
+  entities: Entity[];
+};
+
 export default defineComponent({
   name: "BaseLibrary",
   components: {
@@ -278,16 +283,16 @@ export default defineComponent({
       required: false,
     },
     predefinedEntities: {
-      type: Array as PropType<Entity[]>,
+      type: Object as PropType<PredefinedEntities>,
       required: false,
     },
     isHideFilters: Boolean,
   },
   emits: ["addSelection"],
   setup: (props, { emit }) => {
-    const entities = ref<Entity[]>(props.predefinedEntities || []);
+    const entities = ref<Entity[]>(props.predefinedEntities?.entities || []);
     const totalEntityCount = ref<number>(
-      props.predefinedEntities ? props.predefinedEntities.length : 0
+      props.predefinedEntities ? props.predefinedEntities.entities.length : 0
     );
     const { getThumbnail } = useThumbnailHelper();
     const { getMediaFilenameFromEntity } = useListItemHelper();
@@ -368,7 +373,7 @@ export default defineComponent({
     );
 
     onResult((result) => {
-      if (result.data) {
+      if (result.data && !props.predefinedEntities) {
         entities.value = result.data.Entities.results as Entity[];
         totalEntityCount.value = result.data.Entities.count;
       }
