@@ -91,6 +91,8 @@ watch(pickEntityModalState, (value: PickEntityModalType) => {
       id: value.pickedEntity.id,
       //@ts-ignore
       teaserMetadata: [...value.pickedEntity.teaserMetadata],
+      //@ts-ignore
+      media: value.pickedEntity.media,
       relationType: "components",
       toBeDeleted: false,
     });
