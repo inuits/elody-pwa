@@ -6,18 +6,16 @@
       :accepted-entity-types="acceptedEntityTypes ? acceptedEntityTypes : []"
       :advancedFiltersChoice="advancedFiltersChoice"
     />
-    <div class="p-6 w-full">
+    <div class="px-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
-        <div
-          v-show="acceptedEntityTypes.length === 0 && !isHideFilters"
-          class="mt-8 mr-4 flex"
-        >
+        <div v-show="acceptedEntityTypes.length === 0" class="mt-8 mr-4 flex">
           <IconToggle
+            v-if="!isHideFilters"
             v-model:checked="isDrawerHiding"
             :icon-on="Unicons.SearchGlass.name"
             :icon-off="Unicons.Filter.name"
           />
-          <div class="ml-2 mt-1.5">
+          <div :class="['mt-1.5', { 'ml-2': !isHideFilters }]">
             <IconToggle
               v-model:checked="displayGrid"
               :icon-on="Unicons.Apps.name"
