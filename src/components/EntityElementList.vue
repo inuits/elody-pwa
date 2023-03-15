@@ -1,6 +1,6 @@
 <template>
   <div>
-    <entity-element-wrapper label="Assets">
+    <entity-element-wrapper label="Assets" :isCollapsed="isCollapsed">
       <template v-slot:actions>
         <div
           v-if="isEdit"
@@ -16,7 +16,7 @@
         </div>
       </template>
       <template v-slot:content>
-        <div class="ml-1 bg-neutral-lightest">
+        <div v-if="!isCollapsed" class="ml-1 bg-neutral-lightest">
           <base-library
             list-item-route-name="SingleAsset"
             :is-hide-filters="true"
@@ -65,6 +65,7 @@ import BaseLibrary from "./base/BaseLibrary.vue";
 const router = useRouter();
 const props = defineProps<{
   RelationKey: string;
+  isCollapsed: Boolean;
 }>();
 const { isEdit } = useEditMode();
 

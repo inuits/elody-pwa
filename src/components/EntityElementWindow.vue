@@ -47,7 +47,7 @@ const panels = computed<WindowElementPanel[]>(() => {
   const returnArray: WindowElementPanel[] = [];
 
   Object.values(props.element).forEach((value) => {
-    if (typeof value !== "string") {
+    if (typeof value === "object") {
       returnArray.push(value);
     }
   });
