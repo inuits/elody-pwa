@@ -16,7 +16,13 @@
         </div>
       </template>
       <template v-slot:content>
-        <div v-for="(field, idx) in fields" :key="field.key">
+        <div class="ml-1 bg-neutral-lightest">
+          <base-library
+            list-item-route-name="SingleAsset"
+            :is-hide-filters="true"
+          />
+        </div>
+        <!-- <div v-for="(field, idx) in fields" :key="field.key">
           <span
             @click="
               router.push({
@@ -38,7 +44,7 @@
             @click="revertRemove(idx, field)"
             >undo delete</span
           >
-        </div>
+        </div> -->
       </template>
     </entity-element-wrapper>
   </div>
@@ -54,6 +60,7 @@ import type { PickEntityModalType } from "./PickEntityModal.vue";
 import useEditMode from "@/composables/useEdit";
 import { useRouter } from "vue-router";
 import { Unicons } from "@/types";
+import BaseLibrary from "./base/BaseLibrary.vue";
 
 const router = useRouter();
 const props = defineProps<{
@@ -86,6 +93,7 @@ watch(pickEntityModalState, (value: PickEntityModalType) => {
       relationType: "components",
       toBeDeleted: false,
     });
+    console.log(fields);
   }
 });
 </script>
