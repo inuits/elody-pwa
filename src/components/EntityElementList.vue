@@ -20,6 +20,7 @@
           <base-library
             list-item-route-name="SingleAsset"
             :is-hide-filters="true"
+            :predefined-entities="entitiesObject"
           />
         </div>
         <!-- <div v-for="(field, idx) in fields" :key="field.key">
@@ -52,7 +53,11 @@
 
 <script lang="ts" setup>
 import { watch } from "vue";
-import { Entitytyping, type RelationValues } from "@/generated-types/queries";
+import {
+  Entitytyping,
+  type Entity,
+  type RelationValues,
+} from "@/generated-types/queries";
 import { useFieldArray, type FieldEntry } from "vee-validate";
 import EntityElementWrapper from "./base/EntityElementWrapper.vue";
 import { usePickEntityModal } from "./PickEntityModal.vue";
@@ -60,7 +65,7 @@ import type { PickEntityModalType } from "./PickEntityModal.vue";
 import useEditMode from "@/composables/useEdit";
 import { useRouter } from "vue-router";
 import { Unicons } from "@/types";
-import BaseLibrary from "./base/BaseLibrary.vue";
+import BaseLibrary, { type PredefinedEntities } from "./base/BaseLibrary.vue";
 
 const router = useRouter();
 const props = defineProps<{
@@ -68,18 +73,20 @@ const props = defineProps<{
   isCollapsed: Boolean;
 }>();
 const { isEdit } = useEditMode();
-
-const { fields, push, update } = useFieldArray<RelationValues>(
-  props.RelationKey
-);
-
-const remove = (idx: number, field: FieldEntry<RelationValues>) => {
-  update(idx, { ...field.value, toBeDeleted: true });
+const entitiesObject: PredefinedEntities = {
+  usePredefinedEntities: true,
+  entities: [],
 };
 
-const revertRemove = (idx: number, field: FieldEntry<RelationValues>) => {
-  update(idx, { ...field.value, toBeDeleted: false });
-};
+const { fields, push, update } = useFieldArray<Entity>(props.RelationKey);
+
+// const remove = (idx: number, field: FieldEntry<RelationValues>) => {
+//   update(idx, { ...field.value, toBeDeleted: true });
+// };
+
+// const revertRemove = (idx: number, field: FieldEntry<RelationValues>) => {
+//   update(idx, { ...field.value, toBeDeleted: false });
+// };
 
 const { openPickEntityModal, pickEntityModalState } = usePickEntityModal();
 
@@ -87,16 +94,7 @@ const { openPickEntityModal, pickEntityModalState } = usePickEntityModal();
 watch(pickEntityModalState, (value: PickEntityModalType) => {
   //@ts-ignore
   if (value.pickedEntity && value.pickedEntity.teaserMetadata) {
-    push({
-      id: value.pickedEntity.id,
-      //@ts-ignore
-      teaserMetadata: [...value.pickedEntity.teaserMetadata],
-      //@ts-ignore
-      media: value.pickedEntity.media,
-      relationType: "components",
-      toBeDeleted: false,
-    });
-    console.log(fields);
+    push(value.pickedEntity);
   }
 });
 </script>
