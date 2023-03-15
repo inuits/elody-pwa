@@ -61,7 +61,7 @@ const props = defineProps<{
 }>();
 
 const panelType = ref<PanelType>(props.panel.panelType);
-const isCollapsed = ref<boolean>(false);
+const isCollapsed = ref<boolean>(props.panel.isCollapsed);
 const metadataArray = ref<MetadataValuesInput[]>([]);
 const relationArray = ref<PanelRelation[]>([]);
 const { mediafileSelectionState } = useEntityMediafileSelector();
@@ -73,7 +73,7 @@ const toggleIsCollapsed = () => {
 const getMetadataForPanel = (): MetadataValuesInput[] => {
   const returnArray: MetadataValuesInput[] = [];
   Object.values(props.panel).forEach((value) => {
-    if (value && typeof value !== "string") {
+    if (value && typeof value === "object") {
       const metadataObject = {
         key: (value as PanelMetaData).label,
         value: useField((value as PanelMetaData).key).value.value as string,
@@ -86,11 +86,18 @@ const getMetadataForPanel = (): MetadataValuesInput[] => {
 };
 
 const getRelationsForPanel = (): PanelRelation[] => {
-  const returnArray: PanelRelation[] = [];
+  let returnArray: PanelRelation[] = [];
   Object.values(props.panel).forEach((value) => {
-    if (typeof value !== "string") {
+    if (typeof value === "object") {
       const relationList = value as [PanelRelation];
-      returnArray.push(...relationList);
+      try {
+        if (!relationList.length) {
+          throw Error("Value can not be spread");
+        }
+        returnArray.push(...relationList);
+      } catch (e) {
+        returnArray = relationList;
+      }
     }
   });
 
@@ -102,7 +109,7 @@ const getMediaInfo = (): MetadataValuesInput[] => {
   const selectedMediafile: { [index: string]: any } | undefined =
     mediafileSelectionState.selectedMediafile;
   Object.values(props.panel).forEach((value) => {
-    if (typeof value !== "string" && selectedMediafile) {
+    if (typeof value === "object" && selectedMediafile) {
       const valueKey = (value as PanelMetaData).key;
       returnArray.push({
         key: (value as PanelMetaData).label,

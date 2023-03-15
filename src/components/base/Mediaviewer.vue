@@ -1,5 +1,5 @@
 <template>
-  <div class="flex checkboard ml-1">
+  <div class="flex h-full checkboard ml-1">
     <div class="w-1/3 m-5">
       <entity-image-selection
         v-model:selectedImage="mediafileSelectionState.selectedMediafile"

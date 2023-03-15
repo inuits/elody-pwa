@@ -1,5 +1,9 @@
 <template>
-  <entity-element-wrapper :label="label" class="flex flex-col h-full">
+  <entity-element-wrapper
+    :isCollapsed="isCollapsed"
+    :label="label"
+    class="flex flex-col h-full"
+  >
     <template v-slot:actions>
       <div
         v-if="isEdit"
@@ -13,7 +17,12 @@
     </template>
     <template v-slot:content>
       <!-- Not yet refactored old component -->
-      <media-viewer :loading="false" entityType="MediaFile" class="flex-1" />
+      <media-viewer
+        v-if="!isCollapsed"
+        :loading="false"
+        entityType="MediaFile"
+        class="flex-1"
+      />
     </template>
   </entity-element-wrapper>
 </template>
@@ -26,6 +35,7 @@ import { usePickEntityModal } from "./PickEntityModal.vue";
 
 const props = defineProps<{
   label: string;
+  isCollapsed: boolean;
 }>();
 
 const { isEdit } = useEditMode();
