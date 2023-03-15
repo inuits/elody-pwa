@@ -41,7 +41,7 @@ import type {
   EntityListElement,
 } from "@/generated-types/queries";
 
-type Elements = WindowElement | MediaFileElement | EntityListElement;
+export type Elements = WindowElement | MediaFileElement | EntityListElement;
 
 const props = defineProps<{
   elements: EntityViewElements;

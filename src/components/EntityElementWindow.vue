@@ -27,7 +27,7 @@ import {
 import EntityElementWindowPanel from "./EntityElementWindowPanel.vue";
 import { computed } from "vue";
 import BaseExpandButton from "./base/BaseExpandButton.vue";
-import useColumnResizeHelper from "@/composables/useColumnResizeHelper";
+import { useColumnResizeHelper } from "@/composables/useResizeHelper";
 
 const props = defineProps<{
   element: WindowElement;
