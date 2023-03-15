@@ -39,15 +39,14 @@
           class="pl-4 my-2 flex flex-row justify-left"
         >
           <BaseDropdown
-            v-if="result?.Entities?.count > 0"
+            v-if="totalEntityCount > 0"
             v-model="queryVariables.limit"
             :options="paginationLimits"
             :label="$t('library.items')"
           />
           <BaseDropdown
             v-if="
-              result?.Entities?.count > 1 &&
-              queryVariables.searchValue.value != ''
+              totalEntityCount > 1 && queryVariables.searchValue.value != ''
             "
             v-model="queryVariables.sort"
             :options="['Title', 'object_number']"
@@ -56,11 +55,11 @@
         </div>
         <div class="flex-grow"></div>
         <BasePagination
-          v-if="result?.Entities?.count > 0"
+          v-if="totalEntityCount > 0"
           v-model:skip="queryVariables.skip"
           v-model:limit="queryVariables.limit"
           :loading="loading"
-          :total-items="result?.Entities?.count"
+          :total-items="totalEntityCount"
         />
       </div>
       <ListContainer id="gridContainer" :class="displayGrid ? 'p-5' : 'p-1'">
@@ -87,11 +86,11 @@
           </ListItem>
         </div>
 
-        <div v-else-if="!displayGrid && result?.Entities?.results">
+        <div v-else-if="!displayGrid && entities">
           <div>
             <ListItem
               :small="listItemRouteName === 'SingleMediafile'"
-              v-for="entity in result.Entities?.results"
+              v-for="entity in entities"
               :key="entity?.id"
               :meta="entity?.teaserMetadata"
               :media="getMediaFilenameFromEntity(entity)"
@@ -142,14 +141,14 @@
             </ListItem>
           </div>
 
-          <div v-if="result?.Entities?.results.length === 0" class="p-4">
+          <div v-if="entities.length === 0" class="p-4">
             {{ $t("search.noresult") }}
           </div>
         </div>
-        <div v-else-if="displayGrid && result?.Entities?.results">
+        <div v-else-if="displayGrid && entities">
           <div :class="`grid grid_cols gap-2 justify-items-center`">
             <GridItem
-              v-for="entity in result.Entities?.results"
+              v-for="entity in entities"
               :key="entity?.id"
               :meta="entity?.teaserMetadata"
               :media="getMediaFilenameFromEntity(entity)"
@@ -186,7 +185,7 @@
               </template>
             </GridItem>
           </div>
-          <div v-if="result?.Entities?.results.length === 0" class="p-4">
+          <div v-if="entities.length === 0" class="p-4">
             {{ $t("search.noresult") }}
           </div>
         </div>
@@ -204,6 +203,7 @@ import {
   ref,
   onMounted,
   nextTick,
+  type Prop,
 } from "vue";
 import type { PropType } from "vue";
 import ListContainer from "../ListContainer.vue";
@@ -217,6 +217,7 @@ import { Unicons } from "../../types";
 import {
   GetEntitiesDocument,
   SearchInputType,
+  type Entity,
 } from "../../generated-types/queries";
 import type {
   GetEntitiesQueryVariables,
@@ -276,10 +277,18 @@ export default defineComponent({
       default: () => [],
       required: false,
     },
+    predefinedEntities: {
+      type: Array as PropType<Entity[]>,
+      required: false,
+    },
     isHideFilters: Boolean,
   },
   emits: ["addSelection"],
   setup: (props, { emit }) => {
+    const entities = ref<Entity[]>(props.predefinedEntities || []);
+    const totalEntityCount = ref<number>(
+      props.predefinedEntities ? props.predefinedEntities.length : 0
+    );
     const { getThumbnail } = useThumbnailHelper();
     const { getMediaFilenameFromEntity } = useListItemHelper();
     const router = useRouter();
@@ -350,13 +359,20 @@ export default defineComponent({
       );
     });
 
-    const { result, loading, refetch } = useQuery(
+    const { onResult, loading, refetch } = useQuery(
       GetEntitiesDocument,
       queryVariables,
       {
         notifyOnNetworkStatusChange: true,
       }
     );
+
+    onResult((result) => {
+      if (result.data) {
+        entities.value = result.data.Entities.results as Entity[];
+        totalEntityCount.value = result.data.Entities.count;
+      }
+    });
 
     const addSelection = (entity: any) => {
       beingAdded.value = "";
@@ -396,7 +412,8 @@ export default defineComponent({
       loading,
       Unicons,
       router,
-      result,
+      entities,
+      totalEntityCount,
       setFilters,
       getThumbnail,
       isNotAlreadyAdded,
