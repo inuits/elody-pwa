@@ -61,7 +61,7 @@ import {
   NotificationType,
   useNotification,
 } from "@/components/base/BaseNotification.vue";
-import { onMounted, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 type UploadRequestData = {
@@ -70,6 +70,7 @@ type UploadRequestData = {
 };
 
 const {
+  dropzone,
   isUploading,
   setSelectedMediafiles,
   increaseSuccessCounter,
@@ -160,7 +161,15 @@ const linkUploadRequestDataWithFile = (
   if (!Array.isArray(uploadRequestData.body)) return uploadRequestData;
   if (uploadRequestData.body.length === 0) return undefined;
 
-  return uploadRequestData;
+  const body = uploadRequestData.body.find((entity) =>
+    entity.metadata.find(
+      (metadata: any) =>
+        metadata.key === "title" && metadata.value === file.name.split(".")[0]
+    )
+  );
+  if (!body) return undefined;
+
+  return { body, uri: uploadRequestData.uri };
 };
 
 const callUploadEndpoint = async (uploadRequestData: UploadRequestData) => {
@@ -169,7 +178,14 @@ const callUploadEndpoint = async (uploadRequestData: UploadRequestData) => {
   );
   for (const file of filesToBeUploaded) {
     const body = linkUploadRequestDataWithFile(uploadRequestData, file);
-    if (!body) continue;
+    if (!body) {
+      if (createEntity.value)
+        exceptionHandler(
+          `File ${file.name} could not be linked to an entity from import method.`
+        );
+      else exceptionHandler();
+      continue;
+    }
 
     await fetch(`/api/upload?filename=${file.name}`, {
       headers: { "Content-Type": "application/json" },
@@ -198,23 +214,35 @@ const callUploadEndpoint = async (uploadRequestData: UploadRequestData) => {
             if (!response.ok) throw response;
 
             increaseSuccessCounter();
-            createNotificationOverwrite(
-              NotificationType.default,
-              t("dropzone.successNotification.title"),
-              t("dropzone.successNotification.description")
-            );
-            closeUploadModal();
+            dropzone.value?.removeFile(file);
+            onUpdateFilesInDropzone(dropzone.value?.files ?? []);
+
+            if (
+              !dropzone.value?.files.find((file) => file.type !== "text/csv")
+            ) {
+              createNotificationOverwrite(
+                NotificationType.default,
+                t("dropzone.successNotification.title"),
+                t("dropzone.successNotification.description")
+              );
+              closeUploadModal();
+            }
           })
-          .catch(() => exceptionHandler());
+          .catch(async (response: Response) =>
+            exceptionHandler(await response.text())
+          );
       });
   }
 };
 
-const exceptionHandler = () => {
+const exceptionHandler = (
+  errorDescription: string = t("dropzone.errorNotification.description")
+) => {
   createNotificationOverwrite(
     NotificationType.error,
     t("dropzone.errorNotification.title"),
-    t("dropzone.errorNotification.description")
+    errorDescription,
+    15
   );
 };
 
