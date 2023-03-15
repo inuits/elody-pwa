@@ -23,5 +23,4 @@ const props = defineProps({
   destination: String,
 });
 </script>
-<style>
-</style>
+<style></style>

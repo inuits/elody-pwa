@@ -6,8 +6,8 @@ import { useAvailableModals } from "@/composables/useAvailableModals";
 import { ref } from "vue";
 import { TypeModals } from "@/composables/modalFactory";
 const { openUploadModal, closeUploadModal } = useUploadModal();
-const {  getModal } = useAvailableModals();
-const selectedMenuItem = ref<String | 'no-item-selected'>("no-item-selected");
+const { getModal } = useAvailableModals();
+const selectedMenuItem = ref<String | "no-item-selected">("no-item-selected");
 
 export const useMenuHelper = () => {
   const router = useRouter();
@@ -16,12 +16,10 @@ export const useMenuHelper = () => {
   const checkIfRouteOrModal = (_menuItem: MenuItem): void => {
     if (_menuItem.linkType === MenuLinkType.Modal) {
       getModal(_menuItem.destination as TypeModals).openModal();
-      
-       if (_menuItem.destination === TypeModals.Upload) {
-          openUploadModal(modalChoices.DROPZONE);
-        }
 
-
+      if (_menuItem.destination === TypeModals.Upload) {
+        openUploadModal(modalChoices.DROPZONE);
+      }
     } else if (_menuItem.linkType === MenuLinkType.Route) {
       router.push(`/${_menuItem.destination}`);
     }
@@ -32,14 +30,13 @@ export const useMenuHelper = () => {
   const isMenuItemActive = (menuItem: MenuItem): boolean => {
     if (selectedMenuItem.value === menuItem.destination) {
       return true;
-    }
-    else {
+    } else {
       showdropdown.value = false;
       return false;
     }
   };
   const resetSelectedMenuItem = () => {
-    selectedMenuItem.value = "no-item-selected"
+    selectedMenuItem.value = "no-item-selected";
   };
 
   return {
@@ -48,8 +45,8 @@ export const useMenuHelper = () => {
     toggleDropDown,
     selectedMenuItem,
     isMenuItemActive,
-    resetSelectedMenuItem
-  }
+    resetSelectedMenuItem,
+  };
 };
 
 export default useMenuHelper;

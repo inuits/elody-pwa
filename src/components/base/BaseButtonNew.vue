@@ -78,15 +78,14 @@ const props = withDefaults(
     icon: DamsIcons | "no-icon";
     buttonStyle: ButtonStyle;
     disabled: boolean;
-    height:number
-    
+    height: number;
   }>(),
   {
     loading: false,
     icon: "no-icon",
     buttonStyle: "default",
     disabled: false,
-    height:18
+    height: 18,
   }
 );
 
