@@ -73,12 +73,13 @@ const props = defineProps<{
   isCollapsed: Boolean;
 }>();
 const { isEdit } = useEditMode();
+
+const { fields, push, update } = useFieldArray<Entity>(props.RelationKey);
+
 const entitiesObject: PredefinedEntities = {
   usePredefinedEntities: true,
   entities: [],
 };
-
-const { fields, push, update } = useFieldArray<Entity>(props.RelationKey);
 
 // const remove = (idx: number, field: FieldEntry<RelationValues>) => {
 //   update(idx, { ...field.value, toBeDeleted: true });
