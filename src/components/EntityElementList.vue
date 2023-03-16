@@ -102,7 +102,6 @@ watch(pickEntityModalState, (value: PickEntityModalType) => {
       (field: FieldEntry<Asset>) => field.value
     );
     entitiesObject.value.entities = entities;
-    console.log(entitiesObject.value);
   }
 });
 </script>
