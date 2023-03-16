@@ -13,6 +13,7 @@
     >
       <entity-element-list
         v-if="element.__typename === 'EntityListElement'"
+        :label="element.label"
         RelationKey="relatie"
         :isCollapsed="element.isCollapsed"
       />
