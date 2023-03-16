@@ -54,7 +54,6 @@
 import { ModalState } from "@/composables/modalFactory";
 import { toRefs, watch } from "vue";
 
-
 export type ModalPosition = "center" | "left" | "right";
 
 const props = withDefaults(
@@ -82,7 +81,7 @@ const hideModal: () => void = () => {
 const { modalState } = toRefs(props);
 
 watch(modalState, (value: ModalState) => {
-  if (value == ModalState.Show|| value == ModalState.Loading) {
+  if (value == ModalState.Show || value == ModalState.Loading) {
     document.body.classList.add("overflow-hidden");
   } else {
     document.body.classList.remove("overflow-hidden");

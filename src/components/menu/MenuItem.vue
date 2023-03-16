@@ -57,13 +57,8 @@ import { MenuLinkType, MenuItem } from "@/generated-types/queries";
 import useMenuHelper from "@/composables/useMenuHelper";
 import useUploadModal, { uploadModalState } from "@/composables/useUploadModal";
 import { useAvailableModals } from "@/composables/useAvailableModals";
-import {
-  modalChoices,
-  ModalState,
-  TypeModals,
-} from "@/composables/modalFactory";
+import { ModalState, TypeModals } from "@/composables/modalFactory";
 
-const { openUploadModal } = useUploadModal();
 const {
   checkIfRouteOrModal,
   showdropdown,
@@ -88,17 +83,13 @@ const props = defineProps<{
 }>();
 
 const handleClick = () => {
-  // TODO: Fix properly, this is a temporary solution!
-  if (props.menuitem.label === "Upload") {
-    openUploadModal(modalChoices.IMPORT);
-  } else {
-    checkIfRouteOrModal(props.menuitem);
-    toggleDropDown();
-    if (props.menuitem) {
-      selectedMenuItem.value = props.menuitem?.destination;
-    }
+  checkIfRouteOrModal(props.menuitem);
+  toggleDropDown();
+  if (props.menuitem) {
+    selectedMenuItem.value = props.menuitem?.destination;
   }
 };
+
 const handleSubMenu = () => {
   const submenu = props.subMenu;
   if (props.subMenu) {
@@ -111,7 +102,7 @@ const handleSubMenu = () => {
 };
 
 watch(
-  () => uploadModalState.value.state,
+  () => getModal(TypeModals.Upload).modalState.value.state,
   (state) => {
     if (state === ModalState.Hide) {
       resetSelectedMenuItem();
@@ -129,7 +120,6 @@ watch(
 );
 handleSubMenu();
 </script>
-
 <style>
 .navbar:hover .IsActive {
   background-color: var(--color-neutral-40);
