@@ -369,6 +369,7 @@ export default defineComponent({
       queryVariables,
       {
         notifyOnNetworkStatusChange: true,
+        enabled: props.predefinedEntities ? false : true,
       }
     );
 
@@ -407,7 +408,7 @@ export default defineComponent({
       }
     });
 
-    refetch();
+    if (!props.predefinedEntities) refetch();
 
     return {
       paginationLimits,
