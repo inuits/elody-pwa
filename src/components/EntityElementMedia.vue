@@ -10,7 +10,7 @@
         class="flex items-center text-accent-normal cursor-pointer"
       >
         <unicon height="16" :name="Unicons.PlusCircle.name" />
-        <p class="underline ml-2" @click="openPickEntityModal([])">
+        <p class="underline" @click="openPickEntityModal([])">
           Voeg bestand toe
         </p>
       </div>

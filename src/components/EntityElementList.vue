@@ -8,7 +8,7 @@
         >
           <unicon height="16" :name="Unicons.PlusCircle.name" />
           <p
-            class="underline ml-2"
+            class="underline"
             @click="openPickEntityModal([Entitytyping.Asset])"
           >
             Voeg assets toe
