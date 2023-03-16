@@ -4,7 +4,6 @@ const useThumbnailHelper = (): {
   getThumbnail: (entity: any) => string;
 } => {
   const getThumbnail = (data: any) => {
-    console.log(data);
     if (
       data?.label === "audio" ||
       (data?.media?.mediafiles?.length > 0 &&
