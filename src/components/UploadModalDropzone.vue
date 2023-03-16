@@ -85,7 +85,7 @@ const props = defineProps<{
   entityToCreate: DropzoneEntityToCreate;
 }>();
 
-const createEntity = ref<boolean>(false);
+const createEntity = ref<boolean>(true);
 const entityToCreateOptions = ref<DropdownOption[]>(
   props.entityToCreate.options
 );
@@ -250,7 +250,7 @@ const handleCheckOptionEvent = () => (createEntity.value = !createEntity.value);
 watch(
   () => uploadModalState.value.state,
   () => {
-    createEntity.value = false;
+    createEntity.value = true;
     clearDropzoneCounters();
     clearDropzoneErrorMessages();
   }
