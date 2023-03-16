@@ -1,10 +1,10 @@
 import { Unicons } from "@/types";
-import type { MediaFileEntity } from "@/generated-types/queries";
 
 const useThumbnailHelper = (): {
   getThumbnail: (entity: any) => string;
 } => {
   const getThumbnail = (data: any) => {
+    console.log(data);
     if (
       data?.label === "audio" ||
       (data?.media?.mediafiles?.length > 0 &&
