@@ -71,9 +71,13 @@ import BaseExpandButton from "./base/BaseExpandButton.vue";
 import useEditMode from "@/composables/useEdit";
 import { Unicons } from "@/types";
 import EntityImageSelectionItem from "./EntityImageSelectionItem.vue";
+import { useAvailableModals } from "@/composables/useAvailableModals";
+import { TypeModals } from "@/composables/modalFactory";
 // import draggable from "vuedraggable/src/vuedraggable";
 
 export const toBeDeleted = ref<string[]>([]);
+
+const { getModal } = useAvailableModals();
 
 type MediafileSelectionState = {
   selectedMediafile: MediaFile | undefined;
