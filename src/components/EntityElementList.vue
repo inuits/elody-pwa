@@ -1,6 +1,6 @@
 <template>
   <div>
-    <entity-element-wrapper label="Assets" :isCollapsed="isCollapsed">
+    <entity-element-wrapper :label="label" :isCollapsed="isCollapsed">
       <template v-slot:actions>
         <div
           v-if="isEdit"
@@ -67,13 +67,16 @@ import useEditMode from "@/composables/useEdit";
 import { useRouter } from "vue-router";
 import { Unicons } from "@/types";
 import BaseLibrary, { type PredefinedEntities } from "./base/BaseLibrary.vue";
+import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
 
 const router = useRouter();
 const props = defineProps<{
+  label: string;
   RelationKey: string;
   isCollapsed: Boolean;
 }>();
 const { isEdit } = useEditMode();
+const { toggleElementCollapse } = useEntityElementCollapseHelper();
 
 const { fields, push, update } = useFieldArray<Asset>(props.RelationKey);
 
@@ -102,6 +105,9 @@ watch(pickEntityModalState, (value: PickEntityModalType) => {
       (field: FieldEntry<Asset>) => field.value
     );
     entitiesObject.value.entities = entities;
+    if (props.isCollapsed) {
+      toggleElementCollapse(props.label);
+    }
   }
 });
 </script>
