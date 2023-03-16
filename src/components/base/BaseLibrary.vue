@@ -234,6 +234,7 @@ import BaseIcon from "./BaseIcon.vue";
 import GridItem from "../GridItem.vue";
 import { setCookie, getCookie } from "tiny-cookie";
 import useListItemHelper from "../../composables/useListItemHelper";
+import EntityColumn from "../EntityColumn.vue";
 
 export type PredefinedEntities = {
   usePredefinedEntities: Boolean;
@@ -414,6 +415,7 @@ export default defineComponent({
       () => {
         if (props.predefinedEntities?.entities) {
           entities.value = props.predefinedEntities?.entities;
+          totalEntityCount.value = entities.value.length;
         }
       },
       { immediate: true }
