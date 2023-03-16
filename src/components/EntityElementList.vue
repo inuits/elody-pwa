@@ -21,6 +21,7 @@
             list-item-route-name="SingleAsset"
             :is-hide-filters="true"
             :predefined-entities="entitiesObject"
+            :enable-selection="true"
           />
         </div>
         <!-- <div v-for="(field, idx) in fields" :key="field.key">
@@ -78,7 +79,9 @@ const props = defineProps<{
 const { isEdit } = useEditMode();
 const { toggleElementCollapse } = useEntityElementCollapseHelper();
 
-const { fields, push, update } = useFieldArray<Asset>(props.RelationKey);
+const { fields, push, update, remove } = useFieldArray<Asset>(
+  props.RelationKey
+);
 
 let entitiesObject = ref<PredefinedEntities>({
   usePredefinedEntities: true,
@@ -93,6 +96,12 @@ let entitiesObject = ref<PredefinedEntities>({
 //   update(idx, { ...field.value, toBeDeleted: false });
 // };
 
+const syncFieldWithObject = (fields: any) => {
+  entitiesObject.value.entities = fields.value.map(
+    (field: FieldEntry<Asset>) => field.value
+  );
+};
+
 const { openPickEntityModal, pickEntityModalState } = usePickEntityModal();
 
 //Picke entity modal needs to be refactored
@@ -101,13 +110,19 @@ watch(pickEntityModalState, (value: PickEntityModalType) => {
   if (value.pickedEntity && value.pickedEntity.teaserMetadata) {
     const entity = JSON.parse(JSON.stringify(value.pickedEntity));
     push(entity);
-    const entities = fields.value.map(
-      (field: FieldEntry<Asset>) => field.value
-    );
-    entitiesObject.value.entities = entities;
+    syncFieldWithObject(fields);
+
     if (props.isCollapsed) {
       toggleElementCollapse(props.label);
     }
   }
+});
+
+document.addEventListener("discard", () => {
+  // TODO: Refetch related assets
+  fields.value.forEach((field: FieldEntry<Asset>, idx: number) => {
+    remove(idx);
+    syncFieldWithObject(fields);
+  });
 });
 </script>
