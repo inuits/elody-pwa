@@ -52,9 +52,10 @@
 </template>
 
 <script lang="ts" setup>
-import { watch } from "vue";
+import { ref, watch } from "vue";
 import {
   Entitytyping,
+  type Asset,
   type Entity,
   type RelationValues,
 } from "@/generated-types/queries";
@@ -74,12 +75,12 @@ const props = defineProps<{
 }>();
 const { isEdit } = useEditMode();
 
-const { fields, push, update } = useFieldArray<Entity>(props.RelationKey);
+const { fields, push, update } = useFieldArray<Asset>(props.RelationKey);
 
-const entitiesObject: PredefinedEntities = {
+let entitiesObject = ref<PredefinedEntities>({
   usePredefinedEntities: true,
   entities: [],
-};
+});
 
 // const remove = (idx: number, field: FieldEntry<RelationValues>) => {
 //   update(idx, { ...field.value, toBeDeleted: true });
@@ -95,7 +96,13 @@ const { openPickEntityModal, pickEntityModalState } = usePickEntityModal();
 watch(pickEntityModalState, (value: PickEntityModalType) => {
   //@ts-ignore
   if (value.pickedEntity && value.pickedEntity.teaserMetadata) {
-    push(value.pickedEntity);
+    const entity = JSON.parse(JSON.stringify(value.pickedEntity));
+    push(entity);
+    const entities = fields.value.map(
+      (field: FieldEntry<Asset>) => field.value
+    );
+    entitiesObject.value.entities = entities;
+    console.log(entitiesObject.value);
   }
 });
 </script>

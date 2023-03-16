@@ -217,6 +217,7 @@ import { Unicons } from "../../types";
 import {
   GetEntitiesDocument,
   SearchInputType,
+  type Asset,
   type Entity,
 } from "../../generated-types/queries";
 import type {
@@ -236,7 +237,7 @@ import useListItemHelper from "../../composables/useListItemHelper";
 
 export type PredefinedEntities = {
   usePredefinedEntities: Boolean;
-  entities: Entity[];
+  entities: Asset[];
 };
 
 export default defineComponent({
@@ -290,7 +291,7 @@ export default defineComponent({
   },
   emits: ["addSelection"],
   setup: (props, { emit }) => {
-    const entities = ref<Entity[]>(props.predefinedEntities?.entities || []);
+    const entities = ref<Asset[]>(props.predefinedEntities?.entities || []);
     const totalEntityCount = ref<number>(
       props.predefinedEntities ? props.predefinedEntities.entities.length : 0
     );
@@ -407,6 +408,16 @@ export default defineComponent({
         calculateGridColumns();
       }
     });
+
+    watch(
+      () => props.predefinedEntities?.entities,
+      () => {
+        if (props.predefinedEntities?.entities) {
+          entities.value = props.predefinedEntities?.entities;
+        }
+      },
+      { immediate: true }
+    );
 
     if (!props.predefinedEntities) refetch();
 
