@@ -33,7 +33,9 @@ export function useBreadcrumb() {
           .filter((page) => page.label)
           .reverse()
       : [];
-  });
+  
+    selectedVisitedPage;
+  });  
 
   const selectedVisitedPage = ref(visitedPages.value.length - 1);
 
