@@ -28,8 +28,10 @@ import { reactive, ref } from "vue";
 import { asString } from "@/helpers";
 import { useRoute, onBeforeRouteUpdate } from "vue-router";
 import {
+  Entitytyping,
   GetEntityByIdDocument,
   type ColumnList,
+  type Entity,
   type GetEntityByIdQuery,
   type GetEntityByIdQueryVariables,
   type IntialValues,
@@ -42,6 +44,15 @@ import useMetaDataHelper from "@/composables/useMetaDataHelper";
 import { useEntityMediafileSelector } from "./EntityImageSelection.vue";
 import EntityForm from "./EntityForm.vue";
 import { usePageInfo } from "@/composables/usePageInfo";
+
+const props = withDefaults(
+  defineProps<{
+    entityType: Entitytyping;
+  }>(),
+  {
+    entityType: Entitytyping.Asset,
+  }
+);
 
 const id = asString(useRoute().params["id"]);
 const loading = ref<boolean>(true);
@@ -57,7 +68,7 @@ const { mediafileSelectionState, updateSelectedEntityMediafile } =
 
 const queryVariables = reactive<GetEntityByIdQueryVariables>({
   id: id,
-  type: "Entity",
+  type: props.entityType,
 });
 
 const { onResult, refetch } = useQuery<GetEntityByIdQuery>(
@@ -81,34 +92,32 @@ const intialValues = ref<Omit<IntialValues, "keyValue"> | "no-values">(
 const columnList = ref<ColumnList | "no-values">("no-values");
 
 onResult((queryResults) => {
-  //TEMP: check if it's an asset
+  //TEMP: check if it's an asset or mediafile
   try {
+    const entity = queryResults.data.Entity;
     if (
-      queryResults.data.Entity &&
-      queryResults.data.Entity.__typename === "Asset"
+      (entity && entity.__typename == "Asset") ||
+      entity?.__typename == "MediaFileEntity"
     ) {
-      intialValues.value = queryResults.data.Entity.intialValues;
-      columnList.value = queryResults.data.Entity.entityView;
+      intialValues.value = entity.intialValues;
+      columnList.value = entity.entityView;
       //If logged in set edit mode -> need to check permissions if enabled
       if (auth.isAuthenticated.value === true) {
         showEditToggle("edit");
       }
 
       //TEMP: set page title
-      updatePageInfo(
-        queryResults.data.Entity.intialValues.title,
-        "entityTitle"
-      );
+      updatePageInfo(entity.intialValues.title, "entityTitle");
 
       //Old medafile code
       clearMediafiles();
       if (
-        queryResults.data &&
-        queryResults.data.Entity?.media?.mediafiles &&
-        queryResults.data.Entity?.media?.mediafiles?.length > 0
+        entity &&
+        entity.media?.mediafiles &&
+        entity.media?.mediafiles?.length > 0
       ) {
         let mediaFileChanged: boolean = false;
-        queryResults.data.Entity.media.mediafiles?.forEach((mediafile: any) => {
+        entity.media.mediafiles?.forEach((mediafile: any) => {
           if (mediafile?.__typename === "MediaFile") {
             if (
               mediafile._id == mediafileSelectionState.selectedMediafile?._id
