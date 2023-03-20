@@ -4,7 +4,7 @@
     :isSelectionDisplayed="true"
     :isMetaDisplayed="true"
     :isMediaFileSingle="false"
-    :entityType="'Entity'"
+    :entityType="Entitytyping.Asset"
   />
   <entity-single v-else></entity-single>
 </template>
@@ -13,6 +13,7 @@
 import BaseSingleEntity from "@/components/base/BaseSingleEntity.vue";
 import { inject } from "vue";
 import EntitySingle from "../components/EntitySingle.vue";
+import { Entitytyping } from "@/generated-types/queries";
 
 const config: any = inject("config");
 const useOldComponent = config.features.useOldSingleEntityComponent;
