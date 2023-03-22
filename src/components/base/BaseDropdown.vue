@@ -39,7 +39,7 @@ export default defineComponent({
     },
     labelColor: {
       type: String,
-      default: "neutral-600",
+      default: "text-light",
     },
   },
   emits: ["update:modelValue"],
