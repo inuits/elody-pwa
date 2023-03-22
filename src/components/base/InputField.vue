@@ -3,7 +3,7 @@
     class="block"
     :class="{ 'justify-end flex flex-row-reverse gap-2': type === 'checkbox' }"
   >
-    <span v-if="label" class="ml-1 text-neutral-700 text-sm">{{ label }}</span>
+    <span v-if="label" class="ml-1 text-text-light text-sm">{{ label }}</span>
     <div :class="[inputContainerStyle]">
       <unicon
         v-if="icon"
@@ -27,10 +27,9 @@
 import { computed, defineComponent } from "vue";
 import { debounce } from "ts-debounce";
 export const lableStyle = 'ml-1 text-neutral-700 text-sm"';
-export const inputContainerStyle =
-  "flex flex-row bg-neutral-20 border border-[var(--color-text-body)] rounded";
+export const inputContainerStyle = "flex flex-row bg-neutral-20 rounded";
 export const inputStyle =
-  " py-1 pl-4  w-full rounded min-w-48 text-neutral-700 text-sm focus:outline-none";
+  "w-full rounded min-w-48 text-neutral-700 text-sm focus:outline-none";
 
 export default defineComponent({
   name: "InputField",
