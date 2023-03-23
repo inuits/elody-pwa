@@ -58,7 +58,7 @@ export default defineComponent({
 
 <style lang="postcss" scoped>
 select {
-  @apply block mr-4 p-2 w-48 min-w-0 cursor-pointer;
+  @apply block mr-4 p-2 w-full min-w-0 cursor-pointer;
   @apply border border-neutral-50;
   @apply text-neutral-700 text-sm;
   @apply rounded bg-neutral-20;
