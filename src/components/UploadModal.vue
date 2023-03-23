@@ -72,13 +72,10 @@ import { useQuery } from "@vue/apollo-composable";
 import {
   GetDirectoriesDocument,
   GetDropzoneEntityToCreateDocument,
+  TypeModals,
 } from "../generated-types/queries";
 import { useAvailableModals } from "@/composables/useAvailableModals";
-import {
-  modalChoices,
-  ModalState,
-  TypeModals,
-} from "../composables/modalFactory";
+import { modalChoices, ModalState } from "../composables/modalFactory";
 
 const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
 const { mediafiles } = useMetaDataHelper();

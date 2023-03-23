@@ -38,7 +38,7 @@
       :class="{ dropdownMenuItem: showdropdown }"
     >
       <MenuSubItem
-        :linkType="submenuItem.linkType"
+        :typeLink="submenuItem.typeLink.route.destination"
         :labelName="submenuItem.label"
         :destination="submenuItem.destination"
         :show="showdropdown"
@@ -53,12 +53,10 @@ import { useAuth } from "session-vue-3-oidc-library";
 import { useRouter } from "vue-router";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
 import { Unicons, DamsIcons } from "@/types";
-import { MenuLinkType, MenuItem } from "@/generated-types/queries";
+import { MenuItem, TypeModals } from "@/generated-types/queries";
 import useMenuHelper from "@/composables/useMenuHelper";
-import useUploadModal, { uploadModalState } from "@/composables/useUploadModal";
 import { useAvailableModals } from "@/composables/useAvailableModals";
-import { ModalState, TypeModals } from "@/composables/modalFactory";
-
+import { ModalState } from "@/composables/modalFactory";
 const {
   checkIfRouteOrModal,
   showdropdown,
@@ -69,11 +67,8 @@ const {
 } = useMenuHelper();
 
 const router = useRouter();
-
 const auth = useAuth();
-
 const menuSubitem = ref<Array<MenuItem>>([]);
-
 const { getModal } = useAvailableModals();
 
 const props = defineProps<{
@@ -86,7 +81,10 @@ const handleClick = () => {
   checkIfRouteOrModal(props.menuitem);
   toggleDropDown();
   if (props.menuitem) {
-    selectedMenuItem.value = props.menuitem?.destination;
+    const menu = props.menuitem;
+    console.log(menu.typeLink);
+    selectedMenuItem.value =
+      menu.typeLink.route?.destination || menu.typeLink.modal?.typeModal;
   }
 };
 
@@ -94,9 +92,7 @@ const handleSubMenu = () => {
   const submenu = props.subMenu;
   if (props.subMenu) {
     menuSubitem.value = Object.values(submenu).filter(
-      (menu) =>
-        menu.linkType === MenuLinkType.Route ||
-        menu.linkType === MenuLinkType.Modal
+      (menu: MenuItem) => menu.typeLink
     );
   }
 };
