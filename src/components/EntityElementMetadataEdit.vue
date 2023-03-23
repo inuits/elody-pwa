@@ -13,8 +13,13 @@
 <script lang="ts" setup>
 import InputField from "./base/InputField.vue";
 import BaseDropdown from "./base/BaseDropdown.vue";
-import type { InputField as InputFieldType } from "@/generated-types/queries";
+import {
+  ReplaceRelationsAndMetaDataDocument,
+  type InputField as InputFieldType,
+  type ReplaceRelationsAndMetaDataMutation,
+} from "@/generated-types/queries";
 import { computed, ref, watch, type PropType } from "vue";
+import { useMutation } from "@vue/apollo-composable";
 
 const props = defineProps({
   label: { type: String, required: true },
@@ -22,16 +27,17 @@ const props = defineProps({
   field: { type: Object as PropType<InputFieldType>, required: false },
 });
 
+const { mutate, onDone } = useMutation<ReplaceRelationsAndMetaDataMutation>(
+  ReplaceRelationsAndMetaDataDocument
+);
+
 const refValue = ref(props.value);
 
 const isDropdownType = computed(() => {
+  const dropdownTypes = ["dropdown", "dropdownMultiselect"];
   let isDropdown = false;
   if (props.field) {
-    isDropdown =
-      props.field.type === "dropdown" ||
-      props.field.type === "dropdownMultiselect"
-        ? true
-        : false;
+    isDropdown = dropdownTypes.includes(props.field.type);
   }
   return isDropdown;
 });
