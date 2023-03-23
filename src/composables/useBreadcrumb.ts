@@ -33,9 +33,9 @@ export function useBreadcrumb() {
           .filter((page) => page.label)
           .reverse()
       : [];
-  
+
     selectedVisitedPage;
-  });  
+  });
 
   const selectedVisitedPage = ref(visitedPages.value.length - 1);
 
@@ -64,23 +64,22 @@ export function useBreadcrumb() {
     if (selectedPage) {
       const { entityTitle, path } = selectedPage;
       const matchedRoute = routes.find((route) => route.path === path);
-  
+
       const routerTitle = matchedRoute?.meta?.title;
       const routeType = matchedRoute?.meta?.type;
       const parentRouteName = matchedRoute?.name;
-  
+
       pageInfo.value = {
         routerTitle,
         entityTitle,
         routeType,
         parentRouteName,
       };
-  
+
       visitedPages.value.splice(index + 1);
       router.push(path);
     }
   }
-  
 
   router.beforeEach((to, from, next) => {
     if (from.name) {

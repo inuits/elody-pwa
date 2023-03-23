@@ -112,7 +112,7 @@ import BaseButton from "../base/BaseButton.vue";
 import { defineComponent } from "vue";
 import { useEditMode } from "@/composables/useEdit";
 import MetaEditMedia from "@/components/base/MetaEditMedia.vue";
-import { useEntityMediafileSelector } from "../EntityImageSelection.vue";
+import { useEntityMediafileSelector } from "../EntityImageSelectionOld.vue";
 import BaseIcon from "@/components/base/BaseIcon.vue";
 import { Unicons } from "@/types";
 import { useMutation } from "@vue/apollo-composable";

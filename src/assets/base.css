@@ -39,24 +39,69 @@
   --color-main-dark: theme("colors.main.dark");
 }
 
-.checkboard {
-  background-color: #fff;
-  background-size: 60px 60px;
-  background-position: 0 0, 30px 30px;
-  background-image: linear-gradient(
-      45deg,
-      #f4f5f7 25%,
-      transparent 25%,
-      transparent 75%,
-      #f4f5f7 75%,
-      #f4f5f7
-    ),
-    linear-gradient(
-      45deg,
-      #f4f5f7 25%,
-      transparent 25%,
-      transparent 75%,
-      #f4f5f7 75%,
-      #f4f5f7
-    );
+@layer base {
+  .title {
+    font-size: 24px;
+    font-weight: bold;
+    color: theme("colors.text.body");
+  }
+
+  .subtitle{
+    font-size: 18px;
+    font-weight: bold;
+    color: theme("colors.text.body");
+  }
+}
+
+@layer utilities{
+  .w-1\/10 {
+    width: 10%;
+  }
+  .w-2\/10 {
+    width: 20%;
+  }
+  .w-3\/10 {
+    width: 30%;
+  }
+  .w-4\/10 {
+    width: 40%;
+  }
+  .w-5\/10 {
+    width: 50%;
+  }
+  .w-6\/10 {
+    width: 60%;
+  }
+  .w-7\/10 {
+    width: 70%;
+  }
+  .w-8\/10 {
+    width: 80%;
+  }
+  .w-9\/10 {
+    width: 90%;
+  }
+
+  .checkboard {
+    background-color: #fff;
+    background-size: 60px 60px;
+    background-position: 0 0, 30px 30px;
+    background-image: linear-gradient(
+        45deg,
+        #f4f5f7 25%,
+        transparent 25%,
+        transparent 75%,
+        #f4f5f7 75%,
+        #f4f5f7
+      ),
+      linear-gradient(
+        45deg,
+        #f4f5f7 25%,
+        transparent 25%,
+        transparent 75%,
+        #f4f5f7 75%,
+        #f4f5f7
+      );
+  }
+  
 }

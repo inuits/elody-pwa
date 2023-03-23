@@ -1,5 +1,12 @@
 <template>
-  <div :class="['relative w-full h-full']">
+  <div
+    :class="[
+      'relative w-full h-full',
+      {
+        checkboard: loading,
+      },
+    ]"
+  >
     <div ref="OpenSeadragon-toolbar" class="hidden" />
     <viewer-toolbar
       v-model:zoomIn="zoomInDiv"
@@ -14,14 +21,14 @@
     >
       {{ $t("loading") }}
     </div>
-    <div ref="OpenSeadragonDiv" class="w-full h-full z-0" />
+    <div ref="OpenSeadragonDiv" class="w-full h-full z-0 checkboard" />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from "vue";
 import OpenSeadragon from "openseadragon";
-import ViewerToolbar from "./ViewerToolbar.vue";
+import ViewerToolbar from "./ViewerToolbarOld.vue";
 
 export default defineComponent({
   name: "IIIFViewer",

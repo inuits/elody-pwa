@@ -136,6 +136,8 @@
 </template>
 
 <script lang="ts">
+/*import { PostMediaFileDocument } from "../generated-types/queries";*/
+import type { PostMediaFileMutation } from "../generated-types/queries";
 import useDropzoneHelper from "../composables/useDropzoneHelper";
 import { onMounted, ref, defineComponent } from "vue";
 import Dropzone from "dropzone";
@@ -174,6 +176,9 @@ export default defineComponent({
       getDropzoneSettings,
       setSelectedMediafiles,
     } = useDropzoneHelper();
+    /*const { onDone, mutate } = useMutation<PostMediaFileMutation>(
+      PostMediaFileDocument
+    );*/
     const dropzonePreviewDiv = ref<HTMLDivElement | undefined>(undefined);
     const dropzoneDiv = ref<HTMLDivElement | undefined>(undefined);
     const triggerUpload = ref<() => void | undefined>();
@@ -233,8 +238,15 @@ export default defineComponent({
           clearDropzoneCounters();
           clearDropzoneErrorMessages();
           updateFileCount();
-          updateUIBasedOnExistenceOfCsv(addedFile, "added");
         });
+
+        //  onDone((value) => {
+        //   if (value.data && value.data.postMediaFile) {
+        //     mediafiles.value.push(value.data.postMediaFile);
+        //     addMediaFileToLinkList(value.data.postMediaFile);
+        //   }
+        //   increaseSuccessCounter();
+        // });
 
         const uploadFiles = () => {
           selectedFiles.value.forEach(async (file: any) => {

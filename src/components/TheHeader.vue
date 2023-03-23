@@ -44,5 +44,5 @@
 </template>
 
 <script lang="ts" setup>
-import BreadCrumbs from "@/components/BreadCrumbs.vue"
+import BreadCrumbs from "@/components/BreadCrumbs.vue";
 </script>

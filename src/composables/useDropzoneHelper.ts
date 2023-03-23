@@ -83,7 +83,7 @@ const useDropzoneHelper = () => {
   };
 
   return {
-    myDropzone: dropzone, // used in deprecated dropzone component
+    dropzone,
     initDropzone,
     getDropzone,
     setDropzoneErrorMessages,

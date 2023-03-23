@@ -1,6 +1,6 @@
 <template>
   <BaseLibrary
-    :has-simple-search="true"
+    :has-simple-search="false"
     :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
     :search-input-type="SearchInputType.SimpleInputtype"
     :list-item-route-name="'SingleEntity'"
