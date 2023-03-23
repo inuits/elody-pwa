@@ -1,10 +1,6 @@
 import { ref, type Ref } from "vue";
 import useDropzoneHelper from "@/composables/useDropzoneHelper";
-
-export enum TypeModals {
-  Upload = "Upload",
-  Create = "Nieuw",
-}
+import { TypeModals } from "@/generated-types/queries";
 
 export enum modalChoices {
   IMPORT = "IMPORT",

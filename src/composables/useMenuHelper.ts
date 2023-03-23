@@ -1,29 +1,32 @@
-import { MenuLinkType, type MenuItem } from "@/generated-types/queries";
+import type { type MenuItem, TypeModals } from "@/generated-types/queries";
 import { useRouter } from "vue-router";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { ref } from "vue";
-import { TypeModals, modalChoices } from "@/composables/modalFactory";
+import { modalChoices } from "@/composables/modalFactory";
 const { getModal } = useAvailableModals();
 const selectedMenuItem = ref<String | "no-item-selected">("no-item-selected");
 
 export const useMenuHelper = () => {
   const router = useRouter();
   const showdropdown = ref(false);
-
   const checkIfRouteOrModal = (_menuItem: MenuItem): void => {
-    if (_menuItem.linkType === MenuLinkType.Modal) {
-      getModal(_menuItem.destination as TypeModals).openModal(
+    if (_menuItem.typeLink.modal) {
+      getModal(_menuItem.typeLink.modal.typeModal as TypeModals).openModal(
         modalChoices.IMPORT
       );
-    } else if (_menuItem.linkType === MenuLinkType.Route) {
-      router.push(`/${_menuItem.destination}`);
+    } else if (_menuItem.typeLink.route) {
+      router.push(`/${_menuItem.typeLink.route.destination}`);
     }
+    console.log(showdropdown.value);
   };
   const toggleDropDown = () => {
     showdropdown.value = !showdropdown.value;
   };
   const isMenuItemActive = (menuItem: MenuItem): boolean => {
-    if (selectedMenuItem.value === menuItem.destination) {
+    if (
+      selectedMenuItem.value === menuItem.typeLink.route?.destination ||
+      selectedMenuItem.value === menuItem.typeLink.modal?.typeModal
+    ) {
       return true;
     } else {
       showdropdown.value = false;

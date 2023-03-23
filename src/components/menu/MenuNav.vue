@@ -28,7 +28,6 @@ import {
   GetMenuDocument,
   GetMenuQuery,
   GetMenuQueryVariables,
-  MenuLinkType,
   type menuItem,
 } from "@/generated-types/queries";
 import Menuitem from "@/components/menu/MenuItem.vue";
@@ -42,12 +41,9 @@ const { result: menuQueryResult, onResult } = useQuery<GetMenuQuery>(
   GetMenuDocument,
   queryVariables
 );
-
 onResult((value) => {
   menuItems.value = Object.values(value.data.Menu?.menu || {}).filter(
-    (menu) =>
-      menu.linkType === MenuLinkType.Route ||
-      menu.linkType === MenuLinkType.Modal
+    (menu: menuItem) => menu.typeLink
   );
 });
 </script>
