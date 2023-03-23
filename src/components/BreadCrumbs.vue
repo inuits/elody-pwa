@@ -9,13 +9,14 @@
     >
       <option
         v-for="page in visitedPagesOptions"
-        v-bind:key="page.value"
+        :key="page.value"
         :value="page.value"
+        class="text-gray-700"
       >
         {{ page.label }}
       </option>
     </select>
-    <span v-if="showEntityTitle" class="mx-2 text-gray-400"> > </span>
+    <span v-if="showEntityTitle" class="mx-2 text-gray-400"> &gt; </span>
     <span v-if="showEntityTitle" class="text-gray-700">{{ entityTitle }}</span>
   </div>
 </template>
