@@ -8,14 +8,14 @@
     <div class="w-full h-full flex flex-col overflow-auto">
       <BaseTabs
         v-if="
-          modal.modalToOpen?.value === ModalChoices.Import &&
+          modalToOpen === modalChoices.IMPORT &&
           directoriesQueryResult &&
           dropzoneEntityToCreateQueryResult
         "
       >
         <BaseTab :title="$t('upload.upload-files')">
           <upload-modal-dropzone
-            v-if="modal.modalToOpen?.value === ModalChoices.Import"
+            v-if="modalToOpen === modalChoices.IMPORT"
             :entity-to-create="
               dropzoneEntityToCreateQueryResult.DropzoneEntityToCreate
             "
@@ -23,7 +23,7 @@
         </BaseTab>
         <BaseTab :title="$t('upload.import')">
           <upload-modal-import
-            v-if="modal.modalToOpen?.value === ModalChoices.Import"
+            v-if="modalToOpen === modalChoices.IMPORT"
             :directories="directoriesQueryResult.Directories"
           />
         </BaseTab>
@@ -31,14 +31,14 @@
 
       <BaseTabs
         v-if="
-          modal.modalToOpen?.value === ModalChoices.Dropzone &&
+          modalToOpen === modalChoices.DROPZONE &&
           dropzoneEntityToCreateQueryResult
         "
       >
         <BaseTab :title="$t('upload.upload-files')">
           <div class="h-full">
             <upload-modal-dropzone
-              v-if="modal.modalToOpen?.value === ModalChoices.Dropzone"
+              v-if="modalToOpen === modalChoices.DROPZONE"
               :entity-to-create="
                 dropzoneEntityToCreateQueryResult.DropzoneEntityToCreate
               "
@@ -67,23 +67,19 @@ import UploadModalDropzone from "./UploadModalDropzone.vue";
 import UploadModalImport from "./UploadModalImport.vue";
 import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "../composables/useMetaDataHelper";
+import useUploadModal, {
+  modalChoices,
 import { ref, watch } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 import {
-  GetDirectoriesDocument,
   GetDropzoneEntityToCreateDocument,
-  TypeModals,
-  ModalChoices,
-  ModalState,
 } from "../generated-types/queries";
-import { useAvailableModals } from "@/composables/useAvailableModals";
 
 const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
 const { mediafiles } = useMetaDataHelper();
 const { getModal } = useAvailableModals();
 const modal = getModal(TypeModals.Upload);
 const fetchEnabled = ref(false);
-
 const { result: directoriesQueryResult, refetch: refetchDirectoriesQuery } =
   useQuery(GetDirectoriesDocument, undefined, () => ({
     enabled: fetchEnabled.value,

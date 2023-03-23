@@ -21,7 +21,7 @@ import { defineComponent, ref } from "vue";
 import { DefaultOIDC, useAuth } from "session-vue-3-oidc-library";
 import UploadModal from "./components/UploadModal.vue";
 import CreateModal from "./components/CreateModal.vue";
-import TheNavigation from "@/components/menu/MenuNav.vue";
+import TheNavigation from "@/components/menu/NavigationMenu.vue";
 import TheHeader from "@/components/TheHeader.vue";
 import EditModal from "./components/EditModal.vue";
 import useRouteHelpers from "./composables/useRouteHelpers";
@@ -84,13 +84,10 @@ export default defineComponent({
   writing-mode: vertical-lr;
   font-size: 20px;
   font-weight: bold;
-  transition: writing-mode 300ms ease-in-out, transform 300ms ease-in-out;
 }
 
 .navbar:hover .logo {
   writing-mode: horizontal-tb;
-  margin-left: 0.7rem;
-  transform: translate(2%, 25%);
 }
 
 .move-by-nav {
