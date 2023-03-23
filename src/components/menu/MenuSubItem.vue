@@ -12,14 +12,13 @@
     >
   </router-link>
 </template>
-
 <script lang="ts" setup>
 const props = defineProps({
   show: {
     type: Boolean,
     default: false,
   },
-  typeLink: String,
+  linkType: String,
   labelName: String,
   destination: String,
 });

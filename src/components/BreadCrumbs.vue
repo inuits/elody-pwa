@@ -1,92 +1,34 @@
 <template>
-  <div class="breadcrumb">
+  <div class="flex items-center text-sm">
     <span v-if="showVisitedPages"></span>
-    <select v-if="showVisitedPages" v-model="selectedVisitedPage" @change="onVisitedPageChange($event.target.value)">
-      <option v-for="page in visitedPagesOptions" :value="page.value">{{ page.label }}</option>
+    <select
+      v-if="showVisitedPages"
+      v-model="selectedVisitedPage"
+      @change="onVisitedPageChange($event.target.value)"
+      class="py-2 px-4 rounded border-gray-300 text-gray-700 font-medium ml-2"
+    >
+      <option
+        v-for="page in visitedPagesOptions"
+        v-bind:key="page.value"
+        :value="page.value"
+      >
+        {{ page.label }}
+      </option>
     </select>
-    <span v-if="showEntityTitle" class="breadcrumb-divider"> > </span>
-    <span v-if="showEntityTitle" class="breadcrumb-item">{{ entityTitle }}</span>
+    <span v-if="showEntityTitle" class="mx-2 text-gray-400"> > </span>
+    <span v-if="showEntityTitle" class="text-gray-700">{{ entityTitle }}</span>
   </div>
 </template>
 
-<script>
-import { useBreadcrumb } from '@/composables/useBreadcrumb'
+<script lang="ts" setup>
+import { useBreadcrumb } from "@/composables/useBreadcrumb";
 
-export default {
-  name: 'Breadcrumb',
-  mounted() {
-    const lastBreadcrumbItem = document.querySelector('.breadcrumb-item:last-child')
-    if (lastBreadcrumbItem) {
-      lastBreadcrumbItem.classList.add('breadcrumb-item--active')
-    }
-  },
-  setup() {
-    const {
-      visitedPagesOptions,
-      selectedVisitedPage,
-      showVisitedPages,
-      entityTitle,
-      showEntityTitle,
-      addVisitedPage,
-      clearVisitedPages,
-      onVisitedPageChange,
-      pageInfo
-    } = useBreadcrumb()
-
-    return {
-      visitedPagesOptions,
-      selectedVisitedPage,
-      showVisitedPages,
-      entityTitle,
-      showEntityTitle,
-      addVisitedPage,
-      clearVisitedPages,
-      onVisitedPageChange,
-      pageInfo
-    }
-  },
-}
+const {
+  visitedPagesOptions,
+  selectedVisitedPage,
+  showVisitedPages,
+  entityTitle,
+  showEntityTitle,
+  onVisitedPageChange,
+} = useBreadcrumb();
 </script>
-
-<style>
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  font-size: 16px;
-}
-
-.breadcrumb-divider {
-  color: #ccc;
-  margin: 0 5px;
-}
-
-.breadcrumb-item {
-  display: inline-block;
-  font-size: 0.875rem;
-  margin-right: 0.5rem;
-}
-
-.breadcrumb-item:not(:last-child)::after {
-  display: inline-block;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  color: #6c757d;
-  content: "/";
-}
-
-.breadcrumb-item--active {
-  color: #6c757d;
-}
-
-.breadcrumb a {
-  color: #6c757d;
-}
-
-select {
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-  border: 1px solid #ccc;
-  font-size: 1rem;
-  margin-left: 0.5rem;
-}
-</style>
