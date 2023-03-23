@@ -2,16 +2,11 @@
   <div v-if="field" class="text-sm pl-4">
     <InputField
       v-if="!isDropdownType"
-      v-model="computedValue"
+      v-model="refValue"
       :label="label"
       :type="field.type"
     />
-    <BaseDropdown
-      v-else
-      v-model="computedValue"
-      :label="label"
-      :options="options"
-    />
+    <BaseDropdown v-else v-model="refValue" :label="label" :options="options" />
   </div>
 </template>
 
@@ -19,7 +14,7 @@
 import InputField from "./base/InputField.vue";
 import BaseDropdown from "./base/BaseDropdown.vue";
 import type { InputField as InputFieldType } from "@/generated-types/queries";
-import { computed, type PropType } from "vue";
+import { computed, ref, watch, type PropType } from "vue";
 
 const props = defineProps({
   label: { type: String, required: true },
@@ -27,7 +22,7 @@ const props = defineProps({
   field: { type: Object as PropType<InputFieldType>, required: false },
 });
 
-const computedValue = computed(() => props.value);
+const refValue = ref(props.value);
 
 const isDropdownType = computed(() => {
   let isDropdown = false;
