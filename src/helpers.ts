@@ -56,3 +56,40 @@ export const customSort = (
   });
   return arrayToSort;
 };
+
+export const convertSizeToTailwind = (size: string): string => {
+  let tailwindSize = "";
+  switch (size) {
+    case "ten":
+      tailwindSize = "w-1/10";
+      break;
+    case "twenty":
+      tailwindSize = "w-2/10";
+      break;
+    case "thirty":
+      tailwindSize = "w-3/10";
+      break;
+    case "forthy":
+      tailwindSize = "w-4/10";
+      break;
+    case "fifty":
+      tailwindSize = "w-5/10";
+      break;
+    case "sixty":
+      tailwindSize = "w-6/10";
+      break;
+    case "seventy":
+      tailwindSize = "w-7/10";
+      break;
+    case "eighty":
+      tailwindSize = "w-8/10";
+      break;
+    case "ninety":
+      tailwindSize = "w-9/10";
+      break;
+    default:
+      tailwindSize = "w-full";
+  }
+
+  return tailwindSize;
+};

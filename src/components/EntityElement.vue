@@ -1,13 +1,26 @@
 <template>
-  <div class="py-5 w-full">
-    <div v-for="(element, index) in elements" :key="index">
+  <div :class="'h-full w-full flex flex-col'">
+    <div
+      v-for="(element, index) in elements"
+      :key="index"
+      :class="[
+        'overflow-y-scroll',
+        { 'mb-5': index + 1 != elements.length },
+        {
+          'flex-1': !element.isCollapsed,
+        },
+      ]"
+    >
       <entity-element-list
         v-if="element.__typename === 'EntityListElement'"
+        :label="element.label"
         RelationKey="relatie"
+        :isCollapsed="element.isCollapsed"
       />
       <entity-element-media
         v-if="element.__typename === 'MediaFileElement'"
         :label="element.label"
+        :isCollapsed="element.isCollapsed"
       />
       <entity-element-window
         v-if="element.__typename === 'WindowElement'"
@@ -29,7 +42,7 @@ import type {
   EntityListElement,
 } from "@/generated-types/queries";
 
-type Elements = WindowElement | MediaFileElement | EntityListElement;
+export type Elements = WindowElement | MediaFileElement | EntityListElement;
 
 const props = defineProps<{
   elements: EntityViewElements;
@@ -43,7 +56,6 @@ const elements = computed<Elements[]>(() => {
       returnArray.push(value);
     }
   });
-
   return returnArray;
 });
 </script>

@@ -6,23 +6,42 @@
     @hide-modal="closeUploadModal"
   >
     <div class="w-full h-full flex flex-col overflow-auto">
-      <BaseTabs v-if="modalToOpen === modalChoices.IMPORT && result">
+      <BaseTabs
+        v-if="
+          modalToOpen === modalChoices.IMPORT &&
+          directoriesQueryResult &&
+          dropzoneEntityToCreateQueryResult
+        "
+      >
         <BaseTab :title="$t('upload.upload-files')">
-          <upload-modal-dropzone v-if="modalToOpen === modalChoices.IMPORT" />
+          <upload-modal-dropzone
+            v-if="modalToOpen === modalChoices.IMPORT"
+            :entity-to-create="
+              dropzoneEntityToCreateQueryResult.DropzoneEntityToCreate
+            "
+          />
         </BaseTab>
         <BaseTab :title="$t('upload.import')">
           <upload-modal-import
             v-if="modalToOpen === modalChoices.IMPORT"
-            :directories="result.Directories"
+            :directories="directoriesQueryResult.Directories"
           />
         </BaseTab>
       </BaseTabs>
 
-      <BaseTabs v-if="modalToOpen === modalChoices.DROPZONE">
+      <BaseTabs
+        v-if="
+          modalToOpen === modalChoices.DROPZONE &&
+          dropzoneEntityToCreateQueryResult
+        "
+      >
         <BaseTab :title="$t('upload.upload-files')">
           <div class="h-full">
             <upload-modal-dropzone
               v-if="modalToOpen === modalChoices.DROPZONE"
+              :entity-to-create="
+                dropzoneEntityToCreateQueryResult.DropzoneEntityToCreate
+              "
             />
           </div>
         </BaseTab>
@@ -40,7 +59,7 @@
 </template>
 
 <script lang="ts" setup>
-import BaseModal from "./base/BaseModal.vue";
+import BaseModal from "@/components/base/BaseModal.vue";
 import BaseTab from "./BaseTab.vue";
 import BaseTabs from "./BaseTabs.vue";
 import MediaFileLibrary from "./MediaFileLibrary.vue";
@@ -52,23 +71,34 @@ import useUploadModal, {
   modalChoices,
   uploadModalState,
 } from "@/composables/useUploadModal";
-import { GetDirectoriesDocument } from "../generated-types/queries";
 import { ref, watch } from "vue";
 import { useQuery } from "@vue/apollo-composable";
+import {
+  GetDirectoriesDocument,
+  GetDropzoneEntityToCreateDocument,
+} from "../generated-types/queries";
 
 const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
 const { mediafiles } = useMetaDataHelper();
 const { modalToOpen, closeUploadModal } = useUploadModal();
 
 const fetchEnabled = ref(false);
-const { result, refetch } = useQuery(GetDirectoriesDocument, undefined, () => ({
+const { result: directoriesQueryResult, refetch: refetchDirectoriesQuery } =
+  useQuery(GetDirectoriesDocument, undefined, () => ({
+    enabled: fetchEnabled.value,
+  }));
+const {
+  result: dropzoneEntityToCreateQueryResult,
+  refetch: refetchDropzoneEntityToCreateQuery,
+} = useQuery(GetDropzoneEntityToCreateDocument, undefined, () => ({
   enabled: fetchEnabled.value,
 }));
 
 const getData = () => {
   if (modalToOpen.value === modalChoices.IMPORT) {
     if (fetchEnabled.value === true) {
-      refetch();
+      refetchDirectoriesQuery();
+      refetchDropzoneEntityToCreateQuery();
     } else fetchEnabled.value = true;
   }
 };

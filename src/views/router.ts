@@ -56,4 +56,5 @@ export const routes: RouteRecordRaw[] = [
     meta: { title: "History", requiresAuth: true },
     component: History,
   },
+  { path: "/home", redirect: "/" },
 ];

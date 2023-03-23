@@ -6,18 +6,16 @@
       :accepted-entity-types="acceptedEntityTypes ? acceptedEntityTypes : []"
       :advancedFiltersChoice="advancedFiltersChoice"
     />
-    <div class="p-6 w-full">
+    <div class="px-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
-        <div
-          v-show="acceptedEntityTypes.length === 0 && !isHideFilters"
-          class="mt-8 mr-4 flex"
-        >
+        <div v-show="acceptedEntityTypes.length === 0" class="mt-8 mr-4 flex">
           <IconToggle
+            v-if="!isHideFilters"
             v-model:checked="isDrawerHiding"
             :icon-on="Unicons.SearchGlass.name"
             :icon-off="Unicons.Filter.name"
           />
-          <div class="ml-2 mt-1.5">
+          <div :class="['mt-1.5', { 'ml-2': !isHideFilters }]">
             <IconToggle
               v-model:checked="displayGrid"
               :icon-on="Unicons.Apps.name"
@@ -41,15 +39,14 @@
           class="pl-4 my-2 flex flex-row justify-left"
         >
           <BaseDropdown
-            v-if="result?.Entities?.count > 0"
+            v-if="totalEntityCount > 0"
             v-model="queryVariables.limit"
             :options="paginationLimits"
             :label="$t('library.items')"
           />
           <BaseDropdown
             v-if="
-              result?.Entities?.count > 1 &&
-              queryVariables.searchValue.value != ''
+              totalEntityCount > 1 && queryVariables.searchValue.value != ''
             "
             v-model="queryVariables.sort"
             :options="['Title', 'object_number']"
@@ -58,11 +55,11 @@
         </div>
         <div class="flex-grow"></div>
         <BasePagination
-          v-if="result?.Entities?.count > 0"
+          v-if="totalEntityCount > 0"
           v-model:skip="queryVariables.skip"
           v-model:limit="queryVariables.limit"
           :loading="loading"
-          :total-items="result?.Entities?.count"
+          :total-items="totalEntityCount"
         />
       </div>
       <ListContainer id="gridContainer" :class="displayGrid ? 'p-5' : 'p-1'">
@@ -89,11 +86,11 @@
           </ListItem>
         </div>
 
-        <div v-else-if="!displayGrid && result?.Entities?.results">
+        <div v-else-if="!displayGrid && entities">
           <div>
             <ListItem
               :small="listItemRouteName === 'SingleMediafile'"
-              v-for="entity in result.Entities?.results"
+              v-for="entity in entities"
               :key="entity?.id"
               :meta="entity?.teaserMetadata"
               :media="getMediaFilenameFromEntity(entity)"
@@ -144,14 +141,14 @@
             </ListItem>
           </div>
 
-          <div v-if="result?.Entities?.results.length === 0" class="p-4">
+          <div v-if="entities.length === 0" class="p-4">
             {{ $t("search.noresult") }}
           </div>
         </div>
-        <div v-else-if="displayGrid && result?.Entities?.results">
+        <div v-else-if="displayGrid && entities">
           <div :class="`grid grid_cols gap-2 justify-items-center`">
             <GridItem
-              v-for="entity in result.Entities?.results"
+              v-for="entity in entities"
               :key="entity?.id"
               :meta="entity?.teaserMetadata"
               :media="getMediaFilenameFromEntity(entity)"
@@ -188,7 +185,7 @@
               </template>
             </GridItem>
           </div>
-          <div v-if="result?.Entities?.results.length === 0" class="p-4">
+          <div v-if="entities.length === 0" class="p-4">
             {{ $t("search.noresult") }}
           </div>
         </div>
@@ -206,6 +203,7 @@ import {
   ref,
   onMounted,
   nextTick,
+  type Prop,
 } from "vue";
 import type { PropType } from "vue";
 import ListContainer from "../ListContainer.vue";
@@ -219,6 +217,8 @@ import { Unicons } from "../../types";
 import {
   GetEntitiesDocument,
   SearchInputType,
+  type Asset,
+  type Entity,
 } from "../../generated-types/queries";
 import type {
   GetEntitiesQueryVariables,
@@ -234,6 +234,12 @@ import BaseIcon from "./BaseIcon.vue";
 import GridItem from "../GridItem.vue";
 import { setCookie, getCookie } from "tiny-cookie";
 import useListItemHelper from "../../composables/useListItemHelper";
+import EntityColumn from "../EntityColumn.vue";
+
+export type PredefinedEntities = {
+  usePredefinedEntities: Boolean;
+  entities: Asset[];
+};
 
 export default defineComponent({
   name: "BaseLibrary",
@@ -278,10 +284,18 @@ export default defineComponent({
       default: () => [],
       required: false,
     },
+    predefinedEntities: {
+      type: Object as PropType<PredefinedEntities>,
+      required: false,
+    },
     isHideFilters: Boolean,
   },
   emits: ["addSelection"],
   setup: (props, { emit }) => {
+    const entities = ref<Asset[]>(props.predefinedEntities?.entities || []);
+    const totalEntityCount = ref<number>(
+      props.predefinedEntities ? props.predefinedEntities.entities.length : 0
+    );
     const { getThumbnail } = useThumbnailHelper();
     const { getMediaFilenameFromEntity } = useListItemHelper();
     const router = useRouter();
@@ -352,13 +366,21 @@ export default defineComponent({
       );
     });
 
-    const { result, loading, refetch } = useQuery(
+    const { onResult, loading, refetch } = useQuery(
       GetEntitiesDocument,
       queryVariables,
       {
         notifyOnNetworkStatusChange: true,
+        enabled: props.predefinedEntities ? false : true,
       }
     );
+
+    onResult((result) => {
+      if (result.data && !props.predefinedEntities) {
+        entities.value = result.data.Entities.results as Entity[];
+        totalEntityCount.value = result.data.Entities.count;
+      }
+    });
 
     const addSelection = (entity: any) => {
       beingAdded.value = "";
@@ -388,7 +410,18 @@ export default defineComponent({
       }
     });
 
-    refetch();
+    watch(
+      () => props.predefinedEntities?.entities,
+      () => {
+        if (props.predefinedEntities?.entities) {
+          entities.value = props.predefinedEntities?.entities;
+          totalEntityCount.value = entities.value.length;
+        }
+      },
+      { immediate: true }
+    );
+
+    if (!props.predefinedEntities) refetch();
 
     return {
       paginationLimits,
@@ -398,7 +431,8 @@ export default defineComponent({
       loading,
       Unicons,
       router,
-      result,
+      entities,
+      totalEntityCount,
       setFilters,
       getThumbnail,
       isNotAlreadyAdded,

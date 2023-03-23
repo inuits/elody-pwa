@@ -15,8 +15,9 @@ export const uploadModalState = ref<UploadModalType>({
   state: "hide",
 });
 
+const modalToOpen = ref<modalChoices>(modalChoices.DROPZONE);
+
 const useUploadModal = () => {
-  const modalToOpen = ref<modalChoices>(modalChoices.DROPZONE);
   const updateUploadModal = (uploadModalInput: UploadModalType) => {
     uploadModalState.value = uploadModalInput;
   };
