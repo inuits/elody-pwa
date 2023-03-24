@@ -1,11 +1,11 @@
 <template>
-  <div class="h-full flex overflow-y-scroll flex-1">
+  <div class="h-full flex flex-1">
     <base-expand-button
       orientation="Left"
       v-on:expand-media-list="resizeColumn"
     />
     <div
-      class="h-full w-full border-solid border-neutral-30 border-2 bg-neutral-0 rounded-t-md"
+      class="h-full overflow-y-scroll w-full border-solid border-neutral-30 border-2 bg-neutral-0 rounded-t-md"
     >
       <div class="border-solid border-neutral-30 border-b-2 pb-2 rounded-t-md">
         <h1 class="subtitle p-2">{{ element.label }}</h1>
@@ -27,7 +27,7 @@ import {
 import EntityElementWindowPanel from "./EntityElementWindowPanel.vue";
 import { computed } from "vue";
 import BaseExpandButton from "./base/BaseExpandButton.vue";
-import useColumnResizeHelper from "@/composables/useColumnResizeHelper";
+import { useColumnResizeHelper } from "@/composables/useResizeHelper";
 
 const props = defineProps<{
   element: WindowElement;
@@ -47,7 +47,7 @@ const panels = computed<WindowElementPanel[]>(() => {
   const returnArray: WindowElementPanel[] = [];
 
   Object.values(props.element).forEach((value) => {
-    if (typeof value !== "string") {
+    if (typeof value === "object") {
       returnArray.push(value);
     }
   });

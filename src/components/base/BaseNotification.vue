@@ -14,7 +14,7 @@
         </h2>
       </div>
       <div>
-        <p>{{ notification.description }}</p>
+        <p class="break-words">{{ notification.description }}</p>
       </div>
     </div>
   </transition>
@@ -53,9 +53,10 @@ export const useNotification = () => {
   const createNotificationOverwrite = (
     type: NotificationType,
     title: string,
-    description: string
+    description: string,
+    displayTime: number = 10
   ) => {
-    const baseNotification = { displayTime: 10, shown: true };
+    const baseNotification = { displayTime, shown: true };
     const notificationOverwrite = { type, title, description };
     Object.assign(baseNotification, notificationOverwrite);
     createNotification(baseNotification as Notification);

@@ -1,3 +1,4 @@
+import type { Elements } from "@/components/EntityElement.vue";
 import type { Column, ColumnSizes } from "@/generated-types/queries";
 import { convertSizeToTailwind } from "@/helpers";
 import { ref } from "vue";
@@ -75,4 +76,45 @@ const useColumnResizeHelper = () => {
   };
 };
 
-export default useColumnResizeHelper;
+const useEntityElementCollapseHelper = () => {
+  const getElementByLabel = (
+    elementLabel: string
+  ): { column: Column | undefined; element: Elements | undefined } => {
+    try {
+      let toggleElement: Elements | undefined = undefined;
+      let toggleElementColumn: Column | undefined = undefined;
+
+      currentColumnConfig.value.forEach((col: Column) => {
+        const elements: { [key: string]: any } = col.elements;
+        const columnElements = Object.getOwnPropertyNames(col.elements);
+        columnElements.forEach((el: string) => {
+          const element = elements[el];
+          if (element.label === elementLabel) {
+            toggleElementColumn = col;
+            toggleElement = element;
+          }
+        });
+      });
+
+      if (!toggleElement || !toggleElementColumn) {
+        throw Error("Element to toggle could not be found");
+      }
+
+      return { column: toggleElementColumn, element: toggleElement };
+    } catch (e) {
+      console.log(e);
+      return { column: undefined, element: undefined };
+    }
+  };
+
+  const toggleElementCollapse = (elementLabel: string) => {
+    const { element, column } = getElementByLabel(elementLabel);
+    if (element && column) {
+      element.isCollapsed = !element.isCollapsed;
+    }
+  };
+
+  return { toggleElementCollapse };
+};
+
+export { useColumnResizeHelper, useEntityElementCollapseHelper };
