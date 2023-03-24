@@ -17,7 +17,6 @@ export const useMenuHelper = () => {
     } else if (_menuItem.typeLink.route) {
       router.push(`/${_menuItem.typeLink.route.destination}`);
     }
-    console.log(showdropdown.value);
   };
   const toggleDropDown = () => {
     showdropdown.value = !showdropdown.value;

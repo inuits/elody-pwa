@@ -82,7 +82,6 @@ const handleClick = () => {
   toggleDropDown();
   if (props.menuitem) {
     const menu = props.menuitem;
-    console.log(menu.typeLink);
     selectedMenuItem.value =
       menu.typeLink.route?.destination || menu.typeLink.modal?.typeModal;
   }
