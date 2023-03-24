@@ -8,7 +8,7 @@
     </div>
     <transition>
       <div v-if="!isCollapsed">
-        <div v-if="panelType === PanelType.Relation">
+        <div v-if="panelType === PanelType.Relation && relationArray.length">
           <div class="pl-2 rounded-sm bg-accent-light">
             <p class="text-sm text-text-body">Behoort tot</p>
             <div class="rounded-sm border-solid border-neutral-30 border-2">
@@ -29,8 +29,15 @@
             class="py-2"
           >
             <entity-element-metadata
+              v-if="!isEdit || !metadata.field"
               :label="metadata.key"
               :value="metadata.value"
+            />
+            <entity-element-metadata-edit
+              v-else-if="panel.isEditable"
+              :label="metadata.key"
+              :value="metadata.value"
+              :field="metadata.field"
             />
           </div>
         </div>
@@ -41,9 +48,7 @@
 
 <script lang="ts" setup>
 import type {
-  KeyValue,
-  MediaFile,
-  MetadataValuesInput,
+  InputField,
   PanelMetaData,
   PanelRelation,
   WindowElementPanel,
@@ -51,32 +56,42 @@ import type {
 import { PanelType } from "@/generated-types/queries";
 import { ref, watch } from "vue";
 import EntityElementMetadata from "./EntityElementMetadata.vue";
+import EntityElementMetadataEdit from "./EntityElementMetadataEdit.vue";
 import EntityElementRelation from "./EntityElementRelation.vue";
 import { Unicons } from "@/types";
 import { useField } from "vee-validate";
 import { useEntityMediafileSelector } from "./EntityImageSelection.vue";
+import { useEditMode } from "@/composables/useEdit";
+
+type MetadataField = {
+  key: string;
+  value: string;
+  field: InputField;
+};
 
 const props = defineProps<{
   panel: WindowElementPanel;
 }>();
 
 const panelType = ref<PanelType>(props.panel.panelType);
-const isCollapsed = ref<boolean>(false);
-const metadataArray = ref<MetadataValuesInput[]>([]);
+const isCollapsed = ref<boolean>(props.panel.isCollapsed);
+const metadataArray = ref<MetadataField[]>([]);
 const relationArray = ref<PanelRelation[]>([]);
 const { mediafileSelectionState } = useEntityMediafileSelector();
+const { isEdit } = useEditMode();
 
 const toggleIsCollapsed = () => {
   isCollapsed.value = !isCollapsed.value;
 };
 
-const getMetadataForPanel = (): MetadataValuesInput[] => {
-  const returnArray: MetadataValuesInput[] = [];
+const getMetadataForPanel = (): MetadataField[] => {
+  const returnArray: MetadataField[] = [];
   Object.values(props.panel).forEach((value) => {
-    if (value && typeof value !== "string") {
+    if (value && typeof value === "object") {
       const metadataObject = {
         key: (value as PanelMetaData).label,
         value: useField((value as PanelMetaData).key).value.value as string,
+        field: (value as PanelMetaData).inputField,
       };
       returnArray.push(metadataObject);
     }
@@ -86,27 +101,35 @@ const getMetadataForPanel = (): MetadataValuesInput[] => {
 };
 
 const getRelationsForPanel = (): PanelRelation[] => {
-  const returnArray: PanelRelation[] = [];
+  let returnArray: PanelRelation[] = [];
   Object.values(props.panel).forEach((value) => {
-    if (typeof value !== "string") {
+    if (typeof value === "object") {
       const relationList = value as [PanelRelation];
-      returnArray.push(...relationList);
+      try {
+        if (!relationList.length) {
+          throw Error("Value can not be spread");
+        }
+        returnArray.push(...relationList);
+      } catch (e) {
+        returnArray = relationList;
+      }
     }
   });
 
   return returnArray;
 };
 
-const getMediaInfo = (): MetadataValuesInput[] => {
-  const returnArray: MetadataValuesInput[] = [];
+const getMediaInfo = (): MetadataField[] => {
+  const returnArray: MetadataField[] = [];
   const selectedMediafile: { [index: string]: any } | undefined =
     mediafileSelectionState.selectedMediafile;
   Object.values(props.panel).forEach((value) => {
-    if (typeof value !== "string" && selectedMediafile) {
+    if (typeof value === "object" && selectedMediafile) {
       const valueKey = (value as PanelMetaData).key;
       returnArray.push({
         key: (value as PanelMetaData).label,
         value: selectedMediafile[valueKey],
+        field: (value as PanelMetaData).inputField,
       });
     }
   });
