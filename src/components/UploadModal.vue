@@ -8,14 +8,14 @@
     <div class="w-full h-full flex flex-col overflow-auto">
       <BaseTabs
         v-if="
-          modal.modalToOpen?.value === modalChoices.IMPORT &&
+          modal.modalToOpen?.value === ModalChoices.Import &&
           directoriesQueryResult &&
           dropzoneEntityToCreateQueryResult
         "
       >
         <BaseTab :title="$t('upload.upload-files')">
           <upload-modal-dropzone
-            v-if="modal.modalToOpen.value === modalChoices.IMPORT"
+            v-if="modal.modalToOpen?.value === ModalChoices.Import"
             :entity-to-create="
               dropzoneEntityToCreateQueryResult.DropzoneEntityToCreate
             "
@@ -23,7 +23,7 @@
         </BaseTab>
         <BaseTab :title="$t('upload.import')">
           <upload-modal-import
-            v-if="modal.modalToOpen.value === modalChoices.IMPORT"
+            v-if="modal.modalToOpen?.value === ModalChoices.Import"
             :directories="directoriesQueryResult.Directories"
           />
         </BaseTab>
@@ -31,14 +31,14 @@
 
       <BaseTabs
         v-if="
-          modal.modalToOpen?.value === modalChoices.DROPZONE &&
+          modal.modalToOpen?.value === ModalChoices.Dropzone &&
           dropzoneEntityToCreateQueryResult
         "
       >
         <BaseTab :title="$t('upload.upload-files')">
           <div class="h-full">
             <upload-modal-dropzone
-              v-if="modal.modalToOpen?.value === modalChoices.DROPZONE"
+              v-if="modal.modalToOpen?.value === ModalChoices.Dropzone"
               :entity-to-create="
                 dropzoneEntityToCreateQueryResult.DropzoneEntityToCreate
               "
@@ -73,9 +73,10 @@ import {
   GetDirectoriesDocument,
   GetDropzoneEntityToCreateDocument,
   TypeModals,
+  ModalChoices,
 } from "../generated-types/queries";
 import { useAvailableModals } from "@/composables/useAvailableModals";
-import { modalChoices, ModalState } from "../composables/modalFactory";
+import { ModalState } from "../composables/modalFactory";
 
 const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
 const { mediafiles } = useMetaDataHelper();
@@ -95,7 +96,7 @@ const {
 }));
 
 const getData = () => {
-  if (modal.modalToOpen?.value === modalChoices.IMPORT) {
+  if (modal.modalToOpen?.value === ModalChoices.Import) {
     if (fetchEnabled.value === true) {
       refetchDirectoriesQuery();
       refetchDropzoneEntityToCreateQuery();
