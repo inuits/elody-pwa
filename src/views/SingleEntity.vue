@@ -4,7 +4,7 @@
     :isSelectionDisplayed="true"
     :isMetaDisplayed="true"
     :isMediaFileSingle="false"
-    :entityType="'Entity'"
+    :entityType="Entity"
   />
   <entity-single v-else></entity-single>
 </template>
