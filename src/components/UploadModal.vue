@@ -74,9 +74,9 @@ import {
   GetDropzoneEntityToCreateDocument,
   TypeModals,
   ModalChoices,
+  ModalState
 } from "../generated-types/queries";
 import { useAvailableModals } from "@/composables/useAvailableModals";
-import { ModalState } from "../composables/modalFactory";
 
 const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
 const { mediafiles } = useMetaDataHelper();

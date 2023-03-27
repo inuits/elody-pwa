@@ -53,10 +53,9 @@ import { useAuth } from "session-vue-3-oidc-library";
 import { useRouter } from "vue-router";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
 import { Unicons, DamsIcons } from "@/types";
-import { MenuItem, TypeModals } from "@/generated-types/queries";
+import { MenuItem, TypeModals, ModalState } from "@/generated-types/queries";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { useAvailableModals } from "@/composables/useAvailableModals";
-import { ModalState } from "@/composables/modalFactory";
 const {
   checkIfRouteOrModal,
   showdropdown,
