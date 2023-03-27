@@ -1,16 +1,12 @@
 import { assert, expect, test } from "vitest";
-import { MenuLinkType, type MenuItem } from "@/generated-types/queries";
-import {
-  ModalState,
-  useAvailableModals,
-} from "@/composables/useAvailableModals";
+import { type MenuItem, MenuLinkType } from "@/generated-types/queries";
+import { useAvailableModals } from "@/composables/useAvailableModals";
 import useUploadModal, { modalChoices } from "@/composables/useUploadModal";
 import { useMenuHelper } from "@/composables/useMenuHelper";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
 const { openUploadModal, closeUploadModal } = useUploadModal();
-const { openModal, closeModal, modalState } = useAvailableModals();
 const { toggleDropDown, showdropdown, checkIfRouteOrModal } = useMenuHelper();
 test("toggleDropDown toggles showdropdown value", () => {
   toggleDropDown();
