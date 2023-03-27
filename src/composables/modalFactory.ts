@@ -1,13 +1,10 @@
 import { ref, type Ref } from "vue";
-import { type TypeModals, ModalChoices } from "@/generated-types/queries";
+import {
+  type TypeModals,
+  ModalChoices,
+  ModalState,
+} from "@/generated-types/queries";
 import useDropzoneHelper from "@/composables/useDropzoneHelper";
-
-export enum ModalState {
-  Initial = "initial",
-  Show = "show",
-  Hide = "hide",
-  Loading = "loading",
-}
 
 export type ModalType = {
   state: ModalState;
@@ -32,7 +29,6 @@ export function useBaseModal(): IBaseModal {
   const modalToOpen: Ref<ModalChoices> = ref<ModalChoices>(
     ModalChoices.Dropzone
   );
-
   function updateModal(modalInput: ModalType): void {
     modalState.value = modalInput;
   }
