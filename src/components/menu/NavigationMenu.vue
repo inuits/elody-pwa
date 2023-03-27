@@ -26,16 +26,9 @@ import { reactive, ref } from "vue";
 import { useRouter, RouterLink } from "vue-router";
 import {
   GetMenuDocument,
-<<<<<<<< HEAD:src/components/menu/MenuNav.vue
-  GetMenuQuery,
-  GetMenuQueryVariables,
-  type menuItem,
-========
   type GetMenuQuery,
   type GetMenuQueryVariables,
-  MenuLinkType,
   type MenuItem,
->>>>>>>> master:src/components/menu/NavigationMenu.vue
 } from "@/generated-types/queries";
 import Menuitem from "@/components/menu/MenuItem.vue";
 import { useQuery } from "@vue/apollo-composable";
