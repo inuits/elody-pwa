@@ -11,10 +11,12 @@ export function useBreadcrumb() {
   const visitedPages = ref([]);
 
   function addHomePage() {
-    visitedPages.value.unshift({
-      entityTitle: "Home",
-      path: "/",
-    });
+    if (router.currentRoute.value.path === "/") {
+      visitedPages.value.unshift({
+        entityTitle: "Home",
+        path: "/",
+      });
+    }
   }
 
   if (visitedPages.value.length === 0) {
@@ -85,6 +87,13 @@ export function useBreadcrumb() {
     if (from.name) {
       visitedPages.value.pop();
       selectedVisitedPage.value = visitedPages.value.length - 1;
+    }
+    if (to.matched.length === 1) {
+      clearVisitedPages();
+      addVisitedPage({
+        entityTitle: to.meta.title,
+        path: to.path
+      });
     }
     next();
   });
