@@ -92,7 +92,7 @@ export function useBreadcrumb() {
       clearVisitedPages();
       addVisitedPage({
         entityTitle: to.meta.title,
-        path: to.path
+        path: to.path,
       });
     }
     next();
