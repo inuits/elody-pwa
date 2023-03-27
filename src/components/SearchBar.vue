@@ -1,5 +1,5 @@
 <template>
-    <div class="float-right">
+  <div class="float-right">
     <form>
       <div class="flex">
         <div class="relative w-full">

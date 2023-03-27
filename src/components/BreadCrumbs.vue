@@ -1,5 +1,7 @@
 <template>
-  <div class="flex flex-row items-center justify-center bg-neutral-light p-2 gap-2 w-250 h-120 rounded-lg">
+  <div
+    class="flex flex-row items-center justify-center bg-neutral-light p-2 gap-2 w-250 h-120 rounded-lg"
+  >
     <span v-if="showVisitedPages"></span>
     <div class="relative flex-1">
       <select
@@ -19,8 +21,8 @@
       </select>
     </div>
   </div>
-    <span v-if="showEntityTitle" class="mx-2 text-gray-400">&gt;</span>
-    <span v-if="showEntityTitle" class="text-gray-700">{{ entityTitle }}</span>
+  <span v-if="showEntityTitle" class="mx-2 text-gray-400">&gt;</span>
+  <span v-if="showEntityTitle" class="text-gray-700">{{ entityTitle }}</span>
 </template>
 
 <script lang="ts" setup>
