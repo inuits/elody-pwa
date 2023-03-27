@@ -74,7 +74,7 @@ import {
   GetDropzoneEntityToCreateDocument,
   TypeModals,
   ModalChoices,
-  ModalState
+  ModalState,
 } from "../generated-types/queries";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 
