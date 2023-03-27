@@ -43,7 +43,7 @@ const { result: menuQueryResult, onResult } = useQuery<GetMenuQuery>(
 );
 onResult((value) => {
   menuItems.value = Object.values(value.data.Menu?.menu || {}).filter(
-    (menu: menuItem) => menu.typeLink
+    (menu) => menu.typeLink
   );
 });
 </script>
