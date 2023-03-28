@@ -1,9 +1,5 @@
-import {
-  TypeModals,
-  makeModal,
-  type IBaseModal,
-} from "@/composables/modalFactory";
-
+import { makeModal, type IBaseModal } from "@/composables/modalFactory";
+import { TypeModals } from "@/generated-types/queries";
 const modalMap = new Map<TypeModals, IBaseModal>();
 
 export const useAvailableModals = () => {
