@@ -49,7 +49,9 @@
             : '',
         ]"
         :src="
-          element?.mimetype && !element.mimetype.includes('pdf')
+          element?.mimetype &&
+          !element.mimetype.includes('pdf') &&
+          !element.mimetype.includes('json/manifest')
             ? `/api/iiif/3/${
                 element.transcode_filename || element.filename
               }/square/100,/0/default.jpg`
