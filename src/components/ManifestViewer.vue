@@ -1,5 +1,5 @@
 <template>
-  <BaseTabs class="bg-neutral-0">
+  <BaseTabs :key="props.manifestUrl" class="bg-neutral-0">
     <BaseTab title="Mirador">
       <div class="w-full h-full relative" id="mirador-viewer"></div>
     </BaseTab>
