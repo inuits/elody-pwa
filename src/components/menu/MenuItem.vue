@@ -136,7 +136,7 @@ handleSubMenu();
 .dropdownMenuItem {
   animation-name: dropdown;
   animation-duration: 1s;
-  animation-timing-function: ease-in;
+  animation-timing-function: ease-out;
 }
 @keyframes dropdown {
   25% {
