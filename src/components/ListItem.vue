@@ -11,7 +11,9 @@
       <img
         v-if="media && !imageSrcError"
         class="h-10 w-10 obtain-cover mr-4 rounded-sm outline-none shadow-sm self-center"
-        :src="`/api/iiif/3/${media}/square/100,/0/default.jpg`"
+        :src="
+          mediaIsLink ? media : `/api/iiif/3/${media}/square/100,/0/default.jpg`
+        "
         @error="setNoImage()"
       />
       <unicon
@@ -45,7 +47,7 @@ import type {
   Media,
   MetadataAndRelation,
 } from "../generated-types/queries";
-import { defineComponent, inject, ref } from "vue";
+import { computed, defineComponent, inject, ref } from "vue";
 import type { PropType } from "vue";
 import { customSort } from "@/helpers";
 
@@ -66,12 +68,18 @@ export default defineComponent({
     thumbIcon: { type: String, default: "" },
     small: { type: Boolean, default: false },
   },
-  setup() {
+  setup(props) {
     const config: any = inject("config");
     const imageSrcError = ref<Boolean>(false);
     const setNoImage = () => {
       imageSrcError.value = true;
     };
+
+    const mediaIsLink = computed<Boolean>(() =>
+      props.media?.includes("http://") || props.media?.includes("https://")
+        ? true
+        : false
+    );
 
     const only4Meta = (input: Maybe<Maybe<MetadataAndRelation>[]>) => {
       const sortOrder: string[] = ["object_number", "type", "title"];
@@ -85,7 +93,7 @@ export default defineComponent({
         return [];
       }
     };
-    return { setNoImage, imageSrcError, only4Meta, config };
+    return { setNoImage, imageSrcError, only4Meta, config, mediaIsLink };
   },
 });
 </script>
