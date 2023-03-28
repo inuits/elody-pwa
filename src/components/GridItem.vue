@@ -12,7 +12,11 @@
           <img
             v-if="media"
             class="h-48 w-48"
-            :src="`/api/iiif/3/${media}/square/500,/0/default.jpg`"
+            :src="
+              mediaIsLink
+                ? media
+                : `/api/iiif/3/${media}/square/500,/0/default.jpg`
+            "
             @error="setNoImage()"
           />
           <div
@@ -65,9 +69,9 @@
 
 <script lang="ts">
 import type { Maybe, MetadataAndRelation } from "../generated-types/queries";
-import { defineComponent, inject, ref } from "vue";
+import { computed, defineComponent, inject, ref } from "vue";
 import type { PropType } from "vue";
-import { customSort } from "../helpers";
+import { customSort, stringIsUrl } from "../helpers";
 
 export default defineComponent({
   name: "GridItem",
@@ -89,6 +93,8 @@ export default defineComponent({
     };
     const hasFileName = ref<boolean>(false);
 
+    const mediaIsLink = computed<Boolean>(() => stringIsUrl(props.media || ""));
+
     const only4Meta = (input: Maybe<Maybe<MetadataAndRelation>[]>) => {
       const sortOrder: string[] = ["object_number", "type", "title"];
       return customSort(
@@ -98,7 +104,14 @@ export default defineComponent({
       );
     };
 
-    return { setNoImage, imageSrcError, only4Meta, config, hasFileName };
+    return {
+      setNoImage,
+      imageSrcError,
+      only4Meta,
+      config,
+      hasFileName,
+      mediaIsLink,
+    };
   },
 });
 </script>
