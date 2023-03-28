@@ -20,7 +20,7 @@ const props = withDefaults(
   defineProps<{
     manifestUrl: string;
   }>(),
-  {}
+  { manifestUrl: "" }
 );
 
 onMounted(() => {
