@@ -1,5 +1,5 @@
 <template>
-  <BaseTabs :key="props.manifestUrl" class="bg-neutral-0">
+  <BaseTabs :key="props.manifestUrl || Math.random()" class="bg-neutral-0">
     <BaseTab title="Mirador">
       <div class="w-full h-full relative z-10" id="mirador-viewer"></div>
     </BaseTab>
