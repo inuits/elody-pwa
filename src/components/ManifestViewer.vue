@@ -16,7 +16,12 @@ import Mirador from "mirador/dist/mirador.min.js";
 import BaseTabs from "./BaseTabs.vue";
 import BaseTab from "./BaseTab.vue";
 
-const props = defineProps<{ manifestUrl: string }>();
+const props = withDefaults(
+  defineProps<{
+    manifestUrl: string;
+  }>(),
+  {}
+);
 
 onMounted(() => {
   // @ts-ignore
@@ -27,6 +32,16 @@ onMounted(() => {
 
   Mirador.viewer({
     id: "mirador-viewer",
+    themes: {
+      light: {
+        palette: {
+          type: "light",
+          primary: {
+            main: "#DCF4F9",
+          },
+        },
+      },
+    },
     windows: [
       {
         manifestId: props.manifestUrl,
