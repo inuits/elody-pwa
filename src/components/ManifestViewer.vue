@@ -18,8 +18,6 @@ import BaseTab from "./BaseTab.vue";
 
 const props = defineProps<{ manifestUrl: string }>();
 
-const isTify = ref<Boolean>(true);
-
 onMounted(() => {
   // @ts-ignore
   new Tify({
