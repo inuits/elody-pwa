@@ -30,8 +30,13 @@ onMounted(() => {
     manifestUrl: props.manifestUrl,
   });
 
-  Mirador.viewer({
+  const miradorConfig: any = {
     id: "mirador-viewer",
+    language: "nl",
+    availableLanguages: {
+      nl: "Nederlands",
+      en: "English",
+    },
     themes: {
       light: {
         palette: {
@@ -42,11 +47,12 @@ onMounted(() => {
         },
       },
     },
-    windows: [
-      {
-        manifestId: props.manifestUrl,
-      },
-    ],
-  });
+  };
+
+  if (props.manifestUrl) {
+    miradorConfig.windows = [{ manifestId: props.manifestUrl }];
+  }
+
+  Mirador.viewer(miradorConfig);
 });
 </script>
