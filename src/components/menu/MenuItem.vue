@@ -3,9 +3,9 @@
     <div
       v-show="menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
       @click="handleClick"
-      class="flex flex-row items-center ml-3 hover:text-accent-normal m-3"
+      class="flex flex-row items-center ml-3 h-9 hover:text-accent-normal mt-3"
       :class="{
-        'IsActive text-accent-normal h-9 rounded-lg':
+        'IsActive text-accent-normal rounded-lg':
           menuitem && isMenuItemActive(menuitem),
       }"
     >
@@ -136,14 +136,11 @@ handleSubMenu();
 .dropdownMenuItem {
   animation-name: dropdown;
   animation-duration: 1s;
+  animation-timing-function: ease-in;
 }
 @keyframes dropdown {
-  0% {
-    margin-top: -0.4rem;
-    opacity: 0;
-  }
   25% {
-    margin-top: -0.16rem;
+    margin-top: -0.25rem;
     opacity: 0.25;
   }
   50% {
