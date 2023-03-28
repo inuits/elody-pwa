@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-row items-center menu-item fixed bottom-8 hover:text-accent-normal"
+    class="flex flex-row items-center menu-item fixed bottom-8 left-4 hover:text-accent-normal"
   >
     <unicon
       v-if="auth.isAuthenticated.value === false"
@@ -19,7 +19,7 @@
   </div>
 
   <div
-    class="flex flex-row items-center menu-item fixed bottom-8 left-3 hover:text-accent-normal"
+    class="flex flex-row items-center menu-item fixed bottom-8 left-4 hover:text-accent-normal left-4"
   >
     <unicon
       v-if="auth.isAuthenticated.value === true"
