@@ -1,61 +1,67 @@
 import { ref, type Ref } from "vue";
+import {
+  type TypeModals,
+  ModalChoices,
+  ModalState,
+} from "@/generated-types/queries";
 import useDropzoneHelper from "@/composables/useDropzoneHelper";
-
-export enum TypeModals {
-  Upload = "Upload",
-  Create = "Nieuw",
-}
-
-export enum modalChoices {
-  IMPORT = "IMPORT",
-  DROPZONE = "DROPZONE",
-}
-
-export enum ModalState {
-  Initial = "initial",
-  Show = "show",
-  Hide = "hide",
-  Loading = "loading",
-}
 
 export type ModalType = {
   state: ModalState;
-  destination?: String;
+  destination?: string;
 };
 
 export interface IBaseModal {
-  openModal: <T, V>(T?: modalChoices, V?: V) => void;
+  openModal: <T extends ModalChoices, V extends ModalType>(
+    T?: T,
+    V?: V
+  ) => void;
   updateModal: (modalInput: ModalType) => void;
   closeModal: () => void;
   modalState: Ref<ModalType>;
-  modalToOpen?: Ref<modalChoices>;
+  modalToOpen?: Ref<ModalChoices>;
 }
 
-export class BaseModal implements IBaseModal {
-  modalState: Ref<ModalType> = ref<ModalType>({ state: ModalState.Initial });
-  modalToOpen: Ref<modalChoices> = ref<modalChoices>(modalChoices.DROPZONE);
-
-  updateModal(modalInput: ModalType): void {
-    this.modalState.value = modalInput;
+export function useBaseModal(): IBaseModal {
+  const modalState: Ref<ModalType> = ref<ModalType>({
+    state: ModalState.Initial,
+  });
+  const modalToOpen: Ref<ModalChoices> = ref<ModalChoices>(
+    ModalChoices.Dropzone
+  );
+  function updateModal(modalInput: ModalType): void {
+    modalState.value = modalInput;
   }
 
-  closeModal(): void {
-    this.updateModal({
+  function closeModal(): void {
+    updateModal({
       state: ModalState.Hide,
     });
   }
 
-  openModal(modalChoices?: modalChoices): void {
-    this.updateModal({
+  function openModal<T extends ModalChoices, V extends ModalType>(
+    modalChoice?: T,
+    modalInput?: V
+  ): void {
+    updateModal({
       state: ModalState.Show,
     });
-    if (modalChoices) {
-      this.modalToOpen.value = ref(modalChoices).value;
+
+    if (modalChoice) {
+      modalToOpen.value = modalChoice;
       useDropzoneHelper().resetDropzone();
     }
   }
+
+  return {
+    modalState,
+    modalToOpen,
+    updateModal,
+    closeModal,
+    openModal,
+  };
 }
 
-export function makeModal(type: TypeModals) {
-  return new BaseModal();
+export function makeModal(type: TypeModals): IBaseModal {
+  return useBaseModal();
 }
