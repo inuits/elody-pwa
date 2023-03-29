@@ -1,0 +1,78 @@
+@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-accent-light: theme("colors.accent.light");
+  --color-accent-normal: theme("colors.accent.normal");
+
+  --color-neutral-10: theme("colors.neutral.10");
+  --color-neutral-20: theme("colors.neutral.20");
+  --color-neutral-30: theme("colors.neutral.30");
+  --color-neutral-40: theme("colors.neutral.40");
+  --color-neutral-50: theme("colors.neutral.50");
+  --color-neutral-60: theme("colors.neutral.60");
+  --color-neutral-70: theme("colors.neutral.70");
+  --color-neutral-80: theme("colors.neutral.80");
+  --color-neutral-90: theme("colors.neutral.90");
+  --color-neutral-100: theme("colors.neutral.100");
+  --color-neutral-200: theme("colors.neutral.200");
+  --color-neutral-300: theme("colors.neutral.300");
+  --color-neutral-400: theme("colors.neutral.400");
+  --color-neutral-500: theme("colors.neutral.500");
+  --color-neutral-600: theme("colors.neutral.600");
+  --color-neutral-700: theme("colors.neutral.700");
+  --color-neutral-800: theme("colors.neutral.800");
+  --color-neutral-900: theme("colors.neutral.900");
+  --color-neutral-white: theme("colors.neutral.white");
+  --color-neutral-lightest: theme("colors.neutral.lightest");
+  --color-neutral-light: theme("colors.neutral.light");
+
+
+ 
+  --color-blue-50: theme("colors.blue.50");
+  --color-blue-75: theme("colors.blue.75");
+  --color-blue-100: theme("colors.blue.100");
+  --color-blue-200: theme("colors.blue.200");
+  --color-blue-300: theme("colors.blue.300");
+  --color-blue-400: theme("colors.blue.400");
+  --color-blue-500: theme("colors.blue.500");
+  --color-blue-600: theme("colors.blue.600");
+
+
+
+  --color-text-light: theme("colors.text.light");
+  --color-text-body: theme("colors.text.body");
+
+  --color-background-frosted: theme("colors.background.frosted");
+
+  --color-main-light: theme("colors.main.light");
+  --color-main-dark: theme("colors.main.dark");
+
+  
+}
+
+.checkboard {
+  background-color: #fff;
+  background-size: 60px 60px;
+  background-position: 0 0, 30px 30px;
+  background-image: linear-gradient(
+      45deg,
+      #f4f5f7 25%,
+      transparent 25%,
+      transparent 75%,
+      #f4f5f7 75%,
+      #f4f5f7
+    ),
+    linear-gradient(
+      45deg,
+      #f4f5f7 25%,
+      transparent 25%,
+      transparent 75%,
+      #f4f5f7 75%,
+      #f4f5f7
+    );
+}
+
