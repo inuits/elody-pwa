@@ -17,12 +17,12 @@ import { UpdateRelationsAndMetadataDocument } from "@/generated-types/queries";
 import { watch } from "vue";
 
 const props = defineProps<{
-  intialValues: IntialValues;
+  intialValues: Omit<IntialValues, "keyValue">;
   entityId: string;
 }>();
 const { addSaveCallback, isEdit } = useEditMode();
 
-const { setValues } = useForm<IntialValues>({
+const { setValues } = useForm<Omit<IntialValues, "keyValue">>({
   initialValues: props.intialValues,
 });
 
