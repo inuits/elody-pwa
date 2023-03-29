@@ -111,7 +111,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, reactive } from "vue";
+import { inject } from "vue";
 import BaseButton from "./base/BaseButton.vue";
 import { Unicons } from "../types";
 import { useRouter } from "vue-router";
