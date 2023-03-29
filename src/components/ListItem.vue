@@ -30,7 +30,17 @@
         >
           <template v-if="metaItem">
             <span class="label" data-test="meta-label">{{ metaItem.key }}</span>
-            <span class="info" data-test="meta-info">{{ metaItem.value }}</span>
+            <span
+              v-if="stringIsUrl(metaItem.value) === false"
+              class="info"
+              data-test="meta-info"
+              >{{ metaItem.value }}</span
+            >
+            <span v-else class="info underline" data-test="meta-info">
+              <a :href="metaItem.value" target="_blank"
+                >Bekijk {{ metaItem.key }}</a
+              >
+            </span>
           </template>
         </div>
       </div>
@@ -49,7 +59,7 @@ import type {
 } from "../generated-types/queries";
 import { computed, defineComponent, inject, ref } from "vue";
 import type { PropType } from "vue";
-import { customSort } from "@/helpers";
+import { customSort, stringIsUrl } from "@/helpers";
 
 export default defineComponent({
   name: "ListItem",
@@ -75,11 +85,7 @@ export default defineComponent({
       imageSrcError.value = true;
     };
 
-    const mediaIsLink = computed<Boolean>(() =>
-      props.media?.includes("http://") || props.media?.includes("https://")
-        ? true
-        : false
-    );
+    const mediaIsLink = computed<Boolean>(() => stringIsUrl(props.media || ""));
 
     const only4Meta = (input: Maybe<Maybe<MetadataAndRelation>[]>) => {
       const sortOrder: string[] = ["object_number", "type", "title"];
@@ -93,7 +99,14 @@ export default defineComponent({
         return [];
       }
     };
-    return { setNoImage, imageSrcError, only4Meta, config, mediaIsLink };
+    return {
+      setNoImage,
+      imageSrcError,
+      only4Meta,
+      config,
+      mediaIsLink,
+      stringIsUrl,
+    };
   },
 });
 </script>
