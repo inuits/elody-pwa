@@ -2,6 +2,7 @@ import { routerKey, type RouteRecordRaw } from "vue-router";
 import History from "./History.vue";
 import Mediafiles from "./MediaFiles.vue";
 import { Collection } from "../generated-types/queries";
+import ManifestViewer from "@/components/ManifestViewer.vue";
 
 export type urlParams = "id";
 
@@ -49,6 +50,12 @@ export const routes: RouteRecordRaw[] = [
           import(/* webpackChunkName: "about" */ "./SingleMediaFile.vue"),
       },
     ],
+  },
+  {
+    path: "/mirador",
+    name: "Mirador",
+    meta: { title: "Mirador", requiresAuth: false },
+    component: ManifestViewer,
   },
   {
     path: "/history",

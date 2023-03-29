@@ -96,8 +96,9 @@ onResult((queryResults) => {
   try {
     const entity = queryResults.data.Entity;
     if (
-      (entity && entity.__typename == "Asset") ||
-      entity?.__typename == "MediaFileEntity"
+      entity?.__typename == "Asset" ||
+      entity?.__typename == "MediaFileEntity" ||
+      entity?.__typename == "Manifest"
     ) {
       intialValues.value = entity.intialValues;
       columnList.value = entity.entityView;

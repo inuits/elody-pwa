@@ -62,6 +62,19 @@
         "
         :source="mediafileSelectionState.selectedMediafile"
       />
+      <MiradorViewer
+        v-if="
+          !loading &&
+          mediafileSelectionState.selectedMediafile !== undefined &&
+          mediafileSelectionState.selectedMediafile.original_file_location &&
+          mediafileSelectionState.selectedMediafile.mimetype?.includes(
+            'json/manifest'
+          )
+        "
+        :manifest-url="
+          mediafileSelectionState.selectedMediafile?.original_file_location
+        "
+      />
     </div>
   </div>
 </template>
@@ -72,6 +85,7 @@ import VideoPlayer from "./VideoPlayer.vue";
 import AudioPlayer from "./AudioPlayer.vue";
 import PDFViewer from "./PDFViewer.vue";
 import TextViewer from "./TextViewer.vue";
+import MiradorViewer from "../ManifestViewer.vue";
 import EntityImageSelection, {
   useEntityMediafileSelector,
 } from "../EntityImageSelection.vue";
@@ -87,6 +101,7 @@ export default defineComponent({
     PDFViewer,
     TextViewer,
     EntityImageSelection,
+    MiradorViewer,
   },
   props: {
     loading: Boolean,
