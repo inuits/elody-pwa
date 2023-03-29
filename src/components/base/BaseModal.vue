@@ -51,8 +51,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ModalState } from "@/composables/modalFactory";
 import { toRefs, watch } from "vue";
+import { ModalState } from "@/generated-types/queries";
 export type ModalPosition = "center" | "left" | "right";
 
 const props = withDefaults(
