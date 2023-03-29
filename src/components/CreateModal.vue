@@ -21,10 +21,11 @@
 <script lang="ts" setup>
 import BaseDropdown from "@/components/base/BaseDropdown.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
-import { Entitytyping, TypeModals } from "@/generated-types/queries";
+import { Entitytyping } from "@/generated-types/queries";
 import { ref } from "vue";
 import CreateEntityForm from "@/components/CreateEntityForm.vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
+import { TypeModals } from "@/composables/modalFactory";
 
 const { getModal } = useAvailableModals();
 const selected = ref<Entitytyping>(Entitytyping.Story);
