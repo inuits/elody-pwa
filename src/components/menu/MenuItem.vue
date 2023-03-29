@@ -38,7 +38,7 @@
       :class="{ dropdownMenuItem: showdropdown }"
     >
       <MenuSubItem
-        :linkType="submenuItem.linkType"
+        :typeLink="submenuItem.typeLink.route.destination"
         :labelName="submenuItem.label"
         :destination="submenuItem.destination"
         :show="showdropdown"
@@ -53,17 +53,9 @@ import { useAuth } from "session-vue-3-oidc-library";
 import { useRouter } from "vue-router";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
 import { Unicons, DamsIcons } from "@/types";
-import { MenuLinkType, MenuItem } from "@/generated-types/queries";
+import { MenuItem, TypeModals, ModalState } from "@/generated-types/queries";
 import useMenuHelper from "@/composables/useMenuHelper";
-import useUploadModal, { uploadModalState } from "@/composables/useUploadModal";
 import { useAvailableModals } from "@/composables/useAvailableModals";
-import {
-  modalChoices,
-  ModalState,
-  TypeModals,
-} from "@/composables/modalFactory";
-
-const { openUploadModal } = useUploadModal();
 const {
   checkIfRouteOrModal,
   showdropdown,
@@ -74,11 +66,8 @@ const {
 } = useMenuHelper();
 
 const router = useRouter();
-
 const auth = useAuth();
-
 const menuSubitem = ref<Array<MenuItem>>([]);
-
 const { getModal } = useAvailableModals();
 
 const props = defineProps<{
@@ -88,39 +77,28 @@ const props = defineProps<{
 }>();
 
 const handleClick = () => {
-  // TODO: Fix properly, this is a temporary solution!
-  if (props.menuitem.label === "Upload") {
-    openUploadModal(modalChoices.IMPORT);
-  } else {
-    checkIfRouteOrModal(props.menuitem);
-    toggleDropDown();
-    if (props.menuitem) {
-      selectedMenuItem.value = props.menuitem?.destination;
-    }
+  checkIfRouteOrModal(props.menuitem);
+  toggleDropDown();
+  if (props.menuitem) {
+    const menu = props.menuitem;
+    selectedMenuItem.value =
+      menu.typeLink.route?.destination || menu.typeLink.modal?.typeModal;
   }
 };
+
 const handleSubMenu = () => {
   const submenu = props.subMenu;
   if (props.subMenu) {
     menuSubitem.value = Object.values(submenu).filter(
-      (menu) =>
-        menu.linkType === MenuLinkType.Route ||
-        menu.linkType === MenuLinkType.Modal
+      (menu: MenuItem) => menu.typeLink
     );
   }
 };
 
 watch(
-  () => uploadModalState.value.state,
-  (state) => {
-    if (state === ModalState.Hide) {
-      resetSelectedMenuItem();
-    }
-  }
-);
-
-watch(
-  () => getModal(TypeModals.Create).modalState.value.state,
+  () =>
+    getModal(props.menuitem.typeLink.modal?.typeModal as TypeModals).modalState
+      .value.state,
   (state) => {
     if (state === ModalState.Hide) {
       resetSelectedMenuItem();
