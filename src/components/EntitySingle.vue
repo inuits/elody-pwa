@@ -95,11 +95,8 @@ onResult((queryResults) => {
   //TEMP: check if it's an asset or mediafile
   try {
     const entity = queryResults.data.Entity;
-    if (
-      entity?.__typename == "Asset" ||
-      entity?.__typename == "MediaFileEntity" ||
-      entity?.__typename == "Manifest"
-    ) {
+    const acceptedTypes = ["Asset", "MediaFileEntity", "Manifest"];
+    if (acceptedTypes.includes(entity?.__typename)) {
       intialValues.value = entity.intialValues;
       columnList.value = entity.entityView;
       //If logged in set edit mode -> need to check permissions if enabled
