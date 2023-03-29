@@ -5,7 +5,7 @@
   >
     <router-link
       :to="{ name: 'Home' }"
-      class="logo ml-3 mt-4 text-neutral-700 font-semibold mb-8 text-xl"
+      class="logo h-12 ml-3 mt-4 text-neutral-700 font-semibold mb-8 text-xl"
     >
       {{ $t("navigation.title") }}
     </router-link>

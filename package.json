@@ -14,8 +14,8 @@
     "generate": "pnpm graphql-code-generator --config ./codegen.ts"
   },
   "dependencies": {
-    "@graphql-codegen/cli": "^2.16.1",
     "@apollo/client": "^3.7.0",
+    "@graphql-codegen/cli": "^2.16.1",
     "@sentry/browser": "^6.19.7",
     "@sentry/integrations": "^6.19.7",
     "@sentry/tracing": "^6.19.7",
@@ -30,13 +30,16 @@
     "@vueuse/head": "^0.6.0",
     "apollo-upload-client": "^17.0.0",
     "c8": "^7.12.0",
+    "dotenv": "^16.0.3",
     "dropzone": "^5.9.3",
     "graphql": "^16.6.0",
     "graphql-tag": "^2.12.6",
+    "mirador": "3.3.0",
     "openseadragon": "^2.4.2",
     "pdfjs-dist": "^2.13.216",
     "pdfvuer": "^2.0.1",
     "session-vue-3-oidc-library": "0.1.x",
+    "tify": "^0.28.1",
     "tiny-cookie": "^2.3.2",
     "ts-debounce": "^3.0.0",
     "url-slug": "^3.0.4",
@@ -46,14 +49,13 @@
     "vue-router": "^4.1.5",
     "vue-unicons": "^3.3.1",
     "vuedraggable": "^4.1.0",
-    "vuex": "^4.0.2",
-    "dotenv": "^16.0.3"
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@graphql-codegen/add": "^3.2.1",
-    "@graphql-codegen/typescript-operations": "^2.5.13",
     "@graphql-codegen/typed-document-node": "2.3.13",
     "@graphql-codegen/typescript": "^2.8.8",
+    "@graphql-codegen/typescript-operations": "^2.5.13",
     "@intlify/vite-plugin-vue-i18n": "^6.0.3",
     "@rushstack/eslint-patch": "^1.1.4",
     "@types/apollo-upload-client": "^17.0.2",
