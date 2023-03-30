@@ -82,14 +82,14 @@
 <script lang="ts" setup>
 import { ref, defineEmits, computed, defineProps } from "vue";
 import type { PropType } from "vue";
-import { FilterInList } from "../composables/useFilterHelper";
+import { FilterInList } from "@/composables/useFilterHelper";
 import SavedSearches from "@/components/SavedSearches.vue";
 import FilterAccordion from "@/components/base/FilterAccordion.vue";
 import MinmaxFilter from "@/components/base/MinmaxFilter.vue";
 import TextFilter from "@/components/base/TextFilter.vue";
 import ChecklistFilter from "@/components/base/ChecklistFilter.vue";
 import MultiFilter from "@/components/base/MultiFilter.vue";
-import { useSavedSearchHelper } from "../composables/useSavedSearchHelper";
+import { useSavedSearchHelper } from "@/composables/useSavedSearchHelper";
 import {
   clearAdvancedSearchInput,
   getActiveFilters,
