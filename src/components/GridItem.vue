@@ -41,13 +41,7 @@
             :key="metaItem ? metaItem.value : 'no-key'"
             class="w-full h-6"
           >
-            <template
-              v-if="
-                metaItem?.key === 'title' ||
-                metaItem?.key === 'type' ||
-                metaItem?.key === 'filename'
-              "
-            >
+            <template v-if="gridItemInfoKeys.includes(metaItem.key)">
               <span
                 :class="[
                   'text-neutral-700 w-fit',
@@ -91,6 +85,7 @@ export default defineComponent({
     const setNoImage = () => {
       imageSrcError = true;
     };
+    const gridItemInfoKeys: string[] = ["title", "type", "filename"];
     const hasFileName = ref<boolean>(false);
 
     const mediaIsLink = computed<Boolean>(() => stringIsUrl(props.media || ""));
@@ -112,6 +107,7 @@ export default defineComponent({
       config,
       hasFileName,
       mediaIsLink,
+      gridItemInfoKeys,
     };
   },
 });
