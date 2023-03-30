@@ -37,7 +37,7 @@
           ]"
         >
           <div
-            v-for="metaItem in only4Meta(meta)"
+            v-for="metaItem in only4Meta(meta as MetadataAndRelation[])"
             :key="metaItem ? metaItem.value : 'no-key'"
             class="w-full h-6"
           >
@@ -95,8 +95,9 @@ export default defineComponent({
 
     const mediaIsLink = computed<Boolean>(() => stringIsUrl(props.media || ""));
 
-    const only4Meta = (input: Maybe<Maybe<MetadataAndRelation>[]>) => {
+    const only4Meta = (input: MetadataAndRelation[]) => {
       const sortOrder: string[] = ["object_number", "type", "title"];
+
       return customSort(
         sortOrder,
         input?.filter((value) => value?.value !== ""),
