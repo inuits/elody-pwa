@@ -1,6 +1,6 @@
 <template>
   <div class="lg:flex">
-    <FilterSideBar
+    <FilterSideBarNew
       v-show="!isDrawerHiding && !isHideFilters"
       @activeFilters="setFilters"
       :accepted-entity-types="acceptedEntityTypes ? acceptedEntityTypes : []"
@@ -224,7 +224,7 @@ import type {
   GetEntitiesQueryVariables,
   Maybe,
 } from "../../generated-types/queries";
-import FilterSideBar from "../FilterSideBar.vue";
+import FilterSideBarNew from "../FilterSideBarNew.vue";
 import IconToggle from "./IconToggle.vue";
 import useThumbnailHelper from "../../composables/useThumbnailHelper";
 import useMetaDataHelper, {
@@ -249,7 +249,7 @@ export default defineComponent({
     BasePagination,
     BaseButton,
     BaseDropdown,
-    FilterSideBar,
+    FilterSideBarNew,
     IconToggle,
     InputField,
     BaseIcon,
