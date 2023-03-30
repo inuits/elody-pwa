@@ -2,6 +2,7 @@
   <div
     class="flex flex-row items-center justify-center bg-neutral-light p-2 gap-2 w-250 h-120 rounded-lg"
   >
+    <unicon :name="Unicons.BookOpen.name" height="18" />
     <span v-if="showVisitedPages"></span>
     <div class="relative flex-1">
       <select
@@ -27,6 +28,7 @@
 
 <script lang="ts" setup>
 import { useBreadcrumb } from "@/composables/useBreadcrumb";
+import { Unicons, DamsIcons } from "@/types";
 
 const {
   visitedPagesOptions,

@@ -1,19 +1,14 @@
 <template>
   <li
-    class="row"
-    :class="{ loading, 'mb-2 px-8 ': !small, 'px-2': small }"
+    class="row bg-white border border-gray-300 rounded-md cursor-pointer flex items-center gap-6 px-4 py-3 hover:bg-gray-100 transition-colors duration-300"
+    :class="{ loading, 'mb-2 px-8': !small, 'px-2': small }"
     data-test="meta-row"
   >
-    <div
-      class="flex w-full items-center"
-      :class="{ 'flex-col': small && !thumbIcon }"
-    >
+    <div class="flex w-full items-center" :class="{ 'flex-col': small && !thumbIcon }">
       <img
         v-if="media && !imageSrcError"
-        class="h-10 w-10 obtain-cover mr-4 rounded-sm outline-none shadow-sm self-center"
-        :src="
-          mediaIsLink ? media : `/api/iiif/3/${media}/square/100,/0/default.jpg`
-        "
+        class="h-10 w-10 object-cover mr-4 rounded-sm outline-none shadow-sm self-center"
+        :src="mediaIsLink ? media : `/api/iiif/3/${media}/square/100,/0/default.jpg`"
         @error="setNoImage()"
       />
       <unicon
@@ -26,27 +21,24 @@
           v-for="metaItem in only4Meta(meta)"
           :key="metaItem ? metaItem.value : 'no-key'"
           class="col"
-          :class="small ? ' w-full' : 'w-1/4'"
+          :class="small ? 'w-full' : 'w-1/4'"
         >
           <template v-if="metaItem">
             <span class="label" data-test="meta-label">{{ metaItem.key }}</span>
             <span
-              v-if="stringIsUrl(metaItem.value) === false"
+              v-if="!stringIsUrl(metaItem.value)"
               class="info"
-              data-test="meta-info"
-              >{{ metaItem.value }}</span
-            >
+              data-test="meta-info">{{ metaItem.value }}
+            </span>
             <span v-else class="info underline" data-test="meta-info">
-              <a :href="metaItem.value" target="_blank"
-                >Bekijk {{ metaItem.key }}</a
-              >
+              <a :href="metaItem.value" target="_blank">{{ metaItem.key }}</a>
             </span>
           </template>
         </div>
       </div>
     </div>
     <div class="flex flex-row" data-test="action-slot">
-      <slot name="actions"></slot>
+      <slot name="">&gt</slot>
     </div>
   </li>
 </template>
@@ -69,26 +61,22 @@ export default defineComponent({
       type: Array as PropType<Maybe<Maybe<MetadataAndRelation>[]>>,
       default: () => [],
     },
-    media: {
-      type: String as PropType<Maybe<string>>,
-      default: () => {
-        return "";
-      },
-    },
+    media: { type: String as PropType<Maybe<string>>, default: "" },
     thumbIcon: { type: String, default: "" },
     small: { type: Boolean, default: false },
   },
   setup(props) {
-    const config: any = inject("config");
-    const imageSrcError = ref<Boolean>(false);
-    const setNoImage = () => {
+    const config = inject("config");
+    const imageSrcError = ref(false);
+
+    function setNoImage() {
       imageSrcError.value = true;
-    };
+    }
 
-    const mediaIsLink = computed<Boolean>(() => stringIsUrl(props.media || ""));
+    const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 
-    const only4Meta = (input: Maybe<Maybe<MetadataAndRelation>[]>) => {
-      const sortOrder: string[] = ["object_number", "type", "title"];
+    function only4Meta(input: Maybe<Maybe<MetadataAndRelation>[]>) {
+      const sortOrder = ["object_number", "type", "title"];
       if (input) {
         return customSort(
           sortOrder,
@@ -98,7 +86,8 @@ export default defineComponent({
       } else {
         return [];
       }
-    };
+    }
+
     return {
       setNoImage,
       imageSrcError,
@@ -118,15 +107,19 @@ export default defineComponent({
   @apply border border-neutral-50 rounded cursor-pointer;
   @apply transition-colors duration-300 hover:shadow-sm;
 }
+
 .col {
   @apply flex justify-start flex-col px-1;
 }
+
 .label {
   @apply rounded text-xs text-neutral-60;
 }
+
 .info {
   @apply mt-0.5 rounded text-sm text-neutral-700;
 }
+
 .row.loading {
   @apply animate-pulse;
   .col span {
