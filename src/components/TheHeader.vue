@@ -14,6 +14,7 @@
 import BreadCrumbs from "@/components/BreadCrumbs.vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import SearchBar from "./SearchBar.vue";
+import EditToggle from "./EditButtons.vue";
 
 const auth = useAuth();
 </script>
