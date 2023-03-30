@@ -3,16 +3,14 @@
     <div
       v-show="menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
       @click="handleClick"
-      class="flex flex-row items-center ml-3 h-9 hover:text-accent-normal mt-3"
+      class="flex flex-row items-center ml-3 h-9 hover:text-accent-normal mt-3 cursor-pointer"
       :class="{
         'IsActive text-accent-normal rounded-lg':
           menuitem && isMenuItemActive(menuitem),
       }"
     >
       <unicon v-if="icon" :name="Unicons[icon].name" height="18" />
-      <span
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
-      >
+      <span class="nav-item-label w-0 h-0 overflow-hidden px-4 font-bold">
         {{ menuitem?.label }}
       </span>
       <div v-if="menuitem.subMenu">
