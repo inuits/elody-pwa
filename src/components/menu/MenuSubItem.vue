@@ -1,19 +1,20 @@
 <template>
   <router-link
-    v-if="show === true"
-    :to="`${destination}`"
+    v-if="this.show === true"
+    :to="`${this.destination}`"
     class="flex flex-column items-center cursor-pointer ml-9 mt-1 origin-top-center"
   >
     <router-link
-      :to="`${destination}`"
+      :to="`${this.destination}`"
       class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer"
     >
-      {{ labelName }}</router-link
+      {{ this.labelName }}</router-link
     >
   </router-link>
 </template>
 
 <script lang="ts" setup>
+import { defineProps } from "vue";
 const props = defineProps({
   show: {
     type: Boolean,
