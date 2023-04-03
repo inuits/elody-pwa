@@ -52,6 +52,7 @@ import type {
 import { computed, defineComponent, inject, ref } from "vue";
 import type { PropType } from "vue";
 import { customSort, stringIsUrl } from "@/helpers";
+import { Unicons } from "@/types";
 
 export default defineComponent({
   name: "ListItem",

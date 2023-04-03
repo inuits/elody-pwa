@@ -2,6 +2,9 @@
   <div
     class="flex flex-row items-center justify-center bg-neutral-light p-2 gap-2 w-250 h-120 rounded-lg"
   >
+    <span class="text-gray-700">
+      <i class="fas fa-home"></i>
+    </span>
     <unicon :name="Unicons.BookOpen.name" height="18" />
     <span v-if="showVisitedPages"></span>
     <div class="relative flex-1">

@@ -62,6 +62,7 @@
           :total-items="totalEntityCount"
         />
       </div>
+
       <ListContainer id="gridContainer" :class="displayGrid ? 'p-5' : 'p-1'">
         <div v-if="loading">
           <ListItem

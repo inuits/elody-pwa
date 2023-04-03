@@ -1,5 +1,5 @@
 <template>
-  <li class="relative row border-none h-72 w-full" data-test="meta-row">
+  <li class="w-56 h-80 bg-grey-200 border border-grey-200 rounded-md">
     <div class="absolute right-0 top-0 w-min h-min" data-test="action-slot">
       <slot name="actions"></slot>
     </div>
