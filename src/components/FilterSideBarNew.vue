@@ -80,9 +80,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, defineEmits, computed, defineProps } from "vue";
-import type { PropType } from "vue";
-import { FilterInList } from "@/composables/useFilterHelper";
+import { defineEmits, defineProps } from "vue";
 import SavedSearches from "@/components/SavedSearches.vue";
 import FilterAccordion from "@/components/base/FilterAccordion.vue";
 import MinmaxFilter from "@/components/base/MinmaxFilter.vue";
@@ -90,28 +88,37 @@ import TextFilter from "@/components/base/TextFilter.vue";
 import ChecklistFilter from "@/components/base/ChecklistFilter.vue";
 import MultiFilter from "@/components/base/MultiFilter.vue";
 import { useSavedSearchHelper } from "@/composables/useSavedSearchHelper";
-import {
-  clearAdvancedSearchInput,
-  getActiveFilters,
-  setSelectedSavedSearchOnFilters,
-} from "@/composables/useFilterHelper";
+import { FilterInList } from "@/composables/useFilterHelper";
 import { useQuery } from "@vue/apollo-composable";
-
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import {
   AdvancedFilterTypes,
   GetAdvancedFiltersDocument,
-  type Definition,
 } from "@/generated-types/queries";
-const initialFilters = ref<FilterInList[]>([]);
+import { useFilterSideBarHelperNew } from "@/composables/useFilterSideBarHelperNew";
+
+const props = defineProps<{
+  advancedFiltersChoice: {
+    type: string;
+    default: "entityFilters";
+  };
+  acceptedEntityTypes: string[];
+}>();
+
 const { pickedSavedSearch, clearTypename, setPickedSavedSearch } =
   useSavedSearchHelper();
+
+const { clearInitialFilters, initialFilters, activeCount } =
+  useFilterSideBarHelperNew();
+
 const emit = defineEmits<{
   (event: "activeFilters", initialFilters: FilterInList[]);
 }>();
+
 const { result: filters } = useQuery(GetAdvancedFiltersDocument, {
   choice: props.advancedFiltersChoice,
 });
+
 const applyFilters = () => {
   const returnArray = initialFilters.value.map((filter: FilterInList) => {
     filter = JSON.parse(JSON.stringify(filter));
@@ -121,29 +128,9 @@ const applyFilters = () => {
   });
   emit("activeFilters", returnArray);
 };
-const props = defineProps({
-  advancedFiltersChoice: {
-    type: String,
-    default: "entityFilters",
-  },
-  acceptedEntityTypes: {
-    type: Array as PropType<string[]>,
-    default: () => [],
-    required: false,
-  },
-});
-const activeCount = computed(
-  () => getActiveFilters(initialFilters.value).length
-);
-const clearInitialFilters = () => {
-  initialFilters.value = clearAdvancedSearchInput(
-    initialFilters.value,
-    props.acceptedEntityTypes
-  );
-};
 
 const clearFilters = () => {
-  clearInitialFilters();
+  clearInitialFilters(props.acceptedEntityTypes);
   setPickedSavedSearch(undefined);
   applyFilters();
 };
