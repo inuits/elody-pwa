@@ -92,7 +92,6 @@ const submit = useSubmitForm<IntialValues>(async (values) => {
       t("notifications.success.entityCreated.description")
     );
     setValues(resultMutate?.data?.updateRelationsAndMetadata.intialValues);
-    props.refetch();
   }
 });
 
