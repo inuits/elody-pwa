@@ -2,11 +2,16 @@
   <div v-if="field" class="text-sm pl-4">
     <InputField
       v-if="!isDropdownType"
-      v-model="refValue"
+      v-model="computedValue"
       :label="label"
       :type="field.type"
     />
-    <BaseDropdown v-else v-model="refValue" :label="label" :options="options" />
+    <BaseDropdown
+      v-else
+      v-model="computedValue"
+      :label="label"
+      :options="options"
+    />
   </div>
 </template>
 
@@ -22,12 +27,24 @@ import type { FormContext } from "vee-validate";
 const props = defineProps({
   fieldKey: { type: String, required: true },
   label: { type: String, required: true },
+  value: { type: String, required: true },
   field: { type: Object as PropType<InputFieldType>, required: false },
 });
+
 const { getForm } = useFormHelper();
-const id = getEntityIdFromRoute();
-const refValue = ref("");
-let form: FormContext | undefined = undefined;
+const id = getEntityIdFromRoute() || "";
+const form: FormContext = getForm(id);
+
+const computedValue = computed<any>({
+  get() {
+    return props.value;
+  },
+  set(value: string) {
+    if (form) {
+      form.setFieldValue(props.fieldKey, value);
+    }
+  },
+});
 
 const isDropdownType = computed(() => {
   const dropdownTypes = ["dropdown", "dropdownMultiselect"];
@@ -43,20 +60,4 @@ const options = computed(() => {
     props.field && props.field.options ? (props.field.options as string[]) : [];
   return options;
 });
-
-onMounted(() => {
-  if (id) {
-    form = getForm(id);
-    refValue.value = form.values[props.fieldKey] || "-";
-  }
-});
-
-watch(
-  () => refValue.value,
-  (value) => {
-    if (form) {
-      form.setFieldValue(props.fieldKey, value);
-    }
-  }
-);
 </script>
