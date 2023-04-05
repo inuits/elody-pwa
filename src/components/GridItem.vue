@@ -1,5 +1,5 @@
 <template>
-  <li class="w-56 h-80 bg-grey-200 border border-grey-200 rounded-md">
+  <li class="w-65 h-80 bg-grey-200 rounded-md align-middle">
     <div class="absolute right-0 top-0 w-min h-min" data-test="action-slot">
       <slot name="actions"></slot>
     </div>
@@ -11,7 +11,7 @@
         <div class="flex justify-center items-center">
           <img
             v-if="media"
-            class="h-48 w-48"
+            class="h-48 w-48 object-cover"
             :src="
               mediaIsLink
                 ? media
@@ -21,7 +21,8 @@
           />
           <div
             v-if="(thumbIcon && !media) || (imageSrcError && thumbIcon)"
-            class="w-48 h-48 flex items-center justify-center flex-col"
+            class="w-48 h-48 flex items-center justify-center flex-col bg-center bg-no-repeat bg-cover"
+            style="background-image: url(.jpg)"
           >
             <unicon
               :name="thumbIcon"
@@ -31,10 +32,7 @@
           </div>
         </div>
         <div
-          :class="[
-            'w-full h-16 mt-3 pl-2 flex border-t-2 border-neutral-20',
-            hasFileName ? 'flex-col' : 'flex-col-reverse',
-          ]"
+          class="w-full h-16 mt-12 pl-2 flex border-t-2 border-neutral-20 flex-col-reverse"
         >
           <div
             v-for="metaItem in only4Meta(meta as MetadataAndRelation[])"
@@ -42,17 +40,24 @@
             class="w-full h-6"
           >
             <template v-if="gridItemInfoKeys.includes(metaItem.key)">
-              <span
-                :class="[
-                  'text-neutral-700 w-fit',
-                  metaItem.key === 'title' || hasFileName
-                    ? 'metaTitle'
-                    : 'metaType',
-                  hasFileName ? 'h-12 handleOverflow' : 'h-6 handleOverflow',
-                ]"
-                data-test="meta-info"
-                >{{ metaItem.value }}</span
-              >
+              <div class="flex items-center bg-neutral-white w-65 h-20 pl-5">
+                <input type="checkbox" class="rounded mr-2" v-model="checked" />
+                <div class="flex flex-col items-start">
+                  <span
+                    class="text-neutral-70 w-fit metaType h-6 handleOverflow"
+                    data-test="meta-label"
+                    >{{ metaItem.key }}</span
+                  >
+                  <span
+                    class="text-black w-fit metaType h-6 handleOverflow"
+                    :class="{
+                      metaTitle: metaItem.key === 'title' || hasFileName,
+                    }"
+                    data-test="meta-info"
+                    >{{ metaItem.value }}</span
+                  >
+                </div>
+              </div>
             </template>
           </div>
         </div>
@@ -131,9 +136,6 @@ export default defineComponent({
   @apply font-bold;
 }
 
-.metaType {
-  @apply text-neutral-70;
-}
 .handleOverflow {
   width: 95%;
   text-overflow: ellipsis;
