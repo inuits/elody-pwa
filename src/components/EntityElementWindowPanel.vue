@@ -24,7 +24,7 @@
         </div>
         <div v-else>
           <div
-            v-for="(metadata, index) in metadataArray || mediaInfoArray"
+            v-for="(metadata, index) in metadataArray"
             :key="index"
             class="py-2"
           >
@@ -97,7 +97,7 @@ const getValueFromForm = (metadataItemKey: string): string => {
   return form.values[metadataItemKey] || "-";
 };
 
-const metadataArray = computed((): MetadataField[] => {
+const getMetadata = () => {
   const returnArray: MetadataField[] = [];
   Object.values(props.panel).forEach((value) => {
     if (value && typeof value === "object") {
@@ -112,6 +112,32 @@ const metadataArray = computed((): MetadataField[] => {
     }
   });
   return returnArray;
+};
+
+const getMetadataFromMediafile = () => {
+  const returnArray: MetadataField[] = [];
+  const selectedMediafile: { [index: string]: any } | undefined =
+    mediafileSelectionState.selectedMediafile;
+  Object.values(props.panel).forEach((value) => {
+    if (typeof value === "object" && selectedMediafile) {
+      const valueKey = (value as PanelMetaData).key;
+      returnArray.push({
+        key: valueKey,
+        label: (value as PanelMetaData).label,
+        value: selectedMediafile[valueKey],
+        field: (value as PanelMetaData).inputField,
+      });
+    }
+  });
+  return returnArray;
+};
+
+const metadataArray = computed((): MetadataField[] => {
+  if (panelType.value === PanelType.Metadata) {
+    return getMetadata();
+  } else {
+    return getMetadataFromMediafile();
+  }
 });
 
 const relationArray = computed((): PanelRelation[] => {
@@ -127,24 +153,6 @@ const relationArray = computed((): PanelRelation[] => {
       } catch (e) {
         returnArray = relationList;
       }
-    }
-  });
-  return returnArray;
-});
-
-const mediaInfoArray = computed((): MetadataField[] => {
-  const returnArray: MetadataField[] = [];
-  const selectedMediafile: { [index: string]: any } | undefined =
-    mediafileSelectionState.selectedMediafile;
-  Object.values(props.panel).forEach((value) => {
-    if (typeof value === "object" && selectedMediafile) {
-      const valueKey = (value as PanelMetaData).key;
-      returnArray.push({
-        key: valueKey,
-        label: (value as PanelMetaData).label,
-        value: selectedMediafile[valueKey],
-        field: (value as PanelMetaData).inputField,
-      });
     }
   });
   return returnArray;
