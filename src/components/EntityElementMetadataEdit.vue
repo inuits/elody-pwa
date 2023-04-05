@@ -13,25 +13,21 @@
 <script lang="ts" setup>
 import InputField from "./base/InputField.vue";
 import BaseDropdown from "./base/BaseDropdown.vue";
-import {
-  ReplaceRelationsAndMetaDataDocument,
-  type InputField as InputFieldType,
-  type ReplaceRelationsAndMetaDataMutation,
-} from "@/generated-types/queries";
-import { computed, ref, watch, type PropType } from "vue";
-import { useMutation } from "@vue/apollo-composable";
+import type { InputField as InputFieldType } from "@/generated-types/queries";
+import { computed, onMounted, ref, watch, type PropType } from "vue";
+import { getEntityIdFromRoute } from "@/helpers";
+import { useFormHelper } from "@/composables/useFormHelper";
+import type { FormContext } from "vee-validate";
 
 const props = defineProps({
+  fieldKey: { type: String, required: true },
   label: { type: String, required: true },
-  value: { type: String, required: true },
   field: { type: Object as PropType<InputFieldType>, required: false },
 });
-
-const { mutate, onDone } = useMutation<ReplaceRelationsAndMetaDataMutation>(
-  ReplaceRelationsAndMetaDataDocument
-);
-
-const refValue = ref(props.value);
+const { getForm } = useFormHelper();
+const id = getEntityIdFromRoute();
+const refValue = ref("");
+let form: FormContext | undefined = undefined;
 
 const isDropdownType = computed(() => {
   const dropdownTypes = ["dropdown", "dropdownMultiselect"];
@@ -47,4 +43,20 @@ const options = computed(() => {
     props.field && props.field.options ? (props.field.options as string[]) : [];
   return options;
 });
+
+onMounted(() => {
+  if (id) {
+    form = getForm(id);
+    refValue.value = form.values[props.fieldKey] || "-";
+  }
+});
+
+watch(
+  () => refValue.value,
+  (value) => {
+    if (form) {
+      form.setFieldValue(props.fieldKey, value);
+    }
+  }
+);
 </script>

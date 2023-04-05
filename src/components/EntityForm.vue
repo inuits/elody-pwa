@@ -14,17 +14,22 @@ import type {
   UpdateRelationsAndMetadataMutationVariables,
 } from "@/generated-types/queries";
 import { UpdateRelationsAndMetadataDocument } from "@/generated-types/queries";
-import { watch } from "vue";
+import { ref, watch } from "vue";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 const props = defineProps<{
   intialValues: Omit<IntialValues, "keyValue">;
   entityId: string;
 }>();
 const { addSaveCallback, isEdit } = useEditMode();
+const { addForm } = useFormHelper();
 
-const { setValues } = useForm<Omit<IntialValues, "keyValue">>({
+const form = useForm<Omit<IntialValues, "keyValue">>({
   initialValues: props.intialValues,
 });
+addForm(props.entityId, form);
+
+const { setValues } = form;
 
 const { mutate } = useMutation<
   UpdateRelationsAndMetadataMutation,

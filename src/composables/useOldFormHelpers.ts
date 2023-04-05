@@ -16,6 +16,8 @@ import type {
 import type { RelationMetaData } from "@/generated-types/queries";
 import useMetaDataHelper from "@/composables/useMetaDataHelper";
 
+// TODO: Old form stuff (Remove once old components are fased out)
+
 export const LINKED_ENTITY: string = "linkedEntity";
 export const selectedRelationField = ref<RelationField>();
 const noKey = "no-key";

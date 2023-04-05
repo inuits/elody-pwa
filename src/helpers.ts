@@ -1,5 +1,6 @@
 import { createI18n } from "vue-i18n";
 import messages from "@intlify/vite-plugin-vue-i18n/messages";
+import { useRoute } from "vue-router";
 
 export const langs: string[] = ["nl", "fr"];
 
@@ -12,8 +13,11 @@ export const mergeLanguageJsonFiles = (messages: any, langs: string[]): any => {
       }
     }
   });
-  console.log(newMessages);
   return newMessages;
+};
+
+export const getEntityIdFromRoute = (): string | undefined => {
+  return asString(useRoute().params["id"]) || undefined;
 };
 
 export const i18n = createI18n({

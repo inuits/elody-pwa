@@ -30,13 +30,13 @@
           >
             <entity-element-metadata
               v-if="!isEdit || !metadata.field"
-              :label="metadata.key"
+              :label="metadata.label"
               :value="metadata.value"
             />
             <entity-element-metadata-edit
               v-else-if="panel.isEditable"
-              :label="metadata.key"
-              :value="metadata.value"
+              :fieldKey="metadata.key"
+              :label="metadata.label"
               :field="metadata.field"
             />
           </div>
@@ -65,6 +65,7 @@ import { useEditMode } from "@/composables/useEdit";
 
 type MetadataField = {
   key: string;
+  label: string;
   value: string;
   field: InputField;
 };
@@ -89,14 +90,14 @@ const getMetadataForPanel = (): MetadataField[] => {
   Object.values(props.panel).forEach((value) => {
     if (value && typeof value === "object") {
       const metadataObject = {
-        key: (value as PanelMetaData).label,
+        key: (value as PanelMetaData).key,
+        label: (value as PanelMetaData).label,
         value: useField((value as PanelMetaData).key).value.value as string,
         field: (value as PanelMetaData).inputField,
       };
       returnArray.push(metadataObject);
     }
   });
-
   return returnArray;
 };
 
@@ -127,7 +128,8 @@ const getMediaInfo = (): MetadataField[] => {
     if (typeof value === "object" && selectedMediafile) {
       const valueKey = (value as PanelMetaData).key;
       returnArray.push({
-        key: (value as PanelMetaData).label,
+        key: valueKey,
+        label: (value as PanelMetaData).label,
         value: selectedMediafile[valueKey],
         field: (value as PanelMetaData).inputField,
       });

@@ -39,8 +39,8 @@ import useRouteHelpers from "../composables/useRouteHelpers";
 import { useEditMode } from "../composables/useEdit";
 import MetaEditRelationField from "./MetaEditRelationField.vue";
 import MetaEditDataField from "./MetaEditDataField.vue";
-import useFormHelper from "../composables/useFormHelpers";
-import type { IntialValues } from "../composables/useFormHelpers";
+import useFormHelper from "../composables/useOldFormHelpers";
+import type { IntialValues } from "../composables/useOldFormHelpers";
 import useMetaDataHelper from "../composables/useMetaDataHelper";
 
 export default defineComponent({
