@@ -16,7 +16,7 @@
 import BaseLibrary from "./base/BaseLibrary.vue";
 import { defineComponent } from "vue";
 import { SearchInputType } from "../generated-types/queries";
-import selectedRelationFieldMetadata from "./../composables/useFormHelpers";
+import selectedRelationFieldMetadata from "../composables/useOldFormHelpers";
 
 export default defineComponent({
   name: "MediaFileLibrary",

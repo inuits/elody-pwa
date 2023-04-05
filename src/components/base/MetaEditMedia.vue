@@ -32,8 +32,8 @@ import { useForm, useSubmitForm } from "vee-validate";
 import { useMutation } from "@vue/apollo-composable";
 import { useEditMode } from "@/composables/useEdit";
 import MetaEditDataField from "../MetaEditDataField.vue";
-import useFormHelper from "@/composables/useFormHelpers";
-import type { IntialValues } from "@/composables/useFormHelpers";
+import useFormHelper from "@/composables/useOldFormHelpers";
+import type { IntialValues } from "@/composables/useOldFormHelpers";
 import useMetaDataHelper from "@/composables/useMetaDataHelper";
 import { useEntityMediafileSelector } from "../EntityImageSelection.vue";
 

@@ -70,8 +70,8 @@ import type { PickEntityModalType } from "./PickEntityModal.vue";
 import {
   selectedRelationField,
   getEmptyMetadatRelationObject,
-} from "@/composables/useFormHelpers";
-import type { relationValues } from "@/composables/useFormHelpers";
+} from "@/composables/useOldFormHelpers";
+import type { relationValues } from "@/composables/useOldFormHelpers";
 import useMetaDataHelper from "@/composables/useMetaDataHelper";
 import ListItem from "@/components/ListItem.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
