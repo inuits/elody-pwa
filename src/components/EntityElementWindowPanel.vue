@@ -55,12 +55,11 @@ import type {
   WindowElementPanel,
 } from "@/generated-types/queries";
 import { PanelType } from "@/generated-types/queries";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import EntityElementMetadata from "./EntityElementMetadata.vue";
 import EntityElementMetadataEdit from "./EntityElementMetadataEdit.vue";
 import EntityElementRelation from "./EntityElementRelation.vue";
 import { Unicons } from "@/types";
-import type { FormContext } from "vee-validate";
 import { useEntityMediafileSelector } from "./EntityImageSelection.vue";
 import { useEditMode } from "@/composables/useEdit";
 import { getEntityIdFromRoute } from "@/helpers";
@@ -87,17 +86,23 @@ const toggleIsCollapsed = () => {
   isCollapsed.value = !isCollapsed.value;
 };
 
-const getValueFromForm = (metadataItemKey: string): string => {
+const getValueForMetadata = (
+  panelType: PanelType,
+  metadataItemKey: string
+): string => {
   const id = getEntityIdFromRoute() || "";
   const form = getForm(id);
-  if (!form) {
-    return "-";
+  const selectedMediafile: { [index: string]: any } | undefined =
+    mediafileSelectionState.selectedMediafile;
+  if (panelType === PanelType.Metadata && form) {
+    return form.values[metadataItemKey] || "-";
+  } else if (selectedMediafile) {
+    return selectedMediafile[metadataItemKey];
   }
-
-  return form.values[metadataItemKey] || "-";
+  return "-";
 };
 
-const getMetadata = () => {
+const metadataArray = computed((): MetadataField[] => {
   const returnArray: MetadataField[] = [];
   Object.values(props.panel).forEach((value) => {
     if (value && typeof value === "object") {
@@ -105,39 +110,13 @@ const getMetadata = () => {
       const metadataObject = {
         key: metadataItemKey,
         label: (value as PanelMetaData).label,
-        value: getValueFromForm(metadataItemKey),
+        value: getValueForMetadata(panelType.value, metadataItemKey),
         field: (value as PanelMetaData).inputField,
       };
       returnArray.push(metadataObject);
     }
   });
   return returnArray;
-};
-
-const getMetadataFromMediafile = () => {
-  const returnArray: MetadataField[] = [];
-  const selectedMediafile: { [index: string]: any } | undefined =
-    mediafileSelectionState.selectedMediafile;
-  Object.values(props.panel).forEach((value) => {
-    if (typeof value === "object" && selectedMediafile) {
-      const valueKey = (value as PanelMetaData).key;
-      returnArray.push({
-        key: valueKey,
-        label: (value as PanelMetaData).label,
-        value: selectedMediafile[valueKey],
-        field: (value as PanelMetaData).inputField,
-      });
-    }
-  });
-  return returnArray;
-};
-
-const metadataArray = computed((): MetadataField[] => {
-  if (panelType.value === PanelType.Metadata) {
-    return getMetadata();
-  } else {
-    return getMetadataFromMediafile();
-  }
 });
 
 const relationArray = computed((): PanelRelation[] => {
