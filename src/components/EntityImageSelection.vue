@@ -60,7 +60,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref, reactive } from "vue";
 import type { PropType } from "vue";
-import type { Entity } from "../generated-types/queries";
+import type { Entity, Media } from "../generated-types/queries";
 import type { MediaFile } from "../generated-types/queries";
 import PlusCircleIcon from "../components/base/PlusCircleIcon.vue";
 import useDropzoneHelper from "../composables/useDropzoneHelper";
@@ -72,7 +72,6 @@ import useEditMode from "@/composables/useEdit";
 import { Unicons } from "@/types";
 import EntityImageSelectionItem from "./EntityImageSelectionItem.vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
-import { TypeModals } from "@/composables/modalFactory";
 // import draggable from "vuedraggable/src/vuedraggable";
 
 export const toBeDeleted = ref<string[]>([]);
@@ -80,16 +79,91 @@ export const toBeDeleted = ref<string[]>([]);
 const { getModal } = useAvailableModals();
 
 type MediafileSelectionState = {
+  mediafiles: [MediaFile] | [];
   selectedMediafile: MediaFile | undefined;
 };
 
 const mediafileSelectionState = reactive<MediafileSelectionState>({
+  mediafiles: [],
   selectedMediafile: undefined,
 });
 
 export const useEntityMediafileSelector = () => {
+  const setEntityMediafiles = (mediafiles: [MediaFile]) => {
+    mediafileSelectionState.mediafiles = mediafiles;
+  };
+
   const updateSelectedEntityMediafile = (mediafile: MediaFile | undefined) => {
     mediafileSelectionState.selectedMediafile = mediafile;
+  };
+
+  const getCurrentlySelectedMediafileIndex = (): number | undefined => {
+    let index = undefined;
+    try {
+      if (
+        mediafileSelectionState.mediafiles.length == 0 ||
+        !mediafileSelectionState.selectedMediafile
+      ) {
+        throw Error(
+          "Mediafile array is empty or there is currently no mediafile selected"
+        );
+      }
+      index = mediafileSelectionState.mediafiles.indexOf(
+        mediafileSelectionState.selectedMediafile
+      );
+    } catch (e) {
+      console.log(e);
+    }
+    return index;
+  };
+
+  const selectMediafileByIndex = (index: number): MediaFile | undefined => {
+    try {
+      if (mediafileSelectionState.mediafiles.length < index || index < 0) {
+        throw Error("This index does not exist");
+      }
+      mediafileSelectionState.selectedMediafile =
+        mediafileSelectionState.mediafiles[index];
+    } catch (e) {
+      console.log(e);
+    }
+    return mediafileSelectionState.selectedMediafile;
+  };
+
+  const selectNextMediafile = () => {
+    try {
+      const currentIndex = getCurrentlySelectedMediafileIndex();
+      if (!currentIndex) {
+        throw Error("Currently no mediafile selected");
+      }
+
+      const nextIndex = currentIndex + 1;
+      if (nextIndex > mediafileSelectionState.mediafiles.length) {
+        selectMediafileByIndex(0);
+      } else {
+        selectMediafileByIndex(nextIndex);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const selectPreviousMediafile = () => {
+    try {
+      const currentIndex = getCurrentlySelectedMediafileIndex();
+      if (!currentIndex) {
+        throw Error("Currently no mediafile selected");
+      }
+
+      const previousIndex = currentIndex - 1;
+      if (previousIndex < 0) {
+        selectMediafileByIndex(mediafileSelectionState.mediafiles.length);
+      } else {
+        selectMediafileByIndex(previousIndex);
+      }
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const mustShowEntityMediafileSelector = (entity: Entity): boolean => {
@@ -99,7 +173,12 @@ export const useEntityMediafileSelector = () => {
 
   return {
     mediafileSelectionState,
+    setEntityMediafiles,
     updateSelectedEntityMediafile,
+    getCurrentlySelectedMediafileIndex,
+    selectMediafileByIndex,
+    selectNextMediafile,
+    selectPreviousMediafile,
     mustShowEntityMediafileSelector,
   };
 };
