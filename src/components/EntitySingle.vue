@@ -62,8 +62,11 @@ const { updatePageInfo } = usePageInfo();
 
 //Old mediafile dependencies
 const { mediafiles, clearMediafiles } = useMetaDataHelper();
-const { mediafileSelectionState, updateSelectedEntityMediafile } =
-  useEntityMediafileSelector();
+const {
+  mediafileSelectionState,
+  updateSelectedEntityMediafile,
+  setEntityMediafiles,
+} = useEntityMediafileSelector();
 //End old mediafile dependencies
 
 const queryVariables = reactive<GetEntityByIdQueryVariables>({
@@ -114,6 +117,7 @@ onResult((queryResults) => {
         entity.media?.mediafiles &&
         entity.media?.mediafiles?.length > 0
       ) {
+        setEntityMediafiles(entity.media.mediafiles);
         let mediaFileChanged: boolean = false;
         entity.media.mediafiles?.forEach((mediafile: any) => {
           if (mediafile?.__typename === "MediaFile") {

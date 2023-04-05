@@ -133,7 +133,7 @@ export const useEntityMediafileSelector = () => {
   const selectNextMediafile = () => {
     try {
       const currentIndex = getCurrentlySelectedMediafileIndex();
-      if (!currentIndex) {
+      if (currentIndex === undefined) {
         throw Error("Currently no mediafile selected");
       }
 
@@ -151,7 +151,7 @@ export const useEntityMediafileSelector = () => {
   const selectPreviousMediafile = () => {
     try {
       const currentIndex = getCurrentlySelectedMediafileIndex();
-      if (!currentIndex) {
+      if (currentIndex === undefined) {
         throw Error("Currently no mediafile selected");
       }
 
