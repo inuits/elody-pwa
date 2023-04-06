@@ -14,17 +14,26 @@ import type {
   UpdateRelationsAndMetadataMutationVariables,
 } from "@/generated-types/queries";
 import { UpdateRelationsAndMetadataDocument } from "@/generated-types/queries";
-import { watch } from "vue";
+import { ref, watch } from "vue";
+import { useFormHelper } from "@/composables/useFormHelper";
+import { NotificationType, useNotification } from "./base/BaseNotification.vue";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   intialValues: Omit<IntialValues, "keyValue">;
   entityId: string;
+  refetch: Function;
 }>();
 const { addSaveCallback, isEdit } = useEditMode();
+const { addForm } = useFormHelper();
+const { t } = useI18n();
 
-const { setValues } = useForm<Omit<IntialValues, "keyValue">>({
+const form = useForm<Omit<IntialValues, "keyValue">>({
   initialValues: props.intialValues,
 });
+addForm(props.entityId, form);
+
+const { setValues } = form;
 
 const { mutate } = useMutation<
   UpdateRelationsAndMetadataMutation,
@@ -77,6 +86,11 @@ const submit = useSubmitForm<IntialValues>(async (values) => {
     resultMutate?.data?.updateRelationsAndMetadata &&
     resultMutate?.data?.updateRelationsAndMetadata.__typename === "Asset"
   ) {
+    useNotification().createNotificationOverwrite(
+      NotificationType.default,
+      t("notifications.success.entityCreated.title"),
+      t("notifications.success.entityCreated.description")
+    );
     setValues(resultMutate?.data?.updateRelationsAndMetadata.intialValues);
   }
 });

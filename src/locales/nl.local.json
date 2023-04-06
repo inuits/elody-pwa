@@ -122,8 +122,14 @@
     "edit": "Edit",
     "search-saved-searches": "Search Saved Searches"
   },
-  "graphql-errors": {
-    "notifications": {
+  "notifications": {
+    "success":{
+      "entityCreated": {
+        "title": "Entity successfully updated",
+        "description": "Changes have been saved successfully"
+      }
+    },
+    "graphql-errors": {
       "duplicate": {
         "title": "Duplicate",
         "description": "Duplicate file detected, upload reverted"
