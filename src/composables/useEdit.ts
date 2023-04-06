@@ -67,7 +67,6 @@ export const useEditMode = () => {
   const save = async () => {
     removeMediafilesFromOrdering(toBeDeleted.value);
     linkMediaFilesToEntity(addSaveCallback);
-    clearMediafiles();
 
     if (relationsToBeDeleted.value.relations.length > 0) {
       addSaveCallback(async () => {
