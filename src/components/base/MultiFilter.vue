@@ -61,12 +61,9 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ["update:multiSelectValue"],
+  emits: ["update:value"],
   setup(props, { emit }) {
-    emit(
-      "update:multiSelectValue",
-      defaultReturnMultiSelectObject(props.filter?.key)
-    );
+    emit("update:value", defaultReturnMultiSelectObject(props.filter?.key));
     const andOr = ref<"and" | "or">("and");
     const isAnd = computed<boolean>({
       get() {
@@ -81,7 +78,7 @@ export default defineComponent({
         props.multiSelectValue &&
           props.multiSelectValue.input.multiSelectInput &&
           emit(
-            "update:multiSelectValue",
+            "update:value",
             defaultReturnMultiSelectObject(props.filter?.key, {
               value: props.multiSelectValue.input.multiSelectInput.value,
               AndOrValue: newValue,
@@ -113,7 +110,7 @@ export default defineComponent({
       set(value) {
         if (props.multiSelectValue) {
           emit(
-            "update:multiSelectValue",
+            "update:value",
             defaultReturnMultiSelectObject(props.filter?.key, {
               value: value,
               AndOrValue: isAnd.value,
@@ -130,10 +127,7 @@ export default defineComponent({
           : undefined;
       },
       set(value) {
-        emit(
-          "update:multiSelectValue",
-          defaultReturnTextObject(props.filter?.key, value)
-        );
+        emit("update:value", defaultReturnTextObject(props.filter?.key, value));
       },
     });
 

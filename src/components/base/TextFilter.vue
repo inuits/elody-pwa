@@ -37,9 +37,9 @@ export default defineComponent({
       default: "",
     },
   },
-  emits: ["update:inputValue"],
+  emits: ["update:value"],
   setup(props, { emit }) {
-    emit("update:inputValue", defaultReturnTextObject(props.filter?.key));
+    emit("update:value", defaultReturnTextObject(props.filter?.key));
 
     const inputField = computed<string | undefined | null>({
       get() {
@@ -48,10 +48,7 @@ export default defineComponent({
           : undefined;
       },
       set(value) {
-        emit(
-          "update:inputValue",
-          defaultReturnTextObject(props.filter?.key, value)
-        );
+        emit("update:value", defaultReturnTextObject(props.filter?.key, value));
       },
     });
 

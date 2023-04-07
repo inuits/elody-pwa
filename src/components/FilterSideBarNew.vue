@@ -1,14 +1,13 @@
 <template>
   <div
     class="lg:w-2/6 md:w-full lg:border-l-2 lg:border-r-2 border-solid border-neutral-50"
-    v-on:keydown.enter="applyFilters"
+    v-on:keydown.enter="applyFilters()"
   >
     <div>
       <div class="flex justify-between py-3 px-3 align-center">
         <div>
           <p class="pl-1 text-xl font-medium">{{ $t("filter.filter") }}</p>
         </div>
-
         <div class="flex justify-between gap-3">
           <p class="bg-blue-50 text-blue-300 rounded-md px-2 py-1 my-1">
             {{ activeCount }} {{ $t("filter.active") }}
@@ -31,12 +30,12 @@
         <BaseButtonNew
           button-style="default"
           :label="$t('filter.clear')"
-          @click="clearFilters"
+          @click="clearFilters()"
         />
         <BaseButtonNew
           button-style="default"
           :label="$t('filter.apply')"
-          @click="applyFilters"
+          @click="applyFilters()"
         />
       </div>
     </div>
@@ -50,28 +49,13 @@
         :label="filter?.label ? filter?.label : ''"
       >
         <template #content>
-          <TextFilter
-            v-if="filter?.type === AdvancedFilterTypes.Tekst"
-            v-model:inputValue="initialFilters[i]"
+          <component
+            :is="componentMap[filter.type]"
+            v-model="initialFilters[i]"
+            @update:value="triggerInitialfilter($event, i)"
             :filter="filter"
             :text="filter?.label"
-          />
-          <ChecklistFilter
-            v-if="filter?.type === AdvancedFilterTypes.Checklist"
-            v-model:listValue="initialFilters[i]"
-            :filter="filter"
             :accepted-entity-types="acceptedEntityTypes"
-          />
-          <MinmaxFilter
-            v-if="filter?.type === AdvancedFilterTypes.Minmax"
-            v-model:minmaxValue="initialFilters[i]"
-            :filter="filter"
-            :is-relation="filter.isRelation ? filter.isRelation : false"
-          />
-          <MultiFilter
-            v-if="filter?.type === AdvancedFilterTypes.Multiselect"
-            v-model:multiSelectValue="initialFilters[i]"
-            :filter="filter"
           />
         </template>
       </FilterAccordion>
@@ -83,18 +67,15 @@
 import { defineEmits, defineProps } from "vue";
 import SavedSearches from "@/components/SavedSearches.vue";
 import FilterAccordion from "@/components/base/FilterAccordion.vue";
-import MinmaxFilter from "@/components/base/MinmaxFilter.vue";
-import TextFilter from "@/components/base/TextFilter.vue";
-import ChecklistFilter from "@/components/base/ChecklistFilter.vue";
-import MultiFilter from "@/components/base/MultiFilter.vue";
+import checklist from "@/components/base/ChecklistFilter.vue";
+import tekst from "@/components/base/TextFilter.vue";
+import minmax from "@/components/base/MinmaxFilter.vue";
+import multiselect from "@/components/base/MultiFilter.vue";
 import { useSavedSearchHelper } from "@/composables/useSavedSearchHelper";
 import { FilterInList } from "@/composables/useFilterHelper";
 import { useQuery } from "@vue/apollo-composable";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import {
-  AdvancedFilterTypes,
-  GetAdvancedFiltersDocument,
-} from "@/generated-types/queries";
+import { GetAdvancedFiltersDocument } from "@/generated-types/queries";
 import { useFilterSideBarHelperNew } from "@/composables/useFilterSideBarHelperNew";
 
 const props = defineProps<{
@@ -105,6 +86,13 @@ const props = defineProps<{
   acceptedEntityTypes: string[];
 }>();
 
+const componentMap: any = {
+  checklist: checklist,
+  tekst: tekst,
+  minmax: minmax,
+  multiselect: multiselect,
+};
+
 const { pickedSavedSearch, clearTypename, setPickedSavedSearch } =
   useSavedSearchHelper();
 
@@ -112,14 +100,19 @@ const { clearInitialFilters, initialFilters, activeCount } =
   useFilterSideBarHelperNew();
 
 const emit = defineEmits<{
-  (event: "activeFilters", initialFilters: FilterInList[]);
+  (event: "activeFilters", initialFilters: FilterInList[]): void;
 }>();
 
 const { result: filters } = useQuery(GetAdvancedFiltersDocument, {
   choice: props.advancedFiltersChoice,
 });
 
+const triggerInitialfilter = (event: any, index: number) => {
+  initialFilters.value[index] = event;
+};
+
 const applyFilters = () => {
+  //issue begins here
   const returnArray = initialFilters.value.map((filter: FilterInList) => {
     filter = JSON.parse(JSON.stringify(filter));
     clearTypename(filter.input);
