@@ -154,6 +154,7 @@ export default defineComponent({
         if (filter.input) filter.input["__typename"] = undefined;
         return filter.input;
       });
+      console.log(returnArray);
       emit("activeFilters", returnArray);
     };
 

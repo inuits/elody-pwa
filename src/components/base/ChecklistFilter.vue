@@ -85,9 +85,9 @@ export default defineComponent({
       required: false,
     },
   },
-  emits: ["update:listValue"],
+  emits: ["update:value"],
   setup(props, { emit }) {
-    emit("update:listValue", defaultReturnMultiSelectObject(props.filter?.key));
+    emit("update:value", defaultReturnMultiSelectObject(props.filter?.key));
     type FilterOptions = { label: string; value: string }[];
 
     let options: { FilterOptions: FilterOptions } = {
@@ -108,7 +108,7 @@ export default defineComponent({
         props.listValue &&
           props.listValue.input.multiSelectInput &&
           emit(
-            "update:listValue",
+            "update:value",
             defaultReturnMultiSelectObject(props.filter?.key, {
               value: props.listValue.input.multiSelectInput.value,
               AndOrValue: newValue,
@@ -136,7 +136,7 @@ export default defineComponent({
       (newVal: any, oldVal: any) => {
         if (newVal !== oldVal) {
           emit(
-            "update:listValue",
+            "update:value",
             defaultReturnMultiSelectObject(props.filter?.key, {
               value: inputFieldMulti.value,
               AndOrValue: isAnd.value,
@@ -148,7 +148,7 @@ export default defineComponent({
 
     if (props.acceptedEntityTypes.length > 0 && props.filter?.key === "type") {
       emit(
-        "update:listValue",
+        "update:value",
         defaultReturnMultiSelectObject("type", {
           value: props.acceptedEntityTypes,
           AndOrValue: isAnd.value,
