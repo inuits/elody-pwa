@@ -19,7 +19,7 @@
   </div>
 
   <div
-    class="flex flex-row items-center menu-item fixed bottom-8 left-4 hover:text-accent-normal left-4"
+    class="flex flex-row items-center menu-item fixed bottom-8 left-4 hover:text-accent-normal left-4 cursor-pointer"
   >
     <unicon
       v-if="auth.isAuthenticated.value === true"
@@ -31,7 +31,7 @@
     <span
       v-if="auth.isAuthenticated.value === true"
       @click="auth.logout()"
-      class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer font-bold"
+      class="nav-item-label w-0 h-0 overflow-hidden px-4 font-bold"
     >
       {{ $t("navigation.log-out") }}
     </span>

@@ -72,12 +72,12 @@ import tekst from "@/components/base/TextFilter.vue";
 import minmax from "@/components/base/MinmaxFilter.vue";
 import multiselect from "@/components/base/MultiFilter.vue";
 import { useSavedSearchHelper } from "@/composables/useSavedSearchHelper";
-import { FilterInList } from "@/composables/useFilterHelper";
+import type { FilterInList } from "@/composables/useFilterHelper";
 import { useQuery } from "@vue/apollo-composable";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { GetAdvancedFiltersDocument } from "@/generated-types/queries";
 import { useFilterSideBarHelperNew } from "@/composables/useFilterSideBarHelperNew";
-
+import type { FilterInput } from "@/generated-types/queries";
 const props = defineProps<{
   advancedFiltersChoice: {
     type: string;
@@ -100,7 +100,7 @@ const { clearInitialFilters, initialFilters, activeCount } =
   useFilterSideBarHelperNew();
 
 const emit = defineEmits<{
-  (event: "activeFilters", initialFilters: FilterInList[]): void;
+  (event: "activeFilters", initialFilters: FilterInput[]): void;
 }>();
 
 const { result: filters } = useQuery(GetAdvancedFiltersDocument, {
@@ -112,11 +112,9 @@ const triggerInitialfilter = (event: any, index: number) => {
 };
 
 const applyFilters = () => {
-  //issue begins here
   const returnArray = initialFilters.value.map((filter: FilterInList) => {
     filter = JSON.parse(JSON.stringify(filter));
     clearTypename(filter.input);
-    if (filter.input) filter.input["__typename"] = undefined;
     return filter.input;
   });
   emit("activeFilters", returnArray);
