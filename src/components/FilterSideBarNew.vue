@@ -68,7 +68,7 @@ import { defineEmits, defineProps } from "vue";
 import SavedSearches from "@/components/SavedSearches.vue";
 import FilterAccordion from "@/components/base/FilterAccordion.vue";
 import checklist from "@/components/base/ChecklistFilter.vue";
-import tekst from "@/components/base/TextFilter.vue";
+import tekst from "@/components/base/TextFilterNew.vue";
 import minmax from "@/components/base/MinmaxFilter.vue";
 import multiselect from "@/components/base/MultiFilter.vue";
 import { useSavedSearchHelper } from "@/composables/useSavedSearchHelper";
