@@ -15,5 +15,5 @@ import { inject } from "vue";
 import EntitySingle from "../components/EntitySingle.vue";
 
 const config: any = inject("config");
-const useOldComponent = "false";
+const useOldComponent = config.features.useOldSingleEntityComponent;
 </script>

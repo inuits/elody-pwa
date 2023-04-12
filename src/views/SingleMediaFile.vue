@@ -35,7 +35,7 @@ export default defineComponent({
     const route = useRoute();
     const linkedAssets = ref<Array<Entity>>([]);
     const config: any = inject("config");
-    const useOldComponent = "false";
+    const useOldComponent = config.features.useOldSingleEntityComponent;
     const { mutate, onDone } =
       useMutation<GetAssetsRelationedWithMediafFileMutation>(
         GetAssetsRelationedWithMediafFileDocument
