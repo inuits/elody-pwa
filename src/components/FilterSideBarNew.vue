@@ -4,12 +4,14 @@
     v-on:keydown.enter="applyFilters()"
   >
     <div>
-      <div class="flex justify-between py-3 px-3 align-center">
+      <div class="flex flex-col py-3 px-3 align-center">
         <div>
           <p class="pl-1 text-xl font-medium">{{ $t("filter.filter") }}</p>
         </div>
-        <div class="flex justify-between gap-3">
-          <p class="bg-blue-50 text-blue-300 rounded-md px-2 py-1 my-1">
+        <div class="mt-2">
+          <p
+            class="bg-neutral-lightest text-neutral-60 rounded-md h-10 w-3/12 text-center pt-1"
+          >
             {{ activeCount }} {{ $t("filter.active") }}
           </p>
           <p
@@ -31,11 +33,13 @@
           button-style="default"
           :label="$t('filter.clear')"
           @click="clearFilters()"
+          class="w-3/12"
         />
         <BaseButtonNew
-          button-style="default"
+          button-style="blue"
           :label="$t('filter.apply')"
           @click="applyFilters()"
+          class="w-8/12"
         />
       </div>
     </div>
@@ -67,9 +71,9 @@
 import { defineEmits, defineProps } from "vue";
 import SavedSearches from "@/components/SavedSearches.vue";
 import FilterAccordion from "@/components/base/FilterAccordion.vue";
-import checklist from "@/components/base/ChecklistFilter.vue";
+import checklist from "@/components/base/ChecklistFilterNew.vue";
 import tekst from "@/components/base/TextFilterNew.vue";
-import minmax from "@/components/base/MinmaxFilter.vue";
+import minmax from "@/components/base/MinmaxFilterNew.vue";
 import multiselect from "@/components/base/MultiFilter.vue";
 import { useSavedSearchHelper } from "@/composables/useSavedSearchHelper";
 import type { FilterInList } from "@/composables/useFilterHelper";
