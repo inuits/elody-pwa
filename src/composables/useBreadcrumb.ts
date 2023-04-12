@@ -13,7 +13,7 @@ export function useBreadcrumb() {
   function addHomePage() {
     if (router.currentRoute.value.path === "/") {
       visitedPages.value.unshift({
-        entityTitle: pageInfo.value.entityTitle,
+        entityTitle: pageInfo.value.entityTitle || "Home",
         path: "/",
       });
     }
