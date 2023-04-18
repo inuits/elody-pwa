@@ -25,24 +25,13 @@ import {
   defaultReturnMinMaxObject,
   type FilterInList,
   type AdvancedFilter,
-} from "../../composables/useFilterHelper";
+} from "@/composables/useFilterHelper";
 import MinMaxField from "@/components/base/MinMaxField.vue";
 
 const props = defineProps<{
-  minmaxValue: {
-    type: FilterInList;
-    required: false;
-    default: undefined;
-  };
-  filter: {
-    type: AdvancedFilter;
-    required: true;
-  };
-  isRelation: {
-    type: Boolean;
-    required: false;
-    default: false;
-  };
+  value?: FilterInList;
+  filter: AdvancedFilter;
+  isRelation: false;
 }>();
 
 const emit = defineEmits<{
@@ -51,10 +40,10 @@ const emit = defineEmits<{
 
 const inputFieldMin = computed<number | undefined>({
   get() {
-    return props.minmaxValue &&
-      props.minmaxValue?.input.minMaxInput &&
-      props.minmaxValue?.input.minMaxInput.min
-      ? props.minmaxValue?.input.minMaxInput.min
+    return props.value &&
+      props.value?.input.minMaxInput &&
+      props.value?.input.minMaxInput.min
+      ? props.value?.input.minMaxInput.min
       : undefined;
   },
   set(value) {
@@ -71,15 +60,15 @@ const inputFieldMin = computed<number | undefined>({
 
 const inputFieldMax = computed<number | undefined>({
   get() {
-    return props.minmaxValue &&
-      props.minmaxValue?.input.minMaxInput &&
-      props.minmaxValue?.input.minMaxInput.max
-      ? props.minmaxValue?.input.minMaxInput.max
+    return props.value &&
+      props.value?.input.minMaxInput &&
+      props.value?.input.minMaxInput.max
+      ? props.value?.input.minMaxInput.max
       : undefined;
   },
   set(value) {
     emit(
-      "update:minmaxValue",
+      "update:value",
       defaultReturnMinMaxObject(props.filter?.key, {
         min: inputFieldMin.value,
         max: value,

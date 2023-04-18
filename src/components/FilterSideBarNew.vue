@@ -8,15 +8,22 @@
         <div>
           <p class="pl-1 text-xl font-medium">{{ $t("filter.filter") }}</p>
         </div>
-        <div class="mt-2">
+        <div class="mt-2 flex justify-between">
           <p
+            v-if="activeCount === 0"
             class="bg-neutral-lightest text-neutral-60 rounded-md h-10 w-3/12 text-center pt-1"
           >
             {{ activeCount }} {{ $t("filter.active") }}
           </p>
           <p
+            v-if="activeCount > 0"
+            class="bg-neutral-lightest text-neutral-700 rounded-md h-10 w-3/12 text-center pt-1"
+          >
+            {{ activeCount }} {{ $t("filter.active") }}
+          </p>
+          <p
             v-if="pickedSavedSearch"
-            class="bg-blue-50 text-blue-300 rounded-md px-2 py-1 my-1"
+            class="bg-neutral-lightest text-neutral-lightest rounded-md px-2 py-1 my-1"
           >
             {{ pickedSavedSearch?.metadata[0]?.value }}
           </p>
@@ -36,7 +43,7 @@
           class="w-3/12"
         />
         <BaseButtonNew
-          button-style="blue"
+          button-style="default"
           :label="$t('filter.apply')"
           @click="applyFilters()"
           class="w-8/12"
@@ -55,7 +62,7 @@
         <template #content>
           <component
             :is="componentMap[filter.type]"
-            v-model="initialFilters[i]"
+            v-model:value="initialFilters[i]"
             @update:value="triggerInitialfilter($event, i)"
             :filter="filter"
             :text="filter?.label"
@@ -71,10 +78,10 @@
 import { defineEmits, defineProps } from "vue";
 import SavedSearches from "@/components/SavedSearches.vue";
 import FilterAccordion from "@/components/base/FilterAccordion.vue";
-import checklist from "@/components/base/ChecklistFilterNew.vue";
-import tekst from "@/components/base/TextFilterNew.vue";
-import minmax from "@/components/base/MinmaxFilterNew.vue";
-import multiselect from "@/components/base/MultiFilter.vue";
+import ChecklistFilter from "@/components/base/ChecklistFilterNew.vue";
+import TextFilter from "@/components/base/TextFilterNew.vue";
+import MinMaxFilter from "@/components/base/filters/MinmaxFilterNew.vue";
+import DateFilter from "@/components/base/filters/DateFilter.vue";
 import { useSavedSearchHelper } from "@/composables/useSavedSearchHelper";
 import type { FilterInList } from "@/composables/useFilterHelper";
 import { useQuery } from "@vue/apollo-composable";
@@ -82,19 +89,20 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { GetAdvancedFiltersDocument } from "@/generated-types/queries";
 import { useFilterSideBarHelperNew } from "@/composables/useFilterSideBarHelperNew";
 import type { FilterInput } from "@/generated-types/queries";
+import BooleanFilter from "@/components/base/filters/BooleanFilter.vue";
+import SelectionFilter from "@/components/base/filters/SelectionFilter.vue";
 const props = defineProps<{
-  advancedFiltersChoice: {
-    type: string;
-    default: "entityFilters";
-  };
+  advancedFiltersChoice?: "entityFilters";
   acceptedEntityTypes: string[];
 }>();
 
 const componentMap: any = {
-  checklist: checklist,
-  tekst: tekst,
-  minmax: minmax,
-  multiselect: multiselect,
+  checklist: ChecklistFilter,
+  text: TextFilter,
+  minmax: MinMaxFilter,
+  selection: SelectionFilter,
+  date: DateFilter,
+  boolean: BooleanFilter,
 };
 
 const { pickedSavedSearch, clearTypename, setPickedSavedSearch } =
@@ -134,5 +142,4 @@ const removedSelectedSearch = () => {
   clearFilters();
 };
 </script>
-
 <style></style>

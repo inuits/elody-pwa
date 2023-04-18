@@ -62,22 +62,13 @@ import type {
 import {
   defaultReturnMultiSelectObject,
   type FilterInList,
+  type FilterOptions,
 } from "@/composables/useFilterHelper";
 
 const props = defineProps<{
-  listValue: {
-    type: FilterInList;
-    required: false;
-    default: undefined;
-  };
-  filter: {
-    type: AdvancedFilter;
-    required: true;
-  };
-  acceptedEntityTypes: {
-    type: String[];
-    required: false;
-  };
+  value?: FilterInList;
+  filter: AdvancedFilter;
+  acceptedEntityTypes?: String[];
 }>();
 
 const emit = defineEmits<{
@@ -98,12 +89,12 @@ const isAnd = computed<boolean>({
     } else {
       andOr.value = "or";
     }
-    props.listValue &&
-      props.listValue?.input.multiSelectInput &&
+    props.value &&
+      props.value?.input.numberInput &&
       emit(
         "update:value",
         defaultReturnMultiSelectObject(props.filter?.key, {
-          value: props.listValue.input.multiSelectInput.value,
+          value: props.value.input.numberInput.value,
           AndOrValue: newValue,
         })
       );
@@ -113,11 +104,11 @@ const isAnd = computed<boolean>({
 const inputFieldMulti = ref<any[]>([]);
 
 watch(
-  () => props.listValue,
+  () => props.value,
   () => {
-    if (props.listValue && props.listValue.input.multiSelectInput) {
-      inputFieldMulti.value = props.listValue.input.multiSelectInput.value
-        ? props.listValue.input.multiSelectInput.value
+    if (props.value && props.value.input.numberInput) {
+      inputFieldMulti.value = props.value.input.numberInput.value
+        ? props.value.input.numberInput.value
         : [];
     }
   },
