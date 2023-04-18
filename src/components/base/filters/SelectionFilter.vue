@@ -6,7 +6,7 @@
         v-model="inputFieldMulti"
         mode="tags"
         :searchable="true"
-        :close-on-select="false"
+        :close-on-select="true"
         :options="result?.FilterOptions"
         :label="$t('filter.label')"
         track-by="label"
@@ -28,34 +28,30 @@
 </template>
 
 <script lang="ts" setup>
-import type {
-  AdvancedFilter,
-  FilterInList,
-} from "@/composables/useFilterHelper";
-import { computed, ref } from "vue";
+import { computed, defineProps, ref, defineEmits } from "vue";
+import Multiselect from "@vueform/multiselect";
+import InputField from "@/components/base/InputField.vue";
 import {
+  type AdvancedFilter,
   defaultReturnMultiSelectObject,
   defaultReturnTextObject,
-} from "../../composables/useFilterHelper";
-import type { Maybe } from "@/generated-types/queries";
+  type FilterInList,
+  type FilterOptions,
+} from "@/composables/useFilterHelper";
+
 const props = defineProps<{
-  multiSelectValue: {
-    type: FilterInList;
-    required: false;
-    default: undefined;
-  };
-  filter: {
-    type: AdvancedFilter;
-    required: true;
-  };
+  value?: FilterInList;
+  filter: AdvancedFilter;
 }>();
 
 const emit = defineEmits<{
-  (event: "update:value", initialFilters: FilterInList): void;
+  (event: "update:value", defaultMultiSelectObject: FilterInList): void;
 }>();
+
 const andOr = ref<"and" | "or">("and");
 const isAnd = computed<boolean>({
   get() {
+    console.log(andOr.value);
     return andOr.value === "and";
   },
   set(newValue) {
@@ -64,12 +60,12 @@ const isAnd = computed<boolean>({
     } else {
       andOr.value = "or";
     }
-    props.multiSelectValue &&
-      props.multiSelectValue?.input.multiSelectInput &&
+    props.value &&
+      props.value?.input.multiSelectInput &&
       emit(
         "update:value",
         defaultReturnMultiSelectObject(props.filter?.key, {
-          value: props.multiSelectValue?.input.multiSelectInput.value,
+          value: props.value?.input.multiSelectInput.value,
           AndOrValue: newValue,
         })
       );
@@ -91,28 +87,26 @@ const isMulti = computed<boolean>({
 
 const inputFieldMulti = computed<Maybe<Maybe<string>[]> | undefined>({
   get() {
-    return props.multiSelectValue &&
-      props.multiSelectValue?.input.multiSelectInput
-      ? props.multiSelectValue.input.multiSelectInput.value
+    return props.value && props.value?.input.multiSelectInput
+      ? props.value?.input.multiSelectInput.value
       : undefined;
   },
   set(value) {
-    if (props.multiSelectValue) {
-      emit(
-        "update:value",
-        defaultReturnMultiSelectObject(props.filter?.key, {
-          value: value,
-          AndOrValue: isAnd.value,
-        })
-      );
-    }
+    emit(
+      "update:value",
+      defaultReturnMultiSelectObject(props.filter?.key, {
+        value: value,
+        AndOrValue: isAnd.value,
+      })
+    );
   },
 });
 
 const inputField = computed<string | undefined | null>({
   get() {
-    return props.multiSelectValue && props.multiSelectValue.input.textInput
-      ? props.multiSelectValue?.input.textInput.value
+    console.log("CLICKEEDDD");
+    return props.value && props.value?.input.textInput
+      ? props.value?.input.textInput.value
       : undefined;
   },
   set(value) {
@@ -120,16 +114,15 @@ const inputField = computed<string | undefined | null>({
   },
 });
 
-type FilterOptions = { label: string; value: string }[];
-
 let result: { FilterOptions: FilterOptions } = {
   FilterOptions: props.filter?.options,
 };
 </script>
+
 <style src="@vueform/multiselect/themes/default.css"></style>
 <style>
 :root {
-  --ms-tag-bg: #0052cc;
+  --ms-tag-bg: var(--color-accent-normal);
   --ms-ring-color: white;
 }
 </style>
