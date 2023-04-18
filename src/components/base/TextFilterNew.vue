@@ -1,9 +1,8 @@
 <template>
   <div>
     <InputField
-      v-model:modelValue="inputField"
+      v-model="inputField"
       :debounce="true"
-      :placeholder="placeholderText"
       :bg-color="'neutral-20'"
     />
   </div>
@@ -19,19 +18,8 @@ import { defaultReturnTextObject } from "../../composables/useFilterHelper";
 import InputField from "@/components/base/InputField.vue";
 
 const props = defineProps<{
-  inputValue: {
-    type: FilterInList;
-    required: false;
-    default: undefined;
-  };
-  filter: {
-    type: AdvancedFilter;
-  };
-  placeholderText: {
-    type: String;
-    required: false;
-    default: "";
-  };
+  value?: FilterInList;
+  filter: AdvancedFilter;
 }>();
 const emit = defineEmits<{
   (event: "update:value", defaultTextObject: FilterInList): void;
@@ -39,8 +27,8 @@ const emit = defineEmits<{
 
 const inputField = computed<string | undefined | null>({
   get() {
-    return props.inputValue && props.inputValue?.input.textInput
-      ? props.inputValue?.input.textInput.value
+    return props.value && props.value?.input.textInput
+      ? props.value?.input.textInput.value
       : undefined;
   },
   set(value) {

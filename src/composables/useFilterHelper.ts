@@ -8,10 +8,12 @@ import { useSavedSearchHelper } from "./useSavedSearchHelper";
 
 export type FilterInList = { isActive: boolean; input: FilterInput };
 
+export type FilterOptions = { label: string; value: string }[];
+
 export type AdvancedFilter = {
   key: string;
   label: string;
-  type: "tekst" | "multiselect" | "checklist" | "minmax";
+  type: "text" | "multiselect" | "checklist" | "minmax";
   isRelation: boolean;
   options: { label: string; value: string }[];
 };
