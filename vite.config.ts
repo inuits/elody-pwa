@@ -45,7 +45,10 @@ export default defineConfig({
   cacheDir,
   build: {
     rollupOptions: {
-      external: ["pdfjs-dist/types/src/display/api"],
+      external: [
+        "pdfjs-dist/types/src/display/api",
+        "mirador/dist/mirador.min.js",
+      ],
     },
   },
   // test: {
