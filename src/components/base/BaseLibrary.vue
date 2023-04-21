@@ -39,16 +39,15 @@
           class="pl-4 my-2 flex flex-row justify-left"
         >
           <BaseDropdown
-            v-if="totalEntityCount > 0"
+            v-if="totalEntityCount > 0 && queryVariables.limit"
             v-model="queryVariables.limit"
             :options="paginationLimits"
             :label="$t('library.items')"
           />
           <BaseDropdown
-            v-if="
-              totalEntityCount > 1 && queryVariables.searchValue.value != ''
-            "
-            v-model="queryVariables.sort"
+            v-if="totalEntityCount > 1 && queryVariables?.searchValue?.order_by"
+            class="ml-4"
+            v-model="queryVariables.searchValue.order_by"
             :options="['Title', 'object_number']"
             :label="$t('library.sort')"
           />
@@ -339,7 +338,7 @@ export default defineComponent({
       searchValue: {
         value: "",
         isAsc: false,
-        key: "title",
+        order_by: "Title",
       },
       advancedSearchValue: [],
       searchInputType: isDrawerHiding.value

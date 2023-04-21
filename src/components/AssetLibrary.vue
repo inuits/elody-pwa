@@ -20,6 +20,7 @@ import { SearchInputType, type Maybe } from "@/generated-types/queries";
 
 export default defineComponent({
   name: "AssetLibrary",
+  components: { BaseLibrary },
   props: {
     enableSelection: {
       type: Boolean,
@@ -32,9 +33,6 @@ export default defineComponent({
     },
   },
   emits: ["addSelection"],
-  components: {
-    BaseLibrary,
-  },
   setup: (props, { emit }) => {
     const addSelection = (id: string) => {
       emit("addSelection", id);

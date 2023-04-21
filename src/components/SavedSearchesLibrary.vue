@@ -20,6 +20,9 @@ import { useSavedSearchHelper } from "@/composables/useSavedSearchHelper";
 
 export default defineComponent({
   name: "SavedSearchesLibrary",
+  components: {
+    BaseLibrary,
+  },
   props: {
     enableSelection: {
       type: Boolean,
@@ -27,9 +30,6 @@ export default defineComponent({
     },
   },
   emits: ["addSelection"],
-  components: {
-    BaseLibrary,
-  },
   setup: () => {
     const { closeSearchSavedSearchesModal, setPickedSavedSearch } =
       useSavedSearchHelper();
