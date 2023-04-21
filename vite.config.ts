@@ -2,7 +2,6 @@ import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import vueI18n from "@intlify/vite-plugin-vue-i18n";
-import { nodeResolve } from "@rollup/plugin-node-resolve";
 import path, { resolve, dirname } from "node:path";
 
 const parsePort = (port: string) => {
@@ -26,7 +25,6 @@ export default defineConfig({
         "./src/locales/**"
       ),
     }),
-    nodeResolve(),
   ],
   resolve: {
     alias: {
