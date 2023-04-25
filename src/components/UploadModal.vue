@@ -1,59 +1,62 @@
 <template>
   <BaseModal
+    class="w-5/12 h-full fixed inset-0 z-50 overflow-y-auto"
     :large="true"
     :scroll="false"
     :modal-state="modal.modalState.value.state"
     @hide-modal="modal.closeModal()"
   >
-    <div class="w-full h-full flex flex-col overflow-auto">
-      <BaseTabs
-        v-if="
-          modal.modalToOpen?.value === ModalChoices.Import &&
-          directoriesQueryResult &&
-          dropzoneEntityToCreateQueryResult
-        "
-      >
-        <BaseTab :title="$t('upload.upload-files')">
-          <upload-modal-dropzone
-            v-if="modal.modalToOpen?.value === ModalChoices.Import"
-            :entity-to-create="
-              dropzoneEntityToCreateQueryResult.DropzoneEntityToCreate
-            "
-          />
-        </BaseTab>
-        <BaseTab :title="$t('upload.import')">
-          <upload-modal-import
-            v-if="modal.modalToOpen?.value === ModalChoices.Import"
-            :directories="directoriesQueryResult.Directories"
-          />
-        </BaseTab>
-      </BaseTabs>
-
-      <BaseTabs
-        v-if="
-          modal.modalToOpen?.value === ModalChoices.Dropzone &&
-          dropzoneEntityToCreateQueryResult
-        "
-      >
-        <BaseTab :title="$t('upload.upload-files')">
-          <div class="h-full">
+    <div class="w-full h-full flex flex-col">
+      <div class="flex-grow flex-shrink-0">
+        <BaseTabs
+          v-if="
+            modal.modalToOpen?.value === ModalChoices.Import &&
+            directoriesQueryResult &&
+            dropzoneEntityToCreateQueryResult
+          "
+        >
+          <BaseTab :title="$t('upload.upload-files')">
             <upload-modal-dropzone
-              v-if="modal.modalToOpen?.value === ModalChoices.Dropzone"
+              v-if="modal.modalToOpen?.value === ModalChoices.Import"
               :entity-to-create="
                 dropzoneEntityToCreateQueryResult.DropzoneEntityToCreate
               "
             />
-          </div>
-        </BaseTab>
-        <BaseTab title="Select file">
-          <div class="h-full">
-            <MediaFileLibrary
-              :enable-selection="true"
-              @add-selection="addSelection"
+          </BaseTab>
+          <BaseTab :title="$t('upload.import')">
+            <upload-modal-import
+              v-if="modal.modalToOpen?.value === ModalChoices.Import"
+              :directories="directoriesQueryResult.Directories"
             />
-          </div>
-        </BaseTab>
-      </BaseTabs>
+          </BaseTab>
+        </BaseTabs>
+
+        <BaseTabs
+          v-if="
+            modal.modalToOpen?.value === ModalChoices.Dropzone &&
+            dropzoneEntityToCreateQueryResult
+          "
+        >
+          <BaseTab :title="$t('upload.upload-files')">
+            <div class="h-full">
+              <upload-modal-dropzone
+                v-if="modal.modalToOpen?.value === ModalChoices.Dropzone"
+                :entity-to-create="
+                  dropzoneEntityToCreateQueryResult.DropzoneEntityToCreate
+                "
+              />
+            </div>
+          </BaseTab>
+          <BaseTab title="Select file">
+            <div class="h-full">
+              <MediaFileLibrary
+                :enable-selection="true"
+                @add-selection="addSelection"
+              />
+            </div>
+          </BaseTab>
+        </BaseTabs>
+      </div>
     </div>
   </BaseModal>
 </template>

@@ -11,8 +11,8 @@
         @change="$emit('update:checked', handleInputChange($event))"
       />
       <div class="dot"></div>
-      <BaseIcon :name="iconOff" class="iconOff" />
-      <BaseIcon :name="iconOn" class="iconOn" />
+      <BaseIcon :name="iconOff" class="iconOff bg-neutral-0" />
+      <BaseIcon :name="iconOn" class="iconOn bg-neutral-0" />
     </div>
     <div v-if="label" class="ml-3 text-gray-700 font-medium">{{ label }}</div>
   </label>

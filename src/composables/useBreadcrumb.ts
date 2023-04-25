@@ -13,8 +13,9 @@ export function useBreadcrumb() {
   function addHomePage() {
     if (router.currentRoute.value.path === "/") {
       visitedPages.value.unshift({
-        entityTitle: pageInfo.value.entityTitle || "Home",
+        entityTitle: pageInfo.value.entityTitle,
         path: "/",
+        entityId: pageInfo.value.entityId,
       });
     }
   }
@@ -35,24 +36,20 @@ export function useBreadcrumb() {
           .filter((page) => page.label)
           .reverse()
       : [];
-
-    selectedVisitedPage;
   });
 
   const selectedVisitedPage = ref(visitedPages.value.length - 1);
 
-  function addVisitedPage(page) {
-    const existingIndex = visitedPages.value.findIndex(
-      (p) => p.entityTitle === page.entityTitle
+  function addVisitedPage(page: { routerTitle: string; entityTitle: string; routeType: string; parentRouteName: string; entityId: string; }) {
+        const existingPage = visitedPages.value.find(
+      (p) => p.entityId === page.entityId
     );
-    if (existingIndex === -1) {
+    if (!existingPage) {
       visitedPages.value.push({
         entityTitle: page.entityTitle,
         path: page.path,
+        entityId: page.entityId,
       });
-    } else {
-      const existingPage = visitedPages.value.splice(existingIndex, 1)[0];
-      visitedPages.value.push(existingPage);
     }
   }
 
@@ -61,7 +58,7 @@ export function useBreadcrumb() {
     addHomePage();
   }
 
-  function onVisitedPageChange(index) {
+  function onVisitedPageChange(index: number) {
     const selectedPage = visitedPages.value[index];
     if (selectedPage) {
       const { entityTitle, path } = selectedPage;
@@ -70,12 +67,14 @@ export function useBreadcrumb() {
       const routerTitle = matchedRoute?.meta?.title;
       const routeType = matchedRoute?.meta?.type;
       const parentRouteName = matchedRoute?.name;
+      const entityId = matchedRoute?.meta?.uuid;
 
       pageInfo.value = {
         routerTitle,
         entityTitle,
         routeType,
         parentRouteName,
+        entityId,
       };
 
       visitedPages.value.splice(index + 1);
@@ -93,6 +92,7 @@ export function useBreadcrumb() {
       addVisitedPage({
         entityTitle: to.meta.title,
         path: to.path,
+        entityId: to.meta.uuid || null,
       });
     }
     next();

@@ -1,5 +1,5 @@
 <template>
-  <div class="lg:flex">
+  <div class="lg:flex bg-neutral-20">
     <FilterSideBarNew
       v-show="!isDrawerHiding && !isHideFilters"
       @activeFilters="setFilters"
@@ -39,15 +39,16 @@
           class="pl-4 my-2 flex flex-row justify-left"
         >
           <BaseDropdown
-            v-if="totalEntityCount > 0 && queryVariables.limit"
+            v-if="totalEntityCount > 0"
             v-model="queryVariables.limit"
             :options="paginationLimits"
             :label="$t('library.items')"
           />
           <BaseDropdown
-            v-if="totalEntityCount > 1 && queryVariables?.searchValue?.order_by"
-            class="ml-4"
-            v-model="queryVariables.searchValue.order_by"
+            v-if="
+              totalEntityCount > 1 && queryVariables.searchValue.value != ''
+            "
+            v-model="queryVariables.sort"
             :options="['Title', 'object_number']"
             :label="$t('library.sort')"
           />
@@ -339,7 +340,7 @@ export default defineComponent({
       searchValue: {
         value: "",
         isAsc: false,
-        order_by: "Title",
+        key: "title",
       },
       advancedSearchValue: [],
       searchInputType: isDrawerHiding.value
