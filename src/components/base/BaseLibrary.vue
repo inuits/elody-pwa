@@ -48,7 +48,7 @@
             v-if="totalEntityCount > 1 && queryVariables?.searchValue?.order_by"
             class="ml-4"
             v-model="queryVariables.searchValue.order_by"
-            :options="['Title', 'object_number']"
+            :options="sortOptions.map((option) => option.label || option.value)"
             :label="$t('library.sort')"
           />
         </div>
@@ -215,9 +215,11 @@ import { useRouter } from "vue-router";
 import { Unicons } from "../../types";
 import {
   GetEntitiesDocument,
+  GetSortOptionsDocument,
   SearchInputType,
   type Asset,
   type Entity,
+  type MetadataFieldOption,
 } from "../../generated-types/queries";
 import type {
   GetEntitiesQueryVariables,
@@ -309,6 +311,20 @@ export default defineComponent({
       skip: 1,
     });
     const displayGrid = ref<boolean>(false);
+    const sortOptions = ref<MetadataFieldOption[]>([]);
+
+    const { onResult: onSortOptionsResult } = useQuery(
+      GetSortOptionsDocument,
+      {}
+    );
+
+    onSortOptionsResult((res) => {
+      const options = res.data.SortOptions.options;
+      sortOptions.value = options;
+      if (queryVariables.searchValue) {
+        queryVariables.searchValue.order_by = options[0].label;
+      }
+    });
 
     onMounted(() => {
       const displayPreference = getCookie("_displayPreference");
@@ -423,6 +439,7 @@ export default defineComponent({
     if (!props.predefinedEntities) refetch();
 
     return {
+      sortOptions,
       paginationLimits,
       queryVariables,
       addSelection,
