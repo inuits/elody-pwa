@@ -41,6 +41,7 @@ module.exports = {
         lightest: "#F2F7F8",
         light: "#E8EEF0",
         blue: "#22D3EE",
+        check: '#02C6F2',
       },
       text: {
         light: "#6795A2",
