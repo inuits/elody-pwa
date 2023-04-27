@@ -12,16 +12,16 @@
       :class="[{ 'opacity-40 cursor-not-allowed': isDisabled }]"
       :disabled="isDisabled"
     >
-      <option v-for="option in options" :key="option" :value="option">
-        {{ option }}
+      <option v-for="option in options" :key="option.value" :value="option">
+        {{ option.label }}
       </option>
     </select>
   </label>
 </template>
 
 <script lang="ts">
-import { defineComponent, onUpdated, ref, watch, type PropType } from "vue";
-import { Unicons } from "@/types";
+import { defineComponent, ref, watch, type PropType } from "vue";
+import type { MetadataFieldOption } from "@/generated-types/queries";
 
 export default defineComponent({
   name: "BaseDropdown",
@@ -29,11 +29,16 @@ export default defineComponent({
     selectedItemPrefix: { type: String, default: "" },
     label: { type: String, default: "" },
     options: {
-      type: Array as PropType<Array<string | number>>,
+      type: Array as PropType<MetadataFieldOption[]>,
       required: true,
     },
     isDisabled: { type: Boolean, required: false },
-    modelValue: { type: [String, Number], default: "" },
+    modelValue: {
+      type: Object as PropType<MetadataFieldOption>,
+      default: () => {
+        return { label: "", value: "" };
+      },
+    },
     bgColor: {
       type: String,
       default: "neutral-0",
@@ -45,14 +50,10 @@ export default defineComponent({
   },
   emits: ["update:modelValue"],
   setup(props, { emit }) {
-    const selectedItem = ref(props.modelValue);
-    watch(selectedItem, (value) => emit("update:modelValue", value));
+    const selectedItem = ref<MetadataFieldOption>(props.modelValue);
+    watch(selectedItem, () => emit("update:modelValue", selectedItem.value));
 
-    onUpdated(() => {
-      selectedItem.value = props.modelValue;
-    });
-
-    return { Unicons, selectedItem };
+    return { selectedItem };
   },
 });
 </script>
