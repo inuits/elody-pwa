@@ -18,7 +18,15 @@
       class="flex text-sm mx-3 flex-row items-center w-1-6"
       data-test="page-count-label"
     >
-      {{ $t("partials.page") }} {{ currentPage }} {{ $t("partials.of") }}
+      {{ $t("partials.page") }}
+      <input
+        class="mx-2 w-16 rounded-lg"
+        type="number"
+        :max="maxPage()"
+        :min="1"
+        v-model="currentPage"
+      />{{}}
+      {{ $t("partials.of") }}
       {{ maxPage() }}
     </div>
     <unicon
@@ -39,7 +47,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, reactive } from "vue";
+import { defineComponent, computed, reactive, ref, watch } from "vue";
 import { Unicons } from "@/types";
 
 export type PaginationInfo = {
@@ -65,9 +73,7 @@ export default defineComponent({
       skip: props.skip,
     });
 
-    const currentPage = computed(() => {
-      return props.skip;
-    });
+    const currentPage = ref<number>(props.skip);
 
     const prev = (pages: number) => {
       if (!props.loading) {
@@ -105,6 +111,19 @@ export default defineComponent({
         }
       }
     };
+
+    const goToPageNumber = (page: number) => {
+      if (!props.loading) {
+        if (page <= maxPage()) {
+          emit("update:skip", page);
+          emit("update:limit", props.limit);
+        } else {
+          emit("update:skip", maxPage());
+          emit("update:limit", props.limit);
+        }
+      }
+    };
+
     const maxPage = () => {
       if (props.totalItems > 1)
         return Math.ceil(props.totalItems / props.limit);
@@ -126,6 +145,22 @@ export default defineComponent({
       }
     };
     init();
+
+    watch(
+      () => currentPage.value,
+      () => {
+        if (currentPage.value) {
+          goToPageNumber(currentPage.value);
+        }
+      }
+    );
+
+    watch(
+      () => props.skip,
+      () => {
+        currentPage.value = props.skip;
+      }
+    );
 
     return {
       currentPage,
