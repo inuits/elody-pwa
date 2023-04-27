@@ -15,7 +15,7 @@
             :icon-on="Unicons.SearchGlass.name"
             :icon-off="Unicons.Filter.name"
           />
-          <div :class="['mt-1.5', { 'ml-2': !isHideFilters }]">
+          <div :class="[{ 'ml-2': !isHideFilters }]">
             <IconToggle
               v-model:checked="displayGrid"
               :icon-on="Unicons.Apps.name"
@@ -44,11 +44,11 @@
             :options="paginationLimits"
             :label="$t('library.items')"
           />
-          <BaseDropdown
-            v-if="totalEntityCount > 1 && queryVariables?.searchValue?.order_by"
+          <NewBaseDropdown
+            v-if="totalEntityCount > 1 && selectedSortOption"
             class="ml-4"
-            v-model="queryVariables.searchValue.order_by"
-            :options="sortOptions.map((option) => option.label || option.value)"
+            v-model="selectedSortOption"
+            :options="sortOptions"
             :label="$t('library.sort')"
           />
         </div>
@@ -202,13 +202,13 @@ import {
   ref,
   onMounted,
   nextTick,
-  type Prop,
 } from "vue";
 import type { PropType } from "vue";
 import ListContainer from "../ListContainer.vue";
 import BaseButton from "./BaseButton.vue";
 import InputField from "./InputField.vue";
 import BaseDropdown from "./BaseDropdown.vue";
+import NewBaseDropdown from "./NewBaseDropdown.vue";
 import { useQuery } from "@vue/apollo-composable";
 import ListItem from "../ListItem.vue";
 import { useRouter } from "vue-router";
@@ -235,7 +235,6 @@ import BaseIcon from "./BaseIcon.vue";
 import GridItem from "../GridItem.vue";
 import { setCookie, getCookie } from "tiny-cookie";
 import useListItemHelper from "../../composables/useListItemHelper";
-import EntityColumn from "../EntityColumn.vue";
 
 export type PredefinedEntities = {
   usePredefinedEntities: Boolean;
@@ -255,6 +254,7 @@ export default defineComponent({
     InputField,
     BaseIcon,
     GridItem,
+    NewBaseDropdown,
   },
   props: {
     advancedFiltersChoice: {
@@ -312,18 +312,29 @@ export default defineComponent({
     });
     const displayGrid = ref<boolean>(false);
     const sortOptions = ref<MetadataFieldOption[]>([]);
+    const selectedSortOption = ref<MetadataFieldOption>({
+      label: "",
+      value: "",
+    });
 
-    const { onResult: onSortOptionsResult } = useQuery(
-      GetSortOptionsDocument,
-      {}
+    watch(
+      () => selectedSortOption.value,
+      (option) => {
+        const newVariables = { ...queryVariables };
+        if (option && newVariables?.searchValue) {
+          newVariables.searchValue.order_by = option.value;
+        }
+        console.log({ newVariables });
+        refetch(newVariables);
+      }
     );
+
+    const { onResult: onSortOptionsResult } = useQuery(GetSortOptionsDocument);
 
     onSortOptionsResult((res) => {
       const options = res.data.SortOptions.options;
       sortOptions.value = options;
-      if (queryVariables.searchValue) {
-        queryVariables.searchValue.order_by = options[0].label;
-      }
+      selectedSortOption.value = options[0];
     });
 
     onMounted(() => {
@@ -354,7 +365,7 @@ export default defineComponent({
       searchValue: {
         value: "",
         isAsc: false,
-        order_by: "Title",
+        order_by: selectedSortOption.value.value,
       },
       advancedSearchValue: [],
       searchInputType: isDrawerHiding.value
@@ -439,6 +450,7 @@ export default defineComponent({
     if (!props.predefinedEntities) refetch();
 
     return {
+      selectedSortOption,
       sortOptions,
       paginationLimits,
       queryVariables,
