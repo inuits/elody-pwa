@@ -64,13 +64,9 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps, reactive, ref } from "vue";
+import { ref } from "vue";
 import { useBreadcrumb } from "@/composables/useBreadcrumb";
-import { Unicons, DamsIcons } from "@/types";
-
-const props = defineProps<{
-  icon: DamsIcons;
-}>();
+import { Unicons } from "@/types";
 
 const {
   visitedPagesOptions,
@@ -82,7 +78,7 @@ const {
 const isOpen = ref(false);
 </script>
 
-<style scoped lang="css">
+<style scoped lang="postcss">
 .dropdown-menu {
   @apply absolute z-0;
 }

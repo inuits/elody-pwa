@@ -8,7 +8,9 @@ export function useBreadcrumb() {
   const router = useRouter();
   const routes = router.options.routes;
 
-  const visitedPages = ref([]);
+  type BreadcrumbInfo = { entityTitle: string; path: string; entityId: string };
+
+  const visitedPages = ref(<BreadcrumbInfo[]>[]);
 
   function addHomePage() {
     if (router.currentRoute.value.path === "/") {
@@ -27,34 +29,28 @@ export function useBreadcrumb() {
   const visitedPagesOptions = computed(() => {
     return visitedPages.value.length > 1
       ? visitedPages.value
-          .map((page, index) => {
-            return {
-              label: page.entityTitle,
-              value: index,
-            };
-          })
-          .filter((page) => page.label)
-          .reverse()
+        .map((page, index) => {
+          return {
+            label: page.entityTitle,
+            value: index,
+          };
+        })
+        .filter((page) => page.label)
+        .reverse()
       : [];
   });
 
   const selectedVisitedPage = ref(visitedPages.value.length - 1);
 
-  function addVisitedPage(page: {
-    routerTitle: string;
-    entityTitle: string;
-    routeType: string;
-    parentRouteName: string;
-    entityId: string;
-  }) {
+  function addVisitedPage(info: BreadcrumbInfo) {
     const existingPage = visitedPages.value.find(
-      (p) => p.entityId === page.entityId
+      (p) => p.entityId === info.entityId
     );
     if (!existingPage) {
       visitedPages.value.push({
-        entityTitle: page.entityTitle,
-        path: page.path,
-        entityId: page.entityId,
+        entityTitle: info.entityTitle,
+        path: info.path,
+        entityId: info.entityId,
       });
     }
   }
@@ -70,10 +66,10 @@ export function useBreadcrumb() {
       const { entityTitle, path } = selectedPage;
       const matchedRoute = routes.find((route) => route.path === path);
 
-      const routerTitle = matchedRoute?.meta?.title;
-      const routeType = matchedRoute?.meta?.type;
-      const parentRouteName = matchedRoute?.name;
-      const entityId = matchedRoute?.meta?.uuid;
+      const routerTitle = matchedRoute?.meta?.title as string;
+      const routeType = matchedRoute?.meta?.type as string;
+      const parentRouteName = matchedRoute?.name as string;
+      const entityId = matchedRoute?.meta?.uuid as string;
 
       pageInfo.value = {
         routerTitle,
@@ -96,16 +92,22 @@ export function useBreadcrumb() {
     if (to.matched.length === 1) {
       clearVisitedPages();
       addVisitedPage({
-        entityTitle: to.meta.title,
+        entityTitle: to.meta.title as string,
         path: to.path,
-        entityId: to.meta.uuid || null,
+        entityId: to.meta.uuid as string,
       });
     }
     next();
   });
 
+  const breadcrumb: BreadcrumbInfo = {
+    entityTitle: pageInfo.value.entityTitle,
+    path: "",
+    entityId: pageInfo.value.entityId
+  };
+
   watchEffect(() => {
-    addVisitedPage(pageInfo.value);
+    addVisitedPage(breadcrumb);
     selectedVisitedPage.value = visitedPages.value.length - 1;
   });
 
