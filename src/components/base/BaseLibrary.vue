@@ -15,7 +15,7 @@
             :icon-on="Unicons.SearchGlass.name"
             :icon-off="Unicons.Filter.name"
           />
-          <div :class="['mt-1.5', { 'ml-2': !isHideFilters }]">
+          <div :class="[{ 'ml-2': !isHideFilters }]">
             <IconToggle
               v-model:checked="displayGrid"
               :icon-on="Unicons.Apps.name"
@@ -44,12 +44,11 @@
             :options="paginationLimits"
             :label="$t('library.items')"
           />
-          <BaseDropdown
-            v-if="
-              totalEntityCount > 1 && queryVariables.searchValue.value != ''
-            "
-            v-model="queryVariables.sort"
-            :options="['Title', 'object_number']"
+          <NewBaseDropdown
+            v-if="totalEntityCount > 1 && selectedSortOption"
+            class="ml-4"
+            v-model="selectedSortOption"
+            :options="sortOptions"
             :label="$t('library.sort')"
           />
         </div>
@@ -204,13 +203,13 @@ import {
   ref,
   onMounted,
   nextTick,
-  type Prop,
 } from "vue";
 import type { PropType } from "vue";
 import ListContainer from "../ListContainer.vue";
 import BaseButton from "./BaseButton.vue";
 import InputField from "./InputField.vue";
 import BaseDropdown from "./BaseDropdown.vue";
+import NewBaseDropdown from "./NewBaseDropdown.vue";
 import { useQuery } from "@vue/apollo-composable";
 import ListItem from "../ListItem.vue";
 import { useRouter } from "vue-router";
@@ -218,12 +217,11 @@ import { Unicons } from "../../types";
 import {
   GetEntitiesDocument,
   SearchInputType,
+  GetSortOptionsDocument,
   type Asset,
   type Entity,
-} from "../../generated-types/queries";
-import type {
-  GetEntitiesQueryVariables,
-  Maybe,
+  type GetEntitiesQueryVariables,
+  type Maybe,
 } from "../../generated-types/queries";
 import FilterSideBarNew from "../FilterSideBarNew.vue";
 import IconToggle from "./IconToggle.vue";
@@ -235,7 +233,6 @@ import BaseIcon from "./BaseIcon.vue";
 import GridItem from "../GridItem.vue";
 import { setCookie, getCookie } from "tiny-cookie";
 import useListItemHelper from "../../composables/useListItemHelper";
-import EntityColumn from "../EntityColumn.vue";
 
 export type PredefinedEntities = {
   usePredefinedEntities: Boolean;
@@ -255,6 +252,7 @@ export default defineComponent({
     InputField,
     BaseIcon,
     GridItem,
+    NewBaseDropdown,
   },
   props: {
     advancedFiltersChoice: {
@@ -311,6 +309,31 @@ export default defineComponent({
       skip: 1,
     });
     const displayGrid = ref<boolean>(false);
+    const sortOptions = ref<MetadataFieldOption[]>([]);
+    const selectedSortOption = ref<MetadataFieldOption>({
+      label: "",
+      value: "",
+    });
+
+    watch(
+      () => selectedSortOption.value,
+      (option) => {
+        const newVariables = { ...queryVariables };
+        if (option && newVariables?.searchValue) {
+          newVariables.searchValue.order_by = option.value;
+        }
+        console.log({ newVariables });
+        refetch(newVariables);
+      }
+    );
+
+    const { onResult: onSortOptionsResult } = useQuery(GetSortOptionsDocument);
+
+    onSortOptionsResult((res) => {
+      const options = res.data.SortOptions.options;
+      sortOptions.value = options;
+      selectedSortOption.value = options[0];
+    });
 
     onMounted(() => {
       const displayPreference = getCookie("_displayPreference");
@@ -341,6 +364,7 @@ export default defineComponent({
         value: "",
         isAsc: false,
         key: "title",
+        order_by: selectedSortOption.value.value,
       },
       advancedSearchValue: [],
       searchInputType: isDrawerHiding.value
@@ -425,6 +449,8 @@ export default defineComponent({
     if (!props.predefinedEntities) refetch();
 
     return {
+      selectedSortOption,
+      sortOptions,
       paginationLimits,
       queryVariables,
       addSelection,

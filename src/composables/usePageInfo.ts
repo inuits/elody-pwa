@@ -32,7 +32,7 @@ export const usePageInfo = () => {
   };
 
   router.beforeEach((to, _from, next) => {
-    updatePageInfo("Home", "entityTitle");
+    updatePageInfo("", "entityTitle");
 
     next();
   });

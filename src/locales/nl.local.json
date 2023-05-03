@@ -95,7 +95,7 @@
   "library": {
     "search": "Search",
     "items": "Items",
-    "sort": "Sort",
+    "sort": "Order by",
     "loading": "Loading"
   },
   "confirmation": {

@@ -1,5 +1,5 @@
 <template>
-  <label class="toggle flex items-center cursor-pointer">
+  <label class="h-full toggle flex items-center cursor-pointer">
     <!-- the IconToggle for some reason puts the icons in a column instead of row in SingleJob instance, I can't 
     figure out why so I am forcing it to use flex to overwrite display: block for now until I figure it out-->
     <div :class="['box', forceFlexClass ? 'forceFlex' : '']">
