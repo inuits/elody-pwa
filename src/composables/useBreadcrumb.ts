@@ -40,8 +40,14 @@ export function useBreadcrumb() {
 
   const selectedVisitedPage = ref(visitedPages.value.length - 1);
 
-  function addVisitedPage(page: { routerTitle: string; entityTitle: string; routeType: string; parentRouteName: string; entityId: string; }) {
-        const existingPage = visitedPages.value.find(
+  function addVisitedPage(page: {
+    routerTitle: string;
+    entityTitle: string;
+    routeType: string;
+    parentRouteName: string;
+    entityId: string;
+  }) {
+    const existingPage = visitedPages.value.find(
       (p) => p.entityId === page.entityId
     );
     if (!existingPage) {

@@ -41,7 +41,7 @@ export const usePageInfo = () => {
     updatePageInfo(to.matched[0].name?.toString() || "parentRouteName");
     updatePageInfo(to.meta.type as string, "routeType");
     updatePageInfo(to.meta.title as string);
-    updatePageInfo(to.meta.uuid as string)
+    updatePageInfo(to.meta.uuid as string);
   });
 
   return {

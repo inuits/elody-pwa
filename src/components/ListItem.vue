@@ -1,33 +1,63 @@
 <template>
   <li
     class="row bg-white border border-gray-300 rounded-md cursor-pointer flex items-center gap-6 px-4 py-3 hover:bg-gray-100 transition-colors duration-300"
-    :class="{ loading, 'mb-2 px-8': !small, 'px-2': small }" data-test="meta-row">
-
+    :class="{ loading, 'mb-2 px-8': !small, 'px-2': small }"
+    data-test="meta-row"
+  >
     <div class="flex items-center">
-      <div class="flex-none w-11 h-11 bg-opacity-50 flex items-center justify-center"
-        :class="{ 'bg-neutral-check bg-opacity-30 rounded': isChecked }">
-        <input type="checkbox"
+      <div
+        class="flex-none w-11 h-11 bg-opacity-50 flex items-center justify-center"
+        :class="{ 'bg-neutral-check bg-opacity-30 rounded': isChecked }"
+      >
+        <input
+          type="checkbox"
           class="form-checkbox h-5 w-5 rounded-sm border-gray-300 checked:bg-neutral-check checked:bg-opacity-30 checked:border-blue-200"
-          :checked="isChecked" @change="handleCheckboxChange" />
+          :checked="isChecked"
+          @change="handleCheckboxChange"
+        />
       </div>
     </div>
 
     <div class="flex items-center"></div>
-    <div class="flex w-full items-center" :class="{ 'flex-col': small && !thumbIcon }">
-      <img v-if="media && !imageSrcError"
-        class="h-10 w-10 object-cover mr-4 rounded-sm outline-none shadow-sm self-center" :src="mediaIsLink ? media : `/api/iiif/3/${media}/square/100,/0/default.jpg`
-          " @error="setNoImage()" />
-      <unicon v-if="(thumbIcon && !media) || (imageSrcError && thumbIcon)" :name="thumbIcon"
-        class="h-10 w-10 p-1 text-neutral-700 mr-4 rounded-sm outline-none shadow-sm self-center" />
+    <div
+      class="flex w-full items-center"
+      :class="{ 'flex-col': small && !thumbIcon }"
+    >
+      <img
+        v-if="media && !imageSrcError"
+        class="h-10 w-10 object-cover mr-4 rounded-sm outline-none shadow-sm self-center"
+        :src="
+          mediaIsLink ? media : `/api/iiif/3/${media}/square/100,/0/default.jpg`
+        "
+        @error="setNoImage()"
+      />
+      <unicon
+        v-if="(thumbIcon && !media) || (imageSrcError && thumbIcon)"
+        :name="thumbIcon"
+        class="h-10 w-10 p-1 text-neutral-700 mr-4 rounded-sm outline-none shadow-sm self-center"
+      />
       <div class="flex w-full" :class="small ? 'flex-col' : ''">
-        <div v-for="metaItem in only4Meta(meta)" :key="metaItem ? metaItem.value : 'no-key'" class="col"
-          :class="small ? 'w-full' : 'w-1/4'">
+        <div
+          v-for="metaItem in only4Meta(meta)"
+          :key="metaItem ? metaItem.value : 'no-key'"
+          class="col"
+          :class="small ? 'w-full' : 'w-1/4'"
+        >
           <template v-if="metaItem">
             <span class="label" data-test="meta-label">{{ metaItem.key }}</span>
-            <span v-if="!stringIsUrl(metaItem.value)" class="info" data-test="meta-info">{{ metaItem.value }}
+            <span
+              v-if="!stringIsUrl(metaItem.value)"
+              class="info"
+              data-test="meta-info"
+              >{{ metaItem.value }}
             </span>
             <span v-else class="info underline" data-test="meta-info">
-              <a :href="metaItem.value" target="_blank" @click.prevent="onLinkClick(metaItem.key)">{{ metaItem.key }}</a>
+              <a
+                :href="metaItem.value"
+                target="_blank"
+                @click.prevent="onLinkClick(metaItem.key)"
+                >{{ metaItem.key }}</a
+              >
             </span>
           </template>
         </div>
