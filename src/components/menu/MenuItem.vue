@@ -9,7 +9,12 @@
           menuitem && isMenuItemActive(menuitem),
       }"
     >
-      <unicon v-if="icon" :name="Unicons[icon].name" height="18" />
+      <unicon
+        v-if="icon && Unicons[icon]"
+        :name="Unicons[icon].name"
+        height="18"
+      />
+      <CustomIcon v-else :icon="icon" :size="24" color="text-accent-normal" />
       <span class="nav-item-label w-0 h-0 overflow-hidden px-4 font-bold">
         {{ menuitem?.label }}
       </span>
@@ -54,6 +59,7 @@ import { Unicons, DamsIcons } from "@/types";
 import { MenuItem, TypeModals, ModalState } from "@/generated-types/queries";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { useAvailableModals } from "@/composables/useAvailableModals";
+import CustomIcon from "../CustomIcon.vue";
 const {
   checkIfRouteOrModal,
   showdropdown,
