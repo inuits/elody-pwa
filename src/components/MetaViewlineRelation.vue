@@ -23,6 +23,7 @@
           metadata.linkedEntity &&
           metadata.linkedEntity.__typename !== 'IntermediateEntity'
         "
+        :item-id="metadata.linkedEntity.id"
         :teaser-metadata="
           metadata.linkedEntity.teaserMetadata?.flatMap(
             (metadata) => metadata ?? []

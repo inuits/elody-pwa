@@ -25,6 +25,7 @@
         </div>
         <ListItem
           v-if="value.linkedEntity && value.linkedEntity.teaserMetadata"
+          :item-id="value.linkedEntity.id"
           :teaser-metadata="
             value.linkedEntity.teaserMetadata.flatMap(
               (metadata) => metadata ?? []

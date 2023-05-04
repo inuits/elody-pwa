@@ -13,7 +13,7 @@
           type="checkbox"
           class="form-checkbox h-5 w-5 rounded-sm border-gray-300 checked:bg-neutral-check checked:bg-opacity-30 checked:border-blue-200"
           :checked="isChecked"
-          @change.stop="() => (isChecked = !isChecked)"
+          @change.stop="handleItemSelection"
           @click.stop
         />
       </div>
@@ -69,9 +69,11 @@
 import type { MetadataAndRelation } from "../generated-types/queries";
 import { computed, ref } from "vue";
 import { customSort, stringIsUrl } from "@/helpers";
+import { useBulkOperations } from "@/composables/useBulkOperations";
 
 const props = withDefaults(
   defineProps<{
+    itemId?: string;
     loading?: boolean;
     teaserMetadata?: MetadataAndRelation[];
     media?: string;
@@ -80,6 +82,7 @@ const props = withDefaults(
     isChecked?: boolean;
   }>(),
   {
+    itemId: "",
     loading: false,
     teaserMetadata: () => [],
     media: "",
@@ -89,8 +92,19 @@ const props = withDefaults(
   }
 );
 
-const imageSrcError = ref(false);
+const { enqueueItemForBulkProcessing, dequeueItemForBulkProcessing } =
+  useBulkOperations();
 const isChecked = ref(props.isChecked);
+const imageSrcError = ref(false);
+
+const handleItemSelection = () => {
+  isChecked.value = !isChecked.value;
+
+  if (props.itemId)
+    if (isChecked.value)
+      enqueueItemForBulkProcessing("entitiesPage", { id: props.itemId });
+    else dequeueItemForBulkProcessing("entitiesPage", props.itemId);
+};
 
 function setNoImage() {
   imageSrcError.value = true;
