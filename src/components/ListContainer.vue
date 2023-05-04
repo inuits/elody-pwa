@@ -1,5 +1,5 @@
 <template>
-  <ul class="bg-neutral-20 border border-neutral-50 rounded-sm">
+  <ul class="bg-neutral-20 rounded-sm">
     <slot></slot>
   </ul>
 </template>

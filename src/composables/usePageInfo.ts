@@ -5,13 +5,15 @@ type infoTypes =
   | "routerTitle"
   | "entityTitle"
   | "routeType"
-  | "parentRouteName";
+  | "parentRouteName"
+  | "entityId";
 
 type PageInfo = {
   routerTitle: string;
   entityTitle: string;
   routeType: string;
   parentRouteName: string;
+  entityId: string;
 };
 
 const pageInfo = ref<PageInfo>({
@@ -19,6 +21,7 @@ const pageInfo = ref<PageInfo>({
   entityTitle: "",
   routeType: "",
   parentRouteName: "",
+  entityId: "",
 });
 
 export const usePageInfo = () => {
@@ -35,9 +38,10 @@ export const usePageInfo = () => {
   });
 
   router.afterEach((to) => {
-    updatePageInfo(to.matched[0].name?.toString() || "Home", "parentRouteName");
+    updatePageInfo(to.matched[0].name?.toString() || "parentRouteName");
     updatePageInfo(to.meta.type as string, "routeType");
     updatePageInfo(to.meta.title as string);
+    updatePageInfo(to.meta.uuid as string);
   });
 
   return {

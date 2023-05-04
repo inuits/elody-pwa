@@ -1,5 +1,5 @@
 <template>
-  <div class="lg:flex">
+  <div class="lg:flex bg-neutral-20">
     <FilterSideBarNew
       v-show="!isDrawerHiding && !isHideFilters"
       @activeFilters="setFilters"
@@ -39,7 +39,7 @@
           class="pl-4 my-2 flex flex-row justify-left"
         >
           <BaseDropdown
-            v-if="totalEntityCount > 0 && queryVariables.limit"
+            v-if="totalEntityCount > 0"
             v-model="queryVariables.limit"
             :options="paginationLimits"
             :label="$t('library.items')"
@@ -61,6 +61,7 @@
           :total-items="totalEntityCount"
         />
       </div>
+
       <ListContainer id="gridContainer" :class="displayGrid ? 'p-5' : 'p-1'">
         <div v-if="loading">
           <ListItem
@@ -215,15 +216,12 @@ import { useRouter } from "vue-router";
 import { Unicons } from "../../types";
 import {
   GetEntitiesDocument,
-  GetSortOptionsDocument,
   SearchInputType,
+  GetSortOptionsDocument,
   type Asset,
   type Entity,
-  type MetadataFieldOption,
-} from "../../generated-types/queries";
-import type {
-  GetEntitiesQueryVariables,
-  Maybe,
+  type GetEntitiesQueryVariables,
+  type Maybe,
 } from "../../generated-types/queries";
 import FilterSideBarNew from "../FilterSideBarNew.vue";
 import IconToggle from "./IconToggle.vue";
@@ -365,6 +363,7 @@ export default defineComponent({
       searchValue: {
         value: "",
         isAsc: false,
+        key: "title",
         order_by: selectedSortOption.value.value,
       },
       advancedSearchValue: [],
