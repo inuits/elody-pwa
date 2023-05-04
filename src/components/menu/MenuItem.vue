@@ -22,7 +22,7 @@
           class="ml-[7rem] mt-1"
         />
         <unicon
-          v-if="showdropdown === false"
+          v-if="!showdropdown"
           @click="handleClick"
           :name="Unicons.AngleDown.name"
           height="20"

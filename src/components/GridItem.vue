@@ -1,5 +1,5 @@
 <template>
-  <li class="relative row border-none h-72 w-full" data-test="meta-row">
+  <li class="w-65 h-80 bg-grey-200 rounded-md align-middle">
     <div class="absolute right-0 top-0 w-min h-min" data-test="action-slot">
       <slot name="actions"></slot>
     </div>
@@ -11,7 +11,7 @@
         <div class="flex justify-center items-center">
           <img
             v-if="media"
-            class="h-48 w-48"
+            class="h-48 w-48 object-cover"
             :src="
               mediaIsLink
                 ? media
@@ -21,7 +21,8 @@
           />
           <div
             v-if="(thumbIcon && !media) || (imageSrcError && thumbIcon)"
-            class="w-48 h-48 flex items-center justify-center flex-col"
+            class="w-48 h-48 flex items-center justify-center flex-col bg-center bg-no-repeat bg-cover"
+            style="background-image: url(.jpg)"
           >
             <unicon
               :name="thumbIcon"
@@ -31,10 +32,7 @@
           </div>
         </div>
         <div
-          :class="[
-            'w-full h-16 mt-3 pl-2 flex border-t-2 border-neutral-20',
-            hasFileName ? 'flex-col' : 'flex-col-reverse',
-          ]"
+          class="w-full h-16 mt-12 pl-2 flex border-t-2 border-neutral-20 flex-col-reverse"
         >
           <div
             v-for="metaItem in only4Meta(meta as MetadataAndRelation[])"
@@ -42,17 +40,38 @@
             class="w-full h-6"
           >
             <template v-if="gridItemInfoKeys.includes(metaItem.key)">
-              <span
-                :class="[
-                  'text-neutral-700 w-fit',
-                  metaItem.key === 'title' || hasFileName
-                    ? 'metaTitle'
-                    : 'metaType',
-                  hasFileName ? 'h-12 handleOverflow' : 'h-6 handleOverflow',
-                ]"
-                data-test="meta-info"
-                >{{ metaItem.value }}</span
-              >
+              <div class="flex items-center bg-neutral-white w-65 h-20 pl-5">
+                <div class="flex items-center">
+                  <div
+                    class="flex-none w-11 h-11 bg-opacity-50 flex items-center justify-center"
+                    :class="{
+                      'bg-neutral-check bg-opacity-30 rounded': isChecked,
+                    }"
+                  >
+                    <input
+                      type="checkbox"
+                      class="form-checkbox h-5 w-5 rounded-sm border-gray-300 checked:bg-neutral-check checked:bg-opacity-30 checked:border-blue-200"
+                      :checked="isChecked"
+                      @change="handleCheckboxChange"
+                    />
+                  </div>
+                </div>
+                <div class="flex flex-col items-start">
+                  <span
+                    class="text-neutral-70 w-fit metaType h-6 handleOverflow"
+                    data-test="meta-label"
+                    >{{ metaItem.key }}</span
+                  >
+                  <span
+                    class="text-black w-fit metaType h-6 handleOverflow"
+                    :class="{
+                      metaTitle: metaItem.key === 'title' || hasFileName,
+                    }"
+                    data-test="meta-info"
+                    >{{ metaItem.value }}</span
+                  >
+                </div>
+              </div>
             </template>
           </div>
         </div>
@@ -78,10 +97,13 @@ export default defineComponent({
     media: { type: String, default: "" },
     thumbIcon: { type: String, default: "" },
     small: { type: Boolean, default: false },
+    isChecked: { type: Boolean, default: false },
   },
-  setup(props) {
+
+  setup(props, { emit }) {
     const config: any = inject("config");
     let imageSrcError = false;
+    const isChecked = ref(props.isChecked);
     const setNoImage = () => {
       imageSrcError = true;
     };
@@ -89,6 +111,12 @@ export default defineComponent({
     const hasFileName = ref<boolean>(false);
 
     const mediaIsLink = computed<Boolean>(() => stringIsUrl(props.media || ""));
+
+    function handleCheckboxChange(event) {
+      event.preventDefault();
+      isChecked.value = !isChecked.value;
+      emit("update:checked", isChecked.value);
+    }
 
     const only4Meta = (input: MetadataAndRelation[]) => {
       const sortOrder: string[] = ["object_number", "type", "title"];
@@ -108,6 +136,7 @@ export default defineComponent({
       hasFileName,
       mediaIsLink,
       gridItemInfoKeys,
+      handleCheckboxChange,
     };
   },
 });
@@ -131,9 +160,6 @@ export default defineComponent({
   @apply font-bold;
 }
 
-.metaType {
-  @apply text-neutral-70;
-}
 .handleOverflow {
   width: 95%;
   text-overflow: ellipsis;
