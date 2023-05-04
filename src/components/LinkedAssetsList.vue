@@ -7,6 +7,7 @@
     </div>
     <div v-for="entity in linkedAssets" :key="entity.id" class="px-2 mb-1">
       <ListItem
+        :item-id="entity.id"
         :teaser-metadata="
           entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
         "

@@ -92,6 +92,7 @@
               :small="listItemRouteName === 'SingleMediafile'"
               v-for="entity in entities"
               :key="entity?.id"
+              :item-id="entity.id"
               :teaser-metadata="
                 entity?.teaserMetadata?.flatMap((metadata) => metadata ?? [])
               "
