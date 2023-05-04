@@ -73,11 +73,11 @@ const buttonStyles: Record<ButtonStyle, Button> = {
 const props = withDefaults(
   defineProps<{
     label: string;
-    loading: boolean;
-    icon: DamsIcons | "no-icon";
+    loading?: boolean;
+    icon?: DamsIcons | "no-icon";
     buttonStyle: ButtonStyle;
-    disabled: boolean;
-    height: number;
+    disabled?: boolean;
+    height?: number;
   }>(),
   {
     loading: false,

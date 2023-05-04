@@ -59,7 +59,7 @@ const props = withDefaults(
   defineProps<{
     modalState: ModalState;
     modalPosition?: ModalPosition;
-    large: boolean;
+    large?: boolean;
     scroll: boolean;
   }>(),
   {
