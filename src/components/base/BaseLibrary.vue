@@ -225,6 +225,7 @@ import {
   type Entity,
   type GetEntitiesQueryVariables,
   type Maybe,
+  type MetadataFieldOption,
 } from "../../generated-types/queries";
 import FilterSideBarNew from "../FilterSideBarNew.vue";
 import IconToggle from "./IconToggle.vue";
