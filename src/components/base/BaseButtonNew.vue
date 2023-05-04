@@ -23,7 +23,6 @@
 <script lang="ts" setup>
 import type { DamsIcons } from "@/types";
 import { Unicons } from "@/types";
-import { type } from "os";
 import { computed } from "vue";
 
 type PseudoStyle = {
