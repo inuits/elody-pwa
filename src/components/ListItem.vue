@@ -13,7 +13,8 @@
           type="checkbox"
           class="form-checkbox h-5 w-5 rounded-sm border-gray-300 checked:bg-neutral-check checked:bg-opacity-30 checked:border-blue-200"
           :checked="isChecked"
-          @change="handleCheckboxChange"
+          @change.stop="() => (isChecked = !isChecked)"
+          @click.stop
         />
       </div>
     </div>
@@ -38,7 +39,7 @@
       />
       <div class="flex w-full" :class="small ? 'flex-col' : ''">
         <div
-          v-for="metaItem in only4Meta(meta)"
+          v-for="metaItem in sortMetadata(teaserMetadata)"
           :key="metaItem ? metaItem.value : 'no-key'"
           class="col"
           :class="small ? 'w-full' : 'w-1/4'"
@@ -52,90 +53,62 @@
               >{{ metaItem.value }}
             </span>
             <span v-else class="info underline" data-test="meta-info">
-              <a
-                :href="metaItem.value"
-                target="_blank"
-                @click.prevent="onLinkClick(metaItem.key)"
-                >{{ metaItem.key }}</a
-              >
+              <a :href="metaItem.value" target="_blank">{{ metaItem.key }}</a>
             </span>
           </template>
         </div>
       </div>
     </div>
     <div class="flex flex-row" data-test="action-slot">
-      <slot name="">&gt</slot>
+      <slot name="">&gt;</slot>
     </div>
   </li>
 </template>
 
-<script lang="ts">
-import type {
-  Maybe,
-  Media,
-  MetadataAndRelation,
-} from "../generated-types/queries";
-import { computed, defineComponent, inject, ref } from "vue";
-import type { PropType } from "vue";
+<script lang="ts" setup>
+import type { MetadataAndRelation } from "../generated-types/queries";
+import { computed, ref } from "vue";
 import { customSort, stringIsUrl } from "@/helpers";
-import { Unicons } from "@/types";
 
-export default defineComponent({
-  name: "ListItem",
-  props: {
-    loading: { type: Boolean, default: false },
-    meta: {
-      type: Array as PropType<Maybe<Maybe<MetadataAndRelation>[]>>,
-      default: () => [],
-    },
-    media: { type: String as PropType<Maybe<string>>, default: "" },
-    thumbIcon: { type: String, default: "" },
-    small: { type: Boolean, default: false },
-    isChecked: { type: Boolean, default: false },
-  },
-  emits: ["update:checked"],
-  setup(props, { emit }) {
-    const config = inject("config");
-    const imageSrcError = ref(false);
-    const isChecked = ref(props.isChecked);
+const props = withDefaults(
+  defineProps<{
+    loading?: boolean;
+    teaserMetadata?: MetadataAndRelation[];
+    media?: string;
+    thumbIcon?: string;
+    small?: boolean;
+    isChecked?: boolean;
+  }>(),
+  {
+    loading: false,
+    teaserMetadata: () => [],
+    media: "",
+    thumbIcon: "",
+    small: false,
+    isChecked: false,
+  }
+);
 
-    function setNoImage() {
-      imageSrcError.value = true;
-    }
+const imageSrcError = ref(false);
+const isChecked = ref(props.isChecked);
 
-    const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
+function setNoImage() {
+  imageSrcError.value = true;
+}
 
-    function only4Meta(input: Maybe<Maybe<MetadataAndRelation>[]>) {
-      const sortOrder = ["object_number", "type", "title"];
-      if (input) {
-        return customSort(
-          sortOrder,
-          input?.filter((value) => value?.value !== ""),
-          "key"
-        );
-      } else {
-        return [];
-      }
-    }
+function sortMetadata(metadata: MetadataAndRelation[]) {
+  const sortOrder = ["object_number", "type", "title"];
+  if (metadata.length > 0)
+    return customSort(
+      sortOrder,
+      metadata.filter((value) => value?.value !== ""),
+      "key"
+    );
 
-    function handleCheckboxChange(event) {
-      event.preventDefault();
-      isChecked.value = !isChecked.value;
-      emit("update:checked", isChecked.value);
-    }
+  return [];
+}
 
-    return {
-      setNoImage,
-      imageSrcError,
-      only4Meta,
-      config,
-      mediaIsLink,
-      stringIsUrl,
-      isChecked,
-      handleCheckboxChange,
-    };
-  },
-});
+const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 </script>
 
 <style lang="postcss" scoped>

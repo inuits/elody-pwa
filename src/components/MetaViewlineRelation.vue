@@ -23,7 +23,11 @@
           metadata.linkedEntity &&
           metadata.linkedEntity.__typename !== 'IntermediateEntity'
         "
-        :meta="metadata.linkedEntity.teaserMetadata"
+        :teaser-metadata="
+          metadata.linkedEntity.teaserMetadata?.flatMap(
+            (metadata) => metadata ?? []
+          )
+        "
         :media="
           metadata.linkedEntity.media
             ? metadata.linkedEntity.media.primary_transcode
