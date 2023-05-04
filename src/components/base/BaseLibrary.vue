@@ -69,7 +69,7 @@
             :key="n"
             :title="$t('library.loading')"
             :loading="true"
-            :meta="[
+            :teaser-metadata="[
               { key: '/', value: '/', label: '/' },
               { key: '/', value: '/', label: '/' },
               { key: '/', value: '/', label: '/' },
@@ -92,7 +92,9 @@
               :small="listItemRouteName === 'SingleMediafile'"
               v-for="entity in entities"
               :key="entity?.id"
-              :meta="entity?.teaserMetadata"
+              :teaser-metadata="
+                entity?.teaserMetadata?.flatMap((metadata) => metadata ?? [])
+              "
               :media="getMediaFilenameFromEntity(entity)"
               :thumb-icon="getThumbnail(entity)"
               @click="

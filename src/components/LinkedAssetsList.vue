@@ -7,7 +7,9 @@
     </div>
     <div v-for="entity in linkedAssets" :key="entity.id" class="px-2 mb-1">
       <ListItem
-        :meta="entity.teaserMetadata"
+        :teaser-metadata="
+          entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
+        "
         :media="entity.media ? entity.media.primary_transcode : null"
         :thumb-icon="getThumbnail(entity)"
         @click="

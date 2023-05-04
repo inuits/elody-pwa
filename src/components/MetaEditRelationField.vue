@@ -25,7 +25,11 @@
         </div>
         <ListItem
           v-if="value.linkedEntity && value.linkedEntity.teaserMetadata"
-          :meta="value.linkedEntity.teaserMetadata"
+          :teaser-metadata="
+            value.linkedEntity.teaserMetadata.flatMap(
+              (metadata) => metadata ?? []
+            )
+          "
           :media="
             value.linkedEntity.media
               ? value.linkedEntity.media.primary_transcode
