@@ -22,29 +22,16 @@
 
 <script lang="ts" setup>
 import { reactive, ref } from "vue";
-import { useRouter, RouterLink } from "vue-router";
-import {
-  GetMenuDocument,
-  type GetMenuQuery,
-  type GetMenuQueryVariables,
-  type MenuItem,
-} from "@/generated-types/queries";
+import { useRoute, RouterLink } from "vue-router";
 import Menuitem from "@/components/menu/MenuItem.vue";
 import { useQuery } from "@vue/apollo-composable";
 import LogInLogout from "@/components/LogInLogout.vue";
+import useMenuHelper from "@/composables/useMenuHelper";
 
-const router = useRouter();
-const menuItems = ref<Array<MenuItem>>([]);
-const queryVariables = reactive<GetMenuQueryVariables>({ name: "main-menu" });
-const { result: menuQueryResult, onResult } = useQuery<GetMenuQuery>(
-  GetMenuDocument,
-  queryVariables
-);
-onResult((value) => {
-  menuItems.value = Object.values(value.data.Menu?.menu || {}).filter(
-    (menu) => menu.typeLink
-  );
-});
+const { getMenuEntities, menuItems } = useMenuHelper();
+getMenuEntities();
+const route = useRoute();
+
 </script>
 
 <style>
