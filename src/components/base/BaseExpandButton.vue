@@ -19,18 +19,18 @@ import { ref, type PropType } from "vue";
 const props = withDefaults(
   defineProps<{
     isHidden?: boolean;
-    orientation?: "Left" | "Right";
+    orientation?: "left" | "right";
   }>(),
   {
     isHidden: false,
-    orientation: "Right",
+    orientation: "right",
   }
 );
 const emit = defineEmits(["expandMediaList"]);
-const rounding = props.orientation == "Right" ? "rounded-r-md" : "rounded-l-md";
+const rounding = props.orientation == "right" ? "rounded-r-md" : "rounded-l-md";
 const arrows = [Unicons.AngleRight.name, Unicons.AngleLeft.name];
 let currentArrow = ref<string>(
-  props.orientation == "Right" ? arrows[0] : arrows[1]
+  props.orientation == "right" ? arrows[0] : arrows[1]
 );
 const toggled = ref<Boolean>(false);
 
