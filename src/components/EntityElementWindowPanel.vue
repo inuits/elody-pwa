@@ -50,6 +50,7 @@
 <script lang="ts" setup>
 import type {
   InputField,
+  PanelInfo,
   PanelMetaData,
   PanelRelation,
   WindowElementPanel,
@@ -110,7 +111,9 @@ const metadataArray = computed((): MetadataField[] => {
       const metadataObject = {
         key: metadataItemKey,
         label: (value as PanelMetaData).label,
-        value: getValueForMetadata(panelType.value, metadataItemKey),
+        value:
+          (value as PanelInfo).value ||
+          getValueForMetadata(panelType.value, metadataItemKey),
         field: (value as PanelMetaData).inputField,
       };
       returnArray.push(metadataObject);

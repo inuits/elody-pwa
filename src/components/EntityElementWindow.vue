@@ -1,7 +1,11 @@
 <template>
   <div class="h-full flex flex-1">
     <base-expand-button
-      orientation="Left"
+      v-if="
+        element.expandButtonOptions?.shown &&
+        element.expandButtonOptions?.orientation === Orientations.Left
+      "
+      :orientation="element.expandButtonOptions.orientation"
       v-on:expand-media-list="resizeColumn"
     />
     <div
@@ -15,6 +19,14 @@
         <entity-element-window-panel :panel="panel" />
       </div>
     </div>
+    <base-expand-button
+      v-if="
+        element.expandButtonOptions?.shown &&
+        element.expandButtonOptions?.orientation === Orientations.Right
+      "
+      :orientation="element.expandButtonOptions.orientation"
+      v-on:expand-media-list="resizeColumn"
+    />
   </div>
 </template>
 
@@ -23,6 +35,7 @@ import {
   ColumnSizes,
   type WindowElement,
   type WindowElementPanel,
+  Orientations,
 } from "@/generated-types/queries";
 import EntityElementWindowPanel from "./EntityElementWindowPanel.vue";
 import { computed } from "vue";
@@ -47,11 +60,14 @@ const panels = computed<WindowElementPanel[]>(() => {
   const returnArray: WindowElementPanel[] = [];
 
   Object.values(props.element).forEach((value) => {
-    if (typeof value === "object") {
+    if (
+      typeof value === "object" &&
+      value?.__typename === "WindowElementPanel"
+    ) {
       returnArray.push(value);
     }
   });
-
+  console.log(returnArray);
   return returnArray;
 });
 </script>
