@@ -326,7 +326,6 @@ export default defineComponent({
         if (option && newVariables?.searchValue) {
           newVariables.searchValue.order_by = option.value;
         }
-        console.log({ newVariables });
         refetch(newVariables);
       }
     );
