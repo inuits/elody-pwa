@@ -37,6 +37,7 @@
               : undefined
           "
           :thumb-icon="getThumbnail(value)"
+          bulk-operations-context="entitiesPage"
         />
         <div v-if="!structure.disabled" class="delete">
           <BaseButton

@@ -9,6 +9,7 @@
     @add-selection="addSelection"
     :enable-selection="true"
     :isHideFilters="true"
+    bulk-operations-context="savedSearches"
   />
 </template>
 

@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { DropdownOption } from "@/components/base/BaseDropdownNew.vue";
+import type { DropdownOption } from "@/generated-types/queries";
 import { onUpdated, ref, watch } from "vue";
 import { Unicons } from "@/types";
 

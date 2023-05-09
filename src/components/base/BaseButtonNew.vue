@@ -12,7 +12,7 @@
     ]"
   >
     <unicon
-      v-if="props.icon !== 'no-icon'"
+      v-if="props.icon !== DamsIcons.NoIcon"
       :name="Unicons[props.icon].name"
       :height="height"
     />
@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { DamsIcons } from "@/types";
+import { DamsIcons } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { computed } from "vue";
 
@@ -56,7 +56,7 @@ const defaultButton: Button = {
   activeStyle: activeStyle,
   disabledStyle: disabledStyle,
 };
-const blueButton: Button = {
+const normalAccentButton: Button = {
   txtColor: "text-neutral-white",
   bgColor: "bg-accent-normal",
   hoverStyle: hoverStyle,
@@ -64,31 +64,31 @@ const blueButton: Button = {
   disabledStyle: disabledStyle,
 };
 
-type ButtonStyle = "default" | "blue";
+type ButtonStyle = "default" | "normalAccent";
 const buttonStyles: Record<ButtonStyle, Button> = {
   default: defaultButton,
-  blue: blueButton,
+  normalAccent: normalAccentButton,
 };
 
 const props = withDefaults(
   defineProps<{
     label: string;
     loading?: boolean;
-    icon?: DamsIcons | "no-icon";
+    icon?: DamsIcons;
     buttonStyle: ButtonStyle;
     disabled?: boolean;
     height?: number;
   }>(),
   {
     loading: false,
-    icon: "no-icon",
+    icon: DamsIcons.NoIcon,
     buttonStyle: "default",
     disabled: false,
     height: 18,
   }
 );
 
-const selectedButtonStyle = computed<Button>(() => {
-  return buttonStyles[props.buttonStyle];
-});
+const selectedButtonStyle = computed<Button>(
+  () => buttonStyles[props.buttonStyle]
+);
 </script>

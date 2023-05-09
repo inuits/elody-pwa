@@ -19,7 +19,8 @@
           <BaseDropdownNew
             v-model="selectedImportMethod"
             :options="importMethods"
-            :disabled="!createEntity"
+            :disable="!createEntity"
+            dropdown-style="default"
           />
         </div>
       </div>
@@ -29,8 +30,8 @@
           v-if="!modifyMetadata"
           class="w-full"
           :label="$t('dropzone.upload')"
-          icon="PlusCircle"
-          button-style="blue"
+          :icon="DamsIcons.PlusCircle"
+          button-style="normalAccent"
           :disabled="isDisabledUploadButton"
           @click="uploadFiles"
         />
@@ -38,8 +39,8 @@
           v-if="modifyMetadata"
           class="w-full"
           :label="$t('dropzone.modifyMetadata')"
-          icon="EditAlt"
-          button-style="blue"
+          :icon="DamsIcons.EditAlt"
+          button-style="normalAccent"
         />
       </div>
     </div>
@@ -47,13 +48,15 @@
 </template>
 
 <script lang="ts" setup>
-import type { DropzoneEntityToCreate } from "../generated-types/queries";
+import {
+  DamsIcons,
+  type DropdownOption,
+  type DropzoneEntityToCreate,
+} from "@/generated-types/queries";
 import type { DropzoneFile } from "dropzone";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseCheckDropdown from "@/components/base/BaseCheckDropdown.vue";
-import BaseDropdownNew, {
-  type DropdownOption,
-} from "@/components/base/BaseDropdownNew.vue";
+import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import DropzoneNew from "@/components/base/dropzone/DropzoneNew.vue";
 import useDropzoneHelper from "@/composables/useDropzoneHelper";
 import useUploadModal, { uploadModalState } from "@/composables/useUploadModal";
@@ -94,7 +97,7 @@ const selectedEntityToCreate = ref<DropdownOption>(
 );
 const initialImportMethods: DropdownOption[] = [];
 const importMethods = ref<DropdownOption[]>(initialImportMethods);
-const selectedImportMethod = ref<DropdownOption>(initialImportMethods[0]);
+const selectedImportMethod = ref<DropdownOption>();
 
 const filesInDropzone = ref<DropzoneFile[]>([]);
 const isDisabledUploadButton = ref<boolean>(true);
@@ -108,13 +111,18 @@ const onUpdateFilesInDropzone = (files: DropzoneFile[]) => {
   modifyMetadata.value = csvFiles.length === 1 && files.length === 1;
   importMethods.value = [
     ...csvFiles.map((file) => {
-      return { label: file.name, value: file.name };
+      return {
+        icon: DamsIcons.NoIcon,
+        label: file.name,
+        value: file.name,
+      };
     }),
     ...initialImportMethods,
   ];
 
   const mostRecentlyAddedCsvFileName = csvFiles[csvFiles.length - 1]?.name;
   selectedImportMethod.value = {
+    icon: DamsIcons.NoIcon,
     label: mostRecentlyAddedCsvFileName,
     value: mostRecentlyAddedCsvFileName,
   };
@@ -129,7 +137,7 @@ const uploadFiles = async () => {
 
 const getUploadRequestData = async (): Promise<UploadRequestData> => {
   const csvToBeParsedToEntityBodies = filesInDropzone.value.find(
-    (file) => file.name === selectedImportMethod.value.value
+    (file) => file.name === selectedImportMethod.value?.value
   );
 
   let blob: Blob | undefined;

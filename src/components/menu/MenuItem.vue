@@ -55,8 +55,13 @@ import { ref, defineProps, watch } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useRouter } from "vue-router";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
-import { Unicons, DamsIcons } from "@/types";
-import { MenuItem, TypeModals, ModalState } from "@/generated-types/queries";
+import { Unicons } from "@/types";
+import {
+  MenuItem,
+  TypeModals,
+  ModalState,
+  DamsIcons,
+} from "@/generated-types/queries";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import CustomIcon from "../CustomIcon.vue";
