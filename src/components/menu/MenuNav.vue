@@ -31,7 +31,6 @@ import useMenuHelper from "@/composables/useMenuHelper";
 const { getMenuEntities, menuItems } = useMenuHelper();
 getMenuEntities();
 const route = useRoute();
-
 </script>
 
 <style>

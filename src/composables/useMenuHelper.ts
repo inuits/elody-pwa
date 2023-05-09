@@ -56,11 +56,11 @@ export const useMenuHelper = () => {
       menuItems.value = Object.values(value.data.Menu?.menu || {}).filter(
         (menu) => menu.typeLink
       );
-      getEntityIdFromRoute
-      console.log(menuItems.value)
+      getEntityIdFromRoute;
+      console.log(menuItems.value);
     });
-    console.log("This is the route",getEntityIdFromRoute())
-  }
+    console.log("This is the route", getEntityIdFromRoute());
+  };
 
   return {
     checkIfRouteOrModal,
@@ -70,7 +70,7 @@ export const useMenuHelper = () => {
     isMenuItemActive,
     resetSelectedMenuItem,
     getMenuEntities,
-    menuItems
+    menuItems,
   };
 };
 

@@ -1,14 +1,22 @@
 <template>
-  <div class="flex flex-row pt-3 items-center justify-center bg-neutral-light p-2 gap-2 w-250 h-120 rounded-lg relative">
+  <div
+    class="flex flex-row pt-3 items-center justify-center bg-neutral-light p-2 gap-2 w-250 h-120 rounded-lg relative"
+  >
     <span class="text-gray-700">
       <i class="fas fa-home"></i>
     </span>
-    <button @click="isOpen = !isOpen" class="py-2 text-sm text-gray-800 text-right hover:bg-gray-100 cursor-pointer">
+    <button
+      @click="isOpen = !isOpen"
+      class="py-2 text-sm text-gray-800 text-right hover:bg-gray-100 cursor-pointer"
+    >
       <div v-if="visitedPagesOptions.length > 0">
         <div v-for="menuItem in menuItems">
-          <div v-if="visitedPagesOptions[0].label ===
-            menuItem.typeLink?.route?.destination
-            ">
+          <div
+            v-if="
+              visitedPagesOptions[0].label ===
+              menuItem.typeLink?.route?.destination
+            "
+          >
             <unicon :name="Unicons[menuItem.icon].name" class="w-6 h-6 mr-2" />
           </div>
         </div>
@@ -18,9 +26,16 @@
       </div>
       <svg v-if="isOpen" class="w-3 h-0"></svg>
     </button>
-    <ul v-show="isOpen" class="dropdown-menu pr-4 pb-4 bg-neutral-light rounded-lg w-full absolute top-10 left-0">
-      <li v-for="page in visitedPagesOptions" :key="page.value" @click="onVisitedPageChange(page.value)"
-        class="text-sm text-gray-800 text-right hover:bg-gray-100 cursor-pointer">
+    <ul
+      v-show="isOpen"
+      class="dropdown-menu pr-4 pb-4 bg-neutral-light rounded-lg w-full absolute top-10 left-0"
+    >
+      <li
+        v-for="page in visitedPagesOptions"
+        :key="page.value"
+        @click="onVisitedPageChange(page.value)"
+        class="text-sm text-gray-800 text-right hover:bg-gray-100 cursor-pointer"
+      >
         <unicon v-if="page.label != entityTitle" :name="Unicons.AngleUp.name" />
         <div v-if="page.label != entityTitle">
           {{ page.label }}
@@ -34,9 +49,12 @@
   <span class="font-serif text-xl leading-8 text-gray-800 font-bold">
     <div v-if="entityTitle === ''">
       <div v-for="menuItem in menuItems">
-        <div v-if="visitedPagesOptions[0].label ===
-          menuItem.typeLink?.route?.destination
-          ">
+        <div
+          v-if="
+            visitedPagesOptions[0].label ===
+            menuItem.typeLink?.route?.destination
+          "
+        >
           {{ menuItem.typeLink.route.destination }}
         </div>
       </div>
