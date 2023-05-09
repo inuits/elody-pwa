@@ -67,13 +67,17 @@
 
 <script lang="ts" setup>
 import type { MetadataAndRelation } from "../generated-types/queries";
+import {
+  type Context,
+  useBulkOperations,
+} from "@/composables/useBulkOperations";
 import { computed, ref } from "vue";
 import { customSort, stringIsUrl } from "@/helpers";
-import { useBulkOperations } from "@/composables/useBulkOperations";
 
 const props = withDefaults(
   defineProps<{
     itemId?: string;
+    bulkOperationsContext: Context;
     loading?: boolean;
     teaserMetadata?: MetadataAndRelation[];
     media?: string;
@@ -92,9 +96,12 @@ const props = withDefaults(
   }
 );
 
-const { enqueueItemForBulkProcessing, dequeueItemForBulkProcessing } =
-  useBulkOperations();
-const isChecked = ref(props.isChecked);
+const {
+  enqueueItemForBulkProcessing,
+  dequeueItemForBulkProcessing,
+  isEnqueued,
+} = useBulkOperations();
+const isChecked = ref(isEnqueued(props.bulkOperationsContext, props.itemId));
 const imageSrcError = ref(false);
 
 const handleItemSelection = () => {
@@ -102,8 +109,11 @@ const handleItemSelection = () => {
 
   if (props.itemId)
     if (isChecked.value)
-      enqueueItemForBulkProcessing("entitiesPage", { id: props.itemId });
-    else dequeueItemForBulkProcessing("entitiesPage", props.itemId);
+      enqueueItemForBulkProcessing(props.bulkOperationsContext, {
+        id: props.itemId,
+      });
+    else
+      dequeueItemForBulkProcessing(props.bulkOperationsContext, props.itemId);
 };
 
 function setNoImage() {

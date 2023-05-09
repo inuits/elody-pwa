@@ -17,6 +17,7 @@
           router.push({ name: 'SingleEntity', params: { id: entity.id } })
         "
         :small="true"
+        bulk-operations-context="entitiesPage"
       >
         <template #actions>
           <BaseButton

@@ -139,5 +139,14 @@
         "description": "You don't have access to this page/action"
       }
     }
+  },
+  "bulk-operations": {
+    "selected-items": "items geselecteerd",
+    "undo-selection": "selectie ongedaan maken",
+    "select-page": "selecteer pagina",
+    "select-all": "selecteer alles"
+  },
+  "dropdown": {
+    "select-option": "selecteer optie"
   }
 }

@@ -9,6 +9,7 @@
     @add-selection="addSelection"
     :enable-selection="enableSelection"
     :accepted-entity-types="acceptedEntityTypes"
+    bulk-operations-context="entitiesPage"
   />
 </template>
 

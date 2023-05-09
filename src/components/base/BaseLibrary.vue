@@ -62,12 +62,20 @@
         />
       </div>
 
+      <div class="my-3">
+        <BulkOperations
+          :context="bulkOperationsContext"
+          :total-items-count="totalEntityCount"
+        />
+      </div>
+
       <ListContainer id="gridContainer" :class="displayGrid ? 'p-5' : 'p-1'">
         <div v-if="loading">
           <ListItem
             v-for="n in queryVariables.limit"
             :key="n"
             :title="$t('library.loading')"
+            :bulk-operations-context="bulkOperationsContext"
             :loading="true"
             :teaser-metadata="[
               { key: '/', value: '/', label: '/' },
@@ -93,6 +101,7 @@
               v-for="entity in entities"
               :key="entity?.id"
               :item-id="entity.id"
+              :bulk-operations-context="bulkOperationsContext"
               :teaser-metadata="
                 entity?.teaserMetadata?.flatMap((metadata) => metadata ?? [])
               "
@@ -213,6 +222,7 @@ import BaseButton from "./BaseButton.vue";
 import InputField from "./InputField.vue";
 import BaseDropdown from "./BaseDropdown.vue";
 import NewBaseDropdown from "./NewBaseDropdown.vue";
+import BulkOperations from "@/components/BulkOperations.vue";
 import { useQuery } from "@vue/apollo-composable";
 import ListItem from "../ListItem.vue";
 import { useRouter } from "vue-router";
@@ -227,6 +237,7 @@ import {
   type Maybe,
   type MetadataFieldOption,
 } from "../../generated-types/queries";
+import type { Context } from "@/composables/useBulkOperations";
 import FilterSideBarNew from "../FilterSideBarNew.vue";
 import IconToggle from "./IconToggle.vue";
 import useThumbnailHelper from "../../composables/useThumbnailHelper";
@@ -257,6 +268,7 @@ export default defineComponent({
     BaseIcon,
     GridItem,
     NewBaseDropdown,
+    BulkOperations,
   },
   props: {
     advancedFiltersChoice: {
@@ -269,6 +281,10 @@ export default defineComponent({
     },
     listItemRouteName: {
       type: String,
+      required: true,
+    },
+    bulkOperationsContext: {
+      type: String as PropType<Context>,
       required: true,
     },
     hasSimpleSearch: Boolean,

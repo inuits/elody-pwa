@@ -8,6 +8,7 @@
     :advanced-filters-choice="'mediaFileFilters'"
     :enable-selection="enableSelection"
     :already-added-metadata="selectedRelationFieldMetadata"
+    bulk-operations-context="mediafilesPage"
     @add-selection="addSelection"
   />
 </template>

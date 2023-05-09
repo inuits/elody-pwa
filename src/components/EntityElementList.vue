@@ -22,6 +22,7 @@
             :is-hide-filters="true"
             :predefined-entities="entitiesObject"
             :enable-selection="true"
+            bulk-operations-context="entitiesPage"
           />
         </div>
         <!-- <div v-for="(field, idx) in fields" :key="field.key">

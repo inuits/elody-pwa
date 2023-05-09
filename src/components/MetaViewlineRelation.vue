@@ -36,6 +36,7 @@
         "
         :thumb-icon="getThumbnail(metadata)"
         :small="true"
+        bulk-operations-context="entitiesPage"
         @click="
           router.push({
             name: 'SingleEntity',
