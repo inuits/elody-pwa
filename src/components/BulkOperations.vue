@@ -41,7 +41,7 @@ import type { Context } from "@/composables/useBulkOperations";
 import { GetBulkOperationsDocument } from "@/generated-types/queries";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import { useBulkOperations } from "@/composables/useBulkOperations";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 
 const props = withDefaults(
@@ -54,8 +54,11 @@ const props = withDefaults(
   }
 );
 
-const { onResult } = useQuery<GetBulkOperationsQuery>(
-  GetBulkOperationsDocument
+const refetchEnabled = ref<boolean>(false);
+const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
+  GetBulkOperationsDocument,
+  undefined,
+  () => ({ enabled: refetchEnabled.value })
 );
 const bulkOperations = ref<DropdownOption[]>([]);
 const selectedBulkOperation = ref<DropdownOption>();
@@ -68,6 +71,10 @@ const enqueuedItemCount = computed<number>(() =>
 onResult(
   (result) => (bulkOperations.value = result.data.BulkOperations.options)
 );
+onMounted(() => {
+  refetchEnabled.value = true;
+  refetch();
+});
 </script>
 
 <style lang="postcss" scoped>

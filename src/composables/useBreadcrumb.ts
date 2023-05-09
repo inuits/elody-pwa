@@ -29,14 +29,14 @@ export function useBreadcrumb() {
   const visitedPagesOptions = computed(() => {
     return visitedPages.value.length > 1
       ? visitedPages.value
-        .map((page, index) => {
-          return {
-            label: page.entityTitle,
-            value: index,
-          };
-        })
-        .filter((page) => page.label)
-        .reverse()
+          .map((page, index) => {
+            return {
+              label: page.entityTitle,
+              value: index,
+            };
+          })
+          .filter((page) => page.label)
+          .reverse()
       : [];
   });
 
@@ -103,7 +103,7 @@ export function useBreadcrumb() {
   const breadcrumb: BreadcrumbInfo = {
     entityTitle: pageInfo.value.entityTitle,
     path: "",
-    entityId: pageInfo.value.entityId
+    entityId: pageInfo.value.entityId,
   };
 
   watchEffect(() => {
