@@ -6,7 +6,7 @@ import {
   type GetMenuQuery,
   GetMenuDocument,
 } from "@/generated-types/queries";
-import { useRoute, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { reactive, ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
@@ -47,19 +47,14 @@ export const useMenuHelper = () => {
   };
 
   const queryVariables = reactive<GetMenuQueryVariables>({ name: "main-menu" });
-  const { result: menuQueryResult, onResult } = useQuery<GetMenuQuery>(
-    GetMenuDocument,
-    queryVariables
-  );
+  const { onResult } = useQuery<GetMenuQuery>(GetMenuDocument, queryVariables);
   const getMenuEntities = () => {
     onResult((value) => {
       menuItems.value = Object.values(value.data.Menu?.menu || {}).filter(
         (menu) => menu.typeLink
       );
       getEntityIdFromRoute;
-      console.log(menuItems.value);
     });
-    console.log("This is the route", getEntityIdFromRoute());
   };
 
   return {
