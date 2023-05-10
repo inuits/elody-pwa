@@ -68,9 +68,9 @@ const enqueuedItemCount = computed<number>(() =>
   getEnqueuedItemCount(props.context)
 );
 
-onResult(
-  (result) => (bulkOperations.value = result.data.BulkOperations.options)
-);
+onResult((result) => {
+  if (result.data) bulkOperations.value = result.data.BulkOperations.options;
+});
 onMounted(() => {
   refetchEnabled.value = true;
   refetch();
