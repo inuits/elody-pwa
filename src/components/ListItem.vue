@@ -71,7 +71,7 @@ import {
   type Context,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { customSort, stringIsUrl } from "@/helpers";
 
 const props = withDefaults(
@@ -97,6 +97,7 @@ const props = withDefaults(
 );
 
 const {
+  contextWhereUndoSelectionEventIsTriggered,
   enqueueItemForBulkProcessing,
   dequeueItemForBulkProcessing,
   isEnqueued,
@@ -133,6 +134,14 @@ function sortMetadata(metadata: MetadataAndRelation[]) {
 }
 
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
+
+watch(contextWhereUndoSelectionEventIsTriggered, () => {
+  if (
+    contextWhereUndoSelectionEventIsTriggered.value ===
+    props.bulkOperationsContext
+  )
+    isChecked.value = false;
+});
 </script>
 
 <style lang="postcss" scoped>
