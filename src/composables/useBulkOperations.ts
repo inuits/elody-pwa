@@ -7,6 +7,7 @@ const items = ref<Record<Context, InBulkProcessableItem[]>>({
   mediafilesPage: [],
   savedSearches: [],
 });
+const contextWhereUndoSelectionEventIsTriggered = ref<"" | Context>("");
 
 export const useBulkOperations = () => {
   const enqueueItemForBulkProcessing = (
@@ -20,6 +21,15 @@ export const useBulkOperations = () => {
     );
   };
 
+  const dequeueAllItemsForBulkProcessing = (context: Context) => {
+    items.value[context] = [];
+    contextWhereUndoSelectionEventIsTriggered.value = context;
+    setTimeout(
+      () => (contextWhereUndoSelectionEventIsTriggered.value = ""),
+      1000
+    );
+  };
+
   const getEnqueuedItemCount = (context: Context) =>
     items.value[context].length;
 
@@ -27,8 +37,10 @@ export const useBulkOperations = () => {
     items.value[context].find((item) => item.id == itemId) !== undefined;
 
   return {
+    contextWhereUndoSelectionEventIsTriggered,
     enqueueItemForBulkProcessing,
     dequeueItemForBulkProcessing,
+    dequeueAllItemsForBulkProcessing,
     getEnqueuedItemCount,
     isEnqueued,
   };

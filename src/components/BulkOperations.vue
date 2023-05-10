@@ -11,14 +11,23 @@
           {{ $t("bulk-operations.selected-items") }}
         </span>
       </div>
-      <div class="select-actions">
-        <span>{{ $t("bulk-operations.undo-selection") }}</span>
+      <div>
+        <span
+          class="select-actions"
+          @click="dequeueAllItemsForBulkProcessing(context)"
+        >
+          {{ $t("bulk-operations.undo-selection") }}
+        </span>
       </div>
-      <div class="select-actions">
-        <span>{{ $t("bulk-operations.select-page") }}</span>
+      <div>
+        <span class="select-actions" @click="() => emit('selectPage')">
+          {{ $t("bulk-operations.select-page") }}
+        </span>
       </div>
-      <div class="select-actions">
-        <span>{{ $t("bulk-operations.select-all") }}</span>
+      <div>
+        <span class="select-actions" @click="() => emit('selectAll')">
+          {{ $t("bulk-operations.select-all") }}
+        </span>
       </div>
     </div>
 
@@ -54,6 +63,11 @@ const props = withDefaults(
   }
 );
 
+const emit = defineEmits<{
+  (event: "selectPage"): void;
+  (event: "selectAll"): void;
+}>();
+
 const refetchEnabled = ref<boolean>(false);
 const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
   GetBulkOperationsDocument,
@@ -62,7 +76,8 @@ const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
 );
 const bulkOperations = ref<DropdownOption[]>([]);
 const selectedBulkOperation = ref<DropdownOption>();
-const { getEnqueuedItemCount } = useBulkOperations();
+const { getEnqueuedItemCount, dequeueAllItemsForBulkProcessing } =
+  useBulkOperations();
 
 const enqueuedItemCount = computed<number>(() =>
   getEnqueuedItemCount(props.context)
