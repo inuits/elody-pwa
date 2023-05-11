@@ -23,6 +23,7 @@ const config: CodegenConfig = {
     preResolveTypes: true,
     scalars: { Void: "void" },
     useTypeImports: true,
+    dedupeFragments: true,
   },
 };
 
