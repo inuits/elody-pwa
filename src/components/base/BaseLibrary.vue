@@ -200,6 +200,7 @@
           <div v-if="entities.length === 0" class="p-4">
             {{ $t("search.noresult") }}
           </div>
+          {{}}
         </div>
       </ListContainer>
     </div>
@@ -248,7 +249,6 @@ import BaseIcon from "./BaseIcon.vue";
 import GridItem from "../GridItem.vue";
 import { setCookie, getCookie } from "tiny-cookie";
 import useListItemHelper from "../../composables/useListItemHelper";
-
 export type PredefinedEntities = {
   usePredefinedEntities: Boolean;
   entities: Asset[];
@@ -418,7 +418,6 @@ export default defineComponent({
         enabled: props.predefinedEntities ? false : true,
       }
     );
-
     onResult((result) => {
       if (result.data && !props.predefinedEntities) {
         entities.value = result.data.Entities.results as Entity[];

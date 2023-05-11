@@ -29,6 +29,7 @@
 
 <script lang="ts" setup>
 import { computed, defineProps, ref, defineEmits } from "vue";
+import type { Maybe } from "@/generated-types/queries";
 import Multiselect from "@vueform/multiselect";
 import InputField from "@/components/base/InputField.vue";
 import {
@@ -51,7 +52,6 @@ const emit = defineEmits<{
 const andOr = ref<"and" | "or">("and");
 const isAnd = computed<boolean>({
   get() {
-    console.log(andOr.value);
     return andOr.value === "and";
   },
   set(newValue) {
@@ -104,7 +104,6 @@ const inputFieldMulti = computed<Maybe<Maybe<string>[]> | undefined>({
 
 const inputField = computed<string | undefined | null>({
   get() {
-    console.log("CLICKEEDDD");
     return props.value && props.value?.input.textInput
       ? props.value?.input.textInput.value
       : undefined;

@@ -13,8 +13,8 @@ import { computed, defineProps, defineEmits } from "vue";
 import type {
   AdvancedFilter,
   FilterInList,
-} from "../../composables/useFilterHelper";
-import { defaultReturnTextObject } from "../../composables/useFilterHelper";
+} from "@/composables/useFilterHelper";
+import { defaultReturnTextObject } from "@/composables/useFilterHelper";
 import InputField from "@/components/base/InputField.vue";
 
 const props = defineProps<{

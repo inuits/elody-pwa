@@ -74,7 +74,7 @@ const props = withDefaults(
   defineProps<{
     label: string;
     loading?: boolean;
-    icon?: DamsIcons;
+    icon?: DamsIcons | "no-icon";
     buttonStyle: ButtonStyle;
     disabled?: boolean;
     height?: number;
