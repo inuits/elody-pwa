@@ -55,9 +55,10 @@
       :key="filter?.key"
       class="filters w-full lg:h-1770"
     >
-      <FilterAccordion
+      <FilterAccordionNew
         :active="initialFilters[i] && initialFilters[i].isActive"
         :label="filter?.label ? filter?.label : ''"
+        @toggled="getFilterOptionsWhenNoOptionsAvailable(filter)"
       >
         <template #content>
           <component
@@ -69,40 +70,42 @@
             :accepted-entity-types="acceptedEntityTypes"
           />
         </template>
-      </FilterAccordion>
+      </FilterAccordionNew>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { defineEmits, defineProps } from "vue";
+import { defineEmits, defineProps, reactive, ref, watch } from "vue";
 import SavedSearches from "@/components/SavedSearches.vue";
-import FilterAccordion from "@/components/base/FilterAccordion.vue";
-import ChecklistFilter from "@/components/base/ChecklistFilterNew.vue";
-import TextFilter from "@/components/base/TextFilterNew.vue";
-import MinMaxFilter from "@/components/base/filters/MinmaxFilterNew.vue";
-import DateFilter from "@/components/base/filters/DateFilter.vue";
+import FilterAccordionNew from "@/components/base/FilterAccordionNew.vue";
+import TextFilter from "@/components/filters/TextFilterNew.vue";
+import MinMaxFilter from "@/components/filters/MinmaxFilterNew.vue";
 import { useSavedSearchHelper } from "@/composables/useSavedSearchHelper";
 import type { FilterInList } from "@/composables/useFilterHelper";
 import { useQuery } from "@vue/apollo-composable";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { GetAdvancedFiltersDocument } from "@/generated-types/queries";
 import { useFilterSideBarHelperNew } from "@/composables/useFilterSideBarHelperNew";
-import type { FilterInput } from "@/generated-types/queries";
-import BooleanFilter from "@/components/base/filters/BooleanFilter.vue";
-import SelectionFilter from "@/components/base/filters/SelectionFilter.vue";
+import SelectionFilter from "@/components/filters/SelectionFilter.vue";
+import {
+  type AdvancedFilter,
+  GetEntitiesDocument,
+  type GetEntitiesQueryVariables,
+  SearchInputType,
+  type Asset,
+  type FilterInput,
+} from "../generated-types/queries";
+import type { PredefinedEntities } from "./base/BaseLibrary.vue";
 const props = defineProps<{
   advancedFiltersChoice?: "entityFilters";
   acceptedEntityTypes: string[];
 }>();
 
 const componentMap: any = {
-  checklist: ChecklistFilter,
   text: TextFilter,
   minmax: MinMaxFilter,
   selection: SelectionFilter,
-  date: DateFilter,
-  boolean: BooleanFilter,
 };
 
 const { pickedSavedSearch, clearTypename, setPickedSavedSearch } =
@@ -140,6 +143,55 @@ const clearFilters = () => {
 
 const removedSelectedSearch = () => {
   clearFilters();
+};
+
+const queryVariables = reactive<GetEntitiesQueryVariables>({
+  limit: 20,
+  skip: 1,
+  searchValue: {
+    value: "",
+    isAsc: false,
+    order_by: "Title",
+  },
+  advancedSearchValue: [],
+  searchInputType: "AdvancedInputType" as SearchInputType,
+});
+
+const predefinedEntities = ref<PredefinedEntities>({
+  usePredefinedEntities: true,
+  entities: [],
+});
+
+const entities = ref<Asset[]>(predefinedEntities.value?.entities || []);
+
+console.log("Dit zijn je entities", entities.value);
+
+const { refetch } = useQuery(GetEntitiesDocument, queryVariables, {
+  notifyOnNetworkStatusChange: true,
+});
+
+watch(
+  () => predefinedEntities?.value.entities,
+  () => {
+    if (predefinedEntities?.value.entities) {
+      entities.value = predefinedEntities?.value.entities;
+    }
+  },
+  { immediate: true }
+);
+
+const getFilterOptionsWhenNoOptionsAvailable = (
+  advancedFilter: AdvancedFilter
+) => {
+  queryVariables.advancedSearchValue = [
+    {
+      type: "MultiSelectInput",
+      key: "type",
+      multiSelectInput: {
+        value: [advancedFilter.key],
+      },
+    },
+  ];
 };
 </script>
 <style></style>

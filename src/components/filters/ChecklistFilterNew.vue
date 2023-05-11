@@ -8,7 +8,7 @@
         v-if="
           option &&
           option.label &&
-          (acceptedEntityTypes.length == 0 || filterkey !== 'type')
+          (acceptedEntityTypes?.length == 0 || filter.key !== 'type')
         "
       >
         <input
@@ -17,7 +17,9 @@
           type="checkbox"
           :name="option.label"
           :value="option.value"
+          class="w-4 h-4 ml-3 rounded text-accent-normal checked:text-accent-normal"
         />
+
         <label
           :for="option.label"
           class="ml-2 align-center p-10px cursor-pointer display-inline-block"
@@ -30,8 +32,8 @@
           option &&
           option.label &&
           option.value &&
-          acceptedEntityTypes.includes(option.value) &&
-          filterkey == 'type'
+          acceptedEntityTypes?.includes(option.value) &&
+          filter.key == 'type'
         "
       >
         <input
@@ -141,4 +143,8 @@ if (props.acceptedEntityTypes.length > 0 && props.filter?.key === "type") {
 }
 </script>
 
-<style></style>
+<style>
+.test:checked {
+  color: white;
+}
+</style>

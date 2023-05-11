@@ -40,10 +40,8 @@
 
 <script lang="ts" setup>
 import { useAuth } from "session-vue-3-oidc-library";
-import { usePermissions } from "@/composables/usePermissions";
 import { Unicons } from "@/types";
 const auth = useAuth();
-const { determinePermission, loading } = usePermissions();
 </script>
 
 <style></style>
