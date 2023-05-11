@@ -38,6 +38,7 @@ import {
   type FilterInList,
   type FilterOptions,
 } from "@/composables/useFilterHelper";
+import type { Maybe } from "@/generated-types/queries";
 
 const props = defineProps<{
   value?: FilterInList;
