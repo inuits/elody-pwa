@@ -13,9 +13,10 @@
     >
       <entity-element-list
         v-if="element.__typename === 'EntityListElement'"
-        :label="element.label"
+        :label="(element.label as string)"
         RelationKey="relatie"
         :isCollapsed="element.isCollapsed"
+        :entity-list="(element.entityList as Entity[])"
       />
       <entity-element-media
         v-if="element.__typename === 'MediaFileElement'"
@@ -40,6 +41,7 @@ import type {
   WindowElement,
   MediaFileElement,
   EntityListElement,
+  Entity,
 } from "@/generated-types/queries";
 
 export type Elements = WindowElement | MediaFileElement | EntityListElement;
