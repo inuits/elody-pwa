@@ -76,6 +76,7 @@ const props = defineProps<{
   label: string;
   RelationKey: string;
   isCollapsed: Boolean;
+  entityList: Entity[];
 }>();
 const { isEdit } = useEditMode();
 const { toggleElementCollapse } = useEntityElementCollapseHelper();
@@ -86,7 +87,7 @@ const { fields, push, update, remove } = useFieldArray<Asset>(
 
 let entitiesObject = ref<PredefinedEntities>({
   usePredefinedEntities: true,
-  entities: [],
+  entities: props.entityList || [],
 });
 
 // const remove = (idx: number, field: FieldEntry<RelationValues>) => {
