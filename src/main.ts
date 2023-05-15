@@ -10,7 +10,7 @@ import Unicon from "vue-unicons";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { OpenIdConnectClient } from "session-vue-3-oidc-library";
 import App from "./App.vue";
-import { routes } from "./views/router";
+import { addComponentToRoutes } from "./views/router";
 import { store } from "./store";
 import { Unicons } from "./types";
 import { i18n } from "@/helpers";
@@ -37,7 +37,7 @@ const start = async () => {
 
   const head = createHead();
   const router = createRouter({
-    routes,
+    routes: addComponentToRoutes(config.routerConfig),
     history: createWebHistory(import.meta.env.BASE_URL),
   });
 
