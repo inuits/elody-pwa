@@ -1,9 +1,8 @@
-import { routerKey, type RouteRecordRaw } from "vue-router";
+import type { RouteRecordRaw } from "vue-router";
 import History from "./History.vue";
 import Home from "./Home.vue";
 import Mediafiles from "./MediaFiles.vue";
 import SingleEntity from "./SingleEntity.vue";
-import { Collection } from "../generated-types/queries";
 import ManifestViewer from "@/components/ManifestViewer.vue";
 
 export type urlParams = "id";
@@ -53,63 +52,3 @@ export const addComponentToRoutes = (
   });
   return router;
 };
-
-// export const routes: RouteRecordRaw[] = [
-//   {
-//     path: "/",
-//     name: "Home",
-//     meta: { title: "Home", type: Collection.Entities, requiresAuth: false },
-//     component: () => import(/* webpackChunkName: "about" */ "./Home.vue"),
-//     children: [
-//       {
-//         path: "entity/:id",
-//         name: "SingleEntity",
-//         meta: {
-//           title: "Single Asset",
-//           requiresAuth: false,
-//           showEntityTitle: true,
-//           type: Collection.Entities,
-//         },
-//         component: () =>
-//           import(/* webpackChunkName: "about" */ "./SingleEntity.vue"),
-//       },
-//     ],
-//   },
-//   {
-//     path: "/mediafiles",
-//     name: "Mediafiles",
-//     meta: {
-//       title: "Mediafiles",
-//       type: Collection.Mediafiles,
-//       requiresAuth: true,
-//     },
-//     component: Mediafiles,
-//     children: [
-//       {
-//         path: ":id",
-//         name: "SingleMediafile",
-//         meta: {
-//           title: "Single Mediafile",
-//           requiresAuth: true,
-//           showEntityTitle: true,
-//           type: Collection.Mediafiles,
-//         },
-//         component: () =>
-//           import(/* webpackChunkName: "about" */ "./SingleMediaFile.vue"),
-//       },
-//     ],
-//   },
-//   {
-//     path: "/mirador",
-//     name: "Mirador",
-//     meta: { title: "Mirador", requiresAuth: false },
-//     component: ManifestViewer,
-//   },
-//   {
-//     path: "/history",
-//     name: "History",
-//     meta: { title: "History", requiresAuth: true },
-//     component: History,
-//   },
-//   { path: "/home", redirect: "/" },
-// ];
