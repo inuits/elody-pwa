@@ -1,3 +1,4 @@
+import { bulkSelectAllSizeLimit } from "@/main";
 import { ref } from "vue";
 
 export type Context = "entitiesPage" | "mediafilesPage" | "savedSearches";
@@ -14,7 +15,10 @@ export const useBulkOperations = () => {
     context: Context,
     inBulkProcessableItem: InBulkProcessableItem
   ) => {
-    if (!isEnqueued(context, inBulkProcessableItem.id))
+    if (
+      !isEnqueued(context, inBulkProcessableItem.id) &&
+      items.value[context].length < bulkSelectAllSizeLimit
+    )
       items.value[context].push(inBulkProcessableItem);
   };
 

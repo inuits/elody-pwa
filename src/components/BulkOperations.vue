@@ -25,7 +25,18 @@
         </span>
       </div>
       <div>
-        <span class="select-actions" @click="() => emit('selectAll')">
+        <span
+          :class="
+            totalItemsCount <= bulkSelectAllSizeLimit
+              ? 'select-actions'
+              : 'disabled-select-actions'
+          "
+          @click="
+            () => {
+              if (totalItemsCount <= bulkSelectAllSizeLimit) emit('selectAll');
+            }
+          "
+        >
           {{ $t("bulk-operations.select-all") }}
         </span>
       </div>
@@ -47,6 +58,7 @@ import type {
   GetBulkOperationsQuery,
 } from "@/generated-types/queries";
 import type { Context } from "@/composables/useBulkOperations";
+import { bulkSelectAllSizeLimit } from "@/main";
 import { GetBulkOperationsDocument } from "@/generated-types/queries";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import { useBulkOperations } from "@/composables/useBulkOperations";
@@ -98,6 +110,10 @@ onMounted(() => {
 }
 
 .select-actions {
-  @apply underline text-accent-normal cursor-pointer select-none;
+  @apply text-accent-normal underline cursor-pointer select-none;
+}
+
+.disabled-select-actions {
+  @apply text-text-light select-none;
 }
 </style>
