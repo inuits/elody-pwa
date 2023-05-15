@@ -16,7 +16,10 @@ type RouteComponentConfig = {
 const routeComponentConfig: RouteComponentConfig[] = [
   { routeName: "Home", routeComponent: Home },
   { routeName: "SingleEntity", routeComponent: SingleEntity },
+  { routeName: "Mediafiles", routeComponent: Mediafiles },
+  { routeName: "SingleMediafile", routeComponent: SingleEntity },
   { routeName: "History", routeComponent: History },
+  { routeName: "Mirador", routeComponent: ManifestViewer },
 ];
 
 const getComponentForRoute = (route: RouteRecordRaw): any => {
