@@ -71,8 +71,9 @@ import {
   type Context,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
-import { computed, ref, watch } from "vue";
+import { bulkSelectAllSizeLimit } from "@/main";
 import { customSort, stringIsUrl } from "@/helpers";
+import { computed, ref, watch } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -101,11 +102,16 @@ const {
   enqueueItemForBulkProcessing,
   dequeueItemForBulkProcessing,
   isEnqueued,
+  getEnqueuedItemCount,
 } = useBulkOperations();
 const isChecked = ref(isEnqueued(props.bulkOperationsContext, props.itemId));
 const imageSrcError = ref(false);
 
 const handleItemSelection = () => {
+  if (
+    getEnqueuedItemCount(props.bulkOperationsContext) >= bulkSelectAllSizeLimit
+  )
+    return;
   isChecked.value = !isChecked.value;
 
   if (props.itemId)

@@ -24,6 +24,7 @@ import { setIgnorePermissions } from "./composables/usePermissions";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
+export let bulkSelectAllSizeLimit: number = 999999;
 
 const start = async () => {
   Unicon.add(Object.values(Unicons));
@@ -34,6 +35,7 @@ const start = async () => {
       : "/api/config"
   ).then((r) => r.json());
   auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
+  bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
 
   const head = createHead();
   const router = createRouter({

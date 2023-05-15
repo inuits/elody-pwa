@@ -254,6 +254,7 @@ import BaseIcon from "./BaseIcon.vue";
 import GridItem from "../GridItem.vue";
 import { setCookie, getCookie } from "tiny-cookie";
 import useListItemHelper from "../../composables/useListItemHelper";
+import { bulkSelectAllSizeLimit } from "@/main";
 export type PredefinedEntities = {
   usePredefinedEntities: Boolean;
   entities: Asset[];
@@ -444,7 +445,7 @@ export default defineComponent({
     const { result: allEntitiesResult } = useQuery(
       GetEntitiesDocument,
       {
-        limit: 999999,
+        limit: bulkSelectAllSizeLimit,
         skip: 1,
         searchValue: {
           value: "",
