@@ -66,6 +66,8 @@
         <BulkOperations
           :context="bulkOperationsContext"
           :total-items-count="totalEntityCount"
+          @select-page="bulkSelect"
+          @select-all="bulkSelect(allEntitiesResult.Entities.results)"
         />
       </div>
 
@@ -238,7 +240,10 @@ import {
   type Maybe,
   type MetadataFieldOption,
 } from "../../generated-types/queries";
-import type { Context } from "@/composables/useBulkOperations";
+import {
+  useBulkOperations,
+  type Context,
+} from "@/composables/useBulkOperations";
 import FilterSideBarNew from "../FilterSideBarNew.vue";
 import IconToggle from "./IconToggle.vue";
 import useThumbnailHelper from "../../composables/useThumbnailHelper";
@@ -425,6 +430,38 @@ export default defineComponent({
       }
     });
 
+    const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
+      useBulkOperations();
+    const bulkSelect = (items: Entity[] = entities.value) => {
+      for (let entity of items)
+        enqueueItemForBulkProcessing(props.bulkOperationsContext, {
+          id: entity.id,
+        });
+
+      triggerBulkSelectionEvent(props.bulkOperationsContext);
+    };
+
+    const { result: allEntitiesResult } = useQuery(
+      GetEntitiesDocument,
+      {
+        limit: 999999,
+        skip: 1,
+        searchValue: {
+          value: "",
+          isAsc: false,
+          key: "title",
+          order_by: selectedSortOption.value.value,
+        },
+        advancedSearchValue: [],
+        searchInputType: isDrawerHiding.value
+          ? props.searchInputType
+          : props.searchInputTypeOnDrawer,
+      },
+      {
+        enabled: true,
+      }
+    );
+
     const addSelection = (entity: any) => {
       beingAdded.value = "";
       removeFromRelationsToBeDeletedList(entity.uuid);
@@ -486,6 +523,8 @@ export default defineComponent({
       displayGrid,
       calculateGridColumns,
       getMediaFilenameFromEntity,
+      bulkSelect,
+      allEntitiesResult,
     };
   },
 });

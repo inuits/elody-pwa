@@ -98,6 +98,6 @@ onMounted(() => {
 }
 
 .select-actions {
-  @apply underline text-accent-normal cursor-pointer;
+  @apply underline text-accent-normal cursor-pointer select-none;
 }
 </style>
