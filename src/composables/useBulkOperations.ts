@@ -7,13 +7,16 @@ const items = ref<Record<Context, InBulkProcessableItem[]>>({
   mediafilesPage: [],
   savedSearches: [],
 });
-const contextWhereUndoSelectionEventIsTriggered = ref<"" | Context>("");
+const contextWhereSelectionEventIsTriggered = ref<"" | Context>("");
 
 export const useBulkOperations = () => {
   const enqueueItemForBulkProcessing = (
     context: Context,
     inBulkProcessableItem: InBulkProcessableItem
-  ) => items.value[context].push(inBulkProcessableItem);
+  ) => {
+    if (!isEnqueued(context, inBulkProcessableItem.id))
+      items.value[context].push(inBulkProcessableItem);
+  };
 
   const dequeueItemForBulkProcessing = (context: Context, itemId: string) => {
     items.value[context] = items.value[context].filter(
@@ -23,11 +26,7 @@ export const useBulkOperations = () => {
 
   const dequeueAllItemsForBulkProcessing = (context: Context) => {
     items.value[context] = [];
-    contextWhereUndoSelectionEventIsTriggered.value = context;
-    setTimeout(
-      () => (contextWhereUndoSelectionEventIsTriggered.value = ""),
-      1000
-    );
+    triggerBulkSelectionEvent(context);
   };
 
   const getEnqueuedItemCount = (context: Context) =>
@@ -36,12 +35,18 @@ export const useBulkOperations = () => {
   const isEnqueued = (context: Context, itemId: string) =>
     items.value[context].find((item) => item.id == itemId) !== undefined;
 
+  const triggerBulkSelectionEvent = (context: Context) => {
+    contextWhereSelectionEventIsTriggered.value = context;
+    setTimeout(() => (contextWhereSelectionEventIsTriggered.value = ""), 50);
+  };
+
   return {
-    contextWhereUndoSelectionEventIsTriggered,
+    contextWhereSelectionEventIsTriggered,
     enqueueItemForBulkProcessing,
     dequeueItemForBulkProcessing,
     dequeueAllItemsForBulkProcessing,
     getEnqueuedItemCount,
     isEnqueued,
+    triggerBulkSelectionEvent,
   };
 };

@@ -97,7 +97,7 @@ const props = withDefaults(
 );
 
 const {
-  contextWhereUndoSelectionEventIsTriggered,
+  contextWhereSelectionEventIsTriggered,
   enqueueItemForBulkProcessing,
   dequeueItemForBulkProcessing,
   isEnqueued,
@@ -135,13 +135,11 @@ function sortMetadata(metadata: MetadataAndRelation[]) {
 
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 
-watch(contextWhereUndoSelectionEventIsTriggered, () => {
-  if (
-    contextWhereUndoSelectionEventIsTriggered.value ===
-    props.bulkOperationsContext
-  )
-    isChecked.value = false;
-});
+watch(
+  contextWhereSelectionEventIsTriggered,
+  () =>
+    (isChecked.value = isEnqueued(props.bulkOperationsContext, props.itemId))
+);
 </script>
 
 <style lang="postcss" scoped>
