@@ -22,6 +22,7 @@
         v-if="element.__typename === 'MediaFileElement'"
         :label="element.label"
         :isCollapsed="element.isCollapsed"
+        :type="element.type"
       />
       <entity-element-window
         v-if="element.__typename === 'WindowElement'"
