@@ -10,14 +10,25 @@
       class="py-2 text-sm text-gray-800 text-right hover:bg-gray-100 cursor-pointer"
     >
       <div v-if="visitedPagesOptions.length > 0">
-        <div v-for="menuItem in menuItems">
+        <div v-for="(menuItem, index) in menuItems" :key="index">
           <div
             v-if="
               visitedPagesOptions[0].label ===
               menuItem.typeLink?.route?.destination
             "
           >
-            <unicon :name="Unicons[menuItem.icon].name" class="w-6 h-6 mr-2" />
+            <unicon
+              v-if="menuItem.icon && Unicons[menuItem.icon]"
+              :name="Unicons[menuItem.icon].name"
+              class="w-6 h-6 mr-2"
+            />
+            <CustomIcon
+              v-else-if="menuItem.icon"
+              :icon="menuItem.icon"
+              :size="24"
+              color="text-accent-normal"
+              class="mr-2"
+            />
           </div>
         </div>
       </div>
@@ -48,7 +59,7 @@
   </span>
   <span class="font-serif text-xl leading-8 text-gray-800 font-bold">
     <div v-if="entityTitle === ''">
-      <div v-for="menuItem in menuItems">
+      <div v-for="(menuItem, index) in menuItems" :key="index">
         <div
           v-if="
             visitedPagesOptions[0].label ===
@@ -70,13 +81,10 @@ import { ref } from "vue";
 import { useBreadcrumb } from "@/composables/useBreadcrumb";
 import { Unicons } from "@/types";
 import useMenuHelper from "@/composables/useMenuHelper";
+import CustomIcon from "./CustomIcon.vue";
 
-const {
-  visitedPagesOptions,
-  entityTitle,
-  showEntityTitle,
-  onVisitedPageChange,
-} = useBreadcrumb();
+const { visitedPagesOptions, entityTitle, onVisitedPageChange } =
+  useBreadcrumb();
 
 const { getMenuEntities, menuItems } = useMenuHelper();
 getMenuEntities();
