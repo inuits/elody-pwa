@@ -25,7 +25,7 @@
       />
       <base-map
         v-if="!isCollapsed && type === MediaFileElementTypes.Map"
-        :coordinates="metadata?.find((data) => data.key === 'location')?.value"
+        :metadata="metadata"
       ></base-map>
     </template>
   </entity-element-wrapper>

@@ -17,14 +17,10 @@
     </div>
     <div class="info bg-neutral-0 w-full p-4 z-50">
       <EntityElementMetadata
-        v-if="convertedCoordinates"
-        label="Coordinates"
-        :value="`${convertedCoordinates[0]}, ${convertedCoordinates[1]}`"
-      ></EntityElementMetadata>
-      <EntityElementMetadata
-        v-if="type"
-        label="Type"
-        :value="type"
+        v-for="data in metadata"
+        :key="data.key"
+        :label="data.label"
+        :value="data.value"
       ></EntityElementMetadata>
     </div>
   </div>
@@ -35,20 +31,19 @@ import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
 import { computed, ref } from "vue";
 import EntityElementMetadata from "../EntityElementMetadata.vue";
+import type { MetadataAndRelation } from "@/generated-types/queries";
 
-const props = withDefaults(
-  defineProps<{
-    coordinates: string;
-  }>(),
-  {
-    coordinates: "0,0",
-  }
-);
+const props = defineProps<{
+  metadata: MetadataAndRelation[];
+}>();
 
-const type = ref<string>("");
 const zoom = ref<number>(15);
-const convertedCoordinates = computed(() => props.coordinates.split(","));
-console.log({ convertedCoordinates });
+
+const convertedCoordinates = computed(() =>
+  props.metadata
+    .find((dataItem) => dataItem.key === "location")
+    ?.value.split(",")
+);
 </script>
 
 <style scoped>
