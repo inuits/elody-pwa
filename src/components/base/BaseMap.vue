@@ -13,7 +13,9 @@
           name="OpenStreetMap"
         ></l-tile-layer>
         <l-marker :lat-lng="parsedMapData.coordinates"
-          ><l-tooltip>{{ parsedMapData.name }}</l-tooltip></l-marker
+          ><l-tooltip v-if="parsedMapData.name">{{
+            parsedMapData.name
+          }}</l-tooltip></l-marker
         >
       </l-map>
     </div>
