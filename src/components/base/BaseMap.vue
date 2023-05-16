@@ -1,6 +1,6 @@
 <template>
-  <div v-if="coordinates.length" class="h-full w-full">
-    <div class="map w-full">
+  <div :class="['h-full w-full']">
+    <div v-if="!loading" class="map w-full">
       <l-map
         :use-global-leaflet="false"
         ref="map"
@@ -15,7 +15,7 @@
         <l-marker :lat-lng="coordinates"></l-marker>
       </l-map>
     </div>
-    <div class="info bg-neutral-0 w-full p-4 z-50">
+    <div v-if="!loading" class="info bg-neutral-0 w-full p-4 z-50">
       <EntityElementMetadata
         v-if="coordinates"
         label="Coordinates"
@@ -48,7 +48,7 @@ const coordinates = ref<Array<number>>([]);
 const type = ref<string>("");
 const zoom = ref<number>(15);
 
-const { onResult } = useQuery<GetLocationQuery>(GetLocationDocument, {
+const { onResult, loading } = useQuery<GetLocationQuery>(GetLocationDocument, {
   id: getEntityIdFromRoute(),
   type: Entitytyping.Iotdevice,
 });
