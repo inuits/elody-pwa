@@ -105,9 +105,11 @@ const handleSubMenu = () => {
 };
 
 watch(
-  () =>
-    getModal(props.menuitem.typeLink.modal?.typeModal as TypeModals).modalState
-      .value.state,
+  () => {
+    const typeModal = props.menuitem.typeLink?.modal?.typeModal;
+    if (!typeModal) return undefined;
+    return getModal(typeModal).modalState.value.state;
+  },
   (state) => {
     if (state === ModalState.Hide) {
       resetSelectedMenuItem();

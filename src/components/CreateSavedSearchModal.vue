@@ -1,7 +1,8 @@
 <template>
   <base-modal
-    :scroll="true"
     :modal-state="createModalState.state"
+    modal-position="left"
+    modal-width-style="w-8/12"
     @hide-modal="closeModal"
   >
     <div class="bg-neutral-0 w-full">

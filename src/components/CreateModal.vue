@@ -1,7 +1,8 @@
 <template>
   <base-modal
-    :scroll="true"
     :modal-state="getModal(TypeModals.Create).modalState.value.state"
+    modal-position="center"
+    modal-width-style="w-3/4"
     @hide-modal="getModal(TypeModals.Create).closeModal()"
   >
     <div class="bg-neutral-0 w-full">
