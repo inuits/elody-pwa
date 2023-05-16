@@ -23,9 +23,9 @@
         entityType="MediaFile"
         class="flex-1"
       />
-      <base-map
+      <!-- <base-map
         v-if="!isCollapsed && type === MediaFileElementTypes.Map"
-      ></base-map>
+      ></base-map> -->
     </template>
   </entity-element-wrapper>
 </template>
@@ -36,7 +36,7 @@ import useEditMode from "@/composables/useEdit";
 import { Unicons } from "@/types";
 import { usePickEntityModal } from "./PickEntityModal.vue";
 import { MediaFileElementTypes } from "@/generated-types/queries";
-import BaseMap from "./base/BaseMap.vue";
+// import BaseMap from "./base/BaseMap.vue";
 
 const props = defineProps<{
   label: string;
