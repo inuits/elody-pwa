@@ -20,14 +20,9 @@
         aria-hidden="true"
         @click="hideModal"
       ></div>
-      <div
-        class="w-full h-screen transform"
-        :class="[
-          modalPosition === 'center' ? 'h-[75vh] my-[12.5vh]' : 'h-screen',
-        ]"
-      >
-        <div class="h-full bg-neutral-0">
-          <div class="h-full">
+      <div class="w-full h-screen transform" :class="modalHeight">
+        <div class="bg-neutral-0" :class="modalHeight">
+          <div :class="modalHeight">
             <slot />
           </div>
         </div>
@@ -37,7 +32,7 @@
 </template>
 
 <script lang="ts" setup>
-import { toRefs, watch } from "vue";
+import { computed, toRefs, watch } from "vue";
 import { ModalState } from "@/generated-types/queries";
 export type ModalPosition = "center" | "left" | "right";
 
@@ -55,6 +50,10 @@ const hideModal: () => void = () => {
 };
 
 const { modalState } = toRefs(props);
+
+const modalHeight = computed<string>(() =>
+  props.modalPosition === "center" ? "h-[75vh] my-[12.5vh]" : "h-screen"
+);
 
 watch(modalState, (value: ModalState) => {
   if (value == ModalState.Show || value == ModalState.Loading)
