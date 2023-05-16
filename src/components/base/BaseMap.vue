@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div :class="['h-full w-full']">
     <div v-if="!loading" class="map w-full">
       <l-map
@@ -70,4 +70,4 @@ onResult((queryResult) => {
 .info {
   height: 15%;
 }
-</style>
+</style> -->
