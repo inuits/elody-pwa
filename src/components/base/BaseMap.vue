@@ -1,25 +1,25 @@
-<!-- <template>
+<template>
   <div :class="['h-full w-full']">
-    <div v-if="!loading" class="map w-full">
+    <div class="map w-full">
       <l-map
         :use-global-leaflet="false"
         ref="map"
         v-model:zoom="zoom"
-        :center="coordinates"
+        :center="convertedCoordinates"
       >
         <l-tile-layer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           layer-type="base"
           name="OpenStreetMap"
         ></l-tile-layer>
-        <l-marker :lat-lng="coordinates"></l-marker>
+        <l-marker :lat-lng="convertedCoordinates"></l-marker>
       </l-map>
     </div>
-    <div v-if="!loading" class="info bg-neutral-0 w-full p-4 z-50">
+    <div class="info bg-neutral-0 w-full p-4 z-50">
       <EntityElementMetadata
-        v-if="coordinates"
+        v-if="convertedCoordinates"
         label="Coordinates"
-        :value="`${coordinates[0]}, ${coordinates[1]}`"
+        :value="`${convertedCoordinates[0]}, ${convertedCoordinates[1]}`"
       ></EntityElementMetadata>
       <EntityElementMetadata
         v-if="type"
@@ -33,34 +33,22 @@
 <script lang="ts" setup>
 import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import EntityElementMetadata from "../EntityElementMetadata.vue";
-import {
-  type GetLocationQuery,
-  GetLocationDocument,
-  Entitytyping,
-  type IotDevice,
-} from "@/generated-types/queries";
-import { useQuery } from "@vue/apollo-composable";
-import { getEntityIdFromRoute } from "@/helpers";
 
-const coordinates = ref<Array<number>>([]);
+const props = withDefaults(
+  defineProps<{
+    coordinates: string;
+  }>(),
+  {
+    coordinates: "0,0",
+  }
+);
+
 const type = ref<string>("");
 const zoom = ref<number>(15);
-
-const { onResult, loading } = useQuery<GetLocationQuery>(GetLocationDocument, {
-  id: getEntityIdFromRoute(),
-  type: Entitytyping.Iotdevice,
-});
-
-onResult((queryResult) => {
-  const entity: IotDevice | undefined | null = queryResult?.data
-    ?.Entity as IotDevice;
-  if (entity) {
-    coordinates.value = entity.location?.coordinates as number[];
-    type.value = entity.location?.type as string;
-  }
-});
+const convertedCoordinates = computed(() => props.coordinates.split(","));
+console.log({ convertedCoordinates });
 </script>
 
 <style scoped>
@@ -70,4 +58,4 @@ onResult((queryResult) => {
 .info {
   height: 15%;
 }
-</style> -->
+</style>
