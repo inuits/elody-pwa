@@ -23,6 +23,7 @@
         :label="element.label"
         :isCollapsed="element.isCollapsed"
         :type="element.type"
+        :metadata="(element.metadata as MetadataAndRelation[])"
       />
       <entity-element-window
         v-if="element.__typename === 'WindowElement'"
@@ -43,6 +44,7 @@ import type {
   MediaFileElement,
   EntityListElement,
   Entity,
+  MetadataAndRelation,
 } from "@/generated-types/queries";
 
 export type Elements = WindowElement | MediaFileElement | EntityListElement;
