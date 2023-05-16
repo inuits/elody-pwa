@@ -7,7 +7,7 @@
         mode="tags"
         :searchable="true"
         :close-on-select="true"
-        :options="result?.FilterOptions"
+        :options="clickedFilter.options"
         :label="$t('filter.label')"
         track-by="label"
         value-prop="label"
@@ -39,10 +39,12 @@ import {
   type FilterInList,
   type FilterOptions,
 } from "@/composables/useFilterHelper";
+import { clickedFilter } from "@/composables/useFilterSideBarHelperNew";
 
 const props = defineProps<{
   value?: FilterInList;
   filter: AdvancedFilter;
+  options: any;
 }>();
 
 const emit = defineEmits<{

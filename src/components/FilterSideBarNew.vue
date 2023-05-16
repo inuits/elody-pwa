@@ -93,10 +93,10 @@ import {
   GetEntitiesDocument,
   type GetEntitiesQueryVariables,
   SearchInputType,
-  type Asset,
+  Asset,
   type FilterInput,
-} from "../generated-types/queries";
-import type { PredefinedEntities } from "./base/BaseLibrary.vue";
+} from "@/generated-types/queries";
+import type { PredefinedEntities } from "@/components/base/BaseLibrary.vue";
 const props = defineProps<{
   advancedFiltersChoice?: "entityFilters";
   acceptedEntityTypes: string[];
@@ -111,7 +111,7 @@ const componentMap: any = {
 const { pickedSavedSearch, clearTypename, setPickedSavedSearch } =
   useSavedSearchHelper();
 
-const { clearInitialFilters, initialFilters, activeCount } =
+const { clearInitialFilters, initialFilters, activeCount, clickedFilter } =
   useFilterSideBarHelperNew();
 
 const emit = defineEmits<{
@@ -164,11 +164,13 @@ const predefinedEntities = ref<PredefinedEntities>({
 
 const entities = ref<Asset[]>(predefinedEntities.value?.entities || []);
 
-console.log("Dit zijn je entities", entities.value);
-
-const { refetch } = useQuery(GetEntitiesDocument, queryVariables, {
-  notifyOnNetworkStatusChange: true,
-});
+const { refetch, onResult, result } = useQuery(
+  GetEntitiesDocument,
+  queryVariables,
+  {
+    notifyOnNetworkStatusChange: true,
+  }
+);
 
 watch(
   () => predefinedEntities?.value.entities,
@@ -179,10 +181,29 @@ watch(
   },
   { immediate: true }
 );
+onResult((t) => {
+  if (
+    clickedFilter.value?.type === "selection" ||
+    clickedFilter.value?.type === "MultiSelectInput"
+  ) {
+    t.data?.Entities.results.forEach((e) => {
+      let titles = e.teaserMetadata.filter((f) => f.key === "title");
+      if (titles.length > 0) {
+        let title = titles[0];
+        let updatedOptions = [{ value: title.label, label: title.value }];
+        clickedFilter.value = {
+          ...clickedFilter.value,
+          options: [...clickedFilter.value.options, ...updatedOptions],
+        };
+      }
+    });
+  }
+});
 
 const getFilterOptionsWhenNoOptionsAvailable = (
   advancedFilter: AdvancedFilter
 ) => {
+  clickedFilter.value = advancedFilter;
   queryVariables.advancedSearchValue = [
     {
       type: "MultiSelectInput",

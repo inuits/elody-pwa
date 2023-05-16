@@ -1,7 +1,7 @@
 <template>
   <div v-if="options">
     <ul
-      v-for="(option, index) in options.FilterOptions"
+      v-for="(option, index) in clickedFilter.options"
       :key="option && option.label ? `${option.label}-${index}` : 'no-key'"
     >
       <li
@@ -66,12 +66,15 @@ import {
   type FilterInList,
   type FilterOptions,
 } from "@/composables/useFilterHelper";
+import { useFilterSideBarHelperNew } from "@/composables/useFilterSideBarHelperNew";
 
 const props = defineProps<{
   value?: FilterInList;
   filter: AdvancedFilter;
   acceptedEntityTypes?: String[];
 }>();
+
+const { clickedFilter } = useFilterSideBarHelperNew();
 
 const emit = defineEmits<{
   (event: "update:value", defaultMinMaxObject: FilterInList): void;
@@ -132,7 +135,7 @@ watch(
   }
 );
 
-if (props.acceptedEntityTypes.length > 0 && props.filter?.key === "type") {
+if (props.acceptedEntityTypes?.length > 0 && props.filter?.key === "type") {
   emit(
     "update:value",
     defaultReturnMultiSelectObject("type", {
