@@ -52,16 +52,22 @@
 </template>
 
 <script lang="ts" setup>
-import type {
-  DropdownOption,
-  GetBulkOperationsQuery,
+import {
+  type DropdownOption,
+  type GetBulkOperationsQuery,
+  ModalState,
 } from "@/generated-types/queries";
 import type { Context } from "@/composables/useBulkOperations";
-import { bulkSelectAllSizeLimit } from "@/main";
-import { GetBulkOperationsDocument } from "@/generated-types/queries";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
+import { bulkSelectAllSizeLimit } from "@/main";
+import {
+  GetBulkOperationsDocument,
+  BulkOperationTypes,
+  TypeModals,
+} from "@/generated-types/queries";
+import { onMounted, ref, watch } from "vue";
+import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useBulkOperations } from "@/composables/useBulkOperations";
-import { onMounted, ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 
 withDefaults(
@@ -89,14 +95,32 @@ const bulkOperations = ref<DropdownOption[]>([]);
 const selectedBulkOperation = ref<DropdownOption>();
 const { getEnqueuedItemCount, dequeueAllItemsForBulkProcessing } =
   useBulkOperations();
+const { getModal } = useAvailableModals();
 
 onResult((result) => {
   if (result.data) bulkOperations.value = result.data.BulkOperations.options;
 });
+
 onMounted(() => {
   refetchEnabled.value = true;
   refetch();
 });
+
+watch(selectedBulkOperation, () => {
+  if (selectedBulkOperation.value?.value === BulkOperationTypes.ExportCsv)
+    getModal(TypeModals.BulkOperations).openModal();
+});
+
+watch(
+  () => getModal(TypeModals.BulkOperations).modalState.value.state,
+  () => {
+    if (
+      getModal(TypeModals.BulkOperations).modalState.value.state ===
+      ModalState.Hide
+    )
+      selectedBulkOperation.value = undefined;
+  }
+);
 </script>
 
 <style lang="postcss" scoped>
