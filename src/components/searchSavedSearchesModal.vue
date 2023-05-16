@@ -1,9 +1,9 @@
 <template>
   <div v-if="SearchSavedSearchesModalState.state === 'show'">
     <BaseModal
-      :large="true"
-      :scroll="false"
       :modal-state="SearchSavedSearchesModalState.state"
+      modal-position="left"
+      modal-width-style="w-8/12"
       @hide-modal="closeSearchSavedSearchesModal"
     >
       <div class="bg-neutral-20 w-full h-full flex flex-col overflow-auto">

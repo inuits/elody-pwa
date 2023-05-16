@@ -1,8 +1,8 @@
 <template>
   <BaseModal
-    :large="true"
-    :scroll="false"
     :modal-state="pickEntityModalState.state"
+    modal-position="left"
+    modal-width-style="w-8/12"
     @hide-modal="closePickEntityModal"
   >
     <div

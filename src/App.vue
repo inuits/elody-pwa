@@ -9,10 +9,11 @@
       </div>
       <edit-modal />
     </div>
-    <upload-modal :modal-position="'left'" />
+    <upload-modal />
     <pick-entity-modal />
     <create-modal />
     <search-saved-searches-modal />
+    <BulkoperationsModal />
   </div>
 </template>
 
@@ -29,6 +30,7 @@ import { useHead } from "@vueuse/head";
 import PickEntityModal from "./components/PickEntityModal.vue";
 import BaseNotification from "./components/base/BaseNotification.vue";
 import SearchSavedSearchesModal from "./components/searchSavedSearchesModal.vue";
+import BulkoperationsModal from "@/components/bulk-operations/BulkOperationsModal.vue";
 
 export default defineComponent({
   name: "App",
@@ -41,6 +43,7 @@ export default defineComponent({
     CreateModal,
     BaseNotification,
     SearchSavedSearchesModal,
+    BulkoperationsModal,
   },
   inject: { DefaultOIDC },
   setup() {

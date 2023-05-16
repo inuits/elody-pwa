@@ -1,9 +1,8 @@
 <template>
   <BaseModal
-    class="w-5/12 h-full fixed inset-0 z-50 overflow-y-auto"
-    :large="true"
-    :scroll="false"
     :modal-state="modal.modalState.value.state"
+    modal-position="left"
+    modal-width-style="w-5/12"
     @hide-modal="modal.closeModal()"
   >
     <div class="w-full h-full flex flex-col">
