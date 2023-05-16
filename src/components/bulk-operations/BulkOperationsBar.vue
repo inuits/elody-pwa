@@ -5,9 +5,8 @@
     <div class="flex justify-start">
       <div class="px-2 rounded-md bg-accent-light text-accent-normal">
         <span>
-          <span class="font-bold"> {{ enqueuedItemCount }} </span>/{{
-            totalItemsCount
-          }}
+          <span class="font-bold"> {{ getEnqueuedItemCount(context) }} </span
+          >/{{ totalItemsCount }}
           {{ $t("bulk-operations.selected-items") }}
         </span>
       </div>
@@ -62,10 +61,10 @@ import { bulkSelectAllSizeLimit } from "@/main";
 import { GetBulkOperationsDocument } from "@/generated-types/queries";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import { useBulkOperations } from "@/composables/useBulkOperations";
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     context: Context;
     totalItemsCount: number;
@@ -90,10 +89,6 @@ const bulkOperations = ref<DropdownOption[]>([]);
 const selectedBulkOperation = ref<DropdownOption>();
 const { getEnqueuedItemCount, dequeueAllItemsForBulkProcessing } =
   useBulkOperations();
-
-const enqueuedItemCount = computed<number>(() =>
-  getEnqueuedItemCount(props.context)
-);
 
 onResult((result) => {
   if (result.data) bulkOperations.value = result.data.BulkOperations.options;

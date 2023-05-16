@@ -63,7 +63,7 @@
       </div>
 
       <div class="my-3">
-        <BulkOperations
+        <BulkOperationsBar
           :context="bulkOperationsContext"
           :total-items-count="totalEntityCount"
           @select-page="bulkSelect"
@@ -225,7 +225,7 @@ import BaseButton from "./BaseButton.vue";
 import InputField from "./InputField.vue";
 import BaseDropdown from "./BaseDropdown.vue";
 import NewBaseDropdown from "./NewBaseDropdown.vue";
-import BulkOperations from "@/components/BulkOperations.vue";
+import BulkOperationsBar from "@/components/bulk-operations/BulkOperationsBar.vue";
 import { useQuery } from "@vue/apollo-composable";
 import ListItem from "../ListItem.vue";
 import { useRouter } from "vue-router";
@@ -274,7 +274,7 @@ export default defineComponent({
     BaseIcon,
     GridItem,
     NewBaseDropdown,
-    BulkOperations,
+    BulkOperationsBar,
   },
   props: {
     advancedFiltersChoice: {
