@@ -1,12 +1,19 @@
 import { bulkSelectAllSizeLimit } from "@/main";
 import { ref } from "vue";
 
-export type Context = "entitiesPage" | "mediafilesPage" | "savedSearches";
+export type Context =
+  | "Home"
+  | "SingleEntity"
+  | "Mediafiles"
+  | "SingleMediafile"
+  | "History";
 export type InBulkProcessableItem = { id: string };
 const items = ref<Record<Context, InBulkProcessableItem[]>>({
-  entitiesPage: [],
-  mediafilesPage: [],
-  savedSearches: [],
+  Home: [],
+  SingleEntity: [],
+  Mediafiles: [],
+  SingleMediafile: [],
+  History: [],
 });
 const contextWhereSelectionEventIsTriggered = ref<"" | Context>("");
 
@@ -34,7 +41,7 @@ export const useBulkOperations = () => {
   };
 
   const getEnqueuedItemCount = (context: Context) =>
-    items.value[context].length;
+    items.value[context]?.length ?? 0;
 
   const isEnqueued = (context: Context, itemId: string) =>
     items.value[context].find((item) => item.id == itemId) !== undefined;

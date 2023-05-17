@@ -28,7 +28,6 @@
       <div>
         <BaseButtonNew
           v-if="!modifyMetadata"
-          class="w-full"
           :label="$t('dropzone.upload')"
           :icon="DamsIcons.PlusCircle"
           button-style="normalAccent"
@@ -37,7 +36,6 @@
         />
         <BaseButtonNew
           v-if="modifyMetadata"
-          class="w-full"
           :label="$t('dropzone.modifyMetadata')"
           :icon="DamsIcons.EditAlt"
           button-style="normalAccent"

@@ -37,7 +37,7 @@
               : undefined
           "
           :thumb-icon="getThumbnail(value)"
-          bulk-operations-context="entitiesPage"
+          :bulk-operations-context="route.name as Context"
         />
         <div v-if="!structure.disabled" class="delete">
           <BaseButton
@@ -83,6 +83,8 @@ import ListItem from "@/components/ListItem.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import useRouteHelpers from "@/composables/useRouteHelpers";
 import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
+import { useRoute } from "vue-router";
+import type { Context } from "@/composables/useBulkOperations";
 
 export default defineComponent({
   name: "MetaEditRelationField",
@@ -101,6 +103,7 @@ export default defineComponent({
     },
   },
   setup: (props) => {
+    const route = useRoute();
     const { remove, push, fields, update } = useFieldArray<relationValues>(
       props.label ? props.label : props.structure.relationType //MAKING UNIQUE ARRAY FOR EACH COMPONENT DEPENDING ON THE LABEL...
     );
@@ -179,6 +182,7 @@ export default defineComponent({
       getThumbnail,
       removeRelation,
       onChangeMetaEditDataField,
+      route,
     };
   },
 });

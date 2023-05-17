@@ -144,7 +144,10 @@
     "selected-items": "items geselecteerd",
     "undo-selection": "selectie ongedaan maken",
     "select-page": "selecteer pagina",
-    "select-all": "selecteer alles"
+    "select-all": "selecteer alles",
+    "edit": "Bewerk",
+    "items": "items",
+    "cancel": "annuleren"
   },
   "dropdown": {
     "select-option": "selecteer optie"
