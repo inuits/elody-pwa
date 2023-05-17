@@ -21,7 +21,7 @@
         @click="hideModal"
       ></div>
       <div class="w-full h-screen transform" :class="modalHeight">
-        <div class="bg-neutral-0" :class="modalHeight">
+        <div class="bg-neutral-lightest" :class="modalHeight">
           <div :class="modalHeight">
             <slot />
           </div>

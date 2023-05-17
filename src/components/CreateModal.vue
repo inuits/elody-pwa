@@ -5,7 +5,7 @@
     modal-width-style="w-3/4"
     @hide-modal="getModal(TypeModals.Create).closeModal()"
   >
-    <div class="bg-neutral-0 w-full">
+    <div class="bg-neutral-0 w-full h-full">
       <div class="p-6 pb-0">
         <h1>{{ $t("entity.create") }}</h1>
         <BaseDropdown
