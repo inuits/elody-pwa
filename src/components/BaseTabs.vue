@@ -1,6 +1,6 @@
 <template>
-  <div class="h-full flex flex-col flex-shrink">
-    <div class="flex gap-3 shadow">
+  <div class="h-full flex flex-col flex-shrink bg-neutral-0">
+    <div class="flex gap-3">
       <div
         v-for="(tab, index) in tabs"
         :key="index"
@@ -8,8 +8,8 @@
         class="text-center cursor-pointer p-3"
         :class="
           index === selectedIndex
-            ? 'text-[var(--color-text-body)] font-bold border-b-2'
-            : 'text-[var(--color-text-light)]'
+            ? 'text-text-body font-bold border-b-2'
+            : 'text-text-light'
         "
       >
         {{ tab?.props?.title }}

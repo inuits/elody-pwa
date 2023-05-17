@@ -2,7 +2,7 @@
   <BaseModal
     :modal-state="modal.modalState.value.state"
     modal-position="right"
-    modal-width-style="w-5/12"
+    modal-width-style="w-11/12"
     @hide-modal="modal.closeModal()"
   >
   </BaseModal>
