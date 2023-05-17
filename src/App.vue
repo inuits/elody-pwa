@@ -90,12 +90,6 @@ export default defineComponent({
   transition: writing-mode 300ms ease-in-out, transform 300ms ease-in-out;
 }
 
-.navbar:hover .logo {
-  writing-mode: horizontal-tb;
-  margin-left: 0.7rem;
-  transform: translate(2%, 25%);
-}
-
 .move-by-nav {
   padding-left: 6rem;
   -webkit-transition: padding-left 300ms ease-in-out;
