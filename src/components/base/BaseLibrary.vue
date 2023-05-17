@@ -12,8 +12,8 @@
           <IconToggle
             v-if="!isHideFilters"
             v-model:checked="isDrawerHiding"
-            :icon-on="Unicons.SearchGlass.name"
-            :icon-off="Unicons.Filter.name"
+            :icon-on="Unicons.WindowMaximize.name"
+            :icon-off="Unicons.WindowGrid.name"
           />
           <div :class="[{ 'ml-2': !isHideFilters }]">
             <IconToggle
@@ -425,7 +425,7 @@ export default defineComponent({
       }
     );
     onResult((result) => {
-      if (result.data && !props.predefinedEntities) {
+      if (result.data && result.data.Entities && !props.predefinedEntities) {
         entities.value = result.data.Entities.results as Entity[];
         totalEntityCount.value = result.data.Entities.count;
       }
