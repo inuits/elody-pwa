@@ -5,6 +5,13 @@
     modal-width-style="w-11/12"
     @hide-modal="modal.closeModal()"
   >
+    <div class="flex flex-wrap p-8 h-full">
+      <div class="flex basis-full h-[95%]">
+        <div class="basis-[60%]"></div>
+        <div class="grow"></div>
+      </div>
+      <div class="basis-full h-[5%]"></div>
+    </div>
   </BaseModal>
 </template>
 
