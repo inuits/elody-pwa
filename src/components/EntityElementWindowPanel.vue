@@ -29,7 +29,8 @@
             class="py-2"
           >
             <entity-element-metadata
-              v-if="!isEdit || !metadata.field"
+              v-if="!isEdit || !metadata.field || !panel.isEditable"
+              :class="[{ 'opacity-60': !panel.isEditable && isEdit }]"
               :label="metadata.label"
               :value="metadata.value"
             />
