@@ -13,7 +13,7 @@
     <pick-entity-modal />
     <create-modal />
     <search-saved-searches-modal />
-    <BulkoperationsModal />
+    <BulkoperationsModal :context="route.name as Context" />
   </div>
 </template>
 
@@ -31,6 +31,8 @@ import PickEntityModal from "./components/PickEntityModal.vue";
 import BaseNotification from "./components/base/BaseNotification.vue";
 import SearchSavedSearchesModal from "./components/searchSavedSearchesModal.vue";
 import BulkoperationsModal from "@/components/bulk-operations/BulkOperationsModal.vue";
+import { useRoute } from "vue-router";
+import type { Context } from "@/composables/useBulkOperations";
 
 export default defineComponent({
   name: "App",
@@ -50,6 +52,7 @@ export default defineComponent({
     const auth: Object = useAuth();
     const { isSingle } = useRouteHelpers();
     const contentPadding = ref("24");
+    const route = useRoute();
 
     //Todo Fix vite migrations
     const getIndexValue = () => {
@@ -75,6 +78,7 @@ export default defineComponent({
       auth,
       isSingle,
       contentPadding,
+      route,
     };
   },
 });

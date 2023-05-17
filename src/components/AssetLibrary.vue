@@ -9,7 +9,7 @@
     @add-selection="addSelection"
     :enable-selection="enableSelection"
     :accepted-entity-types="acceptedEntityTypes"
-    bulk-operations-context="entitiesPage"
+    :bulk-operations-context="route.name as Context"
   />
 </template>
 
@@ -18,6 +18,8 @@ import BaseLibrary from "@/components/base/BaseLibrary.vue";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import { SearchInputType, type Maybe } from "@/generated-types/queries";
+import { useRoute } from "vue-router";
+import type { Context } from "@/composables/useBulkOperations";
 
 export default defineComponent({
   name: "AssetLibrary",
@@ -35,6 +37,7 @@ export default defineComponent({
   },
   emits: ["addSelection"],
   setup: (props, { emit }) => {
+    const route = useRoute();
     const addSelection = (id: string) => {
       emit("addSelection", id);
     };
@@ -42,6 +45,7 @@ export default defineComponent({
     return {
       SearchInputType,
       addSelection,
+      route,
     };
   },
 });

@@ -17,7 +17,7 @@
           router.push({ name: 'SingleEntity', params: { id: entity.id } })
         "
         :small="true"
-        bulk-operations-context="entitiesPage"
+        :bulk-operations-context="route.name as Context"
       >
         <template #actions>
           <BaseButton
@@ -40,8 +40,9 @@ import type { MediaFileEntity } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
+import type { Context } from "@/composables/useBulkOperations";
 
 export default defineComponent({
   name: "LinkedAssetsList",
@@ -58,11 +59,13 @@ export default defineComponent({
   setup() {
     const { getThumbnail } = useThumbnailHelper();
     const router = useRouter();
+    const route = useRoute();
 
     return {
       Unicons,
       router,
       getThumbnail,
+      route,
     };
   },
 });

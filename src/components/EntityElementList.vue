@@ -22,7 +22,7 @@
             :is-hide-filters="true"
             :predefined-entities="entitiesObject"
             :enable-selection="true"
-            bulk-operations-context="entitiesPage"
+            :bulk-operations-context="route.name as Context"
           />
         </div>
         <!-- <div v-for="(field, idx) in fields" :key="field.key">
@@ -66,12 +66,14 @@ import EntityElementWrapper from "./base/EntityElementWrapper.vue";
 import { usePickEntityModal } from "./PickEntityModal.vue";
 import type { PickEntityModalType } from "./PickEntityModal.vue";
 import useEditMode from "@/composables/useEdit";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { Unicons } from "@/types";
 import BaseLibrary, { type PredefinedEntities } from "./base/BaseLibrary.vue";
 import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
+import type { Context } from "@/composables/useBulkOperations";
 
 const router = useRouter();
+const route = useRoute();
 const props = defineProps<{
   label: string;
   RelationKey: string;

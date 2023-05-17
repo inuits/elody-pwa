@@ -8,7 +8,7 @@
     :advanced-filters-choice="'mediaFileFilters'"
     :enable-selection="enableSelection"
     :already-added-metadata="selectedRelationFieldMetadata"
-    bulk-operations-context="mediafilesPage"
+    :bulk-operations-context="route.name as Context"
     @add-selection="addSelection"
   />
 </template>
@@ -18,6 +18,8 @@ import BaseLibrary from "./base/BaseLibrary.vue";
 import { defineComponent } from "vue";
 import { SearchInputType } from "../generated-types/queries";
 import selectedRelationFieldMetadata from "../composables/useOldFormHelpers";
+import { useRoute } from "vue-router";
+import type { Context } from "@/composables/useBulkOperations";
 
 export default defineComponent({
   name: "MediaFileLibrary",
@@ -32,6 +34,7 @@ export default defineComponent({
     },
   },
   setup: (props, { emit }) => {
+    const route = useRoute();
     const addSelection = (entity: any) => {
       emit("addSelection", entity);
     };
@@ -40,6 +43,7 @@ export default defineComponent({
       SearchInputType,
       addSelection,
       selectedRelationFieldMetadata,
+      route,
     };
   },
 });

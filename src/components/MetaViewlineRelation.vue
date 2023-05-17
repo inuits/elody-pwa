@@ -36,7 +36,7 @@
         "
         :thumb-icon="getThumbnail(metadata)"
         :small="true"
-        bulk-operations-context="entitiesPage"
+        :bulk-operations-context="route.name as Context"
         @click="
           router.push({
             name: 'SingleEntity',
@@ -106,11 +106,12 @@ import type { MetadataRelation } from "@/generated-types/queries";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { Unicons } from "@/types";
 import { inputContainerStyle } from "./base/InputField.vue";
 import ListItem from "@/components/ListItem.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
+import type { Context } from "@/composables/useBulkOperations";
 
 export default defineComponent({
   name: "MetaViewlineRelation",
@@ -124,6 +125,7 @@ export default defineComponent({
     },
   },
   setup() {
+    const route = useRoute();
     const router = useRouter();
     const { t } = useI18n();
     const { getThumbnail } = useThumbnailHelper();
@@ -141,6 +143,7 @@ export default defineComponent({
       inputContainerStyle,
       checkTranslationForlabel,
       getThumbnail,
+      route,
     };
   },
 });

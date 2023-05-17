@@ -2,19 +2,22 @@
   <button
     type="button"
     :disabled="disabled"
-    class="text-base flex justify-center items-center p-3 rounded transition-colors duration-300 disabled:cursor-auto"
+    class="flex justify-center items-center w-full rounded transition-colors duration-300 disabled:cursor-auto"
     :class="[
+      label ? `pl-1.5` : ``,
       `${selectedButtonStyle.bgColor} ${selectedButtonStyle.txtColor}`,
       `${selectedButtonStyle.hoverStyle.bgColor} ${selectedButtonStyle.hoverStyle.txtColor}`,
       `${selectedButtonStyle.activeStyle.bgColor} ${selectedButtonStyle.activeStyle.txtColor}`,
       `${selectedButtonStyle.disabledStyle.bgColor} ${selectedButtonStyle.disabledStyle.txtColor}`,
-      label ? `pl-1.5` : ``,
+      { 'text-base p-3': buttonSize === 'normal' },
+      { 'text-sm p-1.5': buttonSize === 'small' },
     ]"
   >
     <unicon
       v-if="props.icon !== DamsIcons.NoIcon"
+      class="-ml-0.5"
       :name="Unicons[props.icon].name"
-      :height="height"
+      :height="iconHeight"
     />
     <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
   </button>
@@ -70,21 +73,25 @@ const buttonStyles: Record<ButtonStyle, Button> = {
   normalAccent: normalAccentButton,
 };
 
+type ButtonSize = "normal" | "small";
+
 const props = withDefaults(
   defineProps<{
     label: string;
-    loading?: boolean;
-    icon?: DamsIcons | "no-icon";
-    buttonStyle: ButtonStyle;
+    icon?: DamsIcons;
+    buttonStyle?: ButtonStyle;
+    buttonSize?: ButtonSize;
     disabled?: boolean;
-    height?: number;
+    iconHeight?: number;
+    loading?: boolean;
   }>(),
   {
-    loading: false,
     icon: DamsIcons.NoIcon,
     buttonStyle: "default",
+    buttonSize: "normal",
     disabled: false,
-    height: 18,
+    iconHeight: 18,
+    loading: false,
   }
 );
 
