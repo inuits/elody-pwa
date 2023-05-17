@@ -66,7 +66,7 @@
 <script lang="ts" setup>
 import { DamsIcons, type DropdownOption } from "@/generated-types/queries";
 import { Unicons } from "@/types";
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, toRefs, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 type PseudoStyle = {
@@ -148,6 +148,7 @@ const defaultOption: DropdownOption = {
   value: "",
 };
 const dropdown = ref<HTMLUListElement>();
+const { modelValue } = toRefs(props);
 const selectedOption = ref(defaultOption);
 const showOptions = ref(false);
 const disable = ref(props.disable);
@@ -172,6 +173,9 @@ const collapseDropdown = (event: MouseEvent) => {
     showOptions.value = false;
 };
 
+watch(modelValue, (value) =>
+  value === undefined ? (selectedOption.value = defaultOption) : undefined
+);
 watch(selectedOption, (value) => emit("update:modelValue", value));
 
 onMounted(() => document.addEventListener("click", collapseDropdown));
