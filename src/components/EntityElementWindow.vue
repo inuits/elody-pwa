@@ -67,7 +67,6 @@ const panels = computed<WindowElementPanel[]>(() => {
       returnArray.push(value);
     }
   });
-  console.log(returnArray);
   return returnArray;
 });
 </script>
