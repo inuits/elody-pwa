@@ -2,13 +2,13 @@
   <button
     type="button"
     :disabled="disabled"
-    class="flex justify-center items-center w-full rounded transition-colors duration-300 disabled:cursor-auto"
+    class="flex justify-center items-center w-full rounded outline-none transition-colors duration-300 disabled:cursor-auto"
     :class="[
       label ? `pl-1.5` : ``,
-      `${selectedButtonStyle.bgColor} ${selectedButtonStyle.txtColor}`,
-      `${selectedButtonStyle.hoverStyle.bgColor} ${selectedButtonStyle.hoverStyle.txtColor}`,
-      `${selectedButtonStyle.activeStyle.bgColor} ${selectedButtonStyle.activeStyle.txtColor}`,
-      `${selectedButtonStyle.disabledStyle.bgColor} ${selectedButtonStyle.disabledStyle.txtColor}`,
+      `${selectedButtonStyle.textColor} ${selectedButtonStyle.bgColor}`,
+      `${selectedButtonStyle.hoverStyle.textColor} ${selectedButtonStyle.hoverStyle.bgColor}`,
+      `${selectedButtonStyle.activeStyle.textColor} ${selectedButtonStyle.activeStyle.bgColor}`,
+      `${selectedButtonStyle.disabledStyle.textColor} ${selectedButtonStyle.disabledStyle.bgColor}`,
       { 'text-base p-3': buttonSize === 'normal' },
       { 'text-sm p-1.5': buttonSize === 'small' },
     ]"
@@ -29,42 +29,38 @@ import { Unicons } from "@/types";
 import { computed } from "vue";
 
 type PseudoStyle = {
-  txtColor: string;
+  textColor: string;
   bgColor: string;
 };
-const hoverStyle: PseudoStyle = {
-  txtColor: "hover:text-accent-normal",
-  bgColor: "hover:bg-neutral-lightest",
-};
-const activeStyle: PseudoStyle = {
-  txtColor: "active:text-accent-normal",
-  bgColor: "active:bg-accent-light",
-};
-const disabledStyle: PseudoStyle = {
-  txtColor: "disabled:text-text-light",
-  bgColor: "disabled:bg-neutral-lightest",
-};
-
 type Button = {
-  txtColor: string;
+  textColor: string;
   bgColor: string;
   hoverStyle: PseudoStyle;
   activeStyle: PseudoStyle;
   disabledStyle: PseudoStyle;
 };
 const defaultButton: Button = {
-  txtColor: "text-text-body",
+  textColor: "text-text-body",
   bgColor: "bg-neutral-lightest",
-  hoverStyle: hoverStyle,
-  activeStyle: activeStyle,
-  disabledStyle: disabledStyle,
+  hoverStyle: {
+    textColor: "hover:text-accent-normal",
+    bgColor: "hover:bg-neutral-lightest",
+  },
+  activeStyle: {
+    textColor: "active:text-accent-normal",
+    bgColor: "active:bg-accent-light",
+  },
+  disabledStyle: {
+    textColor: "disabled:text-text-light",
+    bgColor: "disabled:bg-neutral-lightest",
+  },
 };
 const normalAccentButton: Button = {
-  txtColor: "text-neutral-white",
+  textColor: "text-neutral-white",
   bgColor: "bg-accent-normal",
-  hoverStyle: hoverStyle,
-  activeStyle: activeStyle,
-  disabledStyle: disabledStyle,
+  hoverStyle: defaultButton.hoverStyle,
+  activeStyle: defaultButton.activeStyle,
+  disabledStyle: defaultButton.disabledStyle,
 };
 
 type ButtonStyle = "default" | "normalAccent";

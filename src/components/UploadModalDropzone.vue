@@ -20,7 +20,7 @@
             v-model="selectedImportMethod"
             :options="importMethods"
             :disable="!createEntity"
-            dropdown-style="default"
+            dropdown-style="defaultWithBorder"
           />
         </div>
       </div>
