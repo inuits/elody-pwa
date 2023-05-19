@@ -7,10 +7,12 @@
   >
     <div class="flex flex-wrap p-8 h-full">
       <div class="flex basis-full h-[94%]">
-        <div class="basis-[60%]"></div>
+        <div class="basis-[60%]">
+          <LibraryBar />
+        </div>
         <div class="grow"></div>
       </div>
-      <div class="basis-full h-[6%]">
+      <div class="basis-full h-[55px]">
         <BulkOperationsSubmitBar
           :context="context"
           :selected-items-count="getEnqueuedItemCount(context)"
@@ -25,6 +27,7 @@
 import type { Context } from "@/composables/useBulkOperations";
 import BaseModal from "@/components/base/BaseModal.vue";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
+import LibraryBar from "@/components/library/LibraryBar.vue";
 import { TypeModals } from "@/generated-types/queries";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useBulkOperations } from "@/composables/useBulkOperations";

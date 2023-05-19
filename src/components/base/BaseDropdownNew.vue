@@ -3,10 +3,10 @@
     ref="dropdown"
     class="relative w-full h-full px-3 select-none border"
     :class="[
-      `${selectedDropdownStyle.bgColor} ${selectedDropdownStyle.txtColor} ${selectedDropdownStyle.borderColor}`,
+      `${selectedDropdownStyle.textColor} ${selectedDropdownStyle.bgColor} ${selectedDropdownStyle.borderColor}`,
       showOptions ? 'rounded-t-lg' : 'rounded-lg',
       disabled
-        ? `${selectedDropdownStyle.disabledStyle.bgColor} ${selectedDropdownStyle.disabledStyle.txtColor} ${selectedDropdownStyle.disabledStyle.borderColor}`
+        ? `${selectedDropdownStyle.disabledStyle.textColor} ${selectedDropdownStyle.disabledStyle.bgColor} ${selectedDropdownStyle.disabledStyle.borderColor}`
         : '',
     ]"
   >
@@ -26,7 +26,11 @@
           :name="Unicons[selectedOption.icon].name"
           class="h-5 mr-2 -ml-0.5"
         />
-        <span>{{ selectedOption.label }}</span>
+        <span>
+          <span v-if="labelAlignment === 'left'">{{ label }} </span>
+          {{ selectedOption.label }}
+          <span v-if="labelAlignment === 'right'"> {{ label }}</span>
+        </span>
       </div>
       <div class="flex justify-end items-center">
         <unicon :name="Unicons[arrowIcon].name" class="ml-2 -mr-1" />
@@ -36,7 +40,7 @@
       v-show="showOptions"
       class="absolute z-0 rounded-b-lg border-x border-b"
       :class="[
-        `${selectedDropdownStyle.bgColor} ${selectedDropdownStyle.txtColor} ${selectedDropdownStyle.borderColor}`,
+        `${selectedDropdownStyle.textColor} ${selectedDropdownStyle.bgColor} ${selectedDropdownStyle.borderColor}`,
         `${selectedDropdownStyle.borderColor}` !== 'border-none'
           ? 'extra_width -mx-[13px]'
           : 'w-full -mx-[12px]',
@@ -47,7 +51,7 @@
         :key="option.value"
         class="flex h-full px-3 py-1.5 items-center last:rounded-b-lg"
         :class="[
-          `${selectedDropdownStyle.hoverStyle.bgColor} ${selectedDropdownStyle.hoverStyle.txtColor} ${selectedDropdownStyle.hoverStyle.borderColor}`,
+          `${selectedDropdownStyle.hoverStyle.textColor} ${selectedDropdownStyle.hoverStyle.bgColor} ${selectedDropdownStyle.hoverStyle.borderColor}`,
           disabled ? 'cursor-normal' : 'cursor-pointer',
         ]"
         @click="selectOption(option)"
@@ -70,56 +74,67 @@ import { computed, onMounted, onUnmounted, ref, toRefs, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 type PseudoStyle = {
-  txtColor: string;
+  textColor: string;
   bgColor: string;
   borderColor: string;
 };
-const defaultHoverStyle: PseudoStyle = {
-  txtColor: "hover:text-accent-normal",
-  bgColor: "hover:bg-accent-light",
-  borderColor: "border-text-body",
-};
-const normalAccentHoverStyle: PseudoStyle = {
-  txtColor: "hover:text-accent-normal",
-  bgColor: "hover:bg-accent-light",
-  borderColor: "border-none",
-};
-const defaultDisabledStyle: PseudoStyle = {
-  txtColor: "text-text-light",
-  bgColor: "bg-neutral-lightest",
-  borderColor: "border-text-light",
-};
-const normalAccentDisabledStyle: PseudoStyle = {
-  txtColor: "text-text-light",
-  bgColor: "bg-neutral-lightest",
-  borderColor: "border-none",
-};
-
 type Dropdown = {
+  textColor: string;
   bgColor: string;
-  txtColor: string;
   borderColor: string;
   hoverStyle: PseudoStyle;
   disabledStyle: PseudoStyle;
 };
 const defaultDropdown: Dropdown = {
+  textColor: "text-text-body",
   bgColor: "bg-neutral-white",
-  txtColor: "text-text-body",
+  borderColor: "border-none",
+  hoverStyle: {
+    textColor: "hover:text-accent-normal",
+    bgColor: "hover:bg-accent-light",
+    borderColor: "hover:border-none",
+  },
+  disabledStyle: {
+    textColor: "text-text-light",
+    bgColor: "bg-neutral-lightest",
+    borderColor: "border-none",
+  },
+};
+const defaultWithBorderDropdown: Dropdown = {
+  textColor: defaultDropdown.textColor,
+  bgColor: defaultDropdown.bgColor,
   borderColor: "border-text-body",
-  hoverStyle: defaultHoverStyle,
-  disabledStyle: defaultDisabledStyle,
+  hoverStyle: {
+    textColor: defaultDropdown.hoverStyle.textColor,
+    bgColor: defaultDropdown.hoverStyle.bgColor,
+    borderColor: "hover:border-text-body",
+  },
+  disabledStyle: {
+    textColor: defaultDropdown.disabledStyle.textColor,
+    bgColor: defaultDropdown.disabledStyle.bgColor,
+    borderColor: "border-text-light",
+  },
 };
 const normalAccentDropdown: Dropdown = {
+  textColor: "text-neutral-white",
   bgColor: "bg-accent-normal",
-  txtColor: "text-neutral-white",
   borderColor: "border-none",
-  hoverStyle: normalAccentHoverStyle,
-  disabledStyle: normalAccentDisabledStyle,
+  hoverStyle: {
+    textColor: "hover:text-accent-normal",
+    bgColor: "hover:bg-accent-light",
+    borderColor: "hover:border-none",
+  },
+  disabledStyle: {
+    textColor: "text-text-light",
+    bgColor: "bg-neutral-lightest",
+    borderColor: "border-none",
+  },
 };
 
-type DropdownStyle = "default" | "normalAccent";
+type DropdownStyle = "default" | "defaultWithBorder" | "normalAccent";
 const dropdownStyles: Record<DropdownStyle, Dropdown> = {
   default: defaultDropdown,
+  defaultWithBorder: defaultWithBorderDropdown,
   normalAccent: normalAccentDropdown,
 };
 
@@ -127,12 +142,14 @@ const props = withDefaults(
   defineProps<{
     modelValue: DropdownOption | undefined;
     options: DropdownOption[];
-    dropdownStyle: DropdownStyle;
     label?: string;
+    labelAlignment?: "left" | "right";
+    dropdownStyle: DropdownStyle;
     disable?: boolean;
   }>(),
   {
     label: "",
+    labelAlignment: "left",
     disable: false,
   }
 );
@@ -174,7 +191,9 @@ const collapseDropdown = (event: MouseEvent) => {
 };
 
 watch(modelValue, (value) =>
-  value === undefined ? (selectedOption.value = defaultOption) : undefined
+  value === undefined
+    ? (selectedOption.value = defaultOption)
+    : (selectedOption.value = value)
 );
 watch(selectedOption, (value) => emit("update:modelValue", value));
 

@@ -94,8 +94,8 @@
   },
   "library": {
     "search": "Search",
-    "items": "Items",
-    "sort": "Order by",
+    "items": "items",
+    "sort": "order by",
     "loading": "Loading"
   },
   "confirmation": {
@@ -151,5 +151,9 @@
   },
   "dropdown": {
     "select-option": "selecteer optie"
+  },
+  "pagination": {
+    "page": "pagina",
+    "of": "van"
   }
 }

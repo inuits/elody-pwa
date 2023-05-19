@@ -2,6 +2,7 @@
   <div class="flex items-center rounded-2xl p-3 h-full bg-neutral-white">
     <div class="w-[10rem]">
       <BaseButtonNew
+        class="font-bold"
         :label="`${$t('bulk-operations.edit')} ${selectedItemsCount} ${$t(
           'bulk-operations.items'
         )}`"
