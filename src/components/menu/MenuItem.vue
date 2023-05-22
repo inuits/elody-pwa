@@ -3,9 +3,9 @@
     <div
       v-show="menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
       @click="handleClick"
-      class="flex flex-row items-center ml-3 h-9 hover:text-accent-normal mt-3 cursor-pointer"
+      class="flex flex-row items-center ml-3 h-9 hover:text-accent-accent mt-3 cursor-pointer"
       :class="{
-        'IsActive text-accent-normal rounded-lg':
+        'IsActive text-accent-accent rounded-lg':
           menuitem && isMenuItemActive(menuitem),
       }"
     >

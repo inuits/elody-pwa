@@ -90,7 +90,7 @@ const defaultDropdown: Dropdown = {
   bgColor: "bg-neutral-white",
   borderColor: "border-none",
   hoverStyle: {
-    textColor: "hover:text-accent-normal",
+    textColor: "hover:text-accent-accent",
     bgColor: "hover:bg-accent-light",
     borderColor: "hover:border-none",
   },
@@ -115,12 +115,12 @@ const defaultWithBorderDropdown: Dropdown = {
     borderColor: "border-text-light",
   },
 };
-const normalAccentDropdown: Dropdown = {
+const accentAccentDropdown: Dropdown = {
   textColor: "text-neutral-white",
-  bgColor: "bg-accent-normal",
+  bgColor: "bg-accent-accent",
   borderColor: "border-none",
   hoverStyle: {
-    textColor: "hover:text-accent-normal",
+    textColor: "hover:text-accent-accent",
     bgColor: "hover:bg-accent-light",
     borderColor: "hover:border-none",
   },
@@ -131,11 +131,11 @@ const normalAccentDropdown: Dropdown = {
   },
 };
 
-type DropdownStyle = "default" | "defaultWithBorder" | "normalAccent";
+type DropdownStyle = "default" | "defaultWithBorder" | "accentAccent";
 const dropdownStyles: Record<DropdownStyle, Dropdown> = {
   default: defaultDropdown,
   defaultWithBorder: defaultWithBorderDropdown,
-  normalAccent: normalAccentDropdown,
+  accentAccent: accentAccentDropdown,
 };
 
 const props = withDefaults(

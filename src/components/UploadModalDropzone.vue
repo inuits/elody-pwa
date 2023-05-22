@@ -30,7 +30,7 @@
           v-if="!modifyMetadata"
           :label="$t('dropzone.upload')"
           :icon="DamsIcons.PlusCircle"
-          button-style="normalAccent"
+          button-style="accentAccent"
           :disabled="isDisabledUploadButton"
           @click="uploadFiles"
         />
@@ -38,7 +38,7 @@
           v-if="modifyMetadata"
           :label="$t('dropzone.modifyMetadata')"
           :icon="DamsIcons.EditAlt"
-          button-style="normalAccent"
+          button-style="accentAccent"
         />
       </div>
     </div>
