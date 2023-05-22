@@ -24,14 +24,14 @@
     >
       <unicon
         v-if="auth.isAuthenticated.value === true"
-        @click="auth.logout()"
+        @click="performLogout()"
         :name="Unicons.SignOut.name"
         height="20"
         class="mt-1 menu-btn ml-4"
       />
       <span
         v-if="auth.isAuthenticated.value === true"
-        @click="auth.logout()"
+        @click="performLogout()"
         class="nav-item-label w-0 h-0 overflow-hidden px-4 font-bold"
       >
         {{ $t("navigation.log-out") }}
@@ -43,7 +43,17 @@
 <script lang="ts" setup>
 import { useAuth } from "session-vue-3-oidc-library";
 import { Unicons } from "@/types";
+import { useRoute } from "vue-router";
+
 const auth = useAuth();
+const route = useRoute();
+
+const performLogout = () => {
+  auth.logout();
+  if (route.meta.requiresAuth === true) {
+    auth.redirectToLogin();
+  }
+};
 </script>
 
 <style></style>
