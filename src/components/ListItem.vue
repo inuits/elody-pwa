@@ -6,7 +6,7 @@
       <BaseInputCheckbox
         class="text-center"
         v-model="isChecked"
-        :item-id="itemId"
+        :item="{ id: itemId, teaserMetadata }"
         :bulk-operations-context="bulkOperationsContext"
         input-style="accentNormal"
       />
@@ -32,7 +32,8 @@
       <div
         v-for="metadataItem in sortMetadata(teaserMetadata)"
         :key="metadataItem ? metadataItem.value : 'no-key'"
-        class="flex justify-start flex-col mx-2 break-words w-1/4"
+        class="flex justify-start flex-col mx-2 break-words"
+        :class="`${teaserMetadataWidth}`"
       >
         <template v-if="metadataItem">
           <span class="text-sm text-text-light">{{ metadataItem.key }}</span>
@@ -72,6 +73,7 @@ const props = withDefaults(
     bulkOperationsContext: Context;
     loading?: boolean;
     teaserMetadata?: MetadataAndRelation[];
+    teaserMetadataWidth?: string;
     media?: string;
     thumbIcon?: string;
     small?: boolean;
@@ -81,6 +83,7 @@ const props = withDefaults(
     itemId: "",
     loading: false,
     teaserMetadata: () => [],
+    teaserMetadataWidth: "w-1/4",
     media: "",
     thumbIcon: "",
     small: false,

@@ -27,6 +27,7 @@
 import {
   useBulkOperations,
   type Context,
+  type InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
 import { bulkSelectAllSizeLimit } from "@/main";
 import { computed, onMounted, watch } from "vue";
@@ -34,7 +35,7 @@ import { computed, onMounted, watch } from "vue";
 const props = withDefaults(
   defineProps<{
     modelValue: boolean;
-    itemId: string;
+    item: InBulkProcessableItem;
     bulkOperationsContext: Context;
     inputStyle: InputStyle;
     disabled?: boolean;
@@ -100,10 +101,8 @@ const handleItemSelection = () => {
     return;
 
   if (!inputValue.value)
-    enqueueItemForBulkProcessing(props.bulkOperationsContext, {
-      id: props.itemId,
-    });
-  else dequeueItemForBulkProcessing(props.bulkOperationsContext, props.itemId);
+    enqueueItemForBulkProcessing(props.bulkOperationsContext, props.item);
+  else dequeueItemForBulkProcessing(props.bulkOperationsContext, props.item.id);
 
   inputValue.value = !inputValue.value;
 };
@@ -115,12 +114,12 @@ const divSelectedBgColor = computed<string>(() =>
 
 onMounted(
   () =>
-    (inputValue.value = isEnqueued(props.bulkOperationsContext, props.itemId))
+    (inputValue.value = isEnqueued(props.bulkOperationsContext, props.item.id))
 );
 
 watch(
   contextWhereSelectionEventIsTriggered,
   () =>
-    (inputValue.value = isEnqueued(props.bulkOperationsContext, props.itemId))
+    (inputValue.value = isEnqueued(props.bulkOperationsContext, props.item.id))
 );
 </script>
