@@ -6,7 +6,7 @@
       <BreadCrumbs />
       <EditToggle v-if="auth.isAuthenticated.value === true" />
     </div>
-    <SearchBar />
+    <SearchBar v-if="showSearch" />
   </div>
 </template>
 
@@ -15,6 +15,9 @@ import BreadCrumbs from "@/components/BreadCrumbs.vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import SearchBar from "./SearchBar.vue";
 import EditToggle from "./EditButtons.vue";
+import { inject } from "vue";
 
 const auth = useAuth();
+const config: any = inject("config");
+const showSearch = config.features.hasSimpleSearch;
 </script>
