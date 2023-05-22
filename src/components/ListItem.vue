@@ -1,17 +1,14 @@
 <template>
   <li
-    class="flex items-center gap-6 mb-2 px-8 py-4 bg-neutral-white border-[1px] border-neutral-light rounded"
+    class="flex items-center gap-6 mb-2 px-8 py-4 bg-neutral-white border-[1px] border-neutral-light rounded cursor-pointer"
   >
-    <div
-      class="flex-none flex items-center justify-center w-10 h-10"
-      :class="[{ 'bg-accent-normal': isChecked }]"
-    >
-      <input
-        type="checkbox"
-        class="form-checkbox h-5 w-5 rounded-sm border-gray-300 checked:bg-neutral-check checked:bg-opacity-30 checked:border-blue-200"
-        :checked="isChecked"
-        @change.stop="handleItemSelection"
-        @click.stop
+    <div>
+      <BaseInputCheckbox
+        class="text-center"
+        v-model="isChecked"
+        :item-id="itemId"
+        :bulk-operations-context="bulkOperationsContext"
+        input-style="accentNormal"
       />
     </div>
 
@@ -63,12 +60,9 @@
 
 <script lang="ts" setup>
 import type { MetadataAndRelation } from "../generated-types/queries";
-import {
-  type Context,
-  useBulkOperations,
-} from "@/composables/useBulkOperations";
-import { bulkSelectAllSizeLimit } from "@/main";
-import { computed, ref, watch } from "vue";
+import type { Context } from "@/composables/useBulkOperations";
+import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
+import { computed, ref } from "vue";
 import { customSort, stringIsUrl } from "@/helpers";
 import { Unicons } from "@/types";
 
@@ -94,31 +88,8 @@ const props = withDefaults(
   }
 );
 
-const {
-  contextWhereSelectionEventIsTriggered,
-  enqueueItemForBulkProcessing,
-  dequeueItemForBulkProcessing,
-  isEnqueued,
-  getEnqueuedItemCount,
-} = useBulkOperations();
-const isChecked = ref(isEnqueued(props.bulkOperationsContext, props.itemId));
+const isChecked = ref(false);
 const imageSrcError = ref(false);
-
-const handleItemSelection = () => {
-  if (
-    getEnqueuedItemCount(props.bulkOperationsContext) >= bulkSelectAllSizeLimit
-  )
-    return;
-  isChecked.value = !isChecked.value;
-
-  if (props.itemId)
-    if (isChecked.value)
-      enqueueItemForBulkProcessing(props.bulkOperationsContext, {
-        id: props.itemId,
-      });
-    else
-      dequeueItemForBulkProcessing(props.bulkOperationsContext, props.itemId);
-};
 
 function setNoImage() {
   imageSrcError.value = true;
@@ -137,12 +108,6 @@ function sortMetadata(metadata: MetadataAndRelation[]) {
 }
 
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
-
-watch(
-  contextWhereSelectionEventIsTriggered,
-  () =>
-    (isChecked.value = isEnqueued(props.bulkOperationsContext, props.itemId))
-);
 </script>
 
 <style lang="postcss" scoped>

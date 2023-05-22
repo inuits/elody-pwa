@@ -8,6 +8,8 @@
     v-model="inputValue"
     :type="type"
     :disabled="disabled"
+    @change.stop
+    @click.stop
   />
 </template>
 
