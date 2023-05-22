@@ -7,8 +7,18 @@
   >
     <div class="flex flex-wrap p-8 h-full">
       <div class="flex basis-full h-[94%]">
-        <div class="basis-[60%]">
-          <LibraryBar />
+        <div class="h-full basis-[60%]">
+          <div class="h-[40px] mb-6">
+            <LibraryBar />
+          </div>
+          <div class="h-[90%] overflow-y-auto">
+            <ListItem
+              v-for="item in getEnqueuedItems(context)"
+              :key="item.id"
+              :item-id="item.id"
+              :bulk-operations-context="context"
+            />
+          </div>
         </div>
         <div class="grow"></div>
       </div>
@@ -28,6 +38,7 @@ import type { Context } from "@/composables/useBulkOperations";
 import BaseModal from "@/components/base/BaseModal.vue";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
+import ListItem from "@/components/ListItem.vue";
 import { TypeModals } from "@/generated-types/queries";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useBulkOperations } from "@/composables/useBulkOperations";
@@ -36,7 +47,7 @@ defineProps<{
   context: Context;
 }>();
 
-const { getEnqueuedItemCount } = useBulkOperations();
+const { getEnqueuedItems, getEnqueuedItemCount } = useBulkOperations();
 const { getModal } = useAvailableModals();
 const modal = getModal(TypeModals.BulkOperations);
 </script>

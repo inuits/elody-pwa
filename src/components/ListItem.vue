@@ -1,32 +1,24 @@
 <template>
   <li
-    class="row bg-white border border-gray-300 rounded-md cursor-pointer flex items-center gap-6 px-4 py-3 hover:bg-gray-100 transition-colors duration-300"
-    :class="{ loading, 'mb-2 px-8': !small, 'px-2': small }"
-    data-test="meta-row"
+    class="flex items-center gap-6 mb-2 px-8 py-4 bg-neutral-white border-[1px] border-neutral-light rounded"
   >
-    <div class="flex items-center">
-      <div
-        class="flex-none w-11 h-11 bg-opacity-50 flex items-center justify-center"
-        :class="{ 'bg-neutral-check bg-opacity-30 rounded': isChecked }"
-      >
-        <input
-          type="checkbox"
-          class="form-checkbox h-5 w-5 rounded-sm border-gray-300 checked:bg-neutral-check checked:bg-opacity-30 checked:border-blue-200"
-          :checked="isChecked"
-          @change.stop="handleItemSelection"
-          @click.stop
-        />
-      </div>
+    <div
+      class="flex-none flex items-center justify-center w-10 h-10"
+      :class="[{ 'bg-accent-normal': isChecked }]"
+    >
+      <input
+        type="checkbox"
+        class="form-checkbox h-5 w-5 rounded-sm border-gray-300 checked:bg-neutral-check checked:bg-opacity-30 checked:border-blue-200"
+        :checked="isChecked"
+        @change.stop="handleItemSelection"
+        @click.stop
+      />
     </div>
 
-    <div class="flex items-center"></div>
-    <div
-      class="flex w-full items-center"
-      :class="{ 'flex-col': small && !thumbIcon }"
-    >
+    <div class="flex items-center">
       <img
         v-if="media && !imageSrcError"
-        class="h-10 w-10 object-cover mr-4 rounded-sm outline-none shadow-sm self-center"
+        class="h-10 w-10 object-cover self-center outline-none"
         :src="
           mediaIsLink ? media : `/api/iiif/3/${media}/square/100,/0/default.jpg`
         "
@@ -35,32 +27,36 @@
       <unicon
         v-if="(thumbIcon && !media) || (imageSrcError && thumbIcon)"
         :name="thumbIcon"
-        class="h-10 w-10 p-1 text-neutral-700 mr-4 rounded-sm outline-none shadow-sm self-center"
+        class="h-10 w-10 self-center outline-none text-text-body"
       />
-      <div class="flex w-full" :class="small ? 'flex-col' : ''">
-        <div
-          v-for="metaItem in sortMetadata(teaserMetadata)"
-          :key="metaItem ? metaItem.value : 'no-key'"
-          class="col"
-          :class="small ? 'w-full' : 'w-1/4'"
-        >
-          <template v-if="metaItem">
-            <span class="label" data-test="meta-label">{{ metaItem.key }}</span>
-            <span
-              v-if="!stringIsUrl(metaItem.value)"
-              class="info"
-              data-test="meta-info"
-              >{{ metaItem.value }}
-            </span>
-            <span v-else class="info underline" data-test="meta-info">
-              <a :href="metaItem.value" target="_blank">{{ metaItem.key }}</a>
-            </span>
-          </template>
-        </div>
+    </div>
+
+    <div class="flex items-center w-full">
+      <div
+        v-for="metadataItem in sortMetadata(teaserMetadata)"
+        :key="metadataItem ? metadataItem.value : 'no-key'"
+        class="flex justify-start flex-col mx-2 w-1/4"
+      >
+        <template v-if="metadataItem">
+          <span class="text-sm text-text-light">{{ metadataItem.key }}</span>
+          <span v-if="!stringIsUrl(metadataItem.value)" class="info"
+            >{{ metadataItem.value }}
+          </span>
+          <span v-else class="info underline">
+            <a :href="metadataItem.value" target="_blank">{{
+              metadataItem.key
+            }}</a>
+          </span>
+        </template>
       </div>
     </div>
-    <div class="flex flex-row" data-test="action-slot">
-      <slot name="">&gt;</slot>
+    <div class="flex flex-row">
+      <slot>
+        <unicon
+          :name="Unicons.AngleRight.name"
+          class="h-5.5 w-5.5 text-text-body"
+        />
+      </slot>
     </div>
   </li>
 </template>
@@ -72,8 +68,9 @@ import {
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { bulkSelectAllSizeLimit } from "@/main";
-import { customSort, stringIsUrl } from "@/helpers";
 import { computed, ref, watch } from "vue";
+import { customSort, stringIsUrl } from "@/helpers";
+import { Unicons } from "@/types";
 
 const props = withDefaults(
   defineProps<{
@@ -149,29 +146,7 @@ watch(
 </script>
 
 <style lang="postcss" scoped>
-.row {
-  @apply flex justify-between py-4;
-  @apply bg-neutral-0 hover:bg-neutral-10;
-  @apply border border-neutral-50 rounded cursor-pointer;
-  @apply transition-colors duration-300 hover:shadow-sm;
-}
-
-.col {
-  @apply flex justify-start flex-col px-1;
-}
-
-.label {
-  @apply rounded text-xs text-neutral-60;
-}
-
 .info {
-  @apply mt-0.5 rounded text-sm text-neutral-700;
-}
-
-.row.loading {
-  @apply animate-pulse;
-  .col span {
-    @apply bg-neutral-20 text-neutral-20;
-  }
+  @apply mt-0.5 text-sm text-text-body;
 }
 </style>
