@@ -26,6 +26,7 @@
   --color-neutral-700: theme("colors.neutral.700");
   --color-neutral-800: theme("colors.neutral.800");
   --color-neutral-900: theme("colors.neutral.900");
+  --color-neutral-black: theme("colors.neutral.black");
   --color-neutral-white: theme("colors.neutral.white");
   --color-neutral-lightest: theme("colors.neutral.lightest");
   --color-neutral-light: theme("colors.neutral.light");
@@ -46,14 +47,14 @@
     color: theme("colors.text.body");
   }
 
-  .subtitle{
+  .subtitle {
     font-size: 18px;
     font-weight: bold;
     color: theme("colors.text.body");
   }
 }
 
-@layer utilities{
+@layer utilities {
   .w-1\/10 {
     width: 10%;
   }
@@ -103,5 +104,4 @@
         #f4f5f7
       );
   }
-  
 }

@@ -14,7 +14,14 @@
         :name="Unicons[icon].name"
         height="18"
       />
-      <CustomIcon v-else :icon="icon" :size="24" color="text-accent-normal" />
+      <CustomIcon
+        v-else
+        :icon="icon"
+        :size="24"
+        :color="
+          menuitem && isMenuItemActive(menuitem) ? 'accent-normal' : 'text-body'
+        "
+      />
       <span class="nav-item-label w-0 h-0 overflow-hidden px-4 font-bold">
         {{ menuitem?.label }}
       </span>
