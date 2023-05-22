@@ -32,7 +32,7 @@
       <div
         v-for="metadataItem in sortMetadata(teaserMetadata)"
         :key="metadataItem ? metadataItem.value : 'no-key'"
-        class="flex justify-start flex-col mx-2 w-1/4"
+        class="flex justify-start flex-col mx-2 break-words w-1/4"
       >
         <template v-if="metadataItem">
           <span class="text-sm text-text-light">{{ metadataItem.key }}</span>
