@@ -19,7 +19,6 @@
               :teaser-metadata="item.teaserMetadata"
               :bulk-operations-context="context"
               :thumb-icon="getThumbnail(item)"
-              teaser-metadata-width="w-1/3"
             />
           </div>
         </div>
