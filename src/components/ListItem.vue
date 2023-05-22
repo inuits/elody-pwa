@@ -32,8 +32,7 @@
       <div
         v-for="metadataItem in sortMetadata(teaserMetadata)"
         :key="metadataItem ? metadataItem.value : 'no-key'"
-        class="flex justify-start flex-col mx-2 break-words"
-        :class="`${teaserMetadataWidth}`"
+        class="flex justify-start flex-col mx-2 break-words w-1/4"
       >
         <template v-if="metadataItem">
           <span class="text-sm text-text-light">{{ metadataItem.key }}</span>
@@ -73,7 +72,6 @@ const props = withDefaults(
     bulkOperationsContext: Context;
     loading?: boolean;
     teaserMetadata?: MetadataAndRelation[];
-    teaserMetadataWidth?: string;
     media?: string;
     thumbIcon?: string;
     small?: boolean;
@@ -83,7 +81,6 @@ const props = withDefaults(
     itemId: "",
     loading: false,
     teaserMetadata: () => [],
-    teaserMetadataWidth: "w-1/4",
     media: "",
     thumbIcon: "",
     small: false,
