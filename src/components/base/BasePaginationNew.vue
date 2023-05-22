@@ -17,7 +17,7 @@
 
     <span>{{ $t("pagination.page") }}</span>
     <div class="w-11">
-      <BaseInputField
+      <BaseInputTextNumber
         class="text-center"
         v-model="currentPage"
         type="number"
@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-import BaseInputField from "@/components/base/BaseInputField.vue";
+import BaseInputTextNumber from "@/components/base/BaseInputTextNumber.vue";
 import { ref, watch } from "vue";
 import { Unicons } from "@/types";
 
