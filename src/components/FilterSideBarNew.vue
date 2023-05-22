@@ -181,20 +181,31 @@ watch(
   },
   { immediate: true }
 );
+
 onResult((t) => {
   if (
     clickedFilter.value?.type === "selection" ||
-    clickedFilter.value?.type === "MultiSelectInput"
+    clickedFilter.value?.type === "SelectionInput"
   ) {
     t.data?.Entities.results.forEach((e) => {
       let titles = e.teaserMetadata.filter((f) => f.key === "title");
       if (titles.length > 0) {
         let title = titles[0];
-        let updatedOptions = [{ value: title.label, label: title.value }];
         clickedFilter.value = {
           ...clickedFilter.value,
-          options: [...clickedFilter.value.options, ...updatedOptions],
+          options: [{ value: title.label, label: title.value }],
         };
+        queryVariables.advancedSearchValue = [
+          {
+            type: "SelectionInput",
+            key: "type",
+            selectionInput: {
+              value: [title.value],
+            },
+          },
+        ];
+        console.log("Clicked filter waarde : ", clickedFilter.value);
+        console.log("Dit is de queryVariable", queryVariables);
       }
     });
   }
@@ -206,13 +217,14 @@ const getFilterOptionsWhenNoOptionsAvailable = (
   clickedFilter.value = advancedFilter;
   queryVariables.advancedSearchValue = [
     {
-      type: "MultiSelectInput",
+      type: "SelectionInput",
       key: "type",
-      multiSelectInput: {
+      selectionInput: {
         value: [advancedFilter.key],
       },
     },
   ];
+  console.log("dit is vanuit de methode :", queryVariables.advancedSearchValue);
 };
 </script>
 <style></style>

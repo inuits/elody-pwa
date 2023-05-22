@@ -2,7 +2,7 @@ import { AdvancedInputType, type Definition } from "@/generated-types/queries";
 import type {
   FilterInput,
   MinMaxInput,
-  MultiSelectInput,
+  SelectionInput,
 } from "@/generated-types/queries";
 import { useSavedSearchHelper } from "./useSavedSearchHelper";
 
@@ -34,14 +34,14 @@ export const defaultReturnTextObject = (
 
 export const defaultReturnMultiSelectObject = (
   key: string,
-  value: MultiSelectInput = { value: [], AndOrValue: true }
+  value: SelectionInput = { value: [], AndOrValue: true }
 ): FilterInList => {
   const filterObj: FilterInList = {
     isActive: value.value && value.value.length !== 0 ? true : false,
     input: {
-      type: AdvancedInputType.MultiSelectInput,
+      type: AdvancedInputType.SelectionInput,
       key,
-      multiSelectInput: value,
+      selectionInput: value,
     },
   };
   return filterObj;
@@ -84,12 +84,12 @@ export const clearAdvancedSearchInput = (
       case AdvancedInputType.MinMaxInput:
         input[index] = defaultReturnMinMaxObject(filter.input.key);
         break;
-      case AdvancedInputType.MultiSelectInput:
+      case AdvancedInputType.SelectionInput:
         // @ts-ignore
-        if (input[index]?.input?.multiSelectInput?.value) {
+        if (input[index]?.input?.selectionInput?.value) {
           // @ts-ignore
           if (
-            input[index]?.input?.multiSelectInput?.value !== acceptedEntityTypes
+            input[index]?.input?.selectionInput?.value !== acceptedEntityTypes
           ) {
             input[index] = defaultReturnMultiSelectObject(filter.input.key);
           }
@@ -129,8 +129,8 @@ const filterToInputFilter = (filter: Definition): FilterInput => {
     case AdvancedInputType.TextInput:
       filterInput.textInput = filter.textInput;
       break;
-    case AdvancedInputType.MultiSelectInput:
-      filterInput.multiSelectInput = filter.multiSelectInput;
+    case AdvancedInputType.SelectionInput:
+      filterInput.selectionInput = filter.selectionInput;
       break;
     case AdvancedInputType.MinMaxInput:
       filterInput.minMaxInput = filter.minMaxInput;
