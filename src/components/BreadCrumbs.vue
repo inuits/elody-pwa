@@ -13,7 +13,7 @@
         <div v-for="(menuItem, index) in menuItems" :key="index">
           <div
             v-if="
-              visitedPagesOptions[0].label ===
+              visitedPagesOptions[0]?.label ===
               menuItem.typeLink?.route?.destination
             "
           >
@@ -62,7 +62,7 @@
       <div v-for="(menuItem, index) in menuItems" :key="index">
         <div
           v-if="
-            visitedPagesOptions[0].label ===
+            visitedPagesOptions[0]?.label ===
             menuItem.typeLink?.route?.destination
           "
         >
