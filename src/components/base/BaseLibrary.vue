@@ -433,10 +433,13 @@ export default defineComponent({
 
     const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
       useBulkOperations();
-    const bulkSelect = (items: Entity[] = entities.value) => {
+    const bulkSelect = (items = entities.value) => {
       for (let entity of items)
         enqueueItemForBulkProcessing(props.bulkOperationsContext, {
           id: entity.id,
+          teaserMetadata: entity.teaserMetadata?.flatMap(
+            (metadata) => metadata ?? []
+          ),
         });
 
       triggerBulkSelectionEvent(props.bulkOperationsContext);

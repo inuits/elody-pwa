@@ -1,3 +1,4 @@
+import type { MetadataAndRelation } from "@/generated-types/queries";
 import { bulkSelectAllSizeLimit } from "@/main";
 import { ref } from "vue";
 
@@ -7,7 +8,10 @@ export type Context =
   | "Mediafiles"
   | "SingleMediafile"
   | "History";
-export type InBulkProcessableItem = { id: string };
+export type InBulkProcessableItem = {
+  id: string;
+  teaserMetadata?: MetadataAndRelation[];
+};
 const items = ref<Record<Context, InBulkProcessableItem[]>>({
   Home: [],
   SingleEntity: [],
