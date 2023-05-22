@@ -1,9 +1,9 @@
 <template>
   <div
-    class="flex justify-between items-center rounded-md p-4 bg-neutral-white alignment-nested-divs"
+    class="flex justify-between items-center p-4 bg-neutral-white rounded alignment-nested-divs"
   >
     <div class="flex justify-start">
-      <div class="px-2 rounded-md bg-accent-light text-accent-normal">
+      <div class="px-2 rounded-md bg-accent-normal text-neutral-white">
         <span>
           <span class="font-bold"> {{ getEnqueuedItemCount(context) }} </span
           >/{{ totalItemsCount }}
@@ -45,7 +45,7 @@
       <BaseDropdownNew
         v-model="selectedBulkOperation"
         :options="bulkOperations"
-        dropdown-style="normalAccent"
+        dropdown-style="accentAccent"
       />
     </div>
   </div>
@@ -129,7 +129,7 @@ watch(
 }
 
 .select-actions {
-  @apply text-accent-normal underline cursor-pointer select-none;
+  @apply text-accent-accent underline cursor-pointer select-none;
 }
 
 .disabled-select-actions {

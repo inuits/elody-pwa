@@ -7,7 +7,7 @@
           'bulk-operations.items'
         )}`"
         :icon="DamsIcons.Edit"
-        button-style="normalAccent"
+        button-style="accentAccent"
         button-size="small"
         @click="() => emit('submit')"
       />

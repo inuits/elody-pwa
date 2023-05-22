@@ -15,7 +15,15 @@ module.exports = {
       },
       accent: {
         light: "#DCF4F9",
-        normal: "#02C6F2",
+        normal: "#6BC6B3",
+        accent: "#0CB2BC",
+      },
+      text: {
+        light: "#355BA9",
+        body: "#003A52",
+      },
+      background: {
+        frosted: "rgba(220, 244, 249, 0.25)",
       },
       neutral: {
         0: "#FFFFFF",
@@ -40,15 +48,6 @@ module.exports = {
         white: "#FFFFFF",
         lightest: "#F2F7F8",
         light: "#E8EEF0",
-        blue: "#22D3EE",
-        check: '#02C6F2',
-      },
-      text: {
-        light: "#6795A2",
-        body: "#052737",
-      },
-      background: {
-        frosted: "rgba(220, 244, 249, 0.25)",
       },
       blue: {
         50: "#DEEBFF",
