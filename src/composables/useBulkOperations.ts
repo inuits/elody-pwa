@@ -40,6 +40,12 @@ export const useBulkOperations = () => {
     triggerBulkSelectionEvent(context);
   };
 
+  const getEnqueuedItems = (
+    context: Context,
+    skip: number = 0,
+    limit: number = 0
+  ) => items.value[context];
+
   const getEnqueuedItemCount = (context: Context) =>
     items.value[context]?.length ?? 0;
 
@@ -56,6 +62,7 @@ export const useBulkOperations = () => {
     enqueueItemForBulkProcessing,
     dequeueItemForBulkProcessing,
     dequeueAllItemsForBulkProcessing,
+    getEnqueuedItems,
     getEnqueuedItemCount,
     isEnqueued,
     triggerBulkSelectionEvent,
