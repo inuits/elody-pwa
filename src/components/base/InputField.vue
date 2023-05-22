@@ -30,7 +30,7 @@ import { InputFieldTypes } from "@/generated-types/queries";
 export const lableStyle = 'ml-1 text-neutral-700 text-sm"';
 export const inputContainerStyle = "flex flex-row bg-neutral-20 rounded";
 export const inputStyle =
-  "w-full rounded min-w-48 text-neutral-700 text-sm focus:outline-none";
+  "w-full min-w-48 text-neutral-700 text-sm focus:outline-none";
 
 export default defineComponent({
   name: "InputField",
