@@ -1,35 +1,63 @@
 <template>
   <div
-    class="flex justify-between items-center p-4 bg-neutral-white rounded alignment-nested-divs"
+    class="flex justify-between items-center rounded alignment-nested-divs"
+    :class="
+      useExtendedBulkOperations && itemsSelected
+        ? `p-3 bg-neutral-white`
+        : `py-3 bg-transparent`
+    "
   >
     <div class="flex justify-start">
-      <div class="px-2 rounded-md bg-accent-normal text-neutral-white">
+      <div
+        class="px-2 rounded-md"
+        :class="
+          useExtendedBulkOperations && itemsSelected
+            ? `text-neutral-white bg-accent-normal`
+            : `text-text-body bg-neutral-light`
+        "
+      >
         <span>
-          <span class="font-bold"> {{ getEnqueuedItemCount(context) }} </span
-          >/{{ totalItemsCount }}
-          {{ $t("bulk-operations.selected-items") }}
+          <span v-if="itemsSelected" class="font-bold"
+            >{{ getEnqueuedItemCount(context) }}/</span
+          >{{ totalItemsCount }}
+          {{ $t("bulk-operations.items") }}
+          <span v-if="itemsSelected">{{ $t("bulk-operations.selected") }}</span>
         </span>
       </div>
-      <div>
+      <div v-if="itemsSelected">
         <span
           class="select-actions"
+          :class="
+            useExtendedBulkOperations ? `text-accent-accent` : `text-text-body`
+          "
           @click="dequeueAllItemsForBulkProcessing(context)"
         >
           {{ $t("bulk-operations.undo-selection") }}
         </span>
       </div>
       <div>
-        <span class="select-actions" @click="() => emit('selectPage')">
+        <span
+          class="select-actions"
+          :class="
+            useExtendedBulkOperations && itemsSelected
+              ? `text-accent-accent`
+              : `text-text-body`
+          "
+          @click="() => emit('selectPage')"
+        >
           {{ $t("bulk-operations.select-page") }}
         </span>
       </div>
       <div>
         <span
-          :class="
+          :class="[
             totalItemsCount <= bulkSelectAllSizeLimit
               ? 'select-actions'
-              : 'disabled-select-actions'
-          "
+              : 'disabled-select-actions',
+            useExtendedBulkOperations && itemsSelected
+              ? `text-accent-accent`
+              : `text-text-body`,
+          ]"
           @click="
             () => {
               if (totalItemsCount <= bulkSelectAllSizeLimit) emit('selectAll');
@@ -41,7 +69,10 @@
       </div>
     </div>
 
-    <div class="flex justify-end w-60">
+    <div
+      v-if="useExtendedBulkOperations && itemsSelected"
+      class="flex justify-end w-60"
+    >
       <BaseDropdownNew
         v-model="selectedBulkOperation"
         :options="bulkOperations"
@@ -65,15 +96,16 @@ import {
   BulkOperationTypes,
   TypeModals,
 } from "@/generated-types/queries";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useBulkOperations } from "@/composables/useBulkOperations";
 import { useQuery } from "@vue/apollo-composable";
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     context: Context;
     totalItemsCount: number;
+    useExtendedBulkOperations: boolean;
   }>(),
   {
     totalItemsCount: 0,
@@ -100,6 +132,10 @@ const { getModal } = useAvailableModals();
 onResult((result) => {
   if (result.data) bulkOperations.value = result.data.BulkOperations.options;
 });
+
+const itemsSelected = computed<boolean>(
+  () => getEnqueuedItemCount(props.context) > 0
+);
 
 onMounted(() => {
   refetchEnabled.value = true;
@@ -129,7 +165,7 @@ watch(
 }
 
 .select-actions {
-  @apply text-accent-accent underline cursor-pointer select-none;
+  @apply underline cursor-pointer select-none;
 }
 
 .disabled-select-actions {
