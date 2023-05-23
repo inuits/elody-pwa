@@ -9,11 +9,17 @@
       <div class="flex basis-full h-[94%]">
         <div class="h-full basis-[60%]">
           <div class="h-[40px] mb-6">
-            <LibraryBar />
+            <LibraryBar
+              v-model:skip="skip"
+              v-model:limit="limit"
+              :total-items="getEnqueuedItemCount(context)"
+              @update:skip="loadItems()"
+              @update:limit="loadItems()"
+            />
           </div>
           <div class="h-[90%] overflow-y-hidden hover:overflow-y-auto">
             <ListItem
-              v-for="item in getEnqueuedItems(context)"
+              v-for="item in items"
               :key="item.id"
               :item-id="item.id"
               :teaser-metadata="item.teaserMetadata"
@@ -36,17 +42,21 @@
 </template>
 
 <script lang="ts" setup>
-import type { Context } from "@/composables/useBulkOperations";
+import type {
+  Context,
+  InBulkProcessableItem,
+} from "@/composables/useBulkOperations";
 import BaseModal from "@/components/base/BaseModal.vue";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import ListItem from "@/components/ListItem.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
-import { TypeModals } from "@/generated-types/queries";
+import { ref, watch } from "vue";
+import { ModalState, TypeModals } from "@/generated-types/queries";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useBulkOperations } from "@/composables/useBulkOperations";
 
-defineProps<{
+const props = defineProps<{
   context: Context;
 }>();
 
@@ -54,4 +64,21 @@ const { getEnqueuedItems, getEnqueuedItemCount } = useBulkOperations();
 const { getThumbnail } = useThumbnailHelper();
 const { getModal } = useAvailableModals();
 const modal = getModal(TypeModals.BulkOperations);
+const skip = ref<number>(1);
+const limit = ref<number>(1);
+
+const items = ref<InBulkProcessableItem[]>([]);
+const loadItems = () =>
+  (items.value = getEnqueuedItems(props.context, skip.value, limit.value));
+
+watch(
+  () => getModal(TypeModals.BulkOperations).modalState.value.state,
+  () => {
+    if (
+      getModal(TypeModals.BulkOperations).modalState.value.state ===
+      ModalState.Show
+    )
+      loadItems();
+  }
+);
 </script>
