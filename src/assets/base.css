@@ -51,7 +51,7 @@
   .subtitle {
     font-size: 18px;
     font-weight: bold;
-    color: theme("colors.text.body");
+    color: theme("colors.text.subtitle");
   }
 }
 
