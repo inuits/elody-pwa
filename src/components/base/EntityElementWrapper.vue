@@ -1,11 +1,13 @@
 <template>
-  <div class="bg-accent-light rounded-t-lg">
+  <div class="bg-accent-normal rounded-t-lg">
     <div class="flex items-center justify-between">
       <div class="flex p-2">
         <span class="subtitle mr-2">{{ label }}</span>
         <slot name="actions"></slot>
       </div>
-      <span @click="toggleElementCollapse(label)" class="p-2 cursor-pointer"
+      <span
+        @click="toggleElementCollapse(label)"
+        class="p-2 cursor-pointer text-text-subtitle"
         ><unicon
           :name="isCollapsed ? Unicons.AngleDown.name : Unicons.AngleUp.name"
       /></span>

@@ -21,6 +21,7 @@ module.exports = {
       text: {
         light: "#355BA9",
         body: "#003A52",
+        subtitle: "#FFFFFF"
       },
       background: {
         frosted: "rgba(220, 244, 249, 0.25)",
