@@ -55,16 +55,23 @@ import type {
   Context,
   InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
+import {
+  GetBulkOperationCsvExportKeysDocument,
+  ModalState,
+  TypeModals,
+  type DropdownOption,
+  type GetBulkOperationCsvExportKeysQuery,
+} from "@/generated-types/queries";
 import BaseModal from "@/components/base/BaseModal.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import ListItem from "@/components/ListItem.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
-import { ModalState, TypeModals } from "@/generated-types/queries";
 import { ref, watch } from "vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useBulkOperations } from "@/composables/useBulkOperations";
+import { useQuery } from "@vue/apollo-composable";
 
 const props = defineProps<{
   context: Context;
@@ -81,14 +88,31 @@ const items = ref<InBulkProcessableItem[]>([]);
 const loadItems = () =>
   (items.value = getEnqueuedItems(props.context, skip.value, limit.value));
 
+const refetchEnabled = ref<boolean>(false);
+const { refetch, onResult } = useQuery<GetBulkOperationCsvExportKeysQuery>(
+  GetBulkOperationCsvExportKeysDocument,
+  undefined,
+  () => ({ enabled: refetchEnabled.value })
+);
+const bulkOperationCsvExportKeys = ref<DropdownOption[]>([]);
+
+onResult((result) => {
+  if (result.data)
+    bulkOperationCsvExportKeys.value =
+      result.data.BulkOperationCsvExportKeys.options;
+});
+
 watch(
   () => getModal(TypeModals.BulkOperations).modalState.value.state,
   () => {
     if (
       getModal(TypeModals.BulkOperations).modalState.value.state ===
       ModalState.Show
-    )
+    ) {
+      refetchEnabled.value = true;
+      refetch();
       loadItems();
+    }
   }
 );
 </script>
