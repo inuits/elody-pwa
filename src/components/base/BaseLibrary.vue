@@ -66,6 +66,7 @@
         <BulkOperationsActionsBar
           :context="bulkOperationsContext"
           :total-items-count="totalEntityCount"
+          :use-extended-bulk-operations="true"
           @select-page="bulkSelect"
           @select-all="bulkSelect(allEntitiesResult.Entities.results)"
         />

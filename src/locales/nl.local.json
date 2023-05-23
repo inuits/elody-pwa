@@ -141,12 +141,12 @@
     }
   },
   "bulk-operations": {
-    "selected-items": "items geselecteerd",
     "undo-selection": "selectie ongedaan maken",
     "select-page": "selecteer pagina",
     "select-all": "selecteer alles",
     "edit": "Bewerk",
     "items": "items",
+    "selected": "geselecteerd",
     "cancel": "annuleren"
   },
   "dropdown": {

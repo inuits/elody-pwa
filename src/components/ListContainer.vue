@@ -1,5 +1,5 @@
 <template>
-  <ul class="bg-neutral-20 rounded-sm">
+  <ul class="px-0 py-1">
     <slot></slot>
   </ul>
 </template>
