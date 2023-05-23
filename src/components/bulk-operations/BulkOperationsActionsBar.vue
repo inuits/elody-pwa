@@ -1,11 +1,12 @@
 <template>
   <div
     class="flex justify-between items-center rounded alignment-nested-divs"
-    :class="
+    :class="[
       useExtendedBulkOperations && itemsSelected
-        ? `p-3 bg-neutral-white`
-        : `py-3 bg-transparent`
-    "
+        ? `px-3 bg-neutral-white`
+        : `bg-transparent`,
+      { 'py-3': useExtendedBulkOperations },
+    ]"
   >
     <div class="flex justify-start">
       <div
