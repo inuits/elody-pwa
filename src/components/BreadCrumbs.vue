@@ -9,7 +9,7 @@
       @click="isOpen = !isOpen"
       class="py-2 text-sm text-gray-800 text-right hover:bg-gray-100 cursor-pointer"
     >
-      <div v-if="visitedPagesOptions.length > 0">
+      <div v-if="menuItems.length && visitedPagesOptions.length > 0">
         <div
           v-if="
             visitedPagesOptions[0]?.label ===
@@ -17,7 +17,7 @@
           "
         >
           <unicon
-            v-if="menuItems.length && Unicons[menuItems[0].icon]"
+            v-if="Unicons[menuItems[0].icon]"
             :name="Unicons[menuItems[0].icon].name"
             class="w-6 h-6 mr-2"
           />
@@ -56,7 +56,7 @@
     <unicon :name="Unicons.AngleRight.name" />
   </span>
   <span class="font-serif text-xl leading-8 text-gray-800 font-bold">
-    <div v-if="entityTitle === ''">
+    <div v-if="menuItems.length && entityTitle === ''">
       <div
         v-if="
           visitedPagesOptions[0]?.label ===
