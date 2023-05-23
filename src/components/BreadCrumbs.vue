@@ -10,26 +10,24 @@
       class="py-2 text-sm text-gray-800 text-right hover:bg-gray-100 cursor-pointer"
     >
       <div v-if="visitedPagesOptions.length > 0">
-        <div v-for="(menuItem, index) in menuItems" :key="index">
-          <div
-            v-if="
-              visitedPagesOptions[0]?.label ===
-              menuItem.typeLink?.route?.destination
-            "
-          >
-            <unicon
-              v-if="menuItem.icon && Unicons[menuItem.icon]"
-              :name="Unicons[menuItem.icon].name"
-              class="w-6 h-6 mr-2"
-            />
-            <CustomIcon
-              v-else-if="menuItem.icon"
-              :icon="menuItem.icon"
-              :size="24"
-              color="text-accent-normal"
-              class="mr-2"
-            />
-          </div>
+        <div
+          v-if="
+            visitedPagesOptions[0]?.label ===
+            menuItems[0].typeLink?.route?.destination
+          "
+        >
+          <unicon
+            v-if="menuItems.length && Unicons[menuItems[0].icon]"
+            :name="Unicons[menuItems[0].icon].name"
+            class="w-6 h-6 mr-2"
+          />
+          <CustomIcon
+            v-else-if="menuItems[0].icon"
+            :icon="menuItems[0].icon"
+            :size="24"
+            color="text-body"
+            class="mr-2"
+          />
         </div>
       </div>
       <div v-else>
@@ -59,15 +57,13 @@
   </span>
   <span class="font-serif text-xl leading-8 text-gray-800 font-bold">
     <div v-if="entityTitle === ''">
-      <div v-for="(menuItem, index) in menuItems" :key="index">
-        <div
-          v-if="
-            visitedPagesOptions[0]?.label ===
-            menuItem.typeLink?.route?.destination
-          "
-        >
-          {{ menuItem.typeLink.route.destination }}
-        </div>
+      <div
+        v-if="
+          visitedPagesOptions[0]?.label ===
+          menuItems[0].typeLink?.route?.destination
+        "
+      >
+        {{ menuItems[0].typeLink.route.destination }}
       </div>
     </div>
     <div v-else>
