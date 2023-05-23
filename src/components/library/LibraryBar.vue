@@ -23,9 +23,9 @@
     </div>
     <div class="flex justify-end">
       <BasePaginationNew
-        :skip="1"
+        v-model:skip="skip"
         :limit="selectedPaginationLimitOption?.value ?? NaN"
-        :total-items="31"
+        :total-items="totalItems"
       />
     </div>
   </div>
@@ -47,6 +47,16 @@ import { ref, watch } from "vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useQuery } from "@vue/apollo-composable";
 
+defineProps<{
+  totalItems: number;
+}>();
+
+const emit = defineEmits<{
+  (event: "update:skip", skip: number): void;
+  (event: "update:limit", limit: number): void;
+}>();
+
+const skip = ref<number>(1);
 const { getModal } = useAvailableModals();
 
 const selectedPaginationLimitOption = ref<DropdownOption>();
@@ -68,6 +78,11 @@ onSortOptionsResult((result) => {
   selectedSortOption.value = sortOptions.value[0];
 });
 
+watch(skip, () => emit("update:skip", skip.value));
+watch(selectedPaginationLimitOption, () => {
+  skip.value = 1;
+  emit("update:limit", selectedPaginationLimitOption.value?.value);
+});
 watch(
   () => getModal(TypeModals.BulkOperations).modalState.value.state,
   () => {
@@ -77,6 +92,7 @@ watch(
     ) {
       selectedPaginationLimitOption.value = paginationLimitOptions.value[0];
       selectedSortOption.value = sortOptions.value[0];
+      skip.value = 1;
     }
   }
 );

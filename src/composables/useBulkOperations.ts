@@ -46,9 +46,9 @@ export const useBulkOperations = () => {
 
   const getEnqueuedItems = (
     context: Context,
-    skip: number = 0,
-    limit: number = 0
-  ) => items.value[context];
+    skip: number = 1,
+    limit: number = 1
+  ) => items.value[context].slice((skip - 1) * limit, skip * limit);
 
   const getEnqueuedItemCount = (context: Context) =>
     items.value[context]?.length ?? 0;
