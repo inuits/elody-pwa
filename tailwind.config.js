@@ -19,6 +19,7 @@ module.exports = {
         accent: "#0CB2BC",
       },
       text: {
+        disabled: "#6795A2",
         light: "#355BA9",
         body: "#003A52",
         subtitle: "#FFFFFF"

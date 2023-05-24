@@ -32,8 +32,8 @@ const defaultInput: Input = {
   bgColor: "bg-neutral-white",
   borderColor: "border-none",
   disabledStyle: {
-    textColor: "disabled:text-text-light",
-    bgColor: "disabled:bg-neutral-lightest",
+    textColor: "disabled:text-text-disabled",
+    bgColor: "disabled:bg-neutral-white",
     borderColor: "disabled:border-none",
   },
 };

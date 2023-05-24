@@ -7,7 +7,7 @@
   >
     <div class="flex flex-wrap p-8 h-full">
       <div class="flex basis-full gap-8 h-[94%]">
-        <div class="h-full basis-[60%]">
+        <div class="h-full basis-[56%]">
           <div class="h-[40px] mb-6">
             <LibraryBar
               v-model:skip="skip"
@@ -32,17 +32,35 @@
           <div class="flex items-center h-[40px] mb-6">
             <BulkOperationsActionsBar
               context="BulkOperationsCsvExport"
-              :total-items-count="10"
+              :total-items-count="csvExportOptions.length"
               :use-extended-bulk-operations="false"
+              @select-page="bulkSelect"
+              @select-all="bulkSelect"
             />
           </div>
-          <div class="h-[90%]"></div>
+          <div class="h-[90%]">
+            <BaseInputCheckbox
+              v-for="csvExportOption in csvExportOptions"
+              :key="csvExportOption.key.value"
+              :class="{ 'mb-2': csvExportOption.isSelected }"
+              v-model="csvExportOption.isSelected"
+              :label="csvExportOption.key.label"
+              :item="{ id: csvExportOption.key.value }"
+              bulk-operations-context="BulkOperationsCsvExport"
+              input-style="accentNormal"
+            />
+          </div>
         </div>
       </div>
       <div class="basis-full h-[55px]">
         <BulkOperationsSubmitBar
           :context="context"
           :selected-items-count="getEnqueuedItemCount(context)"
+          :is-disabled-button="
+            getEnqueuedItemCount('BulkOperationsCsvExport') === 0
+          "
+          :button-icon="DamsIcons.DocumentInfo"
+          button-label="Exporteer naar csv"
           @cancel="modal.closeModal()"
         />
       </div>
@@ -56,12 +74,14 @@ import type {
   InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
 import {
+  DamsIcons,
   GetBulkOperationCsvExportKeysDocument,
   ModalState,
   TypeModals,
   type DropdownOption,
   type GetBulkOperationCsvExportKeysQuery,
 } from "@/generated-types/queries";
+import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
@@ -77,7 +97,12 @@ const props = defineProps<{
   context: Context;
 }>();
 
-const { getEnqueuedItems, getEnqueuedItemCount } = useBulkOperations();
+const {
+  getEnqueuedItems,
+  getEnqueuedItemCount,
+  enqueueItemForBulkProcessing,
+  triggerBulkSelectionEvent,
+} = useBulkOperations();
 const { getThumbnail } = useThumbnailHelper();
 const { getModal } = useAvailableModals();
 const modal = getModal(TypeModals.BulkOperations);
@@ -94,12 +119,22 @@ const { refetch, onResult } = useQuery<GetBulkOperationCsvExportKeysQuery>(
   undefined,
   () => ({ enabled: refetchEnabled.value })
 );
-const bulkOperationCsvExportKeys = ref<DropdownOption[]>([]);
+const csvExportOptions = ref<{ isSelected: boolean; key: DropdownOption }[]>(
+  []
+);
+
+const bulkSelect = () => {
+  for (let csvExportOption of csvExportOptions.value)
+    enqueueItemForBulkProcessing("BulkOperationsCsvExport", {
+      id: csvExportOption.key.value,
+    });
+  triggerBulkSelectionEvent("BulkOperationsCsvExport");
+};
 
 onResult((result) => {
   if (result.data)
-    bulkOperationCsvExportKeys.value =
-      result.data.BulkOperationCsvExportKeys.options;
+    for (let key of result.data.BulkOperationCsvExportKeys.options)
+      csvExportOptions.value.push({ isSelected: false, key });
 });
 
 watch(

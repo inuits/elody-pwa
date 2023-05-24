@@ -15,7 +15,7 @@
   >
     <unicon
       v-if="props.icon !== DamsIcons.NoIcon"
-      class="-ml-0.5"
+      class="-ml-1"
       :name="Unicons[props.icon].name"
       :height="iconHeight"
     />
@@ -51,7 +51,7 @@ const defaultButton: Button = {
     bgColor: "active:bg-accent-light",
   },
   disabledStyle: {
-    textColor: "disabled:text-text-light",
+    textColor: "disabled:text-text-disabled",
     bgColor: "disabled:bg-neutral-lightest",
   },
 };
