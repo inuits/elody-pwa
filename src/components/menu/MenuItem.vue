@@ -60,18 +60,12 @@
 <script lang="ts" setup>
 import { ref, defineProps, watch } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
-import { useRouter } from "vue-router";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
 import { Unicons } from "@/types";
-import {
-  MenuItem,
-  TypeModals,
-  ModalState,
-  DamsIcons,
-} from "@/generated-types/queries";
+import { MenuItem, ModalState, DamsIcons } from "@/generated-types/queries";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { useAvailableModals } from "@/composables/useAvailableModals";
-import CustomIcon from "../CustomIcon.vue";
+import CustomIcon from "@/components/CustomIcon.vue";
 const {
   checkIfRouteOrModal,
   showdropdown,
@@ -81,7 +75,6 @@ const {
   resetSelectedMenuItem,
 } = useMenuHelper();
 
-const router = useRouter();
 const auth = useAuth();
 const menuSubitem = ref<Array<MenuItem>>([]);
 const { getModal } = useAvailableModals();

@@ -57,10 +57,7 @@
 </template>
 <script lang="ts" setup>
 import { ref, defineProps, defineEmits, watch, computed } from "vue";
-import type {
-  AdvancedFilter,
-  GetFilterOptionsDocument,
-} from "@/generated-types/queries";
+import type { AdvancedFilter } from "@/generated-types/queries";
 import {
   defaultReturnMultiSelectObject,
   type FilterInList,
@@ -131,6 +128,15 @@ watch(
           AndOrValue: isAnd.value,
         })
       );
+      if (clickedFilter.value.key === "museum") {
+        emit(
+          "update:value",
+          defaultReturnMultiSelectObject("type", {
+            value: clickedFilter.value.key,
+            AndOrValue: isAnd.value,
+          })
+        );
+      }
     }
   }
 );

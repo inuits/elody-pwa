@@ -13,7 +13,7 @@ export type FilterOptions = { label: string; value: string }[];
 export type AdvancedFilter = {
   key: string;
   label: string;
-  type: "text" | "multiselect" | "checklist" | "minmax";
+  type: "text" | "selection" | "checklist" | "minmax";
   isRelation: boolean;
   options: { label: string; value: string }[];
 };

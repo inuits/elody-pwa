@@ -10,6 +10,9 @@ export const initialFilters = ref<FilterInList[]>([]);
 
 export const clickedFilter = ref<AdvancedFilter[]>([]);
 
+export const refValue = ref<AdvancedFilter>({} as AdvancedFilter);
+export const refValue2 = ref<String>("");
+
 export const useFilterSideBarHelperNew = () => {
   const clearInitialFilters = (acceptedEntityTypes: string[]) => {
     initialFilters.value = clearAdvancedSearchInput(
@@ -26,5 +29,7 @@ export const useFilterSideBarHelperNew = () => {
     initialFilters,
     activeCount,
     clickedFilter,
+    refValue,
+    refValue2,
   };
 };

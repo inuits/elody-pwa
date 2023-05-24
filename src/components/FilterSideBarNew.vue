@@ -82,7 +82,6 @@ import FilterAccordionNew from "@/components/base/FilterAccordionNew.vue";
 import TextFilter from "@/components/filters/TextFilterNew.vue";
 import MinMaxFilter from "@/components/filters/MinmaxFilterNew.vue";
 import { useSavedSearchHelper } from "@/composables/useSavedSearchHelper";
-import type { FilterInList } from "@/composables/useFilterHelper";
 import { useQuery } from "@vue/apollo-composable";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { GetAdvancedFiltersDocument } from "@/generated-types/queries";
@@ -111,8 +110,14 @@ const componentMap: any = {
 const { pickedSavedSearch, clearTypename, setPickedSavedSearch } =
   useSavedSearchHelper();
 
-const { clearInitialFilters, initialFilters, activeCount, clickedFilter } =
-  useFilterSideBarHelperNew();
+const {
+  clearInitialFilters,
+  initialFilters,
+  activeCount,
+  clickedFilter,
+  refValue,
+  refValue2,
+} = useFilterSideBarHelperNew();
 
 const emit = defineEmits<{
   (event: "activeFilters", initialFilters: FilterInput[]): void;
@@ -127,7 +132,7 @@ const triggerInitialfilter = (event: any, index: number) => {
 };
 
 const applyFilters = () => {
-  const returnArray = initialFilters.value.map((filter: FilterInList) => {
+  const returnArray = initialFilters.value.map((filter: FilterInput) => {
     filter = JSON.parse(JSON.stringify(filter));
     clearTypename(filter.input);
     return filter.input;
@@ -164,13 +169,9 @@ const predefinedEntities = ref<PredefinedEntities>({
 
 const entities = ref<Asset[]>(predefinedEntities.value?.entities || []);
 
-const { refetch, onResult, result } = useQuery(
-  GetEntitiesDocument,
-  queryVariables,
-  {
-    notifyOnNetworkStatusChange: true,
-  }
-);
+const { onResult } = useQuery(GetEntitiesDocument, queryVariables, {
+  notifyOnNetworkStatusChange: true,
+});
 
 watch(
   () => predefinedEntities?.value.entities,
@@ -183,29 +184,21 @@ watch(
 );
 
 onResult((t) => {
-  if (
-    clickedFilter.value?.type === "selection" ||
-    clickedFilter.value?.type === "SelectionInput"
-  ) {
+  const clickedType = clickedFilter.value?.type;
+
+  if (clickedType === "selection" || clickedType === "SelectionInput") {
     t.data?.Entities.results.forEach((e) => {
-      let titles = e.teaserMetadata.filter((f) => f.key === "title");
+      const titles = e.teaserMetadata.filter((f) => f.key === "title");
+
       if (titles.length > 0) {
-        let title = titles[0];
+        const title = titles[0];
         clickedFilter.value = {
           ...clickedFilter.value,
           options: [{ value: title.label, label: title.value }],
         };
-        queryVariables.advancedSearchValue = [
-          {
-            type: "SelectionInput",
-            key: "type",
-            selectionInput: {
-              value: [title.value],
-            },
-          },
-        ];
-        console.log("Clicked filter waarde : ", clickedFilter.value);
-        console.log("Dit is de queryVariable", queryVariables);
+
+        refValue.value = clickedFilter.value;
+        refValue2.value = title;
       }
     });
   }
@@ -224,7 +217,6 @@ const getFilterOptionsWhenNoOptionsAvailable = (
       },
     },
   ];
-  console.log("dit is vanuit de methode :", queryVariables.advancedSearchValue);
 };
 </script>
 <style></style>
