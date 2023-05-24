@@ -44,7 +44,6 @@
 import { useAuth } from "session-vue-3-oidc-library";
 import { Unicons } from "@/types";
 import { useRoute } from "vue-router";
-import { e } from "vitest/dist/index-6e18a03a";
 
 const auth = useAuth();
 const route = useRoute();
