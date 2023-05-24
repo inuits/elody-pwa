@@ -1,12 +1,17 @@
 <template>
   <div class="flex items-center rounded-2xl p-3 h-full bg-neutral-white">
-    <div class="w-[10rem]">
+    <div class="min-w-[10rem]">
       <BaseButtonNew
         class="font-bold"
-        :label="`${$t('bulk-operations.edit')} ${selectedItemsCount} ${$t(
-          'bulk-operations.items'
-        )}`"
-        :icon="DamsIcons.Edit"
+        :label="
+          buttonLabel
+            ? buttonLabel
+            : `${$t('bulk-operations.edit')} ${selectedItemsCount} ${$t(
+                'bulk-operations.items'
+              )}`
+        "
+        :icon="buttonIcon"
+        :disabled="isDisabledButton"
         button-style="accentAccent"
         button-size="small"
         @click="() => emit('submit')"
@@ -30,9 +35,14 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 withDefaults(
   defineProps<{
     selectedItemsCount: number;
+    isDisabledButton: boolean;
+    buttonIcon: DamsIcons;
+    buttonLabel?: string;
   }>(),
   {
     selectedItemsCount: 0,
+    buttonIcon: DamsIcons.Edit,
+    buttonLabel: "",
   }
 );
 

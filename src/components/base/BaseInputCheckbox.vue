@@ -1,25 +1,30 @@
 <template>
-  <div
-    class="flex-none flex items-center justify-center w-10 h-10 rounded-lg"
-    :class="[
-      inputValue ? `${divSelectedBgColor}` : '',
-      { 'cursor-pointer': !disabled },
-    ]"
-    @change.stop
-    @click.stop="handleItemSelection"
-  >
-    <input
-      class="border-2 focus:ring-0"
+  <div class="flex items-center">
+    <div
+      class="flex-none flex items-center justify-center w-10 h-10 rounded-lg"
       :class="[
+        inputValue ? `${divSelectedBgColor}` : '',
         { 'cursor-pointer': !disabled },
-        { rounded: !inputValue },
-        `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
-        `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
       ]"
-      v-model="inputValue"
-      type="checkbox"
-      :disabled="disabled"
-    />
+      @change.stop
+      @click.stop="handleItemSelection"
+    >
+      <input
+        class="border-2 focus:ring-0"
+        :class="[
+          { 'cursor-pointer': !disabled },
+          { rounded: !inputValue },
+          `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
+          `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
+        ]"
+        v-model="inputValue"
+        type="checkbox"
+        :disabled="disabled"
+      />
+    </div>
+    <span v-if="label" :class="{ 'ml-2': inputValue }">
+      {{ label }}
+    </span>
   </div>
 </template>
 
@@ -35,12 +40,14 @@ import { computed, onMounted, watch } from "vue";
 const props = withDefaults(
   defineProps<{
     modelValue: boolean;
+    label?: string;
     item: InBulkProcessableItem;
     bulkOperationsContext: Context;
     inputStyle: InputStyle;
     disabled?: boolean;
   }>(),
   {
+    label: "",
     disabled: false,
   }
 );

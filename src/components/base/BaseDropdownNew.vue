@@ -49,7 +49,7 @@
       <li
         v-for="option in options"
         :key="option.value"
-        class="flex h-full px-3 py-1.5 items-center last:rounded-b-lg"
+        class="flex h-full px-3 py-1.5 items-center last:rounded-b-lg transition-colors duration-300"
         :class="[
           `${selectedDropdownStyle.hoverStyle.textColor} ${selectedDropdownStyle.hoverStyle.bgColor} ${selectedDropdownStyle.hoverStyle.borderColor}`,
           disabled ? 'cursor-normal' : 'cursor-pointer',
@@ -95,7 +95,7 @@ const defaultDropdown: Dropdown = {
     borderColor: "hover:border-none",
   },
   disabledStyle: {
-    textColor: "text-text-light",
+    textColor: "text-text-disabled",
     bgColor: "bg-neutral-lightest",
     borderColor: "border-none",
   },
@@ -112,23 +112,15 @@ const defaultWithBorderDropdown: Dropdown = {
   disabledStyle: {
     textColor: defaultDropdown.disabledStyle.textColor,
     bgColor: defaultDropdown.disabledStyle.bgColor,
-    borderColor: "border-text-light",
+    borderColor: "border-text-disabled",
   },
 };
 const accentAccentDropdown: Dropdown = {
   textColor: "text-neutral-white",
   bgColor: "bg-accent-accent",
   borderColor: "border-none",
-  hoverStyle: {
-    textColor: "hover:text-accent-accent",
-    bgColor: "hover:bg-accent-light",
-    borderColor: "hover:border-none",
-  },
-  disabledStyle: {
-    textColor: "text-text-light",
-    bgColor: "bg-neutral-lightest",
-    borderColor: "border-none",
-  },
+  hoverStyle: defaultDropdown.hoverStyle,
+  disabledStyle: defaultDropdown.disabledStyle,
 };
 
 type DropdownStyle = "default" | "defaultWithBorder" | "accentAccent";
