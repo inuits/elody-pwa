@@ -38,7 +38,7 @@
               @select-all="bulkSelect"
             />
           </div>
-          <div class="h-[90%]">
+          <div class="h-[90%] overflow-y-hidden hover:overflow-y-auto">
             <BaseInputCheckbox
               v-for="csvExportOption in csvExportOptions"
               :key="csvExportOption.key.value"
@@ -144,8 +144,10 @@ watch(
       getModal(TypeModals.BulkOperations).modalState.value.state ===
       ModalState.Show
     ) {
-      refetchEnabled.value = true;
-      refetch();
+      if (csvExportOptions.value.length <= 0) {
+        refetchEnabled.value = true;
+        refetch();
+      }
       loadItems();
     }
   }
