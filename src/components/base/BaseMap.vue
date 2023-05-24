@@ -6,6 +6,7 @@
         ref="map"
         v-model:zoom="zoom"
         :center="parsedMapData.coordinates"
+        @click="getMapCoordinates"
       >
         <l-tile-layer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -33,6 +34,7 @@
 <script lang="ts" setup>
 import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LMarker, LTooltip } from "@vue-leaflet/vue-leaflet";
+import type { LeafletMouseEvent } from "leaflet";
 import { computed, ref } from "vue";
 import EntityElementMetadata from "../EntityElementMetadata.vue";
 import type { MetadataAndRelation } from "@/generated-types/queries";
@@ -51,6 +53,12 @@ const parsedMapData = computed(() => {
     name: props.metadata.find((dataItem) => dataItem.key === "name")?.value,
   };
 });
+
+const getMapCoordinates = (e: LeafletMouseEvent | undefined) => {
+  if (e) {
+    console.log(e.latlng);
+  }
+};
 </script>
 
 <style scoped>

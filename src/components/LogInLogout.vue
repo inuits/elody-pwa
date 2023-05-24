@@ -43,18 +43,22 @@
 <script lang="ts" setup>
 import { useAuth } from "session-vue-3-oidc-library";
 import { Unicons } from "@/types";
-import { useRoute } from "vue-router";
+import { inject } from "vue";
+const config: any = inject("config");
 
 const auth = useAuth();
-const route = useRoute();
 
-const performLogout = () => {
-  auth.logout();
-  setTimeout(() => {
-    if (route.meta.requiresAuth === true) {
-      auth.redirectToLogin();
-    }
-  }, 100);
+const performLogout = (e: any) => {
+  e.preventDefault();
+  window.location.href = `${
+    config.oidc.baseUrl + config.oidc.logoutEndpoint
+  }?redirect_uri=${window.location.origin + window.location.pathname}`;
+  // auth.logout();
+  // setTimeout(() => {
+  //   if (route.meta.requiresAuth === true) {
+  //     auth.redirectToLogin();
+  //   }
+  // }, 100);
 };
 </script>
 
