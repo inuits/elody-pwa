@@ -3,8 +3,8 @@
 </template>
 
 <script lang="ts" setup>
-import ChecklistFilterNew from "@/components/filters/ChecklistFilterNew.vue";
-import MultiFilterNew from "@/components/filters/MultiFilterNew.vue";
+import ChecklistOptions from "@/components/filters/ChecklistOptions.vue";
+import AutocompleteOptions from "@/components/filters/AutoCompleteOptions.vue";
 import type { AdvancedFilter } from "@/composables/useFilterHelper";
 
 const props = defineProps<{
@@ -12,8 +12,8 @@ const props = defineProps<{
 }>();
 
 const componentMap: any = {
-  selection: MultiFilterNew,
-  checklist: ChecklistFilterNew,
+  selection: AutocompleteOptions,
+  checklist: ChecklistOptions,
 };
 
 const checkIfOptionsMoreThan10 = (): string => {
