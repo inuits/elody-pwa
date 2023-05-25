@@ -68,7 +68,7 @@ import type { PaginationInfo } from "../components/base/BasePagination.vue";
 import { getJobTypes, jobTypeLabels } from "../composables/useJobHelpers";
 import ListContainer from "../components/ListContainer.vue";
 import useRouteHelpers from "../composables/useRouteHelpers";
-import IconToggle from "../components/base/IconToggle.vue";
+import IconToggle from "../components/toggles/IconToggle.vue";
 import { Unicons } from "../types";
 
 type Filter = {
