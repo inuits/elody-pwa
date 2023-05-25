@@ -22,7 +22,7 @@
     </div>
     <div class="info bg-neutral-0 w-full p-4 z-50">
       <EntityElementMetadata
-        v-for="data in metadata"
+        v-for="data in parsedMetadata"
         :key="data.key"
         :label="data.label"
         :value="data.value"
@@ -45,11 +45,26 @@ const props = defineProps<{
 
 const zoom = ref<number>(15);
 
+const parsedMetadata = computed(() => {
+  const parsedData: any[] = [];
+  props.metadata.forEach((dataItem) => {
+    if (typeof dataItem.value === "string") {
+      parsedData.push(dataItem);
+    } else {
+      const newDataItem = { ...dataItem };
+      newDataItem.value = Object.values(dataItem.value).reverse().toString();
+      parsedData.push(newDataItem);
+    }
+  });
+  return parsedData;
+});
+
 const parsedMapData = computed(() => {
+  const locationdata = props.metadata.find(
+    (dataItem) => dataItem.key === "location"
+  )?.value;
   return {
-    coordinates: props.metadata
-      .find((dataItem) => dataItem.key === "location")
-      ?.value.split(","),
+    coordinates: [locationdata.longitude, locationdata.latitude],
     name: props.metadata.find((dataItem) => dataItem.key === "name")?.value,
   };
 });
