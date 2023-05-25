@@ -256,6 +256,7 @@ import GridItem from "../GridItem.vue";
 import { setCookie, getCookie } from "tiny-cookie";
 import useListItemHelper from "../../composables/useListItemHelper";
 import { bulkSelectAllSizeLimit } from "@/main";
+
 export type PredefinedEntities = {
   usePredefinedEntities: Boolean;
   entities: Asset[];
@@ -296,9 +297,6 @@ export default defineComponent({
     },
     hasSimpleSearch: Boolean,
     searchInputTypeOnDrawer: {
-      type: String as PropType<Maybe<SearchInputType>>,
-    },
-    searchInputType: {
       type: String as PropType<Maybe<SearchInputType>>,
     },
     enableSelection: {
@@ -393,15 +391,10 @@ export default defineComponent({
         order_by: selectedSortOption.value.value,
       },
       advancedSearchValue: [],
-      searchInputType: isDrawerHiding.value
-        ? props.searchInputType
-        : props.searchInputTypeOnDrawer,
+      searchInputType: props.searchInputTypeOnDrawer,
     });
 
     watch(isDrawerHiding, () => {
-      queryVariables.searchInputType = isDrawerHiding.value
-        ? props.searchInputType
-        : props.searchInputTypeOnDrawer;
       nextTick(() => {
         calculateGridColumns();
       });
@@ -458,9 +451,7 @@ export default defineComponent({
           order_by: selectedSortOption.value.value,
         },
         advancedSearchValue: [],
-        searchInputType: isDrawerHiding.value
-          ? props.searchInputType
-          : props.searchInputTypeOnDrawer,
+        searchInputType: props.searchInputTypeOnDrawer,
       },
       {
         enabled: true,
