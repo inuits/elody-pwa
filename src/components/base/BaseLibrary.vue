@@ -46,10 +46,15 @@
           />
           <NewBaseDropdown
             v-if="totalEntityCount > 1 && selectedSortOption"
-            class="ml-4"
+            class="mx-4"
             v-model="selectedSortOption"
             :options="sortOptions"
             :label="$t('library.sort')"
+          />
+          <SingleIconToggle
+            :icon-on="Unicons.AngleUp.name"
+            :icon-off="Unicons.AngleDown.name"
+            @update:checked="isAsc = !isAsc"
           />
         </div>
         <div class="flex-grow"></div>
@@ -256,6 +261,7 @@ import GridItem from "../GridItem.vue";
 import { setCookie, getCookie } from "tiny-cookie";
 import useListItemHelper from "../../composables/useListItemHelper";
 import { bulkSelectAllSizeLimit } from "@/main";
+import SingleIconToggle from "../toggles/SingleIconToggle.vue";
 
 export type PredefinedEntities = {
   usePredefinedEntities: Boolean;
@@ -277,6 +283,7 @@ export default defineComponent({
     GridItem,
     NewBaseDropdown,
     BulkOperationsActionsBar,
+    SingleIconToggle,
   },
   props: {
     advancedFiltersChoice: {
@@ -339,13 +346,16 @@ export default defineComponent({
       label: "",
       value: "",
     });
+    const isAsc = ref<boolean>(false);
 
     watch(
-      () => selectedSortOption.value,
-      (option) => {
+      () => [selectedSortOption.value, isAsc.value],
+      () => {
+        console.log(isAsc.value);
         const newVariables = { ...queryVariables };
-        if (option && newVariables?.searchValue) {
-          newVariables.searchValue.order_by = option.value;
+        if (selectedSortOption.value && newVariables?.searchValue) {
+          newVariables.searchValue.order_by = selectedSortOption.value.value;
+          newVariables.searchValue.isAsc = isAsc.value;
         }
         refetch(newVariables);
       }
@@ -386,7 +396,7 @@ export default defineComponent({
       skip: paginationInfo.skip,
       searchValue: {
         value: "",
-        isAsc: false,
+        isAsc: isAsc.value,
         key: "title",
         order_by: selectedSortOption.value.value,
       },
@@ -446,7 +456,7 @@ export default defineComponent({
         skip: 1,
         searchValue: {
           value: "",
-          isAsc: false,
+          isAsc: isAsc.value,
           key: "title",
           order_by: selectedSortOption.value.value,
         },
@@ -521,6 +531,7 @@ export default defineComponent({
       getMediaFilenameFromEntity,
       bulkSelect,
       allEntitiesResult,
+      isAsc,
     };
   },
 });
