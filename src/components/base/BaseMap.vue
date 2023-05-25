@@ -52,7 +52,7 @@ const parsedMetadata = computed(() => {
       parsedData.push(dataItem);
     } else {
       const newDataItem = { ...dataItem };
-      newDataItem.value = Object.values(dataItem.value).reverse().toString();
+      newDataItem.value = Object.values(dataItem.value).toString();
       parsedData.push(newDataItem);
     }
   });
@@ -64,7 +64,7 @@ const parsedMapData = computed(() => {
     (dataItem) => dataItem.key === "location"
   )?.value;
   return {
-    coordinates: [locationdata.longitude, locationdata.latitude],
+    coordinates: [locationdata.latitude, locationdata.longitude],
     name: props.metadata.find((dataItem) => dataItem.key === "name")?.value,
   };
 });
