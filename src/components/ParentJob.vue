@@ -114,7 +114,7 @@ import { GetJobDocument, type Job } from "../generated-types/queries";
 import { useQuery } from "@vue/apollo-composable";
 import useJobHelpers from "../composables/useJobHelpers";
 import ListContainer from "./ListContainer.vue";
-import IconToggle from "./base/IconToggle.vue";
+import IconToggle from "./toggles/IconToggle.vue";
 
 export default defineComponent({
   name: "ParentJob",

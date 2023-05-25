@@ -29,7 +29,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
-import IconToggle from "./base/IconToggle.vue";
+import IconToggle from "./toggles/IconToggle.vue";
 import useRouteHelpers from "../composables/useRouteHelpers";
 import { Unicons } from "../types";
 import BaseButton from "./base/BaseButton.vue";

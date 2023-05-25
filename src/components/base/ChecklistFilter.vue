@@ -65,10 +65,8 @@ import { computed, defineComponent, ref, watch } from "vue";
 import type { PropType } from "vue";
 import InputField from "./InputField.vue";
 
-// import AndOrToggle from './AndOrToggle.vue';
 export default defineComponent({
   name: "ChecklistFilter",
-  // components: { AndOrToggle },
   props: {
     listValue: {
       type: Object as PropType<FilterInList>,

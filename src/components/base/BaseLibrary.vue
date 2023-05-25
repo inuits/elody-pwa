@@ -246,7 +246,7 @@ import {
   type Context,
 } from "@/composables/useBulkOperations";
 import FilterSideBarNew from "../FilterSideBarNew.vue";
-import IconToggle from "./IconToggle.vue";
+import IconToggle from "../toggles/IconToggle.vue";
 import useThumbnailHelper from "../../composables/useThumbnailHelper";
 import useMetaDataHelper, {
   beingAdded,
