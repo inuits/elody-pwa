@@ -61,6 +61,7 @@
           "
           :button-icon="DamsIcons.DocumentInfo"
           button-label="Exporteer naar csv"
+          @submit="exportCsv()"
           @cancel="modal.closeModal()"
         />
       </div>
@@ -88,9 +89,14 @@ import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperations
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import ListItem from "@/components/ListItem.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
+import {
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
 import { ref, watch } from "vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useBulkOperations } from "@/composables/useBulkOperations";
+import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 
 const props = defineProps<{
@@ -103,6 +109,8 @@ const {
   enqueueItemForBulkProcessing,
   triggerBulkSelectionEvent,
 } = useBulkOperations();
+const { t } = useI18n();
+const { createNotificationOverwrite } = useNotification();
 const { getThumbnail } = useThumbnailHelper();
 const { getModal } = useAvailableModals();
 const modal = getModal(TypeModals.BulkOperations);
@@ -129,6 +137,41 @@ const bulkSelect = () => {
       id: csvExportOption.key.value,
     });
   triggerBulkSelectionEvent("BulkOperationsCsvExport");
+};
+
+const exportCsv = async () => {
+  let fieldQueryParameter = "";
+  csvExportOptions.value.forEach((option) => {
+    if (option.isSelected)
+      fieldQueryParameter += `&field[]=${option.key.value}`;
+  });
+
+  await fetch(`/api/export/csv?${fieldQueryParameter.substring(1)}`, {
+    method: "GET",
+  })
+    .then((response: Response) => {
+      if (!response.ok) throw response;
+      return response.text();
+    })
+    .then((csv: string) => {
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "entities.csv";
+      link.click();
+
+      URL.revokeObjectURL(url);
+    })
+    .catch(async (response: Response) =>
+      createNotificationOverwrite(
+        NotificationType.error,
+        t("bulk-operations.csv-export.error.title"),
+        await response.text(),
+        15
+      )
+    );
 };
 
 onResult((result) => {

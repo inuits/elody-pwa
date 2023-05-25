@@ -147,7 +147,12 @@
     "edit": "Bewerk",
     "items": "items",
     "selected": "geselecteerd",
-    "cancel": "annuleren"
+    "cancel": "annuleren",
+    "csv-export": {
+      "error": {
+        "title": "Export failed"
+      }
+    }
   },
   "dropdown": {
     "select-option": "selecteer optie"
