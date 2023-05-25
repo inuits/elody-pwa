@@ -351,7 +351,6 @@ export default defineComponent({
     watch(
       () => [selectedSortOption.value, isAsc.value],
       () => {
-        console.log(isAsc.value);
         const newVariables = { ...queryVariables };
         if (selectedSortOption.value && newVariables?.searchValue) {
           newVariables.searchValue.order_by = selectedSortOption.value.value;
