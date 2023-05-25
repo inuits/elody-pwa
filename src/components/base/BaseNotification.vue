@@ -2,7 +2,7 @@
   <transition>
     <div
       v-if="notification.shown && notification.title"
-      class="absolute m-4 p-4 w-2/12 bg-neutral-20 top-0 right-0 rounded-md z-50"
+      class="absolute m-4 p-4 w-2/12 bg-neutral-20 top-0 right-0 rounded-md z-[100]"
     >
       <div
         :class="`w-full border-b-2 mb-2 font-bold border-${
