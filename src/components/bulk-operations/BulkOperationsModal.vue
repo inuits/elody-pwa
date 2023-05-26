@@ -147,9 +147,14 @@ const exportCsv = async () => {
       fieldQueryParameter += `&field[]=${option.key.value}`;
   });
 
-  await fetch(`/api/export/csv?${fieldQueryParameter.substring(1)}`, {
-    method: "GET",
-  })
+  await fetch(
+    `/api/export/csv?ids=${getEnqueuedItems(props.context)
+      .map((item) => item.id)
+      .join(",")}${fieldQueryParameter}`,
+    {
+      method: "GET",
+    }
+  )
     .then((response: Response) => {
       if (!response.ok) throw response;
       return response.text();
