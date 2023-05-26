@@ -4,13 +4,7 @@
       v-for="(option, index) in options.FilterOptions"
       :key="option && option.label ? `${option.label}-${index}` : 'no-key'"
     >
-      <li
-        v-if="
-          option &&
-          option.label &&
-          (acceptedEntityTypes.length == 0 || filterkey !== 'type')
-        "
-      >
+      <li v-if="option && option.label">
         <input
           :id="option.label"
           v-model="inputFieldMulti"
@@ -30,8 +24,7 @@
           option &&
           option.label &&
           option.value &&
-          acceptedEntityTypes.includes(option.value) &&
-          filterkey == 'type'
+          acceptedEntityTypes.includes(option.value)
         "
       >
         <input

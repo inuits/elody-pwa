@@ -50,7 +50,7 @@
       <MenuSubItem
         :typeLink="submenuItem.typeLink.route.destination"
         :labelName="submenuItem.label"
-        :destination="submenuItem.destination"
+        :destination="submenuItem.typeLink.route.destination"
         :show="showdropdown"
       />
     </div>

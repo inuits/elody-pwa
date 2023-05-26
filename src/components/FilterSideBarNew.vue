@@ -51,14 +51,14 @@
       </div>
     </div>
     <div
-      v-for="(filter, i) in filters?.advancedFilters"
+      v-for="(filter, i) in filters"
       :key="filter?.key"
       class="filters w-full lg:h-1770"
     >
       <FilterAccordionNew
+        v-show="!filter.hidden"
         :active="initialFilters[i] && initialFilters[i].isActive"
         :label="filter?.label ? filter?.label : ''"
-        @toggled="getFilterOptionsWhenNoOptionsAvailable(filter)"
       >
         <template #content>
           <component
@@ -93,8 +93,10 @@ import {
   GetEntitiesDocument,
   type GetEntitiesQueryVariables,
   SearchInputType,
+  AdvancedInputType,
   Asset,
   type FilterInput,
+  type GetAdvancedFiltersQuery,
 } from "@/generated-types/queries";
 import type { PredefinedEntities } from "@/components/base/BaseLibrary.vue";
 const props = defineProps<{
@@ -118,8 +120,40 @@ const emit = defineEmits<{
   (event: "activeFilters", initialFilters: FilterInput[]): void;
 }>();
 
-const { result: filters } = useQuery(GetAdvancedFiltersDocument, {
-  choice: props.advancedFiltersChoice,
+const filters = ref<any[]>([]);
+const { onResult } = useQuery<GetAdvancedFiltersQuery>(
+  GetAdvancedFiltersDocument,
+  {
+    entityType: props.advancedFiltersChoice,
+  }
+);
+onResult((queryResult) => {
+  if (queryResult.data.advancedFilters) {
+    const returnArray: any[] = [];
+    // Todo use object or key string names for filters
+    let i: number = 0;
+    Object.values(queryResult.data.advancedFilters).forEach((value) => {
+      if (typeof value !== "string") {
+        if (value && value.defaultValue && value?.type === "selection") {
+          initialFilters.value[i] = {
+            isActive: true,
+            input: {
+              key: value.key,
+              type: AdvancedInputType.SelectionInput,
+              multiSelectInput: { value: [value.defaultValue] },
+            },
+          };
+        }
+        returnArray.push(value);
+        i++;
+      }
+    });
+    filters.value = returnArray;
+  }
+
+  if (filters.value.length > 0) {
+    applyFilters();
+  }
 });
 
 const triggerInitialfilter = (event: any, index: number) => {
@@ -145,17 +179,17 @@ const removedSelectedSearch = () => {
   clearFilters();
 };
 
-const queryVariables = reactive<GetEntitiesQueryVariables>({
-  limit: 20,
-  skip: 1,
-  searchValue: {
-    value: "",
-    isAsc: false,
-    order_by: "Title",
-  },
-  advancedSearchValue: [],
-  searchInputType: "AdvancedInputType" as SearchInputType,
-});
+// const queryVariables = reactive<GetEntitiesQueryVariables>({
+//   limit: 20,
+//   skip: 1,
+//   searchValue: {
+//     value: "",
+//     isAsc: false,
+//     order_by: "Title",
+//   },
+//   advancedSearchValue: [],
+//   searchInputType: "AdvancedInputType" as SearchInputType,
+// });
 
 const predefinedEntities = ref<PredefinedEntities>({
   usePredefinedEntities: true,
@@ -164,13 +198,13 @@ const predefinedEntities = ref<PredefinedEntities>({
 
 const entities = ref<Asset[]>(predefinedEntities.value?.entities || []);
 
-const { refetch, onResult, result } = useQuery(
-  GetEntitiesDocument,
-  queryVariables,
-  {
-    notifyOnNetworkStatusChange: true,
-  }
-);
+// const { refetch, onResult, result } = useQuery(
+//   GetEntitiesDocument,
+//   queryVariables,
+//   {
+//     notifyOnNetworkStatusChange: true,
+//   }
+// );
 
 watch(
   () => predefinedEntities?.value.entities,
@@ -182,49 +216,49 @@ watch(
   { immediate: true }
 );
 
-onResult((t) => {
-  if (
-    clickedFilter.value?.type === "selection" ||
-    clickedFilter.value?.type === "SelectionInput"
-  ) {
-    t.data?.Entities.results.forEach((e) => {
-      let titles = e.teaserMetadata.filter((f) => f.key === "title");
-      if (titles.length > 0) {
-        let title = titles[0];
-        clickedFilter.value = {
-          ...clickedFilter.value,
-          options: [{ value: title.label, label: title.value }],
-        };
-        queryVariables.advancedSearchValue = [
-          {
-            type: "SelectionInput",
-            key: "type",
-            selectionInput: {
-              value: [title.value],
-            },
-          },
-        ];
-        console.log("Clicked filter waarde : ", clickedFilter.value);
-        console.log("Dit is de queryVariable", queryVariables);
-      }
-    });
-  }
-});
+// onResult((t) => {
+//   if (
+//     clickedFilter.value?.type === "selection" ||
+//     clickedFilter.value?.type === "SelectionInput"
+//   ) {
+//     t.data?.Entities.results.forEach((e) => {
+//       let titles = e.teaserMetadata.filter((f) => f.key === "title");
+//       if (titles.length > 0) {
+//         let title = titles[0];
+//         clickedFilter.value = {
+//           ...clickedFilter.value,
+//           options: [{ value: title.label, label: title.value }],
+//         };
+//         queryVariables.advancedSearchValue = [
+//           {
+//             type: "SelectionInput",
+//             key: "type",
+//             selectionInput: {
+//               value: [title.value],
+//             },
+//           },
+//         ];
+//         console.log("Clicked filter waarde : ", clickedFilter.value);
+//         console.log("Dit is de queryVariable", queryVariables);
+//       }
+//     });
+//   }
+// });
 
-const getFilterOptionsWhenNoOptionsAvailable = (
-  advancedFilter: AdvancedFilter
-) => {
-  clickedFilter.value = advancedFilter;
-  queryVariables.advancedSearchValue = [
-    {
-      type: "SelectionInput",
-      key: "type",
-      selectionInput: {
-        value: [advancedFilter.key],
-      },
-    },
-  ];
-  console.log("dit is vanuit de methode :", queryVariables.advancedSearchValue);
-};
+// const getFilterOptionsWhenNoOptionsAvailable = (
+//   advancedFilter: AdvancedFilter
+// ) => {
+//   clickedFilter.value = advancedFilter;
+//   queryVariables.advancedSearchValue = [
+//     {
+//       type: "SelectionInput",
+//       key: "type",
+//       selectionInput: {
+//         value: [advancedFilter.key],
+//       },
+//     },
+//   ];
+//   console.log("dit is vanuit de methode :", queryVariables.advancedSearchValue);
+// };
 </script>
 <style></style>
