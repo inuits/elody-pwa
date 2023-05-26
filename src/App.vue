@@ -2,7 +2,7 @@
   <div>
     <BaseNotification />
     <the-navigation class="navbar" />
-    <div :class="[`pl-24 h-screen flex flex-col`]">
+    <div class="bg-neutral-lightest" :class="[`pl-24 h-screen flex flex-col`]">
       <the-header />
       <div :class="['flex-grow', { 'h-full overflow-hidden': isSingle }]">
         <router-view />

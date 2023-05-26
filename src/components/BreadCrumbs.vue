@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-row pt-3 items-center justify-center bg-neutral-light p-2 gap-2 w-250 h-120 rounded-lg relative"
+    class="flex flex-row items-center justify-center bg-neutral-light pt-1.5 px-3.5 min-w-12 h-12 rounded-2xl relative"
   >
     <span class="text-gray-700">
       <i class="fas fa-home"></i>
@@ -19,7 +19,7 @@
           <unicon
             v-if="Unicons[menuItems[0].icon]"
             :name="Unicons[menuItems[0].icon].name"
-            class="w-6 h-6 mr-2"
+            class="w-5 h-5"
           />
           <CustomIcon
             v-else-if="menuItems[0].icon"
@@ -55,7 +55,7 @@
   <span class="mx-2 mt-1 text-gray-400">
     <unicon :name="Unicons.AngleRight.name" />
   </span>
-  <span class="font-serif text-xl leading-8 text-gray-800 font-bold">
+  <span class="font-serif text-lg leading-8 text-gray-800 font-bold">
     <div v-if="menuItems.length && entityTitle === ''">
       <div
         v-if="
