@@ -22,7 +22,7 @@ const routeComponentConfig: RouteComponentConfig[] = [
 ];
 
 const getComponentForRoute = (route: RouteRecordRaw): any => {
-  const routeName = route.name;
+  const routeName = route.component;
   if (!routeName) {
     return;
   }

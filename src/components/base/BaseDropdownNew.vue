@@ -16,7 +16,7 @@
       :class="disabled ? 'cursor-normal' : 'cursor-pointer'"
     >
       <div class="flex justify-start items-center">
-        <unicon
+        <!--  <unicon
           v-if="
             selectedOption.icon !== 'NoIcon' &&
             selectedOption.icon !== defaultOption.icon &&
@@ -25,7 +25,7 @@
           "
           :name="Unicons[selectedOption.icon].name"
           class="h-5 mr-2 -ml-0.5"
-        />
+        /> -->
         <span>
           <span v-if="labelAlignment === 'left'">{{ label }} </span>
           {{ selectedOption.label }}
@@ -56,11 +56,11 @@
         ]"
         @click="selectOption(option)"
       >
-        <unicon
+        <!--  <unicon
           v-if="option.icon !== 'NoIcon'"
           :name="Unicons[option.icon].name"
           class="h-5 mr-2 -ml-0.5"
-        />
+        /> -->
         <span>{{ option.label }}</span>
       </li>
     </div>

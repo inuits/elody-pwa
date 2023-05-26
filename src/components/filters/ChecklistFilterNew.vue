@@ -4,13 +4,7 @@
       v-for="(option, index) in clickedFilter.options"
       :key="option && option.label ? `${option.label}-${index}` : 'no-key'"
     >
-      <li
-        v-if="
-          option &&
-          option.label &&
-          (acceptedEntityTypes?.length == 0 || filter.key !== 'type')
-        "
-      >
+      <li v-if="option && option.label">
         <input
           :id="option.label"
           v-model="inputFieldMulti"
@@ -27,15 +21,7 @@
           {{ option.label.charAt(0).toUpperCase() + option.label.slice(1) }}
         </label>
       </li>
-      <li
-        v-if="
-          option &&
-          option.label &&
-          option.value &&
-          acceptedEntityTypes?.includes(option.value) &&
-          filter.key == 'type'
-        "
-      >
+      <li v-if="option && option.label && option.value">
         <input
           :id="option.value"
           type="checkbox"

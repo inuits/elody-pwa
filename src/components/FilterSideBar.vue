@@ -144,7 +144,7 @@ export default defineComponent({
     );
     const AndOrChoice = ref<boolean>(true);
     const { result: filters } = useQuery(GetAdvancedFiltersDocument, {
-      choice: props.advancedFiltersChoice,
+      entityType: props.advancedFiltersChoice,
     });
 
     const applyFilters = () => {
