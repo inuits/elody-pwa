@@ -107,6 +107,7 @@ const {
   getEnqueuedItems,
   getEnqueuedItemCount,
   enqueueItemForBulkProcessing,
+  dequeueAllItemsForBulkProcessing,
   triggerBulkSelectionEvent,
 } = useBulkOperations();
 const { t } = useI18n();
@@ -193,6 +194,12 @@ watch(
       }
       loadItems();
     }
+
+    if (
+      getModal(TypeModals.BulkOperations).modalState.value.state ===
+      ModalState.Hide
+    )
+      dequeueAllItemsForBulkProcessing("BulkOperationsCsvExport");
   }
 );
 </script>
