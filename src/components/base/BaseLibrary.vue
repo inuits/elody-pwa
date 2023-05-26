@@ -1,5 +1,5 @@
 <template>
-  <div class="lg:flex bg-neutral-20">
+  <div class="lg:flex bg-neutral-lightest">
     <FilterSideBarNew
       v-show="!isDrawerHiding && !isHideFilters"
       @activeFilters="setFilters"
@@ -8,7 +8,7 @@
     />
     <div class="px-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
-        <div v-show="acceptedEntityTypes.length === 0" class="mt-8 mr-4 flex">
+        <div v-show="acceptedEntityTypes.length === 0" class="mr-4 flex">
           <IconToggle
             v-if="!isHideFilters"
             v-model:checked="isDrawerHiding"
@@ -36,7 +36,7 @@
         />
         <div
           v-show="acceptedEntityTypes.length === 0"
-          class="pl-4 my-2 flex flex-row justify-left"
+          class="pl-4 flex flex-row justify-left"
         >
           <BaseDropdown
             v-if="totalEntityCount > 0"

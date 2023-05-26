@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-full px-6 py-8 border-b border-neutral-50 z-10 flex items-center justify-between bg-neutral-0"
+    class="flex items-center z-10 mx-6 my-8 px-6 py-4 rounded-3xl bg-neutral-white"
   >
     <div class="flex w-full items-center">
       <BreadCrumbs />
