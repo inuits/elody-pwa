@@ -1,7 +1,7 @@
 <template>
   <div
     v-show="!filter.advancedFilter.hidden"
-    class="flex items-center justify-between px-6 py-4 border-t-2 cursor-pointer"
+    class="flex items-center justify-between px-6 py-4 border-t-2 cursor-pointer select-none"
     :class="
       filter.isActive
         ? 'bg-accent-normal border-accent-normal'

@@ -1,7 +1,7 @@
 <template>
   <div
     class="ml-6 bg-neutral-white border-[1px] border-neutral-light rounded lg:w-2/6 md:w-full"
-    v-on:keydown.enter="applyFilters()"
+    @keydown.enter="applyFilters()"
   >
     <div class="flex flex-col gap-4 p-4">
       <div>
