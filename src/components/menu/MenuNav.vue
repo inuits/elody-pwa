@@ -11,6 +11,7 @@
 
     <div v-for="menuItem in menuItems" :key="menuItem.label">
       <Menuitem
+        class="hover:bg-neutral-40"
         :icon="menuItem.icon"
         :menuitem="menuItem"
         :subMenu="menuItem.subMenu"
