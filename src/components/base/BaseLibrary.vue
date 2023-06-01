@@ -1,10 +1,8 @@
 <template>
   <div class="lg:flex bg-neutral-lightest">
-    <FilterSideBarNew
+    <FiltersBase
       v-show="!isDrawerHiding && !isHideFilters"
-      @activeFilters="setFilters"
-      :accepted-entity-types="acceptedEntityTypes ? acceptedEntityTypes : []"
-      :advancedFiltersChoice="advancedFiltersChoice"
+      :entity-type="route.meta.entityType as string"
     />
     <div class="px-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
@@ -234,7 +232,7 @@ import NewBaseDropdown from "./NewBaseDropdown.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
 import { useQuery } from "@vue/apollo-composable";
 import ListItem from "../ListItem.vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { Unicons } from "../../types";
 import {
   GetEntitiesDocument,
@@ -250,7 +248,7 @@ import {
   useBulkOperations,
   type Context,
 } from "@/composables/useBulkOperations";
-import FilterSideBarNew from "../FilterSideBarNew.vue";
+import FiltersBase from "@/components/filters-new/FiltersBase.vue";
 import IconToggle from "../toggles/IconToggle.vue";
 import useThumbnailHelper from "../../composables/useThumbnailHelper";
 import useMetaDataHelper, {
@@ -276,7 +274,6 @@ export default defineComponent({
     BasePagination,
     BaseButton,
     BaseDropdown,
-    FilterSideBarNew,
     IconToggle,
     InputField,
     BaseIcon,
@@ -284,6 +281,7 @@ export default defineComponent({
     NewBaseDropdown,
     BulkOperationsActionsBar,
     SingleIconToggle,
+    FiltersBase,
   },
   props: {
     advancedFiltersChoice: {
@@ -330,6 +328,7 @@ export default defineComponent({
     const { getThumbnail } = useThumbnailHelper();
     const { getMediaFilenameFromEntity } = useListItemHelper();
     const router = useRouter();
+    const route = useRoute();
     const {
       isNotAlreadyAdded,
       mediafiles,
@@ -531,6 +530,7 @@ export default defineComponent({
       bulkSelect,
       allEntitiesResult,
       isAsc,
+      route,
     };
   },
 });
