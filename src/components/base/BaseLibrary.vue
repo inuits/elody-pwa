@@ -84,10 +84,10 @@
             :bulk-operations-context="bulkOperationsContext"
             :loading="true"
             :teaser-metadata="[
-              { key: '/', value: '/', label: '/' },
-              { key: '/', value: '/', label: '/' },
-              { key: '/', value: '/', label: '/' },
-              { key: '/', value: '/', label: '/' },
+              { key: '', value: '', label: '' },
+              { key: '', value: '', label: '' },
+              { key: '', value: '', label: '' },
+              { key: '', value: '', label: '' },
             ]"
           >
             <template #actions>
