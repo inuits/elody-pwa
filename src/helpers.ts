@@ -1,6 +1,9 @@
 import { createI18n } from "vue-i18n";
 import messages from "@intlify/vite-plugin-vue-i18n/messages";
 import { useRoute } from "vue-router";
+import { PanelType } from "./generated-types/queries";
+import { useEntityMediafileSelector } from "./components/EntityImageSelection.vue";
+import { useFormHelper } from "./composables/useFormHelper";
 
 export const langs: string[] = ["nl", "fr"];
 
@@ -96,4 +99,23 @@ export const convertSizeToTailwind = (size: string): string => {
   }
 
   return tailwindSize;
+};
+
+const { mediafileSelectionState } = useEntityMediafileSelector();
+const { getForm } = useFormHelper();
+
+export const getValueForPanelMetadata = (
+  panelType: PanelType,
+  metadataItemKey: string
+): string => {
+  const id = getEntityIdFromRoute() || "";
+  const form = getForm(id);
+  const selectedMediafile: { [index: string]: any } | undefined =
+    mediafileSelectionState.selectedMediafile;
+  if (panelType === PanelType.Metadata && form) {
+    return form.values[metadataItemKey] || "-";
+  } else if (selectedMediafile) {
+    return selectedMediafile[metadataItemKey];
+  }
+  return "-";
 };
