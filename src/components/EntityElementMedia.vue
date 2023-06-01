@@ -1,7 +1,7 @@
 <template>
   <entity-element-wrapper
-    :isCollapsed="isCollapsed"
-    :label="label"
+    :isCollapsed="element.isCollapsed"
+    :label="element.label"
     class="flex flex-col h-full"
   >
     <template v-slot:actions>
@@ -18,14 +18,21 @@
     <template v-slot:content>
       <!-- Not yet refactored old component -->
       <media-viewer
-        v-if="!isCollapsed && type === MediaFileElementTypes.Media"
+        v-if="
+          !element.isCollapsed && element.type === MediaFileElementTypes.Media
+        "
         :loading="false"
         entityType="MediaFile"
         class="flex-1"
       />
       <base-map
-        v-if="!isCollapsed && type === MediaFileElementTypes.Map"
-        :metadata="metadata"
+        v-if="
+          !element.isCollapsed &&
+          element.type === MediaFileElementTypes.Map &&
+          mapComponentData
+        "
+        :element="element"
+        :mapData="mapComponentData"
       ></base-map>
     </template>
   </entity-element-wrapper>
@@ -37,18 +44,37 @@ import useEditMode from "@/composables/useEdit";
 import { Unicons } from "@/types";
 import { usePickEntityModal } from "./PickEntityModal.vue";
 import {
+  type MediaFileElement,
   MediaFileElementTypes,
-  type Metadata,
+  type PanelMetaData,
+  PanelType,
   type MetadataAndRelation,
 } from "@/generated-types/queries";
 import BaseMap from "./base/BaseMap.vue";
+import { computed } from "vue";
+import { getValueForPanelMetadata } from "@/helpers";
 
 const props = defineProps<{
-  label: string;
-  isCollapsed: boolean;
-  type: string;
-  metadata: MetadataAndRelation[];
+  element: MediaFileElement;
 }>();
+
+const mapComponentData = computed(() => {
+  const returnArray: MetadataAndRelation[] = [];
+
+  Object.values(props.element).forEach((value) => {
+    if (typeof value === "object" && value.__typename === "PanelMetaData") {
+      const metadataItemKey: string = (value as PanelMetaData).key;
+      const metadataObject = {
+        key: metadataItemKey,
+        label: (value as PanelMetaData).label,
+        value: getValueForPanelMetadata(PanelType.Metadata, metadataItemKey),
+        field: (value as PanelMetaData).inputField,
+      };
+      returnArray.push(metadataObject);
+    }
+  });
+  return returnArray;
+});
 
 const { isEdit } = useEditMode();
 const { openPickEntityModal } = usePickEntityModal();

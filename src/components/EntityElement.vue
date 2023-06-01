@@ -20,10 +20,7 @@
       />
       <entity-element-media
         v-if="element.__typename === 'MediaFileElement'"
-        :label="element.label"
-        :isCollapsed="element.isCollapsed"
-        :type="element.type"
-        :metadata="(element.metadata as MetadataAndRelation[])"
+        :element="element"
       />
       <entity-element-window
         v-if="element.__typename === 'WindowElement'"

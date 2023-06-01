@@ -62,10 +62,8 @@ import EntityElementMetadata from "./EntityElementMetadata.vue";
 import EntityElementMetadataEdit from "./EntityElementMetadataEdit.vue";
 import EntityElementRelation from "./EntityElementRelation.vue";
 import { Unicons } from "@/types";
-import { useEntityMediafileSelector } from "./EntityImageSelection.vue";
 import { useEditMode } from "@/composables/useEdit";
-import { getEntityIdFromRoute } from "@/helpers";
-import { useFormHelper } from "@/composables/useFormHelper";
+import { getValueForPanelMetadata } from "@/helpers";
 
 type MetadataField = {
   key: string;
@@ -80,28 +78,10 @@ const props = defineProps<{
 
 const panelType = ref<PanelType>(props.panel.panelType);
 const isCollapsed = ref<boolean>(props.panel.isCollapsed);
-const { mediafileSelectionState } = useEntityMediafileSelector();
-const { getForm } = useFormHelper();
 const { isEdit } = useEditMode();
 
 const toggleIsCollapsed = () => {
   isCollapsed.value = !isCollapsed.value;
-};
-
-const getValueForMetadata = (
-  panelType: PanelType,
-  metadataItemKey: string
-): string => {
-  const id = getEntityIdFromRoute() || "";
-  const form = getForm(id);
-  const selectedMediafile: { [index: string]: any } | undefined =
-    mediafileSelectionState.selectedMediafile;
-  if (panelType === PanelType.Metadata && form) {
-    return form.values[metadataItemKey] || "-";
-  } else if (selectedMediafile) {
-    return selectedMediafile[metadataItemKey];
-  }
-  return "-";
 };
 
 const metadataArray = computed((): MetadataField[] => {
@@ -114,7 +94,7 @@ const metadataArray = computed((): MetadataField[] => {
         label: (value as PanelMetaData).label,
         value:
           (value as PanelInfo).value ||
-          getValueForMetadata(panelType.value, metadataItemKey),
+          getValueForPanelMetadata(panelType.value, metadataItemKey),
         field: (value as PanelMetaData).inputField,
       };
       returnArray.push(metadataObject);
