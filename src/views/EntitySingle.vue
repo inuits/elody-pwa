@@ -37,12 +37,12 @@ import {
   type IntialValues,
 } from "@/generated-types/queries";
 import { useQuery } from "@vue/apollo-composable";
-import EntityColumn from "./EntityColumn.vue";
+import EntityColumn from "@/components/EntityColumn.vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import useEditMode from "@/composables/useEdit";
 import useMetaDataHelper from "@/composables/useMetaDataHelper";
-import { useEntityMediafileSelector } from "./EntityImageSelection.vue";
-import EntityForm from "./EntityForm.vue";
+import { useEntityMediafileSelector } from "@/components/EntityImageSelection.vue";
+import EntityForm from "@/components/EntityForm.vue";
 import { usePageInfo } from "@/composables/usePageInfo";
 
 const props = withDefaults(

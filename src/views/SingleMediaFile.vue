@@ -23,7 +23,7 @@ import type {
   Entity,
 } from "../generated-types/queries";
 import { useRoute } from "vue-router";
-import EntitySingle from "../components/EntitySingle.vue";
+import EntitySingle from "./EntitySingle.vue";
 
 export default defineComponent({
   name: "SingleMediaFile",
