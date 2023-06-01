@@ -126,9 +126,6 @@ watch(
 handleSubMenu();
 </script>
 <style>
-.navbar:hover .IsActive {
-  background-color: var(--color-neutral-40);
-}
 .dropdownMenuItem {
   animation-name: dropdown;
   animation-duration: 1s;
