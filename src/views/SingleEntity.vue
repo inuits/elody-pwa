@@ -12,7 +12,7 @@
 <script lang="ts" setup>
 import BaseSingleEntity from "@/components/base/BaseSingleEntity.vue";
 import { inject } from "vue";
-import EntitySingle from "../components/EntitySingle.vue";
+import EntitySingle from "./EntitySingle.vue";
 
 const config: any = inject("config");
 const useOldComponent = config.features.useOldSingleEntityComponent;
