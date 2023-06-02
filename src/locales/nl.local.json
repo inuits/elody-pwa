@@ -160,5 +160,19 @@
   "pagination": {
     "page": "pagina",
     "of": "van"
+  },
+  "filters": {
+    "matchers": {
+      "any": "Any",
+      "contains": "Gedeeltelijk",
+      "exact": "Exact",
+      "id": "ID",
+      "in_between": "Tussenin",
+      "max": "Maximum (niet inbegrepen)",
+      "max_included": "Maximum (inbegrepen)",
+      "min": "Minimum (niet inbegrepen)",
+      "min_included": "Minimum (inbegrepen)",
+      "none": "None"
+    }
   }
 }
