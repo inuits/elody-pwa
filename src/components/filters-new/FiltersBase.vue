@@ -96,7 +96,7 @@ onFilterMatcherMappingResult((result) => {
   matchers.value = Array.from(matcherSet).map((matcher) => {
     return {
       icon: DamsIcons.NoIcon,
-      label: t(`filters.matchers.${matcher}`),
+      label: t(`filters.matcher-labels.${matcher}`),
       value: matcher,
     };
   });

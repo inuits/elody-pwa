@@ -14,16 +14,29 @@
     </span>
     <unicon :name="icon" height="20" fill="text-text-body" />
   </div>
-  <div v-show="isOpen" class="bg-neutral-light p-6">
-    <BaseInputTextNumber v-model="value" input-style="default" />
+  <div v-show="isOpen" class="flex flex-col gap-4 p-6 bg-neutral-light">
+    <BaseDropdownNew
+      v-model="selectedMatcher"
+      :options="matchers"
+      label="Filter "
+      dropdown-style="default"
+    />
+    <component
+      :is="matcherComponent"
+      :filter="filter.advancedFilter"
+      @new-advanced-filter-input="(input: AdvancedFilterInput) => advancedFilterInput = input"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import type { DropdownOption } from "@/generated-types/queries";
+import type {
+  AdvancedFilterInput,
+  DropdownOption,
+} from "@/generated-types/queries";
 import type { FilterListItem } from "@/components/filters-new/FiltersBase.vue";
-import BaseInputTextNumber from "@/components/base/BaseInputTextNumber.vue";
-import { computed, ref, watch } from "vue";
+import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
+import { computed, markRaw, onMounted, ref, watch } from "vue";
 import { Unicons } from "@/types";
 
 const props = defineProps<{
@@ -32,11 +45,23 @@ const props = defineProps<{
 }>();
 
 const isOpen = ref<boolean>(false);
-const value = ref<string>("");
+const matcherComponent = ref();
+const selectedMatcher = ref<DropdownOption>();
+const advancedFilterInput = ref<AdvancedFilterInput>();
+
+const loadMatcher = async () => {
+  const module = await import(
+    `@/components/filters-new/matchers/${selectedMatcher.value?.value}.vue`
+  );
+  matcherComponent.value = markRaw(module.default);
+};
 
 const icon = computed<string>(() =>
   isOpen.value ? Unicons.Minus.name : Unicons.Plus.name
 );
 
-watch(value, () => (props.filter.isActive = !!value.value));
+onMounted(() => (selectedMatcher.value = props.matchers[0]));
+
+watch(selectedMatcher, async () => await loadMatcher());
+watch(advancedFilterInput, () => console.log(advancedFilterInput.value));
 </script>
