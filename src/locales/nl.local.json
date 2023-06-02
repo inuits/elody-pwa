@@ -162,17 +162,17 @@
     "of": "van"
   },
   "filters": {
-    "matchers": {
-      "any": "Any",
-      "contains": "Gedeeltelijk",
-      "exact": "Exact",
-      "id": "ID",
-      "in_between": "Tussenin",
-      "max": "Maximum (niet inbegrepen)",
-      "max_included": "Maximum (inbegrepen)",
-      "min": "Minimum (niet inbegrepen)",
-      "min_included": "Minimum (inbegrepen)",
-      "none": "None"
+    "matcher-labels": {
+      "AnyMatcher": "op eender welke waarde",
+      "ContainsMatcher": "gedeeltelijk",
+      "ExactMatcher": "exact",
+      "IdMatcher": "ID",
+      "InBetweenMatcher": "tussen twee waarden in",
+      "MaxIncludedMatcher": "op maximum waare (inbegrepen)",
+      "MaxMatcher": "op maximum waarde (niet inbegrepen)",
+      "MinIncludedMatcher": "op minimum waarde (inbegrepen)",
+      "MinMatcher": "op minimum waarde (niet inbegrepen)",
+      "NoneMatcher": "op lege waarde"
     }
   }
 }
