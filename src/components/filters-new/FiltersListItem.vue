@@ -18,14 +18,17 @@
     <BaseInputTextNumber v-model="value" input-style="default" />
   </div>
 </template>
+
 <script lang="ts" setup>
+import type { DropdownOption } from "@/generated-types/queries";
 import type { FilterListItem } from "@/components/filters-new/FiltersBase.vue";
 import BaseInputTextNumber from "@/components/base/BaseInputTextNumber.vue";
 import { computed, ref, watch } from "vue";
-import { Unicons } from "../../types";
+import { Unicons } from "@/types";
 
 const props = defineProps<{
   filter: FilterListItem;
+  matchers: DropdownOption[];
 }>();
 
 const isOpen = ref<boolean>(false);
