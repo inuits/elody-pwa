@@ -463,6 +463,7 @@ export default defineComponent({
           order_by: selectedSortOption.value.value,
         },
         advancedSearchValue: [],
+        advancedFilterInputs: [],
         searchInputType: props.searchInputTypeOnDrawer,
       },
       {
