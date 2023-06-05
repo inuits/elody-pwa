@@ -32,7 +32,7 @@ watch(input, () =>
   emit("newAdvancedFilterInput", {
     type: props.filter.type,
     key: props.filter.key,
-    value: input.value,
+    value: input.value ? input.value : undefined,
     match_exact: true,
   })
 );
