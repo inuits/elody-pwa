@@ -36,6 +36,11 @@
             )
           )
         "
+        @activate-filter="(filter: AdvancedFilterInput) => {
+          activeFilters = activeFilters.filter(activeFilter => activeFilter.key !== filter.key);
+          activeFilters.push(filter);
+        }"
+        @deactivate-filter="(key: string) => activeFilters = activeFilters.filter(filter => filter.key !== key)"
       />
     </div>
   </div>
@@ -47,6 +52,7 @@ import {
   GetAdvancedFiltersDocument,
   GetFilterMatcherMappingDocument,
   type AdvancedFilter,
+  type AdvancedFilterInput,
   type AdvancedFilters,
   type BaseEntity,
   type DropdownOption,
@@ -70,6 +76,10 @@ const props = defineProps<{
   entityType: string;
 }>();
 
+const emit = defineEmits<{
+  (event: "applyFilters", advancedFilterInputs: AdvancedFilterInput[]): void;
+}>();
+
 const { t } = useI18n();
 const filterMatcherMapping = ref<FilterMatcherMap>({
   id: [],
@@ -81,6 +91,7 @@ const filterMatcherMapping = ref<FilterMatcherMap>({
 });
 const matchers = ref<DropdownOption[]>([]);
 const filters = ref<FilterListItem[]>([]);
+const activeFilters = ref<AdvancedFilterInput[]>([]);
 
 const { onResult: onFilterMatcherMappingResult } =
   useQuery<GetFilterMatcherMappingQuery>(GetFilterMatcherMappingDocument);
@@ -122,5 +133,5 @@ onAdvancedFiltersResult((result) => {
   });
 });
 
-const applyFilters = () => {};
+const applyFilters = () => emit("applyFilters", activeFilters.value);
 </script>

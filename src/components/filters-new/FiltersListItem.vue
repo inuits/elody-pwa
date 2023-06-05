@@ -44,10 +44,19 @@ const props = defineProps<{
   matchers: DropdownOption[];
 }>();
 
+const emit = defineEmits<{
+  (event: "activateFilter", advancedFilterInput: AdvancedFilterInput): void;
+  (event: "deactivateFilter", advancedFilterKey: string): void;
+}>();
+
 const isOpen = ref<boolean>(false);
 const matcherComponent = ref();
 const selectedMatcher = ref<DropdownOption>();
-const advancedFilterInput = ref<AdvancedFilterInput>();
+const advancedFilterInput = ref<AdvancedFilterInput>({
+  type: props.filter.advancedFilter.type,
+  key: props.filter.advancedFilter.key,
+  value: "",
+});
 
 const loadMatcher = async () => {
   const module = await import(
@@ -63,5 +72,9 @@ const icon = computed<string>(() =>
 onMounted(() => (selectedMatcher.value = props.matchers[0]));
 
 watch(selectedMatcher, async () => await loadMatcher());
-watch(advancedFilterInput, () => console.log(advancedFilterInput.value));
+watch(advancedFilterInput, () => {
+  if (advancedFilterInput.value.value !== "")
+    emit("activateFilter", advancedFilterInput.value);
+  else emit("deactivateFilter", advancedFilterInput.value.key);
+});
 </script>
