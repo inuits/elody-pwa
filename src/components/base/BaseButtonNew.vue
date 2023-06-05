@@ -15,7 +15,7 @@
   >
     <unicon
       v-if="props.icon !== DamsIcons.NoIcon"
-      class="-ml-1"
+      :class="{ '-ml-1': label }"
       :name="Unicons[props.icon].name"
       :height="iconHeight"
     />

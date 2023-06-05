@@ -18,18 +18,24 @@
       <div class="flex justify-start items-center">
         <unicon
           v-if="
-            selectedOption.icon !== 'NoIcon' &&
-            selectedOption.icon !== defaultOption.icon &&
-            selectedOption.label !== defaultOption.label &&
-            selectedOption.value !== defaultOption.value
+            selectedOption.icon !== 'NoIcon' && selectedOptionIsNotDefaultOption
           "
           :name="Unicons[selectedOption.icon].name"
           class="h-5 mr-2 -ml-0.5"
         />
         <span>
-          <span v-if="labelAlignment === 'left'">{{ label }} </span>
+          <span
+            v-if="selectedOptionIsNotDefaultOption && labelAlignment === 'left'"
+            >{{ label }}
+          </span>
           {{ selectedOption.label }}
-          <span v-if="labelAlignment === 'right'"> {{ label }}</span>
+          <span
+            v-if="
+              selectedOptionIsNotDefaultOption && labelAlignment === 'right'
+            "
+          >
+            {{ label }}</span
+          >
         </span>
       </div>
       <div class="flex justify-end items-center">
@@ -135,6 +141,7 @@ const props = withDefaults(
     modelValue: DropdownOption | undefined;
     options: DropdownOption[];
     label?: string;
+    defaultLabel?: string;
     labelAlignment?: "left" | "right";
     dropdownStyle: DropdownStyle;
     disable?: boolean;
@@ -153,7 +160,7 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const defaultOption: DropdownOption = {
   icon: DamsIcons.AngleDown,
-  label: t("dropdown.select-option"),
+  label: props.defaultLabel ? props.defaultLabel : t("dropdown.select-option"),
   value: "",
 };
 const dropdown = ref<HTMLUListElement>();
@@ -177,6 +184,14 @@ const disabled = computed<Boolean>(() =>
   props.options.length > 0 ? disable.value : true
 );
 
+const selectedOptionIsNotDefaultOption = computed<boolean>(() => {
+  return (
+    selectedOption.value.icon !== defaultOption.icon &&
+    selectedOption.value.label !== defaultOption.label &&
+    selectedOption.value.value !== defaultOption.value
+  );
+});
+
 const collapseDropdown = (event: MouseEvent) => {
   if (!dropdown.value?.contains(event.target as Node))
     showOptions.value = false;
@@ -187,7 +202,9 @@ watch(modelValue, (value) =>
     ? (selectedOption.value = defaultOption)
     : (selectedOption.value = value)
 );
-watch(selectedOption, (value) => emit("update:modelValue", value));
+watch(selectedOption, (value) => {
+  if (selectedOptionIsNotDefaultOption.value) emit("update:modelValue", value);
+});
 
 onMounted(() => document.addEventListener("click", collapseDropdown));
 onUnmounted(() => document.addEventListener("click", collapseDropdown));
