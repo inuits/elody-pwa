@@ -65,7 +65,7 @@ module.exports = {
         600:"#22D3EE",
       },
       red: {
-        default: "#e50000",
+        default: "#D11800",
         dark: "#9b0000",
       },
       green: {
@@ -82,6 +82,7 @@ module.exports = {
       }
     },
   },
+  safelist: ['bg-red-default'],
   variants: {
     extend: {
       opacity: ["disabled"],
