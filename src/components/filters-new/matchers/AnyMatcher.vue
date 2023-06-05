@@ -1,14 +1,11 @@
-<template>
-  <BaseInputTextNumber v-model="input" input-style="default" type="text" />
-</template>
+<template></template>
 
 <script lang="ts" setup>
-import BaseInputTextNumber from "@/components/base/BaseInputTextNumber.vue";
 import type {
   AdvancedFilter,
   AdvancedFilterInput,
 } from "@/generated-types/queries";
-import { defineEmits, ref, watch } from "vue";
+import { defineEmits, onBeforeUnmount, onMounted } from "vue";
 
 const props = defineProps<{
   filter: AdvancedFilter;
@@ -21,14 +18,19 @@ const emit = defineEmits<{
   ): void;
 }>();
 
-const input = ref<string | number>("");
-
-watch(input, () =>
+onMounted(() =>
   emit("newAdvancedFilterInput", {
     type: props.filter.type,
     key: props.filter.key,
-    value: input.value ? input.value : undefined,
-    match_exact: false,
+    value: "*",
+  })
+);
+
+onBeforeUnmount(() =>
+  emit("newAdvancedFilterInput", {
+    type: props.filter.type,
+    key: props.filter.key,
+    value: undefined,
   })
 );
 </script>

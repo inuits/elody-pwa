@@ -73,7 +73,7 @@ onMounted(() => (selectedMatcher.value = props.matchers[0]));
 
 watch(selectedMatcher, async () => await loadMatcher());
 watch(advancedFilterInput, () => {
-  if (advancedFilterInput.value.value !== "")
+  if (advancedFilterInput.value.value !== undefined)
     emit("activateFilter", advancedFilterInput.value);
   else emit("deactivateFilter", advancedFilterInput.value.key);
 });
