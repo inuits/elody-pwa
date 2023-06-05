@@ -3,6 +3,7 @@
     <FiltersBase
       v-show="!isDrawerHiding && !isHideFilters"
       :entity-type="route.meta.entityType as string"
+      @apply-filters="setFilters"
     />
     <div class="px-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
@@ -243,6 +244,7 @@ import {
   type GetEntitiesQueryVariables,
   type Maybe,
   type MetadataFieldOption,
+  type AdvancedFilterInput,
 } from "../../generated-types/queries";
 import {
   useBulkOperations,
@@ -383,8 +385,9 @@ export default defineComponent({
       isDrawerHiding.value = false;
     }
 
-    const setFilters = (value: any) => {
-      queryVariables.advancedSearchValue = value;
+    const setFilters = (advancedFilterInputs: AdvancedFilterInput[]) => {
+      //queryVariables.advancedSearchValue = value;
+      queryVariables.advancedFilterInputs = advancedFilterInputs;
       queryVariables.limit = paginationInfo.limit;
       queryVariables.skip = paginationInfo.skip;
     };
@@ -399,6 +402,7 @@ export default defineComponent({
         order_by: selectedSortOption.value.value,
       },
       advancedSearchValue: [],
+      advancedFilterInputs: [],
       searchInputType: props.searchInputTypeOnDrawer,
     });
 
