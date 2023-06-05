@@ -23,15 +23,10 @@
         class="w-10"
         label=""
         :icon="DamsIcons.Redo"
-        :disabled="!selectedMatcher || advancedFilterInput.value === undefined"
+        :disabled="!selectedMatcher"
         button-style="accentAccent"
         button-size="small"
-        @click="
-          () => {
-            selectedMatcher = undefined;
-            emit('deactivateFilter', advancedFilterInput.key);
-          }
-        "
+        @click="() => (selectedMatcher = undefined)"
       />
     </div>
     <component
@@ -78,6 +73,9 @@ const loadMatcher = async () => {
   const module = await import(
     `@/components/filters-new/matchers/${selectedMatcher.value?.value}.vue`
   );
+
+  if (matcherComponent.value !== module.default)
+    emit("deactivateFilter", advancedFilterInput.value.key);
   matcherComponent.value = markRaw(module.default);
 };
 
@@ -87,7 +85,10 @@ const icon = computed<string>(() =>
 
 watch(selectedMatcher, async () => {
   if (selectedMatcher.value) await loadMatcher();
-  else advancedFilterInput.value.value = undefined;
+  else {
+    advancedFilterInput.value.value = undefined;
+    emit("deactivateFilter", advancedFilterInput.value.key);
+  }
 });
 watch(advancedFilterInput, () => {
   if (advancedFilterInput.value.value !== undefined)
