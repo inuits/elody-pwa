@@ -13,7 +13,7 @@
       v-if="icon"
       :name="icon"
       :height="iconHeight"
-      :fill="loading ? 'var(--color-neutral-20)' : `var(--color-blue-100)`"
+      :fill="loading ? 'fill-neutral-20' : 'fill-neutral-white'"
     />
     <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
   </button>
@@ -55,7 +55,7 @@ export default defineComponent({
     },
     iconColor: {
       type: String,
-      default: "var(--color-neutral-700)",
+      default: "neutral-700",
     },
     borderColor: {
       type: String,
