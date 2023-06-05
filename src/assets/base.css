@@ -31,6 +31,7 @@
   --color-neutral-white: theme("colors.neutral.white");
   --color-neutral-lightest: theme("colors.neutral.lightest");
   --color-neutral-light: theme("colors.neutral.light");
+  --color-red-default: theme("colors.red.default");
 
   --color-text-light: theme("colors.text.light");
   --color-text-body: theme("colors.text.body");
