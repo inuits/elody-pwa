@@ -63,7 +63,7 @@ import {
 } from "@/generated-types/queries";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import FiltersListItem from "@/components/filters-new/FiltersListItem.vue";
-import { defineProps, ref } from "vue";
+import { defineProps, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 
@@ -134,4 +134,13 @@ onAdvancedFiltersResult((result) => {
 });
 
 const applyFilters = () => emit("applyFilters", activeFilters.value);
+
+watch(activeFilters, () =>
+  filters.value.forEach(
+    (filter) =>
+      (filter.isActive = activeFilters.value
+        .map((activeFilter) => activeFilter.key)
+        .includes(filter.advancedFilter.key))
+  )
+);
 </script>

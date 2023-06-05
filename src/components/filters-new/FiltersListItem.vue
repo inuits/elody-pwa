@@ -1,27 +1,41 @@
 <template>
   <div
     v-show="!filter.advancedFilter.hidden"
-    class="flex items-center justify-between px-6 py-4 border-t-2 cursor-pointer select-none"
-    :class="
-      filter.isActive
-        ? 'bg-accent-normal border-accent-normal'
-        : 'border-neutral-light'
-    "
+    class="flex items-center justify-between px-6 py-4 border-t-2 border-neutral-light cursor-pointer select-none"
+    :class="{ 'bg-accent-normal text-neutral-white': filter.isActive }"
     @click="isOpen = !isOpen"
   >
-    <span class="text-text-body text-lg">
+    <span class="text-lg">
       {{ filter.advancedFilter.label }}
     </span>
-    <unicon :name="icon" height="20" fill="text-text-body" />
+    <unicon :name="icon" height="20" />
   </div>
   <div v-show="isOpen" class="flex flex-col gap-4 p-6 bg-neutral-light">
-    <BaseDropdownNew
-      v-model="selectedMatcher"
-      :options="matchers"
-      label="Filter "
-      dropdown-style="default"
-    />
+    <div class="flex gap-4">
+      <BaseDropdownNew
+        v-model="selectedMatcher"
+        :options="matchers"
+        label="filter "
+        default-label="selecteer filter type"
+        dropdown-style="default"
+      />
+      <BaseButtonNew
+        class="w-10"
+        label=""
+        :icon="DamsIcons.Redo"
+        :disabled="!selectedMatcher || advancedFilterInput.value === undefined"
+        button-style="accentAccent"
+        button-size="small"
+        @click="
+          () => {
+            selectedMatcher = undefined;
+            emit('deactivateFilter', advancedFilterInput.key);
+          }
+        "
+      />
+    </div>
     <component
+      v-if="selectedMatcher"
       :is="matcherComponent"
       :filter="filter.advancedFilter"
       @new-advanced-filter-input="(input: AdvancedFilterInput) => advancedFilterInput = input"
@@ -35,8 +49,10 @@ import type {
   DropdownOption,
 } from "@/generated-types/queries";
 import type { FilterListItem } from "@/components/filters-new/FiltersBase.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
-import { computed, markRaw, onMounted, ref, watch } from "vue";
+import { computed, markRaw, ref, watch } from "vue";
+import { DamsIcons } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 
 const props = defineProps<{
@@ -55,7 +71,7 @@ const selectedMatcher = ref<DropdownOption>();
 const advancedFilterInput = ref<AdvancedFilterInput>({
   type: props.filter.advancedFilter.type,
   key: props.filter.advancedFilter.key,
-  value: "",
+  value: undefined,
 });
 
 const loadMatcher = async () => {
@@ -69,9 +85,10 @@ const icon = computed<string>(() =>
   isOpen.value ? Unicons.Minus.name : Unicons.Plus.name
 );
 
-onMounted(() => (selectedMatcher.value = props.matchers[0]));
-
-watch(selectedMatcher, async () => await loadMatcher());
+watch(selectedMatcher, async () => {
+  if (selectedMatcher.value) await loadMatcher();
+  else advancedFilterInput.value.value = undefined;
+});
 watch(advancedFilterInput, () => {
   if (advancedFilterInput.value.value !== undefined)
     emit("activateFilter", advancedFilterInput.value);
