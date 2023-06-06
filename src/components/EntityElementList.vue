@@ -59,20 +59,18 @@ import {
   Entitytyping,
   type Asset,
   type Entity,
-  type RelationValues,
 } from "@/generated-types/queries";
 import { useFieldArray, type FieldEntry } from "vee-validate";
 import EntityElementWrapper from "./base/EntityElementWrapper.vue";
 import { usePickEntityModal } from "./PickEntityModal.vue";
 import type { PickEntityModalType } from "./PickEntityModal.vue";
 import useEditMode from "@/composables/useEdit";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { Unicons } from "@/types";
 import BaseLibrary, { type PredefinedEntities } from "./base/BaseLibrary.vue";
 import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
 import type { Context } from "@/composables/useBulkOperations";
 
-const router = useRouter();
 const route = useRoute();
 const props = defineProps<{
   label: string;
@@ -83,9 +81,7 @@ const props = defineProps<{
 const { isEdit } = useEditMode();
 const { toggleElementCollapse } = useEntityElementCollapseHelper();
 
-const { fields, push, update, remove } = useFieldArray<Asset>(
-  props.RelationKey
-);
+const { fields, push } = useFieldArray<Asset>(props.RelationKey);
 
 let entitiesObject = ref<PredefinedEntities>({
   usePredefinedEntities: true,
@@ -120,13 +116,5 @@ watch(pickEntityModalState, (value: PickEntityModalType) => {
       toggleElementCollapse(props.label);
     }
   }
-});
-
-document.addEventListener("discard", () => {
-  // TODO: Refetch related assets
-  fields.value.forEach((field: FieldEntry<Asset>, idx: number) => {
-    remove(idx);
-    syncFieldWithObject(fields);
-  });
 });
 </script>

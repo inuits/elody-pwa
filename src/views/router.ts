@@ -1,7 +1,6 @@
 import type { RouteRecordRaw } from "vue-router";
 import History from "./History.vue";
 import Home from "./Home.vue";
-import Mediafiles from "./MediaFiles.vue";
 import SingleEntity from "./SingleEntity.vue";
 import ManifestViewer from "@/components/ManifestViewer.vue";
 
@@ -15,7 +14,6 @@ type RouteComponentConfig = {
 const routeComponentConfig: RouteComponentConfig[] = [
   { routeName: "Home", routeComponent: Home },
   { routeName: "SingleEntity", routeComponent: SingleEntity },
-  { routeName: "Mediafiles", routeComponent: Mediafiles },
   { routeName: "SingleMediafile", routeComponent: SingleEntity },
   { routeName: "History", routeComponent: History },
   { routeName: "Mirador", routeComponent: ManifestViewer },
