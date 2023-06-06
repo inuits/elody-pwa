@@ -46,13 +46,14 @@ import type {
 import type { FilterListItem } from "@/components/filters-new/FiltersBase.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
-import { computed, markRaw, ref, watch } from "vue";
+import { computed, markRaw, ref, toRefs, watch } from "vue";
 import { DamsIcons } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 
 const props = defineProps<{
   filter: FilterListItem;
   matchers: DropdownOption[];
+  clearAllActiveFilters: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -60,6 +61,7 @@ const emit = defineEmits<{
   (event: "deactivateFilter", advancedFilterKey: string): void;
 }>();
 
+const { clearAllActiveFilters } = toRefs(props);
 const isOpen = ref<boolean>(false);
 const matcherComponent = ref();
 const selectedMatcher = ref<DropdownOption>();
@@ -91,5 +93,11 @@ watch(advancedFilterInput, () => {
   if (advancedFilterInput.value.value !== undefined)
     emit("activateFilter", advancedFilterInput.value);
   else emit("deactivateFilter", advancedFilterInput.value.key);
+});
+watch(clearAllActiveFilters, () => {
+  if (clearAllActiveFilters.value) {
+    selectedMatcher.value = undefined;
+    isOpen.value = false;
+  }
 });
 </script>
