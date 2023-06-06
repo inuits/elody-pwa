@@ -48,7 +48,7 @@
           </BaseTab>
           <BaseTab title="Select file">
             <div class="h-full">
-              <MediaFileLibrary
+              <AssetLibrary
                 :enable-selection="true"
                 @add-selection="addSelection"
               />
@@ -64,7 +64,7 @@
 import BaseModal from "@/components/base/BaseModal.vue";
 import BaseTab from "./BaseTab.vue";
 import BaseTabs from "./BaseTabs.vue";
-import MediaFileLibrary from "./MediaFileLibrary.vue";
+import AssetLibrary from "./AssetLibrary.vue";
 import UploadModalDropzone from "./UploadModalDropzone.vue";
 import UploadModalImport from "./UploadModalImport.vue";
 import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";

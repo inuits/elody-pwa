@@ -15,7 +15,6 @@ import {
   removeMediafilesFromOrdering,
 } from "../composables/useMediafilesOrderHelpers";
 import { toBeDeleted } from "@/components/EntityImageSelection.vue";
-
 export type EditModes = "edit" | "view" | "loading";
 export type callback = (e?: Event | undefined) => Promise<unknown>;
 
@@ -55,8 +54,6 @@ export const useEditMode = () => {
     }
   };
   const hideEditToggle = () => (isEditToggleVisible.value = "no-edit");
-  const saveEvent = new Event("save");
-  const discardEvent = new Event("discard");
   const { mutate } = useMutation<UpdateMediafilesOrderMutation>(
     UpdateMediafilesOrderDocument
   );
@@ -89,7 +86,6 @@ export const useEditMode = () => {
         }
       });
     }
-    document.dispatchEvent(saveEvent);
   };
 
   const discard = () => {
@@ -100,7 +96,6 @@ export const useEditMode = () => {
     resetMetadataToBePatched();
     clearMediaFilesToLinkToEntity();
     clearMediaFilesToPatch();
-    document.dispatchEvent(discardEvent);
   };
 
   return {

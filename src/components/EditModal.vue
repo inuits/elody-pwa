@@ -18,7 +18,7 @@
             bg-color="'neutral-0'"
             :border-color="'red-default'"
             :txt-color="'body'"
-            @click="discard()"
+            @click="discard"
           />
         </div>
         <BaseButton

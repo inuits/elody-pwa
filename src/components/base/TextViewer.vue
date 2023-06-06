@@ -3,18 +3,14 @@
     <div class="w-full h-full p-4 bg-neutral-20 overflow-y-scroll">
       <p v-html="fileContent"></p>
     </div>
-    <media-info class="" :meta-data="source.metadata" />
   </div>
 </template>
 <script lang="ts">
 import { defineComponent, onMounted, ref } from "vue";
-import MediaInfo from "./MediaInfo.vue";
 
 export default defineComponent({
   name: "TextViewer",
-  components: {
-    MediaInfo,
-  },
+  components: {},
   props: {
     source: {
       type: Object,

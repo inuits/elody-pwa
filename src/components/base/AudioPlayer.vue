@@ -11,23 +11,16 @@
       />
       {{ $t("audio.no-support") }}
     </audio>
-    <media-info class="" :meta-data="source.metadata" />
   </div>
 </template>
 <script lang="ts">
-import type {
-  MediaFile,
-  MediaFileMetadata,
-} from "../../generated-types/queries";
+import type { MediaFile } from "../../generated-types/queries";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
-import MediaInfo from "./MediaInfo.vue";
 
 export default defineComponent({
   name: "AudioPlayer",
-  components: {
-    MediaInfo,
-  },
+  components: {},
   props: {
     source: {
       type: Object as PropType<MediaFile>,

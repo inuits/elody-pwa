@@ -51,21 +51,15 @@
       </a>
     </div>
   </div>
-  <div>
-    <MediaInfo />
-  </div>
+  <div></div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import type { PropType } from "vue";
 import { Unicons } from "@/types";
-import MediaInfo from "./base/MediaInfo.vue";
 export default defineComponent({
   name: "PdfToolbar",
-  components: {
-    MediaInfo,
-  },
+  components: {},
   props: ["pageNum", "pageCount"],
   emits: ["zoomIn", "zoomOut", "changePage"],
   setup: (props, { emit }) => {

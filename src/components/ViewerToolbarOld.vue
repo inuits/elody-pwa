@@ -35,19 +35,15 @@
       $t("upload.reset")
     }}</a>
   </div>
-  <MediaInfo />
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted, ref } from "vue";
 import type { PropType } from "vue";
 import { Unicons } from "../types";
-import MediaInfo from "./base/MediaInfo.vue";
 export default defineComponent({
   name: "ViewerToolbar",
-  components: {
-    MediaInfo,
-  },
+  components: {},
   props: {
     zoomIn: {
       type: Object as PropType<HTMLDivElement | string | null>,
