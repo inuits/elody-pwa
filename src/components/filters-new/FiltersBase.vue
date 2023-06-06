@@ -11,9 +11,10 @@
       </div>
       <div class="flex justify-between gap-4">
         <BaseButtonNew
-          class="w-4/12"
+          class="w-[33%]"
           :label="$t('filter.clear')"
           button-style="default"
+          @click="() => (clearAllActiveFilters = true)"
         />
         <BaseButtonNew
           class="grow"
@@ -36,6 +37,7 @@
             )
           )
         "
+        :clear-all-active-filters="clearAllActiveFilters"
         @activate-filter="(filter: AdvancedFilterInput) => {
           activeFilters = activeFilters.filter(activeFilter => activeFilter.key !== filter.key);
           activeFilters.push(filter);
@@ -92,6 +94,7 @@ const filterMatcherMapping = ref<FilterMatcherMap>({
 const matchers = ref<DropdownOption[]>([]);
 const filters = ref<FilterListItem[]>([]);
 const activeFilters = ref<AdvancedFilterInput[]>([]);
+const clearAllActiveFilters = ref<boolean>(false);
 
 const { onResult: onFilterMatcherMappingResult } =
   useQuery<GetFilterMatcherMappingQuery>(GetFilterMatcherMappingDocument);
@@ -143,4 +146,11 @@ watch(activeFilters, () =>
         .includes(filter.advancedFilter.key))
   )
 );
+watch(clearAllActiveFilters, () => {
+  if (clearAllActiveFilters.value) {
+    activeFilters.value = [];
+    setTimeout(() => (clearAllActiveFilters.value = false), 50);
+    applyFilters();
+  }
+});
 </script>
