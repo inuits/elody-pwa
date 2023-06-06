@@ -20,7 +20,7 @@
         dropdown-style="default"
       />
       <BaseButtonNew
-        class="w-10"
+        class="w-[40px]"
         label=""
         :icon="DamsIcons.Redo"
         :disabled="!selectedMatcher"
@@ -85,10 +85,7 @@ const icon = computed<string>(() =>
 
 watch(selectedMatcher, async () => {
   if (selectedMatcher.value) await loadMatcher();
-  else {
-    advancedFilterInput.value.value = undefined;
-    emit("deactivateFilter", advancedFilterInput.value.key);
-  }
+  else emit("deactivateFilter", advancedFilterInput.value.key);
 });
 watch(advancedFilterInput, () => {
   if (advancedFilterInput.value.value !== undefined)
