@@ -8,7 +8,8 @@ export type Context =
   | "Mediafiles"
   | "SingleMediafile"
   | "History"
-  | "BulkOperationsCsvExport";
+  | "BulkOperationsCsvExport"
+  | "FilterOptions";
 export type InBulkProcessableItem = {
   id: string;
   teaserMetadata?: MetadataAndRelation[];
@@ -20,6 +21,7 @@ const items = ref<Record<Context, InBulkProcessableItem[]>>({
   SingleMediafile: [],
   History: [],
   BulkOperationsCsvExport: [],
+  FilterOptions: [],
 });
 const contextWhereSelectionEventIsTriggered = ref<"" | Context>("");
 
