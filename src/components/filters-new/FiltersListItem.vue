@@ -20,7 +20,7 @@
         dropdown-style="default"
       />
       <BaseButtonNew
-        class="w-[40px]"
+        class="!w-10"
         label=""
         :icon="DamsIcons.Redo"
         :disabled="!selectedMatcher"
