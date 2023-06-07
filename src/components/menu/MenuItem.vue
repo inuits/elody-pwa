@@ -25,20 +25,18 @@
       <span class="nav-item-label w-0 h-0 overflow-hidden px-4 font-bold">
         {{ menuitem?.label }}
       </span>
-      <div v-if="menuitem.subMenu">
+      <div class="w-full flex justify-end align-center" v-if="menuitem.subMenu">
         <unicon
           v-if="showdropdown"
           @click="handleClick"
           :name="Unicons.AngleDown.name"
           height="20"
-          class="ml-[7rem] mt-1"
         />
         <unicon
           v-if="!showdropdown"
           @click="handleClick"
-          :name="Unicons.AngleDown.name"
+          :name="Unicons.AngleRight.name"
           height="20"
-          class="rotate-180 ml-[7rem] mt-1"
         />
       </div>
     </div>
@@ -60,15 +58,9 @@
 <script lang="ts" setup>
 import { ref, defineProps, watch } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
-import { useRouter } from "vue-router";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
 import { Unicons } from "@/types";
-import {
-  MenuItem,
-  TypeModals,
-  ModalState,
-  DamsIcons,
-} from "@/generated-types/queries";
+import { MenuItem, ModalState, DamsIcons } from "@/generated-types/queries";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import CustomIcon from "../CustomIcon.vue";
@@ -81,7 +73,6 @@ const {
   resetSelectedMenuItem,
 } = useMenuHelper();
 
-const router = useRouter();
 const auth = useAuth();
 const menuSubitem = ref<Array<MenuItem>>([]);
 const { getModal } = useAvailableModals();
