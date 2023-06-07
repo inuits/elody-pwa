@@ -11,13 +11,12 @@
       </div>
       <div class="flex justify-between gap-4">
         <BaseButtonNew
-          class="w-[33%]"
+          class="!w-1/3"
           :label="$t('filter.clear')"
           button-style="default"
           @click="() => (clearAllActiveFilters = true)"
         />
         <BaseButtonNew
-          class="grow"
           :label="$t('filter.apply')"
           button-style="accentAccent"
           @click="applyFilters()"
