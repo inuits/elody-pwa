@@ -49,6 +49,7 @@ import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import { computed, markRaw, ref, toRefs, watch } from "vue";
 import { DamsIcons } from "@/generated-types/queries";
 import { Unicons } from "@/types";
+import { useBulkOperations } from "@/composables/useBulkOperations";
 
 const props = defineProps<{
   filter: FilterListItem;
@@ -61,6 +62,7 @@ const emit = defineEmits<{
   (event: "deactivateFilter", advancedFilterKey: string): void;
 }>();
 
+const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const { clearAllActiveFilters } = toRefs(props);
 const isOpen = ref<boolean>(false);
 const matcherComponent = ref();
@@ -90,14 +92,22 @@ watch(selectedMatcher, async () => {
   else emit("deactivateFilter", advancedFilterInput.value.key);
 });
 watch(advancedFilterInput, () => {
-  if (advancedFilterInput.value.value !== undefined)
+  if (Array.isArray(advancedFilterInput.value.value))
+    if (advancedFilterInput.value.value.length > 0)
+      emit("activateFilter", advancedFilterInput.value);
+    else {
+      dequeueAllItemsForBulkProcessing("FilterOptions");
+      emit("deactivateFilter", advancedFilterInput.value.key);
+    }
+  else if (advancedFilterInput.value.value !== undefined)
     emit("activateFilter", advancedFilterInput.value);
   else emit("deactivateFilter", advancedFilterInput.value.key);
 });
 watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
-    selectedMatcher.value = undefined;
     isOpen.value = false;
+    selectedMatcher.value = undefined;
+    dequeueAllItemsForBulkProcessing("FilterOptions");
   }
 });
 </script>
