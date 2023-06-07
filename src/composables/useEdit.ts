@@ -7,7 +7,7 @@ import type {
   DeleteRelationsMutation,
 } from "@/generated-types/queries";
 import { useMutation } from "@vue/apollo-composable";
-import { computed, ref } from "vue";
+import { computed, ref, inject } from "vue";
 import useMediaAssetLinkHelper from "./useMediaAssetLinkHelper";
 import useMetaDataHelper from "./useMetaDataHelper";
 import {
@@ -15,6 +15,8 @@ import {
   removeMediafilesFromOrdering,
 } from "../composables/useMediafilesOrderHelpers";
 import { toBeDeleted } from "@/components/EntityImageSelection.vue";
+import { useRouter } from "vue-router";
+
 export type EditModes = "edit" | "view" | "loading";
 export type callback = (e?: Event | undefined) => Promise<unknown>;
 
@@ -23,6 +25,7 @@ const saveCallbacks = ref<callback[]>([]);
 const isEditToggleVisible = ref<"no-edit" | "edit" | "edit-delete">("no-edit");
 
 export const useEditMode = () => {
+  const router = useRouter();
   const { linkMediaFilesToEntity, clearMediaFilesToLinkToEntity } =
     useMediaAssetLinkHelper();
   const {
@@ -34,7 +37,11 @@ export const useEditMode = () => {
   const setEditMode = () => (editMode.value = "edit");
   const disableEditMode = () => (editMode.value = "view");
   const isEdit = computed<boolean>(() => editMode.value === "edit");
-  const { clearMediafiles } = useMetaDataHelper();
+  const { discardEvent } = inject<any>("discardEvent");
+
+  router.beforeEach(() => {
+    disableEditMode();
+  });
 
   const addSaveCallback = (input: callback, order?: string) => {
     if (order === "first") {
@@ -60,6 +67,10 @@ export const useEditMode = () => {
   const { mutate: deleteRelationMutate } = useMutation<DeleteRelationsMutation>(
     DeleteRelationsDocument
   );
+
+  const fireDiscardEvent = () => {
+    discardEvent.value = true;
+  };
 
   const save = async () => {
     removeMediafilesFromOrdering(toBeDeleted.value);
@@ -96,6 +107,7 @@ export const useEditMode = () => {
     resetMetadataToBePatched();
     clearMediaFilesToLinkToEntity();
     clearMediaFilesToPatch();
+    fireDiscardEvent();
   };
 
   return {
