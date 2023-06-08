@@ -8,7 +8,7 @@
         v-if="intialValues != 'no-values'"
         :intialValues="intialValues"
         :entityId="id"
-        :refetch="refetch"
+        @discardEdit="refreshEntity"
       >
         <entity-column
           v-if="columnList != 'no-values'"
@@ -24,14 +24,13 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, watch } from "vue";
 import { asString } from "@/helpers";
 import { useRoute, onBeforeRouteUpdate } from "vue-router";
 import {
   Entitytyping,
   GetEntityByIdDocument,
   type ColumnList,
-  type Entity,
   type GetEntityByIdQuery,
   type GetEntityByIdQueryVariables,
   type IntialValues,
@@ -74,7 +73,7 @@ const queryVariables = reactive<GetEntityByIdQueryVariables>({
   type: props.entityType,
 });
 
-const { onResult, refetch } = useQuery<GetEntityByIdQuery>(
+const { result, refetch } = useQuery<GetEntityByIdQuery>(
   GetEntityByIdDocument,
   queryVariables,
   {
@@ -82,6 +81,10 @@ const { onResult, refetch } = useQuery<GetEntityByIdQuery>(
     fetchPolicy: "no-cache",
   }
 );
+
+const refreshEntity = () => {
+  refetch(queryVariables);
+};
 
 onBeforeRouteUpdate(async (to: any) => {
   queryVariables.id = to.params.id;
@@ -94,10 +97,15 @@ const intialValues = ref<Omit<IntialValues, "keyValue"> | "no-values">(
 );
 const columnList = ref<ColumnList | "no-values">("no-values");
 
-onResult((queryResults) => {
-  //TEMP: check if it's an asset or mediafile
+const resetEntityData = () => {
+  intialValues.value = "no-values";
+  columnList.value = "no-values";
+};
+
+watch(result, (queryResults) => {
+  resetEntityData();
   try {
-    const entity = queryResults.data.Entity;
+    const entity = queryResults?.Entity;
     const acceptedTypes = ["Asset", "MediaFileEntity", "Manifest", "IotDevice"];
     if (acceptedTypes.includes(entity?.__typename)) {
       intialValues.value = entity.intialValues;

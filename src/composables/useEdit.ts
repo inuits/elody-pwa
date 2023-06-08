@@ -7,7 +7,7 @@ import type {
   DeleteRelationsMutation,
 } from "@/generated-types/queries";
 import { useMutation } from "@vue/apollo-composable";
-import { computed, ref, inject } from "vue";
+import { computed, ref } from "vue";
 import useMediaAssetLinkHelper from "./useMediaAssetLinkHelper";
 import useMetaDataHelper from "./useMetaDataHelper";
 import {
@@ -37,7 +37,6 @@ export const useEditMode = () => {
   const setEditMode = () => (editMode.value = "edit");
   const disableEditMode = () => (editMode.value = "view");
   const isEdit = computed<boolean>(() => editMode.value === "edit");
-  const { discardEvent } = inject<any>("discardEvent");
 
   router.beforeEach(() => {
     disableEditMode();
@@ -68,10 +67,6 @@ export const useEditMode = () => {
     DeleteRelationsDocument
   );
 
-  const fireDiscardEvent = () => {
-    discardEvent.value = true;
-  };
-
   const save = async () => {
     removeMediafilesFromOrdering(toBeDeleted.value);
     linkMediaFilesToEntity(addSaveCallback);
@@ -100,6 +95,7 @@ export const useEditMode = () => {
   };
 
   const discard = () => {
+    const discardEvent = new Event("discardEdit");
     disableEditMode();
     saveCallbacks.value = [];
     toBeDeleted.value = [];
@@ -107,7 +103,7 @@ export const useEditMode = () => {
     resetMetadataToBePatched();
     clearMediaFilesToLinkToEntity();
     clearMediaFilesToPatch();
-    fireDiscardEvent();
+    document.dispatchEvent(discardEvent);
   };
 
   return {
