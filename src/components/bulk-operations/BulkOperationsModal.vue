@@ -31,7 +31,7 @@
         <div class="grow">
           <div class="flex items-center h-[40px] mb-6">
             <BulkOperationsActionsBar
-              context="BulkOperationsCsvExport"
+              :context="BulkOperationsContextEnum.BulkOperationsCsvExport"
               :total-items-count="csvExportOptions.length"
               :use-extended-bulk-operations="false"
               @select-page="bulkSelect"
@@ -46,7 +46,9 @@
               v-model="csvExportOption.isSelected"
               :label="csvExportOption.key.label"
               :item="{ id: csvExportOption.key.value }"
-              bulk-operations-context="BulkOperationsCsvExport"
+              :bulk-operations-context="
+                BulkOperationsContextEnum.BulkOperationsCsvExport
+              "
               input-style="accentNormal"
             />
           </div>
@@ -57,7 +59,9 @@
           :context="context"
           :selected-items-count="getEnqueuedItemCount(context)"
           :is-disabled-button="
-            getEnqueuedItemCount('BulkOperationsCsvExport') === 0
+            getEnqueuedItemCount(
+              BulkOperationsContextEnum.BulkOperationsCsvExport
+            ) === 0
           "
           :button-icon="DamsIcons.DocumentInfo"
           button-label="Exporteer naar csv"
@@ -70,9 +74,10 @@
 </template>
 
 <script lang="ts" setup>
-import type {
-  Context,
-  InBulkProcessableItem,
+import {
+  BulkOperationsContextEnum,
+  type Context,
+  type InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
 import {
   DamsIcons,
@@ -134,10 +139,13 @@ const csvExportOptions = ref<{ isSelected: boolean; key: DropdownOption }[]>(
 
 const bulkSelect = () => {
   for (let csvExportOption of csvExportOptions.value)
-    enqueueItemForBulkProcessing("BulkOperationsCsvExport", {
-      id: csvExportOption.key.value,
-    });
-  triggerBulkSelectionEvent("BulkOperationsCsvExport");
+    enqueueItemForBulkProcessing(
+      BulkOperationsContextEnum.BulkOperationsCsvExport,
+      {
+        id: csvExportOption.key.value,
+      }
+    );
+  triggerBulkSelectionEvent(BulkOperationsContextEnum.BulkOperationsCsvExport);
 };
 
 const exportCsv = async () => {
@@ -204,7 +212,9 @@ watch(
       getModal(TypeModals.BulkOperations).modalState.value.state ===
       ModalState.Hide
     )
-      dequeueAllItemsForBulkProcessing("BulkOperationsCsvExport");
+      dequeueAllItemsForBulkProcessing(
+        BulkOperationsContextEnum.BulkOperationsCsvExport
+      );
   }
 );
 </script>

@@ -42,6 +42,7 @@ import {
 } from "@/composables/useBulkOperations";
 import { bulkSelectAllSizeLimit } from "@/main";
 import { computed, onMounted, watch } from "vue";
+import { useRoute } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -105,6 +106,7 @@ const {
   isEnqueued,
   getEnqueuedItemCount,
 } = useBulkOperations();
+const route = useRoute();
 
 const handleItemSelection = () => {
   if (
@@ -134,5 +136,9 @@ watch(
   contextWhereSelectionEventIsTriggered,
   () =>
     (inputValue.value = isEnqueued(props.bulkOperationsContext, props.item.id))
+);
+watch(
+  route,
+  () => (inputValue.value = isEnqueued(route.name as Context, props.item.id))
 );
 </script>
