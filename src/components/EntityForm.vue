@@ -14,7 +14,7 @@ import type {
   UpdateRelationsAndMetadataMutationVariables,
 } from "@/generated-types/queries";
 import { UpdateRelationsAndMetadataDocument } from "@/generated-types/queries";
-import { ref, watch } from "vue";
+import { watch } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { NotificationType, useNotification } from "./base/BaseNotification.vue";
 import { useI18n } from "vue-i18n";
@@ -22,8 +22,10 @@ import { useI18n } from "vue-i18n";
 const props = defineProps<{
   intialValues: Omit<IntialValues, "keyValue">;
   entityId: string;
-  refetch: Function;
 }>();
+
+const emit = defineEmits(["discardEdit"]);
+
 const { addSaveCallback, isEdit } = useEditMode();
 const { addForm } = useFormHelper();
 const { t } = useI18n();
@@ -93,6 +95,10 @@ const submit = useSubmitForm<IntialValues>(async (values) => {
     );
     setValues(resultMutate?.data?.updateRelationsAndMetadata.intialValues);
   }
+});
+
+document.addEventListener("discardEdit", () => {
+  emit("discardEdit");
 });
 
 watch(isEdit, (value) => {
