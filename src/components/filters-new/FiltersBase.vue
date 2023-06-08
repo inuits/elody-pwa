@@ -165,7 +165,6 @@ watch(clearAllActiveFilters, () => {
         .map((filter) => filter.advancedFilter.key)
         .includes(activeFilter.key)
     );
-    console.log(activeFilters.value);
     setTimeout(() => (clearAllActiveFilters.value = false), 50);
     applyFilters();
   }
