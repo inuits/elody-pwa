@@ -49,6 +49,7 @@
 
 <script lang="ts" setup>
 import {
+  AdvancedFilterTypes,
   DamsIcons,
   GetAdvancedFiltersDocument,
   GetFilterMatcherMappingDocument,
@@ -64,7 +65,7 @@ import {
 } from "@/generated-types/queries";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import FiltersListItem from "@/components/filters-new/FiltersListItem.vue";
-import { defineProps, ref, watch } from "vue";
+import { defineProps, ref, toRefs, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 
@@ -94,6 +95,7 @@ const matchers = ref<DropdownOption[]>([]);
 const filters = ref<FilterListItem[]>([]);
 const activeFilters = ref<AdvancedFilterInput[]>([]);
 const clearAllActiveFilters = ref<boolean>(false);
+const { entityType } = toRefs(props);
 
 const { onResult: onFilterMatcherMappingResult } =
   useQuery<GetFilterMatcherMappingQuery>(GetFilterMatcherMappingDocument);
@@ -115,18 +117,28 @@ onFilterMatcherMappingResult((result) => {
   });
 });
 
-const { onResult: onAdvancedFiltersResult } = useQuery<GetAdvancedFiltersQuery>(
-  GetAdvancedFiltersDocument,
-  { entityType: props.entityType }
-);
+const { refetch, onResult: onAdvancedFiltersResult } =
+  useQuery<GetAdvancedFiltersQuery>(
+    GetAdvancedFiltersDocument,
+    { entityType: entityType.value },
+    { enabled: true }
+  );
 onAdvancedFiltersResult((result) => {
   const advancedFilters: Maybe<AdvancedFilters> | undefined = (
     result.data.EntityTypeFilters as BaseEntity
   ).advancedFilters;
   if (!advancedFilters) return;
 
+  filters.value = [];
   Object.values(advancedFilters).forEach((advancedFilter) => {
     if (typeof advancedFilter !== "string") {
+      if (advancedFilter.defaultValue)
+        activeFilters.value.push({
+          type: AdvancedFilterTypes.Text,
+          key: advancedFilter.key,
+          value: advancedFilter.defaultValue,
+          match_exact: true,
+        });
       filters.value.push({
         isActive: !!advancedFilter.defaultValue,
         advancedFilter,
@@ -147,9 +159,19 @@ watch(activeFilters, () =>
 );
 watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
-    activeFilters.value = [];
+    activeFilters.value = activeFilters.value.filter((activeFilter) =>
+      filters.value
+        .filter((filter) => !!filter.advancedFilter.defaultValue)
+        .map((filter) => filter.advancedFilter.key)
+        .includes(activeFilter.key)
+    );
+    console.log(activeFilters.value);
     setTimeout(() => (clearAllActiveFilters.value = false), 50);
     applyFilters();
   }
+});
+watch(entityType, () => {
+  activeFilters.value = [];
+  refetch();
 });
 </script>

@@ -46,10 +46,13 @@ import type {
 import type { FilterListItem } from "@/components/filters-new/FiltersBase.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
+import {
+  BulkOperationsContextEnum,
+  useBulkOperations,
+} from "@/composables/useBulkOperations";
 import { computed, markRaw, ref, toRefs, watch } from "vue";
 import { DamsIcons } from "@/generated-types/queries";
 import { Unicons } from "@/types";
-import { useBulkOperations } from "@/composables/useBulkOperations";
 
 const props = defineProps<{
   filter: FilterListItem;
@@ -96,7 +99,7 @@ watch(advancedFilterInput, () => {
     if (advancedFilterInput.value.value.length > 0)
       emit("activateFilter", advancedFilterInput.value);
     else {
-      dequeueAllItemsForBulkProcessing("FilterOptions");
+      dequeueAllItemsForBulkProcessing(BulkOperationsContextEnum.FilterOptions);
       emit("deactivateFilter", advancedFilterInput.value.key);
     }
   else if (advancedFilterInput.value.value !== undefined)
@@ -107,7 +110,7 @@ watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
     isOpen.value = false;
     selectedMatcher.value = undefined;
-    dequeueAllItemsForBulkProcessing("FilterOptions");
+    dequeueAllItemsForBulkProcessing(BulkOperationsContextEnum.FilterOptions);
   }
 });
 </script>

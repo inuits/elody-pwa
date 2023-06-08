@@ -1,28 +1,27 @@
-import type { MetadataAndRelation } from "@/generated-types/queries";
+import {
+  RouteNames,
+  type MetadataAndRelation,
+} from "@/generated-types/queries";
 import { bulkSelectAllSizeLimit } from "@/main";
 import { ref } from "vue";
 
-export type Context =
-  | "Home"
-  | "SingleEntity"
-  | "Mediafiles"
-  | "SingleMediafile"
-  | "History"
-  | "BulkOperationsCsvExport"
-  | "FilterOptions";
+export enum BulkOperationsContextEnum {
+  BulkOperationsCsvExport = "BulkOperationsCsvExport",
+  FilterOptions = "FilterOptions",
+}
+export type Context = RouteNames | BulkOperationsContextEnum;
 export type InBulkProcessableItem = {
   id: string;
   teaserMetadata?: MetadataAndRelation[];
 };
-const items = ref<Record<Context, InBulkProcessableItem[]>>({
-  Home: [],
-  SingleEntity: [],
-  Mediafiles: [],
-  SingleMediafile: [],
-  History: [],
-  BulkOperationsCsvExport: [],
-  FilterOptions: [],
-});
+
+/* @ts-ignore */
+const items = ref<Record<Context, InBulkProcessableItem[]>>({});
+for (const key of [
+  ...Object.values(RouteNames),
+  ...Object.values(BulkOperationsContextEnum),
+])
+  items.value[key] = [];
 const contextWhereSelectionEventIsTriggered = ref<"" | Context>("");
 
 export const useBulkOperations = () => {
