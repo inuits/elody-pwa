@@ -170,7 +170,8 @@ watch(clearAllActiveFilters, () => {
   }
 });
 watch(entityType, () => {
+  clearAllActiveFilters.value = true;
   activeFilters.value = [];
-  refetch();
+  refetch({ entityType: entityType.value });
 });
 </script>
