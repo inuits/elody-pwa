@@ -22,7 +22,13 @@
         :disabled="disabled"
       />
     </div>
-    <span v-if="label" :class="{ 'ml-2': inputValue }">
+    <span
+      v-if="label"
+      class="select-none cursor-pointer"
+      :class="{ 'ml-2': inputValue }"
+      @change.stop
+      @click.stop="handleItemSelection"
+    >
       {{ label }}
     </span>
   </div>
