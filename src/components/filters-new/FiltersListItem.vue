@@ -34,6 +34,7 @@
       :is="matcherComponent"
       :filter="filter.advancedFilter"
       @new-advanced-filter-input="(input: AdvancedFilterInput) => advancedFilterInput = input"
+      @filter-options="(options: string[]) => filterOptions = options"
     />
   </div>
 </template>
@@ -65,7 +66,7 @@ const emit = defineEmits<{
   (event: "deactivateFilter", advancedFilterKey: string): void;
 }>();
 
-const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
+const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { clearAllActiveFilters } = toRefs(props);
 const isOpen = ref<boolean>(false);
 const matcherComponent = ref();
@@ -75,6 +76,7 @@ const advancedFilterInput = ref<AdvancedFilterInput>({
   key: props.filter.advancedFilter.key,
   value: undefined,
 });
+const filterOptions = ref<string[]>([]);
 
 const loadMatcher = async () => {
   const module = await import(
@@ -93,15 +95,19 @@ const icon = computed<string>(() =>
 watch(selectedMatcher, async () => {
   if (selectedMatcher.value) await loadMatcher();
   else emit("deactivateFilter", advancedFilterInput.value.key);
+
+  filterOptions.value.forEach((option) =>
+    dequeueItemForBulkProcessing(
+      BulkOperationsContextEnum.FilterOptions,
+      option
+    )
+  );
 });
 watch(advancedFilterInput, () => {
   if (Array.isArray(advancedFilterInput.value.value))
     if (advancedFilterInput.value.value.length > 0)
       emit("activateFilter", advancedFilterInput.value);
-    else {
-      dequeueAllItemsForBulkProcessing(BulkOperationsContextEnum.FilterOptions);
-      emit("deactivateFilter", advancedFilterInput.value.key);
-    }
+    else emit("deactivateFilter", advancedFilterInput.value.key);
   else if (advancedFilterInput.value.value !== undefined)
     emit("activateFilter", advancedFilterInput.value);
   else emit("deactivateFilter", advancedFilterInput.value.key);
@@ -110,7 +116,6 @@ watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
     isOpen.value = false;
     selectedMatcher.value = undefined;
-    dequeueAllItemsForBulkProcessing(BulkOperationsContextEnum.FilterOptions);
   }
 });
 </script>

@@ -18,7 +18,7 @@
       v-model="option.isSelected"
       :label="option.key"
       :item="{ id: option.key }"
-      bulk-operations-context="FilterOptions"
+      :bulk-operations-context="BulkOperationsContextEnum.FilterOptions"
       input-style="accentNormal"
     />
   </div>
@@ -35,6 +35,7 @@ import {
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseInputTextNumber from "@/components/base/BaseInputTextNumber.vue";
+import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import { defineEmits, onMounted, reactive, ref, watch } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 
@@ -47,6 +48,7 @@ const emit = defineEmits<{
     event: "newAdvancedFilterInput",
     advancedFilterInput: AdvancedFilterInput
   ): void;
+  (event: "filterOptions", filterOptions: string[]): void;
 }>();
 
 const input = ref<string | number | string[]>("");
@@ -65,6 +67,10 @@ onResult((result) => {
     input.value = [];
     options.forEach((option) =>
       filterOptions.push({ isSelected: false, key: option })
+    );
+    emit(
+      "filterOptions",
+      filterOptions.map((option) => option.key)
     );
   }
 });
