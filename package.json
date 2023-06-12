@@ -58,7 +58,7 @@
   "devDependencies": {
     "@graphql-codegen/add": "^4.0.1",
     "@graphql-codegen/cli": "^4.0.1",
-    "@graphql-codegen/graphql-modules-preset": "^4.0.0",
+    "@graphql-codegen/typed-document-node": "^4.0.0",
     "@graphql-codegen/typescript": "^4.0.0",
     "@graphql-codegen/typescript-operations": "^4.0.0",
     "@intlify/vite-plugin-vue-i18n": "^6.0.3",
