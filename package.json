@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.7.0",
-    "@graphql-codegen/cli": "^2.16.1",
+    "@graphql-codegen/cli": "^4.0.1",
     "@rollup/plugin-node-resolve": "^15.0.2",
     "@sentry/browser": "^6.19.7",
     "@sentry/integrations": "^6.19.7",
@@ -56,10 +56,11 @@
     "vuex": "^4.0.2"
   },
   "devDependencies": {
-    "@graphql-codegen/add": "^3.2.1",
-    "@graphql-codegen/typed-document-node": "2.3.13",
-    "@graphql-codegen/typescript": "^2.8.8",
-    "@graphql-codegen/typescript-operations": "^2.5.13",
+    "@graphql-codegen/add": "^4.0.1",
+    "@graphql-codegen/cli": "^4.0.1",
+    "@graphql-codegen/graphql-modules-preset": "^4.0.0",
+    "@graphql-codegen/typescript": "^4.0.0",
+    "@graphql-codegen/typescript-operations": "^4.0.0",
     "@intlify/vite-plugin-vue-i18n": "^6.0.3",
     "@rushstack/eslint-patch": "^1.1.4",
     "@types/apollo-upload-client": "^17.0.2",
