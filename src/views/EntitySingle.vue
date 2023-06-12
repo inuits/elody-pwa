@@ -106,7 +106,13 @@ watch(result, (queryResults) => {
   resetEntityData();
   try {
     const entity = queryResults?.Entity;
-    const acceptedTypes = ["Asset", "MediaFileEntity", "Manifest", "IotDevice"];
+    const acceptedTypes = [
+      "Asset",
+      "MediaFileEntity",
+      "Manifest",
+      "IotDevice",
+      "PoliceZone",
+    ];
     if (acceptedTypes.includes(entity?.__typename)) {
       intialValues.value = entity.intialValues;
       columnList.value = entity.entityView;
