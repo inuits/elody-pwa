@@ -1,8 +1,9 @@
 import type { RouteRecordRaw } from "vue-router";
 import History from "./History.vue";
-import Home from "./Home.vue";
-import SingleEntity from "./SingleEntity.vue";
+import Home from "@/views/Home.vue";
+import HomeWrapper from "@/views/HomeWrapper.vue";
 import ManifestViewer from "@/components/ManifestViewer.vue";
+import SingleEntity from "@/views/SingleEntity.vue";
 
 export type urlParams = "id";
 
@@ -13,6 +14,7 @@ type RouteComponentConfig = {
 
 const routeComponentConfig: RouteComponentConfig[] = [
   { routeName: "Home", routeComponent: Home },
+  { routeName: "HomeWrapper", routeComponent: HomeWrapper },
   { routeName: "SingleEntity", routeComponent: SingleEntity },
   { routeName: "SingleMediafile", routeComponent: SingleEntity },
   { routeName: "History", routeComponent: History },
