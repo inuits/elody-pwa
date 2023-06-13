@@ -118,7 +118,13 @@
                 !enableSelection &&
                   router.push({
                     name: listItemRouteName,
-                    params: { id: entity?.id },
+                    params: {
+                      id:
+                        entity?.id ||
+                        entity.teaserMetadata?.find(
+                          (dataItem) => dataItem?.key === 'id'
+                        )?.value,
+                    },
                   })
               "
             >
