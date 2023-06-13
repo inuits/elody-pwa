@@ -114,19 +114,7 @@
               "
               :media="getMediaFilenameFromEntity(entity)"
               :thumb-icon="getThumbnail(entity)"
-              @click="
-                !enableSelection &&
-                  router.push({
-                    name: listItemRouteName,
-                    params: {
-                      id:
-                        entity?.id ||
-                        entity.teaserMetadata?.find(
-                          (dataItem) => dataItem?.key === 'id'
-                        )?.value,
-                    },
-                  })
-              "
+              @click="goToEntityPage(entity)"
             >
               <template #actions>
                 <BaseButton
@@ -178,13 +166,7 @@
               :meta="entity?.teaserMetadata"
               :media="getMediaFilenameFromEntity(entity)"
               :thumb-icon="getThumbnail(entity)"
-              @click="
-                !enableSelection &&
-                  router.push({
-                    name: listItemRouteName,
-                    params: { id: entity?.id },
-                  })
-              "
+              @click="goToEntityPage(entity)"
             >
               <template #actions>
                 <BaseButton
@@ -505,6 +487,20 @@ export default defineComponent({
       }
     });
 
+    const goToEntityPage = (entity: Asset) => {
+      if (props.enableSelection) return;
+
+      const entityId =
+        entity?.id ||
+        entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")
+          ?.value;
+
+      router.push({
+        name: props.listItemRouteName,
+        params: { id: entityId },
+      });
+    };
+
     watch(
       () => props.predefinedEntities?.entities,
       () => {
@@ -542,6 +538,7 @@ export default defineComponent({
       allEntitiesResult,
       isAsc,
       route,
+      goToEntityPage,
     };
   },
 });
