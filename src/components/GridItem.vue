@@ -1,5 +1,5 @@
 <template>
-  <li class="w-65 h-80 bg-grey-200 rounded-md align-middle">
+  <li class="w-full h-auto bg-grey-200 rounded-md align-middle">
     <div class="absolute right-0 top-0 w-min h-min" data-test="action-slot">
       <slot name="actions"></slot>
     </div>
@@ -32,47 +32,47 @@
           </div>
         </div>
         <div
-          class="w-full h-16 mt-12 pl-2 flex border-t-2 border-neutral-20 flex-col-reverse"
+          class="w-full mt-12 p-4 flex border-t-2 border-neutral-20 bg-neutral-white"
         >
           <div
-            v-for="metaItem in only4Meta(meta as MetadataAndRelation[])"
-            :key="metaItem ? metaItem.value : 'no-key'"
-            class="w-full h-6"
+            class="bg-opacity-50 flex items-center justify-center"
+            :class="{
+              'bg-neutral-check bg-opacity-30 rounded': isChecked,
+            }"
           >
-            <template v-if="gridItemInfoKeys.includes(metaItem.key)">
-              <div class="flex items-center bg-neutral-white w-65 h-20 pl-5">
-                <div class="flex items-center">
-                  <div
-                    class="flex-none w-11 h-11 bg-opacity-50 flex items-center justify-center"
-                    :class="{
-                      'bg-neutral-check bg-opacity-30 rounded': isChecked,
-                    }"
-                  >
-                    <input
-                      type="checkbox"
-                      class="form-checkbox h-5 w-5 rounded-sm border-gray-300 checked:bg-neutral-check checked:bg-opacity-30 checked:border-blue-200"
-                      :checked="isChecked"
-                      @change="handleCheckboxChange"
-                    />
+            <input
+              type="checkbox"
+              class="form-checkbox h-5 w-5 rounded-sm border-gray-300 checked:bg-neutral-check checked:bg-opacity-30 checked:border-blue-200"
+              :checked="isChecked"
+              @change="handleCheckboxChange"
+            />
+          </div>
+          <div class="w-full">
+            <div
+              v-for="metaItem in only4Meta(meta as MetadataAndRelation[])"
+              :key="metaItem ? metaItem.value : 'no-key'"
+              class="w-full"
+            >
+              <template v-if="gridItemInfoKeys.includes(metaItem.key)">
+                <div class="flex items-center w-full pl-5">
+                  <div class="flex flex-col items-start w-full">
+                    <span
+                      class="text-neutral-70 w-full metaType handleOverflow"
+                      data-test="meta-label"
+                      >{{ metaItem.key }}</span
+                    >
+                    <span
+                      class="text-black w-full metaType handleOverflow"
+                      :class="{
+                        metaTitle: metaItem.key === 'title' || hasFileName,
+                      }"
+                      data-test="meta-info"
+                      >{{ metaItem.value }}</span
+                    >
                   </div>
                 </div>
-                <div class="flex flex-col items-start">
-                  <span
-                    class="text-neutral-70 w-fit metaType h-6 handleOverflow"
-                    data-test="meta-label"
-                    >{{ metaItem.key }}</span
-                  >
-                  <span
-                    class="text-black w-fit metaType h-6 handleOverflow"
-                    :class="{
-                      metaTitle: metaItem.key === 'title' || hasFileName,
-                    }"
-                    data-test="meta-info"
-                    >{{ metaItem.value }}</span
-                  >
-                </div>
-              </div>
-            </template>
+              </template>
+            </div>
           </div>
         </div>
       </div>
@@ -107,7 +107,13 @@ export default defineComponent({
     const setNoImage = () => {
       imageSrcError = true;
     };
-    const gridItemInfoKeys: string[] = ["title", "type", "filename"];
+    const gridItemInfoKeys: string[] = [
+      "id",
+      "title",
+      "name",
+      "type",
+      "filename",
+    ];
     const hasFileName = ref<boolean>(false);
 
     const mediaIsLink = computed<Boolean>(() => stringIsUrl(props.media || ""));
