@@ -18,10 +18,9 @@
       <template v-slot:content>
         <div v-if="!isCollapsed" class="ml-1 bg-neutral-lightest">
           <base-library
-            list-item-route-name="SingleAsset"
+            list-item-route-name="SingleEntity"
             :is-hide-filters="true"
             :predefined-entities="entitiesObject"
-            :enable-selection="true"
             :bulk-operations-context="route.name as Context"
           />
         </div>

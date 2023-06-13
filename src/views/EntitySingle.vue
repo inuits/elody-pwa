@@ -112,6 +112,8 @@ watch(result, (queryResults) => {
       "Manifest",
       "IotDevice",
       "PoliceZone",
+      "DeviceModel",
+      "DeviceStatus",
     ];
     if (acceptedTypes.includes(entity?.__typename)) {
       intialValues.value = entity.intialValues;
