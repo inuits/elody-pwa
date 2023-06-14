@@ -44,7 +44,7 @@
     </li>
     <div
       v-show="showOptions"
-      class="absolute z-0 rounded-b-lg border-x border-b"
+      class="absolute z-10 rounded-b-lg border-x border-b"
       :class="[
         `${selectedDropdownStyle.textColor} ${selectedDropdownStyle.bgColor} ${selectedDropdownStyle.borderColor}`,
         `${selectedDropdownStyle.borderColor}` !== 'border-none'
@@ -97,7 +97,7 @@ const defaultDropdown: Dropdown = {
   borderColor: "border-none",
   hoverStyle: {
     textColor: "hover:text-accent-accent",
-    bgColor: "hover:bg-accent-light",
+    bgColor: "hover:bg-neutral-lightest",
     borderColor: "hover:border-none",
   },
   disabledStyle: {
