@@ -215,7 +215,7 @@ const inputValue = computed<string[] | undefined>({
 .multiselect-option {
   display: flex;
   align-items: center;
-  padding: 0.5rem 0.75rem;
+  padding: 0.425rem 0.75rem;
   font-size: 1rem;
   cursor: pointer;
   color: var(--color-text-body);

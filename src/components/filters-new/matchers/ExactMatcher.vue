@@ -131,7 +131,7 @@ onAutocompleteOptionsResult((result) => {
   if (!options) options = [];
 
   autocompleteOptions.value.push(...options);
-  setTimeout(() => (refetchAutocompleteOptionsEnabled.value = false), 50);
+  setTimeout(() => (refetchAutocompleteOptionsEnabled.value = false), 150);
 });
 
 const clearAutocompleteOptions = () => {
