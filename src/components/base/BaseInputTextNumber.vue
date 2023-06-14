@@ -45,7 +45,7 @@ const inputStyles: Record<InputStyle, Input> = {
 
 const props = withDefaults(
   defineProps<{
-    modelValue: string | number;
+    modelValue: string | number | undefined;
     type?: "text" | "number";
     inputStyle: InputStyle;
     disabled?: boolean;
@@ -59,10 +59,10 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (event: "update:modelValue", modelValue: string | number): void;
+  (event: "update:modelValue", modelValue: string | number | undefined): void;
 }>();
 
-const inputValue = computed<string | number>({
+const inputValue = computed<string | number | undefined>({
   get() {
     return props.modelValue;
   },
