@@ -114,6 +114,7 @@ const getAutocompleteOptions = (value: string) => {
         type: props.filter.advancedFilterInputForRetrievingOptions.type,
         key: props.filter.advancedFilterInputForRetrievingOptions.key,
         value,
+        item_types: props.filter.advancedFilterInputForRetrievingOptions.item_types ?? [],
         provide_value_options_for_key:
           props.filter.advancedFilterInputForRetrievingOptions
             .provide_value_options_for_key,
@@ -138,7 +139,7 @@ const clearAutocompleteOptions = () => {
     autocompleteOption = autocompleteOptions.value.pop();
 };
 
-const useAutocomplete = computed<boolean>(() => filterOptions.length > 10);
+const useAutocomplete = computed<boolean>(() => filterOptions.length > 10 || filterOptions.length === 0);
 
 onMounted(() => {
   if (
@@ -150,6 +151,7 @@ onMounted(() => {
         type: props.filter.advancedFilterInputForRetrievingOptions.type,
         key: props.filter.advancedFilterInputForRetrievingOptions.key,
         value: props.filter.advancedFilterInputForRetrievingOptions.value,
+        item_types: props.filter.advancedFilterInputForRetrievingOptions.item_types ?? [],
         provide_value_options_for_key:
           props.filter.advancedFilterInputForRetrievingOptions
             .provide_value_options_for_key,
