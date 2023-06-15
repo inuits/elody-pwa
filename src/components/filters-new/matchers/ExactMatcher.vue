@@ -129,9 +129,7 @@ onAutocompleteOptionsResult((result) => {
   clearAutocompleteOptions();
   let options = result.data?.FilterOptions;
   if (!options) options = [];
-
   autocompleteOptions.value.push(...options);
-  setTimeout(() => (refetchAutocompleteOptionsEnabled.value = false), 150);
 });
 
 const clearAutocompleteOptions = () => {
