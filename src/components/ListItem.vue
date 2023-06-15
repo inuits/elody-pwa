@@ -30,7 +30,7 @@
 
     <div class="flex items-center w-full">
       <div
-        v-for="metadataItem in sortMetadata(teaserMetadata)"
+        v-for="metadataItem in teaserMetadata"
         :key="metadataItem ? metadataItem.value : 'no-key'"
         class="flex justify-start flex-col mx-2 break-words w-1/4"
       >
@@ -63,7 +63,7 @@ import type { MetadataAndRelation } from "../generated-types/queries";
 import type { Context } from "@/composables/useBulkOperations";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import { computed, ref } from "vue";
-import { customSort, stringIsUrl } from "@/helpers";
+import { stringIsUrl } from "@/helpers";
 import { Unicons } from "@/types";
 
 const props = withDefaults(
@@ -93,18 +93,6 @@ const imageSrcError = ref(false);
 
 function setNoImage() {
   imageSrcError.value = true;
-}
-
-function sortMetadata(metadata: MetadataAndRelation[]) {
-  const sortOrder = ["object_number", "type", "title"];
-  if (metadata.length > 0)
-    return customSort(
-      sortOrder,
-      metadata.filter((value) => value?.value !== ""),
-      "key"
-    );
-
-  return [];
 }
 
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));

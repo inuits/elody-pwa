@@ -33,6 +33,7 @@
               :class="[{ 'opacity-60': !panel.isEditable && isEdit }]"
               :label="metadata.label"
               :value="metadata.value"
+              :unit="metadata.unit"
             />
             <entity-element-metadata-edit
               v-else-if="panel.isEditable"
@@ -54,6 +55,7 @@ import type {
   PanelInfo,
   PanelMetaData,
   PanelRelation,
+  Unit,
   WindowElementPanel,
 } from "@/generated-types/queries";
 import { PanelType } from "@/generated-types/queries";
@@ -69,6 +71,7 @@ type MetadataField = {
   key: string;
   label: string;
   value: string;
+  unit: Unit;
   field: InputField;
 };
 
@@ -92,6 +95,7 @@ const metadataArray = computed((): MetadataField[] => {
       const metadataObject = {
         key: metadataItemKey,
         label: (value as PanelMetaData).label,
+        unit: (value as PanelMetaData).unit,
         value:
           (value as PanelInfo).value ||
           getValueForPanelMetadata(panelType.value, metadataItemKey),

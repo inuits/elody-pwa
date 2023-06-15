@@ -1,7 +1,7 @@
 import { createI18n } from "vue-i18n";
 import messages from "@intlify/vite-plugin-vue-i18n/messages";
 import { useRoute } from "vue-router";
-import { PanelType } from "./generated-types/queries";
+import { PanelType, Unit } from "./generated-types/queries";
 import { useEntityMediafileSelector } from "./components/EntityImageSelection.vue";
 import { useFormHelper } from "./composables/useFormHelper";
 
@@ -113,9 +113,27 @@ export const getValueForPanelMetadata = (
   const selectedMediafile: { [index: string]: any } | undefined =
     mediafileSelectionState.selectedMediafile;
   if (panelType === PanelType.Metadata && form) {
-    return form.values[metadataItemKey] || "-";
+    return form.values[metadataItemKey] || "";
   } else if (selectedMediafile) {
     return selectedMediafile[metadataItemKey];
   }
-  return "-";
+  return "";
+};
+
+export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
+  const unitConversionTable = {
+    datetime: (value: string) => new Date(value).toLocaleString(),
+    seconds: (value: string) => `${value} s`,
+  };
+
+  if (!unitConversionTable[unit] || value == "") {
+    console.warn(
+      "This unit can not be converted yet or this item has no value"
+    );
+    return value;
+  }
+
+  const conversionFunction = unitConversionTable[unit];
+
+  return conversionFunction(value);
 };
