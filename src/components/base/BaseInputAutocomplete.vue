@@ -69,6 +69,17 @@ const inputValue = computed<string[] | undefined>({
   outline: none;
 }
 
+.multiselect-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 0 auto;
+  width: 100%;
+  outline: none;
+  cursor: pointer;
+}
+
 .multiselect-tags {
   display: flex;
   flex-grow: 1;
@@ -83,8 +94,8 @@ const inputValue = computed<string[] | undefined>({
 
 .multiselect-tag {
   display: flex;
-  margin-bottom: 0.25rem;
-  margin-right: 0.5rem;
+  margin-bottom: 0.35rem;
+  margin-right: 0.35rem;
   padding: 0.125rem 0 0.125rem 0.5rem;
   white-space: pre-wrap;
   align-items: center;
@@ -159,8 +170,9 @@ const inputValue = computed<string[] | undefined>({
   display: flex;
   flex-grow: 0;
   flex-shrink: 0;
-  padding: 0 0.625rem 0 0;
+  padding: 0 0.5rem;
   cursor: pointer;
+  outline: none;
 }
 
 .multiselect-clear-icon {
@@ -255,5 +267,14 @@ const inputValue = computed<string[] | undefined>({
   font-size: 1rem;
   cursor: auto;
   color: var(--color-text-body);
+}
+
+.multiselect-assistive-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
 }
 </style>
