@@ -1,9 +1,13 @@
 <template>
-  <BaseInputTextNumber v-model="input" input-style="default" type="text" />
+  <BaseInputTextNumberDatetime
+    v-model="input"
+    input-style="default"
+    type="text"
+  />
 </template>
 
 <script lang="ts" setup>
-import BaseInputTextNumber from "@/components/base/BaseInputTextNumber.vue";
+import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import type {
   AdvancedFilter,
   AdvancedFilterInput,

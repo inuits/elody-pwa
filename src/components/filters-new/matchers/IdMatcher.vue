@@ -54,7 +54,8 @@ const getAutocompleteOptions = (value: string) => {
         type: props.filter.advancedFilterInputForRetrievingOptions.type,
         key: props.filter.advancedFilterInputForRetrievingOptions.key,
         value,
-        item_types: props.filter.advancedFilterInputForRetrievingOptions.item_types ?? [],
+        item_types:
+          props.filter.advancedFilterInputForRetrievingOptions.item_types ?? [],
         provide_value_options_for_key:
           props.filter.advancedFilterInputForRetrievingOptions
             .provide_value_options_for_key,

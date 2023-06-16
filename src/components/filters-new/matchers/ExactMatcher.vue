@@ -4,10 +4,10 @@
       filter.type !== AdvancedFilterTypes.Selection && !Array.isArray(input)
     "
   >
-    <BaseInputTextNumber
+    <BaseInputTextNumberDatetime
       v-model="input"
       input-style="default"
-      :type="filter.type === AdvancedFilterTypes.Number ? 'number' : 'text'"
+      :type="determineInputType"
     />
   </div>
   <div v-else>
@@ -46,7 +46,7 @@ import {
 } from "@/generated-types/queries";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
-import BaseInputTextNumber from "@/components/base/BaseInputTextNumber.vue";
+import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import { computed, defineEmits, onMounted, reactive, ref, watch } from "vue";
 import { useQuery } from "@vue/apollo-composable";
@@ -114,7 +114,8 @@ const getAutocompleteOptions = (value: string) => {
         type: props.filter.advancedFilterInputForRetrievingOptions.type,
         key: props.filter.advancedFilterInputForRetrievingOptions.key,
         value,
-        item_types: props.filter.advancedFilterInputForRetrievingOptions.item_types ?? [],
+        item_types:
+          props.filter.advancedFilterInputForRetrievingOptions.item_types ?? [],
         provide_value_options_for_key:
           props.filter.advancedFilterInputForRetrievingOptions
             .provide_value_options_for_key,
@@ -139,7 +140,16 @@ const clearAutocompleteOptions = () => {
     autocompleteOption = autocompleteOptions.value.pop();
 };
 
-const useAutocomplete = computed<boolean>(() => filterOptions.length > 10 || filterOptions.length === 0);
+const useAutocomplete = computed<boolean>(
+  () => filterOptions.length > 10 || filterOptions.length === 0
+);
+const determineInputType = computed<"text" | "number" | "datetime-local">(
+  () => {
+    if (props.filter.type === AdvancedFilterTypes.Number) return "number";
+    if (props.filter.type === AdvancedFilterTypes.Date) return "datetime-local";
+    return "text";
+  }
+);
 
 onMounted(() => {
   if (
@@ -151,7 +161,8 @@ onMounted(() => {
         type: props.filter.advancedFilterInputForRetrievingOptions.type,
         key: props.filter.advancedFilterInputForRetrievingOptions.key,
         value: props.filter.advancedFilterInputForRetrievingOptions.value,
-        item_types: props.filter.advancedFilterInputForRetrievingOptions.item_types ?? [],
+        item_types:
+          props.filter.advancedFilterInputForRetrievingOptions.item_types ?? [],
         provide_value_options_for_key:
           props.filter.advancedFilterInputForRetrievingOptions
             .provide_value_options_for_key,
