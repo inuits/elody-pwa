@@ -85,7 +85,6 @@ const inputValue = computed<string[] | undefined>({
   flex-grow: 1;
   flex-shrink: 1;
   flex-wrap: wrap;
-  margin: 0.25rem 0 0;
   padding-top: 2px;
   padding-left: 8px;
   padding-bottom: 2px;
@@ -94,7 +93,8 @@ const inputValue = computed<string[] | undefined>({
 
 .multiselect-tag {
   display: flex;
-  margin-bottom: 0.35rem;
+  margin-top: 0.175rem;
+  margin-bottom: 0.175rem;
   margin-right: 0.35rem;
   padding: 0.125rem 0 0.125rem 0.5rem;
   white-space: pre-wrap;
