@@ -46,7 +46,7 @@ const inputStyles: Record<InputStyle, Input> = {
 const props = withDefaults(
   defineProps<{
     modelValue: string | number | undefined;
-    type?: "text" | "number";
+    type?: "text" | "number" | "datetime-local";
     inputStyle: InputStyle;
     disabled?: boolean;
     isValidPredicate?: Function;
