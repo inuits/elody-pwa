@@ -28,5 +28,5 @@ import CreateEntityForm from "@/components/CreateEntityForm.vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 
 const { getModal } = useAvailableModals();
-const selected = ref<Entitytyping>(Entitytyping.Story);
+const selected = ref<Entitytyping>();
 </script>
