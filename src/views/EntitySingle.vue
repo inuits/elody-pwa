@@ -112,7 +112,7 @@ watch(result, (queryResults) => {
       "Manifest",
       "IotDevice",
       "PoliceZone",
-      "DeviceModel",
+      "IotDeviceModel",
       "DeviceStatus",
     ];
     if (acceptedTypes.includes(entity?.__typename)) {
