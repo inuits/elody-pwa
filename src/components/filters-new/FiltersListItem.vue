@@ -24,7 +24,7 @@
         label=""
         :icon="DamsIcons.Redo"
         :disabled="!selectedMatcher"
-        button-style="accentAccent"
+        button-style="accentNormal"
         button-size="small"
         @click="() => (selectedMatcher = undefined)"
       />

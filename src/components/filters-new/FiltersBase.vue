@@ -1,15 +1,44 @@
 <template>
   <div
-    class="ml-6 bg-neutral-white border-[1px] border-neutral-light rounded lg:w-2/6 md:w-full"
+    class="relative h-full bg-neutral-white w-full lg:w-[30%]"
+    :class="expandFilters ? 'rounded-t' : 'rounded-xl'"
     @keydown.enter="applyFilters()"
   >
-    <div class="flex flex-col gap-4 p-4">
-      <div>
-        <span class="text-text-body text-xl font-bold">
-          {{ $t("filter.filter") }}
+    <div
+      class="flex justify-between items-center px-4 h-12 border-t-[1px] border-x-[1px] select-none cursor-pointer"
+      :class="
+        expandFilters
+          ? 'border-neutral-light rounded-t'
+          : 'border-neutral-white rounded-xl'
+      "
+      @click="
+        () => {
+          expandFilters = !expandFilters;
+          emit('expandFilters', expandFilters);
+        }
+      "
+    >
+      <span class="text-text-body text-xl font-bold">
+        {{ $t("filter.filter") }}
+      </span>
+      <div class="flex">
+        <span class="text-text-body">
+          {{ activeFilterCount }} {{ $t("filter.active") }}
         </span>
+        <unicon
+          class="text-text-body ml-4"
+          :name="Unicons[getAngleIcon].name"
+        />
       </div>
-      <div class="flex justify-between gap-4">
+    </div>
+
+    <div
+      class="absolute w-full rounded-b bg-neutral-white"
+      :class="
+        expandFilters ? 'border-x-[1px] border-b-2 border-neutral-light' : ''
+      "
+    >
+      <div v-if="expandFilters" class="flex justify-between gap-4 p-4">
         <BaseButtonNew
           class="!w-1/3"
           :label="$t('filter.clear')"
@@ -18,31 +47,31 @@
         />
         <BaseButtonNew
           :label="$t('filter.apply')"
-          button-style="accentAccent"
+          button-style="accentNormal"
           @click="applyFilters()"
         />
       </div>
-    </div>
 
-    <div v-if="matchers.length > 0">
-      <FiltersListItem
-        v-for="filter in filters"
-        :key="filter.advancedFilter.key"
-        :filter="filter"
-        :matchers="
-          matchers.filter((option) =>
-            filterMatcherMapping[filter.advancedFilter.type].includes(
-              option.value
+      <div v-if="expandFilters && matchers.length > 0">
+        <FiltersListItem
+          v-for="filter in filters"
+          :key="filter.advancedFilter.key"
+          :filter="filter"
+          :matchers="
+            matchers.filter((option) =>
+              filterMatcherMapping[filter.advancedFilter.type].includes(
+                option.value
+              )
             )
-          )
-        "
-        :clear-all-active-filters="clearAllActiveFilters"
-        @activate-filter="(filter: AdvancedFilterInput) => {
-          activeFilters = activeFilters.filter(activeFilter => activeFilter.key !== filter.key);
-          activeFilters.push(filter);
-        }"
-        @deactivate-filter="(key: string) => activeFilters = activeFilters.filter(filter => filter.key !== key)"
-      />
+          "
+          :clear-all-active-filters="clearAllActiveFilters"
+          @activate-filter="(filter: AdvancedFilterInput) => {
+            activeFilters = activeFilters.filter(activeFilter => activeFilter.key !== filter.key);
+            activeFilters.push(filter);
+          }"
+          @deactivate-filter="(key: string) => activeFilters = activeFilters.filter(filter => filter.key !== key)"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -65,7 +94,8 @@ import {
 } from "@/generated-types/queries";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import FiltersListItem from "@/components/filters-new/FiltersListItem.vue";
-import { defineProps, ref, toRefs, watch } from "vue";
+import { computed, defineProps, ref, toRefs, watch } from "vue";
+import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 
@@ -80,6 +110,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (event: "applyFilters", advancedFilterInputs: AdvancedFilterInput[]): void;
+  (event: "expandFilters", expandFilters: boolean): void;
 }>();
 
 const { t } = useI18n();
@@ -94,7 +125,9 @@ const filterMatcherMapping = ref<FilterMatcherMap>({
 const matchers = ref<DropdownOption[]>([]);
 const filters = ref<FilterListItem[]>([]);
 const activeFilters = ref<AdvancedFilterInput[]>([]);
+const activeFilterCount = ref<number>(0);
 const clearAllActiveFilters = ref<boolean>(false);
+const expandFilters = ref<boolean>(false);
 const { entityType } = toRefs(props);
 
 const { onResult: onFilterMatcherMappingResult } =
@@ -149,14 +182,20 @@ onAdvancedFiltersResult((result) => {
 
 const applyFilters = () => emit("applyFilters", activeFilters.value);
 
-watch(activeFilters, () =>
-  filters.value.forEach(
-    (filter) =>
-      (filter.isActive = activeFilters.value
-        .map((activeFilter) => activeFilter.key)
-        .includes(filter.advancedFilter.key))
-  )
+const getAngleIcon = computed<DamsIcons>(() =>
+  expandFilters.value ? DamsIcons.AngleUp : DamsIcons.AngleDown
 );
+
+watch(activeFilters, () => {
+  activeFilterCount.value = 0;
+
+  filters.value.forEach((filter) => {
+    filter.isActive = activeFilters.value
+      .map((activeFilter) => activeFilter.key)
+      .includes(filter.advancedFilter.key);
+    activeFilterCount.value += filter.isActive ? 1 : 0;
+  });
+});
 watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
     activeFilters.value = activeFilters.value.filter((activeFilter) =>
