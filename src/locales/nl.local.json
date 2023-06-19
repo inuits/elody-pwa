@@ -42,7 +42,7 @@
   },
   "filter": {
     "filter": "Filters",
-    "active": "Actief",
+    "active": "actief",
     "clear": "Clear all",
     "apply": "Apply filter(s)",
     "min": "Min",

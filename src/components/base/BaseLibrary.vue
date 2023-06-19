@@ -1,13 +1,13 @@
 <template>
   <div class="lg:flex bg-neutral-lightest">
-    <FiltersBase
-      v-show="!isDrawerHiding && !isHideFilters"
-      :entity-type="route.meta.entityType as string"
-      @apply-filters="setFilters"
-    />
     <div class="px-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
-        <div v-show="acceptedEntityTypes.length === 0" class="mr-4 flex">
+        <FiltersBase
+          :entity-type="route.meta.entityType as string"
+          @apply-filters="setFilters"
+          @expand-filters="expandFilters = !expandFilters"
+        />
+        <div v-show="acceptedEntityTypes.length === 0" class="flex mx-4">
           <IconToggle
             v-if="!isHideFilters"
             v-model:checked="isDrawerHiding"
@@ -66,8 +66,9 @@
         />
       </div>
 
-      <div class="my-3">
+      <div class="my-3" :class="{ 'flex justify-end': expandFilters }">
         <BulkOperationsActionsBar
+          :class="{ 'w-[69%]': expandFilters }"
           :context="bulkOperationsContext"
           :total-items-count="totalEntityCount"
           :use-extended-bulk-operations="true"
@@ -76,128 +77,133 @@
         />
       </div>
 
-      <ListContainer id="gridContainer" :class="displayGrid ? 'p-5' : 'p-1'">
-        <div v-if="loading">
-          <ListItem
-            v-for="n in queryVariables.limit"
-            :key="n"
-            :title="$t('library.loading')"
-            :bulk-operations-context="bulkOperationsContext"
-            :loading="true"
-            :teaser-metadata="[
-              { key: '', value: '', label: '' },
-              { key: '', value: '', label: '' },
-              { key: '', value: '', label: '' },
-              { key: '', value: '', label: '' },
-            ]"
-          >
-            <template #actions>
-              <BaseButton
-                :loading="true"
-                class="ml-2"
-                :icon="Unicons.Eye.name"
-              />
-            </template>
-          </ListItem>
-        </div>
-
-        <div v-else-if="!displayGrid && entities">
-          <div>
+      <div :class="{ 'flex justify-end': expandFilters }">
+        <ListContainer
+          id="gridContainer"
+          :class="[{ 'w-[69%]': expandFilters }, displayGrid ? 'p-5' : 'p-1']"
+        >
+          <div v-if="loading">
             <ListItem
-              :small="listItemRouteName === 'SingleMediafile'"
-              v-for="entity in entities"
-              :key="entity?.id"
-              :item-id="entity.id"
+              v-for="n in queryVariables.limit"
+              :key="n"
+              :title="$t('library.loading')"
               :bulk-operations-context="bulkOperationsContext"
-              :teaser-metadata="
-                entity?.teaserMetadata?.flatMap((metadata) => metadata ?? [])
-              "
-              :media="getMediaFilenameFromEntity(entity)"
-              :thumb-icon="getThumbnail(entity)"
-              @click="goToEntityPage(entity)"
+              :loading="true"
+              :teaser-metadata="[
+                { key: '', value: '', label: '' },
+                { key: '', value: '', label: '' },
+                { key: '', value: '', label: '' },
+                { key: '', value: '', label: '' },
+              ]"
             >
               <template #actions>
                 <BaseButton
-                  v-if="
-                    isNotAlreadyAdded(
-                      entity,
-                      mediafiles,
-                      selectedRelationFieldMetadata
-                    ) && enableSelection
-                  "
-                  :loading="loading"
-                  class="ml-2"
-                  :icon="Unicons.PlusCircle.name"
-                  @click="addSelection(entity)"
-                />
-                <BaseIcon
-                  v-else-if="enableSelection"
-                  :name="Unicons.Check.name"
-                  fill="green"
-                  width="40px"
-                  class="mr-3"
-                />
-
-                <BaseButton
-                  v-else
-                  :loading="loading"
+                  :loading="true"
                   class="ml-2"
                   :icon="Unicons.Eye.name"
-                  @click="
-                    router.push({
-                      name: listItemRouteName,
-                      params: { id: entity?.id },
-                    })
-                  "
                 />
               </template>
             </ListItem>
           </div>
 
-          <div v-if="entities.length === 0" class="p-4">
-            {{ $t("search.noresult") }}
+          <div v-else-if="!displayGrid && entities">
+            <div>
+              <ListItem
+                :small="listItemRouteName === 'SingleMediafile'"
+                v-for="entity in entities"
+                :key="entity?.id"
+                :item-id="entity.id"
+                :bulk-operations-context="bulkOperationsContext"
+                :teaser-metadata="
+                  entity?.teaserMetadata?.flatMap((metadata) => metadata ?? [])
+                "
+                :media="getMediaFilenameFromEntity(entity)"
+                :thumb-icon="getThumbnail(entity)"
+                @click="goToEntityPage(entity)"
+              >
+                <template #actions>
+                  <BaseButton
+                    v-if="
+                      isNotAlreadyAdded(
+                        entity,
+                        mediafiles,
+                        selectedRelationFieldMetadata
+                      ) && enableSelection
+                    "
+                    :loading="loading"
+                    class="ml-2"
+                    :icon="Unicons.PlusCircle.name"
+                    @click="addSelection(entity)"
+                  />
+                  <BaseIcon
+                    v-else-if="enableSelection"
+                    :name="Unicons.Check.name"
+                    fill="green"
+                    width="40px"
+                    class="mr-3"
+                  />
+
+                  <BaseButton
+                    v-else
+                    :loading="loading"
+                    class="ml-2"
+                    :icon="Unicons.Eye.name"
+                    @click="
+                      router.push({
+                        name: listItemRouteName,
+                        params: { id: entity?.id },
+                      })
+                    "
+                  />
+                </template>
+              </ListItem>
+            </div>
+
+            <div v-if="entities.length === 0" class="p-4">
+              {{ $t("search.noresult") }}
+            </div>
           </div>
-        </div>
-        <div v-else-if="displayGrid && entities">
-          <div :class="`grid grid_cols gap-2 justify-items-center`">
-            <GridItem
-              v-for="entity in entities"
-              :key="entity?.id"
-              :meta="entity?.teaserMetadata"
-              :media="getMediaFilenameFromEntity(entity)"
-              :thumb-icon="getThumbnail(entity)"
-              @click="goToEntityPage(entity)"
-            >
-              <template #actions>
-                <BaseButton
-                  v-if="
-                    isNotAlreadyAdded(
-                      entity,
-                      mediafiles,
-                      selectedRelationFieldMetadata
-                    ) && enableSelection
-                  "
-                  :loading="loading"
-                  class="ml-2"
-                  :icon="Unicons.PlusCircle.name"
-                  @click="addSelection(entity)"
-                />
-                <BaseIcon
-                  v-else-if="enableSelection"
-                  :name="Unicons.Check.name"
-                  fill="green"
-                  width="40px"
-                  class="mr-3"
-                />
-              </template>
-            </GridItem>
+          <div v-else-if="displayGrid && entities">
+            <div :class="`grid grid_cols gap-2 justify-items-center`">
+              <GridItem
+                v-for="entity in entities"
+                :key="entity?.id"
+                :meta="entity?.teaserMetadata"
+                :media="getMediaFilenameFromEntity(entity)"
+                :thumb-icon="getThumbnail(entity)"
+                @click="goToEntityPage(entity)"
+              >
+                <template #actions>
+                  <BaseButton
+                    v-if="
+                      isNotAlreadyAdded(
+                        entity,
+                        mediafiles,
+                        selectedRelationFieldMetadata
+                      ) && enableSelection
+                    "
+                    :loading="loading"
+                    class="ml-2"
+                    :icon="Unicons.PlusCircle.name"
+                    @click="addSelection(entity)"
+                  />
+                  <BaseIcon
+                    v-else-if="enableSelection"
+                    :name="Unicons.Check.name"
+                    fill="green"
+                    width="40px"
+                    class="mr-3"
+                  />
+                </template>
+              </GridItem>
+            </div>
+            <div v-if="entities.length === 0" class="p-4">
+              {{ $t("search.noresult") }}
+            </div>
+            {{}}
           </div>
-          <div v-if="entities.length === 0" class="p-4">
-            {{ $t("search.noresult") }}
-          </div>
-          {{}}
-        </div>
-      </ListContainer>
+        </ListContainer>
+      </div>
     </div>
   </div>
 </template>
@@ -336,6 +342,7 @@ export default defineComponent({
       value: "",
     });
     const isAsc = ref<boolean>(false);
+    const expandFilters = ref<boolean>(false);
 
     watch(
       () => [selectedSortOption.value, isAsc.value],
@@ -539,6 +546,7 @@ export default defineComponent({
       isAsc,
       route,
       goToEntityPage,
+      expandFilters: expandFilters,
     };
   },
 });
