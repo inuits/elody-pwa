@@ -20,15 +20,18 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
+import { computed, defineComponent, ref, watch } from "vue";
 import type { PropType } from "vue";
 import MetaEditDataField from "./MetaEditDataField.vue";
 import {
   CreateEntityDocument,
   Entitytyping,
-  GetFormsDocument,
+  GetCreateEntityFormDocument,
 } from "../generated-types/queries";
-import type { CreateEntityMutation } from "../generated-types/queries";
+import type {
+  CreateEntityMutation,
+  GetCreateEntityFormQuery,
+} from "../generated-types/queries";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import BaseButton from "./base/BaseButton.vue";
 import urlSlug from "url-slug";
@@ -47,18 +50,30 @@ export default defineComponent({
   setup(props) {
     const router = useRouter();
     const { closeModal } = useAvailableModals();
-    const { result } = useQuery(GetFormsDocument, {
-      type: props.entityType,
-    });
 
     const EntityTitle = ref<string>("");
+    const idPrefix = ref<string>("");
+    const manualID = computed(
+      () => `${idPrefix.value}${urlSlug(EntityTitle.value)}`
+    );
+    const type = computed(() => props.entityType);
 
-    const manualID = ref<string>("");
+    const { result, onResult, refetch } = useQuery<GetCreateEntityFormQuery>(
+      GetCreateEntityFormDocument,
+      { type }
+    );
+
+    watch(
+      () => type.value,
+      () => {
+        refetch();
+      }
+    );
 
     const { mutate } = useMutation<CreateEntityMutation>(CreateEntityDocument);
 
-    watch(EntityTitle, (value: string) => {
-      manualID.value = urlSlug(value);
+    onResult((queryResult) => {
+      idPrefix.value = queryResult?.data?.GetCreateEntityForm?.idPrefix || "";
     });
 
     const create = async () => {

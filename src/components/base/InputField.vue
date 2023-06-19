@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, type PropType } from "vue";
+import { computed, defineComponent } from "vue";
 import { debounce } from "ts-debounce";
 import { InputFieldTypes } from "@/generated-types/queries";
 export const lableStyle = 'ml-1 text-neutral-700 text-sm"';
@@ -48,7 +48,7 @@ export default defineComponent({
     name: { type: String, default: "", required: false },
     isDisabled: { type: Boolean, default: false, required: false },
     type: {
-      type: String as PropType<InputFieldTypes>,
+      type: String,
       required: false,
       default: InputFieldTypes.Text,
     },
