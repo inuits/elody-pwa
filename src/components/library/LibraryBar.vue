@@ -20,6 +20,13 @@
           dropdown-style="default"
         />
       </div>
+      <div class="h-full flex items-center">
+        <SingleIconToggle
+          :icon-on="Unicons.AngleUp.name"
+          :icon-off="Unicons.AngleDown.name"
+          @update:checked="isAsc = !isAsc"
+        />
+      </div>
     </div>
     <div class="flex justify-end">
       <BasePaginationNew
@@ -46,6 +53,8 @@ import {
 import { ref, watch } from "vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useQuery } from "@vue/apollo-composable";
+import SingleIconToggle from "../toggles/SingleIconToggle.vue";
+import { Unicons } from "../../types";
 
 defineProps<{
   totalItems: number;
@@ -55,6 +64,7 @@ const emit = defineEmits<{
   (event: "update:skip", skip: number): void;
   (event: "update:limit", limit: number): void;
   (event: "update:sortKey", limit: any): void;
+  (event: "update:isAsc", limit: any): void;
 }>();
 
 const skip = ref<number>(1);
@@ -79,7 +89,10 @@ onSortOptionsResult((result) => {
   selectedSortOption.value = sortOptions.value[0];
 });
 
+const isAsc = ref<boolean>(false);
+
 watch(skip, () => emit("update:skip", skip.value));
+watch(isAsc, () => emit("update:isAsc", isAsc.value));
 watch(
   () => selectedSortOption.value,
   () => {

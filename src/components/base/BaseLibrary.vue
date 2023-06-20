@@ -21,19 +21,12 @@
           v-model:limit="queryVariables.limit"
           v-model:skip="queryVariables.skip"
           v-model:sortKey="selectedSortOption"
+          v-model:isAsc="isAsc"
           @update:limit="setNewQueryVariables"
           @update:skip="setNewQueryVariables"
           @update:sortKey="setNewQueryVariables"
+          @update:isAsc="setNewQueryVariables"
         />
-        <!-- <div
-          class="pl-4 flex flex-row justify-left"
-        >
-          <SingleIconToggle
-            :icon-on="Unicons.AngleUp.name"
-            :icon-off="Unicons.AngleDown.name"
-            @update:checked="isAsc = !isAsc"
-          />
-        </div> -->
       </div>
 
       <div
