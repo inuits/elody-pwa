@@ -49,7 +49,9 @@ const parseIntialValues = (
   const metadata: MetadataValuesInput[] = [];
 
   Object.values(values).forEach((value, index) => {
+    console.log("hye", value);
     if (Array.isArray(value)) {
+      console.log("isArray");
       value.forEach((relationValue) => {
         relationValue &&
           relations.push({
@@ -62,9 +64,8 @@ const parseIntialValues = (
             toBeDeleted: relationValue.toBeDeleted,
           });
       });
-    }
-
-    if (typeof value === "string") {
+    } else if (typeof value === "string" || typeof value === "object") {
+      console.log("isString");
       metadata.push({
         key: Object.keys(values)[index],
         value,

@@ -17,6 +17,7 @@
         :class="[`bg-${bgColor}`, inputStyle]"
         :type="type"
         :accept="accept"
+        :step="step"
         name=""
       />
     </div>
@@ -53,6 +54,7 @@ export default defineComponent({
       default: InputFieldTypes.Text,
     },
     accept: { type: String, required: false, default: "" },
+    step: { type: Number, required: false },
   },
   emits: ["update:modelValue"],
   setup(props, { emit }) {

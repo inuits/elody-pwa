@@ -69,6 +69,7 @@ const mapComponentData = computed(() => {
         label: (value as PanelMetaData).label,
         value: getValueForPanelMetadata(PanelType.Metadata, metadataItemKey),
         field: (value as PanelMetaData).inputField,
+        unit: (value as PanelMetaData).unit,
       };
       returnArray.push(metadataObject);
     }
