@@ -126,9 +126,7 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
     datetime: (value: string) => new Date(value).toLocaleString(),
     seconds: (value: string) => `${value} s`,
     coordinates: (value: string) =>
-      `${(JSON.parse(value) as Location).longitude}, ${
-        (JSON.parse(value) as Location).latitude
-      }`,
+      `${(value as any).longitude}, ${(value as any).latitude}`,
   };
 
   if (!unitConversionTable[unit] || value == "") {
@@ -140,5 +138,5 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
 
   const conversionFunction = unitConversionTable[unit];
 
-  return conversionFunction(JSON.stringify(value));
+  return conversionFunction(value);
 };
