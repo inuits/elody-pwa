@@ -8,12 +8,6 @@
           @expand-filters="expandFilters = !expandFilters"
         />
         <div v-show="acceptedEntityTypes.length === 0" class="flex mx-4">
-          <IconToggle
-            v-if="!isHideFilters"
-            v-model:checked="isDrawerHiding"
-            :icon-on="Unicons.WindowMaximize.name"
-            :icon-off="Unicons.WindowGrid.name"
-          />
           <div :class="[{ 'ml-2': !isHideFilters }]">
             <IconToggle
               v-model:checked="displayGrid"
