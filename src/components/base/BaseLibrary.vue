@@ -8,25 +8,13 @@
           @expand-filters="expandFilters = !expandFilters"
         />
         <div v-show="acceptedEntityTypes.length === 0" class="flex mx-4">
-          <div :class="[{ 'ml-2': !isHideFilters }]">
-            <IconToggle
-              v-model:checked="displayGrid"
-              :icon-on="Unicons.Apps.name"
-              :icon-off="Unicons.ListUl.name"
-              class="ml-2"
-            />
-          </div>
+          <IconToggle
+            v-model:checked="displayGrid"
+            :icon-on="Unicons.Apps.name"
+            :icon-off="Unicons.ListUl.name"
+            class="ml-2"
+          />
         </div>
-        <InputField
-          v-show="acceptedEntityTypes.length === 0 && hasSimpleSearch"
-          v-model="queryVariables.searchValue.value"
-          :debounce="true"
-          :placeholder="searchPlaceholder"
-          :label="$t('library.search')"
-          :is-disabled="loading"
-          :bg-color="'neutral-20'"
-          :disabled="!isDrawerHiding"
-        />
         <div
           v-show="acceptedEntityTypes.length === 0"
           class="pl-4 flex flex-row justify-left"
@@ -215,7 +203,6 @@ import {
 import type { PropType } from "vue";
 import ListContainer from "../ListContainer.vue";
 import BaseButton from "./BaseButton.vue";
-import InputField from "./InputField.vue";
 import BaseDropdown from "./BaseDropdown.vue";
 import NewBaseDropdown from "./NewBaseDropdown.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
@@ -265,7 +252,6 @@ export default defineComponent({
     BaseButton,
     BaseDropdown,
     IconToggle,
-    InputField,
     BaseIcon,
     GridItem,
     NewBaseDropdown,
@@ -290,7 +276,6 @@ export default defineComponent({
       type: String as PropType<Context>,
       required: true,
     },
-    hasSimpleSearch: Boolean,
     searchInputTypeOnDrawer: {
       type: String as PropType<Maybe<SearchInputType>>,
     },
@@ -369,10 +354,6 @@ export default defineComponent({
     const isDrawerHiding = ref(
       props.acceptedEntityTypes.length === 0 ? true : false
     );
-
-    if (props.hasSimpleSearch === false) {
-      isDrawerHiding.value = false;
-    }
 
     const setFilters = (advancedFilterInputs: AdvancedFilterInput[]) => {
       //queryVariables.advancedSearchValue = value;
