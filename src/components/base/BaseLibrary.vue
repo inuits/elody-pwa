@@ -104,39 +104,7 @@
                 @click="goToEntityPage(entity)"
               >
                 <template #actions>
-                  <BaseButton
-                    v-if="
-                      isNotAlreadyAdded(
-                        entity,
-                        mediafiles,
-                        selectedRelationFieldMetadata
-                      ) && enableSelection
-                    "
-                    :loading="loading"
-                    class="ml-2"
-                    :icon="Unicons.PlusCircle.name"
-                    @click="addSelection(entity)"
-                  />
-                  <BaseIcon
-                    v-else-if="enableSelection"
-                    :name="Unicons.Check.name"
-                    fill="green"
-                    width="40px"
-                    class="mr-3"
-                  />
-
-                  <BaseButton
-                    v-else
-                    :loading="loading"
-                    class="ml-2"
-                    :icon="Unicons.Eye.name"
-                    @click="
-                      router.push({
-                        name: listItemRouteName,
-                        params: { id: entity?.id },
-                      })
-                    "
-                  />
+                  <!-- Use bulkoperations checkboxes to apply this logic again -->
                 </template>
               </ListItem>
             </div>
@@ -156,26 +124,7 @@
                 @click="goToEntityPage(entity)"
               >
                 <template #actions>
-                  <BaseButton
-                    v-if="
-                      isNotAlreadyAdded(
-                        entity,
-                        mediafiles,
-                        selectedRelationFieldMetadata
-                      ) && enableSelection
-                    "
-                    :loading="loading"
-                    class="ml-2"
-                    :icon="Unicons.PlusCircle.name"
-                    @click="addSelection(entity)"
-                  />
-                  <BaseIcon
-                    v-else-if="enableSelection"
-                    :name="Unicons.Check.name"
-                    fill="green"
-                    width="40px"
-                    class="mr-3"
-                  />
+                  <!-- Use bulkoperations checkboxes to apply this logic again -->
                 </template>
               </GridItem>
             </div>
@@ -228,10 +177,7 @@ import {
 import FiltersBase from "@/components/filters-new/FiltersBase.vue";
 import IconToggle from "../toggles/IconToggle.vue";
 import useThumbnailHelper from "../../composables/useThumbnailHelper";
-import useMetaDataHelper, {
-  beingAdded,
-} from "../../composables/useMetaDataHelper";
-import BaseIcon from "./BaseIcon.vue";
+import useMetaDataHelper from "../../composables/useMetaDataHelper";
 import GridItem from "../GridItem.vue";
 import { setCookie, getCookie } from "tiny-cookie";
 import useListItemHelper from "../../composables/useListItemHelper";
@@ -252,7 +198,6 @@ export default defineComponent({
     BaseButton,
     BaseDropdown,
     IconToggle,
-    BaseIcon,
     GridItem,
     NewBaseDropdown,
     BulkOperationsActionsBar,
@@ -279,10 +224,6 @@ export default defineComponent({
     searchInputTypeOnDrawer: {
       type: String as PropType<Maybe<SearchInputType>>,
     },
-    enableSelection: {
-      type: Boolean,
-      default: false,
-    },
     acceptedEntityTypes: {
       type: Array as PropType<Maybe<string>[]>,
       default: () => [],
@@ -295,7 +236,7 @@ export default defineComponent({
     isHideFilters: Boolean,
   },
   emits: ["addSelection"],
-  setup: (props, { emit }) => {
+  setup: (props) => {
     const entities = ref<Asset[]>(props.predefinedEntities?.entities || []);
     const totalEntityCount = ref<number>(
       props.predefinedEntities ? props.predefinedEntities.entities.length : 0
@@ -304,12 +245,8 @@ export default defineComponent({
     const { getMediaFilenameFromEntity } = useListItemHelper();
     const router = useRouter();
     const route = useRoute();
-    const {
-      isNotAlreadyAdded,
-      mediafiles,
-      selectedRelationFieldMetadata,
-      removeFromRelationsToBeDeletedList,
-    } = useMetaDataHelper();
+    const { isNotAlreadyAdded, mediafiles, selectedRelationFieldMetadata } =
+      useMetaDataHelper();
     const paginationInfo = reactive({
       limit: 20,
       skip: 1,
@@ -441,12 +378,6 @@ export default defineComponent({
       }
     );
 
-    const addSelection = (entity: any) => {
-      beingAdded.value = "";
-      removeFromRelationsToBeDeletedList(entity.uuid);
-      emit("addSelection", entity);
-    };
-
     const setCssGridVariable = (colAmount: number = 5) => {
       const root = document.querySelector(":root") as HTMLElement;
       root.style.setProperty("--grid-cols", colAmount.toString());
@@ -470,8 +401,6 @@ export default defineComponent({
     });
 
     const goToEntityPage = (entity: Asset) => {
-      if (props.enableSelection) return;
-
       const entityId =
         entity?.id ||
         entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")
@@ -501,7 +430,6 @@ export default defineComponent({
       sortOptions,
       paginationLimits,
       queryVariables,
-      addSelection,
       isDrawerHiding,
       loading,
       Unicons,

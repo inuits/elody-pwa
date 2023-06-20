@@ -1,12 +1,9 @@
 <template>
   <BaseLibrary
-    :has-simple-search="false"
     :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
     :list-item-route-name="'SingleEntity'"
     :search-placeholder="$t('search.asset-library')"
     :advanced-filters-choice="entityType"
-    @add-selection="addSelection"
-    :enable-selection="enableSelection"
     :accepted-entity-types="acceptedEntityTypes"
     :bulk-operations-context="route.name as Context"
   />
@@ -24,10 +21,6 @@ export default defineComponent({
   name: "AssetLibrary",
   components: { BaseLibrary },
   props: {
-    enableSelection: {
-      type: Boolean,
-      default: false,
-    },
     acceptedEntityTypes: {
       type: Array as PropType<Maybe<string>[]>,
       default: () => [],
@@ -35,11 +28,8 @@ export default defineComponent({
     },
   },
   emits: ["addSelection"],
-  setup: (props, { emit }) => {
+  setup: () => {
     const route = useRoute();
-    const addSelection = (id: string) => {
-      emit("addSelection", id);
-    };
 
     const entityType = computed<string>(() => {
       return route.meta.entityType ? route.meta.EntityType : "baseEntity";
@@ -47,9 +37,9 @@ export default defineComponent({
 
     return {
       SearchInputType,
-      addSelection,
       route,
       entityType,
+      Context,
     };
   },
 });
