@@ -26,6 +26,7 @@
           v-if="!isEdit || !data.field"
           :label="data.label"
           :value="data.value"
+          :unit="data.unit"
         ></EntityElementMetadata>
         <entity-element-coordinate-edit
           v-else-if="data.field && isEdit && data.unit === Unit.Coordinates"

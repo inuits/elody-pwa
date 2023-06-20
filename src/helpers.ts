@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 import { PanelType, Unit } from "./generated-types/queries";
 import { useEntityMediafileSelector } from "./components/EntityImageSelection.vue";
 import { useFormHelper } from "./composables/useFormHelper";
+import type { Location } from "./components/EntityElementCoordinateEdit.vue";
 
 export const langs: string[] = ["nl", "fr"];
 
@@ -124,6 +125,10 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
   const unitConversionTable = {
     datetime: (value: string) => new Date(value).toLocaleString(),
     seconds: (value: string) => `${value} s`,
+    coordinates: (value: string) =>
+      `${(JSON.parse(value) as Location).longitude}, ${
+        (JSON.parse(value) as Location).latitude
+      }`,
   };
 
   if (!unitConversionTable[unit] || value == "") {
@@ -135,5 +140,5 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
 
   const conversionFunction = unitConversionTable[unit];
 
-  return conversionFunction(value);
+  return conversionFunction(JSON.stringify(value));
 };

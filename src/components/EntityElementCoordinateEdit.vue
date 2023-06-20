@@ -23,7 +23,7 @@ import { getEntityIdFromRoute } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
 import type { FormContext } from "vee-validate";
 
-type Location = {
+export type Location = {
   latitude: string;
   longitude: string;
 };
@@ -43,9 +43,7 @@ const form: FormContext = getForm(id);
 let refValue = ref(props.value);
 
 watch(refValue.value, (value: Location) => {
-  console.log(value);
   if (form) {
-    console.log(props.fieldKey);
     form.setFieldValue(props.fieldKey, value);
   }
 });
