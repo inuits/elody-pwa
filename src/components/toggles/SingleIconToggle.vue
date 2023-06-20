@@ -1,10 +1,10 @@
 <template>
   <div
     @click="toggleCheck"
-    class="rounded h-9 w-9 bg-neutral-0 cursor-pointer flex items-center justify-center"
+    class="rounded h-full w-9 bg-neutral-0 cursor-pointer flex items-center justify-center"
   >
-    <div v-if="checked"><unicon :name="iconOn" /></div>
-    <div v-else><unicon :name="iconOff" /></div>
+    <unicon v-if="checked" :name="iconOn" />
+    <unicon v-else :name="iconOff" />
   </div>
 </template>
 

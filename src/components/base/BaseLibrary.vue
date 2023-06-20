@@ -1,7 +1,7 @@
 <template>
   <div class="lg:flex bg-neutral-lightest">
     <div class="px-6 w-full">
-      <div class="flex flex-row flex-wrap gap-y-4">
+      <div class="flex flex-row gap-y-4">
         <FiltersBase
           v-if="enableAdvancedFilters"
           :entity-type="route.meta.entityType as string"
