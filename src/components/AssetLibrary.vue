@@ -5,6 +5,7 @@
     :search-placeholder="$t('search.asset-library')"
     :advanced-filters-choice="entityType"
     :accepted-entity-types="acceptedEntityTypes"
+    :enable-bulk-operations="true"
     :bulk-operations-context="route.name as Context"
   />
 </template>
@@ -39,7 +40,6 @@ export default defineComponent({
       SearchInputType,
       route,
       entityType,
-      Context,
     };
   },
 });

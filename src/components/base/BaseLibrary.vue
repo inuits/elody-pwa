@@ -3,6 +3,7 @@
     <div class="px-6 w-full">
       <div class="flex flex-row flex-wrap gap-y-4">
         <FiltersBase
+          v-if="enableAdvancedFilters"
           :entity-type="route.meta.entityType as string"
           @apply-filters="setFilters"
           @expand-filters="expandFilters = !expandFilters"
@@ -48,7 +49,11 @@
         />
       </div>
 
-      <div class="my-3" :class="{ 'flex justify-end': expandFilters }">
+      <div
+        v-if="enableBulkOperations"
+        class="my-3"
+        :class="{ 'flex justify-end': expandFilters }"
+      >
         <BulkOperationsActionsBar
           :class="{ 'w-[69%]': expandFilters }"
           :context="bulkOperationsContext"
@@ -205,17 +210,14 @@ export default defineComponent({
     FiltersBase,
   },
   props: {
-    advancedFiltersChoice: {
-      type: String,
-      default: "entityFilters",
-    },
-    searchPlaceholder: {
-      type: String,
-      default: "Search...",
-    },
     listItemRouteName: {
       type: String,
       required: true,
+    },
+    enableBulkOperations: {
+      type: Boolean,
+      required: false,
+      default: true,
     },
     bulkOperationsContext: {
       type: String as PropType<Context>,
@@ -233,7 +235,11 @@ export default defineComponent({
       type: Object as PropType<PredefinedEntities>,
       required: false,
     },
-    isHideFilters: Boolean,
+    enableAdvancedFilters: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   emits: ["addSelection"],
   setup: (props) => {
@@ -288,10 +294,6 @@ export default defineComponent({
       calculateGridColumns();
     });
 
-    const isDrawerHiding = ref(
-      props.acceptedEntityTypes.length === 0 ? true : false
-    );
-
     const setFilters = (advancedFilterInputs: AdvancedFilterInput[]) => {
       //queryVariables.advancedSearchValue = value;
       queryVariables.advancedFilterInputs = advancedFilterInputs;
@@ -311,12 +313,6 @@ export default defineComponent({
       advancedSearchValue: [],
       advancedFilterInputs: [],
       searchInputType: props.searchInputTypeOnDrawer,
-    });
-
-    watch(isDrawerHiding, () => {
-      nextTick(() => {
-        calculateGridColumns();
-      });
     });
 
     watch(displayGrid, () => {
@@ -430,7 +426,6 @@ export default defineComponent({
       sortOptions,
       paginationLimits,
       queryVariables,
-      isDrawerHiding,
       loading,
       Unicons,
       router,
