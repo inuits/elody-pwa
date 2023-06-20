@@ -21,13 +21,7 @@ import type { Context } from "@/composables/useBulkOperations";
 export default defineComponent({
   name: "AssetLibrary",
   components: { BaseLibrary },
-  props: {
-    acceptedEntityTypes: {
-      type: Array as PropType<Maybe<string>[]>,
-      default: () => [],
-      required: false,
-    },
-  },
+  props: {},
   emits: ["addSelection"],
   setup: () => {
     const route = useRoute();
