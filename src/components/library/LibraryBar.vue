@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between items-center">
+  <div class="flex justify-between items-center w-full">
     <div class="flex justify-start gap-x-3">
       <div class="w-32">
         <BaseDropdownNew
@@ -20,7 +20,7 @@
           dropdown-style="default"
         />
       </div>
-      <div class="h-full flex items-center">
+      <div class="py-1 flex items-center">
         <SingleIconToggle
           :icon-on="Unicons.AngleUp.name"
           :icon-off="Unicons.AngleDown.name"
