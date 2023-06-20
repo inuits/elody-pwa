@@ -54,6 +54,7 @@ defineProps<{
 const emit = defineEmits<{
   (event: "update:skip", skip: number): void;
   (event: "update:limit", limit: number): void;
+  (event: "update:sortKey", limit: any): void;
 }>();
 
 const skip = ref<number>(1);
@@ -79,6 +80,12 @@ onSortOptionsResult((result) => {
 });
 
 watch(skip, () => emit("update:skip", skip.value));
+watch(
+  () => selectedSortOption.value,
+  () => {
+    emit("update:sortKey", selectedSortOption.value?.value);
+  }
+);
 watch(selectedPaginationLimitOption, () => {
   skip.value = 1;
   emit("update:limit", selectedPaginationLimitOption.value?.value);

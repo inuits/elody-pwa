@@ -8,7 +8,7 @@
           @apply-filters="setFilters"
           @expand-filters="expandFilters = !expandFilters"
         />
-        <div v-show="acceptedEntityTypes.length === 0" class="flex mx-4">
+        <div class="flex mx-4">
           <IconToggle
             v-model:checked="displayGrid"
             :icon-on="Unicons.Apps.name"
@@ -16,37 +16,24 @@
             class="ml-2"
           />
         </div>
-        <div
-          v-show="acceptedEntityTypes.length === 0"
+        <LibraryBar
+          :total-items="totalEntityCount"
+          v-model:limit="queryVariables.limit"
+          v-model:skip="queryVariables.skip"
+          v-model:sortKey="selectedSortOption"
+          @update:limit="setNewQueryVariables"
+          @update:skip="setNewQueryVariables"
+          @update:sortKey="setNewQueryVariables"
+        />
+        <!-- <div
           class="pl-4 flex flex-row justify-left"
         >
-          <BaseDropdown
-            v-if="totalEntityCount > 0"
-            v-model="queryVariables.limit"
-            :options="paginationLimits"
-            :label="$t('library.items')"
-          />
-          <NewBaseDropdown
-            v-if="totalEntityCount > 1 && selectedSortOption"
-            class="mx-4"
-            v-model="selectedSortOption"
-            :options="sortOptions"
-            :label="$t('library.sort')"
-          />
           <SingleIconToggle
             :icon-on="Unicons.AngleUp.name"
             :icon-off="Unicons.AngleDown.name"
             @update:checked="isAsc = !isAsc"
           />
-        </div>
-        <div class="flex-grow"></div>
-        <BasePagination
-          v-if="totalEntityCount > 0"
-          v-model:skip="queryVariables.skip"
-          v-model:limit="queryVariables.limit"
-          :loading="loading"
-          :total-items="totalEntityCount"
-        />
+        </div> -->
       </div>
 
       <div
@@ -160,12 +147,10 @@ import { Unicons } from "../../types";
 import {
   GetEntitiesDocument,
   SearchInputType,
-  GetSortOptionsDocument,
   type Asset,
   type Entity,
   type GetEntitiesQueryVariables,
   type Maybe,
-  type MetadataFieldOption,
   type AdvancedFilterInput,
 } from "../../generated-types/queries";
 import {
@@ -181,6 +166,7 @@ import { setCookie, getCookie } from "tiny-cookie";
 import useListItemHelper from "../../composables/useListItemHelper";
 import { bulkSelectAllSizeLimit } from "@/main";
 import SingleIconToggle from "../toggles/SingleIconToggle.vue";
+import LibraryBar from "../library/LibraryBar.vue";
 
 export type PredefinedEntities = {
   usePredefinedEntities: Boolean;
@@ -201,6 +187,7 @@ export default defineComponent({
     BulkOperationsActionsBar,
     SingleIconToggle,
     FiltersBase,
+    LibraryBar,
   },
   props: {
     listItemRouteName: {
@@ -218,11 +205,6 @@ export default defineComponent({
     },
     searchInputTypeOnDrawer: {
       type: String as PropType<Maybe<SearchInputType>>,
-    },
-    acceptedEntityTypes: {
-      type: Array as PropType<Maybe<string>[]>,
-      default: () => [],
-      required: false,
     },
     predefinedEntities: {
       type: Object as PropType<PredefinedEntities>,
@@ -246,38 +228,10 @@ export default defineComponent({
     const route = useRoute();
     const { isNotAlreadyAdded, mediafiles, selectedRelationFieldMetadata } =
       useMetaDataHelper();
-    const paginationInfo = reactive({
-      limit: 20,
-      skip: 1,
-    });
     const displayGrid = ref<boolean>(false);
-    const sortOptions = ref<MetadataFieldOption[]>([]);
-    const selectedSortOption = ref<MetadataFieldOption>({
-      label: "",
-      value: "",
-    });
+    const selectedSortOption = ref<string>();
     const isAsc = ref<boolean>(false);
     const expandFilters = ref<boolean>(false);
-
-    watch(
-      () => [selectedSortOption.value, isAsc.value],
-      () => {
-        const newVariables = { ...queryVariables };
-        if (selectedSortOption.value && newVariables?.searchValue) {
-          newVariables.searchValue.order_by = selectedSortOption.value.value;
-          newVariables.searchValue.isAsc = isAsc.value;
-        }
-        refetch(newVariables);
-      }
-    );
-
-    const { onResult: onSortOptionsResult } = useQuery(GetSortOptionsDocument);
-
-    onSortOptionsResult((res) => {
-      const options = res.data.SortOptions.options;
-      sortOptions.value = options;
-      selectedSortOption.value = options[0];
-    });
 
     onMounted(() => {
       const displayPreference = getCookie("_displayPreference");
@@ -287,26 +241,41 @@ export default defineComponent({
       calculateGridColumns();
     });
 
-    const setFilters = (advancedFilterInputs: AdvancedFilterInput[]) => {
-      //queryVariables.advancedSearchValue = value;
-      queryVariables.advancedFilterInputs = advancedFilterInputs;
-      queryVariables.limit = paginationInfo.limit;
-      queryVariables.skip = paginationInfo.skip;
-    };
-
     const queryVariables = reactive<GetEntitiesQueryVariables>({
-      limit: paginationInfo.limit,
-      skip: paginationInfo.skip,
+      limit: bulkSelectAllSizeLimit,
+      skip: 1,
       searchValue: {
         value: "",
         isAsc: isAsc.value,
         key: "title",
-        order_by: selectedSortOption.value.value,
+        order_by: "",
       },
       advancedSearchValue: [],
       advancedFilterInputs: [],
       searchInputType: props.searchInputTypeOnDrawer,
     });
+
+    const setNewQueryVariables = () => {
+      console.log(selectedSortOption.value);
+      const newVariables = { ...queryVariables };
+      if (selectedSortOption.value && newVariables?.searchValue) {
+        newVariables.searchValue.order_by = selectedSortOption.value;
+        newVariables.searchValue.isAsc = isAsc.value;
+      }
+      refetch(newVariables);
+    };
+
+    const { result: allEntitiesResult } = useQuery(
+      GetEntitiesDocument,
+      queryVariables,
+      {
+        enabled: true,
+      }
+    );
+
+    const setFilters = (advancedFilterInputs: AdvancedFilterInput[]) => {
+      queryVariables.advancedFilterInputs = advancedFilterInputs;
+    };
 
     watch(displayGrid, () => {
       setCookie(
@@ -346,26 +315,6 @@ export default defineComponent({
 
       triggerBulkSelectionEvent(props.bulkOperationsContext);
     };
-
-    const { result: allEntitiesResult } = useQuery(
-      GetEntitiesDocument,
-      {
-        limit: bulkSelectAllSizeLimit,
-        skip: 1,
-        searchValue: {
-          value: "",
-          isAsc: isAsc.value,
-          key: "title",
-          order_by: selectedSortOption.value.value,
-        },
-        advancedSearchValue: [],
-        advancedFilterInputs: [],
-        searchInputType: props.searchInputTypeOnDrawer,
-      },
-      {
-        enabled: true,
-      }
-    );
 
     const setCssGridVariable = (colAmount: number = 5) => {
       const root = document.querySelector(":root") as HTMLElement;
@@ -415,8 +364,8 @@ export default defineComponent({
     if (!props.predefinedEntities) refetch();
 
     return {
+      setNewQueryVariables,
       selectedSortOption,
-      sortOptions,
       paginationLimits,
       queryVariables,
       loading,
