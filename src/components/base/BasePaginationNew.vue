@@ -1,18 +1,20 @@
 <template>
   <div class="flex items-center gap-2 text-text-body select-none">
-    <div class="flex items-center">
-      <unicon
-        class="cursor-pointer -mr-1"
-        :name="Unicons.AngleDoubleLeft.name"
-        height="16"
-        @click="goToPage(1)"
-      />
-      <unicon
-        class="cursor-pointer -mr-1"
-        :name="Unicons.AngleLeft.name"
-        height="16"
-        @click="previous()"
-      />
+    <div class="flex">
+      <div class="flex" @click="goToPage(1)">
+        <unicon
+          class="cursor-pointer -mr-1"
+          :name="Unicons.AngleDoubleLeft.name"
+          height="16"
+        />
+      </div>
+      <div class="flex" @click="previous()">
+        <unicon
+          class="cursor-pointer -mr-1"
+          :name="Unicons.AngleLeft.name"
+          height="16"
+        />
+      </div>
     </div>
 
     <span>{{ $t("pagination.page") }}</span>
@@ -28,19 +30,21 @@
     <span>{{ $t("pagination.of") }}</span>
     <span>{{ getLastPage() }}</span>
 
-    <div class="flex items-center">
-      <unicon
-        class="cursor-pointer -ml-1"
-        :name="Unicons.AngleRight.name"
-        height="16"
-        @click="next()"
-      />
-      <unicon
-        class="cursor-pointer -ml-1"
-        :name="Unicons.AngleDoubleRight.name"
-        height="16"
-        @click="goToPage(getLastPage())"
-      />
+    <div class="flex">
+      <div class="flex" @click="next()">
+        <unicon
+          class="cursor-pointer -ml-1"
+          :name="Unicons.AngleRight.name"
+          height="16"
+        />
+      </div>
+      <div class="flex" @click="goToPage(getLastPage())">
+        <unicon
+          class="cursor-pointer -ml-1"
+          :name="Unicons.AngleDoubleRight.name"
+          height="16"
+        />
+      </div>
     </div>
   </div>
 </template>
