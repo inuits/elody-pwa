@@ -5,7 +5,7 @@
     @keydown.enter="applyFilters()"
   >
     <div
-      class="flex justify-between items-center px-4 h-12 border-t-[1px] border-x-[1px] select-none cursor-pointer"
+      class="flex justify-between items-center px-4 h-12 border-t border-x select-none cursor-pointer"
       :class="
         expandFilters
           ? 'border-neutral-light rounded-t'
@@ -34,27 +34,40 @@
 
     <div
       class="absolute w-full rounded-b bg-neutral-white"
-      :class="
-        expandFilters ? 'border-x-[1px] border-b-2 border-neutral-light' : ''
-      "
+      :class="expandFilters ? 'border-x border-b-2 border-neutral-light' : ''"
     >
-      <div v-if="expandFilters" class="flex justify-between gap-4 p-4">
-        <BaseButtonNew
-          class="!w-1/3"
-          :label="$t('filter.clear')"
-          button-style="default"
-          @click="() => (clearAllActiveFilters = true)"
-        />
-        <BaseButtonNew
-          :label="$t('filter.apply')"
-          button-style="accentNormal"
-          @click="applyFilters()"
-        />
+      <div v-if="expandFilters" class="p-4">
+        <div class="flex justify-between gap-4 pb-4">
+          <BaseButtonNew
+            class="!w-1/3"
+            :label="$t('filter.clear')"
+            button-style="default"
+            @click="() => (clearAllActiveFilters = true)"
+          />
+          <BaseButtonNew
+            :label="$t('filter.apply')"
+            button-style="accentNormal"
+            @click="applyFilters()"
+          />
+        </div>
+        <div>
+          <BaseInputAutocomplete
+            v-model="labelsOfDisplayedFilters"
+            :options="
+              filters
+                .filter((filter) => !filter.advancedFilter.isDisplayedByDefault)
+                .filter((filter) => !filter.advancedFilter.defaultValue)
+                .map((filter) => filter.advancedFilter.label)
+            "
+            placeholder="voeg filter toe"
+            autocomplete-style="defaultWithBorder"
+          />
+        </div>
       </div>
 
       <div v-if="expandFilters && matchers.length > 0">
         <FiltersListItem
-          v-for="filter in filters"
+          v-for="filter in filters.filter((filter) => filter.isDisplayed)"
           :key="filter.advancedFilter.key"
           :filter="filter"
           :matchers="
@@ -93,6 +106,7 @@ import {
   type Maybe,
 } from "@/generated-types/queries";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import FiltersListItem from "@/components/filters-new/FiltersListItem.vue";
 import { computed, defineProps, ref, toRefs, watch } from "vue";
 import { Unicons } from "@/types";
@@ -101,6 +115,7 @@ import { useQuery } from "@vue/apollo-composable";
 
 export type FilterListItem = {
   isActive: boolean;
+  isDisplayed: boolean;
   advancedFilter: AdvancedFilter;
 };
 
@@ -124,6 +139,7 @@ const filterMatcherMapping = ref<FilterMatcherMap>({
 });
 const matchers = ref<DropdownOption[]>([]);
 const filters = ref<FilterListItem[]>([]);
+const labelsOfDisplayedFilters = ref<string[]>([]);
 const activeFilters = ref<AdvancedFilterInput[]>([]);
 const activeFilterCount = ref<number>(0);
 const clearAllActiveFilters = ref<boolean>(false);
@@ -172,8 +188,10 @@ onAdvancedFiltersResult((result) => {
           value: advancedFilter.defaultValue,
           match_exact: true,
         });
+
       filters.value.push({
         isActive: !!advancedFilter.defaultValue,
+        isDisplayed: advancedFilter.isDisplayedByDefault ?? false,
         advancedFilter,
       });
     }
@@ -186,6 +204,14 @@ const getAngleIcon = computed<DamsIcons>(() =>
   expandFilters.value ? DamsIcons.AngleUp : DamsIcons.AngleDown
 );
 
+watch(labelsOfDisplayedFilters, () =>
+  filters.value.forEach(
+    (filter) =>
+      (filter.isDisplayed =
+        labelsOfDisplayedFilters.value.includes(filter.advancedFilter.label) ||
+        filter.advancedFilter.isDisplayedByDefault)
+  )
+);
 watch(activeFilters, () => {
   activeFilterCount.value = 0;
 
@@ -198,6 +224,7 @@ watch(activeFilters, () => {
 });
 watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
+    labelsOfDisplayedFilters.value = [];
     activeFilters.value = activeFilters.value.filter((activeFilter) =>
       filters.value
         .filter((filter) => !!filter.advancedFilter.defaultValue)

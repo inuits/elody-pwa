@@ -22,7 +22,8 @@ module.exports = {
         disabled: "#6795A2",
         light: "#355BA9",
         body: "#003A52",
-        subtitle: "#FFFFFF"
+        subtitle: "#FFFFFF",
+        placeholder: "#9CA3AF"
       },
       background: {
         frosted: "rgba(220, 244, 249, 0.25)",

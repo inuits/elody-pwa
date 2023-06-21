@@ -12,6 +12,7 @@
   --color-text-disabled: theme("colors.text.disabled");
   --color-text-light: theme("colors.text.light");
   --color-text-body: theme("colors.text.body");
+  --color-text-placeholder: theme("colors.text.placeholder");
 
   --color-background-frosted: theme("colors.background.frosted");
 

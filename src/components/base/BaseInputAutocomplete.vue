@@ -5,6 +5,7 @@
     :options="options"
     :searchable="true"
     :close-on-select="true"
+    :placeholder="placeholder"
     :classes="
       autocompleteStyle === 'defaultWithBorder'
         ? {
@@ -31,10 +32,12 @@ const props = withDefaults(
   defineProps<{
     modelValue: string[] | undefined;
     options: string[];
+    placeholder?: string;
     autocompleteStyle: AutocompleteStyle;
     disabled?: boolean;
   }>(),
   {
+    placeholder: "",
     disabled: false,
   }
 );
@@ -89,6 +92,23 @@ const inputValue = computed<string[] | undefined>({
   width: 100%;
   outline: none;
   cursor: pointer;
+}
+
+.multiselect-placeholder {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  line-height: 1.375rem;
+  max-width: 100%;
+  padding-left: 0.875rem;
+  padding-right: calc(1.25rem + 0.875rem * 3);
+  align-items: center;
+}
+
+.multiselect-placeholder {
+  color: var(--color-text-placeholder);
 }
 
 .multiselect-tags {
