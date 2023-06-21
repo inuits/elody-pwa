@@ -37,6 +37,7 @@ import BaseButton from "./base/BaseButton.vue";
 import urlSlug from "url-slug";
 import { useRouter } from "vue-router";
 import { useAvailableModals } from "@/composables/useAvailableModals";
+import { useEditMode } from "@/composables/useEdit";
 
 export default defineComponent({
   name: "CreateEntityForm",
@@ -50,6 +51,7 @@ export default defineComponent({
   setup(props) {
     const router = useRouter();
     const { closeModal } = useAvailableModals();
+    const { setEditMode } = useEditMode();
 
     const EntityTitle = ref<string>("");
     const idPrefix = ref<string>("");
@@ -88,6 +90,7 @@ export default defineComponent({
       });
       closeModal();
       if (createResult && createResult.data?.createEntity?.id) {
+        setEditMode();
         router.push({
           name: "SingleEntity",
           params: { id: createResult.data.createEntity.id },
