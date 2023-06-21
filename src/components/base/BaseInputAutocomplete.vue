@@ -5,6 +5,14 @@
     :options="options"
     :searchable="true"
     :close-on-select="true"
+    :classes="
+      autocompleteStyle === 'defaultWithBorder'
+        ? {
+            container: 'multiselect multiselect-border',
+            dropdown: 'multiselect-dropdown multiselect-dropdown-border',
+          }
+        : {}
+    "
     :disabled="disabled"
     @search-change="(value: string) => {
       searchValue = value;
@@ -17,10 +25,13 @@
 import Multiselect from "@vueform/multiselect";
 import { computed, ref } from "vue";
 
+type AutocompleteStyle = "default" | "defaultWithBorder";
+
 const props = withDefaults(
   defineProps<{
     modelValue: string[] | undefined;
     options: string[];
+    autocompleteStyle: AutocompleteStyle;
     disabled?: boolean;
   }>(),
   {
@@ -162,7 +173,8 @@ const inputValue = computed<string[] | undefined>({
 }
 
 .multiselect-tags-search:focus {
-  box-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color) !important;
+  box-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width))
+    var(--tw-ring-color) !important;
 }
 
 .multiselect-clear {
@@ -275,5 +287,16 @@ const inputValue = computed<string[] | undefined>({
   margin: -1px;
   overflow: hidden;
   clip: rect(0 0 0 0);
+}
+
+.multiselect-border {
+  border: 1px solid var(--color-text-body);
+}
+
+.multiselect-dropdown-border {
+  border: 1px solid var(--color-text-body);
+  border-top: none;
+  width: calc(100% + 2px);
+  margin: 0 -0.05rem;
 }
 </style>
