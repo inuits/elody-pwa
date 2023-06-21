@@ -17,6 +17,7 @@
       <BaseInputAutocomplete
         v-model="input"
         :options="autocompleteOptions"
+        autocomplete-style="default"
         @search-change="(value: string) => getAutocompleteOptions(value)"
       />
     </div>
