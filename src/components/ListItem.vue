@@ -1,6 +1,9 @@
 <template>
   <li
-    class="flex items-center gap-6 mb-2 px-8 py-4 bg-neutral-white border-[1px] border-neutral-light rounded cursor-pointer"
+    :class="[
+      'flex items-center gap-6 mb-2 px-8 py-4 bg-neutral-white border-[1px] border-neutral-light rounded cursor-pointer',
+      { 'animate-pulse': loading },
+    ]"
   >
     <div>
       <BaseInputCheckbox

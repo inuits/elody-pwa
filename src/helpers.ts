@@ -1,7 +1,12 @@
 import { createI18n } from "vue-i18n";
 import messages from "@intlify/vite-plugin-vue-i18n/messages";
 import { useRoute } from "vue-router";
-import { PanelType, Unit } from "./generated-types/queries";
+import {
+  PanelType,
+  Unit,
+  type Entity,
+  type BaseEntity,
+} from "./generated-types/queries";
 import { useEntityMediafileSelector } from "./components/EntityImageSelection.vue";
 import { useFormHelper } from "./composables/useFormHelper";
 import type { Location } from "./components/EntityElementCoordinateEdit.vue";
@@ -139,4 +144,20 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
   const conversionFunction = unitConversionTable[unit];
 
   return conversionFunction(value);
+};
+
+export const createPlaceholderEntities = (amount: number): any[] => {
+  const placeholders = [];
+  for (let i = 0; i <= amount; i++) {
+    placeholders.push({
+      id: "/",
+      teaserMetadata: [
+        { key: "/", value: "/", label: "/" },
+        { key: "/", value: "/", label: "/" },
+        { key: "/", value: "/", label: "/" },
+        { key: "/", value: "/", label: "/" },
+      ],
+    });
+  }
+  return placeholders;
 };

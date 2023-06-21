@@ -49,31 +49,7 @@
           id="gridContainer"
           :class="[{ 'w-[69%]': expandFilters }, displayGrid ? 'p-5' : 'p-1']"
         >
-          <div v-if="loading">
-            <ListItem
-              v-for="n in queryVariables.limit"
-              :key="n"
-              :title="$t('library.loading')"
-              :bulk-operations-context="bulkOperationsContext"
-              :loading="true"
-              :teaser-metadata="[
-                { key: '', value: '', label: '' },
-                { key: '', value: '', label: '' },
-                { key: '', value: '', label: '' },
-                { key: '', value: '', label: '' },
-              ]"
-            >
-              <template #actions>
-                <BaseButton
-                  :loading="true"
-                  class="ml-2"
-                  :icon="Unicons.Eye.name"
-                />
-              </template>
-            </ListItem>
-          </div>
-
-          <div v-else-if="!displayGrid && entities">
+          <div v-if="!displayGrid && entities">
             <div>
               <ListItem
                 :small="listItemRouteName === 'SingleMediafile'"
@@ -84,18 +60,17 @@
                 :teaser-metadata="
                   entity?.teaserMetadata?.flatMap((metadata) => metadata ?? [])
                 "
-                :media="getMediaFilenameFromEntity(entity)"
-                :thumb-icon="getThumbnail(entity)"
-                @click="goToEntityPage(entity)"
+                :loading="loading"
+                :media="
+                  loading ? undefined : getMediaFilenameFromEntity(entity)
+                "
+                :thumb-icon="loading ? undefined : getThumbnail(entity)"
+                @click="loading ? undefined : goToEntityPage(entity)"
               >
                 <template #actions>
                   <!-- Use bulkoperations checkboxes to apply this logic again -->
                 </template>
               </ListItem>
-            </div>
-
-            <div v-if="entities.length === 0" class="p-4">
-              {{ $t("search.noresult") }}
             </div>
           </div>
           <div v-else-if="displayGrid && entities">
@@ -125,13 +100,10 @@
 </template>
 
 <script lang="ts">
-import BasePagination, { paginationLimits } from "./BasePagination.vue";
+import { paginationLimits } from "./BasePagination.vue";
 import { defineComponent, watch, reactive, ref, onMounted } from "vue";
 import type { PropType } from "vue";
 import ListContainer from "../ListContainer.vue";
-import BaseButton from "./BaseButton.vue";
-import BaseDropdown from "./BaseDropdown.vue";
-import NewBaseDropdown from "./NewBaseDropdown.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
 import { useQuery } from "@vue/apollo-composable";
 import ListItem from "../ListItem.vue";
@@ -158,8 +130,8 @@ import GridItem from "../GridItem.vue";
 import { setCookie, getCookie } from "tiny-cookie";
 import useListItemHelper from "../../composables/useListItemHelper";
 import { bulkSelectAllSizeLimit } from "@/main";
-import SingleIconToggle from "../toggles/SingleIconToggle.vue";
 import LibraryBar from "../library/LibraryBar.vue";
+import { createPlaceholderEntities } from "@/helpers";
 
 export type PredefinedEntities = {
   usePredefinedEntities: Boolean;
@@ -171,14 +143,9 @@ export default defineComponent({
   components: {
     ListContainer,
     ListItem,
-    BasePagination,
-    BaseButton,
-    BaseDropdown,
     IconToggle,
     GridItem,
-    NewBaseDropdown,
     BulkOperationsActionsBar,
-    SingleIconToggle,
     FiltersBase,
     LibraryBar,
   },
@@ -288,6 +255,7 @@ export default defineComponent({
         enabled: props.predefinedEntities ? false : true,
       }
     );
+
     onResult((result) => {
       if (result.data && result.data.Entities && !props.predefinedEntities) {
         entities.value = result.data.Entities.results as Entity[];
@@ -342,6 +310,18 @@ export default defineComponent({
         params: { id: entityId },
       });
     };
+
+    watch(
+      () => loading.value,
+      (isLoading) => {
+        if (!isLoading) {
+          return;
+        }
+        console.log("yuuu");
+        entities.value = createPlaceholderEntities(queryVariables.limit || 25);
+      },
+      { immediate: true }
+    );
 
     watch(
       () => props.predefinedEntities?.entities,
