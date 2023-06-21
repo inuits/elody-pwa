@@ -153,7 +153,7 @@ const inputValue = computed<string[] | undefined>({
   bottom: 0;
   left: 0;
   border: 0;
-  padding: 0;
+  padding: 0 !important;
   width: 100%;
   outline: none;
   -webkit-appearance: none;
@@ -162,8 +162,7 @@ const inputValue = computed<string[] | undefined>({
 }
 
 .multiselect-tags-search:focus {
-  box-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width))
-    var(--tw-ring-color);
+  box-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color) !important;
 }
 
 .multiselect-clear {
