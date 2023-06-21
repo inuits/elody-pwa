@@ -4,6 +4,7 @@
       <div class="flex flex-row gap-y-4">
         <FiltersBase
           v-if="enableAdvancedFilters"
+          class="lg:w-[46%]"
           :entity-type="route.meta.entityType as string"
           @apply-filters="setFilters"
           @expand-filters="expandFilters = !expandFilters"
@@ -35,7 +36,7 @@
         :class="{ 'flex justify-end': expandFilters }"
       >
         <BulkOperationsActionsBar
-          :class="{ 'w-[69%]': expandFilters }"
+          :class="{ 'w-[69.75%]': expandFilters }"
           :context="bulkOperationsContext"
           :total-items-count="totalEntityCount"
           :use-extended-bulk-operations="true"
@@ -47,7 +48,10 @@
       <div :class="{ 'flex justify-end': expandFilters }">
         <ListContainer
           id="gridContainer"
-          :class="[{ 'w-[69%]': expandFilters }, displayGrid ? 'p-5' : 'p-1']"
+          :class="[
+            { 'w-[69.75%]': expandFilters },
+            displayGrid ? 'p-5' : 'p-1',
+          ]"
         >
           <div v-if="!displayGrid && entities">
             <div>

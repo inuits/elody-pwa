@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative h-full bg-neutral-white w-full lg:w-[30%]"
+    class="relative h-full bg-neutral-white w-full"
     :class="expandFilters ? 'rounded-t' : 'rounded-xl'"
     @keydown.enter="applyFilters()"
   >
