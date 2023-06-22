@@ -13,7 +13,6 @@
       "
       @click="
         () => {
-          expandFilters = !expandFilters;
           emit('expandFilters', expandFilters);
         }
       "
