@@ -203,7 +203,9 @@ export default defineComponent({
       );
       if (displayPreferences) {
         displayGrid.value = JSON.parse(displayPreferences).grid;
-        expandFilters.value = JSON.parse(displayPreferences).expandFilters;
+        expandFilters.value = !props.enableAdvancedFilters
+          ? false
+          : JSON.parse(displayPreferences).expandFilters;
       }
       calculateGridColumns();
     });
