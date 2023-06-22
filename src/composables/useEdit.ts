@@ -38,10 +38,6 @@ export const useEditMode = () => {
   const disableEditMode = () => (editMode.value = "view");
   const isEdit = computed<boolean>(() => editMode.value === "edit");
 
-  router.beforeEach(() => {
-    disableEditMode();
-  });
-
   const addSaveCallback = (input: callback, order?: string) => {
     if (order === "first") {
       saveCallbacks.value.unshift(input);

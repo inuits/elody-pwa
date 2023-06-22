@@ -27,6 +27,7 @@ import {
   CreateEntityDocument,
   Entitytyping,
   GetCreateEntityFormDocument,
+TypeModals,
 } from "../generated-types/queries";
 import type {
   CreateEntityMutation,
@@ -50,9 +51,9 @@ export default defineComponent({
   },
   setup(props) {
     const router = useRouter();
-    const { closeModal } = useAvailableModals();
     const { setEditMode } = useEditMode();
-
+    const { getModal } = useAvailableModals();
+    const modal = getModal(TypeModals.Create);
     const EntityTitle = ref<string>("");
     const idPrefix = ref<string>("");
     const manualID = computed(
@@ -82,15 +83,16 @@ export default defineComponent({
       const createResult = await mutate({
         data: {
           type: props.entityType,
-          id: "",
+          id: manualID.value,
           metadata: [],
           title: EntityTitle.value,
           identifiers: [manualID.value],
         },
       });
-      closeModal();
+
       if (createResult && createResult.data?.createEntity?.id) {
         setEditMode();
+        modal.closeModal()
         router.push({
           name: "SingleEntity",
           params: { id: createResult.data.createEntity.id },
