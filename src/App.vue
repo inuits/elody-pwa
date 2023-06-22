@@ -13,12 +13,15 @@
     <pick-entity-modal />
     <create-modal />
     <search-saved-searches-modal />
-    <BulkoperationsModal :context="route.name as Context" />
+    <BulkoperationsModal
+      v-if="route.name !== undefined"
+      :context="route.name as Context"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import { DefaultOIDC, useAuth } from "session-vue-3-oidc-library";
 import UploadModal from "./components/UploadModal.vue";
 import CreateModal from "./components/CreateModal.vue";

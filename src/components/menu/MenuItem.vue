@@ -79,7 +79,6 @@ const { getModal } = useAvailableModals();
 
 const props = defineProps<{
   menuitem: MenuItem;
-  subMenu: MenuItem;
   icon: DamsIcons;
 }>();
 
@@ -94,8 +93,8 @@ const handleClick = () => {
 };
 
 const handleSubMenu = () => {
-  const submenu = props.subMenu;
-  if (props.subMenu) {
+  const submenu = props.menuitem.subMenu;
+  if (submenu) {
     menuSubitem.value = Object.values(submenu).filter(
       (menu: MenuItem) => menu.typeLink
     );
