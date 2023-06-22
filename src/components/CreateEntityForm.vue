@@ -41,6 +41,7 @@ import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useEditMode } from "@/composables/useEdit";
 import { useNotification } from "./base/BaseNotification.vue";
 import { NotificationType } from "./base/BaseNotification.vue";
+import { useI18n } from "vue-i18n";
 
 export default defineComponent({
   name: "CreateEntityForm",
@@ -52,6 +53,7 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const { t } = useI18n();
     const router = useRouter();
     const { createNotification } = useNotification();
     const { setEditMode } = useEditMode();
@@ -99,8 +101,8 @@ export default defineComponent({
         createNotification({
           displayTime: 10,
           type: NotificationType.default,
-          title: "Succes",
-          description: "Entity was created succesfully",
+          title: t("notifications.success.entityCreated.title"),
+          description: t("notifications.success.entityCreated.description"),
           shown: true,
         });
         router.push({
