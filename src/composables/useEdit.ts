@@ -16,6 +16,10 @@ import {
 } from "../composables/useMediafilesOrderHelpers";
 import { toBeDeleted } from "@/components/EntityImageSelection.vue";
 import { useRouter } from "vue-router";
+import {
+  useNotification,
+  NotificationType,
+} from "@/components/base/BaseNotification.vue";
 
 export type EditModes = "edit" | "view" | "loading";
 export type callback = (e?: Event | undefined) => Promise<unknown>;
@@ -25,6 +29,7 @@ const saveCallbacks = ref<callback[]>([]);
 const isEditToggleVisible = ref<"no-edit" | "edit" | "edit-delete">("no-edit");
 
 export const useEditMode = () => {
+  const { createNotification } = useNotification();
   const router = useRouter();
   const { linkMediaFilesToEntity, clearMediaFilesToLinkToEntity } =
     useMediaAssetLinkHelper();
@@ -85,6 +90,13 @@ export const useEditMode = () => {
         if (isEdit.value) {
           saveCallbacks.value = [];
           disableEditMode();
+          createNotification({
+            displayTime: 10,
+            type: NotificationType.default,
+            title: "Entity successfully updated",
+            description: "Changes have been saved successfully",
+            shown: true,
+          });
         }
       });
     }

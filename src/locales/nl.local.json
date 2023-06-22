@@ -127,6 +127,10 @@
       "entityCreated": {
         "title": "Entity successfully created",
         "description": "Changes have been saved successfully"
+      },
+      "entityUpdated": {
+        "title": "Entity successfully Updated",
+        "description": "Changes have been saved successfully"
       }
     },
     "graphql-errors": {
