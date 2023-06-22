@@ -66,6 +66,8 @@ module.exports = {
         600:"#22D3EE",
       },
       red: {
+        lightest: "#F8F2F2",
+        light: "#F9DCDC",
         default: "#D11800",
         dark: "#9b0000",
       },
