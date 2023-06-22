@@ -56,7 +56,7 @@ const props = withDefaults(
 const id = asString(useRoute().params["id"]);
 const loading = ref<boolean>(true);
 const auth = useAuth();
-const { showEditToggle } = useEditMode();
+const { showEditToggle, disableEditMode } = useEditMode();
 const { updatePageInfo } = usePageInfo();
 
 //Old mediafile dependencies
@@ -90,6 +90,7 @@ onBeforeRouteUpdate(async (to: any) => {
   queryVariables.id = to.params.id;
   intialValues.value = "no-values";
   columnList.value = "no-values";
+  disableEditMode();
 });
 
 const intialValues = ref<Omit<IntialValues, "keyValue"> | "no-values">(
