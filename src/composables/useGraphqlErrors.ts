@@ -84,15 +84,6 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
           console.log(`Message:`, error.message);
           console.log(`---`);
           handleErrorByCode(Number(error.extensions.statusCode));
-          // if (error.extensions.statusCode != 401) {
-          //   useNotification().createNotification({
-          //     displayTime: 10,
-          //     type: NotificationType.error,
-          //     title: "Error",
-          //     description: "Something went wrong",
-          //     shown: true,
-          //   });
-          // }
         }
       }
     }
