@@ -1,6 +1,6 @@
 <template>
   <div :class="['h-full w-full overflow-hidden']">
-    <div class="map w-full">
+    <div v-if="parsedMapData.coordinates" class="map w-full">
       <l-map
         :use-global-leaflet="false"
         ref="map"
@@ -71,12 +71,21 @@ const props = defineProps<{
 const zoom = ref<number>(15);
 const { isEdit } = useEditMode();
 
+const createNewCoordinatesObject = (coordinatesObject: any) => {
+  coordinatesObject.value = { longitude: 1, latitude: 1 };
+  return coordinatesObject.value;
+};
+
 const parsedMapData = computed(() => {
-  const locationdata = props.mapData.find(
+  const coordinatesObject = props.mapData.find(
     (dataItem) => dataItem.key === "location"
-  )?.value;
+  );
+  let coordinates = coordinatesObject.value;
+
+  if (!coordinates) coordinates = createNewCoordinatesObject(coordinatesObject);
+
   return {
-    coordinates: [locationdata.latitude, locationdata.longitude],
+    coordinates: [coordinates.latitude, coordinates.longitude],
     name: props.mapData.find((dataItem) => dataItem.key === "name")?.value,
   };
 });
