@@ -16,7 +16,7 @@
         :label="(element.label as string)"
         RelationKey="relatie"
         :isCollapsed="element.isCollapsed"
-        :entity-list="(element.entityList as Entity[])"
+        :entity-list="(element.entityList as Entity[]) ?? []"
       />
       <entity-element-media
         v-if="element.__typename === 'MediaFileElement'"
