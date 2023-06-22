@@ -56,15 +56,14 @@
       </div>
       <div class="basis-full h-[55px]">
         <BulkOperationsSubmitBar
-          :context="context"
-          :selected-items-count="getEnqueuedItemCount(context)"
-          :is-disabled-button="
+          button-label="Exporteer naar csv"
+          :button-icon="DamsIcons.DocumentInfo"
+          :disabled="
             getEnqueuedItemCount(
               BulkOperationsContextEnum.BulkOperationsCsvExport
             ) === 0
           "
-          :button-icon="DamsIcons.DocumentInfo"
-          button-label="Exporteer naar csv"
+          :selected-items-count="getEnqueuedItemCount(context)"
           @submit="exportCsv()"
           @cancel="modal.closeModal()"
         />

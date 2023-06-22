@@ -151,7 +151,9 @@
     "edit": "Bewerk",
     "items": "items",
     "selected": "geselecteerd",
+    "save": "opslaan",
     "cancel": "annuleren",
+    "delete": "verwijderen",
     "csv-export": {
       "error": {
         "title": "Export failed"
