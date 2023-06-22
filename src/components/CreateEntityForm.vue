@@ -27,7 +27,7 @@ import {
   CreateEntityDocument,
   Entitytyping,
   GetCreateEntityFormDocument,
-TypeModals,
+  TypeModals,
 } from "../generated-types/queries";
 import type {
   CreateEntityMutation,
@@ -39,6 +39,8 @@ import urlSlug from "url-slug";
 import { useRouter } from "vue-router";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useEditMode } from "@/composables/useEdit";
+import { useNotification } from "./base/BaseNotification.vue";
+import { NotificationType } from "./base/BaseNotification.vue";
 
 export default defineComponent({
   name: "CreateEntityForm",
@@ -51,6 +53,7 @@ export default defineComponent({
   },
   setup(props) {
     const router = useRouter();
+    const { createNotification } = useNotification();
     const { setEditMode } = useEditMode();
     const { getModal } = useAvailableModals();
     const modal = getModal(TypeModals.Create);
@@ -92,7 +95,14 @@ export default defineComponent({
 
       if (createResult && createResult.data?.createEntity?.id) {
         setEditMode();
-        modal.closeModal()
+        modal.closeModal();
+        createNotification({
+          displayTime: 10,
+          type: NotificationType.default,
+          title: "Succes",
+          description: "Entity was created succesfully",
+          shown: true,
+        });
         router.push({
           name: "SingleEntity",
           params: { id: createResult.data.createEntity.id },
