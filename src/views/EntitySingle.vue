@@ -46,7 +46,7 @@ import { usePageInfo } from "@/composables/usePageInfo";
 
 const props = withDefaults(
   defineProps<{
-    entityType: Entitytyping;
+    entityType?: Entitytyping;
   }>(),
   {
     entityType: Entitytyping.Asset,

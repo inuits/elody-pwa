@@ -11,12 +11,12 @@ import { convertUnitToReadbleFormat } from "@/helpers";
 import { computed } from "vue";
 
 const props = defineProps<{
-  label: string;
-  value: string;
-  unit: string;
+  label?: string;
+  value?: string;
+  unit?: string;
 }>();
 
 const readableValue = computed(() => {
-  return convertUnitToReadbleFormat(props.unit as Unit, props.value);
+  return convertUnitToReadbleFormat(props.unit as Unit, props.value ?? "");
 });
 </script>
