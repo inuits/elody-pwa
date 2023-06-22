@@ -75,12 +75,26 @@ const accentNormalButton: Button = {
   },
   disabledStyle: defaultButton.disabledStyle,
 };
+const redDefaultButton: Button = {
+  textColor: accentAccentButton.textColor,
+  bgColor: "bg-red-default",
+  hoverStyle: {
+    textColor: "hover:text-red-default",
+    bgColor: "hover:bg-red-lightest",
+  },
+  activeStyle: {
+    textColor: "active:text-red-default",
+    bgColor: "active:bg-red-light",
+  },
+  disabledStyle: defaultButton.disabledStyle,
+};
 
-type ButtonStyle = "default" | "accentAccent" | "accentNormal";
+type ButtonStyle = "default" | "accentAccent" | "accentNormal" | "redDefault";
 const buttonStyles: Record<ButtonStyle, Button> = {
   default: defaultButton,
   accentAccent: accentAccentButton,
   accentNormal: accentNormalButton,
+  redDefault: redDefaultButton,
 };
 
 type ButtonSize = "normal" | "small";
