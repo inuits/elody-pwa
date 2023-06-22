@@ -31,7 +31,7 @@
       />
     </div>
 
-    <div class="flex items-center w-full">
+    <div v-if="!loading" class="flex items-center w-full">
       <div
         v-for="metadataItem in teaserMetadata"
         :key="metadataItem ? metadataItem.value : 'no-key'"
@@ -49,6 +49,10 @@
           </span>
         </template>
       </div>
+    </div>
+    <div class="w-full" v-else>
+      <div class="bg-neutral-100 h-4 w-1/4 opacity-40 mb-2"></div>
+      <div class="bg-neutral-100 h-4 w-5/6 opacity-40"></div>
     </div>
     <div class="flex flex-row">
       <slot>
