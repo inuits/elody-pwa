@@ -193,7 +193,7 @@ export default defineComponent({
   },
   props: {
     selectedImage: {
-      type: Object as PropType<MediaFile | null>,
+      type: Object as PropType<MediaFile | undefined>,
       required: true,
     },
     loading: {

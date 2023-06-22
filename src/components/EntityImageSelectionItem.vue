@@ -4,7 +4,7 @@
     :class="['px-5 py-2 flex flex-col justify-end']"
   >
     <div class="relative group">
-      <trash-icon
+      <!--<trash-icon
         v-if="editMode === 'edit' && !toBeDeleted.includes(element._id)"
         class="hidden group-hover:block"
         @click="addToSaveCallback(element._id)"
@@ -38,9 +38,10 @@
             : '',
         ]"
         @click="selectImage(element)"
-      />
+      />-->
+      <!--<img
+        v-else-if="element.thumbnail_file_location"-->
       <img
-        v-else-if="element.thumbnail_file_location"
         :class="[
           'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
           toBeDeleted.includes(element._id) ? 'filter blur-xs grayscale' : '',
@@ -64,7 +65,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, type PropType } from "vue";
+import { defineComponent, type PropType } from "vue";
 import useEditMode from "@/composables/useEdit";
 import useMediaAssetLinkHelper from "@/composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "@/composables/useMetaDataHelper";
@@ -88,7 +89,7 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props) {
+  setup() {
     const { updateSelectedEntityMediafile } = useEntityMediafileSelector();
     const selectImage = (mediafile: MediaFile) => {
       updateSelectedEntityMediafile(mediafile);
