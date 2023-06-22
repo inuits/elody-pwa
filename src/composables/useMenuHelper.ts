@@ -50,7 +50,7 @@ export const useMenuHelper = () => {
   const { onResult } = useQuery<GetMenuQuery>(GetMenuDocument, queryVariables);
   const getMenuEntities = () => {
     onResult((value) => {
-      menuItems.value = Object.values(value.data.Menu?.menu || {}).filter(
+      menuItems.value = Object.values(value.data?.Menu?.menu || {}).filter(
         (menu) => menu.typeLink
       );
       getEntityIdFromRoute;

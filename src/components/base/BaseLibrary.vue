@@ -220,7 +220,6 @@ export default defineComponent({
     });
 
     const setNewQueryVariables = () => {
-      console.log(selectedSortOption.value);
       const newVariables = { ...queryVariables };
       if (selectedSortOption.value && newVariables?.searchValue) {
         newVariables.searchValue.order_by = selectedSortOption.value;
@@ -321,7 +320,6 @@ export default defineComponent({
         if (!isLoading) {
           return;
         }
-        console.log("yuuu");
         entities.value = createPlaceholderEntities(queryVariables.limit || 25);
       },
       { immediate: true }

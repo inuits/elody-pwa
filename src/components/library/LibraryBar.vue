@@ -75,7 +75,8 @@ const paginationLimitOptions = ref<DropdownOption[]>([]);
 const { onResult: onPaginationLimitOptionsResult } =
   useQuery<GetPaginationLimitOptionsQuery>(GetPaginationLimitOptionsDocument);
 onPaginationLimitOptionsResult((result) => {
-  paginationLimitOptions.value = result.data.PaginationLimitOptions.options;
+  paginationLimitOptions.value =
+    result.data?.PaginationLimitOptions.options ?? [];
   selectedPaginationLimitOption.value = paginationLimitOptions.value[0];
 });
 
@@ -85,7 +86,7 @@ const { onResult: onSortOptionsResult } = useQuery<GetSortOptionsQuery>(
   GetSortOptionsDocument
 );
 onSortOptionsResult((result) => {
-  sortOptions.value = result.data.SortOptions.options;
+  sortOptions.value = result.data?.SortOptions.options ?? [];
   selectedSortOption.value = sortOptions.value[0];
 });
 

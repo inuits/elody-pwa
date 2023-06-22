@@ -14,7 +14,6 @@
         class="hover:bg-neutral-40"
         :icon="menuItem.icon"
         :menuitem="menuItem"
-        :subMenu="menuItem.subMenu"
       />
     </div>
     <LogInLogout />
@@ -22,15 +21,13 @@
 </template>
 
 <script lang="ts" setup>
-import { useRoute, RouterLink } from "vue-router";
+import { RouterLink } from "vue-router";
 import Menuitem from "@/components/menu/MenuItem.vue";
-import { useQuery } from "@vue/apollo-composable";
 import LogInLogout from "@/components/LogInLogout.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 
 const { getMenuEntities, menuItems } = useMenuHelper();
 getMenuEntities();
-const route = useRoute();
 </script>
 
 <style>

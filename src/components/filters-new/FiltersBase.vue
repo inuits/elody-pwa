@@ -149,6 +149,7 @@ const { entityType } = toRefs(props);
 const { onResult: onFilterMatcherMappingResult } =
   useQuery<GetFilterMatcherMappingQuery>(GetFilterMatcherMappingDocument);
 onFilterMatcherMappingResult((result) => {
+  if (!result.data) return;
   filterMatcherMapping.value = result.data.FilterMatcherMapping;
 
   const matcherSet = new Set<string>();
@@ -174,8 +175,8 @@ const { refetch, onResult: onAdvancedFiltersResult } =
   );
 onAdvancedFiltersResult((result) => {
   const advancedFilters: Maybe<AdvancedFilters> | undefined = (
-    result.data.EntityTypeFilters as BaseEntity
-  ).advancedFilters;
+    result.data?.EntityTypeFilters as BaseEntity
+  )?.advancedFilters;
   if (!advancedFilters) return;
 
   filters.value = [];
