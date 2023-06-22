@@ -125,7 +125,7 @@
   "notifications": {
     "success":{
       "entityCreated": {
-        "title": "Entity successfully updated",
+        "title": "Entity successfully created",
         "description": "Changes have been saved successfully"
       }
     },
