@@ -23,9 +23,7 @@
           ''
         "
         :downloadLocation="
-          canGet(result?.Entity?.permission)
-            ? mediafileSelectionState.selectedMediafile.original_file_location
-            : ''
+          mediafileSelectionState.selectedMediafile.original_file_location
         "
       />
       <VideoPlayer
@@ -78,8 +76,9 @@
     </div>
   </div>
 </template>
+
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 import IIIFViewer from "../IIIFViewer.vue";
 import VideoPlayer from "./VideoPlayer.vue";
 import AudioPlayer from "./AudioPlayer.vue";
