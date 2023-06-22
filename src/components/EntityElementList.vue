@@ -4,14 +4,14 @@
       <template v-slot:actions>
         <div
           v-if="isEdit"
-          class="flex items-center text-accent-normal cursor-pointer"
+          class="flex items-center text-text-subtitle cursor-pointer"
         >
           <unicon height="16" :name="Unicons.PlusCircle.name" />
           <p
             class="underline"
             @click="openPickEntityModal([Entitytyping.Asset])"
           >
-            Voeg assets toe
+            {{ t("library.add") }}
           </p>
         </div>
       </template>
@@ -71,6 +71,7 @@ import { Unicons } from "@/types";
 import BaseLibrary, { type PredefinedEntities } from "./base/BaseLibrary.vue";
 import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
 import type { Context } from "@/composables/useBulkOperations";
+import { useI18n } from "vue-i18n";
 
 const route = useRoute();
 const props = defineProps<{
@@ -81,6 +82,7 @@ const props = defineProps<{
 }>();
 const { isEdit } = useEditMode();
 const { toggleElementCollapse } = useEntityElementCollapseHelper();
+const { t } = useI18n();
 
 const { fields, push } = useFieldArray<Asset>(props.RelationKey);
 

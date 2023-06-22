@@ -96,7 +96,8 @@
     "search": "Search",
     "items": "items",
     "sort": "order by",
-    "loading": "Loading"
+    "loading": "Loading",
+    "add": "Add"
   },
   "confirmation": {
     "sure-message": "Are you sure you want to delete this?",

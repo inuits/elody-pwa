@@ -6,7 +6,7 @@
     @hide-modal="closePickEntityModal"
   >
     <div
-      v-if="pickEntityModalState.state === 'show'"
+      v-if="pickEntityModalState.state === ModalState.Show"
       class="bg-neutral-20 w-full h-full flex flex-col overflow-auto"
     >
       <AssetLibrary
@@ -19,7 +19,7 @@
 </template>
 <script lang="ts">
 import BaseModal from "./base/BaseModal.vue";
-import type { ModalState } from "./base/BaseModal.vue";
+import { ModalState } from "@/generated-types/queries";
 import { defineComponent, ref } from "vue";
 import AssetLibrary from "@/components/AssetLibrary.vue";
 import type { Entity, Maybe, Entitytyping } from "@/generated-types/queries";
@@ -31,7 +31,7 @@ export type PickEntityModalType = {
 };
 
 const pickEntityModalState = ref<PickEntityModalType>({
-  state: "hide",
+  state: ModalState.Hide,
   pickedEntity: undefined,
   acceptedEntityTypes: [],
 });
@@ -43,21 +43,21 @@ export const usePickEntityModal = () => {
 
   const pickEntity = (pickedEntity: Entity) => {
     updatePickEntityModal({
-      state: "show",
+      state: ModalState.Show,
       pickedEntity: pickedEntity,
     });
   };
 
   const closePickEntityModal = () => {
     updatePickEntityModal({
-      state: "hide",
+      state: ModalState.Hide,
       pickedEntity: undefined,
     });
   };
 
   const openPickEntityModal = (acceptedEntityTypes: Maybe<Entitytyping>[]) => {
     updatePickEntityModal({
-      state: "show",
+      state: ModalState.Show,
       pickedEntity: undefined,
       acceptedEntityTypes: acceptedEntityTypes,
     });
@@ -88,6 +88,7 @@ export default defineComponent({
       addItem,
       pickEntityModalState,
       closePickEntityModal,
+      ModalState,
     };
   },
 });
