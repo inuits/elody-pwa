@@ -121,6 +121,7 @@ export type FilterListItem = {
 
 const props = defineProps<{
   entityType: string;
+  expandFilters: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -143,7 +144,6 @@ const labelsOfDisplayedFilters = ref<string[]>([]);
 const activeFilters = ref<AdvancedFilterInput[]>([]);
 const activeFilterCount = ref<number>(0);
 const clearAllActiveFilters = ref<boolean>(false);
-const expandFilters = ref<boolean>(false);
 const { entityType } = toRefs(props);
 
 const { onResult: onFilterMatcherMappingResult } =
@@ -202,7 +202,7 @@ onAdvancedFiltersResult((result) => {
 const applyFilters = () => emit("applyFilters", activeFilters.value);
 
 const getAngleIcon = computed<DamsIcons>(() =>
-  expandFilters.value ? DamsIcons.AngleUp : DamsIcons.AngleDown
+  props.expandFilters ? DamsIcons.AngleUp : DamsIcons.AngleDown
 );
 
 watch(labelsOfDisplayedFilters, () =>

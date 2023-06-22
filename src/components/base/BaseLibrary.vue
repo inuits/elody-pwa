@@ -4,6 +4,7 @@
       <div class="flex flex-row gap-y-4">
         <FiltersBase
           v-if="enableAdvancedFilters"
+          :expandFilters="expandFilters"
           class="lg:w-[46%]"
           :entity-type="route.meta.entityType as string"
           @apply-filters="setFilters"
@@ -131,7 +132,6 @@ import IconToggle from "../toggles/IconToggle.vue";
 import useThumbnailHelper from "../../composables/useThumbnailHelper";
 import useMetaDataHelper from "../../composables/useMetaDataHelper";
 import GridItem from "../GridItem.vue";
-import { setCookie, getCookie } from "tiny-cookie";
 import useListItemHelper from "../../composables/useListItemHelper";
 import { bulkSelectAllSizeLimit } from "@/main";
 import LibraryBar from "../library/LibraryBar.vue";
@@ -198,9 +198,12 @@ export default defineComponent({
     const expandFilters = ref<boolean>(false);
 
     onMounted(() => {
-      const displayPreference = getCookie("_displayPreference");
-      if (displayPreference) {
-        displayGrid.value = JSON.parse(displayPreference).grid;
+      const displayPreferences = window.localStorage.getItem(
+        "_displayPreferences"
+      );
+      if (displayPreferences) {
+        displayGrid.value = JSON.parse(displayPreferences).grid;
+        expandFilters.value = JSON.parse(displayPreferences).expandFilters;
       }
       calculateGridColumns();
     });
@@ -239,16 +242,6 @@ export default defineComponent({
     const setFilters = (advancedFilterInputs: AdvancedFilterInput[]) => {
       queryVariables.advancedFilterInputs = advancedFilterInputs;
     };
-
-    watch(displayGrid, () => {
-      setCookie(
-        "_displayPreference",
-        JSON.stringify({ grid: displayGrid.value }),
-        {
-          expires: "1Y",
-        }
-      );
-    });
 
     const { onResult, loading, refetch } = useQuery(
       GetEntitiesDocument,
@@ -335,6 +328,16 @@ export default defineComponent({
       },
       { immediate: true }
     );
+
+    watch([displayGrid, expandFilters], () => {
+      window.localStorage.setItem(
+        "_displayPreferences",
+        JSON.stringify({
+          grid: displayGrid.value,
+          expandFilters: expandFilters.value,
+        })
+      );
+    });
 
     if (!props.predefinedEntities) refetch();
 
