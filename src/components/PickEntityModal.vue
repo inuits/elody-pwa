@@ -7,22 +7,27 @@
   >
     <div
       v-if="pickEntityModalState.state === ModalState.Show"
-      class="bg-neutral-20 w-full h-full flex flex-col overflow-auto"
+      class="bg-neutral-20 w-full h-full flex flex-col overflow-auto py-2"
     >
-      <AssetLibrary
-        selection="true"
-        :accepted-entity-types="pickEntityModalState.acceptedEntityTypes"
-        @add-selection="addItem($event)"
+      <BaseLibrary
+        :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
+        :list-item-route-name="'SingleEntity'"
+        :enable-bulk-operations="true"
+        :bulk-operations-context="route.name as Context"
       />
     </div>
   </BaseModal>
 </template>
+
 <script lang="ts">
 import BaseModal from "./base/BaseModal.vue";
 import { ModalState } from "@/generated-types/queries";
 import { defineComponent, ref } from "vue";
-import AssetLibrary from "@/components/AssetLibrary.vue";
+import BaseLibrary from "@/components/base/BaseLibrary.vue";
 import type { Entity, Maybe, Entitytyping } from "@/generated-types/queries";
+import { SearchInputType } from "@/generated-types/queries";
+import { useRoute } from "vue-router";
+import type { Context } from "@/composables/useBulkOperations";
 
 export type PickEntityModalType = {
   state: ModalState;
@@ -75,7 +80,7 @@ export default defineComponent({
   name: "PickEntityModal",
   components: {
     BaseModal,
-    AssetLibrary,
+    BaseLibrary,
   },
   setup() {
     const { pickEntity, closePickEntityModal, pickEntityModalState } =
@@ -83,12 +88,15 @@ export default defineComponent({
     const addItem = (entity: Entity) => {
       pickEntity(entity);
     };
+    const route = useRoute();
 
     return {
       addItem,
       pickEntityModalState,
       closePickEntityModal,
       ModalState,
+      SearchInputType,
+      route,
     };
   },
 });
