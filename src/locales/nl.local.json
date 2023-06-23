@@ -181,5 +181,10 @@
       "MinMatcher": "op minimum waarde (niet inbegrepen)",
       "NoneMatcher": "op lege waarde"
     }
+  },
+  "confirm": {
+    "sure-message": "Are you sure you want to delete this?",
+    "delete-entity": "delete entity",
+    "delete-entity-mediafiles": "delete entity and mediafiles"
   }
 }
