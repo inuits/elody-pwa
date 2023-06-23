@@ -25,7 +25,9 @@
         @error="setNoImage()"
       />
       <unicon
-        v-if="(thumbIcon && media) || (imageSrcError && thumbIcon)"
+        v-if="
+          (thumbIcon && media && imageSrcError) || (imageSrcError && thumbIcon)
+        "
         :name="thumbIcon"
         class="h-10 w-10 self-center outline-none text-text-body"
       />
