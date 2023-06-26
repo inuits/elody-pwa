@@ -50,7 +50,7 @@ import {
   type GetPaginationLimitOptionsQuery,
   type GetSortOptionsQuery,
 } from "@/generated-types/queries";
-import { onMounted, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useQuery } from "@vue/apollo-composable";
 import SingleIconToggle from "../toggles/SingleIconToggle.vue";
@@ -72,10 +72,8 @@ const { getModal } = useAvailableModals();
 
 const selectedPaginationLimitOption = ref<DropdownOption>();
 const paginationLimitOptions = ref<DropdownOption[]>([]);
-const {
-  onResult: onPaginationLimitOptionsResult,
-  refetch: refetchPaginationOptions,
-} = useQuery<GetPaginationLimitOptionsQuery>(GetPaginationLimitOptionsDocument);
+const { onResult: onPaginationLimitOptionsResult } =
+  useQuery<GetPaginationLimitOptionsQuery>(GetPaginationLimitOptionsDocument);
 onPaginationLimitOptionsResult((result) => {
   paginationLimitOptions.value =
     result.data?.PaginationLimitOptions.options ?? [];
@@ -118,9 +116,4 @@ watch(
     }
   }
 );
-
-onMounted(() => {
-  refetchPaginationOptions();
-  refetchSortOptions();
-});
 </script>

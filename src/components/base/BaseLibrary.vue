@@ -6,7 +6,7 @@
           v-if="enableAdvancedFilters"
           :expandFilters="expandFilters"
           class="lg:w-[46%]"
-          :entity-type="route.meta.entityType as string"
+          :entity-type="filterType || route.meta.entityType as string"
           @apply-filters="setFilters"
           @expand-filters="expandFilters = !expandFilters"
         />
@@ -157,6 +157,9 @@ export default defineComponent({
     listItemRouteName: {
       type: String,
       required: true,
+    },
+    filterType: {
+      type: String,
     },
     enableBulkOperations: {
       type: Boolean,

@@ -7,10 +7,7 @@
           class="flex items-center text-text-subtitle cursor-pointer"
         >
           <unicon height="16" :name="Unicons.PlusCircle.name" />
-          <p
-            class="underline"
-            @click="openPickEntityModal([Entitytyping.Asset])"
-          >
+          <p class="underline" @click="openPickEntityModal(types)">
             {{ t("library.add") }}
           </p>
         </div>
@@ -56,11 +53,7 @@
 
 <script lang="ts" setup>
 import { ref, watch } from "vue";
-import {
-  Entitytyping,
-  type Asset,
-  type Entity,
-} from "@/generated-types/queries";
+import { type Asset, type Entity } from "@/generated-types/queries";
 import { useFieldArray, type FieldEntry } from "vee-validate";
 import EntityElementWrapper from "./base/EntityElementWrapper.vue";
 import { usePickEntityModal } from "./PickEntityModal.vue";
@@ -78,6 +71,7 @@ const props = defineProps<{
   label: string;
   RelationKey: string;
   isCollapsed: Boolean;
+  types: String[];
   entityList: Entity[];
 }>();
 const { isEdit } = useEditMode();

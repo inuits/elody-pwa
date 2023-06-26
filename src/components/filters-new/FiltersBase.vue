@@ -194,6 +194,9 @@ onAdvancedFiltersResult((result) => {
         isDisplayed: advancedFilter.isDisplayedByDefault ?? false,
         advancedFilter,
       });
+      if (props.entityType) {
+        applyFilters();
+      }
     }
   });
 });
