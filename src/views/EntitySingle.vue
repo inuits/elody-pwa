@@ -26,7 +26,7 @@
 <script lang="ts" setup>
 import { reactive, ref, watch } from "vue";
 import { asString } from "@/helpers";
-import { useRoute, onBeforeRouteUpdate } from "vue-router";
+import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import {
   Entitytyping,
   GetEntityByIdDocument,
@@ -56,8 +56,9 @@ const props = withDefaults(
 const id = asString(useRoute().params["id"]);
 const loading = ref<boolean>(true);
 const auth = useAuth();
-const { showEditToggle, disableEditMode } = useEditMode();
+const { showEditToggle, disableEditMode, isEdit } = useEditMode();
 const { updatePageInfo } = usePageInfo();
+const router = useRouter();
 
 //Old mediafile dependencies
 const { mediafiles, clearMediafiles } = useMetaDataHelper();
@@ -161,6 +162,12 @@ watch(result, (queryResults) => {
     }
   } catch (error) {
     console.error("no assets");
+  }
+});
+
+router.beforeEach(() => {
+  if (isEdit) {
+    disableEditMode();
   }
 });
 </script>
