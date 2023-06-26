@@ -51,7 +51,7 @@ export const useBulkOperations = () => {
     context: Context,
     skip: number = 1,
     limit: number = Number.MAX_SAFE_INTEGER
-  ) => items.value[context].slice((skip - 1) * limit, skip * limit);
+  ) => items.value[context]?.slice((skip - 1) * limit, skip * limit) || [];
 
   const getEnqueuedItemCount = (context: Context) =>
     items.value[context]?.length ?? 0;
