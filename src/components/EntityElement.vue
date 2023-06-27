@@ -17,6 +17,7 @@
         RelationKey="relatie"
         :isCollapsed="element.isCollapsed"
         :types="element.entityTypes as String[]"
+        :metaKey="element.metaKey"
         :entity-list="(element.entityList as Entity[]) ?? []"
       />
       <entity-element-media
