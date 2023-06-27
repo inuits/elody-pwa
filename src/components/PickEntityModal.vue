@@ -10,7 +10,7 @@
       class="bg-neutral-20 w-full h-[92%] flex flex-col overflow-auto py-2"
     >
       <BaseLibrary
-        :filterType="pickEntityModalState.acceptedEntityTypes[0]"
+        :filterType="(pickEntityModalState?.acceptedEntityTypes[0] as string)"
         :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
         :list-item-route-name="'SingleEntity'"
         :enable-bulk-operations="false"
@@ -20,7 +20,7 @@
     <div class="w-full flex justify-end items-center p-6">
       <div
         :class="['rounded-md bg-accent-normal text-text-subtitle h-10 w-16 flex justify-center items-center cursor-pointer', {'opacity-30': !getEnqueuedItems(route.name as Context).length}]"
-        @click="getItems()"
+        @click="addItems()"
       >
         Add
       </div>
@@ -41,15 +41,19 @@ import {
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { useRouter } from "vue-router";
+import { useFormHelper } from "@/composables/useFormHelper";
+import type { FormContext } from "vee-validate";
 
 export type PickEntityModalType = {
   state: ModalState;
+  metaKey?: string | undefined;
   pickedEntities: Entity[];
   acceptedEntityTypes?: Maybe<string>[];
 };
 
 const pickEntityModalState = ref<PickEntityModalType>({
   state: ModalState.Hide,
+  metaKey: undefined,
   pickedEntities: [],
   acceptedEntityTypes: [],
 });
@@ -59,30 +63,27 @@ export const usePickEntityModal = () => {
     pickEntityModalState.value = uploadModalInput;
   };
 
-  const pickEntity = (pickedEntities: Entity[]) => {
-    updatePickEntityModal({
-      state: ModalState.Show,
-      pickedEntities: pickedEntities,
-    });
-  };
-
   const closePickEntityModal = () => {
     updatePickEntityModal({
       state: ModalState.Hide,
       pickedEntities: [],
+      metaKey: undefined,
     });
   };
 
-  const openPickEntityModal = (acceptedEntityTypes: Maybe<Entitytyping>[]) => {
+  const openPickEntityModal = (
+    acceptedEntityTypes: Maybe<Entitytyping>[],
+    metaKey: string | undefined = undefined
+  ) => {
     updatePickEntityModal({
       state: ModalState.Show,
       pickedEntities: [],
       acceptedEntityTypes: acceptedEntityTypes,
+      metaKey,
     });
   };
 
   return {
-    pickEntity,
     closePickEntityModal,
     openPickEntityModal,
     pickEntityModalState,
@@ -96,19 +97,41 @@ export default defineComponent({
     BaseLibrary,
   },
   setup() {
-    const { pickEntity, closePickEntityModal, pickEntityModalState } =
-      usePickEntityModal();
-    const addItems = (entities: Entity[]) => {
-      pickEntity(entities);
-    };
+    const { closePickEntityModal, pickEntityModalState } = usePickEntityModal();
     const { getEnqueuedItems } = useBulkOperations();
+    const { getForm } = useFormHelper();
     const route = useRoute();
     const router = useRouter();
 
-    const getItems = () => {
+    const addItemToList = (
+      currentValue: string[],
+      items: string[]
+    ): string[] => {
+      const returnList = [...currentValue];
+      items.forEach((item: string) => {
+        if (currentValue.includes(item)) {
+          console.warn("This item was already added, skipping");
+          return;
+        }
+        returnList.push(item);
+      });
+      return returnList;
+    };
+
+    const addItems = () => {
       const selectedEntities = getEnqueuedItems(route.name as Context);
-      console.log(selectedEntities);
-      addItems(selectedEntities as Entity[]);
+      const id = route.params.id as string;
+      const form: FormContext = getForm(id);
+      const fieldKey = pickEntityModalState.value.metaKey;
+      if (form && selectedEntities && fieldKey) {
+        const currentValue = form.values[fieldKey];
+        const newValue = addItemToList(
+          currentValue,
+          selectedEntities.map((e) => e.id)
+        );
+        form.setFieldValue(fieldKey, newValue);
+        closePickEntityModal();
+      }
     };
 
     router.beforeEach(() => {
@@ -121,7 +144,7 @@ export default defineComponent({
       ModalState,
       SearchInputType,
       route,
-      getItems,
+      addItems,
       getEnqueuedItems,
     };
   },

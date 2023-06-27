@@ -49,7 +49,7 @@ const parseIntialValues = (
   const metadata: MetadataValuesInput[] = [];
 
   Object.values(values).forEach((value, index) => {
-    if (Array.isArray(value)) {
+    if (Object.keys(values)[index] == "relations" && Array.isArray(value)) {
       value.forEach((relationValue) => {
         relationValue &&
           relations.push({

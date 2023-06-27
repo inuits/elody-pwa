@@ -7,7 +7,7 @@
           class="flex items-center text-text-subtitle cursor-pointer"
         >
           <unicon height="16" :name="Unicons.PlusCircle.name" />
-          <p class="underline" @click="openPickEntityModal(types)">
+          <p class="underline" @click="openPickEntityModal(types, metaKey)">
             {{ t("library.add") }}
           </p>
         </div>
@@ -52,17 +52,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from "vue";
-import { type Asset, type Entity } from "@/generated-types/queries";
-import { useFieldArray, type FieldEntry } from "vee-validate";
+import { ref } from "vue";
+import { type Entity } from "@/generated-types/queries";
 import EntityElementWrapper from "./base/EntityElementWrapper.vue";
 import { usePickEntityModal } from "./PickEntityModal.vue";
-import type { PickEntityModalType } from "./PickEntityModal.vue";
 import useEditMode from "@/composables/useEdit";
 import { useRoute } from "vue-router";
 import { Unicons } from "@/types";
 import BaseLibrary, { type PredefinedEntities } from "./base/BaseLibrary.vue";
-import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
 import type { Context } from "@/composables/useBulkOperations";
 import { useI18n } from "vue-i18n";
 
@@ -72,46 +69,16 @@ const props = defineProps<{
   RelationKey: string;
   isCollapsed: Boolean;
   types: String[];
+  metaKey: String;
   entityList: Entity[];
 }>();
 const { isEdit } = useEditMode();
-const { toggleElementCollapse } = useEntityElementCollapseHelper();
 const { t } = useI18n();
-
-const { fields, push } = useFieldArray<Asset>(props.RelationKey);
 
 let entitiesObject = ref<PredefinedEntities>({
   usePredefinedEntities: true,
   entities: props.entityList || [],
 });
 
-// const remove = (idx: number, field: FieldEntry<RelationValues>) => {
-//   update(idx, { ...field.value, toBeDeleted: true });
-// };
-
-// const revertRemove = (idx: number, field: FieldEntry<RelationValues>) => {
-//   update(idx, { ...field.value, toBeDeleted: false });
-// };
-
-const syncFieldWithObject = (fields: any) => {
-  entitiesObject.value.entities = fields.value.map(
-    (field: FieldEntry<Asset>) => field.value
-  );
-};
-
-const { openPickEntityModal, pickEntityModalState } = usePickEntityModal();
-
-//Picke entity modal needs to be refactored
-watch(pickEntityModalState, (value: PickEntityModalType) => {
-  //@ts-ignore
-  if (value.pickedEntity && value.pickedEntity.teaserMetadata) {
-    const entity = JSON.parse(JSON.stringify(value.pickedEntity));
-    push(entity);
-    syncFieldWithObject(fields);
-
-    if (props.isCollapsed) {
-      toggleElementCollapse(props.label);
-    }
-  }
-});
+const { openPickEntityModal } = usePickEntityModal();
 </script>
