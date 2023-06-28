@@ -37,7 +37,6 @@ const form = computed(() => {
     initialValues: values,
   });
 });
-addForm(entityId.value, form.value);
 
 const { setValues } = form.value;
 
@@ -103,6 +102,14 @@ document.addEventListener("discardEdit", () => {
   const refetch = refetchFn.value;
   if (refetch) refetch();
 });
+
+watch(
+  () => form.value,
+  () => {
+    addForm(entityId.value, form.value);
+  },
+  { immediate: true }
+);
 
 watch(isEdit, (value) => {
   if (value) {
