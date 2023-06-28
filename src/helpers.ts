@@ -1,15 +1,9 @@
 import { createI18n } from "vue-i18n";
 import messages from "@intlify/vite-plugin-vue-i18n/messages";
 import { useRoute } from "vue-router";
-import {
-  PanelType,
-  Unit,
-  type Entity,
-  type BaseEntity,
-} from "./generated-types/queries";
+import { PanelType, Unit } from "./generated-types/queries";
 import { useEntityMediafileSelector } from "./components/EntityImageSelection.vue";
 import { useFormHelper } from "./composables/useFormHelper";
-import type { Location } from "./components/EntityElementCoordinateEdit.vue";
 
 export const langs: string[] = ["nl", "fr"];
 
@@ -112,10 +106,10 @@ const { getForm } = useFormHelper();
 
 export const getValueForPanelMetadata = (
   panelType: PanelType,
-  metadataItemKey: string
+  metadataItemKey: string,
+  entityId: string
 ): string => {
-  const id = getEntityIdFromRoute() || "";
-  const form = getForm(id);
+  const form = getForm(entityId);
   const selectedMediafile: { [index: string]: any } | undefined =
     mediafileSelectionState.selectedMediafile;
   if (panelType === PanelType.Metadata && form) {

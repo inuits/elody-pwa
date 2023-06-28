@@ -66,6 +66,7 @@ import EntityElementRelation from "./EntityElementRelation.vue";
 import { Unicons } from "@/types";
 import { useEditMode } from "@/composables/useEdit";
 import { getValueForPanelMetadata } from "@/helpers";
+import { useRoute } from "vue-router";
 
 type MetadataField = {
   key: string;
@@ -88,9 +89,11 @@ const toggleIsCollapsed = () => {
 };
 
 const metadataArray = computed((): MetadataField[] => {
+  console.log("getting metadata");
   const returnArray: MetadataField[] = [];
   Object.values(props.panel).forEach((value) => {
     if (value && typeof value === "object") {
+      console.log(value);
       const metadataItemKey: string = (value as PanelMetaData).key;
       const metadataObject = {
         key: metadataItemKey,
@@ -98,7 +101,11 @@ const metadataArray = computed((): MetadataField[] => {
         unit: (value as PanelMetaData).unit,
         value:
           (value as PanelInfo).value ||
-          getValueForPanelMetadata(panelType.value, metadataItemKey),
+          getValueForPanelMetadata(
+            panelType.value,
+            metadataItemKey,
+            useRoute().params.id as string
+          ),
         field: (value as PanelMetaData).inputField,
       };
       returnArray.push(metadataObject);
