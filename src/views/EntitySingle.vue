@@ -7,7 +7,6 @@
       <entity-form
         v-if="intialValues != 'no-values'"
         :intialValues="intialValues"
-        :entityId="id"
       >
         <entity-column
           v-if="columnList != 'no-values'"
@@ -30,9 +29,9 @@ import {
   Entitytyping,
   GetEntityByIdDocument,
   type ColumnList,
-  type GetEntityByIdQuery,
   type GetEntityByIdQueryVariables,
   type IntialValues,
+  type BaseEntity,
 } from "@/generated-types/queries";
 import { useQuery } from "@vue/apollo-composable";
 import EntityColumn from "@/components/EntityColumn.vue";
@@ -73,14 +72,10 @@ const queryVariables = reactive<GetEntityByIdQueryVariables>({
   type: props.entityType,
 });
 
-const { result, refetch } = useQuery<GetEntityByIdQuery>(
-  GetEntityByIdDocument,
-  queryVariables,
-  {
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: "no-cache",
-  }
-);
+const { result, refetch } = useQuery(GetEntityByIdDocument, queryVariables, {
+  notifyOnNetworkStatusChange: true,
+  fetchPolicy: "no-cache",
+});
 
 onBeforeRouteUpdate(async (to: any) => {
   queryVariables.id = to.params.id;
@@ -97,44 +92,48 @@ const columnList = ref<ColumnList | "no-values">("no-values");
 watch(result, (queryResults) => {
   setRefetchFn(refetch);
   try {
-    const entity = queryResults?.Entity;
-    intialValues.value = entity.intialValues;
-    columnList.value = entity.entityView;
-    //If logged in set edit mode -> need to check permissions if enabled
-    if (auth.isAuthenticated.value === true) {
-      showEditToggle("edit");
-    }
-
-    //TEMP: set page title
-    updatePageInfo(entity.intialValues.title, "entityTitle");
-
-    //Old medafile code
-    clearMediafiles();
-    if (
-      entity &&
-      entity.media?.mediafiles &&
-      entity.media?.mediafiles?.length > 0
-    ) {
-      setEntityMediafiles(entity.media.mediafiles);
-      let mediaFileChanged: boolean = false;
-      entity.media.mediafiles?.forEach((mediafile: any) => {
-        if (mediafile?.__typename === "MediaFile") {
-          if (mediafile._id == mediafileSelectionState.selectedMediafile?._id) {
-            updateSelectedEntityMediafile(mediafile);
-            mediaFileChanged = true;
-          }
-          mediafiles.value.push(mediafile);
-        }
-      });
-      if (!mediaFileChanged && mediafiles.value[0]) {
-        updateSelectedEntityMediafile(mediafiles.value[0]);
+    const entity: BaseEntity | undefined = queryResults?.Entity || undefined;
+    if (entity) {
+      intialValues.value = entity?.intialValues;
+      columnList.value = entity?.entityView;
+      //If logged in set edit mode -> need to check permissions if enabled
+      if (auth.isAuthenticated.value === true) {
+        showEditToggle("edit");
       }
-    } else {
-      updateSelectedEntityMediafile(undefined);
-    }
-    //End old mediafile code
 
-    loading.value = false;
+      //TEMP: set page title
+      updatePageInfo(entity?.intialValues.title, "entityTitle");
+
+      //Old medafile code
+      clearMediafiles();
+      if (
+        entity &&
+        entity.media?.mediafiles &&
+        entity.media?.mediafiles?.length > 0
+      ) {
+        setEntityMediafiles(entity.media.mediafiles);
+        let mediaFileChanged: boolean = false;
+        entity.media.mediafiles?.forEach((mediafile: any) => {
+          if (mediafile?.__typename === "MediaFile") {
+            if (
+              mediafile._id == mediafileSelectionState.selectedMediafile?._id
+            ) {
+              updateSelectedEntityMediafile(mediafile);
+              mediaFileChanged = true;
+            }
+            mediafiles.value.push(mediafile);
+          }
+        });
+        if (!mediaFileChanged && mediafiles.value[0]) {
+          updateSelectedEntityMediafile(mediafiles.value[0]);
+        }
+      } else {
+        updateSelectedEntityMediafile(undefined);
+      }
+      //End old mediafile code
+
+      loading.value = false;
+    }
   } catch (error) {
     console.error("no assets");
   }
