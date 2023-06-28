@@ -52,12 +52,14 @@ import {
 } from "@/generated-types/queries";
 import BaseMap from "./base/BaseMap.vue";
 import { computed } from "vue";
-import { getValueForPanelMetadata } from "@/helpers";
+import { asString, getValueForPanelMetadata } from "@/helpers";
+import { useRoute } from "vue-router";
 
 const props = defineProps<{
   element: MediaFileElement;
 }>();
 
+const entityId = computed(() => asString(useRoute().params["id"]));
 const mapComponentData = computed(() => {
   const returnArray: MetadataAndRelation[] = [];
 
@@ -67,7 +69,11 @@ const mapComponentData = computed(() => {
       const metadataObject = {
         key: metadataItemKey,
         label: (value as PanelMetaData).label,
-        value: getValueForPanelMetadata(PanelType.Metadata, metadataItemKey),
+        value: getValueForPanelMetadata(
+          PanelType.Metadata,
+          metadataItemKey,
+          entityId.value
+        ),
         field: (value as PanelMetaData).inputField,
         unit: (value as PanelMetaData).unit,
       };
