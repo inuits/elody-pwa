@@ -256,7 +256,7 @@ export default defineComponent({
       GetEntitiesDocument,
       queryVariables,
       {
-        enabled: true,
+        enabled: props.enableBulkOperations,
       }
     );
 
