@@ -5,11 +5,11 @@
       class="absolute m-4 p-4 w-2/12 bg-neutral-20 top-0 right-0 rounded-md z-[100]"
     >
       <div
-        :class="`w-full border-b-2 mb-2 font-bold border-${
-          typeColors[notification.type]
+        :class="`w-full border-b-2 mb-2 font-bold ${
+          typeColors[notification.type].border
         }`"
       >
-        <h2 :class="`text-${typeColors[notification.type]}`">
+        <h2 :class="`${typeColors[notification.type].text}`">
           {{ notification.title }}
         </h2>
       </div>
@@ -72,9 +72,12 @@ export default defineComponent({
   setup() {
     const { notification } = useNotification();
     const typeColors = {
-      default: "neutral-700",
-      warning: "yellow-default",
-      error: "red-default",
+      default: { border: "border-neutral-700", text: "text-neutral-700" },
+      warning: {
+        border: "border-yellow-default",
+        text: "text-yellow-default",
+      },
+      error: { border: "border-red-default", text: "text-red-default" },
     };
 
     const secondsToMilliseconds = (seconds: number): number => {
