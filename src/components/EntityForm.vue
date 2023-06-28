@@ -14,28 +14,34 @@ import type {
   UpdateRelationsAndMetadataMutationVariables,
 } from "@/generated-types/queries";
 import { UpdateRelationsAndMetadataDocument } from "@/generated-types/queries";
-import { watch } from "vue";
+import { computed, watch } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { NotificationType, useNotification } from "./base/BaseNotification.vue";
 import { useI18n } from "vue-i18n";
+import { useRoute } from "vue-router";
+import { asString } from "@/helpers";
 
 const props = defineProps<{
   intialValues: Omit<IntialValues, "keyValue">;
-  entityId: string;
 }>();
-
-const emit = defineEmits(["discardEdit"]);
 
 const { addSaveCallback, isEdit } = useEditMode();
 const { addForm } = useFormHelper();
+const { refetchFn } = useEditMode();
+const entityId = computed(() => asString(useRoute().params["id"]));
+console.log(entityId.value);
 const { t } = useI18n();
 
-const form = useForm<Omit<IntialValues, "keyValue">>({
-  initialValues: props.intialValues,
+const form = computed(() => {
+  const values = props.intialValues;
+  return useForm<Omit<IntialValues, "keyValue">>({
+    initialValues: values,
+  });
 });
-addForm(props.entityId, form);
+console.log(entityId.value, "form added");
+addForm(entityId.value, form.value);
 
-const { setValues } = form;
+const { setValues } = form.value;
 
 const { mutate } = useMutation<
   UpdateRelationsAndMetadataMutation,
@@ -78,7 +84,7 @@ const parseIntialValues = (
 
 const submit = useSubmitForm<IntialValues>(async (values) => {
   const resultMutate = await mutate({
-    id: props.entityId,
+    id: entityId.value,
     data: parseIntialValues(values),
   });
   //Find better way to check if Intialvalues is present
@@ -96,7 +102,8 @@ const submit = useSubmitForm<IntialValues>(async (values) => {
 });
 
 document.addEventListener("discardEdit", () => {
-  emit("discardEdit");
+  const refetch = refetchFn.value;
+  if (refetch) refetch();
 });
 
 watch(isEdit, (value) => {
