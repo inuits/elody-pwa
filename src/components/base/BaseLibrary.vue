@@ -70,7 +70,11 @@
                   loading ? undefined : getMediaFilenameFromEntity(entity)
                 "
                 :thumb-icon="loading ? undefined : getThumbnail(entity)"
-                @click="loading ? undefined : goToEntityPage(entity)"
+                @click="
+                  loading || !enableNavigation
+                    ? undefined
+                    : goToEntityPage(entity)
+                "
               >
                 <template #actions>
                   <!-- Use bulkoperations checkboxes to apply this logic again -->
@@ -83,10 +87,16 @@
               <GridItem
                 v-for="entity in entities"
                 :key="entity?.id"
+                :itemid="entity?.id"
+                :bulk-operations-context="bulkOperationsContext"
                 :meta="entity?.teaserMetadata"
                 :media="getMediaFilenameFromEntity(entity)"
                 :thumb-icon="getThumbnail(entity)"
-                @click="goToEntityPage(entity)"
+                @click="
+                  loading || !enableNavigation
+                    ? undefined
+                    : goToEntityPage(entity)
+                "
               >
                 <template #actions>
                   <!-- Use bulkoperations checkboxes to apply this logic again -->
@@ -178,6 +188,11 @@ export default defineComponent({
       required: false,
     },
     enableAdvancedFilters: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    enableNavigation: {
       type: Boolean,
       required: false,
       default: true,
