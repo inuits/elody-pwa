@@ -43,7 +43,6 @@ import type {
   MediaFileElement,
   EntityListElement,
   Entity,
-  MetadataAndRelation,
 } from "@/generated-types/queries";
 
 export type Elements = WindowElement | MediaFileElement | EntityListElement;
