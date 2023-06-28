@@ -29,7 +29,6 @@ const { addSaveCallback, isEdit } = useEditMode();
 const { addForm } = useFormHelper();
 const { refetchFn } = useEditMode();
 const entityId = computed(() => asString(useRoute().params["id"]));
-console.log(entityId.value);
 const { t } = useI18n();
 
 const form = computed(() => {
@@ -38,7 +37,6 @@ const form = computed(() => {
     initialValues: values,
   });
 });
-console.log(entityId.value, "form added");
 addForm(entityId.value, form.value);
 
 const { setValues } = form.value;
