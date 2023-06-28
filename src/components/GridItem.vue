@@ -34,17 +34,13 @@
         <div
           class="w-full mt-12 p-4 flex border-t-2 border-neutral-20 bg-neutral-white"
         >
-          <div
-            class="bg-opacity-50 flex items-center justify-center"
-            :class="{
-              'bg-neutral-check bg-opacity-30 rounded': isChecked,
-            }"
-          >
-            <input
-              type="checkbox"
-              class="form-checkbox h-5 w-5 rounded-sm border-gray-300 checked:bg-neutral-check checked:bg-opacity-30 checked:border-blue-200"
-              :checked="isChecked"
-              @change="handleCheckboxChange"
+          <div>
+            <BaseInputCheckbox
+              class="text-center"
+              v-model="isChecked"
+              :item="{ id: itemId, teaserMetadata: meta }"
+              :bulk-operations-context="bulkOperationsContext"
+              input-style="accentNormal"
             />
           </div>
           <div class="w-full">
@@ -85,10 +81,14 @@ import type { Maybe, MetadataAndRelation } from "../generated-types/queries";
 import { computed, defineComponent, inject, ref } from "vue";
 import type { PropType } from "vue";
 import { customSort, stringIsUrl } from "../helpers";
+import type { Context } from "@/composables/useBulkOperations";
+import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 
 export default defineComponent({
   name: "GridItem",
   props: {
+    itemId: { type: String, required: false },
+    bulkOperationsContext: { type: String as PropType<Context> },
     loading: { type: Boolean, default: false },
     meta: {
       type: Array as PropType<Maybe<Maybe<MetadataAndRelation>[]>>,
@@ -99,11 +99,11 @@ export default defineComponent({
     small: { type: Boolean, default: false },
     isChecked: { type: Boolean, default: false },
   },
-
+  components: { BaseInputCheckbox },
   setup(props, { emit }) {
     const config: any = inject("config");
     let imageSrcError = false;
-    const isChecked = ref(props.isChecked);
+    const isChecked = ref(false);
     const setNoImage = () => {
       imageSrcError = true;
     };
@@ -143,6 +143,7 @@ export default defineComponent({
       mediaIsLink,
       gridItemInfoKeys,
       handleCheckboxChange,
+      isChecked,
     };
   },
 });
