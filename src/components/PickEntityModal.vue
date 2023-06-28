@@ -14,6 +14,7 @@
         :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
         :list-item-route-name="'SingleEntity'"
         :enable-bulk-operations="false"
+        :enable-navigation="false"
         :bulk-operations-context="route.name as Context"
       />
     </div>

@@ -56,7 +56,7 @@ const props = withDefaults(
 const id = asString(useRoute().params["id"]);
 const loading = ref<boolean>(true);
 const auth = useAuth();
-const { showEditToggle, disableEditMode, isEdit } = useEditMode();
+const { showEditToggle, disableEditMode, isEdit, setRefetchFn } = useEditMode();
 const { updatePageInfo } = usePageInfo();
 const router = useRouter();
 
@@ -105,6 +105,8 @@ const resetEntityData = () => {
 };
 
 watch(result, (queryResults) => {
+  console.log("Here againn");
+  setRefetchFn(refetch);
   resetEntityData();
   try {
     const entity = queryResults?.Entity;
