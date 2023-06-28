@@ -27,10 +27,10 @@ export type callback = (e?: Event | undefined) => Promise<unknown>;
 const editMode = ref<EditModes>("view");
 const saveCallbacks = ref<callback[]>([]);
 const isEditToggleVisible = ref<"no-edit" | "edit" | "edit-delete">("no-edit");
+const refetchFn = ref<Function>();
 
 export const useEditMode = () => {
   const { createNotification } = useNotification();
-  const router = useRouter();
   const { linkMediaFilesToEntity, clearMediaFilesToLinkToEntity } =
     useMediaAssetLinkHelper();
   const {
@@ -42,6 +42,7 @@ export const useEditMode = () => {
   const setEditMode = () => (editMode.value = "edit");
   const disableEditMode = () => (editMode.value = "view");
   const isEdit = computed<boolean>(() => editMode.value === "edit");
+  const setRefetchFn = (refetch: Function) => (refetchFn.value = refetch);
 
   const addSaveCallback = (input: callback, order?: string) => {
     if (order === "first") {
@@ -100,6 +101,8 @@ export const useEditMode = () => {
         }
       });
     }
+    const refetch = refetchFn.value;
+    if (refetch) refetch();
   };
 
   const discard = () => {
@@ -125,6 +128,8 @@ export const useEditMode = () => {
     showEditToggle,
     hideEditToggle,
     isEditToggleVisible,
+    setRefetchFn,
+    refetchFn,
   };
 };
 
