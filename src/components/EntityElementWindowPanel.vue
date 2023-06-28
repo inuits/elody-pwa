@@ -89,11 +89,9 @@ const toggleIsCollapsed = () => {
 };
 
 const metadataArray = computed((): MetadataField[] => {
-  console.log("getting metadata");
   const returnArray: MetadataField[] = [];
   Object.values(props.panel).forEach((value) => {
     if (value && typeof value === "object") {
-      console.log(value);
       const metadataItemKey: string = (value as PanelMetaData).key;
       const metadataObject = {
         key: metadataItemKey,
