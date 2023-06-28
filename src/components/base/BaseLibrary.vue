@@ -10,7 +10,7 @@
           @apply-filters="setFilters"
           @expand-filters="expandFilters = !expandFilters"
         />
-        <div class="flex mx-4">
+        <div :class="['flex', { 'ml-4': enableAdvancedFilters }]">
           <IconToggle
             v-model:checked="displayGrid"
             :icon-on="Unicons.Apps.name"
@@ -19,6 +19,7 @@
           />
         </div>
         <LibraryBar
+          v-if="!predefinedEntities"
           :total-items="totalEntityCount"
           v-model:limit="queryVariables.limit"
           v-model:skip="queryVariables.skip"
