@@ -52,14 +52,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { computed } from "vue";
 import { type Entity } from "@/generated-types/queries";
 import EntityElementWrapper from "./base/EntityElementWrapper.vue";
 import { usePickEntityModal } from "./PickEntityModal.vue";
 import useEditMode from "@/composables/useEdit";
 import { useRoute } from "vue-router";
 import { Unicons } from "@/types";
-import BaseLibrary, { type PredefinedEntities } from "./base/BaseLibrary.vue";
+import BaseLibrary from "./base/BaseLibrary.vue";
 import type { Context } from "@/composables/useBulkOperations";
 import { useI18n } from "vue-i18n";
 
@@ -75,9 +75,8 @@ const props = defineProps<{
 const { isEdit } = useEditMode();
 const { t } = useI18n();
 
-let entitiesObject = ref<PredefinedEntities>({
-  usePredefinedEntities: true,
-  entities: props.entityList || [],
+const entitiesObject = computed(() => {
+  return { usePredefinedEntities: true, entities: props.entityList || [] };
 });
 
 const { openPickEntityModal } = usePickEntityModal();
