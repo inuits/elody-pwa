@@ -71,6 +71,9 @@
     "page": "Page",
     "of": "of"
   },
+  "breadcrumbs": {
+    "noVisitedRoutes" : "There are no visited routes yet..."
+  },
   "navigation": {
     "title": "DAMS",
     "entities": "Entitities",
