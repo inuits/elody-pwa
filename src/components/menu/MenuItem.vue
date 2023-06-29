@@ -5,8 +5,7 @@
       @click="handleClick"
       class="flex flex-row items-center ml-3 h-9 hover:text-accent-accent mt-3 cursor-pointer"
       :class="{
-        'IsActive text-accent-accent rounded-lg':
-          menuitem && selectedMenuItem === menuitem,
+        'IsActive text-accent-accent rounded-lg': isActiveItem(menuitem),
       }"
     >
       <unicon
@@ -18,11 +17,7 @@
         v-else
         :icon="icon"
         :size="24"
-        :color="
-          menuitem && selectedMenuItem === menuitem
-            ? 'accent-normal'
-            : 'text-body'
-        "
+        :color="isActiveItem(menuitem) ? 'accent-normal' : 'text-body'"
       />
       <span class="nav-item-label w-0 h-0 overflow-hidden px-4 font-bold">
         {{ menuitem?.label }}
@@ -89,6 +84,8 @@ const handleClick = () => {
   checkIfRouteOrModal(props.menuitem);
   toggleDropDown();
 };
+
+const isActiveItem = (menuItem: MenuItem) => menuItem === selectedMenuItem;
 
 const handleSubMenu = () => {
   const submenu = props.menuitem.subMenu;
