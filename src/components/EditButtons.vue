@@ -106,7 +106,6 @@ export default defineComponent({
       toggleBoolean,
       showConfirmation,
       isEditToggleVisible,
-      pageInfo,
     };
   },
 });
