@@ -10,7 +10,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import type { ColumnList, Column } from "@/generated-types/queries";
 import EntityElement from "./EntityElement.vue";
 import { convertSizeToTailwind } from "@/helpers";
@@ -36,7 +36,11 @@ const columns = computed<Column[]>(() => {
   return returnArray;
 });
 
-if (columns.value) {
-  setInitialColumns(columns.value);
-}
+watch(
+  () => columns.value,
+  () => {
+    if (columns.value) setInitialColumns(columns.value);
+  },
+  { immediate: true }
+);
 </script>
