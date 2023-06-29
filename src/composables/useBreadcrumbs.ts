@@ -26,7 +26,6 @@ export const useBreadcrumbs = () => {
 
   useRouter().afterEach((to) => {
     currentRouteTitle.value = to.meta.title as string;
-    console.log(to);
     if (to.name === "Home") resetVisitedRoutes();
   });
 
