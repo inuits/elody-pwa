@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { computed } from "vue";
 
 const props = defineProps<{
   icon: string;
@@ -11,7 +11,7 @@ const props = defineProps<{
   color: string;
 }>();
 
-const color = ref<string>("fill-" + props.color);
+const color = computed(() => "fill-" + props.color);
 
 const icons: Record<string, string> = {
   Iot: `<svg width="${props.size}" height="${props.size}" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
