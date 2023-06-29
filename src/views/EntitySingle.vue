@@ -40,7 +40,7 @@ import useEditMode from "@/composables/useEdit";
 import useMetaDataHelper from "@/composables/useMetaDataHelper";
 import { useEntityMediafileSelector } from "@/components/EntityImageSelection.vue";
 import EntityForm from "@/components/EntityForm.vue";
-import { usePageInfo } from "@/composables/usePageInfo";
+import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 
 const props = withDefaults(
   defineProps<{
@@ -55,7 +55,8 @@ const id = asString(useRoute().params["id"]);
 const loading = ref<boolean>(true);
 const auth = useAuth();
 const { showEditToggle, disableEditMode, isEdit, setRefetchFn } = useEditMode();
-const { updatePageInfo } = usePageInfo();
+const { setCurrentRouteTitle, addVisitedRoute, currentRouteTitle } =
+  useBreadcrumbs();
 const router = useRouter();
 
 //Old mediafile dependencies
@@ -101,8 +102,8 @@ watch(result, (queryResults) => {
         showEditToggle("edit");
       }
 
-      //TEMP: set page title
-      updatePageInfo(entity?.intialValues.title, "entityTitle");
+      setCurrentRouteTitle(entity?.intialValues?.title);
+      addVisitedRoute({ id, routeName: currentRouteTitle.value });
 
       //Old medafile code
       clearMediafiles();

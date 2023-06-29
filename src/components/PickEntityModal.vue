@@ -124,6 +124,7 @@ export default defineComponent({
       const id = route.params.id as string;
       const form: FormContext = getForm(id);
       const fieldKey = pickEntityModalState.value.metaKey;
+      console.log(form.values);
       if (form && selectedEntities && fieldKey) {
         const currentValue = form.values[fieldKey];
         const newValue = addItemToList(

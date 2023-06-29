@@ -6,7 +6,7 @@
       class="flex flex-row items-center ml-3 h-9 hover:text-accent-accent mt-3 cursor-pointer"
       :class="{
         'IsActive text-accent-accent rounded-lg':
-          menuitem && isMenuItemActive(menuitem),
+          menuitem && selectedMenuItem === menuitem,
       }"
     >
       <unicon
@@ -19,7 +19,9 @@
         :icon="icon"
         :size="24"
         :color="
-          menuitem && isMenuItemActive(menuitem) ? 'accent-normal' : 'text-body'
+          menuitem && selectedMenuItem === menuitem
+            ? 'accent-normal'
+            : 'text-body'
         "
       />
       <span class="nav-item-label w-0 h-0 overflow-hidden px-4 font-bold">
@@ -68,9 +70,9 @@ const {
   checkIfRouteOrModal,
   showdropdown,
   toggleDropDown,
-  isMenuItemActive,
-  selectedMenuItem,
   resetSelectedMenuItem,
+  setSelectedMenuItem,
+  selectedMenuItem,
 } = useMenuHelper();
 
 const auth = useAuth();
@@ -83,13 +85,9 @@ const props = defineProps<{
 }>();
 
 const handleClick = () => {
+  setSelectedMenuItem(props.menuitem);
   checkIfRouteOrModal(props.menuitem);
   toggleDropDown();
-  if (props.menuitem) {
-    const menu = props.menuitem;
-    selectedMenuItem.value =
-      menu.typeLink.route?.destination || menu.typeLink.modal?.typeModal;
-  }
 };
 
 const handleSubMenu = () => {
