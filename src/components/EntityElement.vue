@@ -28,6 +28,10 @@
         v-if="element.__typename === 'WindowElement'"
         :element="element"
       />
+      <entity-element-action
+        v-if="element.__typename === 'ActionElement'"
+        :element="element"
+      />
     </div>
   </div>
 </template>
@@ -36,16 +40,22 @@ import { computed } from "vue";
 import EntityElementList from "./EntityElementList.vue";
 import EntityElementMedia from "./EntityElementMedia.vue";
 import EntityElementWindow from "./EntityElementWindow.vue";
+import EntityElementAction from "./EntityElementAction.vue";
 
 import type {
   EntityViewElements,
   WindowElement,
+  ActionElement,
   MediaFileElement,
   EntityListElement,
   Entity,
 } from "@/generated-types/queries";
 
-export type Elements = WindowElement | MediaFileElement | EntityListElement;
+export type Elements =
+  | WindowElement
+  | MediaFileElement
+  | EntityListElement
+  | ActionElement;
 
 const props = defineProps<{
   elements: EntityViewElements;
