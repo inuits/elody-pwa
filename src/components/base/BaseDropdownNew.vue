@@ -63,7 +63,7 @@
         @click="selectOption(option)"
       >
         <unicon
-          v-if="option.icon !== 'NoIcon'"
+          v-if="option.icon && option.icon !== 'NoIcon'"
           :name="Unicons[option.icon].name"
           class="h-5 mr-2 -ml-0.5"
         />
