@@ -43,22 +43,21 @@
 <script lang="ts" setup>
 import { useAuth } from "session-vue-3-oidc-library";
 import { Unicons } from "@/types";
-import { inject } from "vue";
-const config: any = inject("config");
+import { useRoute } from "vue-router";
+const route = useRoute();
 
 const auth = useAuth();
 
-const performLogout = (e: any) => {
-  e.preventDefault();
-  window.location.href = `${
-    config.oidc.baseUrl + config.oidc.logoutEndpoint
-  }?redirect_uri=${window.location.origin + window.location.pathname}`;
-  // auth.logout();
-  // setTimeout(() => {
-  //   if (route.meta.requiresAuth === true) {
-  //     auth.redirectToLogin();
-  //   }
-  // }, 100);
+const performLogout = () => {
+  // window.location.href = `${
+  //   config.oidc.baseUrl + config.oidc.logoutEndpoint
+  // }?redirect_uri=${window.location.origin + window.location.pathname}`;
+  auth.logout();
+  setTimeout(() => {
+    if (route.meta.requiresAuth === true) {
+      auth.redirectToLogin();
+    }
+  }, 100);
 };
 </script>
 
