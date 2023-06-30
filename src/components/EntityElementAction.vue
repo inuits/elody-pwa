@@ -78,21 +78,24 @@ const actions = computed<Actions[]>(() => {
   return returnArray;
 });
 
-async function performAction(type: any) {
-  switch (type) {
-    case Actions.Ocr:
-      getModal(TypeModals.Ocr).openModal();
-      break;
-    case Actions.Download:
-      console.log("downloading now...");
-      console.log("entityID found", entityID);
+async function performAction(type: Actions) {
+  const actions = {
+    ocr: () => getModal(TypeModals.Ocr).openModal()
+    download: () => {
       for (const mf of mediafiles.value) {
         const mediafileID = mf._id;
         console.log("Mediafile found", mediafileID);
       }
-      break;
-    default:
-      break;
+    }
+
+    const action = actions[type]
+
+    if (!action) {
+      console.log('This action does not exist')
+      return
+    }
+
+    action()
   }
 }
 </script>
