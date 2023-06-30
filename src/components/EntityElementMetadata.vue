@@ -12,7 +12,7 @@ import { computed } from "vue";
 
 const props = defineProps<{
   label?: string;
-  value?: string;
+  value?: any;
   unit?: string;
 }>();
 
