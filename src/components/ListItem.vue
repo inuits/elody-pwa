@@ -68,8 +68,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { MetadataAndRelation } from "../generated-types/queries";
 import type { Context } from "@/composables/useBulkOperations";
+import type { MetadataAndRelation } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import { computed, ref } from "vue";
 import { stringIsUrl } from "@/helpers";
@@ -97,8 +97,8 @@ const props = withDefaults(
   }
 );
 
-const isChecked = ref(false);
-const imageSrcError = ref(false);
+const isChecked = ref<boolean>(false);
+const imageSrcError = ref<boolean>(false);
 
 function setNoImage() {
   imageSrcError.value = true;
