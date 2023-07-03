@@ -74,11 +74,22 @@
       v-if="useExtendedBulkOperations && itemsSelected"
       class="flex justify-end w-60"
     >
-      <BaseDropdownNew
-        v-model="selectedBulkOperation"
-        :options="bulkOperations"
-        dropdown-style="accentAccent"
-      />
+      <div v-if="confirmSelectionButton" class="w-full !m-0">
+        <BaseButtonNew
+          :label="$t('bulk-operations.confirm-selection')"
+          :icon="DamsIcons.Check"
+          button-style="accentAccent"
+          button-size="small"
+          @click="emit('confirmSelection', getEnqueuedItems(context))"
+        />
+      </div>
+      <div v-else class="w-full !m-0">
+        <BaseDropdownNew
+          v-model="selectedBulkOperation"
+          :options="bulkOperations"
+          dropdown-style="accentAccent"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -88,15 +99,20 @@ import {
   type DropdownOption,
   type GetBulkOperationsQuery,
   ModalState,
+  DamsIcons,
 } from "@/generated-types/queries";
-import type { Context } from "@/composables/useBulkOperations";
-import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
-import { bulkSelectAllSizeLimit } from "@/main";
 import {
   GetBulkOperationsDocument,
   BulkOperationTypes,
   TypeModals,
 } from "@/generated-types/queries";
+import type {
+  Context,
+  InBulkProcessableItem,
+} from "@/composables/useBulkOperations";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
+import { bulkSelectAllSizeLimit } from "@/main";
 import { computed, onMounted, ref, watch } from "vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useBulkOperations } from "@/composables/useBulkOperations";
@@ -107,15 +123,18 @@ const props = withDefaults(
     context: Context;
     totalItemsCount: number;
     useExtendedBulkOperations: boolean;
+    confirmSelectionButton?: boolean;
   }>(),
   {
     totalItemsCount: 0,
+    confirmSelectionButton: false,
   }
 );
 
 const emit = defineEmits<{
   (event: "selectPage"): void;
   (event: "selectAll"): void;
+  (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
 }>();
 
 const refetchEnabled = ref<boolean>(false);
@@ -126,8 +145,11 @@ const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
 );
 const bulkOperations = ref<DropdownOption[]>([]);
 const selectedBulkOperation = ref<DropdownOption>();
-const { getEnqueuedItemCount, dequeueAllItemsForBulkProcessing } =
-  useBulkOperations();
+const {
+  getEnqueuedItemCount,
+  getEnqueuedItems,
+  dequeueAllItemsForBulkProcessing,
+} = useBulkOperations();
 const { getModal } = useAvailableModals();
 
 onResult((result) => {

@@ -1,55 +1,55 @@
 <template>
   <BaseModal
     :modal-state="pickEntityModalState.state"
-    modal-position="left"
-    modal-width-style="w-8/12"
+    modal-position="right"
+    modal-width-style="w-10/12"
     @hide-modal="closePickEntityModal"
   >
     <div
       v-if="pickEntityModalState.state === ModalState.Show"
-      class="bg-neutral-20 w-full h-[92%] flex flex-col overflow-auto py-2"
+      class="flex flex-col w-full h-full overflow-auto py-6"
     >
       <BaseLibrary
-        :filterType="(pickEntityModalState?.acceptedEntityTypes[0] as string)"
-        :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
-        :list-item-route-name="'SingleEntity'"
-        :enable-bulk-operations="false"
-        :enable-navigation="false"
         :bulk-operations-context="route.name as Context"
+        :search-input-type-on-drawer="
+          pickEntityModalState.acceptedEntityTypes.length > 0
+            ? pickEntityModalState.acceptedEntityTypes[0] !== 'mediafile'
+              ? SearchInputType.AdvancedInputType
+              : SearchInputType.AdvancedInputMediaFilesType
+            : SearchInputType.AdvancedInputType
+        "
+        :filter-type="pickEntityModalState.acceptedEntityTypes.length > 0 ? (pickEntityModalState.acceptedEntityTypes[0] as string) : undefined"
+        :confirm-selection-button="true"
+        :enable-navigation="false"
+        list-item-route-name="SingleEntity"
+        @confirm-selection="(selectedItems) => addItems(selectedItems)"
       />
-    </div>
-    <div class="w-full flex justify-end items-center p-6">
-      <div
-        :class="['rounded-md bg-accent-normal text-text-subtitle h-10 w-16 flex justify-center items-center cursor-pointer', {'opacity-30': !getEnqueuedItems(route.name as Context).length}]"
-        @click="addItems()"
-      >
-        Add
-      </div>
     </div>
   </BaseModal>
 </template>
 
 <script lang="ts">
-import BaseModal from "./base/BaseModal.vue";
-import { ModalState } from "@/generated-types/queries";
-import { defineComponent, ref } from "vue";
-import BaseLibrary from "@/components/base/BaseLibrary.vue";
-import type { Entity, Maybe, Entitytyping } from "@/generated-types/queries";
-import { SearchInputType } from "@/generated-types/queries";
-import { useRoute } from "vue-router";
 import {
   type Context,
   useBulkOperations,
+  type InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
-import { useRouter } from "vue-router";
-import { useFormHelper } from "@/composables/useFormHelper";
+import type { Entity } from "@/generated-types/queries";
 import type { FormContext } from "vee-validate";
+import BaseLibrary from "@/components/base/BaseLibrary.vue";
+import BaseModal from "./base/BaseModal.vue";
+import { defineComponent, ref } from "vue";
+import { Entitytyping, ModalState } from "@/generated-types/queries";
+import { SearchInputType } from "@/generated-types/queries";
+import { useFormHelper } from "@/composables/useFormHelper";
+import { useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 
 export type PickEntityModalType = {
   state: ModalState;
   metaKey?: string | undefined;
   pickedEntities: Entity[];
-  acceptedEntityTypes?: Maybe<string>[];
+  acceptedEntityTypes: string[];
 };
 
 const pickEntityModalState = ref<PickEntityModalType>({
@@ -60,6 +60,9 @@ const pickEntityModalState = ref<PickEntityModalType>({
 });
 
 export const usePickEntityModal = () => {
+  const route = useRoute();
+  const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
+
   const updatePickEntityModal = (uploadModalInput: PickEntityModalType) => {
     pickEntityModalState.value = uploadModalInput;
   };
@@ -68,12 +71,14 @@ export const usePickEntityModal = () => {
     updatePickEntityModal({
       state: ModalState.Hide,
       pickedEntities: [],
+      acceptedEntityTypes: [],
       metaKey: undefined,
     });
+    dequeueAllItemsForBulkProcessing(route.name as Context);
   };
 
   const openPickEntityModal = (
-    acceptedEntityTypes: Maybe<Entitytyping>[],
+    acceptedEntityTypes: Entitytyping[],
     metaKey: string | undefined = undefined
   ) => {
     updatePickEntityModal({
@@ -119,17 +124,15 @@ export default defineComponent({
       return returnList;
     };
 
-    const addItems = () => {
-      const selectedEntities = getEnqueuedItems(route.name as Context);
+    const addItems = (selectedItems: InBulkProcessableItem[]) => {
       const id = route.params.id as string;
       const form: FormContext = getForm(id);
       const fieldKey = pickEntityModalState.value.metaKey;
-      console.log(form.values);
-      if (form && selectedEntities && fieldKey) {
+      if (form && selectedItems && fieldKey) {
         const currentValue = form.values[fieldKey];
         const newValue = addItemToList(
           currentValue,
-          selectedEntities.map((e) => e.id)
+          selectedItems.map((i) => i.id)
         );
         form.setFieldValue(fieldKey, newValue);
         closePickEntityModal();

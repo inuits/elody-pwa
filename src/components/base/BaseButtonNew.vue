@@ -2,15 +2,15 @@
   <button
     type="button"
     :disabled="disabled"
-    class="flex justify-center items-center w-full rounded outline-none transition-colors duration-300 disabled:cursor-auto"
+    class="flex justify-center items-center w-full text-base rounded-md outline-none transition-colors duration-300 disabled:cursor-auto"
     :class="[
       label ? `pl-1.5` : ``,
       `${selectedButtonStyle.textColor} ${selectedButtonStyle.bgColor}`,
       `${selectedButtonStyle.hoverStyle.textColor} ${selectedButtonStyle.hoverStyle.bgColor}`,
       `${selectedButtonStyle.activeStyle.textColor} ${selectedButtonStyle.activeStyle.bgColor}`,
       `${selectedButtonStyle.disabledStyle.textColor} ${selectedButtonStyle.disabledStyle.bgColor}`,
-      { 'text-base p-3': buttonSize === 'normal' },
-      { 'text-sm p-1.5': buttonSize === 'small' },
+      { 'p-3': buttonSize === 'normal' },
+      { 'p-1.5': buttonSize === 'small' },
     ]"
   >
     <unicon
