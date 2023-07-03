@@ -93,11 +93,17 @@
               <GridItem
                 v-for="entity in entities"
                 :key="entity.id"
-                :itemid="entity?.id"
+                :item-id="entity.id"
                 :bulk-operations-context="bulkOperationsContext"
-                :meta="entity.teaserMetadata"
-                :media="getMediaFilenameFromEntity(entity)"
-                :thumb-icon="getThumbnail(entity)"
+                :teaser-metadata="
+                  entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
+                "
+                :media="
+                  loading ? undefined : getMediaFilenameFromEntity(entity)
+                "
+                :thumb-icon="loading ? undefined : getThumbnail(entity)"
+                :small="listItemRouteName === 'SingleMediafile'"
+                :loading="loading"
                 @click="
                   loading || !enableNavigation
                     ? undefined

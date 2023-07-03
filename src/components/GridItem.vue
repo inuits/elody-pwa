@@ -1,10 +1,10 @@
 <template>
-  <li class="w-full h-auto bg-grey-200 rounded-md align-middle">
-    <div class="absolute right-0 top-0 w-min h-min" data-test="action-slot">
+  <li class="w-full h-auto align-middle rounded-md">
+    <div class="absolute top-0 right-0 w-min h-min">
       <slot name="actions"></slot>
     </div>
     <div
-      class="flex items-center flex-col w-full"
+      class="flex items-center w-full"
       :class="{ 'flex-col': small && !thumbIcon }"
     >
       <div class="w-full">
@@ -31,40 +31,35 @@
             <div class="text-neutral-70">No media</div>
           </div>
         </div>
+
         <div
-          class="w-full mt-12 p-4 flex border-t-2 border-neutral-20 bg-neutral-white"
+          class="flex items-center w-full mt-12 p-4 pb-3 border-t-2 border-neutral-20 bg-neutral-white"
         >
           <div>
             <BaseInputCheckbox
               class="text-center"
               v-model="isChecked"
-              :item="{ id: itemId, teaserMetadata: meta }"
+              :item="{ id: itemId, teaserMetadata }"
               :bulk-operations-context="bulkOperationsContext"
               input-style="accentNormal"
             />
           </div>
           <div class="w-full">
             <div
-              v-for="metaItem in only4Meta(meta as MetadataAndRelation[])"
-              :key="metaItem ? metaItem.value : 'no-key'"
-              class="w-full"
+              v-for="metadataItem in teaserMetadata"
+              :key="metadataItem ? metadataItem.value : 'no-key'"
             >
-              <template v-if="gridItemInfoKeys.includes(metaItem.key)">
-                <div class="flex items-center w-full pl-5">
+              <template v-if="metadataItem">
+                <div class="flex items-center pl-4 mb-1">
                   <div class="flex flex-col items-start w-full">
+                    <span class="text-sm text-text-light">
+                      {{ metadataItem.key }}
+                    </span>
                     <span
-                      class="text-neutral-70 w-full metaType handleOverflow"
-                      data-test="meta-label"
-                      >{{ metaItem.key }}</span
+                      class="text-sm text-text-body w-[95%] overflow-hidden text-ellipsis"
                     >
-                    <span
-                      class="text-black w-full metaType handleOverflow"
-                      :class="{
-                        metaTitle: metaItem.key === 'title' || hasFileName,
-                      }"
-                      data-test="meta-info"
-                      >{{ metaItem.value }}</span
-                    >
+                      {{ metadataItem.value }}
+                    </span>
                   </div>
                 </div>
               </template>
@@ -76,102 +71,41 @@
   </li>
 </template>
 
-<script lang="ts">
-import type { Maybe, MetadataAndRelation } from "../generated-types/queries";
-import { computed, defineComponent, inject, ref } from "vue";
-import type { PropType } from "vue";
-import { customSort, stringIsUrl } from "../helpers";
+<script lang="ts" setup>
 import type { Context } from "@/composables/useBulkOperations";
+import type { MetadataAndRelation } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
+import { computed, ref } from "vue";
+import { stringIsUrl } from "@/helpers";
 
-export default defineComponent({
-  name: "GridItem",
-  props: {
-    itemId: { type: String, required: false },
-    bulkOperationsContext: { type: String as PropType<Context> },
-    loading: { type: Boolean, default: false },
-    meta: {
-      type: Array as PropType<Maybe<Maybe<MetadataAndRelation>[]>>,
-      default: () => [],
-    },
-    media: { type: String, default: "" },
-    thumbIcon: { type: String, default: "" },
-    small: { type: Boolean, default: false },
-    isChecked: { type: Boolean, default: false },
-  },
-  components: { BaseInputCheckbox },
-  setup(props, { emit }) {
-    const config: any = inject("config");
-    let imageSrcError = false;
-    const isChecked = ref(false);
-    const setNoImage = () => {
-      imageSrcError = true;
-    };
-    const gridItemInfoKeys: string[] = [
-      "id",
-      "title",
-      "name",
-      "type",
-      "filename",
-    ];
-    const hasFileName = ref<boolean>(false);
+const props = withDefaults(
+  defineProps<{
+    itemId?: string;
+    bulkOperationsContext: Context;
+    loading?: boolean;
+    teaserMetadata?: MetadataAndRelation[];
+    media?: string;
+    thumbIcon?: string;
+    small?: boolean;
+    isChecked?: boolean;
+  }>(),
+  {
+    itemId: "",
+    loading: false,
+    teaserMetadata: () => [],
+    media: "",
+    thumbIcon: "",
+    small: false,
+    isChecked: false,
+  }
+);
 
-    const mediaIsLink = computed<Boolean>(() => stringIsUrl(props.media || ""));
+const isChecked = ref<boolean>(false);
+const imageSrcError = ref<boolean>(false);
 
-    function handleCheckboxChange(event) {
-      event.preventDefault();
-      isChecked.value = !isChecked.value;
-      emit("update:checked", isChecked.value);
-    }
+function setNoImage() {
+  imageSrcError.value = true;
+}
 
-    const only4Meta = (input: MetadataAndRelation[]) => {
-      const sortOrder: string[] = ["object_number", "type", "title"];
-
-      return customSort(
-        sortOrder,
-        input?.filter((value) => value?.value !== ""),
-        "key"
-      );
-    };
-
-    return {
-      setNoImage,
-      imageSrcError,
-      only4Meta,
-      config,
-      hasFileName,
-      mediaIsLink,
-      gridItemInfoKeys,
-      handleCheckboxChange,
-      isChecked,
-    };
-  },
-});
+const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 </script>
-
-<style lang="postcss" scoped>
-.row {
-  @apply flex justify-between py-4;
-  @apply bg-neutral-0 hover:bg-neutral-10;
-  @apply border border-neutral-50 rounded cursor-pointer;
-  @apply transition-colors duration-300 hover:shadow-sm;
-}
-.label {
-  @apply rounded text-xs text-neutral-60;
-}
-.row.loading {
-  @apply animate-pulse;
-}
-
-.metaTitle {
-  @apply font-bold;
-}
-
-.handleOverflow {
-  width: 95%;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-  display: inline-block;
-}
-</style>
