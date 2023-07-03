@@ -1,5 +1,10 @@
 <template>
-  <li class="w-full h-auto align-middle rounded-md">
+  <li
+    :class="[
+      'w-full h-auto align-middle border border-neutral-light rounded cursor-pointer',
+      { 'animate-pulse': loading },
+    ]"
+  >
     <div class="absolute top-0 right-0 w-min h-min">
       <slot name="actions"></slot>
     </div>
@@ -33,7 +38,7 @@
         </div>
 
         <div
-          class="flex items-center w-full mt-12 p-4 pb-3 border-t-2 border-neutral-20 bg-neutral-white"
+          class="flex items-center w-full mt-12 p-4 pb-3 border-t-2 border-neutral-20 rounded-b bg-neutral-white"
         >
           <div>
             <BaseInputCheckbox
