@@ -7,10 +7,13 @@
     <template v-slot:actions>
       <div
         v-if="isEdit"
-        class="flex items-center text-accent-normal cursor-pointer"
+        class="flex items-center text-text-subtitle cursor-pointer"
       >
         <unicon height="16" :name="Unicons.PlusCircle.name" />
-        <p class="underline" @click="openPickEntityModal([])">
+        <p
+          class="underline"
+          @click="openPickEntityModal([Entitytyping.Mediafile], 'relatie')"
+        >
           Voeg bestand toe
         </p>
       </div>
@@ -37,22 +40,24 @@
     </template>
   </entity-element-wrapper>
 </template>
+
 <script lang="ts" setup>
+import {
+  Entitytyping,
+  MediaFileElementTypes,
+  PanelType,
+  type MediaFileElement,
+  type MetadataAndRelation,
+  type PanelMetaData,
+} from "@/generated-types/queries";
+import BaseMap from "./base/BaseMap.vue";
 import EntityElementWrapper from "./base/EntityElementWrapper.vue";
 import MediaViewer from "./base/Mediaviewer.vue";
 import useEditMode from "@/composables/useEdit";
+import { asString, getValueForPanelMetadata } from "@/helpers";
+import { computed } from "vue";
 import { Unicons } from "@/types";
 import { usePickEntityModal } from "./PickEntityModal.vue";
-import {
-  type MediaFileElement,
-  MediaFileElementTypes,
-  type PanelMetaData,
-  PanelType,
-  type MetadataAndRelation,
-} from "@/generated-types/queries";
-import BaseMap from "./base/BaseMap.vue";
-import { computed } from "vue";
-import { asString, getValueForPanelMetadata } from "@/helpers";
 import { useRoute } from "vue-router";
 
 const props = defineProps<{

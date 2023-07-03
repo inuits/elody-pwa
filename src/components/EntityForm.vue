@@ -52,18 +52,29 @@ const parseIntialValues = (
   const metadata: MetadataValuesInput[] = [];
 
   Object.values(values).forEach((value, index) => {
-    if (Object.keys(values)[index] == "relations" && Array.isArray(value)) {
+    if (Object.keys(values)[index] == "relatie" && Array.isArray(value)) {
       value.forEach((relationValue) => {
-        relationValue &&
+        // temporary fix for digipolis mediafiles (sorry, i know it's ugly)
+        if (typeof relationValue === "string") {
           relations.push({
-            label: Object.keys(values)[index],
-            id: relationValue.id,
-            relationType: relationValue.relationType,
-            metaData: relationValue.metaData
-              ? parseIntialValues(relationValue.metaData).metadata
-              : [],
-            toBeDeleted: relationValue.toBeDeleted,
+            label: "hasMediafile",
+            id: relationValue,
+            relationType: "hasMediafile",
+            metaData: [],
+            toBeDeleted: false,
           });
+        } else {
+          relationValue &&
+            relations.push({
+              label: Object.keys(values)[index],
+              id: relationValue.id,
+              relationType: relationValue.relationType,
+              metaData: relationValue.metaData
+                ? parseIntialValues(relationValue.metaData).metadata
+                : [],
+              toBeDeleted: relationValue.toBeDeleted,
+            });
+        }
       });
     } else if (typeof value === "string" || typeof value === "object") {
       metadata.push({

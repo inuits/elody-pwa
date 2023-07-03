@@ -158,6 +158,7 @@
     "save": "opslaan",
     "cancel": "annuleren",
     "delete": "verwijderen",
+    "confirm-selection": "bevestig selectie",
     "csv-export": {
       "error": {
         "title": "Export failed"

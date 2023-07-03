@@ -4,8 +4,8 @@
       <div class="flex flex-row gap-y-4">
         <FiltersBase
           v-if="enableAdvancedFilters"
-          :expandFilters="expandFilters"
           class="lg:w-[46%]"
+          :expandFilters="expandFilters"
           :entity-type="filterType || route.meta.entityType as string"
           @apply-filters="setFilters"
           @expand-filters="expandFilters = !expandFilters"
@@ -42,8 +42,12 @@
           :context="bulkOperationsContext"
           :total-items-count="totalEntityCount"
           :use-extended-bulk-operations="true"
+          :confirm-selection-button="confirmSelectionButton"
           @select-page="bulkSelect"
           @select-all="bulkSelect(allEntitiesResult.Entities.results)"
+          @confirm-selection="
+            (selection) => emit('confirmSelection', selection)
+          "
         />
       </div>
 
@@ -58,19 +62,19 @@
           <div v-if="!displayGrid && entities">
             <div>
               <ListItem
-                :small="listItemRouteName === 'SingleMediafile'"
                 v-for="entity in entities"
-                :key="entity?.id"
+                :key="entity.id"
                 :item-id="entity.id"
                 :bulk-operations-context="bulkOperationsContext"
                 :teaser-metadata="
-                  entity?.teaserMetadata?.flatMap((metadata) => metadata ?? [])
+                  entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
                 "
-                :loading="loading"
                 :media="
                   loading ? undefined : getMediaFilenameFromEntity(entity)
                 "
                 :thumb-icon="loading ? undefined : getThumbnail(entity)"
+                :small="listItemRouteName === 'SingleMediafile'"
+                :loading="loading"
                 @click="
                   loading || !enableNavigation
                     ? undefined
@@ -83,14 +87,15 @@
               </ListItem>
             </div>
           </div>
+
           <div v-else-if="displayGrid && entities">
-            <div :class="`grid grid_cols gap-2 justify-items-center`">
+            <div class="grid grid_cols gap-2 justify-items-center">
               <GridItem
                 v-for="entity in entities"
-                :key="entity?.id"
+                :key="entity.id"
                 :itemid="entity?.id"
                 :bulk-operations-context="bulkOperationsContext"
-                :meta="entity?.teaserMetadata"
+                :meta="entity.teaserMetadata"
                 :media="getMediaFilenameFromEntity(entity)"
                 :thumb-icon="getThumbnail(entity)"
                 @click="
@@ -107,7 +112,6 @@
             <div v-if="entities.length === 0" class="p-4">
               {{ $t("search.noresult") }}
             </div>
-            {{}}
           </div>
         </ListContainer>
       </div>
@@ -115,279 +119,214 @@
   </div>
 </template>
 
-<script lang="ts">
-import { paginationLimits } from "./BasePagination.vue";
-import { defineComponent, watch, reactive, ref, onMounted } from "vue";
-import type { PropType } from "vue";
-import ListContainer from "../ListContainer.vue";
-import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
-import { useQuery } from "@vue/apollo-composable";
-import ListItem from "../ListItem.vue";
-import { useRoute, useRouter } from "vue-router";
-import { Unicons } from "../../types";
+<script lang="ts" setup>
 import {
   GetEntitiesDocument,
   SearchInputType,
-  type Asset,
+  type AdvancedFilterInput,
   type Entity,
   type GetEntitiesQueryVariables,
-  type Maybe,
-  type AdvancedFilterInput,
-} from "../../generated-types/queries";
+} from "@/generated-types/queries";
 import {
   useBulkOperations,
   type Context,
+  type InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
+import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
 import FiltersBase from "@/components/filters-new/FiltersBase.vue";
-import IconToggle from "../toggles/IconToggle.vue";
-import useThumbnailHelper from "../../composables/useThumbnailHelper";
-import useMetaDataHelper from "../../composables/useMetaDataHelper";
-import GridItem from "../GridItem.vue";
-import useListItemHelper from "../../composables/useListItemHelper";
+import GridItem from "@/components/GridItem.vue";
+import IconToggle from "@/components/toggles/IconToggle.vue";
+import LibraryBar from "@/components/library/LibraryBar.vue";
+import ListContainer from "@/components/ListContainer.vue";
+import ListItem from "@/components/ListItem.vue";
+import useListItemHelper from "@/composables/useListItemHelper";
+import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import { bulkSelectAllSizeLimit } from "@/main";
-import LibraryBar from "../library/LibraryBar.vue";
 import { createPlaceholderEntities } from "@/helpers";
+import { Unicons } from "@/types";
+import { useQuery } from "@vue/apollo-composable";
+import { useRoute, useRouter } from "vue-router";
+import { watch, reactive, ref, onMounted } from "vue";
 
 export type PredefinedEntities = {
-  usePredefinedEntities: Boolean;
-  entities: Asset[];
+  usePredefinedEntities: boolean;
+  entities: Entity[];
 };
 
-export default defineComponent({
-  name: "BaseLibrary",
-  components: {
-    ListContainer,
-    ListItem,
-    IconToggle,
-    GridItem,
-    BulkOperationsActionsBar,
-    FiltersBase,
-    LibraryBar,
+const props = withDefaults(
+  defineProps<{
+    bulkOperationsContext: Context;
+    listItemRouteName: string;
+    predefinedEntities?: PredefinedEntities;
+    searchInputTypeOnDrawer?: SearchInputType;
+    enableAdvancedFilters?: boolean;
+    enableBulkOperations?: boolean;
+    filterType?: string;
+    confirmSelectionButton?: boolean;
+    enableNavigation?: boolean;
+  }>(),
+  {
+    predefinedEntities: undefined,
+    searchInputTypeOnDrawer: SearchInputType.AdvancedInputType,
+    enableAdvancedFilters: true,
+    enableBulkOperations: true,
+    filterType: undefined,
+    confirmSelectionButton: false,
+    enableNavigation: true,
+  }
+);
+
+const emit = defineEmits<{
+  (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
+}>();
+
+const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
+  useBulkOperations();
+const { getMediaFilenameFromEntity } = useListItemHelper();
+const { getThumbnail } = useThumbnailHelper();
+const route = useRoute();
+const router = useRouter();
+
+const entities = ref<Entity[]>(props.predefinedEntities?.entities || []);
+const totalEntityCount = ref<number>(
+  props.predefinedEntities ? props.predefinedEntities.entities.length : 0
+);
+const displayGrid = ref<boolean>(false);
+const expandFilters = ref<boolean>(false);
+const selectedSortOption = ref<string>();
+const isAsc = ref<boolean>(false);
+
+onMounted(() => {
+  const displayPreferences = window.localStorage.getItem("_displayPreferences");
+  if (displayPreferences) {
+    displayGrid.value = JSON.parse(displayPreferences).grid;
+    expandFilters.value = !props.enableAdvancedFilters
+      ? false
+      : JSON.parse(displayPreferences).expandFilters;
+  }
+  calculateGridColumns();
+});
+
+const queryVariables = reactive<GetEntitiesQueryVariables>({
+  limit: bulkSelectAllSizeLimit,
+  skip: 1,
+  searchValue: {
+    value: "",
+    isAsc: isAsc.value,
+    key: "title",
+    order_by: "",
   },
-  props: {
-    listItemRouteName: {
-      type: String,
-      required: true,
-    },
-    filterType: {
-      type: String,
-    },
-    enableBulkOperations: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    bulkOperationsContext: {
-      type: String as PropType<Context>,
-      required: true,
-    },
-    searchInputTypeOnDrawer: {
-      type: String as PropType<Maybe<SearchInputType>>,
-    },
-    predefinedEntities: {
-      type: Object as PropType<PredefinedEntities>,
-      required: false,
-    },
-    enableAdvancedFilters: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    enableNavigation: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
+  advancedSearchValue: [],
+  advancedFilterInputs: [],
+  searchInputType: props.searchInputTypeOnDrawer,
+});
+
+const setNewQueryVariables = () => {
+  const newVariables = { ...queryVariables };
+  if (selectedSortOption.value && newVariables?.searchValue) {
+    newVariables.searchValue.order_by = selectedSortOption.value;
+    newVariables.searchValue.isAsc = isAsc.value;
+  }
+  refetch(newVariables);
+};
+
+const {
+  onResult: onEntitiesResult,
+  loading,
+  refetch,
+} = useQuery(GetEntitiesDocument, queryVariables, {
+  notifyOnNetworkStatusChange: true,
+  enabled: props.predefinedEntities ? false : true,
+});
+
+onEntitiesResult((result) => {
+  if (result.data && result.data.Entities && !props.predefinedEntities) {
+    entities.value = result.data.Entities.results as Entity[];
+    totalEntityCount.value = result.data.Entities.count;
+  }
+});
+
+const setFilters = (advancedFilterInputs: AdvancedFilterInput[]) => {
+  queryVariables.advancedFilterInputs = advancedFilterInputs;
+};
+
+const { result: allEntitiesResult } = useQuery(
+  GetEntitiesDocument,
+  queryVariables,
+  { enabled: true }
+);
+
+const bulkSelect = (items = entities.value) => {
+  for (let entity of items)
+    enqueueItemForBulkProcessing(props.bulkOperationsContext, {
+      id: entity.id,
+      teaserMetadata: entity.teaserMetadata?.flatMap(
+        (metadata) => metadata ?? []
+      ),
+    });
+
+  triggerBulkSelectionEvent(props.bulkOperationsContext);
+};
+
+const goToEntityPage = (entity: Entity) => {
+  const entityId =
+    entity?.id ||
+    entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")?.value;
+
+  router.push({
+    name: props.listItemRouteName,
+    params: { id: entityId },
+  });
+};
+
+const setCssGridVariable = (colAmount: number = 5) => {
+  const root = document.querySelector(":root") as HTMLElement;
+  root.style.setProperty("--grid-cols", colAmount.toString());
+};
+
+const calculateGridColumns = () => {
+  const gridContainerWidth =
+    document.getElementById("gridContainer")?.offsetWidth;
+  const gridItemWidth = 330;
+  let colAmount = 0;
+
+  if (gridContainerWidth)
+    colAmount = Math.floor(gridContainerWidth / gridItemWidth);
+  setCssGridVariable(colAmount);
+};
+
+window.addEventListener("resize", () => {
+  if (displayGrid.value) calculateGridColumns();
+});
+
+if (!props.predefinedEntities) refetch();
+
+watch(
+  () => loading.value,
+  (isLoading) => {
+    if (!isLoading) return;
+    entities.value = createPlaceholderEntities(queryVariables.limit || 25);
   },
-  emits: ["addSelection"],
-  setup: (props) => {
-    const entities = ref<Asset[]>(props.predefinedEntities?.entities || []);
-    const totalEntityCount = ref<number>(
-      props.predefinedEntities ? props.predefinedEntities.entities.length : 0
-    );
-    const { getThumbnail } = useThumbnailHelper();
-    const { getMediaFilenameFromEntity } = useListItemHelper();
-    const router = useRouter();
-    const route = useRoute();
-    const { isNotAlreadyAdded, mediafiles, selectedRelationFieldMetadata } =
-      useMetaDataHelper();
-    const displayGrid = ref<boolean>(false);
-    const selectedSortOption = ref<string>();
-    const isAsc = ref<boolean>(false);
-    const expandFilters = ref<boolean>(false);
-
-    onMounted(() => {
-      const displayPreferences = window.localStorage.getItem(
-        "_displayPreferences"
-      );
-      if (displayPreferences) {
-        displayGrid.value = JSON.parse(displayPreferences).grid;
-        expandFilters.value = !props.enableAdvancedFilters
-          ? false
-          : JSON.parse(displayPreferences).expandFilters;
-      }
-      calculateGridColumns();
-    });
-
-    const queryVariables = reactive<GetEntitiesQueryVariables>({
-      limit: bulkSelectAllSizeLimit,
-      skip: 1,
-      searchValue: {
-        value: "",
-        isAsc: isAsc.value,
-        key: "title",
-        order_by: "",
-      },
-      advancedSearchValue: [],
-      advancedFilterInputs: [],
-      searchInputType: props.searchInputTypeOnDrawer,
-    });
-
-    const setNewQueryVariables = () => {
-      const newVariables = { ...queryVariables };
-      if (selectedSortOption.value && newVariables?.searchValue) {
-        newVariables.searchValue.order_by = selectedSortOption.value;
-        newVariables.searchValue.isAsc = isAsc.value;
-      }
-      refetch(newVariables);
-    };
-
-    const { result: allEntitiesResult } = useQuery(
-      GetEntitiesDocument,
-      queryVariables,
-      {
-        enabled: props.enableBulkOperations,
-      }
-    );
-
-    const setFilters = (advancedFilterInputs: AdvancedFilterInput[]) => {
-      queryVariables.advancedFilterInputs = advancedFilterInputs;
-    };
-
-    const { onResult, loading, refetch } = useQuery(
-      GetEntitiesDocument,
-      queryVariables,
-      {
-        notifyOnNetworkStatusChange: true,
-        enabled: props.predefinedEntities ? false : true,
-      }
-    );
-
-    onResult((result) => {
-      if (result.data && result.data.Entities && !props.predefinedEntities) {
-        entities.value = result.data.Entities.results as Entity[];
-        totalEntityCount.value = result.data.Entities.count;
-      }
-    });
-
-    const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
-      useBulkOperations();
-    const bulkSelect = (items = entities.value) => {
-      for (let entity of items)
-        enqueueItemForBulkProcessing(props.bulkOperationsContext, {
-          id: entity.id,
-          teaserMetadata: entity.teaserMetadata?.flatMap(
-            (metadata) => metadata ?? []
-          ),
-        });
-
-      triggerBulkSelectionEvent(props.bulkOperationsContext);
-    };
-
-    const setCssGridVariable = (colAmount: number = 5) => {
-      const root = document.querySelector(":root") as HTMLElement;
-      root.style.setProperty("--grid-cols", colAmount.toString());
-    };
-
-    const calculateGridColumns = () => {
-      const gridContainerWidth =
-        document.getElementById("gridContainer")?.offsetWidth;
-      const gridItemWidth = 330;
-      let colAmount = 0;
-      if (gridContainerWidth) {
-        colAmount = Math.floor(gridContainerWidth / gridItemWidth);
-      }
-      setCssGridVariable(colAmount);
-    };
-
-    window.addEventListener("resize", () => {
-      if (displayGrid.value) {
-        calculateGridColumns();
-      }
-    });
-
-    const goToEntityPage = (entity: Asset) => {
-      const entityId =
-        entity?.id ||
-        entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")
-          ?.value;
-
-      router.push({
-        name: props.listItemRouteName,
-        params: { id: entityId },
-      });
-    };
-
-    watch(
-      () => loading.value,
-      (isLoading) => {
-        if (!isLoading) {
-          return;
-        }
-        entities.value = createPlaceholderEntities(queryVariables.limit || 25);
-      },
-      { immediate: true }
-    );
-
-    watch(
-      () => props.predefinedEntities?.entities,
-      () => {
-        if (props.predefinedEntities?.entities) {
-          entities.value = props.predefinedEntities?.entities;
-          totalEntityCount.value = entities.value.length;
-        }
-      },
-      { immediate: true }
-    );
-
-    watch([displayGrid, expandFilters], () => {
-      window.localStorage.setItem(
-        "_displayPreferences",
-        JSON.stringify({
-          grid: displayGrid.value,
-          expandFilters: expandFilters.value,
-        })
-      );
-    });
-
-    if (!props.predefinedEntities) refetch();
-
-    return {
-      setNewQueryVariables,
-      selectedSortOption,
-      paginationLimits,
-      queryVariables,
-      loading,
-      Unicons,
-      router,
-      entities,
-      totalEntityCount,
-      setFilters,
-      getThumbnail,
-      isNotAlreadyAdded,
-      mediafiles,
-      selectedRelationFieldMetadata,
-      displayGrid,
-      calculateGridColumns,
-      getMediaFilenameFromEntity,
-      bulkSelect,
-      allEntitiesResult,
-      isAsc,
-      route,
-      goToEntityPage,
-      expandFilters: expandFilters,
-    };
+  { immediate: true }
+);
+watch(
+  () => props.predefinedEntities?.entities,
+  () => {
+    if (props.predefinedEntities?.entities) {
+      entities.value = props.predefinedEntities?.entities;
+      totalEntityCount.value = entities.value.length;
+    }
   },
+  { immediate: true }
+);
+watch([displayGrid, expandFilters], () => {
+  window.localStorage.setItem(
+    "_displayPreferences",
+    JSON.stringify({
+      grid: displayGrid.value,
+      expandFilters: expandFilters.value,
+    })
+  );
 });
 </script>
 

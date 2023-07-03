@@ -5,7 +5,6 @@
     <div class="flex items-center">
       <div class="min-w-[10rem]">
         <BaseButtonNew
-          class="font-bold"
           :label="
             buttonLabel
               ? buttonLabel
@@ -30,9 +29,8 @@
       </div>
     </div>
 
-    <div>
+    <div v-if="showDeleteButton">
       <BaseButtonNew
-        class="font-bold"
         :label="$t('bulk-operations.delete')"
         :icon="DamsIcons.Trash"
         button-style="redDefault"
@@ -52,12 +50,14 @@ withDefaults(
     buttonLabel?: string;
     buttonIcon?: DamsIcons;
     disabled?: boolean;
+    showDeleteButton?: boolean;
     selectedItemsCount?: number;
   }>(),
   {
     buttonLabel: "",
     buttonIcon: DamsIcons.Edit,
     disabled: false,
+    showDeleteButton: false,
     selectedItemsCount: 0,
   }
 );

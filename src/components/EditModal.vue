@@ -4,6 +4,7 @@
       <BulkOperationsSubmitBar
         :button-label="$t('bulk-operations.save')"
         :button-icon="DamsIcons.Save"
+        :show-delete-button="true"
         @submit="save()"
         @cancel="discard()"
         @delete="() => modal.openModal()"
@@ -25,7 +26,6 @@
             <div class="flex gap-4">
               <div>
                 <BaseButtonNew
-                  class="font-bold"
                   :label="$t('confirm.delete-entity')"
                   :icon="DamsIcons.Trash"
                   button-style="redDefault"
@@ -35,7 +35,6 @@
               </div>
               <div>
                 <BaseButtonNew
-                  class="font-bold"
                   :label="$t('confirm.delete-entity-mediafiles')"
                   :icon="DamsIcons.Trash"
                   button-style="redDefault"
@@ -46,7 +45,6 @@
             </div>
             <div>
               <BaseButtonNew
-                class="font-bold"
                 :label="$t('bulk-operations.cancel')"
                 button-style="default"
                 button-size="small"
@@ -58,7 +56,6 @@
             <div>
               <div>
                 <BaseButtonNew
-                  class="font-bold"
                   :label="$t('bulk-operations.delete')"
                   :icon="DamsIcons.Trash"
                   button-style="redDefault"
@@ -69,7 +66,6 @@
             </div>
             <div>
               <BaseButtonNew
-                class="font-bold"
                 :label="$t('bulk-operations.cancel')"
                 button-style="default"
                 button-size="small"
