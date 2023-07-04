@@ -21,10 +21,11 @@
         />
       </div>
       <div class="py-1 flex items-center">
-        <SingleIconToggle
-          :icon-on="Unicons.AngleUp.name"
-          :icon-off="Unicons.AngleDown.name"
-          @update:checked="isAsc = !isAsc"
+        <BaseToggle
+          v-model="isAsc"
+          :icon-on="DamsIcons.AngleUp"
+          :icon-off="DamsIcons.AngleDown"
+          :icon-height="24"
         />
       </div>
     </div>
@@ -39,9 +40,8 @@
 </template>
 
 <script lang="ts" setup>
-import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
-import BasePaginationNew from "@/components/base/BasePaginationNew.vue";
 import {
+  DamsIcons,
   GetPaginationLimitOptionsDocument,
   GetSortOptionsDocument,
   ModalState,
@@ -50,11 +50,12 @@ import {
   type GetPaginationLimitOptionsQuery,
   type GetSortOptionsQuery,
 } from "@/generated-types/queries";
+import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
+import BasePaginationNew from "@/components/base/BasePaginationNew.vue";
+import BaseToggle from "@/components/base/BaseToggle.vue";
 import { ref, watch } from "vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useQuery } from "@vue/apollo-composable";
-import SingleIconToggle from "../toggles/SingleIconToggle.vue";
-import { Unicons } from "../../types";
 
 defineProps<{
   totalItems: number;
@@ -82,8 +83,9 @@ onPaginationLimitOptionsResult((result) => {
 
 const selectedSortOption = ref<DropdownOption>();
 const sortOptions = ref<DropdownOption[]>([]);
-const { onResult: onSortOptionsResult, refetch: refetchSortOptions } =
-  useQuery<GetSortOptionsQuery>(GetSortOptionsDocument);
+const { onResult: onSortOptionsResult } = useQuery<GetSortOptionsQuery>(
+  GetSortOptionsDocument
+);
 onSortOptionsResult((result) => {
   sortOptions.value = result.data?.SortOptions.options ?? [];
   selectedSortOption.value = sortOptions.value[0];
