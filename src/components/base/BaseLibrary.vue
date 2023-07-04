@@ -1,7 +1,7 @@
 <template>
   <div class="lg:flex bg-neutral-lightest">
     <div class="px-6 w-full">
-      <div class="flex flex-row gap-y-4">
+      <div class="flex flex-row items-center gap-y-4">
         <FiltersBase
           v-if="enableAdvancedFilters"
           class="lg:w-[46%]"
@@ -10,14 +10,11 @@
           @apply-filters="setFilters"
           @expand-filters="expandFilters = !expandFilters"
         />
-        <div :class="['flex', { 'ml-4': enableAdvancedFilters }]">
-          <IconToggle
-            v-model:checked="displayGrid"
-            :icon-on="Unicons.Apps.name"
-            :icon-off="Unicons.ListUl.name"
-            class="ml-2"
-          />
+
+        <div class="mr-2" :class="['flex', { 'ml-4': enableAdvancedFilters }]">
+          <BaseToggleGroup :toggles="toggles" />
         </div>
+
         <LibraryBar
           v-if="!predefinedEntities"
           :total-items="totalEntityCount"
@@ -59,7 +56,7 @@
             displayGrid ? 'p-5' : 'p-1',
           ]"
         >
-          <div v-if="!displayGrid && entities">
+          <div v-if="displayList && entities">
             <div>
               <ListItem
                 v-for="entity in entities"
@@ -127,6 +124,7 @@
 
 <script lang="ts" setup>
 import {
+  DamsIcons,
   GetEntitiesDocument,
   SearchInputType,
   type AdvancedFilterInput,
@@ -138,10 +136,10 @@ import {
   type Context,
   type InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
+import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
 import FiltersBase from "@/components/filters-new/FiltersBase.vue";
 import GridItem from "@/components/GridItem.vue";
-import IconToggle from "@/components/toggles/IconToggle.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import ListContainer from "@/components/ListContainer.vue";
 import ListItem from "@/components/ListItem.vue";
@@ -149,7 +147,6 @@ import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import { bulkSelectAllSizeLimit } from "@/main";
 import { createPlaceholderEntities } from "@/helpers";
-import { Unicons } from "@/types";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
 import { watch, reactive, ref, onMounted } from "vue";
@@ -197,10 +194,15 @@ const entities = ref<Entity[]>(props.predefinedEntities?.entities || []);
 const totalEntityCount = ref<number>(
   props.predefinedEntities ? props.predefinedEntities.entities.length : 0
 );
+const displayList = ref<boolean>(false);
 const displayGrid = ref<boolean>(false);
 const expandFilters = ref<boolean>(false);
 const selectedSortOption = ref<string>();
 const isAsc = ref<boolean>(false);
+const toggles = [
+  { isOn: displayList, iconOn: DamsIcons.ListUl, iconOff: DamsIcons.ListUl },
+  { isOn: displayGrid, iconOn: DamsIcons.Apps, iconOff: DamsIcons.Apps },
+];
 
 onMounted(() => {
   const displayPreferences = window.localStorage.getItem("_displayPreferences");
