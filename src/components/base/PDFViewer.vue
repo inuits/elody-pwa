@@ -60,7 +60,7 @@ export default defineComponent({
   components: { PdfToolbar },
   props: {
     source: {
-      type: Object as PropType<MediaFile>,
+      type: Object as PropType<any>,
       required: true,
     },
   },

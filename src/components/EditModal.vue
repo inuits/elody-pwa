@@ -93,7 +93,7 @@ import ConfirmModal from "@/components/base/ConfirmModal.vue";
 import { asString } from "@/helpers";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useEditMode } from "@/composables/useEdit";
-import { useEntityMediafileSelector } from "@/components/EntityImageSelection.vue";
+import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useMutation } from "@vue/apollo-composable";
 import { usePageInfo } from "@/composables/usePageInfo";
 import { useRoute, useRouter } from "vue-router";

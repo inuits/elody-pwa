@@ -57,7 +57,7 @@
 import { defineComponent, onMounted, ref } from "vue";
 import type { PropType } from "vue";
 import { Unicons } from "../types";
-import { useEntityMediafileSelector } from "@/components/EntityImageSelection.vue";
+import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 export default defineComponent({
   name: "ViewerToolbar",
   components: {},
