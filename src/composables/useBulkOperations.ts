@@ -8,6 +8,7 @@ import { ref } from "vue";
 export enum BulkOperationsContextEnum {
   BulkOperationsCsvExport = "BulkOperationsCsvExport",
   FilterOptions = "FilterOptions",
+  EntityElementMedia = "EntityElementMedia",
 }
 export type Context = RouteNames | BulkOperationsContextEnum;
 export type InBulkProcessableItem = {

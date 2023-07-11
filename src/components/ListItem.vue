@@ -100,9 +100,9 @@ const props = withDefaults(
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
 
-function setNoImage() {
+const setNoImage = () => {
   imageSrcError.value = true;
-}
+};
 
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 </script>
