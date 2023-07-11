@@ -22,9 +22,6 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, watch } from "vue";
-import { asString } from "@/helpers";
-import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import {
   Entitytyping,
   GetEntityByIdDocument,
@@ -33,14 +30,15 @@ import {
   type IntialValues,
   type BaseEntity,
 } from "@/generated-types/queries";
-import { useQuery } from "@vue/apollo-composable";
 import EntityColumn from "@/components/EntityColumn.vue";
-import { useAuth } from "session-vue-3-oidc-library";
-import useEditMode from "@/composables/useEdit";
-import useMetaDataHelper from "@/composables/useMetaDataHelper";
-import { useEntityMediafileSelector } from "@/components/EntityImageSelection.vue";
 import EntityForm from "@/components/EntityForm.vue";
+import useEditMode from "@/composables/useEdit";
+import { asString } from "@/helpers";
+import { reactive, ref, watch } from "vue";
+import { useAuth } from "session-vue-3-oidc-library";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
+import { useQuery } from "@vue/apollo-composable";
+import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -58,15 +56,6 @@ const { showEditToggle, disableEditMode, isEdit, setRefetchFn } = useEditMode();
 const { setCurrentRouteTitle, addVisitedRoute, currentRouteTitle } =
   useBreadcrumbs();
 const router = useRouter();
-
-//Old mediafile dependencies
-const { mediafiles, clearMediafiles } = useMetaDataHelper();
-const {
-  mediafileSelectionState,
-  updateSelectedEntityMediafile,
-  setEntityMediafiles,
-} = useEntityMediafileSelector();
-//End old mediafile dependencies
 
 const queryVariables = reactive<GetEntityByIdQueryVariables>({
   id: id,
@@ -104,34 +93,6 @@ watch(result, (queryResults) => {
 
       setCurrentRouteTitle(entity?.intialValues?.title);
       addVisitedRoute({ id, routeName: currentRouteTitle.value });
-
-      //Old medafile code
-      clearMediafiles();
-      if (
-        entity &&
-        entity.media?.mediafiles &&
-        entity.media?.mediafiles?.length > 0
-      ) {
-        setEntityMediafiles(entity.media.mediafiles);
-        let mediaFileChanged: boolean = false;
-        entity.media.mediafiles?.forEach((mediafile: any) => {
-          if (mediafile?.__typename === "MediaFile") {
-            if (
-              mediafile._id == mediafileSelectionState.selectedMediafile?._id
-            ) {
-              updateSelectedEntityMediafile(mediafile);
-              mediaFileChanged = true;
-            }
-            mediafiles.value.push(mediafile);
-          }
-        });
-        if (!mediaFileChanged && mediafiles.value[0]) {
-          updateSelectedEntityMediafile(mediafiles.value[0]);
-        }
-      } else {
-        updateSelectedEntityMediafile(undefined);
-      }
-      //End old mediafile code
 
       loading.value = false;
     }

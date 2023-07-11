@@ -19,15 +19,23 @@
       </div>
     </template>
     <template v-slot:content>
-      <!-- Not yet refactored old component -->
-      <media-viewer
+      <BaseLibrary
+        class="flex-1"
         v-if="
           !element.isCollapsed && element.type === MediaFileElementTypes.Media
         "
-        :loading="false"
-        entityType="MediaFile"
-        class="flex-1"
+        :search-input-type-on-drawer="
+          SearchInputType.AdvancedInputMediaFilesType
+        "
+        :parent-entity-id="entityId"
+        :enable-preview="true"
+        :enable-bulk-operations="true"
+        :bulk-operations-context="BulkOperationsContextEnum.EntityElementMedia"
+        :enable-advanced-filters="false"
+        :enable-navigation="false"
+        list-item-route-name="SingleEntity"
       />
+      <!-- Not yet refactored old component -->
       <base-map
         v-if="
           !element.isCollapsed &&
@@ -46,15 +54,17 @@ import {
   Entitytyping,
   MediaFileElementTypes,
   PanelType,
+  SearchInputType,
   type MediaFileElement,
   type MetadataAndRelation,
   type PanelMetaData,
 } from "@/generated-types/queries";
+import BaseLibrary from "@/components/base/BaseLibrary.vue";
 import BaseMap from "./base/BaseMap.vue";
 import EntityElementWrapper from "./base/EntityElementWrapper.vue";
-import MediaViewer from "./base/Mediaviewer.vue";
 import useEditMode from "@/composables/useEdit";
 import { asString, getValueForPanelMetadata } from "@/helpers";
+import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import { computed } from "vue";
 import { Unicons } from "@/types";
 import { usePickEntityModal } from "./PickEntityModal.vue";

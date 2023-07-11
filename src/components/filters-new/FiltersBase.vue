@@ -107,6 +107,7 @@ import {
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import FiltersListItem from "@/components/filters-new/FiltersListItem.vue";
+import useEditMode from "@/composables/useEdit";
 import { computed, defineProps, ref, toRefs, watch } from "vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
@@ -121,6 +122,7 @@ export type FilterListItem = {
 const props = defineProps<{
   entityType: string;
   expandFilters: boolean;
+  parentEntityId?: string;
 }>();
 
 const emit = defineEmits<{
@@ -144,6 +146,7 @@ const activeFilters = ref<AdvancedFilterInput[]>([]);
 const activeFilterCount = ref<number>(0);
 const clearAllActiveFilters = ref<boolean>(false);
 const { entityType } = toRefs(props);
+const { isSaved } = useEditMode();
 
 const { onResult: onFilterMatcherMappingResult } =
   useQuery<GetFilterMatcherMappingQuery>(GetFilterMatcherMappingDocument);
@@ -181,22 +184,29 @@ onAdvancedFiltersResult((result) => {
   filters.value = [];
   Object.values(advancedFilters).forEach((advancedFilter) => {
     if (typeof advancedFilter !== "string") {
-      if (advancedFilter.defaultValue)
-        activeFilters.value.push({
+      if (advancedFilter.defaultValue) {
+        const hiddenFilter: AdvancedFilterInput = {
           type: AdvancedFilterTypes.Text,
           key: advancedFilter.key,
           value: advancedFilter.defaultValue,
           match_exact: true,
-        });
+        };
+
+        if (advancedFilter.label === "parent") {
+          if (props.parentEntityId) {
+            hiddenFilter.parent = props.parentEntityId;
+            activeFilters.value.push(hiddenFilter);
+          }
+        } else activeFilters.value.push(hiddenFilter);
+      }
 
       filters.value.push({
         isActive: !!advancedFilter.defaultValue,
         isDisplayed: advancedFilter.isDisplayedByDefault ?? false,
         advancedFilter,
       });
-      if (props.entityType) {
-        applyFilters();
-      }
+
+      if (props.entityType || props.parentEntityId) applyFilters();
     }
   });
 });
@@ -207,6 +217,10 @@ const getAngleIcon = computed<DamsIcons>(() =>
   props.expandFilters ? DamsIcons.AngleUp : DamsIcons.AngleDown
 );
 
+if (props.parentEntityId)
+  watch(isSaved, () => {
+    if (isSaved) applyFilters();
+  });
 watch(labelsOfDisplayedFilters, () =>
   filters.value.forEach(
     (filter) =>

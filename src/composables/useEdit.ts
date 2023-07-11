@@ -1,28 +1,28 @@
-import {
-  UpdateMediafilesOrderDocument,
-  DeleteRelationsDocument,
-} from "@/generated-types/queries";
 import type {
   UpdateMediafilesOrderMutation,
   DeleteRelationsMutation,
 } from "@/generated-types/queries";
-import { useMutation } from "@vue/apollo-composable";
-import { computed, ref } from "vue";
-import useMediaAssetLinkHelper from "./useMediaAssetLinkHelper";
-import useMetaDataHelper from "./useMetaDataHelper";
 import {
   getDiffArray,
   removeMediafilesFromOrdering,
-} from "../composables/useMediafilesOrderHelpers";
-import { toBeDeleted } from "@/components/EntityImageSelection.vue";
-import { useRouter } from "vue-router";
+} from "@/composables/useMediafilesOrderHelpers";
+import {
+  UpdateMediafilesOrderDocument,
+  DeleteRelationsDocument,
+} from "@/generated-types/queries";
+import { useMutation } from "@vue/apollo-composable";
 import {
   useNotification,
   NotificationType,
 } from "@/components/base/BaseNotification.vue";
+import useMediaAssetLinkHelper from "@/composables/useMediaAssetLinkHelper";
+import useMetaDataHelper from "@/composables/useMetaDataHelper";
+import { computed, ref } from "vue";
 
 export type EditModes = "edit" | "view" | "loading";
 export type callback = (e?: Event | undefined) => Promise<unknown>;
+export const toBeDeleted = ref<string[]>([]);
+export const isSaved = ref<boolean>(false);
 
 const editMode = ref<EditModes>("view");
 const saveCallbacks = ref<callback[]>([]);
@@ -70,6 +70,7 @@ export const useEditMode = () => {
   );
 
   const save = async () => {
+    isSaved.value = false;
     removeMediafilesFromOrdering(toBeDeleted.value);
     linkMediaFilesToEntity(addSaveCallback);
 
@@ -103,6 +104,7 @@ export const useEditMode = () => {
     }
     const refetch = refetchFn.value;
     if (refetch) refetch();
+    isSaved.value = true;
   };
 
   const discard = () => {
@@ -130,6 +132,7 @@ export const useEditMode = () => {
     isEditToggleVisible,
     setRefetchFn,
     refetchFn,
+    isSaved,
   };
 };
 

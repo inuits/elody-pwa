@@ -1,123 +1,74 @@
 <template>
-  <div class="flex h-full checkboard ml-1">
-    <div class="w-1/3 m-5">
-      <entity-image-selection
-        v-model:selectedImage="mediafileSelectionState.selectedMediafile"
-        :loading="loading"
-      />
+  <div class="flex ml-1 h-full checkboard select-none">
+    <div class="w-1/3 m-5" v-if="mediafileSelectionState.selectedMediafile">
+      <entity-image-selection :loading="loading" />
     </div>
+
     <div
-      v-show="!loading && mediafileSelectionState.selectedMediafile"
+      v-if="!loading && mediafileSelectionState.selectedMediafile"
       class="w-full"
     >
       <IIIFViewer
-        v-if="
-          !loading &&
-          mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype?.includes('image')
-        "
-        :is-public="mediafileSelectionState.selectedMediafile.isPublic"
+        v-if="getValueOfMediafile('mimetype')?.includes('image')"
         :imageFilename="
-          mediafileSelectionState.selectedMediafile.transcode_filename ||
-          mediafileSelectionState.selectedMediafile.filename ||
+          getValueOfMediafile('transcode_filename') ||
+          getValueOfMediafile('filename') ||
           ''
         "
-        :downloadLocation="
-          mediafileSelectionState.selectedMediafile.original_file_location
-        "
+        :downloadLocation="getValueOfMediafile('original_file_location')"
       />
       <VideoPlayer
-        v-if="
-          !loading &&
-          mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype?.includes('video')
-        "
+        v-if="getValueOfMediafile('mimetype')?.includes('video')"
         :source="mediafileSelectionState.selectedMediafile"
       />
       <AudioPlayer
-        v-if="
-          !loading &&
-          mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype?.includes('audio')
-        "
+        v-if="getValueOfMediafile('mimetype')?.includes('audio')"
         :source="mediafileSelectionState.selectedMediafile"
       />
       <PDFViewer
-        v-if="
-          !loading &&
-          mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype?.includes('pdf')
-        "
+        v-if="getValueOfMediafile('mimetype')?.includes('pdf')"
         :source="mediafileSelectionState.selectedMediafile"
       />
       <TextViewer
-        v-if="
-          !loading &&
-          mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.mimetype?.includes(
-            'text/plain'
-          )
-        "
+        v-if="getValueOfMediafile('mimetype')?.includes('text/plain')"
         :source="mediafileSelectionState.selectedMediafile"
       />
       <MiradorViewer
         v-if="
-          !loading &&
-          mediafileSelectionState.selectedMediafile !== undefined &&
-          mediafileSelectionState.selectedMediafile.original_file_location &&
-          mediafileSelectionState.selectedMediafile.mimetype?.includes(
-            'json/manifest'
-          )
+          getValueOfMediafile('mimetype')?.includes('json/manifest') &&
+          getValueOfMediafile('original_file_location')
         "
-        :manifest-url="
-          mediafileSelectionState.selectedMediafile?.original_file_location
-        "
+        :manifest-url="getValueOfMediafile('original_file_location')"
       />
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import IIIFViewer from "../IIIFViewer.vue";
-import VideoPlayer from "./VideoPlayer.vue";
-import AudioPlayer from "./AudioPlayer.vue";
-import PDFViewer from "./PDFViewer.vue";
-import TextViewer from "./TextViewer.vue";
-import MiradorViewer from "../ManifestViewer.vue";
-import EntityImageSelection, {
-  useEntityMediafileSelector,
-} from "../EntityImageSelection.vue";
-import { usePermissions } from "../../composables/usePermissions";
-import { Unicons } from "@/types";
+<script lang="ts" setup>
+import type { MediaFileEntity } from "@/generated-types/queries";
+import AudioPlayer from "@/components/base/AudioPlayer.vue";
+import EntityImageSelection from "@/components/EntityImageSelection.vue";
+import IIIFViewer from "@/components/IIIFViewer.vue";
+import MiradorViewer from "@/components/ManifestViewer.vue";
+import PDFViewer from "@/components/base/PDFViewer.vue";
+import TextViewer from "@/components/base/TextViewer.vue";
+import VideoPlayer from "@/components/base/VideoPlayer.vue";
+import { toRefs, watch } from "vue";
+import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 
-export default defineComponent({
-  name: "MediaViewer",
-  components: {
-    IIIFViewer,
-    VideoPlayer,
-    AudioPlayer,
-    PDFViewer,
-    TextViewer,
-    EntityImageSelection,
-    MiradorViewer,
-  },
-  props: {
-    loading: Boolean,
-    entityType: {
-      type: String,
-      required: true,
-    },
-  },
-  setup(props) {
-    const { mediafileSelectionState } = useEntityMediafileSelector();
-    const { canGet } = usePermissions();
+const props = defineProps<{
+  mediafiles: MediaFileEntity[];
+  loading: boolean;
+}>();
 
-    return {
-      canGet,
-      mediafileSelectionState,
-      Unicons,
-    };
-  },
+const { mediafiles } = toRefs(props);
+const { mediafileSelectionState, getValueOfMediafile } =
+  useEntityMediafileSelector();
+
+watch([() => props.loading, mediafiles], () => {
+  if (!props.loading && mediafiles.value.length > 0) {
+    mediafileSelectionState.mediafiles = mediafiles.value;
+    mediafileSelectionState.selectedMediafile = mediafiles.value[0];
+  }
 });
 </script>
