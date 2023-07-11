@@ -207,7 +207,7 @@ watch(selectedOption, (value) => {
 });
 
 onMounted(() => document.addEventListener("click", collapseDropdown));
-onUnmounted(() => document.addEventListener("click", collapseDropdown));
+onUnmounted(() => document.removeEventListener("click", collapseDropdown));
 </script>
 
 <style>

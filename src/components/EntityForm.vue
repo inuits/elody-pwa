@@ -1,9 +1,6 @@
 <template><slot></slot></template>
 
 <script lang="ts" setup>
-import { useEditMode } from "../composables/useEdit";
-import { useMutation } from "@vue/apollo-composable";
-import { useForm, useSubmitForm } from "vee-validate";
 import type {
   EntityFormInput,
   IntialValues,
@@ -13,13 +10,19 @@ import type {
   UpdateRelationsAndMetadataMutation,
   UpdateRelationsAndMetadataMutationVariables,
 } from "@/generated-types/queries";
-import { UpdateRelationsAndMetadataDocument } from "@/generated-types/queries";
-import { computed, watch } from "vue";
-import { useFormHelper } from "@/composables/useFormHelper";
-import { NotificationType, useNotification } from "./base/BaseNotification.vue";
-import { useI18n } from "vue-i18n";
-import { useRoute } from "vue-router";
+import {
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
 import { asString } from "@/helpers";
+import { computed, watch } from "vue";
+import { UpdateRelationsAndMetadataDocument } from "@/generated-types/queries";
+import { useEditMode } from "@/composables/useEdit";
+import { useForm, useSubmitForm } from "vee-validate";
+import { useFormHelper } from "@/composables/useFormHelper";
+import { useI18n } from "vue-i18n";
+import { useMutation } from "@vue/apollo-composable";
+import { useRoute } from "vue-router";
 
 const props = defineProps<{
   intialValues: Omit<IntialValues, "keyValue">;

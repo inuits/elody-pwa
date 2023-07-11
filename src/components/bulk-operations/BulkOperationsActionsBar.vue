@@ -3,7 +3,7 @@
     class="flex justify-between items-center rounded alignment-nested-divs"
     :class="[
       useExtendedBulkOperations && itemsSelected
-        ? `px-3 bg-neutral-white`
+        ? `px-3 !py-2 bg-neutral-white`
         : `bg-transparent`,
       { 'py-3': useExtendedBulkOperations },
     ]"

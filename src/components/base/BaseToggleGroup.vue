@@ -8,7 +8,7 @@
       :icon-on="toggle.iconOn"
       :icon-off="toggle.iconOff"
       :is-part-of-toggle-group="true"
-      @turn-all-toggles-in-group-off="turnAllTogglesOf"
+      @turn-all-toggles-in-group-off="turnAllTogglesOff"
     />
   </div>
 </template>
@@ -24,14 +24,16 @@ const props = defineProps<{
 
 const toggles = reactive(props.toggles);
 
-const turnAllTogglesOf = () => {
+const turnAllTogglesOff = () => {
   for (const toggle of toggles) toggle.isOn = false;
 };
 
-onMounted(() => (toggles[0].isOn = true));
+const onlyHaveOneToggleTurnedOn = () => {
+  const togglesTurnedOn = toggles.filter((toggle) => toggle.isOn).length;
+  if (togglesTurnedOn === 0) toggles[0].isOn = true;
+  else if (togglesTurnedOn > 1) toggles[0].isOn = false;
+};
 
-watch(toggles, () => {
-  if (toggles.filter((toggle) => toggle.isOn).length === 0)
-    toggles[0].isOn = true;
-});
+onMounted(() => onlyHaveOneToggleTurnedOn());
+watch(toggles, () => onlyHaveOneToggleTurnedOn());
 </script>
