@@ -1,12 +1,13 @@
 <template>
   <div class="lg:flex bg-neutral-lightest">
-    <div class="px-6 w-full">
+    <div class="w-full" :class="parentEntityId ? 'p-3' : 'px-6'">
       <div class="flex flex-row items-center gap-y-4">
         <FiltersBase
-          v-if="enableAdvancedFilters"
+          v-show="enableAdvancedFilters"
           class="lg:w-[46%]"
           :expandFilters="expandFilters"
           :entity-type="filterType || route.meta.entityType as string"
+          :parent-entity-id="parentEntityId"
           @apply-filters="setFilters"
           @expand-filters="expandFilters = !expandFilters"
         />
@@ -30,7 +31,7 @@
       </div>
 
       <div
-        v-if="enableBulkOperations"
+        v-if="enableBulkOperations && !displayPreview"
         class="my-3"
         :class="{ 'flex justify-end': expandFilters }"
       >
@@ -61,6 +62,12 @@
               <ListItem
                 v-for="entity in entities"
                 :key="entity.id"
+                :class="
+                  parentEntityId &&
+                  mediafileSelectionState.selectedMediafile?.id === entity.id
+                    ? '!border-2 !border-accent-normal'
+                    : ''
+                "
                 :item-id="entity.id"
                 :bulk-operations-context="bulkOperationsContext"
                 :teaser-metadata="
@@ -74,8 +81,17 @@
                 :loading="loading"
                 @click="
                   loading || !enableNavigation
-                    ? undefined
+                    ? !enableNavigation &&
+                      parentEntityId &&
+                      entity.type === 'MediaFile'
+                      ? updateSelectedEntityMediafile(entity)
+                      : undefined
                     : goToEntityPage(entity)
+                "
+                @dblclick="
+                  !enableNavigation && parentEntityId
+                    ? goToEntityPage(entity)
+                    : undefined
                 "
               >
                 <template #actions>
@@ -90,6 +106,12 @@
               <GridItem
                 v-for="entity in entities"
                 :key="entity.id"
+                :class="
+                  parentEntityId &&
+                  mediafileSelectionState.selectedMediafile?.id === entity.id
+                    ? '!border-2 !border-accent-normal'
+                    : ''
+                "
                 :item-id="entity.id"
                 :bulk-operations-context="bulkOperationsContext"
                 :teaser-metadata="
@@ -103,8 +125,17 @@
                 :loading="loading"
                 @click="
                   loading || !enableNavigation
-                    ? undefined
+                    ? !enableNavigation &&
+                      parentEntityId &&
+                      entity.type === 'MediaFile'
+                      ? updateSelectedEntityMediafile(entity)
+                      : undefined
                     : goToEntityPage(entity)
+                "
+                @dblclick="
+                  !enableNavigation && parentEntityId
+                    ? goToEntityPage(entity)
+                    : undefined
                 "
               >
                 <template #actions>
@@ -115,6 +146,10 @@
             <div v-if="entities.length === 0" class="p-4">
               {{ $t("search.noresult") }}
             </div>
+          </div>
+
+          <div v-else-if="displayPreview && entities" class="h-[62vh] mt-5">
+            <media-viewer :mediafiles="entities" :loading="loading" />
           </div>
         </ListContainer>
       </div>
@@ -143,13 +178,16 @@ import GridItem from "@/components/GridItem.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import ListContainer from "@/components/ListContainer.vue";
 import ListItem from "@/components/ListItem.vue";
+import MediaViewer from "./Mediaviewer.vue";
+import useEditMode from "@/composables/useEdit";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import { bulkSelectAllSizeLimit } from "@/main";
 import { createPlaceholderEntities } from "@/helpers";
+import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
-import { watch, reactive, ref, onMounted } from "vue";
+import { watch, reactive, ref, onMounted, onUnmounted } from "vue";
 
 export type PredefinedEntities = {
   usePredefinedEntities: boolean;
@@ -162,18 +200,22 @@ const props = withDefaults(
     listItemRouteName: string;
     predefinedEntities?: PredefinedEntities;
     searchInputTypeOnDrawer?: SearchInputType;
+    enablePreview?: boolean;
     enableAdvancedFilters?: boolean;
     enableBulkOperations?: boolean;
     filterType?: string;
+    parentEntityId?: string;
     confirmSelectionButton?: boolean;
     enableNavigation?: boolean;
   }>(),
   {
     predefinedEntities: undefined,
     searchInputTypeOnDrawer: SearchInputType.AdvancedInputType,
+    enablePreview: false,
     enableAdvancedFilters: true,
     enableBulkOperations: true,
     filterType: undefined,
+    parentEntityId: undefined,
     confirmSelectionButton: false,
     enableNavigation: true,
   }
@@ -185,8 +227,11 @@ const emit = defineEmits<{
 
 const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
+const { mediafileSelectionState, updateSelectedEntityMediafile } =
+  useEntityMediafileSelector();
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { getThumbnail } = useThumbnailHelper();
+const { isSaved } = useEditMode();
 const route = useRoute();
 const router = useRouter();
 
@@ -196,6 +241,8 @@ const totalEntityCount = ref<number>(
 );
 const displayList = ref<boolean>(false);
 const displayGrid = ref<boolean>(false);
+const displayPreview = ref<boolean>(props.enablePreview);
+
 const expandFilters = ref<boolean>(false);
 const selectedSortOption = ref<string>();
 const isAsc = ref<boolean>(false);
@@ -203,17 +250,6 @@ const toggles = [
   { isOn: displayList, iconOn: DamsIcons.ListUl, iconOff: DamsIcons.ListUl },
   { isOn: displayGrid, iconOn: DamsIcons.Apps, iconOff: DamsIcons.Apps },
 ];
-
-onMounted(() => {
-  const displayPreferences = window.localStorage.getItem("_displayPreferences");
-  if (displayPreferences) {
-    displayGrid.value = JSON.parse(displayPreferences).grid;
-    expandFilters.value = !props.enableAdvancedFilters
-      ? false
-      : JSON.parse(displayPreferences).expandFilters;
-  }
-  calculateGridColumns();
-});
 
 const queryVariables = reactive<GetEntitiesQueryVariables>({
   limit: bulkSelectAllSizeLimit,
@@ -256,6 +292,7 @@ onEntitiesResult((result) => {
 
 const setFilters = (advancedFilterInputs: AdvancedFilterInput[]) => {
   queryVariables.advancedFilterInputs = advancedFilterInputs;
+  if (props.parentEntityId && isSaved) setNewQueryVariables();
 };
 
 const { result: allEntitiesResult } = useQuery(
@@ -265,6 +302,8 @@ const { result: allEntitiesResult } = useQuery(
 );
 
 const bulkSelect = (items = entities.value) => {
+  if (props.predefinedEntities) items = props.predefinedEntities.entities;
+
   for (let entity of items)
     enqueueItemForBulkProcessing(props.bulkOperationsContext, {
       id: entity.id,
@@ -298,16 +337,43 @@ const calculateGridColumns = () => {
   const gridItemWidth = 330;
   let colAmount = 0;
 
-  if (gridContainerWidth)
+  if (gridContainerWidth) {
     colAmount = Math.floor(gridContainerWidth / gridItemWidth);
+    if (props.parentEntityId) --colAmount;
+  }
   setCssGridVariable(colAmount);
 };
 
-window.addEventListener("resize", () => {
+const conditionallyCalculateGridColumns = () => {
   if (displayGrid.value) calculateGridColumns();
+};
+
+onMounted(() => {
+  window.addEventListener("resize", conditionallyCalculateGridColumns);
+  window.addEventListener("popstate", conditionallyCalculateGridColumns);
+
+  if (!props.predefinedEntities) refetch();
+  if (props.enablePreview)
+    toggles.push({
+      isOn: displayPreview,
+      iconOn: DamsIcons.Image,
+      iconOff: DamsIcons.Image,
+    });
+
+  const displayPreferences = window.localStorage.getItem("_displayPreferences");
+  if (displayPreferences) {
+    displayGrid.value = JSON.parse(displayPreferences).grid;
+    expandFilters.value = !props.enableAdvancedFilters
+      ? false
+      : JSON.parse(displayPreferences).expandFilters;
+  }
+  calculateGridColumns();
 });
 
-if (!props.predefinedEntities) refetch();
+onUnmounted(() => {
+  window.removeEventListener("resize", conditionallyCalculateGridColumns);
+  window.removeEventListener("popstate", conditionallyCalculateGridColumns);
+});
 
 watch(
   () => loading.value,
@@ -331,7 +397,7 @@ watch([displayGrid, expandFilters], () => {
   window.localStorage.setItem(
     "_displayPreferences",
     JSON.stringify({
-      grid: displayGrid.value,
+      grid: displayPreview.value ? false : displayGrid.value,
       expandFilters: expandFilters.value,
     })
   );
