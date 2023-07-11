@@ -52,16 +52,16 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
-import { type Entity } from "@/generated-types/queries";
-import EntityElementWrapper from "./base/EntityElementWrapper.vue";
-import { usePickEntityModal } from "./PickEntityModal.vue";
-import useEditMode from "@/composables/useEdit";
-import { useRoute } from "vue-router";
-import { Unicons } from "@/types";
-import BaseLibrary from "./base/BaseLibrary.vue";
 import type { Context } from "@/composables/useBulkOperations";
+import type { Entity } from "@/generated-types/queries";
+import BaseLibrary from "@/components/base/BaseLibrary.vue";
+import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
+import useEditMode from "@/composables/useEdit";
+import { computed } from "vue";
+import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
+import { usePickEntityModal } from "@/components/PickEntityModal.vue";
+import { useRoute } from "vue-router";
 
 const route = useRoute();
 const props = defineProps<{

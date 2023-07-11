@@ -14,7 +14,6 @@
   </div>
 </template>
 <script lang="ts">
-import type { MediaFile } from "../../generated-types/queries";
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
 
@@ -23,7 +22,7 @@ export default defineComponent({
   components: {},
   props: {
     source: {
-      type: Object as PropType<MediaFile>,
+      type: Object as PropType<any>,
       required: true,
     },
   },
