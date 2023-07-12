@@ -173,7 +173,11 @@ const { refetch, onResult: onAdvancedFiltersResult } =
   useQuery<GetAdvancedFiltersQuery>(
     GetAdvancedFiltersDocument,
     { entityType: entityType.value },
-    { enabled: true }
+    {
+      enabled: true,
+      fetchPolicy: "no-cache",
+      notifyOnNetworkStatusChange: true,
+    }
   );
 onAdvancedFiltersResult((result) => {
   const advancedFilters: Maybe<AdvancedFilters> | undefined = (
