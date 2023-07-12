@@ -7,7 +7,7 @@
           class="flex items-center text-text-subtitle cursor-pointer"
         >
           <unicon height="16" :name="Unicons.PlusCircle.name" />
-          <p class="underline" @click="openPickEntityModal(types, metaKey)">
+          <p class="underline" @click="openPickEntityModal(types as Entitytyping[], metaKey)">
             {{ t("library.add") }}
           </p>
         </div>
@@ -53,7 +53,7 @@
 
 <script lang="ts" setup>
 import type { Context } from "@/composables/useBulkOperations";
-import type { Entity } from "@/generated-types/queries";
+import type { Entity, Entitytyping } from "@/generated-types/queries";
 import BaseLibrary from "@/components/base/BaseLibrary.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import useEditMode from "@/composables/useEdit";
@@ -63,16 +63,23 @@ import { useI18n } from "vue-i18n";
 import { usePickEntityModal } from "@/components/PickEntityModal.vue";
 import { useRoute } from "vue-router";
 
-const route = useRoute();
-const props = defineProps<{
-  label: string;
-  RelationKey: string;
-  isCollapsed: Boolean;
-  types: String[];
-  metaKey: String;
-  entityList: Entity[];
-}>();
+const props = withDefaults(
+  defineProps<{
+    label: string;
+    RelationKey: string;
+    isCollapsed: Boolean;
+    types: string[];
+    metaKey: string;
+    entityList: Entity[];
+  }>(),
+  {
+    types: () => [],
+    metaKey: ""
+  }
+);
+
 const { isEdit } = useEditMode();
+const route = useRoute();
 const { t } = useI18n();
 
 const entitiesObject = computed(() => {

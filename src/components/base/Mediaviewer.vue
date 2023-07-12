@@ -66,9 +66,8 @@ const { mediafileSelectionState, getValueOfMediafile } =
   useEntityMediafileSelector();
 
 watch([() => props.loading, mediafiles], () => {
-  if (!props.loading && mediafiles.value.length > 0) {
-    mediafileSelectionState.mediafiles = mediafiles.value;
-    mediafileSelectionState.selectedMediafile = mediafiles.value[0];
-  }
+  if (props.loading) return;
+  mediafileSelectionState.mediafiles = mediafiles.value;
+  mediafileSelectionState.selectedMediafile = mediafiles.value[0];
 });
 </script>
