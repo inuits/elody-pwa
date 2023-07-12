@@ -15,7 +15,7 @@ import {
   useNotification,
 } from "@/components/base/BaseNotification.vue";
 import { asString } from "@/helpers";
-import { computed, watch } from "vue";
+import { computed, onMounted, onUnmounted, watch } from "vue";
 import { UpdateRelationsAndMetadataDocument } from "@/generated-types/queries";
 import { useEditMode } from "@/composables/useEdit";
 import { useForm, useSubmitForm } from "vee-validate";
@@ -112,10 +112,13 @@ const submit = useSubmitForm<IntialValues>(async (values) => {
   }
 });
 
-document.addEventListener("discardEdit", () => {
+const callRefetchFn = () => {
   const refetch = refetchFn.value;
   if (refetch) refetch();
-});
+};
+
+onMounted(() => document.addEventListener("discardEdit", () => callRefetchFn));
+onUnmounted(() => document.removeEventListener("discardEdit", () => callRefetchFn));
 
 watch(
   () => form.value,
