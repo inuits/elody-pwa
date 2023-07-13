@@ -74,7 +74,14 @@ const { getModal } = useAvailableModals();
 const selectedPaginationLimitOption = ref<DropdownOption>();
 const paginationLimitOptions = ref<DropdownOption[]>([]);
 const { onResult: onPaginationLimitOptionsResult } =
-  useQuery<GetPaginationLimitOptionsQuery>(GetPaginationLimitOptionsDocument);
+  useQuery<GetPaginationLimitOptionsQuery>(
+    GetPaginationLimitOptionsDocument,
+    undefined,
+    {
+      fetchPolicy: "no-cache",
+      notifyOnNetworkStatusChange: true,
+    }
+  );
 onPaginationLimitOptionsResult((result) => {
   paginationLimitOptions.value =
     result.data?.PaginationLimitOptions.options ?? [];
@@ -84,7 +91,12 @@ onPaginationLimitOptionsResult((result) => {
 const selectedSortOption = ref<DropdownOption>();
 const sortOptions = ref<DropdownOption[]>([]);
 const { onResult: onSortOptionsResult } = useQuery<GetSortOptionsQuery>(
-  GetSortOptionsDocument
+  GetSortOptionsDocument,
+  undefined,
+  {
+    fetchPolicy: "no-cache",
+    notifyOnNetworkStatusChange: true,
+  }
 );
 onSortOptionsResult((result) => {
   sortOptions.value = result.data?.SortOptions.options ?? [];

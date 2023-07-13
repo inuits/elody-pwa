@@ -7,7 +7,10 @@
           class="flex items-center text-text-subtitle cursor-pointer"
         >
           <unicon height="16" :name="Unicons.PlusCircle.name" />
-          <p class="underline" @click="openPickEntityModal(types as Entitytyping[], metaKey)">
+          <p
+            class="underline"
+            @click="openPickEntityModal(types as Entitytyping[], metaKey)"
+          >
             {{ t("library.add") }}
           </p>
         </div>
@@ -74,7 +77,7 @@ const props = withDefaults(
   }>(),
   {
     types: () => [],
-    metaKey: ""
+    metaKey: "",
   }
 );
 

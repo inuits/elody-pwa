@@ -1,6 +1,6 @@
 <template>
   <div
-    class="absolute w-11/12 bg-neutral-0 z-20 mx-4 mt-7 p-2 shadow-sm flex justify-between h-10"
+    class="absolute w-11/12 bg-neutral-0 z-[5] mx-4 mt-7 p-2 shadow-sm flex justify-between h-10"
   >
     <div>
       <a ref="fullPageRef" class="mr-2 ml-2">
