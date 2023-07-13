@@ -36,7 +36,7 @@ export default defineConfig({
     host: "0.0.0.0",
     port: parsePort("8080"),
     hmr: {
-      clientPort: parsePort("8100"),
+      clientPort: parsePort(process.env.PROJECT_PORT || "8100"),
     },
     watch: {
       usePolling: true,
