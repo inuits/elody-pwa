@@ -118,7 +118,9 @@ const callRefetchFn = () => {
 };
 
 onMounted(() => document.addEventListener("discardEdit", () => callRefetchFn));
-onUnmounted(() => document.removeEventListener("discardEdit", () => callRefetchFn));
+onUnmounted(() =>
+  document.removeEventListener("discardEdit", () => callRefetchFn)
+);
 
 watch(
   () => form.value,
