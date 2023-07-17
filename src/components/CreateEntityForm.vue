@@ -26,12 +26,12 @@ import MetaEditDataField from "./MetaEditDataField.vue";
 import {
   CreateEntityDocument,
   Entitytyping,
-  GetCreateEntityFormDocument,
   TypeModals,
 } from "../generated-types/queries";
 import type {
   CreateEntityMutation,
   GetCreateEntityFormQuery,
+  GetCreateEntityFormDocument,
 } from "../generated-types/queries";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import BaseButton from "./base/BaseButton.vue";
