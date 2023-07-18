@@ -15,8 +15,9 @@ export const useBreadcrumbs = () => {
   };
 
   const addVisitedRoute = (route: VisitedRoute): void => {
-    if (visitedRoutes.value.includes({ ...route })) return;
-    visitedRoutes.value.push(route);
+    if (!visitedRoutes.value.includes(route)) {
+      visitedRoutes.value.push(route);
+    }
   };
 
   const resetVisitedRoutes = (): void => {
