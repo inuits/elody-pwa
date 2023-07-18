@@ -35,12 +35,22 @@
       <ul>
         <li
           v-show="visitedRoutes.length"
-          v-for="route in visitedRoutes"
+          v-for="(route, index) in visitedRoutes.reverse()"
           :key="route.id"
           @click="navigateToEntity(route)"
-          class="p-4 cursor-pointer hover:bg-neutral-lightest"
         >
-          {{ route.routeName }}
+          <div class="flex flex-col items-end w-full p-4">
+            <unicon
+              v-if="index !== 0"
+              height="24"
+              :name="Unicons.AngleUp.name"
+            ></unicon>
+            <div
+              class="cursor-pointer hover:bg-neutral-lightest w-full flex justify-end"
+            >
+              <p>{{ route.routeName }}</p>
+            </div>
+          </div>
         </li>
         <li v-show="!visitedRoutes.length" class="p-4">
           {{ t("breadcrumbs.noVisitedRoutes") }}

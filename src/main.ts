@@ -61,13 +61,13 @@ const start = async () => {
     // }
   });
 
-  router.afterEach(async (to, _from, next) => {
+  router.beforeEach(async (to, _from) => {
     auth.changeRedirectRoute(window.location.origin + window.location.pathname);
     await auth.verifyServerAuth();
     if (!to.matched.some((route) => route.meta.requiresAuth)) {
       return;
     } else {
-      await auth.assertIsAuthenticated(to.fullPath, next);
+      await auth.assertIsAuthenticated(to.fullPath);
     }
   });
 
