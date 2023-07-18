@@ -10,9 +10,9 @@
         @click="showHistory = !showHistory"
       >
         <unicon
-          v-if="selectedMenuItem?.icon && Unicons[selectedMenuItem?.icon as unknown as DamsIcons]"
+          v-if="selectedMenuItem?.icon && Unicons[selectedMenuItem?.icon as unknown as DamsIcons].name"
           height="24"
-          :name="selectedMenuItem?.icon"
+          :name="Unicons[selectedMenuItem?.icon as unknown as DamsIcons].name"
         ></unicon>
         <CustomIcon
           v-else
