@@ -17,6 +17,10 @@
       v-if="route.name !== undefined"
       :context="route.name as Context"
     />
+    <OCRModal
+      v-if="route.name !== undefined"
+      :context="route.name as Context"
+    />
   </div>
 </template>
 
@@ -34,6 +38,7 @@ import PickEntityModal from "./components/PickEntityModal.vue";
 import BaseNotification from "./components/base/BaseNotification.vue";
 import SearchSavedSearchesModal from "./components/searchSavedSearchesModal.vue";
 import BulkoperationsModal from "@/components/bulk-operations/BulkOperationsModal.vue";
+import OCRModal from "@/components/OCRModal.vue";
 import { useRoute } from "vue-router";
 import type { Context } from "@/composables/useBulkOperations";
 
@@ -49,6 +54,7 @@ export default defineComponent({
     BaseNotification,
     SearchSavedSearchesModal,
     BulkoperationsModal,
+    OCRModal,
   },
   inject: { DefaultOIDC },
   setup() {
