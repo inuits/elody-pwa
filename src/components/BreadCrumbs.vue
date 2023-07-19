@@ -7,7 +7,7 @@
           { 'rounded-t-xl': showHistory },
           { 'rounded-xl': !showHistory },
         ]"
-        @click="showHistory = !showHistory"
+        @click="toggleList"
       >
         <unicon
           v-if="selectedMenuItem?.icon && Unicons[selectedMenuItem?.icon as unknown as DamsIcons]"
@@ -34,8 +34,8 @@
     >
       <ul>
         <li
-          v-show="visitedRoutes.length"
-          v-for="(route, index) in visitedRoutes.reverse()"
+          v-show="showHistory"
+          v-for="(route, index) in visitedRoutes"
           :key="route.id"
           @click="navigateToEntity(route)"
         >
@@ -76,6 +76,17 @@ const { currentRouteTitle, visitedRoutes } = useBreadcrumbs();
 const { selectedMenuItem } = useMenuHelper();
 const router = useRouter();
 const { t } = useI18n();
+
+const toggleList = () => {
+  if (!visitedRoutes.value.length) {
+    return;
+  }
+  if (visitedRoutes.value.length == 1) {
+    router.go(-1);
+    return;
+  }
+  showHistory.value = !showHistory.value;
+};
 
 const navigateToEntity = (historyRoute: VisitedRoute) => {
   router.push({
