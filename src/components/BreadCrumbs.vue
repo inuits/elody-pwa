@@ -10,7 +10,7 @@
         @click="toggleList"
       >
         <unicon
-          v-if="selectedMenuItem?.icon && Unicons[selectedMenuItem?.icon as unknown as DamsIcons]"
+          v-if="Unicons[selectedMenuItem?.icon as unknown as DamsIcons]"
           height="24"
           :name="Unicons[selectedMenuItem?.icon as unknown as DamsIcons].name"
         ></unicon>
