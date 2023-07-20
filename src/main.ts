@@ -26,6 +26,11 @@ export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
 export let bulkSelectAllSizeLimit: number = 999999;
 
+const applyCustomization = (rulesObject: any) => {
+  if (rulesObject.applicationTitle)
+    document.title = rulesObject.applicationTitle;
+};
+
 const start = async () => {
   Unicon.add(Object.values(Unicons));
 
@@ -34,6 +39,7 @@ const start = async () => {
       ? import.meta.env.VUE_APP_CONFIG_URL
       : "/api/config"
   ).then((r) => r.json());
+  applyCustomization(config.customization);
   auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
   bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
 
