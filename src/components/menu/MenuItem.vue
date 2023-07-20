@@ -3,22 +3,20 @@
     <div
       v-show="menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
       @click="handleClick"
-      class="flex flex-row items-center ml-3 h-9 hover:text-accent-accent mt-3 cursor-pointer"
-      :class="{
-        'IsActive text-accent-accent rounded-lg': isActiveItem(menuitem),
-      }"
+      class="flex flex-row items-center ml-3 h-9 mt-3 cursor-pointer"
+      :class="[
+        {
+          'IsActive text-accent-accent': isActive,
+        },
+        { 'bg-neurtal-40 rounded-lg': isExpanded },
+      ]"
     >
       <unicon
         v-if="icon && Unicons[icon]"
         :name="Unicons[icon].name"
         height="18"
       />
-      <CustomIcon
-        v-else
-        :icon="icon"
-        :size="24"
-        :color="isActiveItem(menuitem) ? 'accent-normal' : 'text-body'"
-      />
+      <CustomIcon v-else :icon="icon" :size="24" :color="iconColor" />
       <span class="nav-item-label w-0 h-0 overflow-hidden px-4 font-bold">
         {{ menuitem?.label }}
       </span>
@@ -53,7 +51,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, defineProps, watch } from "vue";
+import { ref, defineProps, watch, computed } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
 import { Unicons } from "@/types";
@@ -77,6 +75,7 @@ const { getModal } = useAvailableModals();
 const props = defineProps<{
   menuitem: MenuItem;
   icon: DamsIcons;
+  isExpanded: Boolean;
 }>();
 
 const handleClick = () => {
@@ -85,7 +84,10 @@ const handleClick = () => {
   toggleDropDown();
 };
 
-const isActiveItem = (menuItem: MenuItem) => menuItem === selectedMenuItem;
+const isActive = computed(() => props.menuitem === selectedMenuItem.value);
+const iconColor = computed(() =>
+  props.menuitem === selectedMenuItem.value ? "accent-normal" : "text-body"
+);
 
 const handleSubMenu = () => {
   const submenu = props.menuitem.subMenu;
