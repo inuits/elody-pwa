@@ -51,9 +51,10 @@ const icons = computed((): Record<string, string> => {
 const displayIcon = ref<string>(icons.value[props.icon]);
 
 watch(
-  () => props.color,
+  () => [props.color, props.icon],
   () => {
     displayIcon.value = icons.value[props.icon];
-  }
+  },
+  { immediate: true }
 );
 </script>
