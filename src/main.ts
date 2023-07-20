@@ -39,7 +39,7 @@ const start = async () => {
       ? import.meta.env.VUE_APP_CONFIG_URL
       : "/api/config"
   ).then((r) => r.json());
-  applyCustomization(config.customization);
+  if (config.customization) applyCustomization(config.customization);
   auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
   bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
 
