@@ -3,13 +3,8 @@
     <div
       v-show="menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
       @click="handleClick"
-      class="flex flex-row items-center ml-3 h-9 mt-3 cursor-pointer"
-      :class="[
-        {
-          'IsActive text-accent-accent': isActive,
-        },
-        { 'bg-neurtal-40 rounded-lg': isExpanded },
-      ]"
+      class="flex flex-row items-center ml-3 h-9 mt-3 cursor-pointer hover:text-accent-accent"
+      :class="[{ 'bg-neurtal-40 rounded-lg': isExpanded }]"
     >
       <unicon
         v-if="icon && Unicons[icon]"
@@ -41,9 +36,9 @@
       :class="{ dropdownMenuItem: showdropdown }"
     >
       <MenuSubItem
-        :typeLink="submenuItem.typeLink.route.destination"
+        :typeLink="submenuItem?.typeLink?.route?.destination"
         :labelName="submenuItem.label"
-        :destination="submenuItem.typeLink.route.destination"
+        :destination="submenuItem?.typeLink?.route?.destination"
         :show="showdropdown"
       />
     </div>
@@ -55,7 +50,11 @@ import { ref, defineProps, watch, computed } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
 import { Unicons } from "@/types";
-import { MenuItem, ModalState, DamsIcons } from "@/generated-types/queries";
+import {
+  type MenuItem,
+  ModalState,
+  DamsIcons,
+} from "@/generated-types/queries";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import CustomIcon from "../CustomIcon.vue";
@@ -86,7 +85,7 @@ const handleClick = () => {
 
 const isActive = computed(() => props.menuitem === selectedMenuItem.value);
 const iconColor = computed(() =>
-  props.menuitem === selectedMenuItem.value ? "accent-normal" : "text-body"
+  isActive.value ? "accent-normal" : "text-body"
 );
 
 const handleSubMenu = () => {
