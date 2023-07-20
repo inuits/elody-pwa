@@ -42,7 +42,7 @@
         <template v-if="metadataItem">
           <span class="text-sm text-text-light">{{ metadataItem.key }}</span>
           <span v-if="!stringIsUrl(metadataItem.value)" class="info"
-            >{{ metadataItem.key.startsWith('date_') ? convertUnitToReadbleFormat(metadataItem.value, 'datetime') :  metadataItem.value }}
+            >{{ metadataItem.key.startsWith('date_') ? convertUnitToReadbleFormat('datetime', metadataItem.value,) :  metadataItem.value }}
           </span>
           <span v-else class="info underline">
             <a :href="metadataItem.value" target="_blank">{{
