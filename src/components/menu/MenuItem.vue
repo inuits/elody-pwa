@@ -3,7 +3,7 @@
     <div
       v-show="menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
       @click="handleClick"
-      class="flex flex-row items-center ml-3 h-9 mt-3 cursor-pointer"
+      class="flex flex-row items-center pl-3 h-9 mt-3 cursor-pointer"
       :class="[{ 'bg-neutral-40 rounded-lg': isBeingHovered }]"
     >
       <unicon
