@@ -3,8 +3,8 @@
     <div
       v-show="menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
       @click="handleClick"
-      class="flex flex-row items-center ml-3 h-9 mt-3 cursor-pointer hover:text-accent-accent"
-      :class="[{ 'bg-neurtal-40 rounded-lg': isExpanded }]"
+      class="flex flex-row items-center ml-3 h-9 mt-3 cursor-pointer"
+      :class="[{ 'bg-neutral-40 rounded-lg': isBeingHovered }]"
     >
       <unicon
         v-if="icon && Unicons[icon]"
@@ -75,6 +75,7 @@ const props = defineProps<{
   menuitem: MenuItem;
   icon: DamsIcons;
   isExpanded: Boolean;
+  isBeingHovered: Boolean;
 }>();
 
 const handleClick = () => {
