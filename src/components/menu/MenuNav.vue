@@ -1,6 +1,8 @@
 <template>
   <nav
     class="navbar fixed left-0 top-0 w-24 h-screen flex flex-col justify-start align-center pt-10 bg-neutral-white px-5 z-50"
+    @mouseenter="changeExpandedState(true)"
+    @mouseleave="changeExpandedState(false)"
   >
     <router-link
       :to="{ name: 'Home' }"
@@ -14,6 +16,7 @@
         class="hover:bg-neutral-40"
         :icon="menuItem.icon"
         :menuitem="menuItem"
+        :isExpanded="isExpanded"
       />
     </div>
     <LogInLogout />
@@ -25,9 +28,15 @@ import { RouterLink } from "vue-router";
 import Menuitem from "@/components/menu/MenuItem.vue";
 import LogInLogout from "@/components/LogInLogout.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
+import { ref } from "vue";
 
+const isExpanded = ref<boolean>(false);
 const { getMenuEntities, menuItems } = useMenuHelper();
 getMenuEntities();
+
+const changeExpandedState = (newState: boolean) => {
+  isExpanded.value = newState;
+};
 </script>
 
 <style>
