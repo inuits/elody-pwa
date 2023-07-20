@@ -11,12 +11,17 @@
       <img src="/logo.svg" alt="Elody logo" class="h-12" />
     </router-link>
 
-    <div v-for="menuItem in menuItems" :key="menuItem.label">
+    <div
+      v-for="menuItem in menuItems"
+      :key="menuItem.label"
+      @mouseenter="changeHoveredItem(menuItem)"
+      @mouseleave="changeHoveredItem(undefined)"
+    >
       <Menuitem
-        class="hover:bg-neutral-40"
         :icon="menuItem.icon"
         :menuitem="menuItem"
         :isExpanded="isExpanded"
+        :isBeingHovered="menuItem === hoveredItem"
       />
     </div>
     <LogInLogout />
@@ -29,13 +34,19 @@ import Menuitem from "@/components/menu/MenuItem.vue";
 import LogInLogout from "@/components/LogInLogout.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { ref } from "vue";
+import type { MenuItem } from "@/generated-types/queries";
 
 const isExpanded = ref<boolean>(false);
+const hoveredItem = ref<MenuItem | undefined>(undefined);
 const { getMenuEntities, menuItems } = useMenuHelper();
 getMenuEntities();
 
 const changeExpandedState = (newState: boolean) => {
   isExpanded.value = newState;
+};
+
+const changeHoveredItem = (item: MenuItem | undefined) => {
+  hoveredItem.value = item;
 };
 </script>
 
