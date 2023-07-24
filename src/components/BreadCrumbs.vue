@@ -39,7 +39,14 @@
         ></unicon>
         <p
           v-if="previousRoute?.routeName"
-          :class="['px-2', { 'cursor-pointer': visitedRoutes.length > 2 }]"
+          :class="[
+            'px-2 ',
+            { 'cursor-pointer': visitedRoutes.length > 2 },
+            { 'w-[200px] truncate': truncatePreviousRouteName },
+          ]"
+          @mouseenter="truncatePreviousRouteName = false"
+          @mouseleave="truncatePreviousRouteName = true"
+          @click="navigateToEntity(previousRoute)"
         >
           {{ previousRoute?.routeName }}
         </p>
@@ -47,7 +54,12 @@
       <div class="flex h-full justify-center items-center px-2">
         <unicon height="24" :name="Unicons.AngleRight.name" />
       </div>
-      <div class="flex h-full items-center subtitle text-neutral-black">
+      <div
+        :class="[
+          'flex h-full items-center subtitle text-neutral-black',
+          { 'max-w-[200px] truncate': !truncatePreviousRouteName },
+        ]"
+      >
         {{ currentRouteTitle }}
       </div>
     </div>
@@ -76,7 +88,7 @@
             >
               <div class="mr-2" v-if="route.icon">
                 <unicon
-                  v-if="Unicons[route.icon].name"
+                  v-if="Unicons[route.icon]"
                   height="24"
                   :name="Unicons[route.icon].name"
                 ></unicon>
@@ -107,6 +119,7 @@ import type { VisitedRoute } from "@/composables/useBreadcrumbs";
 import { useRouter } from "vue-router";
 
 const showHistory = ref<boolean>(false);
+const truncatePreviousRouteName = ref<boolean>(true);
 const { currentRouteTitle, visitedRoutes, previousRoute } = useBreadcrumbs();
 const { selectedMenuItem } = useMenuHelper();
 const router = useRouter();
