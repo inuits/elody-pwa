@@ -92,7 +92,7 @@ watch(result, (queryResults) => {
       }
 
       setCurrentRouteTitle(entity?.intialValues?.title);
-      addVisitedRoute({ id, routeName: currentRouteTitle.value });
+      addVisitedRoute({ id: entity?.id, routeName: currentRouteTitle.value });
 
       loading.value = false;
     }
