@@ -53,9 +53,10 @@ import {
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import BasePaginationNew from "@/components/base/BasePaginationNew.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useQuery } from "@vue/apollo-composable";
+import { useRoute } from "vue-router";
 
 defineProps<{
   totalItems: number;
@@ -70,6 +71,7 @@ const emit = defineEmits<{
 
 const skip = ref<number>(1);
 const { getModal } = useAvailableModals();
+const route = useRoute();
 
 const selectedPaginationLimitOption = ref<DropdownOption>();
 const paginationLimitOptions = ref<DropdownOption[]>([]);
@@ -90,16 +92,25 @@ onPaginationLimitOptionsResult((result) => {
 
 const selectedSortOption = ref<DropdownOption>();
 const sortOptions = ref<DropdownOption[]>([]);
-const { onResult: onSortOptionsResult } = useQuery<GetSortOptionsQuery>(
-  GetSortOptionsDocument,
-  undefined,
-  {
-    fetchPolicy: "no-cache",
-    notifyOnNetworkStatusChange: true,
+const entityType = computed(() => route.meta.entityType);
+const { onResult: onSortOptionsResult, refetch: refetchSortOptions } =
+  useQuery<GetSortOptionsQuery>(
+    GetSortOptionsDocument,
+    { entityType: entityType.value },
+    {
+      fetchPolicy: "no-cache",
+      notifyOnNetworkStatusChange: true,
+    }
+  );
+watch(
+  () => entityType.value,
+  () => {
+    refetchSortOptions({ entityType: entityType.value });
   }
 );
 onSortOptionsResult((result) => {
-  sortOptions.value = result.data?.SortOptions.options ?? [];
+  sortOptions.value =
+    result.data?.EntityTypeSortOptions?.sortOptions?.options ?? [];
   selectedSortOption.value = sortOptions.value[0];
 });
 
