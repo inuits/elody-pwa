@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="flex h-10">
+    <div class="flex h-10 z-[70] relative">
       <div
         :class="[
           'flex justify-center items-center bg-neutral-light h-full',
@@ -63,7 +63,10 @@
         {{ currentRouteTitle }}
       </div>
     </div>
-    <div v-if="showHistory" class="absolute bg-neutral-light rounded-b-md">
+    <div
+      v-if="showHistory"
+      class="absolute bg-neutral-light rounded-b-md z-[70]"
+    >
       <ul>
         <li
           v-show="showHistory"
@@ -105,6 +108,11 @@
         </li>
       </ul>
     </div>
+    <div
+      v-if="showHistory"
+      class="absolute top-0 left-0 h-screen w-screen z-[60]"
+      @click="showHistory = false"
+    ></div>
   </div>
 </template>
 
