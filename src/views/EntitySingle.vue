@@ -34,7 +34,7 @@ import EntityColumn from "@/components/EntityColumn.vue";
 import EntityForm from "@/components/EntityForm.vue";
 import useEditMode from "@/composables/useEdit";
 import { asString } from "@/helpers";
-import { reactive, ref, watch } from "vue";
+import { reactive, ref, watch, inject } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useQuery } from "@vue/apollo-composable";
@@ -49,12 +49,13 @@ const props = withDefaults(
   }
 );
 
+const config: any = inject("config");
 const id = asString(useRoute().params["id"]);
 const loading = ref<boolean>(true);
 const auth = useAuth();
 const { showEditToggle, disableEditMode, isEdit, setRefetchFn } = useEditMode();
 const { setCurrentRouteTitle, addVisitedRoute, currentRouteTitle } =
-  useBreadcrumbs();
+  useBreadcrumbs(config);
 const router = useRouter();
 
 const queryVariables = reactive<GetEntityByIdQueryVariables>({
