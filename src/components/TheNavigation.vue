@@ -158,46 +158,4 @@ const forceDisableEditMediafiles = () => {
 };
 </script>
 
-<style scoped>
-.navbar {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 300ms;
-}
-
-.menu-item:hover .menu-btn {
-  --tw-bg-opacity: 1;
-  background-color: rgb(165 173 186 / var(--tw-bg-opacity));
-}
-
-.navbar:hover {
-  width: 20rem;
-}
-
-.navbar:hover .router-link {
-  padding-left: 0.3rem;
-  justify-content: flex-start;
-}
-
-.navbar:hover .nav-item-label {
-  animation: showText 0.1s ease-in 0.2s forwards;
-  -moz-animation: showText 0.1s ease-in 0.2s forwards;
-  -webkit-animation: showText 0.1s ease-in 0.2s forwards;
-  -o-animation: showText 0.1s ease-in 0.2s forwards;
-  animation-fill-mode: forwards;
-}
-
-@keyframes showText {
-  100% {
-    width: auto;
-    height: auto;
-  }
-}
-
-@-webkit-keyframes showText {
-  100% {
-    width: auto;
-    height: auto;
-  }
-}
-</style>
+<style scoped></style>
