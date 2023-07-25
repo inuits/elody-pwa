@@ -21,7 +21,6 @@ export const useBreadcrumbs = (config: any) => {
   );
 
   const setCurrentRouteTitle = (title: string): void => {
-    console.log(config);
     currentRouteTitle.value = title;
     document.title = `${config.customization.applicationTitle} | ${title}`;
   };
