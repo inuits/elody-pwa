@@ -42,7 +42,7 @@
           :class="[
             'px-2 ',
             { 'cursor-pointer': visitedRoutes.length > 2 },
-            { 'w-[200px] truncate': truncatePreviousRouteName },
+            { 'max-w-[200px] truncate': truncatePreviousRouteName },
           ]"
           @mouseenter="truncatePreviousRouteName = false"
           @mouseleave="truncatePreviousRouteName = true"
