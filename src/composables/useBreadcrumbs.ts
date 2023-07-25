@@ -1,4 +1,4 @@
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, inject } from "vue";
 import { useRouter } from "vue-router";
 import { useMenuHelper } from "@/composables/useMenuHelper";
 import type { DamsIcons } from "@/generated-types/queries";
@@ -12,7 +12,7 @@ export type VisitedRoute = {
 const currentRouteTitle = ref<string>("");
 const visitedRoutes = ref<VisitedRoute[]>([]);
 
-export const useBreadcrumbs = () => {
+export const useBreadcrumbs = (config: any) => {
   const { selectedMenuItem } = useMenuHelper();
   const previousRoute = computed<VisitedRoute | undefined>(() =>
     visitedRoutes.value.length == 2
@@ -21,7 +21,9 @@ export const useBreadcrumbs = () => {
   );
 
   const setCurrentRouteTitle = (title: string): void => {
+    console.log(config);
     currentRouteTitle.value = title;
+    document.title = `${config.customization.applicationTitle} | ${title}`;
   };
 
   const addVisitedRoute = (route: VisitedRoute): void => {
@@ -52,7 +54,7 @@ export const useBreadcrumbs = () => {
   );
 
   useRouter().afterEach((to) => {
-    currentRouteTitle.value = to.meta.title as string;
+    setCurrentRouteTitle(to.meta.title as string);
     if (to.name === "Home") {
       resetVisitedRoutes();
     }

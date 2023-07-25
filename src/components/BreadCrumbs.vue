@@ -114,13 +114,15 @@ import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useMenuHelper } from "@/composables/useMenuHelper";
 import type { DamsIcons } from "@/generated-types/queries";
 import CustomIcon from "./CustomIcon.vue";
-import { ref } from "vue";
+import { ref, inject } from "vue";
 import type { VisitedRoute } from "@/composables/useBreadcrumbs";
 import { useRouter } from "vue-router";
 
+const config: any = inject("config");
 const showHistory = ref<boolean>(false);
 const truncatePreviousRouteName = ref<boolean>(true);
-const { currentRouteTitle, visitedRoutes, previousRoute } = useBreadcrumbs();
+const { currentRouteTitle, visitedRoutes, previousRoute } =
+  useBreadcrumbs(config);
 const { selectedMenuItem } = useMenuHelper();
 const router = useRouter();
 
