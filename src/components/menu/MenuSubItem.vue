@@ -26,7 +26,6 @@ const props = defineProps({
   destination: String,
 });
 const route = useRoute();
-console.log(props.destination, route.path.replace("/", ""));
 const isActive = computed(
   () => route.path.replace("/", "") === props.destination
 );
