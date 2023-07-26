@@ -245,7 +245,7 @@ const displayPreview = ref<boolean>(props.enablePreview);
 
 const expandFilters = ref<boolean>(false);
 const selectedSortOption = ref<string>();
-const isAsc = ref<boolean>(false);
+const isAsc = ref<boolean>(true);
 const toggles = [
   { isOn: displayList, iconOn: DamsIcons.ListUl, iconOff: DamsIcons.ListUl },
   { isOn: displayGrid, iconOn: DamsIcons.Apps, iconOff: DamsIcons.Apps },
