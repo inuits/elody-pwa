@@ -20,7 +20,7 @@
           v-if="!predefinedEntities"
           :total-items="totalEntityCount"
           v-model:limit="queryVariables.limit"
-          v-model:skip="queryVariables.skip"
+          v-model:skip="(queryVariables.skip as number)"
           v-model:sortKey="selectedSortOption"
           v-model:isAsc="isAsc"
           @update:limit="setNewQueryVariables"
