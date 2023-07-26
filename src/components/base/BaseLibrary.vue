@@ -290,7 +290,12 @@ onEntitiesResult((result) => {
   }
 });
 
+const resetSkip = () => {
+  queryVariables.skip = 1;
+};
+
 const setFilters = (advancedFilterInputs: AdvancedFilterInput[]) => {
+  resetSkip();
   queryVariables.advancedFilterInputs = advancedFilterInputs;
   if (props.parentEntityId && isSaved) setNewQueryVariables();
 };

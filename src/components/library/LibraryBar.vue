@@ -58,8 +58,9 @@ import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute } from "vue-router";
 
-defineProps<{
+const props = defineProps<{
   totalItems: number;
+  skip: number;
 }>();
 
 const emit = defineEmits<{
@@ -69,7 +70,7 @@ const emit = defineEmits<{
   (event: "update:isAsc", limit: any): void;
 }>();
 
-const skip = ref<number>(1);
+const skip = ref<number>(props.skip);
 const { getModal } = useAvailableModals();
 const route = useRoute();
 
@@ -117,6 +118,10 @@ onSortOptionsResult((result) => {
 const isAsc = ref<boolean>(false);
 
 watch(skip, () => emit("update:skip", skip.value));
+watch(
+  () => props.skip,
+  () => (skip.value = props.skip)
+);
 watch(isAsc, () => emit("update:isAsc", isAsc.value));
 watch(
   () => selectedSortOption.value,
