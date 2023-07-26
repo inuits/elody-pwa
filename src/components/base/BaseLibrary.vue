@@ -303,7 +303,7 @@ const setFilters = (advancedFilterInputs: AdvancedFilterInput[]) => {
 const { result: allEntitiesResult } = useQuery(
   GetEntitiesDocument,
   queryVariables,
-  { enabled: true }
+  { enabled: true, fetchPolicy: "network-only" }
 );
 
 const bulkSelect = (items = entities.value) => {
