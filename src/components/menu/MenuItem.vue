@@ -36,6 +36,7 @@
       :class="{ dropdownMenuItem: showdropdown }"
     >
       <MenuSubItem
+        @click="setSelectedMenuItem(menuitem)"
         :typeLink="submenuItem?.typeLink?.route?.destination"
         :labelName="submenuItem.label"
         :destination="submenuItem?.typeLink?.route?.destination"
