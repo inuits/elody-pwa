@@ -215,7 +215,9 @@ onAdvancedFiltersResult((result) => {
   });
 });
 
-const applyFilters = () => emit("applyFilters", activeFilters.value);
+const applyFilters = () => {
+  emit("applyFilters", activeFilters.value);
+};
 
 const getAngleIcon = computed<DamsIcons>(() =>
   props.expandFilters ? DamsIcons.AngleUp : DamsIcons.AngleDown
