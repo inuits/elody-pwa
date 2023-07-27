@@ -7,6 +7,7 @@
         v-model:zoom="zoom"
         :center="(parsedMapData.coordinates as PointExpression)"
         @click="getMapCoordinates"
+        :options="{ attributionControl: false }"
       >
         <l-tile-layer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
