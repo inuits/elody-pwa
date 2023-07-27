@@ -8,11 +8,11 @@ export const getEntityIdFromRoute = (): string | undefined => {
   return asString(useRoute().params["id"]) || undefined;
 };
 
-export const i18n = (translations: Object) => {
+export const i18n = (translations: Object, applicationLocale: string) => {
   return createI18n({
     legacy: false,
     globalInjection: true,
-    locale: "en",
+    locale: applicationLocale,
     fallbackLocale: "en",
     // @ts-ignore
     messages: translations,

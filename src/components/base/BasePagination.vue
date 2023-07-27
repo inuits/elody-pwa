@@ -18,7 +18,7 @@
       class="flex text-sm mx-3 flex-row items-center w-1-6"
       data-test="page-count-label"
     >
-      {{ $t("partials.page") }}
+      {{ $t("pagination.page") }}
       <input
         class="mx-2 w-16 rounded-lg"
         type="number"
@@ -26,7 +26,7 @@
         :min="1"
         v-model="currentPage"
       />{{}}
-      {{ $t("partials.of") }}
+      {{ $t("pagination.of") }}
       {{ maxPage() }}
     </div>
     <unicon
@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, reactive, ref, watch } from "vue";
+import { defineComponent, reactive, ref, watch } from "vue";
 import { Unicons } from "@/types";
 
 export type PaginationInfo = {
