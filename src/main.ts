@@ -11,7 +11,6 @@ import { DefaultApolloClient } from "@vue/apollo-composable";
 import { OpenIdConnectClient } from "session-vue-3-oidc-library";
 import App from "./App.vue";
 import { addComponentToRoutes } from "./views/router";
-import { store } from "./store";
 import { Unicons } from "./types";
 import { i18n } from "@/helpers";
 import { createHead } from "@vueuse/head";
@@ -31,14 +30,26 @@ const applyCustomization = (rulesObject: any) => {
     document.title = rulesObject.applicationTitle;
 };
 
-const start = async () => {
-  Unicon.add(Object.values(Unicons));
-
+const getApplicationDetails = async () => {
   const config = await fetch(
     import.meta.env.VUE_APP_CONFIG_URL
       ? import.meta.env.VUE_APP_CONFIG_URL
       : "/api/config"
   ).then((r) => r.json());
+  const translations = await fetch(
+    import.meta.env.VUE_APP_CONFIG_URL
+      ? import.meta.env.VUE_APP_CONFIG_URL
+      : "/api/translation"
+  ).then((r) => r.json());
+
+  return { config, translations };
+};
+
+const start = async () => {
+  Unicon.add(Object.values(Unicons));
+
+  const { config, translations } = await getApplicationDetails();
+
   if (config.customization) applyCustomization(config.customization);
   auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
   bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
@@ -52,19 +63,6 @@ const start = async () => {
   const graphqlErrorInterceptor = onError((error: any) => {
     const errorHandler = useGraphqlErrors(error);
     errorHandler.logFormattedErrors();
-
-    // if (errorHandler.checkForUnauthorized() === true) {
-    //   new Promise((resolve) => {
-    //     fetch("/api/logout").then(() => {
-    //       auth.resetAuthProperties();
-    //       auth.changeRedirectRoute(
-    //         window.location.origin + window.location.pathname
-    //       );
-    //       auth.redirectToLogin(router.currentRoute?.value.fullPath);
-    //       resolve;
-    //     });
-    //   });
-    // }
   });
 
   router.beforeEach(async (to, _from) => {
@@ -100,7 +98,6 @@ const start = async () => {
     .use(Unicon, {
       fill: "currentColor",
     })
-    .use(store)
     .use(router)
     .use(auth)
     .use(head)
