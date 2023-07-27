@@ -2,7 +2,7 @@
   <div class="bg-accent-normal rounded-t-lg">
     <div class="flex items-center justify-between">
       <div class="flex p-2">
-        <span class="subtitle mr-2">{{ label }}</span>
+        <span class="subtitle mr-2">{{ t(label) }}</span>
         <slot name="actions"></slot>
       </div>
       <span
@@ -20,10 +20,13 @@
 <script lang="ts" setup>
 import { Unicons } from "@/types";
 import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
-const props = defineProps<{
+import { useI18n } from "vue-i18n";
+
+defineProps<{
   label: string;
   isCollapsed: Boolean;
 }>();
 
+const { t } = useI18n();
 const { toggleElementCollapse } = useEntityElementCollapseHelper();
 </script>
