@@ -6,7 +6,7 @@
     @click="isOpen = !isOpen"
   >
     <span class="text-lg">
-      {{ filter.advancedFilter.label }}
+      {{ t(filter.advancedFilter.label) }}
     </span>
     <unicon :name="icon" height="20" />
   </div>
@@ -16,7 +16,7 @@
         v-model="selectedMatcher"
         :options="matchers"
         label="filter "
-        default-label="selecteer filter type"
+        :default-label="t('filters.matcher-labels.select-filter-type')"
         dropdown-style="default"
       />
       <BaseButtonNew
@@ -54,6 +54,7 @@ import {
 import { computed, markRaw, ref, toRefs, watch } from "vue";
 import { DamsIcons } from "@/generated-types/queries";
 import { Unicons } from "@/types";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   filter: FilterListItem;
@@ -66,6 +67,7 @@ const emit = defineEmits<{
   (event: "deactivateFilter", advancedFilterKey: string): void;
 }>();
 
+const { t } = useI18n();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { clearAllActiveFilters } = toRefs(props);
 const isOpen = ref<boolean>(false);

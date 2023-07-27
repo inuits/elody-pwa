@@ -94,7 +94,7 @@ const start = async () => {
   });
 
   const app = createApp(App)
-    .use(i18n)
+    .use(i18n(translations))
     .use(Unicon, {
       fill: "currentColor",
     })

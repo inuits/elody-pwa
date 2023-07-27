@@ -8,7 +8,7 @@
     ]"
   >
     <p class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer">
-      {{ labelName }}
+      {{ t(labelName || "") }}
     </p>
   </router-link>
 </template>
@@ -16,6 +16,8 @@
 <script lang="ts" setup>
 import { computed, defineProps } from "vue";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
+
 const props = defineProps({
   show: {
     type: Boolean,
@@ -25,6 +27,7 @@ const props = defineProps({
   labelName: String,
   destination: String,
 });
+const { t } = useI18n();
 const route = useRoute();
 const isActive = computed(
   () => route.path.replace("/", "") === props.destination

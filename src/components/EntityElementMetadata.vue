@@ -1,6 +1,6 @@
 <template>
   <div class="text-sm pl-4">
-    <p class="text-text-light w-full">{{ label }}</p>
+    <p class="text-text-light w-full">{{ t(label || "") }}</p>
     <div v-if="Array.isArray(readableValue)">
       <div v-for="item in readableValue" :key="item">
         <p v-if="!stringIsUrl(item)">{{ item }}</p>
@@ -24,12 +24,15 @@
 import type { Unit } from "@/generated-types/queries";
 import { convertUnitToReadbleFormat, stringIsUrl } from "@/helpers";
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   label?: string;
   value?: any;
   unit?: string;
 }>();
+
+const { t } = useI18n();
 
 const readableValue = computed(() => {
   return convertUnitToReadbleFormat(props.unit as Unit, props.value ?? "");

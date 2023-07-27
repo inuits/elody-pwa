@@ -1,34 +1,23 @@
-import messages from "@intlify/vite-plugin-vue-i18n/messages";
 import { createI18n } from "vue-i18n";
 import { PanelType, Unit } from "@/generated-types/queries";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useRoute } from "vue-router";
 
-export const langs: string[] = ["nl", "fr"];
-
-export const mergeLanguageJsonFiles = (messages: any, langs: string[]): any => {
-  const newMessages: any = {};
-  langs.forEach((lang: string) => {
-    for (const propt in messages) {
-      if (propt.includes(lang)) {
-        newMessages[lang] = { ...newMessages[lang], ...messages[propt] };
-      }
-    }
-  });
-  return newMessages;
-};
-
 export const getEntityIdFromRoute = (): string | undefined => {
   return asString(useRoute().params["id"]) || undefined;
 };
 
-export const i18n = createI18n({
-  globalInjection: true,
-  locale: "nl",
-  fallbackLocale: "nl",
-  messages: mergeLanguageJsonFiles(messages, langs),
-});
+export const i18n = (translations: Object) => {
+  return createI18n({
+    legacy: false,
+    globalInjection: true,
+    locale: "en",
+    fallbackLocale: "en",
+    // @ts-ignore
+    messages: translations,
+  });
+};
 
 export const asString = (x: string | string[]) => (Array.isArray(x) ? x[0] : x);
 

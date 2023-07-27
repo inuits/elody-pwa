@@ -13,7 +13,7 @@
       />
       <CustomIcon v-else :icon="icon" :size="24" :color="iconColor" />
       <span class="nav-item-label w-0 h-0 overflow-hidden px-4 font-bold">
-        {{ menuitem?.label }}
+        {{ t(menuitem?.label) }}
       </span>
       <div class="w-full flex justify-end align-center" v-if="menuitem.subMenu">
         <unicon
@@ -59,6 +59,8 @@ import {
 import useMenuHelper from "@/composables/useMenuHelper";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import CustomIcon from "../CustomIcon.vue";
+import { useI18n } from "vue-i18n";
+
 const {
   checkIfRouteOrModal,
   showdropdown,
@@ -67,6 +69,7 @@ const {
   setSelectedMenuItem,
   selectedMenuItem,
 } = useMenuHelper();
+const { t } = useI18n();
 
 const auth = useAuth();
 const menuSubitem = ref<Array<MenuItem>>([]);

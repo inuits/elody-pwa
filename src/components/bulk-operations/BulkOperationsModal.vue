@@ -44,7 +44,7 @@
               :key="csvExportOption.key.value"
               :class="{ 'mb-2': csvExportOption.isSelected }"
               v-model="csvExportOption.isSelected"
-              :label="csvExportOption.key.label"
+              :label="t(csvExportOption.key.label)"
               :item="{ id: csvExportOption.key.value }"
               :bulk-operations-context="
                 BulkOperationsContextEnum.BulkOperationsCsvExport
@@ -56,7 +56,7 @@
       </div>
       <div class="basis-full h-[55px]">
         <BulkOperationsSubmitBar
-          button-label="Exporteer naar csv"
+          :button-label="t('bulk-operations.export-to-csv')"
           :button-icon="DamsIcons.DocumentInfo"
           :disabled="
             getEnqueuedItemCount(
