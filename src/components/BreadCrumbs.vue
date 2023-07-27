@@ -48,7 +48,7 @@
           @mouseleave="truncatePreviousRouteName = true"
           @click="navigateToEntity(previousRoute)"
         >
-          {{ previousRoute?.routeName }}
+          {{ t(previousRoute?.routeName) }}
         </p>
       </div>
       <div class="flex h-full justify-center items-center px-2">
@@ -60,7 +60,7 @@
           { 'max-w-[200px] truncate': !truncatePreviousRouteName },
         ]"
       >
-        {{ currentRouteTitle }}
+        {{ t(currentRouteTitle) }}
       </div>
     </div>
     <div
@@ -102,7 +102,7 @@
                   color="text-body"
                 />
               </div>
-              <p>{{ route.routeName }}</p>
+              <p>{{ t(route.routeName) }}</p>
             </div>
           </div>
         </li>
@@ -125,8 +125,10 @@ import CustomIcon from "./CustomIcon.vue";
 import { ref, inject } from "vue";
 import type { VisitedRoute } from "@/composables/useBreadcrumbs";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 
 const config: any = inject("config");
+const { t } = useI18n();
 const showHistory = ref<boolean>(false);
 const truncatePreviousRouteName = ref<boolean>(true);
 const { currentRouteTitle, visitedRoutes, previousRoute } =

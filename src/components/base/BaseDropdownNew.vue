@@ -28,7 +28,7 @@
             v-if="selectedOptionIsNotDefaultOption && labelAlignment === 'left'"
             >{{ label }}
           </span>
-          {{ selectedOption.label }}
+          {{ t(selectedOption.label) }}
           <span
             v-if="
               selectedOptionIsNotDefaultOption && labelAlignment === 'right'
@@ -67,7 +67,7 @@
           :name="Unicons[option.icon].name"
           class="h-5 mr-2 -ml-0.5"
         />
-        <span>{{ option.label }}</span>
+        <span>{{ t(option.label) }}</span>
       </li>
     </div>
   </ul>
