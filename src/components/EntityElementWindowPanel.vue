@@ -1,7 +1,7 @@
 <template>
   <div class="border-solid border-neutral-30 border-b-2 p-2">
     <div class="flex items-center justify-between">
-      <h2>{{ panel.label }}</h2>
+      <h2>{{ t(panel.label) }}</h2>
       <div @click="toggleIsCollapsed()" class="cursor-pointer">
         <unicon :name="!isCollapsed ? Unicons.Minus.name : Unicons.Plus.name" />
       </div>
@@ -67,6 +67,7 @@ import { Unicons } from "@/types";
 import { useEditMode } from "@/composables/useEdit";
 import { getValueForPanelMetadata } from "@/helpers";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 
 type MetadataField = {
   key: string;
@@ -80,6 +81,7 @@ const props = defineProps<{
   panel: WindowElementPanel;
 }>();
 
+const { t } = useI18n();
 const panelType = ref<PanelType>(props.panel.panelType);
 const isCollapsed = ref<boolean>(props.panel.isCollapsed);
 const { isEdit } = useEditMode();
