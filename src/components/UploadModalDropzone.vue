@@ -209,7 +209,7 @@ const callUploadEndpoint = async (uploadRequestData: UploadRequestData) => {
         await fetch(
           json.url.replace(
             "storage-api:5000/",
-            "storage-api.digipolis-dams.localhost:8100"
+            "storage-api.digipolis-dams.localhost:8300"
           ),
           {
             method: "POST",
