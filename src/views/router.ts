@@ -4,6 +4,7 @@ import Home from "@/views/Home.vue";
 import HomeWrapper from "@/views/HomeWrapper.vue";
 import ManifestViewer from "@/components/ManifestViewer.vue";
 import SingleEntity from "@/views/SingleEntity.vue";
+import NotFound from "@/components/NotFound.vue";
 
 export type urlParams = "id";
 
@@ -19,6 +20,7 @@ const routeComponentConfig: RouteComponentConfig[] = [
   { routeName: "SingleMediafile", routeComponent: SingleEntity },
   { routeName: "History", routeComponent: History },
   { routeName: "Mirador", routeComponent: ManifestViewer },
+  { routeName: "NotFound", routeComponent: NotFound },
 ];
 
 const getComponentForRoute = (route: RouteRecordRaw): any => {
