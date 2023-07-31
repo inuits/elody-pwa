@@ -58,7 +58,7 @@
                 .filter((filter) => !filter.advancedFilter.defaultValue)
                 .map((filter) => filter.advancedFilter.label)
             "
-            placeholder="voeg filter toe"
+            :placeholder="t('filters.add-filter')"
             autocomplete-style="defaultWithBorder"
           />
         </div>
