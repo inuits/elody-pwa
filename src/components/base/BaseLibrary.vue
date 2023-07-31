@@ -187,7 +187,7 @@ import { createPlaceholderEntities } from "@/helpers";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
-import { watch, reactive, ref, onMounted, onUnmounted } from "vue";
+import { watch, reactive, ref, onMounted, onUnmounted, toRefs } from "vue";
 
 export type PredefinedEntities = {
   usePredefinedEntities: boolean;
@@ -239,6 +239,7 @@ const entities = ref<Entity[]>(props.predefinedEntities?.entities || []);
 const totalEntityCount = ref<number>(
   props.predefinedEntities ? props.predefinedEntities.entities.length : 0
 );
+const { searchInputTypeOnDrawer } = toRefs(props);
 const displayList = ref<boolean>(false);
 const displayGrid = ref<boolean>(false);
 const displayPreview = ref<boolean>(props.enablePreview);
@@ -262,7 +263,7 @@ const queryVariables = reactive<GetEntitiesQueryVariables>({
   },
   advancedSearchValue: [],
   advancedFilterInputs: [],
-  searchInputType: props.searchInputTypeOnDrawer,
+  searchInputType: searchInputTypeOnDrawer,
 });
 
 const setNewQueryVariables = () => {

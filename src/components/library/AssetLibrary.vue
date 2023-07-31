@@ -1,9 +1,13 @@
 <template>
   <BaseLibrary
-    :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
-    :list-item-route-name="'SingleEntity'"
-    :enable-bulk-operations="true"
     :bulk-operations-context="route.name as Context"
+    :search-input-type-on-drawer="
+      route.meta.type === 'mediafiles'
+        ? SearchInputType.AdvancedInputMediaFilesType
+        : SearchInputType.AdvancedInputType
+    "
+    :enable-bulk-operations="true"
+    list-item-route-name="SingleEntity"
   />
 </template>
 
