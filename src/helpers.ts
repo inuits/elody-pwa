@@ -110,8 +110,9 @@ export const getValueForPanelMetadata = (
 };
 
 export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
-  const unitConversionTable = {
-    datetime: (value: string) => new Date(value).toLocaleString(),
+  const unitConversionTable: Record<string, any> = {
+    datetime: (value: string) =>
+      new Date(value).toLocaleString("nl-BE", { timeZone: "Europe/Brussels" }),
     seconds: (value: string) => `${value} s`,
     coordinates: (value: string) =>
       `${(value as any).longitude}, ${(value as any).latitude}`,
