@@ -71,6 +71,7 @@ const emit = defineEmits<{
 }>();
 
 const skip = ref<number>(props.skip);
+const isAsc = ref<boolean>(false);
 const { getModal } = useAvailableModals();
 const route = useRoute();
 
@@ -103,19 +104,11 @@ const { onResult: onSortOptionsResult, refetch: refetchSortOptions } =
       notifyOnNetworkStatusChange: true,
     }
   );
-watch(
-  () => entityType.value,
-  () => {
-    refetchSortOptions({ entityType: entityType.value });
-  }
-);
 onSortOptionsResult((result) => {
   sortOptions.value =
     result.data?.EntityTypeSortOptions?.sortOptions?.options ?? [];
   selectedSortOption.value = sortOptions.value[0];
 });
-
-const isAsc = ref<boolean>(false);
 
 watch(skip, () => emit("update:skip", skip.value));
 watch(
@@ -125,9 +118,11 @@ watch(
 watch(isAsc, () => emit("update:isAsc", isAsc.value));
 watch(
   () => selectedSortOption.value,
-  () => {
-    emit("update:sortKey", selectedSortOption.value?.value);
-  }
+  () => emit("update:sortKey", selectedSortOption.value?.value)
+);
+watch(
+  () => entityType.value,
+  () => refetchSortOptions({ entityType: entityType.value })
 );
 watch(selectedPaginationLimitOption, () => {
   skip.value = 1;

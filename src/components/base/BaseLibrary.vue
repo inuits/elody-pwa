@@ -19,14 +19,14 @@
         <LibraryBar
           v-if="!predefinedEntities"
           :total-items="totalEntityCount"
-          v-model:limit="queryVariables.limit"
-          v-model:skip="(queryVariables.skip as number)"
+          v-model:limit="entitiesQueryVariables.limit"
+          v-model:skip="(entitiesQueryVariables.skip as number)"
           v-model:sortKey="selectedSortOption"
           v-model:isAsc="isAsc"
-          @update:limit="setNewQueryVariables"
-          @update:skip="setNewQueryVariables"
-          @update:sortKey="setNewQueryVariables"
-          @update:isAsc="setNewQueryVariables"
+          @update:limit="setQueryVariables"
+          @update:skip="setQueryVariables"
+          @update:sortKey="setQueryVariables"
+          @update:isAsc="setQueryVariables"
         />
       </div>
 
@@ -74,13 +74,15 @@
                   entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
                 "
                 :media="
-                  loading ? undefined : getMediaFilenameFromEntity(entity)
+                  entitiesLoading
+                    ? undefined
+                    : getMediaFilenameFromEntity(entity)
                 "
-                :thumb-icon="loading ? undefined : getThumbnail(entity)"
+                :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
                 :small="listItemRouteName === 'SingleMediafile'"
-                :loading="loading"
+                :loading="entitiesLoading"
                 @click="
-                  loading || !enableNavigation
+                  entitiesLoading || !enableNavigation
                     ? !enableNavigation &&
                       parentEntityId &&
                       entity.type === 'MediaFile'
@@ -118,13 +120,15 @@
                   entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
                 "
                 :media="
-                  loading ? undefined : getMediaFilenameFromEntity(entity)
+                  entitiesLoading
+                    ? undefined
+                    : getMediaFilenameFromEntity(entity)
                 "
-                :thumb-icon="loading ? undefined : getThumbnail(entity)"
+                :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
                 :small="listItemRouteName === 'SingleMediafile'"
-                :loading="loading"
+                :loading="entitiesLoading"
                 @click="
-                  loading || !enableNavigation
+                  entitiesLoading || !enableNavigation
                     ? !enableNavigation &&
                       parentEntityId &&
                       entity.type === 'MediaFile'
@@ -149,7 +153,7 @@
           </div>
 
           <div v-else-if="displayPreview && entities" class="h-[62vh] mt-5">
-            <media-viewer :mediafiles="entities" :loading="loading" />
+            <media-viewer :mediafiles="entities" :loading="entitiesLoading" />
           </div>
         </ListContainer>
       </div>
@@ -187,7 +191,7 @@ import { createPlaceholderEntities } from "@/helpers";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
-import { watch, reactive, ref, onMounted, onUnmounted, toRefs } from "vue";
+import { watch, ref, onMounted, onUnmounted, toRefs } from "vue";
 
 export type PredefinedEntities = {
   usePredefinedEntities: boolean;
@@ -235,6 +239,7 @@ const { isSaved } = useEditMode();
 const route = useRoute();
 const router = useRouter();
 
+const fetchEnabled = ref<boolean>(false);
 const entities = ref<Entity[]>(props.predefinedEntities?.entities || []);
 const totalEntityCount = ref<number>(
   props.predefinedEntities ? props.predefinedEntities.entities.length : 0
@@ -252,7 +257,35 @@ const toggles = [
   { isOn: displayGrid, iconOn: DamsIcons.Apps, iconOff: DamsIcons.Apps },
 ];
 
-const queryVariables = reactive<GetEntitiesQueryVariables>({
+const entitiesQueryVariables: GetEntitiesQueryVariables = {
+  limit: 20,
+  skip: 1,
+  searchValue: {
+    value: "",
+    isAsc: isAsc.value,
+    key: "title",
+    order_by: "",
+  },
+  advancedSearchValue: [],
+  advancedFilterInputs: [],
+  searchInputType: searchInputTypeOnDrawer,
+};
+const {
+  onResult: onEntitiesResult,
+  loading: entitiesLoading,
+  refetch: refetchEntities,
+} = useQuery(GetEntitiesDocument, entitiesQueryVariables, () => ({
+  notifyOnNetworkStatusChange: true,
+  enabled: fetchEnabled.value,
+}));
+onEntitiesResult((result) => {
+  if (result.data && result.data.Entities && !props.predefinedEntities) {
+    entities.value = result.data.Entities.results as Entity[];
+    totalEntityCount.value = result.data.Entities.count;
+  }
+});
+
+const allEntitiesQueryVariables: GetEntitiesQueryVariables = {
   limit: bulkSelectAllSizeLimit,
   skip: 1,
   searchValue: {
@@ -264,48 +297,39 @@ const queryVariables = reactive<GetEntitiesQueryVariables>({
   advancedSearchValue: [],
   advancedFilterInputs: [],
   searchInputType: searchInputTypeOnDrawer,
-});
-
-const setNewQueryVariables = () => {
-  const newVariables = { ...queryVariables };
-  if (selectedSortOption.value && newVariables?.searchValue) {
-    newVariables.searchValue.order_by = selectedSortOption.value;
-    newVariables.searchValue.isAsc = isAsc.value;
-  }
-  refetch(newVariables);
 };
+const { result: allEntitiesResult, refetch: refetchAllEntities } = useQuery(
+  GetEntitiesDocument,
+  allEntitiesQueryVariables,
+  () => ({ enabled: fetchEnabled.value, fetchPolicy: "network-only" })
+);
 
-const {
-  onResult: onEntitiesResult,
-  loading,
-  refetch,
-} = useQuery(GetEntitiesDocument, queryVariables, {
-  notifyOnNetworkStatusChange: true,
-  enabled: props.predefinedEntities ? false : true,
-});
+const setQueryVariables = (resetSkip: boolean = false) => {
+  if (selectedSortOption.value) {
+    entitiesQueryVariables.searchValue.order_by = selectedSortOption.value;
+    entitiesQueryVariables.searchValue.isAsc = isAsc.value;
+    if (resetSkip) entitiesQueryVariables.skip = 1;
 
-onEntitiesResult((result) => {
-  if (result.data && result.data.Entities && !props.predefinedEntities) {
-    entities.value = result.data.Entities.results as Entity[];
-    totalEntityCount.value = result.data.Entities.count;
+    allEntitiesQueryVariables.limit = bulkSelectAllSizeLimit;
+    allEntitiesQueryVariables.skip = entitiesQueryVariables.skip;
+    allEntitiesQueryVariables.searchValue = entitiesQueryVariables.searchValue;
+    allEntitiesQueryVariables.advancedSearchValue =
+      entitiesQueryVariables.advancedSearchValue;
+    allEntitiesQueryVariables.advancedFilterInputs =
+      entitiesQueryVariables.advancedFilterInputs;
+
+    if (!props.predefinedEntities) {
+      fetchEnabled.value = true;
+      refetchEntities();
+      refetchAllEntities();
+    }
   }
-});
-
-const resetSkip = () => {
-  queryVariables.skip = 1;
 };
 
 const setFilters = (advancedFilterInputs: AdvancedFilterInput[]) => {
-  resetSkip();
-  queryVariables.advancedFilterInputs = advancedFilterInputs;
-  if (props.parentEntityId && isSaved) setNewQueryVariables();
+  entitiesQueryVariables.advancedFilterInputs = advancedFilterInputs;
+  if (props.parentEntityId && isSaved) setQueryVariables(true);
 };
-
-const { result: allEntitiesResult } = useQuery(
-  GetEntitiesDocument,
-  queryVariables,
-  { enabled: true, fetchPolicy: "network-only" }
-);
 
 const bulkSelect = (items = entities.value) => {
   if (props.predefinedEntities) items = props.predefinedEntities.entities;
@@ -358,7 +382,6 @@ onMounted(() => {
   window.addEventListener("resize", conditionallyCalculateGridColumns);
   window.addEventListener("popstate", conditionallyCalculateGridColumns);
 
-  if (!props.predefinedEntities) refetch();
   if (props.enablePreview)
     toggles.push({
       isOn: displayPreview,
@@ -382,10 +405,12 @@ onUnmounted(() => {
 });
 
 watch(
-  () => loading.value,
+  () => entitiesLoading.value,
   (isLoading) => {
     if (!isLoading) return;
-    entities.value = createPlaceholderEntities(queryVariables.limit || 25);
+    entities.value = createPlaceholderEntities(
+      entitiesQueryVariables.limit || 25
+    );
   },
   { immediate: true }
 );
