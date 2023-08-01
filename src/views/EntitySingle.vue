@@ -23,7 +23,6 @@
 
 <script lang="ts" setup>
 import {
-  Entitytyping,
   GetEntityByIdDocument,
   type ColumnList,
   type GetEntityByIdQueryVariables,
@@ -40,15 +39,6 @@ import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 
-const props = withDefaults(
-  defineProps<{
-    entityType?: Entitytyping;
-  }>(),
-  {
-    entityType: Entitytyping.Asset,
-  }
-);
-
 const config: any = inject("config");
 const id = asString(useRoute().params["id"]);
 const loading = ref<boolean>(true);
@@ -60,7 +50,7 @@ const router = useRouter();
 
 const queryVariables = reactive<GetEntityByIdQueryVariables>({
   id: id,
-  type: props.entityType,
+  type: String(useRoute().meta.entityType),
 });
 
 const { result, refetch } = useQuery(GetEntityByIdDocument, queryVariables, {

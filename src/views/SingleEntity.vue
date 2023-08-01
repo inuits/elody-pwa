@@ -3,5 +3,5 @@
 </template>
 
 <script lang="ts" setup>
-import EntitySingle from "./EntitySingle.vue";
+import EntitySingle from "@/views/EntitySingle.vue";
 </script>
