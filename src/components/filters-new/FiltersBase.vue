@@ -196,7 +196,7 @@ onAdvancedFiltersResult((result) => {
           match_exact: true,
         };
 
-        if (advancedFilter.label === "parent") {
+        if (advancedFilter.label === "metadata.labels.parent") {
           if (props.parentEntityId) {
             hiddenFilter.parent = props.parentEntityId;
             activeFilters.value.push(hiddenFilter);
