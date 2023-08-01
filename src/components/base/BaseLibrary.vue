@@ -303,19 +303,7 @@ const setFilters = (advancedFilterInputs: AdvancedFilterInput[]) => {
 
 const { result: allEntitiesResult } = useQuery(
   GetEntitiesDocument,
-  {
-    limit: bulkSelectAllSizeLimit,
-    skip: 1,
-    searchValue: {
-      value: "",
-      isAsc: isAsc.value,
-      key: "title",
-      order_by: "",
-    },
-    advancedSearchValue: [],
-    advancedFilterInputs: [],
-    searchInputType: searchInputTypeOnDrawer,
-  },
+  queryVariables,
   { enabled: true, fetchPolicy: "network-only" }
 );
 
