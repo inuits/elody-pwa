@@ -165,7 +165,6 @@ import {
   type AdvancedFilterInput,
   type Entity,
   type GetEntitiesQueryVariables,
-  Entitytyping,
 } from "@/generated-types/queries";
 import {
   useBulkOperations,
@@ -252,14 +251,8 @@ const toggles = [
   { isOn: displayList, iconOn: DamsIcons.ListUl, iconOff: DamsIcons.ListUl },
   { isOn: displayGrid, iconOn: DamsIcons.Apps, iconOff: DamsIcons.Apps },
 ];
-const entityCollection = computed(() =>
-  route.meta.entityType === Entitytyping.Mediafile
-    ? Entitytyping.Mediafile
-    : Entitytyping.Asset
-);
 
 const queryVariables = reactive<GetEntitiesQueryVariables>({
-  type: entityCollection.value,
   limit: bulkSelectAllSizeLimit,
   skip: 1,
   searchValue: {
@@ -305,7 +298,6 @@ const resetSkip = () => {
 const setFilters = (advancedFilterInputs: AdvancedFilterInput[]) => {
   resetSkip();
   queryVariables.advancedFilterInputs = advancedFilterInputs;
-  queryVariables.type = entityCollection.value;
   if (props.parentEntityId && isSaved) setNewQueryVariables();
 };
 
