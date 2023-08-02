@@ -30,6 +30,11 @@ export const stringIsUrl = (value: string): Boolean => {
   return isUrl;
 };
 
+export const stringIsDate = (value) => {
+  const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+  return dateRegex.test(value);
+};
+
 export const getIdFromKey = (prefix: string = "entities", key: string) => {
   if (key.includes(prefix + "/")) {
     return key.replace(prefix + "/", "");
@@ -111,9 +116,8 @@ export const getValueForPanelMetadata = (
 };
 
 export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
-  const unitConversionTable: Record<string, any> = {
-    datetime: (value: string) =>
-      new Date(value).toLocaleString("nl-BE", { timeZone: "Europe/Brussels" }),
+  const unitConversionTable = {
+    datetime: (value: string) => convertDateToReadbleFormat(value),
     seconds: (value: string) => `${value} s`,
     coordinates: (value: string) =>
       `${(value as any).longitude}, ${(value as any).latitude}`,
@@ -129,6 +133,20 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
   const conversionFunction = unitConversionTable[unit];
 
   return conversionFunction(value);
+};
+
+export const convertDateToReadbleFormat = (dateString: string): string => {
+  const date = new Date(dateString);
+  const options = {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    hour12: true,
+  };
+  return new Intl.DateTimeFormat(undefined, options).format(date);
 };
 
 export const createPlaceholderEntities = (amount: number): any[] => {
