@@ -251,7 +251,7 @@ const displayPreview = ref<boolean>(props.enablePreview);
 
 const expandFilters = ref<boolean>(false);
 const selectedSortOption = ref<string>();
-const isAsc = ref<boolean>(true);
+const isAsc = ref<boolean>(false);
 const toggles = [
   { isOn: displayList, iconOn: DamsIcons.ListUl, iconOff: DamsIcons.ListUl },
   { isOn: displayGrid, iconOn: DamsIcons.Apps, iconOff: DamsIcons.Apps },
@@ -305,9 +305,6 @@ const { result: allEntitiesResult, refetch: refetchAllEntities } = useQuery(
 );
 
 const setQueryVariables = (resetSkip: boolean = false) => {
-  const oldEntitiesQueryVariables = { ...entitiesQueryVariables };
-  const oldAllEntitiesQueryVariables = { ...allEntitiesQueryVariables };
-
   entitiesQueryVariables.searchValue.order_by = selectedSortOption.value;
   entitiesQueryVariables.searchValue.isAsc = isAsc.value;
   if (resetSkip) entitiesQueryVariables.skip = 1;
