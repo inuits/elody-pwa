@@ -268,7 +268,7 @@ const entitiesQueryVariables: GetEntitiesQueryVariables = {
   },
   advancedSearchValue: [],
   advancedFilterInputs: [],
-  searchInputType: searchInputTypeOnDrawer,
+  searchInputType: searchInputTypeOnDrawer.value,
 };
 const {
   onResult: onEntitiesResult,
@@ -296,7 +296,7 @@ const allEntitiesQueryVariables: GetEntitiesQueryVariables = {
   },
   advancedSearchValue: [],
   advancedFilterInputs: [],
-  searchInputType: searchInputTypeOnDrawer,
+  searchInputType: searchInputTypeOnDrawer.value,
 };
 const { result: allEntitiesResult, refetch: refetchAllEntities } = useQuery(
   GetEntitiesDocument,
@@ -305,30 +305,31 @@ const { result: allEntitiesResult, refetch: refetchAllEntities } = useQuery(
 );
 
 const setQueryVariables = (resetSkip: boolean = false) => {
-  if (selectedSortOption.value) {
-    entitiesQueryVariables.searchValue.order_by = selectedSortOption.value;
-    entitiesQueryVariables.searchValue.isAsc = isAsc.value;
-    if (resetSkip) entitiesQueryVariables.skip = 1;
+  const oldEntitiesQueryVariables = { ...entitiesQueryVariables };
+  const oldAllEntitiesQueryVariables = { ...allEntitiesQueryVariables };
 
-    allEntitiesQueryVariables.limit = bulkSelectAllSizeLimit;
-    allEntitiesQueryVariables.skip = entitiesQueryVariables.skip;
-    allEntitiesQueryVariables.searchValue = entitiesQueryVariables.searchValue;
-    allEntitiesQueryVariables.advancedSearchValue =
-      entitiesQueryVariables.advancedSearchValue;
-    allEntitiesQueryVariables.advancedFilterInputs =
-      entitiesQueryVariables.advancedFilterInputs;
+  entitiesQueryVariables.searchValue.order_by = selectedSortOption.value;
+  entitiesQueryVariables.searchValue.isAsc = isAsc.value;
+  if (resetSkip) entitiesQueryVariables.skip = 1;
 
-    if (!props.predefinedEntities) {
-      fetchEnabled.value = true;
-      refetchEntities();
-      refetchAllEntities();
-    }
+  allEntitiesQueryVariables.limit = bulkSelectAllSizeLimit;
+  allEntitiesQueryVariables.skip = entitiesQueryVariables.skip;
+  allEntitiesQueryVariables.searchValue = entitiesQueryVariables.searchValue;
+  allEntitiesQueryVariables.advancedSearchValue =
+    entitiesQueryVariables.advancedSearchValue;
+  allEntitiesQueryVariables.advancedFilterInputs =
+    entitiesQueryVariables.advancedFilterInputs;
+
+  if (!props.predefinedEntities) {
+    fetchEnabled.value = true;
+    refetchEntities(entitiesQueryVariables);
+    refetchAllEntities(allEntitiesQueryVariables);
   }
 };
 
 const setFilters = (advancedFilterInputs: AdvancedFilterInput[]) => {
   entitiesQueryVariables.advancedFilterInputs = advancedFilterInputs;
-  if (props.parentEntityId && isSaved) setQueryVariables(true);
+  setQueryVariables(true);
 };
 
 const bulkSelect = (items = entities.value) => {
