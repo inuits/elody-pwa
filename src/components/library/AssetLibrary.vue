@@ -17,7 +17,7 @@
 
 <script lang="ts" setup>
 import type { Context } from "@/composables/useBulkOperations";
-import BaseLibrary from "@/components/base/BaseLibrary.vue";
+import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import { RouteNames, SearchInputType } from "@/generated-types/queries";
 import { useRoute } from "vue-router";
 

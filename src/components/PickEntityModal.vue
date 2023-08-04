@@ -36,7 +36,7 @@ import {
 } from "@/composables/useBulkOperations";
 import type { Entity } from "@/generated-types/queries";
 import type { FormContext } from "vee-validate";
-import BaseLibrary from "@/components/base/BaseLibrary.vue";
+import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "./base/BaseModal.vue";
 import { defineComponent, ref } from "vue";
 import { Entitytyping, ModalState } from "@/generated-types/queries";
