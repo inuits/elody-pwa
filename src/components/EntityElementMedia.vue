@@ -59,7 +59,7 @@ import {
   type MetadataAndRelation,
   type PanelMetaData,
 } from "@/generated-types/queries";
-import BaseLibrary from "@/components/base/BaseLibrary.vue";
+import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseMap from "./base/BaseMap.vue";
 import EntityElementWrapper from "./base/EntityElementWrapper.vue";
 import useEditMode from "@/composables/useEdit";

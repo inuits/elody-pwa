@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts">
-import BaseLibrary from "@/components/base/BaseLibrary.vue";
+import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import { defineComponent } from "vue";
 import { SearchInputType } from "@/generated-types/queries";
 import { useSavedSearchHelper } from "@/composables/useSavedSearchHelper";

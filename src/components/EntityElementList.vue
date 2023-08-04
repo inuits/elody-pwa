@@ -57,7 +57,7 @@
 <script lang="ts" setup>
 import type { Context } from "@/composables/useBulkOperations";
 import type { Entity, Entitytyping } from "@/generated-types/queries";
-import BaseLibrary from "@/components/base/BaseLibrary.vue";
+import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import useEditMode from "@/composables/useEdit";
 import { computed } from "vue";

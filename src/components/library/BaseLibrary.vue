@@ -182,7 +182,7 @@ import GridItem from "@/components/GridItem.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import ListContainer from "@/components/ListContainer.vue";
 import ListItem from "@/components/ListItem.vue";
-import MediaViewer from "./Mediaviewer.vue";
+import MediaViewer from "@/components/base/Mediaviewer.vue";
 import useEditMode from "@/composables/useEdit";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
