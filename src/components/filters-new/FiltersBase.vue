@@ -150,7 +150,15 @@ const { entityType } = toRefs(props);
 const { isSaved } = useEditMode();
 
 const { onResult: onFilterMatcherMappingResult } =
-  useQuery<GetFilterMatcherMappingQuery>(GetFilterMatcherMappingDocument);
+  useQuery<GetFilterMatcherMappingQuery>(
+    GetFilterMatcherMappingDocument,
+    undefined,
+    {
+      enabled: true,
+      fetchPolicy: "no-cache",
+      notifyOnNetworkStatusChange: true,
+    }
+  );
 onFilterMatcherMappingResult((result) => {
   if (!result.data) return;
   filterMatcherMapping.value = result.data.FilterMatcherMapping;
