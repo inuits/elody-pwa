@@ -41,8 +41,10 @@
       >
         <template v-if="metadataItem">
           <span class="text-sm text-text-light">{{ metadataItem.key }}</span>
-          <span v-if="stringIsDate(metadataItem.value)" class="info"
-            >{{ convertDateToReadbleFormat(metadataItem.value) }}
+          <span v-if="metadataItem.unit !== null" class="info"
+            >{{
+              convertUnitToReadbleFormat(metadataItem.unit, metadataItem.value)
+            }}
           </span>
           <span v-else-if="!stringIsUrl(metadataItem.value)" class="info"
             >{{ metadataItem.value }}
@@ -75,7 +77,7 @@ import type { Context } from "@/composables/useBulkOperations";
 import type { MetadataAndRelation } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import { computed, ref } from "vue";
-import { stringIsUrl, stringIsDate, convertDateToReadbleFormat } from "@/helpers";
+import { stringIsUrl, convertUnitToReadbleFormat } from "@/helpers";
 import { Unicons } from "@/types";
 
 const props = withDefaults(
