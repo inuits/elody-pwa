@@ -5,7 +5,7 @@
         <BaseDropdownNew
           v-model="selectedPaginationLimitOption"
           :options="paginationLimitOptions"
-          :label="$t('library.items')"
+          :label="t('library.items')"
           label-alignment="right"
           dropdown-style="default"
         />
@@ -15,7 +15,7 @@
           class="py-1"
           v-model="selectedSortOption"
           :options="sortOptions"
-          :label="$t('library.sort')"
+          :label="t('library.sort')"
           label-alignment="left"
           dropdown-style="default"
         />
@@ -49,6 +49,7 @@ import {
   type DropdownOption,
   type GetPaginationLimitOptionsQuery,
   type GetSortOptionsQuery,
+  type GetEntitiesQueryVariables,
 } from "@/generated-types/queries";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import BasePaginationNew from "@/components/base/BasePaginationNew.vue";
@@ -57,22 +58,17 @@ import { computed, ref, watch } from "vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   totalItems: number;
-  skip: number;
+  queryVariables: GetEntitiesQueryVariables;
 }>();
 
-const emit = defineEmits<{
-  (event: "update:skip", skip: number): void;
-  (event: "update:limit", limit: number): void;
-  (event: "update:sortKey", limit: any): void;
-  (event: "update:isAsc", limit: any): void;
-}>();
-
-const skip = ref<number>(props.skip);
-const isAsc = ref<boolean>(false);
+const { t } = useI18n();
 const { getModal } = useAvailableModals();
+const skip = ref<number>(1);
+const isAsc = ref<boolean>(false);
 const route = useRoute();
 
 const selectedPaginationLimitOption = ref<DropdownOption>();
@@ -110,23 +106,34 @@ onSortOptionsResult((result) => {
   selectedSortOption.value = sortOptions.value[0];
 });
 
-watch(skip, () => emit("update:skip", skip.value));
-watch(
-  () => props.skip,
-  () => (skip.value = props.skip)
-);
-watch(isAsc, () => emit("update:isAsc", isAsc.value));
+watch(skip, () => {
+  if (props.queryVariables) {
+    props.queryVariables.skip = skip.value;
+  }
+});
+watch(isAsc, () => {
+  if (props.queryVariables) {
+    props.queryVariables.searchValue.isAsc = isAsc.value;
+  }
+});
 watch(
   () => selectedSortOption.value,
-  () => emit("update:sortKey", selectedSortOption.value?.value)
+  () => {
+    if (props.queryVariables) {
+      props.queryVariables.searchValue.order_by =
+        selectedSortOption.value?.value;
+    }
+  }
 );
 watch(
   () => entityType.value,
   () => refetchSortOptions({ entityType: entityType.value })
 );
 watch(selectedPaginationLimitOption, () => {
-  skip.value = 1;
-  emit("update:limit", selectedPaginationLimitOption.value?.value);
+  if (props.queryVariables) {
+    props.queryVariables.skip = 1;
+    props.queryVariables.limit = selectedPaginationLimitOption.value?.value;
+  }
 });
 watch(
   () => getModal(TypeModals.BulkOperations).modalState.value.state,
@@ -137,7 +144,9 @@ watch(
     ) {
       selectedPaginationLimitOption.value = paginationLimitOptions.value[0];
       selectedSortOption.value = sortOptions.value[0];
-      skip.value = 1;
+      if (props.queryVariables) {
+        props.queryVariables.skip = 1;
+      }
     }
   }
 );
