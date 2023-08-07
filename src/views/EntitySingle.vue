@@ -4,7 +4,7 @@
       v-if="!loading"
       class="pl-24 h-full w-full flex fixed top-0 bg-neutral-lightest pt-24 left-0"
     >
-      <entity-form-new
+      <entity-form
         v-if="intialValues != 'no-values' && relationValues != 'no-values'"
         :intial-values="intialValues"
         :relation-values="relationValues"
@@ -13,7 +13,7 @@
           v-if="columnList != 'no-values'"
           :columnList="columnList"
         ></entity-column>
-      </entity-form-new>
+      </entity-form>
     </div>
     <div
       v-else
@@ -32,7 +32,7 @@ import {
   type GetEntityByIdQuery,
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
-import EntityFormNew from "@/components/EntityForm.vue";
+import EntityForm from "@/components/EntityForm.vue";
 import useEditMode from "@/composables/useEdit";
 import { asString } from "@/helpers";
 import { reactive, ref, watch, inject } from "vue";
