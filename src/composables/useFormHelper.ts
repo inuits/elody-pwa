@@ -1,18 +1,18 @@
-import type { FormContext, FormOptions } from "vee-validate";
+import type { FormContext } from "vee-validate";
 import { ref } from "vue";
 
-const forms = ref<{ [key: string]: FormContext }>({});
+const forms = ref<{ [key: string]: FormContext<any> }>({});
 
 const useFormHelper = () => {
-  const addForm = (key: string, form: FormContext) => {
+  const addForm = (key: string, form: FormContext<any>) => {
     forms.value[key] = form;
   };
 
-  const getForm = (key: string): FormContext => {
+  const getForm = (key: string): FormContext<any> => {
     return forms.value[key];
   };
 
-  const getForms = (): { [key: string]: FormContext } => {
+  const getForms = (): { [key: string]: FormContext<any> } => {
     return forms.value;
   };
 

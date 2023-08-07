@@ -1,16 +1,3 @@
-import type {
-  UpdateMediafilesOrderMutation,
-  DeleteRelationsMutation,
-} from "@/generated-types/queries";
-import {
-  getDiffArray,
-  removeMediafilesFromOrdering,
-} from "@/composables/useMediafilesOrderHelpers";
-import {
-  UpdateMediafilesOrderDocument,
-  DeleteRelationsDocument,
-} from "@/generated-types/queries";
-import { useMutation } from "@vue/apollo-composable";
 import {
   useNotification,
   NotificationType,
@@ -35,7 +22,6 @@ export const useEditMode = () => {
     useMediaAssetLinkHelper();
   const {
     clearMediaFilesToPatch,
-    relationsToBeDeleted,
     resetRelationsToBeDeleted,
     resetMetadataToBePatched,
   } = useMetaDataHelper();
@@ -62,30 +48,10 @@ export const useEditMode = () => {
     }
   };
   const hideEditToggle = () => (isEditToggleVisible.value = "no-edit");
-  const { mutate } = useMutation<UpdateMediafilesOrderMutation>(
-    UpdateMediafilesOrderDocument
-  );
-  const { mutate: deleteRelationMutate } = useMutation<DeleteRelationsMutation>(
-    DeleteRelationsDocument
-  );
 
   const save = async () => {
     isSaved.value = false;
-    removeMediafilesFromOrdering(toBeDeleted.value);
     linkMediaFilesToEntity(addSaveCallback);
-
-    if (relationsToBeDeleted.value.relations.length > 0) {
-      addSaveCallback(async () => {
-        await deleteRelationMutate({
-          id: relationsToBeDeleted.value.entityId,
-          metadata: relationsToBeDeleted.value.relations,
-        });
-      });
-    }
-
-    addSaveCallback(async () => {
-      await mutate({ value: { value: getDiffArray() } });
-    });
 
     for (const callback of saveCallbacks.value) {
       await callback().then(() => {
