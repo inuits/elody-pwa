@@ -138,6 +138,7 @@ const filterMatcherMapping = ref<FilterMatcherMap>({
   number: [],
   selection: [],
   boolean: [],
+  relation: [],
 });
 const matchers = ref<DropdownOption[]>([]);
 const filters = ref<FilterListItem[]>([]);
@@ -196,8 +197,9 @@ onAdvancedFiltersResult((result) => {
           match_exact: true,
         };
 
-        if (advancedFilter.label === "metadata.labels.parent") {
+        if (advancedFilter.type === AdvancedFilterTypes.Relation) {
           if (props.parentEntityId) {
+            hiddenFilter.type = advancedFilter.type;
             hiddenFilter.parent = props.parentEntityId;
             activeFilters.value.push(hiddenFilter);
           }
@@ -209,7 +211,7 @@ onAdvancedFiltersResult((result) => {
         isDisplayed: advancedFilter.isDisplayedByDefault ?? false,
         advancedFilter,
       });
-      if (props.entityType || props.parentEntityId) applyFilters();
+      if (entityType.value || props.parentEntityId) applyFilters();
     }
   });
 });

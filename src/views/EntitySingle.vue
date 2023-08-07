@@ -4,15 +4,16 @@
       v-if="!loading"
       class="pl-24 h-full w-full flex fixed top-0 bg-neutral-lightest pt-24 left-0"
     >
-      <entity-form
-        v-if="intialValues != 'no-values'"
-        :intialValues="intialValues"
+      <entity-form-new
+        v-if="intialValues != 'no-values' && relationValues != 'no-values'"
+        :intial-values="intialValues"
+        :relation-values="relationValues"
       >
         <entity-column
           v-if="columnList != 'no-values'"
           :columnList="columnList"
         ></entity-column>
-      </entity-form>
+      </entity-form-new>
     </div>
     <div
       v-else
@@ -27,10 +28,11 @@ import {
   type ColumnList,
   type GetEntityByIdQueryVariables,
   type IntialValues,
-  type BaseEntity,
+  type RelationValues,
+  type GetEntityByIdQuery,
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
-import EntityForm from "@/components/EntityForm.vue";
+import EntityFormNew from "@/components/EntityForm.vue";
 import useEditMode from "@/composables/useEdit";
 import { asString } from "@/helpers";
 import { reactive, ref, watch, inject } from "vue";
@@ -40,61 +42,58 @@ import { useQuery } from "@vue/apollo-composable";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 
 const config: any = inject("config");
-const id = asString(useRoute().params["id"]);
-const loading = ref<boolean>(true);
+const router = useRouter();
+const route = useRoute();
 const auth = useAuth();
+
+const id = asString(route.params["id"]);
+const loading = ref<boolean>(true);
 const { showEditToggle, disableEditMode, isEdit, setRefetchFn } = useEditMode();
 const { setCurrentRouteTitle, addVisitedRoute, currentRouteTitle } =
   useBreadcrumbs(config);
-const router = useRouter();
 
 const queryVariables = reactive<GetEntityByIdQueryVariables>({
   id: id,
-  type: String(useRoute().meta.entityType),
+  type: String(route.meta.entityType),
 });
+const { result, refetch } = useQuery<GetEntityByIdQuery>(
+  GetEntityByIdDocument,
+  queryVariables,
+  () => ({
+    notifyOnNetworkStatusChange: true,
+    fetchPolicy: "no-cache",
+  })
+);
 
-const { result, refetch } = useQuery(GetEntityByIdDocument, queryVariables, {
-  notifyOnNetworkStatusChange: true,
-  fetchPolicy: "no-cache",
+const intialValues = ref<IntialValues | "no-values">("no-values");
+const relationValues = ref<RelationValues | "no-values">("no-values");
+const columnList = ref<ColumnList | "no-values">("no-values");
+
+router.beforeEach(() => {
+  if (isEdit) disableEditMode();
 });
 
 onBeforeRouteUpdate(async (to: any) => {
   queryVariables.id = to.params.id;
   intialValues.value = "no-values";
+  relationValues.value = "no-values";
   columnList.value = "no-values";
   disableEditMode();
 });
 
-const intialValues = ref<Omit<IntialValues, "keyValue"> | "no-values">(
-  "no-values"
-);
-const columnList = ref<ColumnList | "no-values">("no-values");
+watch(result, () => {
+  const entity = result.value?.Entity;
+  if (entity == undefined) return;
 
-watch(result, (queryResults) => {
+  intialValues.value = entity.intialValues;
+  relationValues.value = entity.relationValues;
+  columnList.value = entity.entityView;
+
+  if (auth.isAuthenticated.value === true) showEditToggle("edit");
+  setCurrentRouteTitle(entity.intialValues?.title);
+  addVisitedRoute({ id: entity.id, routeName: currentRouteTitle.value });
+
   setRefetchFn(refetch);
-  try {
-    const entity: BaseEntity | undefined = queryResults?.Entity || undefined;
-    if (entity) {
-      intialValues.value = entity?.intialValues;
-      columnList.value = entity?.entityView;
-      //If logged in set edit mode -> need to check permissions if enabled
-      if (auth.isAuthenticated.value === true) {
-        showEditToggle("edit");
-      }
-
-      setCurrentRouteTitle(entity?.intialValues?.title);
-      addVisitedRoute({ id: entity?.id, routeName: currentRouteTitle.value });
-
-      loading.value = false;
-    }
-  } catch (error) {
-    console.error("no assets");
-  }
-});
-
-router.beforeEach(() => {
-  if (isEdit) {
-    disableEditMode();
-  }
+  loading.value = false;
 });
 </script>

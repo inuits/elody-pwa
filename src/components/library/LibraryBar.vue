@@ -94,7 +94,7 @@ onPaginationLimitOptionsResult((result) => {
 
 const selectedSortOption = ref<DropdownOption>();
 const sortOptions = ref<DropdownOption[]>([]);
-const entityType = computed(() => route.meta.entityType);
+const entityType = computed(() => route.meta.entityType || "BaseLibrary");
 const { onResult: onSortOptionsResult, refetch: refetchSortOptions } =
   useQuery<GetSortOptionsQuery>(
     GetSortOptionsDocument,

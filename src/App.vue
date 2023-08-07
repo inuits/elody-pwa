@@ -10,7 +10,7 @@
       <edit-modal />
     </div>
     <upload-modal />
-    <pick-entity-modal />
+    <EntityPickerModal />
     <create-modal />
     <search-saved-searches-modal />
     <BulkoperationsModal
@@ -21,34 +21,34 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
-import { DefaultOIDC, useAuth } from "session-vue-3-oidc-library";
-import UploadModal from "./components/UploadModal.vue";
-import CreateModal from "./components/CreateModal.vue";
-import TheNavigation from "@/components/menu/MenuNav.vue";
-import TheHeader from "@/components/TheHeader.vue";
-import EditModal from "./components/EditModal.vue";
-import useRouteHelpers from "./composables/useRouteHelpers";
-import { useHead } from "@vueuse/head";
-import PickEntityModal from "./components/PickEntityModal.vue";
-import BaseNotification from "./components/base/BaseNotification.vue";
-import SearchSavedSearchesModal from "./components/searchSavedSearchesModal.vue";
-import BulkoperationsModal from "@/components/bulk-operations/BulkOperationsModal.vue";
-import { useRoute } from "vue-router";
 import type { Context } from "@/composables/useBulkOperations";
+import BaseNotification from "@/components/base/BaseNotification.vue";
+import BulkoperationsModal from "@/components/bulk-operations/BulkOperationsModal.vue";
+import CreateModal from "@/components/CreateModal.vue";
+import EditModal from "@/components/EditModal.vue";
+import EntityPickerModal from "@/components/EntityPickerModal.vue";
+import SearchSavedSearchesModal from "@/components/searchSavedSearchesModal.vue";
+import TheHeader from "@/components/TheHeader.vue";
+import TheNavigation from "@/components/menu/MenuNav.vue";
+import UploadModal from "@/components/UploadModal.vue";
+import useRouteHelpers from "@/composables/useRouteHelpers";
+import { DefaultOIDC, useAuth } from "session-vue-3-oidc-library";
+import { defineComponent, ref } from "vue";
+import { useHead } from "@vueuse/head";
+import { useRoute } from "vue-router";
 
 export default defineComponent({
   name: "App",
   components: {
-    UploadModal,
-    TheNavigation,
-    TheHeader,
-    EditModal,
-    PickEntityModal,
-    CreateModal,
     BaseNotification,
-    SearchSavedSearchesModal,
     BulkoperationsModal,
+    CreateModal,
+    EditModal,
+    EntityPickerModal,
+    SearchSavedSearchesModal,
+    TheHeader,
+    TheNavigation,
+    UploadModal,
   },
   inject: { DefaultOIDC },
   setup() {

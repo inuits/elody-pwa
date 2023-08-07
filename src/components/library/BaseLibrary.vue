@@ -6,7 +6,7 @@
           v-show="enableAdvancedFilters"
           class="lg:w-[46%]"
           :expandFilters="expandFilters"
-          :entity-type="filterType || route.meta.entityType as string"
+          :entity-type="filterType || route.meta.entityType ? route.meta.entityType as string : 'BaseLibrary'"
           :parent-entity-id="parentEntityId"
           @apply-filters="setFilters"
           @expand-filters="expandFilters = !expandFilters"
@@ -68,7 +68,7 @@
                     ? '!border-2 !border-accent-normal'
                     : ''
                 "
-                :item-id="entity.id"
+                :item-id="entity.uuid"
                 :bulk-operations-context="bulkOperationsContext"
                 :teaser-metadata="
                   entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
@@ -114,7 +114,7 @@
                     ? '!border-2 !border-accent-normal'
                     : ''
                 "
-                :item-id="entity.id"
+                :item-id="entity.uuid"
                 :bulk-operations-context="bulkOperationsContext"
                 :teaser-metadata="
                   entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
@@ -184,6 +184,7 @@ import ListContainer from "@/components/ListContainer.vue";
 import ListItem from "@/components/ListItem.vue";
 import MediaViewer from "@/components/base/Mediaviewer.vue";
 import useEditMode from "@/composables/useEdit";
+import useEntitySingle from "@/composables/useEntitySingle";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import { bulkSelectAllSizeLimit } from "@/main";
@@ -235,6 +236,7 @@ const { mediafileSelectionState, updateSelectedEntityMediafile } =
   useEntityMediafileSelector();
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { getThumbnail } = useThumbnailHelper();
+const { setEntityUuid } = useEntitySingle();
 const { isSaved } = useEditMode();
 const route = useRoute();
 const router = useRouter();
@@ -344,8 +346,9 @@ const bulkSelect = (items = entities.value) => {
 };
 
 const goToEntityPage = (entity: Entity) => {
+  setEntityUuid(entity.uuid);
   const entityId =
-    entity?.id ||
+    entity.id ||
     entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")?.value;
 
   router.push({
