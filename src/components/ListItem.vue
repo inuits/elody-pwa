@@ -36,7 +36,7 @@
     <div v-if="!loading" class="flex items-center w-full">
       <div
         v-for="metadataItem in teaserMetadata"
-        :key="metadataItem ? metadataItem.value : 'no-key'"
+        :key="metadataItem ? metadataItem.key : 'no-key'"
         class="flex justify-start flex-col mx-2 break-words w-1/4"
       >
         <template v-if="metadataItem">

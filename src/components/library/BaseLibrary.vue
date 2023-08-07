@@ -54,7 +54,7 @@
             <div>
               <ListItem
                 v-for="entity in entities"
-                :key="entity.id"
+                :key="entity.id + '_list'"
                 :class="
                   parentEntityId &&
                   mediafileSelectionState.selectedMediafile?.id === entity.id
@@ -100,7 +100,7 @@
             <div class="grid grid_cols gap-2 justify-items-center">
               <GridItem
                 v-for="entity in entities"
-                :key="entity.id"
+                :key="entity.id + '_grid'"
                 :class="
                   parentEntityId &&
                   mediafileSelectionState.selectedMediafile?.id === entity.id
@@ -253,7 +253,6 @@ const displayGrid = ref<boolean>(false);
 const displayPreview = ref<boolean>(props.enablePreview);
 
 const expandFilters = ref<boolean>(false);
-const selectedSortOption = ref<string>();
 const isAsc = ref<boolean>(false);
 const toggles = [
   { isOn: displayList, iconOn: DamsIcons.ListUl, iconOff: DamsIcons.ListUl },
@@ -292,7 +291,7 @@ const allEntitiesQueryVariables: GetEntitiesQueryVariables = {
   advancedFilterInputs: [],
   searchInputType: searchInputTypeOnDrawer.value,
 };
-const { result: allEntitiesResult, refetch: refetchAllEntities } = useQuery(
+const { result: allEntitiesResult } = useQuery(
   GetEntitiesDocument,
   allEntitiesQueryVariables,
   () => ({ fetchPolicy: "network-only" })
