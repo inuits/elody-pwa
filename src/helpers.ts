@@ -3,6 +3,8 @@ import { PanelType, Unit } from "@/generated-types/queries";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useRoute } from "vue-router";
+import { options } from "dropzone";
+import type internal from "stream";
 
 export const getEntityIdFromRoute = (): string | undefined => {
   return asString(useRoute().params["id"]) || undefined;
@@ -115,38 +117,62 @@ export const getValueForPanelMetadata = (
   return "";
 };
 
+type ConversionFunction = (value: string, detail: string) => string;
+
 export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
-  const unitConversionTable = {
-    datetime: (value: string) => convertDateToReadbleFormat(value),
-    seconds: (value: string) => `${value} s`,
-    coordinates: (value: string) =>
+  if (unit == undefined) {
+    return value;
+  }
+
+  const unitConversionTable: Record<string, ConversionFunction> = {
+    DATETIME: (value: string, detail: string) =>
+      convertDateToReadbleFormat(value, detail),
+    SECONDS: (value: string) => `${value} s`,
+    COORDINATES: (value: string) =>
       `${(value as any).longitude}, ${(value as any).latitude}`,
   };
 
-  if (!unitConversionTable[unit] || value == "") {
+  const details = unit.split("_");
+
+  if (!unitConversionTable[details[0]] || value == "") {
     console.warn(
       "This unit can not be converted yet or this item has no value"
     );
     return value;
   }
-
-  const conversionFunction = unitConversionTable[unit];
-
-  return conversionFunction(value);
+  const conversionFunction = unitConversionTable[details[0] as string];
+  return conversionFunction(value, details[1]);
 };
-
-export const convertDateToReadbleFormat = (dateString: string): string => {
+export const convertDateToReadbleFormat = (
+  dateString: string,
+  format: string
+): string => {
   const date = new Date(dateString);
-  const options = {
+  const options: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "numeric",
     day: "numeric",
     hour: "numeric",
     minute: "numeric",
     second: "numeric",
-    hour12: true,
+    hour12: undefined,
   };
-  return new Intl.DateTimeFormat(undefined, options).format(date);
+  let dateFormat;
+  if (format !== "DEFAULT") {
+    options.hour12 = format.slice(-2) == "12";
+  }
+  switch (format.slice(0, 3)) {
+    case "DMY":
+      dateFormat = "en-GB";
+      break;
+    case "MDY":
+      dateFormat = "en-US";
+      break;
+    default:
+      dateFormat = undefined;
+      break;
+  }
+  return new Intl.DateTimeFormat(dateFormat, options).format(date);
 };
 
 export const createPlaceholderEntities = (amount: number): any[] => {
