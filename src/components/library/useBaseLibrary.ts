@@ -54,8 +54,8 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
       query: GetEntitiesDocument,
       variables: queryVariables.value,
     });
-    setEntities(newEntities.data.Entities.results);
-    totalEntityCount.value = newEntities.data.Entities.count;
+    setEntities(newEntities?.data?.Entities?.results);
+    totalEntityCount.value = newEntities?.data?.Entities?.count;
     __setEntitiesLoading(false);
   };
 
