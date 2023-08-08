@@ -106,7 +106,7 @@ import {
 } from "@/generated-types/queries";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
-import FiltersListItem from "@/components/filters-new/FiltersListItem.vue";
+import FiltersListItem from "@/components/filters/FiltersListItem.vue";
 import useEditMode from "@/composables/useEdit";
 import { computed, defineProps, ref, toRefs, watch } from "vue";
 import { Unicons } from "@/types";
