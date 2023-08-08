@@ -18,13 +18,13 @@
       <div class="w-full flex justify-end align-center" v-if="menuitem.subMenu">
         <unicon
           v-if="showdropdown"
-          @click="handleClick"
+          @click="toggleDropDown"
           :name="Unicons.AngleDown.name"
           height="20"
         />
         <unicon
           v-if="!showdropdown"
-          @click="handleClick"
+          @click="toggleDropDown"
           :name="Unicons.AngleRight.name"
           height="20"
         />
@@ -83,9 +83,10 @@ const props = defineProps<{
 }>();
 
 const handleClick = () => {
-  setSelectedMenuItem(props.menuitem);
+  if (props.menuitem.typeLink?.route) {
+    setSelectedMenuItem(props.menuitem);
+  }
   checkIfRouteOrModal(props.menuitem);
-  toggleDropDown();
 };
 
 const isActive = computed(() => props.menuitem === selectedMenuItem.value);
