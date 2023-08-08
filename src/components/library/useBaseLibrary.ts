@@ -40,6 +40,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
 
   const setEntities = (newEntities: Entity[]): void => {
     entities.value = newEntities;
+    __setEntitiesLoading(false);
   };
 
   const setTotalEntityCount = (newCount: number): void => {
@@ -56,7 +57,6 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     });
     setEntities(newEntities?.data?.Entities?.results);
     totalEntityCount.value = newEntities?.data?.Entities?.count;
-    __setEntitiesLoading(false);
   };
 
   watch(

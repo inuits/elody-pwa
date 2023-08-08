@@ -31,6 +31,7 @@
             :enable-advanced-filters="false"
             :enable-navigation="false"
             list-item-route-name="SingleEntity"
+            :predefined-entities="entityList"
           />
         </div>
       </template>
@@ -43,6 +44,7 @@ import {
   SearchInputType,
   TypeModals,
   type Entitytyping,
+  type Entity,
 } from "@/generated-types/queries";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
@@ -62,6 +64,7 @@ withDefaults(
     isCollapsed: Boolean;
     types: string[];
     label: string;
+    entityList: Entity[];
   }>(),
   {
     types: () => [],
