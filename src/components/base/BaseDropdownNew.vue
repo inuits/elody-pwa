@@ -28,7 +28,7 @@
             v-if="selectedOptionIsNotDefaultOption && labelAlignment === 'left'"
             >{{ label }}
           </span>
-          {{ t(selectedOption.label) }}
+          {{ getSelectedOptionLabel }}
           <span
             v-if="
               selectedOptionIsNotDefaultOption && labelAlignment === 'right'
@@ -183,6 +183,13 @@ const arrowIcon = computed<DamsIcons>(() =>
 const disabled = computed<Boolean>(() =>
   props.options.length > 0 ? disable.value : true
 );
+const getSelectedOptionLabel = computed<string>(() => {
+  try {
+    return t(selectedOption.value.label);
+  } catch {
+    return selectedOption.value.label;
+  }
+});
 
 const selectedOptionIsNotDefaultOption = computed<boolean>(() => {
   return (
@@ -197,6 +204,9 @@ const collapseDropdown = (event: MouseEvent) => {
     showOptions.value = false;
 };
 
+onMounted(() => document.addEventListener("click", collapseDropdown));
+onUnmounted(() => document.removeEventListener("click", collapseDropdown));
+
 watch(modelValue, (value) =>
   value === undefined
     ? (selectedOption.value = defaultOption)
@@ -205,9 +215,6 @@ watch(modelValue, (value) =>
 watch(selectedOption, (value) => {
   if (selectedOptionIsNotDefaultOption.value) emit("update:modelValue", value);
 });
-
-onMounted(() => document.addEventListener("click", collapseDropdown));
-onUnmounted(() => document.removeEventListener("click", collapseDropdown));
 </script>
 
 <style>
