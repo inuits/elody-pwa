@@ -169,7 +169,7 @@ import {
 } from "@/composables/useBulkOperations";
 import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
-import FiltersBase from "@/components/filters-new/FiltersBase.vue";
+import FiltersBase from "@/components/filters/FiltersBase.vue";
 import GridItem from "@/components/GridItem.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import ListContainer from "@/components/ListContainer.vue";

@@ -44,7 +44,7 @@ import type {
   AdvancedFilterInput,
   DropdownOption,
 } from "@/generated-types/queries";
-import type { FilterListItem } from "@/components/filters-new/FiltersBase.vue";
+import type { FilterListItem } from "@/components/filters/FiltersBase.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import {
@@ -82,7 +82,7 @@ const filterOptions = ref<string[]>([]);
 
 const loadMatcher = async () => {
   const module = await import(
-    `@/components/filters-new/matchers/${selectedMatcher.value?.value}.vue`
+    `@/components/filters/matchers/${selectedMatcher.value?.value}.vue`
   );
 
   if (matcherComponent.value !== module.default)
