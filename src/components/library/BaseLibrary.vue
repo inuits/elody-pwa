@@ -188,16 +188,11 @@ import { useBaseLibrary } from "./useBaseLibrary";
 import type { ApolloClient } from "@apollo/client";
 import { useI18n } from "vue-i18n";
 
-export type PredefinedEntities = {
-  usePredefinedEntities: boolean;
-  entities: Entity[];
-};
-
 const props = withDefaults(
   defineProps<{
     bulkOperationsContext: Context;
     listItemRouteName: string;
-    predefinedEntities?: PredefinedEntities;
+    predefinedEntities?: Entity[];
     searchInputTypeOnDrawer?: SearchInputType;
     enablePreview?: boolean;
     enableAdvancedFilters?: boolean;
@@ -274,8 +269,10 @@ const entitiesQueryVariables: GetEntitiesQueryVariables = {
 };
 
 const initializeBaseLibrary = () => {
-  setQueryVariables(entitiesQueryVariables);
-  getEntities();
+  if (!props.predefinedEntities) {
+    setQueryVariables(entitiesQueryVariables);
+    getEntities();
+  }
 };
 
 const allEntitiesQueryVariables: GetEntitiesQueryVariables = {
@@ -298,7 +295,7 @@ const { result: allEntitiesResult } = useQuery(
 );
 
 const bulkSelect = (items = entities.value) => {
-  if (props.predefinedEntities) items = props.predefinedEntities.entities;
+  if (props.predefinedEntities) items = props.predefinedEntities;
 
   for (let entity of items)
     enqueueItemForBulkProcessing(props.bulkOperationsContext, {
@@ -372,11 +369,11 @@ onUnmounted(() => {
 });
 
 watch(
-  () => props.predefinedEntities?.entities,
+  () => props.predefinedEntities,
   () => {
-    if (props.predefinedEntities?.entities) {
-      setEntities(props.predefinedEntities?.entities);
-      setTotalEntityCount(props.predefinedEntities?.entities.length);
+    if (props.predefinedEntities) {
+      setEntities(props.predefinedEntities);
+      setTotalEntityCount(props.predefinedEntities.length);
     }
   },
   { immediate: true }

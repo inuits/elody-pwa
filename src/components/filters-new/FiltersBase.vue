@@ -18,11 +18,11 @@
       "
     >
       <span class="text-text-body text-xl font-bold">
-        {{ $t("filters.filter") }}
+        {{ t("filters.filter") }}
       </span>
       <div class="flex">
         <span class="text-text-body">
-          {{ activeFilterCount }} {{ $t("filters.active") }}
+          {{ activeFilterCount }} {{ t("filters.active") }}
         </span>
         <unicon
           class="text-text-body ml-4"
@@ -39,12 +39,12 @@
         <div class="flex justify-between gap-4 pb-4">
           <BaseButtonNew
             class="!w-1/3"
-            :label="$t('filters.clear')"
+            :label="t('filters.clear')"
             button-style="default"
             @click="() => (clearAllActiveFilters = true)"
           />
           <BaseButtonNew
-            :label="$t('filters.apply')"
+            :label="t('filters.apply')"
             button-style="accentNormal"
             @click="applyFilters()"
           />
