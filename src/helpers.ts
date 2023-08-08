@@ -134,7 +134,7 @@ export const createPlaceholderEntities = (amount: number): any[] => {
   const placeholders = [];
   for (let i = 0; i <= amount; i++) {
     placeholders.push({
-      id: "/",
+      id: `${i}`,
       teaserMetadata: [
         { key: "", value: "", label: "" },
         { key: "", value: "", label: "" },
