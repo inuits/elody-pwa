@@ -62,10 +62,11 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
   watch(
     () => entitiesLoading.value,
     (loading) => {
-      if (loading)
-        entities.value = createPlaceholderEntities(
-          queryVariables.value?.limit || 25
-        );
+      if (loading) {
+        const placeholderAmount = queryVariables.value?.limit || 25;
+        entities.value = createPlaceholderEntities(placeholderAmount);
+        totalEntityCount.value = placeholderAmount;
+      }
     }
   );
 
