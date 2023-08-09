@@ -25,11 +25,7 @@
           :name="Unicons.AngleDown.name"
           height="20"
         />
-        <unicon
-          v-if="!showdropdown"
-          :name="Unicons.AngleRight.name"
-          height="20"
-        />
+        <unicon v-else :name="Unicons.AngleRight.name" height="20" />
       </div>
     </div>
     <div
