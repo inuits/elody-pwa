@@ -57,6 +57,7 @@
                 :key="entity.id + '_list'"
                 :class="
                   parentEntityId &&
+                  entity.id &&
                   mediafileSelectionState.selectedMediafile?.id === entity.id
                     ? '!border-2 !border-accent-normal'
                     : ''
