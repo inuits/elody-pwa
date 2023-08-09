@@ -15,16 +15,18 @@
       <span class="nav-item-label w-0 h-0 overflow-hidden px-4 font-bold">
         {{ t(menuitem?.label) }}
       </span>
-      <div class="w-full flex justify-end align-center" v-if="menuitem.subMenu">
+      <div
+        @click="toggleDropDown()"
+        class="w-full flex justify-end align-center"
+        v-if="menuitem.subMenu"
+      >
         <unicon
           v-if="showdropdown"
-          @click="toggleDropDown"
           :name="Unicons.AngleDown.name"
           height="20"
         />
         <unicon
           v-if="!showdropdown"
-          @click="toggleDropDown"
           :name="Unicons.AngleRight.name"
           height="20"
         />
