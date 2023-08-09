@@ -389,6 +389,7 @@ watch(
           : SearchInputType.AdvancedInputType;
       if (searchInputType === queryVariables.value.searchInputType)
         getEntities();
+      else queryVariables.value.searchInputType = searchInputType;
     }
   }
 );
