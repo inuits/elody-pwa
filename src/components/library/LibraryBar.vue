@@ -62,7 +62,7 @@ import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   totalItems: number;
-  queryVariables: GetEntitiesQueryVariables;
+  queryVariables?: GetEntitiesQueryVariables;
 }>();
 
 const { t } = useI18n();
@@ -70,6 +70,9 @@ const { getModal } = useAvailableModals();
 const skip = ref<number>(1);
 const isAsc = ref<boolean>(false);
 const route = useRoute();
+const queryVariablesRef = ref<GetEntitiesQueryVariables | undefined>(
+  props.queryVariables
+);
 
 const selectedPaginationLimitOption = ref<DropdownOption>();
 const paginationLimitOptions = ref<DropdownOption[]>([]);
@@ -107,20 +110,20 @@ onSortOptionsResult((result) => {
 });
 
 watch(skip, () => {
-  if (props.queryVariables) {
-    props.queryVariables.skip = skip.value;
+  if (queryVariablesRef.value) {
+    queryVariablesRef.value.skip = skip.value;
   }
 });
 watch(isAsc, () => {
-  if (props.queryVariables) {
-    props.queryVariables.searchValue.isAsc = isAsc.value;
+  if (queryVariablesRef.value) {
+    queryVariablesRef.value.searchValue.isAsc = isAsc.value;
   }
 });
 watch(
   () => selectedSortOption.value,
   () => {
-    if (props.queryVariables) {
-      props.queryVariables.searchValue.order_by =
+    if (queryVariablesRef.value) {
+      queryVariablesRef.value.searchValue.order_by =
         selectedSortOption.value?.value;
     }
   }
@@ -130,9 +133,9 @@ watch(
   () => refetchSortOptions({ entityType: entityType.value })
 );
 watch(selectedPaginationLimitOption, () => {
-  if (props.queryVariables) {
-    props.queryVariables.skip = 1;
-    props.queryVariables.limit = selectedPaginationLimitOption.value?.value;
+  if (queryVariablesRef.value) {
+    queryVariablesRef.value.skip = 1;
+    queryVariablesRef.value.limit = selectedPaginationLimitOption.value?.value;
   }
 });
 watch(
@@ -144,8 +147,8 @@ watch(
     ) {
       selectedPaginationLimitOption.value = paginationLimitOptions.value[0];
       selectedSortOption.value = sortOptions.value[0];
-      if (props.queryVariables) {
-        props.queryVariables.skip = 1;
+      if (queryVariablesRef.value) {
+        queryVariablesRef.value.skip = 1;
       }
     }
   }

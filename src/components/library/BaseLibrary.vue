@@ -18,7 +18,7 @@
 
         <LibraryBar
           v-if="!predefinedEntities"
-          :total-items="totalEntityCount"
+          :total-items="totalEntityCount || NaN"
           :queryVariables="(queryVariables as GetEntitiesQueryVariables)"
         />
       </div>
