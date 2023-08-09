@@ -45,17 +45,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, defineProps, watch, computed } from "vue";
+import { ref, defineProps, computed } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
 import { Unicons } from "@/types";
-import {
-  type MenuItem,
-  ModalState,
-  DamsIcons,
-} from "@/generated-types/queries";
+import type { MenuItem, DamsIcons } from "@/generated-types/queries";
 import useMenuHelper from "@/composables/useMenuHelper";
-import { useAvailableModals } from "@/composables/useAvailableModals";
 import CustomIcon from "../CustomIcon.vue";
 import { useI18n } from "vue-i18n";
 
@@ -63,7 +58,6 @@ const {
   checkIfRouteOrModal,
   showdropdown,
   toggleDropDown,
-  resetSelectedMenuItem,
   setSelectedMenuItem,
   selectedMenuItem,
 } = useMenuHelper();
@@ -71,7 +65,6 @@ const { t } = useI18n();
 
 const auth = useAuth();
 const menuSubitem = ref<Array<MenuItem>>([]);
-const { getModal } = useAvailableModals();
 
 const props = defineProps<{
   menuitem: MenuItem;
@@ -101,18 +94,6 @@ const handleSubMenu = () => {
   }
 };
 
-watch(
-  () => {
-    const typeModal = props.menuitem.typeLink?.modal?.typeModal;
-    if (!typeModal) return undefined;
-    return getModal(typeModal).modalState.value.state;
-  },
-  (state) => {
-    if (state === ModalState.Hide) {
-      resetSelectedMenuItem();
-    }
-  }
-);
 handleSubMenu();
 </script>
 <style>
