@@ -16,6 +16,7 @@ export const i18n = (translations: Object, applicationLocale: string) => {
     fallbackLocale: "en",
     // @ts-ignore
     messages: translations,
+    missingWarn: false,
   });
 };
 
