@@ -382,10 +382,13 @@ watch(
       libraryBarInitializationStatus.value = "not-initialized";
       filtersBaseInitializationStatus.value = "not-initialized";
       setEntityType(entityType.value);
-      queryVariables.value.searchInputType =
+
+      const searchInputType =
         entityType.value === Entitytyping.Mediafile
           ? SearchInputType.AdvancedInputMediaFilesType
           : SearchInputType.AdvancedInputType;
+      if (searchInputType === queryVariables.value.searchInputType)
+        getEntities();
     }
   }
 );
