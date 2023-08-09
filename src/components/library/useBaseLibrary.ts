@@ -169,17 +169,13 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
   };
 
   const getEntities = async (): Promise<void> => {
-    if (libraryBarInitializationStatus.value === "not-initialized") {
+    if (libraryBarInitializationStatus.value === "not-initialized")
       initializeLibraryBar();
-      return;
-    }
-    if (filtersBaseInitializationStatus.value === "not-initialized") {
+    if (filtersBaseInitializationStatus.value === "not-initialized")
       initializeFiltersBase();
-      return;
-    }
     if (
-      libraryBarInitializationStatus.value === "inProgress" ||
-      filtersBaseInitializationStatus.value === "inProgress"
+      libraryBarInitializationStatus.value !== "initialized" ||
+      filtersBaseInitializationStatus.value !== "initialized"
     )
       return;
     __setEntitiesLoading(true);
