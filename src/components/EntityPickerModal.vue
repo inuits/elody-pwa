@@ -7,6 +7,10 @@
   >
     <div class="flex flex-col w-full h-full overflow-auto py-6">
       <BaseLibrary
+        v-if="
+          getModal(TypeModals.EntityPicker).modalState.value.state ===
+          ModalState.Show
+        "
         :bulk-operations-context="
           getAcceptedTypes().length > 0
             ? getAcceptedTypes()[0] !== Entitytyping.Mediafile
@@ -39,6 +43,7 @@
 import {
   EditStatus,
   Entitytyping,
+  ModalState,
   SearchInputType,
   TypeModals,
   type BaseRelationValuesInput,

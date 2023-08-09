@@ -31,7 +31,9 @@
             :enable-advanced-filters="false"
             :enable-navigation="false"
             list-item-route-name="SingleEntity"
-            :predefined-entities="entityList"
+            :predefined-entities="
+              !entityList || entityList.length <= 0 ? undefined : entityList
+            "
           />
         </div>
       </template>

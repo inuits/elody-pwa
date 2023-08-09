@@ -92,26 +92,20 @@
 import {
   AdvancedFilterTypes,
   DamsIcons,
-  GetAdvancedFiltersDocument,
-  GetFilterMatcherMappingDocument,
   type AdvancedFilter,
   type AdvancedFilterInput,
   type AdvancedFilters,
-  type BaseEntity,
   type DropdownOption,
   type FilterMatcherMap,
-  type GetAdvancedFiltersQuery,
-  type GetFilterMatcherMappingQuery,
   type Maybe,
 } from "@/generated-types/queries";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import FiltersListItem from "@/components/filters/FiltersListItem.vue";
 import useEditMode from "@/composables/useEdit";
-import { computed, defineProps, ref, toRefs, watch } from "vue";
+import { computed, defineProps, onMounted, ref, toRefs, watch } from "vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
-import { useQuery } from "@vue/apollo-composable";
 
 export type FilterListItem = {
   isActive: boolean;
@@ -120,9 +114,11 @@ export type FilterListItem = {
 };
 
 const props = defineProps<{
+  filterMatcherMapping: FilterMatcherMap;
+  advancedFilters: Maybe<AdvancedFilters> | undefined;
   entityType: string;
-  expandFilters: boolean;
   parentEntityId?: string;
+  expandFilters: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -131,40 +127,26 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const filterMatcherMapping = ref<FilterMatcherMap>({
-  id: [],
-  text: [],
-  date: [],
-  number: [],
-  selection: [],
-  boolean: [],
-  relation: [],
-});
+const { entityType } = toRefs(props);
+const { isSaved } = useEditMode();
 const matchers = ref<DropdownOption[]>([]);
 const filters = ref<FilterListItem[]>([]);
 const labelsOfDisplayedFilters = ref<string[]>([]);
 const activeFilters = ref<AdvancedFilterInput[]>([]);
 const activeFilterCount = ref<number>(0);
 const clearAllActiveFilters = ref<boolean>(false);
-const { entityType } = toRefs(props);
-const { isSaved } = useEditMode();
 
-const { onResult: onFilterMatcherMappingResult } =
-  useQuery<GetFilterMatcherMappingQuery>(
-    GetFilterMatcherMappingDocument,
-    undefined,
-    {
-      enabled: true,
-      fetchPolicy: "no-cache",
-      notifyOnNetworkStatusChange: true,
-    }
-  );
-onFilterMatcherMappingResult((result) => {
-  if (!result.data) return;
-  filterMatcherMapping.value = result.data.FilterMatcherMapping;
+const applyFilters = () => {
+  emit("applyFilters", activeFilters.value);
+};
 
+const getAngleIcon = computed<DamsIcons>(() =>
+  props.expandFilters ? DamsIcons.AngleUp : DamsIcons.AngleDown
+);
+
+const handleFilterMatcherMapping = () => {
   const matcherSet = new Set<string>();
-  Object.values(filterMatcherMapping.value).forEach((matcherArray) => {
+  Object.values(props.filterMatcherMapping).forEach((matcherArray) => {
     if (typeof matcherArray !== "string")
       for (const matcher of matcherArray) matcherSet.add(matcher);
   });
@@ -176,26 +158,12 @@ onFilterMatcherMappingResult((result) => {
       value: matcher,
     };
   });
-});
+};
 
-const { refetch, onResult: onAdvancedFiltersResult } =
-  useQuery<GetAdvancedFiltersQuery>(
-    GetAdvancedFiltersDocument,
-    { entityType: entityType.value },
-    {
-      enabled: true,
-      fetchPolicy: "no-cache",
-      notifyOnNetworkStatusChange: true,
-    }
-  );
-onAdvancedFiltersResult((result) => {
-  const advancedFilters: Maybe<AdvancedFilters> | undefined = (
-    result.data?.EntityTypeFilters as BaseEntity
-  )?.advancedFilters;
-  if (!advancedFilters) return;
-
+const handleAdvancedFilters = () => {
+  if (!props.advancedFilters) return;
   filters.value = [];
-  Object.values(advancedFilters).forEach((advancedFilter) => {
+  Object.values(props.advancedFilters).forEach((advancedFilter) => {
     if (typeof advancedFilter !== "string") {
       if (advancedFilter.defaultValue) {
         const hiddenFilter: AdvancedFilterInput = {
@@ -222,20 +190,20 @@ onAdvancedFiltersResult((result) => {
       if (entityType.value || props.parentEntityId) applyFilters();
     }
   });
-});
-
-const applyFilters = () => {
-  emit("applyFilters", activeFilters.value);
 };
 
-const getAngleIcon = computed<DamsIcons>(() =>
-  props.expandFilters ? DamsIcons.AngleUp : DamsIcons.AngleDown
-);
+onMounted(() => {
+  handleFilterMatcherMapping();
+  handleAdvancedFilters();
+});
 
 if (props.parentEntityId)
-  watch(isSaved, () => {
-    if (isSaved) applyFilters();
-  });
+  watch(
+    () => isSaved.value,
+    () => {
+      if (isSaved.value) applyFilters();
+    }
+  );
 watch(labelsOfDisplayedFilters, () =>
   filters.value.forEach(
     (filter) =>
@@ -266,10 +234,5 @@ watch(clearAllActiveFilters, () => {
     setTimeout(() => (clearAllActiveFilters.value = false), 50);
     applyFilters();
   }
-});
-watch(entityType, () => {
-  clearAllActiveFilters.value = true;
-  activeFilters.value = [];
-  refetch({ entityType: entityType.value });
 });
 </script>

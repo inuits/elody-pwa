@@ -3,11 +3,14 @@
     <div class="w-full" :class="parentEntityId ? 'p-3' : 'px-6'">
       <div class="flex flex-row items-center gap-y-4">
         <FiltersBase
+          v-if="filtersBaseInitializationStatus === 'initialized'"
           v-show="enableAdvancedFilters"
           class="lg:w-[46%]"
-          :expandFilters="expandFilters"
-          :entity-type="filterType || route.meta.entityType ? route.meta.entityType as string : 'BaseLibrary'"
+          :filter-matcher-mapping="filterMatcherMapping"
+          :advanced-filters="advancedFilters"
+          :entity-type="filterType || entityType"
           :parent-entity-id="parentEntityId"
+          :expandFilters="expandFilters"
           @apply-filters="setAdvancedFilters"
           @expand-filters="expandFilters = !expandFilters"
         />
@@ -17,7 +20,12 @@
         </div>
 
         <LibraryBar
-          v-if="!predefinedEntities"
+          v-if="
+            libraryBarInitializationStatus === 'initialized' &&
+            !predefinedEntities
+          "
+          :pagination-limit-options="paginationLimitOptions"
+          :sort-options="sortOptions"
           :total-items="totalEntityCount || NaN"
           :queryVariables="(queryVariables as GetEntitiesQueryVariables)"
         />
@@ -156,8 +164,10 @@
 </template>
 
 <script lang="ts" setup>
+import type { ApolloClient } from "@apollo/client";
 import {
   DamsIcons,
+  Entitytyping,
   GetEntitiesDocument,
   SearchInputType,
   type Entity,
@@ -179,15 +189,15 @@ import MediaViewer from "@/components/base/Mediaviewer.vue";
 import useEntitySingle from "@/composables/useEntitySingle";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
+import useUploadModalDropzone from "@/composables/useUploadModalDropzone";
 import { bulkSelectAllSizeLimit } from "@/main";
+import { DefaultApolloClient } from "@vue/apollo-composable";
+import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
+import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
-import { watch, ref, onMounted, onUnmounted, toRefs, inject } from "vue";
-import { DefaultApolloClient } from "@vue/apollo-composable";
-import { useBaseLibrary } from "./useBaseLibrary";
-import type { ApolloClient } from "@apollo/client";
-import { useI18n } from "vue-i18n";
+import { watch, ref, onMounted, onUnmounted, inject, computed } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -222,28 +232,35 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const apolloClient = inject(DefaultApolloClient);
+const route = useRoute();
+const router = useRouter();
+
+const {
+  advancedFilters,
+  entities,
+  entitiesLoading,
+  filterMatcherMapping,
+  filtersBaseInitializationStatus,
+  getEntities,
+  libraryBarInitializationStatus,
+  paginationLimitOptions,
+  queryVariables,
+  setAdvancedFilters,
+  setEntities,
+  setEntityType,
+  setTotalEntityCount,
+  sortOptions,
+  totalEntityCount,
+} = useBaseLibrary(apolloClient as ApolloClient<any>);
 const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
 const { mediafileSelectionState, updateSelectedEntityMediafile } =
   useEntityMediafileSelector();
+const { getUploadStatus, setUploadStatus } = useUploadModalDropzone();
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { getThumbnail } = useThumbnailHelper();
 const { setEntityUuid } = useEntitySingle();
-const route = useRoute();
-const router = useRouter();
-const {
-  setQueryVariables,
-  getEntities,
-  entities,
-  totalEntityCount,
-  setEntities,
-  setTotalEntityCount,
-  setAdvancedFilters,
-  entitiesLoading,
-  queryVariables,
-} = useBaseLibrary(apolloClient as ApolloClient<any>);
 
-const { searchInputTypeOnDrawer } = toRefs(props);
 const displayList = ref<boolean>(false);
 const displayGrid = ref<boolean>(false);
 const displayPreview = ref<boolean>(props.enablePreview);
@@ -255,26 +272,9 @@ const toggles = [
   { isOn: displayGrid, iconOn: DamsIcons.Apps, iconOff: DamsIcons.Apps },
 ];
 
-const entitiesQueryVariables: GetEntitiesQueryVariables = {
-  limit: 20,
-  skip: 1,
-  searchValue: {
-    value: "",
-    isAsc: isAsc.value,
-    key: "title",
-    order_by: "",
-  },
-  advancedSearchValue: [],
-  advancedFilterInputs: [],
-  searchInputType: searchInputTypeOnDrawer.value,
-};
-
-const initializeBaseLibrary = () => {
-  if (!props.predefinedEntities) {
-    setQueryVariables(entitiesQueryVariables);
-    getEntities();
-  }
-};
+const entityType = computed(() =>
+  route.meta.entityType ? (route.meta.entityType as Entitytyping) : "BaseEntity"
+);
 
 const allEntitiesQueryVariables: GetEntitiesQueryVariables = {
   limit: bulkSelectAllSizeLimit,
@@ -287,12 +287,12 @@ const allEntitiesQueryVariables: GetEntitiesQueryVariables = {
   },
   advancedSearchValue: [],
   advancedFilterInputs: [],
-  searchInputType: searchInputTypeOnDrawer.value,
+  searchInputType: props.searchInputTypeOnDrawer,
 };
 const { result: allEntitiesResult } = useQuery(
   GetEntitiesDocument,
   allEntitiesQueryVariables,
-  () => ({ fetchPolicy: "network-only" })
+  () => ({ enabled: false, fetchPolicy: "network-only" })
 );
 
 const bulkSelect = (items = entities.value) => {
@@ -343,7 +343,13 @@ const conditionallyCalculateGridColumns = () => {
   if (displayGrid.value) calculateGridColumns();
 };
 
+const initializeBaseLibrary = () => {
+  if (!props.predefinedEntities)
+    queryVariables.value.searchInputType = props.searchInputTypeOnDrawer;
+};
+
 onMounted(() => {
+  initializeBaseLibrary();
   window.addEventListener("resize", conditionallyCalculateGridColumns);
   window.addEventListener("popstate", conditionallyCalculateGridColumns);
 
@@ -370,6 +376,26 @@ onUnmounted(() => {
 });
 
 watch(
+  () => entityType.value,
+  () => {
+    if (!props.predefinedEntities) {
+      libraryBarInitializationStatus.value = "not-initialized";
+      filtersBaseInitializationStatus.value = "not-initialized";
+      setEntityType(entityType.value);
+      queryVariables.value.searchInputType =
+        entityType.value === Entitytyping.Mediafile
+          ? SearchInputType.AdvancedInputMediaFilesType
+          : SearchInputType.AdvancedInputType;
+    }
+  }
+);
+watch(getUploadStatus, (status) => {
+  if (status === "success") {
+    getEntities();
+    setUploadStatus("no-upload");
+  }
+});
+watch(
   () => props.predefinedEntities,
   () => {
     if (props.predefinedEntities) {
@@ -379,7 +405,6 @@ watch(
   },
   { immediate: true }
 );
-
 watch([displayGrid, expandFilters], () => {
   window.localStorage.setItem(
     "_displayPreferences",
@@ -389,8 +414,6 @@ watch([displayGrid, expandFilters], () => {
     })
   );
 });
-
-initializeBaseLibrary();
 </script>
 
 <style scoped>
