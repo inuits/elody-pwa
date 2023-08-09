@@ -97,7 +97,7 @@ import {
   NotificationType,
   useNotification,
 } from "@/components/base/BaseNotification.vue";
-import { ref, watch } from "vue";
+import { ref, watch, inject } from "vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useBulkOperations } from "@/composables/useBulkOperations";
 import { useI18n } from "vue-i18n";
@@ -114,13 +114,14 @@ const {
   dequeueAllItemsForBulkProcessing,
   triggerBulkSelectionEvent,
 } = useBulkOperations();
+const config = inject("config") as any;
 const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
 const { getThumbnail } = useThumbnailHelper();
 const { getModal } = useAvailableModals();
 const modal = getModal(TypeModals.BulkOperations);
 const skip = ref<number>(1);
-const limit = ref<number>(1);
+const limit = ref<number>(config.bulkSelectAllSizeLimit);
 
 const items = ref<InBulkProcessableItem[]>([]);
 const loadItems = () =>
