@@ -62,6 +62,7 @@ import BaseCheckDropdown from "@/components/base/BaseCheckDropdown.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import DropzoneNew from "@/components/base/dropzone/DropzoneNew.vue";
 import useDropzoneHelper from "@/composables/useDropzoneHelper";
+import useUploadModalDropzone from "@/composables/useUploadModalDropzone";
 import { ref, watch } from "vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useI18n } from "vue-i18n";
@@ -85,6 +86,7 @@ const {
 } = useDropzoneHelper();
 const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
+const { setUploadStatus } = useUploadModalDropzone();
 const { getModal } = useAvailableModals();
 const modal = getModal(TypeModals.Upload);
 
@@ -234,6 +236,7 @@ const callUploadEndpoint = async (uploadRequestData: UploadRequestData) => {
                 t("dropzone.successNotification.title"),
                 t("dropzone.successNotification.description")
               );
+              setUploadStatus("success");
               modal.closeModal();
             }
           })

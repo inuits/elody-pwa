@@ -3,6 +3,7 @@
     <div class="flex justify-start gap-x-3">
       <div class="w-32">
         <BaseDropdownNew
+          v-if="paginationLimitOptions"
           v-model="selectedPaginationLimitOption"
           :options="paginationLimitOptions"
           :label="t('library.items')"
@@ -13,6 +14,7 @@
       <div class="w-72">
         <BaseDropdownNew
           class="py-1"
+          v-if="sortOptions"
           v-model="selectedSortOption"
           :options="sortOptions"
           :label="t('library.sort')"
@@ -42,101 +44,63 @@
 <script lang="ts" setup>
 import {
   DamsIcons,
-  GetPaginationLimitOptionsDocument,
-  GetSortOptionsDocument,
   ModalState,
   TypeModals,
   type DropdownOption,
-  type GetPaginationLimitOptionsQuery,
-  type GetSortOptionsQuery,
   type GetEntitiesQueryVariables,
 } from "@/generated-types/queries";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import BasePaginationNew from "@/components/base/BasePaginationNew.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
-import { computed, ref, watch } from "vue";
+import { onMounted, ref, toRefs, watch } from "vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
-import { useQuery } from "@vue/apollo-composable";
-import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
+  paginationLimitOptions: DropdownOption[];
+  sortOptions: DropdownOption[];
   totalItems: number;
-  queryVariables?: GetEntitiesQueryVariables;
+  queryVariables: GetEntitiesQueryVariables;
 }>();
 
-const { t } = useI18n();
+const { paginationLimitOptions, sortOptions, queryVariables } = toRefs(props);
 const { getModal } = useAvailableModals();
+const { t } = useI18n();
 const skip = ref<number>(1);
 const isAsc = ref<boolean>(false);
-const route = useRoute();
-const queryVariablesRef = ref<GetEntitiesQueryVariables | undefined>(
-  props.queryVariables
-);
 
 const selectedPaginationLimitOption = ref<DropdownOption>();
-const paginationLimitOptions = ref<DropdownOption[]>([]);
-const { onResult: onPaginationLimitOptionsResult } =
-  useQuery<GetPaginationLimitOptionsQuery>(
-    GetPaginationLimitOptionsDocument,
-    undefined,
-    {
-      fetchPolicy: "no-cache",
-      notifyOnNetworkStatusChange: true,
-    }
-  );
-onPaginationLimitOptionsResult((result) => {
-  paginationLimitOptions.value =
-    result.data?.PaginationLimitOptions.options ?? [];
-  selectedPaginationLimitOption.value = paginationLimitOptions.value[0];
-});
-
 const selectedSortOption = ref<DropdownOption>();
-const sortOptions = ref<DropdownOption[]>([]);
-const entityType = computed(() => route.meta.entityType || "BaseLibrary");
-const { onResult: onSortOptionsResult, refetch: refetchSortOptions } =
-  useQuery<GetSortOptionsQuery>(
-    GetSortOptionsDocument,
-    { entityType: entityType.value },
-    {
-      fetchPolicy: "no-cache",
-      notifyOnNetworkStatusChange: true,
-    }
-  );
-onSortOptionsResult((result) => {
-  sortOptions.value =
-    result.data?.EntityTypeSortOptions?.sortOptions?.options ?? [];
-  selectedSortOption.value = sortOptions.value[0];
-});
 
-watch(skip, () => {
-  if (queryVariablesRef.value) {
-    queryVariablesRef.value.skip = skip.value;
-  }
-});
-watch(isAsc, () => {
-  if (queryVariablesRef.value) {
-    queryVariablesRef.value.searchValue.isAsc = isAsc.value;
-  }
-});
+const setDefaultOptions = () => {
+  selectedPaginationLimitOption.value = paginationLimitOptions.value?.[0];
+  selectedSortOption.value = sortOptions.value?.[0];
+};
+
+onMounted(() => setDefaultOptions());
+
 watch(
   () => selectedSortOption.value,
   () => {
-    if (queryVariablesRef.value) {
-      queryVariablesRef.value.searchValue.order_by =
+    if (queryVariables.value) {
+      queryVariables.value.searchValue.order_by =
         selectedSortOption.value?.value;
     }
   }
 );
-watch(
-  () => entityType.value,
-  () => refetchSortOptions({ entityType: entityType.value })
-);
 watch(selectedPaginationLimitOption, () => {
-  if (queryVariablesRef.value) {
-    queryVariablesRef.value.skip = 1;
-    queryVariablesRef.value.limit = selectedPaginationLimitOption.value?.value;
+  if (queryVariables.value) {
+    queryVariables.value.limit = selectedPaginationLimitOption.value?.value;
+    queryVariables.value.skip = 1;
   }
+});
+watch(isAsc, () => {
+  if (queryVariables.value) {
+    queryVariables.value.searchValue.isAsc = isAsc.value;
+  }
+});
+watch(skip, () => {
+  if (queryVariables.value) queryVariables.value.skip = skip.value;
 });
 watch(
   () => getModal(TypeModals.BulkOperations).modalState.value.state,
@@ -145,11 +109,8 @@ watch(
       getModal(TypeModals.BulkOperations).modalState.value.state ===
       ModalState.Hide
     ) {
-      selectedPaginationLimitOption.value = paginationLimitOptions.value[0];
-      selectedSortOption.value = sortOptions.value[0];
-      if (queryVariablesRef.value) {
-        queryVariablesRef.value.skip = 1;
-      }
+      setDefaultOptions();
+      if (queryVariables.value) queryVariables.value.skip = 1;
     }
   }
 );
