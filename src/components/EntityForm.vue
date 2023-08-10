@@ -18,7 +18,7 @@ import {
 } from "@/composables/useBulkOperations";
 import { computed, onMounted, onUnmounted, watch } from "vue";
 import { useEditMode } from "@/composables/useEdit";
-import { useForm, useSubmitForm } from "vee-validate";
+import { useSubmitForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useMutation } from "@vue/apollo-composable";
 import { useRoute } from "vue-router";
@@ -30,7 +30,7 @@ const props = defineProps<{
 
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const { isEdit, addSaveCallback, refetchFn } = useEditMode();
-const { addForm } = useFormHelper();
+const { getForm, createForm } = useFormHelper();
 const entityId = computed(() => asString(useRoute().params["id"]));
 
 const { mutate } = useMutation<
@@ -42,15 +42,15 @@ type EntityValues = {
   intialValues: IntialValues;
   relationValues: RelationValues;
 };
-const form = computed(() => {
-  return useForm<EntityValues>({
-    initialValues: {
-      intialValues: props.intialValues,
-      relationValues: props.relationValues,
-    },
+
+const form =
+  getForm(entityId.value) ||
+  createForm(entityId.value, {
+    intialValues: props.intialValues,
+    relationValues: props.relationValues,
   });
-});
-const { setValues } = form.value;
+
+const { setValues } = form;
 
 const parseFormValuesToFormInput = (values: EntityValues) => {
   const metadata: MetadataValuesInput[] = [];
@@ -61,7 +61,7 @@ const parseFormValuesToFormInput = (values: EntityValues) => {
     });
 
   const relations: BaseRelationValuesInput[] = [];
-  values.relationValues.relations.forEach((relation) => {
+  values?.relationValues?.relations.forEach((relation) => {
     const relationInput: any = {};
     Object.keys(relation)
       .filter((key) => key !== "__typename")
@@ -81,7 +81,7 @@ const parseFormValuesToFormInput = (values: EntityValues) => {
 const submit = useSubmitForm<EntityValues>(async () => {
   const result = await mutate({
     id: entityId.value,
-    formInput: parseFormValuesToFormInput(form.value.values),
+    formInput: parseFormValuesToFormInput(form.values),
   });
 
   if (!result?.data?.mutateEntityValues) return;
@@ -102,13 +102,6 @@ onUnmounted(() =>
   document.removeEventListener("discardEdit", () => callRefetchFn)
 );
 
-watch(
-  () => form.value,
-  () => {
-    addForm(entityId.value, form.value);
-  },
-  { immediate: true }
-);
 watch(isEdit, () => {
   if (isEdit.value) addSaveCallback(submit, "first");
   dequeueAllItemsForBulkProcessing(
