@@ -52,7 +52,7 @@
               filters
                 .filter((filter) => !filter.advancedFilter.isDisplayedByDefault)
                 .filter((filter) => !filter.advancedFilter.defaultValue)
-                .map((filter) => filter.advancedFilter.label)
+                .map((filter) => t(filter.advancedFilter.label))
             "
             :placeholder="t('filters.add-filter')"
             autocomplete-style="defaultWithBorder"
