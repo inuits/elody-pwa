@@ -60,7 +60,7 @@
           { 'max-w-[200px] truncate': !truncatePreviousRouteName },
         ]"
       >
-        {{ t(currentRouteTitle) }}
+        {{ getCurrentRouteTitle }}
       </div>
     </div>
     <div
@@ -117,24 +117,36 @@
 </template>
 
 <script lang="ts" setup>
+import type { DamsIcons } from "@/generated-types/queries";
+import type { VisitedRoute } from "@/composables/useBreadcrumbs";
+import CustomIcon from "./CustomIcon.vue";
+import { ref, inject, computed } from "vue";
 import { Unicons } from "@/types";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
-import { useMenuHelper } from "@/composables/useMenuHelper";
-import type { DamsIcons } from "@/generated-types/queries";
-import CustomIcon from "./CustomIcon.vue";
-import { ref, inject } from "vue";
-import type { VisitedRoute } from "@/composables/useBreadcrumbs";
-import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { useMenuHelper } from "@/composables/useMenuHelper";
+import { useRouter } from "vue-router";
 
 const config: any = inject("config");
-const { t } = useI18n();
-const showHistory = ref<boolean>(false);
-const truncatePreviousRouteName = ref<boolean>(true);
 const { currentRouteTitle, visitedRoutes, previousRoute } =
   useBreadcrumbs(config);
+const { t } = useI18n();
 const { selectedMenuItem } = useMenuHelper();
+const showHistory = ref<boolean>(false);
+const truncatePreviousRouteName = ref<boolean>(true);
 const router = useRouter();
+
+router.beforeEach(() => {
+  showHistory.value = false;
+});
+
+const getCurrentRouteTitle = computed<string>(() => {
+  try {
+    return t(currentRouteTitle.value);
+  } catch {
+    return currentRouteTitle.value;
+  }
+});
 
 const toggleList = () => {
   if (!visitedRoutes.value.length) {
@@ -152,10 +164,6 @@ const navigateToEntity = (historyRoute: VisitedRoute) => {
     params: { id: historyRoute.id },
   });
 };
-
-router.beforeEach(() => {
-  showHistory.value = false;
-});
 </script>
 
 <style scoped></style>

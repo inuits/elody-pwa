@@ -252,10 +252,13 @@ const {
   sortOptions,
   totalEntityCount,
 } = useBaseLibrary(apolloClient as ApolloClient<any>);
+const {
+  mediafileSelectionState,
+  setEntityMediafiles,
+  updateSelectedEntityMediafile,
+} = useEntityMediafileSelector();
 const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
-const { mediafileSelectionState, updateSelectedEntityMediafile } =
-  useEntityMediafileSelector();
 const { getUploadStatus, setUploadStatus } = useUploadModalDropzone();
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { getThumbnail } = useThumbnailHelper();
@@ -310,6 +313,11 @@ const bulkSelect = (items = entities.value) => {
 };
 
 const goToEntityPage = (entity: Entity) => {
+  if (entity.type === "MediaFile") {
+    setEntityMediafiles([]);
+    updateSelectedEntityMediafile(entity);
+  }
+
   setEntityUuid(entity.uuid);
   const entityId =
     entity.id ||
