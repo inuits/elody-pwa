@@ -22,18 +22,16 @@
         <div v-if="!isCollapsed" class="ml-1 bg-neutral-lightest">
           <BaseLibrary
             class="flex-1"
-            :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
-            :parent-entity-id="entityId"
-            :enable-bulk-operations="true"
             :bulk-operations-context="
               BulkOperationsContextEnum.EntityElementList
             "
+            :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
             :enable-advanced-filters="false"
+            :enable-bulk-operations="true"
             :enable-navigation="false"
+            :parent-entity-id="entityId"
+            :filter-type="types[0]"
             list-item-route-name="SingleEntity"
-            :predefined-entities="
-              !entityList || entityList.length <= 0 ? undefined : entityList
-            "
           />
         </div>
       </template>
