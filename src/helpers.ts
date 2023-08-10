@@ -129,6 +129,7 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
       convertDateToReadbleFormat(value, detail),
     SECONDS: (value: string) => `${value} s`,
     COORDINATES: (value: string) =>
+
       `${(value as any).longitude}, ${(value as any).latitude}`,
   };
 
