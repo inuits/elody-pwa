@@ -1,6 +1,12 @@
 <template>
   <div class="flex ml-1 h-full checkboard select-none">
-    <div class="w-1/3 m-5" v-if="mediafileSelectionState.selectedMediafile">
+    <div
+      class="w-1/3 m-5"
+      v-if="
+        mediafileSelectionState.selectedMediafile &&
+        mediafileSelectionState.mediafiles.length > 0
+      "
+    >
       <entity-image-selection :loading="loading" />
     </div>
 

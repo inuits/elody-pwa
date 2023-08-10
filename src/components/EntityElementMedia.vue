@@ -29,15 +29,26 @@
         v-if="
           !element.isCollapsed && element.type === MediaFileElementTypes.Media
         "
+        :bulk-operations-context="BulkOperationsContextEnum.EntityElementMedia"
         :search-input-type-on-drawer="
           SearchInputType.AdvancedInputMediaFilesType
         "
-        :parent-entity-id="entityId"
+        :predefined-entities="
+          entityId === mediafileSelectionState.selectedMediafile?.id ||
+          entityId === mediafileSelectionState.selectedMediafile?.uuid
+            ? [mediafileSelectionState.selectedMediafile]
+            : undefined
+        "
         :enable-preview="true"
-        :enable-bulk-operations="true"
-        :bulk-operations-context="BulkOperationsContextEnum.EntityElementMedia"
         :enable-advanced-filters="false"
+        :enable-bulk-operations="true"
         :enable-navigation="false"
+        :parent-entity-id="
+          entityId === mediafileSelectionState.selectedMediafile?.id ||
+          entityId === mediafileSelectionState.selectedMediafile?.uuid
+            ? undefined
+            : entityId
+        "
         list-item-route-name="SingleEntity"
       />
       <!-- Not yet refactored old component -->
@@ -77,11 +88,13 @@ import { computed } from "vue";
 import { Unicons } from "@/types";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useRoute } from "vue-router";
+import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 
 const props = defineProps<{
   element: MediaFileElement;
 }>();
 
+const { mediafileSelectionState } = useEntityMediafileSelector();
 const { setAcceptedTypes } = useEntityPickerModal();
 const { getEntityUuid } = useEntitySingle();
 const { getModal } = useAvailableModals();
