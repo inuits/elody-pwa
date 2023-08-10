@@ -11,11 +11,7 @@
           ? 'border-neutral-light rounded-t'
           : 'border-neutral-white rounded-xl'
       "
-      @click="
-        () => {
-          emit('expandFilters', expandFilters);
-        }
-      "
+      @click="() => emit('expandFilters', expandFilters)"
     >
       <span class="text-text-body text-xl font-bold">
         {{ t("filters.filter") }}
@@ -167,7 +163,10 @@ const handleAdvancedFilters = () => {
     if (typeof advancedFilter !== "string") {
       if (advancedFilter.defaultValue) {
         const hiddenFilter: AdvancedFilterInput = {
-          type: AdvancedFilterTypes.Text,
+          type:
+            advancedFilter.key === "type"
+              ? AdvancedFilterTypes.Type
+              : AdvancedFilterTypes.Text,
           key: advancedFilter.key,
           value: advancedFilter.defaultValue,
           match_exact: true,
