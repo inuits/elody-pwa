@@ -66,13 +66,16 @@ const start = async () => {
   });
 
   router.beforeEach(async (to, _from) => {
-    auth.changeRedirectRoute(window.location.origin + window.location.pathname);
     await auth.verifyServerAuth();
     if (!to.matched.some((route) => route.meta.requiresAuth)) {
       return;
     } else {
       await auth.assertIsAuthenticated(to.fullPath);
     }
+  });
+
+  router.afterEach(() => {
+    auth.changeRedirectRoute(window.location.origin + window.location.pathname);
   });
 
   auth.changeRedirectRoute(window.location.origin + window.location.pathname);
