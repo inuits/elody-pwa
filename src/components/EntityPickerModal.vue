@@ -79,8 +79,14 @@ const addRelations = (selectedItems: InBulkProcessableItem[]) => {
   selectedItems.forEach((item) => {
     relations.push({
       key: item.id,
-      label: form.values.relationValues.label,
-      type: form.values.relationValues.type,
+      label:
+        getAcceptedTypes()[0] === Entitytyping.Mediafile
+          ? "mediafile"
+          : form.values.relationValues.label,
+      type:
+        getAcceptedTypes()[0] === Entitytyping.Mediafile
+          ? "hasMediafile"
+          : form.values.relationValues.type,
       value: item.teaserMetadata?.find((data) => data.key === "name")?.value,
       editStatus: EditStatus.New,
     });
