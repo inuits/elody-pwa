@@ -185,3 +185,11 @@ export const createPlaceholderEntities = (amount: number): any[] => {
   }
   return placeholders;
 };
+
+export const updateLocalStorage = (key: string, data: object): void => {
+  const oldData = localStorage.getItem(key);
+  if (oldData) {
+    data = Object.assign(JSON.parse(oldData), data);
+  }
+  window.localStorage.setItem(key, JSON.stringify(data));
+};
