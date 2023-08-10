@@ -79,11 +79,9 @@ const addRelations = (selectedItems: InBulkProcessableItem[]) => {
   selectedItems.forEach((item) => {
     relations.push({
       key: item.id,
-      label: getAcceptedTypes()[0] ?? "asset",
-      type:
-        getAcceptedTypes()[0] === Entitytyping.Mediafile
-          ? "hasMediafile"
-          : "parent",
+      label: form.values.relationValues.label,
+      type: form.values.relationValues.type,
+      value: item.teaserMetadata?.find((data) => data.key === "name")?.value,
       editStatus: EditStatus.New,
     });
   });
