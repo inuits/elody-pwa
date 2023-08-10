@@ -344,8 +344,11 @@ const conditionallyCalculateGridColumns = () => {
 };
 
 const initializeBaseLibrary = () => {
-  if (!props.predefinedEntities)
+  if (!props.predefinedEntities) {
+    if (props.filterType)
+      setEntityType(props.filterType as Entitytyping);
     queryVariables.value.searchInputType = props.searchInputTypeOnDrawer;
+  }
 };
 
 onMounted(() => {
