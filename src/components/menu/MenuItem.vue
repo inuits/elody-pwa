@@ -15,19 +15,17 @@
       <span class="nav-item-label w-0 h-0 overflow-hidden px-4 font-bold">
         {{ t(menuitem?.label) }}
       </span>
-      <div class="w-full flex justify-end align-center" v-if="menuitem.subMenu">
+      <div
+        @click="toggleDropDown()"
+        class="w-full flex justify-end align-center"
+        v-if="menuitem.subMenu"
+      >
         <unicon
           v-if="showdropdown"
-          @click="handleClick"
           :name="Unicons.AngleDown.name"
           height="20"
         />
-        <unicon
-          v-if="!showdropdown"
-          @click="handleClick"
-          :name="Unicons.AngleRight.name"
-          height="20"
-        />
+        <unicon v-else :name="Unicons.AngleRight.name" height="20" />
       </div>
     </div>
     <div
@@ -47,17 +45,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, defineProps, watch, computed } from "vue";
+import { ref, defineProps, computed } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
 import { Unicons } from "@/types";
-import {
-  type MenuItem,
-  ModalState,
-  DamsIcons,
-} from "@/generated-types/queries";
+import type { MenuItem, DamsIcons } from "@/generated-types/queries";
 import useMenuHelper from "@/composables/useMenuHelper";
-import { useAvailableModals } from "@/composables/useAvailableModals";
 import CustomIcon from "../CustomIcon.vue";
 import { useI18n } from "vue-i18n";
 
@@ -65,7 +58,6 @@ const {
   checkIfRouteOrModal,
   showdropdown,
   toggleDropDown,
-  resetSelectedMenuItem,
   setSelectedMenuItem,
   selectedMenuItem,
 } = useMenuHelper();
@@ -73,7 +65,6 @@ const { t } = useI18n();
 
 const auth = useAuth();
 const menuSubitem = ref<Array<MenuItem>>([]);
-const { getModal } = useAvailableModals();
 
 const props = defineProps<{
   menuitem: MenuItem;
@@ -83,9 +74,10 @@ const props = defineProps<{
 }>();
 
 const handleClick = () => {
-  setSelectedMenuItem(props.menuitem);
+  if (props.menuitem.typeLink?.route) {
+    setSelectedMenuItem(props.menuitem);
+  }
   checkIfRouteOrModal(props.menuitem);
-  toggleDropDown();
 };
 
 const isActive = computed(() => props.menuitem === selectedMenuItem.value);
@@ -102,18 +94,6 @@ const handleSubMenu = () => {
   }
 };
 
-watch(
-  () => {
-    const typeModal = props.menuitem.typeLink?.modal?.typeModal;
-    if (!typeModal) return undefined;
-    return getModal(typeModal).modalState.value.state;
-  },
-  (state) => {
-    if (state === ModalState.Hide) {
-      resetSelectedMenuItem();
-    }
-  }
-);
 handleSubMenu();
 </script>
 <style>

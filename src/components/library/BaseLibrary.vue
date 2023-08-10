@@ -3,12 +3,15 @@
     <div class="w-full" :class="parentEntityId ? 'p-3' : 'px-6'">
       <div class="flex flex-row items-center gap-y-4">
         <FiltersBase
+          v-if="filtersBaseInitializationStatus === 'initialized'"
           v-show="enableAdvancedFilters"
           class="lg:w-[46%]"
-          :expandFilters="expandFilters"
-          :entity-type="filterType || route.meta.entityType as string"
+          :filter-matcher-mapping="filterMatcherMapping"
+          :advanced-filters="advancedFilters"
+          :entity-type="filterType || entityType"
           :parent-entity-id="parentEntityId"
-          @apply-filters="setFilters"
+          :expandFilters="expandFilters"
+          @apply-filters="setAdvancedFilters"
           @expand-filters="expandFilters = !expandFilters"
         />
 
@@ -17,16 +20,14 @@
         </div>
 
         <LibraryBar
-          v-if="!predefinedEntities"
-          :total-items="totalEntityCount"
-          v-model:limit="queryVariables.limit"
-          v-model:skip="(queryVariables.skip as number)"
-          v-model:sortKey="selectedSortOption"
-          v-model:isAsc="isAsc"
-          @update:limit="setNewQueryVariables"
-          @update:skip="setNewQueryVariables"
-          @update:sortKey="setNewQueryVariables"
-          @update:isAsc="setNewQueryVariables"
+          v-if="
+            libraryBarInitializationStatus === 'initialized' &&
+            !predefinedEntities
+          "
+          :pagination-limit-options="paginationLimitOptions"
+          :sort-options="sortOptions"
+          :total-items="totalEntityCount || NaN"
+          :queryVariables="(queryVariables as GetEntitiesQueryVariables)"
         />
       </div>
 
@@ -61,26 +62,29 @@
             <div>
               <ListItem
                 v-for="entity in entities"
-                :key="entity.id"
+                :key="entity.id + '_list'"
                 :class="
                   parentEntityId &&
+                  entity.id &&
                   mediafileSelectionState.selectedMediafile?.id === entity.id
                     ? '!border-2 !border-accent-normal'
                     : ''
                 "
-                :item-id="entity.id"
+                :item-id="entity.uuid"
                 :bulk-operations-context="bulkOperationsContext"
                 :teaser-metadata="
                   entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
                 "
                 :media="
-                  loading ? undefined : getMediaFilenameFromEntity(entity)
+                  entitiesLoading
+                    ? undefined
+                    : getMediaFilenameFromEntity(entity)
                 "
-                :thumb-icon="loading ? undefined : getThumbnail(entity)"
+                :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
                 :small="listItemRouteName === 'SingleMediafile'"
-                :loading="loading"
+                :loading="entitiesLoading"
                 @click="
-                  loading || !enableNavigation
+                  entitiesLoading || !enableNavigation
                     ? !enableNavigation &&
                       parentEntityId &&
                       entity.type === 'MediaFile'
@@ -105,26 +109,28 @@
             <div class="grid grid_cols gap-2 justify-items-center">
               <GridItem
                 v-for="entity in entities"
-                :key="entity.id"
+                :key="entity.id + '_grid'"
                 :class="
                   parentEntityId &&
                   mediafileSelectionState.selectedMediafile?.id === entity.id
                     ? '!border-2 !border-accent-normal'
                     : ''
                 "
-                :item-id="entity.id"
+                :item-id="entity.uuid"
                 :bulk-operations-context="bulkOperationsContext"
                 :teaser-metadata="
                   entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
                 "
                 :media="
-                  loading ? undefined : getMediaFilenameFromEntity(entity)
+                  entitiesLoading
+                    ? undefined
+                    : getMediaFilenameFromEntity(entity)
                 "
-                :thumb-icon="loading ? undefined : getThumbnail(entity)"
+                :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
                 :small="listItemRouteName === 'SingleMediafile'"
-                :loading="loading"
+                :loading="entitiesLoading"
                 @click="
-                  loading || !enableNavigation
+                  entitiesLoading || !enableNavigation
                     ? !enableNavigation &&
                       parentEntityId &&
                       entity.type === 'MediaFile'
@@ -144,12 +150,12 @@
               </GridItem>
             </div>
             <div v-if="entities.length === 0" class="p-4">
-              {{ $t("search.noresult") }}
+              {{ t("search.noresult") }}
             </div>
           </div>
 
           <div v-else-if="displayPreview && entities" class="h-[62vh] mt-5">
-            <media-viewer :mediafiles="entities" :loading="loading" />
+            <media-viewer :mediafiles="entities" :loading="entitiesLoading" />
           </div>
         </ListContainer>
       </div>
@@ -158,11 +164,12 @@
 </template>
 
 <script lang="ts" setup>
+import type { ApolloClient } from "@apollo/client";
 import {
   DamsIcons,
+  Entitytyping,
   GetEntitiesDocument,
   SearchInputType,
-  type AdvancedFilterInput,
   type Entity,
   type GetEntitiesQueryVariables,
 } from "@/generated-types/queries";
@@ -173,32 +180,30 @@ import {
 } from "@/composables/useBulkOperations";
 import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
-import FiltersBase from "@/components/filters-new/FiltersBase.vue";
+import FiltersBase from "@/components/filters/FiltersBase.vue";
 import GridItem from "@/components/GridItem.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import ListContainer from "@/components/ListContainer.vue";
 import ListItem from "@/components/ListItem.vue";
-import MediaViewer from "./Mediaviewer.vue";
-import useEditMode from "@/composables/useEdit";
+import MediaViewer from "@/components/base/Mediaviewer.vue";
+import useEntitySingle from "@/composables/useEntitySingle";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
+import useUploadModalDropzone from "@/composables/useUploadModalDropzone";
 import { bulkSelectAllSizeLimit } from "@/main";
-import { createPlaceholderEntities } from "@/helpers";
+import { DefaultApolloClient } from "@vue/apollo-composable";
+import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
+import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
-import { watch, reactive, ref, onMounted, onUnmounted } from "vue";
-
-export type PredefinedEntities = {
-  usePredefinedEntities: boolean;
-  entities: Entity[];
-};
+import { watch, ref, onMounted, onUnmounted, inject, computed } from "vue";
 
 const props = withDefaults(
   defineProps<{
     bulkOperationsContext: Context;
     listItemRouteName: string;
-    predefinedEntities?: PredefinedEntities;
+    predefinedEntities?: Entity[];
     searchInputTypeOnDrawer?: SearchInputType;
     enablePreview?: boolean;
     enableAdvancedFilters?: boolean;
@@ -225,33 +230,56 @@ const emit = defineEmits<{
   (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
 }>();
 
-const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
-  useBulkOperations();
-const { mediafileSelectionState, updateSelectedEntityMediafile } =
-  useEntityMediafileSelector();
-const { getMediaFilenameFromEntity } = useListItemHelper();
-const { getThumbnail } = useThumbnailHelper();
-const { isSaved } = useEditMode();
+const { t } = useI18n();
+const apolloClient = inject(DefaultApolloClient);
 const route = useRoute();
 const router = useRouter();
 
-const entities = ref<Entity[]>(props.predefinedEntities?.entities || []);
-const totalEntityCount = ref<number>(
-  props.predefinedEntities ? props.predefinedEntities.entities.length : 0
-);
+const {
+  advancedFilters,
+  entities,
+  entitiesLoading,
+  filterMatcherMapping,
+  filtersBaseInitializationStatus,
+  getEntities,
+  libraryBarInitializationStatus,
+  paginationLimitOptions,
+  queryVariables,
+  setAdvancedFilters,
+  setEntities,
+  setEntityType,
+  setTotalEntityCount,
+  sortOptions,
+  totalEntityCount,
+} = useBaseLibrary(apolloClient as ApolloClient<any>);
+const {
+  mediafileSelectionState,
+  setEntityMediafiles,
+  updateSelectedEntityMediafile,
+} = useEntityMediafileSelector();
+const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
+  useBulkOperations();
+const { getUploadStatus, setUploadStatus } = useUploadModalDropzone();
+const { getMediaFilenameFromEntity } = useListItemHelper();
+const { getThumbnail } = useThumbnailHelper();
+const { setEntityUuid } = useEntitySingle();
+
 const displayList = ref<boolean>(false);
 const displayGrid = ref<boolean>(false);
 const displayPreview = ref<boolean>(props.enablePreview);
 
 const expandFilters = ref<boolean>(false);
-const selectedSortOption = ref<string>();
-const isAsc = ref<boolean>(true);
+const isAsc = ref<boolean>(false);
 const toggles = [
   { isOn: displayList, iconOn: DamsIcons.ListUl, iconOff: DamsIcons.ListUl },
   { isOn: displayGrid, iconOn: DamsIcons.Apps, iconOff: DamsIcons.Apps },
 ];
 
-const queryVariables = reactive<GetEntitiesQueryVariables>({
+const entityType = computed(() =>
+  route.meta.entityType ? (route.meta.entityType as Entitytyping) : "BaseEntity"
+);
+
+const allEntitiesQueryVariables: GetEntitiesQueryVariables = {
   limit: bulkSelectAllSizeLimit,
   skip: 1,
   searchValue: {
@@ -263,51 +291,15 @@ const queryVariables = reactive<GetEntitiesQueryVariables>({
   advancedSearchValue: [],
   advancedFilterInputs: [],
   searchInputType: props.searchInputTypeOnDrawer,
-});
-
-const setNewQueryVariables = () => {
-  const newVariables = { ...queryVariables };
-  if (selectedSortOption.value && newVariables?.searchValue) {
-    newVariables.searchValue.order_by = selectedSortOption.value;
-    newVariables.searchValue.isAsc = isAsc.value;
-  }
-  refetch(newVariables);
 };
-
-const {
-  onResult: onEntitiesResult,
-  loading,
-  refetch,
-} = useQuery(GetEntitiesDocument, queryVariables, {
-  notifyOnNetworkStatusChange: true,
-  enabled: props.predefinedEntities ? false : true,
-});
-
-onEntitiesResult((result) => {
-  if (result.data && result.data.Entities && !props.predefinedEntities) {
-    entities.value = result.data.Entities.results as Entity[];
-    totalEntityCount.value = result.data.Entities.count;
-  }
-});
-
-const resetSkip = () => {
-  queryVariables.skip = 1;
-};
-
-const setFilters = (advancedFilterInputs: AdvancedFilterInput[]) => {
-  resetSkip();
-  queryVariables.advancedFilterInputs = advancedFilterInputs;
-  if (props.parentEntityId && isSaved) setNewQueryVariables();
-};
-
 const { result: allEntitiesResult } = useQuery(
   GetEntitiesDocument,
-  queryVariables,
-  { enabled: true, fetchPolicy: "network-only" }
+  allEntitiesQueryVariables,
+  () => ({ enabled: false, fetchPolicy: "network-only" })
 );
 
 const bulkSelect = (items = entities.value) => {
-  if (props.predefinedEntities) items = props.predefinedEntities.entities;
+  if (props.predefinedEntities) items = props.predefinedEntities;
 
   for (let entity of items)
     enqueueItemForBulkProcessing(props.bulkOperationsContext, {
@@ -321,8 +313,14 @@ const bulkSelect = (items = entities.value) => {
 };
 
 const goToEntityPage = (entity: Entity) => {
+  if (entity.type === "MediaFile") {
+    setEntityMediafiles([]);
+    updateSelectedEntityMediafile(entity);
+  }
+
+  setEntityUuid(entity.uuid);
   const entityId =
-    entity?.id ||
+    entity.id ||
     entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")?.value;
 
   router.push({
@@ -353,11 +351,18 @@ const conditionallyCalculateGridColumns = () => {
   if (displayGrid.value) calculateGridColumns();
 };
 
+const initializeBaseLibrary = () => {
+  if (!props.predefinedEntities) {
+    if (props.filterType) setEntityType(props.filterType as Entitytyping);
+    queryVariables.value.searchInputType = props.searchInputTypeOnDrawer;
+  }
+};
+
 onMounted(() => {
+  initializeBaseLibrary();
   window.addEventListener("resize", conditionallyCalculateGridColumns);
   window.addEventListener("popstate", conditionallyCalculateGridColumns);
 
-  if (!props.predefinedEntities) refetch();
   if (props.enablePreview)
     toggles.push({
       isOn: displayPreview,
@@ -381,19 +386,35 @@ onUnmounted(() => {
 });
 
 watch(
-  () => loading.value,
-  (isLoading) => {
-    if (!isLoading) return;
-    entities.value = createPlaceholderEntities(queryVariables.limit || 25);
-  },
-  { immediate: true }
-);
-watch(
-  () => props.predefinedEntities?.entities,
+  () => entityType.value,
   () => {
-    if (props.predefinedEntities?.entities) {
-      entities.value = props.predefinedEntities?.entities;
-      totalEntityCount.value = entities.value.length;
+    if (!props.predefinedEntities) {
+      libraryBarInitializationStatus.value = "not-initialized";
+      filtersBaseInitializationStatus.value = "not-initialized";
+      setEntityType(entityType.value);
+
+      const searchInputType =
+        entityType.value === Entitytyping.Mediafile
+          ? SearchInputType.AdvancedInputMediaFilesType
+          : SearchInputType.AdvancedInputType;
+      if (searchInputType === queryVariables.value.searchInputType)
+        getEntities();
+      else queryVariables.value.searchInputType = searchInputType;
+    }
+  }
+);
+watch(getUploadStatus, (status) => {
+  if (status === "success") {
+    getEntities();
+    setUploadStatus("no-upload");
+  }
+});
+watch(
+  () => props.predefinedEntities,
+  () => {
+    if (props.predefinedEntities) {
+      setEntities(props.predefinedEntities);
+      setTotalEntityCount(props.predefinedEntities.length);
     }
   },
   { immediate: true }

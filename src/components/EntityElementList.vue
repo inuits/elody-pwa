@@ -9,7 +9,10 @@
           <unicon height="16" :name="Unicons.PlusCircle.name" />
           <p
             class="underline"
-            @click="openPickEntityModal(types as Entitytyping[], metaKey)"
+            @click="() => {
+              setAcceptedTypes(types as Entitytyping[]);
+              modal.openModal();
+            }"
           >
             {{ t("library.add") }}
           </p>
@@ -17,77 +20,65 @@
       </template>
       <template v-slot:content>
         <div v-if="!isCollapsed" class="ml-1 bg-neutral-lightest">
-          <base-library
+          <BaseLibrary
+            class="flex-1"
+            :bulk-operations-context="
+              BulkOperationsContextEnum.EntityElementList
+            "
+            :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
             :enable-advanced-filters="false"
+            :enable-bulk-operations="true"
+            :enable-navigation="false"
+            :parent-entity-id="entityId"
+            :filter-type="types[0]"
             list-item-route-name="SingleEntity"
-            :is-hide-filters="true"
-            :predefined-entities="entitiesObject"
-            :enable-bulk-operations="false"
-            :bulk-operations-context="route.name as Context"
           />
         </div>
-        <!-- <div v-for="(field, idx) in fields" :key="field.key">
-          <span
-            @click="
-              router.push({
-                name: 'SingleEntity',
-                params: { id: field.value.id },
-              })
-            "
-            >{{ field.value.teaserMetadata[0]?.value }}</span
-          >
-          <span
-            v-if="isEdit && !field.value.toBeDeleted"
-            class="underline ml-2"
-            @click="remove(idx, field)"
-            >delete</span
-          >
-          <span
-            v-if="isEdit && field.value.toBeDeleted"
-            class="underline ml-2"
-            @click="revertRemove(idx, field)"
-            >undo delete</span
-          >
-        </div> -->
       </template>
     </entity-element-wrapper>
   </div>
 </template>
 
 <script lang="ts" setup>
-import type { Context } from "@/composables/useBulkOperations";
-import type { Entity, Entitytyping } from "@/generated-types/queries";
-import BaseLibrary from "@/components/base/BaseLibrary.vue";
+import {
+  SearchInputType,
+  TypeModals,
+  type Entitytyping,
+  type Entity,
+} from "@/generated-types/queries";
+import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import useEditMode from "@/composables/useEdit";
+import useEntityPickerModal from "@/composables/useEntityPickerModal";
+import useEntitySingle from "@/composables/useEntitySingle";
+import { asString } from "@/helpers";
+import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import { computed } from "vue";
 import { Unicons } from "@/types";
+import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useI18n } from "vue-i18n";
-import { usePickEntityModal } from "@/components/PickEntityModal.vue";
 import { useRoute } from "vue-router";
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
-    label: string;
-    RelationKey: string;
     isCollapsed: Boolean;
     types: string[];
-    metaKey: string;
+    label: string;
     entityList: Entity[];
   }>(),
   {
     types: () => [],
-    metaKey: "",
   }
 );
 
+const { setAcceptedTypes } = useEntityPickerModal();
+const { getEntityUuid } = useEntitySingle();
+const { getModal } = useAvailableModals();
 const { isEdit } = useEditMode();
-const route = useRoute();
 const { t } = useI18n();
 
-const entitiesObject = computed(() => {
-  return { usePredefinedEntities: true, entities: props.entityList || [] };
-});
-
-const { openPickEntityModal } = usePickEntityModal();
+const modal = getModal(TypeModals.EntityPicker);
+const entityId = computed(
+  () => getEntityUuid() || asString(useRoute().params["id"])
+);
 </script>

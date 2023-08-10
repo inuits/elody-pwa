@@ -28,7 +28,7 @@
       <div>
         <BaseButtonNew
           v-if="!modifyMetadata"
-          :label="$t('dropzone.upload')"
+          :label="t('dropzone.upload')"
           :icon="DamsIcons.PlusCircle"
           button-style="accentAccent"
           :disabled="isDisabledUploadButton"
@@ -36,7 +36,7 @@
         />
         <BaseButtonNew
           v-if="modifyMetadata"
-          :label="$t('dropzone.modifyMetadata')"
+          :label="t('dropzone.modifyMetadata')"
           :icon="DamsIcons.EditAlt"
           button-style="accentAccent"
         />
@@ -46,24 +46,30 @@
 </template>
 
 <script lang="ts" setup>
+import type { DropzoneFile } from "dropzone";
 import {
   DamsIcons,
+  TypeModals,
   type DropdownOption,
   type DropzoneEntityToCreate,
 } from "@/generated-types/queries";
-import type { DropzoneFile } from "dropzone";
+import {
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseCheckDropdown from "@/components/base/BaseCheckDropdown.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import DropzoneNew from "@/components/base/dropzone/DropzoneNew.vue";
 import useDropzoneHelper from "@/composables/useDropzoneHelper";
-import useUploadModal, { uploadModalState } from "@/composables/useUploadModal";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import useUploadModalDropzone from "@/composables/useUploadModalDropzone";
 import { ref, watch } from "vue";
+import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useI18n } from "vue-i18n";
+
+const props = defineProps<{
+  entityToCreate: DropzoneEntityToCreate;
+}>();
 
 type UploadRequestData = {
   body: object | Array<object>;
@@ -78,13 +84,11 @@ const {
   clearDropzoneCounters,
   clearDropzoneErrorMessages,
 } = useDropzoneHelper();
-const { closeUploadModal } = useUploadModal();
-const { createNotificationOverwrite } = useNotification();
 const { t } = useI18n();
-
-const props = defineProps<{
-  entityToCreate: DropzoneEntityToCreate;
-}>();
+const { createNotificationOverwrite } = useNotification();
+const { setUploadStatus } = useUploadModalDropzone();
+const { getModal } = useAvailableModals();
+const modal = getModal(TypeModals.Upload);
 
 const createEntity = ref<boolean>(true);
 const entityToCreateOptions = ref<DropdownOption[]>(
@@ -119,11 +123,12 @@ const onUpdateFilesInDropzone = (files: DropzoneFile[]) => {
   ];
 
   const mostRecentlyAddedCsvFileName = csvFiles[csvFiles.length - 1]?.name;
-  selectedImportMethod.value = {
-    icon: DamsIcons.NoIcon,
-    label: mostRecentlyAddedCsvFileName,
-    value: mostRecentlyAddedCsvFileName,
-  };
+  if (mostRecentlyAddedCsvFileName)
+    selectedImportMethod.value = {
+      icon: DamsIcons.NoIcon,
+      label: mostRecentlyAddedCsvFileName,
+      value: mostRecentlyAddedCsvFileName,
+    };
 };
 
 const uploadFiles = async () => {
@@ -209,7 +214,7 @@ const callUploadEndpoint = async (uploadRequestData: UploadRequestData) => {
         await fetch(
           json.url.replace(
             "storage-api:5000/",
-            "storage-api.digipolis-dams.localhost:8300"
+            "storage-api.digipolis-dams.localhost:8100"
           ),
           {
             method: "POST",
@@ -231,7 +236,8 @@ const callUploadEndpoint = async (uploadRequestData: UploadRequestData) => {
                 t("dropzone.successNotification.title"),
                 t("dropzone.successNotification.description")
               );
-              closeUploadModal();
+              setUploadStatus("success");
+              modal.closeModal();
             }
           })
           .catch(async (response: Response) =>
@@ -254,9 +260,10 @@ const exceptionHandler = (
 
 const handleCheckOptionEvent = () => (createEntity.value = !createEntity.value);
 watch(
-  () => uploadModalState.value.state,
+  () => modal.modalState.value.state,
   () => {
     createEntity.value = true;
+    selectedImportMethod.value = undefined;
     clearDropzoneCounters();
     clearDropzoneErrorMessages();
   }

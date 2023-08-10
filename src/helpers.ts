@@ -18,6 +18,7 @@ export const i18n = (translations: Object, applicationLocale: string) => {
     fallbackLocale: "en",
     // @ts-ignore
     messages: translations,
+    missingWarn: false,
   });
 };
 
@@ -107,7 +108,7 @@ export const getValueForPanelMetadata = (
 ): string => {
   const form = getForm(entityId);
   if (panelType === PanelType.Metadata && form) {
-    return form.values[metadataItemKey] || "";
+    return form.values.intialValues[metadataItemKey] || "";
   } else if (mediafileSelectionState.selectedMediafile) {
     return (mediafileSelectionState.selectedMediafile.intialValues as any)?.[
       metadataItemKey
@@ -128,6 +129,7 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
       convertDateToReadbleFormat(value, detail),
     SECONDS: (value: string) => `${value} s`,
     COORDINATES: (value: string) =>
+
       `${(value as any).longitude}, ${(value as any).latitude}`,
   };
 
@@ -178,7 +180,7 @@ export const createPlaceholderEntities = (amount: number): any[] => {
   const placeholders = [];
   for (let i = 0; i <= amount; i++) {
     placeholders.push({
-      id: "/",
+      id: `${i}`,
       teaserMetadata: [
         { key: "", value: "", label: "" },
         { key: "", value: "", label: "" },

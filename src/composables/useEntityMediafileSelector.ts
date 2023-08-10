@@ -13,13 +13,11 @@ type MediaFileKeys =
 type MediafileSelectionState = {
   mediafiles: MediaFileEntity[];
   selectedMediafile: MediaFileEntity | undefined;
-  toBeDeleted: string[];
 };
 
 const mediafileSelectionState = reactive<MediafileSelectionState>({
   mediafiles: [],
   selectedMediafile: undefined,
-  toBeDeleted: [],
 });
 
 export const useEntityMediafileSelector = () => {
@@ -30,7 +28,7 @@ export const useEntityMediafileSelector = () => {
       | undefined = mediafileSelectionState.selectedMediafile
   ) => (mediafile?.intialValues as any)?.[key];
 
-  const setEntityMediafiles = (mediafiles: [MediaFileEntity]) => {
+  const setEntityMediafiles = (mediafiles: MediaFileEntity[]) => {
     mediafileSelectionState.mediafiles = mediafiles;
   };
 

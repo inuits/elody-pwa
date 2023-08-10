@@ -91,7 +91,7 @@ export default defineComponent({
           id: manualID.value,
           metadata: [],
           title: EntityTitle.value,
-          identifiers: [manualID.value],
+          identifiers: [manualID.value, EntityTitle.value],
         },
       });
 
@@ -107,7 +107,7 @@ export default defineComponent({
         });
         router.push({
           name: "SingleEntity",
-          params: { id: createResult.data.createEntity.id },
+          params: { id: manualID.value },
         });
       }
     };

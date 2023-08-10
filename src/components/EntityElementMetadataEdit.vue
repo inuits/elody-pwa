@@ -3,26 +3,27 @@
     <InputField
       v-if="!isDropdownType"
       v-model="computedValue"
-      :label="label"
+      :label="t(label)"
       :type="field.type"
     />
     <BaseDropdown
       v-else
       v-model="computedValue"
-      :label="label"
+      :label="t(label)"
       :options="options"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
-import InputField from "./base/InputField.vue";
-import BaseDropdown from "./base/BaseDropdown.vue";
+import type { FormContext } from "vee-validate";
 import type { InputField as InputFieldType } from "@/generated-types/queries";
-import { computed, onMounted, ref, watch, type PropType } from "vue";
+import BaseDropdown from "@/components/base/BaseDropdown.vue";
+import InputField from "@/components/base/InputField.vue";
+import { computed, type PropType } from "vue";
 import { getEntityIdFromRoute } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
-import type { FormContext } from "vee-validate";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps({
   fieldKey: { type: String, required: true },
@@ -31,6 +32,7 @@ const props = defineProps({
   field: { type: Object as PropType<InputFieldType>, required: false },
 });
 
+const { t } = useI18n();
 const { getForm } = useFormHelper();
 const id = getEntityIdFromRoute() || "";
 const form: FormContext = getForm(id);
@@ -41,7 +43,7 @@ const computedValue = computed<any>({
   },
   set(value: string) {
     if (form) {
-      form.setFieldValue(props.fieldKey, value);
+      form.setFieldValue(`intialValues.${props.fieldKey}`, value);
     }
   },
 });

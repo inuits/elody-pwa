@@ -3,9 +3,10 @@
     <div class="flex justify-start gap-x-3">
       <div class="w-32">
         <BaseDropdownNew
+          v-if="paginationLimitOptions"
           v-model="selectedPaginationLimitOption"
           :options="paginationLimitOptions"
-          :label="$t('library.items')"
+          :label="t('library.items')"
           label-alignment="right"
           dropdown-style="default"
         />
@@ -13,9 +14,10 @@
       <div class="w-72">
         <BaseDropdownNew
           class="py-1"
+          v-if="sortOptions"
           v-model="selectedSortOption"
           :options="sortOptions"
-          :label="$t('library.sort')"
+          :label="t('library.sort')"
           label-alignment="left"
           dropdown-style="default"
         />
@@ -42,96 +44,63 @@
 <script lang="ts" setup>
 import {
   DamsIcons,
-  GetPaginationLimitOptionsDocument,
-  GetSortOptionsDocument,
   ModalState,
   TypeModals,
   type DropdownOption,
-  type GetPaginationLimitOptionsQuery,
-  type GetSortOptionsQuery,
+  type GetEntitiesQueryVariables,
 } from "@/generated-types/queries";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import BasePaginationNew from "@/components/base/BasePaginationNew.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
-import { computed, ref, watch } from "vue";
+import { onMounted, ref, toRefs, watch } from "vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
-import { useQuery } from "@vue/apollo-composable";
-import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
+  paginationLimitOptions: DropdownOption[];
+  sortOptions: DropdownOption[];
   totalItems: number;
-  skip: number;
+  queryVariables: GetEntitiesQueryVariables;
 }>();
 
-const emit = defineEmits<{
-  (event: "update:skip", skip: number): void;
-  (event: "update:limit", limit: number): void;
-  (event: "update:sortKey", limit: any): void;
-  (event: "update:isAsc", limit: any): void;
-}>();
-
-const skip = ref<number>(props.skip);
+const { paginationLimitOptions, sortOptions, queryVariables } = toRefs(props);
 const { getModal } = useAvailableModals();
-const route = useRoute();
-
-const selectedPaginationLimitOption = ref<DropdownOption>();
-const paginationLimitOptions = ref<DropdownOption[]>([]);
-const { onResult: onPaginationLimitOptionsResult } =
-  useQuery<GetPaginationLimitOptionsQuery>(
-    GetPaginationLimitOptionsDocument,
-    undefined,
-    {
-      fetchPolicy: "no-cache",
-      notifyOnNetworkStatusChange: true,
-    }
-  );
-onPaginationLimitOptionsResult((result) => {
-  paginationLimitOptions.value =
-    result.data?.PaginationLimitOptions.options ?? [];
-  selectedPaginationLimitOption.value = paginationLimitOptions.value[0];
-});
-
-const selectedSortOption = ref<DropdownOption>();
-const sortOptions = ref<DropdownOption[]>([]);
-const entityType = computed(() => route.meta.entityType);
-const { onResult: onSortOptionsResult, refetch: refetchSortOptions } =
-  useQuery<GetSortOptionsQuery>(
-    GetSortOptionsDocument,
-    { entityType: entityType.value },
-    {
-      fetchPolicy: "no-cache",
-      notifyOnNetworkStatusChange: true,
-    }
-  );
-watch(
-  () => entityType.value,
-  () => {
-    refetchSortOptions({ entityType: entityType.value });
-  }
-);
-onSortOptionsResult((result) => {
-  sortOptions.value =
-    result.data?.EntityTypeSortOptions?.sortOptions?.options ?? [];
-  selectedSortOption.value = sortOptions.value[0];
-});
-
+const { t } = useI18n();
+const skip = ref<number>(1);
 const isAsc = ref<boolean>(false);
 
-watch(skip, () => emit("update:skip", skip.value));
-watch(
-  () => props.skip,
-  () => (skip.value = props.skip)
-);
-watch(isAsc, () => emit("update:isAsc", isAsc.value));
+const selectedPaginationLimitOption = ref<DropdownOption>();
+const selectedSortOption = ref<DropdownOption>();
+
+const setDefaultOptions = () => {
+  selectedPaginationLimitOption.value = paginationLimitOptions.value?.[0];
+  selectedSortOption.value = sortOptions.value?.[0];
+};
+
+onMounted(() => setDefaultOptions());
+
 watch(
   () => selectedSortOption.value,
   () => {
-    emit("update:sortKey", selectedSortOption.value?.value);
+    if (queryVariables.value) {
+      queryVariables.value.searchValue.order_by =
+        selectedSortOption.value?.value;
+    }
   }
 );
 watch(selectedPaginationLimitOption, () => {
-  skip.value = 1;
-  emit("update:limit", selectedPaginationLimitOption.value?.value);
+  if (queryVariables.value) {
+    queryVariables.value.limit = selectedPaginationLimitOption.value?.value;
+    queryVariables.value.skip = 1;
+  }
+});
+watch(isAsc, () => {
+  if (queryVariables.value) {
+    queryVariables.value.searchValue.isAsc = isAsc.value;
+  }
+});
+watch(skip, () => {
+  if (queryVariables.value) queryVariables.value.skip = skip.value;
 });
 watch(
   () => getModal(TypeModals.BulkOperations).modalState.value.state,
@@ -140,9 +109,8 @@ watch(
       getModal(TypeModals.BulkOperations).modalState.value.state ===
       ModalState.Hide
     ) {
-      selectedPaginationLimitOption.value = paginationLimitOptions.value[0];
-      selectedSortOption.value = sortOptions.value[0];
-      skip.value = 1;
+      setDefaultOptions();
+      if (queryVariables.value) queryVariables.value.skip = 1;
     }
   }
 );

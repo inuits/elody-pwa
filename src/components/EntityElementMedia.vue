@@ -12,7 +12,12 @@
         <unicon height="16" :name="Unicons.PlusCircle.name" />
         <p
           class="underline"
-          @click="openPickEntityModal([Entitytyping.Mediafile], 'relatie')"
+          @click="
+            () => {
+              setAcceptedTypes([Entitytyping.Mediafile]);
+              modal.openModal();
+            }
+          "
         >
           Voeg bestand toe
         </p>
@@ -24,15 +29,26 @@
         v-if="
           !element.isCollapsed && element.type === MediaFileElementTypes.Media
         "
+        :bulk-operations-context="BulkOperationsContextEnum.EntityElementMedia"
         :search-input-type-on-drawer="
           SearchInputType.AdvancedInputMediaFilesType
         "
-        :parent-entity-id="entityId"
+        :predefined-entities="
+          entityId === mediafileSelectionState.selectedMediafile?.id ||
+          entityId === mediafileSelectionState.selectedMediafile?.uuid
+            ? [mediafileSelectionState.selectedMediafile]
+            : undefined
+        "
         :enable-preview="true"
-        :enable-bulk-operations="true"
-        :bulk-operations-context="BulkOperationsContextEnum.EntityElementMedia"
         :enable-advanced-filters="false"
+        :enable-bulk-operations="true"
         :enable-navigation="false"
+        :parent-entity-id="
+          entityId === mediafileSelectionState.selectedMediafile?.id ||
+          entityId === mediafileSelectionState.selectedMediafile?.uuid
+            ? undefined
+            : entityId
+        "
         list-item-route-name="SingleEntity"
       />
       <!-- Not yet refactored old component -->
@@ -55,26 +71,40 @@ import {
   MediaFileElementTypes,
   PanelType,
   SearchInputType,
+  TypeModals,
   type MediaFileElement,
   type MetadataAndRelation,
   type PanelMetaData,
 } from "@/generated-types/queries";
-import BaseLibrary from "@/components/base/BaseLibrary.vue";
+import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseMap from "./base/BaseMap.vue";
-import EntityElementWrapper from "./base/EntityElementWrapper.vue";
+import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import useEditMode from "@/composables/useEdit";
+import useEntityPickerModal from "@/composables/useEntityPickerModal";
+import useEntitySingle from "@/composables/useEntitySingle";
 import { asString, getValueForPanelMetadata } from "@/helpers";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import { computed } from "vue";
 import { Unicons } from "@/types";
-import { usePickEntityModal } from "./PickEntityModal.vue";
+import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useRoute } from "vue-router";
+import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 
 const props = defineProps<{
   element: MediaFileElement;
 }>();
 
-const entityId = computed(() => asString(useRoute().params["id"]));
+const { mediafileSelectionState } = useEntityMediafileSelector();
+const { setAcceptedTypes } = useEntityPickerModal();
+const { getEntityUuid } = useEntitySingle();
+const { getModal } = useAvailableModals();
+const { isEdit } = useEditMode();
+
+const modal = getModal(TypeModals.EntityPicker);
+const entityId = computed(
+  () => getEntityUuid() || asString(useRoute().params["id"])
+);
+
 const mapComponentData = computed(() => {
   const returnArray: MetadataAndRelation[] = [];
 
@@ -97,7 +127,4 @@ const mapComponentData = computed(() => {
   });
   return returnArray;
 });
-
-const { isEdit } = useEditMode();
-const { openPickEntityModal } = usePickEntityModal();
 </script>

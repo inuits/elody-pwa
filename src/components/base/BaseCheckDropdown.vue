@@ -26,7 +26,7 @@
         :value="option"
         class="text-text-body"
       >
-        {{ option.label }}
+        {{ t(option.label).toLowerCase() }}
       </option>
     </select>
   </div>
@@ -36,6 +36,7 @@
 import type { DropdownOption } from "@/generated-types/queries";
 import { onUpdated, ref, watch } from "vue";
 import { Unicons } from "@/types";
+import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
   defineProps<{
@@ -54,6 +55,7 @@ const emit = defineEmits<{
   (event: "checkOption"): void;
 }>();
 
+const { t } = useI18n();
 const selectedOption = ref(props.modelValue);
 
 onUpdated(() => (selectedOption.value = props.modelValue));
