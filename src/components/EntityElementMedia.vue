@@ -119,7 +119,7 @@ const mapComponentData = computed(() => {
         value: getValueForPanelMetadata(
           PanelType.Metadata,
           metadataItemKey,
-          entityId.value
+          asString(useRoute().params["id"])
         ),
         field: (value as PanelMetaData).inputField,
         unit: (value as PanelMetaData).unit,
