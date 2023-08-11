@@ -41,7 +41,7 @@
       >
         <template v-if="metadataItem">
           <span class="text-sm text-text-light">{{ metadataItem.key }}</span>
-          <span v-if="metadataItem.unit !== null" class="info"
+          <span v-if="metadataItem.unit" class="info"
             >{{
               convertUnitToReadbleFormat(metadataItem.unit, metadataItem.value)
             }}
@@ -74,7 +74,7 @@
 
 <script lang="ts" setup>
 import type { Context } from "@/composables/useBulkOperations";
-import type { MetadataAndRelation } from "@/generated-types/queries";
+import type { Metadata } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import { computed, ref } from "vue";
 import { stringIsUrl, convertUnitToReadbleFormat } from "@/helpers";
@@ -85,7 +85,7 @@ const props = withDefaults(
     itemId?: string;
     bulkOperationsContext: Context;
     loading?: boolean;
-    teaserMetadata?: MetadataAndRelation[];
+    teaserMetadata?: Metadata[];
     media?: string;
     thumbIcon?: string;
     small?: boolean;
