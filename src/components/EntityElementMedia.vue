@@ -6,7 +6,7 @@
   >
     <template v-slot:actions>
       <div
-        v-if="isEdit"
+        v-if="isEdit && element.type !== MediaFileElementTypes.Map"
         class="flex items-center text-text-subtitle cursor-pointer"
       >
         <unicon height="16" :name="Unicons.PlusCircle.name" />
@@ -19,7 +19,7 @@
             }
           "
         >
-          Voeg bestand toe
+          {{ t("window-element-labels.add-media") }}
         </p>
       </div>
     </template>
@@ -89,11 +89,13 @@ import { Unicons } from "@/types";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useRoute } from "vue-router";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   element: MediaFileElement;
 }>();
 
+const { t } = useI18n();
 const { mediafileSelectionState } = useEntityMediafileSelector();
 const { setAcceptedTypes } = useEntityPickerModal();
 const { getEntityUuid } = useEntitySingle();
