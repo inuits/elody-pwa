@@ -207,7 +207,7 @@ watch(labelsOfDisplayedFilters, () =>
   filters.value.forEach(
     (filter) =>
       (filter.isDisplayed =
-        labelsOfDisplayedFilters.value.includes(filter.advancedFilter.label) ||
+        labelsOfDisplayedFilters.value.includes(t(filter.advancedFilter.label)) ||
         filter.advancedFilter.isDisplayedByDefault)
   )
 );
