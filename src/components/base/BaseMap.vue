@@ -1,6 +1,6 @@
 <template>
   <div :class="['h-full w-full overflow-hidden']">
-    <div v-if="parsedMapData.coordinates" class="map w-full">
+    <div v-if="parsedMapData.coordinates" class="h-[50vh] w-full">
       <l-map
         :use-global-leaflet="false"
         ref="map"
