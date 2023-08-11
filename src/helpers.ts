@@ -32,11 +32,6 @@ export const stringIsUrl = (value: string): Boolean => {
   return isUrl;
 };
 
-export const stringIsDate = (value) => {
-  const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-  return dateRegex.test(value);
-};
-
 export const getIdFromKey = (prefix: string = "entities", key: string) => {
   if (key.includes(prefix + "/")) {
     return key.replace(prefix + "/", "");
@@ -129,7 +124,6 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
       convertDateToReadbleFormat(value, detail),
     SECONDS: (value: string) => `${value} s`,
     COORDINATES: (value: string) =>
-
       `${(value as any).longitude}, ${(value as any).latitude}`,
   };
 
