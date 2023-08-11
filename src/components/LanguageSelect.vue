@@ -1,7 +1,11 @@
 <template>
   <div class="float-right">
-    <BaseDropdownNew v-if="languageOptions" v-model="selectedLanguageOption" :options="languageOptions"
-      dropdown-style="default" />
+    <BaseDropdownNew
+      v-if="languageOptions"
+      v-model="selectedLanguageOption"
+      :options="languageOptions"
+      dropdown-style="default"
+    />
   </div>
 </template>
 
@@ -9,18 +13,24 @@
 import { ref, onMounted, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
-import { DamsIcons, DropdownOption } from "@/generated-types/queries";
+import { DamsIcons, type DropdownOption } from "@/generated-types/queries";
 import { updateLocalStorage } from "@/helpers";
 
 const { availableLocales, locale, t } = useI18n();
 const selectedLanguageOption = ref<DropdownOption | undefined>();
 
-const languageOptions = computed(() => {
-  return availableLocales.map((language) => ({
+const createOptionsFromAvailableLanguages = (
+  avilableLanguages: string[]
+): DropdownOption[] => {
+  return avilableLanguages.map((language) => ({
     icon: DamsIcons.NoIcon,
     label: t("language." + language),
     value: language,
   }));
+};
+
+const languageOptions = computed(() => {
+  return createOptionsFromAvailableLanguages(availableLocales);
 });
 
 const displayPreferences = localStorage.getItem("_displayPreferences");
@@ -37,7 +47,10 @@ onMounted(() => {
 });
 
 watch(selectedLanguageOption, () => {
-  locale.value = selectedLanguageOption.value.value;
-  updateLocalStorage("_displayPreferences", { lang: locale.value });
+  createOptionsFromAvailableLanguages(availableLocales);
+  if (selectedLanguageOption.value) {
+    locale.value = selectedLanguageOption.value.value;
+    updateLocalStorage("_displayPreferences", { lang: locale.value });
+  }
 });
 </script>
