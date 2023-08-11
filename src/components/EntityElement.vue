@@ -1,5 +1,5 @@
 <template>
-  <div :class="'h-full w-full flex flex-col'">
+  <div :class="'w-full flex flex-col'">
     <div
       v-for="(element, index) in elements"
       :key="index"
