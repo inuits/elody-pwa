@@ -30,7 +30,9 @@
           :unit="data.unit"
         ></EntityElementMetadata>
         <entity-element-coordinate-edit
-          v-else-if="data.field && isEdit && data.unit === Unit.Coordinates"
+          v-else-if="
+            data.field && isEdit && data.unit === Unit.CoordinatesDefault
+          "
           :fieldKey="data.key"
           :label="data.label"
           v-model:value="data.value"
