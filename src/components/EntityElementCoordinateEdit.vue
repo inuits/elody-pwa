@@ -44,10 +44,10 @@ let refValue = ref(props.value);
 
 watch(refValue.value, (value: Location) => {
   if (form) {
-    form.setFieldValue(
-      `intialValues.${props.fieldKey}`,
-      { latitude: Number(value.latitude), longitude: Number(value.longitude) }
-    );
+    form.setFieldValue(`intialValues.${props.fieldKey}`, {
+      latitude: Number(value.latitude),
+      longitude: Number(value.longitude),
+    });
   }
 });
 </script>

@@ -4,7 +4,7 @@ import { ref } from "vue";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 
-type EntityValues = {
+export type EntityValues = {
   intialValues: IntialValues;
   relationValues: RelationValues;
 };

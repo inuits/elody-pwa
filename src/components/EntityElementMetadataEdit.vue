@@ -20,31 +20,30 @@ import type { FormContext } from "vee-validate";
 import type { InputField as InputFieldType } from "@/generated-types/queries";
 import BaseDropdown from "@/components/base/BaseDropdown.vue";
 import InputField from "@/components/base/InputField.vue";
-import { computed, type PropType } from "vue";
+import { computed } from "vue";
 import { getEntityIdFromRoute } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 
-const props = defineProps({
-  fieldKey: { type: String, required: true },
-  label: { type: String, required: true },
-  value: { type: String, required: true },
-  field: { type: Object as PropType<InputFieldType>, required: false },
-});
+const props = defineProps<{
+  fieldKey: string;
+  label: string;
+  value: string;
+  field?: InputFieldType;
+  formId?: string;
+}>();
 
 const { t } = useI18n();
 const { getForm } = useFormHelper();
 const id = getEntityIdFromRoute() || "";
-const form: FormContext = getForm(id);
+const form: FormContext = getForm(props.formId || id);
 
 const computedValue = computed<any>({
   get() {
     return props.value;
   },
   set(value: string) {
-    if (form) {
-      form.setFieldValue(`intialValues.${props.fieldKey}`, value);
-    }
+    if (form) form.setFieldValue(`intialValues.${props.fieldKey}`, value);
   },
 });
 
