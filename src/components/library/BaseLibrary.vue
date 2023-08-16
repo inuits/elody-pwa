@@ -73,7 +73,10 @@
                 :item-id="entity.uuid"
                 :bulk-operations-context="bulkOperationsContext"
                 :teaser-metadata="
-                  entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
+                  formatTeaserMetadata(
+                    entity.teaserMetadata,
+                    entity.intialValues
+                  )
                 "
                 :media="
                   entitiesLoading
@@ -119,7 +122,10 @@
                 :item-id="entity.uuid"
                 :bulk-operations-context="bulkOperationsContext"
                 :teaser-metadata="
-                  entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
+                  formatTeaserMetadata(
+                    entity.teaserMetadata,
+                    entity.intialValues
+                  )
                 "
                 :media="
                   entitiesLoading
@@ -252,6 +258,7 @@ const {
   setTotalEntityCount,
   sortOptions,
   totalEntityCount,
+  formatTeaserMetadata,
 } = useBaseLibrary(apolloClient as ApolloClient<any>);
 const {
   mediafileSelectionState,
@@ -305,8 +312,9 @@ const bulkSelect = (items = entities.value) => {
   for (let entity of items)
     enqueueItemForBulkProcessing(props.bulkOperationsContext, {
       id: entity.id,
-      teaserMetadata: entity.teaserMetadata?.flatMap(
-        (metadata) => metadata ?? []
+      teaserMetadata: formatTeaserMetadata(
+        entity.teaserMetadata,
+        entity.intialValues
       ),
     });
 

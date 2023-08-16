@@ -168,6 +168,17 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     queryVariables.value.advancedFilterInputs = filters;
   };
 
+  const formatTeaserMetadata = (teaserMetadata: object, intialValues: object): object => {
+    let formatted = [];
+    for (const key in teaserMetadata){
+      if(key !== "__typename" && intialValues[key]){
+        teaserMetadata[key].value = intialValues[key];
+        formatted.push(teaserMetadata[key]);
+      }
+    }
+    return formatted
+  }
+
   const getEntities = async (): Promise<void> => {
     if (libraryBarInitializationStatus.value === "not-initialized")
       initializeLibraryBar();
@@ -226,5 +237,6 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     setTotalEntityCount,
     sortOptions,
     totalEntityCount,
+    formatTeaserMetadata,
   };
 };

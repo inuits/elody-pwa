@@ -39,7 +39,14 @@
         :key="metadataItem ? metadataItem.key : 'no-key'"
         class="flex justify-start flex-col mx-2 break-words w-1/4"
       >
-        <template v-if="metadataItem">
+
+      <entity-element-metadata
+              :label="metadataItem.label"
+              :value="metadataItem.value"
+              :unit="metadataItem.unit"
+            />
+
+        <!-- <template v-if="metadataItem">
           <span class="text-sm text-text-light">{{ metadataItem.key }}</span>
           <span v-if="metadataItem.unit" class="info"
             >{{
@@ -54,7 +61,7 @@
               metadataItem.key
             }}</a>
           </span>
-        </template>
+        </template> -->
       </div>
     </div>
     <div class="w-full" v-else>
@@ -73,6 +80,7 @@
 </template>
 
 <script lang="ts" setup>
+import EntityElementMetadata from "./EntityElementMetadata.vue";
 import type { Context } from "@/composables/useBulkOperations";
 import type { Metadata } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
