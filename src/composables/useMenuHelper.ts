@@ -27,7 +27,7 @@ export const useMenuHelper = () => {
       getModal(_menuItem.typeLink.modal.typeModal as TypeModals).openModal(
         ModalChoices.Import
       );
-    } else if (_menuItem?.typeLink?.route) {
+    } else if (_menuItem?.typeLink?.route && !_menuItem.subMenu) {
       router.push(`/${_menuItem.typeLink.route.destination}`);
     }
   };
