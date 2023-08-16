@@ -16,12 +16,12 @@
 </template>
 
 <script lang="ts" setup>
-import InputField from "./base/InputField.vue";
-import type { InputField as InputFieldType } from "@/generated-types/queries";
-import { ref, type PropType, watch } from "vue";
-import { getEntityIdFromRoute } from "@/helpers";
-import { useFormHelper } from "@/composables/useFormHelper";
 import type { FormContext } from "vee-validate";
+import type { InputField as InputFieldType } from "@/generated-types/queries";
+import InputField from "@/components/base/InputField.vue";
+import { getEntityIdFromRoute } from "@/helpers";
+import { ref, type PropType, watch, onMounted } from "vue";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 export type Location = {
   latitude: string;
@@ -42,12 +42,20 @@ const form: FormContext = getForm(id);
 
 let refValue = ref(props.value);
 
-watch(refValue.value, (value: Location) => {
+const setFormValues = (latitude: string, longitude: string) => {
   if (form) {
     form.setFieldValue(`intialValues.${props.fieldKey}`, {
-      latitude: Number(value.latitude),
-      longitude: Number(value.longitude),
+      latitude: Number(latitude),
+      longitude: Number(longitude),
     });
   }
-});
+};
+
+onMounted(() =>
+  setFormValues(refValue.value.latitude, refValue.value.longitude)
+);
+
+watch(refValue.value, (value: Location) =>
+  setFormValues(value.latitude, value.longitude)
+);
 </script>

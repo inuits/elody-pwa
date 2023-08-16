@@ -54,11 +54,11 @@
               v-for="metadataItem in teaserMetadata"
               :key="metadataItem ? metadataItem.value : 'no-key'"
             >
-            <entity-element-metadata
-              :label="metadataItem.label"
-              :value="metadataItem.value"
-              :unit="metadataItem.unit"
-            />
+              <entity-element-metadata
+                :label="metadataItem.label"
+                :value="metadataItem.value"
+                :unit="metadataItem.unit"
+              />
               <!-- <template v-if="metadataItem">
                 <div class="flex items-center pl-4 mb-1">
                   <div class="flex flex-col items-start w-full">
