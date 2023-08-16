@@ -2,47 +2,88 @@
   <div class="lg:flex bg-neutral-lightest">
     <div class="w-full" :class="parentEntityId ? 'p-3' : 'px-6'">
       <div class="flex flex-row items-center gap-y-4">
-        <FiltersBase v-if="filtersBaseInitializationStatus === 'initialized'" v-show="enableAdvancedFilters"
-          class="lg:w-[46%]" :filter-matcher-mapping="filterMatcherMapping" :advanced-filters="advancedFilters"
-          :entity-type="filterType || entityType" :parent-entity-id="parentEntityId" :expandFilters="expandFilters"
-          @apply-filters="setAdvancedFilters" @expand-filters="expandFilters = !expandFilters" />
+        <FiltersBase
+          v-if="filtersBaseInitializationStatus === 'initialized'"
+          v-show="enableAdvancedFilters"
+          class="lg:w-[46%]"
+          :filter-matcher-mapping="filterMatcherMapping"
+          :advanced-filters="advancedFilters"
+          :entity-type="filterType || entityType"
+          :parent-entity-id="parentEntityId"
+          :expandFilters="expandFilters"
+          @apply-filters="setAdvancedFilters"
+          @expand-filters="expandFilters = !expandFilters"
+        />
 
         <div class="mr-2" :class="['flex', { 'ml-4': enableAdvancedFilters }]">
           <BaseToggleGroup :toggles="toggles" />
         </div>
 
-        <LibraryBar v-if="libraryBarInitializationStatus === 'initialized' &&
-          !predefinedEntities
-          " :pagination-limit-options="paginationLimitOptions" :sort-options="sortOptions"
-          :total-items="totalEntityCount || NaN" :queryVariables="(queryVariables as GetEntitiesQueryVariables)" />
+        <LibraryBar
+          v-if="
+            libraryBarInitializationStatus === 'initialized' &&
+            !predefinedEntities
+          "
+          :pagination-limit-options="paginationLimitOptions"
+          :sort-options="sortOptions"
+          :total-items="totalEntityCount || NaN"
+          :queryVariables="(queryVariables as GetEntitiesQueryVariables)"
+        />
       </div>
 
-      <div v-if="enableBulkOperations && !displayPreview" class="my-3" :class="{ 'flex justify-end': expandFilters }">
-        <BulkOperationsActionsBar :class="{ 'w-[69.75%]': expandFilters }" :context="bulkOperationsContext"
-          :total-items-count="totalEntityCount" :use-extended-bulk-operations="true"
-          :confirm-selection-button="confirmSelectionButton" @select-page="bulkSelect"
-          @select-all="bulkSelect(allEntitiesResult.Entities.results)" @confirm-selection="(selection) => emit('confirmSelection', selection)
-            " />
+      <div
+        v-if="enableBulkOperations && !displayPreview"
+        class="my-3"
+        :class="{ 'flex justify-end': expandFilters }"
+      >
+        <BulkOperationsActionsBar
+          :class="{ 'w-[69.75%]': expandFilters }"
+          :context="bulkOperationsContext"
+          :total-items-count="totalEntityCount"
+          :use-extended-bulk-operations="true"
+          :confirm-selection-button="confirmSelectionButton"
+          @select-page="bulkSelect"
+          @select-all="bulkSelect(allEntitiesResult.Entities.results)"
+          @confirm-selection="
+            (selection) => emit('confirmSelection', selection)
+          "
+        />
       </div>
 
       <div :class="{ 'flex justify-end': expandFilters }">
-        <ListContainer id="gridContainer" :class="[
-          { 'w-[69.75%]': expandFilters },
-          displayGrid ? 'p-5' : 'p-1',
-        ]">
+        <ListContainer
+          id="gridContainer"
+          :class="[
+            { 'w-[69.75%]': expandFilters },
+            displayGrid ? 'p-5' : 'p-1',
+          ]"
+        >
           <div v-if="displayList && entities">
             <div>
-              <ListItem v-for="entity in entities" :key="entity.id + '_list'" :class="parentEntityId &&
-                entity.id &&
-                mediafileSelectionState.selectedMediafile?.id === entity.id
-                ? '!border-2 !border-accent-normal'
-                : ''
-                " :item-id="entity.uuid" :bulk-operations-context="bulkOperationsContext" :teaser-metadata="entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
-    " :media="entitiesLoading
-    ? undefined
-    : getMediaFilenameFromEntity(entity)
-    " :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)" :small="listItemRouteName === 'SingleMediafile'"
-                :loading="entitiesLoading" @click="
+              <ListItem
+                v-for="entity in entities"
+                :key="entity.id + '_list'"
+                :class="
+                  parentEntityId &&
+                  entity.id &&
+                  mediafileSelectionState.selectedMediafile?.id === entity.id
+                    ? '!border-2 !border-accent-normal'
+                    : ''
+                "
+                :item-id="entity.uuid"
+                :bulk-operations-context="bulkOperationsContext"
+                :teaser-metadata="
+                  entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
+                "
+                :media="
+                  entitiesLoading
+                    ? undefined
+                    : getMediaFilenameFromEntity(entity)
+                "
+                :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
+                :small="listItemRouteName === 'SingleMediafile'"
+                :loading="entitiesLoading"
+                @click="
                   entitiesLoading || !enableNavigation
                     ? !enableNavigation &&
                       parentEntityId &&
@@ -50,11 +91,13 @@
                       ? updateSelectedEntityMediafile(entity)
                       : undefined
                     : goToEntityPage(entity)
-                  " @dblclick="
-    !enableNavigation && parentEntityId
-      ? goToEntityPage(entity)
-      : undefined
-    ">
+                "
+                @dblclick="
+                  !enableNavigation && parentEntityId
+                    ? goToEntityPage(entity)
+                    : undefined
+                "
+              >
                 <template #actions>
                   <!-- Use bulkoperations checkboxes to apply this logic again -->
                 </template>
@@ -64,16 +107,29 @@
 
           <div v-else-if="displayGrid && entities">
             <div class="grid grid_cols gap-2 justify-items-center">
-              <GridItem v-for="entity in entities" :key="entity.id + '_grid'" :class="parentEntityId &&
-                mediafileSelectionState.selectedMediafile?.id === entity.id
-                ? '!border-2 !border-accent-normal'
-                : ''
-                " :item-id="entity.uuid" :bulk-operations-context="bulkOperationsContext" :teaser-metadata="entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
-    " :media="entitiesLoading
-    ? undefined
-    : getMediaFilenameFromEntity(entity)
-    " :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)" :small="listItemRouteName === 'SingleMediafile'"
-                :loading="entitiesLoading" @click="
+              <GridItem
+                v-for="entity in entities"
+                :key="entity.id + '_grid'"
+                :class="
+                  parentEntityId &&
+                  mediafileSelectionState.selectedMediafile?.id === entity.id
+                    ? '!border-2 !border-accent-normal'
+                    : ''
+                "
+                :item-id="entity.uuid"
+                :bulk-operations-context="bulkOperationsContext"
+                :teaser-metadata="
+                  entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
+                "
+                :media="
+                  entitiesLoading
+                    ? undefined
+                    : getMediaFilenameFromEntity(entity)
+                "
+                :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
+                :small="listItemRouteName === 'SingleMediafile'"
+                :loading="entitiesLoading"
+                @click="
                   entitiesLoading || !enableNavigation
                     ? !enableNavigation &&
                       parentEntityId &&
@@ -81,11 +137,13 @@
                       ? updateSelectedEntityMediafile(entity)
                       : undefined
                     : goToEntityPage(entity)
-                  " @dblclick="
-    !enableNavigation && parentEntityId
-      ? goToEntityPage(entity)
-      : undefined
-    ">
+                "
+                @dblclick="
+                  !enableNavigation && parentEntityId
+                    ? goToEntityPage(entity)
+                    : undefined
+                "
+              >
                 <template #actions>
                   <!-- Use bulkoperations checkboxes to apply this logic again -->
                 </template>
@@ -263,7 +321,7 @@ const goToEntityPage = (entity: Entity) => {
 
   setEntityUuid(entity.uuid);
   const entityId =
-    entity.id ||
+    entity.uuid ||
     entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")?.value;
 
   router.push({
