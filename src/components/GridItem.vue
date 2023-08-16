@@ -54,7 +54,12 @@
               v-for="metadataItem in teaserMetadata"
               :key="metadataItem ? metadataItem.value : 'no-key'"
             >
-              <template v-if="metadataItem">
+            <entity-element-metadata
+              :label="metadataItem.label"
+              :value="metadataItem.value"
+              :unit="metadataItem.unit"
+            />
+              <!-- <template v-if="metadataItem">
                 <div class="flex items-center pl-4 mb-1">
                   <div class="flex flex-col items-start w-full">
                     <span class="text-sm text-text-light">
@@ -67,7 +72,7 @@
                     </span>
                   </div>
                 </div>
-              </template>
+              </template> -->
             </div>
           </div>
         </div>
@@ -77,6 +82,7 @@
 </template>
 
 <script lang="ts" setup>
+import EntityElementMetadata from "./EntityElementMetadata.vue";
 import type { Context } from "@/composables/useBulkOperations";
 import type { MetadataAndRelation } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
