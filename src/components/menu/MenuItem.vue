@@ -35,9 +35,7 @@
     >
       <MenuSubItem
         @click="setSelectedMenuItem(menuitem)"
-        :typeLink="submenuItem?.typeLink?.route?.destination"
-        :labelName="submenuItem.label"
-        :destination="submenuItem?.typeLink?.route?.destination"
+        :subMenuItem="submenuItem"
         :show="showdropdown"
       />
     </div>
@@ -77,6 +75,7 @@ const handleClick = () => {
   if (props.menuitem.typeLink?.route) {
     setSelectedMenuItem(props.menuitem);
   }
+  if (props.menuitem.subMenu) toggleDropDown();
   checkIfRouteOrModal(props.menuitem);
 };
 
