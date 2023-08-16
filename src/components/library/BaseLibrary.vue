@@ -37,8 +37,8 @@
                 mediafileSelectionState.selectedMediafile?.id === entity.id
                 ? '!border-2 !border-accent-normal'
                 : ''
-                " :item-id="entity.uuid" :bulk-operations-context="bulkOperationsContext" :teaser-metadata="entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
-    " :media="entitiesLoading
+                " :item-id="entity.uuid" :bulk-operations-context="bulkOperationsContext" :teaser-metadata="formatTeaserMetadata(entity.teaserMetadata, entity.intialValues)"
+                :media="entitiesLoading
     ? undefined
     : getMediaFilenameFromEntity(entity)
     " :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)" :small="listItemRouteName === 'SingleMediafile'"
@@ -68,7 +68,7 @@
                 mediafileSelectionState.selectedMediafile?.id === entity.id
                 ? '!border-2 !border-accent-normal'
                 : ''
-                " :item-id="entity.uuid" :bulk-operations-context="bulkOperationsContext" :teaser-metadata="entity.teaserMetadata?.flatMap((metadata) => metadata ?? [])
+                " :item-id="entity.uuid" :bulk-operations-context="bulkOperationsContext" :teaser-metadata="formatTeaserMetadata(entity.teaserMetadata, entity.intialValues)
     " :media="entitiesLoading
     ? undefined
     : getMediaFilenameFromEntity(entity)
@@ -194,6 +194,7 @@ const {
   setTotalEntityCount,
   sortOptions,
   totalEntityCount,
+  formatTeaserMetadata,
 } = useBaseLibrary(apolloClient as ApolloClient<any>);
 const {
   mediafileSelectionState,
@@ -247,9 +248,7 @@ const bulkSelect = (items = entities.value) => {
   for (let entity of items)
     enqueueItemForBulkProcessing(props.bulkOperationsContext, {
       id: entity.id,
-      teaserMetadata: entity.teaserMetadata?.flatMap(
-        (metadata) => metadata ?? []
-      ),
+      teaserMetadata: formatTeaserMetadata(entity.teaserMetadata, entity.intialValues),
     });
 
   triggerBulkSelectionEvent(props.bulkOperationsContext);
