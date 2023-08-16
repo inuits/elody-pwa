@@ -39,12 +39,11 @@
         :key="metadataItem ? metadataItem.key : 'no-key'"
         class="flex justify-start flex-col mx-2 break-words w-1/4"
       >
-
-      <entity-element-metadata
-              :label="metadataItem.label"
-              :value="metadataItem.value"
-              :unit="metadataItem.unit"
-            />
+        <entity-element-metadata
+          :label="metadataItem.label"
+          :value="metadataItem.value"
+          :unit="metadataItem.unit"
+        />
 
         <!-- <template v-if="metadataItem">
           <span class="text-sm text-text-light">{{ metadataItem.key }}</span>
