@@ -1,10 +1,23 @@
+import {
+  PanelType,
+  Unit,
+  type InputField,
+  type PanelInfo,
+  type PanelMetaData,
+  type WindowElementPanel,
+} from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
-import { PanelType, Unit } from "@/generated-types/queries";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useRoute } from "vue-router";
-import { options } from "dropzone";
-import type internal from "stream";
+
+type MetadataField = {
+  key: string;
+  label: string;
+  value: string;
+  unit: Unit;
+  field: InputField;
+};
 
 export const getEntityIdFromRoute = (): string | undefined => {
   return asString(useRoute().params["id"]) || undefined;
@@ -110,6 +123,33 @@ export const getValueForPanelMetadata = (
     ];
   }
   return "";
+};
+
+export const getMetadataFields = (
+  objectToGetMetadataFrom: WindowElementPanel | PanelMetaData[],
+  panelType: PanelType,
+  formId: string
+): MetadataField[] => {
+  const fields: MetadataField[] = [];
+
+  Object.values(objectToGetMetadataFrom).forEach((value) => {
+    if (!value || typeof value !== "object") return;
+
+    const key: string = (value as PanelMetaData).key;
+    const field = {
+      key: key,
+      label: (value as PanelMetaData).label,
+      unit: (value as PanelMetaData).unit,
+      value:
+        (value as PanelInfo).value ||
+        getValueForPanelMetadata(panelType, key, formId),
+      field: (value as PanelMetaData).inputField,
+    };
+
+    fields.push(field);
+  });
+
+  return fields;
 };
 
 type ConversionFunction = (value: string, detail: string) => string;

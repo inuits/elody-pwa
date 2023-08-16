@@ -1,117 +1,154 @@
 <template>
   <div>
-    <div class="p-6 pt-0 bg-neutral-0 pb-20">
+    <div class="px-6 pt-0 pb-20 bg-neutral-white">
       <form v-if="result">
-        <MetaEditDataField
-          v-model="EntityTitle"
-          field-key="title"
-          :label="$t('form.title')"
-        />
-        <input
-          v-model="manualID"
-          disabled
-          type="text"
-          class="w-full px-3 py-2"
-          placeholder="id"
-        />
-        <BaseButton :label="$t('form.create')" @click="create" />
+        <div
+          class="py-2"
+          v-for="(metadata, index) in getMetadataFields(
+            formFields,
+            PanelType.Metadata,
+            'createEntity'
+          )"
+          :key="index"
+        >
+          <entity-element-metadata-edit
+            class="-ml-4"
+            v-model:value="metadata.value"
+            :label="metadata.label"
+            :field="metadata.field"
+            :fieldKey="metadata.key"
+            form-id="createEntity"
+          />
+          <input
+            class="w-full px-3 py-2"
+            v-if="metadata.key === 'alternate_name'"
+            v-model="id"
+            type="text"
+          />
+        </div>
+        <div class="absolute left-0 bottom-6 w-full px-6">
+          <BaseButtonNew
+            :label="t('form.create')"
+            :icon="DamsIcons.Create"
+            button-style="accentAccent"
+            @click="create"
+          />
+        </div>
       </form>
     </div>
   </div>
 </template>
-<script lang="ts">
-import { computed, defineComponent, ref, watch } from "vue";
-import type { PropType } from "vue";
-import MetaEditDataField from "./MetaEditDataField.vue";
+
+<script lang="ts" setup>
+import type { FormContext } from "vee-validate";
 import {
   CreateEntityDocument,
+  DamsIcons,
   Entitytyping,
-  TypeModals,
   GetCreateEntityFormDocument,
-} from "../generated-types/queries";
-import type {
-  CreateEntityMutation,
-  GetCreateEntityFormQuery,
-} from "../generated-types/queries";
-import { useMutation, useQuery } from "@vue/apollo-composable";
-import BaseButton from "./base/BaseButton.vue";
+  PanelType,
+  TypeModals,
+  type CreateEntityForm,
+  type CreateEntityMutation,
+  type GetCreateEntityFormQuery,
+  type PanelMetaData,
+} from "@/generated-types/queries";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import EntityElementMetadataEdit from "@/components/EntityElementMetadataEdit.vue";
 import urlSlug from "url-slug";
-import { useRouter } from "vue-router";
+import { computed, ref, watch } from "vue";
+import { getMetadataFields } from "@/helpers";
+import { NotificationType } from "@/components/base/BaseNotification.vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useEditMode } from "@/composables/useEdit";
-import { useNotification } from "./base/BaseNotification.vue";
-import { NotificationType } from "./base/BaseNotification.vue";
+import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
+import { useMutation, useQuery } from "@vue/apollo-composable";
+import { useNotification } from "@/components/base/BaseNotification.vue";
+import { useRouter } from "vue-router";
 
-export default defineComponent({
-  name: "CreateEntityForm",
-  components: { MetaEditDataField, BaseButton },
-  props: {
-    entityType: {
-      type: String as PropType<Entitytyping>,
-      required: true,
-    },
-  },
-  setup(props) {
-    const { t } = useI18n();
-    const router = useRouter();
-    const { createNotification } = useNotification();
-    const { setEditMode } = useEditMode();
-    const { getModal } = useAvailableModals();
-    const modal = getModal(TypeModals.Create);
-    const EntityTitle = ref<string>("");
-    const idPrefix = ref<string>("");
-    const manualID = computed(
-      () => `${idPrefix.value}${urlSlug(EntityTitle.value)}`
-    );
-    const type = computed(() => props.entityType);
+const props = defineProps<{
+  entityType: Entitytyping;
+}>();
 
-    const { result, onResult, refetch } = useQuery<GetCreateEntityFormQuery>(
-      GetCreateEntityFormDocument,
-      { type }
-    );
+const { t } = useI18n();
+const { setEditMode } = useEditMode();
+const { createNotification } = useNotification();
+const { createForm } = useFormHelper();
+const { getModal } = useAvailableModals();
+const modal = getModal(TypeModals.Create);
+const router = useRouter();
 
-    watch(
-      () => type.value,
-      () => {
-        refetch();
-      }
-    );
+let form: FormContext<any>;
+const formFields = ref<PanelMetaData[]>([]);
+const idPrefix = ref<string>("");
 
-    const { mutate } = useMutation<CreateEntityMutation>(CreateEntityDocument);
+const type = computed(() => props.entityType);
+const id = computed(
+  () =>
+    `${idPrefix.value}${urlSlug(form.values.intialValues["alternate_name"])}`
+);
 
-    onResult((queryResult) => {
-      idPrefix.value = queryResult?.data?.GetCreateEntityForm?.idPrefix || "";
-    });
+const { mutate } = useMutation<CreateEntityMutation>(CreateEntityDocument);
+const { result, onResult, refetch } = useQuery<GetCreateEntityFormQuery>(
+  GetCreateEntityFormDocument,
+  { type },
+  {
+    fetchPolicy: "no-cache",
+    notifyOnNetworkStatusChange: true,
+  }
+);
+onResult((result) => {
+  const createEntityForm = result.data?.CreateEntityForm as CreateEntityForm;
+  idPrefix.value = createEntityForm?.idPrefix || "";
+  formFields.value = createEntityForm?.formFields.createFormFields || [];
 
-    const create = async () => {
-      const createResult = await mutate({
-        data: {
-          type: props.entityType,
-          id: manualID.value,
-          metadata: [],
-          title: EntityTitle.value,
-          identifiers: [manualID.value, EntityTitle.value],
-        },
-      });
-
-      if (createResult && createResult.data?.createEntity?.id) {
-        setEditMode();
-        modal.closeModal();
-        createNotification({
-          displayTime: 10,
-          type: NotificationType.default,
-          title: t("notifications.success.entityCreated.title"),
-          description: t("notifications.success.entityCreated.description"),
-          shown: true,
-        });
-        router.push({
-          name: "SingleEntity",
-          params: { id: manualID.value },
-        });
-      }
-    };
-    return { result, create, EntityTitle, manualID };
-  },
+  const intialValues: any = {};
+  Object.values(formFields.value).forEach((field) => {
+    if (!field.key) return;
+    intialValues[field.key] = "";
+  });
+  form = createForm("createEntity", {
+    intialValues,
+    relationValues: { label: "", relations: [] },
+  });
 });
+
+const create = async () => {
+  const createResult = await mutate({
+    data: {
+      id: id.value,
+      identifiers: [id.value, form.values.intialValues["alternate_name"]],
+      metadata: Object.keys(form.values.intialValues)
+        .filter((key) => key !== "__typename")
+        .map((key) => {
+          return { key, value: form.values.intialValues[key] };
+        }),
+      type: props.entityType,
+    },
+  });
+
+  if (createResult && createResult.data?.createEntity?.id) {
+    setEditMode();
+    modal.closeModal();
+    createNotification({
+      displayTime: 10,
+      type: NotificationType.default,
+      title: t("notifications.success.entityCreated.title"),
+      description: t("notifications.success.entityCreated.description"),
+      shown: true,
+    });
+    router.push({
+      name: "SingleEntity",
+      params: { id: id.value },
+    });
+  }
+};
+
+watch(
+  () => type.value,
+  () => {
+    refetch();
+  }
+);
 </script>

@@ -11,17 +11,17 @@ import {
   type MutateEntityValuesMutationVariables,
   type RelationValues,
 } from "@/generated-types/queries";
-import { asString } from "@/helpers";
 import {
   BulkOperationsContextEnum,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
+import { asString } from "@/helpers";
 import { computed, onMounted, onUnmounted, watch } from "vue";
 import { useEditMode } from "@/composables/useEdit";
-import { useSubmitForm } from "vee-validate";
-import { useFormHelper } from "@/composables/useFormHelper";
+import { useFormHelper, type EntityValues } from "@/composables/useFormHelper";
 import { useMutation } from "@vue/apollo-composable";
 import { useRoute } from "vue-router";
+import { useSubmitForm } from "vee-validate";
 
 const props = defineProps<{
   intialValues: IntialValues;
@@ -37,11 +37,6 @@ const { mutate } = useMutation<
   MutateEntityValuesMutation,
   MutateEntityValuesMutationVariables
 >(MutateEntityValuesDocument);
-
-type EntityValues = {
-  intialValues: IntialValues;
-  relationValues: RelationValues;
-};
 
 const form =
   getForm(entityId.value) ||

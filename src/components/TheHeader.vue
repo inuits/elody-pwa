@@ -1,5 +1,7 @@
 <template>
-  <div class="flex items-center z-10 mx-6 my-8 px-6 py-4 rounded-3xl bg-neutral-white">
+  <div
+    class="flex items-center z-10 mx-6 my-8 px-6 py-4 rounded-3xl bg-neutral-white"
+  >
     <div class="flex w-full items-center">
       <BreadCrumbs />
       <EditToggle v-if="auth.isAuthenticated.value === true" />

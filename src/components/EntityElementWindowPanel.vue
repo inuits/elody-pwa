@@ -24,7 +24,7 @@
         </div>
         <div v-else>
           <div
-            v-for="(metadata, index) in metadataArray"
+            v-for="(metadata, index) in getMetadataFields(props.panel, panelType, useRoute().params.id as string)"
             :key="index"
             class="py-2"
           >
@@ -51,31 +51,19 @@
 
 <script lang="ts" setup>
 import type {
-  InputField,
-  PanelInfo,
-  PanelMetaData,
   PanelRelation,
-  Unit,
   WindowElementPanel,
 } from "@/generated-types/queries";
-import { PanelType } from "@/generated-types/queries";
+import EntityElementMetadata from "@/components/EntityElementMetadata.vue";
+import EntityElementMetadataEdit from "@/components/EntityElementMetadataEdit.vue";
+import EntityElementRelation from "@/components/EntityElementRelation.vue";
 import { computed, ref } from "vue";
-import EntityElementMetadata from "./EntityElementMetadata.vue";
-import EntityElementMetadataEdit from "./EntityElementMetadataEdit.vue";
-import EntityElementRelation from "./EntityElementRelation.vue";
+import { getMetadataFields } from "@/helpers";
+import { PanelType } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useEditMode } from "@/composables/useEdit";
-import { getValueForPanelMetadata } from "@/helpers";
-import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
-
-type MetadataField = {
-  key: string;
-  label: string;
-  value: string;
-  unit: Unit;
-  field: InputField;
-};
+import { useRoute } from "vue-router";
 
 const props = defineProps<{
   panel: WindowElementPanel;
@@ -89,30 +77,6 @@ const { isEdit } = useEditMode();
 const toggleIsCollapsed = () => {
   isCollapsed.value = !isCollapsed.value;
 };
-
-const metadataArray = computed((): MetadataField[] => {
-  const returnArray: MetadataField[] = [];
-  Object.values(props.panel).forEach((value) => {
-    if (value && typeof value === "object") {
-      const metadataItemKey: string = (value as PanelMetaData).key;
-      const metadataObject = {
-        key: metadataItemKey,
-        label: (value as PanelMetaData).label,
-        unit: (value as PanelMetaData).unit,
-        value:
-          (value as PanelInfo).value ||
-          getValueForPanelMetadata(
-            panelType.value,
-            metadataItemKey,
-            useRoute().params.id as string
-          ),
-        field: (value as PanelMetaData).inputField,
-      };
-      returnArray.push(metadataObject);
-    }
-  });
-  return returnArray;
-});
 
 const relationArray = computed((): PanelRelation[] => {
   let returnArray: PanelRelation[] = [];
