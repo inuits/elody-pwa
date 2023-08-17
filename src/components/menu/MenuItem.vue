@@ -17,7 +17,7 @@
       </span>
       <div class="w-full flex justify-end align-center" v-if="menuitem.subMenu">
         <unicon
-          v-if="showdropdown"
+          v-if="isBeingHovered"
           :name="Unicons.AngleDown.name"
           height="20"
         />
@@ -27,12 +27,12 @@
     <div
       v-for="submenuItem in menuSubitem"
       :key="submenuItem.label"
-      :class="{ dropdownMenuItem: showdropdown }"
+      :class="{ dropdownMenuItem: isBeingHovered }"
     >
       <MenuSubItem
         @click="setSelectedMenuItem(menuitem)"
         :subMenuItem="submenuItem"
-        :show="showdropdown"
+        :show="(isBeingHovered as boolean)"
       />
     </div>
   </div>
@@ -50,7 +50,6 @@ import { useI18n } from "vue-i18n";
 
 const {
   checkIfRouteOrModal,
-  showdropdown,
   toggleDropDown,
   setSelectedMenuItem,
   selectedMenuItem,

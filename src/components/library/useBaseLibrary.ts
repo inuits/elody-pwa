@@ -19,6 +19,8 @@ import {
   type GetPaginationLimitOptionsQuery,
   type GetSortOptionsQuery,
   type Maybe,
+  type Metadata,
+  type IntialValues,
 } from "@/generated-types/queries";
 import useEditMode from "@/composables/useEdit";
 import { createPlaceholderEntities } from "@/helpers";
@@ -169,8 +171,8 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
   };
 
   const formatTeaserMetadata = (
-    teaserMetadata: object,
-    intialValues: object
+    teaserMetadata: Record<string, Metadata>,
+    intialValues: Record<string, IntialValues>
   ): object => {
     const formatted = [];
     for (const key in teaserMetadata) {

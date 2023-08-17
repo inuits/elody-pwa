@@ -16,7 +16,6 @@ const menuItems = ref<Array<MenuItem>>([]);
 
 export const useMenuHelper = () => {
   const router = useRouter();
-  const showdropdown = ref(false);
 
   const setSelectedMenuItem = (menuItem: MenuItem) => {
     selectedMenuItem.value = menuItem;
@@ -30,10 +29,6 @@ export const useMenuHelper = () => {
     } else if (_menuItem?.typeLink?.route && !_menuItem.subMenu) {
       router.push(`/${_menuItem.typeLink.route.destination}`);
     }
-  };
-
-  const toggleDropDown = () => {
-    showdropdown.value = !showdropdown.value;
   };
 
   const resetSelectedMenuItem = () => {
@@ -54,8 +49,6 @@ export const useMenuHelper = () => {
   return {
     setSelectedMenuItem,
     checkIfRouteOrModal,
-    showdropdown,
-    toggleDropDown,
     selectedMenuItem,
     resetSelectedMenuItem,
     getMenuEntities,
