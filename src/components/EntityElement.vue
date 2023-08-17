@@ -28,6 +28,10 @@
         v-if="element.__typename === 'WindowElement'"
         :element="element"
       />
+      <entity-element-prom-graph
+        v-if="element.__typename === 'PromGraphElement'"
+        :element="element"
+      />
     </div>
   </div>
 </template>
@@ -36,16 +40,22 @@ import { computed } from "vue";
 import EntityElementList from "./EntityElementList.vue";
 import EntityElementMedia from "./EntityElementMedia.vue";
 import EntityElementWindow from "./EntityElementWindow.vue";
+import EntityElementPromGraph from "./EntityElementPromGraph.vue";
 
 import type {
   EntityViewElements,
   WindowElement,
   MediaFileElement,
   EntityListElement,
+  GraphElement,
   Entity,
 } from "@/generated-types/queries";
 
-export type Elements = WindowElement | MediaFileElement | EntityListElement;
+export type Elements =
+  | WindowElement
+  | MediaFileElement
+  | EntityListElement
+  | GraphElement;
 
 const props = defineProps<{
   elements: EntityViewElements;
