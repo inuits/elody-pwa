@@ -23,7 +23,7 @@
 
 <script lang="ts" setup>
 import type { FormContext } from "vee-validate";
-import type { InputField as InputFieldType } from "@/generated-types/queries";
+import type { InputFieldTypes, InputField as InputFieldType } from "@/generated-types/queries";
 import BaseDropdown from "@/components/base/BaseDropdown.vue";
 import BaseTextarea from "@/components/base/BaseTextarea.vue";
 import InputField from "@/components/base/InputField.vue";
@@ -64,12 +64,7 @@ const isDropdownType = computed(() => {
 });
 
 const isTextareaType = computed(() => {
-  const textareaType = ["textarea"];
-  let isTextarea = false;
-  if (props.field) {
-    isTextarea = textareaType.includes(props.field.type);
-  }
-  return isTextarea;
+  return props.field === InputFieldTypes.Textarea
 });
 
 const options = computed(() => {
