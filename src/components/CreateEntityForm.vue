@@ -20,10 +20,11 @@
             form-id="createEntity"
           />
           <input
-            class="w-full px-3 py-2"
+            class="w-full px-3 py-2 my-2 opacity-50 rounded"
             v-if="metadata.key === 'alternate_name'"
             v-model="id"
             type="text"
+            disabled
           />
         </div>
         <div class="absolute left-0 bottom-6 w-full px-6">
