@@ -176,7 +176,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
   ): object => {
     const formatted = [];
     for (const key in teaserMetadata) {
-      if (key !== "__typename" && intialValues[key]) {
+      if (key !== "__typename" && intialValues && intialValues[key]) {
         teaserMetadata[key].value = intialValues[key];
         formatted.push(teaserMetadata[key]);
       }
