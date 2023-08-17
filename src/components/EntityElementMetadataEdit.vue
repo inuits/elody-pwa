@@ -1,12 +1,18 @@
 <template>
   <div v-if="field" class="text-sm pl-4">
     <InputField
-      v-if="!isDropdownType"
+      v-if="!isDropdownType && !isTextareaType"
       v-model="computedValue"
       :label="t(label)"
       :type="field.type"
     />
     <BaseDropdown
+      v-else-if="isDropdownType"
+      v-model="computedValue"
+      :label="t(label)"
+      :options="options"
+    />
+    <BaseTextarea
       v-else
       v-model="computedValue"
       :label="t(label)"
@@ -19,6 +25,7 @@
 import type { FormContext } from "vee-validate";
 import type { InputField as InputFieldType } from "@/generated-types/queries";
 import BaseDropdown from "@/components/base/BaseDropdown.vue";
+import BaseTextarea from "@/components/base/BaseTextarea.vue";
 import InputField from "@/components/base/InputField.vue";
 import { computed } from "vue";
 import { getEntityIdFromRoute } from "@/helpers";
@@ -54,6 +61,15 @@ const isDropdownType = computed(() => {
     isDropdown = dropdownTypes.includes(props.field.type);
   }
   return isDropdown;
+});
+
+const isTextareaType = computed(() => {
+  const textareaType = ["textarea"];
+  let isTextarea = false;
+  if (props.field) {
+    isTextarea = textareaType.includes(props.field.type);
+  }
+  return isTextarea;
 });
 
 const options = computed(() => {
