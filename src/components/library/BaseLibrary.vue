@@ -170,7 +170,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { ApolloClient } from "@apollo/client";
+import type { ApolloClient } from "@apollo/client/core";
 import {
   DamsIcons,
   Entitytyping,
