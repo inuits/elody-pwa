@@ -20,7 +20,7 @@
             form-id="createEntity"
           />
           <input
-            class="w-full px-3 py-2 my-2 opacity-50 rounded"
+            class="w-full px-3 py-2 my-2 mt-1 opacity-50 rounded"
             v-if="metadata.key === 'alternate_name'"
             v-model="id"
             type="text"
@@ -31,6 +31,7 @@
           <BaseButtonNew
             :label="t('form.create')"
             :icon="DamsIcons.Create"
+            :disabled="cannotCreate"
             button-style="accentAccent"
             @click="create"
           />
@@ -89,6 +90,11 @@ const id = computed(
   () =>
     `${idPrefix.value}${urlSlug(form.values.intialValues["alternate_name"])}`
 );
+const cannotCreate = computed(() => {
+  if (!form) return true;
+  const values = Object.values(form.values.intialValues);
+  return values.length <= 0 || values.includes("");
+});
 
 const { mutate } = useMutation<CreateEntityMutation>(CreateEntityDocument);
 const { result, onResult, refetch } = useQuery<GetCreateEntityFormQuery>(
@@ -148,8 +154,6 @@ const create = async () => {
 
 watch(
   () => type.value,
-  () => {
-    refetch();
-  }
+  () => refetch()
 );
 </script>
