@@ -12,6 +12,7 @@
         <entity-column
           v-if="columnList != 'no-values'"
           :columnList="columnList"
+          :identifiers="identifiers"
         ></entity-column>
       </entity-form>
     </div>
@@ -47,6 +48,7 @@ const route = useRoute();
 const auth = useAuth();
 
 const id = asString(route.params["id"]);
+const identifiers = ref<string[]>([]);
 const loading = ref<boolean>(true);
 const { showEditToggle, disableEditMode, isEdit, setRefetchFn } = useEditMode();
 const { setCurrentRouteTitle, addVisitedRoute, currentRouteTitle } =
@@ -85,6 +87,7 @@ watch(result, () => {
   const entity = result.value?.Entity;
   if (entity == undefined) return;
 
+  identifiers.value = [entity.id, entity.intialValues.id];
   intialValues.value = entity.intialValues;
   relationValues.value = entity.relationValues;
   columnList.value = entity.entityView;

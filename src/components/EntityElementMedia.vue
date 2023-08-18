@@ -43,11 +43,11 @@
         :enable-advanced-filters="false"
         :enable-bulk-operations="true"
         :enable-navigation="false"
-        :parent-entity-id="
+        :parent-entity-identifiers="
           entityId === mediafileSelectionState.selectedMediafile?.id ||
           entityId === mediafileSelectionState.selectedMediafile?.uuid
             ? undefined
-            : entityId
+            : identifiers
         "
         list-item-route-name="SingleEntity"
       />
@@ -93,6 +93,7 @@ import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   element: MediaFileElement;
+  identifiers: string[];
 }>();
 
 const { t } = useI18n();

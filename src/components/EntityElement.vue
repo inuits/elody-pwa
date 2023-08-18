@@ -14,15 +14,16 @@
       <entity-element-list
         v-if="element.__typename === 'EntityListElement'"
         :label="(element.label as string)"
-        RelationKey="relatie"
         :isCollapsed="element.isCollapsed"
-        :types="element.entityTypes as String[]"
+        :types="element.entityTypes as string[]"
         :metaKey="element.metaKey"
         :entity-list="(element.entityList as Entity[]) ?? []"
+        :identifiers="identifiers"
       />
       <entity-element-media
         v-if="element.__typename === 'MediaFileElement'"
         :element="element"
+        :identifiers="identifiers"
       />
       <entity-element-window
         v-if="element.__typename === 'WindowElement'"
@@ -59,6 +60,7 @@ export type Elements =
 
 const props = defineProps<{
   elements: EntityViewElements;
+  identifiers: string[];
 }>();
 
 const elements = computed<Elements[]>(() => {

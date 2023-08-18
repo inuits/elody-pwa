@@ -109,13 +109,18 @@ export type FilterListItem = {
   advancedFilter: AdvancedFilter;
 };
 
-const props = defineProps<{
-  filterMatcherMapping: FilterMatcherMap;
-  advancedFilters: Maybe<AdvancedFilters> | undefined;
-  entityType: string;
-  parentEntityId?: string;
-  expandFilters: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    filterMatcherMapping: FilterMatcherMap;
+    advancedFilters: Maybe<AdvancedFilters> | undefined;
+    entityType: string;
+    expandFilters: boolean;
+    parentEntityIdentifiers?: string[];
+  }>(),
+  {
+    parentEntityIdentifiers: () => [],
+  }
+);
 
 const emit = defineEmits<{
   (event: "applyFilters", advancedFilterInputs: AdvancedFilterInput[]): void;
@@ -173,9 +178,9 @@ const handleAdvancedFilters = () => {
         };
 
         if (advancedFilter.type === AdvancedFilterTypes.Relation) {
-          if (props.parentEntityId) {
+          if (props.parentEntityIdentifiers.length > 0) {
             hiddenFilter.type = advancedFilter.type;
-            hiddenFilter.parent = props.parentEntityId;
+            hiddenFilter.parents = props.parentEntityIdentifiers;
             activeFilters.value.push(hiddenFilter);
           }
         } else activeFilters.value.push(hiddenFilter);
@@ -186,7 +191,8 @@ const handleAdvancedFilters = () => {
         isDisplayed: advancedFilter.isDisplayedByDefault ?? false,
         advancedFilter,
       });
-      if (entityType.value || props.parentEntityId) applyFilters();
+      if (entityType.value || props.parentEntityIdentifiers.length > 0)
+        applyFilters();
     }
   });
 };
@@ -196,7 +202,7 @@ onMounted(() => {
   handleAdvancedFilters();
 });
 
-if (props.parentEntityId)
+if (props.parentEntityIdentifiers.length > 0)
   watch(
     () => isSaved.value,
     () => {
