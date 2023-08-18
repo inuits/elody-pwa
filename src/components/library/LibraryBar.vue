@@ -7,6 +7,7 @@
           v-model="selectedPaginationLimitOption"
           :options="paginationLimitOptions"
           :label="t('library.items')"
+          label-position="inline"
           label-alignment="right"
           dropdown-style="default"
         />
@@ -18,6 +19,7 @@
           v-model="selectedSortOption"
           :options="sortOptions"
           :label="t('library.sort')"
+          label-position="inline"
           label-alignment="left"
           dropdown-style="default"
         />

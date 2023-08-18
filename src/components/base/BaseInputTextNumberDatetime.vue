@@ -1,20 +1,27 @@
 <template>
-  <input
-    class="w-full h-full rounded-lg focus:ring-0"
-    :class="[
-      `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
-      `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
-    ]"
-    v-model="inputValue"
-    :type="type"
-    :disabled="disabled"
-    @change.stop
-    @click.stop
-  />
+  <label>
+    <span v-if="label" class="text-sm text-text-light ml-1">
+      {{ label }}
+    </span>
+    <input
+      class="w-full h-full border rounded-lg focus:ring-0"
+      :class="[
+        `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
+        `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
+      ]"
+      v-model="inputValue"
+      :type="type"
+      :step="step"
+      :disabled="disabled"
+      @change.stop
+      @click.stop
+    />
+  </label>
 </template>
 
 <script lang="ts" setup>
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 
 type PseudoStyle = {
   textColor: string;
@@ -37,22 +44,37 @@ const defaultInput: Input = {
     borderColor: "disabled:border-none",
   },
 };
+const defaultWithBorderInput: Input = {
+  textColor: defaultInput.textColor,
+  bgColor: defaultInput.bgColor,
+  borderColor: "border-[rgba(0,58,82,0.6)] focus:border-[rgba(0,58,82,0.6)]",
+  disabledStyle: {
+    textColor: defaultInput.disabledStyle.textColor,
+    bgColor: defaultInput.disabledStyle.bgColor,
+    borderColor: "disabled:border-text-disabled",
+  },
+};
 
-type InputStyle = "default";
+type InputStyle = "default" | "defaultWithBorder";
 const inputStyles: Record<InputStyle, Input> = {
   default: defaultInput,
+  defaultWithBorder: defaultWithBorderInput,
 };
 
 const props = withDefaults(
   defineProps<{
     modelValue: string | number | undefined;
-    type?: "text" | "number" | "datetime-local";
     inputStyle: InputStyle;
+    label?: string;
+    type?: "text" | "number" | "datetime-local";
+    step?: number;
     disabled?: boolean;
     isValidPredicate?: Function;
   }>(),
   {
+    label: "",
     type: "text",
+    step: 1,
     disabled: false,
     isValidPredicate: () => true,
   }
@@ -62,6 +84,8 @@ const emit = defineEmits<{
   (event: "update:modelValue", modelValue: string | number | undefined): void;
 }>();
 
+const { t } = useI18n();
+
 const inputValue = computed<string | number | undefined>({
   get() {
     return props.modelValue;
@@ -69,6 +93,13 @@ const inputValue = computed<string | number | undefined>({
   set(value) {
     if (props.isValidPredicate(value)) emit("update:modelValue", value);
   },
+});
+const label = computed<string>(() => {
+  try {
+    return t(props.label);
+  } catch {
+    return props.label;
+  }
 });
 
 const selectedInputStyle = computed<Input>(() => inputStyles[props.inputStyle]);

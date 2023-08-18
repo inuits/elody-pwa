@@ -4,6 +4,7 @@
       v-if="languageOptions"
       v-model="selectedLanguageOption"
       :options="languageOptions"
+      label-position="inline"
       dropdown-style="default"
     />
   </div>

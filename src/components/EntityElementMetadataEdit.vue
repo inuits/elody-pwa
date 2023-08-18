@@ -1,29 +1,34 @@
 <template>
   <div v-if="field" class="text-sm pl-4">
-    <InputField
+    <BaseInputTextNumberDatetime
       v-if="!isDropdownType"
       v-model="computedValue"
-      :label="t(label)"
-      :type="field.type"
+      :label="label"
+      :type="field.type as any"
+      input-style="defaultWithBorder"
     />
-    <BaseDropdown
-      v-else
+    <BaseDropdownNew
+      v-if="isDropdownType"
       v-model="computedValue"
-      :label="t(label)"
       :options="options"
+      :label="label"
+      dropdown-style="defaultWithBorder"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
 import type { FormContext } from "vee-validate";
-import type { InputField as InputFieldType } from "@/generated-types/queries";
-import BaseDropdown from "@/components/base/BaseDropdown.vue";
-import InputField from "@/components/base/InputField.vue";
+import {
+  DamsIcons,
+  type DropdownOption,
+  type InputField as InputFieldType,
+} from "@/generated-types/queries";
+import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
+import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { computed } from "vue";
 import { getEntityIdFromRoute } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   fieldKey: string;
@@ -33,7 +38,6 @@ const props = defineProps<{
   formId?: string;
 }>();
 
-const { t } = useI18n();
 const { getForm } = useFormHelper();
 const id = getEntityIdFromRoute() || "";
 const form: FormContext = getForm(props.formId || id);
@@ -56,9 +60,12 @@ const isDropdownType = computed(() => {
   return isDropdown;
 });
 
-const options = computed(() => {
-  const options =
+const options = computed<DropdownOption[]>(() => {
+  const fieldOptions =
     props.field && props.field.options ? (props.field.options as string[]) : [];
+  const options = fieldOptions.map((option) => {
+    return { icon: DamsIcons.NoIcon, label: option, value: option };
+  });
   return options;
 });
 </script>
