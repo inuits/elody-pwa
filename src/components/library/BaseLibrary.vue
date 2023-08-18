@@ -1,6 +1,9 @@
 <template>
   <div class="lg:flex bg-neutral-lightest">
-    <div class="w-full" :class="parentEntityId ? 'p-3' : 'px-6'">
+    <div
+      class="w-full"
+      :class="parentEntityIdentifiers.length > 0 ? 'p-3' : 'px-6'"
+    >
       <div class="flex flex-row items-center gap-y-4">
         <FiltersBase
           v-if="filtersBaseInitializationStatus === 'initialized'"
@@ -9,7 +12,7 @@
           :filter-matcher-mapping="filterMatcherMapping"
           :advanced-filters="advancedFilters"
           :entity-type="filterType || entityType"
-          :parent-entity-id="parentEntityId"
+          :parent-entity-identifiers="parentEntityIdentifiers"
           :expandFilters="expandFilters"
           @apply-filters="setAdvancedFilters"
           @expand-filters="expandFilters = !expandFilters"
@@ -64,7 +67,7 @@
                 v-for="entity in entities"
                 :key="entity.id + '_list'"
                 :class="
-                  parentEntityId &&
+                  parentEntityIdentifiers.length > 0 &&
                   entity.id &&
                   mediafileSelectionState.selectedMediafile?.id === entity.id
                     ? '!border-2 !border-accent-normal'
@@ -89,14 +92,14 @@
                 @click="
                   entitiesLoading || !enableNavigation
                     ? !enableNavigation &&
-                      parentEntityId &&
+                      parentEntityIdentifiers.length > 0 &&
                       entity.type === 'MediaFile'
                       ? updateSelectedEntityMediafile(entity)
                       : undefined
                     : goToEntityPage(entity)
                 "
                 @dblclick="
-                  !enableNavigation && parentEntityId
+                  !enableNavigation && parentEntityIdentifiers.length > 0
                     ? goToEntityPage(entity)
                     : undefined
                 "
@@ -114,7 +117,7 @@
                 v-for="entity in entities"
                 :key="entity.id + '_grid'"
                 :class="
-                  parentEntityId &&
+                  parentEntityIdentifiers.length > 0 &&
                   mediafileSelectionState.selectedMediafile?.id === entity.id
                     ? '!border-2 !border-accent-normal'
                     : ''
@@ -138,14 +141,14 @@
                 @click="
                   entitiesLoading || !enableNavigation
                     ? !enableNavigation &&
-                      parentEntityId &&
+                      parentEntityIdentifiers.length > 0 &&
                       entity.type === 'MediaFile'
                       ? updateSelectedEntityMediafile(entity)
                       : undefined
                     : goToEntityPage(entity)
                 "
                 @dblclick="
-                  !enableNavigation && parentEntityId
+                  !enableNavigation && parentEntityIdentifiers.length > 0
                     ? goToEntityPage(entity)
                     : undefined
                 "
@@ -216,7 +219,7 @@ const props = withDefaults(
     enableAdvancedFilters?: boolean;
     enableBulkOperations?: boolean;
     filterType?: string;
-    parentEntityId?: string;
+    parentEntityIdentifiers?: string[];
     confirmSelectionButton?: boolean;
     enableNavigation?: boolean;
   }>(),
@@ -227,7 +230,7 @@ const props = withDefaults(
     enableAdvancedFilters: true,
     enableBulkOperations: true,
     filterType: undefined,
-    parentEntityId: undefined,
+    parentEntityIdentifiers: () => [],
     confirmSelectionButton: false,
     enableNavigation: true,
   }
@@ -351,7 +354,7 @@ const calculateGridColumns = () => {
 
   if (gridContainerWidth) {
     colAmount = Math.floor(gridContainerWidth / gridItemWidth);
-    if (props.parentEntityId) --colAmount;
+    if (props.parentEntityIdentifiers.length > 0) --colAmount;
   }
   setCssGridVariable(colAmount);
 };

@@ -29,7 +29,7 @@
             :enable-advanced-filters="false"
             :enable-bulk-operations="true"
             :enable-navigation="false"
-            :parent-entity-id="entityId"
+            :parent-entity-identifiers="identifiers"
             :filter-type="types[0]"
             list-item-route-name="SingleEntity"
           />
@@ -50,14 +50,10 @@ import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import useEditMode from "@/composables/useEdit";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import useEntitySingle from "@/composables/useEntitySingle";
-import { asString } from "@/helpers";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
-import { computed } from "vue";
 import { Unicons } from "@/types";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useI18n } from "vue-i18n";
-import { useRoute } from "vue-router";
 
 withDefaults(
   defineProps<{
@@ -65,6 +61,7 @@ withDefaults(
     types: string[];
     label: string;
     entityList: Entity[];
+    identifiers: string[];
   }>(),
   {
     types: () => [],
@@ -72,13 +69,9 @@ withDefaults(
 );
 
 const { setAcceptedTypes } = useEntityPickerModal();
-const { getEntityUuid } = useEntitySingle();
 const { getModal } = useAvailableModals();
 const { isEdit } = useEditMode();
 const { t } = useI18n();
 
 const modal = getModal(TypeModals.EntityPicker);
-const entityId = computed(
-  () => getEntityUuid() || asString(useRoute().params["id"])
-);
 </script>
