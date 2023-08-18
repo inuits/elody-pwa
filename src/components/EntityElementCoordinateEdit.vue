@@ -1,16 +1,20 @@
 <template>
   <div v-if="field" class="text-sm pl-4 flex justify-between">
-    <InputField
+    <BaseInputTextNumberDatetime
       v-model="refValue.longitude"
+      class="h-1/2"
       label="Longitude"
-      :type="field.type"
+      :type="field.type as any"
       :step="decimalPointStep"
+      input-style="defaultWithBorder"
     />
-    <InputField
+    <BaseInputTextNumberDatetime
       v-model="refValue.latitude"
+      class="h-1/2"
       label="Latitude"
-      :type="field.type"
+      :type="field.type as any"
       :step="decimalPointStep"
+      input-style="defaultWithBorder"
     />
   </div>
 </template>
@@ -18,7 +22,7 @@
 <script lang="ts" setup>
 import type { FormContext } from "vee-validate";
 import type { InputField as InputFieldType } from "@/generated-types/queries";
-import InputField from "@/components/base/InputField.vue";
+import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { getEntityIdFromRoute } from "@/helpers";
 import { ref, type PropType, watch, onMounted } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";

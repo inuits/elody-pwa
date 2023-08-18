@@ -1,4 +1,10 @@
 <template>
+  <span
+    v-if="label && labelPosition === 'above'"
+    class="text-sm text-text-light ml-1"
+  >
+    {{ label }}
+  </span>
   <ul
     ref="dropdown"
     class="relative w-full h-full px-3 select-none border"
@@ -25,13 +31,19 @@
         />
         <span>
           <span
-            v-if="selectedOptionIsNotDefaultOption && labelAlignment === 'left'"
+            v-if="
+              labelPosition === 'inline' &&
+              selectedOptionIsNotDefaultOption &&
+              labelAlignment === 'left'
+            "
             >{{ label }}
           </span>
-          {{ getSelectedOptionLabel }}
+          {{ selectedOptionLabel }}
           <span
             v-if="
-              selectedOptionIsNotDefaultOption && labelAlignment === 'right'
+              labelPosition === 'inline' &&
+              selectedOptionIsNotDefaultOption &&
+              labelAlignment === 'right'
             "
           >
             {{ label }}</span
@@ -74,9 +86,9 @@
 </template>
 
 <script lang="ts" setup>
+import { computed, onMounted, onUnmounted, ref, toRefs, watch } from "vue";
 import { DamsIcons, type DropdownOption } from "@/generated-types/queries";
 import { Unicons } from "@/types";
-import { computed, onMounted, onUnmounted, ref, toRefs, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 type PseudoStyle = {
@@ -109,11 +121,11 @@ const defaultDropdown: Dropdown = {
 const defaultWithBorderDropdown: Dropdown = {
   textColor: defaultDropdown.textColor,
   bgColor: defaultDropdown.bgColor,
-  borderColor: "border-text-body",
+  borderColor: "border-[rgba(0,58,82,0.6)]",
   hoverStyle: {
     textColor: defaultDropdown.hoverStyle.textColor,
     bgColor: defaultDropdown.hoverStyle.bgColor,
-    borderColor: "hover:border-text-body",
+    borderColor: "hover:border-[rgba(0,58,82,0.6)]",
   },
   disabledStyle: {
     textColor: defaultDropdown.disabledStyle.textColor,
@@ -138,23 +150,25 @@ const dropdownStyles: Record<DropdownStyle, Dropdown> = {
 
 const props = withDefaults(
   defineProps<{
-    modelValue: DropdownOption | undefined;
+    modelValue: DropdownOption | string | undefined;
     options: DropdownOption[];
-    label?: string;
-    defaultLabel?: string;
-    labelAlignment?: "left" | "right";
     dropdownStyle: DropdownStyle;
+    label?: string;
+    labelPosition?: "above" | "inline";
+    labelAlignment?: "left" | "right";
+    defaultLabel?: string;
     disable?: boolean;
   }>(),
   {
     label: "",
+    labelPosition: "above",
     labelAlignment: "left",
     disable: false,
   }
 );
 
 const emit = defineEmits<{
-  (event: "update:modelValue", modelValue: DropdownOption): void;
+  (event: "update:modelValue", modelValue: DropdownOption | string): void;
 }>();
 
 const { t } = useI18n();
@@ -165,9 +179,9 @@ const defaultOption: DropdownOption = {
 };
 const dropdown = ref<HTMLUListElement>();
 const { modelValue } = toRefs(props);
-const selectedOption = ref(defaultOption);
-const showOptions = ref(false);
-const disable = ref(props.disable);
+const selectedOption = ref<DropdownOption>(defaultOption);
+const showOptions = ref<boolean>(false);
+const disable = ref<boolean>(props.disable);
 
 const selectOption = (dropdownOption: DropdownOption) => {
   selectedOption.value = dropdownOption;
@@ -183,7 +197,14 @@ const arrowIcon = computed<DamsIcons>(() =>
 const disabled = computed<Boolean>(() =>
   props.options.length > 0 ? disable.value : true
 );
-const getSelectedOptionLabel = computed<string>(() => {
+const label = computed<string>(() => {
+  try {
+    return t(props.label);
+  } catch {
+    return props.label;
+  }
+});
+const selectedOptionLabel = computed<string>(() => {
   try {
     return t(selectedOption.value.label);
   } catch {
@@ -210,10 +231,19 @@ onUnmounted(() => document.removeEventListener("click", collapseDropdown));
 watch(modelValue, (value) =>
   value === undefined
     ? (selectedOption.value = defaultOption)
+    : typeof value === "string"
+    ? (selectedOption.value = {
+        icon: DamsIcons.NoIcon,
+        label: value,
+        value: value,
+      })
     : (selectedOption.value = value)
 );
 watch(selectedOption, (value) => {
-  if (selectedOptionIsNotDefaultOption.value) emit("update:modelValue", value);
+  if (selectedOptionIsNotDefaultOption.value)
+    if (typeof props.modelValue === "string")
+      emit("update:modelValue", value.value);
+    else emit("update:modelValue", value);
 });
 </script>
 

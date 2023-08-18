@@ -11,6 +11,7 @@
         <BaseDropdownNew
           v-model="selectedEntityType"
           :options="entityTypes"
+          label="Entity type"
           dropdown-style="defaultWithBorder"
         />
       </div>
@@ -23,9 +24,6 @@
 </template>
 
 <script lang="ts" setup>
-import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
-import BaseModal from "@/components/base/BaseModal.vue";
-import CreateEntityForm from "@/components/CreateEntityForm.vue";
 import {
   CreateableEntityTypes,
   DamsIcons,
@@ -33,6 +31,9 @@ import {
   TypeModals,
   type DropdownOption,
 } from "@/generated-types/queries";
+import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
+import BaseModal from "@/components/base/BaseModal.vue";
+import CreateEntityForm from "@/components/CreateEntityForm.vue";
 import { ref, watch } from "vue";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useI18n } from "vue-i18n";
