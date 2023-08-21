@@ -114,7 +114,7 @@ const getMapCoordinates = (e: LeafletMouseEvent | undefined) => {
 };
 
 const customIcon = {
-  iconUrl: "/Map-Marker.png",
+  iconUrl: "/marker.svg",
   iconSize: [32, 37],
   iconAnchor: [16, 37],
 };
