@@ -30,7 +30,7 @@ const props = defineProps<{
 
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const { isEdit, addSaveCallback, refetchFn } = useEditMode();
-const { getForm, createForm } = useFormHelper();
+const { getForm, createForm, editableFields } = useFormHelper();
 const entityId = computed(() => asString(useRoute().params["id"]));
 
 const { mutate } = useMutation<
@@ -52,6 +52,7 @@ const parseFormValuesToFormInput = (values: EntityValues) => {
   Object.keys(values.intialValues)
     .filter((key) => key !== "__typename")
     .forEach((key) => {
+      if (!editableFields.value[entityId.value].includes(key)) return;
       metadata.push({ key, value: (values.intialValues as any)[key] });
     });
 

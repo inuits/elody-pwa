@@ -1,8 +1,15 @@
-import type { IntialValues, RelationValues } from "@/generated-types/queries";
+import type {
+  IntialValues,
+  PanelMetaData,
+  RelationValues,
+  WindowElement,
+  WindowElementPanel,
+} from "@/generated-types/queries";
 import { useForm, type FormContext } from "vee-validate";
 import { ref } from "vue";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
+const editableFields = ref<{ [key: string]: string[] }>({});
 
 export type EntityValues = {
   intialValues: IntialValues;
@@ -44,6 +51,27 @@ const useFormHelper = () => {
     forms.value = {};
   };
 
+  const getEditableMetadataKeys = (
+    windowElement: WindowElement,
+    formId: string
+  ): string[] => {
+    const keys: string[] = [];
+    Object.keys(windowElement).forEach((key: string) => {
+      const panel: WindowElementPanel = windowElement[key];
+      if (!panel) return;
+      if (panel.__typename !== "WindowElementPanel" || !panel.isEditable)
+        return;
+      Object.keys(panel).forEach((metadataItemKey: string) => {
+        const metadataItem: PanelMetaData = panel[metadataItemKey];
+        if (!metadataItem || !metadataItem.inputField) return;
+        keys.push(metadataItem.key);
+      });
+    });
+    editableFields.value[formId] = keys;
+    console.log(editableFields.value);
+    return keys;
+  };
+
   return {
     createForm,
     addForm,
@@ -52,6 +80,8 @@ const useFormHelper = () => {
     deleteForm,
     deleteForms,
     forms,
+    getEditableMetadataKeys,
+    editableFields,
   };
 };
 
