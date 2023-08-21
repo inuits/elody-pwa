@@ -1,30 +1,30 @@
 <template>
-  <Multiselect
-    v-model="inputValue"
-    mode="tags"
-    :options="options"
-    :searchable="true"
-    :close-on-select="true"
-    :placeholder="placeholder"
-    :classes="
-      autocompleteStyle === 'defaultWithBorder'
-        ? {
-            container: 'multiselect multiselect-border',
-            dropdown: 'multiselect-dropdown multiselect-dropdown-border',
-          }
-        : {}
-    "
-    :disabled="disabled"
-    @search-change="(value: string) => {
-      searchValue = value;
-      emit('searchChange', value);
-    }"
-  />
+  <label>
+    <span v-if="label" class="text-sm text-text-light ml-1">
+      {{ label }}
+    </span>
+    <Multiselect
+      v-model="inputValue"
+      mode="tags"
+      :options="options"
+      :searchable="searchable"
+      :show-options="searchable"
+      :close-on-select="true"
+      :placeholder="placeholder"
+      :classes="classes"
+      :disabled="disabled"
+      @search-change="(value: string) => {
+        searchValue = value;
+        emit('searchChange', value);
+      }"
+    />
+  </label>
 </template>
 
 <script lang="ts" setup>
 import Multiselect from "@vueform/multiselect";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 
 type AutocompleteStyle = "default" | "defaultWithBorder";
 
@@ -32,11 +32,15 @@ const props = withDefaults(
   defineProps<{
     modelValue: string[] | undefined;
     options: string[];
-    placeholder?: string;
     autocompleteStyle: AutocompleteStyle;
+    selectType?: "multi" | "single";
+    label?: string;
+    placeholder?: string;
     disabled?: boolean;
   }>(),
   {
+    selectType: "multi",
+    label: "",
     placeholder: "",
     disabled: false,
   }
@@ -47,6 +51,8 @@ const emit = defineEmits<{
   (event: "searchChange", value: string): void;
 }>();
 
+const { t } = useI18n();
+const classes = ref();
 const searchValue = ref<string>();
 
 const inputValue = computed<string[] | undefined>({
@@ -57,6 +63,43 @@ const inputValue = computed<string[] | undefined>({
     emit("update:modelValue", value);
   },
 });
+const label = computed<string>(() => {
+  try {
+    return t(props.label);
+  } catch {
+    return props.label;
+  }
+});
+const searchable = computed<boolean>(() => {
+  return (
+    !inputValue.value ||
+    inputValue.value[0] === "" ||
+    props.selectType === "multi" ||
+    (props.selectType === "single" && inputValue.value.length < 1)
+  );
+});
+
+const setClasses = () => {
+  classes.value =
+    !inputValue.value ||
+    inputValue.value.length <= 0 ||
+    inputValue.value[0] === ""
+      ? { tags: "multiselect-tags multiselect-tags-margin" }
+      : {};
+
+  if (props.autocompleteStyle === "defaultWithBorder") {
+    classes.value["container"] = "multiselect multiselect-border";
+    classes.value["dropdown"] =
+      "multiselect-dropdown multiselect-dropdown-border";
+  }
+};
+
+onMounted(() => setClasses());
+
+watch(
+  () => inputValue.value,
+  () => setClasses()
+);
 </script>
 
 <style>
@@ -120,6 +163,11 @@ const inputValue = computed<string[] | undefined>({
   padding-left: 8px;
   padding-bottom: 2px;
   align-items: center;
+}
+
+.multiselect-tags-margin {
+  margin-top: 0.185rem;
+  margin-bottom: 0.185rem;
 }
 
 .multiselect-tag {
@@ -310,11 +358,11 @@ const inputValue = computed<string[] | undefined>({
 }
 
 .multiselect-border {
-  border: 1px solid var(--color-text-body);
+  border: 1px solid rgba(0, 58, 82, 0.6);
 }
 
 .multiselect-dropdown-border {
-  border: 1px solid var(--color-text-body);
+  border: 1px solid rgba(0, 58, 82, 0.6);
   border-top: none;
   width: calc(100% + 2px);
   margin: 0 -0.05rem;

@@ -232,6 +232,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     entitiesLoading,
     filterMatcherMapping,
     filtersBaseInitializationStatus,
+    formatTeaserMetadata,
     getEntities,
     libraryBarInitializationStatus,
     paginationLimitOptions,
@@ -242,6 +243,5 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     setTotalEntityCount,
     sortOptions,
     totalEntityCount,
-    formatTeaserMetadata,
   };
 };
