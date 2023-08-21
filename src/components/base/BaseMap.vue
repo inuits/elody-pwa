@@ -14,10 +14,12 @@
           layer-type="base"
           name="OpenStreetMap"
         ></l-tile-layer>
-        <l-marker
-          :icon="customIcon"
-          :lat-lng="(parsedMapData.coordinates as LatLngExpression)"
-        >
+        <l-marker :lat-lng="(parsedMapData.coordinates as LatLngExpression)">
+          <l-icon
+            :icon-size="customIcon.iconSize"
+            :icon-anchor="customIcon.iconAnchor"
+            :icon-url="customIcon.iconUrl"
+          ></l-icon>
           <l-tooltip v-if="parsedMapData.name">{{
             parsedMapData.name
           }}</l-tooltip></l-marker
@@ -111,11 +113,11 @@ const getMapCoordinates = (e: LeafletMouseEvent | undefined) => {
   }
 };
 
-const customIcon = icon({
+const customIcon = {
   iconUrl: "/Map-Marker.png",
   iconSize: [32, 37],
   iconAnchor: [16, 37],
-});
+};
 </script>
 
 <style scoped>
