@@ -14,7 +14,9 @@
           layer-type="base"
           name="OpenStreetMap"
         ></l-tile-layer>
-        <l-marker :lat-lng="(parsedMapData.coordinates as LatLngExpression)"
+        <l-marker
+          :icon="icon"
+          :lat-lng="(parsedMapData.coordinates as LatLngExpression)"
           ><l-tooltip v-if="parsedMapData.name">{{
             parsedMapData.name
           }}</l-tooltip></l-marker
@@ -53,10 +55,11 @@
 <script lang="ts" setup>
 import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LMarker, LTooltip } from "@vue-leaflet/vue-leaflet";
-import type {
-  LatLngExpression,
-  LeafletMouseEvent,
-  PointExpression,
+import {
+  Icon,
+  type LatLngExpression,
+  type LeafletMouseEvent,
+  type PointExpression,
 } from "leaflet";
 import { computed, ref } from "vue";
 import EntityElementMetadata from "../EntityElementMetadata.vue";
@@ -94,6 +97,7 @@ const parsedMapData = computed(() => {
 });
 
 const getMapCoordinates = (e: LeafletMouseEvent | undefined) => {
+  console.log(props);
   if (e) {
     console.log(e.latlng);
   }
