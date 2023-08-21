@@ -31,6 +31,7 @@ import {
   type IntialValues,
   type RelationValues,
   type GetEntityByIdQuery,
+  type BaseEntity,
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
 import EntityForm from "@/components/EntityForm.vue";
@@ -84,12 +85,12 @@ onBeforeRouteUpdate(async (to: any) => {
 });
 
 watch(result, () => {
-  const entity = result.value?.Entity;
-  if (entity == undefined) return;
+  const entity: BaseEntity = result.value?.Entity as BaseEntity;
+  if (!entity) return;
 
   identifiers.value = [entity.id, entity.intialValues.id];
   intialValues.value = entity.intialValues;
-  relationValues.value = entity.relationValues;
+  relationValues.value = entity.relationValues as RelationValues;
   columnList.value = entity.entityView;
 
   if (auth.isAuthenticated.value === true) showEditToggle("edit");

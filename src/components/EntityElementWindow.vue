@@ -42,6 +42,8 @@ import { computed } from "vue";
 import BaseExpandButton from "./base/BaseExpandButton.vue";
 import { useColumnResizeHelper } from "@/composables/useResizeHelper";
 import { useI18n } from "vue-i18n";
+import { useFormHelper } from "@/composables/useFormHelper";
+import { useRoute } from "vue-router";
 
 const props = defineProps<{
   element: WindowElement;
@@ -49,6 +51,10 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const { setColumnSizes, resetToDefaultSizes } = useColumnResizeHelper();
+const { getEditableMetadataKeys } = useFormHelper();
+const route = useRoute();
+
+getEditableMetadataKeys(props.element, route.params.id as string);
 
 const resizeColumn = (toggled: Boolean) => {
   if (toggled) {
