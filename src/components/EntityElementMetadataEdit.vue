@@ -7,25 +7,21 @@
       :type="field.type as any"
       input-style="defaultWithBorder"
     />
-    <BaseDropdownNew
+    <ViewModesAutocomplete
       v-if="isDropdownType"
       v-model="computedValue"
-      :options="options"
+      :metadata-key-to-get-options-for="fieldKey"
       :label="label"
-      dropdown-style="defaultWithBorder"
+      select-type="single"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
 import type { FormContext } from "vee-validate";
-import {
-  DamsIcons,
-  type DropdownOption,
-  type InputField as InputFieldType,
-} from "@/generated-types/queries";
-import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
+import type { InputField as InputFieldType } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
+import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
 import { computed } from "vue";
 import { getEntityIdFromRoute } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -46,7 +42,8 @@ const computedValue = computed<any>({
   get() {
     return props.value;
   },
-  set(value: string) {
+  set(value) {
+    if (Array.isArray(value)) value = value[0];
     if (form) form.setFieldValue(`intialValues.${props.fieldKey}`, value);
   },
 });
@@ -58,14 +55,5 @@ const isDropdownType = computed(() => {
     isDropdown = dropdownTypes.includes(props.field.type);
   }
   return isDropdown;
-});
-
-const options = computed<DropdownOption[]>(() => {
-  const fieldOptions =
-    props.field && props.field.options ? (props.field.options as string[]) : [];
-  const options = fieldOptions.map((option) => {
-    return { icon: DamsIcons.NoIcon, label: option, value: option };
-  });
-  return options;
 });
 </script>

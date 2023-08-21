@@ -17,11 +17,9 @@
           @apply-filters="setAdvancedFilters"
           @expand-filters="expandFilters = !expandFilters"
         />
-
         <div class="mr-2" :class="['flex', { 'ml-4': enableAdvancedFilters }]">
           <BaseToggleGroup :toggles="toggles" />
         </div>
-
         <LibraryBar
           v-if="
             libraryBarInitializationStatus === 'initialized' &&
@@ -53,120 +51,40 @@
         />
       </div>
 
-      <div :class="{ 'flex justify-end': expandFilters }">
-        <ListContainer
-          id="gridContainer"
-          :class="[
-            { 'w-[69.75%]': expandFilters },
-            displayGrid ? 'p-5' : 'p-1',
-          ]"
-        >
-          <div v-if="displayList && entities">
-            <div>
-              <ListItem
-                v-for="entity in entities"
-                :key="entity.id + '_list'"
-                :class="
-                  parentEntityIdentifiers.length > 0 &&
-                  entity.id &&
-                  mediafileSelectionState.selectedMediafile?.id === entity.id
-                    ? '!border-2 !border-accent-normal'
-                    : ''
-                "
-                :item-id="entity.uuid"
-                :bulk-operations-context="bulkOperationsContext"
-                :teaser-metadata="
-                  formatTeaserMetadata(
-                    entity.teaserMetadata,
-                    entity.intialValues
-                  )
-                "
-                :media="
-                  entitiesLoading
-                    ? undefined
-                    : getMediaFilenameFromEntity(entity)
-                "
-                :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
-                :small="listItemRouteName === 'SingleMediafile'"
-                :loading="entitiesLoading"
-                @click="
-                  entitiesLoading || !enableNavigation
-                    ? !enableNavigation &&
-                      parentEntityIdentifiers.length > 0 &&
-                      entity.type === 'MediaFile'
-                      ? updateSelectedEntityMediafile(entity)
-                      : undefined
-                    : goToEntityPage(entity)
-                "
-                @dblclick="
-                  !enableNavigation && parentEntityIdentifiers.length > 0
-                    ? goToEntityPage(entity)
-                    : undefined
-                "
-              >
-                <template #actions>
-                  <!-- Use bulkoperations checkboxes to apply this logic again -->
-                </template>
-              </ListItem>
-            </div>
-          </div>
+      <div v-if="entities" :class="{ 'flex justify-end': expandFilters }">
+        <div id="gridContainer" :class="[{ 'w-[69.75%]': expandFilters }]">
+          <ViewModesList
+            v-if="displayList"
+            :entities="entities"
+            :entities-loading="entitiesLoading"
+            :bulk-operations-context="bulkOperationsContext"
+            :list-item-route-name="listItemRouteName"
+            :enable-navigation="enableNavigation"
+            :parent-entity-identifiers="parentEntityIdentifiers"
+            @go-to-entity-page="(entity) => goToEntityPage(entity)"
+          />
 
-          <div v-else-if="displayGrid && entities">
-            <div class="grid grid_cols gap-2 justify-items-center">
-              <GridItem
-                v-for="entity in entities"
-                :key="entity.id + '_grid'"
-                :class="
-                  parentEntityIdentifiers.length > 0 &&
-                  mediafileSelectionState.selectedMediafile?.id === entity.id
-                    ? '!border-2 !border-accent-normal'
-                    : ''
-                "
-                :item-id="entity.uuid"
-                :bulk-operations-context="bulkOperationsContext"
-                :teaser-metadata="
-                  formatTeaserMetadata(
-                    entity.teaserMetadata,
-                    entity.intialValues
-                  )
-                "
-                :media="
-                  entitiesLoading
-                    ? undefined
-                    : getMediaFilenameFromEntity(entity)
-                "
-                :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
-                :small="listItemRouteName === 'SingleMediafile'"
-                :loading="entitiesLoading"
-                @click="
-                  entitiesLoading || !enableNavigation
-                    ? !enableNavigation &&
-                      parentEntityIdentifiers.length > 0 &&
-                      entity.type === 'MediaFile'
-                      ? updateSelectedEntityMediafile(entity)
-                      : undefined
-                    : goToEntityPage(entity)
-                "
-                @dblclick="
-                  !enableNavigation && parentEntityIdentifiers.length > 0
-                    ? goToEntityPage(entity)
-                    : undefined
-                "
-              >
-                <template #actions>
-                  <!-- Use bulkoperations checkboxes to apply this logic again -->
-                </template>
-              </GridItem>
-            </div>
-            <div v-if="entities.length === 0" class="p-4">
-              {{ t("search.noresult") }}
-            </div>
-          </div>
+          <ViewModesGrid
+            v-if="displayGrid"
+            :entities="entities"
+            :entities-loading="entitiesLoading"
+            :bulk-operations-context="bulkOperationsContext"
+            :list-item-route-name="listItemRouteName"
+            :enable-navigation="enableNavigation"
+            :parent-entity-identifiers="parentEntityIdentifiers"
+            @go-to-entity-page="(entity) => goToEntityPage(entity)"
+          />
 
-          <div v-else-if="displayPreview && entities" class="h-[62vh] mt-5">
-            <media-viewer :mediafiles="entities" :loading="entitiesLoading" />
-          </div>
-        </ListContainer>
+          <ViewModesMedia
+            v-if="displayPreview"
+            :entities="entities"
+            :entities-loading="entitiesLoading"
+          />
+        </div>
+      </div>
+
+      <div v-if="entities.length === 0">
+        {{ t("search.noresult") }}
       </div>
     </div>
   </div>
@@ -190,24 +108,21 @@ import {
 import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
 import FiltersBase from "@/components/filters/FiltersBase.vue";
-import GridItem from "@/components/GridItem.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
-import ListContainer from "@/components/ListContainer.vue";
-import ListItem from "@/components/ListItem.vue";
-import MediaViewer from "@/components/base/Mediaviewer.vue";
 import useEntitySingle from "@/composables/useEntitySingle";
-import useListItemHelper from "@/composables/useListItemHelper";
-import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import useUploadModalDropzone from "@/composables/useUploadModalDropzone";
+import ViewModesGrid from "@/components/library/view-modes/ViewModesGrid.vue";
+import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
+import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
 import { bulkSelectAllSizeLimit } from "@/main";
 import { DefaultApolloClient } from "@vue/apollo-composable";
+import { updateLocalStorage } from "@/helpers";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
-import { watch, ref, onMounted, onUnmounted, inject, computed } from "vue";
-import { updateLocalStorage } from "@/helpers";
+import { watch, ref, onMounted, inject, computed } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -263,16 +178,11 @@ const {
   totalEntityCount,
   formatTeaserMetadata,
 } = useBaseLibrary(apolloClient as ApolloClient<any>);
-const {
-  mediafileSelectionState,
-  setEntityMediafiles,
-  updateSelectedEntityMediafile,
-} = useEntityMediafileSelector();
+const { setEntityMediafiles, updateSelectedEntityMediafile } =
+  useEntityMediafileSelector();
 const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
 const { getUploadStatus, setUploadStatus } = useUploadModalDropzone();
-const { getMediaFilenameFromEntity } = useListItemHelper();
-const { getThumbnail } = useThumbnailHelper();
 const { setEntityUuid } = useEntitySingle();
 
 const displayList = ref<boolean>(false);
@@ -308,7 +218,6 @@ const { result: allEntitiesResult } = useQuery(
   allEntitiesQueryVariables,
   () => ({ enabled: false, fetchPolicy: "network-only" })
 );
-
 const bulkSelect = (items = entities.value) => {
   if (props.predefinedEntities) items = props.predefinedEntities;
 
@@ -341,28 +250,6 @@ const goToEntityPage = (entity: Entity) => {
   });
 };
 
-const setCssGridVariable = (colAmount: number = 5) => {
-  const root = document.querySelector(":root") as HTMLElement;
-  root.style.setProperty("--grid-cols", colAmount.toString());
-};
-
-const calculateGridColumns = () => {
-  const gridContainerWidth =
-    document.getElementById("gridContainer")?.offsetWidth;
-  const gridItemWidth = 330;
-  let colAmount = 0;
-
-  if (gridContainerWidth) {
-    colAmount = Math.floor(gridContainerWidth / gridItemWidth);
-    if (props.parentEntityIdentifiers.length > 0) --colAmount;
-  }
-  setCssGridVariable(colAmount);
-};
-
-const conditionallyCalculateGridColumns = () => {
-  if (displayGrid.value) calculateGridColumns();
-};
-
 const initializeBaseLibrary = () => {
   if (!props.predefinedEntities) {
     if (props.filterType) setEntityType(props.filterType as Entitytyping);
@@ -370,18 +257,7 @@ const initializeBaseLibrary = () => {
   }
 };
 
-onMounted(() => {
-  initializeBaseLibrary();
-  window.addEventListener("resize", conditionallyCalculateGridColumns);
-  window.addEventListener("popstate", conditionallyCalculateGridColumns);
-
-  if (props.enablePreview)
-    toggles.push({
-      isOn: displayPreview,
-      iconOn: DamsIcons.Image,
-      iconOff: DamsIcons.Image,
-    });
-
+const setDisplayPreferences = () => {
   const displayPreferences = window.localStorage.getItem("_displayPreferences");
   if (displayPreferences) {
     displayGrid.value = JSON.parse(displayPreferences).grid;
@@ -389,14 +265,25 @@ onMounted(() => {
       ? false
       : JSON.parse(displayPreferences).expandFilters;
   }
-  calculateGridColumns();
+};
+
+onMounted(() => {
+  initializeBaseLibrary();
+  if (props.enablePreview)
+    toggles.push({
+      isOn: displayPreview,
+      iconOn: DamsIcons.Image,
+      iconOff: DamsIcons.Image,
+    });
+  setDisplayPreferences();
 });
 
-onUnmounted(() => {
-  window.removeEventListener("resize", conditionallyCalculateGridColumns);
-  window.removeEventListener("popstate", conditionallyCalculateGridColumns);
+watch(getUploadStatus, (status) => {
+  if (status === "success") {
+    getEntities();
+    setUploadStatus("no-upload");
+  }
 });
-
 watch(
   () => entityType.value,
   () => {
@@ -415,12 +302,6 @@ watch(
     }
   }
 );
-watch(getUploadStatus, (status) => {
-  if (status === "success") {
-    getEntities();
-    setUploadStatus("no-upload");
-  }
-});
 watch(
   () => props.predefinedEntities,
   () => {
@@ -438,9 +319,3 @@ watch([displayGrid, expandFilters], () => {
   });
 });
 </script>
-
-<style scoped>
-.grid_cols {
-  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
-}
-</style>
