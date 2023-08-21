@@ -15,9 +15,10 @@
           name="OpenStreetMap"
         ></l-tile-layer>
         <l-marker
-          :icon="icon"
+          :icon="customIcon"
           :lat-lng="(parsedMapData.coordinates as LatLngExpression)"
-          ><l-tooltip v-if="parsedMapData.name">{{
+        >
+          <l-tooltip v-if="parsedMapData.name">{{
             parsedMapData.name
           }}</l-tooltip></l-marker
         >
@@ -54,9 +55,16 @@
 
 <script lang="ts" setup>
 import "leaflet/dist/leaflet.css";
-import { LMap, LTileLayer, LMarker, LTooltip } from "@vue-leaflet/vue-leaflet";
 import {
-  Icon,
+  LMap,
+  LTileLayer,
+  LMarker,
+  LTooltip,
+  LIcon,
+} from "@vue-leaflet/vue-leaflet";
+import {
+  L,
+  icon,
   type LatLngExpression,
   type LeafletMouseEvent,
   type PointExpression,
@@ -102,6 +110,12 @@ const getMapCoordinates = (e: LeafletMouseEvent | undefined) => {
     console.log(e.latlng);
   }
 };
+
+const customIcon = icon({
+  iconUrl: "/Map-Marker.png",
+  iconSize: [32, 37],
+  iconAnchor: [16, 37],
+});
 </script>
 
 <style scoped>
