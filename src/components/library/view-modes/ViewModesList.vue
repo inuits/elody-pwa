@@ -1,5 +1,16 @@
 <template>
   <ListItem
+    v-if="!disablePreviews"
+    v-for="item in getItemPreviews()"
+    :key="item.id + '_preview'"
+    :item-id="item.id"
+    :bulk-operations-context="bulkOperationsContext"
+    :teaser-metadata="item.teaserMetadata"
+    :thumb-icon="entitiesLoading ? undefined : getThumbnail(item)"
+    :small="listItemRouteName === 'SingleMediafile'"
+    :is-preview="true"
+  />
+  <ListItem
     v-for="entity in entities"
     :key="entity.id + '_list'"
     :class="
@@ -32,8 +43,7 @@
         ? emit('goToEntityPage', entity)
         : undefined
     "
-  >
-  </ListItem>
+  />
 </template>
 
 <script lang="ts" setup>
@@ -43,6 +53,7 @@ import type { Entity } from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
+import useViewModes from "@/composables/useViewModes";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { inject } from "vue";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
@@ -54,10 +65,12 @@ withDefaults(
     entitiesLoading: boolean;
     bulkOperationsContext: Context;
     listItemRouteName: string;
+    disablePreviews?: boolean;
     enableNavigation?: boolean;
     parentEntityIdentifiers?: string[];
   }>(),
   {
+    disablePreviews: false,
     enableNavigation: true,
     parentEntityIdentifiers: () => [],
   }
@@ -75,6 +88,7 @@ const { mediafileSelectionState, updateSelectedEntityMediafile } =
   useEntityMediafileSelector();
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { getThumbnail } = useThumbnailHelper();
+const { getItemPreviews } = useViewModes();
 </script>
 
 <style></style>

@@ -2,11 +2,13 @@
   <li
     :class="[
       'flex items-center gap-6 mb-2 px-8 py-4 bg-neutral-white border border-neutral-light rounded cursor-pointer',
+      { 'border-dashed border-2 !border-accent-normal': isPreview },
       { 'animate-pulse': loading },
     ]"
   >
     <div>
       <BaseInputCheckbox
+        v-if="!isPreview"
         class="text-center"
         v-model="isChecked"
         :item="{ id: itemId, teaserMetadata }"
@@ -44,30 +46,15 @@
           :value="metadataItem.value"
           :unit="metadataItem.unit"
         />
-
-        <!-- <template v-if="metadataItem">
-          <span class="text-sm text-text-light">{{ metadataItem.key }}</span>
-          <span v-if="metadataItem.unit" class="info"
-            >{{
-              convertUnitToReadbleFormat(metadataItem.unit, metadataItem.value)
-            }}
-          </span>
-          <span v-else-if="!stringIsUrl(metadataItem.value)" class="info"
-            >{{ metadataItem.value }}
-          </span>
-          <span v-else class="info underline">
-            <a :href="metadataItem.value" target="_blank">{{
-              metadataItem.key
-            }}</a>
-          </span>
-        </template> -->
       </div>
     </div>
+
     <div class="w-full" v-else>
       <div class="bg-neutral-100 h-4 w-1/4 opacity-40 mb-2"></div>
       <div class="bg-neutral-100 h-4 w-5/6 opacity-40"></div>
     </div>
-    <div class="flex flex-row">
+
+    <div v-if="!isPreview" class="flex flex-row">
       <slot>
         <unicon
           :name="Unicons.AngleRight.name"
@@ -79,24 +66,25 @@
 </template>
 
 <script lang="ts" setup>
-import EntityElementMetadata from "./EntityElementMetadata.vue";
 import type { Context } from "@/composables/useBulkOperations";
 import type { Metadata } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
+import EntityElementMetadata from "./EntityElementMetadata.vue";
 import { computed, ref } from "vue";
-import { stringIsUrl, convertUnitToReadbleFormat } from "@/helpers";
+import { stringIsUrl } from "@/helpers";
 import { Unicons } from "@/types";
 
 const props = withDefaults(
   defineProps<{
-    itemId?: string;
     bulkOperationsContext: Context;
+    itemId?: string;
     loading?: boolean;
     teaserMetadata?: Metadata[];
     media?: string;
     thumbIcon?: string;
     small?: boolean;
     isChecked?: boolean;
+    isPreview: boolean;
   }>(),
   {
     itemId: "",
@@ -106,6 +94,7 @@ const props = withDefaults(
     thumbIcon: "",
     small: false,
     isChecked: false,
+    isPreview: false,
   }
 );
 
@@ -118,9 +107,3 @@ const setNoImage = () => {
 
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 </script>
-
-<style lang="postcss" scoped>
-.info {
-  @apply mt-0.5 text-sm text-text-body;
-}
-</style>

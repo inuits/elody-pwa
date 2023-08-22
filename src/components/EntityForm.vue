@@ -15,6 +15,7 @@ import {
   BulkOperationsContextEnum,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
+import useViewModes from "@/composables/useViewModes";
 import { asString } from "@/helpers";
 import { computed, onMounted, onUnmounted, watch } from "vue";
 import { useEditMode } from "@/composables/useEdit";
@@ -31,6 +32,7 @@ const props = defineProps<{
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const { isEdit, addSaveCallback, refetchFn } = useEditMode();
 const { getForm, createForm, editableFields } = useFormHelper();
+const { clearItemPreviews } = useViewModes();
 const entityId = computed(() => asString(useRoute().params["id"]));
 
 const { mutate } = useMutation<
@@ -86,6 +88,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
     intialValues: entity.intialValues,
     relationValues: entity.relationValues,
   });
+  clearItemPreviews();
 });
 
 const callRefetchFn = () => {
@@ -106,5 +109,6 @@ watch(isEdit, () => {
   dequeueAllItemsForBulkProcessing(
     BulkOperationsContextEnum.EntityElementMediaEntityPickerModal
   );
+  clearItemPreviews();
 });
 </script>

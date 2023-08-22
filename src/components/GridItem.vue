@@ -2,6 +2,7 @@
   <li
     :class="[
       'w-full h-auto align-middle border border-neutral-light rounded cursor-pointer',
+      { 'border-dashed border-2 !border-accent-normal': isPreview },
       { 'animate-pulse': loading },
     ]"
   >
@@ -42,6 +43,7 @@
         >
           <div>
             <BaseInputCheckbox
+              v-if="!isPreview"
               class="text-center"
               v-model="isChecked"
               :item="{ id: itemId, teaserMetadata }"
@@ -59,20 +61,6 @@
                 :value="metadataItem.value"
                 :unit="metadataItem.unit"
               />
-              <!-- <template v-if="metadataItem">
-                <div class="flex items-center pl-4 mb-1">
-                  <div class="flex flex-col items-start w-full">
-                    <span class="text-sm text-text-light">
-                      {{ metadataItem.key }}
-                    </span>
-                    <span
-                      class="text-sm text-text-body w-[95%] overflow-hidden text-ellipsis"
-                    >
-                      {{ metadataItem.value }}
-                    </span>
-                  </div>
-                </div>
-              </template> -->
             </div>
           </div>
         </div>
@@ -82,10 +70,10 @@
 </template>
 
 <script lang="ts" setup>
-import EntityElementMetadata from "./EntityElementMetadata.vue";
 import type { Context } from "@/composables/useBulkOperations";
 import type { MetadataAndRelation } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
+import EntityElementMetadata from "./EntityElementMetadata.vue";
 import { computed, ref } from "vue";
 import { stringIsUrl } from "@/helpers";
 
@@ -99,6 +87,7 @@ const props = withDefaults(
     thumbIcon?: string;
     small?: boolean;
     isChecked?: boolean;
+    isPreview: boolean;
   }>(),
   {
     itemId: "",
@@ -108,6 +97,7 @@ const props = withDefaults(
     thumbIcon: "",
     small: false,
     isChecked: false,
+    isPreview: false,
   }
 );
 
