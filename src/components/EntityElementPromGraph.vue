@@ -6,7 +6,12 @@
   >
     <template v-slot:actions />
     <template v-slot:content>
-      <canvas class="bg-neutral-0" ref="canvasRef" id="chart"></canvas>
+      <canvas
+        v-if="!element.isCollapsed"
+        class="bg-neutral-0"
+        ref="canvasRef"
+        id="chart"
+      ></canvas>
     </template>
   </entity-element-wrapper>
 </template>
