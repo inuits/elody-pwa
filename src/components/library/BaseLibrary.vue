@@ -223,7 +223,7 @@ const bulkSelect = (items = entities.value) => {
 
   for (let entity of items)
     enqueueItemForBulkProcessing(props.bulkOperationsContext, {
-      id: entity.id,
+      id: entity.uuid,
       teaserMetadata: formatTeaserMetadata(
         entity.teaserMetadata,
         entity.intialValues
