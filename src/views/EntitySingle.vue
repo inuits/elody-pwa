@@ -43,6 +43,7 @@ import { useAuth } from "session-vue-3-oidc-library";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 const config: any = inject("config");
 const router = useRouter();
@@ -56,6 +57,7 @@ const { clearItemPreviews } = useViewModes();
 const { showEditToggle, disableEditMode, isEdit, setRefetchFn } = useEditMode();
 const { setCurrentRouteTitle, addVisitedRoute, currentRouteTitle } =
   useBreadcrumbs(config);
+const { getEditableMetadataKeys } = useFormHelper();
 
 const queryVariables = reactive<GetEntityByIdQueryVariables>({
   id: id,
@@ -96,6 +98,10 @@ watch(result, () => {
   intialValues.value = entity.intialValues;
   relationValues.value = entity.relationValues as RelationValues;
   columnList.value = entity.entityView;
+
+  if (typeof columnList.value !== "string") {
+    getEditableMetadataKeys(columnList.value, route.params.id as string);
+  }
 
   if (auth.isAuthenticated.value === true) showEditToggle("edit");
   setCurrentRouteTitle(entity.intialValues?.title);

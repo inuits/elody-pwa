@@ -1,4 +1,7 @@
 import type {
+  Column,
+  ColumnList,
+  EntityViewElements,
   IntialValues,
   PanelMetaData,
   RelationValues,
@@ -51,25 +54,44 @@ const useFormHelper = () => {
     forms.value = {};
   };
 
+  function findPanelMetadata(
+    obj: any,
+    parentIsEditable?: boolean
+  ): PanelMetaData[] {
+    const results: PanelMetaData[] = [];
+
+    if (obj && obj.__typename === "PanelMetaData") {
+      if (parentIsEditable !== false) {
+        results.push(obj);
+      }
+    }
+
+    if (typeof obj === "object") {
+      for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          const nestedResults = findPanelMetadata(obj[key], obj.isEditable);
+          results.push(...nestedResults);
+        }
+      }
+    }
+
+    return results;
+  }
+
   const getEditableMetadataKeys = (
-    windowElement: WindowElement,
+    columnList: Record<string, any>,
     formId: string
   ): string[] => {
-    const keys: string[] = [];
-    Object.keys(windowElement).forEach((key: string) => {
-      const panel: WindowElementPanel = windowElement[key];
-      if (!panel) return;
-      if (panel.__typename !== "WindowElementPanel" || !panel.isEditable)
-        return;
-      Object.keys(panel).forEach((metadataItemKey: string) => {
-        const metadataItem: PanelMetaData = panel[metadataItemKey];
-        if (!metadataItem || !metadataItem.inputField) return;
-        keys.push(metadataItem.key);
-      });
+    const keyArray: string[] = [];
+    const panelMetadataItems = findPanelMetadata(columnList);
+
+    panelMetadataItems.forEach((metadataItem: PanelMetaData) => {
+      if (!metadataItem.inputField) return;
+      keyArray.push(metadataItem.key);
     });
-    editableFields.value[formId] = keys;
-    console.log(editableFields.value);
-    return keys;
+    editableFields.value[formId] = keyArray;
+    console.log(keyArray);
+    return keyArray;
   };
 
   return {
