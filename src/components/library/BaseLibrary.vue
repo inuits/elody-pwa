@@ -4,53 +4,57 @@
       class="w-full"
       :class="parentEntityIdentifiers.length > 0 ? 'p-3' : 'px-6'"
     >
-      <div class="flex flex-row items-center gap-y-4">
-        <FiltersBase
-          v-if="filtersBaseInitializationStatus === 'initialized'"
-          v-show="enableAdvancedFilters"
-          class="lg:w-[46%]"
-          :filter-matcher-mapping="filterMatcherMapping"
-          :advanced-filters="advancedFilters"
-          :entity-type="filterType || entityType"
-          :parent-entity-identifiers="parentEntityIdentifiers"
-          :expandFilters="expandFilters"
-          @apply-filters="setAdvancedFilters"
-          @expand-filters="expandFilters = !expandFilters"
-        />
-        <div class="mr-2" :class="['flex', { 'ml-4': enableAdvancedFilters }]">
-          <BaseToggleGroup :toggles="toggles" />
+      <div class="sticky top-0 mb-2 pt-4 bg-neutral-lightest">
+        <div class="flex flex-row items-center gap-y-4">
+          <FiltersBase
+            v-if="filtersBaseInitializationStatus === 'initialized'"
+            v-show="enableAdvancedFilters"
+            class="lg:w-[46%]"
+            :filter-matcher-mapping="filterMatcherMapping"
+            :advanced-filters="advancedFilters"
+            :entity-type="filterType || entityType"
+            :parent-entity-identifiers="parentEntityIdentifiers"
+            :expandFilters="expandFilters"
+            @apply-filters="setAdvancedFilters"
+            @expand-filters="expandFilters = !expandFilters"
+          />
+          <div
+            class="mr-2"
+            :class="['flex', { 'ml-4': enableAdvancedFilters }]"
+          >
+            <BaseToggleGroup :toggles="toggles" />
+          </div>
+          <LibraryBar
+            v-if="
+              libraryBarInitializationStatus === 'initialized' &&
+              !predefinedEntities
+            "
+            :pagination-limit-options="paginationLimitOptions"
+            :sort-options="sortOptions"
+            :total-items="totalEntityCount || NaN"
+            :queryVariables="(queryVariables as GetEntitiesQueryVariables)"
+          />
         </div>
-        <LibraryBar
-          v-if="
-            libraryBarInitializationStatus === 'initialized' &&
-            !predefinedEntities
-          "
-          :pagination-limit-options="paginationLimitOptions"
-          :sort-options="sortOptions"
-          :total-items="totalEntityCount || NaN"
-          :queryVariables="(queryVariables as GetEntitiesQueryVariables)"
-        />
-      </div>
 
-      <div
-        v-if="enableBulkOperations && !displayPreview"
-        class="my-3"
-        :class="{ 'flex justify-end': expandFilters }"
-      >
-        <BulkOperationsActionsBar
-          :class="{ 'w-[69.75%]': expandFilters }"
-          :context="bulkOperationsContext"
-          :total-items-count="totalEntityCount"
-          :use-extended-bulk-operations="true"
-          :confirm-selection-button="confirmSelectionButton"
-          @select-page="bulkSelect"
-          @select-all="bulkSelect(allEntitiesResult.Entities.results)"
-          @confirm-selection="
-            (selection) => emit('confirmSelection', selection)
-          "
-        />
+        <div
+          v-if="enableBulkOperations && !displayPreview"
+          class="my-3"
+          :class="{ 'flex justify-end': expandFilters }"
+        >
+          <BulkOperationsActionsBar
+            :class="{ 'w-[69.75%]': expandFilters }"
+            :context="bulkOperationsContext"
+            :total-items-count="totalEntityCount"
+            :use-extended-bulk-operations="true"
+            :confirm-selection-button="confirmSelectionButton"
+            @select-page="bulkSelect"
+            @select-all="bulkSelect(allEntitiesResult.Entities.results)"
+            @confirm-selection="
+              (selection) => emit('confirmSelection', selection)
+            "
+          />
+        </div>
       </div>
-
       <div v-if="entities" :class="{ 'flex justify-end': expandFilters }">
         <div id="gridContainer" :class="[{ 'w-[69.75%]': expandFilters }]">
           <ViewModesList
