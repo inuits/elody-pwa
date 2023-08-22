@@ -84,7 +84,7 @@ const props = withDefaults(
     thumbIcon?: string;
     small?: boolean;
     isChecked?: boolean;
-    isPreview: boolean;
+    isPreview?: boolean;
   }>(),
   {
     itemId: "",
