@@ -1,6 +1,17 @@
 <template>
   <div class="grid grid_cols gap-2 justify-items-center">
     <GridItem
+      v-if="!disablePreviews"
+      v-for="item in getItemPreviews()"
+      :key="item.id + '_preview'"
+      :item-id="item.id"
+      :bulk-operations-context="bulkOperationsContext"
+      :teaser-metadata="item.teaserMetadata"
+      :thumb-icon="entitiesLoading ? undefined : getThumbnail(item)"
+      :small="listItemRouteName === 'SingleMediafile'"
+      :is-preview="true"
+    />
+    <GridItem
       v-for="entity in entities"
       :key="entity.id + '_grid'"
       :class="
@@ -32,8 +43,7 @@
           ? emit('goToEntityPage', entity)
           : undefined
       "
-    >
-    </GridItem>
+    />
   </div>
 </template>
 
@@ -44,6 +54,7 @@ import type { Entity } from "@/generated-types/queries";
 import GridItem from "@/components/GridItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
+import useViewModes from "@/composables/useViewModes";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { inject, onMounted, onUnmounted } from "vue";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
@@ -55,10 +66,12 @@ const props = withDefaults(
     entitiesLoading: boolean;
     bulkOperationsContext: Context;
     listItemRouteName: string;
+    disablePreviews?: boolean;
     enableNavigation?: boolean;
     parentEntityIdentifiers?: string[];
   }>(),
   {
+    disablePreviews: false,
     enableNavigation: true,
     parentEntityIdentifiers: () => [],
   }
@@ -76,6 +89,7 @@ const { mediafileSelectionState, updateSelectedEntityMediafile } =
   useEntityMediafileSelector();
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { getThumbnail } = useThumbnailHelper();
+const { getItemPreviews } = useViewModes();
 
 const calculateGridColumns = () => {
   const gridContainerWidth =

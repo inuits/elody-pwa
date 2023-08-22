@@ -32,6 +32,7 @@
         "
         :confirm-selection-button="true"
         :enable-navigation="false"
+        :disable-new-entity-previews="true"
         list-item-route-name="SingleEntity"
         @confirm-selection="(selectedItems) => addRelations(selectedItems)"
       />
@@ -55,6 +56,7 @@ import {
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
+import useViewModes from "@/composables/useViewModes";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useRoute } from "vue-router";
@@ -62,6 +64,7 @@ import { useRoute } from "vue-router";
 const { getAcceptedTypes } = useEntityPickerModal();
 const { getModal } = useAvailableModals();
 const { getForm } = useFormHelper();
+const { setItemPreviews } = useViewModes();
 
 const modal = getModal(TypeModals.EntityPicker);
 const route = useRoute();
@@ -71,6 +74,7 @@ const addRelations = (selectedItems: InBulkProcessableItem[]) => {
   const form = getForm(id);
   if (selectedItems.length <= 0 || !form) return;
 
+  setItemPreviews(selectedItems);
   const relations: BaseRelationValuesInput[] =
     form.values.relationValues.relations.filter(
       (relation: BaseRelationValuesInput) =>

@@ -59,6 +59,7 @@
             :entities-loading="entitiesLoading"
             :bulk-operations-context="bulkOperationsContext"
             :list-item-route-name="listItemRouteName"
+            :disable-previews="disableNewEntityPreviews"
             :enable-navigation="enableNavigation"
             :parent-entity-identifiers="parentEntityIdentifiers"
             @go-to-entity-page="(entity) => goToEntityPage(entity)"
@@ -70,6 +71,7 @@
             :entities-loading="entitiesLoading"
             :bulk-operations-context="bulkOperationsContext"
             :list-item-route-name="listItemRouteName"
+            :disable-previews="disableNewEntityPreviews"
             :enable-navigation="enableNavigation"
             :parent-entity-identifiers="parentEntityIdentifiers"
             @go-to-entity-page="(entity) => goToEntityPage(entity)"
@@ -137,6 +139,7 @@ const props = withDefaults(
     parentEntityIdentifiers?: string[];
     confirmSelectionButton?: boolean;
     enableNavigation?: boolean;
+    disableNewEntityPreviews?: boolean;
   }>(),
   {
     predefinedEntities: undefined,
@@ -148,6 +151,7 @@ const props = withDefaults(
     parentEntityIdentifiers: () => [],
     confirmSelectionButton: false,
     enableNavigation: true,
+    disableNewEntityPreviews: false,
   }
 );
 
