@@ -90,7 +90,6 @@ const useFormHelper = () => {
       keyArray.push(metadataItem.key);
     });
     editableFields.value[formId] = keyArray;
-    console.log(keyArray);
     return keyArray;
   };
 
