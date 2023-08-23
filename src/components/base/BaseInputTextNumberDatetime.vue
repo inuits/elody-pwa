@@ -4,6 +4,7 @@
       {{ label }}
     </span>
     <input
+      v-if="type !== 'textarea'"
       class="w-full h-full border rounded-lg focus:ring-0"
       :class="[
         `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
@@ -16,6 +17,19 @@
       @change.stop
       @click.stop
     />
+    <textarea
+      v-else
+      class="w-full h-full border rounded-lg focus:ring-0"
+      :class="[
+        `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
+        `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
+      ]"
+      v-model="inputValue"
+      :disabled="disabled"
+      @change.stop
+      @click.stop
+      rows="3"
+    ></textarea>
   </label>
 </template>
 
@@ -66,7 +80,7 @@ const props = withDefaults(
     modelValue: string | number | undefined;
     inputStyle: InputStyle;
     label?: string;
-    type?: "text" | "number" | "datetime-local";
+    type?: string;
     step?: number;
     disabled?: boolean;
     isValidPredicate?: Function;
