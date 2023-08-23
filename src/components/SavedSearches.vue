@@ -91,12 +91,6 @@
     </base-context-menu>
   </div>
 
-  <ConfirmationModal
-    v-show="confirmState === 'show'"
-    v-model:confirmState="confirmState"
-    :function="deleteSavedSearch"
-  />
-
   <create-saved-search-modal
     @refetchSavedSearches="refetchSavedSearches"
     :initialFilters="initialFilters"
@@ -104,7 +98,6 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
 import { Unicons } from "@/types";
 import { useMutation } from "@vue/apollo-composable";
 import {
@@ -122,7 +115,6 @@ import type {
 } from "@/generated-types/queries";
 import { useSavedSearchHelper } from "../composables/useSavedSearchHelper";
 import CreateSavedSearchModal from "@/components/CreateSavedSearchModal.vue";
-import ConfirmationModal from "@/components/base/ConfirmationModal.vue";
 import BaseContextMenu from "./base/BaseContextMenu.vue";
 import BaseContextMenuItem from "./base/BaseContextMenuItem.vue";
 import type { FilterInList } from "@/composables/useFilterHelper";
@@ -192,10 +184,9 @@ const deleteSavedSearch = () => {
     emit("removedSelectedSearch");
   });
 };
-const confirmState = ref<"hidden" | "show">("hidden");
 
 const showConfirmation = () => {
-  confirmState.value = confirmState.value === "show" ? "hidden" : "show";
+  // TODO:
 };
 
 const pick = (savedSearch: any) => {

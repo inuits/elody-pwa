@@ -67,8 +67,6 @@ export const useNotification = () => {
 
 export default defineComponent({
   name: "BaseNotification",
-  components: {},
-  props: {},
   setup() {
     const { notification } = useNotification();
     const typeColors = {

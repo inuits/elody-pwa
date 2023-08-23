@@ -20,11 +20,6 @@
     txt-color="neutral-0"
     @click="showConfirmation()"
   />
-  <ConfirmationModal
-    v-show="confirmState === 'show'"
-    v-model:confirmState="confirmState"
-    :function="deleteAsset"
-  />
 </template>
 
 <script lang="ts">
@@ -38,13 +33,12 @@ import { asString } from "../helpers";
 import { useMutation } from "@vue/apollo-composable";
 import { DeleteDataDocument, Collection } from "../generated-types/queries";
 import type { DeleteDataMutation } from "../generated-types/queries";
-import ConfirmationModal from "./base/ConfirmationModal.vue";
 import useEditMode from "../composables/useEdit";
 import { usePageInfo } from "../composables/usePageInfo";
 
 export default defineComponent({
   name: "EditToggle",
-  components: { IconToggle, BaseButton, ConfirmationModal },
+  components: { IconToggle, BaseButton },
   setup() {
     const toggleBoolean = ref<boolean>(false);
     const {
@@ -90,10 +84,9 @@ export default defineComponent({
       disableEditMode();
       router.push({ name: pageInfo.value.parentRouteName });
     };
-    const confirmState = ref<"hidden" | "show">("hidden");
 
     const showConfirmation = () => {
-      confirmState.value = confirmState.value === "show" ? "hidden" : "show";
+      // TODO:
     };
 
     return {
@@ -102,7 +95,6 @@ export default defineComponent({
       isSingle,
       editMode,
       deleteAsset,
-      confirmState,
       toggleBoolean,
       showConfirmation,
       isEditToggleVisible,
