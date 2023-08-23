@@ -1,7 +1,7 @@
 <template>
   <li
     :class="[
-      'w-full h-auto align-middle border border-neutral-light rounded cursor-pointer list-none',
+      'w-full align-middle border border-neutral-light rounded cursor-pointer list-none',
       { 'border-dashed border-2 !border-accent-normal': isPreview },
       { 'animate-pulse': loading },
     ]"
@@ -10,14 +10,14 @@
       <slot name="actions"></slot>
     </div>
     <div
-      class="flex items-center w-full"
+      class="flex items-center w-full h-full"
       :class="{ 'flex-col': small && !thumbIcon }"
     >
-      <div class="w-full">
-        <div class="flex justify-center items-center">
+      <div class="w-full h-full">
+        <div class="h-[50%] flex justify-center items-center">
           <img
             v-if="media"
-            class="h-48 w-48 object-cover"
+            class="h-full w-48 object-cover"
             :src="
               mediaIsLink
                 ? media
@@ -39,7 +39,7 @@
         </div>
 
         <div
-          class="flex items-center w-full mt-12 p-4 pb-3 border-t-2 border-neutral-20 rounded-b bg-neutral-white"
+          class="flex items-center w-full p-4 border-t-2 border-neutral-20 rounded-b bg-neutral-white h-[50%]"
         >
           <div>
             <BaseInputCheckbox
