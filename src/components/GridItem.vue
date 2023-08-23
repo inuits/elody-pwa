@@ -1,7 +1,7 @@
 <template>
   <li
     :class="[
-      'w-full h-auto align-middle border border-neutral-light rounded cursor-pointer',
+      'w-full h-auto align-middle border border-neutral-light rounded cursor-pointer list-none',
       { 'border-dashed border-2 !border-accent-normal': isPreview },
       { 'animate-pulse': loading },
     ]"
