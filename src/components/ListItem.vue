@@ -2,7 +2,12 @@
   <li
     :class="[
       'flex items-center gap-6 mb-2 px-8 py-4 bg-neutral-white border border-neutral-light rounded cursor-pointer',
-      { 'border-dashed border-2 !border-accent-normal': isPreview },
+      {
+        'border-dashed border-2 !border-accent-normal':
+          isPreview || isMarkedAsToBeDeleted,
+      },
+      { '!border-status-new': isPreview },
+      { '!border-status-deleted': isMarkedAsToBeDeleted },
       { 'animate-pulse': loading },
     ]"
   >
@@ -54,6 +59,15 @@
       <div class="bg-neutral-100 h-4 w-5/6 opacity-40"></div>
     </div>
 
+    <div v-if="isEdit && isMarkableAsToBeDeleted && !isPreview" @click.stop>
+      <BaseToggle
+        v-model="isMarkedAsToBeDeleted"
+        :icon-on="DamsIcons.CrossCircle"
+        :icon-off="DamsIcons.Trash"
+        :icon-height="22"
+      />
+    </div>
+
     <div v-if="!isPreview" class="flex flex-row">
       <slot>
         <unicon
@@ -67,10 +81,17 @@
 
 <script lang="ts" setup>
 import type { Context } from "@/composables/useBulkOperations";
-import type { Metadata } from "@/generated-types/queries";
+import {
+  DamsIcons,
+  EditStatus,
+  type BaseRelationValuesInput,
+  type Metadata,
+} from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
-import EntityElementMetadata from "./EntityElementMetadata.vue";
-import { computed, ref } from "vue";
+import BaseToggle from "@/components/base/BaseToggle.vue";
+import EntityElementMetadata from "@/components/EntityElementMetadata.vue";
+import useEditMode from "@/composables/useEdit";
+import { computed, ref, watch } from "vue";
 import { stringIsUrl } from "@/helpers";
 import { Unicons } from "@/types";
 
@@ -85,6 +106,8 @@ const props = withDefaults(
     small?: boolean;
     isChecked?: boolean;
     isPreview?: boolean;
+    isMarkableAsToBeDeleted?: boolean;
+    relation?: BaseRelationValuesInput;
   }>(),
   {
     itemId: "",
@@ -95,9 +118,12 @@ const props = withDefaults(
     small: false,
     isChecked: false,
     isPreview: false,
+    isMarkableAsToBeDeleted: false,
   }
 );
 
+const { isEdit } = useEditMode();
+const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
 
@@ -106,4 +132,15 @@ const setNoImage = () => {
 };
 
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
+
+if (props.relation && props.isMarkableAsToBeDeleted && !props.isPreview)
+  watch(
+    () => isMarkedAsToBeDeleted.value,
+    () => {
+      if (props.relation)
+        if (isMarkedAsToBeDeleted.value)
+          props.relation.editStatus = EditStatus.Deleted;
+        else props.relation.editStatus = EditStatus.Unchanged;
+    }
+  );
 </script>

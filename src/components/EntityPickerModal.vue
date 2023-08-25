@@ -56,7 +56,6 @@ import {
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import useViewModes from "@/composables/useViewModes";
 import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useRoute } from "vue-router";
@@ -64,7 +63,6 @@ import { useRoute } from "vue-router";
 const { getAcceptedTypes } = useEntityPickerModal();
 const { getModal } = useAvailableModals();
 const { getForm } = useFormHelper();
-const { setItemPreviews } = useViewModes();
 
 const modal = getModal(TypeModals.EntityPicker);
 const route = useRoute();
@@ -74,7 +72,6 @@ const addRelations = (selectedItems: InBulkProcessableItem[]) => {
   const form = getForm(id);
   if (selectedItems.length <= 0 || !form) return;
 
-  setItemPreviews(selectedItems);
   const relations: BaseRelationValuesInput[] =
     form.values.relationValues.relations.filter(
       (relation: BaseRelationValuesInput) =>
@@ -93,6 +90,13 @@ const addRelations = (selectedItems: InBulkProcessableItem[]) => {
           : form.values.relationValues.type,
       value: item.teaserMetadata?.find((data) => data.key === "name")?.value,
       editStatus: EditStatus.New,
+      teaserMetadata: item.teaserMetadata?.map((metadata) => {
+        return {
+          key: metadata.key,
+          label: metadata.label,
+          value: metadata.value,
+        };
+      }),
     });
   });
 

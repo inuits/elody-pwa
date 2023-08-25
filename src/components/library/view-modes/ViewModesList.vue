@@ -1,15 +1,27 @@
 <template>
-  <ListItem
+  <div
     v-if="!disablePreviews"
-    v-for="item in getItemPreviews()"
-    :key="item.id + '_preview'"
-    :item-id="item.id"
-    :bulk-operations-context="bulkOperationsContext"
-    :teaser-metadata="item.teaserMetadata"
-    :thumb-icon="entitiesLoading ? undefined : getThumbnail(item)"
-    :small="listItemRouteName === 'SingleMediafile'"
-    :is-preview="true"
-  />
+    v-for="item in relations?.filter(
+      (relation) => relation.editStatus === EditStatus.New
+    )"
+  >
+    <ListItem
+      :key="item.key + '_preview'"
+      :item-id="item.key"
+      :bulk-operations-context="bulkOperationsContext"
+      :teaser-metadata="item.teaserMetadata"
+      :thumb-icon="entitiesLoading ? undefined : getThumbnail(item)"
+      :small="listItemRouteName === 'SingleMediafile'"
+      :is-preview="true"
+      :is-markable-as-to-be-deleted="parentEntityIdentifiers.length > 0"
+      :relation="
+        relations?.find(
+          (relation) =>
+            relation.key === item.key && relation.type === relationType
+        )
+      "
+    />
+  </div>
   <ListItem
     v-for="entity in entities"
     :key="entity.id + '_list'"
@@ -29,6 +41,13 @@
     :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
     :small="listItemRouteName === 'SingleMediafile'"
     :loading="entitiesLoading"
+    :is-markable-as-to-be-deleted="parentEntityIdentifiers.length > 0"
+    :relation="
+      relations?.find(
+        (relation) =>
+          relation.key === entity.id && relation.type === relationType
+      )
+    "
     @click="
       entitiesLoading || !enableNavigation
         ? !enableNavigation &&
@@ -49,15 +68,21 @@
 <script lang="ts" setup>
 import type { ApolloClient } from "@apollo/client/core";
 import type { Context } from "@/composables/useBulkOperations";
-import type { Entity } from "@/generated-types/queries";
+import {
+  EditStatus,
+  type BaseRelationValuesInput,
+  type Entity,
+} from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
-import useViewModes from "@/composables/useViewModes";
+import { asString } from "@/helpers";
+import { computed, inject } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
-import { inject } from "vue";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
+import { useFormHelper } from "@/composables/useFormHelper";
+import { useRoute } from "vue-router";
 
 withDefaults(
   defineProps<{
@@ -88,7 +113,13 @@ const { mediafileSelectionState, updateSelectedEntityMediafile } =
   useEntityMediafileSelector();
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { getThumbnail } = useThumbnailHelper();
-const { getItemPreviews } = useViewModes();
-</script>
+const { getForm } = useFormHelper();
 
-<style></style>
+const entityId = computed<string>(() => asString(useRoute().params["id"]));
+const relations = computed<BaseRelationValuesInput[]>(
+  () => getForm(entityId.value)?.values.relationValues.relations
+);
+const relationType = computed<string>(
+  () => getForm(entityId.value)?.values.relationValues.type
+);
+</script>

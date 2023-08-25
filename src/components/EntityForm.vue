@@ -5,6 +5,7 @@ import {
   EditStatus,
   MutateEntityValuesDocument,
   type BaseRelationValuesInput,
+  type Entity,
   type IntialValues,
   type MetadataValuesInput,
   type MutateEntityValuesMutation,
@@ -15,7 +16,6 @@ import {
   BulkOperationsContextEnum,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
-import useViewModes from "@/composables/useViewModes";
 import { asString } from "@/helpers";
 import { computed, onMounted, onUnmounted, watch } from "vue";
 import { useEditMode } from "@/composables/useEdit";
@@ -31,8 +31,7 @@ const props = defineProps<{
 
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const { isEdit, addSaveCallback, refetchFn } = useEditMode();
-const { getForm, createForm, editableFields } = useFormHelper();
-const { clearItemPreviews } = useViewModes();
+const { createForm, editableFields } = useFormHelper();
 const entityId = computed(() => asString(useRoute().params["id"]));
 
 const { mutate } = useMutation<
@@ -40,12 +39,11 @@ const { mutate } = useMutation<
   MutateEntityValuesMutationVariables
 >(MutateEntityValuesDocument);
 
-const form =
-  getForm(entityId.value) ||
-  createForm(entityId.value, {
-    intialValues: props.intialValues,
-    relationValues: props.relationValues,
-  });
+let form = createForm(entityId.value, {
+  intialValues: props.intialValues,
+  relationValues: props.relationValues,
+});
+let mutatedEntity: Entity | undefined;
 
 const { setValues } = form;
 
@@ -83,12 +81,11 @@ const submit = useSubmitForm<EntityValues>(async () => {
   });
 
   if (!result?.data?.mutateEntityValues) return;
-  const entity = result.data.mutateEntityValues;
+  mutatedEntity = result.data.mutateEntityValues as Entity;
   setValues({
-    intialValues: entity.intialValues,
-    relationValues: entity.relationValues,
+    intialValues: mutatedEntity.intialValues,
+    relationValues: mutatedEntity.relationValues,
   });
-  clearItemPreviews();
 });
 
 const callRefetchFn = () => {
@@ -109,6 +106,10 @@ watch(isEdit, () => {
   dequeueAllItemsForBulkProcessing(
     BulkOperationsContextEnum.EntityElementMediaEntityPickerModal
   );
-  clearItemPreviews();
+  form = createForm(entityId.value, {
+    intialValues: mutatedEntity?.intialValues || props.intialValues,
+    relationValues: mutatedEntity?.relationValues || props.relationValues,
+  });
+  mutatedEntity = undefined;
 });
 </script>
