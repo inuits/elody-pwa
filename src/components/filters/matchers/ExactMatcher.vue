@@ -98,7 +98,11 @@ const {
 } = useQuery<GetFilterOptionsQuery>(
   GetFilterOptionsDocument,
   autocompleteOptionsQueryVariables,
-  () => ({ enabled: refetchAutocompleteOptionsEnabled.value })
+  () => ({
+    enabled: refetchAutocompleteOptionsEnabled.value,
+    notifyOnNetworkStatusChange: true,
+    fetchPolicy: "no-cache",
+  })
 );
 
 const autocompleteOptions = ref<string[]>([]);
