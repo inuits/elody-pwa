@@ -6,11 +6,16 @@ import {
 } from "@/generated-types/queries";
 import useDropzoneHelper from "@/composables/useDropzoneHelper";
 
+export type ConfirmationSettings = {
+  askConfirm: boolean;
+  confirmTranslationKey: string;
+};
+
 export type ModalInfo = {
   state: ModalState;
   destination?: string;
   modalTabToOpen?: ModalChoices;
-  askForCloseConfirmation?: boolean;
+  closeConfirmation?: ConfirmationSettings | undefined;
 };
 
 const openModals = ref<{ [key: string]: ModalInfo }>({});
@@ -18,7 +23,6 @@ const modalToCloseAfterConfirm = ref<TypeModals | undefined>(undefined);
 
 const initialModalInfo: ModalInfo = {
   state: ModalState.Initial,
-  askForCloseConfirmation: false,
 };
 
 export const useBaseModal = () => {
@@ -58,23 +62,26 @@ export const useBaseModal = () => {
     if (!openModals.value[modalType])
       throw new Error(`No open modals of type ${modalType} yet`);
 
-    if (openModals.value[modalType].askForCloseConfirmation) {
+    if (openModals.value[modalType].closeConfirmation?.askConfirm) {
       openModal(TypeModals.Confirm);
     } else {
       openModals.value[modalType].state = ModalState.Hide;
     }
   };
 
-  const changeCloseConfirmation = (modalType: TypeModals, value: boolean) => {
+  const changeCloseConfirmation = (
+    modalType: TypeModals,
+    value: ConfirmationSettings | undefined
+  ) => {
     if (!openModals.value[modalType])
       throw new Error(`No open modals of type ${modalType} yet`);
-    openModals.value[modalType].askForCloseConfirmation = value;
+    openModals.value[modalType].closeConfirmation = value;
   };
 
   const confirmClose = () => {
     if (!modalToCloseAfterConfirm.value)
       throw new Error("Modal to close after confirm has not been defined");
-    changeCloseConfirmation(modalToCloseAfterConfirm.value, false);
+    changeCloseConfirmation(modalToCloseAfterConfirm.value, undefined);
     closeModal(TypeModals.Confirm);
     closeModal(modalToCloseAfterConfirm.value);
     modalToCloseAfterConfirm.value = undefined;

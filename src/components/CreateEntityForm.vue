@@ -170,9 +170,12 @@ watch(
   () => {
     if (formContainsValues.value) {
       modalToCloseAfterConfirm.value = TypeModals.Create;
-      changeCloseConfirmation(TypeModals.Create, true);
+      changeCloseConfirmation(TypeModals.Create, {
+        askConfirm: true,
+        confirmTranslationKey: "discard-create",
+      });
     } else {
-      changeCloseConfirmation(TypeModals.Create, false);
+      changeCloseConfirmation(TypeModals.Create, undefined);
     }
   }
 );

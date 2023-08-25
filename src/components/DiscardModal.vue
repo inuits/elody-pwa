@@ -1,11 +1,11 @@
 <template>
-  <div class="h-full flex flex-col justify-between p-4">
-    <div class="text-xl">{{ t("confirm.discard-create") }}</div>
+  <div v-if="translationKey" class="h-full flex flex-col justify-between p-4">
+    <div class="text-xl">{{ t(`confirm.${translationKey}.message`) }}</div>
     <div class="flex justify-between">
       <div>
         <div>
           <BaseButtonNew
-            :label="t('discard')"
+            :label="t(`confirm.${translationKey}.discard`)"
             :icon="DamsIcons.Trash"
             button-style="redDefault"
             button-size="small"
@@ -15,7 +15,7 @@
       </div>
       <div>
         <BaseButtonNew
-          :label="t('cancel')"
+          :label="t(`confirm.${translationKey}.cancel`)"
           button-style="default"
           button-size="small"
           @click="declineClose"
@@ -30,7 +30,15 @@ import { useI18n } from "vue-i18n";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { DamsIcons } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { computed } from "vue";
 
 const { t } = useI18n();
-const { confirmClose, declineClose } = useBaseModal();
+const { confirmClose, declineClose, getModalInfo, modalToCloseAfterConfirm } =
+  useBaseModal();
+
+const translationKey = computed(() => {
+  if (!modalToCloseAfterConfirm.value) return "";
+  return getModalInfo(modalToCloseAfterConfirm.value).closeConfirmation
+    ?.confirmTranslationKey;
+});
 </script>
