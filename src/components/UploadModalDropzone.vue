@@ -64,7 +64,7 @@ import DropzoneNew from "@/components/base/dropzone/DropzoneNew.vue";
 import useDropzoneHelper from "@/composables/useDropzoneHelper";
 import useUploadModalDropzone from "@/composables/useUploadModalDropzone";
 import { ref, watch } from "vue";
-import { useAvailableModals } from "@/composables/useAvailableModals";
+import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
@@ -87,8 +87,8 @@ const {
 const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
 const { setUploadStatus } = useUploadModalDropzone();
-const { getModal } = useAvailableModals();
-const modal = getModal(TypeModals.Upload);
+const { createModal, closeModal, getModalInfo } = useBaseModal();
+createModal(TypeModals.Upload);
 
 const createEntity = ref<boolean>(true);
 const entityToCreateOptions = ref<DropdownOption[]>(
@@ -237,7 +237,7 @@ const callUploadEndpoint = async (uploadRequestData: UploadRequestData) => {
                 t("dropzone.successNotification.description")
               );
               setUploadStatus("success");
-              modal.closeModal();
+              closeModal(TypeModals.Upload);
             }
           })
           .catch(async (response: Response) =>
@@ -260,7 +260,7 @@ const exceptionHandler = (
 
 const handleCheckOptionEvent = () => (createEntity.value = !createEntity.value);
 watch(
-  () => modal.modalState.value.state,
+  () => getModalInfo(TypeModals.Upload).state,
   () => {
     createEntity.value = true;
     selectedImportMethod.value = undefined;

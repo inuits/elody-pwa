@@ -15,7 +15,7 @@
           @click="
             () => {
               setAcceptedTypes([Entitytyping.Mediafile]);
-              modal.openModal();
+              openModal(TypeModals.EntityPicker);
             }
           "
         >
@@ -86,7 +86,7 @@ import { asString, getValueForPanelMetadata } from "@/helpers";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import { computed } from "vue";
 import { Unicons } from "@/types";
-import { useAvailableModals } from "@/composables/useAvailableModals";
+import { useBaseModal } from "@/composables/useBaseModal";
 import { useRoute } from "vue-router";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useI18n } from "vue-i18n";
@@ -100,10 +100,10 @@ const { t } = useI18n();
 const { mediafileSelectionState } = useEntityMediafileSelector();
 const { setAcceptedTypes } = useEntityPickerModal();
 const { getEntityUuid } = useEntitySingle();
-const { getModal } = useAvailableModals();
+const { createModal, openModal } = useBaseModal();
 const { isEdit } = useEditMode();
 
-const modal = getModal(TypeModals.EntityPicker);
+createModal(TypeModals.EntityPicker);
 const entityId = computed(
   () => getEntityUuid() || asString(useRoute().params["id"])
 );

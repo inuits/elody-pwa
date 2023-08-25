@@ -1,6 +1,5 @@
 import { assert, expect, test } from "vitest";
 import { type MenuItem, MenuLinkType } from "@/generated-types/queries";
-import { useAvailableModals } from "@/composables/useAvailableModals";
 import useUploadModal, { modalChoices } from "@/composables/useUploadModal";
 import { useMenuHelper } from "@/composables/useMenuHelper";
 import { useRouter } from "vue-router";

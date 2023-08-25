@@ -1,16 +1,13 @@
 <template>
   <BaseModal
-    :modal-state="modal.modalState.value.state"
+    :modal-state="getModalInfo(TypeModals.EntityPicker).state"
     modal-position="right"
     modal-width-style="w-10/12"
-    @hide-modal="modal.closeModal()"
+    @hide-modal="closeModal(TypeModals.EntityPicker)"
   >
     <div class="flex flex-col w-full h-full overflow-auto py-6">
       <BaseLibrary
-        v-if="
-          getModal(TypeModals.EntityPicker).modalState.value.state ===
-          ModalState.Show
-        "
+        v-if="getModalInfo(TypeModals.EntityPicker).state === ModalState.Show"
         :bulk-operations-context="
           getAcceptedTypes().length > 0
             ? getAcceptedTypes()[0] !== Entitytyping.Mediafile
@@ -56,15 +53,16 @@ import {
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import { useAvailableModals } from "@/composables/useAvailableModals";
+import useViewModes from "@/composables/useViewModes";
+import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useRoute } from "vue-router";
 
 const { getAcceptedTypes } = useEntityPickerModal();
-const { getModal } = useAvailableModals();
+const { createModal, closeModal, getModalInfo } = useBaseModal();
 const { getForm } = useFormHelper();
 
-const modal = getModal(TypeModals.EntityPicker);
+createModal(TypeModals.EntityPicker);
 const route = useRoute();
 
 const addRelations = (selectedItems: InBulkProcessableItem[]) => {
@@ -101,6 +99,6 @@ const addRelations = (selectedItems: InBulkProcessableItem[]) => {
   });
 
   form.setFieldValue("relationValues.relations", relations);
-  modal.closeModal();
+  closeModal(TypeModals.EntityPicker);
 };
 </script>

@@ -55,7 +55,7 @@ import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import BasePaginationNew from "@/components/base/BasePaginationNew.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
 import { onMounted, ref, toRefs, watch } from "vue";
-import { useAvailableModals } from "@/composables/useAvailableModals";
+import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
@@ -66,7 +66,7 @@ const props = defineProps<{
 }>();
 
 const { paginationLimitOptions, sortOptions, queryVariables } = toRefs(props);
-const { getModal } = useAvailableModals();
+const { getModalInfo } = useBaseModal();
 const { t } = useI18n();
 const skip = ref<number>(1);
 const isAsc = ref<boolean>(false);
@@ -105,12 +105,9 @@ watch(skip, () => {
   if (queryVariables.value) queryVariables.value.skip = skip.value;
 });
 watch(
-  () => getModal(TypeModals.BulkOperations).modalState.value.state,
-  () => {
-    if (
-      getModal(TypeModals.BulkOperations).modalState.value.state ===
-      ModalState.Hide
-    ) {
+  () => getModalInfo(TypeModals.BulkOperations).state,
+  (bulkOperationsModalState: ModalState) => {
+    if (bulkOperationsModalState === ModalState.Hide) {
       setDefaultOptions();
       if (queryVariables.value) queryVariables.value.skip = 1;
     }

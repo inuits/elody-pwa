@@ -54,39 +54,51 @@ import urlSlug from "url-slug";
 import { computed, ref, watch } from "vue";
 import { getMetadataFields } from "@/helpers";
 import { NotificationType } from "@/components/base/BaseNotification.vue";
-import { useAvailableModals } from "@/composables/useAvailableModals";
-import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import { useNotification } from "@/components/base/BaseNotification.vue";
 import { useRouter } from "vue-router";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 const props = defineProps<{
   entityType: Entitytyping;
 }>();
 
 const { t } = useI18n();
-const { setEditMode } = useEditMode();
 const { createNotification } = useNotification();
 const { createForm } = useFormHelper();
-const { getModal } = useAvailableModals();
-const modal = getModal(TypeModals.Create);
+const {
+  createModal,
+  changeCloseConfirmation,
+  closeModal,
+  modalToCloseAfterConfirm,
+} = useBaseModal();
+createModal(TypeModals.Create);
 const router = useRouter();
 
-let form: FormContext<any>;
+const form = ref<FormContext<any>>();
 const formFields = ref<PanelMetaData[]>([]);
 const idPrefix = ref<string>("");
+
+const isNotEmpty = (str: any) => str.trim() !== "";
 
 const type = computed(() => props.entityType);
 const id = computed(
   () =>
-    `${idPrefix.value}${urlSlug(form.values.intialValues["alternate_name"])}`
+    `${idPrefix.value}${urlSlug(
+      form.value?.values.intialValues["alternate_name"]
+    )}`
 );
 const cannotCreate = computed(() => {
-  if (!form) return true;
-  const values = Object.values(form.values.intialValues);
+  if (!form.value) return true;
+  const values = Object.values(form.value?.values.intialValues);
   return values.length <= 0 || values.includes("");
+});
+const formContainsValues = computed(() => {
+  if (!form.value) return false;
+  const values = Object.values(form.value?.values.intialValues);
+  return values.some(isNotEmpty);
 });
 
 const { mutate } = useMutation<CreateEntityMutation>(CreateEntityDocument);
@@ -108,29 +120,32 @@ onResult((result) => {
     if (!field.key) return;
     intialValues[field.key] = "";
   });
-  form = createForm("createEntity", {
+  form.value = createForm("createEntity", {
     intialValues,
     relationValues: { label: "", relations: [] },
   });
+  console.log(form.value);
 });
 
 const create = async () => {
   const createResult = await mutate({
     data: {
       id: id.value,
-      identifiers: [id.value, form.values.intialValues["alternate_name"]],
-      metadata: Object.keys(form.values.intialValues)
+      identifiers: [
+        id.value,
+        form.value?.values.intialValues["alternate_name"],
+      ],
+      metadata: Object.keys(form.value?.values.intialValues)
         .filter((key) => key !== "__typename")
         .map((key) => {
-          return { key, value: form.values.intialValues[key] };
+          return { key, value: form.value?.values.intialValues[key] };
         }),
       type: props.entityType,
     },
   });
 
   if (createResult && createResult.data?.createEntity?.id) {
-    setEditMode();
-    modal.closeModal();
+    closeModal(TypeModals.Create);
     createNotification({
       displayTime: 10,
       type: NotificationType.default,
@@ -148,5 +163,17 @@ const create = async () => {
 watch(
   () => type.value,
   () => refetch()
+);
+
+watch(
+  () => formContainsValues.value,
+  () => {
+    if (formContainsValues.value) {
+      modalToCloseAfterConfirm.value = TypeModals.Create;
+      changeCloseConfirmation(TypeModals.Create, true);
+    } else {
+      changeCloseConfirmation(TypeModals.Create, false);
+    }
+  }
 );
 </script>

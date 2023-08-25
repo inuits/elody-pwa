@@ -7,7 +7,7 @@
         :show-delete-button="true"
         @submit="save()"
         @cancel="discard()"
-        @delete="() => modal.openModal()"
+        @delete="() => openModal(TypeModals.Confirm)"
       />
     </div>
 
@@ -48,7 +48,7 @@
                 :label="$t('bulk-operations.cancel')"
                 button-style="default"
                 button-size="small"
-                @click="modal.closeModal()"
+                @click="closeModal(TypeModals.Confirm)"
               />
             </div>
           </div>
@@ -69,7 +69,7 @@
                 :label="$t('bulk-operations.cancel')"
                 button-style="default"
                 button-size="small"
-                @click="modal.closeModal()"
+                @click="closeModal(TypeModals.Confirm)"
               />
             </div>
           </div>
@@ -91,7 +91,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
 import ConfirmModal from "@/components/base/ConfirmModal.vue";
 import { asString } from "@/helpers";
-import { useAvailableModals } from "@/composables/useAvailableModals";
+import { useBaseModal } from "@/composables/useBaseModal";
 import { useEditMode } from "@/composables/useEdit";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useMutation } from "@vue/apollo-composable";
@@ -102,7 +102,7 @@ const route = useRoute();
 const router = useRouter();
 const { pageInfo } = usePageInfo();
 const { isEdit, save, discard, disableEditMode } = useEditMode();
-const { getModal } = useAvailableModals();
+const { createModal, closeModal, openModal } = useBaseModal();
 const { mediafileSelectionState } = useEntityMediafileSelector();
 
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
@@ -110,10 +110,10 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
   const id = asString(route.params["id"]);
   const collection: Collection = pageInfo.value.routeType as Collection;
   await mutate({ id, path: collection, deleteMediafiles });
-  modal.closeModal();
+  closeModal(TypeModals.Confirm);
   disableEditMode();
   router.push({ name: pageInfo.value.parentRouteName });
 };
 
-const modal = getModal(TypeModals.Confirm);
+createModal(TypeModals.Confirm);
 </script>
