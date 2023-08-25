@@ -36,9 +36,8 @@ import {
 import EntityColumn from "@/components/EntityColumn.vue";
 import EntityForm from "@/components/EntityForm.vue";
 import useEditMode from "@/composables/useEdit";
-import useViewModes from "@/composables/useViewModes";
 import { asString } from "@/helpers";
-import { reactive, ref, watch, inject, onMounted } from "vue";
+import { reactive, ref, watch, inject } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useQuery } from "@vue/apollo-composable";
@@ -53,7 +52,6 @@ const auth = useAuth();
 const id = asString(route.params["id"]);
 const identifiers = ref<string[]>([]);
 const loading = ref<boolean>(true);
-const { clearItemPreviews } = useViewModes();
 const { showEditToggle, disableEditMode, isEdit, setRefetchFn } = useEditMode();
 const { setCurrentRouteTitle, addVisitedRoute, currentRouteTitle } =
   useBreadcrumbs(config);
@@ -87,8 +85,6 @@ onBeforeRouteUpdate(async (to: any) => {
   columnList.value = "no-values";
   disableEditMode();
 });
-
-onMounted(() => clearItemPreviews());
 
 watch(result, () => {
   const entity: BaseEntity = result.value?.Entity as BaseEntity;

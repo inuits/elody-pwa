@@ -1,12 +1,7 @@
 import type {
-  Column,
-  ColumnList,
-  EntityViewElements,
   IntialValues,
   PanelMetaData,
   RelationValues,
-  WindowElement,
-  WindowElementPanel,
 } from "@/generated-types/queries";
 import { useForm, type FormContext } from "vee-validate";
 import { ref } from "vue";

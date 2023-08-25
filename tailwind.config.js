@@ -28,6 +28,10 @@ module.exports = {
       background: {
         frosted: "rgba(220, 244, 249, 0.25)",
       },
+      status: {
+        new: "#6BC6B3",
+        deleted: "#9b0000",
+      },
       neutral: {
         0: "#FFFFFF",
         10: "#FAFBFC",
