@@ -114,7 +114,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import { bulkSelectAllSizeLimit } from "@/main";
 import { computed, onMounted, ref, watch } from "vue";
-import { useAvailableModals } from "@/composables/useAvailableModals";
+import { useBaseModal } from "@/composables/useBaseModal";
 import { useBulkOperations } from "@/composables/useBulkOperations";
 import { useQuery } from "@vue/apollo-composable";
 
@@ -150,7 +150,7 @@ const {
   getEnqueuedItems,
   dequeueAllItemsForBulkProcessing,
 } = useBulkOperations();
-const { getModal } = useAvailableModals();
+const { openModal, getModalInfo } = useBaseModal();
 
 onResult((result) => {
   if (result.data) bulkOperations.value = result.data.BulkOperations.options;
@@ -167,16 +167,13 @@ onMounted(() => {
 
 watch(selectedBulkOperation, () => {
   if (selectedBulkOperation.value?.value === BulkOperationTypes.ExportCsv)
-    getModal(TypeModals.BulkOperations).openModal();
+    openModal(TypeModals.BulkOperations);
 });
 
 watch(
-  () => getModal(TypeModals.BulkOperations).modalState.value.state,
-  () => {
-    if (
-      getModal(TypeModals.BulkOperations).modalState.value.state ===
-      ModalState.Hide
-    )
+  () => getModalInfo(TypeModals.BulkOperations).state,
+  (bulkOperationsModalState: ModalState) => {
+    if (bulkOperationsModalState === ModalState.Hide)
       selectedBulkOperation.value = undefined;
   }
 );

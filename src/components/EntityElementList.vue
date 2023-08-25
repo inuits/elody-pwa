@@ -11,7 +11,7 @@
             class="underline"
             @click="() => {
               setAcceptedTypes(types as Entitytyping[]);
-              modal.openModal();
+              openModal(TypeModals.EntityPicker)
             }"
           >
             {{ t("library.add") }}
@@ -52,7 +52,7 @@ import useEditMode from "@/composables/useEdit";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import { Unicons } from "@/types";
-import { useAvailableModals } from "@/composables/useAvailableModals";
+import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 
 withDefaults(
@@ -69,9 +69,9 @@ withDefaults(
 );
 
 const { setAcceptedTypes } = useEntityPickerModal();
-const { getModal } = useAvailableModals();
+const { createModal, openModal } = useBaseModal();
 const { isEdit } = useEditMode();
 const { t } = useI18n();
 
-const modal = getModal(TypeModals.EntityPicker);
+createModal(TypeModals.EntityPicker);
 </script>

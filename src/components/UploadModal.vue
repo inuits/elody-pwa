@@ -1,22 +1,26 @@
 <template>
   <BaseModal
-    :modal-state="modal.modalState.value.state"
+    :modal-state="getModalInfo(TypeModals.Upload).state"
     modal-position="left"
     modal-width-style="w-5/12"
-    @hide-modal="modal.closeModal()"
+    @hide-modal="closeModal(TypeModals.Upload)"
   >
     <div class="w-full h-full flex flex-col">
       <div class="flex-grow flex-shrink-0">
         <BaseTabs
           v-if="
-            modal.modalToOpen?.value === ModalChoices.Import &&
+            getModalInfo(TypeModals.Upload).modalTabToOpen ===
+              ModalChoices.Import &&
             directoriesQueryResult &&
             dropzoneEntityToCreateQueryResult
           "
         >
           <BaseTab :title="$t('upload.upload-files')">
             <upload-modal-dropzone
-              v-if="modal.modalToOpen?.value === ModalChoices.Import"
+              v-if="
+                getModalInfo(TypeModals.Upload).modalTabToOpen ===
+                ModalChoices.Import
+              "
               :entity-to-create="
                 dropzoneEntityToCreateQueryResult.DropzoneEntityToCreate
               "
@@ -24,7 +28,10 @@
           </BaseTab>
           <BaseTab :title="$t('upload.import')">
             <upload-modal-import
-              v-if="modal.modalToOpen?.value === ModalChoices.Import"
+              v-if="
+                getModalInfo(TypeModals.Upload).modalTabToOpen ===
+                ModalChoices.Import
+              "
               :directories="directoriesQueryResult.Directories"
             />
           </BaseTab>
@@ -32,14 +39,17 @@
 
         <BaseTabs
           v-if="
-            modal.modalToOpen?.value === ModalChoices.Dropzone &&
-            dropzoneEntityToCreateQueryResult
+            getModalInfo(TypeModals.Upload).modalTabToOpen ===
+              ModalChoices.Dropzone && dropzoneEntityToCreateQueryResult
           "
         >
           <BaseTab :title="$t('upload.upload-files')">
             <div class="h-full">
               <upload-modal-dropzone
-                v-if="modal.modalToOpen?.value === ModalChoices.Dropzone"
+                v-if="
+                  getModalInfo(TypeModals.Upload).modalTabToOpen ===
+                  ModalChoices.Dropzone
+                "
                 :entity-to-create="
                   dropzoneEntityToCreateQueryResult.DropzoneEntityToCreate
                 "
@@ -78,12 +88,12 @@ import {
   ModalChoices,
   ModalState,
 } from "../generated-types/queries";
-import { useAvailableModals } from "@/composables/useAvailableModals";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
 const { mediafiles } = useMetaDataHelper();
-const { getModal } = useAvailableModals();
-const modal = getModal(TypeModals.Upload);
+const { createModal, getModalInfo, closeModal } = useBaseModal();
+createModal(TypeModals.Upload);
 const fetchEnabled = ref(false);
 
 const { result: directoriesQueryResult, refetch: refetchDirectoriesQuery } =
@@ -98,7 +108,7 @@ const {
 }));
 
 const getData = () => {
-  if (modal.modalToOpen?.value === ModalChoices.Import) {
+  if (getModalInfo(TypeModals.Upload).modalTabToOpen === ModalChoices.Import) {
     if (fetchEnabled.value === true) {
       refetchDirectoriesQuery();
       refetchDropzoneEntityToCreateQuery();
@@ -113,9 +123,9 @@ const addSelection = (entity: any) => {
 };
 
 watch(
-  () => modal.modalState.value.state,
-  () => {
-    if (modal.modalState.value.state === ModalState.Show) getData();
+  () => getModalInfo(TypeModals.Upload).state,
+  (uploadModalState: ModalState) => {
+    if (uploadModalState === ModalState.Show) getData();
   },
   { immediate: true }
 );

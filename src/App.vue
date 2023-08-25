@@ -17,6 +17,7 @@
       v-if="route.name !== undefined"
       :context="route.name as Context"
     />
+    <ConfirmModal><DiscardModal /></ConfirmModal>
   </div>
 </template>
 
@@ -36,6 +37,8 @@ import { DefaultOIDC, useAuth } from "session-vue-3-oidc-library";
 import { defineComponent, ref } from "vue";
 import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
+import ConfirmModal from "./components/base/ConfirmModal.vue";
+import DiscardModal from "./components/DiscardModal.vue";
 
 export default defineComponent({
   name: "App",
@@ -49,6 +52,8 @@ export default defineComponent({
     TheHeader,
     TheNavigation,
     UploadModal,
+    ConfirmModal,
+    DiscardModal,
   },
   inject: { DefaultOIDC },
   setup() {
@@ -57,7 +62,7 @@ export default defineComponent({
     const contentPadding = ref("24");
     const route = useRoute();
 
-    //Todo Fix vite migrations
+    // TODO: Fix vite migrations
     const getIndexValue = () => {
       let indexStr = "";
       // if (_.index) {

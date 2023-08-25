@@ -7,10 +7,10 @@ import {
   GetMenuDocument,
 } from "@/generated-types/queries";
 import { useRouter } from "vue-router";
-import { useAvailableModals } from "@/composables/useAvailableModals";
+import { useBaseModal } from "@/composables/useBaseModal";
 import { reactive, ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
-const { getModal } = useAvailableModals();
+const { openModal } = useBaseModal();
 const selectedMenuItem = ref<MenuItem | undefined>(undefined);
 const menuItems = ref<Array<MenuItem>>([]);
 
@@ -23,7 +23,8 @@ export const useMenuHelper = () => {
 
   const checkIfRouteOrModal = (_menuItem: MenuItem): void => {
     if (_menuItem?.typeLink?.modal) {
-      getModal(_menuItem.typeLink.modal.typeModal as TypeModals).openModal(
+      openModal(
+        _menuItem.typeLink.modal.typeModal as TypeModals,
         ModalChoices.Import
       );
     } else if (_menuItem?.typeLink?.route && !_menuItem.subMenu) {

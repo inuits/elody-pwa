@@ -1,9 +1,9 @@
 <template>
   <base-modal
-    :modal-state="modal.modalState.value.state"
+    :modal-state="getModalInfo(TypeModals.Create).state"
     modal-position="left"
     modal-width-style="w-5/12"
-    @hide-modal="modal.closeModal()"
+    @hide-modal="closeModal(TypeModals.Create)"
   >
     <div class="w-full h-full bg-neutral-white">
       <div class="p-6 pb-0 mb-3">
@@ -35,12 +35,12 @@ import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import CreateEntityForm from "@/components/CreateEntityForm.vue";
 import { ref, watch } from "vue";
-import { useAvailableModals } from "@/composables/useAvailableModals";
 import { useI18n } from "vue-i18n";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 const { t } = useI18n();
-const { getModal } = useAvailableModals();
-const modal = getModal(TypeModals.Create);
+const { createModal, getModalInfo, closeModal } = useBaseModal();
+createModal(TypeModals.Create);
 const selectedEntityType = ref<DropdownOption>();
 const entityTypes = ref<DropdownOption[]>([]);
 
@@ -49,9 +49,9 @@ Object.values(CreateableEntityTypes).forEach((type) => {
 });
 
 watch(
-  () => modal.modalState.value.state,
-  () => {
-    if (modal.modalState.value.state === ModalState.Hide)
+  () => getModalInfo(TypeModals.Create).state,
+  (createModalState: ModalState) => {
+    if (createModalState === ModalState.Hide)
       selectedEntityType.value = undefined;
   }
 );

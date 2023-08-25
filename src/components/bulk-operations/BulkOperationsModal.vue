@@ -1,9 +1,9 @@
 <template>
   <BaseModal
-    :modal-state="modal.modalState.value.state"
+    :modal-state="getModalInfo(TypeModals.BulkOperations).state"
     modal-position="right"
     modal-width-style="w-11/12"
-    @hide-modal="modal.closeModal()"
+    @hide-modal="closeModal(TypeModals.BulkOperations)"
   >
     <div class="flex flex-wrap p-8 h-full">
       <div class="flex basis-full gap-8 h-[94%]">
@@ -65,7 +65,7 @@
           "
           :selected-items-count="getEnqueuedItemCount(context)"
           @submit="exportCsv()"
-          @cancel="modal.closeModal()"
+          @cancel="closeModal(TypeModals.BulkOperations)"
         />
       </div>
     </div>
@@ -98,7 +98,7 @@ import {
   useNotification,
 } from "@/components/base/BaseNotification.vue";
 import { ref, watch, inject } from "vue";
-import { useAvailableModals } from "@/composables/useAvailableModals";
+import { useBaseModal } from "@/composables/useBaseModal";
 import { useBulkOperations } from "@/composables/useBulkOperations";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
@@ -118,8 +118,8 @@ const config = inject("config") as any;
 const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
 const { getThumbnail } = useThumbnailHelper();
-const { getModal } = useAvailableModals();
-const modal = getModal(TypeModals.BulkOperations);
+const { createModal, getModalInfo, closeModal } = useBaseModal();
+createModal(TypeModals.BulkOperations);
 const skip = ref<number>(1);
 const limit = ref<number>(config.bulkSelectAllSizeLimit);
 
@@ -195,12 +195,9 @@ onResult((result) => {
 });
 
 watch(
-  () => getModal(TypeModals.BulkOperations).modalState.value.state,
-  () => {
-    if (
-      getModal(TypeModals.BulkOperations).modalState.value.state ===
-      ModalState.Show
-    ) {
+  () => getModalInfo(TypeModals.BulkOperations).state,
+  (bulkOperationsModalState: ModalState) => {
+    if (bulkOperationsModalState === ModalState.Show) {
       if (csvExportOptions.value.length <= 0) {
         refetchEnabled.value = true;
         refetch();
@@ -208,10 +205,7 @@ watch(
       loadItems();
     }
 
-    if (
-      getModal(TypeModals.BulkOperations).modalState.value.state ===
-      ModalState.Hide
-    )
+    if (bulkOperationsModalState === ModalState.Hide)
       dequeueAllItemsForBulkProcessing(
         BulkOperationsContextEnum.BulkOperationsCsvExport
       );
