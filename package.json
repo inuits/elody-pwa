@@ -12,7 +12,8 @@
     "lint": "eslint . --ext .vue,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "prepare": "husky install",
     "generate": "pnpm graphql-code-generator --config ./codegen.ts",
-    "check-dependencies": "dependency-cruiser --exclude \"^node_modules\" \"src/**/*.vue\""
+    "check-dependencies": "dependency-cruiser --exclude \"^node_modules\" \"src/**/*.vue\"",
+    "check-unused-components": "check-unused-comp -i **components/filters/matchers/** ./src"
   },
   "dependencies": {
     "@apollo/client": "^3.7.0",
@@ -95,7 +96,8 @@
     "typescript": "^4.9.4",
     "vite": "^3.0.9",
     "vitest": "^0.23.0",
-    "vue-tsc": "^0.40.7"
+    "vue-tsc": "^0.40.7",
+    "vue-unused-components-checker": "^1.1.2"
   },
   "publishConfig": {
     "registry": "https://nexus.inuits.io/repository/npm-private"
