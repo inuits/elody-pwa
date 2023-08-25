@@ -85,6 +85,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     selection: [],
     boolean: [],
     relation: [],
+    type: [],
   });
   const advancedFilters = ref<Maybe<AdvancedFilters>>();
   const initializeFiltersBase = () => {
