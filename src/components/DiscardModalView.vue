@@ -3,13 +3,20 @@
     <div class="text-xl">{{ t(`confirm.${translationKey}.message`) }}</div>
     <div class="flex justify-between">
       <div>
-        <div>
+        <div class="flex gap-4">
           <BaseButtonNew
             v-if="confirmFunction"
             :label="t(`confirm.${translationKey}.confirm`)"
             button-style="redDefault"
             button-size="small"
             @click="confirmFunction()"
+          />
+          <BaseButtonNew
+            v-if="secondaryConfirmFunction"
+            :label="t(`confirm.${translationKey}.secondary-confirm`)"
+            button-style="redDefault"
+            button-size="small"
+            @click="secondaryConfirmFunction()"
           />
         </div>
       </div>
@@ -32,5 +39,10 @@ import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 
 const { t } = useI18n();
-const { translationKey, confirmFunction, declineFunction } = useConfirmModal();
+const {
+  translationKey,
+  confirmFunction,
+  declineFunction,
+  secondaryConfirmFunction,
+} = useConfirmModal();
 </script>
