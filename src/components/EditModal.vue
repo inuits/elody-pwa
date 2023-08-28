@@ -97,11 +97,14 @@ import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSele
 import { useMutation } from "@vue/apollo-composable";
 import { usePageInfo } from "@/composables/usePageInfo";
 import { useRoute, useRouter } from "vue-router";
+import { useConfirmModal } from "@/composables/useConfirmModal";
 
 const route = useRoute();
 const router = useRouter();
 const { pageInfo } = usePageInfo();
 const { isEdit, save, discard, disableEditMode } = useEditMode();
+const { setTranslationKey, setConfirmFunction, setDeclineFunction } =
+  useConfirmModal();
 const { closeModal, openModal } = useBaseModal();
 const { mediafileSelectionState } = useEntityMediafileSelector();
 
@@ -114,4 +117,8 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
   disableEditMode();
   router.push({ name: pageInfo.value.parentRouteName });
 };
+
+setTranslationKey("delete-entity");
+setConfirmFunction(deleteEntity);
+setDeclineFunction(() => closeModal(TypeModals.Confirm));
 </script>

@@ -60,6 +60,7 @@ import { useMutation, useQuery } from "@vue/apollo-composable";
 import { useNotification } from "@/components/base/BaseNotification.vue";
 import { useRouter } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useConfirmModal } from "@/composables/useConfirmModal";
 
 const props = defineProps<{
   entityType: Entitytyping;
@@ -68,12 +69,9 @@ const props = defineProps<{
 const { t } = useI18n();
 const { createNotification } = useNotification();
 const { createForm } = useFormHelper();
-const {
-  changeCloseConfirmation,
-  closeModal,
-  modalToCloseAfterConfirm,
-  updateModal,
-} = useBaseModal();
+const { changeCloseConfirmation, closeModal, updateModal } = useBaseModal();
+const { setConfirmFunction, setDeclineFunction, setTranslationKey } =
+  useConfirmModal();
 const router = useRouter();
 
 const form = ref<FormContext<any>>();
@@ -81,6 +79,14 @@ const formFields = ref<PanelMetaData[]>([]);
 const idPrefix = ref<string>("");
 
 const isNotEmpty = (str: any) => str.trim() !== "";
+
+setConfirmFunction(() => {
+  changeCloseConfirmation(TypeModals.Create, false);
+  closeModal(TypeModals.Confirm);
+  closeModal(TypeModals.Create);
+});
+setDeclineFunction(() => closeModal(TypeModals.Confirm));
+setTranslationKey("discard-create");
 
 const type = computed(() => props.entityType);
 const id = computed(
@@ -170,13 +176,9 @@ watch(
   () => formContainsValues.value,
   () => {
     if (formContainsValues.value) {
-      modalToCloseAfterConfirm.value = TypeModals.Create;
-      changeCloseConfirmation(TypeModals.Create, {
-        askConfirm: true,
-        confirmTranslationKey: "discard-create",
-      });
+      changeCloseConfirmation(TypeModals.Create, true);
     } else {
-      changeCloseConfirmation(TypeModals.Create, undefined);
+      changeCloseConfirmation(TypeModals.Create, false);
     }
   }
 );
