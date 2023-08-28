@@ -5,19 +5,21 @@
       <div>
         <div>
           <BaseButtonNew
+            v-if="confirmFunction"
             :label="t(`confirm.${translationKey}.confirm`)"
             button-style="redDefault"
             button-size="small"
-            @click="confirmClose()"
+            @click="confirmFunction()"
           />
         </div>
       </div>
       <div>
         <BaseButtonNew
+          v-if="declineFunction"
           :label="t(`confirm.${translationKey}.cancel`)"
           button-style="default"
           button-size="small"
-          @click="declineClose()"
+          @click="declineFunction()"
         />
       </div>
     </div>
@@ -27,16 +29,8 @@
 <script lang="ts" setup>
 import { useI18n } from "vue-i18n";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
-import { useBaseModal } from "@/composables/useBaseModal";
-import { computed } from "vue";
+import { useConfirmModal } from "@/composables/useConfirmModal";
 
 const { t } = useI18n();
-const { confirmClose, declineClose, getModalInfo, modalToCloseAfterConfirm } =
-  useBaseModal();
-
-const translationKey = computed(() => {
-  if (!modalToCloseAfterConfirm.value) return "";
-  return getModalInfo(modalToCloseAfterConfirm.value).closeConfirmation
-    ?.confirmTranslationKey;
-});
+const { translationKey, confirmFunction, declineFunction } = useConfirmModal();
 </script>

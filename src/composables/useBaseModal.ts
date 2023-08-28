@@ -8,22 +8,18 @@ import useDropzoneHelper from "@/composables/useDropzoneHelper";
 
 export type ModalPosition = "left" | "center" | "right";
 
-export type ConfirmationSettings = {
-  askConfirm: boolean;
-  confirmTranslationKey: string;
-};
-
 export type ModalInfo = {
   state: ModalState;
   modalPosition: ModalPosition;
   destination?: string;
   modalTabToOpen?: ModalChoices;
-  closeConfirmation?: ConfirmationSettings | undefined;
+  closeConfirmation: boolean;
 };
 
 const initialModalInfo: ModalInfo = {
   state: ModalState.Initial,
   modalPosition: "left",
+  closeConfirmation: false,
 };
 
 const getInitialModals = (): { [key: string]: ModalInfo } => {
@@ -68,39 +64,15 @@ export const useBaseModal = () => {
   };
 
   const closeModal = (modalType: TypeModals): void => {
-    if (modals.value[modalType].closeConfirmation?.askConfirm) {
+    if (modals.value[modalType].closeConfirmation) {
       openModal(TypeModals.Confirm, undefined, "center");
     } else {
       modals.value[modalType].state = ModalState.Hide;
     }
   };
 
-  const changeCloseConfirmation = (
-    modalType: TypeModals,
-    value: ConfirmationSettings | undefined
-  ) => {
-    if (!modals.value[modalType])
-      throw new Error(`No open modals of type ${modalType} yet`);
+  const changeCloseConfirmation = (modalType: TypeModals, value: boolean) => {
     modals.value[modalType].closeConfirmation = value;
-  };
-
-  const confirmClose = (
-    customConfirmCallback: Function | undefined = undefined
-  ) => {
-    if (customConfirmCallback) {
-      customConfirmCallback();
-      return;
-    }
-    if (!modalToCloseAfterConfirm.value)
-      throw new Error("Modal to close after confirm has not been defined");
-    changeCloseConfirmation(modalToCloseAfterConfirm.value, undefined);
-    closeModal(TypeModals.Confirm);
-    closeModal(modalToCloseAfterConfirm.value);
-    modalToCloseAfterConfirm.value = undefined;
-  };
-
-  const declineClose = () => {
-    closeModal(TypeModals.Confirm);
   };
 
   return {
@@ -112,7 +84,5 @@ export const useBaseModal = () => {
     openModal,
     changeCloseConfirmation,
     modalToCloseAfterConfirm,
-    confirmClose,
-    declineClose,
   };
 };
