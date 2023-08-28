@@ -25,7 +25,8 @@ export const useMenuHelper = () => {
     if (_menuItem?.typeLink?.modal) {
       openModal(
         _menuItem.typeLink.modal.typeModal as TypeModals,
-        ModalChoices.Import
+        ModalChoices.Import,
+        "left"
       );
     } else if (_menuItem?.typeLink?.route && !_menuItem.subMenu) {
       router.push(`/${_menuItem.typeLink.route.destination}`);

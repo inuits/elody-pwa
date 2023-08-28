@@ -1,7 +1,7 @@
 <template>
   <BaseModal
     :modal-state="getModalInfo(TypeModals.Upload).state"
-    modal-position="left"
+    :modal-position="getModalInfo(TypeModals.Upload).modalPosition"
     modal-width-style="w-5/12"
     @hide-modal="closeModal(TypeModals.Upload)"
   >
@@ -92,8 +92,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 
 const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
 const { mediafiles } = useMetaDataHelper();
-const { createModal, getModalInfo, closeModal } = useBaseModal();
-createModal(TypeModals.Upload);
+const { getModalInfo, closeModal } = useBaseModal();
 const fetchEnabled = ref(false);
 
 const { result: directoriesQueryResult, refetch: refetchDirectoriesQuery } =

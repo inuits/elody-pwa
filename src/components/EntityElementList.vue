@@ -11,7 +11,7 @@
             class="underline"
             @click="() => {
               setAcceptedTypes(types as Entitytyping[]);
-              openModal(TypeModals.EntityPicker)
+              openModal(TypeModals.EntityPicker, undefined, 'right')
             }"
           >
             {{ t("library.add") }}
@@ -69,9 +69,7 @@ withDefaults(
 );
 
 const { setAcceptedTypes } = useEntityPickerModal();
-const { createModal, openModal } = useBaseModal();
+const { openModal } = useBaseModal();
 const { isEdit } = useEditMode();
 const { t } = useI18n();
-
-createModal(TypeModals.EntityPicker);
 </script>

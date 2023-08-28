@@ -1,7 +1,7 @@
 <template>
   <BaseModal
     :modal-state="getModalInfo(TypeModals.Confirm).state"
-    modal-position="center"
+    :modal-position="modalPosition"
     modal-width-style="w-1/3"
     modal-height-style="h-[15vh] my-[37.5vh]"
     @hide-modal="closeModal(TypeModals.Confirm)"
@@ -14,7 +14,11 @@
 import BaseModal from "@/components/base/BaseModal.vue";
 import { TypeModals } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { computed } from "vue";
 
-const { createModal, closeModal, getModalInfo } = useBaseModal();
-createModal(TypeModals.Confirm);
+const { closeModal, getModalInfo, modals } = useBaseModal();
+
+const modalPosition = computed(
+  () => modals.value[TypeModals.Confirm].modalPosition
+);
 </script>

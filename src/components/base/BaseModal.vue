@@ -5,7 +5,7 @@
     :class="[
       `${modalWidthStyle}`,
       {
-        'inset-y-0 left-24': modalPosition === 'left',
+        'inset-y-0 left-80': modalPosition === 'left',
         'inset-0 mx-auto': modalPosition === 'center',
         'inset-y-0 right-0': modalPosition === 'right',
       },
@@ -15,7 +15,7 @@
       <div
         class="fixed backdrop-blur-sm bg-background-frosted"
         :class="
-          modalPosition === 'left' ? 'left-24 right-0 inset-y-0' : 'inset-0'
+          modalPosition === 'left' ? 'left-80 right-0 inset-y-0' : 'inset-0'
         "
         aria-hidden="true"
         @click="hideModal"
