@@ -87,8 +87,7 @@ const {
 const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
 const { setUploadStatus } = useUploadModalDropzone();
-const { createModal, closeModal, getModalInfo } = useBaseModal();
-createModal(TypeModals.Upload);
+const { closeModal, getModalInfo } = useBaseModal();
 
 const createEntity = ref<boolean>(true);
 const entityToCreateOptions = ref<DropdownOption[]>(

@@ -1,10 +1,12 @@
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import {
   TypeModals,
   ModalState,
   ModalChoices,
 } from "@/generated-types/queries";
 import useDropzoneHelper from "@/composables/useDropzoneHelper";
+
+export type ModalPosition = "left" | "center" | "right";
 
 export type ConfirmationSettings = {
   askConfirm: boolean;
@@ -13,59 +15,63 @@ export type ConfirmationSettings = {
 
 export type ModalInfo = {
   state: ModalState;
+  modalPosition: ModalPosition;
   destination?: string;
   modalTabToOpen?: ModalChoices;
   closeConfirmation?: ConfirmationSettings | undefined;
 };
 
-const openModals = ref<{ [key: string]: ModalInfo }>({});
-const modalToCloseAfterConfirm = ref<TypeModals | undefined>(undefined);
-
 const initialModalInfo: ModalInfo = {
   state: ModalState.Initial,
+  modalPosition: "left",
 };
 
+const getInitialModals = (): { [key: string]: ModalInfo } => {
+  const initialModals: { [key: string]: ModalInfo } = {};
+  Object.keys(TypeModals).forEach(
+    (modalType) => (initialModals[modalType] = { ...initialModalInfo })
+  );
+  return initialModals;
+};
+
+const modals = ref<{ [key: string]: ModalInfo }>(getInitialModals());
+const modalToCloseAfterConfirm = ref<TypeModals | undefined>(undefined);
+
 export const useBaseModal = () => {
-  const createModal = (modalType: TypeModals): ModalInfo => {
-    if (!openModals.value[modalType]) {
-      openModals.value[modalType] = { ...initialModalInfo };
-    }
-    return openModals.value[modalType];
+  const getModal = (modalType: TypeModals): ModalInfo => {
+    return modals.value[modalType];
   };
 
   const openModal = (
     modalType: TypeModals,
-    modalTab: ModalChoices | undefined = undefined
+    modalTab: ModalChoices | undefined = undefined,
+    modalPosition: ModalPosition | undefined = undefined
   ): void => {
-    if (!openModals.value[modalType]) createModal(modalType);
-    updateModal(modalType, {
+    const updatedModal = {
       state: ModalState.Show,
-    });
+    };
+    if (modalPosition) Object.assign(updatedModal, { modalPosition });
+    updateModal(modalType, updatedModal);
     if (modalTab) getModalInfo(modalType).modalTabToOpen = modalTab;
     useDropzoneHelper().resetDropzone();
   };
 
   const getModalInfo = (modalType: TypeModals): ModalInfo => {
-    if (!openModals.value[modalType])
-      throw new Error(`No open modals of type ${modalType} yet`);
-    return openModals.value[modalType];
+    return modals.value[modalType];
   };
 
-  const updateModal = (modalType: TypeModals, modalInput: ModalInfo): void => {
-    if (!openModals.value[modalType])
-      throw new Error(`No open modals of type ${modalType} yet`);
-
-    Object.assign(openModals.value[modalType], modalInput);
+  const updateModal = (
+    modalType: TypeModals,
+    modalInput: { [key: string]: any }
+  ): void => {
+    Object.assign(modals.value[modalType], modalInput);
   };
 
   const closeModal = (modalType: TypeModals): void => {
-    if (!openModals.value[modalType])
-      throw new Error(`No open modals of type ${modalType} yet`);
-
-    if (openModals.value[modalType].closeConfirmation?.askConfirm) {
-      openModal(TypeModals.Confirm);
+    if (modals.value[modalType].closeConfirmation?.askConfirm) {
+      openModal(TypeModals.Confirm, undefined, "center");
     } else {
-      openModals.value[modalType].state = ModalState.Hide;
+      modals.value[modalType].state = ModalState.Hide;
     }
   };
 
@@ -73,12 +79,18 @@ export const useBaseModal = () => {
     modalType: TypeModals,
     value: ConfirmationSettings | undefined
   ) => {
-    if (!openModals.value[modalType])
+    if (!modals.value[modalType])
       throw new Error(`No open modals of type ${modalType} yet`);
-    openModals.value[modalType].closeConfirmation = value;
+    modals.value[modalType].closeConfirmation = value;
   };
 
-  const confirmClose = () => {
+  const confirmClose = (
+    customConfirmCallback: Function | undefined = undefined
+  ) => {
+    if (customConfirmCallback) {
+      customConfirmCallback();
+      return;
+    }
     if (!modalToCloseAfterConfirm.value)
       throw new Error("Modal to close after confirm has not been defined");
     changeCloseConfirmation(modalToCloseAfterConfirm.value, undefined);
@@ -92,8 +104,8 @@ export const useBaseModal = () => {
   };
 
   return {
-    createModal,
-    openModals,
+    getModal,
+    modals,
     getModalInfo,
     updateModal,
     closeModal,

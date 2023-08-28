@@ -167,7 +167,7 @@ onMounted(() => {
 
 watch(selectedBulkOperation, () => {
   if (selectedBulkOperation.value?.value === BulkOperationTypes.ExportCsv)
-    openModal(TypeModals.BulkOperations);
+    openModal(TypeModals.BulkOperations, undefined, "right");
 });
 
 watch(

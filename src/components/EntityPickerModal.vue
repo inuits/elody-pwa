@@ -1,7 +1,7 @@
 <template>
   <BaseModal
     :modal-state="getModalInfo(TypeModals.EntityPicker).state"
-    modal-position="right"
+    :modal-position="getModalInfo(TypeModals.EntityPicker).modalPosition"
     modal-width-style="w-10/12"
     @hide-modal="closeModal(TypeModals.EntityPicker)"
   >
@@ -59,10 +59,9 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useRoute } from "vue-router";
 
 const { getAcceptedTypes } = useEntityPickerModal();
-const { createModal, closeModal, getModalInfo } = useBaseModal();
+const { closeModal, getModalInfo } = useBaseModal();
 const { getForm } = useFormHelper();
 
-createModal(TypeModals.EntityPicker);
 const route = useRoute();
 
 const addRelations = (selectedItems: InBulkProcessableItem[]) => {

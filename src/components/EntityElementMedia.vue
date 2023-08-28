@@ -15,7 +15,7 @@
           @click="
             () => {
               setAcceptedTypes([Entitytyping.Mediafile]);
-              openModal(TypeModals.EntityPicker);
+              openModal(TypeModals.EntityPicker, undefined, 'right');
             }
           "
         >
@@ -100,10 +100,9 @@ const { t } = useI18n();
 const { mediafileSelectionState } = useEntityMediafileSelector();
 const { setAcceptedTypes } = useEntityPickerModal();
 const { getEntityUuid } = useEntitySingle();
-const { createModal, openModal } = useBaseModal();
+const { openModal } = useBaseModal();
 const { isEdit } = useEditMode();
 
-createModal(TypeModals.EntityPicker);
 const entityId = computed(
   () => getEntityUuid() || asString(useRoute().params["id"])
 );

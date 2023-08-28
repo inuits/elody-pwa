@@ -1,7 +1,8 @@
 <template>
   <BaseModal
-    :modal-state="getModalInfo(TypeModals.BulkOperations).state"
-    modal-position="right"
+    v-if="modal"
+    :modal-state="modal.state"
+    :modal-position="modal.modalPosition"
     modal-width-style="w-11/12"
     @hide-modal="closeModal(TypeModals.BulkOperations)"
   >
@@ -118,8 +119,8 @@ const config = inject("config") as any;
 const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
 const { getThumbnail } = useThumbnailHelper();
-const { createModal, getModalInfo, closeModal } = useBaseModal();
-createModal(TypeModals.BulkOperations);
+const { getModal, closeModal } = useBaseModal();
+const modal = getModal(TypeModals.BulkOperations);
 const skip = ref<number>(1);
 const limit = ref<number>(config.bulkSelectAllSizeLimit);
 
@@ -195,7 +196,7 @@ onResult((result) => {
 });
 
 watch(
-  () => getModalInfo(TypeModals.BulkOperations).state,
+  () => modal.state,
   (bulkOperationsModalState: ModalState) => {
     if (bulkOperationsModalState === ModalState.Show) {
       if (csvExportOptions.value.length <= 0) {

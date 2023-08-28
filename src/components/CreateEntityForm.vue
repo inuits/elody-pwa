@@ -69,12 +69,11 @@ const { t } = useI18n();
 const { createNotification } = useNotification();
 const { createForm } = useFormHelper();
 const {
-  createModal,
   changeCloseConfirmation,
   closeModal,
   modalToCloseAfterConfirm,
+  updateModal,
 } = useBaseModal();
-createModal(TypeModals.Create);
 const router = useRouter();
 
 const form = ref<FormContext<any>>();
@@ -124,7 +123,6 @@ onResult((result) => {
     intialValues,
     relationValues: { label: "", relations: [] },
   });
-  console.log(form.value);
 });
 
 const create = async () => {
@@ -145,6 +143,9 @@ const create = async () => {
   });
 
   if (createResult && createResult.data?.createEntity?.id) {
+    updateModal(TypeModals.Create, {
+      closeConfirmation: { askConfirm: false },
+    });
     closeModal(TypeModals.Create);
     createNotification({
       displayTime: 10,

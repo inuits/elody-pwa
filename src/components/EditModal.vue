@@ -7,7 +7,7 @@
         :show-delete-button="true"
         @submit="save()"
         @cancel="discard()"
-        @delete="() => openModal(TypeModals.Confirm)"
+        @delete="() => openModal(TypeModals.Confirm, undefined, 'center')"
       />
     </div>
 
@@ -15,7 +15,7 @@
       <div class="flex flex-col justify-between h-full p-4 bg-neutral-white">
         <div>
           <span class="font-bold text-xl text-text-body">
-            {{ $t("confirm.sure-message") }}
+            {{ $t("confirm.delete-entity.message") }}
           </span>
         </div>
         <div>
@@ -26,7 +26,7 @@
             <div class="flex gap-4">
               <div>
                 <BaseButtonNew
-                  :label="$t('confirm.delete-entity')"
+                  :label="$t('confirm.delete-entity.confirm')"
                   :icon="DamsIcons.Trash"
                   button-style="redDefault"
                   button-size="small"
@@ -35,7 +35,7 @@
               </div>
               <div>
                 <BaseButtonNew
-                  :label="$t('confirm.delete-entity-mediafiles')"
+                  :label="$t('confirm.delete-entity.confirm-with-mediafiles')"
                   :icon="DamsIcons.Trash"
                   button-style="redDefault"
                   button-size="small"
@@ -45,7 +45,7 @@
             </div>
             <div>
               <BaseButtonNew
-                :label="$t('bulk-operations.cancel')"
+                :label="$t('confirm.delete-entity.cancel')"
                 button-style="default"
                 button-size="small"
                 @click="closeModal(TypeModals.Confirm)"
@@ -102,7 +102,7 @@ const route = useRoute();
 const router = useRouter();
 const { pageInfo } = usePageInfo();
 const { isEdit, save, discard, disableEditMode } = useEditMode();
-const { createModal, closeModal, openModal } = useBaseModal();
+const { closeModal, openModal } = useBaseModal();
 const { mediafileSelectionState } = useEntityMediafileSelector();
 
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
@@ -114,6 +114,4 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
   disableEditMode();
   router.push({ name: pageInfo.value.parentRouteName });
 };
-
-createModal(TypeModals.Confirm);
 </script>

@@ -1,7 +1,7 @@
 <template>
   <base-modal
     :modal-state="getModalInfo(TypeModals.Create).state"
-    modal-position="left"
+    :modal-position="getModalInfo(TypeModals.Create).modalPosition"
     modal-width-style="w-5/12"
     @hide-modal="closeModal(TypeModals.Create)"
   >
@@ -39,8 +39,7 @@ import { useI18n } from "vue-i18n";
 import { useBaseModal } from "@/composables/useBaseModal";
 
 const { t } = useI18n();
-const { createModal, getModalInfo, closeModal } = useBaseModal();
-createModal(TypeModals.Create);
+const { getModalInfo, closeModal } = useBaseModal();
 const selectedEntityType = ref<DropdownOption>();
 const entityTypes = ref<DropdownOption[]>([]);
 

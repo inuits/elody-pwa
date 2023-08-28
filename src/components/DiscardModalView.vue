@@ -5,11 +5,10 @@
       <div>
         <div>
           <BaseButtonNew
-            :label="t(`confirm.${translationKey}.discard`)"
-            :icon="DamsIcons.Trash"
+            :label="t(`confirm.${translationKey}.confirm`)"
             button-style="redDefault"
             button-size="small"
-            @click="confirmClose"
+            @click="confirmClose()"
           />
         </div>
       </div>
@@ -18,7 +17,7 @@
           :label="t(`confirm.${translationKey}.cancel`)"
           button-style="default"
           button-size="small"
-          @click="declineClose"
+          @click="declineClose()"
         />
       </div>
     </div>
@@ -28,7 +27,6 @@
 <script lang="ts" setup>
 import { useI18n } from "vue-i18n";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
-import { DamsIcons } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { computed } from "vue";
 
