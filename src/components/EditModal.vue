@@ -1,81 +1,13 @@
 <template>
-  <div>
-    <div v-if="isEdit" class="flex justify-center relative w-full p-5 z-20">
-      <BulkOperationsSubmitBar
-        :button-label="$t('bulk-operations.save')"
-        :button-icon="DamsIcons.Save"
-        :show-delete-button="true"
-        @submit="save()"
-        @cancel="discard()"
-        @delete="() => openModal(TypeModals.Confirm, undefined, 'center')"
-      />
-    </div>
-
-    <ConfirmModal>
-      <div class="flex flex-col justify-between h-full p-4 bg-neutral-white">
-        <div>
-          <span class="font-bold text-xl text-text-body">
-            {{ $t("confirm.delete-entity.message") }}
-          </span>
-        </div>
-        <div>
-          <div
-            v-if="mediafileSelectionState.mediafiles.length > 0"
-            class="flex justify-between"
-          >
-            <div class="flex gap-4">
-              <div>
-                <BaseButtonNew
-                  :label="$t('confirm.delete-entity.confirm')"
-                  :icon="DamsIcons.Trash"
-                  button-style="redDefault"
-                  button-size="small"
-                  @click="deleteEntity()"
-                />
-              </div>
-              <div>
-                <BaseButtonNew
-                  :label="$t('confirm.delete-entity.confirm-with-mediafiles')"
-                  :icon="DamsIcons.Trash"
-                  button-style="redDefault"
-                  button-size="small"
-                  @click="deleteEntity(true)"
-                />
-              </div>
-            </div>
-            <div>
-              <BaseButtonNew
-                :label="$t('confirm.delete-entity.cancel')"
-                button-style="default"
-                button-size="small"
-                @click="closeModal(TypeModals.Confirm)"
-              />
-            </div>
-          </div>
-          <div v-else class="flex justify-between">
-            <div>
-              <div>
-                <BaseButtonNew
-                  :label="$t('bulk-operations.delete')"
-                  :icon="DamsIcons.Trash"
-                  button-style="redDefault"
-                  button-size="small"
-                  @click="deleteEntity()"
-                />
-              </div>
-            </div>
-            <div>
-              <BaseButtonNew
-                :label="$t('bulk-operations.cancel')"
-                button-style="default"
-                button-size="small"
-                @click="closeModal(TypeModals.Confirm)"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </ConfirmModal>
+  <div v-if="isEdit" class="flex justify-center relative w-full p-5 z-20">
+    <BulkOperationsSubmitBar
+      :button-label="$t('bulk-operations.save')"
+      :button-icon="DamsIcons.Save"
+      :show-delete-button="true"
+      @submit="save()"
+      @cancel="openDiscardModal()"
+      @delete="openDeleteModal()"
+    />
   </div>
 </template>
 
@@ -87,9 +19,7 @@ import {
   type Collection,
   type DeleteDataMutation,
 } from "@/generated-types/queries";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
-import ConfirmModal from "@/components/base/ConfirmModal.vue";
 import { asString } from "@/helpers";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useEditMode } from "@/composables/useEdit";
@@ -103,8 +33,12 @@ const route = useRoute();
 const router = useRouter();
 const { pageInfo } = usePageInfo();
 const { isEdit, save, discard, disableEditMode } = useEditMode();
-const { setTranslationKey, setConfirmFunction, setDeclineFunction } =
-  useConfirmModal();
+const {
+  setTranslationKey,
+  setConfirmFunction,
+  setDeclineFunction,
+  setSecondaryConfirmFunction,
+} = useConfirmModal();
 const { closeModal, openModal } = useBaseModal();
 const { mediafileSelectionState } = useEntityMediafileSelector();
 
@@ -118,7 +52,23 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
   router.push({ name: pageInfo.value.parentRouteName });
 };
 
-setTranslationKey("delete-entity");
-setConfirmFunction(deleteEntity);
-setDeclineFunction(() => closeModal(TypeModals.Confirm));
+const openDeleteModal = () => {
+  setTranslationKey("delete-entity");
+  setConfirmFunction(deleteEntity);
+  setDeclineFunction(() => closeModal(TypeModals.Confirm));
+  if (mediafileSelectionState.mediafiles.length > 0) {
+    setSecondaryConfirmFunction(() => deleteEntity(true));
+  }
+  openModal(TypeModals.Confirm, undefined, "center");
+};
+
+const openDiscardModal = () => {
+  setTranslationKey("discard-edit");
+  setConfirmFunction(() => {
+    discard();
+    closeModal(TypeModals.Confirm);
+  });
+  setDeclineFunction(() => closeModal(TypeModals.Confirm));
+  openModal(TypeModals.Confirm, undefined, "center");
+};
 </script>
