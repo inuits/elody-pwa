@@ -37,10 +37,6 @@ const initializeViewers = () => {
   const miradorConfig: any = {
     id: "mirador-viewer",
     language: locale.value,
-    availableLanguages: {
-      nl: "Nederlands",
-      en: "English",
-    },
     themes: {
       light: {
         palette: {
