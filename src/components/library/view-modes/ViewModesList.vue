@@ -119,7 +119,7 @@ const { getForm } = useFormHelper();
 
 const entityId = computed<string>(() => asString(useRoute().params["id"]));
 const relations = computed<BaseRelationValuesInput[]>(
-  () => getForm(entityId.value)?.values.relationValues.relations
+  () => getForm(entityId.value)?.values?.relationValues?.relations
 );
 const relationType = computed<string>(
   () => getForm(entityId.value)?.values.relationValues.type
