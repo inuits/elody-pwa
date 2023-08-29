@@ -1,9 +1,9 @@
 <template>
-  <BaseTabs :key="props.manifestUrl || Math.random()" class="bg-neutral-0">
+  <BaseTabs :key="props.manifestUrl || Math.random()" class="px-6">
     <BaseTab title="Mirador">
       <div class="w-full h-full relative z-10" id="mirador-viewer"></div>
     </BaseTab>
-    <BaseTab title="Tify">
+    <BaseTab v-if="manifestUrl" title="Tify">
       <div class="w-full h-full" id="tify-viewer"></div>
     </BaseTab>
   </BaseTabs>
@@ -27,10 +27,12 @@ const props = withDefaults(
 const { locale } = useI18n();
 
 const initializeViewers = () => {
-  new Tify({
-    container: "#tify-viewer",
-    manifestUrl: props.manifestUrl,
-  });
+  if (props.manifestUrl) {
+    new Tify({
+      container: "#tify-viewer",
+      manifestUrl: props.manifestUrl,
+    });
+  }
 
   const miradorConfig: any = {
     id: "mirador-viewer",
