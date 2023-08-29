@@ -56,10 +56,10 @@
         v-if="
           !element.isCollapsed &&
           element.type === MediaFileElementTypes.Map &&
-          mapComponentData
+          componentMetadata
         "
         :element="element"
-        :mapData="mapComponentData"
+        :mapData="componentMetadata"
       ></base-map>
     </template>
   </entity-element-wrapper>
@@ -107,7 +107,7 @@ const entityId = computed(
   () => getEntityUuid() || asString(useRoute().params["id"])
 );
 
-const mapComponentData = computed(() => {
+const componentMetadata = computed(() => {
   const returnArray: MetadataAndRelation[] = [];
 
   Object.values(props.element).forEach((value) => {
