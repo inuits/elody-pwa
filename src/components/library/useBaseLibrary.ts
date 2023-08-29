@@ -144,7 +144,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
   const entityType = ref<Entitytyping | "BaseEntity">("BaseEntity");
   const entities = ref<Entity[]>([]);
   const totalEntityCount = ref<number>(0);
-  const entitiesLoading = ref<boolean>(true);
+  const entitiesLoading = ref<boolean>(false);
   const { isSaved } = useEditMode();
 
   const __setEntitiesLoading = (isLoading: boolean) =>
@@ -186,6 +186,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
   };
 
   const getEntities = async (): Promise<void> => {
+    __setEntitiesLoading(true);
     if (libraryBarInitializationStatus.value === "not-initialized")
       initializeLibraryBar();
     if (filtersBaseInitializationStatus.value === "not-initialized")
@@ -195,7 +196,6 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
       filtersBaseInitializationStatus.value !== "initialized"
     )
       return;
-    __setEntitiesLoading(true);
 
     apolloClient
       .query<GetEntitiesQuery>({
@@ -213,8 +213,8 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
 
   watch(
     () => entitiesLoading.value,
-    (loading) => {
-      if (loading) {
+    (isLoading) => {
+      if (isLoading) {
         const placeholderAmount = queryVariables.value?.limit || 25;
         entities.value = createPlaceholderEntities(placeholderAmount);
         totalEntityCount.value = placeholderAmount;
