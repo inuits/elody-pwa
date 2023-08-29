@@ -17,7 +17,7 @@
       v-if="route.name !== undefined"
       :context="route.name as Context"
     />
-    <ConfirmModal><DiscardModalView /></ConfirmModal>
+    <ConfirmModal><ConfirmModalView /></ConfirmModal>
   </div>
 </template>
 
@@ -38,7 +38,7 @@ import { defineComponent, ref } from "vue";
 import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
 import ConfirmModal from "./components/base/ConfirmModal.vue";
-import DiscardModalView from "./components/DiscardModalView.vue";
+import ConfirmModalView from "./components/ConfirmModalView.vue";
 
 export default defineComponent({
   name: "App",
@@ -53,7 +53,7 @@ export default defineComponent({
     TheNavigation,
     UploadModal,
     ConfirmModal,
-    DiscardModalView,
+    ConfirmModalView,
   },
   inject: { DefaultOIDC },
   setup() {

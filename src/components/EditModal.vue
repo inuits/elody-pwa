@@ -33,12 +33,8 @@ const route = useRoute();
 const router = useRouter();
 const { pageInfo } = usePageInfo();
 const { isEdit, save, discard, disableEditMode } = useEditMode();
-const {
-  setTranslationKey,
-  setConfirmFunction,
-  setDeclineFunction,
-  setSecondaryConfirmFunction,
-} = useConfirmModal();
+const { setSecondaryConfirmFunction, initializeConfirmModal } =
+  useConfirmModal();
 const { closeModal, openModal } = useBaseModal();
 const { mediafileSelectionState } = useEntityMediafileSelector();
 
@@ -53,9 +49,12 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
 };
 
 const openDeleteModal = () => {
-  setTranslationKey("delete-entity");
-  setConfirmFunction(deleteEntity);
-  setDeclineFunction(() => closeModal(TypeModals.Confirm));
+  initializeConfirmModal(
+    deleteEntity,
+    undefined,
+    () => closeModal(TypeModals.Confirm),
+    "delete-entity"
+  );
   if (mediafileSelectionState.mediafiles.length > 0) {
     setSecondaryConfirmFunction(() => deleteEntity(true));
   }
@@ -63,12 +62,15 @@ const openDeleteModal = () => {
 };
 
 const openDiscardModal = () => {
-  setTranslationKey("discard-edit");
-  setConfirmFunction(() => {
-    discard();
-    closeModal(TypeModals.Confirm);
-  });
-  setDeclineFunction(() => closeModal(TypeModals.Confirm));
+  initializeConfirmModal(
+    () => {
+      discard();
+      closeModal(TypeModals.Confirm);
+    },
+    undefined,
+    () => closeModal(TypeModals.Confirm),
+    "discard-edit"
+  );
   openModal(TypeModals.Confirm, undefined, "center");
 };
 </script>

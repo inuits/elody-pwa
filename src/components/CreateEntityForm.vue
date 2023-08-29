@@ -70,8 +70,7 @@ const { t } = useI18n();
 const { createNotification } = useNotification();
 const { createForm } = useFormHelper();
 const { changeCloseConfirmation, closeModal, updateModal } = useBaseModal();
-const { setConfirmFunction, setDeclineFunction, setTranslationKey } =
-  useConfirmModal();
+const { initializeConfirmModal } = useConfirmModal();
 const router = useRouter();
 
 const form = ref<FormContext<any>>();
@@ -80,13 +79,16 @@ const idPrefix = ref<string>("");
 
 const isNotEmpty = (str: any) => str.trim() !== "";
 
-setConfirmFunction(() => {
-  changeCloseConfirmation(TypeModals.Create, false);
-  closeModal(TypeModals.Confirm);
-  closeModal(TypeModals.Create);
-});
-setDeclineFunction(() => closeModal(TypeModals.Confirm));
-setTranslationKey("discard-create");
+initializeConfirmModal(
+  () => {
+    changeCloseConfirmation(TypeModals.Create, false);
+    closeModal(TypeModals.Confirm);
+    closeModal(TypeModals.Create);
+  },
+  undefined,
+  () => closeModal(TypeModals.Confirm),
+  "discard-create"
+);
 
 const type = computed(() => props.entityType);
 const id = computed(
