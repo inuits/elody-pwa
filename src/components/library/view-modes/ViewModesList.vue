@@ -1,15 +1,16 @@
 <template>
   <div
-    v-if="!disablePreviews"
+    v-show="!disablePreviews"
     v-for="item in relations?.filter(
       (relation) => relation.editStatus === EditStatus.New
     )"
+    :key="item.key"
   >
     <ListItem
       :key="item.key + '_preview'"
       :item-id="item.key"
       :bulk-operations-context="bulkOperationsContext"
-      :teaser-metadata="item.teaserMetadata"
+      :teaser-metadata="(item.teaserMetadata as Metadata[])"
       :thumb-icon="entitiesLoading ? undefined : getThumbnail(item)"
       :small="listItemRouteName === 'SingleMediafile'"
       :is-preview="true"
@@ -35,7 +36,7 @@
     :item-id="entity.uuid"
     :bulk-operations-context="bulkOperationsContext"
     :teaser-metadata="
-      formatTeaserMetadata(entity.teaserMetadata, entity.intialValues)
+      formatTeaserMetadata(entity.teaserMetadata, entity.intialValues) as Metadata[]
     "
     :media="entitiesLoading ? undefined : getMediaFilenameFromEntity(entity)"
     :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
@@ -72,6 +73,7 @@ import {
   EditStatus,
   type BaseRelationValuesInput,
   type Entity,
+  type Metadata,
 } from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
