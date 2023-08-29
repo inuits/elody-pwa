@@ -6,6 +6,18 @@ const declineFunction = ref<Function | undefined>(undefined);
 const translationKey = ref<string>("");
 
 export const useConfirmModal = () => {
+  const initializeConfirmModal = (
+    confirmFunc: Function,
+    secondaryConfirmFunc: Function | undefined,
+    declineFunc: Function,
+    translationKey: string
+  ) => {
+    setConfirmFunction(confirmFunc);
+    setDeclineFunction(declineFunc);
+    setTranslationKey(translationKey);
+    if (secondaryConfirmFunc) setSecondaryConfirmFunction(secondaryConfirmFunc);
+  };
+
   const setConfirmFunction = (func: Function) => {
     confirmFunction.value = func;
   };
@@ -23,6 +35,7 @@ export const useConfirmModal = () => {
   };
 
   return {
+    initializeConfirmModal,
     setConfirmFunction,
     setSecondaryConfirmFunction,
     setDeclineFunction,
