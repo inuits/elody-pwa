@@ -10,11 +10,12 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { onMounted, watch } from "vue";
 // @ts-ignore
 import Mirador from "mirador/dist/mirador.min.js";
 import BaseTabs from "./BaseTabs.vue";
 import BaseTab from "./BaseTab.vue";
+import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
   defineProps<{
@@ -23,8 +24,9 @@ const props = withDefaults(
   { manifestUrl: "" }
 );
 
-onMounted(() => {
-  // @ts-ignore
+const { locale } = useI18n();
+
+const initializeViewers = () => {
   new Tify({
     container: "#tify-viewer",
     manifestUrl: props.manifestUrl,
@@ -32,7 +34,7 @@ onMounted(() => {
 
   const miradorConfig: any = {
     id: "mirador-viewer",
-    language: "nl",
+    language: locale.value,
     availableLanguages: {
       nl: "Nederlands",
       en: "English",
@@ -54,5 +56,16 @@ onMounted(() => {
   }
 
   Mirador.viewer(miradorConfig);
+};
+
+onMounted(() => {
+  initializeViewers();
 });
+
+watch(
+  () => locale.value,
+  () => {
+    initializeViewers();
+  }
+);
 </script>
