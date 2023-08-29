@@ -48,12 +48,8 @@ import useMenuHelper from "@/composables/useMenuHelper";
 import CustomIcon from "../CustomIcon.vue";
 import { useI18n } from "vue-i18n";
 
-const {
-  checkIfRouteOrModal,
-  toggleDropDown,
-  setSelectedMenuItem,
-  selectedMenuItem,
-} = useMenuHelper();
+const { checkIfRouteOrModal, setSelectedMenuItem, selectedMenuItem } =
+  useMenuHelper();
 const { t } = useI18n();
 
 const auth = useAuth();
@@ -70,7 +66,6 @@ const handleClick = () => {
   if (props.menuitem.typeLink?.route) {
     setSelectedMenuItem(props.menuitem);
   }
-  if (props.menuitem.subMenu) toggleDropDown();
   checkIfRouteOrModal(props.menuitem);
 };
 
