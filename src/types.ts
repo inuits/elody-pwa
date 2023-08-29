@@ -55,6 +55,7 @@ import {
   uniVolume,
   uniWindowGrid,
   uniWindowMaximize,
+  uniFocus,
 } from "vue-unicons/dist/icons";
 
 export const Unicons: Record<DamsIcons, { name: string }> = {
@@ -89,6 +90,7 @@ export const Unicons: Record<DamsIcons, { name: string }> = {
   Eye: uniEye,
   FileAlt: uniFileAlt,
   Filter: uniFilter,
+  Focus: uniFocus,
   History: uniHistory,
   Image: uniImage,
   Link: uniLink,
