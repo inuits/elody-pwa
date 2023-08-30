@@ -82,7 +82,8 @@ const goToPage = (page: number) => {
 };
 
 const getLastPage = () => {
-  if (props.totalItems > 1) return Math.ceil(props.totalItems / props.limit);
+  if (props.totalItems > 1)
+    return Math.ceil(props.totalItems / props.limit) || 1;
   else return 1;
 };
 
