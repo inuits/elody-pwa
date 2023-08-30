@@ -8,7 +8,7 @@
       },
       { '!border-status-new': isPreview },
       { '!border-status-deleted': isMarkedAsToBeDeleted },
-      { 'animate-pulse': loading },
+      { 'animate-pulse h-64': loading },
     ]"
   >
     <div class="absolute top-0 right-0 w-min h-min">
@@ -56,7 +56,7 @@
               input-style="accentNormal"
             />
           </div>
-          <div class="w-full">
+          <div v-if="!loading" class="w-full">
             <div
               v-for="metadataItem in teaserMetadata"
               :key="metadataItem ? metadataItem.value : 'no-key'"
@@ -67,6 +67,10 @@
                 :unit="metadataItem.unit"
               />
             </div>
+          </div>
+          <div class="w-full" v-else>
+            <div class="bg-neutral-100 h-4 w-1/4 opacity-40 mb-2"></div>
+            <div class="bg-neutral-100 h-4 w-5/6 opacity-40"></div>
           </div>
           <div
             v-if="isEdit && isMarkableAsToBeDeleted && !isPreview"
