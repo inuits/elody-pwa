@@ -1,9 +1,8 @@
 <template>
   <div class="flex justify-between items-center w-full">
     <div class="flex justify-start gap-x-3">
-      <div class="w-32">
+      <div v-if="paginationLimitOptions" class="w-32">
         <BaseDropdownNew
-          v-if="paginationLimitOptions"
           v-model="selectedPaginationLimitOption"
           :options="paginationLimitOptions"
           :label="t('library.items')"
@@ -12,10 +11,9 @@
           dropdown-style="default"
         />
       </div>
-      <div class="w-72">
+      <div v-if="sortOptions" class="w-72">
         <BaseDropdownNew
           class="py-1"
-          v-if="sortOptions"
           v-model="selectedSortOption"
           :options="sortOptions"
           :label="t('library.sort')"
