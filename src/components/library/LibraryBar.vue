@@ -22,7 +22,7 @@
           dropdown-style="default"
         />
       </div>
-      <div class="py-1 flex items-center">
+      <div v-if="sortOptions" class="py-1 flex items-center">
         <BaseToggle
           v-model="isAsc"
           :icon-on="DamsIcons.AngleUp"
