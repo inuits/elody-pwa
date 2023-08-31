@@ -21,17 +21,17 @@ const createErrorNotification = (title: string, description: string) => {
 };
 
 const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
-  const handleErrorByCode = (errorCode: Number) => {
+  const handleErrorByCode = (errorCode: string) => {
     const { increaseFailedCounter } = useDropzoneHelper();
     switch (errorCode) {
-      case 403:
+      case "FORBIDDEN":
         createErrorNotification(
           "Forbidden",
           "You don't have access to this page/action"
         );
         useRouter().go(-1);
         break;
-      case 409:
+      case "DUPLICATE":
         increaseFailedCounter();
         createErrorNotification(
           "Duplicate",
@@ -83,7 +83,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
           );
           console.log(`Message:`, error.message);
           console.log(`---`);
-          handleErrorByCode(Number(error.extensions.statusCode));
+          handleErrorByCode(error.extensions.statusCode);
         }
       }
     }
