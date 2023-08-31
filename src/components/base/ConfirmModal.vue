@@ -2,8 +2,8 @@
   <BaseModal
     :modal-state="getModalInfo(TypeModals.Confirm).state"
     :modal-position="modalPosition"
-    modal-width-style="w-1/3"
-    modal-height-style="h-[15vh] my-[37.5vh]"
+    modal-width-style="w-1/2"
+    modal-height-style="h-[20vh] my-[37.5vh]"
     @hide-modal="closeModal(TypeModals.Confirm)"
   >
     <slot />
