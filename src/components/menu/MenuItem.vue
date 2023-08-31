@@ -12,16 +12,21 @@
         height="18"
       />
       <CustomIcon v-else :icon="icon" :size="24" :color="iconColor" />
-      <span class="nav-item-label w-0 h-0 overflow-hidden px-4 font-bold">
-        {{ t(menuitem?.label) }}
-      </span>
-      <div class="w-full flex justify-end align-center" v-if="menuitem.subMenu">
-        <unicon
-          v-if="isBeingHovered"
-          :name="Unicons.AngleDown.name"
-          height="20"
-        />
-        <unicon v-else :name="Unicons.AngleRight.name" height="20" />
+      <div v-if="isExpanded" class="w-full flex">
+        <span class="px-4 font-bold">
+          {{ t(menuitem?.label) }}
+        </span>
+        <div
+          class="w-full flex justify-end align-center"
+          v-if="menuitem.subMenu"
+        >
+          <unicon
+            v-if="isBeingHovered"
+            :name="Unicons.AngleDown.name"
+            height="20"
+          />
+          <unicon v-else :name="Unicons.AngleRight.name" height="20" />
+        </div>
       </div>
     </div>
     <div
@@ -93,19 +98,15 @@ handleSubMenu();
 }
 @keyframes dropdown {
   25% {
-    margin-top: -0.25rem;
     opacity: 0.25;
   }
   50% {
-    margin-top: 0rem;
     opacity: 0.5;
   }
   75% {
-    margin-top: 0.16rem;
     opacity: 0.75;
   }
   100% {
-    margin-top: 0.25rem;
     opacity: 1;
   }
 }
