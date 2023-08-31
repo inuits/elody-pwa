@@ -2,8 +2,8 @@
   <div v-if="translationKey" class="h-full flex flex-col justify-between p-4">
     <div class="text-xl">{{ t(`confirm.${translationKey}.message`) }}</div>
     <div class="flex justify-between">
-      <div>
-        <div class="flex gap-4">
+      <div :class="[{ 'w-3/4': secondaryConfirmFunction }]">
+        <div class="flex items-center gap-4">
           <BaseButtonNew
             v-if="confirmFunction"
             :label="t(`confirm.${translationKey}.confirm`)"
@@ -20,7 +20,7 @@
           />
         </div>
       </div>
-      <div>
+      <div class="flex items-center">
         <BaseButtonNew
           v-if="declineFunction"
           :label="t(`confirm.${translationKey}.cancel`)"
