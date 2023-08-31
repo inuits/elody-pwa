@@ -295,7 +295,10 @@ watch(getUploadStatus, (status) => {
 watch(
   () => entityType.value,
   () => {
-    if (!props.predefinedEntities) {
+    if (
+      !props.predefinedEntities &&
+      router.currentRoute.value.name !== "SingleEntity"
+    ) {
       libraryBarInitializationStatus.value = "not-initialized";
       filtersBaseInitializationStatus.value = "not-initialized";
       setEntityType(entityType.value);
