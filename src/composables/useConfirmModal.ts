@@ -15,14 +15,14 @@ export const useConfirmModal = () => {
     setConfirmFunction(confirmFunc);
     setDeclineFunction(declineFunc);
     setTranslationKey(translationKey);
-    if (secondaryConfirmFunc) setSecondaryConfirmFunction(secondaryConfirmFunc);
+    setSecondaryConfirmFunction(secondaryConfirmFunc || undefined);
   };
 
   const setConfirmFunction = (func: Function) => {
     confirmFunction.value = func;
   };
 
-  const setSecondaryConfirmFunction = (func: Function) => {
+  const setSecondaryConfirmFunction = (func: Function | undefined) => {
     secondaryConfirmFunction.value = func;
   };
 
