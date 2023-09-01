@@ -52,7 +52,8 @@
               filters
                 .filter((filter) => !filter.advancedFilter.isDisplayedByDefault)
                 .filter((filter) => !filter.advancedFilter.defaultValue)
-                .map((filter) => t(filter.advancedFilter.label))
+                .filter((filter) => filter.advancedFilter.label)
+                .map((filter) => t(filter.advancedFilter.label || ''))
             "
             :placeholder="t('filters.add-filter')"
             autocomplete-style="defaultWithBorder"
@@ -63,7 +64,7 @@
       <div v-if="expandFilters && matchers.length > 0">
         <FiltersListItem
           v-for="filter in filters.filter((filter) => filter.isDisplayed)"
-          :key="filter.advancedFilter.key"
+          :key="filter.advancedFilter.key || ''"
           :filter="filter"
           :matchers="
             matchers.filter((option) =>
@@ -77,7 +78,12 @@
             activeFilters = activeFilters.filter(activeFilter => activeFilter.key !== filter.key);
             activeFilters.push(filter);
           }"
-          @deactivate-filter="(key: string) => activeFilters = activeFilters.filter(filter => filter.key !== key)"
+          @deactivate-filter="
+            (key) =>
+              (activeFilters = activeFilters.filter(
+                (filter) => filter.key !== key
+              ))
+          "
         />
       </div>
     </div>
@@ -86,7 +92,6 @@
 
 <script lang="ts" setup>
 import {
-  AdvancedFilterTypes,
   DamsIcons,
   type AdvancedFilter,
   type AdvancedFilterInput,
@@ -168,19 +173,17 @@ const handleAdvancedFilters = () => {
     if (typeof advancedFilter !== "string") {
       if (advancedFilter.defaultValue) {
         const hiddenFilter: AdvancedFilterInput = {
-          type:
-            advancedFilter.key === "type"
-              ? AdvancedFilterTypes.Type
-              : AdvancedFilterTypes.Text,
+          type: advancedFilter.type,
+          parent_key: advancedFilter.parentKey,
           key: advancedFilter.key,
           value: advancedFilter.defaultValue,
           match_exact: true,
         };
 
-        if (advancedFilter.type === AdvancedFilterTypes.Relation) {
+        if (advancedFilter.parentKey === "relations") {
           if (props.parentEntityIdentifiers.length > 0) {
-            hiddenFilter.type = advancedFilter.type;
-            hiddenFilter.parents = props.parentEntityIdentifiers;
+            if (advancedFilter.key === "key")
+              hiddenFilter.value = props.parentEntityIdentifiers;
             activeFilters.value.push(hiddenFilter);
           }
         } else activeFilters.value.push(hiddenFilter);
@@ -209,15 +212,14 @@ if (props.parentEntityIdentifiers.length > 0)
       if (isSaved.value) applyFilters();
     }
   );
-watch(labelsOfDisplayedFilters, () =>
-  filters.value.forEach(
-    (filter) =>
-      (filter.isDisplayed =
-        labelsOfDisplayedFilters.value.includes(
-          t(filter.advancedFilter.label)
-        ) || filter.advancedFilter.isDisplayedByDefault)
-  )
-);
+watch(labelsOfDisplayedFilters, () => {
+  filters.value.forEach((filter) => {
+    filter.isDisplayed =
+      labelsOfDisplayedFilters.value.includes(
+        t(filter.advancedFilter.label || "")
+      ) || !!filter.advancedFilter.isDisplayedByDefault;
+  });
+});
 watch(activeFilters, () => {
   activeFilterCount.value = 0;
 

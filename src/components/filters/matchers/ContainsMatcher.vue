@@ -7,11 +7,11 @@
 </template>
 
 <script lang="ts" setup>
-import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import type {
   AdvancedFilter,
   AdvancedFilterInput,
 } from "@/generated-types/queries";
+import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { defineEmits, ref, watch } from "vue";
 
 const props = defineProps<{
@@ -30,6 +30,7 @@ const input = ref<string | number>("");
 watch(input, () =>
   emit("newAdvancedFilterInput", {
     type: props.filter.type,
+    parent_key: props.filter.parentKey,
     key: props.filter.key,
     value: input.value ? input.value : undefined,
     match_exact: false,

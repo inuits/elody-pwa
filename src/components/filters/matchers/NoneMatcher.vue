@@ -21,6 +21,7 @@ const emit = defineEmits<{
 onMounted(() =>
   emit("newAdvancedFilterInput", {
     type: props.filter.type,
+    parent_key: props.filter.parentKey,
     key: props.filter.key,
     value: "",
   })
@@ -29,6 +30,7 @@ onMounted(() =>
 onBeforeUnmount(() =>
   emit("newAdvancedFilterInput", {
     type: props.filter.type,
+    parent_key: props.filter.parentKey,
     key: props.filter.key,
     value: undefined,
   })

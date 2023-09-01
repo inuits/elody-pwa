@@ -35,6 +35,7 @@ const determineInputType = computed<"number" | "datetime-local">(() => {
 watch(input, () =>
   emit("newAdvancedFilterInput", {
     type: props.filter.type,
+    parent_key: props.filter.parentKey,
     key: props.filter.key,
     value: {
       min: input.value,

@@ -2,6 +2,7 @@
   <BaseInputAutocomplete
     v-model="input"
     :options="autocompleteOptions"
+    autocomplete-style="default"
     @search-change="(value: string) => getAutocompleteOptions(value)"
   />
 </template>
@@ -52,13 +53,13 @@ const getAutocompleteOptions = (value: string) => {
     queryVariables.value = {
       input: {
         type: props.filter.advancedFilterInputForRetrievingOptions.type,
+        parent_key:
+          props.filter.advancedFilterInputForRetrievingOptions.parent_key,
         key: props.filter.advancedFilterInputForRetrievingOptions.key,
         value,
         item_types:
           props.filter.advancedFilterInputForRetrievingOptions.item_types ?? [],
-        provide_value_options_for_key:
-          props.filter.advancedFilterInputForRetrievingOptions
-            .provide_value_options_for_key,
+        provide_value_options_for_key: true,
       },
       limit: 999999,
     };
@@ -85,6 +86,7 @@ watch(input, () => {
 
   emit("newAdvancedFilterInput", {
     type: props.filter.type,
+    parent_key: props.filter.parentKey,
     key: props.filter.key,
     value,
     match_exact: true,

@@ -44,6 +44,7 @@ const emitNewAdvancedFilterInput = () => {
   if (min.value && max.value)
     emit("newAdvancedFilterInput", {
       type: props.filter.type,
+      parent_key: props.filter.parentKey,
       key: props.filter.key,
       value: {
         min: min.value,

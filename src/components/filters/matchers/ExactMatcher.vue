@@ -117,13 +117,13 @@ const getAutocompleteOptions = (value: string) => {
     autocompleteOptionsQueryVariables.value = {
       input: {
         type: props.filter.advancedFilterInputForRetrievingOptions.type,
+        parent_key:
+          props.filter.advancedFilterInputForRetrievingOptions.parent_key,
         key: props.filter.advancedFilterInputForRetrievingOptions.key,
         value,
         item_types:
           props.filter.advancedFilterInputForRetrievingOptions.item_types ?? [],
-        provide_value_options_for_key:
-          props.filter.advancedFilterInputForRetrievingOptions
-            .provide_value_options_for_key,
+        provide_value_options_for_key: true,
       },
       limit: 999999,
     };
@@ -164,13 +164,13 @@ onMounted(() => {
     filterOptionsQueryVariables.value = {
       input: {
         type: props.filter.advancedFilterInputForRetrievingOptions.type,
+        parent_key:
+          props.filter.advancedFilterInputForRetrievingOptions.parent_key,
         key: props.filter.advancedFilterInputForRetrievingOptions.key,
         value: props.filter.advancedFilterInputForRetrievingOptions.value,
         item_types:
           props.filter.advancedFilterInputForRetrievingOptions.item_types ?? [],
-        provide_value_options_for_key:
-          props.filter.advancedFilterInputForRetrievingOptions
-            .provide_value_options_for_key,
+        provide_value_options_for_key: true,
       },
       limit: 11,
     };
@@ -196,6 +196,7 @@ watch(input, () => {
 
   emit("newAdvancedFilterInput", {
     type: props.filter.type,
+    parent_key: props.filter.parentKey,
     key: props.filter.key,
     value,
     match_exact: true,
