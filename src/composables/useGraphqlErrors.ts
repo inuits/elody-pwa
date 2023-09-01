@@ -83,7 +83,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
           );
           console.log(`Message:`, error.message);
           console.log(`---`);
-          handleErrorByCode(error.extensions.statusCode);
+          handleErrorByCode(error.extensions?.statusCode as string);
         }
       }
     }
