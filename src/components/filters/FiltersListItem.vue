@@ -6,7 +6,7 @@
     @click="isOpen = !isOpen"
   >
     <span class="text-lg">
-      {{ t(filter.advancedFilter.label) }}
+      {{ t(filter.advancedFilter.label || "") }}
     </span>
     <unicon :name="icon" height="20" />
   </div>
@@ -44,14 +44,15 @@
 import type {
   AdvancedFilterInput,
   DropdownOption,
+  InputMaybe,
 } from "@/generated-types/queries";
 import type { FilterListItem } from "@/components/filters/FiltersBase.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import {
   BulkOperationsContextEnum,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import { computed, markRaw, ref, toRefs, watch } from "vue";
 import { DamsIcons } from "@/generated-types/queries";
 import { Unicons } from "@/types";
@@ -65,7 +66,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (event: "activateFilter", advancedFilterInput: AdvancedFilterInput): void;
-  (event: "deactivateFilter", advancedFilterKey: string): void;
+  (
+    event: "deactivateFilter",
+    advancedFilterKey: string | InputMaybe<string> | undefined
+  ): void;
 }>();
 
 const { t } = useI18n();
