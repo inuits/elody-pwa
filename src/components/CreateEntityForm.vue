@@ -152,7 +152,7 @@ const create = async () => {
 
   if (createResult && createResult.data?.createEntity?.id) {
     updateModal(TypeModals.Create, {
-      closeConfirmation: { askConfirm: false },
+      closeConfirmation: false,
     });
     closeModal(TypeModals.Create);
     createNotification({
