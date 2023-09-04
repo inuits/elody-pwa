@@ -49,6 +49,7 @@
             ? undefined
             : identifiers
         "
+        :filter-type="Entitytyping.Mediafile"
         list-item-route-name="SingleEntity"
       />
       <!-- Not yet refactored old component -->
