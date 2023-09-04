@@ -151,7 +151,7 @@ export default defineComponent({
     const initialRender = (): void => {
       console.log(source.value);
       url.value = source.value
-        ? "/api/mediafile/" + source.value.filename
+        ? "/api/mediafile/" + source.value.intialValues.filename
         : "no-src";
       pageNum.value = 1;
       scale.value = 1;
