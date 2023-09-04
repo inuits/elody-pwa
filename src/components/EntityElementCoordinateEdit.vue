@@ -42,7 +42,7 @@ const props = defineProps({
 const decimalPointStep = 0.000001;
 const { getForm } = useFormHelper();
 const id = getEntityIdFromRoute() || "";
-const form: FormContext = getForm(id);
+const form: FormContext | undefined = getForm(id);
 
 let refValue = ref(props.value);
 

@@ -17,6 +17,10 @@
       v-if="route.name !== undefined"
       :context="route.name as Context"
     />
+    <BulkOperationsEditModal
+      v-if="route.name !== undefined"
+      :context="route.name as Context"
+    />
     <ConfirmModal><ConfirmModalView /></ConfirmModal>
   </div>
 </template>
@@ -25,6 +29,7 @@
 import type { Context } from "@/composables/useBulkOperations";
 import BaseNotification from "@/components/base/BaseNotification.vue";
 import BulkoperationsModal from "@/components/bulk-operations/BulkOperationsModal.vue";
+import BulkOperationsEditModal from "@/components/bulk-operations/BulkOperationsEditModal.vue";
 import CreateModal from "@/components/CreateModal.vue";
 import EditModal from "@/components/EditModal.vue";
 import EntityPickerModal from "@/components/EntityPickerModal.vue";
@@ -45,6 +50,7 @@ export default defineComponent({
   components: {
     BaseNotification,
     BulkoperationsModal,
+    BulkOperationsEditModal,
     CreateModal,
     EditModal,
     EntityPickerModal,

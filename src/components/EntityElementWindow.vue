@@ -16,7 +16,11 @@
       </div>
 
       <div v-for="(panel, index) in panels" :key="index">
-        <entity-element-window-panel :panel="panel" />
+        <entity-element-window-panel
+          :panel="panel"
+          :is-edit="computedIsEdit"
+          :form-id="formId"
+        />
       </div>
     </div>
     <base-expand-button
@@ -42,13 +46,18 @@ import { computed } from "vue";
 import BaseExpandButton from "./base/BaseExpandButton.vue";
 import { useColumnResizeHelper } from "@/composables/useResizeHelper";
 import { useI18n } from "vue-i18n";
+import { useEditMode } from "@/composables/useEdit";
 
 const props = defineProps<{
   element: WindowElement;
+  isEditOverwrite?: boolean;
+  formId: string;
 }>();
 
 const { t } = useI18n();
 const { setColumnSizes, resetToDefaultSizes } = useColumnResizeHelper();
+const { isEdit } = useEditMode();
+const computedIsEdit = computed(() => props.isEditOverwrite || isEdit.value);
 
 const resizeColumn = (toggled: Boolean) => {
   if (toggled) {

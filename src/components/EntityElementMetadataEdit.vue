@@ -8,35 +8,55 @@
       input-style="defaultWithBorder"
     />
     <ViewModesAutocomplete
-      v-if="isDropdownType"
+      v-if="
+        isDropdownType && field.type === InputFieldTypes.DropdownMultiselect
+      "
       v-model="computedValue"
       :metadata-key-to-get-options-for="fieldKey"
       :label="label"
       select-type="single"
+    />
+    <BaseDropdownNew
+      v-if="
+        isDropdownType &&
+        field.type === InputFieldTypes.Dropdown &&
+        field.options
+      "
+      :modelValue="computedValue"
+      :options="(field.options as DropdownOption[])"
+      dropdown-style="defaultWithBorder"
+      :label="label"
+      @update:model-value="setComputedValue"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
 import type { FormContext } from "vee-validate";
-import type { InputField as InputFieldType } from "@/generated-types/queries";
+import {
+  InputFieldTypes,
+  type InputField as InputFieldType,
+} from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
-import { computed } from "vue";
-import { getEntityIdFromRoute } from "@/helpers";
+import { computed, onMounted } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
+import BaseDropdownNew from "./base/BaseDropdownNew.vue";
+import type { DropdownOption } from "@/generated-types/queries";
 
 const props = defineProps<{
   fieldKey: string;
   label: string;
   value: string;
   field?: InputFieldType;
-  formId?: string;
+  formId: string;
 }>();
-
 const { getForm } = useFormHelper();
-const id = getEntityIdFromRoute() || "";
-const form: FormContext = getForm(props.formId || id);
+let form: FormContext | undefined = undefined;
+
+onMounted(() => {
+  form = getForm(props.formId);
+});
 
 const computedValue = computed<any>({
   get() {
@@ -48,8 +68,15 @@ const computedValue = computed<any>({
   },
 });
 
+const setComputedValue = (newValue: string) => {
+  computedValue.value = newValue;
+};
+
 const isDropdownType = computed(() => {
-  const dropdownTypes = ["dropdown", "dropdownMultiselect"];
+  const dropdownTypes = [
+    InputFieldTypes.Dropdown as string,
+    InputFieldTypes.DropdownMultiselect as string,
+  ];
   let isDropdown = false;
   if (props.field) {
     isDropdown = dropdownTypes.includes(props.field.type);

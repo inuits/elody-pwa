@@ -10,8 +10,8 @@ const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
 
 export type EntityValues = {
-  intialValues: IntialValues;
-  relationValues: RelationValues;
+  intialValues?: IntialValues;
+  relationValues?: RelationValues;
 };
 
 const useFormHelper = () => {
@@ -33,8 +33,13 @@ const useFormHelper = () => {
     forms.value[key] = form;
   };
 
-  const getForm = (key: string): FormContext<any> => {
-    return forms.value[key] || undefined;
+  const getForm = (key: string): FormContext<any> | undefined => {
+    const form = forms.value[key];
+    if (!form) {
+      console.log(`Form with id ${key} does not exist. Please create it first`);
+      return undefined;
+    }
+    return form;
   };
 
   const getForms = (): { [key: string]: FormContext<any> } => {
@@ -49,10 +54,10 @@ const useFormHelper = () => {
     forms.value = {};
   };
 
-  function findPanelMetadata(
+  const findPanelMetadata = (
     obj: any,
     parentIsEditable?: boolean
-  ): PanelMetaData[] {
+  ): PanelMetaData[] => {
     const results: PanelMetaData[] = [];
 
     if (obj && obj.__typename === "PanelMetaData") {
@@ -71,7 +76,7 @@ const useFormHelper = () => {
     }
 
     return results;
-  }
+  };
 
   const getEditableMetadataKeys = (
     columnList: Record<string, any>,
