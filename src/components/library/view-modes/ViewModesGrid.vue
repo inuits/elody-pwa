@@ -43,6 +43,10 @@
       :small="listItemRouteName === 'SingleMediafile'"
       :loading="entitiesLoading"
       :is-markable-as-to-be-deleted="parentEntityIdentifiers.length > 0"
+      :is-disabled="
+        idsOfNonSelectableEntities.includes(entity.id) ||
+        idsOfNonSelectableEntities.includes(entity.uuid)
+      "
       :relation="
         relations?.find(
           (relation) =>
@@ -95,11 +99,13 @@ const props = withDefaults(
     disablePreviews?: boolean;
     enableNavigation?: boolean;
     parentEntityIdentifiers?: string[];
+    idsOfNonSelectableEntities?: string[];
   }>(),
   {
     disablePreviews: false,
     enableNavigation: true,
     parentEntityIdentifiers: () => [],
+    idsOfNonSelectableEntities: () => [],
   }
 );
 

@@ -66,6 +66,7 @@
             :disable-previews="disableNewEntityPreviews"
             :enable-navigation="enableNavigation"
             :parent-entity-identifiers="parentEntityIdentifiers"
+            :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
             @go-to-entity-page="(entity) => goToEntityPage(entity)"
           />
 
@@ -78,6 +79,7 @@
             :disable-previews="disableNewEntityPreviews"
             :enable-navigation="enableNavigation"
             :parent-entity-identifiers="parentEntityIdentifiers"
+            :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
             @go-to-entity-page="(entity) => goToEntityPage(entity)"
           />
 
@@ -144,6 +146,7 @@ const props = withDefaults(
     confirmSelectionButton?: boolean;
     enableNavigation?: boolean;
     disableNewEntityPreviews?: boolean;
+    idsOfNonSelectableEntities?: string[];
   }>(),
   {
     predefinedEntities: undefined,
@@ -156,6 +159,7 @@ const props = withDefaults(
     confirmSelectionButton: false,
     enableNavigation: true,
     disableNewEntityPreviews: false,
+    idsOfNonSelectableEntities: () => [],
   }
 );
 
