@@ -28,6 +28,7 @@
       <entity-element-window
         v-if="element.__typename === 'WindowElement'"
         :element="element"
+        :form-id="formId"
       />
       <entity-element-prom-graph
         v-if="element.__typename === 'PromGraphElement'"
@@ -51,6 +52,7 @@ import type {
   GraphElement,
   Entity,
 } from "@/generated-types/queries";
+import { getEntityIdFromRoute } from "@/helpers";
 
 export type Elements =
   | WindowElement
@@ -63,6 +65,7 @@ const props = defineProps<{
   identifiers: string[];
 }>();
 
+const formId = computed(() => getEntityIdFromRoute() as string);
 const elements = computed<Elements[]>(() => {
   const returnArray: Elements[] = [];
 

@@ -49,6 +49,7 @@
           :label="data.label"
           v-model:value="data.value"
           :field="data.field"
+          :form-id="formId"
         />
       </div>
     </div>
@@ -78,6 +79,7 @@ import EntityElementCoordinateEdit from "../EntityElementCoordinateEdit.vue";
 import type { MediaFileElement } from "@/generated-types/queries";
 import { useEditMode } from "@/composables/useEdit";
 import { Unit } from "@/generated-types/queries";
+import { getEntityIdFromRoute } from "@/helpers";
 
 const props = defineProps<{
   element: MediaFileElement;
@@ -86,6 +88,7 @@ const props = defineProps<{
 
 const zoom = ref<number>(15);
 const { isEdit } = useEditMode();
+const formId = computed(() => getEntityIdFromRoute() as string);
 
 const createNewCoordinatesObject = (coordinatesObject: any) => {
   coordinatesObject.value = { longitude: 1, latitude: 1 };

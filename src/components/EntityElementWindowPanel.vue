@@ -41,6 +41,7 @@
               :label="metadata.label"
               v-model:value="metadata.value"
               :field="metadata.field"
+              :formId="formId"
             />
           </div>
         </div>
@@ -61,18 +62,19 @@ import { computed, ref } from "vue";
 import { getMetadataFields } from "@/helpers";
 import { PanelType } from "@/generated-types/queries";
 import { Unicons } from "@/types";
-import { useEditMode } from "@/composables/useEdit";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 
 const props = defineProps<{
   panel: WindowElementPanel;
+  isEdit: boolean;
+  formId: string;
 }>();
 
 const { t } = useI18n();
 const panelType = ref<PanelType>(props.panel.panelType);
 const isCollapsed = ref<boolean>(props.panel.isCollapsed);
-const { isEdit } = useEditMode();
+const isEdit = ref<boolean>(props.isEdit);
 
 const toggleIsCollapsed = () => {
   isCollapsed.value = !isCollapsed.value;
