@@ -8,12 +8,13 @@
       },
       { '!border-status-new': isPreview },
       { '!border-status-deleted': isMarkedAsToBeDeleted },
+      { 'grayscale brightness-95 !cursor-default': isDisabled },
       { 'animate-pulse': loading },
     ]"
   >
     <div>
       <BaseInputCheckbox
-        v-if="!isPreview"
+        v-if="!isPreview && !isDisabled"
         class="text-center"
         v-model="isChecked"
         :item="{ id: itemId, teaserMetadata }"
@@ -111,6 +112,7 @@ const props = withDefaults(
     isPreview?: boolean;
     isMarkableAsToBeDeleted?: boolean;
     relation?: BaseRelationValuesInput;
+    isDisabled?: boolean;
   }>(),
   {
     itemId: "",
@@ -122,6 +124,7 @@ const props = withDefaults(
     isChecked: false,
     isPreview: false,
     isMarkableAsToBeDeleted: false,
+    isDisabled: false,
   }
 );
 
