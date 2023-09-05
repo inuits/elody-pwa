@@ -21,7 +21,7 @@
     </div>
     <div class="flex select-none">
       <div class="flex items-center mr-2 pb-0.5">
-        <span>Page</span>
+        <span>{{ t("pagination.page") }}</span>
       </div>
       <a
         v-on:click="changePageWrapper((props.pageNum - 1).toString())"
@@ -57,6 +57,7 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { Unicons } from "@/types";
+import { useI18n } from "vue-i18n";
 export default defineComponent({
   name: "PdfToolbar",
   components: {},
@@ -64,6 +65,7 @@ export default defineComponent({
   emits: ["zoomIn", "zoomOut", "changePage"],
   setup: (props, { emit }) => {
     const input = ref<HTMLInputElement | undefined>(undefined);
+    const { t } = useI18n();
 
     const changePageWrapper = (page: string): void => {
       let num = parseInt(page);
@@ -83,6 +85,7 @@ export default defineComponent({
       props,
       changePageWrapper,
       input,
+      t,
     };
   },
 });
