@@ -74,7 +74,6 @@ const props = defineProps<{
 const { t } = useI18n();
 const panelType = ref<PanelType>(props.panel.panelType);
 const isCollapsed = ref<boolean>(props.panel.isCollapsed);
-const isEdit = ref<boolean>(props.isEdit);
 
 const toggleIsCollapsed = () => {
   isCollapsed.value = !isCollapsed.value;
