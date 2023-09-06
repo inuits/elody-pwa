@@ -24,17 +24,17 @@
 
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
-import IconToggle from "./toggles/IconToggle.vue";
-import useRouteHelpers from "../composables/useRouteHelpers";
-import { Unicons } from "../types";
-import BaseButton from "./base/BaseButton.vue";
+import IconToggle from "@/components//toggles/IconToggle.vue";
+import useRouteHelpers from "@/composables/useRouteHelpers";
+import { Unicons } from "@/types";
+import BaseButton from "@/components/base/BaseButton.vue";
 import { useRoute, useRouter } from "vue-router";
-import { asString } from "../helpers";
+import { asString } from "@/helpers";
 import { useMutation } from "@vue/apollo-composable";
-import { DeleteDataDocument, Collection } from "../generated-types/queries";
-import type { DeleteDataMutation } from "../generated-types/queries";
-import useEditMode from "../composables/useEdit";
-import { usePageInfo } from "../composables/usePageInfo";
+import { DeleteDataDocument, Collection } from "@/generated-types/queries";
+import type { DeleteDataMutation } from "@/generated-types/queries";
+import useEditMode from "@/composables/useEdit";
+import { usePageInfo } from "@/composables/usePageInfo";
 
 export default defineComponent({
   name: "EditToggle",

@@ -14,10 +14,10 @@
 <script lang="ts" setup>
 import BreadCrumbs from "@/components/BreadCrumbs.vue";
 import { useAuth } from "session-vue-3-oidc-library";
-import SearchBar from "./SearchBar.vue";
-import EditToggle from "./EditButtons.vue";
+import SearchBar from "@/components/SearchBar.vue";
+import EditToggle from "@/components/toggles/EditToggle.vue";
 import { inject } from "vue";
-import LanguageSelect from "./LanguageSelect.vue";
+import LanguageSelect from "@/components/LanguageSelect.vue";
 
 const auth = useAuth();
 const config: any = inject("config");
