@@ -12,14 +12,6 @@
       :icon-off="Unicons.Eye.name"
     />
   </div>
-  <BaseButton
-    v-if="editMode === 'edit' && isEditToggleVisible === 'edit-delete'"
-    :label="$t('buttons.delete')"
-    bg-color="red-default"
-    bg-hover-color="red-dark"
-    txt-color="neutral-0"
-    @click="showConfirmation()"
-  />
 </template>
 
 <script lang="ts">
@@ -27,7 +19,6 @@ import { defineComponent, ref, watch } from "vue";
 import IconToggle from "@/components//toggles/IconToggle.vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
 import { Unicons } from "@/types";
-import BaseButton from "@/components/base/BaseButton.vue";
 import { useRoute, useRouter } from "vue-router";
 import { asString } from "@/helpers";
 import { useMutation } from "@vue/apollo-composable";
@@ -38,7 +29,7 @@ import { usePageInfo } from "@/composables/usePageInfo";
 
 export default defineComponent({
   name: "EditToggle",
-  components: { IconToggle, BaseButton },
+  components: { IconToggle },
   setup() {
     const toggleBoolean = ref<boolean>(false);
     const {
@@ -85,10 +76,6 @@ export default defineComponent({
       router.push({ name: pageInfo.value.parentRouteName });
     };
 
-    const showConfirmation = () => {
-      // TODO:
-    };
-
     return {
       isEdit,
       Unicons,
@@ -96,7 +83,6 @@ export default defineComponent({
       editMode,
       deleteAsset,
       toggleBoolean,
-      showConfirmation,
       isEditToggleVisible,
     };
   },
