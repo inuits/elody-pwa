@@ -68,16 +68,16 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const { createNotification } = useNotification();
-const { createForm } = useFormHelper();
+const { createForm, createEntityValues, formContainsValues } = useFormHelper();
 const { changeCloseConfirmation, closeModal, updateModal } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const router = useRouter();
+const formId: string = "createEntity";
 
 const form = ref<FormContext<any>>();
 const formFields = ref<PanelMetaData[]>([]);
 const idPrefix = ref<string>("");
-
-const isNotEmpty = (str: any) => str.trim() !== "";
+const formHasValues = computed(() => formContainsValues(formId));
 
 initializeConfirmModal(
   () => {
@@ -102,11 +102,6 @@ const cannotCreate = computed(() => {
   const values = Object.values(form.value?.values.intialValues);
   return values.length <= 0 || values.includes("");
 });
-const formContainsValues = computed(() => {
-  if (!form.value) return false;
-  const values = Object.values(form.value?.values.intialValues);
-  return values.some(isNotEmpty);
-});
 
 const { mutate } = useMutation<CreateEntityMutation>(CreateEntityDocument);
 const { result, onResult, refetch } = useQuery<GetCreateEntityFormQuery>(
@@ -121,16 +116,8 @@ onResult((result) => {
   const createEntityForm = result.data?.CreateEntityForm as CreateEntityForm;
   idPrefix.value = createEntityForm?.idPrefix || "";
   formFields.value = createEntityForm?.formFields.createFormFields || [];
-
-  const intialValues: any = {};
-  Object.values(formFields.value).forEach((field) => {
-    if (!field.key) return;
-    intialValues[field.key] = "";
-  });
-  form.value = createForm("createEntity", {
-    intialValues,
-    relationValues: { label: "", relations: [] },
-  });
+  const entityValues = createEntityValues(formFields.value);
+  form.value = createForm(formId, entityValues);
 });
 
 const create = async () => {
@@ -175,9 +162,9 @@ watch(
 );
 
 watch(
-  () => formContainsValues.value,
+  () => formHasValues.value,
   () => {
-    if (formContainsValues.value) {
+    if (formHasValues.value) {
       changeCloseConfirmation(TypeModals.Create, true);
     } else {
       changeCloseConfirmation(TypeModals.Create, false);

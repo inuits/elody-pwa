@@ -1,6 +1,6 @@
 <template>
   <BaseModal
-    v-if="modal"
+    v-if="modal && form"
     :modal-state="modal.state"
     :modal-position="modal.modalPosition"
     modal-width-style="w-11/12"
@@ -33,7 +33,7 @@
           <EntityElementWindow
             v-if="relationForm"
             :element="relationForm"
-            :is-edit-overwrite="true"
+            :is-edit-overwrite="editRelations"
             :form-id="formId"
           />
         </div>
@@ -43,7 +43,7 @@
           :button-label="t('bulk-operations.edit')"
           :button-icon="DamsIcons.DocumentInfo"
           :selected-items-count="getEnqueuedItemCount(context)"
-          :disabled="form.values.initialValues === undefined"
+          :disabled="!relationFormHasValues || !relationEntityId"
           @submit="bulkAddRelations()"
           @cancel="closeModal(TypeModals.BulkOperationsEdit)"
         />
@@ -79,6 +79,7 @@ import EntityElementWindow from "../EntityElementWindow.vue";
 import type {
   BulkAddRelationsMutation,
   BulkAddRelationsMutationVariables,
+  PanelMetaData,
   WindowElement,
 } from "@/generated-types/queries";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -92,7 +93,8 @@ const config = inject("config") as any;
 const { t } = useI18n();
 const { getThumbnail } = useThumbnailHelper();
 const { getModal, closeModal } = useBaseModal();
-const { createForm, forms } = useFormHelper();
+const { createForm, createEntityValues, getForm, formContainsValues } =
+  useFormHelper();
 const modal = getModal(TypeModals.BulkOperationsEdit);
 const skip = ref<number>(1);
 const limit = ref<number>(config.bulkSelectAllSizeLimit);
@@ -102,18 +104,28 @@ const entityIds = computed(() =>
   items.value.map((item: InBulkProcessableItem) => item.id)
 );
 const formId = "bulkEdit";
-const form = ref(createForm(formId, {}));
+const form = computed(() => getForm(formId));
+const relationFormHasValues = computed(() => formContainsValues(formId));
+const relationEntityId = computed((): string | undefined => {
+  const intialValues = form.value?.values.intialValues;
+  if (!intialValues) return undefined;
+  return Object.values(intialValues)[0] as string;
+});
+const editRelations = ref<boolean>(true);
 
-const { mutate: bulkAddRelations } = useMutation<
+const { mutate: mutateRelations } = useMutation<
   BulkAddRelationsMutation,
   BulkAddRelationsMutationVariables
->(BulkAddRelationsDocument, {
-  variables: {
+>(BulkAddRelationsDocument);
+
+const bulkAddRelations = () => {
+  if (!relationEntityId.value) return;
+  mutateRelations({
     entityIds: entityIds.value,
-    relationEntityId: "",
+    relationEntityId: relationEntityId.value,
     relationType: "",
-  },
-});
+  });
+};
 
 const { onResult: onRelationFormResult } =
   useQuery<GetBulkOperationsRelationFormQuery>(
@@ -122,6 +134,12 @@ const { onResult: onRelationFormResult } =
 
 onRelationFormResult((relationFormResult: any) => {
   relationForm.value = relationFormResult?.data?.BulkOperationsRelationForm;
+  const panels: any = relationForm.value;
+  if (panels) {
+    const fields = Object.values(panels.relations);
+    const entityValues = createEntityValues(fields as PanelMetaData[]);
+    createForm(formId, entityValues);
+  }
 });
 
 const loadItems = () =>
