@@ -1,10 +1,12 @@
 import type {
+  FormFields,
   IntialValues,
   PanelMetaData,
   RelationValues,
 } from "@/generated-types/queries";
+import { findPanelMetadata } from "@/helpers";
 import { useForm, type FormContext } from "vee-validate";
-import { ref } from "vue";
+import { computed, ref, type Ref } from "vue";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
@@ -15,6 +17,17 @@ export type EntityValues = {
 };
 
 const useFormHelper = () => {
+  const createEntityValues = (
+    intialValueFields: PanelMetaData[]
+  ): EntityValues => {
+    const intialValues: any = {};
+    Object.values(intialValueFields).forEach((field: PanelMetaData) => {
+      if (!field.key) return;
+      intialValues[field.key] = "";
+    });
+    return { intialValues, relationValues: { label: "", relations: [] } };
+  };
+
   const createForm = (
     key: string,
     formValues: EntityValues
@@ -54,28 +67,13 @@ const useFormHelper = () => {
     forms.value = {};
   };
 
-  const findPanelMetadata = (
-    obj: any,
-    parentIsEditable?: boolean
-  ): PanelMetaData[] => {
-    const results: PanelMetaData[] = [];
+  const __isNotEmpty = (str: any) => str.trim() !== "";
 
-    if (obj && obj.__typename === "PanelMetaData") {
-      if (parentIsEditable !== false) {
-        results.push(obj);
-      }
-    }
-
-    if (typeof obj === "object") {
-      for (const key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
-          const nestedResults = findPanelMetadata(obj[key], obj.isEditable);
-          results.push(...nestedResults);
-        }
-      }
-    }
-
-    return results;
+  const formContainsValues = (key: string) => {
+    const form = forms.value[key];
+    if (!form) return false;
+    const values = Object.values(form.values.intialValues);
+    return values.some(__isNotEmpty);
   };
 
   const getEditableMetadataKeys = (
@@ -103,6 +101,8 @@ const useFormHelper = () => {
     forms,
     getEditableMetadataKeys,
     editableFields,
+    createEntityValues,
+    formContainsValues,
   };
 };
 

@@ -233,3 +233,27 @@ export const updateLocalStorage = (key: string, data: object): void => {
   }
   window.localStorage.setItem(key, JSON.stringify(data));
 };
+
+export const findPanelMetadata = (
+  obj: any,
+  parentIsEditable?: boolean
+): PanelMetaData[] => {
+  const results: PanelMetaData[] = [];
+
+  if (obj && obj.__typename === "PanelMetaData") {
+    if (parentIsEditable !== false) {
+      results.push(obj);
+    }
+  }
+
+  if (typeof obj === "object") {
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        const nestedResults = findPanelMetadata(obj[key], obj.isEditable);
+        results.push(...nestedResults);
+      }
+    }
+  }
+
+  return results;
+};
