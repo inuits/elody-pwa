@@ -26,7 +26,10 @@
               "
             />
           </BaseTab>
-          <BaseTab :title="$t('upload.import')">
+          <BaseTab
+            v-if="config.features.hasDirectoryImport"
+            :title="$t('upload.import')"
+          >
             <upload-modal-import
               v-if="
                 getModalInfo(TypeModals.Upload).modalTabToOpen ===
@@ -79,7 +82,7 @@ import UploadModalDropzone from "./UploadModalDropzone.vue";
 import UploadModalImport from "./UploadModalImport.vue";
 import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "../composables/useMetaDataHelper";
-import { ref, watch } from "vue";
+import { ref, watch, inject } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 import {
   GetDirectoriesDocument,
@@ -94,6 +97,7 @@ const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
 const { mediafiles } = useMetaDataHelper();
 const { getModalInfo, closeModal } = useBaseModal();
 const fetchEnabled = ref(false);
+const config = inject("config") as any;
 
 const { result: directoriesQueryResult, refetch: refetchDirectoriesQuery } =
   useQuery(GetDirectoriesDocument, undefined, () => ({
