@@ -23,7 +23,7 @@
       />
     </div>
 
-    <div class="flex items-center">
+    <div v-if="media && !imageSrcError" class="flex items-center">
       <img
         v-if="media && !imageSrcError"
         class="h-10 w-10 object-cover self-center outline-none"
@@ -32,7 +32,7 @@
         "
         @error="setNoImage()"
       />
-      <div
+      <!-- <div
         v-if="(thumbIcon && !media) || (imageSrcError && thumbIcon)"
         class="h-10 w-10 flex items-center justify-center flex-col bg-center bg-no-repeat bg-cover"
         style="background-image: url(.jpg)"
@@ -41,7 +41,7 @@
           :name="thumbIcon"
           class="h-10 w-10 p-1 text-neutral-70 rounded-sm outline-none shadow-sm self-center"
         />
-      </div>
+      </div> -->
     </div>
 
     <div v-if="!loading" class="flex items-center w-full">
@@ -145,7 +145,9 @@ if (props.relation && props.isMarkableAsToBeDeleted && !props.isPreview)
     () => {
       if (props.relation)
         if (isMarkedAsToBeDeleted.value)
+          // @ts-ignore
           props.relation.editStatus = EditStatus.Deleted;
+        // @ts-ignore
         else props.relation.editStatus = EditStatus.Unchanged;
     }
   );
