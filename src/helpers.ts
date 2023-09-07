@@ -107,14 +107,13 @@ export const convertSizeToTailwind = (size: string): string => {
 };
 
 const { mediafileSelectionState } = useEntityMediafileSelector();
-const { getForm } = useFormHelper();
 
 export const getValueForPanelMetadata = (
   panelType: PanelType,
   metadataItemKey: string,
   entityId: string
 ): string => {
-  const form = getForm(entityId);
+  const form = useFormHelper().getForm(entityId);
   if (panelType === PanelType.Metadata && form) {
     return form.values.intialValues[metadataItemKey] || "";
   } else if (mediafileSelectionState.selectedMediafile) {

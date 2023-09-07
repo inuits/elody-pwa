@@ -5,6 +5,7 @@
       v-model="computedValue"
       :label="label"
       :type="field.type as any"
+      :validation="field.validation || ''"
       input-style="defaultWithBorder"
     />
     <ViewModesAutocomplete

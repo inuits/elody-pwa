@@ -1,12 +1,12 @@
 import type {
-  FormFields,
   IntialValues,
   PanelMetaData,
   RelationValues,
 } from "@/generated-types/queries";
 import { findPanelMetadata } from "@/helpers";
 import { useForm, type FormContext } from "vee-validate";
-import { computed, ref, type Ref } from "vue";
+import { ref } from "vue";
+import { object } from "yup";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
@@ -30,9 +30,14 @@ const useFormHelper = () => {
 
   const createForm = (
     key: string,
-    formValues: EntityValues
+    formValues: EntityValues,
+    validationSchemaObject: any | undefined = undefined
   ): FormContext<any> => {
+    console.log(validationSchemaObject);
+    const validationSchema = object().shape(validationSchemaObject);
+    console.log(validationSchema);
     const form = useForm<EntityValues>({
+      validationSchema,
       initialValues: {
         intialValues: formValues.intialValues,
         relationValues: formValues.relationValues,

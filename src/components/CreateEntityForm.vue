@@ -51,7 +51,7 @@ import {
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityElementMetadataEdit from "@/components/EntityElementMetadataEdit.vue";
 import urlSlug from "url-slug";
-import { computed, ref, watch } from "vue";
+import { computed, inject, ref, watch } from "vue";
 import { getMetadataFields } from "@/helpers";
 import { NotificationType } from "@/components/base/BaseNotification.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -71,6 +71,7 @@ const { createNotification } = useNotification();
 const { createForm, createEntityValues, formContainsValues } = useFormHelper();
 const { changeCloseConfirmation, closeModal, updateModal } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
+const validationSchema = inject("validationSchema") as Object;
 const router = useRouter();
 const formId: string = "createEntity";
 
@@ -117,7 +118,7 @@ onResult((result) => {
   idPrefix.value = createEntityForm?.idPrefix || "";
   formFields.value = createEntityForm?.formFields.createFormFields || [];
   const entityValues = createEntityValues(formFields.value);
-  form.value = createForm(formId, entityValues);
+  form.value = createForm(formId, entityValues, validationSchema);
 });
 
 const create = async () => {
