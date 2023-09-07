@@ -41,14 +41,19 @@ const getApplicationDetails = async () => {
       ? import.meta.env.VUE_APP_CONFIG_URL
       : "/api/translation"
   ).then((r) => r.json());
-
-  return { config, translations };
+  const validationSchema = await fetch(
+    import.meta.env.VUE_APP_CONFIG_URL
+      ? import.meta.env.VUE_APP_CONFIG_URL
+      : "/api/validation"
+  ).then((r) => r.json());
+  return { config, translations, validationSchema };
 };
 
 const start = async () => {
   Unicon.add(Object.values(Unicons));
 
-  const { config, translations } = await getApplicationDetails();
+  const { config, translations, validationSchema } =
+    await getApplicationDetails();
 
   if (config.customization) applyCustomization(config.customization);
   auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
@@ -105,6 +110,7 @@ const start = async () => {
     .use(auth)
     .use(head)
     .provide("config", config)
+    .provide("validationSchema", validationSchema)
     .provide(DefaultApolloClient, apolloClient);
 
   if (config.SENTRY_ENABLED) {
