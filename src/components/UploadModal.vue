@@ -26,10 +26,7 @@
               "
             />
           </BaseTab>
-          <BaseTab
-            v-if="config.features.hasDirectoryImport"
-            :title="$t('upload.import')"
-          >
+          <BaseTab v-if="directoriesEnabled" :title="$t('upload.import')">
             <upload-modal-import
               v-if="
                 getModalInfo(TypeModals.Upload).modalTabToOpen ===
@@ -98,10 +95,11 @@ const { mediafiles } = useMetaDataHelper();
 const { getModalInfo, closeModal } = useBaseModal();
 const fetchEnabled = ref(false);
 const config = inject("config") as any;
+const directoriesEnabled = config.features.hasDirectoryImport;
 
 const { result: directoriesQueryResult, refetch: refetchDirectoriesQuery } =
   useQuery(GetDirectoriesDocument, undefined, () => ({
-    enabled: fetchEnabled.value,
+    enabled: directoriesEnabled === false ? false : fetchEnabled.value,
   }));
 const {
   result: dropzoneEntityToCreateQueryResult,
