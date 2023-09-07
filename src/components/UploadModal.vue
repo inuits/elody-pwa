@@ -10,9 +10,7 @@
         <BaseTabs
           v-if="
             getModalInfo(TypeModals.Upload).modalTabToOpen ===
-              ModalChoices.Import &&
-            directoriesQueryResult &&
-            dropzoneEntityToCreateQueryResult
+              ModalChoices.Import && dropzoneEntityToCreateQueryResult
           "
         >
           <BaseTab :title="$t('upload.upload-files')">
