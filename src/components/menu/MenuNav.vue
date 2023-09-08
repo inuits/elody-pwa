@@ -13,7 +13,6 @@
     >
       <img src="/logo.svg" alt="Elody logo" class="h-12" />
     </router-link>
-
     <div
       v-for="menuItem in menuItems"
       :key="menuItem.label"
@@ -27,6 +26,7 @@
         :isBeingHovered="menuItem === hoveredItem"
       />
     </div>
+    <tenant-switcher />
     <LogInLogout />
   </nav>
 </template>
@@ -35,6 +35,7 @@
 import { RouterLink } from "vue-router";
 import Menuitem from "@/components/menu/MenuItem.vue";
 import LogInLogout from "@/components/LogInLogout.vue";
+import TenantSwitcher from "@/components/menu/TenantSwitcher.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { ref, computed, watch } from "vue";
 import { ModalState, type MenuItem } from "@/generated-types/queries";
