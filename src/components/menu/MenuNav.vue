@@ -1,7 +1,7 @@
 <template>
   <nav
     :class="[
-      'navbar fixed left-0 top-0 w-24 h-screen flex flex-col justify-start align-center pt-10 bg-neutral-white px-5 z-50 hover:w-80',
+      'navbar fixed left-0 top-0 w-24 h-screen align-center pt-10 bg-neutral-white px-5 z-50 hover:w-80',
       { 'w-80': isLeftModalOpened },
     ]"
     @mouseenter="changeExpandedState(true)"
@@ -13,21 +13,27 @@
     >
       <img src="/logo.svg" alt="Elody logo" class="h-12" />
     </router-link>
-    <div
-      v-for="menuItem in menuItems"
-      :key="menuItem.label"
-      @mouseenter="changeHoveredItem(menuItem)"
-      @mouseleave="changeHoveredItem(undefined)"
-    >
-      <Menuitem
-        :icon="menuItem.icon"
-        :menuitem="menuItem"
-        :isExpanded="isExpanded"
-        :isBeingHovered="menuItem === hoveredItem"
-      />
+    <div class="flex flex-col justify-between h-[86%]">
+      <div>
+        <div
+          v-for="menuItem in menuItems"
+          :key="menuItem.label"
+          @mouseenter="changeHoveredItem(menuItem)"
+          @mouseleave="changeHoveredItem(undefined)"
+        >
+          <Menuitem
+            :icon="menuItem.icon"
+            :menuitem="menuItem"
+            :isExpanded="isExpanded"
+            :isBeingHovered="menuItem === hoveredItem"
+          />
+        </div>
+      </div>
+      <div>
+        <tenant-switcher v-if="isExpanded" />
+        <LogInLogout class="mt-5 ml-3" />
+      </div>
     </div>
-    <tenant-switcher />
-    <LogInLogout />
   </nav>
 </template>
 
