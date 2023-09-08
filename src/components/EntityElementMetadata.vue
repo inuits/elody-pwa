@@ -6,6 +6,7 @@
         <p v-if="!stringIsUrl(item)">{{ item }}</p>
         <a v-else class="underline" target="_blank" :href="item">{{ item }}</a>
       </div>
+      <div v-if="readableValue.length == 0">-</div>
     </div>
     <div v-else>
       <a

@@ -4,6 +4,7 @@
       {{ label }}
     </span>
     <Multiselect
+      v-if="inputValue"
       v-model="inputValue"
       mode="tags"
       :options="options"
@@ -13,6 +14,7 @@
       :placeholder="placeholder"
       :classes="classes"
       :disabled="disabled"
+      :create-option="createOption"
       @search-change="(value: string) => {
         searchValue = value;
         emit('searchChange', value);
@@ -37,12 +39,16 @@ const props = withDefaults(
     label?: string;
     placeholder?: string;
     disabled?: boolean;
+    createOption?: boolean;
+    relation?: boolean;
   }>(),
   {
     selectType: "multi",
     label: "",
     placeholder: "",
     disabled: false,
+    createOption: false,
+    relation: false,
   }
 );
 

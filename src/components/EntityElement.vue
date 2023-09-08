@@ -19,6 +19,7 @@
         :metaKey="element.metaKey"
         :entity-list="(element.entityList as Entity[]) ?? []"
         :identifiers="identifiers"
+        :relationType="element.relationType"
       />
       <entity-element-media
         v-if="element.__typename === 'MediaFileElement'"
@@ -29,6 +30,7 @@
         v-if="element.__typename === 'WindowElement'"
         :element="element"
         :form-id="formId"
+        :identifiers="identifiers"
       />
       <entity-element-prom-graph
         v-if="element.__typename === 'PromGraphElement'"

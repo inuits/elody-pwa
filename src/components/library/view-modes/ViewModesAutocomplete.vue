@@ -3,6 +3,7 @@
     v-model="inputValue"
     :options="autocompleteOptions"
     :select-type="selectType"
+    :create-option="createOption"
     :label="label"
     autocomplete-style="defaultWithBorder"
     @search-change="(value: string) => getAutocompleteOptions(value)"
@@ -23,13 +24,17 @@ import { useQuery } from "@vue/apollo-composable";
 const props = withDefaults(
   defineProps<{
     modelValue: string[] | string | undefined;
-    metadataKeyToGetOptionsFor: string;
+    metadataKeyToGetOptionsFor?: string | "no-key";
     selectType?: "multi" | "single";
     label?: string;
+    dropdownOptions: string[];
+    createOption?: boolean;
   }>(),
   {
     selectType: "multi",
     label: "",
+    createOption: false,
+    metadataKeyToGetOptionsFor: "no-key",
   }
 );
 
@@ -69,18 +74,25 @@ const getAutocompleteOptions = (value: string) => {
   clearAutocompleteOptions();
   if (value.length < 3) return;
 
-  autocompleteOptionsQueryVariables.value = {
-    input: {
-      type: AdvancedFilterTypes.Text,
-      key: props.metadataKeyToGetOptionsFor,
-      value,
-      provide_value_options_for_key: true,
-    },
-    limit: 999999,
-  };
+  if (
+    props.dropdownOptions?.length === 0 ||
+    props.dropdownOptions === undefined
+  ) {
+    autocompleteOptionsQueryVariables.value = {
+      input: {
+        type: AdvancedFilterTypes.Text,
+        key: props.metadataKeyToGetOptionsFor,
+        value,
+        provide_value_options_for_key: true,
+      },
+      limit: 999999,
+    };
 
-  refetchAutocompleteOptionsEnabled.value = true;
-  refetchAutocompleteOptions();
+    refetchAutocompleteOptionsEnabled.value = true;
+    refetchAutocompleteOptions();
+  } else {
+    autocompleteOptions.value = props.dropdownOptions;
+  }
 };
 onAutocompleteOptionsResult((result) => {
   clearAutocompleteOptions();

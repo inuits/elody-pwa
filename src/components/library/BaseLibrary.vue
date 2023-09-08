@@ -68,6 +68,7 @@
             :parent-entity-identifiers="parentEntityIdentifiers"
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
             @go-to-entity-page="(entity) => goToEntityPage(entity)"
+            :relation-type="relationType"
           />
 
           <ViewModesGrid
@@ -81,6 +82,7 @@
             :parent-entity-identifiers="parentEntityIdentifiers"
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
             @go-to-entity-page="(entity) => goToEntityPage(entity)"
+            :relation-type="relationType"
           />
 
           <ViewModesMedia
@@ -147,6 +149,7 @@ const props = withDefaults(
     enableNavigation?: boolean;
     disableNewEntityPreviews?: boolean;
     idsOfNonSelectableEntities?: string[];
+    relationType: string;
   }>(),
   {
     predefinedEntities: undefined,
@@ -199,6 +202,7 @@ const { setEntityUuid } = useEntitySingle();
 
 const displayList = ref<boolean>(false);
 const displayGrid = ref<boolean>(false);
+const displayDropdown = ref<boolean>(false);
 const displayPreview = ref<boolean>(props.enablePreview);
 
 const expandFilters = ref<boolean>(false);

@@ -15,7 +15,8 @@
       v-model="computedValue"
       :metadata-key-to-get-options-for="fieldKey"
       :label="label"
-      select-type="single"
+      :select-type="field.type === 'dropdownMultiselect' ? 'multi' : 'single'"
+      :options="field.options"
     />
     <BaseDropdownNew
       v-if="
@@ -64,7 +65,9 @@ const computedValue = computed<any>({
     return props.value;
   },
   set(value) {
-    if (Array.isArray(value)) value = value[0];
+    if (props.field.type == "dropdown") {
+      if (Array.isArray(value)) value = value[0];
+    }
     if (form) form.setFieldValue(`intialValues.${props.fieldKey}`, value);
   },
 });

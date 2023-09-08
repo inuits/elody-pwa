@@ -1,15 +1,21 @@
-import type {
-  IntialValues,
-  PanelMetaData,
-  RelationValues,
+import {
+  EditStatus,
+  type IntialValues,
+  type PanelMetaData,
+  type RelationValues,
+  type BaseRelationValuesInput,
 } from "@/generated-types/queries";
 import { findPanelMetadata } from "@/helpers";
 import { useForm, type FormContext } from "vee-validate";
 import { ref } from "vue";
+import { useRoute } from "vue-router";
+import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
+import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { object } from "yup";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
+const { getRelationType } = useEntityPickerModal();
 
 export type EntityValues = {
   intialValues?: IntialValues;
@@ -96,6 +102,39 @@ const useFormHelper = () => {
     return keyArray;
   };
 
+  const route = useRoute();
+
+  const addRelations = (selectedItems: InBulkProcessableItem[]) => {
+    const id = route.params.id as string;
+    const form = getForm(id);
+
+    if (selectedItems.length <= 0 || !form) return;
+
+    const relations: BaseRelationValuesInput[] =
+      form.values.relationValues.relations.filter(
+        (relation: BaseRelationValuesInput) =>
+          relation.editStatus !== EditStatus.New
+      );
+    selectedItems.forEach((item) => {
+      relations.push({
+        key: item.id,
+        type: getRelationType(),
+        value: item.teaserMetadata?.find((data) => data.key === "name")?.value,
+        editStatus: EditStatus.New,
+        teaserMetadata: item.teaserMetadata?.map((metadata) => {
+          return {
+            key: metadata.key,
+            label: metadata.label,
+            value: metadata.value,
+          };
+        }),
+      });
+      console.log(item);
+    });
+
+    form.setFieldValue("relationValues.relations", relations);
+  };
+
   return {
     createForm,
     addForm,
@@ -108,6 +147,7 @@ const useFormHelper = () => {
     editableFields,
     createEntityValues,
     formContainsValues,
+    addRelations,
   };
 };
 

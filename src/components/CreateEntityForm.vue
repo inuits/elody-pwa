@@ -48,6 +48,7 @@ import {
   type GetCreateEntityFormQuery,
   type PanelMetaData,
 } from "@/generated-types/queries";
+import { IdSyntax } from "@/generated-types/type-defs";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityElementMetadataEdit from "@/components/EntityElementMetadataEdit.vue";
 import urlSlug from "url-slug";
@@ -77,7 +78,7 @@ const formId: string = "createEntity";
 
 const form = ref<FormContext<any>>();
 const formFields = ref<PanelMetaData[]>([]);
-const idPrefix = ref<string>("");
+const idSyntax = ref<IdSyntax>();
 const formHasValues = computed(() => formContainsValues(formId));
 
 initializeConfirmModal(
@@ -94,8 +95,8 @@ initializeConfirmModal(
 const type = computed(() => props.entityType);
 const id = computed(
   () =>
-    `${idPrefix.value}${urlSlug(
-      form.value?.values.intialValues["alternate_name"]
+    `${idSyntax.value.prefix}${urlSlug(
+      form.value?.values.intialValues[idSyntax.value.field]
     )}`
 );
 const cannotCreate = computed(() => {
@@ -115,7 +116,7 @@ const { result, onResult, refetch } = useQuery<GetCreateEntityFormQuery>(
 );
 onResult((result) => {
   const createEntityForm = result.data?.CreateEntityForm as CreateEntityForm;
-  idPrefix.value = createEntityForm?.idPrefix || "";
+  idSyntax.value = createEntityForm?.idSyntax;
   formFields.value = createEntityForm?.formFields.createFormFields || [];
   const entityValues = createEntityValues(formFields.value);
   form.value = createForm(formId, entityValues, validationSchema);
@@ -127,7 +128,7 @@ const create = async () => {
       id: id.value,
       identifiers: [
         id.value,
-        form.value?.values.intialValues["alternate_name"],
+        form.value?.values.intialValues[idSyntax.value.field],
       ],
       metadata: Object.keys(form.value?.values.intialValues)
         .filter((key) => key !== "__typename")

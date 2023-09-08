@@ -18,6 +18,7 @@
       <div v-for="(panel, index) in panels" :key="index">
         <entity-element-window-panel
           :panel="panel"
+          :identifiers="identifiers"
           :is-edit="computedIsEdit"
           :form-id="formId"
         />
@@ -50,6 +51,7 @@ import { useEditMode } from "@/composables/useEdit";
 
 const props = defineProps<{
   element: WindowElement;
+  identifiers: string[];
   isEditOverwrite?: boolean;
   formId: string;
 }>();
