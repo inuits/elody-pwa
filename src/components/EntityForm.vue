@@ -46,7 +46,7 @@ let form = createForm(
     intialValues: props.intialValues,
     relationValues: props.relationValues,
   },
-  validationSchema
+  //validationSchema
 );
 let mutatedEntity: Entity | undefined;
 
@@ -117,7 +117,7 @@ watch(isEdit, () => {
       intialValues: mutatedEntity?.intialValues || props.intialValues,
       relationValues: mutatedEntity?.relationValues || props.relationValues,
     },
-    validationSchema
+    //validationSchema
   );
   mutatedEntity = undefined;
 });
