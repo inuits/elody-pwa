@@ -94,9 +94,9 @@ initializeConfirmModal(
 const type = computed(() => props.entityType);
 const id = computed(
   () =>
-    `${idPrefix.value}${urlSlug(
-      form.value?.values.intialValues["alternate_name"]
-    )}`
+    `${idPrefix.value}${
+      form.value?.values.intialValues["code"] || form.value?.values.intialValues["alternate_name"]
+    }`
 );
 const cannotCreate = computed(() => {
   if (!form.value) return true;
@@ -122,13 +122,20 @@ onResult((result) => {
 });
 
 const create = async () => {
+  let identifiers: string[] = []
+  if (props.entityType === Entitytyping.User)
+    identifiers = [form.value?.values.intialValues["email"]];
+  else if (props.entityType === Entitytyping.PoliceZone)
+    identifiers = [id.value, form.value?.values.intialValues["code"]];
+  else if (props.entityType === Entitytyping.IotDevice)
+    identifiers = [id.value, form.value?.values.intialValues["alternate_name"]];
+  else
+    identifiers = [id.value];
+
   const createResult = await mutate({
     data: {
-      id: id.value,
-      identifiers: [
-        id.value,
-        form.value?.values.intialValues["alternate_name"],
-      ],
+      id: identifiers[0],
+      identifiers: identifiers,
       metadata: Object.keys(form.value?.values.intialValues)
         .filter((key) => key !== "__typename")
         .map((key) => {
