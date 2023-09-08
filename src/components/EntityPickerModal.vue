@@ -32,7 +32,12 @@
         :disable-new-entity-previews="true"
         :ids-of-non-selectable-entities="getAlreadySelectedEntityIds()"
         list-item-route-name="SingleEntity"
-        @confirm-selection="(selectedItems) => addRelations(selectedItems)"
+        @confirm-selection="
+          (selectedItems) => {
+            addRelations(selectedItems);
+            closeModal(TypeModals.EntityPicker);
+          }
+        "
       />
     </div>
   </BaseModal>
@@ -40,17 +45,12 @@
 
 <script lang="ts" setup>
 import {
-  EditStatus,
   Entitytyping,
   ModalState,
   SearchInputType,
   TypeModals,
-  type BaseRelationValuesInput,
 } from "@/generated-types/queries";
-import {
-  BulkOperationsContextEnum,
-  type InBulkProcessableItem,
-} from "@/composables/useBulkOperations";
+import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
@@ -60,7 +60,7 @@ import { useRoute } from "vue-router";
 
 const { getAcceptedTypes } = useEntityPickerModal();
 const { closeModal, getModalInfo } = useBaseModal();
-const { getForm } = useFormHelper();
+const { addRelations, getForm } = useFormHelper();
 
 const route = useRoute();
 
@@ -70,42 +70,5 @@ const getAlreadySelectedEntityIds = (): string[] => {
   return form.values.relationValues.relations.map(
     (relation: any) => relation.key
   );
-};
-
-const addRelations = (selectedItems: InBulkProcessableItem[]) => {
-  const id = route.params.id as string;
-  const form = getForm(id);
-  if (selectedItems.length <= 0 || !form) return;
-
-  const relations: BaseRelationValuesInput[] =
-    form.values.relationValues.relations.filter(
-      (relation: BaseRelationValuesInput) =>
-        relation.editStatus !== EditStatus.New
-    );
-  selectedItems.forEach((item) => {
-    relations.push({
-      key: item.id,
-      label:
-        getAcceptedTypes()[0] === Entitytyping.Mediafile
-          ? "mediafile"
-          : form.values.relationValues.label,
-      type:
-        getAcceptedTypes()[0] === Entitytyping.Mediafile
-          ? "hasMediafile"
-          : form.values.relationValues.type,
-      value: item.teaserMetadata?.find((data) => data.key === "name")?.value,
-      editStatus: EditStatus.New,
-      teaserMetadata: item.teaserMetadata?.map((metadata) => {
-        return {
-          key: metadata.key,
-          label: metadata.label,
-          value: metadata.value,
-        };
-      }),
-    });
-  });
-
-  form.setFieldValue("relationValues.relations", relations);
-  closeModal(TypeModals.EntityPicker);
 };
 </script>

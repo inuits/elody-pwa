@@ -100,6 +100,7 @@ const props = withDefaults(
     enableNavigation?: boolean;
     parentEntityIdentifiers?: string[];
     idsOfNonSelectableEntities?: string[];
+    relationType: string;
   }>(),
   {
     disablePreviews: false,
@@ -126,9 +127,6 @@ const { getForm } = useFormHelper();
 const entityId = computed<string>(() => asString(useRoute().params["id"]));
 const relations = computed<BaseRelationValuesInput[]>(
   () => getForm(entityId.value)?.values.relationValues.relations
-);
-const relationType = computed<string>(
-  () => getForm(entityId.value)?.values.relationValues.type
 );
 
 const calculateGridColumns = () => {

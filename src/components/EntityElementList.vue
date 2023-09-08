@@ -11,6 +11,7 @@
             class="underline"
             @click="() => {
               setAcceptedTypes(types as Entitytyping[]);
+              setRelationType(relationType);
               openModal(TypeModals.EntityPicker, undefined, 'right')
             }"
           >
@@ -32,6 +33,7 @@
             :parent-entity-identifiers="identifiers"
             :filter-type="types[0]"
             list-item-route-name="SingleEntity"
+            :relation-type="relationType"
           />
         </div>
       </template>
@@ -43,6 +45,7 @@
 import {
   SearchInputType,
   TypeModals,
+  EntityListViewMode,
   type Entitytyping,
   type Entity,
 } from "@/generated-types/queries";
@@ -54,21 +57,49 @@ import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
+import { watch } from "vue";
+import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
+import { useFormHelper } from "@/composables/useFormHelper";
 
-withDefaults(
+const { addRelations } = useFormHelper();
+
+const props = withDefaults(
   defineProps<{
     isCollapsed: Boolean;
     types: string[];
     label: string;
     entityList: Entity[];
     identifiers: string[];
+    relationType: string;
+    viewMode?: EntityListViewMode;
   }>(),
   {
     types: () => [],
+    viewMode: EntityListViewMode.Library,
   }
 );
 
-const { setAcceptedTypes } = useEntityPickerModal();
+watch(
+  () => props.entityList,
+  () => {
+    if (props.entityList.length > 0) {
+      updateRelationForm(props.entityList);
+    }
+  }
+);
+
+const updateRelationForm = (newTags: String[]) => {
+  if (typeof newTags == "string") {
+    return;
+  }
+  const InBulkProcessableItems: InBulkProcessableItem = newTags.map((str) => ({
+    id: str,
+  }));
+  setRelationType(props.relationType);
+  addRelations(InBulkProcessableItems);
+};
+
+const { setAcceptedTypes, setRelationType } = useEntityPickerModal();
 const { openModal } = useBaseModal();
 const { isEdit } = useEditMode();
 const { t } = useI18n();

@@ -28,8 +28,19 @@
             :key="index"
             class="py-2"
           >
+            <entity-element-list
+              v-if="metadata.__typename === 'EntityListElement'"
+              :label="(metadata.label as string)"
+              :isCollapsed="metadata.isCollapsed"
+              :types="metadata.entityTypes as string[]"
+              :metaKey="metadata.metaKey"
+              :entity-list="(metadata.entityList as Entity[]) ?? []"
+              :identifiers="identifiers"
+              :relationType="metadata.relationType"
+              :viewMode="metadata.viewMode"
+            />
             <entity-element-metadata
-              v-if="!isEdit || !metadata.field || !panel.isEditable"
+              v-else-if="!isEdit || !metadata.field || !panel.isEditable"
               :class="[{ 'opacity-60': !panel.isEditable && isEdit }]"
               :label="metadata.label"
               :value="metadata.value"
@@ -54,10 +65,12 @@
 import type {
   PanelRelation,
   WindowElementPanel,
+  Entity,
 } from "@/generated-types/queries";
 import EntityElementMetadata from "@/components/EntityElementMetadata.vue";
 import EntityElementMetadataEdit from "@/components/EntityElementMetadataEdit.vue";
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
+import EntityElementList from "@/components/EntityElementList.vue";
 import { computed, ref } from "vue";
 import { getMetadataFields } from "@/helpers";
 import { PanelType } from "@/generated-types/queries";
@@ -67,6 +80,7 @@ import { useRoute } from "vue-router";
 
 const props = defineProps<{
   panel: WindowElementPanel;
+  identifiers: string[];
   isEdit: boolean;
   formId: string;
 }>();

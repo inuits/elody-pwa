@@ -5,6 +5,7 @@ import {
   type PanelInfo,
   type PanelMetaData,
   type WindowElementPanel,
+  type EntityListElement,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -128,24 +129,27 @@ export const getMetadataFields = (
   objectToGetMetadataFrom: WindowElementPanel | PanelMetaData[],
   panelType: PanelType,
   formId: string
-): MetadataField[] => {
-  const fields: MetadataField[] = [];
+): Array<MetadataField | EntityListElement> => {
+  const fields: Array<MetadataField | EntityListElement> = [];
 
   Object.values(objectToGetMetadataFrom).forEach((value) => {
     if (!value || typeof value !== "object") return;
+    if (value.__typename && value.__typename === "EntityListElement") {
+      fields.push(value);
+    } else {
+      const key: string = (value as PanelMetaData).key;
+      const field = {
+        key: key,
+        label: (value as PanelMetaData).label,
+        unit: (value as PanelMetaData).unit,
+        value:
+          (value as PanelInfo).value ||
+          getValueForPanelMetadata(panelType, key, formId),
+        field: (value as PanelMetaData).inputField,
+      };
 
-    const key: string = (value as PanelMetaData).key;
-    const field = {
-      key: key,
-      label: (value as PanelMetaData).label,
-      unit: (value as PanelMetaData).unit,
-      value:
-        (value as PanelInfo).value ||
-        getValueForPanelMetadata(panelType, key, formId),
-      field: (value as PanelMetaData).inputField,
-    };
-
-    fields.push(field);
+      fields.push(field);
+    }
   });
 
   return fields;
