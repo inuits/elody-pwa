@@ -29,6 +29,7 @@
       :label="label"
       @update:model-value="setComputedValue"
     />
+    <span v-if="fieldError" class="text-red-default">{{ fieldError }}</span>
   </div>
 </template>
 
@@ -40,7 +41,7 @@ import {
 } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import BaseDropdownNew from "./base/BaseDropdownNew.vue";
 import type { DropdownOption } from "@/generated-types/queries";
@@ -52,8 +53,9 @@ const props = defineProps<{
   field?: InputFieldType;
   formId: string;
 }>();
-const { getForm } = useFormHelper();
+const { getForm, getFieldError } = useFormHelper();
 let form: FormContext | undefined = undefined;
+const fieldError = ref<string | undefined>(undefined);
 
 onMounted(() => {
   form = getForm(props.formId);
@@ -66,6 +68,7 @@ const computedValue = computed<any>({
   set(value) {
     if (Array.isArray(value)) value = value[0];
     if (form) form.setFieldValue(`intialValues.${props.fieldKey}`, value);
+    fieldError.value = getFieldError(props.formId, props.fieldKey);
   },
 });
 
