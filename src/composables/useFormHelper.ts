@@ -6,7 +6,7 @@ import type {
 import { findPanelMetadata } from "@/helpers";
 import { useForm, type FormContext } from "vee-validate";
 import { ref } from "vue";
-import { object } from "yup";
+import { object, string, date } from "yup";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
@@ -33,9 +33,15 @@ const useFormHelper = () => {
     formValues: EntityValues,
     validationSchemaObject: any | undefined = undefined
   ): FormContext<any> => {
-    console.log(validationSchemaObject);
-    const validationSchema = object().shape(validationSchemaObject);
-    console.log(validationSchema);
+    let validationSchema = object().shape(validationSchemaObject);
+    validationSchema = object().shape({
+      id: string().required(),
+      name: string().required(),
+      title: string().required(),
+      description: string().notRequired(),
+      email: string().email(),
+      date: date().default(() => new Date()),
+    });
     const form = useForm<EntityValues>({
       validationSchema,
       initialValues: {
@@ -70,6 +76,16 @@ const useFormHelper = () => {
 
   const deleteForms = () => {
     forms.value = {};
+  };
+
+  const getFieldError = (
+    formKey: string,
+    fieldKey: string
+  ): string | undefined => {
+    const form = getForm(formKey);
+    if (!form) return undefined;
+    const errorMessage = (form.errors as any)[fieldKey];
+    return errorMessage || undefined;
   };
 
   const __isNotEmpty = (str: any) => str.trim() !== "";
@@ -108,6 +124,7 @@ const useFormHelper = () => {
     editableFields,
     createEntityValues,
     formContainsValues,
+    getFieldError,
   };
 };
 
