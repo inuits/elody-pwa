@@ -43,7 +43,7 @@ const useFormHelper = () => {
     const validationSchema = object().shape(validationSchemaObject);
     console.log(validationSchema);
     const form = useForm<EntityValues>({
-      validationSchema,
+      //validationSchema,
       initialValues: {
         intialValues: formValues.intialValues,
         relationValues: formValues.relationValues,
