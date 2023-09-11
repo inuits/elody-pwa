@@ -6,17 +6,53 @@ import {
   type GetTenantsQuery,
 } from "@/generated-types/queries";
 import { isObject } from "chart.js/helpers";
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, inject, onMounted } from "vue";
 
-const tenants = ref<Array<{ id: string; label: string }> | "no-tenants">(
-  "no-tenants"
-);
-const selectedTenant = ref<DropdownOption | string | undefined>(undefined);
+type tenant = { id: string; label: string };
+const tenants = ref<tenant[] | "no-tenants">("no-tenants");
+const selectedTenant = ref<string | undefined>(undefined);
 
-const useTenant = (apolloClient: ApolloClient<any>) => {
-  const tenantsLoaded = ref<boolean>(false);
-  const getTenants = () => {
-    apolloClient
+const useTenant = (
+  apolloClient: ApolloClient<any>,
+  config?: { features: { hasTenantSelect: boolean } }
+) => {
+  const tenantsLoaded = ref<
+    "not-loaded" | "no-switcher" | "loaded" | "switching"
+  >("not-loaded");
+  const hasTenantSelect: boolean =
+    config && config.features.hasTenantSelect
+      ? (config.features.hasTenantSelect as boolean)
+      : false;
+  const initTenants = async () => {
+    await getTenants();
+    const tenantFromSession = await getTennantFromSession();
+    console.log(tenants.value);
+    if (
+      tenants.value !== "no-tenants" &&
+      tenantFromSession === "no-tenant-in-session"
+    ) {
+      setTennant(tenants.value[0].label, tenants.value[0].id);
+    }
+
+    if (tenantFromSession !== "no-tenant-in-session") {
+      setTennant(tenantFromSession.label, tenantFromSession.id);
+    }
+
+    tenantsLoaded.value = "loaded";
+  };
+
+  onMounted(() => {
+    if (tenants.value === "no-tenants") {
+      if (hasTenantSelect) {
+        initTenants();
+      } else {
+        tenantsLoaded.value = "no-switcher";
+      }
+    }
+  });
+
+  const getTenants = async () => {
+    return apolloClient
       .query<GetTenantsQuery>({
         query: GetTenantsDocument,
         fetchPolicy: "no-cache",
@@ -40,31 +76,8 @@ const useTenant = (apolloClient: ApolloClient<any>) => {
               });
             }
           });
-
-        fetch("/api/tenant").then(async (res) => {
-          const result = await res.json();
-          const filterResult =
-            Array.isArray(tenants.value) &&
-            tenants.value.filter((value) => {
-              return value.id === result;
-            });
-
-          if (filterResult && filterResult.length === 1) {
-            selectedTenant.value = {
-              label: filterResult[0].label,
-              value: filterResult[0].id,
-              icon: DamsIcons.NoIcon,
-            };
-          }
-        });
-
-        tenantsLoaded.value = true;
       });
   };
-
-  if (tenants.value === "no-tenants") {
-    getTenants();
-  }
 
   const tenantsAsDropdownOptions = computed<DropdownOption[]>(() => {
     const options: DropdownOption[] = [];
@@ -80,23 +93,66 @@ const useTenant = (apolloClient: ApolloClient<any>) => {
     return options;
   });
 
+  const getTennantFromSession = async (): Promise<
+    tenant | "no-tenant-in-session"
+  > => {
+    return fetch("/api/tenant").then(async (res) => {
+      const result = await res.json();
+      const filterResult =
+        Array.isArray(tenants.value) &&
+        tenants.value.filter((value) => {
+          return value.id === result;
+        });
+
+      if (filterResult && filterResult.length === 1) {
+        return { id: filterResult[0].id, label: filterResult[0].label };
+      } else {
+        return "no-tenant-in-session";
+      }
+    });
+  };
+
+  const setTennant = (label: string, id: string) => {
+    console.log(`setTenant ${id}`);
+    selectedTenant.value = id;
+  };
+
+  const setTennantInSession = (tenantId: string) => {
+    fetch("/api/tenant", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ tenant: tenantId }),
+    });
+  };
+
   watch(selectedTenant, (selectedTenantValue) => {
     selectedTenantValue &&
       isObject(selectedTenantValue) &&
-      fetch("/api/tenant", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ tenant: selectedTenantValue.value }),
-      });
+      setTennantInSession(selectedTenantValue);
+    tenantsLoaded.value = "switching";
   });
+
+  watch(tenantsLoaded, (value) => {
+    if (value === "switching") {
+      tenantsLoaded.value = "loaded";
+    }
+  });
+
+  const getLabelById = (idToFind: string) => {
+    if (tenants.value !== "no-tenants") {
+      const tenantResult = tenants.value.find(({ id }) => id === idToFind);
+      return tenantResult && tenantResult.label;
+    }
+  };
 
   return {
     tenants,
     tenantsAsDropdownOptions,
     tenantsLoaded,
     selectedTenant,
+    getLabelById,
   };
 };
 
