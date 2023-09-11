@@ -5,11 +5,13 @@ import type {
 } from "@/generated-types/queries";
 import { findPanelMetadata } from "@/helpers";
 import { useForm, type FormContext } from "vee-validate";
-import { ref } from "vue";
+import { ref, inject } from "vue";
 import { object, string, date } from "yup";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
+
+const validationSchemaObject = inject("validationSchema") as any;
 
 export type EntityValues = {
   intialValues?: IntialValues;
@@ -30,20 +32,19 @@ const useFormHelper = () => {
 
   const createForm = (
     key: string,
-    formValues: EntityValues,
-    validationSchemaObject: any | undefined = undefined
+    formValues: EntityValues
   ): FormContext<any> => {
-    let validationSchema = object().shape(validationSchemaObject);
-    validationSchema = object().shape({
-      id: string().required(),
-      name: string().required(),
-      title: string().required(),
-      description: string().notRequired(),
-      email: string().email(),
-      date: date().default(() => new Date()),
-    });
+    const validationSchema = object().shape(validationSchemaObject);
+    // validationSchema = object().shape({
+    //   id: string().required(),
+    //   name: string().required(),
+    //   title: string().required(),
+    //   description: string().notRequired(),
+    //   email: string().email(),
+    //   date: date().default(() => new Date()),
+    // });
     const form = useForm<EntityValues>({
-      validationSchema,
+      // validationSchema,
       initialValues: {
         intialValues: formValues.intialValues,
         relationValues: formValues.relationValues,

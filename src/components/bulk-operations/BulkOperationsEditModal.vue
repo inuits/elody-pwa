@@ -90,7 +90,6 @@ const props = defineProps<{
 
 const { getEnqueuedItems, getEnqueuedItemCount } = useBulkOperations();
 const config = inject("config") as any;
-const validationSchema = inject("validationSchema") as Object;
 const { t } = useI18n();
 const { getThumbnail } = useThumbnailHelper();
 const { getModal, closeModal } = useBaseModal();
@@ -139,7 +138,7 @@ onRelationFormResult((relationFormResult: any) => {
   if (panels) {
     const fields = Object.values(panels.relations);
     const entityValues = createEntityValues(fields as PanelMetaData[]);
-    createForm(formId, entityValues, validationSchema);
+    createForm(formId, entityValues);
   }
 });
 

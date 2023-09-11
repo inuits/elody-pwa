@@ -50,8 +50,7 @@ import {
 } from "@/generated-types/queries";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityElementMetadataEdit from "@/components/EntityElementMetadataEdit.vue";
-import urlSlug from "url-slug";
-import { computed, inject, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { getMetadataFields } from "@/helpers";
 import { NotificationType } from "@/components/base/BaseNotification.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -71,7 +70,6 @@ const { createNotification } = useNotification();
 const { createForm, createEntityValues, formContainsValues } = useFormHelper();
 const { changeCloseConfirmation, closeModal, updateModal } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
-const validationSchema = inject("validationSchema") as Object;
 const router = useRouter();
 const formId: string = "createEntity";
 
@@ -95,7 +93,8 @@ const type = computed(() => props.entityType);
 const id = computed(
   () =>
     `${idPrefix.value}${
-      form.value?.values.intialValues["code"] || form.value?.values.intialValues["alternate_name"]
+      form.value?.values.intialValues["code"] ||
+      form.value?.values.intialValues["alternate_name"]
     }`
 );
 const cannotCreate = computed(() => {
@@ -118,19 +117,18 @@ onResult((result) => {
   idPrefix.value = createEntityForm?.idPrefix || "";
   formFields.value = createEntityForm?.formFields.createFormFields || [];
   const entityValues = createEntityValues(formFields.value);
-  form.value = createForm(formId, entityValues, validationSchema);
+  form.value = createForm(formId, entityValues);
 });
 
 const create = async () => {
-  let identifiers: string[] = []
+  let identifiers: string[] = [];
   if (props.entityType === Entitytyping.User)
     identifiers = [form.value?.values.intialValues["email"]];
   else if (props.entityType === Entitytyping.PoliceZone)
     identifiers = [id.value, form.value?.values.intialValues["code"]];
   else if (props.entityType === Entitytyping.IotDevice)
     identifiers = [id.value, form.value?.values.intialValues["alternate_name"]];
-  else
-    identifiers = [id.value];
+  else identifiers = [id.value];
 
   const createResult = await mutate({
     data: {
