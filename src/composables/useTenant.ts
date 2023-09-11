@@ -8,7 +8,7 @@ import {
 import { isObject } from "chart.js/helpers";
 import { ref, computed, watch } from "vue";
 
-const tenants = ref<Array<{ id: string; name: string; }> | "no-tenants">(
+const tenants = ref<Array<{ id: string; label: string }> | "no-tenants">(
   "no-tenants"
 );
 const selectedTenant = ref<DropdownOption | string | undefined>(undefined);
@@ -29,14 +29,14 @@ const useTenant = (apolloClient: ApolloClient<any>) => {
           entities.results.forEach((entity) => {
             if (entity && entity.__typename === "Tenant") {
               const id = entity.intialValues.id as string;
-              const name = entity.intialValues.name as string;
+              const label = entity.intialValues.label as string;
               if (tenants.value === "no-tenants") {
                 tenants.value = [];
               }
 
               tenants.value.push({
                 id,
-                name,
+                label,
               });
             }
           });
@@ -51,7 +51,7 @@ const useTenant = (apolloClient: ApolloClient<any>) => {
 
           if (filterResult && filterResult.length === 1) {
             selectedTenant.value = {
-              label: filterResult[0].name,
+              label: filterResult[0].label,
               value: filterResult[0].id,
               icon: DamsIcons.NoIcon,
             };
@@ -72,7 +72,7 @@ const useTenant = (apolloClient: ApolloClient<any>) => {
       tenants.value.forEach((tenant) => {
         options.push({
           value: tenant.id,
-          label: tenant.name,
+          label: tenant.label,
           icon: DamsIcons.NoIcon,
         });
       });
