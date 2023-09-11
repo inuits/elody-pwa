@@ -30,7 +30,7 @@
         </div>
       </div>
       <div>
-        <tenant-switcher v-if="isExpanded" />
+        <tenant-switcher v-show="isExpanded" />
         <LogInLogout class="mt-5 ml-3" />
       </div>
     </div>
