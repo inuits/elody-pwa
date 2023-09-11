@@ -6,7 +6,7 @@ import {
   type GetTenantsQuery,
 } from "@/generated-types/queries";
 import { isObject } from "chart.js/helpers";
-import { ref, computed, watch, inject, onMounted } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 
 type tenant = { id: string; label: string };
 const tenants = ref<tenant[] | "no-tenants">("no-tenants");
@@ -134,8 +134,9 @@ const useTenant = (
     tenantsLoaded.value = "switching";
   });
 
-  watch(tenantsLoaded, (value) => {
+  watch(tenantsLoaded, async (value) => {
     if (value === "switching") {
+      await apolloClient.cache.reset();
       tenantsLoaded.value = "loaded";
     }
   });
