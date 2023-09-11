@@ -17,7 +17,7 @@ import {
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { asString } from "@/helpers";
-import { computed, inject, onMounted, onUnmounted, watch } from "vue";
+import { computed, onMounted, onUnmounted, watch } from "vue";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper, type EntityValues } from "@/composables/useFormHelper";
 import { useMutation } from "@vue/apollo-composable";
@@ -33,21 +33,16 @@ const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const { isEdit, addSaveCallback, refetchFn } = useEditMode();
 const { createForm, editableFields } = useFormHelper();
 const entityId = computed(() => asString(useRoute().params["id"]));
-const validationSchema = inject("validationSchema") as Object;
 
 const { mutate } = useMutation<
   MutateEntityValuesMutation,
   MutateEntityValuesMutationVariables
 >(MutateEntityValuesDocument);
 
-let form = createForm(
-  entityId.value,
-  {
-    intialValues: props.intialValues,
-    relationValues: props.relationValues,
-  },
-  //validationSchema
-);
+let form = createForm(entityId.value, {
+  intialValues: props.intialValues,
+  relationValues: props.relationValues,
+});
 let mutatedEntity: Entity | undefined;
 
 const { setValues } = form;
@@ -111,14 +106,10 @@ watch(isEdit, () => {
   dequeueAllItemsForBulkProcessing(
     BulkOperationsContextEnum.EntityElementMediaEntityPickerModal
   );
-  form = createForm(
-    entityId.value,
-    {
-      intialValues: mutatedEntity?.intialValues || props.intialValues,
-      relationValues: mutatedEntity?.relationValues || props.relationValues,
-    },
-    //validationSchema
-  );
+  form = createForm(entityId.value, {
+    intialValues: mutatedEntity?.intialValues || props.intialValues,
+    relationValues: mutatedEntity?.relationValues || props.relationValues,
+  });
   mutatedEntity = undefined;
 });
 </script>
