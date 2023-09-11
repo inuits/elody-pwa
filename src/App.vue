@@ -2,31 +2,35 @@
   <div>
     <BaseNotification />
     <the-navigation class="navbar" />
-    <div class="bg-neutral-lightest" :class="[`pl-24 h-screen flex flex-col`]">
-      <the-header />
-      <div :class="['flex-grow', { 'h-full overflow-hidden': isSingle }]">
-        <router-view />
+    <div v-if="tenantsLoaded !== 'not-loaded' && tenantsLoaded !== 'switching'">
+      <div
+        class="bg-neutral-lightest"
+        :class="[`pl-24 h-screen flex flex-col`]"
+      >
+        <the-header />
+        <div :class="['flex-grow', { 'h-full overflow-hidden': isSingle }]">
+          <router-view />
+        </div>
+        <edit-modal />
       </div>
-      <edit-modal />
+      <upload-modal />
+      <EntityPickerModal />
+      <create-modal />
+      <search-saved-searches-modal />
+      <BulkoperationsModal
+        v-if="route.name !== undefined"
+        :context="route.name as Context"
+      />
+      <BulkOperationsEditModal
+        v-if="route.name !== undefined"
+        :context="route.name as Context"
+      />
+      <ConfirmModal><ConfirmModalView /></ConfirmModal>
     </div>
-    <upload-modal />
-    <EntityPickerModal />
-    <create-modal />
-    <search-saved-searches-modal />
-    <BulkoperationsModal
-      v-if="route.name !== undefined"
-      :context="route.name as Context"
-    />
-    <BulkOperationsEditModal
-      v-if="route.name !== undefined"
-      :context="route.name as Context"
-    />
-    <ConfirmModal><ConfirmModalView /></ConfirmModal>
   </div>
 </template>
 
 <script lang="ts">
-import type { Context } from "@/composables/useBulkOperations";
 import BaseNotification from "@/components/base/BaseNotification.vue";
 import BulkoperationsModal from "@/components/bulk-operations/BulkOperationsModal.vue";
 import BulkOperationsEditModal from "@/components/bulk-operations/BulkOperationsEditModal.vue";
@@ -39,11 +43,14 @@ import TheNavigation from "@/components/menu/MenuNav.vue";
 import UploadModal from "@/components/UploadModal.vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
 import { DefaultOIDC, useAuth } from "session-vue-3-oidc-library";
-import { defineComponent, ref } from "vue";
+import { defineComponent, inject, ref } from "vue";
 import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
 import ConfirmModal from "./components/base/ConfirmModal.vue";
 import ConfirmModalView from "./components/ConfirmModalView.vue";
+import useTenant from "@/composables/useTenant";
+import { DefaultApolloClient } from "@vue/apollo-composable";
+import type { ApolloClient } from "@apollo/client/core";
 
 export default defineComponent({
   name: "App",
@@ -67,6 +74,8 @@ export default defineComponent({
     const { isSingle } = useRouteHelpers();
     const contentPadding = ref("24");
     const route = useRoute();
+    const apolloClient = inject(DefaultApolloClient);
+    const { tenantsLoaded } = useTenant(apolloClient as ApolloClient<any>);
 
     // TODO: Fix vite migrations
     const getIndexValue = () => {
@@ -93,6 +102,7 @@ export default defineComponent({
       isSingle,
       contentPadding,
       route,
+      tenantsLoaded,
     };
   },
 });
