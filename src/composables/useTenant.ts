@@ -31,11 +31,11 @@ const useTenant = (
       tenants.value !== "no-tenants" &&
       tenantFromSession === "no-tenant-in-session"
     ) {
-      setTennant(tenants.value[0].label, tenants.value[0].id);
+      await setTennant(tenants.value[0].label, tenants.value[0].id);
     }
 
     if (tenantFromSession !== "no-tenant-in-session") {
-      setTennant(tenantFromSession.label, tenantFromSession.id);
+      await setTennant(tenantFromSession.label, tenantFromSession.id);
     }
 
     tenantsLoaded.value = "loaded";
@@ -112,12 +112,12 @@ const useTenant = (
     });
   };
 
-  const setTennant = (label: string, id: string) => {
-    console.log(`setTenant ${id}`);
+  const setTennant = async (label: string, id: string) => {
+    setTennantInSession(id);
     selectedTenant.value = id;
   };
 
-  const setTennantInSession = (tenantId: string) => {
+  const setTennantInSession = async (tenantId: string) => {
     fetch("/api/tenant", {
       method: "POST",
       headers: {
