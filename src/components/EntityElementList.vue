@@ -24,7 +24,9 @@
           <BaseLibrary
             class="flex-1"
             :bulk-operations-context="
-              BulkOperationsContextEnum.EntityElementList
+              createCustomContext(
+                BulkOperationsContextEnum.EntityElementList + relationType
+              )
             "
             :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
             :enable-advanced-filters="false"
@@ -53,15 +55,19 @@ import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import useEditMode from "@/composables/useEdit";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
+import {
+  BulkOperationsContextEnum,
+  useBulkOperations,
+  type InBulkProcessableItem,
+} from "@/composables/useBulkOperations";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 import { watch } from "vue";
-import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { useFormHelper } from "@/composables/useFormHelper";
 
 const { addRelations } = useFormHelper();
+const { createCustomContext } = useBulkOperations();
 
 const props = withDefaults(
   defineProps<{

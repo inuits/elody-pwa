@@ -29,6 +29,12 @@ for (const key of [
 const contextWhereSelectionEventIsTriggered = ref<"" | Context>("");
 
 export const useBulkOperations = () => {
+  const createCustomContext = (bulkOperation: string) => {
+    BulkOperationsContextEnum[bulkOperation] = bulkOperation;
+    items.value[bulkOperation] = [];
+    return BulkOperationsContextEnum[bulkOperation];
+  };
+
   const enqueueItemForBulkProcessing = (
     context: Context,
     inBulkProcessableItem: InBulkProcessableItem
@@ -70,6 +76,7 @@ export const useBulkOperations = () => {
 
   return {
     contextWhereSelectionEventIsTriggered,
+    createCustomContext,
     enqueueItemForBulkProcessing,
     dequeueItemForBulkProcessing,
     dequeueAllItemsForBulkProcessing,
