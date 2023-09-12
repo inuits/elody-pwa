@@ -15,6 +15,7 @@
     </router-link>
     <div class="flex flex-col justify-between h-[86%]">
       <div>
+        <tenant-switcher :is-visible="isExpanded" />
         <div
           v-for="menuItem in menuItems"
           :key="menuItem.label"
@@ -30,7 +31,6 @@
         </div>
       </div>
       <div>
-        <tenant-switcher v-show="isExpanded" />
         <LogInLogout class="mt-5 ml-3" />
       </div>
     </div>
