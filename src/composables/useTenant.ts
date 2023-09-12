@@ -5,7 +5,6 @@ import {
   type DropdownOption,
   type GetTenantsQuery,
 } from "@/generated-types/queries";
-import { isObject } from "chart.js/helpers";
 import { ref, computed, watch, onMounted } from "vue";
 
 type tenant = { id: string; label: string };
@@ -127,9 +126,7 @@ const useTenant = (
   };
 
   watch(selectedTenant, (selectedTenantValue) => {
-    selectedTenantValue &&
-      isObject(selectedTenantValue) &&
-      setTennantInSession(selectedTenantValue);
+    selectedTenantValue && setTennantInSession(selectedTenantValue);
     tenantsLoaded.value = "switching";
   });
 
