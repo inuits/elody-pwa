@@ -1,11 +1,14 @@
 <template>
-  <div v-show="tenantsLoaded === 'loaded'">
-    <BaseDropdownNew
-      v-model="computedValue"
-      :options="tenantsAsDropdownOptions"
-      label="Tenant"
-      dropdown-style="defaultWithBorder"
-    />
+  <div class="min-height-custom block">
+    <div v-show="isVisible">
+      <BaseDropdownNew
+        v-show="tenantsLoaded === 'loaded'"
+        v-model="computedValue"
+        :options="tenantsAsDropdownOptions"
+        label="Tenant"
+        dropdown-style="defaultWithBorder"
+      />
+    </div>
   </div>
 </template>
 
@@ -20,6 +23,13 @@ import { DamsIcons } from "@/generated-types/queries";
 
 const apolloClient = inject(DefaultApolloClient);
 const config = inject<{ features: { hasTenantSelect: boolean } }>("config");
+
+withDefaults(
+  defineProps<{
+    isVisible: boolean;
+  }>(),
+  { isVisible: false }
+);
 
 const {
   tenantsAsDropdownOptions,
@@ -43,3 +53,8 @@ const computedValue = computed<DropdownOption>({
   },
 });
 </script>
+<style scoped>
+.min-height-custom {
+  min-height: 2rem;
+}
+</style>
