@@ -63,7 +63,7 @@
       <div class="bg-neutral-100 h-4 w-5/6 opacity-40"></div>
     </div>
 
-    <div v-if="isEdit && isMarkableAsToBeDeleted && !isPreview" @click.stop>
+    <div v-if="isEdit && isMarkableAsToBeDeleted" @click.stop>
       <BaseToggle
         v-model="isMarkedAsToBeDeleted"
         :icon-on="DamsIcons.CrossCircle"
@@ -113,6 +113,7 @@ const props = withDefaults(
     isMarkableAsToBeDeleted?: boolean;
     relation?: BaseRelationValuesInput;
     isDisabled?: boolean;
+    relations?: BaseRelationValuesInput[];
   }>(),
   {
     itemId: "",
@@ -139,16 +140,24 @@ const setNoImage = () => {
 
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 
-if (props.relation && props.isMarkableAsToBeDeleted && !props.isPreview)
-  watch(
-    () => isMarkedAsToBeDeleted.value,
-    () => {
-      if (props.relation)
-        if (isMarkedAsToBeDeleted.value)
-          // @ts-ignore
-          props.relation.editStatus = EditStatus.Deleted;
+watch(
+  () => isMarkedAsToBeDeleted.value,
+  () => {
+    if (props.relation)
+      if (props.isPreview) removePreviewItem();
+      else if (isMarkedAsToBeDeleted.value)
         // @ts-ignore
-        else props.relation.editStatus = EditStatus.Unchanged;
-    }
+        props.relation.editStatus = EditStatus.Deleted;
+      // @ts-ignore
+      else props.relation.editStatus = EditStatus.Unchanged;
+  }
+);
+
+const removePreviewItem = () => {
+  const indexToRemove = props.relations?.findIndex(
+    (item) => item.key === props.relation.key
   );
+
+  if (indexToRemove !== -1) props.relations?.splice(indexToRemove, 1);
+};
 </script>
