@@ -3,7 +3,9 @@
     <div
       v-if="!disablePreviews"
       v-for="item in relations?.filter(
-        (relation) => relation.editStatus === EditStatus.New
+        (relation) =>
+          relation.editStatus === EditStatus.New &&
+          relation.type === relationType
       )"
       class="w-full"
     >
@@ -22,6 +24,7 @@
               relation.key === item.key && relation.type === relationType
           )
         "
+        :relations="relations"
       />
     </div>
     <GridItem
@@ -53,6 +56,7 @@
             relation.key === entity.id && relation.type === relationType
         )
       "
+      :relations="relations"
       @click="
         entitiesLoading || !enableNavigation
           ? !enableNavigation &&
@@ -82,13 +86,12 @@ import {
 import GridItem from "@/components/GridItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
-import { asString } from "@/helpers";
+import { getEntityIdFromRoute } from "@/helpers";
 import { computed, inject, onMounted, onUnmounted } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { useRoute } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -124,7 +127,7 @@ const { getMediaFilenameFromEntity } = useListItemHelper();
 const { getThumbnail } = useThumbnailHelper();
 const { getForm } = useFormHelper();
 
-const entityId = computed<string>(() => asString(useRoute().params["id"]));
+const entityId = computed(() => getEntityIdFromRoute() as string);
 const relations = computed<BaseRelationValuesInput[]>(
   () => getForm(entityId.value)?.values.relationValues.relations
 );
