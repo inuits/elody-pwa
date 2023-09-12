@@ -26,7 +26,6 @@ const useTenant = (
   const initTenants = async () => {
     await getTenants();
     const tenantFromSession = await getTennantFromSession();
-    console.log(tenants.value);
     if (
       tenants.value !== "no-tenants" &&
       tenantFromSession === "no-tenant-in-session"
