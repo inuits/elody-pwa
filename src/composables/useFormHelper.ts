@@ -39,9 +39,7 @@ const useFormHelper = () => {
     formValues: EntityValues,
     validationSchemaObject: any | undefined = undefined
   ): FormContext<any> => {
-    console.log(validationSchemaObject);
     const validationSchema = object().shape(validationSchemaObject);
-    console.log(validationSchema);
     const form = useForm<EntityValues>({
       //validationSchema,
       initialValues: {
@@ -111,10 +109,7 @@ const useFormHelper = () => {
     if (selectedItems.length <= 0 || !form) return;
 
     const relations: BaseRelationValuesInput[] =
-      form.values.relationValues.relations.filter(
-        (relation: BaseRelationValuesInput) =>
-          relation.editStatus !== EditStatus.New
-      );
+      form.values.relationValues.relations;
     selectedItems.forEach((item) => {
       relations.push({
         key: item.id,
@@ -129,7 +124,6 @@ const useFormHelper = () => {
           };
         }),
       });
-      console.log(item);
     });
 
     form.setFieldValue("relationValues.relations", relations);
