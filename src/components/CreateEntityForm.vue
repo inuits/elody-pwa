@@ -157,7 +157,7 @@ const create = async () => {
     });
     router.push({
       name: "SingleEntity",
-      params: { id: id.value },
+      params: { id: createResult.data.createEntity.id },
     });
   }
 };
