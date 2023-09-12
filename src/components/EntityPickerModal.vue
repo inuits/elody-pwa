@@ -3,18 +3,17 @@
     :modal-state="getModalInfo(TypeModals.EntityPicker).state"
     :modal-position="getModalInfo(TypeModals.EntityPicker).modalPosition"
     modal-width-style="w-10/12"
-    @hide-modal="closeModal(TypeModals.EntityPicker)"
+    @hide-modal="
+      () => {
+        dequeueAllItemsForBulkProcessing(getContext());
+        closeModal(TypeModals.EntityPicker);
+      }
+    "
   >
     <div class="flex flex-col w-full h-full overflow-auto py-6">
       <BaseLibrary
         v-if="getModalInfo(TypeModals.EntityPicker).state === ModalState.Show"
-        :bulk-operations-context="
-          getAcceptedTypes().length > 0
-            ? getAcceptedTypes()[0] !== Entitytyping.Mediafile
-              ? BulkOperationsContextEnum.EntityElementListEntityPickerModal
-              : BulkOperationsContextEnum.EntityElementMediaEntityPickerModal
-            : BulkOperationsContextEnum.EntityElementListEntityPickerModal
-        "
+        :bulk-operations-context="getContext()"
         :search-input-type-on-drawer="
           getAcceptedTypes().length > 0
             ? getAcceptedTypes()[0] !== Entitytyping.Mediafile
@@ -35,6 +34,7 @@
         @confirm-selection="
           (selectedItems) => {
             addRelations(selectedItems);
+            dequeueAllItemsForBulkProcessing(getContext());
             closeModal(TypeModals.EntityPicker);
           }
         "
@@ -50,7 +50,10 @@ import {
   SearchInputType,
   TypeModals,
 } from "@/generated-types/queries";
-import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
+import {
+  BulkOperationsContextEnum,
+  useBulkOperations,
+} from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
@@ -61,6 +64,7 @@ import { useRoute } from "vue-router";
 const { getAcceptedTypes } = useEntityPickerModal();
 const { closeModal, getModalInfo } = useBaseModal();
 const { addRelations, getForm } = useFormHelper();
+const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 
 const route = useRoute();
 
@@ -70,5 +74,18 @@ const getAlreadySelectedEntityIds = (): string[] => {
   return form.values.relationValues.relations.map(
     (relation: any) => relation.key
   );
+};
+
+const getContext = () => {
+  const acceptedTypes = getAcceptedTypes();
+  if (acceptedTypes.length > 0) {
+    if (acceptedTypes[0] !== Entitytyping.Mediafile) {
+      return BulkOperationsContextEnum.EntityElementListEntityPickerModal;
+    } else {
+      return BulkOperationsContextEnum.EntityElementMediaEntityPickerModal;
+    }
+  } else {
+    return BulkOperationsContextEnum.EntityElementListEntityPickerModal;
+  }
 };
 </script>

@@ -236,16 +236,20 @@ const { result: allEntitiesResult } = useQuery(
 );
 const bulkSelect = (items = entities.value) => {
   if (props.predefinedEntities) items = props.predefinedEntities;
-
-  for (let entity of items)
-    enqueueItemForBulkProcessing(props.bulkOperationsContext, {
-      id: entity.uuid,
-      teaserMetadata: formatTeaserMetadata(
-        entity.teaserMetadata,
-        entity.intialValues
-      ),
-    });
-
+  for (let entity of items) {
+    if (
+      !props.idsOfNonSelectableEntities.includes(entity.id) ||
+      !props.idsOfNonSelectableEntities.includes(entity.uuid)
+    ) {
+      enqueueItemForBulkProcessing(props.bulkOperationsContext, {
+        id: entity.uuid,
+        teaserMetadata: formatTeaserMetadata(
+          entity.teaserMetadata,
+          entity.intialValues
+        ),
+      });
+    }
+  }
   triggerBulkSelectionEvent(props.bulkOperationsContext);
 };
 
