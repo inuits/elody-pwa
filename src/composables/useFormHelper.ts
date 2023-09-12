@@ -61,7 +61,6 @@ const useFormHelper = () => {
   const getForm = (key: string): FormContext<any> | undefined => {
     const form = forms.value[key];
     if (!form) {
-      console.log(`Form with id ${key} does not exist. Please create it first`);
       return undefined;
     }
     return form;
