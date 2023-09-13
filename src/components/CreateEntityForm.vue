@@ -94,7 +94,8 @@ const id = computed(
   () =>
     `${idPrefix.value}${
       form.value?.values.intialValues["code"] ||
-      form.value?.values.intialValues["alternate_name"]
+      form.value?.values.intialValues["alternate_name"] ||
+      form.value?.values.intialValues["employee_number"]
     }`
 );
 const cannotCreate = computed(() => {
@@ -123,7 +124,7 @@ onResult((result) => {
 const create = async () => {
   let identifiers: string[] = [];
   if (props.entityType === Entitytyping.User)
-    identifiers = [form.value?.values.intialValues["email"]];
+    identifiers = [id.value, form.value?.values.intialValues["email"]];
   else if (props.entityType === Entitytyping.PoliceZone)
     identifiers = [id.value, form.value?.values.intialValues["code"]];
   else if (props.entityType === Entitytyping.IotDevice)
