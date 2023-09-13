@@ -1,7 +1,7 @@
 <template>
   <div v-if="field" class="text-sm pl-4 flex justify-between">
     <BaseInputTextNumberDatetime
-      v-model="refValue.longitude"
+      v-model="computedLongitude"
       class="h-1/2"
       label="Longitude"
       :type="field.type as any"
@@ -9,7 +9,7 @@
       input-style="defaultWithBorder"
     />
     <BaseInputTextNumberDatetime
-      v-model="refValue.latitude"
+      v-model="computedLatitude"
       class="h-1/2"
       label="Latitude"
       :type="field.type as any"
@@ -24,7 +24,7 @@ import type { FormContext } from "vee-validate";
 import type { InputField as InputFieldType } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { getEntityIdFromRoute } from "@/helpers";
-import { ref, type PropType, watch, onMounted } from "vue";
+import { type PropType, computed } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 
 export type Location = {
@@ -44,8 +44,6 @@ const { getForm } = useFormHelper();
 const id = getEntityIdFromRoute() || "";
 const form: FormContext | undefined = getForm(id);
 
-let refValue = ref(props.value);
-
 const setFormValues = (latitude: string, longitude: string) => {
   if (form) {
     form.setFieldValue(`intialValues.${props.fieldKey}`, {
@@ -55,11 +53,21 @@ const setFormValues = (latitude: string, longitude: string) => {
   }
 };
 
-onMounted(() =>
-  setFormValues(refValue.value.latitude, refValue.value.longitude)
-);
+const computedLongitude = computed<any>({
+  get() {
+    return props.value.longitude;
+  },
+  set(value) {
+    if (form) setFormValues(computedLatitude.value, value);
+  },
+});
 
-watch(refValue.value, (value: Location) =>
-  setFormValues(value.latitude, value.longitude)
-);
+const computedLatitude = computed<any>({
+  get() {
+    return props.value.latitude;
+  },
+  set(value) {
+    if (form) setFormValues(value, computedLongitude.value);
+  },
+});
 </script>
