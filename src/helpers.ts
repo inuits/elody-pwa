@@ -37,10 +37,15 @@ export const i18n = (translations: Object, applicationLocale: string) => {
 
 export const asString = (x: string | string[]) => (Array.isArray(x) ? x[0] : x);
 
-export const stringIsUrl = (value: string): Boolean => {
+export const stringIsUrl = (value: unknown): Boolean => {
   let isUrl: Boolean = false;
-  if (value.includes("http://") || value.includes("https://")) {
-    isUrl = true;
+  if (value && typeof value !== "string") {
+    return isUrl;
+  } else {
+    const stringValue = value as string;
+    if (stringValue.includes("http://") || stringValue.includes("https://")) {
+      isUrl = true;
+    }
   }
   return isUrl;
 };
