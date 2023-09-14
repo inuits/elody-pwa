@@ -251,13 +251,17 @@ watch(
   },
   { immediate: true }
 );
-watch(() => selectedOption.value, (value) => {
-  if (selectedOptionIsNotDefaultOption.value)
-    if (typeof props.modelValue === "string") emit("update:modelValue", value);
-    else {
-      emit("update:modelValue", value);
-    }
-});
+watch(
+  () => selectedOption.value,
+  (value) => {
+    if (selectedOptionIsNotDefaultOption.value)
+      if (typeof props.modelValue === "string")
+        emit("update:modelValue", value);
+      else {
+        emit("update:modelValue", value);
+      }
+  }
+);
 </script>
 
 <style>

@@ -130,7 +130,7 @@ import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSele
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
-import { watch, ref, onMounted, inject, computed } from "vue";
+import { watch, ref, onMounted, inject, computed, onUnmounted } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -288,7 +288,11 @@ onMounted(() => {
       iconOff: DamsIcons.Image,
     });
   setDisplayPreferences();
+
+  if (props.parentEntityIdentifiers.length <= 0)
+    window.addEventListener("popstate", getEntities);
 });
+onUnmounted(() => window.removeEventListener("popstate", getEntities));
 
 watch(getUploadStatus, (status) => {
   if (status === "success") {
