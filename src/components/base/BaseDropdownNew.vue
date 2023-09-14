@@ -221,6 +221,7 @@ const optionLabel = (option: DropdownOption) => {
 };
 
 const selectedOptionIsNotDefaultOption = computed<boolean>(() => {
+  console.log(selectedOption.value, defaultOption);
   return (
     selectedOption.value.icon !== defaultOption.icon &&
     selectedOption.value.label !== defaultOption.label &&
@@ -236,22 +237,28 @@ const collapseDropdown = (event: MouseEvent) => {
 onMounted(() => document.addEventListener("click", collapseDropdown));
 onUnmounted(() => document.removeEventListener("click", collapseDropdown));
 
-watch(modelValue, (value) =>
-  value === undefined
-    ? (selectedOption.value = defaultOption)
-    : typeof value === "string"
-    ? (selectedOption.value = {
-        icon: DamsIcons.NoIcon,
-        label: value,
-        value: value,
-      })
-    : (selectedOption.value = value)
+watch(
+  modelValue,
+  (value) => {
+    value === undefined
+      ? (selectedOption.value = defaultOption)
+      : typeof value === "string"
+      ? (selectedOption.value = {
+          icon: DamsIcons.NoIcon,
+          label: value,
+          value: value,
+        })
+      : (selectedOption.value = value);
+  },
+  { immediate: true }
 );
-watch(selectedOption, (value) => {
+watch(selectedOption.value, (value) => {
   if (selectedOptionIsNotDefaultOption.value)
-    if (typeof props.modelValue === "string")
-      emit("update:modelValue", value.value);
-    else emit("update:modelValue", value);
+    if (typeof props.modelValue === "string") emit("update:modelValue", value);
+    else {
+      console.log(value);
+      emit("update:modelValue", value);
+    }
 });
 </script>
 
