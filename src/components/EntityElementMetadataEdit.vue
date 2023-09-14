@@ -72,8 +72,9 @@ const computedValue = computed<any>({
   },
 });
 
-const setComputedValue = (newValue: string) => {
-  computedValue.value = newValue;
+const setComputedValue = (newDropdownOption: DropdownOption) => {
+  if (computedValue.value === newDropdownOption.value) return;
+  computedValue.value = newDropdownOption.value;
 };
 
 const isDropdownType = computed(() => {
