@@ -256,7 +256,6 @@ watch(selectedOption.value, (value) => {
   if (selectedOptionIsNotDefaultOption.value)
     if (typeof props.modelValue === "string") emit("update:modelValue", value);
     else {
-      console.log(value);
       emit("update:modelValue", value);
     }
 });
