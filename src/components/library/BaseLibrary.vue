@@ -289,8 +289,7 @@ onMounted(() => {
     });
   setDisplayPreferences();
 
-  if (props.parentEntityIdentifiers.length <= 0)
-    window.addEventListener("popstate", getEntities);
+  if (route.name === "Home") window.addEventListener("popstate", getEntities);
 });
 onUnmounted(() => window.removeEventListener("popstate", getEntities));
 
@@ -300,6 +299,15 @@ watch(getUploadStatus, (status) => {
     setUploadStatus("no-upload");
   }
 });
+watch(
+  () => route.path,
+  () => {
+    if (route.name === "Home") window.addEventListener("popstate", getEntities);
+    else if (route.name !== "SingleEntity")
+      window.removeEventListener("popstate", getEntities);
+  },
+  { immediate: true }
+);
 watch(
   () => entityType.value,
   () => {
@@ -318,6 +326,9 @@ watch(
       if (searchInputType === queryVariables.value.searchInputType)
         getEntities();
       else queryVariables.value.searchInputType = searchInputType;
+
+      if (route.name !== "Home" && route.name !== "SingleEntity")
+        window.removeEventListener("popstate", getEntities);
     }
   }
 );
