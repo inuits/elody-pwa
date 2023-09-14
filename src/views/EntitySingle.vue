@@ -100,7 +100,7 @@ watch(result, () => {
   }
 
   if (auth.isAuthenticated.value === true) showEditToggle("edit");
-  setCurrentRouteTitle(entity.intialValues?.title);
+  setCurrentRouteTitle(entity.intialValues?.title || entity.intialValues?.name);
   addVisitedRoute({ id: entity.id, routeName: currentRouteTitle.value });
 
   setRefetchFn(refetch);
