@@ -221,7 +221,6 @@ const optionLabel = (option: DropdownOption) => {
 };
 
 const selectedOptionIsNotDefaultOption = computed<boolean>(() => {
-  console.log(selectedOption.value, defaultOption);
   return (
     selectedOption.value.icon !== defaultOption.icon &&
     selectedOption.value.label !== defaultOption.label &&
