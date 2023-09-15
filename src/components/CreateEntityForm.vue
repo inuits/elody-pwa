@@ -48,11 +48,9 @@ import {
   type GetCreateEntityFormQuery,
   type PanelMetaData,
 } from "@/generated-types/queries";
-import { IdSyntax } from "@/generated-types/type-defs";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityElementMetadataEdit from "@/components/EntityElementMetadataEdit.vue";
-import urlSlug from "url-slug";
-import { computed, inject, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { getMetadataFields } from "@/helpers";
 import { NotificationType } from "@/components/base/BaseNotification.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -62,6 +60,9 @@ import { useNotification } from "@/components/base/BaseNotification.vue";
 import { useRouter } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
+import { IdSyntax } from "@/generated-types/type-defs";
+import urlSlug from "url-slug";
+
 
 const props = defineProps<{
   entityType: Entitytyping;
@@ -72,7 +73,6 @@ const { createNotification } = useNotification();
 const { createForm, createEntityValues, formContainsValues } = useFormHelper();
 const { changeCloseConfirmation, closeModal, updateModal } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
-const validationSchema = inject("validationSchema") as Object;
 const router = useRouter();
 const formId: string = "createEntity";
 
@@ -95,9 +95,9 @@ initializeConfirmModal(
 const type = computed(() => props.entityType);
 const id = computed(
   () =>
-    `${idSyntax.value.prefix}${urlSlug(
+  `${idSyntax.value.prefix}${urlSlug(
       form.value?.values.intialValues[idSyntax.value.field]
-    )}`
+      )}`
 );
 const cannotCreate = computed(() => {
   if (!form.value) return true;
@@ -119,17 +119,16 @@ onResult((result) => {
   idSyntax.value = createEntityForm?.idSyntax;
   formFields.value = createEntityForm?.formFields.createFormFields || [];
   const entityValues = createEntityValues(formFields.value);
-  form.value = createForm(formId, entityValues, validationSchema);
+  form.value = createForm(formId, entityValues);
 });
 
 const create = async () => {
+  let identifiers: string[] = [id.value, form.value?.values.intialValues[idSyntax.value.field]];
+
   const createResult = await mutate({
     data: {
-      id: id.value,
-      identifiers: [
-        id.value,
-        form.value?.values.intialValues[idSyntax.value.field],
-      ],
+      id: identifiers[0],
+      identifiers: identifiers,
       metadata: Object.keys(form.value?.values.intialValues)
         .filter((key) => key !== "__typename")
         .map((key) => {
@@ -153,7 +152,7 @@ const create = async () => {
     });
     router.push({
       name: "SingleEntity",
-      params: { id: id.value },
+      params: { id: createResult.data.createEntity.id },
     });
   }
 };

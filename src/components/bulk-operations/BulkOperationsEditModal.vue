@@ -61,9 +61,15 @@ import {
   DamsIcons,
   ModalState,
   TypeModals,
-  type GetBulkOperationsRelationFormQuery,
   GetBulkOperationsRelationFormDocument,
   BulkAddRelationsDocument,
+} from "@/generated-types/queries";
+import type {
+  BulkAddRelationsMutation,
+  BulkAddRelationsMutationVariables,
+  PanelMetaData,
+  WindowElement,
+  GetBulkOperationsRelationFormQuery,
 } from "@/generated-types/queries";
 import BaseModal from "@/components/base/BaseModal.vue";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
@@ -76,12 +82,6 @@ import { useBulkOperations } from "@/composables/useBulkOperations";
 import { useI18n } from "vue-i18n";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import EntityElementWindow from "../EntityElementWindow.vue";
-import type {
-  BulkAddRelationsMutation,
-  BulkAddRelationsMutationVariables,
-  PanelMetaData,
-  WindowElement,
-} from "@/generated-types/queries";
 import { useFormHelper } from "@/composables/useFormHelper";
 
 const props = defineProps<{
@@ -90,7 +90,6 @@ const props = defineProps<{
 
 const { getEnqueuedItems, getEnqueuedItemCount } = useBulkOperations();
 const config = inject("config") as any;
-const validationSchema = inject("validationSchema") as Object;
 const { t } = useI18n();
 const { getThumbnail } = useThumbnailHelper();
 const { getModal, closeModal } = useBaseModal();
@@ -139,7 +138,7 @@ onRelationFormResult((relationFormResult: any) => {
   if (panels) {
     const fields = Object.values(panels.relations);
     const entityValues = createEntityValues(fields as PanelMetaData[]);
-    createForm(formId, entityValues, validationSchema);
+    createForm(formId, entityValues);
   }
 });
 
