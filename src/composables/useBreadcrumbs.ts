@@ -19,6 +19,9 @@ export const useBreadcrumbs = (config: any) => {
       ? visitedRoutes.value[0]
       : visitedRoutes.value[visitedRoutes.value.length - 2]
   );
+  const visitedIds = computed(() =>
+    visitedRoutes.value.map((route: VisitedRoute) => route.id)
+  );
 
   const setCurrentRouteTitle = (title: string): void => {
     currentRouteTitle.value = title;
@@ -26,9 +29,9 @@ export const useBreadcrumbs = (config: any) => {
   };
 
   const addVisitedRoute = (route: VisitedRoute): void => {
-    if (!visitedRoutes.value.includes(route)) {
-      visitedRoutes.value.push(route);
-    }
+    const visited: boolean = visitedIds.value.includes(route.id);
+    if (visited) resetVisitedRoutes();
+    visitedRoutes.value.push(route);
   };
 
   const resetVisitedRoutes = (): void => {

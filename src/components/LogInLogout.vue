@@ -1,14 +1,14 @@
 <template>
   <div>
     <div
-      class="flex flex-row items-center menu-item fixed bottom-8 left-4 hover:text-accent-accent cursor-pointer"
+      class="flex flex-row items-center hover:text-accent-accent cursor-pointer"
     >
       <unicon
         v-if="auth.isAuthenticated.value === false"
         @click="auth.redirectToLogin()"
         :name="Unicons.UserCircle.name"
         height="21"
-        class="mt-1 menu-btn ml-4"
+        class="mt-1"
       />
       <span
         v-if="auth.isAuthenticated.value === false"
@@ -20,14 +20,14 @@
     </div>
 
     <div
-      class="flex flex-row items-center menu-item fixed bottom-8 left-4 hover:text-accent-accent cursor-pointer"
+      class="flex flex-row items-center hover:text-accent-accent cursor-pointer"
     >
       <unicon
         v-if="auth.isAuthenticated.value === true"
         @click="performLogout"
         :name="Unicons.SignOut.name"
         height="20"
-        class="mt-1 menu-btn ml-4"
+        class="mt-1"
       />
       <span
         v-if="auth.isAuthenticated.value === true"

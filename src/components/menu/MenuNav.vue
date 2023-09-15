@@ -1,7 +1,7 @@
 <template>
   <nav
     :class="[
-      'navbar fixed left-0 top-0 w-24 h-screen flex flex-col justify-start align-center pt-10 bg-neutral-white px-5 z-50 hover:w-80',
+      'navbar fixed left-0 top-0 w-24 h-screen align-center pt-10 bg-neutral-white px-5 z-50 hover:w-80',
       { 'w-80': isLeftModalOpened },
     ]"
     @mouseenter="changeExpandedState(true)"
@@ -13,21 +13,27 @@
     >
       <img src="/logo.svg" alt="Elody logo" class="h-12" />
     </router-link>
-
-    <div
-      v-for="menuItem in menuItems"
-      :key="menuItem.label"
-      @mouseenter="changeHoveredItem(menuItem)"
-      @mouseleave="changeHoveredItem(undefined)"
-    >
-      <Menuitem
-        :icon="menuItem.icon"
-        :menuitem="menuItem"
-        :isExpanded="isExpanded"
-        :isBeingHovered="menuItem === hoveredItem"
-      />
+    <div class="flex flex-col justify-between h-[86%]">
+      <div>
+        <tenant-switcher :is-visible="isExpanded" />
+        <div
+          v-for="menuItem in menuItems"
+          :key="menuItem.label"
+          @mouseenter="changeHoveredItem(menuItem)"
+          @mouseleave="changeHoveredItem(undefined)"
+        >
+          <Menuitem
+            :icon="menuItem.icon"
+            :menuitem="menuItem"
+            :isExpanded="isExpanded"
+            :isBeingHovered="menuItem === hoveredItem"
+          />
+        </div>
+      </div>
+      <div>
+        <LogInLogout class="mt-5 ml-3" />
+      </div>
     </div>
-    <LogInLogout />
   </nav>
 </template>
 
@@ -35,6 +41,7 @@
 import { RouterLink } from "vue-router";
 import Menuitem from "@/components/menu/MenuItem.vue";
 import LogInLogout from "@/components/LogInLogout.vue";
+import TenantSwitcher from "@/components/menu/TenantSwitcher.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { ref, computed, watch } from "vue";
 import { ModalState, type MenuItem } from "@/generated-types/queries";

@@ -7,15 +7,16 @@ import {
 } from "@/generated-types/queries";
 import { findPanelMetadata } from "@/helpers";
 import { useForm, type FormContext } from "vee-validate";
-import { ref } from "vue";
+import { ref, inject } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import { object } from "yup";
+import { object, string, date } from "yup";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
 const { getRelationType } = useEntityPickerModal();
+const validationSchemaObject = inject("validationSchema") as any;
 
 export type EntityValues = {
   intialValues?: IntialValues;
@@ -36,12 +37,19 @@ const useFormHelper = () => {
 
   const createForm = (
     key: string,
-    formValues: EntityValues,
-    validationSchemaObject: any | undefined = undefined
+    formValues: EntityValues
   ): FormContext<any> => {
     const validationSchema = object().shape(validationSchemaObject);
+    // validationSchema = object().shape({
+    //   id: string().required(),
+    //   name: string().required(),
+    //   title: string().required(),
+    //   description: string().notRequired(),
+    //   email: string().email(),
+    //   date: date().default(() => new Date()),
+    // });
     const form = useForm<EntityValues>({
-      //validationSchema,
+      // validationSchema,
       initialValues: {
         intialValues: formValues.intialValues,
         relationValues: formValues.relationValues,
@@ -58,7 +66,6 @@ const useFormHelper = () => {
   const getForm = (key: string): FormContext<any> | undefined => {
     const form = forms.value[key];
     if (!form) {
-      console.log(`Form with id ${key} does not exist. Please create it first`);
       return undefined;
     }
     return form;
@@ -74,6 +81,16 @@ const useFormHelper = () => {
 
   const deleteForms = () => {
     forms.value = {};
+  };
+
+  const getFieldError = (
+    formKey: string,
+    fieldKey: string
+  ): string | undefined => {
+    const form = getForm(formKey);
+    if (!form) return undefined;
+    const errorMessage = (form.errors as any)[fieldKey];
+    return errorMessage || undefined;
   };
 
   const __isNotEmpty = (str: any) => str.trim() !== "";
@@ -141,6 +158,7 @@ const useFormHelper = () => {
     editableFields,
     createEntityValues,
     formContainsValues,
+    getFieldError,
     addRelations,
   };
 };

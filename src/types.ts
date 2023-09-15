@@ -56,6 +56,7 @@ import {
   uniWindowGrid,
   uniWindowMaximize,
   uniFocus,
+  uniSetting,
 } from "vue-unicons/dist/icons";
 
 export const Unicons: Record<DamsIcons, { name: string }> = {
@@ -116,4 +117,5 @@ export const Unicons: Record<DamsIcons, { name: string }> = {
   UserCircle: uniUserCircle,
   WindowGrid: uniWindowGrid,
   WindowMaximize: uniWindowMaximize,
+  Settings: uniSetting,
 };

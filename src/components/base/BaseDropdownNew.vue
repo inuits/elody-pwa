@@ -79,7 +79,7 @@
           :name="Unicons[option.icon].name"
           class="h-5 mr-2 -ml-0.5"
         />
-        <span>{{ t(option.label) }}</span>
+        <span>{{ optionLabel(option) }}</span>
       </li>
     </div>
   </ul>
@@ -197,6 +197,7 @@ const arrowIcon = computed<DamsIcons>(() =>
 const disabled = computed<Boolean>(() =>
   props.options.length > 0 ? disable.value : true
 );
+
 const label = computed<string>(() => {
   try {
     return t(props.label);
@@ -211,6 +212,13 @@ const selectedOptionLabel = computed<string>(() => {
     return selectedOption.value.label;
   }
 });
+const optionLabel = (option: DropdownOption) => {
+  try {
+    return t(option.label);
+  } catch {
+    return option.label;
+  }
+};
 
 const selectedOptionIsNotDefaultOption = computed<boolean>(() => {
   return (
@@ -228,23 +236,32 @@ const collapseDropdown = (event: MouseEvent) => {
 onMounted(() => document.addEventListener("click", collapseDropdown));
 onUnmounted(() => document.removeEventListener("click", collapseDropdown));
 
-watch(modelValue, (value) =>
-  value === undefined
-    ? (selectedOption.value = defaultOption)
-    : typeof value === "string"
-    ? (selectedOption.value = {
-        icon: DamsIcons.NoIcon,
-        label: value,
-        value: value,
-      })
-    : (selectedOption.value = value)
+watch(
+  modelValue,
+  (value) => {
+    value === undefined
+      ? (selectedOption.value = defaultOption)
+      : typeof value === "string"
+      ? (selectedOption.value = {
+          icon: DamsIcons.NoIcon,
+          label: value,
+          value: value,
+        })
+      : (selectedOption.value = value);
+  },
+  { immediate: true }
 );
-watch(selectedOption, (value) => {
-  if (selectedOptionIsNotDefaultOption.value)
-    if (typeof props.modelValue === "string")
-      emit("update:modelValue", value.value);
-    else emit("update:modelValue", value);
-});
+watch(
+  () => selectedOption.value,
+  (value) => {
+    if (selectedOptionIsNotDefaultOption.value)
+      if (typeof props.modelValue === "string")
+        emit("update:modelValue", value);
+      else {
+        emit("update:modelValue", value);
+      }
+  }
+);
 </script>
 
 <style>
