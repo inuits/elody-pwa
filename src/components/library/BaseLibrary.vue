@@ -132,7 +132,7 @@ import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSele
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
-import { watch, ref, onMounted, inject, computed, onUnmounted } from "vue";
+import { watch, ref, onMounted, inject, computed } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -296,10 +296,7 @@ onMounted(() => {
       iconOff: DamsIcons.Image,
     });
   setDisplayPreferences();
-
-  if (route.name === "Home") window.addEventListener("popstate", getEntities);
 });
-onUnmounted(() => window.removeEventListener("popstate", getEntities));
 
 watch(getUploadStatus, (status) => {
   if (status === "success") {
@@ -309,15 +306,6 @@ watch(getUploadStatus, (status) => {
 });
 watch(
   () => route.path,
-  () => {
-    if (route.name === "Home") window.addEventListener("popstate", getEntities);
-    else if (route.name !== "SingleEntity")
-      window.removeEventListener("popstate", getEntities);
-  },
-  { immediate: true }
-);
-watch(
-  () => entityType.value,
   () => {
     if (
       !props.predefinedEntities &&
@@ -334,9 +322,6 @@ watch(
       if (searchInputType === queryVariables.value.searchInputType)
         getEntities();
       else queryVariables.value.searchInputType = searchInputType;
-
-      if (route.name !== "Home" && route.name !== "SingleEntity")
-        window.removeEventListener("popstate", getEntities);
     }
   }
 );
