@@ -23,6 +23,11 @@ import { useFormHelper, type EntityValues } from "@/composables/useFormHelper";
 import { useMutation } from "@vue/apollo-composable";
 import { useRoute } from "vue-router";
 import { useSubmitForm } from "vee-validate";
+import {
+  useNotification,
+  NotificationType,
+} from "@/components/base/BaseNotification.vue";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   intialValues: IntialValues;
@@ -30,8 +35,10 @@ const props = defineProps<{
 }>();
 
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
-const { isEdit, addSaveCallback, refetchFn } = useEditMode();
-const { createForm, editableFields } = useFormHelper();
+const { isEdit, addSaveCallback, refetchFn, disableEditMode } = useEditMode();
+const { createForm, editableFields, showValidationError } = useFormHelper();
+const { createNotification } = useNotification();
+const { t } = useI18n();
 const entityId = computed(() => asString(useRoute().params["id"]));
 
 const { mutate } = useMutation<
@@ -86,6 +93,14 @@ const submit = useSubmitForm<EntityValues>(async () => {
     intialValues: mutatedEntity.intialValues,
     relationValues: mutatedEntity.relationValues,
   });
+  createNotification({
+    displayTime: 10,
+    type: NotificationType.default,
+    title: t("notifications.success.entityCreated.title"),
+    description: t("notifications.success.entityCreated.description"),
+    shown: true,
+  });
+  disableEditMode();
 });
 
 const callRefetchFn = () => {

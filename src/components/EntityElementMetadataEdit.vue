@@ -1,11 +1,11 @@
 <template>
   <div v-if="field" class="text-sm pl-4">
     <BaseInputTextNumberDatetime
+      :name="fieldKey"
       v-if="!isDropdownType"
       v-model="computedValue"
       :label="label"
       :type="field.type as any"
-      :validation="field.validation || ''"
       input-style="defaultWithBorder"
     />
     <ViewModesAutocomplete
@@ -30,7 +30,7 @@
       :label="label"
       @update:model-value="setComputedValue"
     />
-    <span v-if="fieldError" class="text-red-default">{{ fieldError }}</span>
+    <p class="text-red-default">{{ errorMessage }}</p>
   </div>
 </template>
 
@@ -46,32 +46,47 @@ import { computed, onMounted, ref } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import BaseDropdownNew from "./base/BaseDropdownNew.vue";
 import type { DropdownOption } from "@/generated-types/queries";
+import { useField } from "vee-validate";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   fieldKey: string;
   label: string;
   value: string;
-  field?: InputFieldType;
+  field: InputFieldType;
   formId: string;
 }>();
-const { getForm, getFieldError } = useFormHelper();
+const { getForm } = useFormHelper();
 let form: FormContext | undefined = undefined;
-const fieldError = ref<string | undefined>(undefined);
+const { t } = useI18n();
+const {
+  errorMessage,
+  value: fieldValue,
+  setValue,
+  errors,
+} = useField(props.fieldKey, props.field.validation || undefined, {
+  label: t(props.label),
+});
 
 onMounted(() => {
   form = getForm(props.formId);
+  setValue(props.value);
 });
 
 const computedValue = computed<any>({
   get() {
-    return props.value;
+    return fieldValue.value;
   },
   set(value) {
+    setValue(value);
     if (props.field.type == "dropdown") {
       if (Array.isArray(value)) value = value[0];
     }
-    if (form) form.setFieldValue(`intialValues.${props.fieldKey}`, value);
-    fieldError.value = getFieldError(props.formId, props.fieldKey);
+    if (form) {
+      form.setFieldValue(`intialValues.${props.fieldKey}`, value);
+      if (!errors.value) return;
+      form.setFieldError(props.fieldKey, errors.value);
+    }
   },
 });
 

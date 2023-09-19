@@ -14,7 +14,6 @@
       :type="type"
       :step="step"
       :disabled="disabled"
-      :name="validation"
       @change.stop
       @click.stop
     />
@@ -27,7 +26,6 @@
       ]"
       v-model="inputValue"
       :disabled="disabled"
-      :name="validation"
       @change.stop
       @click.stop
       rows="3"
@@ -85,7 +83,6 @@ const props = withDefaults(
     type?: string;
     step?: number;
     disabled?: boolean;
-    validation?: string;
     isValidPredicate?: Function;
   }>(),
   {

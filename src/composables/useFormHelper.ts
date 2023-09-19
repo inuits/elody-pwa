@@ -6,17 +6,20 @@ import {
   type BaseRelationValuesInput,
 } from "@/generated-types/queries";
 import { findPanelMetadata } from "@/helpers";
-import { useForm, type FormContext } from "vee-validate";
-import { ref, inject } from "vue";
+import { useForm, type FormContext, configure, defineRule } from "vee-validate";
+import { ref } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
+import AllRules from "@vee-validate/rules";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import { object, string, date } from "yup";
+import {
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
 const { getRelationType } = useEntityPickerModal();
-const validationSchemaObject = inject("validationSchema") as any;
 
 export type EntityValues = {
   intialValues?: IntialValues;
@@ -32,30 +35,25 @@ const useFormHelper = () => {
       if (!field.key) return;
       intialValues[field.key] = "";
     });
-    return { intialValues, relationValues: { label: "", relations: [] } };
+    return {
+      intialValues: intialValues,
+      relationValues: { label: "", relations: [] },
+    };
   };
 
   const createForm = (
     key: string,
     formValues: EntityValues
   ): FormContext<any> => {
-    const validationSchema = object().shape(validationSchemaObject);
-    // validationSchema = object().shape({
-    //   id: string().required(),
-    //   name: string().required(),
-    //   title: string().required(),
-    //   description: string().notRequired(),
-    //   email: string().email(),
-    //   date: date().default(() => new Date()),
-    // });
+    if (forms.value[key]) return forms.value[key];
     const form = useForm<EntityValues>({
-      // validationSchema,
       initialValues: {
         intialValues: formValues.intialValues,
         relationValues: formValues.relationValues,
       },
     });
     addForm(key, form);
+    defineValidationRules();
     return form;
   };
 
@@ -83,14 +81,25 @@ const useFormHelper = () => {
     forms.value = {};
   };
 
-  const getFieldError = (
-    formKey: string,
-    fieldKey: string
-  ): string | undefined => {
-    const form = getForm(formKey);
-    if (!form) return undefined;
-    const errorMessage = (form.errors as any)[fieldKey];
-    return errorMessage || undefined;
+  const defineValidationRules = () => {
+    configure({
+      validateOnInput: true,
+    });
+    Object.keys(AllRules).forEach((rule) => {
+      defineRule(rule, AllRules[rule]);
+    });
+  };
+
+  const showValidationError = (error: Object, t: Function) => {
+    const errorValues: string[] = Object.values(error);
+    console.log(errorValues);
+    useNotification().createNotification({
+      displayTime: 10,
+      type: NotificationType.error,
+      title: t("notifications.errors.validation-error.title"),
+      description: errorValues[0],
+      shown: true,
+    });
   };
 
   const __isNotEmpty = (str: any) => str.trim() !== "";
@@ -158,7 +167,8 @@ const useFormHelper = () => {
     editableFields,
     createEntityValues,
     formContainsValues,
-    getFieldError,
+    defineValidationRules,
+    showValidationError,
     addRelations,
   };
 };
