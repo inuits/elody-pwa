@@ -1,6 +1,6 @@
 <template>
   <div class="min-height-custom block">
-    <div v-show="isVisible">
+    <div v-show="computedIsVisible">
       <BaseDropdownNew
         v-show="tenantsLoaded === 'loaded'"
         v-model="computedValue"
@@ -24,13 +24,14 @@ import { DamsIcons } from "@/generated-types/queries";
 const apolloClient = inject(DefaultApolloClient);
 const config = inject<{ features: { hasTenantSelect: boolean } }>("config");
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     isVisible: boolean;
   }>(),
   { isVisible: false }
 );
 
+const computedIsVisible = computed(() => config?.features.hasTenantSelect === true  && props.isVisible)
 const {
   tenantsAsDropdownOptions,
   selectedTenant,
