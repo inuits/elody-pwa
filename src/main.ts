@@ -20,6 +20,7 @@ import useGraphqlErrors from "./composables/useGraphqlErrors";
 import * as Sentry from "@sentry/vue";
 import { BrowserTracing } from "@sentry/tracing";
 import { setIgnorePermissions } from "./composables/usePermissions";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
@@ -41,19 +42,13 @@ const getApplicationDetails = async () => {
       ? import.meta.env.VUE_APP_CONFIG_URL
       : "/api/translation"
   ).then((r) => r.json());
-  const validationSchema = await fetch(
-    import.meta.env.VUE_APP_CONFIG_URL
-      ? import.meta.env.VUE_APP_CONFIG_URL
-      : "/api/validation"
-  ).then((r) => r.json());
-  return { config, translations, validationSchema };
+  return { config, translations };
 };
 
 const start = async () => {
   Unicon.add(Object.values(Unicons));
 
-  const { config, translations, validationSchema } =
-    await getApplicationDetails();
+  const { config, translations } = await getApplicationDetails();
 
   if (config.customization) applyCustomization(config.customization);
   auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
@@ -110,7 +105,6 @@ const start = async () => {
     .use(auth)
     .use(head)
     .provide("config", config)
-    .provide("validationSchema", validationSchema)
     .provide(DefaultApolloClient, apolloClient);
 
   if (config.SENTRY_ENABLED) {

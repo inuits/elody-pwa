@@ -32,7 +32,7 @@ const props = defineProps<{
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 
 const getQuery = () => {
-  const pattern = /\$initialValues\.(\w+)/;
+  const pattern = /\$intialValues\.(\w+)/;
   const matches: RegExpExecArray | null = pattern.exec(props.element.query);
   if (matches) {
     const desiredWordBehind: string = matches[1];

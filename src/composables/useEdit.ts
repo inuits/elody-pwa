@@ -54,22 +54,11 @@ export const useEditMode = () => {
     linkMediaFilesToEntity(addSaveCallback);
 
     for (const callback of saveCallbacks.value) {
-      await callback().then(() => {
-        if (isEdit.value) {
-          saveCallbacks.value = [];
-          disableEditMode();
-          createNotification({
-            displayTime: 10,
-            type: NotificationType.default,
-            title: "Entity successfully updated",
-            description: "Changes have been saved successfully",
-            shown: true,
-          });
-        }
-      });
+      await callback();
     }
     const refetch = refetchFn.value;
     if (refetch) refetch();
+    saveCallbacks.value = [];
     isSaved.value = true;
   };
 

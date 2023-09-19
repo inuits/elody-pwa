@@ -26,7 +26,7 @@
         >
       </l-map>
     </div>
-    <div class="info bg-neutral-0 w-full overflow-y-scroll">
+    <div class="bg-neutral-0 w-full h-[16vh] overflow-y-scroll">
       <div v-for="data in mapData" class="px-2 py-1" :key="data.key">
         <EntityElementMetadata
           v-if="!isEdit || !data.field"
@@ -122,12 +122,3 @@ const customIcon = {
   iconAnchor: [16, 37],
 };
 </script>
-
-<style scoped>
-.map {
-  height: 80%;
-}
-.info {
-  height: 20%;
-}
-</style>
