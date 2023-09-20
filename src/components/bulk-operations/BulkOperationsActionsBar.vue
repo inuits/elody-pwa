@@ -166,7 +166,7 @@ onMounted(() => {
   refetch();
 });
 
-const enqueItemsForMiradorCollection = () => {
+const enqueueItemsForMiradorCollection = () => {
   try {
     const manifests = getEnqueuedItems(props.context).map((item: InBulkProcessableItem) => item.teaserMetadata?.find((metadataItem: MetadataAndRelation) => metadataItem.key === "manifest_url")?.value)
     const newItems: InBulkProcessableItem[] = manifests.map((manifest: string) => {
@@ -184,7 +184,7 @@ watch(selectedBulkOperation, () => {
   if (selectedBulkOperation.value?.value === BulkOperationTypes.Edit)
     openModal(TypeModals.BulkOperationsEdit, undefined, "right");
   if (selectedBulkOperation.value?.value === BulkOperationTypes.AddToMiradorViewerCollection){
-    enqueItemsForMiradorCollection()
+    enqueueItemsForMiradorCollection()
     dequeueAllItemsForBulkProcessing(props.context)
 
   }
