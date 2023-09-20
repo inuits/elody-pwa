@@ -24,7 +24,4 @@ const props = defineProps<{
 }>()
 
 const {t} = useI18n()
-console.log(props.element)
-
-
 </script>
