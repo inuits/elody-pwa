@@ -96,27 +96,25 @@
 
 <script lang="ts" setup>
 import {
-  type DropdownOption,
-  type GetBulkOperationsQuery,
-  ModalState,
-  DamsIcons,
-} from "@/generated-types/queries";
-import {
-  GetBulkOperationsDocument,
   BulkOperationTypes,
+  DamsIcons,
+  type DropdownOption,
+  GetBulkOperationsDocument,
+  type GetBulkOperationsQuery,
+  MetadataAndRelation,
+  ModalState,
   TypeModals,
 } from "@/generated-types/queries";
-import type {
-  Context,
-  InBulkProcessableItem,
-} from "@/composables/useBulkOperations";
+import type {Context, InBulkProcessableItem,} from "@/composables/useBulkOperations";
+import {BulkOperationsContextEnum, useBulkOperations} from "@/composables/useBulkOperations";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
-import { bulkSelectAllSizeLimit } from "@/main";
-import { computed, onMounted, ref, watch } from "vue";
-import { useBaseModal } from "@/composables/useBaseModal";
-import { useBulkOperations } from "@/composables/useBulkOperations";
-import { useQuery } from "@vue/apollo-composable";
+import {bulkSelectAllSizeLimit} from "@/main";
+import {computed, onMounted, ref, watch} from "vue";
+import {useBaseModal} from "@/composables/useBaseModal";
+import {useQuery} from "@vue/apollo-composable";
+import {useNotification, NotificationType} from "@/components/base/BaseNotification.vue"
+import {useI18n} from "vue-i18n";
 
 const props = withDefaults(
   defineProps<{
@@ -149,8 +147,11 @@ const {
   getEnqueuedItemCount,
   getEnqueuedItems,
   dequeueAllItemsForBulkProcessing,
+    enqueueItemForBulkProcessing
 } = useBulkOperations();
 const { openModal, getModalInfo } = useBaseModal();
+const {createNotificationOverwrite} = useNotification()
+const {t} = useI18n()
 
 onResult((result) => {
   if (result.data) bulkOperations.value = result.data.BulkOperations.options;
@@ -165,11 +166,28 @@ onMounted(() => {
   refetch();
 });
 
+const enqueItemsForMiradorCollection = () => {
+  try {
+    const manifests = getEnqueuedItems(props.context).map((item: InBulkProcessableItem) => item.teaserMetadata?.find((metadataItem: MetadataAndRelation) => metadataItem.key === "manifest_url")?.value)
+    const newItems: InBulkProcessableItem[] = manifests.map((manifest: string) => {
+      return {id: manifest}
+    })
+    newItems.forEach((item: InBulkProcessableItem) => enqueueItemForBulkProcessing(BulkOperationsContextEnum.ManifestCollection, item))
+  } catch{
+    createNotificationOverwrite(NotificationType.error, t('notifications.errors.manifest-collection-error.title'), t('notifications.errors.manifest-collection-error.description'))
+  }
+}
+
 watch(selectedBulkOperation, () => {
   if (selectedBulkOperation.value?.value === BulkOperationTypes.ExportCsv)
     openModal(TypeModals.BulkOperations, undefined, "right");
   if (selectedBulkOperation.value?.value === BulkOperationTypes.Edit)
     openModal(TypeModals.BulkOperationsEdit, undefined, "right");
+  if (selectedBulkOperation.value?.value === BulkOperationTypes.AddToMiradorViewerCollection){
+    enqueItemsForMiradorCollection()
+    dequeueAllItemsForBulkProcessing(props.context)
+
+  }
 });
 
 watch(
