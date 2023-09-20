@@ -70,7 +70,7 @@ import type {
 import EntityElementMetadata from "@/components/EntityElementMetadata.vue";
 import EntityElementMetadataEdit from "@/components/EntityElementMetadataEdit.vue";
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
-import EntityElementList from "@/components/EntityElementList.vue";
+import EntityElementList from "@/components/entityElements/EntityElementList.vue";
 import { computed, ref } from "vue";
 import { getMetadataFields } from "@/helpers";
 import { PanelType } from "@/generated-types/queries";

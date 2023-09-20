@@ -42,9 +42,9 @@ import {
   type WindowElementPanel,
   Orientations,
 } from "@/generated-types/queries";
-import EntityElementWindowPanel from "./EntityElementWindowPanel.vue";
+import EntityElementWindowPanel from "../EntityElementWindowPanel.vue";
 import { computed } from "vue";
-import BaseExpandButton from "./base/BaseExpandButton.vue";
+import BaseExpandButton from "../base/BaseExpandButton.vue";
 import { useColumnResizeHelper } from "@/composables/useResizeHelper";
 import { useI18n } from "vue-i18n";
 import { useEditMode } from "@/composables/useEdit";

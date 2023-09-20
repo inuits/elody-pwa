@@ -36,6 +36,10 @@
         v-if="element.__typename === 'PromGraphElement'"
         :element="element"
       />
+      <entity-element-manifest-viewer
+          v-if="element.__typename === 'ManifestViewerElement'"
+          :element="element"
+      />
     </div>
   </div>
 </template>
@@ -45,13 +49,15 @@ import EntityElementList from "./EntityElementList.vue";
 import EntityElementMedia from "./EntityElementMedia.vue";
 import EntityElementWindow from "./EntityElementWindow.vue";
 import EntityElementPromGraph from "./EntityElementPromGraph.vue";
+import EntityElementManifestViewer from "./EntityElementManifestViewer.vue";
 
 import type {
   EntityViewElements,
   WindowElement,
   MediaFileElement,
   EntityListElement,
-  GraphElement,
+  PromGraphElement,
+  ManifestViewerElement,
   Entity,
 } from "@/generated-types/queries";
 import { getEntityIdFromRoute } from "@/helpers";
@@ -60,7 +66,8 @@ export type Elements =
   | WindowElement
   | MediaFileElement
   | EntityListElement
-  | GraphElement;
+  | PromGraphElement
+  | ManifestViewerElement;
 
 const props = defineProps<{
   elements: EntityViewElements;

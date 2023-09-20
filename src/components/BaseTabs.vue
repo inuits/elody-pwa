@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full flex flex-col flex-shrink bg-neutral-0">
+  <div class="flex flex-col flex-shrink bg-neutral-0">
     <div class="flex gap-3">
       <div
         v-for="(tab, index) in tabs"
