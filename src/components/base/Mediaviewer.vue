@@ -39,13 +39,6 @@
         v-if="getValueOfMediafile('mimetype')?.includes('text/plain')"
         :source="mediafileSelectionState.selectedMediafile"
       />
-      <MiradorViewer
-        v-if="
-          getValueOfMediafile('mimetype')?.includes('json/manifest') &&
-          getValueOfMediafile('original_file_location')
-        "
-        :manifest-url="getValueOfMediafile('original_file_location')"
-      />
     </div>
   </div>
 </template>

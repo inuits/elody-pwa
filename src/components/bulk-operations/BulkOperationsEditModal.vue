@@ -81,7 +81,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useBulkOperations } from "@/composables/useBulkOperations";
 import { useI18n } from "vue-i18n";
 import { useMutation, useQuery } from "@vue/apollo-composable";
-import EntityElementWindow from "../EntityElementWindow.vue";
+import EntityElementWindow from "../entityElements/EntityElementWindow.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 
 const props = defineProps<{

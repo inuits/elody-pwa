@@ -1,7 +1,7 @@
 <template>
   <div
     v-show="isActive"
-    class="flex flex-col flex-grow p-3 bg-[var(--color-neutral-lightest)]"
+    class="flex flex-col h-full p-3 bg-[var(--color-neutral-lightest)]"
   >
     <slot></slot>
   </div>

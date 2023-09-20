@@ -1,4 +1,4 @@
-import type { Elements } from "@/components/EntityElement.vue";
+import type { Elements } from "@/components/entityElements/EntityElement.vue";
 import type { Column, ColumnSizes } from "@/generated-types/queries";
 import { convertSizeToTailwind } from "@/helpers";
 import { ref } from "vue";

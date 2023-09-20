@@ -1,33 +1,45 @@
 <template>
-  <BaseTabs :key="props.manifestUrl || Math.random()" class="px-6">
-    <BaseTab title="Mirador">
-      <div class="w-full h-full relative z-10" id="mirador-viewer"></div>
+  <BaseTabs class="h-[94%]" :key="props.manifestUrl || Math.random()">
+    <BaseTab v-if="hasMirador" title="Mirador">
+      <div class="flex h-full w-full relative z-10" id="mirador-viewer"></div>
     </BaseTab>
-    <BaseTab v-if="manifestUrl" title="Tify">
+    <BaseTab v-if="manifestUrl && hasTify" title="Tify">
       <div class="w-full h-full" id="tify-viewer"></div>
     </BaseTab>
   </BaseTabs>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, watch } from "vue";
+import {computed, onMounted, watch} from "vue";
 // @ts-ignore
 import Mirador from "mirador/dist/mirador.min.js";
 import BaseTabs from "./BaseTabs.vue";
 import BaseTab from "./BaseTab.vue";
 import { useI18n } from "vue-i18n";
+import {Unicons} from "@/types";
 
 const props = withDefaults(
-  defineProps<{
-    manifestUrl: string;
-  }>(),
-  { manifestUrl: "" }
+    defineProps<{
+      manifestUrl: string;
+      viewers?: string[];
+
+    }>(),
+    {
+      manifestUrl: () => {
+        return "";
+      },
+      viewers: () => {
+        return ['mirador', 'tify'];
+      },
+    }
 );
 
 const { locale } = useI18n();
+const hasTify = computed(() => props.viewers.includes('tify'))
+const hasMirador = computed(() => props.viewers.includes('mirador'))
 
 const initializeViewers = () => {
-  if (props.manifestUrl) {
+  if (props.manifestUrl && hasTify.value) {
     new Tify({
       container: "#tify-viewer",
       manifestUrl: props.manifestUrl,
@@ -52,8 +64,7 @@ const initializeViewers = () => {
   if (props.manifestUrl) {
     miradorConfig.windows = [{ manifestId: props.manifestUrl }];
   }
-
-  Mirador.viewer(miradorConfig);
+  if (hasMirador.value) Mirador.viewer(miradorConfig);
 };
 
 onMounted(() => {
