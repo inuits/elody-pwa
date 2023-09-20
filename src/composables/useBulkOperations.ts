@@ -12,6 +12,7 @@ export enum BulkOperationsContextEnum {
   EntityElementMedia = "EntityElementMedia",
   EntityElementListEntityPickerModal = "EntityElementListEntityPickerModal",
   EntityElementMediaEntityPickerModal = "EntityElementMediaEntityPickerModal",
+  ManifestCollection = "ManifestCollection"
 }
 export type Context = RouteNames | BulkOperationsContextEnum;
 export type InBulkProcessableItem = {

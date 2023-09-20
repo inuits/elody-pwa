@@ -15,8 +15,11 @@ import {computed, onMounted, watch} from "vue";
 import Mirador from "mirador/dist/mirador.min.js";
 import BaseTabs from "./BaseTabs.vue";
 import BaseTab from "./BaseTab.vue";
-import { useI18n } from "vue-i18n";
-import {Unicons} from "@/types";
+import {useI18n} from "vue-i18n";
+import {BulkOperationsContextEnum, useBulkOperations, InBulkProcessableItem} from "@/composables/useBulkOperations";
+
+const {getEnqueuedItems} = useBulkOperations()
+const context = BulkOperationsContextEnum.ManifestCollection
 
 const props = withDefaults(
     defineProps<{
@@ -64,6 +67,8 @@ const initializeViewers = () => {
 
   if (props.manifestUrl) {
     miradorConfig.windows = [{ manifestId: props.manifestUrl }];
+  } else{
+    miradorConfig.windows = getEnqueuedItems(BulkOperationsContextEnum.ManifestCollection).map((item: InBulkProcessableItem) => {return {manifestId: item.id} })
   }
   if (hasMirador.value) Mirador.viewer(miradorConfig);
 };
