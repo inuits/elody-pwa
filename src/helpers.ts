@@ -44,8 +44,11 @@ export const stringIsUrl = (value: unknown): Boolean => {
     return isUrl;
   } else {
     const stringValue = value as string;
-    if (stringValue.includes("http://") || stringValue.includes("https://")) {
+    try {
+      new URL(stringValue);
       isUrl = true;
+    } catch {
+      isUrl = false;
     }
   }
   return isUrl;
