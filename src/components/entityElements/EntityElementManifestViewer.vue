@@ -7,11 +7,11 @@
     <template v-slot:actions>
       <div v-if="!isInManifestCollection" class="flex items-center text-text-subtitle ml-4 cursor-pointer" @click="addToManifestCollection">
         <unicon :name="Unicons.PlusCircle.name" :height="20"></unicon>
-        <p class="text-text-subtitle">{{t('manifest-viewer.add-to-mirador-collection')}}</p>
+        <p class="text-text-subtitle">{{t('manifest-viewer.add-to-manifest-collection')}}</p>
       </div>
       <div v-else class="flex items-center text-text-subtitle ml-4 cursor-pointer" @click="removeFromManifestCollection">
         <unicon :name="Unicons.Minus.name" :height="20"></unicon>
-        <p class="text-text-subtitle">{{t('manifest-viewer.remove-from-mirador-collection')}}</p>
+        <p class="text-text-subtitle">{{t('manifest-viewer.remove-from-manifest-collection')}}</p>
       </div>
     </template>
     <template v-slot:content>
