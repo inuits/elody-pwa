@@ -43,11 +43,13 @@ import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useI18n } from "vue-i18n";
 
 const config: any = inject("config");
 const router = useRouter();
 const route = useRoute();
 const auth = useAuth();
+const { locale } = useI18n();
 
 const id = asString(route.params["id"]);
 const identifiers = ref<string[]>([]);
@@ -60,6 +62,7 @@ const { getEditableMetadataKeys } = useFormHelper();
 const queryVariables = reactive<GetEntityByIdQueryVariables>({
   id: id,
   type: String(route.meta.entityType),
+  preferredLanguage: locale.value,
 });
 const { result, refetch } = useQuery<GetEntityByIdQuery>(
   GetEntityByIdDocument,
@@ -86,24 +89,38 @@ onBeforeRouteUpdate(async (to: any) => {
   disableEditMode();
 });
 
-watch(result, () => {
-  const entity: BaseEntity = result.value?.Entity as BaseEntity;
-  if (!entity) return;
+watch(
+  () => result.value,
+  () => {
+    console.log("newResult");
+    const entity: BaseEntity = result.value?.Entity as BaseEntity;
+    if (!entity) return;
 
-  identifiers.value = [entity.id, entity.intialValues.id];
-  intialValues.value = entity.intialValues;
-  relationValues.value = entity.relationValues as RelationValues;
-  columnList.value = entity.entityView;
+    identifiers.value = [entity.id, entity.intialValues.id];
+    intialValues.value = entity.intialValues;
+    relationValues.value = entity.relationValues as RelationValues;
+    columnList.value = entity.entityView;
 
-  if (typeof columnList.value !== "string") {
-    getEditableMetadataKeys(columnList.value, route.params.id as string);
+    if (typeof columnList.value !== "string") {
+      getEditableMetadataKeys(columnList.value, route.params.id as string);
+    }
+
+    if (auth.isAuthenticated.value === true) showEditToggle("edit");
+    setCurrentRouteTitle(
+      entity.intialValues?.title || entity.intialValues?.name
+    );
+    addVisitedRoute({ id: entity.id, routeName: currentRouteTitle.value });
+
+    setRefetchFn(refetch);
+    loading.value = false;
   }
+);
 
-  if (auth.isAuthenticated.value === true) showEditToggle("edit");
-  setCurrentRouteTitle(entity.intialValues?.title || entity.intialValues?.name);
-  addVisitedRoute({ id: entity.id, routeName: currentRouteTitle.value });
-
-  setRefetchFn(refetch);
-  loading.value = false;
-});
+watch(
+  () => locale.value,
+  (newLocale: string) => {
+    queryVariables.preferredLanguage = newLocale;
+    refetch(queryVariables);
+  }
+);
 </script>
