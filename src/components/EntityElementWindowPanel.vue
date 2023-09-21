@@ -24,6 +24,7 @@
         </div>
         <div v-else>
           <div
+            v-show="config.customization.hideEmptyFields && metadata.value"
             v-for="(metadata, index) in getMetadataFields(props.panel, panelType, useRoute().params.id as string)"
             :key="index"
             class="py-2"
@@ -71,7 +72,7 @@ import EntityElementMetadata from "@/components/EntityElementMetadata.vue";
 import EntityElementMetadataEdit from "@/components/EntityElementMetadataEdit.vue";
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
 import EntityElementList from "@/components/entityElements/EntityElementList.vue";
-import { computed, ref } from "vue";
+import { computed, inject, ref } from "vue";
 import { getMetadataFields } from "@/helpers";
 import { PanelType } from "@/generated-types/queries";
 import { Unicons } from "@/types";
@@ -88,6 +89,7 @@ const props = defineProps<{
 const { t } = useI18n();
 const panelType = ref<PanelType>(props.panel.panelType);
 const isCollapsed = ref<boolean>(props.panel.isCollapsed);
+const config = inject("config") as any;
 
 const toggleIsCollapsed = () => {
   isCollapsed.value = !isCollapsed.value;
