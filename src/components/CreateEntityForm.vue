@@ -63,7 +63,6 @@ import { useConfirmModal } from "@/composables/useConfirmModal";
 import { IdSyntax } from "@/generated-types/type-defs";
 import urlSlug from "url-slug";
 
-
 const props = defineProps<{
   entityType: Entitytyping;
 }>();
@@ -95,9 +94,9 @@ initializeConfirmModal(
 const type = computed(() => props.entityType);
 const id = computed(
   () =>
-  `${idSyntax.value.prefix}${urlSlug(
+    `${idSyntax.value.prefix}${urlSlug(
       form.value?.values.intialValues[idSyntax.value.field]
-      )}`
+    )}`
 );
 const cannotCreate = computed(() => {
   if (!form.value) return true;
@@ -123,7 +122,10 @@ onResult((result) => {
 });
 
 const create = async () => {
-  let identifiers: string[] = [id.value, form.value?.values.intialValues[idSyntax.value.field]];
+  let identifiers: string[] = [
+    id.value,
+    form.value?.values.intialValues[idSyntax.value.field],
+  ];
 
   const createResult = await mutate({
     data: {

@@ -37,8 +37,8 @@
         :element="element"
       />
       <entity-element-manifest-viewer
-          v-if="element.__typename === 'ManifestViewerElement'"
-          :element="element"
+        v-if="element.__typename === 'ManifestViewerElement'"
+        :element="element"
       />
     </div>
   </div>

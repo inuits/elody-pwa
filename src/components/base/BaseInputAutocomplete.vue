@@ -14,7 +14,9 @@
       :placeholder="placeholder"
       :classes="classes"
       :disabled="disabled"
-      :create-option="createOption"
+      :object="true"
+      label="label"
+      valueProp="value"
       @search-change="(value: string) => {
         searchValue = value;
         emit('searchChange', value);
@@ -24,6 +26,7 @@
 </template>
 
 <script lang="ts" setup>
+import type { DropdownOption } from "@/generated-types/queries";
 import Multiselect from "@vueform/multiselect";
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -32,14 +35,13 @@ type AutocompleteStyle = "default" | "defaultWithBorder";
 
 const props = withDefaults(
   defineProps<{
-    modelValue: string[] | undefined;
-    options: string[];
+    modelValue: DropdownOption[] | undefined;
+    options: DropdownOption[];
     autocompleteStyle: AutocompleteStyle;
     selectType?: "multi" | "single";
     label?: string;
     placeholder?: string;
     disabled?: boolean;
-    createOption?: boolean;
     relation?: boolean;
   }>(),
   {
@@ -47,13 +49,12 @@ const props = withDefaults(
     label: "",
     placeholder: "",
     disabled: false,
-    createOption: false,
     relation: false,
   }
 );
 
 const emit = defineEmits<{
-  (event: "update:modelValue", modelValue: string[] | undefined): void;
+  (event: "update:modelValue", modelValue: DropdownOption[] | undefined): void;
   (event: "searchChange", value: string): void;
 }>();
 
@@ -61,7 +62,7 @@ const { t } = useI18n();
 const classes = ref();
 const searchValue = ref<string>();
 
-const inputValue = computed<string[] | undefined>({
+const inputValue = computed<DropdownOption[] | undefined>({
   get() {
     return props.modelValue;
   },
@@ -79,7 +80,7 @@ const label = computed<string>(() => {
 const searchable = computed<boolean>(() => {
   return (
     !inputValue.value ||
-    inputValue.value[0] === "" ||
+    inputValue.value[0]?.value === "" ||
     props.selectType === "multi" ||
     (props.selectType === "single" && inputValue.value.length < 1)
   );
@@ -89,7 +90,7 @@ const setClasses = () => {
   classes.value =
     !inputValue.value ||
     inputValue.value.length <= 0 ||
-    inputValue.value[0] === ""
+    inputValue.value[0]?.value === ""
       ? { tags: "multiselect-tags multiselect-tags-margin" }
       : {};
 
@@ -103,7 +104,7 @@ const setClasses = () => {
 onMounted(() => setClasses());
 
 watch(
-  () => inputValue.value,
+  () => [inputValue.value, props.options],
   () => setClasses()
 );
 </script>

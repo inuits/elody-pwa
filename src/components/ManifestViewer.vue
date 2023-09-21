@@ -10,36 +10,39 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, watch} from "vue";
+import { computed, onMounted, watch } from "vue";
 // @ts-ignore
 import Mirador from "mirador/dist/mirador.min.js";
 import BaseTabs from "./BaseTabs.vue";
 import BaseTab from "./BaseTab.vue";
-import {useI18n} from "vue-i18n";
-import {BulkOperationsContextEnum, useBulkOperations, InBulkProcessableItem} from "@/composables/useBulkOperations";
+import { useI18n } from "vue-i18n";
+import {
+  BulkOperationsContextEnum,
+  useBulkOperations,
+  InBulkProcessableItem,
+} from "@/composables/useBulkOperations";
 
-const {getEnqueuedItems} = useBulkOperations()
-const context = BulkOperationsContextEnum.ManifestCollection
+const { getEnqueuedItems } = useBulkOperations();
+const context = BulkOperationsContextEnum.ManifestCollection;
 
 const props = withDefaults(
-    defineProps<{
-      manifestUrl: string;
-      viewers?: string[];
-
-    }>(),
-    {
-      manifestUrl: () => {
-        return "";
-      },
-      viewers: () => {
-        return ['mirador', 'tify'];
-      },
-    }
+  defineProps<{
+    manifestUrl: string;
+    viewers?: string[];
+  }>(),
+  {
+    manifestUrl: () => {
+      return "";
+    },
+    viewers: () => {
+      return ["mirador", "tify"];
+    },
+  }
 );
 
 const { locale } = useI18n();
-const hasTify = computed(() => props.viewers.includes('tify'))
-const hasMirador = computed(() => props.viewers.includes('mirador'))
+const hasTify = computed(() => props.viewers.includes("tify"));
+const hasMirador = computed(() => props.viewers.includes("mirador"));
 
 const initializeViewers = () => {
   if (props.manifestUrl && hasTify.value) {
@@ -67,8 +70,12 @@ const initializeViewers = () => {
 
   if (props.manifestUrl) {
     miradorConfig.windows = [{ manifestId: props.manifestUrl }];
-  } else{
-    miradorConfig.windows = getEnqueuedItems(BulkOperationsContextEnum.ManifestCollection).map((item: InBulkProcessableItem) => {return {manifestId: item.id} })
+  } else {
+    miradorConfig.windows = getEnqueuedItems(
+      BulkOperationsContextEnum.ManifestCollection
+    ).map((item: InBulkProcessableItem) => {
+      return { manifestId: item.id };
+    });
   }
   if (hasMirador.value) Mirador.viewer(miradorConfig);
 };

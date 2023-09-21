@@ -13,6 +13,7 @@ import {
   GetFilterOptionsDocument,
   type AdvancedFilter,
   type AdvancedFilterInput,
+  type DropdownOption,
   type GetFilterOptionsQuery,
   type GetFilterOptionsQueryVariables,
 } from "@/generated-types/queries";
@@ -31,7 +32,7 @@ const emit = defineEmits<{
   ): void;
 }>();
 
-const input = ref<string[]>([]);
+const input = ref<DropdownOption[]>([]);
 
 const refetchEnabled = ref<boolean>(false);
 const queryVariables = ref<GetFilterOptionsQueryVariables>();
@@ -41,7 +42,7 @@ const { refetch, onResult } = useQuery<GetFilterOptionsQuery>(
   () => ({ enabled: refetchEnabled.value })
 );
 
-const autocompleteOptions = ref<string[]>([]);
+const autocompleteOptions = ref<DropdownOption[]>([]);
 const getAutocompleteOptions = (value: string) => {
   clearAutocompleteOptions();
   if (value.length < 3) return;
@@ -76,13 +77,15 @@ onResult((result) => {
 });
 
 const clearAutocompleteOptions = () => {
-  let autocompleteOption: string | undefined = "";
+  let autocompleteOption: DropdownOption | undefined = { label: "", value: "" };
   while (autocompleteOption !== undefined)
     autocompleteOption = autocompleteOptions.value.pop();
 };
 
 watch(input, () => {
-  const value = input.value ? Object.values(input.value) : undefined;
+  const value = input.value
+    ? Object.values(input.value).map((option) => option.value)
+    : undefined;
 
   emit("newAdvancedFilterInput", {
     type: props.filter.type,

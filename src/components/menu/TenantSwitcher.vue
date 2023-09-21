@@ -31,7 +31,9 @@ const props = withDefaults(
   { isVisible: false }
 );
 
-const computedIsVisible = computed(() => config?.features.hasTenantSelect === true  && props.isVisible)
+const computedIsVisible = computed(
+  () => config?.features.hasTenantSelect === true && props.isVisible
+);
 const {
   tenantsAsDropdownOptions,
   selectedTenant,
