@@ -48,7 +48,6 @@ import type { MediaFileEntity } from "@/generated-types/queries";
 import AudioPlayer from "@/components/base/AudioPlayer.vue";
 import EntityImageSelection from "@/components/EntityImageSelection.vue";
 import IIIFViewer from "@/components/IIIFViewer.vue";
-import MiradorViewer from "@/components/ManifestViewer.vue";
 import PDFViewer from "@/components/base/PDFViewer.vue";
 import TextViewer from "@/components/base/TextViewer.vue";
 import VideoPlayer from "@/components/base/VideoPlayer.vue";
