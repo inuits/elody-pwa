@@ -81,6 +81,14 @@ const useFormHelper = () => {
     forms.value = {};
   };
 
+  const recreateForm = (
+    key: string,
+    newFormValues: EntityValues
+  ): FormContext<any> => {
+    deleteForm(key);
+    return createForm(key, newFormValues);
+  };
+
   const defineValidationRules = () => {
     configure({
       validateOnInput: true,
@@ -170,6 +178,7 @@ const useFormHelper = () => {
     defineValidationRules,
     showValidationError,
     addRelations,
+    recreateForm,
   };
 };
 
