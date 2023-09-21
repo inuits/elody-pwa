@@ -92,7 +92,6 @@ onBeforeRouteUpdate(async (to: any) => {
 watch(
   () => result.value,
   () => {
-    console.log("newResult");
     const entity: BaseEntity = result.value?.Entity as BaseEntity;
     if (!entity) return;
 
