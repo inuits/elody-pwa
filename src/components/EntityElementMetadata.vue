@@ -16,6 +16,7 @@
         :href="readableValue"
         >{{ readableValue }}</a
       >
+      <p v-else-if="isHtml" v-html="readableValue"></p>
       <p v-else>{{ readableValue || "-" }}</p>
     </div>
   </div>
@@ -37,5 +38,9 @@ const { t } = useI18n();
 
 const readableValue = computed(() => {
   return convertUnitToReadbleFormat(props.unit as Unit, props.value ?? "");
+});
+
+const isHtml = computed(() => {
+  return /<\/?[a-z][\s\S]*>/i.test(readableValue.value);
 });
 </script>
