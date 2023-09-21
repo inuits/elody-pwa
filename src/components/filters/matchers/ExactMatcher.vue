@@ -23,12 +23,12 @@
     </div>
     <div v-else>
       <BaseInputCheckbox
-        v-for="option in filterOptions"
-        v-model="option.isSelected"
-        :key="option.key"
-        :class="{ 'mb-2': option.isSelected }"
-        :label="option.key"
-        :item="{ id: option.key }"
+        v-for="filterOption in filterOptions"
+        v-model="filterOption.isSelected"
+        :key="filterOption.option.value"
+        :class="{ 'mb-2': filterOption.isSelected }"
+        :label="filterOption.option.label"
+        :item="{ id: filterOption.option.value }"
         :bulk-operations-context="BulkOperationsContextEnum.FilterOptions"
         input-style="accentNormal"
       />
@@ -42,6 +42,7 @@ import {
   GetFilterOptionsDocument,
   type AdvancedFilter,
   type AdvancedFilterInput,
+  type DropdownOption,
   type GetFilterOptionsQuery,
   type GetFilterOptionsQueryVariables,
 } from "@/generated-types/queries";
@@ -64,7 +65,7 @@ const emit = defineEmits<{
   (event: "filterOptions", filterOptions: string[]): void;
 }>();
 
-const input = ref<string | number | string[]>();
+const input = ref<string | number | DropdownOption[]>();
 
 const refetchFilterOptionsEnabled = ref<boolean>(false);
 const filterOptionsQueryVariables = ref<GetFilterOptionsQueryVariables>();
@@ -75,17 +76,19 @@ const { refetch: refetchFilterOptions, onResult: onFilterOptionsResult } =
     () => ({ enabled: refetchFilterOptionsEnabled.value })
   );
 
-const filterOptions = reactive<{ isSelected: boolean; key: string }[]>([]);
+const filterOptions = reactive<
+  { isSelected: boolean; option: DropdownOption }[]
+>([]);
 onFilterOptionsResult((result) => {
   const options = result.data?.FilterOptions;
   if (options) {
     input.value = [];
     options.forEach((option) =>
-      filterOptions.push({ isSelected: false, key: option })
+      filterOptions.push({ isSelected: false, option })
     );
     emit(
       "filterOptions",
-      filterOptions.map((option) => option.key)
+      filterOptions.map((filterOption) => filterOption.option.value)
     );
   }
 });
@@ -105,7 +108,7 @@ const {
   })
 );
 
-const autocompleteOptions = ref<string[]>([]);
+const autocompleteOptions = ref<DropdownOption[]>([]);
 const getAutocompleteOptions = (value: string) => {
   clearAutocompleteOptions();
   if (value.length < 3) return;
@@ -140,7 +143,7 @@ onAutocompleteOptionsResult((result) => {
 });
 
 const clearAutocompleteOptions = () => {
-  let autocompleteOption: string | undefined = "";
+  let autocompleteOption: DropdownOption | undefined = { label: "", value: "" };
   while (autocompleteOption !== undefined)
     autocompleteOption = autocompleteOptions.value.pop();
 };
@@ -184,14 +187,19 @@ watch(
   filterOptions,
   () =>
     (input.value = filterOptions
-      .filter((option) => option.isSelected)
-      .map((option) => option.key))
+      .filter((filterOption) => filterOption.isSelected)
+      .map((filterOption) => filterOption.option))
 );
 watch(input, () => {
   let value;
   if (Array.isArray(input.value))
-    if (useAutocomplete.value) value = Object.values(input.value);
-    else value = input.value.length > 0 ? input.value : [];
+    if (useAutocomplete.value)
+      value = Object.values(input.value).map((option) => option.value);
+    else
+      value =
+        input.value.length > 0
+          ? input.value.map((filterOption) => filterOption.value)
+          : [];
   else value = input.value ? input.value : undefined;
 
   emit("newAdvancedFilterInput", {

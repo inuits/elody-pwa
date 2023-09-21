@@ -3,7 +3,6 @@
     v-model="inputValue"
     :options="autocompleteOptions"
     :select-type="selectType"
-    :create-option="createOption"
     :label="label"
     autocomplete-style="defaultWithBorder"
     @search-change="(value: string) => getAutocompleteOptions(value)"
@@ -14,6 +13,7 @@
 import {
   AdvancedFilterTypes,
   GetFilterOptionsDocument,
+  type DropdownOption,
   type GetFilterOptionsQuery,
   type GetFilterOptionsQueryVariables,
 } from "@/generated-types/queries";
@@ -27,22 +27,20 @@ const props = withDefaults(
     metadataKeyToGetOptionsFor?: string | "no-key";
     selectType?: "multi" | "single";
     label?: string;
-    dropdownOptions: string[];
-    createOption?: boolean;
+    dropdownOptions: DropdownOption[];
   }>(),
   {
     selectType: "multi",
     label: "",
-    createOption: false,
     metadataKeyToGetOptionsFor: "no-key",
   }
 );
 
 const emit = defineEmits<{
-  (event: "update:modelValue", modelValue: string[] | string | undefined): void;
+  (event: "update:modelValue", modelValue: string | string[] | undefined): void;
 }>();
 
-const inputValue = computed<string[] | undefined>({
+const inputValue = computed<string | string[] | undefined>({
   get() {
     if (typeof props.modelValue === "string") return [props.modelValue];
     return props.modelValue;
@@ -69,7 +67,7 @@ const {
   })
 );
 
-const autocompleteOptions = ref<string[]>([]);
+const autocompleteOptions = ref<DropdownOption[]>([]);
 const getAutocompleteOptions = (value: string) => {
   clearAutocompleteOptions();
   if (value.length < 3) return;
@@ -102,7 +100,7 @@ onAutocompleteOptionsResult((result) => {
 });
 
 const clearAutocompleteOptions = () => {
-  let autocompleteOption: string | undefined = "";
+  let autocompleteOption: DropdownOption | undefined = { label: "", value: "" };
   while (autocompleteOption !== undefined)
     autocompleteOption = autocompleteOptions.value.pop();
 };

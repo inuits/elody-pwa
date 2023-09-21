@@ -35,18 +35,18 @@
 </template>
 
 <script lang="ts" setup>
+import type { DropdownOption } from "@/generated-types/queries";
 import type { FormContext } from "vee-validate";
 import {
   InputFieldTypes,
   type InputField as InputFieldType,
 } from "@/generated-types/queries";
+import BaseDropdownNew from "./base/BaseDropdownNew.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
-import { computed, onMounted, ref } from "vue";
-import { useFormHelper } from "@/composables/useFormHelper";
-import BaseDropdownNew from "./base/BaseDropdownNew.vue";
-import type { DropdownOption } from "@/generated-types/queries";
+import { computed, onMounted } from "vue";
 import { useField } from "vee-validate";
+import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{

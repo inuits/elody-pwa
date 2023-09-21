@@ -47,13 +47,18 @@
         </div>
         <div>
           <BaseInputAutocomplete
-            v-model="labelsOfDisplayedFilters"
+            v-model="displayedFilterOptions"
             :options="
               filters
                 .filter((filter) => !filter.advancedFilter.isDisplayedByDefault)
                 .filter((filter) => !filter.advancedFilter.defaultValue)
                 .filter((filter) => filter.advancedFilter.label)
-                .map((filter) => t(filter.advancedFilter.label || ''))
+                .map((filter) => {
+                  return {
+                    label: t(filter.advancedFilter.label || ''),
+                    value: t(filter.advancedFilter.label || ''),
+                  };
+                })
             "
             :placeholder="t('filters.add-filter')"
             autocomplete-style="defaultWithBorder"
@@ -137,7 +142,7 @@ const { entityType } = toRefs(props);
 const { isSaved } = useEditMode();
 const matchers = ref<DropdownOption[]>([]);
 const filters = ref<FilterListItem[]>([]);
-const labelsOfDisplayedFilters = ref<string[]>([]);
+const displayedFilterOptions = ref<DropdownOption[]>([]);
 const activeFilters = ref<AdvancedFilterInput[]>([]);
 const activeFilterCount = ref<number>(0);
 const clearAllActiveFilters = ref<boolean>(false);
@@ -200,6 +205,16 @@ const handleAdvancedFilters = () => {
   });
 };
 
+const toggleDisplayedFilters = () => {
+  filters.value.forEach((filter) => {
+    filter.isDisplayed =
+      displayedFilterOptions.value
+        .map((option) => option.label)
+        .includes(t(filter.advancedFilter.label || "")) ||
+      !!filter.advancedFilter.isDisplayedByDefault;
+  });
+};
+
 onMounted(() => {
   handleFilterMatcherMapping();
   handleAdvancedFilters();
@@ -212,14 +227,7 @@ if (props.parentEntityIdentifiers.length > 0)
       if (isSaved.value) applyFilters();
     }
   );
-watch(labelsOfDisplayedFilters, () => {
-  filters.value.forEach((filter) => {
-    filter.isDisplayed =
-      labelsOfDisplayedFilters.value.includes(
-        t(filter.advancedFilter.label || "")
-      ) || !!filter.advancedFilter.isDisplayedByDefault;
-  });
-});
+watch(displayedFilterOptions, () => toggleDisplayedFilters());
 watch(activeFilters, () => {
   activeFilterCount.value = 0;
 
@@ -232,10 +240,17 @@ watch(activeFilters, () => {
 });
 watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
-    labelsOfDisplayedFilters.value = [];
+    let displayedFilterOption: DropdownOption | undefined = {
+      label: "",
+      value: "",
+    };
+    while (displayedFilterOption !== undefined)
+      displayedFilterOption = displayedFilterOptions.value.pop();
+    toggleDisplayedFilters();
+
     activeFilters.value = activeFilters.value.filter((activeFilter) =>
       filters.value
-        .filter((filter) => !!filter.advancedFilter.defaultValue)
+        .filter((filter) => !!filter.advancedFilter.hidden)
         .map((filter) => filter.advancedFilter.key)
         .includes(activeFilter.key)
     );
