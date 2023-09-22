@@ -24,8 +24,8 @@
         </div>
         <div v-else>
           <div
-            v-show="config.customization.hideEmptyFields && metadata.value"
             v-for="(metadata, index) in getMetadataFields(props.panel, panelType, useRoute().params.id as string)"
+            v-show="itemMustBeShown(metadata.value)"
             :key="index"
             class="py-2"
           >
@@ -90,6 +90,11 @@ const { t } = useI18n();
 const panelType = ref<PanelType>(props.panel.panelType);
 const isCollapsed = ref<boolean>(props.panel.isCollapsed);
 const config = inject("config") as any;
+
+const itemMustBeShown = (value: any): boolean => {
+  if (config.customization.hideEmptyFields === true && !value) return false;
+  return true;
+};
 
 const toggleIsCollapsed = () => {
   isCollapsed.value = !isCollapsed.value;
