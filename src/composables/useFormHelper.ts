@@ -10,7 +10,7 @@ import { useForm, type FormContext, configure, defineRule } from "vee-validate";
 import { ref } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
-import AllRules from "@vee-validate/rules";
+import * as AllRules from "@vee-validate/rules";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import {
   NotificationType,
