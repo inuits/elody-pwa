@@ -31,27 +31,34 @@ const props = defineProps<{
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 
-const getQuery = () => {
+const getQueries = (): string[] => {
+  const queries = props.element.query;
   const pattern = /\$intialValues\.(\w+)/;
-  const matches: RegExpExecArray | null = pattern.exec(props.element.query);
-  if (matches) {
-    const desiredWordBehind: string = matches[1];
-    const valueFromMetadata = getValueForPanelMetadata(
-      PanelType.Metadata,
-      desiredWordBehind,
-      useRoute().params.id
-    );
-    return props.element.query.replace(pattern, valueFromMetadata);
-  } else {
-    return props.element.query;
-  }
+  const formattedQueries: string[] = [];
+  queries.forEach((query: string) => {
+    const matches: RegExpExecArray | null = pattern.exec(query);
+    if (matches) {
+      const desiredWordBehind: string = matches[1];
+      const valueFromMetadata = getValueForPanelMetadata(
+        PanelType.Metadata,
+        desiredWordBehind,
+        useRoute().params.id
+      );
+      formattedQueries.push(
+        props.element.query.replace(pattern, valueFromMetadata)
+      );
+    } else {
+      formattedQueries.push(query);
+    }
+  });
+  return formattedQueries;
 };
 
 onMounted(() => {
   Chart.registry.plugins.register(ChartDatasourcePrometheusPlugin);
   if (canvasRef.value !== null) {
     new Chart(canvasRef.value, {
-      type: "line",
+      type: "bar",
       plugins: [ChartDatasourcePrometheusPlugin],
       options: {
         plugins: {
@@ -60,7 +67,7 @@ onMounted(() => {
               endpoint: "/api/prom",
               baseURL: "/", // default value
             },
-            query: getQuery(),
+            query: getQueries(),
             timeRange: {
               type: "relative",
               // from 12 hours ago to now

@@ -54,6 +54,11 @@ export const stringIsUrl = (value: unknown): Boolean => {
   return isUrl;
 };
 
+export const stringIsHtml = (value: unknown): boolean => {
+  if (typeof value !== "string") return false;
+  return /<\/?[a-z][\s\S]*>/i.test(value);
+};
+
 export const getIdFromKey = (prefix: string = "entities", key: string) => {
   if (key.includes(prefix + "/")) {
     return key.replace(prefix + "/", "");

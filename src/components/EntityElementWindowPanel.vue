@@ -24,8 +24,8 @@
         </div>
         <div v-else>
           <div
-            v-show="config.customization.hideEmptyFields && metadata.value"
             v-for="(metadata, index) in getMetadataFields(props.panel, panelType, useRoute().params.id as string)"
+            v-show="itemMustBeShown(metadata.value)"
             :key="index"
             class="py-2"
           >
@@ -43,14 +43,14 @@
             <entity-element-metadata
               v-else-if="!isEdit || !metadata.field || !panel.isEditable"
               :class="[{ 'opacity-60': !panel.isEditable && isEdit }]"
-              :label="metadata.label"
+              :label="metadata.label as string"
               :value="metadata.value"
               :unit="metadata.unit"
             />
             <entity-element-metadata-edit
               v-else-if="panel.isEditable"
               :fieldKey="metadata.key"
-              :label="metadata.label"
+              :label="metadata.label as string"
               v-model:value="metadata.value"
               :field="metadata.field"
               :formId="formId"
@@ -90,6 +90,11 @@ const { t } = useI18n();
 const panelType = ref<PanelType>(props.panel.panelType);
 const isCollapsed = ref<boolean>(props.panel.isCollapsed);
 const config = inject("config") as any;
+
+const itemMustBeShown = (value: any): boolean => {
+  if (config.customization.hideEmptyFields === true && !value) return false;
+  return true;
+};
 
 const toggleIsCollapsed = () => {
   isCollapsed.value = !isCollapsed.value;

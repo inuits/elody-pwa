@@ -16,7 +16,7 @@
         :href="readableValue"
         >{{ readableValue }}</a
       >
-      <p v-else-if="isHtml" v-html="readableValue"></p>
+      <p v-else-if="stringIsHtml(readableValue)" v-html="readableValue"></p>
       <p v-else>{{ readableValue || "-" }}</p>
     </div>
   </div>
@@ -24,7 +24,11 @@
 
 <script lang="ts" setup>
 import type { Unit } from "@/generated-types/queries";
-import { convertUnitToReadbleFormat, stringIsUrl } from "@/helpers";
+import {
+  convertUnitToReadbleFormat,
+  stringIsUrl,
+  stringIsHtml,
+} from "@/helpers";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -38,9 +42,5 @@ const { t } = useI18n();
 
 const readableValue = computed(() => {
   return convertUnitToReadbleFormat(props.unit as Unit, props.value ?? "");
-});
-
-const isHtml = computed(() => {
-  return /<\/?[a-z][\s\S]*>/i.test(readableValue.value);
 });
 </script>
