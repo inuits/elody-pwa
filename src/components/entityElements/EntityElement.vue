@@ -4,7 +4,6 @@
       v-for="(element, index) in elements"
       :key="index"
       :class="[
-        'overflow-y-scroll',
         { 'mb-5': index + 1 != elements.length },
         {
           'flex-1': !element.isCollapsed,

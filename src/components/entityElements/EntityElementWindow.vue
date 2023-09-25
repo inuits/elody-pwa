@@ -9,7 +9,7 @@
       v-on:expand-media-list="resizeColumn"
     />
     <div
-      class="h-full overflow-y-scroll w-full border-solid border-neutral-30 border-2 bg-neutral-0 rounded-t-md"
+      class="h-full w-full border-solid border-neutral-30 border-2 bg-neutral-0 rounded-t-md"
     >
       <div class="border-solid border-neutral-30 border-b-2 pb-2 rounded-t-md">
         <h1 class="subtitle text-text-body p-2">{{ t(element.label) }}</h1>
