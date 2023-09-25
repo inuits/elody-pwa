@@ -68,8 +68,7 @@ onMounted(() => {
             query: getQueries(),
             timeRange: {
               type: "relative",
-              // from 12 hours ago to now
-              start: -168 * 60 * 60 * 1000,
+              start: -120 * 60 * 60 * 1000,
               end: 0,
               step: 24000,
             },
