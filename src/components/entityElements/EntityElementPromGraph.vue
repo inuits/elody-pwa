@@ -44,9 +44,7 @@ const getQueries = (): string[] => {
         desiredWordBehind,
         useRoute().params.id
       );
-      formattedQueries.push(
-        props.element.query.replace(pattern, valueFromMetadata)
-      );
+      formattedQueries.push(query.replace(pattern, valueFromMetadata));
     } else {
       formattedQueries.push(query);
     }
