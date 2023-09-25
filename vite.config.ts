@@ -40,9 +40,6 @@ export default defineConfig({
     rollupOptions: {
       external: ["pdfjs-dist/types/src/display/api"],
     },
-    commonjsOptions: {
-      exclude: ["@vee-validate/rules"],
-    },
   },
   // test: {
   //   globals: true,
@@ -51,7 +48,6 @@ export default defineConfig({
   //   },
   // },
   optimizeDeps: {
-    include: ["@vee-validate/rules"],
     exclude: ["session-vue-3-oidc-library"],
   },
 });
