@@ -43,10 +43,13 @@ import {
   GetCreateEntityFormDocument,
   PanelType,
   TypeModals,
-  type CreateEntityForm,
-  type CreateEntityMutation,
-  type GetCreateEntityFormQuery,
-  type PanelMetaData,
+  IdSyntax,
+} from "@/generated-types/queries";
+import type {
+  CreateEntityForm,
+  CreateEntityMutation,
+  GetCreateEntityFormQuery,
+  PanelMetaData,
 } from "@/generated-types/queries";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityElementMetadataEdit from "@/components/EntityElementMetadataEdit.vue";
@@ -60,7 +63,6 @@ import { useNotification } from "@/components/base/BaseNotification.vue";
 import { useRouter } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
-import { IdSyntax } from "@/generated-types/type-defs";
 import urlSlug from "url-slug";
 
 const props = defineProps<{
