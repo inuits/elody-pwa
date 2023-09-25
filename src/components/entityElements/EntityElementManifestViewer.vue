@@ -66,7 +66,7 @@ const isInManifestCollection = computed(() =>
 );
 const availableViewers = computed(() => {
   const viewers: string[] = ["tify", "mirador"];
-  if (props.element.manifestVersion === 2) viewers.splice(0, 1);
+  if (props.element.manifestVersion === 3) viewers.splice(0, 1);
   return viewers;
 });
 
