@@ -70,7 +70,7 @@ onMounted(() => {
               type: "relative",
               start: -120 * 60 * 60 * 1000,
               end: 0,
-              step: 24000,
+              step: 86400,
             },
           },
         },
