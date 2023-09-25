@@ -43,14 +43,14 @@
             <entity-element-metadata
               v-else-if="!isEdit || !metadata.field || !panel.isEditable"
               :class="[{ 'opacity-60': !panel.isEditable && isEdit }]"
-              :label="metadata.label"
+              :label="metadata.label as string"
               :value="metadata.value"
               :unit="metadata.unit"
             />
             <entity-element-metadata-edit
               v-else-if="panel.isEditable"
               :fieldKey="metadata.key"
-              :label="metadata.label"
+              :label="metadata.label as string"
               v-model:value="metadata.value"
               :field="metadata.field"
               :formId="formId"
