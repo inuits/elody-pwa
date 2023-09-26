@@ -55,7 +55,7 @@ const getQueries = (): string[] => {
 onMounted(() => {
   Chart.registry.plugins.register(ChartDatasourcePrometheusPlugin);
   if (canvasRef.value !== null) {
-    new Chart(canvasRef.value, {
+    const chart: Chart = new Chart(canvasRef.value, {
       type: "bar",
       plugins: [ChartDatasourcePrometheusPlugin],
       options: {
