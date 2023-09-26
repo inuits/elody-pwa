@@ -49,9 +49,6 @@ const route = useRoute();
 const auth = useAuth();
 
 const performLogout = () => {
-  // window.location.href = `${
-  //   config.oidc.baseUrl + config.oidc.logoutEndpoint
-  // }?redirect_uri=${window.location.origin + window.location.pathname}`;
   auth.logout();
   setTimeout(() => {
     if (route.meta.requiresAuth === true) {
