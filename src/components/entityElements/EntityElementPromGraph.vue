@@ -66,6 +66,12 @@ onMounted(() => {
               baseURL: "/", // default value
             },
             query: getQueries(),
+            timeRange: {
+              type: "relative",
+              start: -120 * 60 * 60 * 1000,
+              end: 0,
+              step: 86400,
+            },
           },
         },
       },
