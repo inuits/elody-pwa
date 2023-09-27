@@ -40,19 +40,19 @@ const useJobHelpers = (
         return {
           name: Status.Finished,
           color: "green-default",
-          message: t("job-helper.finished"),
+          message: t("jobs.finished"),
         } as State;
       case Status.Failed:
         return {
           name: Status.Failed,
           color: "red-default",
-          message: t("job-helper.failed"),
+          message: t("jobs.failed"),
         } as State;
       default:
         return {
           name: Status.Pending,
           color: "neutral-700",
-          message: t("job-helper.pending"),
+          message: t("jobs.pending"),
         } as State;
     }
   });
