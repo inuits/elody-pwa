@@ -1,7 +1,7 @@
 <template>
   <div v-if="translationKey" class="h-full flex flex-col justify-between p-4">
     <div class="text-xl">{{ t(`confirm.${translationKey}.message`) }}</div>
-    <div class="flex justify-between">
+    <div class="flex justify-between pt-8">
       <div :class="[{ 'w-3/4': secondaryConfirmFunction }]">
         <div class="flex items-center gap-4">
           <BaseButtonNew
