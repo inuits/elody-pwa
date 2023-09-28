@@ -3,7 +3,7 @@
     :modal-state="getModalInfo(TypeModals.Confirm).state"
     :modal-position="modalPosition"
     modal-width-style="w-1/2"
-    modal-height-style="h-[20vh] my-[37.5vh]"
+    modal-height-style="my-[37.5vh]"
     @hide-modal="closeModal(TypeModals.Confirm)"
   >
     <slot />
