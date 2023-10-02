@@ -1,9 +1,12 @@
+
 <template><slot></slot></template>
 
 <script lang="ts" setup>
+
 import {
   EditStatus,
   MutateEntityValuesDocument,
+  TypeModals,
   type BaseRelationValuesInput,
   type Entity,
   type IntialValues,
@@ -21,13 +24,15 @@ import { computed, onMounted, onUnmounted, watch } from "vue";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper, type EntityValues } from "@/composables/useFormHelper";
 import { useMutation } from "@vue/apollo-composable";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter, onBeforeRouteLeave } from "vue-router";
 import { useSubmitForm } from "vee-validate";
 import {
   useNotification,
   NotificationType,
 } from "@/components/base/BaseNotification.vue";
 import { useI18n } from "vue-i18n";
+import { useConfirmModal } from "@/composables/useConfirmModal";
+import {useBaseModal} from "@/composables/useBaseModal";
 
 const props = defineProps<{
   intialValues: IntialValues;
@@ -35,11 +40,14 @@ const props = defineProps<{
 }>();
 
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
-const { isEdit, addSaveCallback, refetchFn, disableEditMode } = useEditMode();
+const { isEdit, addSaveCallback, refetchFn, disableEditMode, discard } = useEditMode();
 const { createForm, editableFields, recreateForm } = useFormHelper();
 const { createNotification } = useNotification();
 const { t } = useI18n();
 const entityId = computed(() => asString(useRoute().params["id"]));
+const { initializeConfirmModal, performRoute, setPathToNavigate, deletePathToNavigate, getPathToNavigate } = useConfirmModal()
+const { closeModal, openModal } = useBaseModal();
+const router = useRouter();
 
 const { mutate } = useMutation<
   MutateEntityValuesMutation,
@@ -137,4 +145,33 @@ watch(
     });
   }
 );
+
+onBeforeRouteLeave((to, from, next) => {
+  if (!isEdit.value) return next();
+  if(getPathToNavigate() != undefined) {
+    deletePathToNavigate();
+    return next();
+  }
+  openNavigationModal();
+  setPathToNavigate(to);
+  return false;
+})
+
+const openNavigationModal = () => {
+  initializeConfirmModal(
+      () => {
+        performRoute();
+        closeModal(TypeModals.Confirm);
+      },
+      undefined,
+      () => {
+        deletePathToNavigate();
+        closeModal(TypeModals.Confirm);
+      },
+      "discard-edit"
+  );
+  openModal(TypeModals.Confirm, undefined, "center");
+};
+
 </script>
+

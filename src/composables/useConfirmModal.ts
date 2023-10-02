@@ -1,16 +1,20 @@
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 
 const confirmFunction = ref<Function | undefined>(undefined);
 const secondaryConfirmFunction = ref<Function | undefined>(undefined);
 const declineFunction = ref<Function | undefined>(undefined);
 const translationKey = ref<string>("");
+const pathToNavigate = ref<string>(undefined);
 
 export const useConfirmModal = () => {
+  const router = useRouter();
+
   const initializeConfirmModal = (
     confirmFunc: Function,
     secondaryConfirmFunc: Function | undefined,
     declineFunc: Function,
-    translationKey: string
+    translationKey: string,
   ) => {
     setConfirmFunction(confirmFunc);
     setDeclineFunction(declineFunc);
@@ -34,12 +38,33 @@ export const useConfirmModal = () => {
     translationKey.value = item;
   };
 
+  const setPathToNavigate = (choice: string): void => {
+    pathToNavigate.value = choice;
+  };
+
+  const deletePathToNavigate = (): void => {
+    return pathToNavigate.value = undefined;
+  }
+
+  const getPathToNavigate = (): string => {
+    return pathToNavigate.value
+  }
+
+  const performRoute = (): void => {
+    router.push(pathToNavigate.value.path);
+
+  }
+
   return {
     initializeConfirmModal,
     setConfirmFunction,
     setSecondaryConfirmFunction,
     setDeclineFunction,
     setTranslationKey,
+    setPathToNavigate,
+    deletePathToNavigate,
+    getPathToNavigate,
+    performRoute,
     confirmFunction,
     secondaryConfirmFunction,
     declineFunction,
