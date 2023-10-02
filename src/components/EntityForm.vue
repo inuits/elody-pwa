@@ -24,7 +24,7 @@ import { computed, onMounted, onUnmounted, watch } from "vue";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper, type EntityValues } from "@/composables/useFormHelper";
 import { useMutation } from "@vue/apollo-composable";
-import { useRoute, useRouter, onBeforeRouteLeave } from "vue-router";
+import { useRoute, onBeforeRouteLeave } from "vue-router";
 import { useSubmitForm } from "vee-validate";
 import {
   useNotification,
@@ -40,14 +40,13 @@ const props = defineProps<{
 }>();
 
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
-const { isEdit, addSaveCallback, refetchFn, disableEditMode, discard } = useEditMode();
+const { isEdit, addSaveCallback, refetchFn, disableEditMode } = useEditMode();
 const { createForm, editableFields, recreateForm } = useFormHelper();
 const { createNotification } = useNotification();
 const { t } = useI18n();
 const entityId = computed(() => asString(useRoute().params["id"]));
 const { initializeConfirmModal, performRoute, setPathToNavigate, deletePathToNavigate, getPathToNavigate } = useConfirmModal()
 const { closeModal, openModal } = useBaseModal();
-const router = useRouter();
 
 const { mutate } = useMutation<
   MutateEntityValuesMutation,

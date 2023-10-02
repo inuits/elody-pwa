@@ -52,7 +52,6 @@ export const useConfirmModal = () => {
 
   const performRoute = (): void => {
     router.push(pathToNavigate.value.path);
-
   }
 
   return {
