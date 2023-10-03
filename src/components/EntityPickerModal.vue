@@ -11,34 +11,48 @@
     "
   >
     <div class="flex flex-col w-full h-full overflow-auto py-6">
-      <BaseLibrary
-        v-if="getModalInfo(TypeModals.EntityPicker).state === ModalState.Show"
-        :bulk-operations-context="getContext()"
-        :search-input-type-on-drawer="
-          getAcceptedTypes().length > 0
-            ? getAcceptedTypes()[0] !== Entitytyping.Mediafile
-              ? SearchInputType.AdvancedInputType
-              : SearchInputType.AdvancedInputMediaFilesType
-            : SearchInputType.AdvancedInputType
-        "
-        :filter-type="
-          getAcceptedTypes().length > 0
-            ? String(getAcceptedTypes()[0])
-            : undefined
-        "
-        :confirm-selection-button="true"
-        :enable-navigation="false"
-        :disable-new-entity-previews="true"
-        :ids-of-non-selectable-entities="getAlreadySelectedEntityIds()"
-        list-item-route-name="SingleEntity"
-        @confirm-selection="
-          (selectedItems) => {
-            addRelations(selectedItems);
-            dequeueAllItemsForBulkProcessing(getContext());
-            closeModal(TypeModals.EntityPicker);
-          }
-        "
-      />
+      <BaseTabs>
+        <BaseTab title="baselibrary">
+          <BaseLibrary
+            v-if="getModalInfo(TypeModals.EntityPicker).state === ModalState.Show"
+            :bulk-operations-context="getContext()"
+            :search-input-type-on-drawer="
+              getAcceptedTypes().length > 0
+                ? getAcceptedTypes()[0] !== Entitytyping.Mediafile
+                  ? SearchInputType.AdvancedInputType
+                  : SearchInputType.AdvancedInputMediaFilesType
+                : SearchInputType.AdvancedInputType
+            "
+            :filter-type="
+              getAcceptedTypes().length > 0
+                ? String(getAcceptedTypes()[0])
+                : undefined
+            "
+            :confirm-selection-button="true"
+            :enable-navigation="false"
+            :disable-new-entity-previews="true"
+            :ids-of-non-selectable-entities="getAlreadySelectedEntityIds()"
+            list-item-route-name="SingleEntity"
+            @confirm-selection="
+              (selectedItems) => {
+                addRelations(selectedItems);
+                dequeueAllItemsForBulkProcessing(getContext());
+                closeModal(TypeModals.EntityPicker);
+              }
+            "
+          />
+        </BaseTab>
+        <BaseTab title="upload file">
+          <div class="h-full">
+            <upload-modal-dropzone
+              v-if="dropzoneEntityToCreateQueryResult?.DropzoneEntityToCreate"
+              :entity-to-create="
+                dropzoneEntityToCreateQueryResult.DropzoneEntityToCreate
+              "
+            />
+          </div>
+        </BaseTab>
+      </BaseTabs>
     </div>
   </BaseModal>
 </template>
@@ -46,6 +60,7 @@
 <script lang="ts" setup>
 import {
   Entitytyping,
+  GetDropzoneEntityToCreateDocument,
   ModalState,
   SearchInputType,
   TypeModals,
@@ -56,9 +71,14 @@ import {
 } from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
+import BaseTab from "@/components/BaseTab.vue";
+import BaseTabs from "@/components/BaseTabs.vue";
+import UploadModalDropzone from "@/components/UploadModalDropzone.vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
+import { ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useQuery } from "@vue/apollo-composable";
 import { useRoute } from "vue-router";
 
 const { getAcceptedTypes } = useEntityPickerModal();
@@ -67,6 +87,14 @@ const { addRelations, getForm } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 
 const route = useRoute();
+const fetchEnabled = ref<boolean>(false);
+
+const {
+  result: dropzoneEntityToCreateQueryResult,
+  refetch: refetchDropzoneEntityToCreateQuery,
+} = useQuery(GetDropzoneEntityToCreateDocument, undefined, () => ({
+  enabled: fetchEnabled.value,
+}));
 
 const getAlreadySelectedEntityIds = (): string[] => {
   const id = route.params.id as string;
@@ -88,4 +116,15 @@ const getContext = () => {
     return BulkOperationsContextEnum.EntityElementListEntityPickerModal;
   }
 };
+
+watch(
+  () => getModalInfo(TypeModals.EntityPicker).state,
+  (uploadModalState: ModalState) => {
+    if (uploadModalState === ModalState.Show) {
+      fetchEnabled.value = true;
+      refetchDropzoneEntityToCreateQuery();
+    }
+  },
+  { immediate: true }
+);
 </script>
