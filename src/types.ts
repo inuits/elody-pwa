@@ -58,6 +58,7 @@ import {
   uniWindowMaximize,
   uniFocus,
   uniSetting,
+  uniKeyholeSquareFull
 } from "vue-unicons/dist/icons";
 
 export const Unicons: Record<DamsIcons, { name: string }> = {
@@ -95,6 +96,7 @@ export const Unicons: Record<DamsIcons, { name: string }> = {
   Focus: uniFocus,
   History: uniHistory,
   Image: uniImage,
+  KeyholeSquare: uniKeyholeSquareFull,
   Link: uniLink,
   ListUl: uniListUl,
   Minus: uniMinus,
