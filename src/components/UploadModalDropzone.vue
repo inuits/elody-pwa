@@ -209,12 +209,9 @@ const callUploadEndpoint = async (uploadRequestData: UploadRequestData) => {
       .then(async (json: { url: string }) => {
         const formUploadData = new FormData();
         formUploadData.append("file", file);
-
+        console.log(json.url)
         await fetch(
-          json.url.replace(
-            "storage-api:5000/",
-            "storage-api.digipolis-dams.localhost:8100"
-          ),
+            json.url,
           {
             method: "POST",
             body: formUploadData,
