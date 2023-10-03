@@ -63,7 +63,7 @@ import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import DropzoneNew from "@/components/base/dropzone/DropzoneNew.vue";
 import useDropzoneHelper from "@/composables/useDropzoneHelper";
 import useUploadModalDropzone from "@/composables/useUploadModalDropzone";
-import { ref, watch } from "vue";
+import { ref, watch, inject } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 
@@ -88,6 +88,7 @@ const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
 const { setUploadStatus } = useUploadModalDropzone();
 const { closeModal, getModalInfo } = useBaseModal();
+const config = inject('config') as any
 
 const createEntity = ref<boolean>(true);
 const entityToCreateOptions = ref<DropdownOption[]>(
@@ -210,7 +211,7 @@ const callUploadEndpoint = async (uploadRequestData: UploadRequestData) => {
         const formUploadData = new FormData();
         formUploadData.append("file", file);
         await fetch(
-            json.url,
+            json.url.replace('http://storage-api:5000/', config.api.storageApiUrl),
           {
             method: "POST",
             body: formUploadData,
