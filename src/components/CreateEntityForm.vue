@@ -14,7 +14,7 @@
           <entity-element-metadata-edit
             class="-ml-4"
             v-model:value="metadata.value"
-            :label="metadata.label"
+            :label="t(metadata.label)"
             :field="metadata.field"
             :fieldKey="metadata.key"
             form-id="createEntity"
@@ -96,9 +96,13 @@ initializeConfirmModal(
 const type = computed(() => props.entityType);
 const id = computed(
   () =>
-    `${idSyntax.value.prefix}${urlSlug(
-      form.value?.values.intialValues[idSyntax.value.field]
+  {
+    console.log({idSyntax})
+    if (!idSyntax.value.field) return 'no-custom-id'
+    return `${idSyntax.value.prefix}${urlSlug(
+        form.value?.values.intialValues[idSyntax.value.field]
     )}`
+  }
 );
 const cannotCreate = computed(() => {
   if (!form.value) return true;
@@ -129,9 +133,10 @@ const create = async () => {
     form.value?.values.intialValues[idSyntax.value.field],
   ];
 
+  console.log(id.value)
   const createResult = await mutate({
     data: {
-      id: identifiers[0],
+      id: id.value,
       identifiers: identifiers,
       metadata: Object.keys(form.value?.values.intialValues)
         .filter((key) => key !== "__typename")
