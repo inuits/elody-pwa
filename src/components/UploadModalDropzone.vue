@@ -65,6 +65,7 @@ import useDropzoneHelper from "@/composables/useDropzoneHelper";
 import useUploadModalDropzone from "@/composables/useUploadModalDropzone";
 import { ref, watch, inject } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
@@ -88,6 +89,7 @@ const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
 const { setUploadStatus } = useUploadModalDropzone();
 const { closeModal, getModalInfo } = useBaseModal();
+const { addRelations } = useFormHelper();
 const config = inject('config') as any
 
 const createEntity = ref<boolean>(true);
@@ -233,6 +235,7 @@ const callUploadEndpoint = async (uploadRequestData: UploadRequestData) => {
                 t("dropzone.successNotification.description")
               );
               setUploadStatus("success");
+              addRelations([{ id: "c247be78-2030-4b14-a5bc-61b5d8e65f33" }])
               closeModal(TypeModals.Upload);
             }
           })
