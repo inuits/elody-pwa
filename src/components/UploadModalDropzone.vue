@@ -209,7 +209,6 @@ const callUploadEndpoint = async (uploadRequestData: UploadRequestData) => {
       .then(async (json: { url: string }) => {
         const formUploadData = new FormData();
         formUploadData.append("file", file);
-        console.log(json.url)
         await fetch(
             json.url,
           {
