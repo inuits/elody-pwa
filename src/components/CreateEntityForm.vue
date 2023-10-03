@@ -97,8 +97,7 @@ const type = computed(() => props.entityType);
 const id = computed(
   () =>
   {
-    console.log({idSyntax})
-    if (!idSyntax.value.field) return 'no-custom-id'
+    if (!form.value?.values.intialValues[idSyntax.value.field]) return 'no-custom-id'
     return `${idSyntax.value.prefix}${urlSlug(
         form.value?.values.intialValues[idSyntax.value.field]
     )}`
