@@ -21,10 +21,10 @@
         v-if="route.name !== undefined"
         :context="route.name as Context"
       />
-<!--      <BulkOperationsEditModal-->
-<!--        v-if="route.name !== undefined"-->
-<!--        :context="route.name as Context"-->
-<!--      />-->
+      <!--      <BulkOperationsEditModal-->
+      <!--        v-if="route.name !== undefined"-->
+      <!--        :context="route.name as Context"-->
+      <!--      />-->
       <ConfirmModal><ConfirmModalView /></ConfirmModal>
     </div>
   </div>

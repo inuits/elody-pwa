@@ -14,7 +14,7 @@ export const useConfirmModal = () => {
     confirmFunc: Function,
     secondaryConfirmFunc: Function | undefined,
     declineFunc: Function,
-    translationKey: string,
+    translationKey: string
   ) => {
     setConfirmFunction(confirmFunc);
     setDeclineFunction(declineFunc);
@@ -43,16 +43,16 @@ export const useConfirmModal = () => {
   };
 
   const deletePathToNavigate = (): void => {
-    return pathToNavigate.value = undefined;
-  }
+    return (pathToNavigate.value = undefined);
+  };
 
   const getPathToNavigate = (): string => {
-    return pathToNavigate.value
-  }
+    return pathToNavigate.value;
+  };
 
   const performRoute = (): void => {
     router.push(pathToNavigate.value.path);
-  }
+  };
 
   return {
     initializeConfirmModal,
