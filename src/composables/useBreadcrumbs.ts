@@ -7,13 +7,14 @@ export type VisitedRoute = {
   id: string;
   routeName: string;
   icon?: DamsIcons;
+  path?: string;
 };
 
 const currentRouteTitle = ref<string>("");
 const visitedRoutes = ref<VisitedRoute[]>([]);
 
 export const useBreadcrumbs = (config: any) => {
-  const { selectedMenuItem } = useMenuHelper();
+  const { selectedMenuItem, getMenuDestinations } = useMenuHelper();
   const previousRoute = computed<VisitedRoute | undefined>(() =>
     visitedRoutes.value.length == 2
       ? visitedRoutes.value[0]
@@ -30,9 +31,21 @@ export const useBreadcrumbs = (config: any) => {
 
   const addVisitedRoute = (route: VisitedRoute): void => {
     const visited: boolean = visitedIds.value.includes(route.id);
-    if (visited) resetVisitedRoutes();
+    if (visited) {
+      removeVisitedRoutesUntilReachedCurrentRoute(route);
+      return;
+    }
     visitedRoutes.value.push(route);
   };
+
+  const removeVisitedRoutesUntilReachedCurrentRoute = (route: VisitedRoute): void => {
+    var counter= visitedRoutes.value.length-1;
+    do {
+      if (route.id === visitedRoutes.value[counter].id) break;
+      visitedRoutes.value.pop();
+      counter--;
+    } while(counter >= 0);
+  }
 
   const resetVisitedRoutes = (): void => {
     visitedRoutes.value = [];
@@ -59,6 +72,24 @@ export const useBreadcrumbs = (config: any) => {
     setCurrentRouteTitle(to.meta.title as string);
     if (to.name === "Home") {
       resetVisitedRoutes();
+    }
+  });
+
+  useRouter().beforeEach((from) => {
+    const route: VisitedRoute = {
+      id: "",
+      routeName: from.name,
+      path: from.path,
+    };
+    if(visitedRoutes.value.length === 0 && from.name !== "Home" && from.path !== "/") {
+      addVisitedRoute(route);
+      return;
+    }
+    const valueToMatch = from.path.slice(1);
+    const destinations = getMenuDestinations().value;
+    if (destinations.includes(valueToMatch)) {
+      resetVisitedRoutes();
+      addVisitedRoute(route);
     }
   });
 

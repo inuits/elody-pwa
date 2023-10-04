@@ -10,7 +10,7 @@
       >
         <div
           class="px-2 cursor-pointer"
-          @click="navigateToEntity({ id: '', routeName: '' })"
+          @click="navigateToEntity(visitedRoutes[0])"
         >
           <unicon
             v-if="Unicons[selectedMenuItem?.icon as unknown as DamsIcons]"
@@ -128,7 +128,7 @@ import { useMenuHelper } from "@/composables/useMenuHelper";
 import { useRouter } from "vue-router";
 
 const config: any = inject("config");
-const { currentRouteTitle, visitedRoutes, previousRoute } =
+const { currentRouteTitle, visitedRoutes, previousRoute, resetVisitedRoutes } =
   useBreadcrumbs(config);
 const { t } = useI18n();
 const { selectedMenuItem } = useMenuHelper();
@@ -156,6 +156,12 @@ const toggleList = () => {
 };
 
 const navigateToEntity = (historyRoute: VisitedRoute) => {
+  if(!historyRoute) return;
+  if (historyRoute.path) {
+    resetVisitedRoutes();
+    router.push(historyRoute.path);
+    return;
+  }
   if (!historyRoute.id) {
     router.push({ name: "Home" });
     return;

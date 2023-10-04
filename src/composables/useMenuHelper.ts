@@ -13,6 +13,7 @@ import { useQuery } from "@vue/apollo-composable";
 const { openModal } = useBaseModal();
 const selectedMenuItem = ref<MenuItem | undefined>(undefined);
 const menuItems = ref<Array<MenuItem>>([]);
+const menuDestinations = ref<Array<string>>([]);
 
 export const useMenuHelper = () => {
   const router = useRouter();
@@ -48,6 +49,21 @@ export const useMenuHelper = () => {
     });
   };
 
+  const getMenuDestinations = () => {
+    menuDestinations.value = [];
+    menuItems.value.forEach((menuItem) => {
+      if(menuItem.subMenu) {
+        const entries = Object.entries(menuItem.subMenu);
+        for (let i = 2; i < entries.length; i += 1) {
+          const [objectKey, objectValue] = entries[i];
+          const destination = objectValue.typeLink.route.destination;
+          menuDestinations.value.push(destination);
+        }
+      }
+    })
+    return menuDestinations;
+  }
+
   return {
     setSelectedMenuItem,
     checkIfRouteOrModal,
@@ -55,6 +71,7 @@ export const useMenuHelper = () => {
     resetSelectedMenuItem,
     getMenuEntities,
     menuItems,
+    getMenuDestinations
   };
 };
 
