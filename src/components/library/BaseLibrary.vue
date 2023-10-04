@@ -22,7 +22,7 @@
             class="mr-2"
             :class="['flex', { 'ml-4': enableAdvancedFilters }]"
           >
-            <BaseToggleGroup :toggles="toggles" />
+            <BaseToggleGroup v-if="toggles.length > 1" :toggles="toggles" />
           </div>
           <LibraryBar
             v-if="
@@ -42,7 +42,10 @@
           :class="{ 'flex justify-end': expandFilters }"
         >
           <BulkOperationsActionsBar
-            :class="{ 'w-[69.75%]': expandFilters }"
+            :class="[
+              { 'w-[67%]': expandFilters && toggles.length == 1 },
+              { 'w-[69.99%]': expandFilters && toggles.length > 1 },
+            ]"
             :context="bulkOperationsContext"
             :total-items-count="totalEntityCount"
             :use-extended-bulk-operations="true"
@@ -172,6 +175,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const apolloClient = inject(DefaultApolloClient);
+const config = inject("config") as any;
 const route = useRoute();
 const router = useRouter();
 
@@ -209,7 +213,6 @@ const expandFilters = ref<boolean>(false);
 const isAsc = ref<boolean>(false);
 const toggles = [
   { isOn: displayList, iconOn: DamsIcons.ListUl, iconOff: DamsIcons.ListUl },
-  { isOn: displayGrid, iconOn: DamsIcons.Apps, iconOff: DamsIcons.Apps },
 ];
 
 const entityType = computed(() =>
@@ -288,6 +291,12 @@ const setDisplayPreferences = () => {
 };
 
 onMounted(() => {
+  if (config.features.hasGridView)
+    toggles.push({
+      isOn: displayGrid,
+      iconOn: DamsIcons.WindowGrid,
+      iconOff: DamsIcons.WindowGrid,
+    });
   initializeBaseLibrary();
   if (props.enablePreview)
     toggles.push({
