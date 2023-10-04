@@ -1,8 +1,6 @@
-
 <template><slot></slot></template>
 
 <script lang="ts" setup>
-
 import {
   EditStatus,
   MutateEntityValuesDocument,
@@ -32,7 +30,7 @@ import {
 } from "@/components/base/BaseNotification.vue";
 import { useI18n } from "vue-i18n";
 import { useConfirmModal } from "@/composables/useConfirmModal";
-import {useBaseModal} from "@/composables/useBaseModal";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 const props = defineProps<{
   intialValues: IntialValues;
@@ -45,7 +43,13 @@ const { createForm, editableFields, recreateForm } = useFormHelper();
 const { createNotification } = useNotification();
 const { t } = useI18n();
 const entityId = computed(() => asString(useRoute().params["id"]));
-const { initializeConfirmModal, performRoute, setPathToNavigate, deletePathToNavigate, getPathToNavigate } = useConfirmModal()
+const {
+  initializeConfirmModal,
+  performRoute,
+  setPathToNavigate,
+  deletePathToNavigate,
+  getPathToNavigate,
+} = useConfirmModal();
 const { closeModal, openModal } = useBaseModal();
 
 const { mutate } = useMutation<
@@ -147,30 +151,28 @@ watch(
 
 onBeforeRouteLeave((to, from, next) => {
   if (!isEdit.value) return next();
-  if(getPathToNavigate() != undefined) {
+  if (getPathToNavigate() != undefined) {
     deletePathToNavigate();
     return next();
   }
   openNavigationModal();
   setPathToNavigate(to);
   return false;
-})
+});
 
 const openNavigationModal = () => {
   initializeConfirmModal(
-      () => {
-        performRoute();
-        closeModal(TypeModals.Confirm);
-      },
-      undefined,
-      () => {
-        deletePathToNavigate();
-        closeModal(TypeModals.Confirm);
-      },
-      "discard-edit"
+    () => {
+      performRoute();
+      closeModal(TypeModals.Confirm);
+    },
+    undefined,
+    () => {
+      deletePathToNavigate();
+      closeModal(TypeModals.Confirm);
+    },
+    "discard-edit"
   );
   openModal(TypeModals.Confirm, undefined, "center");
 };
-
 </script>
-

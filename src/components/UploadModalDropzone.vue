@@ -88,7 +88,7 @@ const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
 const { setUploadStatus } = useUploadModalDropzone();
 const { closeModal, getModalInfo } = useBaseModal();
-const config = inject('config') as any
+const config = inject("config") as any;
 
 const createEntity = ref<boolean>(true);
 const entityToCreateOptions = ref<DropdownOption[]>(
@@ -211,7 +211,10 @@ const callUploadEndpoint = async (uploadRequestData: UploadRequestData) => {
         const formUploadData = new FormData();
         formUploadData.append("file", file);
         await fetch(
-            json.url.replace('http://storage-api:5000/', config.api.storageApiUrl),
+          json.url.replace(
+            "http://storage-api:5000/",
+            config.api.storageApiUrl
+          ),
           {
             method: "POST",
             body: formUploadData,

@@ -58,7 +58,7 @@ import {
   uniWindowMaximize,
   uniFocus,
   uniSetting,
-  uniKeyholeSquareFull
+  uniKeyholeSquareFull,
 } from "vue-unicons/dist/icons";
 
 export const Unicons: Record<DamsIcons, { name: string }> = {

@@ -94,15 +94,13 @@ initializeConfirmModal(
 );
 
 const type = computed(() => props.entityType);
-const id = computed(
-  () =>
-  {
-    if (!form.value?.values.intialValues[idSyntax.value.field]) return 'no-custom-id'
-    return `${idSyntax.value.prefix}${urlSlug(
-        form.value?.values.intialValues[idSyntax.value.field]
-    )}`
-  }
-);
+const id = computed(() => {
+  if (!form.value?.values.intialValues[idSyntax.value.field])
+    return "no-custom-id";
+  return `${idSyntax.value.prefix}${urlSlug(
+    form.value?.values.intialValues[idSyntax.value.field]
+  )}`;
+});
 const cannotCreate = computed(() => {
   if (!form.value) return true;
   const values = Object.values(form.value?.values.intialValues);
@@ -132,7 +130,7 @@ const create = async () => {
     form.value?.values.intialValues[idSyntax.value.field],
   ];
 
-  console.log(id.value)
+  console.log(id.value);
   const createResult = await mutate({
     data: {
       id: id.value,
