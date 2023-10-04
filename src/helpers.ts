@@ -129,7 +129,7 @@ export const getValueForPanelMetadata = (
 ): string => {
   const form = useFormHelper().getForm(entityId);
   if (panelType === PanelType.Metadata && form) {
-    return form.values.intialValues[metadataItemKey] || "";
+    return form.values.intialValues[metadataItemKey];
   } else if (mediafileSelectionState.selectedMediafile) {
     return (mediafileSelectionState.selectedMediafile.intialValues as any)?.[
       metadataItemKey

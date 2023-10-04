@@ -4,7 +4,7 @@
       {{ label }}
     </span>
     <input
-      v-if="type !== 'textarea'"
+      v-if="type !== 'textarea' && type !== 'checkbox'"
       class="w-full h-full border rounded-lg focus:ring-0"
       :class="[
         `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
@@ -16,6 +16,14 @@
       :disabled="disabled"
       @change.stop
       @click.stop
+    />
+    <input v-else-if="type === 'checkbox'"
+     class="w-4 h-4 rounded-md ml-2"
+     v-model="inputValue"
+     :type="type"
+     :disabled="disabled"
+     @change.stop
+     @click.stop
     />
     <textarea
       v-else
