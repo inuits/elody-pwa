@@ -51,7 +51,7 @@
             :options="
               filters
                 .filter((filter) => !filter.advancedFilter.isDisplayedByDefault)
-                .filter((filter) => !filter.advancedFilter.defaultValue)
+                .filter((filter) => !filter.advancedFilter.hidden)
                 .filter((filter) => filter.advancedFilter.label)
                 .map((filter) => {
                   return {
@@ -176,7 +176,7 @@ const handleAdvancedFilters = () => {
   filters.value = [];
   Object.values(props.advancedFilters).forEach((advancedFilter) => {
     if (typeof advancedFilter !== "string") {
-      if (advancedFilter.defaultValue) {
+      if (advancedFilter.hidden) {
         const hiddenFilter: AdvancedFilterInput = {
           type: advancedFilter.type,
           parent_key: advancedFilter.parentKey,
@@ -187,15 +187,14 @@ const handleAdvancedFilters = () => {
 
         if (advancedFilter.parentKey === "relations") {
           if (props.parentEntityIdentifiers.length > 0) {
-            if (advancedFilter.key === "key")
-              hiddenFilter.value = props.parentEntityIdentifiers;
+            hiddenFilter.value = props.parentEntityIdentifiers;
             activeFilters.value.push(hiddenFilter);
           }
         } else activeFilters.value.push(hiddenFilter);
       }
 
       filters.value.push({
-        isActive: !!advancedFilter.defaultValue,
+        isActive: !!advancedFilter.hidden,
         isDisplayed: advancedFilter.isDisplayedByDefault ?? false,
         advancedFilter,
       });
