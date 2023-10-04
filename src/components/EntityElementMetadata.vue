@@ -17,7 +17,7 @@
         >{{ readableValue }}</a
       >
       <p v-else-if="stringIsHtml(readableValue)" v-html="readableValue"></p>
-      <p v-else>{{ readableValue || "-" }}</p>
+      <p v-else>{{ readableValue as string || "-" }}</p>
     </div>
   </div>
 </template>
