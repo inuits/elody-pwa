@@ -12,6 +12,7 @@ import { reactive, ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 const { openModal } = useBaseModal();
 const selectedMenuItem = ref<MenuItem | undefined>(undefined);
+const selectedMenuItemPath = ref<string>(undefined);
 const menuItems = ref<Array<MenuItem>>([]);
 const menuDestinations = ref<Array<string>>([]);
 
@@ -20,6 +21,9 @@ export const useMenuHelper = () => {
 
   const setSelectedMenuItem = (menuItem: MenuItem) => {
     selectedMenuItem.value = menuItem;
+    const menu = ref<Array<MenuItem>>([menuItem]);
+    const destinations = getMenuDestinations(menu);
+    if(destinations) selectedMenuItemPath.value = `/${destinations.value[0]}`;
   };
 
   const checkIfRouteOrModal = (_menuItem: MenuItem): void => {
@@ -36,6 +40,7 @@ export const useMenuHelper = () => {
 
   const resetSelectedMenuItem = () => {
     selectedMenuItem.value = undefined;
+    selectedMenuItemPath.value = undefined;
   };
 
   const queryVariables = reactive<GetMenuQueryVariables>({ name: "main-menu" });
@@ -49,9 +54,12 @@ export const useMenuHelper = () => {
     });
   };
 
-  const getMenuDestinations = () => {
+  const getMenuDestinations = (menuItemsToTraverse?: ref<Array<MenuItem>>) => {
     menuDestinations.value = [];
-    menuItems.value.forEach((menuItem) => {
+    if(!menuItemsToTraverse) {
+      menuItemsToTraverse = menuItems;
+    }
+    menuItemsToTraverse.value.forEach((menuItem) => {
       if(menuItem.subMenu) {
         const entries = Object.entries(menuItem.subMenu);
         for (let i = 2; i < entries.length; i += 1) {
@@ -68,6 +76,7 @@ export const useMenuHelper = () => {
     setSelectedMenuItem,
     checkIfRouteOrModal,
     selectedMenuItem,
+    selectedMenuItemPath,
     resetSelectedMenuItem,
     getMenuEntities,
     menuItems,

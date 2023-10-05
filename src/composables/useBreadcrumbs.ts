@@ -14,7 +14,7 @@ const currentRouteTitle = ref<string>("");
 const visitedRoutes = ref<VisitedRoute[]>([]);
 
 export const useBreadcrumbs = (config: any) => {
-  const { selectedMenuItem, getMenuDestinations } = useMenuHelper();
+  const { selectedMenuItem, selectedMenuItemPath, getMenuDestinations } = useMenuHelper();
   const previousRoute = computed<VisitedRoute | undefined>(() =>
     visitedRoutes.value.length == 2
       ? visitedRoutes.value[0]
@@ -63,6 +63,7 @@ export const useBreadcrumbs = (config: any) => {
         visitedRoutes.value.length === 1 &&
         !visitedRoutes.value.includes(parentView)
       ) {
+        if(selectedMenuItemPath.value) parentView.path = selectedMenuItemPath.value;
         visitedRoutes.value.unshift(parentView);
       }
     }
