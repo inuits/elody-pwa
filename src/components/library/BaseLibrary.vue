@@ -2,7 +2,7 @@
   <div class="lg:flex bg-neutral-lightest">
     <div
       class="w-full"
-      :class="parentEntityIdentifiers.length > 0 ? 'p-3' : 'px-6'"
+      :class="[parentEntityIdentifiers.length > 0 ? 'p-3' : 'px-6']"
     >
       <div class="sticky top-0 mb-2 pt-4 bg-neutral-lightest">
         <div class="flex flex-row items-center gap-y-4">
@@ -44,7 +44,7 @@
           <BulkOperationsActionsBar
             :class="[
               { 'w-[67%]': expandFilters && toggles.length == 1 },
-              { 'w-[69.99%]': expandFilters && toggles.length > 1 },
+              { 'w-[69.75%]': expandFilters && toggles.length > 1 },
             ]"
             :context="bulkOperationsContext"
             :total-items-count="totalEntityCount"
@@ -59,7 +59,13 @@
         </div>
       </div>
       <div v-if="entities" :class="{ 'flex justify-end': expandFilters }">
-        <div id="gridContainer" :class="[{ 'w-[69.75%]': expandFilters }]">
+        <div
+          id="gridContainer"
+          :class="[
+            { 'w-[67%]': expandFilters && toggles.length == 1 },
+            { 'w-[69.75%]': expandFilters && toggles.length > 1 },
+          ]"
+        >
           <ViewModesList
             v-if="displayList"
             :entities="entities"
@@ -294,8 +300,8 @@ onMounted(() => {
   if (config.features.hasGridView)
     toggles.push({
       isOn: displayGrid,
-      iconOn: DamsIcons.WindowGrid,
-      iconOff: DamsIcons.WindowGrid,
+      iconOn: DamsIcons.Apps,
+      iconOff: DamsIcons.Apps,
     });
   initializeBaseLibrary();
   if (props.enablePreview)
@@ -345,6 +351,7 @@ watch(
   { immediate: true }
 );
 watch([displayGrid, expandFilters], () => {
+  displayList.value = !displayGrid.value;
   updateLocalStorage("_displayPreferences", {
     grid: displayPreview.value ? false : displayGrid.value,
     expandFilters: expandFilters.value,
