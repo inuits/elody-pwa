@@ -36,6 +36,7 @@
             :filter-type="types[0]"
             list-item-route-name="SingleEntity"
             :relation-type="relationType"
+            :has-sticky-bars="false"
           />
         </div>
       </template>

@@ -4,7 +4,12 @@
       class="w-full"
       :class="[parentEntityIdentifiers.length > 0 ? 'p-3' : 'px-6']"
     >
-      <div class="sticky top-0 mb-2 pt-4 bg-neutral-lightest">
+      <div
+        :class="[
+          'top-0 mb-2 pt-4 bg-neutral-lightest',
+          { sticky: hasStickyBars },
+        ]"
+      >
         <div class="flex flex-row items-center gap-y-4">
           <FiltersBase
             v-if="filtersBaseInitializationStatus === 'initialized'"
@@ -159,6 +164,7 @@ const props = withDefaults(
     disableNewEntityPreviews?: boolean;
     idsOfNonSelectableEntities?: string[];
     relationType: string;
+    hasStickyBars?: boolean;
   }>(),
   {
     predefinedEntities: undefined,
@@ -172,6 +178,7 @@ const props = withDefaults(
     enableNavigation: true,
     disableNewEntityPreviews: false,
     idsOfNonSelectableEntities: () => [],
+    hasStickyBars: true,
   }
 );
 
