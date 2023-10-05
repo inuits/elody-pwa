@@ -231,10 +231,10 @@ watch(activeFilters, () => {
   activeFilterCount.value = 0;
 
   filters.value.forEach((filter) => {
-    if (filter.advancedFilter.hidden) return;
     filter.isActive = activeFilters.value
       .map((activeFilter) => activeFilter.key)
       .includes(filter.advancedFilter.key);
+    if (filter.advancedFilter.hidden) return;
     activeFilterCount.value += filter.isActive ? 1 : 0;
   });
 });
