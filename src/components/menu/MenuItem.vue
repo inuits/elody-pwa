@@ -29,17 +29,18 @@
         </div>
       </div>
     </div>
-    <div
-      v-for="submenuItem in menuSubitem"
-      :key="submenuItem.label"
-      :class="{ dropdownMenuItem: isBeingHovered }"
-    >
-      <MenuSubItem
-        @click="setSelectedMenuItem(menuitem)"
-        :subMenuItem="submenuItem"
-        :show="(isBeingHovered as boolean)"
-      />
-    </div>
+    <transition-group v-if="isExpanded">
+      <div
+        v-for="submenuItem in menuSubitem"
+        :key="submenuItem.label"
+      >
+        <MenuSubItem
+          @click="setSelectedMenuItem(menuitem)"
+          :subMenuItem="submenuItem"
+          :show="(isBeingHovered as boolean)"
+        />
+      </div>
+    </transition-group>
   </div>
 </template>
 
@@ -90,24 +91,5 @@ const handleSubMenu = () => {
 
 handleSubMenu();
 </script>
-<style>
-.dropdownMenuItem {
-  animation-name: dropdown;
-  animation-duration: 1s;
-  animation-timing-function: ease-out;
-}
-@keyframes dropdown {
-  25% {
-    opacity: 0.25;
-  }
-  50% {
-    opacity: 0.5;
-  }
-  75% {
-    opacity: 0.75;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-</style>
+
+<style></style>

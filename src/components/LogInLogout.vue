@@ -10,13 +10,15 @@
         height="21"
         class="mt-1"
       />
-      <span
-        v-if="auth.isAuthenticated.value === false"
-        @click="auth.redirectToLogin()"
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 font-bold"
-      >
-        {{ $t("navigation.log-in") }}
-      </span>
+      <transition v-if="isExpanded">
+        <span
+          v-if="auth.isAuthenticated.value === false"
+          @click="auth.redirectToLogin()"
+          class="overflow-hidden px-4 font-bold"
+          ss        >
+          {{ $t("navigation.log-in") }}
+        </span>
+        </transition>
     </div>
 
     <div
@@ -29,13 +31,15 @@
         height="20"
         class="mt-1"
       />
-      <span
-        v-if="auth.isAuthenticated.value === true"
-        @click="performLogout"
-        class="nav-item-label w-0 h-0 overflow-hidden px-4 font-bold"
-      >
-        {{ $t("navigation.log-out") }}
-      </span>
+      <transition v-if="isExpanded">
+        <span
+          v-if="auth.isAuthenticated.value === true"
+          @click="performLogout"
+          class="overflow-hidden px-4 font-bold"
+        >
+          {{ $t("navigation.log-out") }}
+        </span>
+      </transition>
     </div>
   </div>
 </template>
@@ -44,8 +48,11 @@
 import { useAuth } from "session-vue-3-oidc-library";
 import { Unicons } from "@/types";
 import { useRoute } from "vue-router";
-const route = useRoute();
 
+const props = defineProps({
+  isExpanded: Boolean,
+})
+const route = useRoute();
 const auth = useAuth();
 
 const performLogout = () => {
