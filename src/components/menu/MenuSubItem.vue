@@ -7,7 +7,7 @@
     ]"
     @click="checkIfRouteOrModal(subMenuItem)"
   >
-    <p class="nav-item-label w-0 h-0 overflow-hidden px-4 cursor-pointer">
+    <p class="overflow-hidden px-4 cursor-pointer">
       {{ t(subMenuItem.label || "") }}
     </p>
   </div>

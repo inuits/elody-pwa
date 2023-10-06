@@ -5,6 +5,7 @@ import {
   ModalChoices,
 } from "@/generated-types/queries";
 import useDropzoneHelper from "@/composables/useDropzoneHelper";
+import { computed } from "vue";
 
 export type ModalPosition = "left" | "center" | "right";
 
@@ -52,6 +53,16 @@ export const useBaseModal = () => {
     useDropzoneHelper().resetDropzone();
   };
 
+  const isLeftModalOpened = computed(() => {
+    let isOpen: boolean = false;
+    Object.keys(modals.value).forEach((modalKey: string) => {
+      const modal: ModalInfo = modals.value[modalKey];
+      if (modal.state === ModalState.Show && modal.modalPosition === "left")
+        isOpen = true;
+    });
+    return isOpen;
+  });
+
   const getModalInfo = (modalType: TypeModals): ModalInfo => {
     return modals.value[modalType];
   };
@@ -82,6 +93,7 @@ export const useBaseModal = () => {
     updateModal,
     closeModal,
     openModal,
+    isLeftModalOpened,
     changeCloseConfirmation,
     modalToCloseAfterConfirm,
   };

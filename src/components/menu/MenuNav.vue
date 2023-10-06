@@ -1,10 +1,10 @@
 <template>
   <nav
     :class="[
-      'navbar fixed left-0 top-0 w-24 h-screen align-center pt-10 bg-neutral-white px-5 z-50 hover:w-80',
-      { 'w-80': isLeftModalOpened },
+      'navbar fixed left-0 top-0 w-24 h-screen align-center pt-10 bg-neutral-white px-5 z-50',
+      { 'w-80': isExpanded },
     ]"
-    @mouseenter="changeExpandedState(true)"
+    @click="changeExpandedState(true)"
     @mouseleave="changeExpandedState(false)"
   >
     <router-link
@@ -27,11 +27,12 @@
             :menuitem="menuItem"
             :isExpanded="isExpanded"
             :isBeingHovered="menuItem === hoveredItem"
+            @onclick="changeExpandedState(true)"
           />
         </div>
       </div>
       <div>
-        <LogInLogout class="mt-5 ml-3" />
+        <LogInLogout :is-expanded="isExpanded" class="mt-5 ml-3" />
       </div>
     </div>
   </nav>
@@ -43,33 +44,23 @@ import Menuitem from "@/components/menu/MenuItem.vue";
 import LogInLogout from "@/components/LogInLogout.vue";
 import TenantSwitcher from "@/components/menu/TenantSwitcher.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
-import { ref, computed, watch } from "vue";
+import { ref, watch } from "vue";
 import { ModalState, type MenuItem } from "@/generated-types/queries";
 import { useBaseModal, type ModalInfo } from "@/composables/useBaseModal";
 
 const isExpanded = ref<boolean>(false);
 const hoveredItem = ref<MenuItem | undefined>(undefined);
 const { getMenuEntities, menuItems } = useMenuHelper();
-const { modals } = useBaseModal();
+const { isLeftModalOpened } = useBaseModal();
 getMenuEntities();
 
 const changeExpandedState = (newState: boolean) => {
-  isExpanded.value = newState;
+  if(!isLeftModalOpened.value || (isLeftModalOpened.value && newState)) isExpanded.value = newState;
 };
 
 const changeHoveredItem = (item: MenuItem | undefined) => {
   hoveredItem.value = item;
 };
-
-const isLeftModalOpened = computed(() => {
-  let isOpen: boolean = false;
-  Object.keys(modals.value).forEach((modalKey: string) => {
-    const modal: ModalInfo = modals.value[modalKey];
-    if (modal.state === ModalState.Show && modal.modalPosition === "left")
-      isOpen = true;
-  });
-  return isOpen;
-});
 
 watch(
   () => isLeftModalOpened.value,
@@ -92,26 +83,5 @@ watch(
 }
 .navbar:hover .router-link {
   justify-content: flex-start;
-}
-
-.navbar:hover .nav-item-label {
-  animation: showText 0.1s ease-in 0.2s forwards;
-  -moz-animation: showText 0.1s ease-in 0.2s forwards;
-  -webkit-animation: showText 0.1s ease-in 0.2s forwards;
-  -o-animation: showText 0.1s ease-in 0.2s forwards;
-  animation-fill-mode: forwards;
-}
-
-@keyframes showText {
-  100% {
-    width: auto;
-    height: auto;
-  }
-}
-@-webkit-keyframes showText {
-  100% {
-    width: auto;
-    height: auto;
-  }
 }
 </style>
