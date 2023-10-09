@@ -1,39 +1,25 @@
 <template>
   <div v-if="field" class="text-sm pl-4 flex justify-between">
-    <Field
-      v-model="computedLongitude"
-      name="Longitude"
-      :rules="field.validation"
-      v-slot="{ field: fieldState, errorMessage }"
-    >
-      <div class="h-10 block">
-        <BaseInputTextNumberDatetime
-          v-model="computedLongitude"
-          label="Longitude"
-          :type="field.type as any"
-          :step="decimalPointStep"
-          input-style="defaultWithBorder"
-        />
-        <p class="text-red-default">{{ errorMessage }}</p>
-      </div>
-    </Field>
-    <Field
-      v-model="computedLatitude"
-      name="Latitude"
-      :rules="field.validation"
-      v-slot="{ field: fieldState, errorMessage }"
-    >
-      <div class="h-10 block">
-        <BaseInputTextNumberDatetime
-          v-model="computedLatitude"
-          label="Latitude"
-          :type="field.type as any"
-          :step="decimalPointStep"
-          input-style="defaultWithBorder"
-        />
-        <p class="text-red-default">{{ errorMessage }}</p>
-      </div>
-    </Field>
+    <div class="h-10 block">
+      <BaseInputTextNumberDatetime
+        v-model="computedLongitude"
+        label="Longitude"
+        :type="field.type as any"
+        :step="decimalPointStep"
+        input-style="defaultWithBorder"
+      />
+      <p class="text-red-default">{{ errorMessage }}</p>
+    </div>
+    <div class="h-10 block">
+      <BaseInputTextNumberDatetime
+        v-model="computedLatitude"
+        label="Latitude"
+        :type="field.type as any"
+        :step="decimalPointStep"
+        input-style="defaultWithBorder"
+      />
+      <p class="text-red-default">{{ errorMessage }}</p>
+    </div>
   </div>
 </template>
 
@@ -44,7 +30,7 @@ import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDa
 import { getEntityIdFromRoute } from "@/helpers";
 import { type PropType, computed, ref } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { Field } from "vee-validate";
+import { useField } from "vee-validate";
 import { useI18n } from "vue-i18n";
 
 export type Location = {
@@ -64,6 +50,14 @@ const { getForm } = useFormHelper();
 const id = getEntityIdFromRoute() || "";
 const form: FormContext | undefined = getForm(id);
 const { t } = useI18n();
+const {
+  errorMessage,
+  value: fieldValue,
+  setValue,
+  errors,
+} = useField("intialValues." + props.fieldKey, {
+  label: t(props.label),
+});
 
 const setFormValues = (latitude: string, longitude: string) => {
   if (form) {
