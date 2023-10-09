@@ -7,16 +7,16 @@
     <template v-slot:actions />
     <template v-slot:content>
       <canvas
-        v-if="!element.isCollapsed"
-        class="bg-neutral-0"
-        ref="canvasRef"
-        id="chart"
+          v-if="!element.isCollapsed"
+          class="bg-neutral-0"
+          ref="canvasRef"
+          id="chart"
       ></canvas>
     </template>
   </entity-element-wrapper>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref, watch } from "vue";
 import Chart from "chart.js/auto";
 import "chartjs-adapter-date-fns";
 import ChartDatasourcePrometheusPlugin from "chartjs-plugin-datasource-prometheus";
@@ -30,6 +30,11 @@ const props = defineProps<{
 }>();
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
+const route = useRoute();
+
+watch(() => canvasRef.value, () => {
+  if(canvasRef.value && !props.element.isCollapsed) fetchGraphData();
+})
 
 const getQueries = (): string[] => {
   const queries = props.element.query;
@@ -42,7 +47,7 @@ const getQueries = (): string[] => {
       const valueFromMetadata = getValueForPanelMetadata(
         PanelType.Metadata,
         desiredWordBehind,
-        useRoute().params.id
+          route.params.id
       );
       formattedQueries.push(query.replace(pattern, valueFromMetadata));
     } else {
@@ -52,7 +57,7 @@ const getQueries = (): string[] => {
   return formattedQueries;
 };
 
-onMounted(() => {
+const fetchGraphData = () => {
   Chart.registry.plugins.register(ChartDatasourcePrometheusPlugin);
   if (canvasRef.value !== null) {
     const chart: Chart = new Chart(canvasRef.value, {
@@ -77,5 +82,5 @@ onMounted(() => {
       },
     });
   }
-});
+}
 </script>
