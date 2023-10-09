@@ -64,9 +64,13 @@ const {
   value: fieldValue,
   setValue,
   errors,
-} = useField(props.fieldKey, props.field.validation || undefined, {
-  label: t(props.label),
-});
+} = useField(
+  "intialValues." + props.fieldKey,
+  props.field.validation || undefined,
+  {
+    label: t(props.label),
+  }
+);
 
 onMounted(() => {
   form = getForm(props.formId);
