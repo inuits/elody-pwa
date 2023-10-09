@@ -32,12 +32,12 @@
         :identifiers="identifiers"
       />
       <entity-element-prom-graph
-        v-if="element.__typename === 'PromGraphElement'"
-        :element="element"
+          v-if="element.__typename === 'PromGraphElement' && !isEdit"
+          :element="element"
       />
       <entity-element-manifest-viewer
-        v-if="element.__typename === 'ManifestViewerElement'"
-        :element="element"
+          v-if="element.__typename === 'ManifestViewerElement'"
+          :element="element"
       />
     </div>
   </div>
@@ -49,6 +49,7 @@ import EntityElementMedia from "./EntityElementMedia.vue";
 import EntityElementWindow from "./EntityElementWindow.vue";
 import EntityElementPromGraph from "./EntityElementPromGraph.vue";
 import EntityElementManifestViewer from "./EntityElementManifestViewer.vue";
+import { useEditMode } from "@/composables/useEdit";
 
 import type {
   EntityViewElements,
@@ -73,13 +74,17 @@ const props = defineProps<{
   identifiers: string[];
 }>();
 
+const { isEdit } = useEditMode();
 const formId = computed(() => getEntityIdFromRoute() as string);
 const elements = computed<Elements[]>(() => {
   const returnArray: Elements[] = [];
 
-  Object.values(props.elements).forEach((value) => {
+  Object.values(props.elements).reverse().forEach((value) => {
     if (value != null && typeof value !== "string") {
-      returnArray.push(value);
+      if (value.__typename === 'PromGraphElement') {
+        value.isCollapsed = true;
+        returnArray.push(value);
+      } else returnArray.unshift(value);
     }
   });
   return returnArray;
