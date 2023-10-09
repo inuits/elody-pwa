@@ -49,14 +49,14 @@ const config: any = inject("config");
 const router = useRouter();
 const route = useRoute();
 const auth = useAuth();
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 
 const id = asString(route.params["id"]);
 const identifiers = ref<string[]>([]);
 const loading = ref<boolean>(true);
 const { showEditToggle, disableEditMode, isEdit, setRefetchFn } = useEditMode();
 const { setCurrentRouteTitle, addVisitedRoute, currentRouteTitle } =
-  useBreadcrumbs(config);
+  useBreadcrumbs(config, t);
 const { getEditableMetadataKeys } = useFormHelper();
 
 const queryVariables = reactive<GetEntityByIdQueryVariables>({

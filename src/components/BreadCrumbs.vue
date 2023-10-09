@@ -128,9 +128,9 @@ import { useMenuHelper } from "@/composables/useMenuHelper";
 import { useRouter } from "vue-router";
 
 const config: any = inject("config");
-const { currentRouteTitle, visitedRoutes, previousRoute, resetVisitedRoutes } =
-  useBreadcrumbs(config);
 const { t } = useI18n();
+const { currentRouteTitle, visitedRoutes, previousRoute, resetVisitedRoutes } =
+  useBreadcrumbs(config, t);
 const { selectedMenuItem } = useMenuHelper();
 const showHistory = ref<boolean>(false);
 const truncatePreviousRouteName = ref<boolean>(true);
@@ -156,7 +156,7 @@ const toggleList = () => {
 };
 
 const navigateToEntity = (historyRoute: VisitedRoute) => {
-  if(!historyRoute) return;
+  if (!historyRoute) return;
   if (historyRoute.path) {
     resetVisitedRoutes();
     router.push(historyRoute.path);

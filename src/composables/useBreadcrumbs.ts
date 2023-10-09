@@ -13,8 +13,9 @@ export type VisitedRoute = {
 const currentRouteTitle = ref<string>("");
 const visitedRoutes = ref<VisitedRoute[]>([]);
 
-export const useBreadcrumbs = (config: any) => {
-  const { selectedMenuItem, selectedMenuItemPath, getMenuDestinations } = useMenuHelper();
+export const useBreadcrumbs = (config: any, t: any) => {
+  const { selectedMenuItem, selectedMenuItemPath, getMenuDestinations } =
+    useMenuHelper();
   const previousRoute = computed<VisitedRoute | undefined>(() =>
     visitedRoutes.value.length == 2
       ? visitedRoutes.value[0]
@@ -26,7 +27,7 @@ export const useBreadcrumbs = (config: any) => {
 
   const setCurrentRouteTitle = (title: string): void => {
     currentRouteTitle.value = title;
-    document.title = `${config.customization.applicationTitle} | ${title}`;
+    document.title = `${config.customization.applicationTitle} | ${t(title)}`;
   };
 
   const addVisitedRoute = (route: VisitedRoute): void => {
@@ -38,14 +39,16 @@ export const useBreadcrumbs = (config: any) => {
     visitedRoutes.value.push(route);
   };
 
-  const removeVisitedRoutesUntilReachedCurrentRoute = (route: VisitedRoute): void => {
-    var counter= visitedRoutes.value.length-1;
+  const removeVisitedRoutesUntilReachedCurrentRoute = (
+    route: VisitedRoute
+  ): void => {
+    var counter = visitedRoutes.value.length - 1;
     do {
       if (route.id === visitedRoutes.value[counter].id) break;
       visitedRoutes.value.pop();
       counter--;
-    } while(counter >= 0);
-  }
+    } while (counter >= 0);
+  };
 
   const resetVisitedRoutes = (): void => {
     visitedRoutes.value = [];
@@ -63,7 +66,8 @@ export const useBreadcrumbs = (config: any) => {
         visitedRoutes.value.length === 1 &&
         !visitedRoutes.value.includes(parentView)
       ) {
-        if(selectedMenuItemPath.value) parentView.path = selectedMenuItemPath.value;
+        if (selectedMenuItemPath.value)
+          parentView.path = selectedMenuItemPath.value;
         visitedRoutes.value.unshift(parentView);
       }
     }
@@ -82,7 +86,11 @@ export const useBreadcrumbs = (config: any) => {
       routeName: from.name,
       path: from.path,
     };
-    if(visitedRoutes.value.length === 0 && from.name !== "Home" && from.path !== "/") {
+    if (
+      visitedRoutes.value.length === 0 &&
+      from.name !== "Home" &&
+      from.path !== "/"
+    ) {
       addVisitedRoute(route);
       return;
     }
