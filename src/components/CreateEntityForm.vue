@@ -94,13 +94,6 @@ initializeConfirmModal(
 );
 
 const type = computed(() => props.entityType);
-const id = computed(() => {
-  if (!form.value?.values.intialValues[idSyntax.value.field])
-    return "no-custom-id";
-  return `${idSyntax.value.prefix}${urlSlug(
-    form.value?.values.intialValues[idSyntax.value.field]
-  )}`;
-});
 const cannotCreate = computed(() => {
   if (!form.value) return true;
   const values = Object.values(form.value?.values.intialValues);
@@ -118,23 +111,14 @@ const { result, onResult, refetch } = useQuery<GetCreateEntityFormQuery>(
 );
 onResult((result) => {
   const createEntityForm = result.data?.CreateEntityForm as CreateEntityForm;
-  idSyntax.value = createEntityForm?.idSyntax;
-  formFields.value = createEntityForm?.formFields.createFormFields || [];
+  if (!createEntityForm) return;
   const entityValues = createEntityValues(formFields.value);
   form.value = createForm(formId, entityValues);
 });
 
 const create = async () => {
-  let identifiers: string[] = [
-    id.value,
-    form.value?.values.intialValues[idSyntax.value.field],
-  ];
-
-  console.log(id.value);
   const createResult = await mutate({
     data: {
-      id: id.value,
-      identifiers: identifiers,
       metadata: Object.keys(form.value?.values.intialValues)
         .filter((key) => key !== "__typename")
         .map((key) => {
