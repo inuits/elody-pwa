@@ -12,10 +12,6 @@ import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import * as AllRules from "@vee-validate/rules";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
@@ -93,20 +89,8 @@ const useFormHelper = () => {
     configure({
       validateOnInput: true,
     });
-    Object.keys(AllRules).forEach((rule) => {
+    Object.keys(AllRules).forEach((rule: string) => {
       defineRule(rule, AllRules[rule]);
-    });
-  };
-
-  const showValidationError = (error: Object, t: Function) => {
-    const errorValues: string[] = Object.values(error);
-    console.log(errorValues);
-    useNotification().createNotification({
-      displayTime: 10,
-      type: NotificationType.error,
-      title: t("notifications.errors.validation-error.title"),
-      description: errorValues[0],
-      shown: true,
     });
   };
 
@@ -127,7 +111,8 @@ const useFormHelper = () => {
     const panelMetadataItems = findPanelMetadata(columnList);
 
     panelMetadataItems.forEach((metadataItem: PanelMetaData) => {
-      if (!metadataItem.inputField) return;
+      if (!metadataItem.inputField || keyArray.includes(metadataItem.key))
+        return;
       keyArray.push(metadataItem.key);
     });
     editableFields.value[formId] = keyArray;
@@ -180,7 +165,6 @@ const useFormHelper = () => {
     createEntityValues,
     formContainsValues,
     defineValidationRules,
-    showValidationError,
     addRelations,
     recreateForm,
   };
