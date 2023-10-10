@@ -20,10 +20,11 @@ export const useMenuHelper = () => {
   const router = useRouter();
 
   const setSelectedMenuItem = (menuItem: MenuItem) => {
+    if (!menuItem) return;
     selectedMenuItem.value = menuItem;
     const menu = ref<Array<MenuItem>>([menuItem]);
     const destinations = getMenuDestinations(menu);
-    if(destinations) selectedMenuItemPath.value = `/${destinations.value[0]}`;
+    if (destinations) selectedMenuItemPath.value = `/${destinations.value[0]}`;
   };
 
   const checkIfRouteOrModal = (_menuItem: MenuItem): void => {
@@ -56,11 +57,11 @@ export const useMenuHelper = () => {
 
   const getMenuDestinations = (menuItemsToTraverse?: ref<Array<MenuItem>>) => {
     menuDestinations.value = [];
-    if(!menuItemsToTraverse) {
+    if (!menuItemsToTraverse) {
       menuItemsToTraverse = menuItems;
     }
     menuItemsToTraverse.value.forEach((menuItem) => {
-      if(menuItem.subMenu) {
+      if (menuItem.subMenu) {
         const entries = Object.entries(menuItem.subMenu);
         for (let i = 2; i < entries.length; i += 1) {
           const [objectKey, objectValue] = entries[i];
@@ -68,9 +69,9 @@ export const useMenuHelper = () => {
           menuDestinations.value.push(destination);
         }
       }
-    })
+    });
     return menuDestinations;
-  }
+  };
 
   return {
     setSelectedMenuItem,
@@ -80,7 +81,7 @@ export const useMenuHelper = () => {
     resetSelectedMenuItem,
     getMenuEntities,
     menuItems,
-    getMenuDestinations
+    getMenuDestinations,
   };
 };
 
