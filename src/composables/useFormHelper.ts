@@ -142,10 +142,11 @@ const useFormHelper = () => {
 
     if (selectedItems.length <= 0 || !form) return;
 
-    const relations: BaseRelationValuesInput[] =
+    const oldRelations: BaseRelationValuesInput[] =
       form.values.relationValues.relations;
+    const newRelations: BaseRelationValuesInput[] = [];
     selectedItems.forEach((item) => {
-      relations.push({
+      newRelations.push({
         key: item.id,
         type: getRelationType(),
         value: item.teaserMetadata?.find((data) => data.key === "name")?.value,
@@ -160,7 +161,10 @@ const useFormHelper = () => {
       });
     });
 
-    form.setFieldValue("relationValues.relations", relations);
+    form.setFieldValue("relationValues.relations", [
+      ...oldRelations,
+      ...newRelations,
+    ]);
   };
 
   return {
