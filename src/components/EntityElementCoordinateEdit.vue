@@ -55,9 +55,7 @@ const {
   value: fieldValue,
   setValue,
   errors,
-} = useField("intialValues." + props.fieldKey, {
-  label: t(props.label),
-});
+} = useField("intialValues." + props.fieldKey);
 
 const setFormValues = (latitude: string, longitude: string) => {
   if (form) {
