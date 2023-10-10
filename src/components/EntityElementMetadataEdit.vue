@@ -88,8 +88,6 @@ const computedValue = computed<any>({
     }
     if (form) {
       form.setFieldValue(`intialValues.${props.fieldKey}`, value);
-      if (!errors.value) return;
-      form.setFieldError(props.fieldKey, errors.value);
     }
   },
 });
