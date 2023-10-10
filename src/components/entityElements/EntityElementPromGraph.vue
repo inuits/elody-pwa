@@ -18,6 +18,7 @@
 <script lang="ts" setup>
 import { ref, watch } from "vue";
 import Chart from "chart.js/auto";
+import { Colors } from 'chart.js';
 import "chartjs-adapter-date-fns";
 import ChartDatasourcePrometheusPlugin from "chartjs-plugin-datasource-prometheus";
 import { type PromGraphElement, PanelType } from "@/generated-types/queries";
@@ -59,12 +60,16 @@ const getQueries = (): string[] => {
 
 const fetchGraphData = () => {
   Chart.registry.plugins.register(ChartDatasourcePrometheusPlugin);
-  if (canvasRef.value !== null) {
+  Chart.register(Colors);
+    if (canvasRef.value !== null) {
     const chart: Chart = new Chart(canvasRef.value, {
       type: "bar",
       plugins: [ChartDatasourcePrometheusPlugin],
       options: {
         plugins: {
+          colors: {
+            forceOverride: true,
+          },
           "datasource-prometheus": {
             prometheus: {
               endpoint: "/api/prom",
