@@ -7,6 +7,8 @@ import {
 } from "@/generated-types/queries";
 import { ref, computed, watch, onMounted } from "vue";
 
+const TENANTS_ENDPOINT = "/api/tenants";
+
 type tenant = { id: string; label: string };
 const tenants = ref<tenant[] | "no-tenants">("no-tenants");
 const selectedTenant = ref<string | undefined>(undefined);
@@ -94,7 +96,7 @@ const useTenant = (
   const getTennantFromSession = async (): Promise<
     tenant | "no-tenant-in-session"
   > => {
-    return fetch("/api/tenant").then(async (res) => {
+    return fetch(TENANTS_ENDPOINT).then(async (res) => {
       const result = await res.json();
       const filterResult =
         Array.isArray(tenants.value) &&
@@ -116,7 +118,7 @@ const useTenant = (
   };
 
   const setTennantInSession = async (tenantId: string) => {
-    fetch("/api/tenant", {
+    fetch(TENANTS_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
