@@ -49,7 +49,6 @@ const useFormHelper = () => {
       },
     });
     addForm(key, form);
-    defineValidationRules();
     return form;
   };
 

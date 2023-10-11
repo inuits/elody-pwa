@@ -49,6 +49,9 @@ const start = async () => {
   Unicon.add(Object.values(Unicons));
 
   const { config, translations } = await getApplicationDetails();
+  const { defineValidationRules } = useFormHelper();
+
+  defineValidationRules();
 
   if (config.customization) applyCustomization(config.customization);
   auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
