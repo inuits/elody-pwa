@@ -48,7 +48,7 @@ const {
   performRoute,
   setPathToNavigate,
   deletePathToNavigate,
-  getPathToNavigate,
+  pathToNavigate,
 } = useConfirmModal();
 const { closeModal, openModal } = useBaseModal();
 
@@ -151,7 +151,7 @@ watch(
 
 onBeforeRouteLeave((to, from, next) => {
   if (!isEdit.value) return next();
-  if (getPathToNavigate() != undefined) {
+  if (pathToNavigate.value != undefined) {
     deletePathToNavigate();
     return next();
   }

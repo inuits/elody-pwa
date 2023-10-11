@@ -46,10 +46,6 @@ export const useConfirmModal = () => {
     return (pathToNavigate.value = undefined);
   };
 
-  const getPathToNavigate = (): string => {
-    return pathToNavigate.value;
-  };
-
   const performRoute = (): void => {
     router.push(pathToNavigate.value.path);
   };
@@ -62,7 +58,7 @@ export const useConfirmModal = () => {
     setTranslationKey,
     setPathToNavigate,
     deletePathToNavigate,
-    getPathToNavigate,
+    pathToNavigate,
     performRoute,
     confirmFunction,
     secondaryConfirmFunction,
