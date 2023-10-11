@@ -43,10 +43,8 @@ import {
   GetCreateEntityFormDocument,
   PanelType,
   TypeModals,
-  IdSyntax,
 } from "@/generated-types/queries";
 import type {
-  CreateEntityForm,
   CreateEntityMutation,
   GetCreateEntityFormQuery,
   PanelMetaData,
@@ -63,7 +61,6 @@ import { useNotification } from "@/components/base/BaseNotification.vue";
 import { useRouter } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
-import urlSlug from "url-slug";
 
 const props = defineProps<{
   entityType: Entitytyping;
@@ -79,7 +76,6 @@ const formId: string = "createEntity";
 
 const form = ref<FormContext<any>>();
 const formFields = ref<PanelMetaData[]>([]);
-const idSyntax = ref<IdSyntax>();
 const formHasValues = computed(() => formContainsValues(formId));
 
 initializeConfirmModal(
@@ -110,8 +106,11 @@ const { result, onResult, refetch } = useQuery<GetCreateEntityFormQuery>(
   }
 );
 onResult((result) => {
-  const createEntityForm = result.data?.CreateEntityForm as CreateEntityForm;
+  const createEntityForm = result.data?.CreateEntityForm;
   if (!createEntityForm) return;
+  //@ts-ignore
+  formFields.value =
+    createEntityForm?.formFields.createFormFields || ([] as PanelMetaData[]);
   const entityValues = createEntityValues(formFields.value);
   form.value = createForm(formId, entityValues);
 });
