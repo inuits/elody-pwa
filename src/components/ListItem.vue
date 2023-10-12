@@ -14,7 +14,7 @@
   >
     <div>
       <BaseInputCheckbox
-        v-if="!isPreview && !isDisabled"
+        v-if="!isPreview && !isDisabled && hasSelection"
         class="text-center"
         v-model="isChecked"
         :item="{ id: itemId, teaserMetadata }"
@@ -114,6 +114,7 @@ const props = withDefaults(
     relation?: BaseRelationValuesInput;
     isDisabled?: boolean;
     relations?: BaseRelationValuesInput[];
+    hasSelection: boolean;
   }>(),
   {
     itemId: "",
@@ -126,6 +127,7 @@ const props = withDefaults(
     isPreview: false,
     isMarkableAsToBeDeleted: false,
     isDisabled: false,
+    hasSelection: true,
   }
 );
 
