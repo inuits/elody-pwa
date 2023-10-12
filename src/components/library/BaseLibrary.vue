@@ -27,7 +27,7 @@
             class="mr-2"
             :class="['flex', { 'ml-4': enableAdvancedFilters }]"
           >
-            <BaseToggleGroup v-show="toggles.length > 1" :toggles="toggles" />
+            <BaseToggleGroup v-if="toggles.length > 0" :toggles="toggles" />
           </div>
           <LibraryBar
             v-if="
@@ -42,7 +42,7 @@
         </div>
 
         <div
-          v-if="hasBulkSelect"
+          v-if="enableBulkOperations && !displayPreview"
           class="my-3"
           :class="{ 'flex justify-end': expandFilters }"
         >
@@ -83,7 +83,6 @@
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
             @go-to-entity-page="(entity) => goToEntityPage(entity)"
             :relation-type="relationType"
-            :enable-selection="hasBulkSelect"
           />
 
           <ViewModesGrid
@@ -98,7 +97,6 @@
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
             @go-to-entity-page="(entity) => goToEntityPage(entity)"
             :relation-type="relationType"
-            :enable-selection="hasBulkSelect"
           />
 
           <ViewModesMedia
@@ -149,6 +147,7 @@ import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
 import { watch, ref, onMounted, inject, computed } from "vue";
+import type { ViewModes } from "@/generated-types/type-defs";
 
 const props = withDefaults(
   defineProps<{
@@ -223,15 +222,10 @@ const displayList = ref<boolean>(false);
 const displayGrid = ref<boolean>(false);
 const displayDropdown = ref<boolean>(false);
 const displayPreview = ref<boolean>(props.enablePreview);
-const hasBulkSelect = computed((): boolean => {
-  return config.features.hasBulkSelect !== false;
-});
 
 const expandFilters = ref<boolean>(false);
 const isAsc = ref<boolean>(false);
-const toggles = [
-  { isOn: displayList, iconOn: DamsIcons.ListUl, iconOff: DamsIcons.ListUl },
-];
+const toggles: [ViewModes.type] = [];
 
 const entityType = computed(() =>
   route.meta.entityType ? (route.meta.entityType as Entitytyping) : "BaseEntity"
@@ -309,14 +303,21 @@ const setDisplayPreferences = () => {
 };
 
 onMounted(() => {
-  if (config.features.hasGridView)
+  const viewModes = config.features.allowedViewModes;
+  if (viewModes.includes(ViewModesList.__name))
+    toggles.unshift({
+      isOn: displayList,
+      iconOn: DamsIcons.ListUl,
+      iconOff: DamsIcons.ListUl,
+    });
+  if (viewModes.includes(ViewModesGrid.__name))
     toggles.push({
       isOn: displayGrid,
       iconOn: DamsIcons.Apps,
       iconOff: DamsIcons.Apps,
     });
   initializeBaseLibrary();
-  if (props.enablePreview)
+  if (viewModes.includes(ViewModesMedia.__name) || props.enablePreview)
     toggles.push({
       isOn: displayPreview,
       iconOn: DamsIcons.Image,
