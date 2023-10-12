@@ -25,6 +25,7 @@
           )
         "
         :relations="relations"
+        :has-selection="enableSelection"
       />
     </div>
     <GridItem
@@ -57,6 +58,7 @@
         )
       "
       :relations="relations"
+      :has-selection="enableSelection"
       @click="
         entitiesLoading || !enableNavigation
           ? !enableNavigation &&
@@ -104,12 +106,14 @@ const props = withDefaults(
     parentEntityIdentifiers?: string[];
     idsOfNonSelectableEntities?: string[];
     relationType: string;
+    enableSelection: boolean;
   }>(),
   {
     disablePreviews: false,
     enableNavigation: true,
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
+    enableSelection: true,
   }
 );
 

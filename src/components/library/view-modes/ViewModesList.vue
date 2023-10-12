@@ -23,6 +23,7 @@
         )
       "
       :relations="relations"
+      :has-selection="enableSelection"
     />
   </div>
   <ListItem
@@ -56,6 +57,7 @@
       )
     "
     :relations="relations"
+    :has-selection="enableSelection"
     @click="
       entitiesLoading || !enableNavigation
         ? !enableNavigation &&
@@ -102,12 +104,14 @@ withDefaults(
     parentEntityIdentifiers?: string[];
     idsOfNonSelectableEntities?: string[];
     relationType: string;
+    enableSelection: boolean;
   }>(),
   {
     disablePreviews: false,
     enableNavigation: true,
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
+    enableSelection: true,
   }
 );
 

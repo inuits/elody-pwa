@@ -42,7 +42,7 @@
         </div>
 
         <div
-          v-if="enableBulkOperations && !displayPreview"
+          v-if="hasBulkSelect"
           class="my-3"
           :class="{ 'flex justify-end': expandFilters }"
         >
@@ -83,6 +83,7 @@
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
             @go-to-entity-page="(entity) => goToEntityPage(entity)"
             :relation-type="relationType"
+            :enable-selection="hasBulkSelect"
           />
 
           <ViewModesGrid
@@ -97,6 +98,7 @@
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
             @go-to-entity-page="(entity) => goToEntityPage(entity)"
             :relation-type="relationType"
+            :enable-selection="hasBulkSelect"
           />
 
           <ViewModesMedia
@@ -221,6 +223,10 @@ const displayList = ref<boolean>(false);
 const displayGrid = ref<boolean>(false);
 const displayDropdown = ref<boolean>(false);
 const displayPreview = ref<boolean>(props.enablePreview);
+const hasBulkSelect = computed((): boolean => {
+  if (config.features.hasBulkSelect === false) return false;
+  return props.enableBulkOperations && !displayPreview;
+});
 
 const expandFilters = ref<boolean>(false);
 const isAsc = ref<boolean>(false);
