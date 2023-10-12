@@ -24,7 +24,7 @@
         </div>
         <div v-else>
           <div
-            v-for="(metadata, index) in getMetadataFields(props.panel, panelType, useRoute().params.id as string)"
+            v-for="(metadata, index) in metadatfields"
             v-show="itemMustBeShown(metadata.value)"
             :key="index"
             class="py-2"
@@ -40,20 +40,22 @@
               :relationType="metadata.relationType"
               :viewMode="metadata.viewMode"
             />
-            <entity-element-metadata
+            <!--     <entity-element-metadata
               v-else-if="!isEdit || !metadata.field || !panel.isEditable"
               :class="[{ 'opacity-60': !panel.isEditable && isEdit }]"
               :label="metadata.label as string"
               :value="metadata.value"
               :unit="metadata.unit"
-            />
+            /> -->
             <entity-element-metadata-edit
-              v-else-if="panel.isEditable"
+              v-else
               :fieldKey="metadata.key"
               :label="metadata.label as string"
               v-model:value="metadata.value"
               :field="metadata.field"
               :formId="formId"
+              :is-edit="isEdit"
+              :unit="metadata.unit"
             />
           </div>
         </div>
@@ -68,7 +70,7 @@ import type {
   WindowElementPanel,
   Entity,
 } from "@/generated-types/queries";
-import EntityElementMetadata from "@/components/EntityElementMetadata.vue";
+// import EntityElementMetadata from "@/components/EntityElementMetadata.vue";
 import EntityElementMetadataEdit from "@/components/EntityElementMetadataEdit.vue";
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
 import EntityElementList from "@/components/entityElements/EntityElementList.vue";
@@ -90,6 +92,7 @@ const { t } = useI18n();
 const panelType = ref<PanelType>(props.panel.panelType);
 const isCollapsed = ref<boolean>(props.panel.isCollapsed);
 const config = inject("config") as any;
+const { params: routeParams } = useRoute();
 
 const itemMustBeShown = (value: any): boolean => {
   if (config.customization.hideEmptyFields === true && !value) return false;
@@ -116,6 +119,14 @@ const relationArray = computed((): PanelRelation[] => {
     }
   });
   return returnArray;
+});
+
+const metadatfields = computed(() => {
+  return getMetadataFields(
+    props.panel,
+    panelType.value,
+    routeParams.id as string
+  );
 });
 </script>
 
