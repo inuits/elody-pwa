@@ -41,7 +41,11 @@ const useFormHelper = () => {
     key: string,
     formValues: EntityValues
   ): FormContext<any> => {
-    if (forms.value[key]) return forms.value[key];
+    if (forms.value[key]) {
+      const form = forms.value[key];
+      form.values = formValues;
+      return form;
+    }
     const form = useForm<EntityValues>({
       initialValues: {
         intialValues: formValues.intialValues,
