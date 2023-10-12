@@ -39,7 +39,7 @@ const props = defineProps<{
 
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const { isEdit, addSaveCallback, refetchFn, disableEditMode } = useEditMode();
-const { createForm, editableFields, recreateForm } = useFormHelper();
+const { createForm, editableFields, recreateForm, getForm } = useFormHelper();
 const { createNotification } = useNotification();
 const { t } = useI18n();
 const entityId = computed(() => asString(useRoute().params["id"]));
@@ -133,6 +133,11 @@ watch(isEdit, () => {
     BulkOperationsContextEnum.EntityElementMediaEntityPickerModal
   );
   mutatedEntity = undefined;
+  if (isEdit && !getForm(entityId.value))
+    createForm(entityId.value, {
+      intialValues: props.intialValues,
+      relationValues: props.relationValues,
+    });
 });
 
 watch(
