@@ -18,6 +18,7 @@
             :field="metadata.field"
             :fieldKey="metadata.key"
             form-id="createEntity"
+            :is-edit="true"
           />
         </div>
         <div class="absolute left-0 bottom-6 w-full px-6">
