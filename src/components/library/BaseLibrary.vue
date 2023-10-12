@@ -224,8 +224,7 @@ const displayGrid = ref<boolean>(false);
 const displayDropdown = ref<boolean>(false);
 const displayPreview = ref<boolean>(props.enablePreview);
 const hasBulkSelect = computed((): boolean => {
-  if (config.features.hasBulkSelect === false) return false;
-  return props.enableBulkOperations && !displayPreview;
+  return config.features.hasBulkSelect !== false;
 });
 
 const expandFilters = ref<boolean>(false);
