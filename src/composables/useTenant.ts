@@ -15,7 +15,7 @@ const selectedTenant = ref<string | undefined>(undefined);
 
 const useTenant = (
   apolloClient: ApolloClient<any>,
-  config?: { features: { hasTenantSelect: boolean } }
+  config?: { features: { hasTenantSelect: boolean, hideSuperTenant: boolean } }
 ) => {
   const tenantsLoaded = ref<
     "not-loaded" | "no-switcher" | "loaded" | "switching"
@@ -24,8 +24,9 @@ const useTenant = (
     config && config.features.hasTenantSelect
       ? (config.features.hasTenantSelect as boolean)
       : false;
+  const hideSuperTenant: boolean = config && config.features.hideSuperTenant || false;
   const initTenants = async () => {
-    await getTenants();
+    await getTenants(hideSuperTenant);
     const tenantFromSession = await getTennantFromSession();
     if (
       tenants.value !== "no-tenants" &&
@@ -51,7 +52,7 @@ const useTenant = (
     }
   });
 
-  const getTenants = async () => {
+  const getTenants = async (hideSuperTenant: boolean) => {
     return apolloClient
       .query<GetTenantsQuery>({
         query: GetTenantsDocument,
@@ -70,10 +71,11 @@ const useTenant = (
                 tenants.value = [];
               }
 
-              tenants.value.push({
-                id,
-                label,
-              });
+              if (!hideSuperTenant || (hideSuperTenant && id !== "tenant:super"))
+                tenants.value.push({
+                  id,
+                  label,
+                });
             }
           });
       });
