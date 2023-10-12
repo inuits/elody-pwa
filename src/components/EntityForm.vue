@@ -132,10 +132,6 @@ watch(isEdit, () => {
   dequeueAllItemsForBulkProcessing(
     BulkOperationsContextEnum.EntityElementMediaEntityPickerModal
   );
-  form = createForm(entityId.value, {
-    intialValues: mutatedEntity?.intialValues || props.intialValues,
-    relationValues: mutatedEntity?.relationValues || props.relationValues,
-  });
   mutatedEntity = undefined;
 });
 
