@@ -1,5 +1,26 @@
 <template>
-  <div v-if="field" class="text-sm pl-4">
+  <div v-if="!isEdit || !field" class="text-sm pl-4">
+    <p class="text-text-light w-full">{{ t(label || "") }}</p>
+    <div v-if="Array.isArray(readableValue)">
+      <div v-for="item in readableValue" :key="item">
+        <p v-if="!stringIsUrl(item)">{{ item }}</p>
+        <a v-else class="underline" target="_blank" :href="item">{{ item }}</a>
+      </div>
+      <div v-if="readableValue.length == 0">-</div>
+    </div>
+    <div v-else>
+      <a
+        v-if="stringIsUrl(readableValue)"
+        class="underline"
+        target="_blank"
+        :href="readableValue"
+        >{{ readableValue }}</a
+      >
+      <p v-else-if="stringIsHtml(readableValue)" v-html="readableValue"></p>
+      <p v-else>{{ (readableValue as string) || "-" }}</p>
+    </div>
+  </div>
+  <div v-else class="text-sm pl-4">
     <BaseInputTextNumberDatetime
       :name="fieldKey"
       v-if="!isDropdownType"
@@ -35,7 +56,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { DropdownOption } from "@/generated-types/queries";
+import type { DropdownOption, Unit } from "@/generated-types/queries";
 import type { FormContext } from "vee-validate";
 import {
   InputFieldTypes,
@@ -55,6 +76,8 @@ const props = defineProps<{
   value: string;
   field: InputFieldType;
   formId: string;
+  isEdit: boolean;
+  unit?: string;
 }>();
 const { getForm } = useFormHelper();
 let form: FormContext | undefined = undefined;
@@ -63,10 +86,9 @@ const {
   errorMessage,
   value: fieldValue,
   setValue,
-  errors,
-} = useField(
+} = useField<string>(
   "intialValues." + props.fieldKey,
-  props.field.validation || undefined,
+  props.field && props.field.validation ? props.field.validation : undefined,
   {
     label: t(props.label),
   }
@@ -107,5 +129,16 @@ const isDropdownType = computed(() => {
     isDropdown = dropdownTypes.includes(props.field.type);
   }
   return isDropdown;
+});
+
+//From view component
+import {
+  convertUnitToReadbleFormat,
+  stringIsUrl,
+  stringIsHtml,
+} from "@/helpers";
+
+const readableValue = computed(() => {
+  return convertUnitToReadbleFormat(props.unit as Unit, fieldValue.value ?? "");
 });
 </script>
