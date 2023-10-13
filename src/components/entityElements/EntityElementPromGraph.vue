@@ -7,10 +7,10 @@
     <template v-slot:actions />
     <template v-slot:content>
       <canvas
-          v-if="!element.isCollapsed"
-          class="bg-neutral-0"
-          ref="canvasRef"
-          id="chart"
+        v-if="!element.isCollapsed"
+        class="bg-neutral-0"
+        ref="canvasRef"
+        id="chart"
       ></canvas>
     </template>
   </entity-element-wrapper>
@@ -18,7 +18,7 @@
 <script lang="ts" setup>
 import { ref, watch } from "vue";
 import Chart from "chart.js/auto";
-import { Colors } from 'chart.js';
+import { Colors } from "chart.js";
 import "chartjs-adapter-date-fns";
 import ChartDatasourcePrometheusPlugin from "chartjs-plugin-datasource-prometheus";
 import { type PromGraphElement, PanelType } from "@/generated-types/queries";
@@ -33,9 +33,12 @@ const props = defineProps<{
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const route = useRoute();
 
-watch(() => canvasRef.value, () => {
-  if(canvasRef.value && !props.element.isCollapsed) fetchGraphData();
-})
+watch(
+  () => canvasRef.value,
+  () => {
+    if (canvasRef.value && !props.element.isCollapsed) fetchGraphData();
+  }
+);
 
 const getQueries = (): string[] => {
   const queries = props.element.query;
@@ -48,7 +51,7 @@ const getQueries = (): string[] => {
       const valueFromMetadata = getValueForPanelMetadata(
         PanelType.Metadata,
         desiredWordBehind,
-          route.params.id
+        route.params.id
       );
       formattedQueries.push(query.replace(pattern, valueFromMetadata));
     } else {
@@ -61,7 +64,7 @@ const getQueries = (): string[] => {
 const fetchGraphData = () => {
   Chart.registry.plugins.register(ChartDatasourcePrometheusPlugin);
   Chart.register(Colors);
-    if (canvasRef.value !== null) {
+  if (canvasRef.value !== null) {
     const chart: Chart = new Chart(canvasRef.value, {
       type: "bar",
       plugins: [ChartDatasourcePrometheusPlugin],
@@ -69,6 +72,9 @@ const fetchGraphData = () => {
         plugins: {
           colors: {
             forceOverride: true,
+          },
+          legend: {
+            display: false,
           },
           "datasource-prometheus": {
             prometheus: {
@@ -86,6 +92,10 @@ const fetchGraphData = () => {
         },
       },
     });
+    if (props.element.label === "panel-labels.average-filesize") {
+      chart.options.plugins.colors.forceOverride = false;
+      chart.options.plugins.legend.display = true;
+    }
   }
-}
+};
 </script>
