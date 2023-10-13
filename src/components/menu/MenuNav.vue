@@ -55,7 +55,8 @@ const { isLeftModalOpened } = useBaseModal();
 getMenuEntities();
 
 const changeExpandedState = (newState: boolean) => {
-  if(!isLeftModalOpened.value || (isLeftModalOpened.value && newState)) isExpanded.value = newState;
+  if (!isLeftModalOpened.value || (isLeftModalOpened.value && newState))
+    isExpanded.value = newState;
 };
 
 const changeHoveredItem = (item: MenuItem | undefined) => {

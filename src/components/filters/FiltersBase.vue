@@ -29,7 +29,11 @@
 
     <div
       class="absolute w-full rounded-b bg-neutral-white"
-      :class="expandFilters ? 'scrollable border-x border-b-2 border-neutral-light' : ''"
+      :class="
+        expandFilters
+          ? 'scrollable border-x border-b-2 border-neutral-light'
+          : ''
+      "
     >
       <div v-if="expandFilters" class="p-4">
         <div class="flex justify-between gap-4 pb-4">

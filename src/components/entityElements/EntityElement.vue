@@ -32,12 +32,12 @@
         :identifiers="identifiers"
       />
       <entity-element-prom-graph
-          v-if="element.__typename === 'PromGraphElement' && !isEdit"
-          :element="element"
+        v-if="element.__typename === 'PromGraphElement' && !isEdit"
+        :element="element"
       />
       <entity-element-manifest-viewer
-          v-if="element.__typename === 'ManifestViewerElement'"
-          :element="element"
+        v-if="element.__typename === 'ManifestViewerElement'"
+        :element="element"
       />
     </div>
   </div>
@@ -79,14 +79,16 @@ const formId = computed(() => getEntityIdFromRoute() as string);
 const elements = computed<Elements[]>(() => {
   const returnArray: Elements[] = [];
 
-  Object.values(props.elements).reverse().forEach((value) => {
-    if (value != null && typeof value !== "string") {
-      if (value.__typename === 'PromGraphElement') {
-        value.isCollapsed = true;
-        returnArray.push(value);
-      } else returnArray.unshift(value);
-    }
-  });
+  Object.values(props.elements)
+    .reverse()
+    .forEach((value) => {
+      if (value != null && typeof value !== "string") {
+        if (value.__typename === "PromGraphElement") {
+          value.isCollapsed = true;
+          returnArray.push(value);
+        } else returnArray.unshift(value);
+      }
+    });
   return returnArray;
 });
 </script>

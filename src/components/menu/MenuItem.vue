@@ -30,10 +30,7 @@
       </div>
     </div>
     <transition-group v-if="isExpanded">
-      <div
-        v-for="submenuItem in menuSubitem"
-        :key="submenuItem.label"
-      >
+      <div v-for="submenuItem in menuSubitem" :key="submenuItem.label">
         <MenuSubItem
           @click="setSelectedMenuItem(menuitem)"
           :subMenuItem="submenuItem"
