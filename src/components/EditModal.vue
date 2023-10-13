@@ -12,6 +12,7 @@
 </template>
 
 <script lang="ts" setup>
+import type { ApolloClient } from "@apollo/client/core";
 import {
   DamsIcons,
   DeleteDataDocument,
@@ -20,14 +21,17 @@ import {
   type DeleteDataMutation,
 } from "@/generated-types/queries";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
+import useTenant from "@/composables/useTenant";
+import { apolloClient } from "@/main";
 import { asString } from "@/helpers";
+import { inject } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useEditMode } from "@/composables/useEdit";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useMutation } from "@vue/apollo-composable";
 import { usePageInfo } from "@/composables/usePageInfo";
 import { useRoute, useRouter } from "vue-router";
-import { useConfirmModal } from "@/composables/useConfirmModal";
 
 const route = useRoute();
 const router = useRouter();
@@ -38,11 +42,16 @@ const { setSecondaryConfirmFunction, initializeConfirmModal } =
 const { closeModal, openModal } = useBaseModal();
 const { mediafileSelectionState } = useEntityMediafileSelector();
 
+const config = inject<{
+  features: { hasTenantSelect: boolean; hideSuperTenant: boolean };
+}>("config");
+const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const deleteEntity = async (deleteMediafiles: boolean = false) => {
   const id = asString(route.params["id"]);
   const collection: Collection = pageInfo.value.routeType as Collection;
   await mutate({ id, path: collection, deleteMediafiles });
+  await getTenants();
   closeModal(TypeModals.Confirm);
   disableEditMode();
   router.push({ name: pageInfo.value.parentRouteName });

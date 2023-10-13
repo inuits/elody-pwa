@@ -27,7 +27,7 @@ const useTenant = (
   const hideSuperTenant: boolean =
     (config && config.features.hideSuperTenant) || false;
   const initTenants = async () => {
-    await getTenants(hideSuperTenant);
+    await getTenants();
     const tenantFromSession = await getTennantFromSession();
     if (
       tenants.value !== "no-tenants" &&
@@ -53,7 +53,7 @@ const useTenant = (
     }
   });
 
-  const getTenants = async (hideSuperTenant: boolean) => {
+  const getTenants = async () => {
     return apolloClient
       .query<GetTenantsQuery>({
         query: GetTenantsDocument,
@@ -61,6 +61,7 @@ const useTenant = (
         notifyOnNetworkStatusChange: true,
       })
       .then((result) => {
+        tenants.value = [];
         const entities = result.data.Tenants;
         entities &&
           entities.results &&
@@ -158,6 +159,7 @@ const useTenant = (
     tenantsLoaded,
     selectedTenant,
     getLabelById,
+    getTenants,
   };
 };
 
