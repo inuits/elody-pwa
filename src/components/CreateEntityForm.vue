@@ -69,7 +69,8 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const { createNotification } = useNotification();
-const { createForm, createEntityValues, formContainsValues } = useFormHelper();
+const { createForm, createEntityValues, formContainsValues, deleteForm } =
+  useFormHelper();
 const { changeCloseConfirmation, closeModal, updateModal } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const router = useRouter();
@@ -140,6 +141,7 @@ const create = async () => {
       description: t("notifications.success.entityCreated.description"),
       shown: true,
     });
+    deleteForm(formId);
     router.push({
       name: "SingleEntity",
       params: { id: createResult.data.createEntity.id },
