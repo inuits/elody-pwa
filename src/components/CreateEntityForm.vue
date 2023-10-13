@@ -52,7 +52,7 @@ import type {
 } from "@/generated-types/queries";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityElementMetadataEdit from "@/components/EntityElementMetadataEdit.vue";
-import { computed, ref, watch } from "vue";
+import { computed, inject, ref, watch } from "vue";
 import { getMetadataFields } from "@/helpers";
 import { NotificationType } from "@/components/base/BaseNotification.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -62,6 +62,9 @@ import { useNotification } from "@/components/base/BaseNotification.vue";
 import { useRouter } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
+import useTenant from "@/composables/useTenant";
+import { apolloClient } from "@/main";
+import type { ApolloClient } from "@apollo/client/core";
 
 const props = defineProps<{
   entityType: Entitytyping;
@@ -73,6 +76,10 @@ const { createForm, createEntityValues, formContainsValues, deleteForm } =
   useFormHelper();
 const { changeCloseConfirmation, closeModal, updateModal } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
+const config = inject<{
+  features: { hasTenantSelect: boolean; hideSuperTenant: boolean };
+}>("config");
+const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const router = useRouter();
 const formId: string = "createEntity";
 
@@ -141,6 +148,7 @@ const create = async () => {
       description: t("notifications.success.entityCreated.description"),
       shown: true,
     });
+    await getTenants();
     deleteForm(formId);
     router.push({
       name: "SingleEntity",

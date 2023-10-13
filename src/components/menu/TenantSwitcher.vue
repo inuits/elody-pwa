@@ -23,7 +23,9 @@ import { DamsIcons } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 
 const apolloClient = inject(DefaultApolloClient);
-const config = inject<{ features: { hasTenantSelect: boolean } }>("config");
+const config = inject<{
+  features: { hasTenantSelect: boolean; hideSuperTenant: boolean };
+}>("config");
 const { t } = useI18n();
 
 const props = withDefaults(
