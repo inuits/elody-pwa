@@ -36,6 +36,14 @@ const useTenant = (
       await setTennant(tenants.value[0].label, tenants.value[0].id);
     }
 
+    if (
+      tenantFromSession !== "no-tenant-in-session" &&
+      tenants.value !== "no-tenants" &&
+      tenants.value.length === 0
+    ) {
+      await getTenants();
+    }
+
     if (tenantFromSession !== "no-tenant-in-session") {
       await setTennant(tenantFromSession.label, tenantFromSession.id);
     }
