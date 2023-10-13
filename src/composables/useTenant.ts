@@ -15,7 +15,7 @@ const selectedTenant = ref<string | undefined>(undefined);
 
 const useTenant = (
   apolloClient: ApolloClient<any>,
-  config?: { features: { hasTenantSelect: boolean, hideSuperTenant: boolean } }
+  config?: { features: { hasTenantSelect: boolean; hideSuperTenant: boolean } }
 ) => {
   const tenantsLoaded = ref<
     "not-loaded" | "no-switcher" | "loaded" | "switching"
@@ -24,7 +24,8 @@ const useTenant = (
     config && config.features.hasTenantSelect
       ? (config.features.hasTenantSelect as boolean)
       : false;
-  const hideSuperTenant: boolean = config && config.features.hideSuperTenant || false;
+  const hideSuperTenant: boolean =
+    (config && config.features.hideSuperTenant) || false;
   const initTenants = async () => {
     await getTenants(hideSuperTenant);
     const tenantFromSession = await getTennantFromSession();
@@ -71,7 +72,10 @@ const useTenant = (
                 tenants.value = [];
               }
 
-              if (!hideSuperTenant || (hideSuperTenant && id !== "tenant:super"))
+              if (
+                !hideSuperTenant ||
+                (hideSuperTenant && id !== "tenant:super")
+              )
                 tenants.value.push({
                   id,
                   label,

@@ -15,10 +15,11 @@
           v-if="auth.isAuthenticated.value === false"
           @click="auth.redirectToLogin()"
           class="overflow-hidden px-4 font-bold"
-          ss        >
+          ss
+        >
           {{ $t("navigation.log-in") }}
         </span>
-        </transition>
+      </transition>
     </div>
 
     <div
@@ -51,7 +52,7 @@ import { useRoute } from "vue-router";
 
 const props = defineProps({
   isExpanded: Boolean,
-})
+});
 const route = useRoute();
 const auth = useAuth();
 

@@ -17,13 +17,14 @@
       @change.stop
       @click.stop
     />
-    <input v-else-if="type === 'checkbox'"
-     class="w-4 h-4 rounded-md ml-2"
-     v-model="inputValue"
-     :type="type"
-     :disabled="disabled"
-     @change.stop
-     @click.stop
+    <input
+      v-else-if="type === 'checkbox'"
+      class="w-4 h-4 rounded-md ml-2"
+      v-model="inputValue"
+      :type="type"
+      :disabled="disabled"
+      @change.stop
+      @click.stop
     />
     <textarea
       v-else

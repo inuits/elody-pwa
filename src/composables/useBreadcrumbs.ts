@@ -42,7 +42,7 @@ export const useBreadcrumbs = (config: any, t: any) => {
   const removeVisitedRoutesUntilReachedCurrentRoute = (
     route: VisitedRoute
   ): void => {
-    var counter = visitedRoutes.value.length - 1;
+    let counter = visitedRoutes.value.length - 1;
     do {
       if (route.id === visitedRoutes.value[counter].id) break;
       visitedRoutes.value.pop();
