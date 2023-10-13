@@ -21,31 +21,33 @@ const createErrorNotification = (title: string, description: string) => {
 };
 
 const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
-  const handleErrorByCode = (errorMessage: string) => {
-    console.log(errorMessage, errorMessage.includes("401"));
-    if (errorMessage.includes("401")) {
-      auth.logout();
-      setTimeout(() => {
-        auth.redirectToLogin();
-      }, 100);
-    }
-    if (errorMessage.includes("403")) {
-      createErrorNotification(
-        "Forbidden",
-        "You don't have access to this page/action"
-      );
-      useRouter().go(-1);
-    }
-    if (errorMessage.includes("409")) {
-      createErrorNotification(
-        "Duplicate",
-        "Duplicate file detected, upload reverted"
-      );
-    } else {
-      createErrorNotification(
-        "Error",
-        "Something went wrong, please try again later"
-      );
+  const handleErrorByCode = (errorMessage: number) => {
+    switch (errorMessage) {
+      case 401:
+        auth.logout();
+        setTimeout(() => {
+          auth.redirectToLogin();
+        }, 100);
+        break;
+      case 403:
+        createErrorNotification(
+          "Forbidden",
+          "You don't have access to this page/action"
+        );
+        useRouter().go(-1);
+        break;
+      case 409:
+        createErrorNotification(
+          "Duplicate",
+          "Duplicate file detected, upload reverted"
+        );
+        break;
+      default:
+        createErrorNotification(
+          "Error",
+          "Something went wrong, please try again later"
+        );
+        break;
     }
   };
 
@@ -67,7 +69,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
           );
           console.log(`Message:`, error.message);
           console.log(`---`);
-          handleErrorByCode(error.message as string);
+          handleErrorByCode(error.extensions?.statusCode);
         }
       }
     }
