@@ -27,7 +27,7 @@
             v-for="(metadata, index) in metadatfields"
             v-show="itemMustBeShown(metadata.value)"
             :key="index"
-            class="py-2"
+            class="py-2 px-2"
           >
             <entity-element-list
               v-if="metadata.__typename === 'EntityListElement'"
@@ -40,13 +40,6 @@
               :relationType="metadata.relationType"
               :viewMode="metadata.viewMode"
             />
-            <!--     <entity-element-metadata
-              v-else-if="!isEdit || !metadata.field || !panel.isEditable"
-              :class="[{ 'opacity-60': !panel.isEditable && isEdit }]"
-              :label="metadata.label as string"
-              :value="metadata.value"
-              :unit="metadata.unit"
-            /> -->
             <entity-element-metadata-edit
               v-else
               :fieldKey="metadata.key"
