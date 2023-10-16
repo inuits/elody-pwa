@@ -33,7 +33,11 @@ const useTenant = (
       tenants.value !== "no-tenants" &&
       tenantFromSession === "no-tenant-in-session"
     ) {
-      await setTennant(tenants.value[0].label, tenants.value[0].id);
+      try {
+        await setTennant(tenants.value[0].label, tenants.value[0].id);
+      } catch {
+        console.warn("Failed to set tenant");
+      }
     }
 
     if (
