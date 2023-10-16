@@ -1,36 +1,35 @@
 <template>
   <div>
     <div class="px-6 pt-0 pb-20 bg-neutral-white">
-      <form v-if="result">
-        <div
-          class="py-2"
-          v-for="(metadata, index) in getMetadataFields(
-            formFields,
-            PanelType.Metadata,
-            'createEntity'
-          )"
-          :key="index"
-        >
-          <entity-element-metadata-edit
-            class="-ml-4"
-            v-model:value="metadata.value"
-            :label="t(metadata.label)"
-            :field="metadata.field"
-            :fieldKey="metadata.key"
-            form-id="createEntity"
-            :is-edit="true"
-          />
-        </div>
-        <div class="absolute left-0 bottom-6 w-full px-6">
-          <BaseButtonNew
-            :label="t('form.create')"
-            :icon="DamsIcons.Create"
-            :disabled="cannotCreate"
-            button-style="accentAccent"
-            @click="create"
-          />
-        </div>
-      </form>
+      <div
+        class="py-2"
+        v-show="form"
+        v-for="(metadata, index) in getMetadataFields(
+          formFields,
+          PanelType.Metadata,
+          'createEntity'
+        )"
+        :key="index"
+      >
+        <entity-element-metadata-edit
+          class="-ml-4"
+          v-model:value="metadata.value"
+          :label="t(metadata.label)"
+          :field="metadata.field"
+          :fieldKey="metadata.key"
+          form-id="createEntity"
+          :is-edit="true"
+        />
+      </div>
+      <div class="absolute left-0 bottom-6 w-full px-6">
+        <BaseButtonNew
+          :label="t('form.create')"
+          :icon="DamsIcons.Create"
+          :disabled="cannotCreate"
+          button-style="accentAccent"
+          @click="create"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -52,7 +51,7 @@ import type {
 } from "@/generated-types/queries";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityElementMetadataEdit from "@/components/EntityElementMetadataEdit.vue";
-import { computed, inject, ref, watch } from "vue";
+import { computed, inject, onMounted, ref, watch } from "vue";
 import { getMetadataFields } from "@/helpers";
 import { NotificationType } from "@/components/base/BaseNotification.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -87,6 +86,12 @@ const form = ref<FormContext<any>>();
 const formFields = ref<PanelMetaData[]>([]);
 const formHasValues = computed(() => formContainsValues(formId));
 
+onMounted(() => {
+  form.value = createForm(formId, { intialValues: {}, relationValues: {} } as {
+    [key: string]: object;
+  });
+});
+
 initializeConfirmModal(
   () => {
     changeCloseConfirmation(TypeModals.Create, false);
@@ -100,7 +105,7 @@ initializeConfirmModal(
 
 const type = computed(() => props.entityType);
 const cannotCreate = computed(() => {
-  if (!form.value) return true;
+  if (!form.value || !form.value.meta.valid) return true;
   const values = Object.values(form.value?.values.intialValues);
   return values.length <= 0 || values.includes("");
 });
@@ -116,12 +121,12 @@ const { result, onResult, refetch } = useQuery<GetCreateEntityFormQuery>(
 );
 onResult((result) => {
   const createEntityForm = result.data?.CreateEntityForm;
-  if (!createEntityForm) return;
+  if (!createEntityForm || !form.value) return;
   //@ts-ignore
   formFields.value =
     createEntityForm?.formFields.createFormFields || ([] as PanelMetaData[]);
   const entityValues = createEntityValues(formFields.value);
-  form.value = createForm(formId, entityValues);
+  form.value.setValues(entityValues);
 });
 
 const create = async () => {

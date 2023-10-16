@@ -3,7 +3,6 @@
     v-model="inputValue"
     :options="autocompleteOptions"
     :select-type="selectType"
-    :label="label"
     autocomplete-style="defaultWithBorder"
     @search-change="(value: string) => getAutocompleteOptions(value)"
   />
@@ -26,7 +25,6 @@ const props = withDefaults(
     modelValue: string[] | string | undefined;
     metadataKeyToGetOptionsFor?: string | "no-key";
     selectType?: "multi" | "single";
-    label?: string;
     dropdownOptions: DropdownOption[];
   }>(),
   {

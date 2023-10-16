@@ -1,45 +1,40 @@
 <template>
-  <label>
-    <span v-if="label" class="text-sm text-text-light ml-1">
-      {{ label }}
-    </span>
-    <input
-      v-if="type !== 'textarea' && type !== 'checkbox'"
-      class="w-full h-full border rounded-lg focus:ring-0"
-      :class="[
-        `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
-        `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
-      ]"
-      v-model="inputValue"
-      :type="type"
-      :step="step"
-      :disabled="disabled"
-      @change.stop
-      @click.stop
-    />
-    <input
-      v-else-if="type === 'checkbox'"
-      class="w-4 h-4 rounded-md ml-2"
-      v-model="inputValue"
-      :type="type"
-      :disabled="disabled"
-      @change.stop
-      @click.stop
-    />
-    <textarea
-      v-else
-      class="w-full h-full border rounded-lg focus:ring-0"
-      :class="[
-        `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
-        `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
-      ]"
-      v-model="inputValue"
-      :disabled="disabled"
-      @change.stop
-      @click.stop
-      rows="3"
-    ></textarea>
-  </label>
+  <input
+    v-if="type !== 'textarea' && type !== 'checkbox'"
+    class="w-full h-full border rounded-lg focus:ring-0"
+    :class="[
+      `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
+      `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
+    ]"
+    v-model="inputValue"
+    :type="type"
+    :step="step"
+    :disabled="disabled"
+    @change.stop
+    @click.stop
+  />
+  <input
+    v-else-if="type === 'checkbox'"
+    class="w-4 h-4 rounded-md ml-2"
+    v-model="inputValue"
+    :type="type"
+    :disabled="disabled"
+    @change.stop
+    @click.stop
+  />
+  <textarea
+    v-else
+    class="w-full h-full border rounded-lg focus:ring-0"
+    :class="[
+      `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
+      `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
+    ]"
+    v-model="inputValue"
+    :disabled="disabled"
+    @change.stop
+    @click.stop
+    rows="3"
+  ></textarea>
 </template>
 
 <script lang="ts" setup>
@@ -88,14 +83,12 @@ const props = withDefaults(
   defineProps<{
     modelValue: string | number | undefined;
     inputStyle: InputStyle;
-    label?: string;
     type?: string;
     step?: number;
     disabled?: boolean;
     isValidPredicate?: Function;
   }>(),
   {
-    label: "",
     type: "text",
     step: 1,
     disabled: false,
@@ -116,13 +109,6 @@ const inputValue = computed<string | number | undefined>({
   set(value) {
     if (props.isValidPredicate(value)) emit("update:modelValue", value);
   },
-});
-const label = computed<string>(() => {
-  try {
-    return t(props.label);
-  } catch {
-    return props.label;
-  }
 });
 
 const selectedInputStyle = computed<Input>(() => inputStyles[props.inputStyle]);

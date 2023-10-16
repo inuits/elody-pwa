@@ -1,28 +1,23 @@
 <template>
-  <label>
-    <span v-if="label" class="text-sm text-text-light ml-1">
-      {{ label }}
-    </span>
-    <Multiselect
-      v-if="inputValue"
-      v-model="inputValue"
-      mode="tags"
-      :options="options"
-      :searchable="searchable"
-      :show-options="searchable"
-      :close-on-select="true"
-      :placeholder="placeholder"
-      :classes="classes"
-      :disabled="disabled"
-      :object="true"
-      label="label"
-      valueProp="value"
-      @search-change="(value: string) => {
+  <Multiselect
+    v-if="inputValue"
+    v-model="inputValue"
+    mode="tags"
+    :options="options"
+    :searchable="searchable"
+    :show-options="searchable"
+    :close-on-select="true"
+    :placeholder="placeholder"
+    :classes="classes"
+    :disabled="disabled"
+    :object="true"
+    label="label"
+    valueProp="value"
+    @search-change="(value: string) => {
         searchValue = value;
         emit('searchChange', value);
       }"
-    />
-  </label>
+  />
 </template>
 
 <script lang="ts" setup>
@@ -39,14 +34,12 @@ const props = withDefaults(
     options: DropdownOption[];
     autocompleteStyle: AutocompleteStyle;
     selectType?: "multi" | "single";
-    label?: string;
     placeholder?: string;
     disabled?: boolean;
     relation?: boolean;
   }>(),
   {
     selectType: "multi",
-    label: "",
     placeholder: "",
     disabled: false,
     relation: false,
@@ -70,13 +63,7 @@ const inputValue = computed<DropdownOption[] | undefined>({
     emit("update:modelValue", value);
   },
 });
-const label = computed<string>(() => {
-  try {
-    return t(props.label);
-  } catch {
-    return props.label;
-  }
-});
+
 const searchable = computed<boolean>(() => {
   return (
     !inputValue.value ||
