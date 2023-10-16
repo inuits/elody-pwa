@@ -1,5 +1,5 @@
 <template>
-  <div v-if="auth.isAuthenticated">
+  <div>
     <BaseNotification />
     <the-navigation class="navbar" />
     <div v-if="tenantsLoaded !== 'not-loaded' && tenantsLoaded !== 'switching'">
