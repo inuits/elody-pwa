@@ -6,7 +6,7 @@
         ? SearchInputType.AdvancedInputMediaFilesType
         : SearchInputType.AdvancedInputType
     "
-    :enable-bulk-operations="true"
+    :enable-bulk-operations="config.features.hasBulkSelect"
     :list-item-route-name="
       route.meta.type === 'mediafiles'
         ? RouteNames.SingleMediafile
@@ -17,13 +17,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import type { Context } from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import { RouteNames, SearchInputType } from "@/generated-types/queries";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
+const config = inject("config");
 
 const entityType = computed<string | "not-set">(() =>
   route.meta.entityType ? (route.meta.entityType as string) : "not-set"

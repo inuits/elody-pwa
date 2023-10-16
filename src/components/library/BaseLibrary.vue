@@ -83,6 +83,7 @@
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
             @go-to-entity-page="(entity) => goToEntityPage(entity)"
             :relation-type="relationType"
+            :enable-selection="enableBulkOperations"
           />
 
           <ViewModesGrid
@@ -97,6 +98,7 @@
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
             @go-to-entity-page="(entity) => goToEntityPage(entity)"
             :relation-type="relationType"
+            :enable-selection="enableBulkOperations"
           />
 
           <ViewModesMedia
