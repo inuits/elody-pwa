@@ -6,6 +6,7 @@ import {
   type GetTenantsQuery,
 } from "@/generated-types/queries";
 import { ref, computed, watch, onMounted } from "vue";
+import { useAuth } from "session-vue-3-oidc-library";
 
 const TENANTS_ENDPOINT = "/api/tenants";
 
@@ -156,6 +157,11 @@ const useTenant = (
       await apolloClient.cache.reset();
       tenantsLoaded.value = "loaded";
     }
+  });
+
+  const auth: Object = useAuth();
+  watch(() => auth.isAuthenticated.value, async () => {
+    await getTenants();
   });
 
   const getLabelById = (idToFind: string) => {
