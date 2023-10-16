@@ -1,11 +1,11 @@
 import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { type RouteLocationRaw, useRouter } from "vue-router";
 
 const confirmFunction = ref<Function | undefined>(undefined);
 const secondaryConfirmFunction = ref<Function | undefined>(undefined);
 const declineFunction = ref<Function | undefined>(undefined);
 const translationKey = ref<string>("");
-const pathToNavigate = ref<string>(undefined);
+const pathToNavigate = ref<string | undefined>(undefined);
 
 export const useConfirmModal = () => {
   const router = useRouter();
@@ -47,7 +47,7 @@ export const useConfirmModal = () => {
   };
 
   const performRoute = (): void => {
-    router.push(pathToNavigate);
+    if (pathToNavigate.value) router.push(pathToNavigate as RouteLocationRaw);
   };
 
   return {
