@@ -71,13 +71,8 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const { createNotification } = useNotification();
-const {
-  createForm,
-  createEntityValues,
-  formContainsValues,
-  deleteForm,
-  recreateForm,
-} = useFormHelper();
+const { createForm, createEntityValues, formContainsValues, deleteForm } =
+  useFormHelper();
 const { changeCloseConfirmation, closeModal, updateModal } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const config = inject<{
@@ -111,8 +106,7 @@ initializeConfirmModal(
 const type = computed(() => props.entityType);
 const cannotCreate = computed(() => {
   if (!form.value || !form.value.meta.valid) return true;
-  const values = Object.values(form.value?.values.intialValues);
-  return values.length <= 0 || values.includes("");
+  return false;
 });
 
 const { mutate } = useMutation<CreateEntityMutation>(CreateEntityDocument);
