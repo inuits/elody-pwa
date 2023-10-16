@@ -84,9 +84,20 @@ const fetchGraphData = () => {
             query: getQueries(),
             timeRange: {
               type: "relative",
-              start: -120 * 60 * 60 * 1000,
+              start: -24 * props.element.days * 60 * 60 * 1000,
               end: 0,
               step: 86400,
+            },
+          },
+        },
+        scales: {
+          x: {
+            type: "time",
+            time: {
+              unit: "day",
+              displayFormats: {
+                day: "MMM dd",
+              },
             },
           },
         },
