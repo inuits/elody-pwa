@@ -41,14 +41,6 @@ const useTenant = (
       }
     }
 
-    if (
-      tenantFromSession !== "no-tenant-in-session" &&
-      tenants.value !== "no-tenants" &&
-      tenants.value.length === 0
-    ) {
-      await getTenants();
-    }
-
     if (tenantFromSession !== "no-tenant-in-session") {
       await setTennant(tenantFromSession.label, tenantFromSession.id);
     }
@@ -160,9 +152,7 @@ const useTenant = (
   });
 
   const auth: Object = useAuth();
-  watch(() => auth.isAuthenticated.value, async () => {
-    await getTenants();
-  });
+  watch(() => auth.isAuthenticated.value, () => initTenants());
 
   const getLabelById = (idToFind: string) => {
     if (tenants.value !== "no-tenants") {
