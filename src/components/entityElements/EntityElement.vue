@@ -78,17 +78,16 @@ const { isEdit } = useEditMode();
 const formId = computed(() => getEntityIdFromRoute() as string);
 const elements = computed<Elements[]>(() => {
   const returnArray: Elements[] = [];
-
-  Object.values(props.elements)
-    .reverse()
-    .forEach((value) => {
-      if (value != null && typeof value !== "string") {
-        if (value.__typename === "PromGraphElement") {
-          value.isCollapsed = true;
-          returnArray.push(value);
-        } else returnArray.unshift(value);
-      }
-    });
+  const graphArray: Elements[] = [];
+  Object.values(props.elements).forEach((value) => {
+    if (value != null && typeof value !== "string") {
+      if (value.__typename === "PromGraphElement") {
+        value.isCollapsed = true;
+        graphArray.push(value);
+      } else returnArray.push(value);
+    }
+  });
+  graphArray.forEach((graph) => returnArray.push(graph));
   return returnArray;
 });
 </script>
