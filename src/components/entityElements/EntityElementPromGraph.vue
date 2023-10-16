@@ -93,7 +93,6 @@ const fetchGraphData = () => {
       },
     });
     if (props.element.label === "panel-labels.average-filesize") {
-      chart.options.plugins.colors.forceOverride = false;
       chart.options.plugins.legend.display = true;
     }
   }
