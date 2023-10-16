@@ -157,7 +157,7 @@ onBeforeRouteLeave((to, from, next) => {
     return next();
   }
   openNavigationModal();
-  setPathToNavigate(to);
+  setPathToNavigate(to.path);
   return false;
 });
 
