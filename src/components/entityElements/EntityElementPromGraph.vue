@@ -106,6 +106,10 @@ const fetchGraphData = () => {
     if (props.element.label === "panel-labels.average-filesize") {
       chart.options.plugins.legend.display = true;
     }
+    if (props.element.label === "panel-labels.delay-amount") {
+      chart.options.scales.x.time.unit = "hour";
+      chart.options.scales.x.time.displayFormats.hour = "hA";
+    }
   }
 };
 </script>
