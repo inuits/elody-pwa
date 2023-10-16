@@ -152,7 +152,7 @@ const useTenant = (
   });
 
   const auth: Object = useAuth();
-  watch(() => auth.isAuthenticated.value, () => initTenants());
+  watch(() => auth.isAuthenticated.value, async () => await initTenants());
 
   const getLabelById = (idToFind: string) => {
     if (tenants.value !== "no-tenants") {
