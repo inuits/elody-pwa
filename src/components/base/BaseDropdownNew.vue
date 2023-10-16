@@ -1,10 +1,4 @@
 <template>
-  <span
-    v-if="label && labelPosition === 'above'"
-    class="text-sm text-text-light ml-1"
-  >
-    {{ label }}
-  </span>
   <ul
     ref="dropdown"
     class="relative w-full h-full px-3 select-none border"
@@ -153,14 +147,12 @@ const props = withDefaults(
     modelValue: DropdownOption | string | undefined;
     options: DropdownOption[];
     dropdownStyle: DropdownStyle;
-    label?: string;
     labelPosition?: "above" | "inline";
     labelAlignment?: "left" | "right";
     defaultLabel?: string;
     disable?: boolean;
   }>(),
   {
-    label: "",
     labelPosition: "above",
     labelAlignment: "left",
     disable: false,
@@ -198,13 +190,6 @@ const disabled = computed<Boolean>(() =>
   props.options.length > 0 ? disable.value : true
 );
 
-const label = computed<string>(() => {
-  try {
-    return t(props.label);
-  } catch {
-    return props.label;
-  }
-});
 const selectedOptionLabel = computed<string>(() => {
   try {
     return t(selectedOption.value.label);

@@ -1,6 +1,11 @@
 <template>
-  <div v-if="!isEdit || !field" class="text-sm pl-4">
-    <p class="text-text-light w-full">{{ t(label || "") }}</p>
+  <div class="text-text-light text-sm flex">
+    <p>
+      {{ t(label) }}
+    </p>
+    <p v-if="isFieldRequired && isEdit" class="pl-1">*</p>
+  </div>
+  <div v-if="!isEdit || !field" class="text-sm">
     <div v-if="Array.isArray(readableValue)">
       <div v-for="item in readableValue" :key="item">
         <p v-if="!stringIsUrl(item)">{{ item }}</p>
@@ -20,12 +25,11 @@
       <p v-else>{{ (readableValue as string) || "-" }}</p>
     </div>
   </div>
-  <div v-else class="text-sm pl-4">
+  <div v-else class="text-sm">
     <BaseInputTextNumberDatetime
       :name="fieldKey"
       v-if="!isDropdownType"
       v-model="computedValue"
-      :label="label"
       :type="field.type as any"
       input-style="defaultWithBorder"
     />
@@ -35,7 +39,6 @@
       "
       v-model="computedValue"
       :metadata-key-to-get-options-for="fieldKey"
-      :label="label"
       :select-type="field.type === 'dropdownMultiselect' ? 'multi' : 'single'"
       :options="field.options"
     />
@@ -48,7 +51,6 @@
       :modelValue="computedValue"
       :options="(field.options as DropdownOption[])"
       dropdown-style="defaultWithBorder"
-      :label="label"
       @update:model-value="setComputedValue"
     />
     <p class="text-red-default">{{ errorMessage }}</p>
@@ -92,6 +94,9 @@ const {
   {
     label: t(props.label),
   }
+);
+const isFieldRequired = computed(() =>
+  props.field?.validation?.includes("required")
 );
 
 onMounted(() => {
