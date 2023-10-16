@@ -9,7 +9,7 @@
           PanelType.Metadata,
           'createEntity'
         )"
-        :key="index"
+        :key="metadata.label"
       >
         <entity-element-metadata-edit
           class="-ml-4"
@@ -71,8 +71,13 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const { createNotification } = useNotification();
-const { createForm, createEntityValues, formContainsValues, deleteForm } =
-  useFormHelper();
+const {
+  createForm,
+  createEntityValues,
+  formContainsValues,
+  deleteForm,
+  recreateForm,
+} = useFormHelper();
 const { changeCloseConfirmation, closeModal, updateModal } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const config = inject<{
