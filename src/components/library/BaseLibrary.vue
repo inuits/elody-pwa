@@ -298,6 +298,7 @@ const setDisplayPreferences = () => {
   const displayPreferences = window.localStorage.getItem("_displayPreferences");
   if (displayPreferences) {
     displayGrid.value = JSON.parse(displayPreferences).grid;
+    if (displayGrid.value === false) displayList.value = true;
     expandFilters.value = !props.enableAdvancedFilters
       ? false
       : JSON.parse(displayPreferences).expandFilters;
