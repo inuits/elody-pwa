@@ -105,8 +105,7 @@ initializeConfirmModal(
 
 const type = computed(() => props.entityType);
 const cannotCreate = computed(() => {
-  if (!form.value || !form.value.meta.valid) return true;
-  return false;
+  return !form.value || !form.value.meta.valid;
 });
 
 const { mutate } = useMutation<CreateEntityMutation>(CreateEntityDocument);
