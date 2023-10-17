@@ -35,11 +35,13 @@ import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import CreateEntityForm from "@/components/CreateEntityForm.vue";
 import { ref, watch } from "vue";
-import { useI18n } from "vue-i18n";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useFormHelper } from "@/composables/useFormHelper";
+import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const { getModalInfo, closeModal } = useBaseModal();
+const { deleteForm } = useFormHelper();
 const selectedEntityType = ref<DropdownOption>();
 const entityTypes = ref<DropdownOption[]>([]);
 
@@ -50,8 +52,10 @@ Object.values(CreateableEntityTypes).forEach((type) => {
 watch(
   () => getModalInfo(TypeModals.Create).state,
   (createModalState: ModalState) => {
-    if (createModalState === ModalState.Hide)
+    if (createModalState === ModalState.Hide) {
       selectedEntityType.value = undefined;
+      deleteForm("createEntity");
+    }
   }
 );
 </script>
