@@ -79,7 +79,8 @@ const fetchGraphData = () => {
           "datasource-prometheus": {
             prometheus: {
               endpoint: "/api/prom",
-              baseURL: "/", // default value
+              baseURL: "/", // default value,
+              timeout: 120000,
             },
             query: getQueries(),
             timeRange: {
