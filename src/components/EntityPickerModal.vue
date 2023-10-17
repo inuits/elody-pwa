@@ -3,6 +3,7 @@
     :modal-state="getModalInfo(TypeModals.EntityPicker).state"
     :modal-position="getModalInfo(TypeModals.EntityPicker).modalPosition"
     modal-width-style="w-10/12"
+    modal-color="bg-neutral-lightest"
     @hide-modal="
       () => {
         dequeueAllItemsForBulkProcessing(getContext());
