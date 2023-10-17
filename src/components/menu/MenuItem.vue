@@ -2,7 +2,7 @@
   <div>
     <div
       v-show="menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
-      @click="handleClick"
+      @click="menuAction?.action"
       class="flex flex-row items-center pl-3 h-9 mt-3 cursor-pointer"
       :class="[{ 'bg-neutral-40 rounded-lg': isBeingHovered }]"
     >
@@ -42,12 +42,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, defineProps, computed } from "vue";
+import { computed, defineProps, ref } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
 import { Unicons } from "@/types";
-import type { MenuItem, DamsIcons } from "@/generated-types/queries";
-import useMenuHelper from "@/composables/useMenuHelper";
+import type { DamsIcons, MenuItem } from "@/generated-types/queries";
+import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
 import CustomIcon from "../CustomIcon.vue";
 import { useI18n } from "vue-i18n";
 
@@ -57,6 +57,7 @@ const { t } = useI18n();
 
 const auth = useAuth();
 const menuSubitem = ref<Array<MenuItem>>([]);
+const menuAction = computed(() => checkIfRouteOrModal(props.menuitem));
 
 const props = defineProps<{
   menuitem: MenuItem;
@@ -64,10 +65,6 @@ const props = defineProps<{
   isExpanded: Boolean;
   isBeingHovered: Boolean;
 }>();
-
-const handleClick = () => {
-  checkIfRouteOrModal(props.menuitem);
-};
 
 const isActive = computed(() => props.menuitem === selectedMenuItem.value);
 const iconColor = computed(() =>

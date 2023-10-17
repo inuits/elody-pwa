@@ -1,16 +1,16 @@
 <template>
-  <div
-    v-if="show === true"
+  <router-link
+    v-if="show"
     :class="[
       'flex flex-column items-center cursor-pointer ml-9 mt-1 origin-top-center hover:text-accent-accent',
       { 'text-accent-accent': isActive },
     ]"
-    @click="checkIfRouteOrModal(subMenuItem)"
+    :to="menuAction?.action"
   >
     <p class="overflow-hidden px-4 cursor-pointer">
       {{ t(subMenuItem.label || "") }}
     </p>
-  </div>
+  </router-link>
 </template>
 
 <script lang="ts" setup>
@@ -19,6 +19,8 @@ import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import useMenuHelper from "@/composables/useMenuHelper";
 import type { MenuItem } from "@/generated-types/queries";
+import { DomEvent } from "leaflet";
+import preventDefault = DomEvent.preventDefault;
 
 const props = defineProps({
   show: {
@@ -35,5 +37,6 @@ const isActive = computed(
     (props.subMenuItem.typeLink?.route?.destination as string)
 );
 const { checkIfRouteOrModal } = useMenuHelper();
+const menuAction = computed(() => checkIfRouteOrModal(props.subMenuItem));
 </script>
 <style></style>
