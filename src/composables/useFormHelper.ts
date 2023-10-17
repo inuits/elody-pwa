@@ -102,7 +102,7 @@ const useFormHelper = () => {
   const formContainsValues = (key: string) => {
     const form = forms.value[key];
     if (!form) return false;
-    const values = Object.values(form.values.intialValues);
+    const values = Object.values(form.values.intialValues || {});
     return values.some(__isNotEmpty);
   };
 
