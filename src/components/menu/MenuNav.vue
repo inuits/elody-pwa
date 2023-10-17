@@ -9,6 +9,7 @@
   >
     <router-link
       :to="{ name: 'Home' }"
+      @click="setSelectedMenuItem(menuItems[0])"
       class="logo mt-4 text-neutral-700 font-semibold mb-8 text-xl"
     >
       <img src="/logo.svg" alt="Elody logo" class="h-12" />
@@ -50,7 +51,7 @@ import { useBaseModal, type ModalInfo } from "@/composables/useBaseModal";
 
 const isExpanded = ref<boolean>(false);
 const hoveredItem = ref<MenuItem | undefined>(undefined);
-const { getMenuEntities, menuItems } = useMenuHelper();
+const { getMenuEntities, menuItems, setSelectedMenuItem } = useMenuHelper();
 const { isLeftModalOpened } = useBaseModal();
 getMenuEntities();
 

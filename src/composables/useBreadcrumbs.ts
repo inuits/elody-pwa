@@ -83,9 +83,13 @@ export const useBreadcrumbs = (config: any, t: any) => {
   useRouter().beforeEach((from) => {
     const route: VisitedRoute = {
       id: "",
-      routeName: from.name,
+      routeName: from.meta.title,
       path: from.path,
     };
+    if (from.meta.title == "Single Entity") {
+      route.routeName = "navigation.devices";
+      route.path = "/iotDevices";
+    }
     if (
       visitedRoutes.value.length === 0 &&
       from.name !== "Home" &&
