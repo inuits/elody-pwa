@@ -32,10 +32,12 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
   >("not-initialized");
   const paginationLimitOptions = ref<DropdownOption[]>([]);
   const sortOptions = ref<DropdownOption[]>([]);
-  const initializeLibraryBar = () => {
+  const paginationLimitOptionsLoaded = ref<boolean>(false);
+  const sortOptionsLoaded = ref<boolean>(false);
+  const initializeLibraryBar = async () => {
     libraryBarInitializationStatus.value = "inProgress";
-    const paginationLimitOptionsLoaded = ref<boolean>(false);
-    const sortOptionsLoaded = ref<boolean>(false);
+    paginationLimitOptionsLoaded.value = false;
+    sortOptionsLoaded.value = false;
 
     apolloClient
       .query<GetPaginationLimitOptionsQuery>({
@@ -64,15 +66,15 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
           sortOptions.value?.[0]?.value || "";
         sortOptionsLoaded.value = true;
       });
-
-    watch(
-      [() => paginationLimitOptionsLoaded.value, () => sortOptionsLoaded.value],
-      () => {
-        if (paginationLimitOptionsLoaded.value && sortOptionsLoaded.value)
-          libraryBarInitializationStatus.value = "initialized";
-      }
-    );
   };
+
+  watch(
+    [() => paginationLimitOptionsLoaded.value, () => sortOptionsLoaded.value],
+    () => {
+      if (paginationLimitOptionsLoaded.value && sortOptionsLoaded.value)
+        libraryBarInitializationStatus.value = "initialized";
+    }
+  );
 
   const filtersBaseInitializationStatus = ref<
     "not-initialized" | "inProgress" | "initialized"
