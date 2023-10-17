@@ -66,9 +66,6 @@ const props = defineProps<{
 }>();
 
 const handleClick = () => {
-  if (props.menuitem.typeLink?.route) {
-    setSelectedMenuItem(props.menuitem);
-  }
   checkIfRouteOrModal(props.menuitem);
 };
 
