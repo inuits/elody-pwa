@@ -190,12 +190,31 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
       initializeLibraryBar();
     if (filtersBaseInitializationStatus.value === "not-initialized")
       initializeFiltersBase();
-    if (
-      libraryBarInitializationStatus.value !== "initialized" ||
-      filtersBaseInitializationStatus.value !== "initialized"
-    )
-      return;
 
+    if (
+      libraryBarInitializationStatus.value === "initialized" &&
+      filtersBaseInitializationStatus.value === "initialized"
+    ) {
+      __doEntitiesCall();
+    } else {
+      if (
+        (libraryBarInitializationStatus.value === "not-initialized" &&
+          filtersBaseInitializationStatus.value === "initialized") ||
+        (libraryBarInitializationStatus.value === "initialized" &&
+          filtersBaseInitializationStatus.value === "not-initialized")
+      )
+        __doEntitiesCall();
+      if (
+        (libraryBarInitializationStatus.value === "initialized" &&
+          filtersBaseInitializationStatus.value === "inProgress") ||
+        (libraryBarInitializationStatus.value === "inProgress" &&
+          filtersBaseInitializationStatus.value === "initialized")
+      )
+        __doEntitiesCall();
+    }
+  };
+
+  const __doEntitiesCall = () => {
     apolloClient
       .query<GetEntitiesQuery>({
         query: GetEntitiesDocument,
@@ -221,7 +240,13 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
   );
   watch(
     () => queryVariables.value,
-    () => getEntities(),
+    () => {
+      if (
+        libraryBarInitializationStatus.value !== "inProgress" &&
+        filtersBaseInitializationStatus.value !== "inProgress"
+      )
+        getEntities();
+    },
     { deep: true }
   );
 
