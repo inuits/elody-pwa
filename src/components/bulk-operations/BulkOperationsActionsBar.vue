@@ -124,6 +124,7 @@ import {
   NotificationType,
 } from "@/components/base/BaseNotification.vue";
 import { useI18n } from "vue-i18n";
+import { useRoute } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -144,10 +145,12 @@ const emit = defineEmits<{
   (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
 }>();
 
+const route = useRoute();
 const refetchEnabled = ref<boolean>(false);
+const entityType = computed(() => route.meta.entityType);
 const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
   GetBulkOperationsDocument,
-  undefined,
+  { entityType: entityType.value },
   () => ({ enabled: refetchEnabled.value })
 );
 const bulkOperations = ref<DropdownOption[]>([]);
@@ -163,7 +166,9 @@ const { createNotificationOverwrite } = useNotification();
 const { t } = useI18n();
 
 onResult((result) => {
-  if (result.data) bulkOperations.value = result.data.BulkOperations.options;
+  if (result.data)
+    bulkOperations.value =
+      result.data.BulkOperations.bulkOperationOptions.options;
 });
 
 const itemsSelected = computed<boolean>(
