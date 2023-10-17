@@ -16,6 +16,16 @@ const selectedMenuItemPath = ref<string>(undefined);
 const menuItems = ref<Array<MenuItem>>([]);
 const menuDestinations = ref<Array<string>>([]);
 
+export enum MenuItemType {
+  modal = "modal",
+  link = "link",
+}
+
+type MenuAction = {
+  menuItemType: MenuItemType;
+  action: Function | string;
+};
+
 export const useMenuHelper = () => {
   const router = useRouter();
 
@@ -27,16 +37,26 @@ export const useMenuHelper = () => {
     if (destinations) selectedMenuItemPath.value = `/${destinations.value[0]}`;
   };
 
-  const checkIfRouteOrModal = (_menuItem: MenuItem): void => {
-    if (_menuItem?.typeLink?.modal) {
-      openModal(
-        _menuItem.typeLink.modal.typeModal as TypeModals,
-        ModalChoices.Import,
-        "left"
-      );
+  const checkIfRouteOrModal = (_menuItem: MenuItem): MenuAction | undefined => {
+    let action: MenuAction | undefined = undefined;
+    if (_menuItem.typeLink && _menuItem.typeLink.modal) {
+      action = {
+        menuItemType: MenuItemType.modal,
+        action: function () {
+          openModal(
+            _menuItem.typeLink.modal.typeModal as TypeModals,
+            ModalChoices.Import,
+            "left"
+          );
+        },
+      };
     } else if (_menuItem?.typeLink?.route && !_menuItem.subMenu) {
-      router.push(`/${_menuItem.typeLink.route.destination}`);
+      action = {
+        menuItemType: MenuItemType.link,
+        action: `/${_menuItem.typeLink.route.destination}`,
+      };
     }
+    return action;
   };
 
   const resetSelectedMenuItem = () => {
