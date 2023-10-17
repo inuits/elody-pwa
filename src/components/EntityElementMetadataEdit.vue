@@ -53,7 +53,9 @@
       dropdown-style="defaultWithBorder"
       @update:model-value="setComputedValue"
     />
-    <p class="text-red-default">{{ errorMessage }}</p>
+    <p v-if="computedValue.length > 1" class="text-red-default">
+      {{ errorMessage }}
+    </p>
   </div>
 </template>
 
