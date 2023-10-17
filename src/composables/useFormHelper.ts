@@ -6,7 +6,7 @@ import {
   type BaseRelationValuesInput,
 } from "@/generated-types/queries";
 import { findPanelMetadata } from "@/helpers";
-import { useForm, type FormContext, configure, defineRule } from "vee-validate";
+import { useForm, type FormContext, defineRule } from "vee-validate";
 import { ref } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
@@ -89,9 +89,6 @@ const useFormHelper = () => {
   };
 
   const defineValidationRules = () => {
-    configure({
-      validateOnInput: true,
-    });
     Object.keys(AllRules).forEach((rule: string) => {
       defineRule(rule, AllRules[rule]);
     });
