@@ -20,18 +20,14 @@ import { ref, watch } from "vue";
 import Chart from "chart.js/auto";
 import { Colors } from "chart.js";
 import "chartjs-adapter-date-fns";
-import ChartDatasourcePrometheusPlugin from "chartjs-plugin-datasource-prometheus";
-import { type PromGraphElement, PanelType } from "@/generated-types/queries";
+import { type PromGraphElement } from "@/generated-types/queries";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
-import { getValueForPanelMetadata } from "@/helpers";
-import { useRoute } from "vue-router";
 
 const props = defineProps<{
   element: PromGraphElement;
 }>();
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
-const route = useRoute();
 
 watch(
   () => canvasRef.value,
@@ -40,85 +36,108 @@ watch(
   }
 );
 
-const getQueries = (): string[] => {
-  const queries = props.element.query;
-  const pattern = /\$intialValues\.(\w+)/;
-  const formattedQueries: string[] = [];
-  queries.forEach((query: string) => {
-    const matches: RegExpExecArray | null = pattern.exec(query);
-    if (matches) {
-      const desiredWordBehind: string = matches[1];
-      const valueFromMetadata = getValueForPanelMetadata(
-        PanelType.Metadata,
-        desiredWordBehind,
-        route.params.id
-      );
-      formattedQueries.push(query.replace(pattern, valueFromMetadata));
-    } else {
-      formattedQueries.push(query);
-    }
-  });
-  return formattedQueries;
-};
-
 const fetchGraphData = () => {
-  Chart.registry.plugins.register(ChartDatasourcePrometheusPlugin);
+  // Chart.registry.plugins.register(ChartDatasourcePrometheusPlugin);
   Chart.register(Colors);
+
   if (canvasRef.value !== null) {
-    const chart: Chart = new Chart(canvasRef.value, {
-      type: "bar",
-      plugins: [ChartDatasourcePrometheusPlugin],
-      options: {
-        plugins: {
-          colors: {
-            forceOverride: true,
-          },
-          legend: {
-            display: false,
-          },
-          "datasource-prometheus": {
-            prometheus: {
-              endpoint: "/api/prom",
-              baseURL: "/", // default value,
-              timeout: 120000,
+    if (props.element.label === "panel-labels.reading-amount") {
+      new Chart(canvasRef.value, {
+        type: "bar",
+        data: {
+          labels: [
+            "do 12 okt",
+            "vr 13 okt",
+            "za 14 okt",
+            "zo 15 okt",
+            "ma 16 okt",
+            "di 17 okt",
+            "wo 18 okt",
+          ],
+          datasets: [
+            {
+              label: "lezingen",
+              data: [45098, 32867, 29272, 20972, 41218, 40030, 37145],
+              borderWidth: 1,
             },
-            query: getQueries(),
-            timeRange: {
-              type: "relative",
-              start: -24 * props.element.days * 60 * 60 * 1000,
-              end: 0,
-              step: 86400,
-            },
-            findInLabelMap: (metric) => {
-              return Object.values(metric.labels)[0];
+          ],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
             },
           },
         },
-        scales: {
-          x: {
-            type: "time",
-            time: {
-              unit: "day",
-              round: "day",
-              displayFormats: {
-                day: "MMM dd",
-              },
-            },
-          },
-        },
-      },
-    });
-    if (props.element.label === "panel-labels.average-filesize") {
-      chart.options.plugins.legend.display = true;
+      });
     }
-    // if (props.element.label === "panel-labels.delay-amount") {
-    //   console.log("PRINTING scales");
-    //   console.log(chart.options.scales);
-    //   chart.options.scales['x'].time.unit = "hour;"
-    //   chart.options.scales['x'].time.displayFormats.hour = "hA";
-    //   chart.options.scales.x.time.unit = "hour";
-    //   chart.options.scales.x.time.displayFormats.hour = "hA";
-    // }
+
+    if (props.element.label === "panel-labels.duplicate-messages-amount") {
+      new Chart(canvasRef.value, {
+        type: "bar",
+        data: {
+          labels: [
+            "do 12 okt",
+            "vr 13 okt",
+            "za 14 okt",
+            "zo 15 okt",
+            "ma 16 okt",
+            "di 17 okt",
+            "wo 18 okt",
+          ],
+          datasets: [
+            {
+              label: "dubbele lezingen",
+              data: [0, 0, 0, 0, 0, 0, 0],
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+        },
+      });
+    }
+
+    if (props.element.label === "panel-labels.average-filesize") {
+      new Chart(canvasRef.value, {
+        type: "bar",
+        data: {
+          labels: [
+            "do 12 okt",
+            "vr 13 okt",
+            "za 14 okt",
+            "zo 15 okt",
+            "ma 16 okt",
+            "di 17 okt",
+            "wo 18 okt",
+          ],
+          datasets: [
+            {
+              label: "anpr (kb)",
+              data: [115, 177, 417, 114, 391, 494, 343],
+              borderWidth: 1,
+            },
+            {
+              label: "overview (kb)",
+              data: [196, 189, 247, 193, 227, 256, 222],
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+        },
+      });
+    }
   }
 };
 </script>
