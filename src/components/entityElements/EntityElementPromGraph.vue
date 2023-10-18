@@ -85,9 +85,12 @@ const fetchGraphData = () => {
             query: getQueries(),
             timeRange: {
               type: "relative",
-              start: -24 * (props.element.days - 1) * 60 * 60 * 1000,
+              start: -24 * props.element.days * 60 * 60 * 1000,
               end: 0,
               step: 86400,
+            },
+            findInLabelMap: (metric) => {
+              return Object.values(metric.labels)[0];
             },
           },
         },
@@ -108,6 +111,14 @@ const fetchGraphData = () => {
     if (props.element.label === "panel-labels.average-filesize") {
       chart.options.plugins.legend.display = true;
     }
+    // if (props.element.label === "panel-labels.delay-amount") {
+    //   console.log("PRINTING scales");
+    //   console.log(chart.options.scales);
+    //   chart.options.scales['x'].time.unit = "hour;"
+    //   chart.options.scales['x'].time.displayFormats.hour = "hA";
+    //   chart.options.scales.x.time.unit = "hour";
+    //   chart.options.scales.x.time.displayFormats.hour = "hA";
+    // }
   }
 };
 </script>
