@@ -119,12 +119,12 @@ const fetchGraphData = () => {
           datasets: [
             {
               label: "anpr (kb)",
-              data: [115, 177, 417, 114, 391, 494, 343],
+              data: [712, 750, 803, 696, 734, 768, 703],
               borderWidth: 1,
             },
             {
               label: "overview (kb)",
-              data: [196, 189, 247, 193, 227, 256, 222],
+              data: [912, 954, 1001, 870, 890, 954, 902],
               borderWidth: 1,
             },
           ],
