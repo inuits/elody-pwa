@@ -81,7 +81,6 @@
             :enable-navigation="enableNavigation"
             :parent-entity-identifiers="parentEntityIdentifiers"
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
-            @go-to-entity-page="(entity) => goToEntityPage(entity)"
             :relation-type="relationType"
             :enable-selection="enableBulkOperations"
           />
@@ -96,7 +95,6 @@
             :enable-navigation="enableNavigation"
             :parent-entity-identifiers="parentEntityIdentifiers"
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
-            @go-to-entity-page="(entity) => goToEntityPage(entity)"
             :relation-type="relationType"
             :enable-selection="enableBulkOperations"
           />
@@ -213,12 +211,9 @@ const {
   totalEntityCount,
   formatTeaserMetadata,
 } = useBaseLibrary(apolloClient as ApolloClient<any>);
-const { setEntityMediafiles, updateSelectedEntityMediafile } =
-  useEntityMediafileSelector();
 const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
 const { getUploadStatus, setUploadStatus } = useUploadModalDropzone();
-const { setEntityUuid } = useEntitySingle();
 
 const displayList = ref<boolean>(false);
 const displayGrid = ref<boolean>(false);
@@ -268,23 +263,6 @@ const bulkSelect = (items = entities.value) => {
     }
   }
   triggerBulkSelectionEvent(props.bulkOperationsContext);
-};
-
-const goToEntityPage = (entity: Entity) => {
-  if (entity.type === "MediaFile") {
-    setEntityMediafiles([]);
-    updateSelectedEntityMediafile(entity);
-  }
-
-  setEntityUuid(entity.uuid);
-  const entityId =
-    entity.uuid ||
-    entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")?.value;
-
-  router.push({
-    name: props.listItemRouteName,
-    params: { id: entityId },
-  });
 };
 
 const initializeBaseLibrary = () => {

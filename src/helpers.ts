@@ -6,11 +6,13 @@ import {
   type PanelMetaData,
   type WindowElementPanel,
   type EntityListElement,
+  type Entity,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { useRoute } from "vue-router";
+import { type Router, useRoute } from "vue-router";
+import useEntitySingle from "@/composables/useEntitySingle";
 
 type MetadataField = {
   key: string;
@@ -18,6 +20,27 @@ type MetadataField = {
   value: string;
   unit: Unit;
   field: InputField;
+};
+
+export const goToEntityPage = (
+  entity: Entity,
+  listItemRouteName: string,
+  router: Router
+) => {
+  if (entity.type === "MediaFile") {
+    useEntityMediafileSelector().setEntityMediafiles([]);
+    useEntityMediafileSelector().updateSelectedEntityMediafile(entity);
+  }
+
+  useEntitySingle().setEntityUuid(entity.uuid);
+  const entityId =
+    entity.uuid ||
+    entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")?.value;
+
+  router.push({
+    name: listItemRouteName,
+    params: { id: entityId },
+  });
 };
 
 export const getEntityIdFromRoute = (): string | undefined => {

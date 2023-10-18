@@ -28,52 +28,45 @@
         :has-selection="enableSelection"
       />
     </div>
-    <GridItem
+    <div
       v-for="entity in entities"
       :key="entity.id + '_grid'"
-      :class="
-        parentEntityIdentifiers.length > 0 &&
-        mediafileSelectionState.selectedMediafile?.id === entity.id
-          ? '!border-2 !border-accent-normal'
-          : ''
-      "
-      :item-id="entity.uuid"
-      :bulk-operations-context="bulkOperationsContext"
-      :teaser-metadata="
-        formatTeaserMetadata(entity.teaserMetadata, entity.intialValues)
-      "
-      :media="entitiesLoading ? undefined : getMediaFilenameFromEntity(entity)"
-      :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
-      :small="listItemRouteName === 'SingleMediafile'"
-      :loading="entitiesLoading"
-      :is-markable-as-to-be-deleted="parentEntityIdentifiers.length > 0"
-      :is-disabled="
-        idsOfNonSelectableEntities.includes(entity.id) ||
-        idsOfNonSelectableEntities.includes(entity.uuid)
-      "
-      :relation="
-        relations?.find(
-          (relation) =>
-            relation.key === entity.id && relation.type === relationType
-        )
-      "
-      :relations="relations"
-      :has-selection="enableSelection"
-      @click="
-        entitiesLoading || !enableNavigation
-          ? !enableNavigation &&
-            parentEntityIdentifiers.length > 0 &&
-            entity.type === 'MediaFile'
-            ? updateSelectedEntityMediafile(entity)
-            : undefined
-          : emit('goToEntityPage', entity)
-      "
-      @dblclick="
-        !enableNavigation && parentEntityIdentifiers.length > 0
-          ? emit('goToEntityPage', entity)
-          : undefined
-      "
-    />
+      @click="navigateToEntityPage(entity, listItemRouteName)"
+      @dblclick="navigateToEntityPage(entity, listItemRouteName, true)"
+    >
+      <GridItem
+        :class="
+          parentEntityIdentifiers.length > 0 &&
+          mediafileSelectionState.selectedMediafile?.id === entity.id
+            ? '!border-2 !border-accent-normal'
+            : ''
+        "
+        :item-id="entity.uuid"
+        :bulk-operations-context="bulkOperationsContext"
+        :teaser-metadata="
+          formatTeaserMetadata(entity.teaserMetadata, entity.intialValues)
+        "
+        :media="
+          entitiesLoading ? undefined : getMediaFilenameFromEntity(entity)
+        "
+        :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
+        :small="listItemRouteName === 'SingleMediafile'"
+        :loading="entitiesLoading"
+        :is-markable-as-to-be-deleted="parentEntityIdentifiers.length > 0"
+        :is-disabled="
+          idsOfNonSelectableEntities.includes(entity.id) ||
+          idsOfNonSelectableEntities.includes(entity.uuid)
+        "
+        :relation="
+          relations?.find(
+            (relation) =>
+              relation.key === entity.id && relation.type === relationType
+          )
+        "
+        :relations="relations"
+        :has-selection="enableSelection"
+      />
+    </div>
   </div>
 </template>
 
@@ -88,12 +81,13 @@ import {
 import GridItem from "@/components/GridItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
-import { getEntityIdFromRoute } from "@/helpers";
+import { getEntityIdFromRoute, goToEntityPage } from "@/helpers";
 import { computed, inject, onMounted, onUnmounted } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useRouter } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -117,10 +111,6 @@ const props = withDefaults(
   }
 );
 
-const emit = defineEmits<{
-  (event: "goToEntityPage", entity: Entity): void;
-}>();
-
 const apolloClient = inject(DefaultApolloClient);
 const { formatTeaserMetadata } = useBaseLibrary(
   apolloClient as ApolloClient<any>
@@ -130,6 +120,7 @@ const { mediafileSelectionState, updateSelectedEntityMediafile } =
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { getThumbnail } = useThumbnailHelper();
 const { getForm } = useFormHelper();
+const router = useRouter();
 
 const entityId = computed(() => getEntityIdFromRoute() as string);
 const relations = computed<BaseRelationValuesInput[]>(
@@ -160,6 +151,24 @@ onUnmounted(() => {
   window.removeEventListener("resize", calculateGridColumns);
   window.removeEventListener("popstate", calculateGridColumns);
 });
+const navigateToEntityPage = (
+  entity: Entity,
+  listItemRouteName: string,
+  isDoubleClick: boolean = false
+) => {
+  if (props.entitiesLoading || !props.enableNavigation) {
+    if (
+      props.parentEntityIdentifiers.length > 0 &&
+      entity.type === "MediaFile"
+    ) {
+      updateSelectedEntityMediafile(entity);
+      return;
+    }
+    if (isDoubleClick) goToEntityPage(entity, listItemRouteName, router);
+    return;
+  }
+  goToEntityPage(entity, listItemRouteName, router);
+};
 </script>
 
 <style scoped>
