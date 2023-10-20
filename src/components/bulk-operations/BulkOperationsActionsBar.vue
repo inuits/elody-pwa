@@ -143,6 +143,7 @@ const emit = defineEmits<{
   (event: "selectPage"): void;
   (event: "selectAll"): void;
   (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
+  (event: "noBulkOperationsAvailable"): void;
 }>();
 
 const route = useRoute();
@@ -166,9 +167,11 @@ const { createNotificationOverwrite } = useNotification();
 const { t } = useI18n();
 
 onResult((result) => {
-  if (result.data)
+  if (result.data) {
+    if (!result.data.BulkOperations.bulkOperationOptions) emit('noBulkOperationsAvailable')
     bulkOperations.value =
       result.data.BulkOperations.bulkOperationOptions.options;
+  }
 });
 
 const itemsSelected = computed<boolean>(
