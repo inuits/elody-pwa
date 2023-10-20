@@ -10,16 +10,18 @@
         :input-enabled="true"
         @updateFilters="updateBaseLibraryFilters"
       />
-      <base-library
-        v-if="getModalInfo(TypeModals.Search).state === ModalState.Show"
-        :bulk-operations-context="BulkOperationsContextEnum.SearchModal"
-        list-item-route-name="SingleEntity"
-        :enable-advanced-filters="false"
-        :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
-        :enable-bulk-operations="false"
-        :filters="filters"
-        :is-search-library="true"
-      ></base-library>
+      <div class="overflow-y-scroll h-full">
+        <base-library
+          v-if="getModalInfo(TypeModals.Search).state === ModalState.Show"
+          :bulk-operations-context="BulkOperationsContextEnum.SearchModal"
+          list-item-route-name="SingleEntity"
+          :enable-advanced-filters="false"
+          :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
+          :enable-bulk-operations="false"
+          :filters="filters"
+          :is-search-library="true"
+        ></base-library>
+      </div>
     </div>
   </BaseModal>
 </template>
