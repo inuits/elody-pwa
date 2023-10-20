@@ -11,7 +11,7 @@
           dropdown-style="default"
         />
       </div>
-      <div v-if="sortOptions" class="w-72">
+      <div v-if="sortOptions" class="w-auto min-w-[175px]">
         <BaseDropdownNew
           class="py-1"
           v-model="selectedSortOption"

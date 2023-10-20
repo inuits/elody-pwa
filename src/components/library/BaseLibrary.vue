@@ -70,6 +70,7 @@
             { 'w-[67%]': expandFilters && toggles.length == 1 },
             { 'w-[69.75%]': expandFilters && toggles.length > 1 },
           ]"
+          @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
         >
           <ViewModesList
             v-if="displayList"
@@ -122,7 +123,7 @@ import {
   GetEntitiesDocument,
   SearchInputType,
   type Entity,
-  type GetEntitiesQueryVariables,
+  type GetEntitiesQueryVariables, AdvancedFilterInput, TypeModals
 } from "@/generated-types/queries";
 import {
   useBulkOperations,
@@ -133,7 +134,6 @@ import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
 import FiltersBase from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
-import useEntitySingle from "@/composables/useEntitySingle";
 import useUploadModalDropzone from "@/composables/useUploadModalDropzone";
 import ViewModesGrid from "@/components/library/view-modes/ViewModesGrid.vue";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
@@ -142,12 +142,12 @@ import { bulkSelectAllSizeLimit } from "@/main";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { updateLocalStorage } from "@/helpers";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
-import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
 import { watch, ref, onMounted, inject, computed } from "vue";
 import type { ViewModes } from "@/generated-types/type-defs";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 const props = withDefaults(
   defineProps<{
@@ -164,8 +164,10 @@ const props = withDefaults(
     enableNavigation?: boolean;
     disableNewEntityPreviews?: boolean;
     idsOfNonSelectableEntities?: string[];
-    relationType: string;
+    relationType?: string;
     hasStickyBars?: boolean;
+    filters?: AdvancedFilterInput[]
+    isSearchLibrary?: boolean
   }>(),
   {
     predefinedEntities: undefined,
@@ -180,6 +182,8 @@ const props = withDefaults(
     disableNewEntityPreviews: false,
     idsOfNonSelectableEntities: () => [],
     hasStickyBars: true,
+    filters: () =>[],
+    isSearchLibrary: false,
   }
 );
 
@@ -214,6 +218,7 @@ const {
 const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
 const { getUploadStatus, setUploadStatus } = useUploadModalDropzone();
+const {closeModal} = useBaseModal()
 
 const displayList = ref<boolean>(false);
 const displayGrid = ref<boolean>(false);
@@ -344,6 +349,11 @@ watch(
   },
   { immediate: true }
 );
+
+watch(() => props.filters, () => {
+  setAdvancedFilters(props.filters)
+})
+
 watch([displayGrid, expandFilters], () => {
   displayList.value = !displayGrid.value;
   updateLocalStorage("_displayPreferences", {

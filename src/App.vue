@@ -21,6 +21,7 @@
         v-if="route.name !== undefined"
         :context="route.name as Context"
       />
+      <search-modal />
       <!--      <BulkOperationsEditModal-->
       <!--        v-if="route.name !== undefined"-->
       <!--        :context="route.name as Context"-->
@@ -51,10 +52,12 @@ import ConfirmModalView from "./components/ConfirmModalView.vue";
 import useTenant from "@/composables/useTenant";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
+import SearchModal from "@/components/SearchModal.vue";
 
 export default defineComponent({
   name: "App",
   components: {
+    SearchModal,
     BaseNotification,
     BulkoperationsModal,
     // BulkOperationsEditModal,
