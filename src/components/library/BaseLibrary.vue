@@ -60,6 +60,7 @@
             @confirm-selection="
               (selection) => emit('confirmSelection', selection)
             "
+            @no-bulk-operations-available="() => (enableBulkOperations = false)"
           />
         </div>
       </div>
