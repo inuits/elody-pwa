@@ -228,7 +228,7 @@ const displayPreview = ref<boolean>(props.enablePreview);
 
 const expandFilters = ref<boolean>(false);
 const isAsc = ref<boolean>(false);
-const toggles: [ViewModes.type] = [];
+var toggles: ViewModes.type[] = [];
 
 const entityType = computed(() =>
   route.meta.entityType ? (route.meta.entityType as Entitytyping) : "BaseEntity"
@@ -290,26 +290,7 @@ const setDisplayPreferences = () => {
 };
 
 onMounted(() => {
-  const viewModes = config.features.allowedViewModes;
-  if (viewModes.includes(ViewModesList.__name))
-    toggles.unshift({
-      isOn: displayList,
-      iconOn: DamsIcons.ListUl,
-      iconOff: DamsIcons.ListUl,
-    });
-  if (viewModes.includes(ViewModesGrid.__name))
-    toggles.push({
-      isOn: displayGrid,
-      iconOn: DamsIcons.Apps,
-      iconOff: DamsIcons.Apps,
-    });
   initializeBaseLibrary();
-  if (viewModes.includes(ViewModesMedia.__name) || props.enablePreview)
-    toggles.push({
-      isOn: displayPreview,
-      iconOn: DamsIcons.Image,
-      iconOff: DamsIcons.Image,
-    });
   setDisplayPreferences();
 });
 
@@ -355,6 +336,34 @@ watch(() => props.filters, () => {
   setAdvancedFilters(props.filters)
 })
 
+watch(
+    () => entities.value,
+    () => {
+      toggles = [];
+      if (!entities.value[0].allowedViewModes) return;
+      const viewModes = entities.value[0].allowedViewModes.viewModes;
+      if(viewModes.includes(ViewModesList.__name))
+        toggles.unshift({
+          isOn: displayList,
+          iconOn: DamsIcons.ListUl,
+          iconOff: DamsIcons.ListUl,
+        });
+      if (viewModes.includes(ViewModesGrid.__name))
+        toggles.push({
+          isOn: displayGrid,
+          iconOn: DamsIcons.Apps,
+          iconOff: DamsIcons.Apps,
+        });
+      initializeBaseLibrary();
+      if (viewModes.includes(ViewModesMedia.__name) || props.enablePreview)
+        toggles.push({
+          isOn: displayPreview,
+          iconOn: DamsIcons.Image,
+          iconOff: DamsIcons.Image,
+        });
+      setDisplayPreferences();
+    }
+);
 watch([displayGrid, expandFilters], () => {
   displayList.value = !displayGrid.value;
   updateLocalStorage("_displayPreferences", {
