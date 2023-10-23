@@ -22,7 +22,7 @@
       <div class="w-full h-full">
         <div class="h-[50%] flex justify-center items-center">
           <img
-            v-if="media"
+            v-if="media && !imageSrcError"
             class="h-full w-48 object-cover"
             :src="
               mediaIsLink
