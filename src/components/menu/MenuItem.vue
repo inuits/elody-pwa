@@ -2,7 +2,7 @@
   <div>
     <div
       v-show="menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
-      @click="menuAction?.action"
+      @click="isLink ? router.push(menuAction.action) : menuAction?.action"
       class="flex flex-row items-center pl-3 h-9 mt-3 cursor-pointer"
       :class="[{ 'bg-neutral-40 rounded-lg': isBeingHovered }]"
     >
@@ -49,15 +49,20 @@ import { Unicons } from "@/types";
 import type { DamsIcons, MenuItem } from "@/generated-types/queries";
 import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
 import CustomIcon from "../CustomIcon.vue";
+import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 
 const { checkIfRouteOrModal, setSelectedMenuItem, selectedMenuItem } =
   useMenuHelper();
 const { t } = useI18n();
+const router = useRouter();
 
 const auth = useAuth();
 const menuSubitem = ref<Array<MenuItem>>([]);
 const menuAction = computed(() => checkIfRouteOrModal(props.menuitem));
+const isLink = computed(
+  () => menuAction.value?.menuItemType === MenuItemType.link
+);
 
 const props = defineProps<{
   menuitem: MenuItem;
