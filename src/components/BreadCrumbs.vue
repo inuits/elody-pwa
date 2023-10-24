@@ -38,7 +38,7 @@
           :name="Unicons.AngleRight.name"
         ></unicon>
         <p
-          v-if="previousRoute?.routeName"
+          v-if="previousRoute?.routeName && previousRoute !== visitedRoutes[0]"
           :class="[
             'px-2 ',
             { 'cursor-pointer': visitedRoutes.length > 2 },
