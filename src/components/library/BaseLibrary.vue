@@ -345,7 +345,7 @@ watch(
   () => entities.value,
   () => {
     toggles = [];
-    if (!entities.value[0].allowedViewModes) return;
+    if (entities.value.length === 0 || !entities.value[0].allowedViewModes) return;
     const viewModes = entities.value[0].allowedViewModes.viewModes;
     if (viewModes.includes(ViewModesList.__name))
       toggles.unshift({
