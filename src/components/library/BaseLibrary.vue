@@ -48,7 +48,7 @@
         >
           <BulkOperationsActionsBar
             :class="[
-              { 'w-[67%]': expandFilters && toggles.length == 1 },
+              { 'w-[67%]': expandFilters && toggles.length <= 1 },
               { 'w-[69.75%]': expandFilters && toggles.length > 1 },
             ]"
             :context="bulkOperationsContext"
@@ -68,7 +68,7 @@
         <div
           id="gridContainer"
           :class="[
-            { 'w-[67%]': expandFilters && toggles.length == 1 },
+            { 'w-[67%]': expandFilters && toggles.length <= 1 },
             { 'w-[69.75%]': expandFilters && toggles.length > 1 },
           ]"
           @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
@@ -124,7 +124,9 @@ import {
   GetEntitiesDocument,
   SearchInputType,
   type Entity,
-  type GetEntitiesQueryVariables, AdvancedFilterInput, TypeModals
+  type GetEntitiesQueryVariables,
+  AdvancedFilterInput,
+  TypeModals,
 } from "@/generated-types/queries";
 import {
   useBulkOperations,
@@ -167,8 +169,8 @@ const props = withDefaults(
     idsOfNonSelectableEntities?: string[];
     relationType?: string;
     hasStickyBars?: boolean;
-    filters?: AdvancedFilterInput[]
-    isSearchLibrary?: boolean
+    filters?: AdvancedFilterInput[];
+    isSearchLibrary?: boolean;
   }>(),
   {
     predefinedEntities: undefined,
@@ -183,7 +185,7 @@ const props = withDefaults(
     disableNewEntityPreviews: false,
     idsOfNonSelectableEntities: () => [],
     hasStickyBars: true,
-    filters: () =>[],
+    filters: () => [],
     isSearchLibrary: false,
   }
 );
@@ -219,7 +221,7 @@ const {
 const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
 const { getUploadStatus, setUploadStatus } = useUploadModalDropzone();
-const {closeModal} = useBaseModal()
+const { closeModal } = useBaseModal();
 
 const displayList = ref<boolean>(false);
 const displayGrid = ref<boolean>(false);
@@ -332,37 +334,40 @@ watch(
   { immediate: true }
 );
 
-watch(() => props.filters, () => {
-  setAdvancedFilters(props.filters)
-})
+watch(
+  () => props.filters,
+  () => {
+    setAdvancedFilters(props.filters);
+  }
+);
 
 watch(
-    () => entities.value,
-    () => {
-      toggles = [];
-      if (!entities.value[0].allowedViewModes) return;
-      const viewModes = entities.value[0].allowedViewModes.viewModes;
-      if(viewModes.includes(ViewModesList.__name))
-        toggles.unshift({
-          isOn: displayList,
-          iconOn: DamsIcons.ListUl,
-          iconOff: DamsIcons.ListUl,
-        });
-      if (viewModes.includes(ViewModesGrid.__name))
-        toggles.push({
-          isOn: displayGrid,
-          iconOn: DamsIcons.Apps,
-          iconOff: DamsIcons.Apps,
-        });
-      initializeBaseLibrary();
-      if (viewModes.includes(ViewModesMedia.__name) || props.enablePreview)
-        toggles.push({
-          isOn: displayPreview,
-          iconOn: DamsIcons.Image,
-          iconOff: DamsIcons.Image,
-        });
-      setDisplayPreferences();
-    }
+  () => entities.value,
+  () => {
+    toggles = [];
+    if (!entities.value[0].allowedViewModes) return;
+    const viewModes = entities.value[0].allowedViewModes.viewModes;
+    if (viewModes.includes(ViewModesList.__name))
+      toggles.unshift({
+        isOn: displayList,
+        iconOn: DamsIcons.ListUl,
+        iconOff: DamsIcons.ListUl,
+      });
+    if (viewModes.includes(ViewModesGrid.__name))
+      toggles.push({
+        isOn: displayGrid,
+        iconOn: DamsIcons.Apps,
+        iconOff: DamsIcons.Apps,
+      });
+    initializeBaseLibrary();
+    if (viewModes.includes(ViewModesMedia.__name) || props.enablePreview)
+      toggles.push({
+        isOn: displayPreview,
+        iconOn: DamsIcons.Image,
+        iconOff: DamsIcons.Image,
+      });
+    setDisplayPreferences();
+  }
 );
 watch([displayGrid, expandFilters], () => {
   displayList.value = !displayGrid.value;
