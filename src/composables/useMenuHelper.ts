@@ -88,6 +88,9 @@ export const useMenuHelper = () => {
           const destination = objectValue.typeLink.route.destination;
           menuDestinations.value.push(destination);
         }
+      } else {
+        const destination = menuItem.typeLink.route?.destination;
+        menuDestinations.value.push(destination);
       }
     });
     return menuDestinations;
