@@ -47,7 +47,6 @@ const hasMirador = computed(() => props.viewers.includes("mirador"));
 const initializeViewers = () => {
   if (props.manifestUrl && hasTify.value) {
     new Tify({
-      language: locale.value,
       container: "#tify-viewer",
       manifestUrl: props.manifestUrl,
     });
