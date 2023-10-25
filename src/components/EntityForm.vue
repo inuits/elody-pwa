@@ -111,6 +111,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
     description: t("notifications.success.entityCreated.description"),
     shown: true,
   });
+  form.resetForm({ values: form.values });
   disableEditMode();
 });
 
