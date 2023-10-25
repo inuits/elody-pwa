@@ -168,9 +168,9 @@ const { t } = useI18n();
 
 onResult((result) => {
   if (result.data) {
-    if (!result.data.BulkOperations.bulkOperationOptions) emit('noBulkOperationsAvailable')
+   if (!result.data.BulkOperations && !result.data.BulkOperations.options) emit('noBulkOperationsAvailable')
     bulkOperations.value =
-      result.data.BulkOperations.bulkOperationOptions.options;
+      result.data.BulkOperations.options;
   }
 });
 
