@@ -31,8 +31,8 @@
         :form-id="formId"
         :identifiers="identifiers"
       />
-      <entity-element-prom-graph
-        v-if="element.__typename === 'PromGraphElement' && !isEdit"
+      <entity-element-graph
+        v-if="element.__typename === 'GraphElement' && !isEdit"
         :element="element"
       />
       <entity-element-manifest-viewer
@@ -44,21 +44,21 @@
 </template>
 <script lang="ts" setup>
 import { computed } from "vue";
-import EntityElementList from "./EntityElementList.vue";
-import EntityElementMedia from "./EntityElementMedia.vue";
-import EntityElementWindow from "./EntityElementWindow.vue";
-import EntityElementPromGraph from "./EntityElementPromGraph.vue";
-import EntityElementManifestViewer from "./EntityElementManifestViewer.vue";
+import EntityElementList from "@/components/entityElements/EntityElementList.vue";
+import EntityElementMedia from "@/components/entityElements/EntityElementMedia.vue";
+import EntityElementWindow from "@/components/entityElements/EntityElementWindow.vue";
+import EntityElementGraph from "@/components/entityElements/EntityElementGraph.vue";
+import EntityElementManifestViewer from "@/components/entityElements/EntityElementManifestViewer.vue";
 import { useEditMode } from "@/composables/useEdit";
 
 import type {
-  EntityViewElements,
-  WindowElement,
-  MediaFileElement,
-  EntityListElement,
-  PromGraphElement,
-  ManifestViewerElement,
   Entity,
+  EntityListElement,
+  EntityViewElements,
+  GraphElement,
+  ManifestViewerElement,
+  MediaFileElement,
+  WindowElement,
 } from "@/generated-types/queries";
 import { getEntityIdFromRoute } from "@/helpers";
 
@@ -66,7 +66,7 @@ export type Elements =
   | WindowElement
   | MediaFileElement
   | EntityListElement
-  | PromGraphElement
+  | GraphElement
   | ManifestViewerElement;
 
 const props = defineProps<{
@@ -81,7 +81,7 @@ const elements = computed<Elements[]>(() => {
   const graphArray: Elements[] = [];
   Object.values(props.elements).forEach((value) => {
     if (value != null && typeof value !== "string") {
-      if (value.__typename === "PromGraphElement") {
+      if (value.__typename === "GraphElement") {
         value.isCollapsed = true;
         graphArray.push(value);
       } else returnArray.push(value);
