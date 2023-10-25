@@ -9,7 +9,9 @@
     <div v-if="Array.isArray(readableValue)">
       <div v-for="item in readableValue" :key="item">
         <p v-if="!stringIsUrl(item)">{{ item }}</p>
-        <a v-else class="underline" target="_blank" :href="item">{{ item }}</a>
+        <a v-else class="underline" target="_blank" :href="item">{{
+          translatedLinkText
+        }}</a>
       </div>
       <div v-if="readableValue.length == 0">-</div>
     </div>
@@ -19,7 +21,7 @@
         class="underline"
         target="_blank"
         :href="readableValue"
-        >{{ readableValue }}</a
+        >{{ translatedLinkText }}</a
       >
       <p v-else-if="stringIsHtml(readableValue)" v-html="readableValue"></p>
       <p v-else>{{ (readableValue as string) || "-" }}</p>
@@ -82,6 +84,7 @@ const props = defineProps<{
   formId: string;
   isEdit: boolean;
   unit?: string;
+  linkText?: string;
 }>();
 const { getForm } = useFormHelper();
 let form: FormContext | undefined = undefined;
@@ -99,6 +102,9 @@ const {
 );
 const isFieldRequired = computed(() =>
   props.field?.validation?.includes("required")
+);
+const translatedLinkText = computed(() =>
+  props.linkText ? t(props.linkText) : readableValue
 );
 
 onMounted(() => {

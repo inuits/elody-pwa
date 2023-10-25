@@ -24,7 +24,7 @@
         </div>
         <div v-else>
           <div
-            v-for="(metadata, index) in metadatfields"
+            v-for="(metadata, index) in metadatafields"
             v-show="itemMustBeShown(metadata.value)"
             :key="index"
             class="py-2 px-2"
@@ -49,6 +49,7 @@
               :formId="formId"
               :is-edit="isEdit"
               :unit="metadata.unit"
+              :link-text="metadata.linkText"
             />
           </div>
         </div>
@@ -63,7 +64,6 @@ import type {
   WindowElementPanel,
   Entity,
 } from "@/generated-types/queries";
-// import EntityElementMetadata from "@/components/EntityElementMetadata.vue";
 import EntityElementMetadataEdit from "@/components/EntityElementMetadataEdit.vue";
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
 import EntityElementList from "@/components/entityElements/EntityElementList.vue";
@@ -114,7 +114,7 @@ const relationArray = computed((): PanelRelation[] => {
   return returnArray;
 });
 
-const metadatfields = computed(() => {
+const metadatafields = computed(() => {
   return getMetadataFields(
     props.panel,
     panelType.value,
