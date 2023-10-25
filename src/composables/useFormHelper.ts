@@ -6,7 +6,7 @@ import {
   type BaseRelationValuesInput,
 } from "@/generated-types/queries";
 import { findPanelMetadata } from "@/helpers";
-import { useForm, type FormContext, defineRule } from "vee-validate";
+import { useForm, type FormContext, defineRule, useField } from "vee-validate";
 import { ref } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
@@ -46,12 +46,16 @@ const useFormHelper = () => {
     //   form.values = formValues;
     //   return form;
     // }
+    console.log(formValues);
     const form = useForm<EntityValues>({
-      initialValues: {
-        intialValues: formValues.intialValues,
-        relationValues: formValues.relationValues,
-      },
+      initialValues: formValues,
     });
+    // formValues.relationValues?.relations &&  form.setFieldValue("relationValues.relations", [
+    //   ...formValues.relationValues?.relations
+    // ]);
+    const { resetField } = useField("relationValues.relations");
+    formValues.relationValues?.relations &&
+      resetField({ value: formValues.relationValues?.relations });
     addForm(key, form);
     return form;
   };
@@ -126,9 +130,13 @@ const useFormHelper = () => {
 
   const route = useRoute();
 
-  const addRelations = (selectedItems: InBulkProcessableItem[]) => {
+  const getFormByRouteId = () => {
     const id = route.params.id as string;
     const form = getForm(id);
+    return { id, form };
+  };
+  const addRelations = (selectedItems: InBulkProcessableItem[]) => {
+    const { id, form } = getFormByRouteId();
 
     if (selectedItems.length <= 0 || !form) return;
 
@@ -157,6 +165,28 @@ const useFormHelper = () => {
     ]);
   };
 
+  const findRelation = (
+    key: string,
+    type: string
+  ):
+    | { idx: number; relation: BaseRelationValuesInput }
+    | "no-relation-found" => {
+    const { form } = getFormByRouteId();
+    if (!form || form.values.relationValues.relations <= 0)
+      return "no-relation-found";
+    let idx: number | "no-idx" = "no-idx";
+    const relation = form.values.relationValues.relations?.find(
+      (relation: BaseRelationValuesInput, index: number) => {
+        if (relation.key === key && relation.type === type) {
+          idx = index;
+          return true;
+        }
+      }
+    );
+
+    return idx === "no-idx" ? "no-relation-found" : { relation, idx };
+  };
+
   return {
     createForm,
     addForm,
@@ -173,6 +203,7 @@ const useFormHelper = () => {
     discardEditForForm,
     addRelations,
     recreateForm,
+    findRelation,
   };
 };
 

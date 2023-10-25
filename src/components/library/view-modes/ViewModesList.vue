@@ -16,13 +16,7 @@
       :small="listItemRouteName === 'SingleMediafile'"
       :is-preview="true"
       :is-markable-as-to-be-deleted="parentEntityIdentifiers.length > 0"
-      :relation="
-        relations?.find(
-          (relation) =>
-            relation.key === item.key && relation.type === relationType
-        )
-      "
-      :relations="relations"
+      :relation="findRelation(item.key, relationType)"
       :has-selection="enableSelection"
     />
   </div>
@@ -54,13 +48,7 @@
         idsOfNonSelectableEntities.includes(entity.id) ||
         idsOfNonSelectableEntities.includes(entity.uuid)
       "
-      :relation="
-        relations?.find(
-          (relation) =>
-            relation.key === entity.id && relation.type === relationType
-        )
-      "
-      :relations="relations"
+      :relation="findRelation(entity.id, relationType)"
       :has-selection="enableSelection"
     />
   </div>
@@ -115,7 +103,7 @@ const { mediafileSelectionState, updateSelectedEntityMediafile } =
   useEntityMediafileSelector();
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { getThumbnail } = useThumbnailHelper();
-const { getForm } = useFormHelper();
+const { getForm, findRelation } = useFormHelper();
 const router = useRouter();
 
 const entityId = computed(() => getEntityIdFromRoute() as string);

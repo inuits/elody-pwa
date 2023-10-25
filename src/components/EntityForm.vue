@@ -18,7 +18,7 @@ import {
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { asString } from "@/helpers";
-import { computed, onMounted, onUnmounted, watch } from "vue";
+import { computed, onMounted, onUnmounted, unref, watch } from "vue";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper, type EntityValues } from "@/composables/useFormHelper";
 import { useMutation } from "@vue/apollo-composable";
@@ -58,8 +58,8 @@ const { mutate } = useMutation<
 >(MutateEntityValuesDocument);
 
 let form = createForm(entityId.value, {
-  intialValues: props.intialValues,
-  relationValues: props.relationValues,
+  intialValues: unref(props.intialValues),
+  relationValues: unref(props.relationValues),
 });
 let mutatedEntity: Entity | undefined;
 

@@ -89,6 +89,7 @@ import useEditMode from "@/composables/useEdit";
 import { computed, ref, watch } from "vue";
 import { stringIsUrl } from "@/helpers";
 import { Unicons } from "@/types";
+import { useFieldArray } from "vee-validate";
 
 const props = withDefaults(
   defineProps<{
@@ -102,9 +103,10 @@ const props = withDefaults(
     isChecked?: boolean;
     isPreview?: boolean;
     isMarkableAsToBeDeleted?: boolean;
-    relation?: BaseRelationValuesInput;
+    relation:
+      | { idx: number; relation: BaseRelationValuesInput }
+      | "no-relation-found";
     isDisabled?: boolean;
-    relations?: BaseRelationValuesInput[];
     hasSelection: boolean;
   }>(),
   {
@@ -119,6 +121,7 @@ const props = withDefaults(
     isMarkableAsToBeDeleted: false,
     isDisabled: false,
     hasSelection: true,
+    relation: "no-relation-found",
   }
 );
 
@@ -126,6 +129,7 @@ const { isEdit } = useEditMode();
 const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
+const { update, remove } = useFieldArray("relationValues.relations");
 
 const setNoImage = () => {
   imageSrcError.value = true;
@@ -136,21 +140,24 @@ const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 watch(
   () => isMarkedAsToBeDeleted.value,
   () => {
-    if (props.relation)
-      if (props.isPreview) removePreviewItem();
-      else if (isMarkedAsToBeDeleted.value)
-        // @ts-ignore
-        props.relation.editStatus = EditStatus.Deleted;
-      // @ts-ignore
-      else props.relation.editStatus = EditStatus.Unchanged;
+    if (props.relation !== "no-relation-found")
+      if (props.isPreview) {
+        removePreviewItem(props.relation.idx);
+      } else if (isMarkedAsToBeDeleted.value) {
+        update(props.relation.idx, {
+          ...props.relation.relation,
+          editStatus: EditStatus.Deleted,
+        });
+      } else {
+        update(props.relation.idx, {
+          ...props.relation.relation,
+          editStatus: EditStatus.Unchanged,
+        });
+      }
   }
 );
 
-const removePreviewItem = () => {
-  const indexToRemove = props.relations?.findIndex(
-    (item) => item.key === props.relation.key
-  );
-
-  if (indexToRemove !== -1) props.relations?.splice(indexToRemove, 1);
+const removePreviewItem = (idx: number) => {
+  remove(idx);
 };
 </script>
