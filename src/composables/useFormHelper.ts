@@ -41,11 +41,11 @@ const useFormHelper = () => {
     key: string,
     formValues: EntityValues
   ): FormContext<any> => {
-    if (forms.value[key]) {
-      const form = forms.value[key];
-      form.values = formValues;
-      return form;
-    }
+    // if (forms.value[key]) {
+    //   const form = forms.value[key];
+    //   form.values = formValues;
+    //   return form;
+    // }
     const form = useForm<EntityValues>({
       initialValues: {
         intialValues: formValues.intialValues,
@@ -54,6 +54,11 @@ const useFormHelper = () => {
     });
     addForm(key, form);
     return form;
+  };
+
+  const discardEditForForm = (key: string) => {
+    console.log(getForm(key));
+    getForm(key)?.resetForm();
   };
 
   const addForm = (key: string, form: FormContext<any>) => {
@@ -165,6 +170,7 @@ const useFormHelper = () => {
     createEntityValues,
     formContainsValues,
     defineValidationRules,
+    discardEditForForm,
     addRelations,
     recreateForm,
   };
