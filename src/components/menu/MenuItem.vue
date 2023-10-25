@@ -2,7 +2,7 @@
   <div>
     <div
       v-show="menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
-      @click="isLink ? router.push(menuAction.action) : menuAction?.action"
+      @click="menuAction?.action"
       class="flex flex-row items-center pl-3 h-9 mt-3 cursor-pointer"
       :class="[{ 'bg-neutral-40 rounded-lg': isBeingHovered }]"
     >
