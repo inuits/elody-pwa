@@ -170,6 +170,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
 
     queryVariables.value.advancedFilterInputs = [];
     queryVariables.value.advancedFilterInputs = filters;
+    queryVariables.value.skip = 1;
   };
 
   const formatTeaserMetadata = (
