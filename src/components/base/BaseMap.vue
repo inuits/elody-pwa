@@ -28,23 +28,15 @@
     </div>
     <div class="bg-neutral-0 w-full h-[16vh]">
       <div v-for="data in mapData" class="px-2 py-1" :key="data.key">
-        <EntityElementMetadata
-          v-if="!isEdit || !data.field"
-          :label="data.label"
-          :value="data.value"
-          :unit="data.unit"
-        ></EntityElementMetadata>
         <entity-element-coordinate-edit
-          v-else-if="
-            data.field && isEdit && data.unit === Unit.CoordinatesDefault
-          "
+          v-if="data.field && data.unit === Unit.CoordinatesDefault"
           :fieldKey="data.key"
           :label="data.label"
           v-model:value="data.value"
           :field="data.field"
         />
         <entity-element-metadata-edit
-          v-else-if="data.field && isEdit"
+          v-else-if="data.field"
           :fieldKey="data.key"
           :label="data.label"
           v-model:value="data.value"
@@ -66,18 +58,14 @@ import {
   LIcon,
 } from "@vue-leaflet/vue-leaflet";
 import {
-  L,
-  icon,
   type LatLngExpression,
   type LeafletMouseEvent,
   type PointExpression,
 } from "leaflet";
 import { computed, ref } from "vue";
-import EntityElementMetadata from "../EntityElementMetadata.vue";
 import EntityElementMetadataEdit from "../EntityElementMetadataEdit.vue";
 import EntityElementCoordinateEdit from "../EntityElementCoordinateEdit.vue";
 import type { MediaFileElement } from "@/generated-types/queries";
-import { useEditMode } from "@/composables/useEdit";
 import { Unit } from "@/generated-types/queries";
 import { getEntityIdFromRoute } from "@/helpers";
 
@@ -87,7 +75,6 @@ const props = defineProps<{
 }>();
 
 const zoom = ref<number>(15);
-const { isEdit } = useEditMode();
 const formId = computed(() => getEntityIdFromRoute() as string);
 
 const createNewCoordinatesObject = (coordinatesObject: any) => {
