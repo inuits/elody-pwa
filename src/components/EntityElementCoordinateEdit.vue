@@ -7,6 +7,7 @@
         :type="field.type as any"
         :step="decimalPointStep"
         input-style="defaultWithBorder"
+        :disabled="!isEdit"
       />
       <p class="text-red-default">{{ errorMessage }}</p>
     </div>
@@ -17,6 +18,7 @@
         :type="field.type as any"
         :step="decimalPointStep"
         input-style="defaultWithBorder"
+        :disabled="!isEdit"
       />
       <p class="text-red-default">{{ errorMessage }}</p>
     </div>
@@ -28,10 +30,10 @@ import type { FormContext } from "vee-validate";
 import type { InputField as InputFieldType } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { getEntityIdFromRoute } from "@/helpers";
-import { type PropType, computed, ref } from "vue";
+import { type PropType, computed } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useField } from "vee-validate";
-import { useI18n } from "vue-i18n";
+import { useEditMode } from "@/composables/useEdit";
 
 export type Location = {
   latitude: string;
@@ -45,17 +47,12 @@ const props = defineProps({
   field: { type: Object as PropType<InputFieldType>, required: false },
 });
 
+const { isEdit } = useEditMode();
 const decimalPointStep = 0.000001;
 const { getForm } = useFormHelper();
 const id = getEntityIdFromRoute() || "";
 const form: FormContext | undefined = getForm(id);
-const { t } = useI18n();
-const {
-  errorMessage,
-  value: fieldValue,
-  setValue,
-  errors,
-} = useField("intialValues." + props.fieldKey);
+const { errorMessage } = useField("intialValues." + props.fieldKey);
 
 const setFormValues = (latitude: string, longitude: string) => {
   if (form) {
