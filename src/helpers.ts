@@ -178,6 +178,7 @@ export const getMetadataFields = (
         key: key,
         label: (value as PanelMetaData).label,
         unit: (value as PanelMetaData).unit,
+        linkText: (value as PanelMetaData).linkText,
         value:
           (value as PanelInfo).value ||
           getValueForPanelMetadata(panelType, key, formId),

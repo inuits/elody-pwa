@@ -4,7 +4,9 @@
     <div v-if="Array.isArray(readableValue)">
       <div v-for="item in readableValue" :key="item">
         <p v-if="!stringIsUrl(item)">{{ item }}</p>
-        <a v-else class="underline" target="_blank" :href="item">{{ item }}</a>
+        <a v-else class="underline" target="_blank" :href="item">{{
+          t(linkText) || item
+        }}</a>
       </div>
       <div v-if="readableValue.length == 0">-</div>
     </div>
@@ -14,7 +16,7 @@
         class="underline"
         target="_blank"
         :href="readableValue"
-        >{{ readableValue }}</a
+        >{{ t(linkText) || readableValue }}</a
       >
       <p v-else-if="stringIsHtml(readableValue)" v-html="readableValue"></p>
       <p v-else>{{ (readableValue as string) || "-" }}</p>
@@ -36,6 +38,7 @@ const props = defineProps<{
   label?: string;
   value?: any;
   unit?: string;
+  linkText?: string;
 }>();
 
 const { t } = useI18n();
