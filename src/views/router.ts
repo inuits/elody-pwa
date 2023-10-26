@@ -19,7 +19,7 @@ const routeComponentConfig: RouteComponentConfig[] = [
   { routeName: "SingleEntity", routeComponent: SingleEntity },
   { routeName: "SingleMediafile", routeComponent: SingleEntity },
   { routeName: "History", routeComponent: History },
-  { routeName: "Mirador", routeComponent: ManifestViewer },
+  { routeName: "Manifest", routeComponent: ManifestViewer },
   { routeName: "NotFound", routeComponent: NotFound },
 ];
 
