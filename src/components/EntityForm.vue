@@ -75,7 +75,7 @@ const parseFormValuesToFormInput = (values: EntityValues) => {
     });
 
   const relations: BaseRelationValuesInput[] = [];
-  values?.relationValues?.relations.forEach((relation) => {
+  values?.relationValues?.relations?.forEach((relation) => {
     const relationInput: any = {};
     Object.keys(relation)
       .filter((key) => key !== "__typename")

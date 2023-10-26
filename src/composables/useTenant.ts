@@ -7,6 +7,7 @@ import {
 } from "@/generated-types/queries";
 import { ref, computed, watch, onMounted } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
+import { useRouter } from "vue-router";
 
 const TENANTS_ENDPOINT = "/api/tenants";
 
@@ -27,6 +28,7 @@ const useTenant = (
       : false;
   const hideSuperTenant: boolean =
     (config && config.features.hideSuperTenant) || false;
+  const router = useRouter();
   const initTenants = async () => {
     await getTenants();
     const tenantFromSession = await getTennantFromSession();
@@ -142,6 +144,7 @@ const useTenant = (
   watch(selectedTenant, (selectedTenantValue) => {
     selectedTenantValue && setTennantInSession(selectedTenantValue);
     tenantsLoaded.value = "switching";
+    router.push({ name: "Home" });
   });
 
   watch(tenantsLoaded, async (value) => {

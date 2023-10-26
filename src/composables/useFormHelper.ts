@@ -172,10 +172,10 @@ const useFormHelper = () => {
     | { idx: number; relation: BaseRelationValuesInput }
     | "no-relation-found" => {
     const { form } = getFormByRouteId();
-    if (!form || form.values.relationValues.relations <= 0)
+    if (!form || form.values.relationValues?.relations <= 0)
       return "no-relation-found";
     let idx: number | "no-idx" = "no-idx";
-    const relation = form.values.relationValues.relations?.find(
+    const relation = form.values.relationValues?.relations?.find(
       (relation: BaseRelationValuesInput, index: number) => {
         if (relation.key === key && relation.type === type) {
           idx = index;
