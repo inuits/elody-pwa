@@ -17,11 +17,11 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  GetGraphDataDocument,
-  type GetGraphDataQueryVariables,
-  type GraphElement,
+import type {
+  GetGraphDataQueryVariables,
+  GraphElement,
 } from "@/generated-types/queries";
+import { GetGraphDataDocument } from "@/generated-types/queries";
 import "chartjs-adapter-date-fns";
 import Chart from "chart.js/auto";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
