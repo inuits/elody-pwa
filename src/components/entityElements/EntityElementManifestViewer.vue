@@ -38,6 +38,7 @@
     </template>
   </entity-element-wrapper>
 </template>
+
 <script lang="ts" setup>
 import ManifestViewer from "@/components/ManifestViewer.vue";
 import { useI18n } from "vue-i18n";

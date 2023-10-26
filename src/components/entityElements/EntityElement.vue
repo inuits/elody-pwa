@@ -39,6 +39,10 @@
         v-if="element.__typename === 'ManifestViewerElement'"
         :element="element"
       />
+      <entity-element-markdown-viewer
+        v-if="element.__typename === 'MarkdownViewerElement'"
+        :element="element"
+      />
     </div>
   </div>
 </template>
@@ -57,17 +61,20 @@ import type {
   EntityViewElements,
   GraphElement,
   ManifestViewerElement,
+  MarkdownViewerElement,
   MediaFileElement,
   WindowElement,
 } from "@/generated-types/queries";
 import { getEntityIdFromRoute } from "@/helpers";
+import EntityElementMarkdownViewer from "@/components/entityElements/EntityElementMarkdownViewer.vue";
 
 export type Elements =
   | WindowElement
   | MediaFileElement
   | EntityListElement
   | GraphElement
-  | ManifestViewerElement;
+  | ManifestViewerElement
+  | MarkdownViewerElement;
 
 const props = defineProps<{
   elements: EntityViewElements;
