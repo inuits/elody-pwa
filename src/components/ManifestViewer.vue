@@ -46,10 +46,10 @@ const hasMirador = computed(() => props.viewers.includes("mirador"));
 
 const initializeViewers = () => {
   if (props.manifestUrl && hasTify.value) {
-    new Tify({
-      container: "#tify-viewer",
+    const tify = new Tify({
       manifestUrl: props.manifestUrl,
     });
+    tify.mount("#tify-viewer");
   }
 
   const miradorConfig: any = {
