@@ -6,6 +6,7 @@ import { bulkSelectAllSizeLimit } from "@/main";
 import { ref } from "vue";
 
 export enum BulkOperationsContextEnum {
+  Home = "Home",
   BulkOperationsCsvExport = "BulkOperationsCsvExport",
   FilterOptions = "FilterOptions",
   EntityElementList = "EntityElementList",
@@ -13,7 +14,7 @@ export enum BulkOperationsContextEnum {
   EntityElementListEntityPickerModal = "EntityElementListEntityPickerModal",
   EntityElementMediaEntityPickerModal = "EntityElementMediaEntityPickerModal",
   ManifestCollection = "ManifestCollection",
-  SearchModal = "SearchModal"
+  SearchModal = "SearchModal",
 }
 export type Context = RouteNames | BulkOperationsContextEnum;
 export type InBulkProcessableItem = {

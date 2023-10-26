@@ -103,6 +103,7 @@ import {
   type GetBulkOperationsQuery,
   MetadataAndRelation,
   ModalState,
+  RouteNames,
   TypeModals,
 } from "@/generated-types/queries";
 import type {
@@ -124,7 +125,7 @@ import {
   NotificationType,
 } from "@/components/base/BaseNotification.vue";
 import { useI18n } from "vue-i18n";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -165,12 +166,17 @@ const {
 const { openModal, getModalInfo } = useBaseModal();
 const { createNotificationOverwrite } = useNotification();
 const { t } = useI18n();
+const router = useRouter();
 
 onResult((result) => {
   if (result.data) {
-   if (!result.data.BulkOperations && !result.data.BulkOperations.options) emit('noBulkOperationsAvailable')
+    if (
+      !result.data.BulkOperations ||
+      !result.data.BulkOperations.bulkOperationOptions.options
+    )
+      emit("noBulkOperationsAvailable");
     bulkOperations.value =
-      result.data.BulkOperations.options;
+      result.data.BulkOperations.bulkOperationOptions.options;
   }
 });
 
@@ -203,6 +209,7 @@ const enqueueItemsForManifestCollection = () => {
         item
       )
     );
+    router.push({ name: RouteNames.ManifestViewer });
   } catch {
     createNotificationOverwrite(
       NotificationType.error,
