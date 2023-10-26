@@ -77,30 +77,26 @@ export const useBreadcrumbs = (config: any, t: any) => {
     setCurrentRouteTitle(to.meta.title as string);
     if (to.meta.entityType === "manifest")
       setCurrentRouteTitle("navigation.entities");
-    if (to.name === "Home")
-      resetVisitedRoutes();
+    if (to.name === "Home") resetVisitedRoutes();
   });
 
-  useRouter().beforeEach((from) => {
-    const route: VisitedRoute = {
+  useRouter().beforeEach((to, from) => {
+    let route: VisitedRoute = {
       id: "",
       routeName: from.meta.title,
       path: from.path,
     };
-    if (from.meta.title === "Single Entity") {
-      route.routeName = "navigation.devices";
-      route.path = "/iotDevices";
-    }
-    else if (from.meta.title === "Single Asset") {
-      route.routeName = "navigation.entities";
-      route.path = "/";
-    }
     if (visitedRoutes.value.length === 0) {
       addVisitedRoute(route);
       return;
     }
-    const valueToMatch = from.path.slice(1);
+    const valueToMatch = to.path.slice(1);
     const destinations = getMenuDestinations().value;
+    route = {
+      id: "",
+      routeName: to.meta.title,
+      path: to.path,
+    };
     if (destinations.includes(valueToMatch)) {
       resetVisitedRoutes();
       addVisitedRoute(route);
