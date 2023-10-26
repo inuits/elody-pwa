@@ -93,7 +93,7 @@ watch(
   () => result.value,
   () => {
     const entity: BaseEntity = result.value?.Entity as BaseEntity;
-    if (!entity) return;
+    if (!entity || !entity.intialValues) return;
 
     identifiers.value = [entity.id, entity.intialValues.id].filter(
       (id) => id != undefined
@@ -106,7 +106,8 @@ watch(
       getEditableMetadataKeys(columnList.value, route.params.id as string);
     }
 
-    if (auth.isAuthenticated.value === true) showEditToggle("edit");
+    if (auth.isAuthenticated.value) showEditToggle("edit");
+
     setCurrentRouteTitle(
       entity.intialValues?.title || entity.intialValues?.name
     );
