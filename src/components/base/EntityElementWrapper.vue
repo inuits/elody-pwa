@@ -1,5 +1,7 @@
 <template>
-  <div class="bg-accent-normal rounded-t-lg">
+  <div
+    :class="['bg-accent-normal rounded-t-lg', { 'rounded-lg': isCollapsed }]"
+  >
     <div class="flex items-center justify-between">
       <div class="flex p-2">
         <span class="subtitle mr-2">{{ t(label) }}</span>
@@ -12,8 +14,7 @@
           :name="isCollapsed ? Unicons.AngleDown.name : Unicons.AngleUp.name"
       /></span>
     </div>
-
-    <slot name="content"></slot>
+    <div v-if="!isCollapsed"><slot name="content"></slot></div>
   </div>
 </template>
 
