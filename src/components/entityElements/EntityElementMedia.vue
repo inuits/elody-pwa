@@ -26,9 +26,7 @@
     <template v-slot:content>
       <BaseLibrary
         class="flex-1"
-        v-if="
-          !element.isCollapsed && element.type === MediaFileElementTypes.Media
-        "
+        v-if="element.type === MediaFileElementTypes.Media"
         :bulk-operations-context="BulkOperationsContextEnum.EntityElementMedia"
         :search-input-type-on-drawer="
           SearchInputType.AdvancedInputMediaFilesType

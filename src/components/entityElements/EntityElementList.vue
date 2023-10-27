@@ -20,7 +20,7 @@
         </div>
       </template>
       <template v-slot:content>
-        <div v-if="!isCollapsed" class="ml-1 bg-neutral-lightest">
+        <div class="ml-1 bg-neutral-lightest">
           <BaseLibrary
             class="flex-1"
             :bulk-operations-context="
