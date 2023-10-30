@@ -46,7 +46,6 @@ const useFormHelper = () => {
     //   form.values = formValues;
     //   return form;
     // }
-    console.log(formValues);
     const form = useForm<EntityValues>({
       initialValues: formValues,
     });
@@ -61,7 +60,6 @@ const useFormHelper = () => {
   };
 
   const discardEditForForm = (key: string) => {
-    console.log(getForm(key));
     getForm(key)?.resetForm();
   };
 
