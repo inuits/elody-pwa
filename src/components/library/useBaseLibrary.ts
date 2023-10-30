@@ -282,8 +282,10 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
       if (
         libraryBarInitializationStatus.value !== "inProgress" &&
         filtersBaseInitializationStatus.value !== "inProgress"
-      )
+      ) {
         getEntities();
+        __doEntitiesCall();
+      }
     },
     { deep: true }
   );
