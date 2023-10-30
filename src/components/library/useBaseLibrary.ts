@@ -71,7 +71,6 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
   watch(
     [() => paginationLimitOptionsLoaded.value, () => sortOptionsLoaded.value],
     () => {
-      console.log(`* ${paginationLimitOptionsLoaded.value} - ${sortOptionsLoaded.value}`);
       if (paginationLimitOptionsLoaded.value && sortOptionsLoaded.value)
         libraryBarInitializationStatus.value = "initialized";
     }
@@ -208,21 +207,18 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
       filtersBaseInitializationStatus.value === "initialized"
     ) return;
 
-    console.log(`1. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`);
     __setEntitiesLoading(true);
     if (libraryBarInitializationStatus.value === "not-initialized")
       await initializeLibraryBar();
     if (filtersBaseInitializationStatus.value === "not-initialized")
       await initializeFiltersBase();
 
-    console.log(`2. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`);
     if (
       libraryBarInitializationStatus.value === "initialized" &&
       filtersBaseInitializationStatus.value === "initialized"
     ) {
       __doEntitiesCall();
     } else {
-      console.log(`3. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`);
       if (
         (libraryBarInitializationStatus.value === "not-initialized" &&
           filtersBaseInitializationStatus.value === "initialized") ||
@@ -230,7 +226,6 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
           filtersBaseInitializationStatus.value === "not-initialized")
       )
         __doEntitiesCall();
-      console.log(`4. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`);
       if (
         (libraryBarInitializationStatus.value === "initialized" &&
           filtersBaseInitializationStatus.value === "inProgress") ||
