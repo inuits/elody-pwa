@@ -19,8 +19,6 @@ import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import useMenuHelper from "@/composables/useMenuHelper";
 import type { MenuItem } from "@/generated-types/queries";
-import { DomEvent } from "leaflet";
-import preventDefault = DomEvent.preventDefault;
 
 const props = defineProps({
   show: {
