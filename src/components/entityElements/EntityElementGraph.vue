@@ -6,7 +6,10 @@
   >
     <template v-slot:actions />
     <template v-slot:content>
-      <canvas class="bg-neutral-0" ref="canvasRef" id="chart"></canvas>
+      <canvas v-show="!loading" class="bg-neutral-0" ref="canvasRef" id="chart"></canvas>
+      <p v-if="loading" class="p-4 text-center bg-neutral-0 text-text-body">
+        loading...
+      </p>
     </template>
   </entity-element-wrapper>
 </template>
@@ -30,6 +33,7 @@ const props = defineProps<{
   element: GraphElement;
 }>();
 
+const loading = ref<boolean>(true);
 const entityId = computed(() => asString(useRoute().params["id"]));
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 let chart: Chart | null = null;
@@ -75,11 +79,14 @@ onResult((result) => {
       },
     },
   });
+
+  loading.value = false;
 });
 
 watch(
   () => canvasRef.value,
   () => {
+    loading.value = true;
     if (canvasRef.value && !props.element.isCollapsed) refetch();
   }
 );
