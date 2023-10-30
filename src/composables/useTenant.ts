@@ -141,10 +141,12 @@ const useTenant = (
     });
   };
 
-  watch(selectedTenant, (selectedTenantValue) => {
+  watch(selectedTenant, async (selectedTenantValue) => {
+    if (selectedTenantValue !== (await getTennantFromSession()).id)
+      router.push({ name: "Home" });
+
     selectedTenantValue && setTennantInSession(selectedTenantValue);
     tenantsLoaded.value = "switching";
-    router.push({ name: "Home" });
   });
 
   watch(tenantsLoaded, async (value) => {
