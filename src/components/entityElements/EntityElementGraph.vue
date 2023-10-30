@@ -72,6 +72,10 @@ onResult((result) => {
     type: props.element.type,
     data: result.data.GraphData,
     options: {
+      onResize: () => {
+        for (let id in Chart.instances)
+          Chart.instances[id].resize();
+      },
       scales: {
         y: {
           beginAtZero: true,
