@@ -172,11 +172,11 @@ onResult((result) => {
   if (result.data) {
     if (
       !result.data.BulkOperations ||
-      !result.data.BulkOperations.bulkOperationOptions.options
+      !result.data.BulkOperations.bulkOperationOptions?.options
     )
       emit("noBulkOperationsAvailable");
     bulkOperations.value =
-      result.data.BulkOperations.bulkOperationOptions.options;
+      result.data.BulkOperations.bulkOperationOptions?.options;
   }
 });
 
