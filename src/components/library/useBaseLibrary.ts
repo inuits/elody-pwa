@@ -219,6 +219,12 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
           filtersBaseInitializationStatus.value === "initialized")
       )
         __doEntitiesCall();
+      if (
+        libraryBarInitializationStatus.value === "inProgress" &&
+        filtersBaseInitializationStatus.value === "inProgress" &&
+        paginationLimitOptionsLoaded.value && sortOptionsLoaded.value
+      )
+        __doEntitiesCall();
     }
   };
 
