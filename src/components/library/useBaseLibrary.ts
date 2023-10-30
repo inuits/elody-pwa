@@ -90,7 +90,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     type: [],
   });
   const advancedFilters = ref<Maybe<AdvancedFilters>>();
-  const initializeFiltersBase = () => {
+  const initializeFiltersBase = async () => {
     filtersBaseInitializationStatus.value = "inProgress";
     const filterMatcherMappingLoaded = ref<boolean>(false);
     const advancedFiltersLoaded = ref<boolean>(false);
@@ -115,6 +115,20 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
         advancedFilters.value = (
           result.data?.EntityTypeFilters as BaseEntity
         )?.advancedFilters;
+        if (advancedFilters.value) {
+          Object.values(advancedFilters.value).forEach((advancedFilter) => {
+            if (typeof advancedFilter !== "string" && advancedFilter.type === "type") {
+              const filter: AdvancedFilterInput = {
+                type: advancedFilter.type,
+                parent_key: advancedFilter.parentKey,
+                key: advancedFilter.key,
+                value: advancedFilter.defaultValue,
+                match_exact: true,
+              };
+              setAdvancedFilters([filter]);
+            }
+          });
+        }
         advancedFiltersLoaded.value = true;
       });
 
@@ -189,12 +203,17 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
   };
 
   const getEntities = async (): Promise<void> => {
+    if (
+      libraryBarInitializationStatus.value === "initialized" &&
+      filtersBaseInitializationStatus.value === "initialized"
+    ) return;
+
     console.log(`1. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`);
     __setEntitiesLoading(true);
     if (libraryBarInitializationStatus.value === "not-initialized")
-      initializeLibraryBar();
+      await initializeLibraryBar();
     if (filtersBaseInitializationStatus.value === "not-initialized")
-      initializeFiltersBase();
+      await initializeFiltersBase();
 
     console.log(`2. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`);
     if (
@@ -243,6 +262,16 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
       });
   };
 
+  watch([() => libraryBarInitializationStatus.value, () => filtersBaseInitializationStatus.value],
+    () => {
+      if (
+        libraryBarInitializationStatus.value === "initialized" &&
+        filtersBaseInitializationStatus.value === "initialized" &&
+        paginationLimitOptionsLoaded.value && sortOptionsLoaded.value
+      )
+        __doEntitiesCall();
+    }
+  );
   watch(
     () => entitiesLoading.value,
     (isLoading) => {
