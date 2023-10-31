@@ -10,19 +10,7 @@
       />
       <button
         type="button"
-        class="
-          flex
-          justify-center
-          items-center
-          h-10
-          w-10
-          p-2.5
-          text-sm
-          font-medium
-          text-neutral-white
-          bg-accent-normal
-          rounded-lg
-        "
+        class="flex justify-center items-center h-10 w-10 p-2.5 text-sm font-medium text-neutral-white bg-accent-normal rounded-lg"
         @click="
           inputEnabled === false ? openSearchModal() : applyFilterToLibrary()
         "

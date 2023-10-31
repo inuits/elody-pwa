@@ -102,9 +102,12 @@ watch(isAsc, () => {
 watch(skip, () => {
   if (queryVariables.value) queryVariables.value.skip = skip.value;
 });
-watch(() => queryVariables.value?.skip, () => {
-  if (queryVariables.value.skip) skip.value = queryVariables.value.skip;
-});
+watch(
+  () => queryVariables.value?.skip,
+  () => {
+    if (queryVariables.value.skip) skip.value = queryVariables.value.skip;
+  }
+);
 watch(
   () => getModalInfo(TypeModals.BulkOperations).state,
   (bulkOperationsModalState: ModalState) => {

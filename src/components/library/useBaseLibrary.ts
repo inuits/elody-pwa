@@ -116,7 +116,10 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
         )?.advancedFilters;
         if (advancedFilters.value) {
           Object.values(advancedFilters.value).forEach((advancedFilter) => {
-            if (typeof advancedFilter !== "string" && advancedFilter.type === "type") {
+            if (
+              typeof advancedFilter !== "string" &&
+              advancedFilter.type === "type"
+            ) {
               const filter: AdvancedFilterInput = {
                 type: advancedFilter.type,
                 parent_key: advancedFilter.parentKey,
@@ -205,7 +208,8 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     if (
       libraryBarInitializationStatus.value === "initialized" &&
       filtersBaseInitializationStatus.value === "initialized"
-    ) return;
+    )
+      return;
 
     __setEntitiesLoading(true);
     if (libraryBarInitializationStatus.value === "not-initialized")
@@ -236,7 +240,8 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
       if (
         libraryBarInitializationStatus.value === "inProgress" &&
         filtersBaseInitializationStatus.value === "inProgress" &&
-        paginationLimitOptionsLoaded.value && sortOptionsLoaded.value
+        paginationLimitOptionsLoaded.value &&
+        sortOptionsLoaded.value
       )
         __doEntitiesCall();
     }
@@ -257,12 +262,17 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
       });
   };
 
-  watch([() => libraryBarInitializationStatus.value, () => filtersBaseInitializationStatus.value],
+  watch(
+    [
+      () => libraryBarInitializationStatus.value,
+      () => filtersBaseInitializationStatus.value,
+    ],
     () => {
       if (
         libraryBarInitializationStatus.value === "initialized" &&
         filtersBaseInitializationStatus.value === "initialized" &&
-        paginationLimitOptionsLoaded.value && sortOptionsLoaded.value
+        paginationLimitOptionsLoaded.value &&
+        sortOptionsLoaded.value
       )
         __doEntitiesCall();
     }
