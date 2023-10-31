@@ -14,40 +14,32 @@
     >
       <img src="/logo.svg" alt="Elody logo" class="h-12" />
     </router-link>
-    <div class="flex flex-col justify-between h-[86%]">
-      <div>
-        <tenant-switcher :is-visible="isExpanded" />
-        <div
-          v-for="menuItem in menuItems"
-          :key="menuItem.label"
-          @mouseenter="changeHoveredItem(menuItem)"
-          @mouseleave="changeHoveredItem(undefined)"
-        >
-          <Menuitem
-            :icon="menuItem.icon"
-            :menuitem="menuItem"
-            :isExpanded="isExpanded"
-            :isBeingHovered="menuItem === hoveredItem"
-            @onclick="changeExpandedState(true)"
-          />
-        </div>
-      </div>
-      <div>
-        <LogInLogout :is-expanded="isExpanded" class="mt-5 ml-3" />
-      </div>
+    <div
+      v-for="menuItem in menuItems"
+      :key="menuItem.label"
+      @mouseenter="changeHoveredItem(menuItem)"
+      @mouseleave="changeHoveredItem(undefined)"
+    >
+      <Menuitem
+        :icon="menuItem.icon"
+        :menuitem="menuItem"
+        :isExpanded="isExpanded"
+        :isBeingHovered="menuItem === hoveredItem"
+        @onclick="changeExpandedState(true)"
+      />
     </div>
+    <LogInLogout :is-expanded="isExpanded" class="mt-5 ml-3" />
   </nav>
 </template>
 
 <script lang="ts" setup>
-import { RouterLink } from "vue-router";
-import Menuitem from "@/components/menu/MenuItem.vue";
+import type { MenuItem } from "@/generated-types/queries";
 import LogInLogout from "@/components/LogInLogout.vue";
-import TenantSwitcher from "@/components/menu/TenantSwitcher.vue";
+import Menuitem from "@/components/menu/MenuItem.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { ref, watch } from "vue";
-import { ModalState, type MenuItem } from "@/generated-types/queries";
-import { useBaseModal, type ModalInfo } from "@/composables/useBaseModal";
+import { RouterLink } from "vue-router";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 const isExpanded = ref<boolean>(false);
 const hoveredItem = ref<MenuItem | undefined>(undefined);
