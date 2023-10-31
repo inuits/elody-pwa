@@ -4,17 +4,16 @@
       <template v-slot:actions>
         <div
           v-if="isEdit"
-          class="flex items-center text-text-subtitle cursor-pointer"
+          class="flex items-center px-2 text-text-subtitle cursor-pointer"
+          @click.stop="() => {
+            setAcceptedTypes(types as Entitytyping[]);
+            setRelationType(relationType);
+            openModal(TypeModals.EntityPicker, undefined, 'right');
+            toggleElementCollapse(label, false);
+          }"
         >
           <unicon height="16" :name="Unicons.PlusCircle.name" />
-          <p
-            class="underline"
-            @click="() => {
-              setAcceptedTypes(types as Entitytyping[]);
-              setRelationType(relationType);
-              openModal(TypeModals.EntityPicker, undefined, 'right')
-            }"
-          >
+          <p class="underline">
             {{ t("library.add") }}
           </p>
         </div>
@@ -52,23 +51,25 @@ import {
   type Entitytyping,
   type Entity,
 } from "@/generated-types/queries";
-import BaseLibrary from "@/components/library/BaseLibrary.vue";
-import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
-import useEditMode from "@/composables/useEdit";
-import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import {
   BulkOperationsContextEnum,
   useBulkOperations,
   type InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
+import BaseLibrary from "@/components/library/BaseLibrary.vue";
+import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
+import useEditMode from "@/composables/useEdit";
+import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
+import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { watch } from "vue";
-import { useFormHelper } from "@/composables/useFormHelper";
 
 const { addRelations } = useFormHelper();
 const { createCustomContext } = useBulkOperations();
+const { toggleElementCollapse } = useEntityElementCollapseHelper();
 
 const props = withDefaults(
   defineProps<{

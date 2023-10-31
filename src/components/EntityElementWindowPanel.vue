@@ -1,8 +1,11 @@
 <template>
   <div class="border-solid border-neutral-30 border-b-2 p-2">
-    <div class="flex items-center justify-between">
+    <div
+      @click="toggleIsCollapsed()"
+      class="flex items-center justify-between cursor-pointer"
+    >
       <h2>{{ t(panel.label) }}</h2>
-      <div @click="toggleIsCollapsed()" class="cursor-pointer">
+      <div>
         <unicon :name="!isCollapsed ? Unicons.Minus.name : Unicons.Plus.name" />
       </div>
     </div>
