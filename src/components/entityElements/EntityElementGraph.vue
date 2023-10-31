@@ -6,7 +6,12 @@
   >
     <template v-slot:actions />
     <template v-slot:content>
-      <canvas v-show="!loading" class="bg-neutral-0" ref="canvasRef" id="chart"></canvas>
+      <canvas
+        v-show="!loading"
+        class="bg-neutral-0"
+        ref="canvasRef"
+        id="chart"
+      ></canvas>
       <p v-if="loading" class="p-4 text-center bg-neutral-0 text-text-body">
         loading...
       </p>
@@ -73,8 +78,7 @@ onResult((result) => {
     data: result.data.GraphData,
     options: {
       onResize: () => {
-        for (let id in Chart.instances)
-          Chart.instances[id].resize();
+        for (let id in Chart.instances) Chart.instances[id].resize();
       },
       scales: {
         y: {
