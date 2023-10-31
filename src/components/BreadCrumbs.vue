@@ -9,7 +9,7 @@
         ]"
       >
         <div
-          class="px-2 cursor-pointer"
+          class="flex items-center px-2 cursor-pointer"
           @click="navigateToEntity(visitedRoutes[0])"
         >
           <unicon
