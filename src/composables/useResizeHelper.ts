@@ -107,10 +107,14 @@ const useEntityElementCollapseHelper = () => {
     }
   };
 
-  const toggleElementCollapse = (elementLabel: string) => {
+  const toggleElementCollapse = (
+    elementLabel: string,
+    collapse: undefined | boolean = undefined
+  ) => {
     const { element, column } = getElementByLabel(elementLabel);
     if (element && column) {
-      element.isCollapsed = !element.isCollapsed;
+      element.isCollapsed =
+        collapse === undefined ? !element.isCollapsed : collapse;
     }
   };
 

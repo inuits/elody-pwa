@@ -2,17 +2,19 @@
   <div
     :class="['bg-accent-normal rounded-t-lg', { 'rounded-lg': isCollapsed }]"
   >
-    <div class="flex items-center justify-between">
+    <div
+      @click="toggleElementCollapse(label)"
+      class="flex items-center justify-between cursor-pointer"
+    >
       <div class="flex p-2">
         <span class="subtitle mr-2">{{ t(label) }}</span>
         <slot name="actions"></slot>
       </div>
-      <span
-        @click="toggleElementCollapse(label)"
-        class="p-2 cursor-pointer text-text-subtitle"
-        ><unicon
+      <span class="p-2 text-text-subtitle">
+        <unicon
           :name="isCollapsed ? Unicons.AngleDown.name : Unicons.AngleUp.name"
-      /></span>
+        />
+      </span>
     </div>
     <div v-if="!isCollapsed"><slot name="content"></slot></div>
   </div>
