@@ -134,12 +134,28 @@ const accentAccentDropdown: Dropdown = {
   hoverStyle: defaultDropdown.hoverStyle,
   disabledStyle: defaultDropdown.disabledStyle,
 };
+const neutralLightDropdown: Dropdown = {
+  textColor: "text-text-body",
+  bgColor: "bg-neutral-light",
+  borderColor: "border-none",
+  hoverStyle: {
+    textColor: "hover:text-[rgba(0,58,82,0.8)]",
+    bgColor: "hover:bg-neutral-lightest",
+    borderColor: "hover:border-none",
+  },
+  disabledStyle: defaultDropdown.disabledStyle,
+};
 
-type DropdownStyle = "default" | "defaultWithBorder" | "accentAccent";
+type DropdownStyle =
+  | "default"
+  | "defaultWithBorder"
+  | "accentAccent"
+  | "neutralLight";
 const dropdownStyles: Record<DropdownStyle, Dropdown> = {
   default: defaultDropdown,
   defaultWithBorder: defaultWithBorderDropdown,
   accentAccent: accentAccentDropdown,
+  neutralLight: neutralLightDropdown,
 };
 
 const props = withDefaults(
@@ -170,10 +186,9 @@ const defaultOption: DropdownOption = {
   value: "",
 };
 const dropdown = ref<HTMLUListElement>();
-const { modelValue } = toRefs(props);
+const { modelValue, disable } = toRefs(props);
 const selectedOption = ref<DropdownOption>(defaultOption);
 const showOptions = ref<boolean>(false);
-const disable = ref<boolean>(props.disable);
 
 const selectOption = (dropdownOption: DropdownOption) => {
   selectedOption.value = dropdownOption;
