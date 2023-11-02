@@ -63,7 +63,11 @@
       />
     </div>
 
-    <div v-if="!isPreview" class="flex flex-row">
+    <div
+      v-if="!isPreview"
+      class="flex flex-row"
+      @click="() => emit('navigateTo')"
+    >
       <slot>
         <unicon
           :name="Unicons.AngleRight.name"
@@ -124,6 +128,10 @@ const props = withDefaults(
     relation: "no-relation-found",
   }
 );
+
+const emit = defineEmits<{
+  (event: "navigateTo"): void;
+}>();
 
 const { isEdit } = useEditMode();
 const isMarkedAsToBeDeleted = ref<boolean>(false);
