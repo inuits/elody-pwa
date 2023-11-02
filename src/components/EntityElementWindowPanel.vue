@@ -10,7 +10,7 @@
       </div>
     </div>
     <transition>
-      <div v-if="!isCollapsed">
+      <div v-show="!isCollapsed">
         <div v-if="panelType === PanelType.Relation && relationArray.length">
           <div class="pl-2 rounded-sm bg-accent-light">
             <p class="text-sm text-text-body">Behoort tot</p>
