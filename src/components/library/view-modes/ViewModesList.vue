@@ -24,9 +24,9 @@
     v-for="entity in entities"
     :key="entity.id + '_list'"
     @click="navigateToEntityPage(entity, listItemRouteName)"
-    @dblclick="navigateToEntityPage(entity, listItemRouteName, true)"
   >
     <ListItem
+      @navigate-to="navigateToEntityPage(entity, listItemRouteName, true)"
       :class="
         parentEntityIdentifiers.length > 0 &&
         entity.id &&
