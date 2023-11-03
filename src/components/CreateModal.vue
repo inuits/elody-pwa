@@ -46,7 +46,11 @@ const selectedEntityType = ref<DropdownOption>();
 const entityTypes = ref<DropdownOption[]>([]);
 
 Object.values(CreateableEntityTypes).forEach((type) => {
-  entityTypes.value.push({ icon: DamsIcons.NoIcon, label: type, value: type });
+  entityTypes.value.push({
+    icon: DamsIcons.NoIcon,
+    label: t(`types.${type}`),
+    value: type,
+  });
 });
 
 watch(
