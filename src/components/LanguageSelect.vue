@@ -1,5 +1,5 @@
 <template>
-  <div class="float-right">
+  <div :key="locale" class="float-right">
     <BaseDropdownNew
       v-if="languageOptions"
       v-model="selectedLanguageOption"
@@ -41,17 +41,22 @@ if (displayPreferences) {
   }
 }
 
-onMounted(() => {
+const setSelectedLanguageOption = (): void => {
   selectedLanguageOption.value = languageOptions.value.find(
     (language) => language.value === locale.value
   );
+};
+
+onMounted(() => {
+  setSelectedLanguageOption();
 });
 
 watch(selectedLanguageOption, () => {
-  createOptionsFromAvailableLanguages(availableLocales);
   if (selectedLanguageOption.value) {
     locale.value = selectedLanguageOption.value.value;
     updateLocalStorage("_displayPreferences", { lang: locale.value });
+    createOptionsFromAvailableLanguages(availableLocales);
+    setSelectedLanguageOption();
   }
 });
 </script>
