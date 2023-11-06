@@ -215,6 +215,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     )
       return;
 
+    entitiesLoaded.value = false;
     setTimeout(() => {
       if (!entitiesLoaded.value) __setEntitiesLoading(true);
       entitiesLoaded.value = false;
