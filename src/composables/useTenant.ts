@@ -8,6 +8,7 @@ import {
 import { ref, computed, watch, onMounted } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useRouter } from "vue-router";
+import { setPermissionsMappings } from "@/composables/usePermissions";
 
 const TENANTS_ENDPOINT = "/api/tenants";
 
@@ -48,6 +49,7 @@ const useTenant = (
     }
 
     tenantsLoaded.value = "loaded";
+    setPermissionsMappings();
   };
 
   onMounted(() => {
