@@ -66,6 +66,7 @@
                 :label="metadataItem.label"
                 :value="metadataItem.value"
                 :unit="metadataItem.unit"
+                :link-text="metadataItem.linkText"
               />
             </div>
           </div>
