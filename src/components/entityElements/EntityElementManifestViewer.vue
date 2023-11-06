@@ -2,7 +2,7 @@
   <entity-element-wrapper
     :isCollapsed="element.isCollapsed"
     :label="element.label"
-    class="h-[80vh]"
+    :class="{ 'h-[80vh]': !element.isCollapsed }"
   >
     <template v-slot:actions>
       <div
