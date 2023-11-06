@@ -216,7 +216,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     setTimeout(() => {
       if (!entitiesLoaded.value) __setEntitiesLoading(true);
       entitiesLoaded.value = false;
-    }, 125);
+    }, 100);
 
     if (libraryBarInitializationStatus.value === "not-initialized")
       await initializeLibraryBar();
