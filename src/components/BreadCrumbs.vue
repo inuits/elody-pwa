@@ -42,7 +42,7 @@
           :class="[
             'px-2 ',
             { 'cursor-pointer': visitedRoutes.length > 2 },
-            { 'max-w-[50vw] truncate': truncatePreviousRouteName },
+            { 'max-w-[40vw] truncate': truncatePreviousRouteName },
           ]"
           @mouseenter="truncatePreviousRouteName = false"
           @mouseleave="truncatePreviousRouteName = true"
@@ -57,7 +57,7 @@
       <div
         :class="[
           'flex max-w-[50vw] items-center subtitle text-neutral-black truncate',
-          { 'max-w-[50vw] truncate': !truncatePreviousRouteName },
+          { 'max-w-[40vw] truncate': !truncatePreviousRouteName },
         ]"
       >
         {{ getCurrentRouteTitle }}
