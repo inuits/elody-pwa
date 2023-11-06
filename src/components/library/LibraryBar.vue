@@ -52,7 +52,7 @@ import {
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import BasePaginationNew from "@/components/base/BasePaginationNew.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
-import { onMounted, ref, toRefs, watch } from "vue";
+import { ref, toRefs, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 
@@ -61,9 +61,18 @@ const props = defineProps<{
   sortOptions: DropdownOption[];
   totalItems: number;
   queryVariables: GetEntitiesQueryVariables;
+  libraryBarInitializationStatus:
+    | "not-initialized"
+    | "inProgress"
+    | "initialized";
 }>();
 
-const { paginationLimitOptions, sortOptions, queryVariables } = toRefs(props);
+const {
+  paginationLimitOptions,
+  sortOptions,
+  queryVariables,
+  libraryBarInitializationStatus,
+} = toRefs(props);
 const { getModalInfo } = useBaseModal();
 const { t } = useI18n();
 const skip = ref<number>(1);
@@ -77,8 +86,13 @@ const setDefaultOptions = () => {
   selectedSortOption.value = sortOptions.value?.[0];
 };
 
-onMounted(() => setDefaultOptions());
-
+watch(
+  () => libraryBarInitializationStatus.value,
+  () => {
+    if (libraryBarInitializationStatus.value === "initialized")
+      setDefaultOptions();
+  }
+);
 watch(
   () => selectedSortOption.value,
   () => {
