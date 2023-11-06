@@ -12,7 +12,6 @@
       >
         <div class="flex flex-row items-center gap-y-4">
           <FiltersBase
-            v-if="filtersBaseInitializationStatus === 'initialized'"
             v-show="enableAdvancedFilters"
             class="lg:w-[46%]"
             :filter-matcher-mapping="filterMatcherMapping"
@@ -20,6 +19,9 @@
             :entity-type="filterType || entityType"
             :parent-entity-identifiers="parentEntityIdentifiers"
             :expandFilters="expandFilters"
+            :filters-base-initialization-status="
+              filtersBaseInitializationStatus
+            "
             @apply-filters="setAdvancedFilters"
             @expand-filters="expandFilters = !expandFilters"
           />
@@ -30,14 +32,12 @@
             <BaseToggleGroup v-if="toggles.length > 1" :toggles="toggles" />
           </div>
           <LibraryBar
-            v-if="
-              libraryBarInitializationStatus === 'initialized' &&
-              !predefinedEntities
-            "
+            v-if="!predefinedEntities"
             :pagination-limit-options="paginationLimitOptions"
             :sort-options="sortOptions"
             :total-items="totalEntityCount || NaN"
             :queryVariables="(queryVariables as GetEntitiesQueryVariables)"
+            :library-bar-initialization-status="libraryBarInitializationStatus"
           />
         </div>
 
@@ -118,14 +118,15 @@
 
 <script lang="ts" setup>
 import type { ApolloClient } from "@apollo/client/core";
+import type { ViewModes } from "@/generated-types/type-defs";
 import {
   DamsIcons,
   Entitytyping,
   GetEntitiesDocument,
   SearchInputType,
+  type AdvancedFilterInput,
   type Entity,
   type GetEntitiesQueryVariables,
-  AdvancedFilterInput,
   TypeModals,
 } from "@/generated-types/queries";
 import {
@@ -145,12 +146,11 @@ import { bulkSelectAllSizeLimit } from "@/main";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { updateLocalStorage } from "@/helpers";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
+import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
 import { watch, ref, onMounted, inject, computed } from "vue";
-import type { ViewModes } from "@/generated-types/type-defs";
-import { useBaseModal } from "@/composables/useBaseModal";
 
 const props = withDefaults(
   defineProps<{
@@ -196,7 +196,6 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const apolloClient = inject(DefaultApolloClient);
-const config = inject("config") as any;
 const route = useRoute();
 const router = useRouter();
 
@@ -225,7 +224,6 @@ const { closeModal } = useBaseModal();
 
 const displayList = ref<boolean>(false);
 const displayGrid = ref<boolean>(false);
-const displayDropdown = ref<boolean>(false);
 const displayPreview = ref<boolean>(props.enablePreview);
 
 const expandFilters = ref<boolean>(false);

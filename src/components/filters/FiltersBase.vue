@@ -113,7 +113,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import FiltersListItem from "@/components/filters/FiltersListItem.vue";
 import useEditMode from "@/composables/useEdit";
-import { computed, defineProps, onMounted, ref, toRefs, watch } from "vue";
+import { computed, defineProps, ref, toRefs, watch } from "vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 
@@ -130,6 +130,10 @@ const props = withDefaults(
     entityType: string;
     expandFilters: boolean;
     parentEntityIdentifiers?: string[];
+    filtersBaseInitializationStatus:
+      | "not-initialized"
+      | "inProgress"
+      | "initialized";
   }>(),
   {
     parentEntityIdentifiers: () => [],
@@ -141,9 +145,9 @@ const emit = defineEmits<{
   (event: "expandFilters", expandFilters: boolean): void;
 }>();
 
-const { t } = useI18n();
-const { entityType } = toRefs(props);
+const { entityType, filtersBaseInitializationStatus } = toRefs(props);
 const { isSaved } = useEditMode();
+const { t } = useI18n();
 const matchers = ref<DropdownOption[]>([]);
 const filters = ref<FilterListItem[]>([]);
 const displayedFilterOptions = ref<DropdownOption[]>([]);
@@ -178,6 +182,7 @@ const handleFilterMatcherMapping = () => {
 const handleAdvancedFilters = () => {
   if (!props.advancedFilters) return;
   filters.value = [];
+  activeFilters.value = [];
   Object.values(props.advancedFilters).forEach((advancedFilter) => {
     if (typeof advancedFilter !== "string") {
       if (advancedFilter.hidden) {
@@ -218,11 +223,6 @@ const toggleDisplayedFilters = () => {
   });
 };
 
-onMounted(() => {
-  handleFilterMatcherMapping();
-  handleAdvancedFilters();
-});
-
 if (props.parentEntityIdentifiers.length > 0)
   watch(
     () => isSaved.value,
@@ -230,6 +230,15 @@ if (props.parentEntityIdentifiers.length > 0)
       if (isSaved.value) applyFilters();
     }
   );
+watch(
+  () => filtersBaseInitializationStatus.value,
+  () => {
+    if (filtersBaseInitializationStatus.value === "initialized") {
+      handleFilterMatcherMapping();
+      handleAdvancedFilters();
+    }
+  }
+);
 watch(displayedFilterOptions, () => toggleDisplayedFilters());
 watch(activeFilters, () => {
   activeFilterCount.value = 0;

@@ -163,6 +163,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
   const entities = ref<Entity[]>([]);
   const totalEntityCount = ref<number>(0);
   const entitiesLoading = ref<boolean>(false);
+  const entitiesLoaded = ref<boolean>(false);
   const { isSaved } = useEditMode();
 
   const __setEntitiesLoading = (isLoading: boolean) =>
@@ -175,6 +176,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
   const setEntities = (newEntities: Entity[]): void => {
     entities.value = newEntities;
     __setEntitiesLoading(false);
+    entitiesLoaded.value = true;
   };
 
   const setTotalEntityCount = (newCount: number): void => {
@@ -211,7 +213,11 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     )
       return;
 
-    __setEntitiesLoading(true);
+    setTimeout(() => {
+      if (!entitiesLoaded.value) __setEntitiesLoading(true);
+      entitiesLoaded.value = false;
+    }, 125);
+
     if (libraryBarInitializationStatus.value === "not-initialized")
       await initializeLibraryBar();
     if (filtersBaseInitializationStatus.value === "not-initialized")
