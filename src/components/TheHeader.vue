@@ -6,9 +6,9 @@
       <BreadCrumbs />
       <EditToggle v-if="auth.isAuthenticated.value === true" />
     </div>
-    <div class="flex w-full justify-end">
+    <div class="flex w-full justify-end px-2">
       <LanguageSelect />
-      <tenant-switcher />
+      <tenant-switcher v-if="config.features.hasTenantSelect" />
     </div>
     <SearchBar v-if="showSearch" :inputEnabled="false" />
   </div>
