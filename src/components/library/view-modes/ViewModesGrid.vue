@@ -1,7 +1,7 @@
 <template>
   <div class="grid grid_cols gap-2 justify-items-center">
     <div
-      v-if="!disablePreviews"
+      v-show="!disablePreviews"
       v-for="item in relations?.filter(
         (relation) =>
           relation.editStatus === EditStatus.New &&
@@ -33,6 +33,7 @@
       :key="entity.id + '_grid'"
       @click="navigateToEntityPage(entity, listItemRouteName)"
       @dblclick="navigateToEntityPage(entity, listItemRouteName, true)"
+      class="w-full"
     >
       <GridItem
         :class="
@@ -44,7 +45,7 @@
         :item-id="entity.uuid"
         :bulk-operations-context="bulkOperationsContext"
         :teaser-metadata="
-          formatTeaserMetadata(entity.teaserMetadata, entity.intialValues)
+          formatTeaserMetadata(entity.teaserMetadata, entity.intialValues) as Metadata[]
         "
         :media="
           entitiesLoading ? undefined : getMediaFilenameFromEntity(entity)
@@ -73,10 +74,10 @@
 <script lang="ts" setup>
 import type { ApolloClient } from "@apollo/client/core";
 import type { Context } from "@/composables/useBulkOperations";
-import {
-  EditStatus,
-  type BaseRelationValuesInput,
-  type Entity,
+import { EditStatus, Metadata } from "@/generated-types/queries";
+import type {
+  BaseRelationValuesInput,
+  Entity,
 } from "@/generated-types/queries";
 import GridItem from "@/components/GridItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";

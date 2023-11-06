@@ -24,14 +24,14 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  GetEntityByIdDocument,
-  type ColumnList,
-  type GetEntityByIdQueryVariables,
-  type IntialValues,
-  type RelationValues,
-  type GetEntityByIdQuery,
-  type BaseEntity,
+import { GetEntityByIdDocument } from "@/generated-types/queries";
+import type {
+  ColumnList,
+  GetEntityByIdQueryVariables,
+  IntialValues,
+  RelationValues,
+  GetEntityByIdQuery,
+  BaseEntity,
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
 import EntityForm from "@/components/EntityForm.vue";
