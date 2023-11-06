@@ -16,7 +16,7 @@
         />
       </span>
     </div>
-    <div v-if="!isCollapsed"><slot name="content"></slot></div>
+    <div class="h-full" v-if="!isCollapsed"><slot name="content"></slot></div>
   </div>
 </template>
 
