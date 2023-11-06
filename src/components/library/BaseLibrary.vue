@@ -75,7 +75,7 @@
         >
           <ViewModesList
             v-if="displayList"
-            :entities="entities"
+            :entities="entities as Entity[]"
             :entities-loading="entitiesLoading"
             :bulk-operations-context="bulkOperationsContext"
             :list-item-route-name="listItemRouteName"
@@ -86,10 +86,9 @@
             :relation-type="relationType"
             :enable-selection="enableBulkOperations"
           />
-
           <ViewModesGrid
             v-if="displayGrid"
-            :entities="entities"
+            :entities="entities as Entity[]"
             :entities-loading="entitiesLoading"
             :bulk-operations-context="bulkOperationsContext"
             :list-item-route-name="listItemRouteName"
@@ -100,10 +99,9 @@
             :relation-type="relationType"
             :enable-selection="enableBulkOperations"
           />
-
           <ViewModesMedia
             v-if="displayPreview"
-            :entities="entities"
+            :entities="entities as Entity[]"
             :entities-loading="entitiesLoading"
           />
         </div>
@@ -124,15 +122,17 @@ import {
   Entitytyping,
   GetEntitiesDocument,
   SearchInputType,
-  type AdvancedFilterInput,
-  type Entity,
-  type GetEntitiesQueryVariables,
   TypeModals,
 } from "@/generated-types/queries";
-import {
-  useBulkOperations,
-  type Context,
-  type InBulkProcessableItem,
+import type {
+  AdvancedFilterInput,
+  Entity,
+  GetEntitiesQueryVariables,
+} from "@/generated-types/queries";
+import { useBulkOperations } from "@/composables/useBulkOperations";
+import type {
+  Context,
+  InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
 import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
@@ -228,7 +228,7 @@ const displayPreview = ref<boolean>(props.enablePreview);
 
 const expandFilters = ref<boolean>(false);
 const isAsc = ref<boolean>(false);
-var toggles: ViewModes.type[] = [];
+let toggles: ViewModes.type[] = [];
 
 const entityType = computed(() =>
   route.meta.entityType ? (route.meta.entityType as Entitytyping) : "BaseEntity"
@@ -345,7 +345,7 @@ watch(
     toggles = [];
     if (entities.value.length === 0 || !entities.value[0].allowedViewModes)
       return;
-    const viewModes = entities.value[0].allowedViewModes.viewModes;
+    const viewModes: any[] = entities.value[0].allowedViewModes.viewModes;
     if (viewModes.includes(ViewModesList.__name))
       toggles.unshift({
         isOn: displayList,
