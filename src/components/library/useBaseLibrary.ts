@@ -224,26 +224,17 @@ export const useBaseLibrary = (
       entitiesLoaded.value = false;
     }, 100);
 
-    console.log(
-      `1. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`
-    );
     if (libraryBarInitializationStatus.value === "not-initialized")
       await initializeLibraryBar();
     if (filtersBaseInitializationStatus.value === "not-initialized")
       await initializeFiltersBase();
 
-    console.log(
-      `2. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`
-    );
     if (
       libraryBarInitializationStatus.value === "initialized" &&
       filtersBaseInitializationStatus.value === "initialized"
     ) {
       __doEntitiesCall();
     } else {
-      console.log(
-        `3. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`
-      );
       if (
         (libraryBarInitializationStatus.value === "not-initialized" &&
           filtersBaseInitializationStatus.value === "initialized") ||
@@ -251,9 +242,6 @@ export const useBaseLibrary = (
           filtersBaseInitializationStatus.value === "not-initialized")
       )
         __doEntitiesCall();
-      console.log(
-        `4. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`
-      );
       if (
         (libraryBarInitializationStatus.value === "initialized" &&
           filtersBaseInitializationStatus.value === "inProgress") ||
@@ -261,9 +249,6 @@ export const useBaseLibrary = (
           filtersBaseInitializationStatus.value === "initialized")
       )
         __doEntitiesCall();
-      console.log(
-        `5. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`
-      );
       if (
         libraryBarInitializationStatus.value === "inProgress" &&
         filtersBaseInitializationStatus.value === "inProgress" &&
@@ -317,14 +302,12 @@ export const useBaseLibrary = (
   watch(
     () => queryVariables.value,
     () => {
-      console.log(
-        `*. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`
-      );
       if (
         libraryBarInitializationStatus.value === "not-initialized" &&
         filtersBaseInitializationStatus.value === "not-initialized"
       )
         return;
+
       if (
         libraryBarInitializationStatus.value !== "inProgress" &&
         filtersBaseInitializationStatus.value !== "inProgress"
