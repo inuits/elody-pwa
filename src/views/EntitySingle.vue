@@ -24,15 +24,17 @@
 </template>
 
 <script lang="ts" setup>
-import { GetEntityByIdDocument } from "@/generated-types/queries";
-import type {
-  ColumnList,
-  GetEntityByIdQueryVariables,
-  IntialValues,
-  RelationValues,
-  GetEntityByIdQuery,
-  BaseEntity,
+import {
+  GetEntityByIdDocument,
+  Permission,
+  type ColumnList,
+  type GetEntityByIdQueryVariables,
+  type IntialValues,
+  type RelationValues,
+  type GetEntityByIdQuery,
+  type BaseEntity,
 } from "@/generated-types/queries";
+
 import EntityColumn from "@/components/EntityColumn.vue";
 import EntityForm from "@/components/EntityForm.vue";
 import useEditMode from "@/composables/useEdit";
@@ -44,17 +46,25 @@ import { useQuery } from "@vue/apollo-composable";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
+import { usePermissions } from "@/composables/usePermissions";
 
 const config: any = inject("config");
 const router = useRouter();
 const route = useRoute();
 const auth = useAuth();
 const { locale, t } = useI18n();
+const { can } = usePermissions();
 
 const id = asString(route.params["id"]);
 const identifiers = ref<string[]>([]);
 const loading = ref<boolean>(true);
-const { showEditToggle, disableEditMode, isEdit, setRefetchFn } = useEditMode();
+const {
+  showEditToggle,
+  disableEditMode,
+  isEdit,
+  setRefetchFn,
+  hideEditToggle,
+} = useEditMode();
 const { setCurrentRouteTitle, addVisitedRoute, currentRouteTitle } =
   useBreadcrumbs(config, t);
 const { getEditableMetadataKeys } = useFormHelper();
@@ -107,6 +117,8 @@ watch(
     }
 
     if (auth.isAuthenticated.value) showEditToggle("edit");
+    const permissionToEdit = can(Permission.Canpatch, undefined);
+    if (!permissionToEdit) hideEditToggle();
 
     setCurrentRouteTitle(
       entity.intialValues?.title || entity.intialValues?.name
