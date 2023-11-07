@@ -114,7 +114,8 @@ const props = withDefaults(
 
 const apolloClient = inject(DefaultApolloClient);
 const { formatTeaserMetadata } = useBaseLibrary(
-  apolloClient as ApolloClient<any>
+  apolloClient as ApolloClient<any>,
+  props.parentEntityIdentifiers.length > 0
 );
 const { mediafileSelectionState, updateSelectedEntityMediafile } =
   useEntityMediafileSelector();

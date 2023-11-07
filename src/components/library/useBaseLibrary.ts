@@ -28,7 +28,10 @@ import useEditMode from "@/composables/useEdit";
 import { createPlaceholderEntities } from "@/helpers";
 import { ref, watch } from "vue";
 
-export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
+export const useBaseLibrary = (
+  apolloClient: ApolloClient<any>,
+  hasParentFilters: boolean
+) => {
   const libraryBarInitializationStatus = ref<
     "not-initialized" | "inProgress" | "initialized"
   >("not-initialized");
@@ -221,17 +224,26 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
       entitiesLoaded.value = false;
     }, 100);
 
+    console.log(
+      `1. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`
+    );
     if (libraryBarInitializationStatus.value === "not-initialized")
       await initializeLibraryBar();
     if (filtersBaseInitializationStatus.value === "not-initialized")
       await initializeFiltersBase();
 
+    console.log(
+      `2. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`
+    );
     if (
       libraryBarInitializationStatus.value === "initialized" &&
       filtersBaseInitializationStatus.value === "initialized"
     ) {
       __doEntitiesCall();
     } else {
+      console.log(
+        `3. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`
+      );
       if (
         (libraryBarInitializationStatus.value === "not-initialized" &&
           filtersBaseInitializationStatus.value === "initialized") ||
@@ -239,6 +251,9 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
           filtersBaseInitializationStatus.value === "not-initialized")
       )
         __doEntitiesCall();
+      console.log(
+        `4. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`
+      );
       if (
         (libraryBarInitializationStatus.value === "initialized" &&
           filtersBaseInitializationStatus.value === "inProgress") ||
@@ -246,6 +261,9 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
           filtersBaseInitializationStatus.value === "initialized")
       )
         __doEntitiesCall();
+      console.log(
+        `5. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`
+      );
       if (
         libraryBarInitializationStatus.value === "inProgress" &&
         filtersBaseInitializationStatus.value === "inProgress" &&
@@ -278,6 +296,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     ],
     () => {
       if (
+        !hasParentFilters &&
         libraryBarInitializationStatus.value === "initialized" &&
         filtersBaseInitializationStatus.value === "initialized" &&
         paginationLimitOptionsLoaded.value &&
@@ -298,6 +317,14 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
   watch(
     () => queryVariables.value,
     () => {
+      console.log(
+        `*. ${libraryBarInitializationStatus.value} - ${filtersBaseInitializationStatus.value}`
+      );
+      if (
+        libraryBarInitializationStatus.value === "not-initialized" &&
+        filtersBaseInitializationStatus.value === "not-initialized"
+      )
+        return;
       if (
         libraryBarInitializationStatus.value !== "inProgress" &&
         filtersBaseInitializationStatus.value !== "inProgress"

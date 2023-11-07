@@ -216,7 +216,10 @@ const {
   sortOptions,
   totalEntityCount,
   formatTeaserMetadata,
-} = useBaseLibrary(apolloClient as ApolloClient<any>);
+} = useBaseLibrary(
+  apolloClient as ApolloClient<any>,
+  props.parentEntityIdentifiers.length > 0
+);
 const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
 const { getUploadStatus, setUploadStatus } = useUploadModalDropzone();
@@ -275,6 +278,7 @@ const initializeBaseLibrary = () => {
   if (!props.predefinedEntities) {
     if (props.filterType) setEntityType(props.filterType as Entitytyping);
     queryVariables.value.searchInputType = props.searchInputTypeOnDrawer;
+    getEntities();
   }
 };
 
