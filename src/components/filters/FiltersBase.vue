@@ -183,6 +183,7 @@ const handleAdvancedFilters = () => {
   if (!props.advancedFilters) return;
   filters.value = [];
   activeFilters.value = [];
+
   Object.values(props.advancedFilters).forEach((advancedFilter) => {
     if (typeof advancedFilter !== "string") {
       if (advancedFilter.hidden) {
@@ -207,10 +208,11 @@ const handleAdvancedFilters = () => {
         isDisplayed: advancedFilter.isDisplayedByDefault ?? false,
         advancedFilter,
       });
-      if (entityType.value || props.parentEntityIdentifiers.length > 0)
-        applyFilters();
     }
   });
+
+  if (entityType.value || props.parentEntityIdentifiers.length > 0)
+    applyFilters();
 };
 
 const toggleDisplayedFilters = () => {
