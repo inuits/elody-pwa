@@ -1,5 +1,4 @@
 import {
-  GetUserPermissionsDocument,
   GetPermissionMappingPerEntityDocument,
   GetPermissionMappingEntitiesDocument,
   type GetPermissionMappingPerEntityQuery,
@@ -68,20 +67,11 @@ const setPermissionsMappings = () => {
 };
 
 const usePermissions = () => {
-  const { result, loading } = useQuery(GetUserPermissionsDocument);
-  const determinePermission = (perm: string) => {
-    if (ignorePermissions.value) {
-      return true;
-    }
-    if (result.value?.UserPermissions?.payload) {
-      return ["read-saved-search"].includes(perm);
-    }
-    return false;
-  };
-
   const can = (permission: Permission, entity: Entitytyping | undefined) => {
     if (ignorePermissions.value) return true;
     try {
+      if (permissionsMappings.value.size < 1)
+        throw Error("The permissions are not loaded in yet");
       if (entity === undefined && permission === Permission.Canget)
         throw Error("For the canGet permission you have to specify an entity");
       if (entity === undefined)
@@ -94,11 +84,8 @@ const usePermissions = () => {
   };
 
   return {
-    determinePermission,
-    loading,
-    setIgnorePermissions,
     can,
   };
 };
 
-export { usePermissions, setIgnorePermissions, setPermissionsMappings };
+export { usePermissions, setPermissionsMappings, setIgnorePermissions };
