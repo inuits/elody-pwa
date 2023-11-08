@@ -1,6 +1,6 @@
 <template>
   <router-link
-    v-if="show"
+    v-if="isPermitted && show"
     :class="[
       'flex flex-column items-center cursor-pointer ml-9 mt-1 origin-top-center hover:text-accent-accent',
       { 'text-accent-accent': isActive },
@@ -18,7 +18,9 @@ import { computed, defineProps, type PropType } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import useMenuHelper from "@/composables/useMenuHelper";
-import type { MenuItem } from "@/generated-types/queries";
+import { usePermissions } from "@/composables/usePermissions";
+import { Permission, type MenuItem } from "@/generated-types/queries";
+import { ref } from "vue";
 
 const props = defineProps({
   show: {
@@ -29,6 +31,7 @@ const props = defineProps({
 });
 const { t } = useI18n();
 const route = useRoute();
+const { can } = usePermissions();
 const isActive = computed(
   () =>
     route.path.replace("/", "") ===
@@ -36,5 +39,8 @@ const isActive = computed(
 );
 const { checkIfRouteOrModal } = useMenuHelper();
 const menuAction = computed(() => checkIfRouteOrModal(props.subMenuItem));
+const isPermitted = ref<boolean>();
+
+isPermitted.value = can(Permission.Canread, props.subMenuItem.entityType);
 </script>
 <style></style>
