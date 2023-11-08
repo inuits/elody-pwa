@@ -49,7 +49,6 @@ const useTenant = (
     }
 
     tenantsLoaded.value = "loaded";
-    setPermissionsMappings();
   };
 
   onMounted(() => {
@@ -155,6 +154,7 @@ const useTenant = (
     if (value === "switching") {
       await apolloClient.cache.reset();
       tenantsLoaded.value = "loaded";
+      setPermissionsMappings();
     }
   });
 
