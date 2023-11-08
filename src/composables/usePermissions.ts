@@ -34,11 +34,11 @@ const setPermissionsMappings = () => {
         })
         .then((result) => {
           permissions.set(
-            Permission.Canget,
+            Permission.Canread,
             result.data?.PermissionMappingPerEntity
           );
         });
-      permissionsMappings.value.set(entity, permissions);
+      permissionsMappings.value.set(entity.toLowerCase(), permissions);
     } catch (e) {
       console.log(
         `Error in usePermissions set function for post entities/filter: ${e}`
@@ -72,12 +72,14 @@ const usePermissions = () => {
     try {
       if (permissionsMappings.value.size < 1)
         throw Error("The permissions are not loaded in yet");
-      if (entity === undefined && permission === Permission.Canget)
+      if (entity === undefined && permission === Permission.Canread)
         throw Error("For the canGet permission you have to specify an entity");
       if (entity === undefined)
         return permissionsMappings.value!.get("all_entities")!.get(permission);
-      if (permission !== Permission.Canget) entity = "all_entities";
-      return permissionsMappings.value!.get(entity)?.get(permission);
+      if (permission !== Permission.Canread) entity = "all_entities";
+      return permissionsMappings
+        .value!.get(entity.toLowerCase())
+        ?.get(permission);
     } catch (e) {
       console.log(e);
     }
@@ -88,4 +90,9 @@ const usePermissions = () => {
   };
 };
 
-export { usePermissions, setPermissionsMappings, setIgnorePermissions };
+export {
+  usePermissions,
+  setPermissionsMappings,
+  setIgnorePermissions,
+  permissionsMappings,
+};

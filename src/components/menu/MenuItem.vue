@@ -1,7 +1,10 @@
 <template>
   <div>
     <div
-      v-show="menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
+      v-show="
+        (menuitem?.isLoggedIn ? auth.isAuthenticated.value : true) &&
+        hasPermissionForMenuItem
+      "
       @click="
         isLink
           ? router.push(menuAction.action)
@@ -36,6 +39,7 @@
     <transition-group v-if="isExpanded">
       <div v-for="submenuItem in menuSubitem" :key="submenuItem.label">
         <MenuSubItem
+          v-if="hasPermissionForMenuItem"
           @click="setSelectedMenuItem(menuitem)"
           :subMenuItem="submenuItem"
           :show="(isBeingHovered as boolean)"
@@ -46,20 +50,26 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineProps, ref } from "vue";
+import { computed, defineProps, ref, watch } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
 import { Unicons } from "@/types";
+import { Permission } from "@/generated-types/queries";
 import type { DamsIcons, MenuItem } from "@/generated-types/queries";
 import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
 import CustomIcon from "../CustomIcon.vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+import {
+  usePermissions,
+  permissionsMappings,
+} from "@/composables/usePermissions";
 
 const { checkIfRouteOrModal, setSelectedMenuItem, selectedMenuItem } =
   useMenuHelper();
 const { t } = useI18n();
 const router = useRouter();
+const { can } = usePermissions();
 
 const auth = useAuth();
 const menuSubitem = ref<Array<MenuItem>>([]);
@@ -67,6 +77,7 @@ const menuAction = computed(() => checkIfRouteOrModal(props.menuitem));
 const isLink = computed(
   () => menuAction.value?.menuItemType === MenuItemType.link
 );
+const hasPermissionForMenuItem = ref<boolean>();
 
 const props = defineProps<{
   menuitem: MenuItem;
@@ -88,8 +99,22 @@ const handleSubMenu = () => {
     );
   }
 };
-
 handleSubMenu();
+
+watch(
+  () => permissionsMappings.value.size,
+  () => {
+    if (props.menuitem.icon === "Create") {
+      hasPermissionForMenuItem.value = can(Permission.Cancreate, undefined);
+      return;
+    }
+    let allowed = false;
+    menuSubitem.value.forEach((item) => {
+      allowed = allowed || !!can(Permission.Canread, item.entityType);
+    });
+    hasPermissionForMenuItem.value = allowed;
+  }
+);
 </script>
 
 <style></style>
