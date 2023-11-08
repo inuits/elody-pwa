@@ -118,7 +118,7 @@ watch(
 
     if (auth.isAuthenticated.value) showEditToggle("edit");
     const permissionToEdit = can(Permission.Canpatch, undefined);
-    if (!permissionToEdit) hideEditToggle();
+    //if (!permissionToEdit) hideEditToggle();
 
     setCurrentRouteTitle(
       entity.intialValues?.title || entity.intialValues?.name
