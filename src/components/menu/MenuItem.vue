@@ -1,10 +1,7 @@
 <template>
   <div>
     <div
-      v-show="
-        (menuitem?.isLoggedIn ? auth.isAuthenticated.value : true) &&
-        hasPermissionForMenuItem
-      "
+      v-show="menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
       @click="
         isLink
           ? router.push(menuAction.action)
@@ -39,7 +36,6 @@
     <transition-group v-if="isExpanded">
       <div v-for="submenuItem in menuSubitem" :key="submenuItem.label">
         <MenuSubItem
-          v-if="hasPermissionForMenuItem"
           @click="setSelectedMenuItem(menuitem)"
           :subMenuItem="submenuItem"
           :show="(isBeingHovered as boolean)"
