@@ -1,7 +1,10 @@
 <template>
   <div>
     <div
-      v-show="menuitem?.isLoggedIn ? auth.isAuthenticated.value : true"
+      v-show="
+        (menuitem?.isLoggedIn ? auth.isAuthenticated.value : true) &&
+        hasPermissionForMenuItem
+      "
       @click="
         isLink
           ? router.push(menuAction.action)
@@ -100,15 +103,16 @@ handleSubMenu();
 watch(
   () => permissionsMappings.value.size,
   () => {
-    if (props.menuitem.icon === "Create") {
+    if ((props.menuitem.typeLink.modal?.typeModal as string) === "Create") {
       hasPermissionForMenuItem.value = can(Permission.Cancreate, undefined);
       return;
     }
     let allowed = false;
     menuSubitem.value.forEach((item) => {
+      if (item.entityType == undefined) allowed = true;
       allowed = allowed || !!can(Permission.Canread, item.entityType);
     });
-    hasPermissionForMenuItem.value = allowed;
+    // hasPermissionForMenuItem.value = allowed;
   }
 );
 </script>

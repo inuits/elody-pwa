@@ -57,6 +57,7 @@ const useTenant = (
         initTenants();
       } else {
         tenantsLoaded.value = "no-switcher";
+        setPermissionsMappings();
       }
     }
   });
