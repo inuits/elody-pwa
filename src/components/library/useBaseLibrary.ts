@@ -201,7 +201,6 @@ export const useBaseLibrary = (
     teaserMetadata: Record<string, Metadata>,
     intialValues: Record<string, IntialValues>
   ): object => {
-    console.log(teaserMetadata);
     const formatted = [];
     for (const key in teaserMetadata) {
       if (key !== "__typename" && intialValues && teaserMetadata[key].label) {
@@ -209,7 +208,6 @@ export const useBaseLibrary = (
         formatted.push(teaserMetadata[key]);
       }
     }
-    console.log(formatted);
     return formatted;
   };
 
