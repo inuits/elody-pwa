@@ -73,7 +73,7 @@ const menuAction = computed(() => checkIfRouteOrModal(props.menuitem));
 const isLink = computed(
   () => menuAction.value?.menuItemType === MenuItemType.link
 );
-const hasPermissionForMenuItem = ref<boolean>();
+const hasPermissionForMenuItem = ref<boolean>(true);
 
 const props = defineProps<{
   menuitem: MenuItem;

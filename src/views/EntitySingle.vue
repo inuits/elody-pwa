@@ -53,7 +53,7 @@ const router = useRouter();
 const route = useRoute();
 const auth = useAuth();
 const { locale, t } = useI18n();
-const { can } = usePermissions();
+const { fetchUpdateAndDeletePermission } = usePermissions();
 
 const id = asString(route.params["id"]);
 const identifiers = ref<string[]>([]);
@@ -86,6 +86,8 @@ const { result, refetch } = useQuery<GetEntityByIdQuery>(
 const intialValues = ref<IntialValues | "no-values">("no-values");
 const relationValues = ref<RelationValues | "no-values">("no-values");
 const columnList = ref<ColumnList | "no-values">("no-values");
+const permissionToEdit = ref<boolean>();
+const permissionToDelete = ref<boolean>();
 
 router.beforeEach(() => {
   if (isEdit) disableEditMode();
@@ -116,9 +118,25 @@ watch(
       getEditableMetadataKeys(columnList.value, route.params.id as string);
     }
 
-    if (auth.isAuthenticated.value) showEditToggle("edit");
-    const permissionToEdit = can(Permission.Canupdate, undefined);
-    if (!permissionToEdit) hideEditToggle();
+    const mappings = fetchUpdateAndDeletePermission(entity.id);
+    if (mappings) {
+      mappings.then((result) => {
+        permissionToEdit.value = result.get(Permission.Canupdate);
+        permissionToDelete.value = result.get(Permission.Candelete);
+      });
+    }
+    watch(
+      () => permissionToDelete.value || permissionToEdit.value,
+      () => {
+        if (auth.isAuthenticated.value) {
+          if (permissionToEdit.value && permissionToDelete.value)
+            showEditToggle("delete");
+          else if (permissionToEdit.value && !permissionToDelete.value)
+            showEditToggle("edit");
+          else hideEditToggle();
+        } else hideEditToggle();
+      }
+    );
 
     setCurrentRouteTitle(
       entity.intialValues?.title || entity.intialValues?.name

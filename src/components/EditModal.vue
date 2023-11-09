@@ -3,7 +3,7 @@
     <BulkOperationsSubmitBar
       :button-label="$t('bulk-operations.save')"
       :button-icon="DamsIcons.Save"
-      :show-delete-button="true"
+      :show-delete-button="isEditToggleVisible !== 'edit-delete'"
       @submit="save()"
       @cancel="openDiscardModal()"
       @delete="openDeleteModal()"
@@ -37,7 +37,8 @@ import { useFormHelper } from "@/composables/useFormHelper";
 const route = useRoute();
 const router = useRouter();
 const { pageInfo } = usePageInfo();
-const { isEdit, save, discard, disableEditMode } = useEditMode();
+const { isEdit, save, discard, disableEditMode, isEditToggleVisible } =
+  useEditMode();
 const { setSecondaryConfirmFunction, initializeConfirmModal } =
   useConfirmModal();
 const { closeModal, openModal } = useBaseModal();
