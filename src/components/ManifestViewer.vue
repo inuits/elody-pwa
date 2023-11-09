@@ -1,10 +1,14 @@
 <template>
   <BaseTabs class="h-[94%]" :key="props.manifestUrl || Math.random()">
     <BaseTab v-if="hasMirador" title="Mirador">
-      <div class="flex h-full w-full relative z-10" id="mirador-viewer"></div>
+      <div
+        class="flex h-full w-full relative z-10"
+        id="mirador-viewer"
+        :key="manifestUrl"
+      ></div>
     </BaseTab>
     <BaseTab v-if="manifestUrl && hasTify" title="Tify">
-      <div class="w-full h-full" id="tify-viewer"></div>
+      <div class="w-full h-full" id="tify-viewer" :key="manifestUrl"></div>
     </BaseTab>
   </BaseTabs>
 </template>
