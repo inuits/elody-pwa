@@ -11,13 +11,20 @@
       <div v-if="readableValue.length == 0">-</div>
     </div>
     <div v-else>
-      <a
-        v-if="stringIsUrl(readableValue)"
-        class="underline"
-        target="_blank"
-        :href="readableValue"
-        >{{ t(linkText) || readableValue }}</a
-      >
+      <div class="flex items-center" v-if="stringIsUrl(readableValue)">
+        <div class="pr-2">
+          <unicon
+            v-if="linkIcon && Unicons[linkIcon]"
+            :name="Unicons[linkIcon].name"
+            height="12"
+          />
+          <CustomIcon v-else-if="linkIcon" :icon="linkIcon" :size="12" />
+        </div>
+        <a class="underline" target="_blank" :href="readableValue">{{
+          t(linkText) || readableValue
+        }}</a>
+      </div>
+
       <p v-else-if="stringIsHtml(readableValue)" v-html="readableValue"></p>
       <p v-else>{{ (readableValue as string) || "-" }}</p>
     </div>
@@ -33,12 +40,15 @@ import {
 } from "@/helpers";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { Unicons } from "@/types";
+import CustomIcon from "@/components/CustomIcon.vue";
 
 const props = defineProps<{
   label?: string;
   value?: any;
   unit?: string;
   linkText?: string;
+  linkIcon?: string;
 }>();
 
 const { t } = useI18n();
