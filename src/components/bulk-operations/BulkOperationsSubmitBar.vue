@@ -29,10 +29,11 @@
       </div>
     </div>
 
-    <div v-if="showDeleteButton">
+    <div>
       <BaseButtonNew
         :label="$t('bulk-operations.delete')"
         :icon="DamsIcons.Trash"
+        :disabled="showDeleteButton"
         button-style="redDefault"
         button-size="small"
         @click="() => emit('delete')"
