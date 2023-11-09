@@ -1,21 +1,26 @@
-import type { BaseEntity, Entity } from "../generated-types/queries";
+import type { BaseEntity } from "@/generated-types/queries";
 
 const useListItemHelper = () => {
   const getMediaFilenameFromEntity = (entity: BaseEntity) => {
-    let mediafile = undefined;
-    if (entity.media?.primary_transcode) {
-      mediafile = entity.media.primary_transcode;
-    }
-    if (entity?.media?.primaryMediafile) {
-      mediafile = entity.media.primaryMediafile;
-    }
-    if (entity?.media?.mediafiles && entity?.media?.mediafiles[0]) {
-      if (entity?.media?.mediafiles[0]?.transcode_filename) {
-        mediafile = entity?.media?.mediafiles[0]?.transcode_filename;
+    let mediafile: string | undefined = undefined;
+    try {
+      if (!entity.teaserMetadata) return mediafile;
+
+      let thumbnailKey = undefined;
+
+      const metadata: { [key: string]: any } = entity.teaserMetadata;
+      for (let key in metadata) {
+        if (metadata[key]?.__typename === "PanelThumbnail") {
+          const customUrl: string = metadata[key].customUrl;
+          if (customUrl) return customUrl;
+          thumbnailKey = key;
+        }
       }
-      if (entity.media?.mediafiles[0]?.thumbnail_file_location) {
-        mediafile = entity.media?.mediafiles[0]?.thumbnail_file_location;
-      }
+      if (!thumbnailKey) return mediafile;
+      const intialValues: { [key: string]: any } = entity.intialValues;
+      mediafile = intialValues[thumbnailKey];
+    } catch (e) {
+      console.log(e);
     }
     return mediafile;
   };
