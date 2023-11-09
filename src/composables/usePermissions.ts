@@ -20,6 +20,7 @@ const permissionsMappings = ref<Map<string, Map<Permission, boolean>>>(
   new Map<string, Map<Permission, boolean>>()
 );
 const setPermissionsMappings = () => {
+  console.log(permissionsMappings);
   if (ignorePermissions.value) return;
   permissionsMappings.value = new Map<string, Map<Permission, boolean>>();
   for (const entity in Entitytyping) {
