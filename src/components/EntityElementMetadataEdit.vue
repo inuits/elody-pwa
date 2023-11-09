@@ -150,6 +150,8 @@ import {
   stringIsUrl,
   stringIsHtml,
 } from "@/helpers";
+import CustomIcon from "@/components/CustomIcon.vue";
+import { Unicons } from "@/types";
 
 const readableValue = computed(() => {
   return convertUnitToReadbleFormat(props.unit as Unit, fieldValue.value ?? "");
