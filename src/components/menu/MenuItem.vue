@@ -103,16 +103,19 @@ handleSubMenu();
 watch(
   () => permissionsMappings.value.size,
   () => {
+    if (props.menuitem.requiresAuth === false) return;
     if ((props.menuitem.typeLink.modal?.typeModal as string) === "Create") {
       hasPermissionForMenuItem.value = can(Permission.Cancreate, undefined);
       return;
     }
+    if (menuSubitem.value.length == 0) return;
     let allowed = false;
     menuSubitem.value.forEach((item) => {
+      if (item.requiresAuth === false) allowed = true;
       if (item.entityType == undefined) allowed = true;
-      allowed = allowed || !!can(Permission.Canread, item.entityType);
+      allowed = allowed || can(Permission.Canread, item.entityType);
     });
-    // hasPermissionForMenuItem.value = allowed;
+    hasPermissionForMenuItem.value = allowed;
   }
 );
 </script>

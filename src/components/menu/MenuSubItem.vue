@@ -1,6 +1,6 @@
 <template>
   <router-link
-    v-if="show"
+    v-if="(isPermitted && show)"
     :class="[
       'flex flex-column items-center cursor-pointer ml-9 mt-1 origin-top-center hover:text-accent-accent',
       { 'text-accent-accent': isActive },
@@ -41,6 +41,7 @@ const { checkIfRouteOrModal } = useMenuHelper();
 const menuAction = computed(() => checkIfRouteOrModal(props.subMenuItem));
 const isPermitted = ref<boolean>();
 
-isPermitted.value = can(Permission.Canread, props.subMenuItem.entityType);
+if (props.subMenuItem.requiresAuth === false) isPermitted.value = true;
+else isPermitted.value = can(Permission.Canread, props.subMenuItem.entityType);
 </script>
 <style></style>
