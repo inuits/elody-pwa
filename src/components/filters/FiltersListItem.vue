@@ -1,14 +1,32 @@
 <template>
   <div
     v-show="!filter.advancedFilter.hidden"
-    class="flex items-center justify-between px-6 py-4 border-t-2 border-neutral-light cursor-pointer select-none"
+    class="flex relative items-center justify-between px-6 py-4 border-t-2 border-neutral-light cursor-pointer select-none"
     :class="{ 'bg-accent-normal text-neutral-white': filter.isActive }"
     @click="isOpen = !isOpen"
   >
-    <span class="text-lg">
-      {{ t(filter.advancedFilter.label || "") }}
-    </span>
-    <unicon :name="icon" height="20" />
+    <div class="flex flex-col">
+      <span class="text-lg">
+        {{ t(filter.advancedFilter.label || "") }}
+      </span>
+    </div>
+    <div class="flex gap-x-2">
+      <base-tooltip position="top-end" :tooltip-offset="8">
+        <template #activator="{ on }">
+          <div v-on="on">
+            <unicon :name="Unicons.QuestionCircle.name" height="20" />
+          </div>
+        </template>
+        <template #default>
+          <span class="text-sm text-text-placeholder">
+            <div>
+              {{ t(filter.advancedFilter.tooltip || "") }}
+            </div>
+          </span>
+        </template>
+      </base-tooltip>
+      <unicon :name="icon" height="20" />
+    </div>
   </div>
   <div v-show="isOpen" class="flex flex-col gap-4 p-6 bg-neutral-light">
     <div class="flex gap-4">
@@ -57,6 +75,7 @@ import { computed, markRaw, ref, toRefs, watch } from "vue";
 import { DamsIcons } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
+import BaseTooltip from "@/components/base/BaseTooltip.vue";
 
 const props = defineProps<{
   filter: FilterListItem;
