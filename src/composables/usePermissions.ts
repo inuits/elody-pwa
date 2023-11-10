@@ -10,7 +10,6 @@ import {
   Permission,
   Entitytyping,
 } from "@/generated-types/queries";
-import { useQuery } from "@vue/apollo-composable";
 import { reactive, ref } from "vue";
 import { apolloClient } from "@/main";
 
@@ -74,10 +73,11 @@ const usePermissions = () => {
     try {
       if (permissionsMappings.value.size < 1)
         throw Error("The mappings are not fetched yet. Wait a bit.");
-      if (permission === Permission.Canread && entity != undefined)
-        return permissionsMappings
-          .value!.get(entity.toLowerCase())
-          ?.get(permission);
+      if (permission === Permission.Canread && entity != undefined) {
+        const entityMapping = permissionsMappings.value!.get(entity.toLowerCase());
+        if (entityMapping.size === 0) return true;
+        return entityMapping?.get(permission);
+      }
       if (permission === Permission.Cancreate)
         return permissionsMappings.value!.get("all_entities")!.get(permission);
       throw Error("There is something wrong with how this function is used");
