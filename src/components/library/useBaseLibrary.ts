@@ -120,6 +120,7 @@ export const useBaseLibrary = (
           result.data?.EntityTypeFilters as BaseEntity
         )?.advancedFilters;
         if (advancedFilters.value) {
+          setAdvancedFilters([]);
           Object.values(advancedFilters.value).forEach((advancedFilter) => {
             if (
               typeof advancedFilter !== "string" &&

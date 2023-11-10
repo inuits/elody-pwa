@@ -319,9 +319,8 @@ watch(
         entityType.value === Entitytyping.Mediafile
           ? SearchInputType.AdvancedInputMediaFilesType
           : SearchInputType.AdvancedInputType;
-      if (searchInputType === queryVariables.value.searchInputType)
-        getEntities();
-      else queryVariables.value.searchInputType = searchInputType;
+      queryVariables.value.searchInputType = searchInputType;
+      getEntities();
     }
   }
 );
