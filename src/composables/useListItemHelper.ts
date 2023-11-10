@@ -9,7 +9,7 @@ const useListItemHelper = () => {
       let thumbnailKey = undefined;
 
       const metadata: { [key: string]: any } = entity.teaserMetadata;
-      for (let key in metadata) {
+      for (const key in metadata) {
         if (metadata[key]?.__typename === "PanelThumbnail") {
           const customUrl: string = metadata[key].customUrl;
           if (customUrl) return customUrl;
