@@ -44,7 +44,6 @@ export const useBaseModal = () => {
     modalTab: ModalChoices | undefined = undefined,
     modalPosition: ModalPosition | undefined = undefined
   ): void => {
-    closeAllModals();
     const updatedModal = {
       state: ModalState.Show,
     };
@@ -85,12 +84,6 @@ export const useBaseModal = () => {
     } catch (e) {
       console.info(`Could not close ${modalType} modal`);
     }
-  };
-
-  const closeAllModals = (): void => {
-    Object.values(TypeModals).forEach((modalType: TypeModals) =>
-      closeModal(modalType)
-    );
   };
 
   const changeCloseConfirmation = (modalType: TypeModals, value: boolean) => {
