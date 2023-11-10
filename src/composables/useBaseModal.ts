@@ -44,6 +44,7 @@ export const useBaseModal = () => {
     modalTab: ModalChoices | undefined = undefined,
     modalPosition: ModalPosition | undefined = undefined
   ): void => {
+    closeAllModals()
     const updatedModal = {
       state: ModalState.Show,
     };
@@ -75,12 +76,20 @@ export const useBaseModal = () => {
   };
 
   const closeModal = (modalType: TypeModals): void => {
-    if (modals.value[modalType].closeConfirmation) {
+    try{
+      if (modals.value[modalType].closeConfirmation) {
       openModal(TypeModals.Confirm, undefined, "center");
     } else {
       modals.value[modalType].state = ModalState.Hide;
+    }} catch (e){
+      console.info(`Could not close ${modalType} modal`)
     }
+
   };
+
+  const closeAllModals = (): void => {
+    Object.values(TypeModals).forEach((modalType: TypeModals) => closeModal(modalType))
+  }
 
   const changeCloseConfirmation = (modalType: TypeModals, value: boolean) => {
     modals.value[modalType].closeConfirmation = value;
