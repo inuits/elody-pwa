@@ -2,6 +2,7 @@
 
 <script lang="ts" setup>
 import {
+  Collection,
   EditStatus,
   MutateEntityValuesDocument,
   TypeModals,
@@ -17,32 +18,26 @@ import {
   BulkOperationsContextEnum,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
-import { asString } from "@/helpers";
-import { computed, onMounted, onUnmounted, unref, watch } from "vue";
-import { useEditMode } from "@/composables/useEdit";
-import { useFormHelper, type EntityValues } from "@/composables/useFormHelper";
-import { useMutation } from "@vue/apollo-composable";
-import { useRoute, onBeforeRouteLeave } from "vue-router";
-import { useSubmitForm } from "vee-validate";
 import {
   useNotification,
   NotificationType,
 } from "@/components/base/BaseNotification.vue";
-import { useI18n } from "vue-i18n";
-import { useConfirmModal } from "@/composables/useConfirmModal";
+import { asString } from "@/helpers";
+import { computed, onMounted, onUnmounted, unref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useConfirmModal } from "@/composables/useConfirmModal";
+import { useEditMode } from "@/composables/useEdit";
+import { useFormHelper, type EntityValues } from "@/composables/useFormHelper";
+import { useI18n } from "vue-i18n";
+import { useMutation } from "@vue/apollo-composable";
+import { useRoute, onBeforeRouteLeave } from "vue-router";
+import { useSubmitForm } from "vee-validate";
 
 const props = defineProps<{
   intialValues: IntialValues;
   relationValues: RelationValues;
 }>();
 
-const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
-const { isEdit, addSaveCallback, refetchFn, disableEditMode } = useEditMode();
-const { createForm, editableFields } = useFormHelper();
-const { createNotification } = useNotification();
-const { t } = useI18n();
-const entityId = computed(() => asString(useRoute().params["id"]));
 const {
   initializeConfirmModal,
   performRoute,
@@ -50,7 +45,14 @@ const {
   deletePathToNavigate,
   pathToNavigate,
 } = useConfirmModal();
+const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
+const { isEdit, addSaveCallback, refetchFn, disableEditMode } = useEditMode();
+const { createForm, editableFields } = useFormHelper();
+const { createNotification } = useNotification();
 const { closeModal, openModal } = useBaseModal();
+const { t } = useI18n();
+const route = useRoute();
+const entityId = computed(() => asString(route.params["id"]));
 
 const { mutate } = useMutation<
   MutateEntityValuesMutation,
@@ -96,6 +98,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
   const result = await mutate({
     id: entityId.value,
     formInput: parseFormValuesToFormInput(form.values),
+    collection: route.meta.type as Collection
   });
 
   if (!result?.data?.mutateEntityValues) return;
