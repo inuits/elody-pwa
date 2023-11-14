@@ -1,6 +1,6 @@
 <template>
   <router-link
-    v-if="(isPermitted && show)"
+    v-if="isPermitted && show"
     :class="[
       'flex flex-column items-center cursor-pointer ml-9 mt-1 origin-top-center hover:text-accent-accent',
       { 'text-accent-accent': isActive },

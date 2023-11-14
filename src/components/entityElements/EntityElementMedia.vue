@@ -15,6 +15,7 @@
           @click="
             () => {
               setAcceptedTypes([Entitytyping.Mediafile]);
+              setRelationType(relationType);
               openModal(TypeModals.EntityPicker, undefined, 'right');
             }
           "
@@ -93,11 +94,12 @@ import { useI18n } from "vue-i18n";
 const props = defineProps<{
   element: MediaFileElement;
   identifiers: string[];
+  relationType: string;
 }>();
 
 const { t } = useI18n();
 const { mediafileSelectionState } = useEntityMediafileSelector();
-const { setAcceptedTypes } = useEntityPickerModal();
+const { setAcceptedTypes, setRelationType } = useEntityPickerModal();
 const { getEntityUuid } = useEntitySingle();
 const { openModal } = useBaseModal();
 const { isEdit } = useEditMode();

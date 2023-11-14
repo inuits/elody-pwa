@@ -24,6 +24,7 @@
         v-if="element.__typename === 'MediaFileElement'"
         :element="element"
         :identifiers="identifiers"
+        :relationType="element.relationType"
       />
       <entity-element-window
         v-if="element.__typename === 'WindowElement'"

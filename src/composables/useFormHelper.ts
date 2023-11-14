@@ -145,7 +145,6 @@ const useFormHelper = () => {
       newRelations.push({
         key: item.id,
         type: getRelationType(),
-        value: item.teaserMetadata?.find((data) => data.key === "name")?.value,
         editStatus: EditStatus.New,
         teaserMetadata: item.teaserMetadata?.map((metadata) => {
           return {
