@@ -10,8 +10,9 @@ import {
   Permission,
   Entitytyping,
 } from "@/generated-types/queries";
-import { reactive, ref } from "vue";
+import { reactive, ref, watch } from "vue";
 import { apolloClient } from "@/main";
+import EventBus from "../EventBus";
 
 const ignorePermissions = ref<boolean>(false);
 const setIgnorePermissions = (value: boolean) => {
@@ -23,8 +24,9 @@ const permissionsMappings = ref<Map<string, Map<Permission, boolean>>>(
 );
 const setPermissionsMappings = () => {
   if (ignorePermissions.value) return;
-  permissionsMappings.value = new Map<string, Map<Permission, boolean>>();
-  for (const entity in Entitytyping) {
+  permissionsMappings.value.clear();
+  const { numberOfEntities } = usePermissions();
+  Object.values(Entitytyping).forEach((entity, index) => {
     const permissions = new Map<Permission, boolean>();
     try {
       apolloClient
@@ -39,14 +41,17 @@ const setPermissionsMappings = () => {
             Permission.Canread,
             result.data?.PermissionMappingPerEntityType
           );
+          permissionsMappings.value.set(entity, permissions);
+          if (numberOfEntities - 1 <= index) {
+            EventBus.emit("permissions_updated", permissionsMappings.value);
+          }
         });
-      permissionsMappings.value.set(entity.toLowerCase(), permissions);
     } catch (e) {
       console.log(
         `Error in usePermissions set function for post entities/filter: ${e}`
       );
     }
-  }
+  });
   try {
     apolloClient
       .query<GetPermissionMappingCreateQuery>({
@@ -59,6 +64,7 @@ const setPermissionsMappings = () => {
           result.data?.PermissionMappingCreate
         );
         permissionsMappings.value.set("all_entities", permissions);
+        EventBus.emit("permissions_updated", permissionsMappings.value);
       });
   } catch (e) {
     console.log(
@@ -68,21 +74,21 @@ const setPermissionsMappings = () => {
 };
 
 const usePermissions = () => {
+  const numberOfEntities = Object.keys(Entitytyping).length;
   const can = (permission: Permission, entity: Entitytyping | undefined) => {
     if (ignorePermissions.value) return true;
     try {
       if (permissionsMappings.value.size < 1)
         throw Error("The mappings are not fetched yet. Wait a bit.");
       if (permission === Permission.Canread && entity != undefined) {
-        const entityMapping = permissionsMappings.value!.get(entity.toLowerCase());
-        if (entityMapping.size === 0) return true;
+        const entityMapping = permissionsMappings.value!.get(entity);
         return entityMapping?.get(permission);
       }
       if (permission === Permission.Cancreate)
         return permissionsMappings.value!.get("all_entities")!.get(permission);
       throw Error("There is something wrong with how this function is used");
     } catch (e) {
-      console.log(e);
+      // console.log(e);
     }
   };
 
@@ -113,17 +119,14 @@ const usePermissions = () => {
         `Error in usePermissions fetch function for update & delete entities/id: ${e}`
       );
     }
+    EventBus.emit("permissions_updated", permissionsMappings.value);
   };
 
   return {
     can,
     fetchUpdateAndDeletePermission,
+    numberOfEntities,
   };
 };
 
-export {
-  usePermissions,
-  setPermissionsMappings,
-  setIgnorePermissions,
-  permissionsMappings,
-};
+export { usePermissions, setPermissionsMappings, setIgnorePermissions };

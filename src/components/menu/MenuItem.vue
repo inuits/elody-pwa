@@ -59,16 +59,14 @@ import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
 import CustomIcon from "../CustomIcon.vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import {
-  usePermissions,
-  permissionsMappings,
-} from "@/composables/usePermissions";
+import { usePermissions } from "@/composables/usePermissions";
+import EventBus from "../../EventBus";
 
 const { checkIfRouteOrModal, setSelectedMenuItem, selectedMenuItem } =
   useMenuHelper();
 const { t } = useI18n();
 const router = useRouter();
-const { can } = usePermissions();
+const { can, numberOfEntities } = usePermissions();
 
 const auth = useAuth();
 const menuSubitem = ref<Array<MenuItem>>([]);
@@ -100,24 +98,21 @@ const handleSubMenu = () => {
 };
 handleSubMenu();
 
-watch(
-  () => permissionsMappings.value.size,
-  () => {
-    if (props.menuitem.requiresAuth === false) return;
-    if ((props.menuitem.typeLink.modal?.typeModal as string) === "Create") {
-      hasPermissionForMenuItem.value = can(Permission.Cancreate, undefined);
-      return;
-    }
-    if (menuSubitem.value.length == 0) return;
-    let allowed = false;
-    menuSubitem.value.forEach((item) => {
-      if (item.requiresAuth === false) allowed = true;
-      if (item.entityType == undefined) allowed = true;
-      allowed = allowed || can(Permission.Canread, item.entityType);
-    });
-    hasPermissionForMenuItem.value = allowed;
+EventBus.on("permissions_updated", () => {
+  if (props.menuitem.requiresAuth === false) return;
+  if ((props.menuitem.typeLink.modal?.typeModal as string) === "Create") {
+    hasPermissionForMenuItem.value = can(Permission.Cancreate, undefined);
+    return;
   }
-);
+  if (menuSubitem.value.length == 0) return;
+  let allowed = false;
+  menuSubitem.value.forEach((item) => {
+    if (item.requiresAuth === false) allowed = true;
+    if (item.entityType == undefined) allowed = true;
+    allowed = allowed || can(Permission.Canread, item.entityType);
+  });
+  hasPermissionForMenuItem.value = allowed;
+});
 </script>
 
 <style></style>
