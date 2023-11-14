@@ -98,7 +98,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
   const result = await mutate({
     id: entityId.value,
     formInput: parseFormValuesToFormInput(form.values),
-    collection: route.meta.type as Collection
+    collection: route.meta.type as Collection,
   });
 
   if (!result?.data?.mutateEntityValues) return;
@@ -155,7 +155,7 @@ watch(isEdit, () => {
 // );
 
 onBeforeRouteLeave((to, from, next) => {
-  if (!isEdit.value) return next();
+  if (!isEdit.value || !form.meta.value.dirty) return next();
   if (pathToNavigate.value != undefined) {
     deletePathToNavigate();
     return next();
