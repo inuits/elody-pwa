@@ -55,8 +55,8 @@ import { toRefs, watch } from "vue";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 
 const props = defineProps<{
-  mediafiles: MediaFileEntity[];
-  loading: boolean;
+  mediafiles?: MediaFileEntity[];
+  loading?: boolean;
 }>();
 
 const { mediafiles } = toRefs(props);
@@ -65,7 +65,7 @@ const { mediafileSelectionState, getValueOfMediafile } =
 
 watch([() => props.loading, mediafiles], () => {
   if (props.loading) return;
-  mediafileSelectionState.mediafiles = mediafiles.value;
-  mediafileSelectionState.selectedMediafile = mediafiles.value[0];
+  mediafileSelectionState.mediafiles = mediafiles?.value || [];
+  mediafileSelectionState.selectedMediafile = mediafiles?.value?.[0];
 });
 </script>

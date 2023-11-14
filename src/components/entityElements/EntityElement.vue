@@ -26,6 +26,10 @@
         :identifiers="identifiers"
         :relationType="element.relationType"
       />
+      <entity-element-single-media
+        v-if="element.__typename === 'SingleMediaFileElement'"
+        :element="element"
+      />
       <entity-element-window
         v-if="element.__typename === 'WindowElement'"
         :element="element"
@@ -47,13 +51,15 @@
     </div>
   </div>
 </template>
+
 <script lang="ts" setup>
-import { computed } from "vue";
-import EntityElementList from "@/components/entityElements/EntityElementList.vue";
-import EntityElementMedia from "@/components/entityElements/EntityElementMedia.vue";
-import EntityElementWindow from "@/components/entityElements/EntityElementWindow.vue";
 import EntityElementGraph from "@/components/entityElements/EntityElementGraph.vue";
+import EntityElementList from "@/components/entityElements/EntityElementList.vue";
 import EntityElementManifestViewer from "@/components/entityElements/EntityElementManifestViewer.vue";
+import EntityElementMedia from "@/components/entityElements/EntityElementMedia.vue";
+import EntityElementSingleMedia from "@/components/entityElements/EntityElementSingleMedia.vue";
+import EntityElementWindow from "@/components/entityElements/EntityElementWindow.vue";
+import { computed } from "vue";
 import { useEditMode } from "@/composables/useEdit";
 
 import type {
@@ -64,18 +70,20 @@ import type {
   ManifestViewerElement,
   MarkdownViewerElement,
   MediaFileElement,
+  SingleMediaFileElement,
   WindowElement,
 } from "@/generated-types/queries";
 import { getEntityIdFromRoute } from "@/helpers";
 import EntityElementMarkdownViewer from "@/components/entityElements/EntityElementMarkdownViewer.vue";
 
 export type Elements =
-  | WindowElement
-  | MediaFileElement
   | EntityListElement
   | GraphElement
   | ManifestViewerElement
-  | MarkdownViewerElement;
+  | MarkdownViewerElement
+  | MediaFileElement
+  | SingleMediaFileElement
+  | WindowElement;
 
 const props = defineProps<{
   elements: EntityViewElements;

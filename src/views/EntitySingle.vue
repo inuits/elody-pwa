@@ -33,6 +33,7 @@ import {
   type RelationValues,
   type GetEntityByIdQuery,
   type BaseEntity,
+  type MediaFileEntity,
 } from "@/generated-types/queries";
 
 import EntityColumn from "@/components/EntityColumn.vue";
@@ -47,6 +48,7 @@ import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { usePermissions } from "@/composables/usePermissions";
+import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 
 const config: any = inject("config");
 const router = useRouter();
@@ -55,9 +57,6 @@ const auth = useAuth();
 const { locale, t } = useI18n();
 const { fetchUpdateAndDeletePermission } = usePermissions();
 
-const id = asString(route.params["id"]);
-const identifiers = ref<string[]>([]);
-const loading = ref<boolean>(true);
 const {
   showEditToggle,
   disableEditMode,
@@ -67,6 +66,10 @@ const {
 } = useEditMode();
 const { setCurrentRouteTitle, addVisitedRoute, currentRouteTitle } =
   useBreadcrumbs(config, t);
+const { mediafileSelectionState } = useEntityMediafileSelector();
+const id = asString(route.params["id"]);
+const identifiers = ref<string[]>([]);
+const loading = ref<boolean>(true);
 const { getEditableMetadataKeys } = useFormHelper();
 
 const queryVariables = reactive<GetEntityByIdQueryVariables>({
@@ -116,6 +119,11 @@ watch(
 
     if (typeof columnList.value !== "string") {
       getEditableMetadataKeys(columnList.value, route.params.id as string);
+    }
+
+    if (entity.type.toLowerCase() === "mediafile") {
+      mediafileSelectionState.mediafiles = [entity as MediaFileEntity];
+      mediafileSelectionState.selectedMediafile = entity as MediaFileEntity;
     }
 
     const mappings = fetchUpdateAndDeletePermission(entity.id);
