@@ -22,16 +22,21 @@
       />
     </div>
     <div v-else>
-      <BaseInputCheckbox
-        v-for="filterOption in filterOptions"
-        v-model="filterOption.isSelected"
-        :key="filterOption.option.value"
-        :class="{ 'mb-2': filterOption.isSelected }"
-        :label="filterOption.option.label"
-        :item="{ id: filterOption.option.value }"
-        :bulk-operations-context="BulkOperationsContextEnum.FilterOptions"
-        input-style="accentNormal"
-      />
+      <div v-if="showSpinner" class="flex items-center justify-center">
+        <spinner-loader/>
+      </div>
+      <div v-else>
+        <BaseInputCheckbox
+            v-for="filterOption in filterOptions"
+            v-model="filterOption.isSelected"
+            :key="filterOption.option.value"
+            :class="{ 'mb-2': filterOption.isSelected }"
+            :label="filterOption.option.label"
+            :item="{ id: filterOption.option.value }"
+            :bulk-operations-context="BulkOperationsContextEnum.FilterOptions"
+            input-style="accentNormal"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -52,6 +57,7 @@ import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDa
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import { computed, defineEmits, onMounted, reactive, ref, watch } from "vue";
 import { useQuery } from "@vue/apollo-composable";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
 
 const props = defineProps<{
   filter: AdvancedFilter;
@@ -66,6 +72,7 @@ const emit = defineEmits<{
 }>();
 
 const input = ref<string | number | DropdownOption[]>();
+const showSpinner = ref<boolean>(false);
 
 const refetchFilterOptionsEnabled = ref<boolean>(false);
 const filterOptionsQueryVariables = ref<GetFilterOptionsQueryVariables>();
@@ -90,6 +97,7 @@ onFilterOptionsResult((result) => {
       "filterOptions",
       filterOptions.map((filterOption) => filterOption.option.value)
     );
+    showSpinner.value = false;
   }
 });
 
@@ -167,6 +175,7 @@ onMounted(() => {
     props.filter.type === AdvancedFilterTypes.Selection &&
     props.filter.advancedFilterInputForRetrievingOptions
   ) {
+    showSpinner.value = true;
     filterOptionsQueryVariables.value = {
       input: {
         type: props.filter.advancedFilterInputForRetrievingOptions.type,
