@@ -13,6 +13,8 @@ const useListItemHelper = () => {
         if (metadata[key]?.__typename === "PanelThumbnail") {
           const customUrl: string = metadata[key].customUrl;
           if (customUrl) return customUrl;
+          const filename: string = metadata[key].filename
+          if (filename) return filename
           thumbnailKey = key;
         }
       }

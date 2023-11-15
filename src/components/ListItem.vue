@@ -33,6 +33,12 @@
         @error="setNoImage()"
       />
     </div>
+    <unicon
+        v-else
+        :name="thumbIcon"
+        class="h-10 w-10 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
+    />
+
 
     <div v-if="!loading" class="flex items-center w-full">
       <div
