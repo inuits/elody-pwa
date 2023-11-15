@@ -190,6 +190,7 @@ export const useBaseLibrary = (
   };
 
   const setAdvancedFilters = (filters: AdvancedFilterInput[]): void => {
+    __setEntitiesLoading(true);
     if (filters === queryVariables.value.advancedFilterInputs && !isSaved.value)
       return;
 
@@ -272,6 +273,7 @@ export const useBaseLibrary = (
         const entities = result.data.Entities;
         setEntities(entities?.results as Entity[]);
         totalEntityCount.value = entities?.count || 0;
+        __setEntitiesLoading(false);
       });
   };
 
