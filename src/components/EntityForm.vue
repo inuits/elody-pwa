@@ -144,15 +144,15 @@ watch(isEdit, () => {
   //   });
 });
 
-// watch(
-//   () => props.intialValues,
-//   () => {
-//     recreateForm(entityId.value, {
-//       intialValues: props.intialValues,
-//       relationValues: props.relationValues,
-//     });
-//   }
-// );
+watch(
+  () => props.intialValues,
+  () => {
+    setValues({
+      intialValues: props.intialValues,
+      relationValues: props.relationValues,
+    });
+  }
+);
 
 onBeforeRouteLeave((to, from, next) => {
   if (!isEdit.value || !form.meta.value.dirty) return next();
