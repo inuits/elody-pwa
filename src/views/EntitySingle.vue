@@ -147,7 +147,7 @@ watch(
     );
 
     setCurrentRouteTitle(
-      entity.intialValues?.title || entity.intialValues?.name
+      entity.intialValues?.title || entity.intialValues?.name || entity.id
     );
     addVisitedRoute({ id: entity.id, routeName: currentRouteTitle.value });
 
