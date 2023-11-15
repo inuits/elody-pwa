@@ -23,7 +23,7 @@ module.exports = {
         light: "#355BA9",
         body: "#003A52",
         subtitle: "#FFFFFF",
-        placeholder: "#9CA3AF"
+        placeholder: "#9CA3AF",
       },
       background: {
         frosted: "rgba(220, 244, 249, 0.25)",
@@ -66,8 +66,8 @@ module.exports = {
         400: "#0052CC",
         500: "#0747A6",
       },
-      cyan:{
-        600:"#22D3EE",
+      cyan: {
+        600: "#22D3EE",
       },
       red: {
         lightest: "#F8F2F2",
@@ -85,11 +85,11 @@ module.exports = {
     },
     extend: {
       spacing: {
-        '76': '305px',
-      }
+        76: "305px",
+      },
     },
   },
-  safelist: ['bg-red-default'],
+  safelist: ["bg-red-default"],
   variants: {
     extend: {
       opacity: ["disabled"],
