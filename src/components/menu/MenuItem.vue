@@ -74,7 +74,7 @@ const menuAction = computed(() => checkIfRouteOrModal(props.menuitem));
 const isLink = computed(
   () => menuAction.value?.menuItemType === MenuItemType.link
 );
-const hasPermissionForMenuItem = ref<boolean>(true);
+const hasPermissionForMenuItem = ref<boolean>();
 
 const props = defineProps<{
   menuitem: MenuItem;
@@ -99,16 +99,16 @@ const handleSubMenu = () => {
 handleSubMenu();
 
 EventBus.on("permissions_updated", () => {
-  if (props.menuitem.requiresAuth === false) return;
-  if ((props.menuitem.typeLink.modal?.typeModal as string) === "Create") {
-    hasPermissionForMenuItem.value = can(Permission.Cancreate, undefined);
-    return;
-  }
-  if (menuSubitem.value.length == 0) return;
   let allowed = false;
+  if (props.menuitem.requiresAuth === false)
+    allowed = true;
+  const typeModal = props.menuitem.typeLink.modal?.typeModal as string;
+  if (typeModal === "Create" || typeModal ===  "Upload")
+    allowed = can(Permission.Cancreate, undefined);
+  if (props.menuitem.entityType)
+    allowed = can(Permission.Canread, props.menuitem.entityType);
   menuSubitem.value.forEach((item) => {
     if (item.requiresAuth === false) allowed = true;
-    if (item.entityType == undefined) allowed = true;
     allowed = allowed || can(Permission.Canread, item.entityType);
   });
   hasPermissionForMenuItem.value = allowed;
