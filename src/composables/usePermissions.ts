@@ -129,4 +129,4 @@ const usePermissions = () => {
   };
 };
 
-export { usePermissions, setPermissionsMappings, setIgnorePermissions };
+export { usePermissions, setPermissionsMappings, setIgnorePermissions, ignorePermissions };

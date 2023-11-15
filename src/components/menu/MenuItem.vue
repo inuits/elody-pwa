@@ -59,14 +59,14 @@ import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
 import CustomIcon from "../CustomIcon.vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { usePermissions } from "@/composables/usePermissions";
+import { usePermissions, ignorePermissions } from "@/composables/usePermissions";
 import EventBus from "../../EventBus";
 
 const { checkIfRouteOrModal, setSelectedMenuItem, selectedMenuItem } =
   useMenuHelper();
 const { t } = useI18n();
 const router = useRouter();
-const { can, numberOfEntities } = usePermissions();
+const { can } = usePermissions();
 
 const auth = useAuth();
 const menuSubitem = ref<Array<MenuItem>>([]);
@@ -74,7 +74,7 @@ const menuAction = computed(() => checkIfRouteOrModal(props.menuitem));
 const isLink = computed(
   () => menuAction.value?.menuItemType === MenuItemType.link
 );
-const hasPermissionForMenuItem = ref<boolean>();
+const hasPermissionForMenuItem = ref<boolean>(ignorePermissions);
 
 const props = defineProps<{
   menuitem: MenuItem;
