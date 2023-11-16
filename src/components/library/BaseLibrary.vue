@@ -220,9 +220,10 @@ const {
   apolloClient as ApolloClient<any>,
   props.parentEntityIdentifiers.length > 0
 );
+const { getUploadStatus, setUploadStatus, setEntityIdForLinkedUpload } =
+  useUploadModalDropzone();
 const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
-const { getUploadStatus, setUploadStatus } = useUploadModalDropzone();
 const { closeModal } = useBaseModal();
 
 const displayList = ref<boolean>(false);
@@ -307,6 +308,9 @@ watch(getUploadStatus, (status) => {
 watch(
   () => route.path,
   () => {
+    if (props.parentEntityIdentifiers.length === 0)
+      setEntityIdForLinkedUpload(undefined);
+
     if (
       !props.predefinedEntities &&
       router.currentRoute.value.name !== "SingleEntity"

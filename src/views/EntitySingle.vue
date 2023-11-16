@@ -35,20 +35,20 @@ import {
   type BaseEntity,
   type MediaFileEntity,
 } from "@/generated-types/queries";
-
 import EntityColumn from "@/components/EntityColumn.vue";
 import EntityForm from "@/components/EntityForm.vue";
 import useEditMode from "@/composables/useEdit";
+import useUploadModalDropzone from "@/composables/useUploadModalDropzone";
 import { asString } from "@/helpers";
 import { reactive, ref, watch, inject } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
-import { useQuery } from "@vue/apollo-composable";
-import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
+import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { usePermissions } from "@/composables/usePermissions";
-import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
+import { useQuery } from "@vue/apollo-composable";
+import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 
 const config: any = inject("config");
 const router = useRouter();
@@ -56,6 +56,7 @@ const route = useRoute();
 const auth = useAuth();
 const { locale, t } = useI18n();
 const { fetchUpdateAndDeletePermission } = usePermissions();
+const { setEntityIdForLinkedUpload } = useUploadModalDropzone();
 
 const {
   showEditToggle,
@@ -121,6 +122,7 @@ watch(
       getEditableMetadataKeys(columnList.value, route.params.id as string);
     }
 
+    setEntityIdForLinkedUpload(entity.id);
     if (entity.type.toLowerCase() === "mediafile") {
       mediafileSelectionState.mediafiles = [entity as MediaFileEntity];
       mediafileSelectionState.selectedMediafile = entity as MediaFileEntity;

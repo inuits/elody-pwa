@@ -23,18 +23,18 @@
     </div>
     <div v-else>
       <div v-if="showSpinner" class="flex items-center justify-center">
-        <spinner-loader/>
+        <spinner-loader />
       </div>
       <div v-else>
         <BaseInputCheckbox
-            v-for="filterOption in filterOptions"
-            v-model="filterOption.isSelected"
-            :key="filterOption.option.value"
-            :class="{ 'mb-2': filterOption.isSelected }"
-            :label="filterOption.option.label"
-            :item="{ id: filterOption.option.value }"
-            :bulk-operations-context="BulkOperationsContextEnum.FilterOptions"
-            input-style="accentNormal"
+          v-for="filterOption in filterOptions"
+          v-model="filterOption.isSelected"
+          :key="filterOption.option.value"
+          :class="{ 'mb-2': filterOption.isSelected }"
+          :label="filterOption.option.label"
+          :item="{ id: filterOption.option.value }"
+          :bulk-operations-context="BulkOperationsContextEnum.FilterOptions"
+          input-style="accentNormal"
         />
       </div>
     </div>

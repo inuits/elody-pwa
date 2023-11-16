@@ -59,7 +59,10 @@ import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
 import CustomIcon from "../CustomIcon.vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { usePermissions, ignorePermissions } from "@/composables/usePermissions";
+import {
+  usePermissions,
+  ignorePermissions,
+} from "@/composables/usePermissions";
 import EventBus from "../../EventBus";
 
 const { checkIfRouteOrModal, setSelectedMenuItem, selectedMenuItem } =
@@ -100,10 +103,9 @@ handleSubMenu();
 
 EventBus.on("permissions_updated", () => {
   let allowed = false;
-  if (props.menuitem.requiresAuth === false)
-    allowed = true;
+  if (props.menuitem.requiresAuth === false) allowed = true;
   const typeModal = props.menuitem.typeLink.modal?.typeModal as string;
-  if (typeModal === "Create" || typeModal ===  "Upload")
+  if (typeModal === "Create" || typeModal === "Upload")
     allowed = can(Permission.Cancreate, undefined);
   if (props.menuitem.entityType)
     allowed = can(Permission.Canread, props.menuitem.entityType);
