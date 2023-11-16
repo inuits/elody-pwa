@@ -86,7 +86,8 @@ const {
 } = useDropzoneHelper();
 const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
-const { setUploadStatus } = useUploadModalDropzone();
+const { setUploadStatus, getEntityIdForLinkedUpload } =
+  useUploadModalDropzone();
 const { closeModal, getModalInfo } = useBaseModal();
 const config = inject("config") as any;
 
@@ -104,7 +105,7 @@ const selectedImportMethod = ref<DropdownOption>();
 const filesInDropzone = ref<DropzoneFile[]>([]);
 const isDisabledUploadButton = ref<boolean>(true);
 const modifyMetadata = ref<boolean>(false);
-clearDropzoneCounters()
+clearDropzoneCounters();
 const onUpdateFilesInDropzone = (files: DropzoneFile[]) => {
   filesInDropzone.value = files;
   isDisabledUploadButton.value = files.length === 0;
@@ -134,7 +135,10 @@ const onUpdateFilesInDropzone = (files: DropzoneFile[]) => {
 const uploadFiles = async () => {
   isUploading.value = true;
   setSelectedMediafiles(filesInDropzone.value);
-  const uploadRequestData = selectedImportMethod.value ? await getUploadRequestData() : 'no-data';
+  const uploadRequestData = selectedImportMethod.value
+    ? await getUploadRequestData()
+    : "no-data";
+  console.log(uploadRequestData);
   await callUploadEndpoint(uploadRequestData);
 };
 
@@ -149,14 +153,11 @@ const getUploadRequestData = async (): Promise<UploadRequestData> => {
       type: csvToBeParsedToEntityBodies.type,
     });
 
-  const response = await fetch(
-    `/api/upload/request-data`,
-    {
-      headers: { "Content-Type": "text/csv" },
-      method: "POST",
-      body: blob,
-    }
-  );
+  const response = await fetch(`/api/upload/request-data`, {
+    headers: { "Content-Type": "text/csv" },
+    method: "POST",
+    body: blob,
+  });
 
   return JSON.parse(await response.text());
 };
@@ -169,65 +170,87 @@ const linkUploadRequestDataWithFile = (
   if (uploadRequestData.body.length === 0) return undefined;
 
   const urls = uploadRequestData.body.find((url: string) =>
-   url.search(file.name)
+    url.search(file.name)
   );
+  console.log(urls);
   if (!urls) return undefined;
 
   return { body: urls, uri: uploadRequestData.uri };
 };
 
-const callUploadEndpoint = async (uploadRequestData: UploadRequestData | 'no-data') => {
+const callUploadEndpoint = async (
+  uploadRequestData: UploadRequestData | "no-data"
+) => {
   const filesToBeUploaded = filesInDropzone.value.filter(
     (file) => file.type !== "text/csv"
   );
   for (const file of filesToBeUploaded) {
-    const body = uploadRequestData === 'no-data' ? undefined : linkUploadRequestDataWithFile(uploadRequestData, file);
+    const body =
+      uploadRequestData === "no-data"
+        ? undefined
+        : linkUploadRequestDataWithFile(uploadRequestData, file);
 
     const formUploadData = new FormData();
     formUploadData.append("file", file);
 
-    let urlToUpload: string | 'no-url' | 'get-ticket-single-upload-failed' = 'no-url';
+    let urlToUpload: string | "no-url" | "get-ticket-single-upload-failed" =
+      "no-url";
     if (body) {
       urlToUpload = body.body;
     } else {
-      const getUrlResponseCall = await fetch(`/api/upload?filename=${file.name}`, {
-        headers: {"Content-Type": "application/json"},
-        method: "POST",
-      })
-      const getUrlResponse = await getUrlResponseCall.json()
+      let extraQueryParameters = "";
+      const entityId = getEntityIdForLinkedUpload();
+      if (entityId) extraQueryParameters = `&entityIdUri=/entities/${entityId}`;
 
-      urlToUpload = getUrlResponse.url ? getUrlResponse.url : 'get-ticket-single-upload-failed'
+      console.log(extraQueryParameters);
+      const getUrlResponseCall = await fetch(
+        `/api/upload?filename=${file.name}${extraQueryParameters}`,
+        {
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+        }
+      );
+      const getUrlResponse = await getUrlResponseCall.json();
+
+      urlToUpload = getUrlResponse.url
+        ? getUrlResponse.url
+        : "get-ticket-single-upload-failed";
     }
 
-    if (urlToUpload != 'no-url' && urlToUpload != 'get-ticket-single-upload-failed') {
-      await fetch(urlToUpload.replace(
+    if (
+      urlToUpload != "no-url" &&
+      urlToUpload != "get-ticket-single-upload-failed"
+    ) {
+      await fetch(
+        urlToUpload.replace(
           "http://storage-api:5000/",
           config.api.storageApiUrl
-      ), {
-        method: "POST",
-        body: formUploadData,
-      }).then((response: Response) => {
-        if (!response.ok) throw response;
+        ),
+        {
+          method: "POST",
+          body: formUploadData,
+        }
+      )
+        .then((response: Response) => {
+          if (!response.ok) throw response;
 
-        increaseSuccessCounter();
-        dropzone.value?.removeFile(file);
-        onUpdateFilesInDropzone(dropzone.value?.files ?? []);
+          increaseSuccessCounter();
+          dropzone.value?.removeFile(file);
+          onUpdateFilesInDropzone(dropzone.value?.files ?? []);
 
-        if (
-            !dropzone.value?.files.find((file) => file.type !== "text/csv")
-        ) {
-          createNotificationOverwrite(
+          if (!dropzone.value?.files.find((file) => file.type !== "text/csv")) {
+            createNotificationOverwrite(
               NotificationType.default,
               t("dropzone.successNotification.title"),
               t("dropzone.successNotification.description")
-          );
-          setUploadStatus("success");
-          closeModal(TypeModals.Upload);
-        }
-      })
-          .catch(async (response: Response) =>
-              exceptionHandler(await response.text())
-          );
+            );
+            setUploadStatus("success");
+            closeModal(TypeModals.Upload);
+          }
+        })
+        .catch(async (response: Response) =>
+          exceptionHandler(await response.text())
+        );
     }
   }
 };
