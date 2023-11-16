@@ -18,7 +18,7 @@
     <div
       ref="spaceForPage"
       :class="[
-        'h-screen-86 flex justify-center mt-10 w-full overflow-scroll relative',
+        'h-[55vh] flex justify-center mt-10 w-full overflow-scroll relative',
         decentralizeFromTop ? 'mt-10' : 'items-center',
         { 'opacity-0': loading },
       ]"
