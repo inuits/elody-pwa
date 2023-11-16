@@ -80,7 +80,6 @@ const hasContent = computed(() => {
 
 const handleMouseOver = () => {
   hover.value = true;
-  if (slots.default) console.log(hasSlotContent(slots.default));
 };
 
 const handleMouseLeave = () => {

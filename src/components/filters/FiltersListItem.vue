@@ -10,7 +10,7 @@
         {{ t(filter.advancedFilter.label || "") }}
       </span>
     </div>
-    <div class="flex gap-x-2">
+    <div v-if="filter.advancedFilter.tooltip" class="flex gap-x-2">
       <base-tooltip position="top-end" :tooltip-offset="8">
         <template #activator="{ on }">
           <div v-on="on">
@@ -20,7 +20,7 @@
         <template #default>
           <span class="text-sm text-text-placeholder">
             <div>
-              {{ t(filter.advancedFilter.tooltip || "") }}
+              {{ t(`tooltip.advancedFilterTypes.${props.filter.advancedFilter.type}`) }}
             </div>
           </span>
         </template>
