@@ -68,8 +68,9 @@ export const stringIsUrl = (value: unknown): Boolean => {
   } else {
     const stringValue = value as string;
     try {
-      new URL(stringValue);
+      const url = new URL(stringValue);
       isUrl = true;
+      if (url.protocol.startsWith("foto:")) isUrl = false;
     } catch {
       isUrl = false;
     }
