@@ -5,7 +5,7 @@ import {
 } from "../components/base/BaseNotification.vue";
 import { useRouter } from "vue-router";
 import { auth } from "@/main";
-import type {GraphQLError} from "graphql/error";
+import type { GraphQLError } from "graphql/error";
 
 const baseGraphQLError = {
   displayTime: 10,
@@ -53,11 +53,12 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
   };
 
   const getStatusCodeFromError = (error: GraphQLError): number => {
-    if (error.extensions?.statusCode) return error.extensions.statusCode as number
-    if (error.extensions?.status) return error.extensions.status as number
-    if (error.message) return parseInt(error.message.split(":")[0])
-  return 0
-  }
+    if (error.extensions?.statusCode)
+      return error.extensions.statusCode as number;
+    if (error.extensions?.status) return error.extensions.status as number;
+    if (error.message) return parseInt(error.message.split(":")[0]);
+    return 0;
+  };
 
   const logFormattedErrors = () => {
     const gqlErrors = _errorResponse.graphQLErrors;
@@ -77,10 +78,8 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
           );
           console.log(`Message:`, error.message);
           console.log(`---`);
-          const statusCode = getStatusCodeFromError(error)
-          handleErrorByCode(
-            statusCode
-          );
+          const statusCode = getStatusCodeFromError(error);
+          handleErrorByCode(statusCode);
         }
       }
     }

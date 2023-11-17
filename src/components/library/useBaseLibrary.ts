@@ -213,8 +213,9 @@ export const useBaseLibrary = (
     return formatted;
   };
 
-  const getEntities = async (): Promise<void> => {
+  const getEntities = async (force: boolean = false): Promise<void> => {
     if (
+      !force &&
       libraryBarInitializationStatus.value === "initialized" &&
       filtersBaseInitializationStatus.value === "initialized"
     )

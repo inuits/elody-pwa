@@ -13,7 +13,7 @@
       <div v-show="!isCollapsed">
         <div v-if="panelType === PanelType.Relation && relationArray.length">
           <div class="pl-2 rounded-sm bg-accent-light">
-            <p class="text-sm text-text-body">{{ t('entity.belongs-to') }}</p>
+            <p class="text-sm text-text-body">{{ t("entity.belongs-to") }}</p>
             <div class="rounded-sm border-solid border-neutral-30 border-2">
               <div
                 v-for="(relation, index) in relationArray"
