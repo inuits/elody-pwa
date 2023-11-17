@@ -170,7 +170,7 @@ const linkUploadRequestDataWithFile = (
   if (uploadRequestData.body.length === 0) return undefined;
 
   const urls = uploadRequestData.body.find((url: string) =>
-    url.search(file.name)
+    url.includes(file.name)
   );
   console.log(urls);
   if (!urls) return undefined;
@@ -196,6 +196,7 @@ const callUploadEndpoint = async (
     let urlToUpload: string | "no-url" | "get-ticket-single-upload-failed" =
       "no-url";
     if (body) {
+      console.log(body)
       urlToUpload = body.body;
     } else {
       let extraQueryParameters = "";
