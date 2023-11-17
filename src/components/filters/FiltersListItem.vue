@@ -20,7 +20,11 @@
         <template #default>
           <span class="text-sm text-text-placeholder">
             <div>
-              {{ t(`tooltip.advancedFilterTypes.${props.filter.advancedFilter.type}`) }}
+              {{
+                t(
+                  `tooltip.advancedFilterTypes.${props.filter.advancedFilter.type}`
+                )
+              }}
             </div>
           </span>
         </template>

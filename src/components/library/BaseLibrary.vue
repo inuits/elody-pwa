@@ -301,7 +301,7 @@ onMounted(() => {
 
 watch(getUploadStatus, (status) => {
   if (status === "success") {
-    getEntities();
+    getEntities(true);
     setUploadStatus("no-upload");
   }
 });
