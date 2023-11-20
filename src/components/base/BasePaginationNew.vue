@@ -18,7 +18,7 @@
     </div>
 
     <span>{{ $t("pagination.page") }}</span>
-    <div class="w-11">
+    <div class="w-14">
       <BaseInputTextNumberDatetime
         class="text-center"
         v-model="currentPage"
