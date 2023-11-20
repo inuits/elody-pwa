@@ -25,6 +25,26 @@
           {{ t("manifest-viewer.remove-from-manifest-collection") }}
         </p>
       </div>
+      <div class="flex gap-x-2">
+        <base-tooltip position="center" :tooltip-offset="8">
+          <template #activator="{ on }">
+            <div v-on="on" @click="navigateToManifestViewer()">
+              <unicon class="unicon" :name="Unicons.QuestionCircle.name" height="20"/>
+            </div>
+          </template>
+          <template #default>
+          <span class="text-sm text-text-placeholder">
+            <div>
+              {{
+                t(
+                    `tooltip.manifest-viewer-add-to-comparison`
+                )
+              }}
+            </div>
+          </span>
+          </template>
+        </base-tooltip>
+      </div>
     </template>
     <template v-slot:content>
       <ManifestViewer
@@ -42,6 +62,7 @@
 <script lang="ts" setup>
 import ManifestViewer from "@/components/ManifestViewer.vue";
 import { useI18n } from "vue-i18n";
+import { RouteNames } from "@/generated-types/queries";
 import type { ManifestViewerElement } from "@/generated-types/queries";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import { Unicons } from "@/types";
@@ -50,6 +71,8 @@ import {
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { computed } from "vue";
+import { useRouter } from "vue-router";
+import BaseTooltip from "@/components/base/BaseTooltip.vue";
 
 const props = defineProps<{
   element: ManifestViewerElement;
@@ -61,6 +84,7 @@ const {
   dequeueItemForBulkProcessing,
   isEnqueued,
 } = useBulkOperations();
+const router = useRouter();
 const context = BulkOperationsContextEnum.ManifestCollection;
 const isInManifestCollection = computed(() =>
   isEnqueued(context, props.element.manifestUrl)
@@ -78,4 +102,13 @@ const removeFromManifestCollection = () => {
 const addToManifestCollection = () => {
   enqueueItemForBulkProcessing(context, { id: props.element.manifestUrl });
 };
+
+const navigateToManifestViewer = () => {
+  router.push({ name: RouteNames.ManifestViewer })
+}
 </script>
+<style>
+  .unicon {
+    fill: white;
+  }
+</style>
