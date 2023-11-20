@@ -26,7 +26,7 @@
         </p>
       </div>
       <div class="flex gap-x-2">
-        <base-tooltip position="center" :tooltip-offset="8">
+        <base-tooltip position="center" :tooltip-offset="20">
           <template #activator="{ on }">
             <div v-on="on" @click="navigateToManifestViewer()">
               <unicon class="unicon" :name="Unicons.QuestionCircle.name" height="20"/>
