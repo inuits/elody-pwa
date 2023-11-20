@@ -2,15 +2,15 @@
   <div
     :class="['bg-accent-normal rounded-t-lg', { 'rounded-lg': isCollapsed }]"
   >
-    <div
-      @click="toggleElementCollapse(label)"
-      class="flex items-center justify-between cursor-pointer"
-    >
+    <div class="flex items-center justify-between cursor-pointer">
       <div class="flex p-2">
         <span class="subtitle mr-2">{{ t(label) }}</span>
         <slot name="actions"></slot>
       </div>
-      <span class="p-2 text-text-subtitle">
+      <span
+        class="p-2 text-text-subtitle"
+        @click="toggleElementCollapse(label)"
+      >
         <unicon
           :name="isCollapsed ? Unicons.AngleDown.name : Unicons.AngleUp.name"
         />
