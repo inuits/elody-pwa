@@ -14,7 +14,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, watch } from "vue";
+import { computed, onMounted, watch, ref } from "vue";
+import { onBeforeRouteLeave } from "vue-router";
 // @ts-ignore
 import Mirador from "mirador/dist/mirador.min.js";
 import BaseTabs from "./BaseTabs.vue";
@@ -26,7 +27,7 @@ import {
   InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
 
-const { getEnqueuedItems } = useBulkOperations();
+const { getEnqueuedItems, dequeueAllItemsForBulkProcessing, enqueueItemForBulkProcessing } = useBulkOperations();
 const context = BulkOperationsContextEnum.ManifestCollection;
 
 const props = withDefaults(
@@ -47,6 +48,7 @@ const props = withDefaults(
 const { locale } = useI18n();
 const hasTify = computed(() => props.viewers.includes("tify"));
 const hasMirador = computed(() => props.viewers.includes("mirador"));
+const miradorInstance = ref<undefined | object>(undefined);
 
 const initializeViewers = () => {
   if (props.manifestUrl && hasTify.value) {
@@ -82,12 +84,26 @@ const initializeViewers = () => {
       return { manifestId: item.id };
     });
   }
-  if (hasMirador.value) Mirador.viewer(miradorConfig);
+  if (hasMirador.value) miradorInstance.value = Mirador.viewer(miradorConfig);
 };
 
 onMounted(() => {
   initializeViewers();
 });
+
+onBeforeRouteLeave((to, from, next) => {
+  if (from.path === "/manifestViewer" && miradorInstance !== undefined) {
+    dequeueAllItemsForBulkProcessing(context);
+    const windows = miradorInstance.value.store.getState().windows;
+    const windowIds= [];
+    for (let windowId in windows) windowIds.push(windowId);
+    windowIds.forEach((id) => {
+      const manifest = windows[id].manifestId;
+      enqueueItemForBulkProcessing(context, { id: manifest });
+    })
+  }
+  return next();
+})
 
 watch(
   () => locale.value,
