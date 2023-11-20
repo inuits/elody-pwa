@@ -72,7 +72,9 @@ const initializeViewers = () => {
   };
 
   if (props.manifestUrl) {
-    miradorConfig.windows = [{ manifestId: props.manifestUrl }];
+    miradorConfig.windows = [
+      { manifestId: props.manifestUrl, view: "gallery" },
+    ];
   } else {
     miradorConfig.windows = getEnqueuedItems(
       BulkOperationsContextEnum.ManifestCollection
