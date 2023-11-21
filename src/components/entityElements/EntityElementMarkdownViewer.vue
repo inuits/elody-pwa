@@ -20,28 +20,57 @@ const props = defineProps<{ element: MarkdownViewerElement }>();
 
 <style>
 .md h1 {
-  font-size: 2em !important;
-  font-weight: bold !important;
+  display: block;
+  font-size: 2em;
+  margin-top: 0.67em;
+  margin-bottom: 0.67em;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: bold;
 }
 .md h2 {
-  font-size: 1.5em !important;
-  font-weight: bold !important;
+  display: block;
+  font-size: 1.5em;
+  margin-top: 0.83em;
+  margin-bottom: 0.83em;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: bold;
 }
 .md h3 {
-  font-size: 1.3em !important;
-  font-weight: bold !important;
+  display: block;
+  font-size: 1.17em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: bold;
 }
 .md h4 {
-  font-size: 1em !important;
-  font-weight: bold !important;
+  display: block;
+  margin-top: 1.33em;
+  margin-bottom: 1.33em;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: bold;
 }
 .md h5 {
-  font-size: 0.8em !important;
-  font-weight: bold !important;
+  display: block;
+  font-size: 0.83em;
+  margin-top: 1.67em;
+  margin-bottom: 1.67em;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: bold;
 }
 .md h6 {
-  font-size: 0.7em !important;
-  font-weight: bold !important;
+  display: block;
+  font-size: 0.67em;
+  margin-top: 2.33em;
+  margin-bottom: 2.33em;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: bold;
 }
 .md a {
   text-decoration: underline;
