@@ -43,4 +43,7 @@ const props = defineProps<{ element: MarkdownViewerElement }>();
   font-size: 0.7em !important;
   font-weight: bold !important;
 }
+.md a {
+  text-decoration: underline;
+}
 </style>
