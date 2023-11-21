@@ -27,7 +27,11 @@ import {
   InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
 
-const { getEnqueuedItems, dequeueAllItemsForBulkProcessing, enqueueItemForBulkProcessing } = useBulkOperations();
+const {
+  getEnqueuedItems,
+  dequeueAllItemsForBulkProcessing,
+  enqueueItemForBulkProcessing,
+} = useBulkOperations();
 const context = BulkOperationsContextEnum.ManifestCollection;
 
 const props = withDefaults(
@@ -92,18 +96,18 @@ onMounted(() => {
 });
 
 onBeforeRouteLeave((to, from, next) => {
-  if (from.path === "/manifestViewer" && miradorInstance !== undefined) {
+  if (from.path === "/manifestViewer" && miradorInstance.value !== undefined) {
     dequeueAllItemsForBulkProcessing(context);
     const windows = miradorInstance.value.store.getState().windows;
-    const windowIds= [];
+    const windowIds = [];
     for (let windowId in windows) windowIds.push(windowId);
     windowIds.forEach((id) => {
       const manifest = windows[id].manifestId;
       enqueueItemForBulkProcessing(context, { id: manifest });
-    })
+    });
   }
   return next();
-})
+});
 
 watch(
   () => locale.value,

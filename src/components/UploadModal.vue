@@ -12,8 +12,9 @@
             getModalInfo(TypeModals.Upload).modalTabToOpen ===
               ModalChoices.Import && dropzoneEntityToCreateQueryResult
           "
+          class="h-full"
         >
-          <BaseTab :title="$t('upload.upload-files')">
+          <BaseTab :title="t('upload.upload-files')">
             <upload-modal-dropzone
               v-if="
                 getModalInfo(TypeModals.Upload).modalTabToOpen ===
@@ -24,7 +25,7 @@
               "
             />
           </BaseTab>
-          <BaseTab v-if="directoriesEnabled" :title="$t('upload.import')">
+          <!--<BaseTab v-if="directoriesEnabled" :title="t('upload.import')">
             <upload-modal-import
               v-if="
                 getModalInfo(TypeModals.Upload).modalTabToOpen ===
@@ -32,16 +33,16 @@
               "
               :directories="directoriesQueryResult.Directories"
             />
-          </BaseTab>
+          </BaseTab>-->
         </BaseTabs>
 
-        <BaseTabs
+        <!--<BaseTabs
           v-if="
             getModalInfo(TypeModals.Upload).modalTabToOpen ===
               ModalChoices.Dropzone && dropzoneEntityToCreateQueryResult
           "
         >
-          <BaseTab :title="$t('upload.upload-files')">
+          <BaseTab :title="t('upload.upload-files')">
             <div class="h-full">
               <upload-modal-dropzone
                 v-if="
@@ -62,43 +63,38 @@
               />
             </div>
           </BaseTab>
-        </BaseTabs>
+        </BaseTabs>-->
       </div>
     </div>
   </BaseModal>
 </template>
 
 <script lang="ts" setup>
-import BaseModal from "@/components/base/BaseModal.vue";
-import BaseTab from "./BaseTab.vue";
-import BaseTabs from "./BaseTabs.vue";
-import AssetLibrary from "./library/AssetLibrary.vue";
-import UploadModalDropzone from "./UploadModalDropzone.vue";
-import UploadModalImport from "./UploadModalImport.vue";
-import useMediaAssetLinkHelper from "../composables/useMediaAssetLinkHelper";
-import useMetaDataHelper from "../composables/useMetaDataHelper";
-import { ref, watch, inject } from "vue";
-import { useQuery } from "@vue/apollo-composable";
 import {
-  GetDirectoriesDocument,
   GetDropzoneEntityToCreateDocument,
   TypeModals,
   ModalChoices,
   ModalState,
-} from "../generated-types/queries";
+} from "@/generated-types/queries";
+import BaseModal from "@/components/base/BaseModal.vue";
+import BaseTab from "@/components/BaseTab.vue";
+import BaseTabs from "@/components/BaseTabs.vue";
+import UploadModalDropzone from "@/components/UploadModalDropzone.vue";
+import { ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useI18n } from "vue-i18n";
+import { useQuery } from "@vue/apollo-composable";
 
-const { addMediaFileToLinkList } = useMediaAssetLinkHelper();
-const { mediafiles } = useMetaDataHelper();
-const { getModalInfo, closeModal } = useBaseModal();
+//const config = inject("config") as any;
+//const directoriesEnabled = config.features.hasDirectoryImport;
 const fetchEnabled = ref(false);
-const config = inject("config") as any;
-const directoriesEnabled = config.features.hasDirectoryImport;
+const { getModalInfo, closeModal } = useBaseModal();
+const { t } = useI18n();
 
-const { result: directoriesQueryResult, refetch: refetchDirectoriesQuery } =
+/*const { result: directoriesQueryResult, refetch: refetchDirectoriesQuery } =
   useQuery(GetDirectoriesDocument, undefined, () => ({
     enabled: directoriesEnabled === false ? false : fetchEnabled.value,
-  }));
+  }));*/
 const {
   result: dropzoneEntityToCreateQueryResult,
   refetch: refetchDropzoneEntityToCreateQuery,
@@ -109,17 +105,17 @@ const {
 const getData = () => {
   if (getModalInfo(TypeModals.Upload).modalTabToOpen === ModalChoices.Import) {
     if (fetchEnabled.value === true) {
-      refetchDirectoriesQuery();
+      //refetchDirectoriesQuery();
       refetchDropzoneEntityToCreateQuery();
     } else fetchEnabled.value = true;
   }
 };
 
-const addSelection = (entity: any) => {
+/*const addSelection = (entity: any) => {
   const mediafile = JSON.parse(JSON.stringify(entity.media.mediafiles[0]));
   mediafiles.value.push(mediafile);
   addMediaFileToLinkList(mediafile);
-};
+};*/
 
 watch(
   () => getModalInfo(TypeModals.Upload).state,

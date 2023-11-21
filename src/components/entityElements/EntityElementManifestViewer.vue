@@ -29,19 +29,19 @@
         <base-tooltip position="center" :tooltip-offset="20">
           <template #activator="{ on }">
             <div v-on="on" @click="navigateToManifestViewer()">
-              <unicon class="unicon" :name="Unicons.QuestionCircle.name" height="20"/>
+              <unicon
+                class="unicon"
+                :name="Unicons.QuestionCircle.name"
+                height="20"
+              />
             </div>
           </template>
           <template #default>
-          <span class="text-sm text-text-placeholder">
-            <div>
-              {{
-                t(
-                    `tooltip.manifest-viewer-add-to-comparison`
-                )
-              }}
-            </div>
-          </span>
+            <span class="text-sm text-text-placeholder">
+              <div>
+                {{ t(`tooltip.manifest-viewer-add-to-comparison`) }}
+              </div>
+            </span>
           </template>
         </base-tooltip>
       </div>
@@ -104,11 +104,11 @@ const addToManifestCollection = () => {
 };
 
 const navigateToManifestViewer = () => {
-  router.push({ name: RouteNames.ManifestViewer })
-}
+  router.push({ name: RouteNames.ManifestViewer });
+};
 </script>
 <style>
-  .unicon {
-    fill: white;
-  }
+.unicon {
+  fill: white;
+}
 </style>

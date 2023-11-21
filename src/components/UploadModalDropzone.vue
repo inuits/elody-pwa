@@ -1,44 +1,17 @@
 <template>
-  <div class="flex flex-col w-full h-[93vh] p-3">
-    <dropzone-new
+  <div class="flex flex-col w-full h-full p-3 mb-7">
+    <dropzone
       view-style="p-3 h-full overflow-x-hidden mb-4"
       @update-files-in-dropzone="onUpdateFilesInDropzone"
     />
-
     <div class="p-3 bg-neutral-white rounded">
-      <div v-if="!modifyMetadata" class="flex mb-3">
-        <BaseCheckDropdown
-          v-model="selectedEntityToCreate"
-          :options="entityToCreateOptions"
-          :check-option="createEntity"
-          label="creëer"
-          @check-option="handleCheckOptionEvent"
-        />
-
-        <div class="w-2/3">
-          <BaseDropdownNew
-            v-model="selectedImportMethod"
-            :options="importMethods"
-            :disable="!createEntity"
-            dropdown-style="defaultWithBorder"
-          />
-        </div>
-      </div>
-
       <div>
         <BaseButtonNew
-          v-if="!modifyMetadata"
           :label="t('dropzone.upload')"
           :icon="DamsIcons.PlusCircle"
           button-style="accentAccent"
-          :disabled="isDisabledUploadButton"
-          @click="uploadFiles"
-        />
-        <BaseButtonNew
-          v-if="modifyMetadata"
-          :label="t('dropzone.modifyMetadata')"
-          :icon="DamsIcons.EditAlt"
-          button-style="accentAccent"
+          :disabled="disabledUploadButton"
+          @click="handleUpload"
         />
       </div>
     </div>
@@ -48,208 +21,61 @@
 <script lang="ts" setup>
 import type { DropzoneFile } from "dropzone";
 import {
-  DamsIcons,
-  TypeModals,
-  type DropdownOption,
-  type DropzoneEntityToCreate,
-} from "@/generated-types/queries";
-import {
   NotificationType,
   useNotification,
 } from "@/components/base/BaseNotification.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import BaseCheckDropdown from "@/components/base/BaseCheckDropdown.vue";
-import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
-import DropzoneNew from "@/components/base/dropzone/DropzoneNew.vue";
+import Dropzone from "@/components/base/dropzone/Dropzone.vue";
 import useDropzoneHelper from "@/composables/useDropzoneHelper";
+import useUpload from "@/composables/useUpload";
 import useUploadModalDropzone from "@/composables/useUploadModalDropzone";
+import { DamsIcons, TypeModals } from "@/generated-types/queries";
 import { ref, watch, inject } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 
-const props = defineProps<{
-  entityToCreate: DropzoneEntityToCreate;
-}>();
-
-type UploadRequestData = {
-  body: string;
-  uri: string;
-};
-
-const {
-  dropzone,
-  isUploading,
-  setSelectedMediafiles,
-  increaseSuccessCounter,
-  clearDropzoneCounters,
-  clearDropzoneErrorMessages,
-} = useDropzoneHelper();
-const { t } = useI18n();
-const { createNotificationOverwrite } = useNotification();
-const { setUploadStatus, getEntityIdForLinkedUpload } =
-  useUploadModalDropzone();
-const { closeModal, getModalInfo } = useBaseModal();
 const config = inject("config") as any;
-
-const createEntity = ref<boolean>(true);
-const entityToCreateOptions = ref<DropdownOption[]>(
-  props.entityToCreate.options
-);
-const selectedEntityToCreate = ref<DropdownOption>(
-  entityToCreateOptions.value[0]
-);
-const initialImportMethods: DropdownOption[] = [];
-const importMethods = ref<DropdownOption[]>(initialImportMethods);
-const selectedImportMethod = ref<DropdownOption>();
-
+const disabledUploadButton = ref<boolean>(true);
 const filesInDropzone = ref<DropzoneFile[]>([]);
-const isDisabledUploadButton = ref<boolean>(true);
-const modifyMetadata = ref<boolean>(false);
-clearDropzoneCounters();
+const { closeModal, getModalInfo } = useBaseModal();
+const { createNotificationOverwrite } = useNotification();
+const { t } = useI18n();
+const { uploadGenerator, validateFiles } = useUpload();
+const { clearDropzoneCounters, clearDropzoneErrorMessages, dropzone } =
+  useDropzoneHelper();
+const { getEntityIdForLinkedUpload, getUploadType, setUploadStatus } =
+  useUploadModalDropzone();
+
 const onUpdateFilesInDropzone = (files: DropzoneFile[]) => {
   filesInDropzone.value = files;
-  isDisabledUploadButton.value = files.length === 0;
-
-  const csvFiles = files.filter((file) => file.type === "text/csv");
-  // modifyMetadata.value = csvFiles.length === 1 && files.length === 1;
-  importMethods.value = [
-    ...csvFiles.map((file) => {
-      return {
-        icon: DamsIcons.NoIcon,
-        label: file.name,
-        value: file.name,
-      };
-    }),
-    ...initialImportMethods,
-  ];
-
-  const mostRecentlyAddedCsvFileName = csvFiles[csvFiles.length - 1]?.name;
-  if (mostRecentlyAddedCsvFileName)
-    selectedImportMethod.value = {
-      icon: DamsIcons.NoIcon,
-      label: mostRecentlyAddedCsvFileName,
-      value: mostRecentlyAddedCsvFileName,
-    };
+  disabledUploadButton.value = !validateFiles(files, getUploadType());
 };
 
-const uploadFiles = async () => {
-  isUploading.value = true;
-  setSelectedMediafiles(filesInDropzone.value);
-  const uploadRequestData = selectedImportMethod.value
-    ? await getUploadRequestData()
-    : "no-data";
-  console.log(uploadRequestData);
-  await callUploadEndpoint(uploadRequestData);
-};
-
-const getUploadRequestData = async (): Promise<UploadRequestData> => {
-  const csvToBeParsedToEntityBodies = filesInDropzone.value.find(
-    (file: DropzoneFile) => file.name === selectedImportMethod.value?.value
+const handleUpload = async () => {
+  const generator = uploadGenerator(
+    filesInDropzone.value,
+    getUploadType(),
+    config,
+    getEntityIdForLinkedUpload()
   );
 
-  let blob: Blob | undefined;
-  if (csvToBeParsedToEntityBodies)
-    blob = new Blob([csvToBeParsedToEntityBodies], {
-      type: csvToBeParsedToEntityBodies.type,
-    });
-
-  const response = await fetch(`/api/upload/request-data`, {
-    headers: { "Content-Type": "text/csv" },
-    method: "POST",
-    body: blob,
-  });
-
-  return JSON.parse(await response.text());
-};
-
-const linkUploadRequestDataWithFile = (
-  uploadRequestData: UploadRequestData,
-  file: DropzoneFile
-): UploadRequestData | undefined => {
-  if (!Array.isArray(uploadRequestData.body)) return uploadRequestData;
-  if (uploadRequestData.body.length === 0) return undefined;
-
-  const urls = uploadRequestData.body.find((url: string) =>
-    url.includes(file.name)
-  );
-  if (!urls) return undefined;
-
-  return { body: urls, uri: uploadRequestData.uri };
-};
-
-const callUploadEndpoint = async (
-  uploadRequestData: UploadRequestData | "no-data"
-) => {
-  const filesToBeUploaded = filesInDropzone.value.filter(
-    (file) => file.type !== "text/csv"
-  );
-  for (const file of filesToBeUploaded) {
-    const body =
-      uploadRequestData === "no-data"
-        ? undefined
-        : linkUploadRequestDataWithFile(uploadRequestData, file);
-
-    const formUploadData = new FormData();
-    formUploadData.append("file", file);
-
-    let urlToUpload: string | "no-url" | "get-ticket-single-upload-failed" =
-      "no-url";
-    if (body) {
-      urlToUpload = body.body;
-    } else {
-      let extraQueryParameters = "";
-      const entityId = getEntityIdForLinkedUpload();
-      if (entityId) extraQueryParameters = `&entityIdUri=/entities/${entityId}`;
-
-      console.log(extraQueryParameters);
-      const getUrlResponseCall = await fetch(
-        `/api/upload?filename=${file.name}${extraQueryParameters}`,
-        {
-          headers: { "Content-Type": "application/json" },
-          method: "POST",
-        }
-      );
-      const getUrlResponse = await getUrlResponseCall.json();
-
-      urlToUpload = getUrlResponse.url
-        ? getUrlResponse.url
-        : "get-ticket-single-upload-failed";
+  for await (const upload of generator) {
+    if (!upload?.response.ok) {
+      exceptionHandler(await upload?.response.text());
+      continue;
     }
 
-    if (
-      urlToUpload != "no-url" &&
-      urlToUpload != "get-ticket-single-upload-failed"
-    ) {
-      await fetch(
-        urlToUpload.replace(
-          "http://storage-api:5000/",
-          config.api.storageApiUrl
-        ),
-        {
-          method: "POST",
-          body: formUploadData,
-        }
-      )
-        .then((response: Response) => {
-          if (!response.ok) throw response;
+    dropzone.value?.removeFile(upload.file);
+    onUpdateFilesInDropzone(dropzone.value?.files ?? []);
 
-          increaseSuccessCounter();
-          dropzone.value?.removeFile(file);
-          onUpdateFilesInDropzone(dropzone.value?.files ?? []);
-
-          if (!dropzone.value?.files.find((file) => file.type !== "text/csv")) {
-            createNotificationOverwrite(
-              NotificationType.default,
-              t("dropzone.successNotification.title"),
-              t("dropzone.successNotification.description")
-            );
-            setUploadStatus("success");
-            closeModal(TypeModals.Upload);
-          }
-        })
-        .catch(async (response: Response) =>
-          exceptionHandler(await response.text())
-        );
+    if (!dropzone.value?.files.find((file) => file.type !== "text/csv")) {
+      createNotificationOverwrite(
+        NotificationType.default,
+        t("dropzone.successNotification.title"),
+        t("dropzone.successNotification.description")
+      );
+      setUploadStatus("success");
+      closeModal(TypeModals.Upload);
     }
   }
 };
@@ -265,12 +91,9 @@ const exceptionHandler = (
   );
 };
 
-const handleCheckOptionEvent = () => (createEntity.value = !createEntity.value);
 watch(
   () => getModalInfo(TypeModals.Upload).state,
   () => {
-    createEntity.value = true;
-    selectedImportMethod.value = undefined;
     clearDropzoneCounters();
     clearDropzoneErrorMessages();
   }
