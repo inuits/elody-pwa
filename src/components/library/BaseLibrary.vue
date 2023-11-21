@@ -220,8 +220,12 @@ const {
   apolloClient as ApolloClient<any>,
   props.parentEntityIdentifiers.length > 0
 );
-const { getUploadStatus, setUploadStatus, setEntityIdForLinkedUpload } =
-  useUploadModalDropzone();
+const {
+  getUploadStatus,
+  setUploadStatus,
+  setEntityIdForLinkedUpload,
+  setUploadType,
+} = useUploadModalDropzone();
 const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
 const { closeModal } = useBaseModal();
@@ -308,8 +312,10 @@ watch(getUploadStatus, (status) => {
 watch(
   () => route.path,
   () => {
-    if (props.parentEntityIdentifiers.length === 0)
+    if (props.parentEntityIdentifiers.length === 0) {
       setEntityIdForLinkedUpload(undefined);
+      setUploadType("batch");
+    }
 
     if (
       !props.predefinedEntities &&

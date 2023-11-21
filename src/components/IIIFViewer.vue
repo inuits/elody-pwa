@@ -43,7 +43,10 @@ export default defineComponent({
     const loading = ref<boolean>(true);
 
     onMounted(() => {
-      if (props.imageFilename && props.imageFilename !== "[PROTECTED_CONTENT]") {
+      if (
+        props.imageFilename &&
+        props.imageFilename !== "[PROTECTED_CONTENT]"
+      ) {
         const dragonOption: OpenSeadragon.Options = {
           element: OpenSeadragonDiv.value,
           prefixUrl: "/static/openseadragon/images/",

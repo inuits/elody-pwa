@@ -56,7 +56,7 @@ const route = useRoute();
 const auth = useAuth();
 const { locale, t } = useI18n();
 const { fetchUpdateAndDeletePermission } = usePermissions();
-const { setEntityIdForLinkedUpload } = useUploadModalDropzone();
+const { setEntityIdForLinkedUpload, setUploadType } = useUploadModalDropzone();
 
 const {
   showEditToggle,
@@ -123,6 +123,8 @@ watch(
     }
 
     setEntityIdForLinkedUpload(entity.id);
+    setUploadType("single");
+
     if (entity.type.toLowerCase() === "mediafile") {
       mediafileSelectionState.mediafiles = [entity as MediaFileEntity];
       mediafileSelectionState.selectedMediafile = entity as MediaFileEntity;

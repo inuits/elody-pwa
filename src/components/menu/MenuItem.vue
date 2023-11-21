@@ -107,7 +107,8 @@ EventBus.on("permissions_updated", () => {
   const typeModal = props.menuitem.typeLink.modal?.typeModal as string;
   if (typeModal === "Create" || typeModal === "Upload") {
     allowed = can(Permission.Cancreate, undefined);
-  }  if (props.menuitem.entityType)
+  }
+  if (props.menuitem.entityType)
     allowed = can(Permission.Canread, props.menuitem.entityType);
   menuSubitem.value.forEach((item) => {
     if (item.requiresAuth === false) allowed = true;
