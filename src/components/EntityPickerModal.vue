@@ -11,35 +11,44 @@
       }
     "
   >
-    <div class="flex flex-col w-full h-full overflow-auto py-6">
-      <BaseLibrary
-        v-if="getModalInfo(TypeModals.EntityPicker).state === ModalState.Show"
-        :bulk-operations-context="getContext()"
-        :search-input-type-on-drawer="
-          getAcceptedTypes().length > 0
-            ? getAcceptedTypes()[0] !== Entitytyping.Mediafile
-              ? SearchInputType.AdvancedInputType
-              : SearchInputType.AdvancedInputMediaFilesType
-            : SearchInputType.AdvancedInputType
-        "
-        :filter-type="
-          getAcceptedTypes().length > 0
-            ? String(getAcceptedTypes()[0])
-            : undefined
-        "
-        :confirm-selection-button="true"
-        :enable-navigation="false"
-        :disable-new-entity-previews="true"
-        :ids-of-non-selectable-entities="getAlreadySelectedEntityIds()"
-        list-item-route-name="SingleEntity"
-        @confirm-selection="
-          (selectedItems) => {
-            addRelations(selectedItems);
-            dequeueAllItemsForBulkProcessing(getContext());
-            closeModal(TypeModals.EntityPicker);
-          }
-        "
-      />
+    <div class="flex flex-col w-full h-full overflow-auto">
+      <BaseTabs class="h-full">
+        <BaseTab :title="t('entity.pick')">
+          <BaseLibrary
+            v-if="
+              getModalInfo(TypeModals.EntityPicker).state === ModalState.Show
+            "
+            :bulk-operations-context="getContext()"
+            :search-input-type-on-drawer="
+              getAcceptedTypes().length > 0
+                ? getAcceptedTypes()[0] !== Entitytyping.Mediafile
+                  ? SearchInputType.AdvancedInputType
+                  : SearchInputType.AdvancedInputMediaFilesType
+                : SearchInputType.AdvancedInputType
+            "
+            :filter-type="
+              getAcceptedTypes().length > 0
+                ? String(getAcceptedTypes()[0])
+                : undefined
+            "
+            :confirm-selection-button="true"
+            :enable-navigation="false"
+            :disable-new-entity-previews="true"
+            :ids-of-non-selectable-entities="getAlreadySelectedEntityIds()"
+            list-item-route-name="SingleEntity"
+            @confirm-selection="
+              (selectedItems) => {
+                addRelations(selectedItems);
+                dequeueAllItemsForBulkProcessing(getContext());
+                closeModal(TypeModals.EntityPicker);
+              }
+            "
+          />
+        </BaseTab>
+        <BaseTab :title="t('upload.upload-files')">
+          <upload-modal-dropzone />
+        </BaseTab>
+      </BaseTabs>
     </div>
   </BaseModal>
 </template>
@@ -57,11 +66,16 @@ import {
 } from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
+import BaseTab from "@/components/BaseTab.vue";
+import BaseTabs from "@/components/BaseTabs.vue";
+import UploadModalDropzone from "@/components/UploadModalDropzone.vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 
+const { t } = useI18n();
 const { getAcceptedTypes } = useEntityPickerModal();
 const { closeModal, getModalInfo } = useBaseModal();
 const { addRelations, getForm } = useFormHelper();

@@ -10,7 +10,7 @@
         <BaseTabs
           v-if="
             getModalInfo(TypeModals.Upload).modalTabToOpen ===
-              ModalChoices.Import && dropzoneEntityToCreateQueryResult
+            ModalChoices.Import
           "
           class="h-full"
         >
@@ -19,9 +19,6 @@
               v-if="
                 getModalInfo(TypeModals.Upload).modalTabToOpen ===
                 ModalChoices.Import
-              "
-              :entity-to-create="
-                dropzoneEntityToCreateQueryResult.DropzoneEntityToCreate
               "
             />
           </BaseTab>
@@ -94,7 +91,7 @@ const { t } = useI18n();
 /*const { result: directoriesQueryResult, refetch: refetchDirectoriesQuery } =
   useQuery(GetDirectoriesDocument, undefined, () => ({
     enabled: directoriesEnabled === false ? false : fetchEnabled.value,
-  }));*/
+  }));
 const {
   result: dropzoneEntityToCreateQueryResult,
   refetch: refetchDropzoneEntityToCreateQuery,
@@ -111,11 +108,11 @@ const getData = () => {
   }
 };
 
-/*const addSelection = (entity: any) => {
+const addSelection = (entity: any) => {
   const mediafile = JSON.parse(JSON.stringify(entity.media.mediafiles[0]));
   mediafiles.value.push(mediafile);
   addMediaFileToLinkList(mediafile);
-};*/
+};
 
 watch(
   () => getModalInfo(TypeModals.Upload).state,
@@ -123,5 +120,5 @@ watch(
     if (uploadModalState === ModalState.Show) getData();
   },
   { immediate: true }
-);
+);*/
 </script>
