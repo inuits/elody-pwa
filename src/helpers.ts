@@ -275,6 +275,10 @@ export const updateLocalStorage = (key: string, data: object): void => {
   window.localStorage.setItem(key, JSON.stringify(data));
 };
 
+export const clearLocalStorageItem = (key: string): void => {
+  localStorage.removeItem(key);
+};
+
 export const findPanelMetadata = (
   obj: any,
   parentIsEditable?: boolean
