@@ -24,7 +24,6 @@ const permissionsMappings = ref<Map<string, Map<Permission, boolean>>>(
 );
 const setPermissionsMappings = () => {
   if (ignorePermissions.value) return;
-  permissionsMappings.value.clear();
   const { numberOfEntities } = usePermissions();
   Object.values(Entitytyping).forEach((entity, index) => {
     const permissions = new Map<Permission, boolean>();

@@ -105,11 +105,10 @@ EventBus.on("permissions_updated", () => {
   let allowed = false;
   if (props.menuitem.requiresAuth === false) allowed = true;
   const typeModal = props.menuitem.typeLink.modal?.typeModal as string;
-  if (typeModal === "Create" || typeModal === "Upload") {
-    allowed = can(Permission.Cancreate, undefined);
-  }
+  if (typeModal === "Create" || typeModal === "Upload")
+    allowed = allowed || can(Permission.Cancreate, undefined);
   if (props.menuitem.entityType)
-    allowed = can(Permission.Canread, props.menuitem.entityType);
+    allowed = allowed || can(Permission.Canread, props.menuitem.entityType);
   menuSubitem.value.forEach((item) => {
     if (item.requiresAuth === false) allowed = true;
     allowed = allowed || can(Permission.Canread, item.entityType);
