@@ -22,7 +22,7 @@
       <div class="w-full h-full">
         <div class="h-[50%] flex justify-center items-center">
           <img
-            v-if="media && !imageSrcError"
+            v-if="canShowCopyRight() && media && !imageSrcError"
             class="h-full w-48 object-cover"
             :src="
               mediaIsLink
@@ -32,7 +32,7 @@
             @error="setNoImage()"
           />
           <div
-            v-if="(thumbIcon && !media) || (imageSrcError && thumbIcon)"
+            v-if="(!canShowCopyRight() && thumbIcon) || (thumbIcon && !media) || (imageSrcError && thumbIcon)"
             class="w-48 h-48 flex items-center justify-center flex-col bg-center bg-no-repeat bg-cover"
             style="background-image: url(.jpg)"
           >
@@ -96,11 +96,13 @@ import {
   EditStatus,
   type BaseRelationValuesInput,
   type MetadataAndRelation,
+  type Metadata
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
 import EntityElementMetadata from "@/components/EntityElementMetadata.vue";
 import useEditMode from "@/composables/useEdit";
+import { useAuth } from "session-vue-3-oidc-library";
 import { computed, ref, watch } from "vue";
 import { stringIsUrl } from "@/helpers";
 
@@ -110,6 +112,7 @@ const props = withDefaults(
     bulkOperationsContext: Context;
     loading?: boolean;
     teaserMetadata?: MetadataAndRelation[];
+    intialValues?: Metadata[];
     media?: string;
     thumbIcon?: string;
     small?: boolean;
@@ -125,6 +128,7 @@ const props = withDefaults(
     itemId: "",
     loading: false,
     teaserMetadata: () => [],
+    intialValues: () => [],
     media: "",
     thumbIcon: "",
     small: false,
@@ -137,6 +141,7 @@ const props = withDefaults(
 );
 
 const { isEdit } = useEditMode();
+const auth = useAuth();
 const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
@@ -144,6 +149,13 @@ const imageSrcError = ref<boolean>(false);
 const setNoImage = () => {
   imageSrcError.value = true;
 };
+
+const canShowCopyRight = () => {
+  if (auth.isAuthenticated.value === true) return true;
+  if (props.intialValues.length !== 0)
+    return props.intialValues.copyrightColor !== "red";
+  return true;
+}
 
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 

@@ -7,7 +7,7 @@
         : 'no-filename'
     "
   >
-    <div class="relative group">
+    <div v-if="canShowCopyRight() && !imageSrcError" class="relative group">
       <img
         :class="[
           'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
@@ -29,6 +29,13 @@
             : getValueOfMediafile('thumbnail_file_location', mediafile)
         "
         @click="updateSelectedEntityMediafile(mediafile)"
+        @error="setNoImage()"
+      />
+    </div>
+    <div v-else class="relative group">
+      <unicon
+          :name="getThumbnail(mediafile)"
+          class="h-10 w-10 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
       />
     </div>
   </div>
@@ -38,10 +45,27 @@
 import type { MediaFileEntity } from "@/generated-types/queries";
 import { toBeDeleted } from "@/composables/useEdit";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
+import {useAuth} from "session-vue-3-oidc-library";
+import { ref } from "vue";
+import useThumbnailHelper from "@/composables/useThumbnailHelper";
 
-defineProps<{
+
+const props = defineProps<{
   mediafile: MediaFileEntity;
 }>();
+
+const auth = useAuth();
+const { getThumbnail } = useThumbnailHelper();
+const imageSrcError = ref<boolean>(false);
+
+const setNoImage = () => {
+  imageSrcError.value = true;
+};
+
+const canShowCopyRight = () => {
+  if (auth.isAuthenticated.value === true) return true;
+  return props.mediafile.intialValues.copyrightColor !== "red";
+}
 
 const {
   mediafileSelectionState,

@@ -47,6 +47,7 @@
         :teaser-metadata="
           formatTeaserMetadata(entity.teaserMetadata, entity.intialValues) as Metadata[]
         "
+        :intialValues="entity.intialValues"
         :media="
           entitiesLoading ? undefined : getMediaFilenameFromEntity(entity)
         "
