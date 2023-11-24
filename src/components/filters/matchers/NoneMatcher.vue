@@ -1,4 +1,11 @@
-<template></template>
+<template>
+  <BaseInputTextNumberDatetime
+    disabled
+    input-style="default"
+    type="text"
+    :model-value="''"
+  />
+</template>
 
 <script lang="ts" setup>
 import type {
@@ -6,6 +13,7 @@ import type {
   AdvancedFilterInput,
 } from "@/generated-types/queries";
 import { defineEmits, onBeforeUnmount, onMounted } from "vue";
+import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 
 const props = defineProps<{
   filter: AdvancedFilter;

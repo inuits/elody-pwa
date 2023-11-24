@@ -2,6 +2,7 @@
   <BaseInputAutocomplete
     v-model="input"
     :options="autocompleteOptions"
+    :placeholder="t('filters.matcher-placeholders.ID')"
     autocomplete-style="default"
     @search-change="(value: string) => getAutocompleteOptions(value)"
   />
@@ -20,6 +21,7 @@ import {
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import { defineEmits, ref, watch } from "vue";
 import { useQuery } from "@vue/apollo-composable";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   filter: AdvancedFilter;
@@ -31,6 +33,8 @@ const emit = defineEmits<{
     advancedFilterInput: AdvancedFilterInput
   ): void;
 }>();
+
+const { t } = useI18n();
 
 const input = ref<DropdownOption[]>([]);
 

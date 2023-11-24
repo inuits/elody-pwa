@@ -32,16 +32,8 @@
       <unicon :name="icon" height="20" />
     </div>
   </div>
-  <div v-show="isOpen" class="flex flex-col gap-4 p-6 bg-neutral-light">
+  <div v-show="isOpen" class="flex flex-row gap-4 p-6 bg-neutral-light">
     <div class="flex gap-4">
-      <BaseDropdownNew
-        v-model="selectedMatcher"
-        :options="matchers"
-        label="filter "
-        label-position="inline"
-        :default-label="t('filters.matcher-labels.select-filter-type')"
-        dropdown-style="default"
-      />
       <BaseButtonNew
         class="!w-10"
         label=""
@@ -50,6 +42,14 @@
         button-style="accentNormal"
         button-size="small"
         @click="() => (selectedMatcher = undefined)"
+      />
+      <BaseDropdownNew
+        v-model="selectedMatcher"
+        :options="matchers"
+        label="filter "
+        label-position="inline"
+        :default-label="t('filters.matcher-labels.select-filter-type')"
+        dropdown-style="default"
       />
     </div>
     <component
@@ -68,6 +68,7 @@ import type {
   DropdownOption,
   InputMaybe,
 } from "@/generated-types/queries";
+import { AdvancedFilterTypes, DamsIcons } from "@/generated-types/queries";
 import type { FilterListItem } from "@/components/filters/FiltersBase.vue";
 import {
   BulkOperationsContextEnum,
@@ -76,7 +77,6 @@ import {
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import { computed, markRaw, ref, toRefs, watch } from "vue";
-import { DamsIcons } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
@@ -97,7 +97,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
-const { clearAllActiveFilters } = toRefs(props);
+const { filter, matchers, clearAllActiveFilters } = toRefs(props);
 const isOpen = ref<boolean>(false);
 const matcherComponent = ref();
 const selectedMatcher = ref<DropdownOption>();
@@ -122,9 +122,16 @@ const icon = computed<string>(() =>
   isOpen.value ? Unicons.Minus.name : Unicons.Plus.name
 );
 
+const defaultMatcherMap: Partial<Record<AdvancedFilterTypes, string>> = {
+  [AdvancedFilterTypes.Selection]: "ExactMatcher",
+  [AdvancedFilterTypes.Text]: "ContainsMatcher",
+};
+
 watch(selectedMatcher, async () => {
   if (selectedMatcher.value) await loadMatcher();
   else emit("deactivateFilter", advancedFilterInput.value.key);
+
+  console.log(selectedMatcher.value);
 
   filterOptions.value.forEach((option) =>
     dequeueItemForBulkProcessing(
@@ -147,5 +154,14 @@ watch(clearAllActiveFilters, () => {
     isOpen.value = false;
     selectedMatcher.value = undefined;
   }
+});
+watch(matchers, () => {
+  const defaultMatcher = matchers.value.find(
+    (matcher) =>
+      matcher.value === defaultMatcherMap[advancedFilterInput.value.type]
+  );
+
+  if (defaultMatcher && !selectedMatcher.value)
+    selectedMatcher.value = defaultMatcher;
 });
 </script>
