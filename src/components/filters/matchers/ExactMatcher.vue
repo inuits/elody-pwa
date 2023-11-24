@@ -1,5 +1,6 @@
 <template>
   <div
+    class="grow"
     v-if="
       filter.type !== AdvancedFilterTypes.Selection && !Array.isArray(input)
     "
@@ -8,9 +9,10 @@
       v-model="input"
       input-style="default"
       :type="determineInputType"
+      :placeholder="determinePlaceholder"
     />
   </div>
-  <div v-else>
+  <div v-else class="grow">
     <div
       v-if="useAutocomplete && (Array.isArray(input) || input === undefined)"
     >
@@ -18,6 +20,7 @@
         v-model="input"
         :options="autocompleteOptions"
         autocomplete-style="default"
+        :placeholder="determinePlaceholder"
         @search-change="(value: string) => getAutocompleteOptions(value)"
       />
     </div>
@@ -58,6 +61,7 @@ import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import { computed, defineEmits, onMounted, reactive, ref, watch } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   filter: AdvancedFilter;
@@ -70,6 +74,8 @@ const emit = defineEmits<{
   ): void;
   (event: "filterOptions", filterOptions: string[]): void;
 }>();
+
+const { t } = useI18n();
 
 const input = ref<string | number | DropdownOption[]>();
 const showSpinner = ref<boolean>(false);
@@ -169,6 +175,13 @@ const determineInputType = computed<"text" | "number" | "datetime-local">(
     return "text";
   }
 );
+const determinePlaceholder = computed(() => {
+  if (props.filter.type === AdvancedFilterTypes.Number)
+    return t("filters.matcher-placeholders.number");
+  if (props.filter.type === AdvancedFilterTypes.Date)
+    return t("filters.matcher-placeholders.date");
+  return t("filters.matcher-placeholders.keyword");
+});
 
 onMounted(() => {
   if (
