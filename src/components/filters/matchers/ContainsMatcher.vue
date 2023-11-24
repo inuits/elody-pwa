@@ -3,6 +3,7 @@
     v-model="input"
     input-style="default"
     type="text"
+    :placeholder="t('filters.matcher-placeholders.keyword')"
   />
 </template>
 
@@ -13,6 +14,7 @@ import type {
 } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { defineEmits, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   filter: AdvancedFilter;
@@ -24,6 +26,8 @@ const emit = defineEmits<{
     advancedFilterInput: AdvancedFilterInput
   ): void;
 }>();
+
+const { t } = useI18n();
 
 const input = ref<string | number>("");
 

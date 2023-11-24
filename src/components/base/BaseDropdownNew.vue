@@ -23,7 +23,7 @@
           :name="Unicons[selectedOption.icon].name"
           class="h-5 mr-2 -ml-0.5"
         />
-        <span>
+        <span class="whitespace-nowrap">
           <span
             v-if="
               labelPosition === 'inline' &&

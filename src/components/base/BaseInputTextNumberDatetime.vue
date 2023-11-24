@@ -10,6 +10,7 @@
     :type="type"
     :step="step"
     :disabled="disabled"
+    :placeholder="placeholder"
     @change.stop
     @click.stop
   />
@@ -19,6 +20,7 @@
     v-model="inputValue"
     :type="type"
     :disabled="disabled"
+    :placeholder="placeholder"
     @change.stop
     @click.stop
   />
@@ -31,6 +33,7 @@
     ]"
     v-model="inputValue"
     :disabled="disabled"
+    :placeholder="placeholder"
     @change.stop
     @click.stop
     rows="3"
@@ -39,7 +42,6 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
-import { useI18n } from "vue-i18n";
 
 type PseudoStyle = {
   textColor: string;
@@ -87,6 +89,7 @@ const props = withDefaults(
     step?: number;
     disabled?: boolean;
     isValidPredicate?: Function;
+    placeholder?: string;
   }>(),
   {
     type: "text",
@@ -99,8 +102,6 @@ const props = withDefaults(
 const emit = defineEmits<{
   (event: "update:modelValue", modelValue: string | number | undefined): void;
 }>();
-
-const { t } = useI18n();
 
 const inputValue = computed<string | number | undefined>({
   get() {
