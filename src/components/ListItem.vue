@@ -22,9 +22,9 @@
         input-style="accentNormal"
       />
     </div>
-    <div v-if="media && !imageSrcError" class="flex items-center">
+    <div v-if="canShowCopyRight() && media && !imageSrcError" class="flex items-center">
       <img
-        v-if="media && !imageSrcError"
+        v-if="canShowCopyRight() && media && !imageSrcError"
         class="h-10 w-10 object-cover self-center outline-none"
         :src="
           mediaIsLink ? media : `/api/iiif/3/${media}/square/100,/0/default.jpg`
@@ -33,7 +33,7 @@
       />
     </div>
     <unicon
-      v-if="media && imageSrcError"
+      v-if="!canShowCopyRight() || (media && imageSrcError)"
       :name="thumbIcon"
       class="h-10 w-10 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
     />
@@ -95,6 +95,7 @@ import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
 import EntityElementMetadata from "@/components/EntityElementMetadata.vue";
 import useEditMode from "@/composables/useEdit";
+import { useAuth } from "session-vue-3-oidc-library";
 import { computed, ref, watch } from "vue";
 import { stringIsUrl } from "@/helpers";
 import { Unicons } from "@/types";
@@ -106,6 +107,7 @@ const props = withDefaults(
     itemId?: string;
     loading?: boolean;
     teaserMetadata?: Metadata[];
+    intialValues?: Metadata[];
     media?: string;
     thumbIcon?: string;
     small?: boolean;
@@ -122,6 +124,7 @@ const props = withDefaults(
     itemId: "",
     loading: false,
     teaserMetadata: () => [],
+    intialValues: () => [],
     media: "",
     thumbIcon: "",
     small: false,
@@ -139,14 +142,22 @@ const emit = defineEmits<{
 }>();
 
 const { isEdit } = useEditMode();
+const { update, remove } = useFieldArray("relationValues.relations");
+const auth = useAuth();
 const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
-const { update, remove } = useFieldArray("relationValues.relations");
 
 const setNoImage = () => {
   imageSrcError.value = true;
 };
+
+const canShowCopyRight = () => {
+  if (auth.isAuthenticated.value === true) return true;
+  if (props.intialValues.length !== 0)
+    return props.intialValues.copyrightColor !== "red";
+  return true;
+}
 
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 
