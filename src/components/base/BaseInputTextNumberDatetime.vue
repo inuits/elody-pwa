@@ -60,7 +60,7 @@ const defaultInput: Input = {
   borderColor: "border-none",
   disabledStyle: {
     textColor: "disabled:text-text-disabled",
-    bgColor: "disabled:bg-neutral-white",
+    bgColor: "disabled:bg-neutral-lightest",
     borderColor: "disabled:border-none",
   },
 };

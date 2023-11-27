@@ -33,7 +33,26 @@
     </div>
   </div>
   <div v-show="isOpen" class="flex flex-row gap-4 p-6 bg-neutral-light">
-    <div class="flex gap-4">
+    <div class="flex w-full justify-start gap-4">
+      <div>
+        <BaseDropdownNew
+          v-model="selectedMatcher"
+          :options="matchers"
+          label="filter "
+          label-position="inline"
+          :default-label="t('filters.matcher-labels.select-filter-type')"
+          dropdown-style="default"
+        />
+      </div>
+      <div class="flex-grow">
+        <component
+          v-if="selectedMatcher"
+          :is="matcherComponent"
+          :filter="filter.advancedFilter"
+          @new-advanced-filter-input="(input: AdvancedFilterInput) => advancedFilterInput = input"
+          @filter-options="(options: string[]) => filterOptions = options"
+        />
+      </div>
       <BaseButtonNew
         class="!w-10"
         label=""
@@ -43,22 +62,7 @@
         button-size="small"
         @click="() => (selectedMatcher = undefined)"
       />
-      <BaseDropdownNew
-        v-model="selectedMatcher"
-        :options="matchers"
-        label="filter "
-        label-position="inline"
-        :default-label="t('filters.matcher-labels.select-filter-type')"
-        dropdown-style="default"
-      />
     </div>
-    <component
-      v-if="selectedMatcher"
-      :is="matcherComponent"
-      :filter="filter.advancedFilter"
-      @new-advanced-filter-input="(input: AdvancedFilterInput) => advancedFilterInput = input"
-      @filter-options="(options: string[]) => filterOptions = options"
-    />
   </div>
 </template>
 
@@ -130,8 +134,6 @@ const defaultMatcherMap: Partial<Record<AdvancedFilterTypes, string>> = {
 watch(selectedMatcher, async () => {
   if (selectedMatcher.value) await loadMatcher();
   else emit("deactivateFilter", advancedFilterInput.value.key);
-
-  console.log(selectedMatcher.value);
 
   filterOptions.value.forEach((option) =>
     dequeueItemForBulkProcessing(
