@@ -96,6 +96,7 @@
 
 <script lang="ts" setup>
 import {
+  BaseEntity,
   BulkOperationTypes,
   DamsIcons,
   type DropdownOption,
@@ -104,28 +105,20 @@ import {
   MetadataAndRelation,
   ModalState,
   RouteNames,
+  TranscodeType,
   TypeModals,
 } from "@/generated-types/queries";
-import type {
-  Context,
-  InBulkProcessableItem,
-} from "@/composables/useBulkOperations";
-import {
-  BulkOperationsContextEnum,
-  useBulkOperations,
-} from "@/composables/useBulkOperations";
+import type {Context, InBulkProcessableItem,} from "@/composables/useBulkOperations";
+import {BulkOperationsContextEnum, useBulkOperations,} from "@/composables/useBulkOperations";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
-import { bulkSelectAllSizeLimit } from "@/main";
-import { computed, onMounted, ref, watch } from "vue";
-import { useBaseModal } from "@/composables/useBaseModal";
-import { useQuery } from "@vue/apollo-composable";
-import {
-  useNotification,
-  NotificationType,
-} from "@/components/base/BaseNotification.vue";
-import { useI18n } from "vue-i18n";
-import { useRoute, useRouter } from "vue-router";
+import {bulkSelectAllSizeLimit} from "@/main";
+import {computed, onMounted, ref, watch} from "vue";
+import {useBaseModal} from "@/composables/useBaseModal";
+import {useMutation, useQuery} from "@vue/apollo-composable";
+import {NotificationType, useNotification,} from "@/components/base/BaseNotification.vue";
+import {useI18n} from "vue-i18n";
+import {useRoute, useRouter} from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -219,6 +212,10 @@ const enqueueItemsForManifestCollection = () => {
   }
 };
 
+const generateTranscodeFromEntityMediafiles = (type: TranscodeType, entityIds: string[]) => {
+
+}
+
 watch(selectedBulkOperation, () => {
   if (selectedBulkOperation.value?.value === BulkOperationTypes.ExportCsv)
     openModal(TypeModals.BulkOperations, undefined, "right");
@@ -230,6 +227,9 @@ watch(selectedBulkOperation, () => {
   ) {
     enqueueItemsForManifestCollection();
     dequeueAllItemsForBulkProcessing(props.context);
+  }
+  if (selectedBulkOperation.value?.value === BulkOperationTypes.TranscodePdf){
+  generateTranscodeFromEntityMediafiles(TranscodeType.Pdf, getEnqueuedItems(props.context).map((entity: BaseEntity) => entity.id))
   }
 });
 
