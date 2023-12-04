@@ -107,7 +107,8 @@ import {
   RouteNames,
   TranscodeType,
   TypeModals,
-  BulkGenerateTranscodesDocument, BulkGenerateTranscodesMutation
+  GenerateTranscodeDocument,
+  GenerateTranscodeMutationVariables, GenerateTranscodeMutation
 } from "@/generated-types/queries";
 import type {Context, InBulkProcessableItem,} from "@/composables/useBulkOperations";
 import {BulkOperationsContextEnum, useBulkOperations,} from "@/composables/useBulkOperations";
@@ -144,7 +145,7 @@ const emit = defineEmits<{
 const route = useRoute();
 const refetchEnabled = ref<boolean>(false);
 const entityType = computed(() => route.meta.entityType);
-const { mutate } = useMutation<BulkGenerateTranscodesMutation>(BulkGenerateTranscodesDocument)
+const { mutate } = useMutation<GenerateTranscodeMutation>(GenerateTranscodeDocument)
 const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
   GetBulkOperationsDocument,
   { entityType: entityType.value },
@@ -214,8 +215,8 @@ const enqueueItemsForManifestCollection = () => {
   }
 };
 
-const generateTranscodeFromEntityMediafiles = (type: TranscodeType, entityIds: string[]) => {
-  mutate({entityIds, transcodeType: type})
+const generateTranscodeFromMediafiles = (type: TranscodeType, entityIds: string[]) => {
+  mutate({mediafileIds: entityIds, transcodeType: type})
 }
 
 watch(selectedBulkOperation, () => {
@@ -231,7 +232,7 @@ watch(selectedBulkOperation, () => {
     dequeueAllItemsForBulkProcessing(props.context);
   }
   if (selectedBulkOperation.value?.value === BulkOperationTypes.TranscodePdf){
-  generateTranscodeFromEntityMediafiles(TranscodeType.Pdf, getEnqueuedItems(props.context).map((entity: BaseEntity) => entity.id))
+  generateTranscodeFromMediafiles(TranscodeType.Pdf, getEnqueuedItems(props.context).map((entity: BaseEntity) => entity.id))
   }
 });
 
