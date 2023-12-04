@@ -107,6 +107,7 @@ import {
   RouteNames,
   TranscodeType,
   TypeModals,
+  BulkGenerateTranscodesDocument, BulkGenerateTranscodesMutation
 } from "@/generated-types/queries";
 import type {Context, InBulkProcessableItem,} from "@/composables/useBulkOperations";
 import {BulkOperationsContextEnum, useBulkOperations,} from "@/composables/useBulkOperations";
@@ -143,6 +144,7 @@ const emit = defineEmits<{
 const route = useRoute();
 const refetchEnabled = ref<boolean>(false);
 const entityType = computed(() => route.meta.entityType);
+const { mutate } = useMutation<BulkGenerateTranscodesMutation>(BulkGenerateTranscodesDocument)
 const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
   GetBulkOperationsDocument,
   { entityType: entityType.value },
@@ -213,7 +215,7 @@ const enqueueItemsForManifestCollection = () => {
 };
 
 const generateTranscodeFromEntityMediafiles = (type: TranscodeType, entityIds: string[]) => {
-
+  mutate({entityIds, transcodeType: type})
 }
 
 watch(selectedBulkOperation, () => {
@@ -240,6 +242,10 @@ watch(
       selectedBulkOperation.value = undefined;
   }
 );
+
+router.afterEach(() => {
+  refetch( { entityType: entityType.value })
+})
 </script>
 
 <style lang="postcss" scoped>
