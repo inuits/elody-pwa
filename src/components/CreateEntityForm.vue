@@ -2,7 +2,7 @@
   <div>
     <div class="px-6 pt-0 pb-20 bg-neutral-white">
       <div
-        class="py-2"
+        :class="['py-2', {'animate-pulse': loading}]"
         v-show="form"
         v-for="(metadata, index) in getMetadataFields(
           formFields,
@@ -108,7 +108,7 @@ const cannotCreate = computed(() => {
   return !form.value || !form.value.meta.valid;
 });
 
-const { mutate } = useMutation<CreateEntityMutation>(CreateEntityDocument);
+const { mutate, loading } = useMutation<CreateEntityMutation>(CreateEntityDocument);
 const { result, onResult, refetch } = useQuery<GetCreateEntityFormQuery>(
   GetCreateEntityFormDocument,
   { type },

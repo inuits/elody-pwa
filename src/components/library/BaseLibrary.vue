@@ -61,6 +61,7 @@
               (selection) => emit('confirmSelection', selection)
             "
             @no-bulk-operations-available="() => (enableBulkOperations = false)"
+            @refetch="refetchEntities()"
           />
         </div>
       </div>
@@ -278,6 +279,10 @@ const bulkSelect = (items = entities.value) => {
   }
   triggerBulkSelectionEvent(props.bulkOperationsContext);
 };
+
+const refetchEntities = () => {
+  console.log('Refetch')
+}
 
 const initializeBaseLibrary = () => {
   if (!props.predefinedEntities) {
