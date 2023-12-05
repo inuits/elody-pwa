@@ -36,6 +36,7 @@
     <div class="flex w-full justify-start gap-4">
       <div>
         <BaseDropdownNew
+          class="max-h-9"
           v-model="selectedMatcher"
           :options="matchers"
           label="filter "
@@ -54,7 +55,7 @@
         />
       </div>
       <BaseButtonNew
-        class="!w-10"
+        class="!w-9 h-9"
         label=""
         :icon="DamsIcons.Redo"
         :disabled="!selectedMatcher"
@@ -67,23 +68,23 @@
 </template>
 
 <script lang="ts" setup>
+import type { FilterListItem } from "@/components/filters/FiltersBase.vue";
 import type {
   AdvancedFilterInput,
   DropdownOption,
   InputMaybe,
 } from "@/generated-types/queries";
-import { AdvancedFilterTypes, DamsIcons } from "@/generated-types/queries";
-import type { FilterListItem } from "@/components/filters/FiltersBase.vue";
 import {
   BulkOperationsContextEnum,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
+import BaseTooltip from "@/components/base/BaseTooltip.vue";
+import { AdvancedFilterTypes, DamsIcons } from "@/generated-types/queries";
 import { computed, markRaw, ref, toRefs, watch } from "vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
-import BaseTooltip from "@/components/base/BaseTooltip.vue";
 
 const props = defineProps<{
   filter: FilterListItem;
