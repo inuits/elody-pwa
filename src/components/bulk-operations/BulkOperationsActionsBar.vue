@@ -224,6 +224,7 @@ const generateTranscodeFromMediafiles = (type: TranscodeType, entityIds: string[
         t("notifications.default.generate-transcode.title"),
         t("notifications.default.generate-transcode.description")
     );
+    dequeueAllItemsForBulkProcessing(props.context)
     emit('refetch')
   })
 }
