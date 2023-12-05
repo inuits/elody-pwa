@@ -281,7 +281,7 @@ const bulkSelect = (items = entities.value) => {
 };
 
 const refetchEntities = () => {
-  console.log('Refetch')
+  getEntities(true)
 }
 
 const initializeBaseLibrary = () => {
