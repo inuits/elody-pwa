@@ -108,19 +108,20 @@ import {
   TranscodeType,
   TypeModals,
   GenerateTranscodeDocument,
-  GenerateTranscodeMutationVariables, GenerateTranscodeMutation
+  GenerateTranscodeMutation
 } from "@/generated-types/queries";
 import type {Context, InBulkProcessableItem,} from "@/composables/useBulkOperations";
 import {BulkOperationsContextEnum, useBulkOperations,} from "@/composables/useBulkOperations";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
-import {bulkSelectAllSizeLimit} from "@/main";
+import {apolloClient, bulkSelectAllSizeLimit} from "@/main";
 import {computed, onMounted, ref, watch} from "vue";
 import {useBaseModal} from "@/composables/useBaseModal";
 import {useMutation, useQuery} from "@vue/apollo-composable";
 import {NotificationType, useNotification,} from "@/components/base/BaseNotification.vue";
 import {useI18n} from "vue-i18n";
 import {useRoute, useRouter} from "vue-router";
+import {useBaseLibrary} from "@/components/library/useBaseLibrary";
 
 const props = withDefaults(
   defineProps<{
@@ -140,6 +141,7 @@ const emit = defineEmits<{
   (event: "selectAll"): void;
   (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
   (event: "noBulkOperationsAvailable"): void;
+  (event: "refetch"): void;
 }>();
 
 const route = useRoute();
@@ -216,7 +218,14 @@ const enqueueItemsForManifestCollection = () => {
 };
 
 const generateTranscodeFromMediafiles = (type: TranscodeType, entityIds: string[]) => {
-  mutate({mediafileIds: entityIds, transcodeType: type})
+  mutate({mediafileIds: entityIds, transcodeType: type}).then(() => {
+    createNotificationOverwrite(
+        NotificationType.default,
+        t("notifications.default.generate-transcode.title"),
+        t("notifications.default.generate-transcode.description")
+    );
+    emit('refetch')
+  })
 }
 
 watch(selectedBulkOperation, () => {
