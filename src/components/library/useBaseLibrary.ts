@@ -171,6 +171,13 @@ export const useBaseLibrary = (
   const entitiesLoading = ref<boolean>(false);
   const entitiesLoaded = ref<boolean>(false);
   const { isSaved } = useEditMode();
+  const manipulateQuery = ref<boolean>(false);
+  const manipulationQuery = ref<object>();
+
+  const setManipulationOfQuery = (manipulate: boolean, manipulation: object) => {
+    manipulateQuery.value = manipulate;
+    manipulationQuery.value = manipulation;
+  }
 
   const __setEntitiesLoading = (isLoading: boolean) =>
     (entitiesLoading.value = isLoading);
@@ -264,9 +271,9 @@ export const useBaseLibrary = (
 
   const __doEntitiesCall = () => {
     apolloClient
-      .query<GetEntitiesQuery>({
-        query: GetEntitiesDocument,
-        variables: queryVariables.value,
+      .query({
+        query: manipulateQuery.value ? manipulationQuery.value.document : GetEntitiesDocument,
+        variables: manipulateQuery.value ? manipulationQuery.value.variables : queryVariables.value,
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
       })
@@ -335,6 +342,7 @@ export const useBaseLibrary = (
     paginationLimitOptions,
     queryVariables,
     setAdvancedFilters,
+    setManipulationOfQuery,
     setEntities,
     setEntityType,
     setTotalEntityCount,

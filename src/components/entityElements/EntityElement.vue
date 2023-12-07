@@ -16,6 +16,7 @@
         :isCollapsed="element.isCollapsed"
         :types="element.entityTypes as string[]"
         :metaKey="element.metaKey"
+        :custom-query="element.customQuery"
         :entity-list="(element.entityList as Entity[]) ?? []"
         :identifiers="identifiers"
         :relationType="element.relationType"

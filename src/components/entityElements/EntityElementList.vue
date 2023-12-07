@@ -19,7 +19,8 @@
         </div>
       </template>
       <template v-slot:content>
-        <div class="ml-1 bg-neutral-lightest">
+        <div v-if="!requiresCustomQuery || queryLoaded"
+            class="ml-1 bg-neutral-lightest">
           <BaseLibrary
             class="flex-1"
             :bulk-operations-context="
@@ -36,6 +37,7 @@
             list-item-route-name="SingleEntity"
             :relation-type="relationType"
             :has-sticky-bars="false"
+            :use-other-query="newQuery"
           />
         </div>
       </template>
@@ -65,17 +67,25 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
-import { watch } from "vue";
+import { watch, ref, onBeforeMount } from "vue";
+import { useImport } from "@/composables/useImport";
+import {bulkSelectAllSizeLimit} from "@/main";
 
 const { addRelations } = useFormHelper();
 const { createCustomContext } = useBulkOperations();
 const { toggleElementCollapse } = useEntityElementCollapseHelper();
+const { setAcceptedTypes, setRelationType } = useEntityPickerModal();
+const { openModal } = useBaseModal();
+const { setQueryName, loadDocument } = useImport();
+const { isEdit } = useEditMode();
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
     isCollapsed: Boolean;
     types: string[];
     label: string;
+    customQuery: String;
     entityList: Entity[];
     identifiers: string[];
     relationType: string;
@@ -96,6 +106,52 @@ watch(
   }
 );
 
+const requiresCustomQuery = ref<boolean>(props.customQuery != undefined);
+const queryLoaded = ref<boolean>(false);
+const newQuery = ref<object>(undefined);
+
+onBeforeMount(async () => {
+  if (!requiresCustomQuery.value)
+    return;
+  setQueryName(props.customQuery);
+  const document = await loadDocument();
+  const variables = {
+    limit: bulkSelectAllSizeLimit,
+    skip: 1,
+    searchValue: {
+      value: "",
+      isAsc: false,
+      key: "title",
+      order_by: "code",
+    },
+    advancedSearchValue: [],
+    advancedFilterInputs: [
+      {
+        type: "type",
+        value: "PoliceZone",
+        match_exact: true
+      },
+      {
+        type: "selection",
+        parent_key: "relations",
+        key: "hasTenant",
+        value: [
+          props.identifiers[0]
+        ],
+        match_exact: true
+      }
+    ],
+    searchInputType: "AdvancedInputType",
+    userUuid: props.identifiers[0]
+  }
+  newQuery.value = {
+    name: props.customQuery,
+    document: document,
+    variables: variables,
+  };
+  queryLoaded.value = true;
+});
+
 const updateRelationForm = (newTags: String[]) => {
   if (typeof newTags == "string") {
     return;
@@ -107,8 +163,4 @@ const updateRelationForm = (newTags: String[]) => {
   addRelations(InBulkProcessableItems);
 };
 
-const { setAcceptedTypes, setRelationType } = useEntityPickerModal();
-const { openModal } = useBaseModal();
-const { isEdit } = useEditMode();
-const { t } = useI18n();
 </script>
