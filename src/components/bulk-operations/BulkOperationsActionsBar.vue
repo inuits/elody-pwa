@@ -108,7 +108,7 @@ import {
   TranscodeType,
   TypeModals,
   GenerateTranscodeDocument,
-  GenerateTranscodeMutation
+  GenerateTranscodeMutation, Entitytyping
 } from "@/generated-types/queries";
 import type {Context, InBulkProcessableItem,} from "@/composables/useBulkOperations";
 import {BulkOperationsContextEnum, useBulkOperations,} from "@/composables/useBulkOperations";
@@ -121,7 +121,6 @@ import {useMutation, useQuery} from "@vue/apollo-composable";
 import {NotificationType, useNotification,} from "@/components/base/BaseNotification.vue";
 import {useI18n} from "vue-i18n";
 import {useRoute, useRouter} from "vue-router";
-import {useBaseLibrary} from "@/components/library/useBaseLibrary";
 
 const props = withDefaults(
   defineProps<{
@@ -129,6 +128,7 @@ const props = withDefaults(
     totalItemsCount: number;
     useExtendedBulkOperations: boolean;
     confirmSelectionButton?: boolean;
+    entityType: Entitytyping;
   }>(),
   {
     totalItemsCount: 0,
@@ -146,7 +146,7 @@ const emit = defineEmits<{
 
 const route = useRoute();
 const refetchEnabled = ref<boolean>(false);
-const entityType = computed(() => route.meta.entityType);
+const entityType = computed(() => props.entityType || route.meta.entityType);
 const { mutate } = useMutation<GenerateTranscodeMutation>(GenerateTranscodeDocument)
 const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
   GetBulkOperationsDocument,
