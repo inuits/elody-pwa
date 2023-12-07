@@ -174,6 +174,7 @@ const props = withDefaults(
     hasStickyBars?: boolean;
     filters?: AdvancedFilterInput[];
     isSearchLibrary?: boolean;
+    useOtherQuery?: object;
   }>(),
   {
     predefinedEntities: undefined,
@@ -190,6 +191,7 @@ const props = withDefaults(
     hasStickyBars: true,
     filters: () => [],
     isSearchLibrary: false,
+    useOtherQuery: undefined,
   }
 );
 
@@ -213,6 +215,7 @@ const {
   paginationLimitOptions,
   queryVariables,
   setAdvancedFilters,
+  setManipulationOfQuery,
   setEntities,
   setEntityType,
   setTotalEntityCount,
@@ -245,24 +248,34 @@ const entityType = computed(() =>
   props.entityType ? props.entityType : route.meta.entityType ? (route.meta.entityType as Entitytyping) : "BaseEntity"
 );
 
-const allEntitiesQueryVariables: GetEntitiesQueryVariables = {
-  limit: bulkSelectAllSizeLimit,
-  skip: 1,
-  searchValue: {
-    value: "",
-    isAsc: isAsc.value,
-    key: "title",
-    order_by: "",
-  },
-  advancedSearchValue: [],
-  advancedFilterInputs: [],
-  searchInputType: props.searchInputTypeOnDrawer,
-};
-const { result: allEntitiesResult } = useQuery(
-  GetEntitiesDocument,
-  allEntitiesQueryVariables,
-  () => ({ enabled: false, fetchPolicy: "network-only" })
+const useOtherQuery = computed(() =>
+   props.useOtherQuery !== undefined
 );
+
+if (useOtherQuery.value) {
+  setManipulationOfQuery(true, props.useOtherQuery);
+}
+else {
+  const allEntitiesQueryVariables: GetEntitiesQueryVariables = {
+    limit: bulkSelectAllSizeLimit,
+    skip: 1,
+    searchValue: {
+      value: "",
+      isAsc: isAsc.value,
+      key: "title",
+      order_by: "",
+    },
+    advancedSearchValue: [],
+    advancedFilterInputs: [],
+    searchInputType: props.searchInputTypeOnDrawer,
+  };
+  const { result: allEntitiesResult } = useQuery(
+      GetEntitiesDocument,
+      allEntitiesQueryVariables,
+      () => ({ enabled: false, fetchPolicy: "network-only" })
+  );
+}
+
 const bulkSelect = (items = entities.value) => {
   if (props.predefinedEntities) items = props.predefinedEntities;
   for (let entity of items) {
