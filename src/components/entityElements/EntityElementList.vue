@@ -111,6 +111,8 @@ const queryLoaded = ref<boolean>(false);
 const newQuery = ref<object>(undefined);
 
 onBeforeMount(async () => {
+  console.log(props.types);
+  console.log(props.relationType);
   if (!requiresCustomQuery.value)
     return;
   setQueryName(props.customQuery);
@@ -121,20 +123,20 @@ onBeforeMount(async () => {
     searchValue: {
       value: "",
       isAsc: false,
-      key: "title",
-      order_by: "code",
+      key: "",
+      order_by: "",
     },
     advancedSearchValue: [],
     advancedFilterInputs: [
       {
         type: "type",
-        value: "PoliceZone",
+        value: props.types[0],
         match_exact: true
       },
       {
         type: "selection",
         parent_key: "relations",
-        key: "hasTenant",
+        key: props.relationType,
         value: [
           props.identifiers[0]
         ],
