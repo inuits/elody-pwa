@@ -55,6 +55,7 @@
             :total-items-count="totalEntityCount"
             :use-extended-bulk-operations="true"
             :confirm-selection-button="confirmSelectionButton"
+            :entity-type="entityType as Entitytyping"
             @select-page="bulkSelect"
             @select-all="bulkSelect(allEntitiesResult.Entities.results)"
             @confirm-selection="
@@ -162,6 +163,7 @@ const props = withDefaults(
     enablePreview?: boolean;
     enableAdvancedFilters?: boolean;
     enableBulkOperations?: boolean;
+    entityType?: Entitytyping
     filterType?: string;
     parentEntityIdentifiers?: string[];
     confirmSelectionButton?: boolean;
@@ -240,7 +242,7 @@ const isAsc = ref<boolean>(false);
 let toggles: ViewModes.type[] = [];
 
 const entityType = computed(() =>
-  route.meta.entityType ? (route.meta.entityType as Entitytyping) : "BaseEntity"
+  props.entityType ? props.entityType : route.meta.entityType ? (route.meta.entityType as Entitytyping) : "BaseEntity"
 );
 
 const allEntitiesQueryVariables: GetEntitiesQueryVariables = {

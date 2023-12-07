@@ -50,6 +50,7 @@
         "
         :filter-type="Entitytyping.Mediafile"
         list-item-route-name="SingleEntity"
+        :entity-type="Entitytyping.Mediafile"
       />
       <!-- Not yet refactored old component -->
       <base-map
@@ -68,13 +69,13 @@
 <script lang="ts" setup>
 import {
   Entitytyping,
+  type MediaFileElement,
   MediaFileElementTypes,
+  type MetadataAndRelation,
+  type PanelMetaData,
   PanelType,
   SearchInputType,
   TypeModals,
-  type MediaFileElement,
-  type MetadataAndRelation,
-  type PanelMetaData,
 } from "@/generated-types/queries";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseMap from "../base/BaseMap.vue";
@@ -82,14 +83,14 @@ import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import useEditMode from "@/composables/useEdit";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { asString, getValueForPanelMetadata } from "@/helpers";
-import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
-import { computed } from "vue";
-import { Unicons } from "@/types";
-import { useBaseModal } from "@/composables/useBaseModal";
-import { useRoute } from "vue-router";
-import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
-import { useI18n } from "vue-i18n";
+import {asString, getValueForPanelMetadata} from "@/helpers";
+import {BulkOperationsContextEnum} from "@/composables/useBulkOperations";
+import {computed} from "vue";
+import {Unicons} from "@/types";
+import {useBaseModal} from "@/composables/useBaseModal";
+import {useRoute} from "vue-router";
+import {useEntityMediafileSelector} from "@/composables/useEntityMediafileSelector";
+import {useI18n} from "vue-i18n";
 
 const props = defineProps<{
   element: MediaFileElement;
