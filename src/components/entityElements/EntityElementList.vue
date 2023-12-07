@@ -111,8 +111,6 @@ const queryLoaded = ref<boolean>(false);
 const newQuery = ref<object>(undefined);
 
 onBeforeMount(async () => {
-  console.log(props.types);
-  console.log(props.relationType);
   if (!requiresCustomQuery.value)
     return;
   setQueryName(props.customQuery);
