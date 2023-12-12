@@ -41,7 +41,7 @@ import {
 import BaseDropdownNew from "../base/BaseDropdownNew.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
-import { onMounted, watch, ref } from "vue";
+import { onMounted, watch, ref, computed } from "vue";
 import { useField } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
@@ -54,18 +54,25 @@ const props = defineProps<{
   formId: string;
   unit?: string;
   linkText?: string;
+  isMetadataOnRelation?: boolean;
 }>();
-const { getForm } = useFormHelper();
+const { getForm, addEditableMetadataOnRelationKey } = useFormHelper();
 let form: FormContext | undefined = undefined;
 const { t } = useI18n();
+const fieldKeyWithoutId = computed(() => {
+  return props.fieldKey.slice(0, props.fieldKey.indexOf("-"));
+})
+
 const metadataValue = ref<string | DropdownOption>(props.value)
 const {
   errorMessage,
   value: fieldValue,
   setValue,
 } = useField<string>(
-  "intialValues." + props.fieldKey,
-  props.field && props.field.validation ? props.field.validation : undefined,
+    props.isMetadataOnRelation
+        ? `relationValues.newrelations.${props.fieldKey}`
+        : `intialValues.${props.fieldKey}`,
+    props.field && props.field.validation ? props.field.validation : undefined,
   {
     label: t(props.label),
   }
@@ -74,12 +81,19 @@ const {
 onMounted(() => {
   form = getForm(props.formId);
   setValue(props.value);
+  if (props.isMetadataOnRelation) addEditableMetadataOnRelationKey(props.fieldKey, props.formId);
 });
 
-watch(() => metadataValue.value, () => {
-if (typeof metadataValue.value === 'string') setValue(metadataValue.value)
-else {
-    setValue(metadataValue.value.value)
+const getValueFromMetadata = () => {
+  if (typeof metadataValue.value === "string") return metadataValue.value
+  return metadataValue.value.value
 }
+
+watch(() => metadataValue.value, () => {
+  const newValue = getValueFromMetadata()
+  if (!props.isMetadataOnRelation)
+    form?.setFieldValue(`intialValues.${props.fieldKey}`, newValue);
+  else
+    form?.setFieldValue(`relationValues.newrelations.${fieldKeyWithoutId}`, newValue)
 })
 </script>
