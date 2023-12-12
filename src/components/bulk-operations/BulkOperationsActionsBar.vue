@@ -254,8 +254,8 @@ watch(
   }
 );
 
-router.afterEach(() => {
-  refetch( { entityType: entityType.value })
+watch(() => entityType.value, (type: Entitytyping) => {
+  refetch( { entityType: type })
 })
 </script>
 
