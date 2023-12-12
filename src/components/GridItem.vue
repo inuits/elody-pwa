@@ -62,13 +62,7 @@
               v-for="metadataItem in teaserMetadata"
               :key="metadataItem ? metadataItem.value : 'no-key'"
             >
-              <entity-element-metadata
-                :label="metadataItem.label"
-                :value="metadataItem.value"
-                :unit="metadataItem.unit"
-                :link-text="metadataItem.linkText"
-                :link-icon="metadataItem.linkIcon"
-              />
+              <metadata-wrapper form-id="gridItem" :metadata="metadataItem as MetadataField" :is-edit="false"/>
             </div>
           </div>
           <div class="w-full" v-else>
@@ -96,15 +90,15 @@ import {
   EditStatus,
   type BaseRelationValuesInput,
   type MetadataAndRelation,
-  type Metadata
+  type Metadata, MetadataField
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
-import EntityElementMetadata from "@/components/EntityElementMetadata.vue";
 import useEditMode from "@/composables/useEdit";
 import { useAuth } from "session-vue-3-oidc-library";
 import { computed, ref, watch } from "vue";
 import { stringIsUrl } from "@/helpers";
+import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 
 const props = withDefaults(
   defineProps<{

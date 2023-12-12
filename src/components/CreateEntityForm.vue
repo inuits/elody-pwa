@@ -11,15 +11,7 @@
         )"
         :key="metadata.label"
       >
-        <entity-element-metadata-edit
-          class="-ml-4"
-          v-model:value="metadata.value"
-          :label="t(metadata.label)"
-          :field="metadata.field"
-          :fieldKey="metadata.key"
-          form-id="createEntity"
-          :is-edit="true"
-        />
+        <metadata-wrapper class="-ml-4" form-id="createEntity" :metadata="metadata as MetadataField" :is-edit="true"/>
       </div>
       <div class="absolute left-0 bottom-6 w-full px-6">
         <BaseButtonNew
@@ -40,7 +32,7 @@ import {
   CreateEntityDocument,
   DamsIcons,
   Entitytyping,
-  GetCreateEntityFormDocument,
+  GetCreateEntityFormDocument, MetadataField,
   PanelType,
   TypeModals,
 } from "@/generated-types/queries";
@@ -50,7 +42,6 @@ import type {
   PanelMetaData,
 } from "@/generated-types/queries";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import EntityElementMetadataEdit from "@/components/EntityElementMetadataEdit.vue";
 import { computed, inject, onMounted, ref, watch } from "vue";
 import { getMetadataFields } from "@/helpers";
 import { NotificationType } from "@/components/base/BaseNotification.vue";
@@ -64,6 +55,7 @@ import { useConfirmModal } from "@/composables/useConfirmModal";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import type { ApolloClient } from "@apollo/client/core";
+import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 
 const props = defineProps<{
   entityType: Entitytyping;

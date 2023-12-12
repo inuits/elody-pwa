@@ -1,6 +1,5 @@
 import {
   useNotification,
-  NotificationType,
 } from "@/components/base/BaseNotification.vue";
 import useMediaAssetLinkHelper from "@/composables/useMediaAssetLinkHelper";
 import useMetaDataHelper from "@/composables/useMetaDataHelper";
@@ -17,7 +16,6 @@ const isEditToggleVisible = ref<"no-edit" | "edit" | "edit-delete">("no-edit");
 const refetchFn = ref<Function>();
 
 export const useEditMode = () => {
-  const { createNotification } = useNotification();
   const { linkMediaFilesToEntity, clearMediaFilesToLinkToEntity } =
     useMediaAssetLinkHelper();
   const {

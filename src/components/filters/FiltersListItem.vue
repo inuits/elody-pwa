@@ -39,7 +39,6 @@
           class="max-h-9"
           v-model="selectedMatcher"
           :options="matchers"
-          label="filter "
           label-position="inline"
           :default-label="t('filters.matcher-labels.select-filter-type')"
           dropdown-style="default"

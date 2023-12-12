@@ -2,7 +2,7 @@
   <div :key="locale" class="float-right">
     <BaseDropdownNew
       v-if="languageOptions"
-      v-model="selectedLanguageOption"
+      v-model:model-value="selectedLanguageOption"
       :options="languageOptions"
       label-position="inline"
       dropdown-style="default"
@@ -21,9 +21,9 @@ const { availableLocales, locale, t } = useI18n();
 const selectedLanguageOption = ref<DropdownOption | undefined>();
 
 const createOptionsFromAvailableLanguages = (
-  avilableLanguages: string[]
+  availableLanguages: string[]
 ): DropdownOption[] => {
-  return avilableLanguages.map((language) => ({
+  return availableLanguages.map((language) => ({
     icon: DamsIcons.NoIcon,
     label: t("language." + language),
     value: language,
