@@ -55,7 +55,7 @@
       dropdown-style="defaultWithBorder"
       @update:model-value="setComputedValue"
     />
-    <p v-if="computedValue.length > 1" class="text-red-default">
+    <p v-if="computedValue && computedValue.length > 1" class="text-red-default">
       {{ errorMessage }}
     </p>
   </div>
@@ -71,7 +71,7 @@ import {
 import BaseDropdownNew from "./base/BaseDropdownNew.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
-import { computed, onMounted } from "vue";
+import { computed, onMounted, watch } from "vue";
 import { useField } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
@@ -121,6 +121,14 @@ onMounted(() => {
   if (props.isMetadataOnRelation) addEditableMetadataOnRelationKey(props.fieldKey, props.formId);
 });
 
+watch(
+    () => props.isEdit,
+    () => {
+      if (!props.isEdit && props.isMetadataOnRelation)
+        setValue(props.value);
+    }
+);
+
 const computedValue = computed<any>({
   get() {
     return fieldValue.value;
@@ -134,7 +142,7 @@ const computedValue = computed<any>({
       if (!props.isMetadataOnRelation)
         form.setFieldValue(`intialValues.${props.fieldKey}`, value);
       else
-        form.setFieldValue(`relationValues.newrelations.${fieldKeyWithoutId}`)
+        form.setFieldValue(`relationValues.newrelations.${fieldKeyWithoutId}`, value);
     }
   },
 });
