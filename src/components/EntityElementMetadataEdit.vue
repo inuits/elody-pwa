@@ -85,16 +85,24 @@ const props = defineProps<{
   isEdit: boolean;
   unit?: string;
   linkText?: string;
+  isMetadataOnRelation?: boolean;
 }>();
-const { getForm } = useFormHelper();
+const { getForm, addEditableMetadataOnRelationKey } = useFormHelper();
 let form: FormContext | undefined = undefined;
 const { t } = useI18n();
+
+const fieldKeyWithoutId = computed(() => {
+  return props.fieldKey.slice(0, props.fieldKey.indexOf("-"));
+})
+
 const {
   errorMessage,
   value: fieldValue,
   setValue,
 } = useField<string>(
-  "intialValues." + props.fieldKey,
+  props.isMetadataOnRelation
+      ? `relationValues.newrelations.${props.fieldKey}`
+      : `intialValues.${props.fieldKey}`,
   props.field && props.field.validation ? props.field.validation : undefined,
   {
     label: t(props.label),
@@ -110,6 +118,7 @@ const translatedLinkText = computed(() =>
 onMounted(() => {
   form = getForm(props.formId);
   setValue(props.value);
+  if (props.isMetadataOnRelation) addEditableMetadataOnRelationKey(props.fieldKey, props.formId);
 });
 
 const computedValue = computed<any>({
@@ -122,7 +131,10 @@ const computedValue = computed<any>({
       if (Array.isArray(value)) value = value[0];
     }
     if (form) {
-      form.setFieldValue(`intialValues.${props.fieldKey}`, value);
+      if (!props.isMetadataOnRelation)
+        form.setFieldValue(`intialValues.${props.fieldKey}`, value);
+      else
+        form.setFieldValue(`relationValues.newrelations.${fieldKeyWithoutId}`)
     }
   },
 });

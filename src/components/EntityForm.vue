@@ -67,6 +67,13 @@ let mutatedEntity: Entity | undefined;
 
 const { setValues } = form;
 
+const linkedEntityId = (key) => {
+  return key.slice(key.indexOf("-") + 1, key.length);
+}
+const fieldKeyWithoutId = (key) => {
+  return key.slice(0, key.indexOf("-"));
+}
+
 const parseFormValuesToFormInput = (values: EntityValues) => {
   const metadata: MetadataValuesInput[] = [];
   Object.keys(values.intialValues)
@@ -91,6 +98,23 @@ const parseFormValuesToFormInput = (values: EntityValues) => {
     relations.push(relationInput);
   });
 
+  if (values.relationValues?.newrelations) {
+    Object.entries(values.relationValues?.newrelations)
+        .filter((entry) => !editableFields.value[entityId.value].includes(entry.key))
+        .forEach((entry) => {
+          const newRelationObject = {
+            key: fieldKeyWithoutId(entry[0]),
+            value: entry[1]
+          }
+          const id = linkedEntityId(entry[0])
+          for (let i = 0; i < relations.length; i++) {
+            if (relations[i].key === id) {
+              relations[i].metadata = [newRelationObject];
+              relations[i].editStatus = EditStatus.Changed;
+            }
+          }
+        })
+  }
   return { metadata, relations };
 };
 
