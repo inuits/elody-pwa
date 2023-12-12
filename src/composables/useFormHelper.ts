@@ -126,6 +126,13 @@ const useFormHelper = () => {
     return keyArray;
   };
 
+  const addEditableMetadataOnRelationKey = (
+      key: string,
+      formId: string
+  ): void => {
+    editableFields.value[formId].push(key);
+  }
+
   const route = useRoute();
 
   const getFormByRouteId = () => {
@@ -193,6 +200,7 @@ const useFormHelper = () => {
     deleteForms,
     forms,
     getEditableMetadataKeys,
+    addEditableMetadataOnRelationKey,
     editableFields,
     createEntityValues,
     formContainsValues,
