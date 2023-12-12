@@ -1,6 +1,5 @@
 <template>
-  <div class="text-sm pl-4">
-    <p class="text-text-light w-full">{{ t(label || "") }}</p>
+  <div class="text-sm">
     <div v-if="Array.isArray(readableValue)">
       <div v-for="item in readableValue" :key="item">
         <p v-if="!stringIsUrl(item)">{{ item }}</p>

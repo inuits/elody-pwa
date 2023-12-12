@@ -43,17 +43,7 @@
               :relationType="metadata.relationType"
               :viewMode="metadata.viewMode"
             />
-            <entity-element-metadata-edit
-              v-else
-              :fieldKey="metadata.key"
-              :label="metadata.label as string"
-              v-model:value="metadata.value"
-              :field="metadata.field"
-              :formId="formId"
-              :is-edit="isEdit"
-              :unit="metadata.unit"
-              :link-text="metadata.linkText"
-            />
+            <metadata-wrapper :form-id="formId" :is-edit="isEdit" :metadata="metadata as MetadataField"/>
           </div>
         </div>
       </div>
@@ -65,9 +55,8 @@
 import type {
   PanelRelation,
   WindowElementPanel,
-  Entity,
+  Entity, MetadataField,
 } from "@/generated-types/queries";
-import EntityElementMetadataEdit from "@/components/EntityElementMetadataEdit.vue";
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
 import EntityElementList from "@/components/entityElements/EntityElementList.vue";
 import { computed, inject, ref } from "vue";
@@ -76,6 +65,7 @@ import { PanelType } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
+import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 
 const props = defineProps<{
   panel: WindowElementPanel;

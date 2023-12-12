@@ -44,24 +44,7 @@
         :key="metadataItem ? metadataItem.key : 'no-key'"
         class="flex justify-start flex-col mx-2 break-words w-1/4"
       >
-        <entity-element-metadata
-          v-if="!metadataItem.inputField"
-          :label="metadataItem.label"
-          :value="metadataItem.value"
-          :unit="metadataItem.unit as string"
-          :link-text="metadataItem.linkText"
-          :link-icon="metadataItem.linkIcon"
-        />
-        <entity-element-metadata-edit
-          v-else
-          :fieldKey="`${metadataItem.key}-${intialValues.id}`"
-          :label="metadataItem.label as string"
-          v-model:value="metadataItem.value"
-          :field="metadataItem.inputField"
-          :formId="formId"
-          :is-edit="isEdit"
-          :is-metadata-on-relation="true"
-        />
+        <metadata-wrapper form-id="listItem" :metadata="metadataItem as MetadataField" :is-edit="false"/>
       </div>
     </div>
 
@@ -100,18 +83,17 @@ import {
   DamsIcons,
   EditStatus,
   type BaseRelationValuesInput,
-  type Metadata,
+  type Metadata, MetadataField,
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
-import EntityElementMetadata from "@/components/EntityElementMetadata.vue";
 import useEditMode from "@/composables/useEdit";
 import { useAuth } from "session-vue-3-oidc-library";
 import { computed, ref, watch } from "vue";
 import {getEntityIdFromRoute, stringIsUrl} from "@/helpers";
 import { Unicons } from "@/types";
 import { useFieldArray } from "vee-validate";
-import EntityElementMetadataEdit from "@/components/EntityElementMetadataEdit.vue";
+import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 
 const props = withDefaults(
   defineProps<{

@@ -1,158 +1,60 @@
 <template>
-  <ul
-    ref="dropdown"
-    class="relative w-full h-full px-3 select-none border"
-    :class="[
-      `${selectedDropdownStyle.textColor} ${selectedDropdownStyle.bgColor} ${selectedDropdownStyle.borderColor}`,
-      showOptions ? 'rounded-t-lg' : 'rounded-lg',
-      disabled
-        ? `${selectedDropdownStyle.disabledStyle.textColor} ${selectedDropdownStyle.disabledStyle.bgColor} ${selectedDropdownStyle.disabledStyle.borderColor}`
-        : '',
-    ]"
-  >
-    <li
-      @click="() => (!disabled ? (showOptions = !showOptions) : undefined)"
-      class="flex justify-between h-full py-1"
-      :class="disabled ? 'cursor-normal' : 'cursor-pointer'"
-    >
-      <div class="flex justify-start items-center">
-        <unicon
-          v-if="
-            selectedOption.icon !== 'NoIcon' && selectedOptionIsNotDefaultOption
-          "
-          :name="Unicons[selectedOption.icon].name"
-          class="h-5 mr-2 -ml-0.5"
-        />
-        <span class="whitespace-nowrap">
-          <span
-            v-if="
-              labelPosition === 'inline' &&
-              selectedOptionIsNotDefaultOption &&
-              labelAlignment === 'left'
-            "
-            >{{ label }}
-          </span>
-          {{ selectedOptionLabel }}
-          <span
-            v-if="
-              labelPosition === 'inline' &&
-              selectedOptionIsNotDefaultOption &&
-              labelAlignment === 'right'
-            "
-          >
-            {{ label }}</span
-          >
-        </span>
-      </div>
-      <div class="flex justify-end items-center">
-        <unicon :name="Unicons[arrowIcon].name" class="ml-2 -mr-1" />
-      </div>
-    </li>
-    <div
-      v-show="showOptions"
-      class="absolute z-10 rounded-b-lg border-x border-b"
-      :class="[
-        `${selectedDropdownStyle.textColor} ${selectedDropdownStyle.bgColor} ${selectedDropdownStyle.borderColor}`,
-        `${selectedDropdownStyle.borderColor}` !== 'border-none'
-          ? 'extra_width -mx-[13px]'
-          : 'w-full -mx-[12px]',
-      ]"
-    >
-      <li
-        v-for="option in options"
-        :key="option.value"
-        class="flex h-full px-3 py-1.5 items-center last:rounded-b-lg transition-colors duration-300"
-        :class="[
-          `${selectedDropdownStyle.hoverStyle.textColor} ${selectedDropdownStyle.hoverStyle.bgColor} ${selectedDropdownStyle.hoverStyle.borderColor}`,
-          disabled ? 'cursor-normal' : 'cursor-pointer',
-        ]"
-        @click="selectOption(option)"
-      >
-        <unicon
-          v-if="option.icon !== 'NoIcon'"
-          :name="Unicons[option.icon].name"
-          class="h-5 mr-2 -ml-0.5"
-        />
-        <span>{{ optionLabel(option) }}</span>
-      </li>
-    </div>
-  </ul>
+  <div v-if="options.length" :class="[labelPosition === 'inline' ? 'flex items-center' : undefined]">
+  <p :class="['pr-2']" v-if="label">{{t(label)}}</p>
+  <select :class="['cursor-pointer', dropdownStyles[dropdownStyle].style]" v-model="selectedItemLabel">
+    <option v-for="option in options" :key="option.value" :value="option.label" @click="selectItem(option)" :class="[dropdownStyles[dropdownStyle].hoverStyle]">{{t(option.label)}}</option>
+  </select>
+  </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref, toRefs, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { DamsIcons, type DropdownOption } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 
-type PseudoStyle = {
-  textColor: string;
-  bgColor: string;
-  borderColor: string;
-};
 type Dropdown = {
-  textColor: string;
-  bgColor: string;
-  borderColor: string;
-  hoverStyle: PseudoStyle;
-  disabledStyle: PseudoStyle;
+  style: string
+  hoverStyle: string;
+  disabledStyle: string;
 };
+
 const defaultDropdown: Dropdown = {
-  textColor: "text-text-body",
-  bgColor: "bg-neutral-white",
-  borderColor: "border-none",
-  hoverStyle: {
-    textColor: "hover:text-accent-accent",
-    bgColor: "hover:bg-neutral-lightest",
-    borderColor: "hover:border-none",
-  },
-  disabledStyle: {
-    textColor: "text-text-disabled",
-    bgColor: "bg-neutral-lightest",
-    borderColor: "border-none",
-  },
+  style: "text-text-body bg-neutral-white border-none rounded-lg",
+  hoverStyle: "hover:text-accent-accent hover:bg-neutral-lightest hover:border-none",
+  disabledStyle: "text-text-disabled bg-neutral-lightest border-none"
+};
+const defaultFullWidthDropdown: Dropdown = {
+  style: "text-text-body bg-neutral-white border-none rounded-lg w-full",
+  hoverStyle: "hover:text-accent-accent hover:bg-neutral-lightest hover:border-none",
+  disabledStyle: "text-text-disabled bg-neutral-lightest border-none"
 };
 const defaultWithBorderDropdown: Dropdown = {
-  textColor: defaultDropdown.textColor,
-  bgColor: defaultDropdown.bgColor,
-  borderColor: "border-[rgba(0,58,82,0.6)]",
-  hoverStyle: {
-    textColor: defaultDropdown.hoverStyle.textColor,
-    bgColor: defaultDropdown.hoverStyle.bgColor,
-    borderColor: "hover:border-[rgba(0,58,82,0.6)]",
-  },
-  disabledStyle: {
-    textColor: defaultDropdown.disabledStyle.textColor,
-    bgColor: defaultDropdown.disabledStyle.bgColor,
-    borderColor: "border-text-disabled",
-  },
+  style: "text-text-body bg-neutral-white border-[rgba(0,58,82,0.6)] rounded-lg w-full",
+  hoverStyle: "hover:text-accent-accent hover:bg-neutral-lightest hover:border-[rgba(0,58,82,0.6)]",
+  disabledStyle: "text-text-disabled bg-neutral-lightest border-text-disabled",
 };
 const accentAccentDropdown: Dropdown = {
-  textColor: "text-neutral-white",
-  bgColor: "bg-accent-accent",
-  borderColor: "border-none",
+  style: "text-neutral-white bg-accent-accent border-none rounded-lg",
   hoverStyle: defaultDropdown.hoverStyle,
   disabledStyle: defaultDropdown.disabledStyle,
 };
 const neutralLightDropdown: Dropdown = {
-  textColor: "text-text-body",
-  bgColor: "bg-neutral-light",
-  borderColor: "border-none",
-  hoverStyle: {
-    textColor: "hover:text-[rgba(0,58,82,0.8)]",
-    bgColor: "hover:bg-neutral-lightest",
-    borderColor: "hover:border-none",
-  },
+  style: "text-text-body bg-neutral-light border-none rounded-lg",
+  hoverStyle: "hover:text-[rgba(0,58,82,0.8)] hover:bg-neutral-lightest hover:border-none",
   disabledStyle: defaultDropdown.disabledStyle,
 };
 
 type DropdownStyle =
   | "default"
+  | "defaultFullWidth"
   | "defaultWithBorder"
   | "accentAccent"
   | "neutralLight";
+
 const dropdownStyles: Record<DropdownStyle, Dropdown> = {
   default: defaultDropdown,
+  defaultFullWidth: defaultFullWidthDropdown,
   defaultWithBorder: defaultWithBorderDropdown,
   accentAccent: accentAccentDropdown,
   neutralLight: neutralLightDropdown,
@@ -160,12 +62,12 @@ const dropdownStyles: Record<DropdownStyle, Dropdown> = {
 
 const props = withDefaults(
   defineProps<{
-    modelValue: DropdownOption | string | undefined;
+    modelValue: DropdownOption | undefined;
     options: DropdownOption[];
     dropdownStyle: DropdownStyle;
     labelPosition?: "above" | "inline";
     labelAlignment?: "left" | "right";
-    defaultLabel?: string;
+    label?: string;
     disable?: boolean;
   }>(),
   {
@@ -176,96 +78,26 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (event: "update:modelValue", modelValue: DropdownOption | string): void;
+  (event: "update:modelValue", modelValue: DropdownOption): void;
 }>();
 
-const { t } = useI18n();
+const {t} = useI18n()
 const defaultOption: DropdownOption = {
   icon: DamsIcons.AngleDown,
-  label: props.defaultLabel ? props.defaultLabel : t("dropdown.select-option"),
+  label: props.label ? props.label : "dropdown.select-option",
   value: "",
-};
-const dropdown = ref<HTMLUListElement>();
-const { modelValue, disable } = toRefs(props);
-const selectedOption = ref<DropdownOption>(defaultOption);
-const showOptions = ref<boolean>(false);
-
-const selectOption = (dropdownOption: DropdownOption) => {
-  selectedOption.value = dropdownOption;
-  showOptions.value = false;
-};
-
-const selectedDropdownStyle = computed<Dropdown>(
-  () => dropdownStyles[props.dropdownStyle]
-);
-const arrowIcon = computed<DamsIcons>(() =>
-  showOptions.value ? DamsIcons.AngleUp : DamsIcons.AngleDown
-);
-const disabled = computed<Boolean>(() =>
-  props.options.length > 0 ? disable.value : true
-);
-
-const selectedOptionLabel = computed<string>(() => {
-  try {
-    return t(selectedOption.value.label);
-  } catch {
-    return selectedOption.value.label;
-  }
-});
-const optionLabel = (option: DropdownOption) => {
-  try {
-    return t(option.label);
-  } catch {
-    return option.label;
-  }
-};
-
-const selectedOptionIsNotDefaultOption = computed<boolean>(() => {
-  return (
-    selectedOption.value.icon !== defaultOption.icon &&
-    selectedOption.value.label !== defaultOption.label &&
-    selectedOption.value.value !== defaultOption.value
-  );
-});
-
-const collapseDropdown = (event: MouseEvent) => {
-  if (!dropdown.value?.contains(event.target as Node))
-    showOptions.value = false;
-};
-
-onMounted(() => document.addEventListener("click", collapseDropdown));
-onUnmounted(() => document.removeEventListener("click", collapseDropdown));
-
-watch(
-  modelValue,
-  (value) => {
-    value === undefined
-      ? (selectedOption.value = defaultOption)
-      : typeof value === "string"
-      ? (selectedOption.value = {
-          icon: DamsIcons.NoIcon,
-          label: value,
-          value: value,
-        })
-      : (selectedOption.value = value);
-  },
-  { immediate: true }
-);
-watch(
-  () => selectedOption.value,
-  (value) => {
-    if (selectedOptionIsNotDefaultOption.value)
-      if (typeof props.modelValue === "string")
-        emit("update:modelValue", value);
-      else {
-        emit("update:modelValue", value);
-      }
-  }
-);
-</script>
-
-<style>
-.extra_width {
-  width: calc(100% + 2px);
 }
-</style>
+const selectedItem = ref<DropdownOption>(defaultOption)
+const selectedItemLabel = computed(() => selectedItem.value.label)
+
+const selectItem = (option:DropdownOption) => {
+  if (option === selectedItem.value) return
+  selectedItem.value = option
+  emit('update:modelValue', option)
+}
+
+watch(() => props.modelValue, () => {
+  if (!props.modelValue) return
+  selectedItem.value = props.modelValue
+}, {immediate: true} )
+</script>
