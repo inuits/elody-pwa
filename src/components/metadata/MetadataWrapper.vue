@@ -5,16 +5,8 @@
     </p>
     <p v-if="isFieldRequired && isEdit" class="pl-1">*</p>
   </div>
-  <entity-element-metadata
-      v-if="!isEdit || !metadata.field"
-      :label="metadata.label as string"
-      :value="metadata.value"
-      :link-text="metadata.linkText"
-      :link-icon="metadata.linkIcon"
-      :unit="metadata.unit"
-  />
   <entity-element-metadata-edit
-      v-else
+      v-if="isEdit && metadata.field"
       :fieldKey="metadata.key"
       :label="metadata.label as string"
       v-model:value="metadata.value"
@@ -22,6 +14,25 @@
       :formId="formId"
       :unit="metadata.unit"
       :link-text="metadata.linkText"
+  />
+  <entity-element-metadata-edit
+      v-if="isEdit && metadata.inputField"
+      :fieldKey="`${metadata.key}-${linkedEntityId}`"
+      :label="metadata.label as string"
+      v-model:value="metadata.value"
+      :field="metadata.inputField "
+      :formId="formId"
+      :unit="metadata.unit"
+      :link-text="metadata.linkText"
+      :is-metadata-on-relation="metadata.__typename === 'PanelRelationMetaData'"
+  />
+  <entity-element-metadata
+      v-else
+      :label="metadata.label as string"
+      :value="metadata.value"
+      :link-text="metadata.linkText"
+      :link-icon="metadata.linkIcon"
+      :unit="metadata.unit"
   />
 </template>
 
@@ -36,6 +47,7 @@ const props = defineProps<{
   isEdit: boolean;
   formId: string;
   metadata: MetadataField
+  linkedEntityId?: String;
 }>();
 
 const {t} = useI18n()
