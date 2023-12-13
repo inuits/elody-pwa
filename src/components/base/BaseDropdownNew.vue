@@ -90,7 +90,7 @@ const selectedItem = ref<DropdownOption>(defaultOption)
 const selectedItemLabel = computed(() => selectedItem.value.label)
 
 const selectItem = (option:DropdownOption) => {
-  if (option === selectedItem.value) return
+  if (option === selectedItem.value || option === defaultOption) return
   selectedItem.value = option
   emit('update:modelValue', option)
 }
