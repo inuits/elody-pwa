@@ -44,7 +44,7 @@
         :key="metadataItem ? metadataItem.key : 'no-key'"
         class="flex justify-start flex-col mx-2 break-words w-1/4"
       >
-        <metadata-wrapper :form-id="formId" :metadata="metadataItem as MetadataField" :is-edit="isEdit"/>
+        <metadata-wrapper :form-id="formId" :metadata="metadataItem as MetadataField" :is-edit="isEdit" :linked-entity-id="intialValues.id"/>
       </div>
     </div>
 

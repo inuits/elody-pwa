@@ -41,7 +41,7 @@ import {
 import BaseDropdownNew from "../base/BaseDropdownNew.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
-import { onMounted, watch, ref, computed } from "vue";
+import { onMounted, watch, ref } from "vue";
 import { useField } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
@@ -59,9 +59,6 @@ const props = defineProps<{
 const { getForm, addEditableMetadataOnRelationKey } = useFormHelper();
 let form: FormContext | undefined = undefined;
 const { t } = useI18n();
-const fieldKeyWithoutId = computed(() => {
-  return props.fieldKey.slice(0, props.fieldKey.indexOf("-"));
-})
 
 const metadataValue = ref<string | DropdownOption>(props.value)
 const {
@@ -94,6 +91,6 @@ watch(() => metadataValue.value, () => {
   if (!props.isMetadataOnRelation)
     form?.setFieldValue(`intialValues.${props.fieldKey}`, newValue);
   else
-    form?.setFieldValue(`relationValues.newrelations.${fieldKeyWithoutId}`, newValue)
+    form?.setFieldValue(`relationValues.newrelations.${props.fieldKey}`, newValue)
 })
 </script>
