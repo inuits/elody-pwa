@@ -6,25 +6,15 @@
     <p v-if="isFieldRequired && isEdit" class="pl-1">*</p>
   </div>
   <entity-element-metadata-edit
-      v-if="isEdit && metadata.field"
-      :fieldKey="metadata.key"
+      v-if="(isEdit && metadata.field) || (isEdit && metadata.inputField)"
+      :fieldKey="isMetadataOnRelation ? `${metadata.key}-${linkedEntityId}` : metadata.key"
       :label="metadata.label as string"
       v-model:value="metadata.value"
-      :field="metadata.field"
+      :field="metadata.inputField ? metadata.inputField : metadata.field "
       :formId="formId"
       :unit="metadata.unit"
       :link-text="metadata.linkText"
-  />
-  <entity-element-metadata-edit
-      v-else-if="isEdit && metadata.inputField"
-      :fieldKey="`${metadata.key}-${linkedEntityId}`"
-      :label="metadata.label as string"
-      v-model:value="metadata.value"
-      :field="metadata.inputField "
-      :formId="formId"
-      :unit="metadata.unit"
-      :link-text="metadata.linkText"
-      :is-metadata-on-relation="metadata.__typename === 'PanelRelationMetaData'"
+      :is-metadata-on-relation="isMetadataOnRelation"
   />
   <entity-element-metadata
       v-else
@@ -40,7 +30,7 @@
 import EntityElementMetadataEdit from "@/components/metadata/EntityElementMetadataEdit.vue";
 import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.vue";
 import { MetadataField} from "@/generated-types/queries";
-import {computed} from "vue";
+import { computed } from "vue";
 import {useI18n} from "vue-i18n";
 
 const props = defineProps<{
@@ -52,6 +42,9 @@ const props = defineProps<{
 
 const {t} = useI18n()
 
+const isMetadataOnRelation = computed(() =>
+    props.metadata.__typename === 'PanelRelationMetaData'
+)
 const isFieldRequired = computed(() =>
     props.metadata?.field?.validation?.includes("required")
 );
