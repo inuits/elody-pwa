@@ -1,7 +1,7 @@
 <template>
   <div v-if="options.length" :class="[labelPosition === 'inline' ? 'flex items-center' : undefined]">
   <p :class="['pr-2']" v-if="label">{{t(label)}}</p>
-  <select :class="['cursor-pointer', dropdownStyles[dropdownStyle].style]" v-model="selectedItemLabel">
+  <select :class="['cursor-pointer', dropdownStyles[dropdownStyle].style, 'max-w-full']" v-model="selectedItemLabel">
     <option v-for="option in [defaultOption, ...options]" :key="option.value" :value="option.label" @click="selectItem(option)" :class="[dropdownStyles[dropdownStyle].hoverStyle]">{{t(option.label)}}</option>
   </select>
   </div>
