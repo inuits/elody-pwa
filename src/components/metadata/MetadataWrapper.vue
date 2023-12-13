@@ -36,7 +36,6 @@ import { DropdownOption, MetadataField } from "@/generated-types/queries";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useField } from "vee-validate";
-import { ref } from "vue/dist/vue";
 
 const props = defineProps<{
   isEdit: boolean;
