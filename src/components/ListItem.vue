@@ -22,7 +22,10 @@
         input-style="accentNormal"
       />
     </div>
-    <div v-if="canShowCopyRight() && media && !imageSrcError" class="flex items-center">
+    <div
+      v-if="canShowCopyRight() && media && !imageSrcError"
+      class="flex items-center"
+    >
       <img
         v-if="canShowCopyRight() && media && !imageSrcError"
         class="h-10 w-10 object-cover self-center outline-none"
@@ -44,7 +47,12 @@
         :key="metadataItem ? metadataItem.key : 'no-key'"
         class="flex justify-start flex-col mx-2 break-words w-1/4"
       >
-        <metadata-wrapper :form-id="formId" :metadata="metadataItem as MetadataField" :is-edit="isEdit" :linked-entity-id="intialValues.id"/>
+        <metadata-wrapper
+          :form-id="formId"
+          v-model:metadata="metadataItem as MetadataField"
+          :is-edit="isEdit"
+          :linked-entity-id="intialValues.id"
+        />
       </div>
     </div>
 
@@ -83,14 +91,15 @@ import {
   DamsIcons,
   EditStatus,
   type BaseRelationValuesInput,
-  type Metadata, MetadataField,
+  type Metadata,
+  MetadataField,
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
 import useEditMode from "@/composables/useEdit";
 import { useAuth } from "session-vue-3-oidc-library";
 import { computed, ref, watch } from "vue";
-import {getEntityIdFromRoute, stringIsUrl} from "@/helpers";
+import { getEntityIdFromRoute, stringIsUrl } from "@/helpers";
 import { Unicons } from "@/types";
 import { useFieldArray } from "vee-validate";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
@@ -152,7 +161,7 @@ const canShowCopyRight = () => {
   if (props.intialValues.length !== 0)
     return props.intialValues.copyrightColor !== "red";
   return true;
-}
+};
 
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 
