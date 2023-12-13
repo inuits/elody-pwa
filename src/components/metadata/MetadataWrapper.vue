@@ -8,7 +8,7 @@
   <entity-element-metadata-edit
     v-if="(isEdit && metadata.field) || (isEdit && metadata.inputField)"
     :fieldKey="
-      isMetadataOnRelation ? `${metadata.key}-${linkedEntityId}` : metadata.key
+      isMetadataOnRelation ? `${fieldKeyWithId}` : metadata.key
     "
     :label="metadata.label as string"
     v-model:value="value"
@@ -46,11 +46,21 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const isMetadataOnRelation = computed(() => false);
-const veeValidateField = computed(() =>
-  isMetadataOnRelation.value
-    ? `relationValues.newrelations.${props.metadata.key}`
-    : `intialValues.${props.metadata.key}`
+const isMetadataOnRelation = computed(
+    () => props.metadata.__typename === "PanelRelationMetaData"
+);
+const fieldKeyWithId = computed(
+    () => `${props.metadata.key}-${props.linkedEntityId}`
+);
+
+const veeValidateField = computed(() => {
+      if (isMetadataOnRelation.value)
+        return `relationValues.newrelations.${fieldKeyWithId.value}`;
+      else if (props.metadata.inputField || props.metadata.field)
+        return `intialValues.${props.metadata.key}`;
+      else
+        return `intialValues.${fieldKeyWithId.value}`;
+    }
 );
 
 const { errorMessage, value } = useField<string>(
