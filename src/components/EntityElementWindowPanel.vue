@@ -43,7 +43,11 @@
               :relationType="metadata.relationType"
               :viewMode="metadata.viewMode"
             />
-            <metadata-wrapper :form-id="formId" :is-edit="isEdit" :metadata="metadata as MetadataField"/>
+            <metadata-wrapper
+              :form-id="formId"
+              :is-edit="isEdit"
+              v-model:metadata="metadata as MetadataField"
+            />
           </div>
         </div>
       </div>
@@ -55,7 +59,8 @@
 import type {
   PanelRelation,
   WindowElementPanel,
-  Entity, MetadataField,
+  Entity,
+  MetadataField,
 } from "@/generated-types/queries";
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
 import EntityElementList from "@/components/entityElements/EntityElementList.vue";

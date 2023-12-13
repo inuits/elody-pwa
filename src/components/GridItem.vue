@@ -32,7 +32,11 @@
             @error="setNoImage()"
           />
           <div
-            v-if="(!canShowCopyRight() && thumbIcon) || (thumbIcon && !media) || (imageSrcError && thumbIcon)"
+            v-if="
+              (!canShowCopyRight() && thumbIcon) ||
+              (thumbIcon && !media) ||
+              (imageSrcError && thumbIcon)
+            "
             class="w-48 h-48 flex items-center justify-center flex-col bg-center bg-no-repeat bg-cover"
             style="background-image: url(.jpg)"
           >
@@ -62,7 +66,11 @@
               v-for="metadataItem in teaserMetadata"
               :key="metadataItem ? metadataItem.value : 'no-key'"
             >
-              <metadata-wrapper form-id="gridItem" :metadata="metadataItem as MetadataField" :is-edit="false"/>
+              <metadata-wrapper
+                form-id="gridItem"
+                v-model:metadata="metadataItem as MetadataField"
+                :is-edit="false"
+              />
             </div>
           </div>
           <div class="w-full" v-else>
@@ -90,7 +98,8 @@ import {
   EditStatus,
   type BaseRelationValuesInput,
   type MetadataAndRelation,
-  type Metadata, MetadataField
+  type Metadata,
+  MetadataField,
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
@@ -149,7 +158,7 @@ const canShowCopyRight = () => {
   if (props.intialValues.length !== 0)
     return props.intialValues.copyrightColor !== "red";
   return true;
-}
+};
 
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 

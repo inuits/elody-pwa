@@ -35,7 +35,12 @@
           v-model:value="data.value"
           :field="data.field"
         />
-        <metadata-wrapper v-else-if="data.field" :form-id="formId" :is-edit="isEdit" :metadata="data as MetadataField"/>
+        <metadata-wrapper
+          v-else-if="data.field"
+          :form-id="formId"
+          :is-edit="isEdit"
+          v-model:metadata="data as MetadataField"
+        />
       </div>
     </div>
   </div>
@@ -56,10 +61,10 @@ import {
   type PointExpression,
 } from "leaflet";
 import { computed, ref } from "vue";
-import { useEditMode } from "@/composables/useEdit"
+import { useEditMode } from "@/composables/useEdit";
 import EntityElementCoordinateEdit from "../EntityElementCoordinateEdit.vue";
 import type { MediaFileElement } from "@/generated-types/queries";
-import {MetadataField, Unit} from "@/generated-types/queries";
+import { MetadataField, Unit } from "@/generated-types/queries";
 import { getEntityIdFromRoute } from "@/helpers";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 
@@ -70,7 +75,7 @@ const props = defineProps<{
 
 const zoom = ref<number>(15);
 const formId = computed(() => getEntityIdFromRoute() as string);
-const { isEdit } = useEditMode()
+const { isEdit } = useEditMode();
 
 const createNewCoordinatesObject = (coordinatesObject: any) => {
   coordinatesObject.value = { longitude: 1, latitude: 1 };
