@@ -21,14 +21,13 @@
       input-style="defaultWithBorder"
     />
     <p v-if="metadataValue?.length > 1" class="text-red-default">
-      {{ errorMessage }}
+      {{ error }}
     </p>
   </div>
 </template>
 
 <script lang="ts" setup>
 import type { DropdownOption } from "@/generated-types/queries";
-import type { FormContext } from "vee-validate";
 import {
   InputFieldTypes,
   type InputField as InputFieldType,
@@ -40,6 +39,8 @@ import { onMounted, watch, ref } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 
+const emit = defineEmits(["update:value"]);
+
 const props = defineProps<{
   fieldKey: string;
   label: string;
@@ -50,20 +51,18 @@ const props = defineProps<{
   linkText?: string;
   isMetadataOnRelation?: boolean;
   setValue: Function;
+  error?: string;
 }>();
-const { getForm, addEditableMetadataOnRelationKey } = useFormHelper();
-let form: FormContext | undefined = undefined;
+const { addEditableMetadataOnRelationKey } = useFormHelper();
 const { t } = useI18n();
 const metadataValue = ref<string | DropdownOption>(props.value);
 
 onMounted(() => {
-  form = getForm(props.formId);
-  props.setValue(props.value);
   if (props.isMetadataOnRelation)
     addEditableMetadataOnRelationKey(props.fieldKey, props.formId);
 });
 
-const getValueFromMetadata = () => {
+const getValueFromMetadata = (): string => {
   if (typeof metadataValue.value === "string") return metadataValue.value;
   return metadataValue.value.value;
 };
@@ -72,13 +71,7 @@ watch(
   () => metadataValue.value,
   () => {
     const newValue = getValueFromMetadata();
-    if (props.isMetadataOnRelation === false)
-      form?.setFieldValue(`intialValues.${props.fieldKey}`, newValue);
-    else
-      form?.setFieldValue(
-        `relationValues.newrelations.${props.fieldKey}`,
-        newValue
-      );
+    emit("update:value", newValue);
   }
 );
 </script>
