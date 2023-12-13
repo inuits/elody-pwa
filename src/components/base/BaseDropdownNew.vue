@@ -2,7 +2,7 @@
   <div v-if="options.length" :class="[labelPosition === 'inline' ? 'flex items-center' : undefined]">
   <p :class="['pr-2']" v-if="label">{{t(label)}}</p>
   <select :class="['cursor-pointer', dropdownStyles[dropdownStyle].style]" v-model="selectedItemLabel">
-    <option v-for="option in options" :key="option.value" :value="option.label" @click="selectItem(option)" :class="[dropdownStyles[dropdownStyle].hoverStyle]">{{t(option.label)}}</option>
+    <option v-for="option in [defaultOption, ...options]" :key="option.value" :value="option.label" @click="selectItem(option)" :class="[dropdownStyles[dropdownStyle].hoverStyle]">{{t(option.label)}}</option>
   </select>
   </div>
 </template>
@@ -10,7 +10,6 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
 import { DamsIcons, type DropdownOption } from "@/generated-types/queries";
-import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 
 type Dropdown = {
