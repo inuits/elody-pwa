@@ -16,7 +16,7 @@
       :link-text="metadata.linkText"
   />
   <entity-element-metadata-edit
-      v-if="isEdit && metadata.inputField"
+      v-else-if="isEdit && metadata.inputField"
       :fieldKey="`${metadata.key}-${linkedEntityId}`"
       :label="metadata.label as string"
       v-model:value="metadata.value"
