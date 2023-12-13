@@ -6,6 +6,7 @@
         :options="tenantsAsDropdownOptions"
         :label="t('navigation.tenant')"
         :disable="isEdit"
+        label-position="inline"
         dropdown-style="neutralLight"
       />
     </div>
