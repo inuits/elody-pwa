@@ -11,18 +11,19 @@
       isMetadataOnRelation ? `${metadata.key}-${linkedEntityId}` : metadata.key
     "
     :label="metadata.label as string"
-    v-model:value="metadata.value"
+    v-model:value="value"
     :field="metadata.inputField ? metadata.inputField : metadata.field"
     :formId="formId"
     :unit="metadata.unit"
     :link-text="metadata.linkText"
     :isMetadataOnRelation="isMetadataOnRelation"
-    :set-value="setValue"
+    :error="errorMessage"
+    @update:value="setNewValue"
   />
   <entity-element-metadata
     v-else
     :label="metadata.label as string"
-    v-model:value="metadata.value"
+    v-model:value="value"
     :link-text="metadata.linkText"
     :link-icon="metadata.linkIcon"
     :unit="metadata.unit"
@@ -32,8 +33,8 @@
 <script lang="ts" setup>
 import EntityElementMetadataEdit from "@/components/metadata/EntityElementMetadataEdit.vue";
 import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.vue";
-import { DropdownOption, MetadataField } from "@/generated-types/queries";
-import { computed } from "vue";
+import { MetadataField } from "@/generated-types/queries";
+import { computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useField } from "vee-validate";
 
@@ -45,17 +46,15 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const isMetadataOnRelation = computed(
-  () => props.metadata.__typename === "PanelRelationMetaData"
+const isMetadataOnRelation = computed(() => false);
+const veeValidateField = computed(() =>
+  isMetadataOnRelation.value
+    ? `relationValues.newrelations.${props.metadata.key}`
+    : `intialValues.${props.metadata.key}`
 );
-const {
-  errorMessage,
-  value: fieldValue,
-  setValue,
-} = useField<string>(
-  isMetadataOnRelation
-    ? `relationValues.newrelations.${props.metadata.fieldKey}`
-    : `intialValues.${props.metadata.fieldKey}`,
+
+const { errorMessage, value } = useField<string>(
+  veeValidateField,
   props.metadata.field && props.metadata.field.validation
     ? props.metadata.field.validation
     : undefined,
@@ -63,6 +62,15 @@ const {
     label: t(props.metadata.label as string),
   }
 );
+
+const setNewValue = (newValue: string) => {
+  value.value = newValue;
+};
+
+onMounted(() => {
+  if (!value.value) setNewValue(props.metadata.value);
+});
+
 const isFieldRequired = computed(() =>
   props.metadata?.field?.validation?.includes("required")
 );
