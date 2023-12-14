@@ -8,10 +8,11 @@
       :options="field.options"
     />
     <BaseDropdownNew
-      v-else-if="field.type === InputFieldTypes.Dropdown && field.options"
+      v-else-if="field.type === InputFieldTypes.Dropdown"
       v-model:model-value="metadataValue as DropdownOption"
       :options="(field.options as DropdownOption[])"
       dropdown-style="defaultWithBorder"
+      :disable="!field.options.length"
     />
     <BaseInputTextNumberDatetime
       v-else
