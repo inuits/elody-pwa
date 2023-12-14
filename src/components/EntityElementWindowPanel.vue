@@ -37,7 +37,6 @@
               :label="(metadata.label as string)"
               :isCollapsed="metadata.isCollapsed"
               :types="metadata.entityTypes as string[]"
-              :metaKey="metadata.metaKey"
               :entity-list="(metadata.entityList as Entity[]) ?? []"
               :identifiers="identifiers"
               :relationType="metadata.relationType"

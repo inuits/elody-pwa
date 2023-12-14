@@ -1,10 +1,11 @@
 <template>
   <div>
+    <spinner-loader v-if="loading"/>
     <div class="px-6 pt-0 pb-20 bg-neutral-white">
       <div
-        :class="['py-2', {'animate-pulse': loading}]"
-        v-show="form"
-        v-for="(metadata, index) in getMetadataFields(
+        :class="['py-2']"
+        v-show="form && !loading"
+        v-for="(metadata) in getMetadataFields(
           formFields,
           PanelType.Metadata,
           'createEntity'
@@ -56,6 +57,7 @@ import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import type { ApolloClient } from "@apollo/client/core";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
 
 const props = defineProps<{
   entityType: Entitytyping;
