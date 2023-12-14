@@ -1,7 +1,7 @@
 <template>
   <div>
-    <spinner-loader v-if="loading"/>
     <div class="px-6 pt-0 pb-20 bg-neutral-white">
+      <div v-if="loading" class="flex justify-center items-center py-2"><spinner-loader /></div>
       <div
         :class="['py-2']"
         v-show="form && !loading"
