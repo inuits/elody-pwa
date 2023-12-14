@@ -85,7 +85,8 @@ const props = withDefaults(
     isCollapsed: Boolean;
     types: string[];
     label: string;
-    customQuery: String;
+    customQuery: string;
+    customQueryRelationType: string;
     entityList: Entity[];
     identifiers: string[];
     relationType: string;
@@ -134,7 +135,7 @@ onBeforeMount(async () => {
       {
         type: "selection",
         parent_key: "relations",
-        key: props.relationType,
+        key: props.customQueryRelationType,
         value: [
           props.identifiers[0]
         ],

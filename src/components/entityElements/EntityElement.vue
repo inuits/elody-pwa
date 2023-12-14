@@ -17,6 +17,7 @@
         :types="element.entityTypes as string[]"
         :metaKey="element.metaKey"
         :custom-query="element.customQuery"
+        :custom-query-relation-type="element.customQueryRelationType"
         :entity-list="(element.entityList as Entity[]) ?? []"
         :identifiers="identifiers"
         :relationType="element.relationType"
