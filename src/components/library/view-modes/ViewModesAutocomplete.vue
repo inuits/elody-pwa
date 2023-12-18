@@ -38,7 +38,7 @@ const emit = defineEmits<{
   (event: "update:modelValue", modelValue: string | string[] | undefined): void;
 }>();
 
-const inputValue = computed<string | string[] | undefined>({
+const inputValue = computed<DropdownOption | undefined>({
   get() {
     if (typeof props.modelValue === "string") return [props.modelValue];
     return props.modelValue;

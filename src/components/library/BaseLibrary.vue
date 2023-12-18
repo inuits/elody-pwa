@@ -1,5 +1,8 @@
 <template>
-  <div class="lg:flex bg-neutral-lightest">
+  <div>
+  <div v-if="isMultiSelectInputField">
+  </div>
+  <div v-else class="lg:flex bg-neutral-lightest">
     <div
       class="w-full"
       :class="[parentEntityIdentifiers.length > 0 ? 'p-3' : 'px-6']"
@@ -114,6 +117,7 @@
       </div>
     </div>
   </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -175,6 +179,7 @@ const props = withDefaults(
     filters?: AdvancedFilterInput[];
     isSearchLibrary?: boolean;
     useOtherQuery?: object;
+    isMultiSelectInputField: boolean;
   }>(),
   {
     predefinedEntities: undefined,
@@ -192,6 +197,7 @@ const props = withDefaults(
     filters: () => [],
     isSearchLibrary: false,
     useOtherQuery: undefined,
+    isMultiSelectInputField: false,
   }
 );
 
