@@ -7,7 +7,6 @@
     :searchable="searchable"
     :show-options="searchable"
     :close-on-select="true"
-    :placeholder="placeholder"
     :classes="classes"
     :disabled="disabled"
     :object="true"

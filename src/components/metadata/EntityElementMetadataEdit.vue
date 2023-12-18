@@ -4,7 +4,7 @@
       v-if="field.type === InputFieldTypes.DropdownMultiselect"
       v-model="metadataValue"
       :metadata-key-to-get-options-for="fieldKey"
-      :select-type="field.type === 'dropdownMultiselect' ? 'multi' : 'single'"
+      select-type="multi"
       :options="field.options"
     />
     <BaseDropdownNew
