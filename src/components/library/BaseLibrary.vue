@@ -1,122 +1,132 @@
 <template>
   <div>
-  <div v-if="isMultiSelectInputField">
-  </div>
-  <div v-else class="lg:flex bg-neutral-lightest">
-    <div
-      class="w-full"
-      :class="[parentEntityIdentifiers.length > 0 ? 'p-3' : 'px-6']"
-    >
+    <div v-if="selectInputFieldType">
+      <base-input-autocomplete
+        autocomplete-style="defaultWithBorder"
+        :options="entityDropdownOptions"
+        :select-type="selectInputFieldType"
+        :model-value="[]"
+      />
+    </div>
+    <div v-else class="lg:flex bg-neutral-lightest">
       <div
-        :class="[
-          'top-0 mb-2 pt-4 bg-neutral-lightest',
-          { sticky: hasStickyBars },
-        ]"
+        class="w-full"
+        :class="[parentEntityIdentifiers.length > 0 ? 'p-3' : 'px-6']"
       >
-        <div class="flex flex-row items-center gap-y-4">
-          <FiltersBase
-            v-show="enableAdvancedFilters"
-            class="lg:w-[46%]"
-            :filter-matcher-mapping="filterMatcherMapping"
-            :advanced-filters="advancedFilters"
-            :entity-type="filterType || entityType"
-            :parent-entity-identifiers="parentEntityIdentifiers"
-            :expandFilters="expandFilters"
-            :filters-base-initialization-status="
-              filtersBaseInitializationStatus
-            "
-            @apply-filters="setAdvancedFilters"
-            @expand-filters="expandFilters = !expandFilters"
-          />
-          <div
-            class="mr-2"
-            :class="['flex', { 'ml-4': enableAdvancedFilters }]"
-          >
-            <BaseToggleGroup v-if="toggles.length > 1" :toggles="toggles" />
-          </div>
-          <LibraryBar
-            v-if="!predefinedEntities"
-            :pagination-limit-options="paginationLimitOptions"
-            :sort-options="sortOptions"
-            :total-items="totalEntityCount || NaN"
-            :queryVariables="(queryVariables as GetEntitiesQueryVariables)"
-            :library-bar-initialization-status="libraryBarInitializationStatus"
-          />
-        </div>
-
         <div
-          v-if="enableBulkOperations && !displayPreview"
-          class="my-3"
-          :class="{ 'flex justify-end': expandFilters }"
+          :class="[
+            'top-0 mb-2 pt-4 bg-neutral-lightest',
+            { 'sticky': hasStickyBars },
+          ]"
         >
-          <BulkOperationsActionsBar
+          <div class="flex flex-row items-center gap-y-4">
+            <FiltersBase
+              v-show="enableAdvancedFilters"
+              class="lg:w-[46%]"
+              :filter-matcher-mapping="filterMatcherMapping"
+              :advanced-filters="advancedFilters"
+              :entity-type="filterType || entityType"
+              :parent-entity-identifiers="parentEntityIdentifiers"
+              :expandFilters="expandFilters"
+              :filters-base-initialization-status="
+                filtersBaseInitializationStatus
+              "
+              @apply-filters="setAdvancedFilters"
+              @expand-filters="expandFilters = !expandFilters"
+            />
+            <div
+              class="mr-2"
+              :class="['flex', { 'ml-4': enableAdvancedFilters }]"
+            >
+              <BaseToggleGroup v-if="toggles.length > 1" :toggles="toggles" />
+            </div>
+            <LibraryBar
+              v-if="!predefinedEntities"
+              :pagination-limit-options="paginationLimitOptions"
+              :sort-options="sortOptions"
+              :total-items="totalEntityCount || NaN"
+              :queryVariables="(queryVariables as GetEntitiesQueryVariables)"
+              :library-bar-initialization-status="
+                libraryBarInitializationStatus
+              "
+            />
+          </div>
+
+          <div
+            v-if="enableBulkOperations && !displayPreview"
+            class="my-3"
+            :class="{ 'flex justify-end': expandFilters }"
+          >
+            <BulkOperationsActionsBar
+              :class="[
+                { 'w-[67%]': expandFilters && toggles.length <= 1 },
+                { 'w-[69.75%]': expandFilters && toggles.length > 1 },
+              ]"
+              :context="bulkOperationsContext"
+              :total-items-count="totalEntityCount"
+              :use-extended-bulk-operations="true"
+              :confirm-selection-button="confirmSelectionButton"
+              :entity-type="entityType as Entitytyping"
+              @select-page="bulkSelect"
+              @select-all="bulkSelect(allEntitiesResult.Entities.results)"
+              @confirm-selection="
+                (selection) => emit('confirmSelection', selection)
+              "
+              @no-bulk-operations-available="
+                () => (enableBulkOperations = false)
+              "
+              @refetch="refetchEntities()"
+            />
+          </div>
+        </div>
+        <div v-if="entities" :class="{ 'flex justify-end': expandFilters }">
+          <div
+            id="gridContainer"
             :class="[
               { 'w-[67%]': expandFilters && toggles.length <= 1 },
               { 'w-[69.75%]': expandFilters && toggles.length > 1 },
             ]"
-            :context="bulkOperationsContext"
-            :total-items-count="totalEntityCount"
-            :use-extended-bulk-operations="true"
-            :confirm-selection-button="confirmSelectionButton"
-            :entity-type="entityType as Entitytyping"
-            @select-page="bulkSelect"
-            @select-all="bulkSelect(allEntitiesResult.Entities.results)"
-            @confirm-selection="
-              (selection) => emit('confirmSelection', selection)
-            "
-            @no-bulk-operations-available="() => (enableBulkOperations = false)"
-            @refetch="refetchEntities()"
-          />
+            @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
+          >
+            <ViewModesList
+              v-if="displayList"
+              :entities="entities as Entity[]"
+              :entities-loading="entitiesLoading"
+              :bulk-operations-context="bulkOperationsContext"
+              :list-item-route-name="listItemRouteName"
+              :disable-previews="disableNewEntityPreviews"
+              :enable-navigation="enableNavigation"
+              :parent-entity-identifiers="parentEntityIdentifiers"
+              :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
+              :relation-type="relationType"
+              :enable-selection="enableBulkOperations"
+            />
+            <ViewModesGrid
+              v-if="displayGrid"
+              :entities="entities as Entity[]"
+              :entities-loading="entitiesLoading"
+              :bulk-operations-context="bulkOperationsContext"
+              :list-item-route-name="listItemRouteName"
+              :disable-previews="disableNewEntityPreviews"
+              :enable-navigation="enableNavigation"
+              :parent-entity-identifiers="parentEntityIdentifiers"
+              :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
+              :relation-type="relationType"
+              :enable-selection="enableBulkOperations"
+            />
+            <ViewModesMedia
+              v-if="displayPreview"
+              :entities="entities as Entity[]"
+              :entities-loading="entitiesLoading"
+            />
+          </div>
         </div>
-      </div>
-      <div v-if="entities" :class="{ 'flex justify-end': expandFilters }">
-        <div
-          id="gridContainer"
-          :class="[
-            { 'w-[67%]': expandFilters && toggles.length <= 1 },
-            { 'w-[69.75%]': expandFilters && toggles.length > 1 },
-          ]"
-          @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
-        >
-          <ViewModesList
-            v-if="displayList"
-            :entities="entities as Entity[]"
-            :entities-loading="entitiesLoading"
-            :bulk-operations-context="bulkOperationsContext"
-            :list-item-route-name="listItemRouteName"
-            :disable-previews="disableNewEntityPreviews"
-            :enable-navigation="enableNavigation"
-            :parent-entity-identifiers="parentEntityIdentifiers"
-            :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
-            :relation-type="relationType"
-            :enable-selection="enableBulkOperations"
-          />
-          <ViewModesGrid
-            v-if="displayGrid"
-            :entities="entities as Entity[]"
-            :entities-loading="entitiesLoading"
-            :bulk-operations-context="bulkOperationsContext"
-            :list-item-route-name="listItemRouteName"
-            :disable-previews="disableNewEntityPreviews"
-            :enable-navigation="enableNavigation"
-            :parent-entity-identifiers="parentEntityIdentifiers"
-            :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
-            :relation-type="relationType"
-            :enable-selection="enableBulkOperations"
-          />
-          <ViewModesMedia
-            v-if="displayPreview"
-            :entities="entities as Entity[]"
-            :entities-loading="entitiesLoading"
-          />
-        </div>
-      </div>
 
-      <div v-if="entities.length === 0">
-        {{ t("search.noresult") }}
+        <div v-if="entities.length === 0">
+          {{ t("search.noresult") }}
+        </div>
       </div>
     </div>
-  </div>
   </div>
 </template>
 
@@ -124,7 +134,9 @@
 import type { ApolloClient } from "@apollo/client/core";
 import type { ViewModes } from "@/generated-types/type-defs";
 import {
+  BaseEntity,
   DamsIcons,
+  DropdownOption,
   Entitytyping,
   GetEntitiesDocument,
   SearchInputType,
@@ -150,13 +162,14 @@ import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
 import { bulkSelectAllSizeLimit } from "@/main";
 import { DefaultApolloClient } from "@vue/apollo-composable";
-import { updateLocalStorage } from "@/helpers";
+import { getEntityTitle, updateLocalStorage } from "@/helpers";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
 import { watch, ref, onMounted, inject, computed } from "vue";
+import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -167,7 +180,7 @@ const props = withDefaults(
     enablePreview?: boolean;
     enableAdvancedFilters?: boolean;
     enableBulkOperations?: boolean;
-    entityType?: Entitytyping
+    entityType?: Entitytyping;
     filterType?: string;
     parentEntityIdentifiers?: string[];
     confirmSelectionButton?: boolean;
@@ -179,7 +192,7 @@ const props = withDefaults(
     filters?: AdvancedFilterInput[];
     isSearchLibrary?: boolean;
     useOtherQuery?: object;
-    isMultiSelectInputField: boolean;
+    selectInputFieldType?: "multi" | "single";
   }>(),
   {
     predefinedEntities: undefined,
@@ -251,17 +264,27 @@ const isAsc = ref<boolean>(false);
 let toggles: ViewModes.type[] = [];
 
 const entityType = computed(() =>
-  props.entityType ? props.entityType : route.meta.entityType ? (route.meta.entityType as Entitytyping) : "BaseEntity"
+  props.entityType
+    ? props.entityType
+    : route.meta.entityType
+    ? (route.meta.entityType as Entitytyping)
+    : "BaseEntity"
 );
+const entityDropdownOptions = computed<DropdownOption[]>(() => {
+  return entities.value.map((entity: BaseEntity) => {
+    return {
+      icon: DamsIcons.NoIcon,
+      label: getEntityTitle(entity),
+      value: entity.id,
+    };
+  });
+});
 
-const useOtherQuery = computed(() =>
-   props.useOtherQuery !== undefined
-);
+const useOtherQuery = computed(() => props.useOtherQuery !== undefined);
 
 if (useOtherQuery.value) {
   setManipulationOfQuery(true, props.useOtherQuery);
-}
-else {
+} else {
   const allEntitiesQueryVariables: GetEntitiesQueryVariables = {
     limit: bulkSelectAllSizeLimit,
     skip: 1,
@@ -276,9 +299,9 @@ else {
     searchInputType: props.searchInputTypeOnDrawer,
   };
   const { result: allEntitiesResult } = useQuery(
-      GetEntitiesDocument,
-      allEntitiesQueryVariables,
-      () => ({ enabled: false, fetchPolicy: "network-only" })
+    GetEntitiesDocument,
+    allEntitiesQueryVariables,
+    () => ({ enabled: false, fetchPolicy: "network-only" })
   );
 }
 
@@ -302,8 +325,8 @@ const bulkSelect = (items = entities.value) => {
 };
 
 const refetchEntities = () => {
-  getEntities(true)
-}
+  getEntities(true);
+};
 
 const initializeBaseLibrary = () => {
   if (!props.predefinedEntities) {
