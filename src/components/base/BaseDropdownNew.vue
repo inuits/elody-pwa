@@ -1,9 +1,27 @@
 <template>
   <div :class="[labelPosition === 'inline' ? 'flex items-center' : undefined]">
-  <p :class="['pr-2']" v-if="label">{{t(label)}}</p>
-  <select :disabled="disable" :class="['cursor-pointer', dropdownStyles[dropdownStyle].style, 'max-w-full', {'opacity-50': disable}]" v-model="selectedItemLabel">
-    <option v-for="option in [defaultOption, ...options]" :key="option.value" :value="option.label" @click="selectItem(option)" :class="[dropdownStyles[dropdownStyle].hoverStyle]">{{t(option.label)}}</option>
-  </select>
+    <p :class="['pr-2']" v-if="label">{{ t(label) }}</p>
+    <select
+      :disabled="disable"
+      :class="[
+        'cursor-pointer',
+        dropdownStyles[dropdownStyle].style,
+        'max-w-full',
+        { 'opacity-50': disable },
+      ]"
+      v-model="selectedItemLabel"
+      @change="selectItem"
+    >
+      <option
+        v-for="option in [defaultOption, ...options]"
+        :key="option.value"
+        :value="option.label"
+        @click="selectItem(option)"
+        :class="[dropdownStyles[dropdownStyle].hoverStyle]"
+      >
+        {{ t(option.label) }}
+      </option>
+    </select>
   </div>
 </template>
 
@@ -13,21 +31,25 @@ import { DamsIcons, type DropdownOption } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 
 type Dropdown = {
-  style: string
+  style: string;
   hoverStyle: string;
 };
 
 const defaultDropdown: Dropdown = {
   style: "text-text-body bg-neutral-white border-none rounded-lg",
-  hoverStyle: "hover:text-accent-accent hover:bg-neutral-lightest hover:border-none",
+  hoverStyle:
+    "hover:text-accent-accent hover:bg-neutral-lightest hover:border-none",
 };
 const defaultFullWidthDropdown: Dropdown = {
   style: "text-text-body bg-neutral-white border-none rounded-lg w-full",
-  hoverStyle: "hover:text-accent-accent hover:bg-neutral-lightest hover:border-none",
+  hoverStyle:
+    "hover:text-accent-accent hover:bg-neutral-lightest hover:border-none",
 };
 const defaultWithBorderDropdown: Dropdown = {
-  style: "text-text-body bg-neutral-white border-[rgba(0,58,82,0.6)] rounded-lg w-full",
-  hoverStyle: "hover:text-accent-accent hover:bg-neutral-lightest hover:border-[rgba(0,58,82,0.6)]",
+  style:
+    "text-text-body bg-neutral-white border-[rgba(0,58,82,0.6)] rounded-lg w-full",
+  hoverStyle:
+    "hover:text-accent-accent hover:bg-neutral-lightest hover:border-[rgba(0,58,82,0.6)]",
 };
 const accentAccentDropdown: Dropdown = {
   style: "text-neutral-white bg-accent-accent border-none rounded-lg",
@@ -35,7 +57,8 @@ const accentAccentDropdown: Dropdown = {
 };
 const neutralLightDropdown: Dropdown = {
   style: "text-text-body bg-neutral-light border-none rounded-lg",
-  hoverStyle: "hover:text-[rgba(0,58,82,0.8)] hover:bg-neutral-lightest hover:border-none",
+  hoverStyle:
+    "hover:text-[rgba(0,58,82,0.8)] hover:bg-neutral-lightest hover:border-none",
 };
 
 type DropdownStyle =
@@ -74,23 +97,35 @@ const emit = defineEmits<{
   (event: "update:modelValue", modelValue: DropdownOption): void;
 }>();
 
-const {t} = useI18n()
+const { t } = useI18n();
 const defaultOption: DropdownOption = {
   icon: DamsIcons.AngleDown,
   label: props.label ? props.label : "dropdown.select-option",
   value: "",
-}
-const selectedItem = ref<DropdownOption>(defaultOption)
-const selectedItemLabel = computed(() => selectedItem.value.label)
+};
+const selectedItem = ref<DropdownOption>(defaultOption);
+const selectedItemLabel = computed(() => selectedItem.value.label);
 
-const selectItem = (option:DropdownOption) => {
-  if (option === selectedItem.value || option === defaultOption) return
-  selectedItem.value = option
-  emit('update:modelValue', option)
-}
+const selectItem = (event: Event) => {
+  const newlySelectedOption = props.options.find(
+    (option: DropdownOption) => option.label === event.target?.value
+  );
+  if (
+    !newlySelectedOption ||
+    newlySelectedOption === selectedItem.value ||
+    newlySelectedOption === defaultOption
+  )
+    return;
+  selectedItem.value = newlySelectedOption;
+  emit("update:modelValue", newlySelectedOption);
+};
 
-watch(() => props.modelValue, () => {
-  if (!props.modelValue) return
-  selectedItem.value = props.modelValue
-}, {immediate: true} )
+watch(
+  () => props.modelValue,
+  () => {
+    if (!props.modelValue) return;
+    selectedItem.value = props.modelValue;
+  },
+  { immediate: true }
+);
 </script>
