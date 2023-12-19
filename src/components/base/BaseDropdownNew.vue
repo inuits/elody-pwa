@@ -16,7 +16,6 @@
         v-for="option in [defaultOption, ...options]"
         :key="option.value"
         :value="option.label"
-        @click="selectItem(option)"
         :class="[dropdownStyles[dropdownStyle].hoverStyle]"
       >
         {{ t(option.label) }}
