@@ -7,6 +7,7 @@ import {
   type WindowElementPanel,
   type EntityListElement,
   type Entity,
+  type BaseEntity,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -301,4 +302,11 @@ export const findPanelMetadata = (
   }
 
   return results;
+};
+
+export const getEntityTitle = (entity: BaseEntity): string => {
+  let title: string = entity.id;
+  if (entity.intialValues?.title) title = entity.intialValues.title;
+  if (entity.intialValues?.name) title = entity.intialValues.name;
+  return title;
 };
