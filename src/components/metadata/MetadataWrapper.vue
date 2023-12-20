@@ -7,9 +7,7 @@
   </div>
   <entity-element-metadata-edit
     v-if="(isEdit && metadata.field) || (isEdit && metadata.inputField)"
-    :fieldKey="
-      isMetadataOnRelation ? `${fieldKeyWithId}` : metadata.key
-    "
+    :fieldKey="isMetadataOnRelation ? `${fieldKeyWithId}` : metadata.key"
     :label="metadata.label as string"
     v-model:value="value"
     :field="metadata.inputField ? metadata.inputField : metadata.field"
@@ -47,27 +45,29 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const isMetadataOnRelation = computed(
-    () => props.metadata.__typename === "PanelRelationMetaData"
+  () => props.metadata.__typename === "PanelRelationMetaData"
 );
 const fieldKeyWithId = computed(
-    () => `${props.metadata.key}-${props.linkedEntityId}`
+  () => `${props.metadata.key}-${props.linkedEntityId}`
 );
 
 const veeValidateField = computed(() => {
-      if (isMetadataOnRelation.value)
-        return `relationValues.newrelations.${fieldKeyWithId.value}`;
-      else if (props.metadata.inputField || props.metadata.field)
-        return `intialValues.${props.metadata.key}`;
-      else
-        return `intialValues.${fieldKeyWithId.value}`;
-    }
-);
+  if (isMetadataOnRelation.value)
+    return `relationValues.newrelations.${fieldKeyWithId.value}`;
+  else if (props.metadata.inputField || props.metadata.field)
+    return `intialValues.${props.metadata.key}`;
+  else return `intialValues.${fieldKeyWithId.value}`;
+});
+
+const validationRules = computed<string | undefined>(() => {
+  if (!props.metadata.field || props.metadata.field.validation)
+    return undefined;
+  return props.metadata.field.validation;
+});
 
 const { errorMessage, value } = useField<string>(
-  veeValidateField,
-  props.metadata.field && props.metadata.field.validation
-    ? props.metadata.field.validation
-    : undefined,
+  veeValidateField.value,
+  validationRules.value,
   {
     label: t(props.metadata.label as string),
   }
