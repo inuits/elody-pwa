@@ -37,7 +37,7 @@
       <div>
         <BaseDropdownNew
           class="max-h-9"
-          v-model="selectedMatcher"
+          v-model:model-value="selectedMatcher"
           :options="matchers"
           label-position="inline"
           :default-label="t('filters.matcher-labels.select-filter-type')"
