@@ -56,8 +56,9 @@ const veeValidateField = computed(() => {
     return `relationValues.newrelations.${fieldKeyWithId.value}`;
   else if (props.metadata.inputField || props.metadata.field)
     return `intialValues.${props.metadata.key}`;
-  else
+  else if (props.linkedEntityId === undefined)
     return `intialValues.${props.metadata.key}`;
+  else return `intialValues.${fieldKeyWithId.value}`;
 });
 
 const validationRules = computed<string | undefined>(() => {
