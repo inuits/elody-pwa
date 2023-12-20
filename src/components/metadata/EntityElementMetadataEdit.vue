@@ -1,10 +1,15 @@
 <template>
   <div>
     <ViewModesAutocomplete
-      v-if="field.type === InputFieldTypes.DropdownMultiselect"
+      v-if="
+        field.type === InputFieldTypes.DropdownMultiselect ||
+        field.type === InputFieldTypes.DropdownSingleselect
+      "
       v-model="metadataValue"
       :metadata-key-to-get-options-for="fieldKey"
-      select-type="multi"
+      :select-type="
+        field.type === InputFieldTypes.DropdownMultiselect ? 'multi' : 'single'
+      "
       :options="field.options"
     />
     <BaseDropdownNew
@@ -51,12 +56,11 @@ const props = defineProps<{
   unit?: string;
   linkText?: string;
   isMetadataOnRelation?: boolean;
-  setValue: Function;
   error?: string;
 }>();
 const { addEditableMetadataOnRelationKey } = useFormHelper();
 const { t } = useI18n();
-const metadataValue = ref<string | DropdownOption>(props.value);
+const metadataValue = ref<string | DropdownOption>("");
 
 onMounted(() => {
   if (props.isMetadataOnRelation)
@@ -64,7 +68,7 @@ onMounted(() => {
 });
 
 const getValueFromMetadata = (): string => {
-  if (typeof metadataValue.value === "string") return metadataValue.value;
+  if (typeof metadataValue.value === "string") return props.value;
   return metadataValue.value.value;
 };
 
