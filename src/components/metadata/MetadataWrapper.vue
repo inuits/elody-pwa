@@ -55,7 +55,7 @@ const fieldKeyWithId = computed(
 
 const veeValidateField = computed(() => {
       if (isMetadataOnRelation.value)
-        return `relationValues.newrelations.${fieldKeyWithId.value}`;
+        return `relationValues.relationMetadata.${fieldKeyWithId.value}`;
       else if (props.metadata.inputField || props.metadata.field)
         return `intialValues.${props.metadata.key}`;
       else

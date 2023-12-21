@@ -98,8 +98,8 @@ const parseFormValuesToFormInput = (values: EntityValues) => {
     relations.push(relationInput);
   });
 
-  if (values.relationValues?.newrelations) {
-    Object.entries(values.relationValues?.newrelations)
+  if (values.relationValues?.relationMetadata) {
+    Object.entries(values.relationValues?.relationMetadata)
         .filter((entry) => !editableFields.value[entityId.value].includes(entry.key))
         .forEach((entry) => {
           const newRelationObject = {
