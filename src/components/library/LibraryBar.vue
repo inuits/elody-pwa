@@ -53,6 +53,7 @@ import BasePaginationNew from "@/components/base/BasePaginationNew.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
 import { ref, toRefs, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useLibraryBar } from "@/composables/useLibraryBar";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
@@ -73,15 +74,15 @@ const {
   libraryBarInitializationStatus,
 } = toRefs(props);
 const { getModalInfo } = useBaseModal();
+const { setSelectedPaginationLimitOption, selectedPaginationLimitOption } = useLibraryBar();
 const { t } = useI18n();
 const skip = ref<number>(1);
 const isAsc = ref<boolean>(false);
 
-const selectedPaginationLimitOption = ref<DropdownOption>();
 const selectedSortOption = ref<DropdownOption>();
 
 const setDefaultOptions = () => {
-  selectedPaginationLimitOption.value = paginationLimitOptions.value?.[0];
+  setSelectedPaginationLimitOption(paginationLimitOptions.value?.[0]);
   selectedSortOption.value = sortOptions.value?.[0];
 };
 
