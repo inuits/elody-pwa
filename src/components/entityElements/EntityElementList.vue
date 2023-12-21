@@ -67,7 +67,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
-import { watch, ref, onBeforeMount } from "vue";
+import { watch, ref, onBeforeMount, computed } from "vue";
 import { useImport } from "@/composables/useImport";
 import {bulkSelectAllSizeLimit} from "@/main";
 
@@ -107,7 +107,7 @@ watch(
   }
 );
 
-const requiresCustomQuery = ref<boolean>(props.customQuery != undefined);
+const requiresCustomQuery = computed(() => props.customQuery != undefined);
 const queryLoaded = ref<boolean>(false);
 const newQuery = ref<object>(undefined);
 
