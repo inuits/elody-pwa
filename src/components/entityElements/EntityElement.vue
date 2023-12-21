@@ -13,10 +13,12 @@
       <entity-element-list
         v-if="element.__typename === 'EntityListElement'"
         :label="(element.label as string)"
+        :type="element.type"
         :isCollapsed="element.isCollapsed"
         :types="element.entityTypes as string[]"
         :custom-query="element.customQuery"
         :custom-query-relation-type="element.customQueryRelationType"
+        :search-input-type="element.searchInputType"
         :entity-list="(element.entityList as Entity[]) ?? []"
         :identifiers="identifiers"
         :relationType="element.relationType"

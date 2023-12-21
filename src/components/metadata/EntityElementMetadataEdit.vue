@@ -23,7 +23,7 @@
     <BaseInputTextNumberDatetime
       v-else
       :name="fieldKey"
-      v-model="metadataValue"
+      v-model:model-value="metadataValue"
       :type="field.type as any"
       input-style="defaultWithBorder"
     />
