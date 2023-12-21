@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col w-full h-full p-3 mb-7">
+  <div class="flex flex-col w-full h-[90vh] p-3 mb-7 overflow-y-scroll">
     <dropzone
       view-style="p-3 h-full overflow-x-hidden mb-4"
       @update-files-in-dropzone="onUpdateFilesInDropzone"
