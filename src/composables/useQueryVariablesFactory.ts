@@ -16,9 +16,6 @@ export const useQueryVariablesFactory = () => {
     }
     const setQueryRelationType = (value: String) => {
         relationType.value = value;
-        console.log("Setting query relation type");
-        console.log(value);
-        console.log(relationType.value);
     }
     const setIdentifiers = (value: String) => {
         identifiers.value = value;
