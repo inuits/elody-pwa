@@ -1,24 +1,25 @@
 <template>
-    <div v-if="!metadata.showOnlyInEditMode"class="text-text-light text-sm flex">
-    <p>
-      {{ metadata.label ? t(metadata.label) : t("metadata.no-label") }}
-    </p>
-    <p v-if="isFieldRequired && isEdit" class="pl-1">*</p>
-  </div>
-  <entity-element-metadata-edit
-    v-if="(isEdit && metadata.field) || (isEdit && metadata.inputField)"
-    :fieldKey="isMetadataOnRelation ? `${fieldKeyWithId}` : metadata.key"
-    :label="metadata.label as string"
-    v-model:value="value"
-    :field="metadata.inputField ? metadata.inputField : metadata.field"
-    :formId="formId"
-    :unit="metadata.unit"
-    :link-text="metadata.linkText"
-    :isMetadataOnRelation="isMetadataOnRelation"
-    :error="errorMessage"
-    :fieldIsDirty="fieldIsDirty"
-        @update:value="setNewValue"
-        @register-enter-pressed:value="registerEnterKeyPressed"
+    <div v-if="!metadata.showOnlyInEditMode" class="text-text-light text-sm flex">
+      <p>
+        {{ metadata.label ? t(metadata.label) : t("metadata.no-label") }}
+      </p>
+      <p v-if="isFieldRequired && isEdit" class="pl-1">*</p>
+    </div>
+    <entity-element-metadata-edit
+        v-if="(isEdit && metadata.field) || (isEdit && metadata.inputField)"
+        :fieldKey="
+      isMetadataOnRelation ? `${fieldKeyWithId}` : metadata.key"
+
+        :label="metadata.label as string"
+        v-model:value="value"
+        :field="metadata.inputField ? metadata.inputField : metadata.field"
+        :formId="formId"
+        :unit="metadata.unit"
+        :link-text="metadata.linkText"
+        :isMetadataOnRelation="isMetadataOnRelation"
+        :error="errorMessage"
+        :fieldIsDirty="fieldIsDirty"
+        @update:value="setNewValue"@register-enter-pressed:value="registerEnterKeyPressed"
     />
     <entity-element-metadata
         v-else
@@ -72,7 +73,7 @@ const veeValidateField = computed(() => {
     return `relationValues.relationMetadata.${fieldKeyWithId.value}`;
   else if (props.metadata.inputField || props.metadata.field)
     return `intialValues.${props.metadata.key}`;
-  elseif (props.linkedEntityId === undefined)
+  else if (props.linkedEntityId === undefined)
     return `intialValues.${props.metadata.key}`;
   else return `intialValues.${fieldKeyWithId.value}`;
 });
