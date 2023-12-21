@@ -1,33 +1,33 @@
 <template>
-  <div class="text-text-light text-sm flex">
-    <p>
-      {{ metadata.label ? t(metadata.label) : t("metadata.no-label") }}
-    </p>
-    <p v-if="isFieldRequired && isEdit" class="pl-1">*</p>
-  </div>
-  <entity-element-metadata-edit
-    v-if="(isEdit && metadata.field) || (isEdit && metadata.inputField)"
-    :fieldKey="
+    <div v-if="!metadata.showOnlyInEditMode" class="text-text-light text-sm flex">
+      <p>
+        {{ metadata.label ? t(metadata.label) : t("metadata.no-label") }}
+      </p>
+      <p v-if="isFieldRequired && isEdit" class="pl-1">*</p>
+    </div>
+    <entity-element-metadata-edit
+        v-if="(isEdit && metadata.field) || (isEdit && metadata.inputField)"
+        :fieldKey="
       isMetadataOnRelation ? `${fieldKeyWithId}` : metadata.key
     "
-    :label="metadata.label as string"
-    v-model:value="value"
-    :field="metadata.inputField ? metadata.inputField : metadata.field"
-    :formId="formId"
-    :unit="metadata.unit"
-    :link-text="metadata.linkText"
-    :isMetadataOnRelation="isMetadataOnRelation"
-    :error="errorMessage"
-    @update:value="setNewValue"
-  />
-  <entity-element-metadata
-    v-else
-    :label="metadata.label as string"
-    v-model:value="value"
-    :link-text="metadata.linkText"
-    :link-icon="metadata.linkIcon"
-    :unit="metadata.unit"
-  />
+        :label="metadata.label as string"
+        v-model:value="value"
+        :field="metadata.inputField ? metadata.inputField : metadata.field"
+        :formId="formId"
+        :unit="metadata.unit"
+        :link-text="metadata.linkText"
+        :isMetadataOnRelation="isMetadataOnRelation"
+        :error="errorMessage"
+        @update:value="setNewValue"
+    />
+    <entity-element-metadata
+        v-else
+        :label="metadata.label as string"
+        v-model:value="value"
+        :link-text="metadata.linkText"
+        :link-icon="metadata.linkIcon"
+        :unit="metadata.unit"
+    />
 </template>
 
 <script lang="ts" setup>
@@ -54,20 +54,24 @@ const fieldKeyWithId = computed(
 );
 
 const veeValidateField = computed(() => {
-      if (isMetadataOnRelation.value)
-        return `relationValues.relationMetadata.${fieldKeyWithId.value}`;
-      else if (props.metadata.inputField || props.metadata.field)
-        return `intialValues.${props.metadata.key}`;
-      else
-        return `intialValues.${fieldKeyWithId.value}`;
-    }
-);
+  if (isMetadataOnRelation.value)
+    return `relationValues.relationMetadata.${fieldKeyWithId.value}`;
+  else if (props.metadata.inputField || props.metadata.field)
+    return `intialValues.${props.metadata.key}`;
+  else if (props.linkedEntityId === undefined)
+    return `intialValues.${props.metadata.key}`;
+  else return `intialValues.${fieldKeyWithId.value}`;
+});
+
+const validationRules = computed<string | undefined>(() => {
+  if (!props.metadata.field || props.metadata.field.validation)
+    return undefined;
+  return props.metadata.field.validation;
+});
 
 const { errorMessage, value } = useField<string>(
-  veeValidateField,
-  props.metadata.field && props.metadata.field.validation
-    ? props.metadata.field.validation
-    : undefined,
+  veeValidateField.value,
+  validationRules.value,
   {
     label: props.metadata.label ? t(props.metadata.label as string) :t("metadata.no-label") ,
   }
