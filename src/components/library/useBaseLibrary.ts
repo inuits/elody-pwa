@@ -25,6 +25,7 @@ import type {
   IntialValues,
 } from "@/generated-types/queries";
 import useEditMode from "@/composables/useEdit";
+import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
 import { createPlaceholderEntities } from "@/helpers";
 import { ref, watch } from "vue";
 
@@ -171,6 +172,7 @@ export const useBaseLibrary = (
   const entitiesLoading = ref<boolean>(false);
   const entitiesLoaded = ref<boolean>(false);
   const { isSaved } = useEditMode();
+  const { createQueryVariables } = useQueryVariablesFactory();
   const manipulateQuery = ref<boolean>(false);
   const manipulationQuery = ref<object>();
 
@@ -273,7 +275,7 @@ export const useBaseLibrary = (
     apolloClient
       .query({
         query: manipulateQuery.value ? manipulationQuery.value.document : GetEntitiesDocument,
-        variables: manipulateQuery.value ? manipulationQuery.value.variables : queryVariables.value,
+        variables: manipulateQuery.value ? createQueryVariables() : queryVariables.value,
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
       })
