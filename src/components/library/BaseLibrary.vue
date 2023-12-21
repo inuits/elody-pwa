@@ -5,7 +5,13 @@
         autocomplete-style="defaultWithBorder"
         :options="entityDropdownOptions"
         :select-type="selectInputFieldType"
-        :model-value="[]"
+        :model-value="selectedDropdownOptions"
+        @update:model-value="
+          (value) => {
+            replaceRelationsFromSameType(mapDropdownOptionsToBulkProcessableItem([...value]), relationType as string);
+            selectedDropdownOptions = [...value];
+          }
+        "
       />
     </div>
     <div v-else class="lg:flex bg-neutral-lightest">
@@ -16,7 +22,7 @@
         <div
           :class="[
             'top-0 mb-2 pt-4 bg-neutral-lightest',
-            { 'sticky': hasStickyBars },
+            { sticky: hasStickyBars },
           ]"
         >
           <div class="flex flex-row items-center gap-y-4">
@@ -139,6 +145,8 @@ import {
   DropdownOption,
   Entitytyping,
   GetEntitiesDocument,
+  Metadata,
+  MetadataAndRelation,
   SearchInputType,
   TypeModals,
 } from "@/generated-types/queries";
@@ -170,6 +178,8 @@ import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
 import { watch, ref, onMounted, inject, computed } from "vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
+import { useFormHelper } from "@/composables/useFormHelper";
+import { options } from "dropzone";
 
 const props = withDefaults(
   defineProps<{
@@ -193,6 +203,7 @@ const props = withDefaults(
     isSearchLibrary?: boolean;
     useOtherQuery?: object;
     selectInputFieldType?: "multi" | "single";
+    selectInputFieldValue?: string[];
   }>(),
   {
     predefinedEntities: undefined,
@@ -254,6 +265,7 @@ const {
 const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
 const { closeModal } = useBaseModal();
+const { replaceRelationsFromSameType } = useFormHelper();
 
 const displayList = ref<boolean>(false);
 const displayGrid = ref<boolean>(false);
@@ -279,6 +291,36 @@ const entityDropdownOptions = computed<DropdownOption[]>(() => {
     };
   });
 });
+
+const selectedDropdownOptions = ref<DropdownOption[]>([]);
+
+const getSelectedOptions = () => {
+  const selectedOptions: DropdownOption[] = [];
+  if (!props.selectInputFieldValue || !entityDropdownOptions.value)
+    return selectedOptions;
+  props.selectInputFieldValue.forEach((item: string) => {
+    const valueOption: DropdownOption | undefined =
+      entityDropdownOptions.value.find(
+        (option: DropdownOption) => option.label === item
+      );
+    if (!valueOption) return;
+    selectedOptions.push(valueOption);
+  });
+  return selectedOptions;
+};
+
+const mapDropdownOptionsToBulkProcessableItem = (
+  dropdownOptions: DropdownOption[]
+): InBulkProcessableItem[] => {
+  const inBulkProcessableItems: InBulkProcessableItem[] = [];
+  dropdownOptions.forEach((dropdownOption: DropdownOption) => {
+    inBulkProcessableItems.push({
+      id: dropdownOption.value,
+      value: dropdownOption.label,
+    });
+  });
+  return inBulkProcessableItems;
+};
 
 const useOtherQuery = computed(() => props.useOtherQuery !== undefined);
 
@@ -404,6 +446,9 @@ watch(
 watch(
   () => entities.value,
   () => {
+    if (props.selectInputFieldType) {
+      selectedDropdownOptions.value = getSelectedOptions();
+    }
     toggles = [];
     if (entities.value.length === 0 || !entities.value[0].allowedViewModes)
       return;

@@ -38,7 +38,7 @@
             list-item-route-name="SingleEntity"
             @confirm-selection="
               (selectedItems) => {
-                addRelations(selectedItems);
+                addRelations(selectedItems, getRelationType());
                 dequeueAllItemsForBulkProcessing(getContext());
                 closeModal(TypeModals.EntityPicker);
               }
@@ -76,7 +76,7 @@ import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 
 const { t } = useI18n();
-const { getAcceptedTypes } = useEntityPickerModal();
+const { getAcceptedTypes, getRelationType } = useEntityPickerModal();
 const { closeModal, getModalInfo } = useBaseModal();
 const { addRelations, getForm } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();

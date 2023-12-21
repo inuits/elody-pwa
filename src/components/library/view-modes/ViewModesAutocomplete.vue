@@ -1,24 +1,19 @@
 <template>
-  <BaseInputAutocomplete
-    v-model="inputValue"
-    :options="autocompleteOptions"
-    :select-type="selectType"
-    autocomplete-style="defaultWithBorder"
-    @search-change="(value: string) => getAutocompleteOptions(value)"
-  />
+  <BaseLibrary
+    bulk-operations-context=""
+    :list-item-route-name="getEntityIdFromRoute() as string"
+    :filter-type="metadataKeyToGetOptionsFor as Entitytyping"
+    :select-input-field-type="selectType"
+    :relation-type="relationType"
+    :select-input-field-value="dropdownValue"
+  ></BaseLibrary>
 </template>
 
 <script lang="ts" setup>
-import {
-  AdvancedFilterTypes,
-  GetFilterOptionsDocument,
-  type DropdownOption,
-  type GetFilterOptionsQuery,
-  type GetFilterOptionsQueryVariables,
-} from "@/generated-types/queries";
-import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
-import { computed, ref } from "vue";
-import { useQuery } from "@vue/apollo-composable";
+import { type DropdownOption, Entitytyping } from "@/generated-types/queries";
+import BaseLibrary from "@/components/library/BaseLibrary.vue";
+import { getEntityIdFromRoute } from "@/helpers";
+import { computed } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -26,6 +21,7 @@ const props = withDefaults(
     metadataKeyToGetOptionsFor?: string | "no-key";
     selectType?: "multi" | "single";
     dropdownOptions: DropdownOption[];
+    relationType: string;
   }>(),
   {
     selectType: "multi",
@@ -34,74 +30,11 @@ const props = withDefaults(
   }
 );
 
-const emit = defineEmits<{
-  (event: "update:modelValue", modelValue: string | string[] | undefined): void;
-}>();
-
-const inputValue = computed<DropdownOption | undefined>({
-  get() {
-    if (typeof props.modelValue === "string") return [props.modelValue];
-    return props.modelValue;
-  },
-  set(value) {
-    if (typeof props.modelValue === "string")
-      emit("update:modelValue", value?.[0]);
-    emit("update:modelValue", value);
-  },
+const dropdownValue = computed<string[]>(() => {
+  if (!props.modelValue) return [];
+  if (typeof props.modelValue === "string") return [props.modelValue];
+  return props.modelValue;
 });
-
-const refetchAutocompleteOptionsEnabled = ref<boolean>(false);
-const autocompleteOptionsQueryVariables = ref<GetFilterOptionsQueryVariables>();
-const {
-  refetch: refetchAutocompleteOptions,
-  onResult: onAutocompleteOptionsResult,
-} = useQuery<GetFilterOptionsQuery>(
-  GetFilterOptionsDocument,
-  autocompleteOptionsQueryVariables,
-  () => ({
-    enabled: refetchAutocompleteOptionsEnabled.value,
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: "no-cache",
-  })
-);
-
-const autocompleteOptions = ref<DropdownOption[]>([]);
-const getAutocompleteOptions = (value: string) => {
-  clearAutocompleteOptions();
-  if (value.length < 3) return;
-
-  if (
-    props.dropdownOptions?.length === 0 ||
-    props.dropdownOptions === undefined
-  ) {
-    autocompleteOptionsQueryVariables.value = {
-      input: {
-        type: AdvancedFilterTypes.Text,
-        key: props.metadataKeyToGetOptionsFor,
-        value,
-        provide_value_options_for_key: true,
-      },
-      limit: 999999,
-    };
-
-    refetchAutocompleteOptionsEnabled.value = true;
-    refetchAutocompleteOptions();
-  } else {
-    autocompleteOptions.value = props.dropdownOptions;
-  }
-};
-onAutocompleteOptionsResult((result) => {
-  clearAutocompleteOptions();
-  let options = result.data?.FilterOptions;
-  if (!options) options = [];
-  autocompleteOptions.value.push(...options);
-});
-
-const clearAutocompleteOptions = () => {
-  let autocompleteOption: DropdownOption | undefined = { label: "", value: "" };
-  while (autocompleteOption !== undefined)
-    autocompleteOption = autocompleteOptions.value.pop();
-};
 </script>
 
 <style></style>

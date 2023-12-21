@@ -1,7 +1,4 @@
-import {
-  RouteNames,
-  type MetadataAndRelation,
-} from "@/generated-types/queries";
+import { RouteNames } from "@/generated-types/queries";
 import { bulkSelectAllSizeLimit } from "@/main";
 import { ref } from "vue";
 
@@ -16,14 +13,14 @@ export enum BulkOperationsContextEnum {
   ManifestCollection = "ManifestCollection",
   SearchModal = "SearchModal",
 }
+
 export type Context = RouteNames | BulkOperationsContextEnum;
 export type InBulkProcessableItem = {
   id: string;
-  teaserMetadata?: MetadataAndRelation[];
+  value?: string;
 };
 
-/* @ts-ignore */
-const items = ref<Record<Context, InBulkProcessableItem[]>>({});
+const items = ref<{ [key: string]: InBulkProcessableItem[] }>({});
 for (const key of [
   ...Object.values(RouteNames),
   ...Object.values(BulkOperationsContextEnum),

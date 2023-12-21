@@ -1,21 +1,19 @@
 import {
+  type BaseRelationValuesInput,
   EditStatus,
   type IntialValues,
   type PanelMetaData,
   type RelationValues,
-  type BaseRelationValuesInput,
 } from "@/generated-types/queries";
 import { findPanelMetadata } from "@/helpers";
-import { useForm, type FormContext, defineRule, useField } from "vee-validate";
+import { defineRule, type FormContext, useField, useForm } from "vee-validate";
 import { ref } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import * as AllRules from "@vee-validate/rules";
-import useEntityPickerModal from "@/composables/useEntityPickerModal";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
-const { getRelationType } = useEntityPickerModal();
 
 export type EntityValues = {
   intialValues?: IntialValues;
@@ -127,11 +125,11 @@ const useFormHelper = () => {
   };
 
   const addEditableMetadataOnRelationKey = (
-      key: string,
-      formId: string
+    key: string,
+    formId: string
   ): void => {
     editableFields.value[formId].push(key);
-  }
+  };
 
   const route = useRoute();
 
@@ -140,8 +138,11 @@ const useFormHelper = () => {
     const form = getForm(id);
     return { id, form };
   };
-  const addRelations = (selectedItems: InBulkProcessableItem[]) => {
-    const { id, form } = getFormByRouteId();
+  const addRelations = (
+    selectedItems: InBulkProcessableItem[],
+    relationType: string
+  ) => {
+    const { form } = getFormByRouteId();
 
     if (selectedItems.length <= 0 || !form) return;
 
@@ -151,20 +152,61 @@ const useFormHelper = () => {
     selectedItems.forEach((item) => {
       newRelations.push({
         key: item.id,
-        type: getRelationType(),
+        type: relationType,
         editStatus: EditStatus.New,
-        teaserMetadata: item.teaserMetadata?.map((metadata) => {
-          return {
-            key: metadata.key,
-            label: metadata.label,
-            value: metadata.value,
-          };
-        }),
+        value: item.value,
       });
     });
 
     form.setFieldValue("relationValues.relations", [
       ...oldRelations,
+      ...newRelations,
+    ]);
+  };
+
+  const replaceRelationsFromSameType = (
+    selectedItems: InBulkProcessableItem[],
+    relationType: string
+  ) => {
+    const { form } = getFormByRouteId();
+
+    const newRelationIds: string[] = selectedItems.map(
+      (item: InBulkProcessableItem) => item.id
+    );
+
+    const otherRelations: BaseRelationValuesInput[] =
+      form.values.relationValues.relations.filter(
+        (relation: BaseRelationValuesInput) => relation.type !== relationType
+      );
+    const relationsToDelete: BaseRelationValuesInput[] =
+      form.values.relationValues.relations.filter(
+        (relation: BaseRelationValuesInput) =>
+          relation.type === relationType &&
+          !newRelationIds.includes(relation.key)
+      );
+    const newRelations: BaseRelationValuesInput[] = [];
+    selectedItems.forEach((item) => {
+      newRelations.push({
+        key: item.id,
+        type: relationType,
+        editStatus: EditStatus.New,
+        value: item.value,
+      });
+    });
+
+    relationsToDelete.forEach((relation: BaseRelationValuesInput) => {
+      newRelations.push({
+        key: relation.key,
+        type: relation.type,
+        editStatus: EditStatus.Deleted,
+        value: relation.value,
+      });
+    });
+
+    console.log(newRelations);
+
+    form.setFieldValue("relationValues.relations", [
+      ...otherRelations,
       ...newRelations,
     ]);
   };
@@ -207,6 +249,7 @@ const useFormHelper = () => {
     defineValidationRules,
     discardEditForForm,
     addRelations,
+    replaceRelationsFromSameType,
     recreateForm,
     findRelation,
   };
