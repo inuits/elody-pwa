@@ -22,7 +22,34 @@
         <div v-if="!requiresCustomQuery || queryLoaded"
             class="ml-1 bg-neutral-lightest">
           <BaseLibrary
+            v-if="type === MediaFileElementTypes.Media"
             class="flex-1"
+            :bulk-operations-context="BulkOperationsContextEnum.EntityElementMedia"
+            :search-input-type-on-drawer="SearchInputType.AdvancedInputMediaFilesType"
+            :predefined-entities="
+              entityId === mediafileSelectionState.selectedMediafile?.id ||
+              entityId === mediafileSelectionState.selectedMediafile?.uuid
+                ? [mediafileSelectionState.selectedMediafile]
+                : undefined
+            "
+            :enable-preview="true"
+            :enable-advanced-filters="false"
+            :enable-bulk-operations="true"
+            :enable-navigation="false"
+            :parent-entity-identifiers="
+              entityId === mediafileSelectionState.selectedMediafile?.id ||
+              entityId === mediafileSelectionState.selectedMediafile?.uuid
+                ? undefined
+                : identifiers
+            "
+            :filter-type="Entitytyping.Mediafile"
+            list-item-route-name="SingleEntity"
+            :entity-type="Entitytyping.Mediafile"
+            :use-other-query="newQuery"
+          />
+          <BaseLibrary
+            class="flex-1"
+            v-else
             :bulk-operations-context="
               createCustomContext(
                 BulkOperationsContextEnum.EntityElementList + relationType
@@ -50,8 +77,9 @@ import {
   SearchInputType,
   TypeModals,
   EntityListViewMode,
-  type Entitytyping,
   type Entity,
+  Entitytyping,
+  MediaFileElementTypes,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -64,6 +92,7 @@ import useEditMode from "@/composables/useEdit";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
+import {useRoute} from "vue-router";
 import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
@@ -85,8 +114,10 @@ const props = withDefaults(
     isCollapsed: Boolean;
     types: string[];
     label: string;
+    type: MediaFileElementTypes;
     customQuery: string;
     customQueryRelationType: string;
+    searchInputType: string;
     entityList: Entity[];
     identifiers: string[];
     relationType: string;
@@ -105,6 +136,10 @@ watch(
       updateRelationForm(props.entityList);
     }
   }
+);
+
+const entityId = computed(
+    () => getEntityUuid() || asString(useRoute().params["id"])
 );
 
 const requiresCustomQuery = computed(() => props.customQuery != undefined);
