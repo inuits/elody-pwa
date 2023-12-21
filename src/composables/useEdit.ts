@@ -1,8 +1,4 @@
-import {
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
 import useMediaAssetLinkHelper from "@/composables/useMediaAssetLinkHelper";
-import useMetaDataHelper from "@/composables/useMetaDataHelper";
 import { computed, ref } from "vue";
 
 export type EditModes = "edit" | "view" | "loading";
@@ -18,11 +14,6 @@ const refetchFn = ref<Function>();
 export const useEditMode = () => {
   const { linkMediaFilesToEntity, clearMediaFilesToLinkToEntity } =
     useMediaAssetLinkHelper();
-  const {
-    clearMediaFilesToPatch,
-    resetRelationsToBeDeleted,
-    resetMetadataToBePatched,
-  } = useMetaDataHelper();
   const setEditMode = () => (editMode.value = "edit");
   const disableEditMode = () => (editMode.value = "view");
   const isEdit = computed<boolean>(() => editMode.value === "edit");
@@ -65,10 +56,7 @@ export const useEditMode = () => {
     disableEditMode();
     saveCallbacks.value = [];
     toBeDeleted.value = [];
-    resetRelationsToBeDeleted();
-    resetMetadataToBePatched();
     clearMediaFilesToLinkToEntity();
-    clearMediaFilesToPatch();
     document.dispatchEvent(discardEvent);
   };
 

@@ -1,4 +1,6 @@
-<template><slot></slot></template>
+<template>
+  <slot></slot>
+</template>
 
 <script lang="ts" setup>
 import {
@@ -67,12 +69,12 @@ let mutatedEntity: Entity | undefined;
 
 const { setValues } = form;
 
-const linkedEntityId = (key) => {
+const linkedEntityId = (key: string) => {
   return key.slice(key.indexOf("-") + 1, key.length);
-}
-const fieldKeyWithoutId = (key) => {
+};
+const fieldKeyWithoutId = (key: string) => {
   return key.slice(0, key.indexOf("-"));
-}
+};
 
 const parseFormValuesToFormInput = (values: EntityValues) => {
   const metadata: MetadataValuesInput[] = [];
@@ -100,20 +102,22 @@ const parseFormValuesToFormInput = (values: EntityValues) => {
 
   if (values.relationValues?.relationMetadata) {
     Object.entries(values.relationValues?.relationMetadata)
-        .filter((entry) => !editableFields.value[entityId.value].includes(entry.key))
-        .forEach((entry) => {
-          const newRelationObject = {
-            key: fieldKeyWithoutId(entry[0]),
-            value: entry[1]
+      .filter(
+        (entry) => !editableFields.value[entityId.value].includes(entry.key)
+      )
+      .forEach((entry) => {
+        const newRelationObject = {
+          key: fieldKeyWithoutId(entry[0]),
+          value: entry[1],
+        };
+        const id = linkedEntityId(entry[0]);
+        for (let i = 0; i < relations.length; i++) {
+          if (relations[i].key === id) {
+            relations[i].metadata = [newRelationObject];
+            relations[i].editStatus = EditStatus.Changed;
           }
-          const id = linkedEntityId(entry[0])
-          for (let i = 0; i < relations.length; i++) {
-            if (relations[i].key === id) {
-              relations[i].metadata = [newRelationObject];
-              relations[i].editStatus = EditStatus.Changed;
-            }
-          }
-        })
+        }
+      });
   }
   return { metadata, relations };
 };
