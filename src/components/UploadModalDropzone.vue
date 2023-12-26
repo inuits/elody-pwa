@@ -40,7 +40,7 @@ const filesInDropzone = ref<DropzoneFile[]>([]);
 const { closeModal, getModalInfo } = useBaseModal();
 const { createNotificationOverwrite } = useNotification();
 const { t } = useI18n();
-const { uploadGenerator, validateFiles } = useUpload();
+const { uploadGenerator, validateFiles, toggleUploadStatus } = useUpload();
 const { clearDropzoneCounters, clearDropzoneErrorMessages, dropzone } =
   useDropzoneHelper();
 const { getEntityIdForLinkedUpload, getUploadType, setUploadStatus } =
@@ -52,6 +52,7 @@ const onUpdateFilesInDropzone = (files: DropzoneFile[]) => {
 };
 
 const handleUpload = async () => {
+  toggleUploadStatus();
   const generator = uploadGenerator(
     filesInDropzone.value,
     getUploadType(),
@@ -78,6 +79,7 @@ const handleUpload = async () => {
       closeModal(TypeModals.Upload);
     }
   }
+  toggleUploadStatus();
 };
 
 const exceptionHandler = (
