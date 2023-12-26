@@ -103,6 +103,7 @@ import {useEntityMediafileSelector} from "@/composables/useEntityMediafileSelect
 import {asString} from "@/helpers";
 import useEntitySingle from "@/composables/useEntitySingle";
 import {useQueryVariablesFactory} from "@/composables/useQueryVariablesFactory";
+import useUpload from "@/composables/useUpload";
 
 const { addRelations } = useFormHelper();
 const { createCustomContext } = useBulkOperations();
@@ -114,13 +115,13 @@ const { isEdit } = useEditMode();
 const { t } = useI18n();
 const { mediafileSelectionState } = useEntityMediafileSelector();
 const { getEntityUuid } = useEntitySingle();
+const { uploadStatus } = useUpload();
 const {
   setIdentifiers,
   setQueryRelationType,
   setSearchInputType,
   setEntityType
 } = useQueryVariablesFactory();
-
 
 const props = withDefaults(
     defineProps<{
@@ -160,8 +161,22 @@ const queryLoaded = ref<boolean>(false);
 const newQuery = ref<object>(undefined);
 
 onBeforeMount(async () => {
-  if (!requiresCustomQuery.value)
-    return;
+  if (requiresCustomQuery.value)
+    await useCustomQuery();
+});
+
+watch(
+    () => uploadStatus.value,
+    async () => {
+      if (!requiresCustomQuery.value) return;
+      if (uploadStatus.value === "uploading")
+        queryLoaded.value = false;
+      else if (uploadStatus.value === "upload-finished")
+        await useCustomQuery();
+    }
+);
+
+const useCustomQuery = async () => {
   setQueryName(props.customQuery);
   const document = await loadDocument();
   setEntityType(props.types[0]);
@@ -173,7 +188,7 @@ onBeforeMount(async () => {
     document: document,
   };
   queryLoaded.value = true;
-});
+}
 
 const updateRelationForm = (newTags: String[]) => {
   if (typeof newTags == "string") {
