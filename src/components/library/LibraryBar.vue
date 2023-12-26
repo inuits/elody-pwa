@@ -32,7 +32,7 @@
     </div>
     <div class="flex justify-end">
       <BasePaginationNew
-        v-model:skip="skip"
+        v-model:skip="selectedSkip"
         :limit="selectedPaginationLimitOption?.value ?? NaN"
         :total-items="totalItems"
       />
@@ -74,15 +74,15 @@ const {
   libraryBarInitializationStatus,
 } = toRefs(props);
 const { getModalInfo } = useBaseModal();
-const { setSelectedPaginationLimitOption, selectedPaginationLimitOption } = useLibraryBar();
+const { setSelectedPaginationLimitOption, selectedPaginationLimitOption, setSelectedSkip, selectedSkip } = useLibraryBar();
 const { t } = useI18n();
-const skip = ref<number>(1);
 const isAsc = ref<boolean>(false);
 
 const selectedSortOption = ref<DropdownOption>();
 
 const setDefaultOptions = () => {
   setSelectedPaginationLimitOption(paginationLimitOptions.value?.[0]);
+  setSelectedSkip(1);
   selectedSortOption.value = sortOptions.value?.[0];
 };
 
@@ -113,13 +113,13 @@ watch(isAsc, () => {
     queryVariables.value.searchValue.isAsc = isAsc.value;
   }
 });
-watch(skip, () => {
-  if (queryVariables.value) queryVariables.value.skip = skip.value;
+watch(selectedSkip, () => {
+  if (queryVariables.value) queryVariables.value.skip = selectedSkip.value;
 });
 watch(
   () => queryVariables.value?.skip,
   () => {
-    if (queryVariables.value.skip) skip.value = queryVariables.value.skip;
+    if (queryVariables.value.skip) selectedSkip.value = queryVariables.value.skip;
   }
 );
 watch(
