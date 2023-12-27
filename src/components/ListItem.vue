@@ -12,7 +12,7 @@
       { 'animate-pulse': loading },
     ]"
   >
-    <div class="flex items-center rounded-2xl p-2 bg-neutral-light" v-show="isEdit">
+    <div class="flex items-center rounded-2xl p-2 bg-neutral-light" v-show="isEdit" v-if="onlyEditableTeaserMetadata.length > 0">
       <div class="pl-2">
         <unicon
             :name="Unicons.Bars.name"
@@ -21,7 +21,7 @@
       </div>
       <div v-if="!loading" class="w-16 pr-2">
         <div
-            v-for="metadataItem in teaserMetadata.filter((metadata) => metadata.showOnlyInEditMode)"
+            v-for="metadataItem in onlyEditableTeaserMetadata"
             :key="metadataItem ? metadataItem.key : 'no-key'"
             class="w-1/1"
         >
@@ -188,6 +188,7 @@ const canShowCopyRight = () => {
 };
 
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
+const onlyEditableTeaserMetadata = computed(() => props.teaserMetadata.filter((metadata) => metadata.showOnlyInEditMode))
 
 watch(
   () => isMarkedAsToBeDeleted.value,
