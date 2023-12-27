@@ -68,22 +68,24 @@ const props = defineProps<{
 }>();
 
 const {
-  paginationLimitOptions,
-  sortOptions,
-  queryVariables,
   libraryBarInitializationStatus,
 } = toRefs(props);
 const { getModalInfo } = useBaseModal();
-const { setSelectedPaginationLimitOption, selectedPaginationLimitOption, setSelectedSkip, selectedSkip } = useLibraryBar();
+const {
+  setSelectedPaginationLimitOption, selectedPaginationLimitOption,
+  setSelectedSkip, selectedSkip,
+  setSelectedSortOption, selectedSortOption,
+  setQueryVariables, queryVariables
+} = useLibraryBar();
 const { t } = useI18n();
 const isAsc = ref<boolean>(false);
 
-const selectedSortOption = ref<DropdownOption>();
 
 const setDefaultOptions = () => {
-  setSelectedPaginationLimitOption(paginationLimitOptions.value?.[0]);
+  setQueryVariables(props.queryVariables);
+  setSelectedPaginationLimitOption(props.paginationLimitOptions.value?.[0]);
   setSelectedSkip(1);
-  selectedSortOption.value = sortOptions.value?.[0];
+  setSelectedSortOption(props.sortOptions.value?.[0]);
 };
 
 watch(

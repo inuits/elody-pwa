@@ -3,8 +3,7 @@
 import { useLibraryBar } from "@/composables/useLibraryBar";
 import { ref } from "vue";
 
-const { selectedPaginationLimitOption } = useLibraryBar();
-const { selectedSkip } = useLibraryBar();
+const { selectedPaginationLimitOption, selectedSkip, queryVariables } = useLibraryBar();
 
 const entityType = ref<String>();
 const relationType = ref<String>();
@@ -29,12 +28,7 @@ export const useQueryVariablesFactory = () => {
         return {
             limit: selectedPaginationLimitOption.value?.value,
             skip: selectedSkip.value,
-            searchValue: {
-                value: "",
-                isAsc: false,
-                key: "",
-                order_by: "",
-            },
+            searchValue: queryVariables.value?.searchValue,
             advancedSearchValue: [],
             advancedFilterInputs: [
                 {
