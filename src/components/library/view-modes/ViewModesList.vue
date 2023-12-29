@@ -113,14 +113,6 @@ const relations = computed<BaseRelationValuesInput[]>(
   () => getForm(entityId.value)?.values?.relationValues?.relations
 );
 
-const sortListItems = () => {
-  try {
-    props.entities = props.entities.sort((el1, el2) => Number(el1.intialValues.order) > Number(el2.intialValues.order));
-  } catch (e) { }
-}
-onMounted(() => sortListItems());
-onUpdated(() => sortListItems());
-
 const navigateToEntityPage = (
   entity: Entity,
   listItemRouteName: string,
