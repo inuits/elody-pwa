@@ -97,6 +97,7 @@ onUpdated(() => {
 
 const getValueFromMetadata = (): string => {
   if (typeof metadataValue.value !== "object") return metadataValue.value;
+  if (metadataValue.value !== undefined) return metadataValue.value;
   return metadataValue.value.value;
 };
 
