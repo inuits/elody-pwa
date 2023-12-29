@@ -70,6 +70,7 @@ onMounted(() => {
 
 const getValueFromMetadata = (): string => {
   if (typeof metadataValue.value === "string") return metadataValue.value;
+  if (metadataValue.value !== undefined) return metadataValue.value;
   return metadataValue.value.value;
 };
 
