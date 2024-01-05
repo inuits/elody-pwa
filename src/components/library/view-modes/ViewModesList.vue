@@ -68,12 +68,17 @@ import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import { getEntityIdFromRoute, goToEntityPage } from "@/helpers";
-import { computed, inject, onMounted, onUpdated } from "vue";
+import { computed, inject, ref } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
+import { useOrderListItems } from "@/composables/useOrderListItems";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useRouter } from "vue-router";
+import EventBus from "../../../EventBus";
+import {useLibraryBar} from "@/composables/useLibraryBar";
+
+
 const props = withDefaults(
   defineProps<{
     entities: Entity[];
@@ -104,8 +109,10 @@ const { formatTeaserMetadata } = useBaseLibrary(
 const { mediafileSelectionState, updateSelectedEntityMediafile } =
   useEntityMediafileSelector();
 const { getMediaFilenameFromEntity } = useListItemHelper();
+const { queryVariables } = useLibraryBar();
 const { getThumbnail } = useThumbnailHelper();
 const { getForm, findRelation } = useFormHelper();
+const { getFormOrderItems } = useOrderListItems();
 const router = useRouter();
 
 const entityId = computed(() => getEntityIdFromRoute() as string);
@@ -131,4 +138,23 @@ const navigateToEntityPage = (
   }
   goToEntityPage(entity, listItemRouteName, router);
 };
+
+EventBus.on("orderList_changed", () => {
+  const orderItems = getFormOrderItems(entityId.value);
+  if (!orderItems) return;
+  let itemsFound: boolean = false;
+  props.entities.forEach((entity) => {
+    const fieldKeyWithId = `order-${entity.id}`;
+    const item = orderItems.filter(item => item.field === fieldKeyWithId)[0];
+    if (!item) return;
+    entity.intialValues.order = item.currentValue;
+    entity.teaserMetadata.order.value = item.currentValue;
+    itemsFound = true;
+  });
+  if (itemsFound) {
+    props.entities.sort((value, nextValue) => value.intialValues.order > nextValue.intialValues.order)
+    if (!queryVariables.value.searchValue.isAsc) props.entities.reverse();
+  }
+});
+
 </script>

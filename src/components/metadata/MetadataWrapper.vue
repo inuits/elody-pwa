@@ -36,7 +36,11 @@ import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.v
 import { MetadataField } from "@/generated-types/queries";
 import { computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
+import { useOrderListItems, OrderItem } from "@/composables/useOrderListItems";
 import { useField } from "vee-validate";
+
+const { t } = useI18n();
+const { addOrderItem, updateOrderItem } = useOrderListItems();
 
 const props = defineProps<{
   isEdit: boolean;
@@ -45,7 +49,14 @@ const props = defineProps<{
   linkedEntityId?: String;
 }>();
 
-const { t } = useI18n();
+const setNewValue = (newValue: string) => {
+  value.value = newValue;
+  updateOrderItem(props.formId, fieldKeyWithId.value, newValue);
+};
+defineExpose({
+  setNewValue
+})
+
 const isMetadataOnRelation = computed(
     () => props.metadata.__typename === "PanelRelationMetaData"
 );
@@ -77,12 +88,16 @@ const { errorMessage, value } = useField<string>(
   }
 );
 
-const setNewValue = (newValue: string) => {
-  value.value = newValue;
-};
-
 onMounted(() => {
   if (!value.value) setNewValue(props.metadata.value);
+  if (isMetadataOnRelation && props.metadata.key === "order") {
+    const orderItem: OrderItem = {
+      field: fieldKeyWithId.value,
+      initialValue: parseInt(props.metadata.value),
+      currentValue: parseInt(props.metadata.value)
+    };
+    addOrderItem(props.formId, orderItem);
+  }
 });
 
 const isFieldRequired = computed(() =>
