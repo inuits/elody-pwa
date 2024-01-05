@@ -42,7 +42,7 @@ import {
 import BaseDropdownNew from "../base/BaseDropdownNew.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
-import { onMounted, watch, ref } from "vue";
+import { onMounted, watch, ref, onUpdated } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 
@@ -66,6 +66,9 @@ const metadataValue = ref<string | DropdownOption>(props.value);
 onMounted(() => {
   if (props.isMetadataOnRelation)
     addEditableMetadataOnRelationKey(props.fieldKey, props.formId);
+});
+onUpdated(() => {
+  metadataValue.value = props.value;
 });
 
 const getValueFromMetadata = (): string => {

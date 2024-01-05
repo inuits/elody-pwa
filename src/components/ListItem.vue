@@ -26,6 +26,7 @@
             class="w-1/1"
         >
           <metadata-wrapper
+              ref="orderMetadataChild"
               :form-id="formId"
               v-model:metadata="metadataItem as MetadataField"
               :is-edit="isEdit"
@@ -122,7 +123,7 @@ import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
 import useEditMode from "@/composables/useEdit";
 import { useAuth } from "session-vue-3-oidc-library";
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, onUpdated } from "vue";
 import { getEntityIdFromRoute, stringIsUrl } from "@/helpers";
 import { Unicons } from "@/types";
 import { useFieldArray } from "vee-validate";
@@ -176,6 +177,13 @@ const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
 
 const formId = computed(() => getEntityIdFromRoute() as string);
+
+const orderMetadataChild = ref(null);
+onUpdated(() => {
+  if (!orderMetadataChild.value) return;
+  orderMetadataChild.value[0]?.setNewValue(props.intialValues?.order);
+});
+
 const setNoImage = () => {
   imageSrcError.value = true;
 };
