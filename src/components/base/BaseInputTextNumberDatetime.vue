@@ -100,10 +100,13 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (event: "update:modelValue", modelValue: string | number | undefined): void;
+  (
+    event: "update:modelValue",
+    modelValue: string | number | boolean | undefined
+  ): void;
 }>();
 
-const inputValue = computed<string | number | undefined>({
+const inputValue = computed<string | number | boolean | undefined>({
   get() {
     return props.modelValue;
   },
@@ -121,6 +124,7 @@ input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
 input[type="number"] {
   appearance: textfield;
   -moz-appearance: textfield;
