@@ -2,7 +2,10 @@
   <div
     :class="['bg-accent-normal rounded-t-lg', { 'rounded-lg': isCollapsed }]"
   >
-    <div class="flex items-center justify-between cursor-pointer">
+    <div
+      class="flex items-center justify-between cursor-pointer"
+      @click.self="toggleElementCollapse(label)"
+    >
       <div class="flex p-2">
         <span class="subtitle mr-2">{{ t(label) }}</span>
         <slot name="actions"></slot>
@@ -16,7 +19,9 @@
         />
       </span>
     </div>
-    <div class="h-full" v-if="!isCollapsed"><slot name="content"></slot></div>
+    <div class="h-full" v-if="!isCollapsed">
+      <slot name="content"></slot>
+    </div>
   </div>
 </template>
 
