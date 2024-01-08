@@ -49,21 +49,22 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineProps, ref, watch } from "vue";
-import { useAuth } from "session-vue-3-oidc-library";
-import MenuSubItem from "@/components/menu/MenuSubItem.vue";
-import { Unicons } from "@/types";
-import { Permission } from "@/generated-types/queries";
-import type { DamsIcons, MenuItem } from "@/generated-types/queries";
-import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
+import { Entitytyping, type DamsIcons, type MenuItem } from "@/generated-types/queries";
 import CustomIcon from "../CustomIcon.vue";
-import { useRouter } from "vue-router";
-import { useI18n } from "vue-i18n";
-import {
-  usePermissions,
-  ignorePermissions,
-} from "@/composables/usePermissions";
 import EventBus from "../../EventBus";
+import MenuSubItem from "@/components/menu/MenuSubItem.vue";
+import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
+import { computed, defineProps, ref } from "vue";
+import { Permission } from "@/generated-types/queries";
+import { Unicons } from "@/types";
+import { useAuth } from "session-vue-3-oidc-library";
+import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
+import {
+  ignorePermissions,
+  permittedEntitiesToCreate,
+  usePermissions,
+} from "@/composables/usePermissions";
 
 const { checkIfRouteOrModal, setSelectedMenuItem, selectedMenuItem } =
   useMenuHelper();
@@ -103,12 +104,22 @@ handleSubMenu();
 
 EventBus.on("permissions_updated", () => {
   let allowed = false;
-  if (props.menuitem.requiresAuth === false) allowed = true;
   const typeModal = props.menuitem.typeLink.modal?.typeModal as string;
-  if (typeModal === "Create" || typeModal === "Upload")
+
+  if (props.menuitem.requiresAuth === false) allowed = true;
+  else if (typeModal === "Upload")
     allowed = allowed || can(Permission.Cancreate, undefined);
-  if (props.menuitem.entityType)
+  else if (typeModal === "Create") {
+    permittedEntitiesToCreate.value = [];
+    Object.values(Entitytyping).forEach(entityType => {
+      if (allowed || can(Permission.Cancreate, entityType))
+        permittedEntitiesToCreate.value.push(entityType);
+    })
+    if (permittedEntitiesToCreate.value.length > 0) allowed = true;
+  }
+  else if (props.menuitem.entityType)
     allowed = allowed || can(Permission.Canread, props.menuitem.entityType);
+
   menuSubitem.value.forEach((item) => {
     if (item.requiresAuth === false) allowed = true;
     allowed = allowed || can(Permission.Canread, item.entityType);
