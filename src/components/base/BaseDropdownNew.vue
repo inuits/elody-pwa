@@ -77,7 +77,7 @@ const dropdownStyles: Record<DropdownStyle, Dropdown> = {
 
 const props = withDefaults(
   defineProps<{
-    modelValue: DropdownOption | undefined;
+    modelValue: DropdownOption | string | undefined;
     options: DropdownOption[];
     dropdownStyle: DropdownStyle;
     labelPosition?: "above" | "inline";
@@ -123,6 +123,12 @@ watch(
   () => props.modelValue,
   () => {
     if (!props.modelValue) return;
+    if (typeof props.modelValue === "string") {
+      selectedItem.value = props.options.find(
+        (option: DropdownOption) => option.value === props.modelValue
+      );
+      return;
+    }
     selectedItem.value = props.modelValue;
   },
   { immediate: true }
