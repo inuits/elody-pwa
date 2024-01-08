@@ -212,9 +212,6 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
   const details = unit.split("_");
 
   if (!unitConversionTable[details[0]] || value == "") {
-    console.warn(
-      "This unit can not be converted yet or this item has no value"
-    );
     return value;
   }
   const conversionFunction = unitConversionTable[details[0] as string];
