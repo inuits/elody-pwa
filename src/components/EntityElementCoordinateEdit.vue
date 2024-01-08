@@ -1,26 +1,31 @@
 <template>
-  <div v-if="field" class="text-sm pl-4 flex justify-between">
-    <div class="h-10 block">
-      <BaseInputTextNumberDatetime
-        v-model="computedLongitude"
-        label="Longitude"
-        :type="field.type as any"
-        :step="decimalPointStep"
-        input-style="defaultWithBorder"
-        :disabled="!isEdit"
-      />
-      <p class="text-red-default">{{ errorMessage }}</p>
-    </div>
-    <div class="h-10 block">
-      <BaseInputTextNumberDatetime
-        v-model="computedLatitude"
-        label="Latitude"
-        :type="field.type as any"
-        :step="decimalPointStep"
-        input-style="defaultWithBorder"
-        :disabled="!isEdit"
-      />
-      <p class="text-red-default">{{ errorMessage }}</p>
+  <div v-if="field" class="text-text-light text-sm">
+    <p>
+      {{ label ? t(label) : t("metadata.no-label") }}
+    </p>
+    <div class="flex justify-between">
+      <div class="h-10 block">
+        <BaseInputTextNumberDatetime
+          v-model="computedLongitude"
+          label="Longitude"
+          :type="field.type as any"
+          :step="decimalPointStep"
+          input-style="defaultWithBorder"
+          :disabled="!isEdit"
+        />
+        <p class="text-red-default">{{ errorMessage }}</p>
+      </div>
+      <div class="h-10 block">
+        <BaseInputTextNumberDatetime
+          v-model="computedLatitude"
+          label="Latitude"
+          :type="field.type as any"
+          :step="decimalPointStep"
+          input-style="defaultWithBorder"
+          :disabled="!isEdit"
+        />
+        <p class="text-red-default">{{ errorMessage }}</p>
+      </div>
     </div>
   </div>
 </template>
@@ -34,6 +39,7 @@ import { type PropType, computed } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useField } from "vee-validate";
 import { useEditMode } from "@/composables/useEdit";
+import { useI18n } from "vue-i18n";
 
 export type Location = {
   latitude: string;
@@ -53,6 +59,7 @@ const { getForm } = useFormHelper();
 const id = getEntityIdFromRoute() || "";
 const form: FormContext | undefined = getForm(id);
 const { errorMessage } = useField("intialValues." + props.fieldKey);
+const { t } = useI18n();
 
 const setFormValues = (latitude: string, longitude: string) => {
   if (form) {
