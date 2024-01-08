@@ -1,12 +1,12 @@
 import  {
     EditStatus,
 } from "@/generated-types/queries";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import {useLibraryBar} from "@/composables/useLibraryBar";
 import EventBus from "@/EventBus";
 
 
-const { selectedSkip, selectedPaginationLimitOption} = useLibraryBar();
+const { selectedPaginationLimitOption } = useLibraryBar();
 
 type OrderItem = {
     field: String,
@@ -15,6 +15,7 @@ type OrderItem = {
     status?: EditStatus
 };
 const orderItemsPerForm = ref<{ [key: string]: OrderItem[] }>([]);
+const pagination = computed(() => selectedPaginationLimitOption.value?.value ? selectedPaginationLimitOption.value?.value : 20);
 
 const useOrderListItems = () => {
 
@@ -38,12 +39,28 @@ const useOrderListItems = () => {
         return orderItemsPerForm.value[formId];
     }
 
+    const checkIfFormHasChangedItems = (formId: number): boolean => {
+        const form = getFormOrderItems(formId);
+        let changedItem = false;
+        form.forEach((item) => {
+            if (item.status === EditStatus.Changed) changedItem = true;
+        });
+        return changedItem
+    }
+
     const addOrderItem = (formId: number, orderItem: OrderItem) => {
         createFormIfNotExists(formId);
         if (getOrderItemInList(formId, orderItem.field)) return;
         orderItem.status = EditStatus.Unchanged;
         orderItemsPerForm.value[formId].push(orderItem);
         sortList(formId);
+    }
+
+    const removeOrderItem = (formId: number, field: string) => {
+        if (checkIfFormHasChangedItems(formId)) {
+            // Code for mutation
+        }
+        orderItemsPerForm.value[formId] = orderItemsPerForm.value[formId].filter((item) => item.field !== field);
     }
 
     const updateOrderItem = (formId: number, field: string, newValue: string) => {
@@ -59,12 +76,20 @@ const useOrderListItems = () => {
     const changeOrderOfList = (formId: number, oldValue: number, newValue: number) => {
         const form = orderItemsPerForm.value[formId];
         if (newValue < oldValue) {
-            for (let index = oldValue-2; index >= newValue-1; index--) {
+            for (let index = oldValue-2 % pagination.value; index >= newValue-1 % pagination.value; index--) {
+                // Check for pagination
+                if (form[index] === undefined) {
+
+                }
                 form[index].currentValue += 1;
                 form[index].status = setStatus(form[index]);
             }
         } else {
-            for (let index = oldValue; index < newValue; index++) {
+            for (let index = oldValue % pagination.value; index < newValue % pagination.value; index++) {
+                // Check for pagination
+                if (form[index] === undefined) {
+
+                }
                 form[index].currentValue -= 1;
                 form[index].status = setStatus(form[index]);
             }
@@ -77,6 +102,7 @@ const useOrderListItems = () => {
     return {
         getFormOrderItems,
         addOrderItem,
+        removeOrderItem,
         updateOrderItem,
     };
 };

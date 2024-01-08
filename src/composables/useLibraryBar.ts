@@ -10,6 +10,7 @@ const selectedPaginationLimitOption = ref<DropdownOption>();
 const selectedSkip = ref<DropdownOption>();
 const selectedSortOption = ref<DropdownOption>();
 const queryVariables = ref<GetEntitiesQueryVariables>();
+const totalItemsCount = ref<number>();
 
 export const useLibraryBar = () => {
 
@@ -25,6 +26,9 @@ export const useLibraryBar = () => {
     const setQueryVariables = (variables: Number) => {
         queryVariables.value = variables;
     }
+    const setTotalItemsCount = (total: Number) => {
+        totalItemsCount.value = total;
+    }
 
     return {
         setSelectedPaginationLimitOption,
@@ -34,7 +38,9 @@ export const useLibraryBar = () => {
         setSelectedSortOption,
         selectedSortOption,
         setQueryVariables,
-        queryVariables
+        queryVariables,
+        setTotalItemsCount,
+        totalItemsCount
     };
 
 }

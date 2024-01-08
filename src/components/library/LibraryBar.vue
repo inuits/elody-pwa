@@ -34,7 +34,7 @@
       <BasePaginationNew
         v-model:skip="selectedSkip"
         :limit="selectedPaginationLimitOption?.value ?? NaN"
-        :total-items="totalItems"
+        :total-items="totalItemsCount"
       />
     </div>
   </div>
@@ -75,11 +75,11 @@ const {
   setSelectedPaginationLimitOption, selectedPaginationLimitOption,
   setSelectedSkip, selectedSkip,
   setSelectedSortOption, selectedSortOption,
-  setQueryVariables, queryVariables
+  setQueryVariables, queryVariables,
+  setTotalItemsCount, totalItemsCount,
 } = useLibraryBar();
 const { t } = useI18n();
 const isAsc = ref<boolean>(false);
-
 
 const setDefaultOptions = () => {
   setQueryVariables(props.queryVariables);
@@ -88,6 +88,10 @@ const setDefaultOptions = () => {
   setSelectedSortOption(props.sortOptions.value?.[0]);
 };
 
+watch(
+    () => props.totalItems,
+    () => setTotalItemsCount(props.totalItems)
+)
 watch(
   () => libraryBarInitializationStatus.value,
   () => {

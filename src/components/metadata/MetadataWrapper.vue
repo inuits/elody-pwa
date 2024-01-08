@@ -34,13 +34,13 @@
 import EntityElementMetadataEdit from "@/components/metadata/EntityElementMetadataEdit.vue";
 import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.vue";
 import { MetadataField } from "@/generated-types/queries";
-import { computed, onMounted } from "vue";
+import { computed, onMounted, onBeforeUnmount } from "vue";
 import { useI18n } from "vue-i18n";
 import { useOrderListItems, OrderItem } from "@/composables/useOrderListItems";
 import { useField } from "vee-validate";
 
 const { t } = useI18n();
-const { addOrderItem, updateOrderItem } = useOrderListItems();
+const { addOrderItem, removeOrderItem, updateOrderItem } = useOrderListItems();
 
 const props = defineProps<{
   isEdit: boolean;
@@ -98,6 +98,10 @@ onMounted(() => {
     };
     addOrderItem(props.formId, orderItem);
   }
+});
+onBeforeUnmount(() => {
+  if (props.metadata.key !== "order") return;
+  removeOrderItem(props.formId, fieldKeyWithId.value);
 });
 
 const isFieldRequired = computed(() =>
