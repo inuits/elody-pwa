@@ -10,7 +10,7 @@
     <router-link
       :to="{ name: 'Home' }"
       @click="setSelectedMenuItem(menuItems[0])"
-      class="logo mt-4 text-neutral-700 font-semibold mb-8 text-xl"
+      class="mt-4 text-neutral-700 font-semibold mb-8 text-xl flex justify-center"
     >
       <img src="/logo.svg" alt="Elody logo" class="h-12" />
     </router-link>
