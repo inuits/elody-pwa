@@ -67,7 +67,7 @@
               :key="metadataItem ? metadataItem.value : 'no-key'"
             >
               <metadata-wrapper
-                form-id="gridItem"
+                :form-id="formId || 'griditem'"
                 v-model:metadata="metadataItem as MetadataField"
                 :is-edit="false"
               />
@@ -106,7 +106,7 @@ import BaseToggle from "@/components/base/BaseToggle.vue";
 import useEditMode from "@/composables/useEdit";
 import { useAuth } from "session-vue-3-oidc-library";
 import { computed, ref, watch } from "vue";
-import { stringIsUrl } from "@/helpers";
+import { getEntityIdFromRoute, stringIsUrl } from "@/helpers";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 
 const props = withDefaults(
@@ -148,6 +148,7 @@ const auth = useAuth();
 const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
+const formId = computed(() => getEntityIdFromRoute() as string);
 
 const setNoImage = () => {
   imageSrcError.value = true;

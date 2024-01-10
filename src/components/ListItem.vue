@@ -73,7 +73,7 @@
         class="flex justify-start flex-col mx-2 break-words w-1/4"
       >
         <metadata-wrapper
-          :form-id="formId"
+          :form-id="formId || 'listview'"
           v-model:metadata="metadataItem as MetadataField"
           :is-edit="isEdit"
           :linked-entity-id="intialValues.id"
