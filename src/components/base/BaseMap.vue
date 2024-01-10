@@ -36,7 +36,7 @@
           :field="data.field"
         />
         <metadata-wrapper
-          v-else-if="data.field"
+          v-else
           :form-id="formId"
           :is-edit="isEdit"
           v-model:metadata="data as MetadataField"
