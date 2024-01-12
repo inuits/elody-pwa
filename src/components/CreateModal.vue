@@ -25,6 +25,7 @@
 
 <script lang="ts" setup>
 import {
+  CreateableEntityTypes,
   DamsIcons,
   ModalState,
   TypeModals,
@@ -33,7 +34,7 @@ import {
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import CreateEntityForm from "@/components/CreateEntityForm.vue";
-import { permittedEntitiesToCreate } from "@/composables/usePermissions";
+//import { permittedEntitiesToCreate } from "@/composables/usePermissions";
 import { ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -45,21 +46,30 @@ const { deleteForm } = useFormHelper();
 const selectedEntityType = ref<DropdownOption>();
 const entityTypes = ref<DropdownOption[]>([]);
 
+Object.values(CreateableEntityTypes).forEach((type) => {
+  entityTypes.value.push({
+    icon: DamsIcons.NoIcon,
+    label: t(`types.${type}`),
+    value: type,
+  });
+});
+
 watch(
   () => getModalInfo(TypeModals.Create).state,
   (createModalState: ModalState) => {
     if (createModalState === ModalState.Hide) {
       selectedEntityType.value = undefined;
       deleteForm("createEntity");
-    } else if (createModalState === ModalState.Show) {
-      entityTypes.value = [];
-      permittedEntitiesToCreate.value.forEach((type) => {
-        entityTypes.value.push({
-          icon: DamsIcons.NoIcon,
-          label: t(`types.${type}`),
-          value: type,
-        });
-      });
+  // don't remove those commented lines, this is just temporarily disabled
+  //} else if (createModalState === ModalState.Show) {
+  //  entityTypes.value = [];
+  //  permittedEntitiesToCreate.value.forEach((type) => {
+  //    entityTypes.value.push({
+  //      icon: DamsIcons.NoIcon,
+  //      label: t(`types.${type}`),
+  //      value: type,
+  //    });
+  //  });
     }
   }
 );
