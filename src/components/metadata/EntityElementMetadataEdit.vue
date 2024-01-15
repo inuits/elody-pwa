@@ -27,7 +27,7 @@
       :type="field.type as any"
       input-style="defaultWithBorder"
     />
-    <p v-if="metadataValue?.length > 1" class="text-red-default">
+    <p v-if="fieldIsDirty" class="text-red-default">
       {{ error }}
     </p>
   </div>
@@ -58,6 +58,7 @@ const props = defineProps<{
   linkText?: string;
   isMetadataOnRelation?: boolean;
   error?: string;
+  fieldIsDirty: boolean;
 }>();
 const { addEditableMetadataOnRelationKey } = useFormHelper();
 const { t } = useI18n();
