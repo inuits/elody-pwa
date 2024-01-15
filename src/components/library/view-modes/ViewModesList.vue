@@ -112,7 +112,6 @@ const { getMediaFilenameFromEntity } = useListItemHelper();
 const { queryVariables } = useLibraryBar();
 const { getThumbnail } = useThumbnailHelper();
 const { getForm, findRelation } = useFormHelper();
-const { getFormOrderItems } = useOrderListItems();
 const router = useRouter();
 
 const entityId = computed(() => getEntityIdFromRoute() as string);
