@@ -161,14 +161,6 @@ const useOrderListItems = () => {
             const isMultipage = oldValue - newValue > pagination.value || isAsc.value ? oldValue - newValue > indexToSave : oldValue - newValue > pagination.value - (indexToSave+1);
             await traverseListDownwards(form, formId, oldValue, newValue, indexToSave, isMultipage);
         } else {
-            for (let index = oldValue % pagination.value; index < newValue % pagination.value; index++) {
-                // Check for pagination
-                if (form[index] === undefined) {
-
-                }
-                form[index].currentValue -= 1;
-                form[index].status = setStatus(form[index]);
-            }
             const multiPageIndexCompare = orderItemsPerForm.value[formId].length - (indexToSave+1);
             const isMultipage = newValue - oldValue > pagination.value || isAsc.value ? newValue - oldValue > pagination.value - (indexToSave+1) : newValue - oldValue > multiPageIndexCompare;
             await traverseListUpwards(form, formId, oldValue, newValue, indexToSave, isMultipage);
