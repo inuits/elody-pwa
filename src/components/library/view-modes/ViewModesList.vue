@@ -71,7 +71,7 @@ import { getEntityIdFromRoute, goToEntityPage } from "@/helpers";
 import { computed, inject, ref } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
-import { useOrderListItems, OrderItem } from "@/composables/useOrderListItems";
+import { OrderItem } from "@/composables/useOrderListItems";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useRouter } from "vue-router";
@@ -112,7 +112,6 @@ const { getMediaFilenameFromEntity } = useListItemHelper();
 const { queryVariables } = useLibraryBar();
 const { getThumbnail } = useThumbnailHelper();
 const { getForm, findRelation } = useFormHelper();
-const { getFormOrderItems } = useOrderListItems();
 const router = useRouter();
 
 const entityId = computed(() => getEntityIdFromRoute() as string);
