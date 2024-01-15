@@ -37,7 +37,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { DropdownOption } from "@/generated-types/queries";
+import type {
+  ConditionalRequired,
+  DropdownOption,
+} from "@/generated-types/queries";
 import {
   InputFieldTypes,
   type InputField as InputFieldType,
@@ -79,8 +82,7 @@ const fieldEditIsDisabled = computed(() => {
     return false;
 
   return !conditionalFieldIsValid(
-    props.field?.validation?.required_if?.field as string,
-    props.field?.validation?.required_if?.value as string,
+    props.field?.validation?.required_if as ConditionalRequired,
     props.formId
   );
 });
