@@ -101,7 +101,7 @@ type ButtonSize = "normal" | "small";
 
 const props = withDefaults(
   defineProps<{
-    label: string;
+    label?: string;
     icon?: DamsIcons;
     buttonStyle?: ButtonStyle;
     buttonSize?: ButtonSize;
