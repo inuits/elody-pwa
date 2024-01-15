@@ -48,7 +48,7 @@ import {
 import BaseDropdownNew from "../base/BaseDropdownNew.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
-import { onMounted, watch, ref, onUpdated, computed, onUpdated } from "vue";
+import { onMounted, watch, ref, computed, onUpdated } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
