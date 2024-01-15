@@ -19,6 +19,7 @@
         :isMetadataOnRelation="isMetadataOnRelation"
         :error="errorMessage"
         @update:value="setNewValue"
+        @register-enter-pressed:value="registerEnterKeyPressed"
     />
     <entity-element-metadata
         v-else
@@ -51,8 +52,10 @@ const props = defineProps<{
 
 const setNewValue = (newValue: string) => {
   value.value = newValue;
-  updateOrderItem(props.formId, fieldKeyWithId.value, newValue);
 };
+const registerEnterKeyPressed = async (value: string) => {
+  await updateOrderItem(props.formId, fieldKeyWithId.value, value);
+}
 defineExpose({
   setNewValue
 })

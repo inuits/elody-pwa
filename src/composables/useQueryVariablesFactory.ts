@@ -10,6 +10,8 @@ const relationType = ref<String>();
 const identifiers = ref<String>();
 const searchInputType = ref<String>();
 
+const changePaginationNumber = ref<number | undefined>(undefined);
+
 export const useQueryVariablesFactory = () => {
     const setEntityType = (value: String) => {
         entityType.value = value;
@@ -24,9 +26,15 @@ export const useQueryVariablesFactory = () => {
         searchInputType.value = value;
     }
 
+    const setChangePaginationNumber = (value: number | undefined) => {
+        changePaginationNumber.value = value;
+    }
+
     const createQueryVariables = () => {
+        let pagination = selectedPaginationLimitOption.value?.value;
+        if (changePaginationNumber.value) pagination += changePaginationNumber.value;
         return {
-            limit: selectedPaginationLimitOption.value?.value,
+            limit: pagination,
             skip: selectedSkip.value,
             searchValue: queryVariables.value?.searchValue,
             advancedSearchValue: [],
@@ -56,6 +64,7 @@ export const useQueryVariablesFactory = () => {
         setIdentifiers,
         setQueryRelationType,
         setSearchInputType,
-        setEntityType
+        setEntityType,
+        setChangePaginationNumber,
     };
 }

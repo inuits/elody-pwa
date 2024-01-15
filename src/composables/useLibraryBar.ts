@@ -8,6 +8,7 @@ import { ref } from "vue";
 
 const selectedPaginationLimitOption = ref<DropdownOption>();
 const selectedSkip = ref<DropdownOption>();
+const isAsc = ref<boolean>(false);
 const selectedSortOption = ref<DropdownOption>();
 const queryVariables = ref<GetEntitiesQueryVariables>();
 const totalItemsCount = ref<number>();
@@ -40,7 +41,8 @@ export const useLibraryBar = () => {
         setQueryVariables,
         queryVariables,
         setTotalItemsCount,
-        totalItemsCount
+        totalItemsCount,
+        isAsc
     };
 
 }
