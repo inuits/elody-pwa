@@ -48,6 +48,11 @@
             button-style="accentNormal"
             @click="applyFilters()"
           />
+          <!--          <BaseButtonNew-->
+          <!--            :icon="DamsIcons.EllipsisV"-->
+          <!--            class="!w-1/5"-->
+          <!--            @click.stop="(event: MouseEvent) => openContextMenu({x: event.clientX, y: event.clientY})"-->
+          <!--          />-->
         </div>
         <div>
           <BaseInputAutocomplete
@@ -96,6 +101,7 @@
         />
       </div>
     </div>
+    <base-context-menu><saved-searches /></base-context-menu>
   </div>
 </template>
 
@@ -116,6 +122,9 @@ import useEditMode from "@/composables/useEdit";
 import { computed, defineProps, ref, toRefs, watch } from "vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
+import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
+import { useBaseContextMenu } from "@/composables/useBaseContextMenu";
+import SavedSearches from "@/components/SavedSearches.vue";
 
 export type FilterListItem = {
   isActive: boolean;
@@ -154,6 +163,7 @@ const displayedFilterOptions = ref<DropdownOption[]>([]);
 const activeFilters = ref<AdvancedFilterInput[]>([]);
 const activeFilterCount = ref<number>(0);
 const clearAllActiveFilters = ref<boolean>(false);
+const { openContextMenu } = useBaseContextMenu();
 
 const applyFilters = () => {
   emit("applyFilters", activeFilters.value);
