@@ -1,21 +1,25 @@
 import { getValueForPanelMetadata } from "@/helpers";
-import { PanelType } from "@/generated-types/queries";
+import { type ConditionalRequired, PanelType } from "@/generated-types/queries";
 
 const useConditionalValidation = () => {
   const conditionalFieldIsValid = (
-    conditionalFieldKey: string,
-    fieldValueToMatch: string,
+    requireIf: ConditionalRequired,
     formId: string
   ): boolean => {
     let isValid: boolean = false;
-    if (!conditionalFieldKey || !fieldValueToMatch || !formId) return isValid;
+    if (!formId || !requireIf.field) return isValid;
     try {
-      isValid =
-        getValueForPanelMetadata(
-          PanelType.Metadata,
-          conditionalFieldKey,
-          formId
-        ).toLowerCase() === fieldValueToMatch.toLowerCase();
+      const fieldValue: string = getValueForPanelMetadata(
+        PanelType.Metadata,
+        requireIf.field,
+        formId
+      ).toLowerCase();
+
+      if (requireIf.ifAnyValue === true && fieldValue.length) return true;
+
+      if (!requireIf.value) return isValid;
+
+      isValid = fieldValue === requireIf.value.toLowerCase();
     } catch (e) {
       return isValid;
     }
