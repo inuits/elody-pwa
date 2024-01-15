@@ -51,7 +51,7 @@ import {
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import BasePaginationNew from "@/components/base/BasePaginationNew.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
-import { ref, toRefs, watch } from "vue";
+import { toRefs, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useLibraryBar } from "@/composables/useLibraryBar";
 import { useI18n } from "vue-i18n";
@@ -77,9 +77,9 @@ const {
   setSelectedSortOption, selectedSortOption,
   setQueryVariables, queryVariables,
   setTotalItemsCount, totalItemsCount,
+  isAsc,
 } = useLibraryBar();
 const { t } = useI18n();
-const isAsc = ref<boolean>(false);
 
 const setDefaultOptions = () => {
   setQueryVariables(props.queryVariables);

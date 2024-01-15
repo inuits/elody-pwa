@@ -26,6 +26,8 @@
       v-model:model-value="metadataValue"
       :type="field.type as any"
       input-style="defaultWithBorder"
+      @keyup.enter="keyUpEnterEvent()"
+      @focusout="keyUpEnterEvent()"
     />
     <p v-if="metadataValue?.length > 1" class="text-red-default">
       {{ error }}
@@ -46,7 +48,7 @@ import { onMounted, watch, ref, onUpdated } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 
-const emit = defineEmits(["update:value"]);
+const emit = defineEmits(["update:value", "registerEnterPressed:value"]);
 
 const props = defineProps<{
   fieldKey: string;
@@ -75,6 +77,11 @@ const getValueFromMetadata = (): string => {
   if (typeof metadataValue.value !== "object") return metadataValue.value;
   return metadataValue.value.value;
 };
+
+const keyUpEnterEvent = () => {
+  const newValue = getValueFromMetadata();
+  emit("registerEnterPressed:value", newValue);
+}
 
 watch(
   () => metadataValue.value,

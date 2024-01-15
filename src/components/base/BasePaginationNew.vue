@@ -53,6 +53,9 @@
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { ref, watch } from "vue";
 import { Unicons } from "@/types";
+import {useLibraryBar} from "@/composables/useLibraryBar";
+
+const { setSelectedSkip } = useLibraryBar();
 
 const props = defineProps<{
   skip: number;
@@ -90,6 +93,12 @@ const getLastPage = () => {
 watch(
   () => props.skip,
   () => (currentPage.value = props.skip)
+);
+watch(
+  () => currentPage.value,
+  () => {
+    setSelectedSkip(currentPage.value)
+  }
 );
 watch(
   () => currentPage.value,
