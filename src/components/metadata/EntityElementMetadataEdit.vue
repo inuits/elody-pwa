@@ -31,6 +31,7 @@
       :disabled="fieldEditIsDisabled"
       @keyup.enter="keyUpEnterEvent()"
       @focusout="keyUpEnterEvent()"
+      :disabled="fieldEditIsDisabled"
     />
     <p v-if="fieldIsDirty" class="text-red-default">
       {{ error }}
