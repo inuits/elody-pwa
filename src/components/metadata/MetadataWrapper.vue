@@ -19,7 +19,8 @@
         :isMetadataOnRelation="isMetadataOnRelation"
         :error="errorMessage"
         :fieldIsDirty="fieldIsDirty"
-        @update:value="setNewValue"@register-enter-pressed:value="registerEnterKeyPressed"
+        @update:value="setNewValue"
+        @register-enter-pressed:value="registerEnterKeyPressed"
     />
     <entity-element-metadata
         v-else
