@@ -32,7 +32,10 @@
 
 <script lang="ts" setup>
 import type { FormContext } from "vee-validate";
-import type { InputField as InputFieldType } from "@/generated-types/queries";
+import type {
+  ConditionalRequired,
+  InputField as InputFieldType,
+} from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { getEntityIdFromRoute } from "@/helpers";
 import { type PropType, computed } from "vue";
@@ -64,8 +67,7 @@ const { conditionalFieldIsValid } = useConditionalValidation();
 const coordinateEditIsDisabled = computed(() => {
   if (!isEdit.value) return true;
   return !conditionalFieldIsValid(
-    props.field?.validation?.required_if?.field as string,
-    props.field?.validation?.required_if?.value as string,
+    props.field?.validation?.required_if as ConditionalRequired,
     getEntityIdFromRoute() as string
   );
 });
