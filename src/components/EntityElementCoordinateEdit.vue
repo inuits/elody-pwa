@@ -11,7 +11,7 @@
           :type="field.type as any"
           :step="decimalPointStep"
           input-style="defaultWithBorder"
-          :disabled="!isEdit"
+          :disabled="coordinateEditIsDisabled"
         />
         <p class="text-red-default">{{ errorMessage }}</p>
       </div>
@@ -22,7 +22,7 @@
           :type="field.type as any"
           :step="decimalPointStep"
           input-style="defaultWithBorder"
-          :disabled="!isEdit"
+          :disabled="coordinateEditIsDisabled"
         />
         <p class="text-red-default">{{ errorMessage }}</p>
       </div>
@@ -40,6 +40,7 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useField } from "vee-validate";
 import { useEditMode } from "@/composables/useEdit";
 import { useI18n } from "vue-i18n";
+import { useConditionalValidation } from "@/composables/useConditionalValidation";
 
 export type Location = {
   latitude: string;
@@ -59,6 +60,15 @@ const { getForm } = useFormHelper();
 const id = getEntityIdFromRoute() || "";
 const form: FormContext | undefined = getForm(id);
 const { errorMessage } = useField("intialValues." + props.fieldKey);
+const { conditionalFieldIsValid } = useConditionalValidation();
+const coordinateEditIsDisabled = computed(() => {
+  if (!isEdit.value) return true;
+  return !conditionalFieldIsValid(
+    props.field?.validation?.required_if?.field as string,
+    props.field?.validation?.required_if?.value as string,
+    getEntityIdFromRoute() as string
+  );
+});
 const { t } = useI18n();
 
 const setFormValues = (latitude: string, longitude: string) => {
