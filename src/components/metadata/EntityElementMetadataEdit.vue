@@ -35,10 +35,7 @@
 </template>
 
 <script lang="ts" setup>
-import type {
-  ConditionalRequired,
-  DropdownOption,
-} from "@/generated-types/queries";
+import type { Conditional, DropdownOption } from "@/generated-types/queries";
 import {
   InputFieldTypes,
   type InputField as InputFieldType,
@@ -68,7 +65,7 @@ const props = defineProps<{
 const { addEditableMetadataOnRelationKey } = useFormHelper();
 const { t } = useI18n();
 const metadataValue = ref<string | DropdownOption>(props.value);
-const { conditionalFieldIsValid } = useConditionalValidation();
+const { conditionalFieldIsAvailable } = useConditionalValidation();
 const fieldEditIsDisabled = computed(() => {
   if (
     props.field.type === InputFieldTypes.Dropdown &&
@@ -79,8 +76,8 @@ const fieldEditIsDisabled = computed(() => {
   if (!props.field.validation || !props.field.validation.required_if)
     return false;
 
-  return !conditionalFieldIsValid(
-    props.field?.validation?.required_if as ConditionalRequired,
+  return !conditionalFieldIsAvailable(
+    props.field?.validation?.available_if as Conditional,
     props.formId
   );
 });

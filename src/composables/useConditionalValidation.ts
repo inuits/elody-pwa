@@ -1,32 +1,32 @@
 import { getValueForPanelMetadata } from "@/helpers";
-import { type ConditionalRequired, PanelType } from "@/generated-types/queries";
+import { type Conditional, PanelType } from "@/generated-types/queries";
 
 const useConditionalValidation = () => {
-  const conditionalFieldIsValid = (
-    requireIf: ConditionalRequired,
+  const conditionalFieldIsAvailable = (
+    availableIf: Conditional,
     formId: string
   ): boolean => {
     let isValid: boolean = false;
-    if (!formId || !requireIf.field) return isValid;
+    if (!formId || !availableIf.field) return isValid;
     try {
       const fieldValue: string = getValueForPanelMetadata(
         PanelType.Metadata,
-        requireIf.field,
+        availableIf.field,
         formId
       ).toLowerCase();
 
-      if (requireIf.ifAnyValue === true && fieldValue.length) return true;
+      if (availableIf.ifAnyValue && fieldValue.length) return true;
 
-      if (!requireIf.value) return isValid;
+      if (!availableIf.value) return isValid;
 
-      isValid = fieldValue === requireIf.value.toLowerCase();
+      isValid = fieldValue === availableIf.value.toLowerCase();
     } catch (e) {
       return isValid;
     }
     return isValid;
   };
 
-  return { conditionalFieldIsValid };
+  return { conditionalFieldIsAvailable };
 };
 
 export { useConditionalValidation };
