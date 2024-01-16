@@ -107,8 +107,11 @@ EventBus.on("permissions_updated", () => {
   const typeModal = props.menuitem.typeLink.modal?.typeModal as string;
 
   if (props.menuitem.requiresAuth === false) allowed = true;
-  else if (typeModal === "Upload")
-    allowed = allowed || can(Permission.Cancreate, undefined);
+  else if (typeModal === "Upload") {
+    Object.values(Entitytyping).forEach(entityType => {
+      if (can(Permission.Cancreate, entityType)) allowed = true;
+    });
+  }
   else if (typeModal === "Create") {
     permittedEntitiesToCreate.value = [];
     Object.values(Entitytyping).forEach(entityType => {
