@@ -93,6 +93,7 @@ import {
   type BaseRelationValuesInput,
   type Metadata,
   MetadataField,
+  type IntialValues,
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
@@ -110,7 +111,7 @@ const props = withDefaults(
     itemId?: string;
     loading?: boolean;
     teaserMetadata?: Metadata[];
-    intialValues?: Metadata[];
+    intialValues?: IntialValues | undefined;
     media?: string;
     thumbIcon?: string;
     small?: boolean;
@@ -127,7 +128,7 @@ const props = withDefaults(
     itemId: "",
     loading: false,
     teaserMetadata: () => [],
-    intialValues: () => [],
+    intialValues: undefined,
     media: "",
     thumbIcon: "",
     small: false,
