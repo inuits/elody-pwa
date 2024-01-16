@@ -10,7 +10,7 @@
     :fieldKey="isMetadataOnRelation ? `${fieldKeyWithId}` : metadata.key"
     :label="metadata.label as string"
     v-model:value="value"
-    :field="metadata.inputField ? metadata.inputField : metadata.field"
+    :field="metadata.field"
     :formId="formId"
     :unit="metadata.unit"
     :link-text="metadata.linkText"
@@ -36,6 +36,7 @@ import { MetadataField } from "@/generated-types/queries";
 import { computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useField } from "vee-validate";
+import { useConditionalValidation } from "@/composables/useConditionalValidation";
 
 const props = defineProps<{
   isEdit: boolean;
@@ -52,22 +53,35 @@ const fieldKeyWithId = computed(
   () => `${props.metadata.key}-${props.linkedEntityId}`
 );
 const fieldIsDirty = computed(() => meta.dirty);
+const { conditionalFieldIsRequired } = useConditionalValidation();
+const isFieldRequired = computed(() => {
+  if (props.metadata?.field?.validation?.value?.includes("required"))
+    return true;
+  if (props.metadata?.field?.validation?.required_if)
+    return conditionalFieldIsRequired(
+      props.metadata?.field?.validation?.required_if,
+      props.formId
+    );
+  return false;
+});
+const getValidationRules = (metadata: MetadataField): string => {
+  const rules: string = metadata?.field?.validation?.value as string;
+  if (isFieldRequired.value)
+    return rules.includes("required") ? rules : `${rules}|required`;
+  return rules;
+};
+const rules = computed(() => getValidationRules(props.metadata));
 
 const veeValidateField = computed(() => {
   if (isMetadataOnRelation.value)
     return `relationValues.relationMetadata.${fieldKeyWithId.value}`;
-  else if (props.metadata.inputField || props.metadata.field)
-    return `intialValues.${props.metadata.key}`;
+  else if (props.metadata.field) return `intialValues.${props.metadata.key}`;
   else return `intialValues.${fieldKeyWithId.value}`;
 });
 
 const { errorMessage, value, meta } = useField<string>(
   veeValidateField,
-  props.metadata.field &&
-    props.metadata.field.validation &&
-    props.metadata.field.validation.value
-    ? props.metadata.field.validation.value
-    : undefined,
+  rules,
   {
     label: props.metadata.label
       ? t(props.metadata.label as string)
@@ -82,8 +96,4 @@ const setNewValue = (newValue: string) => {
 onMounted(() => {
   if (!value.value) setNewValue(props.metadata.value);
 });
-
-const isFieldRequired = computed(() =>
-  props.metadata?.field?.validation?.value?.includes("required")
-);
 </script>

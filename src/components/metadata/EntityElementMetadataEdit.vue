@@ -73,7 +73,7 @@ const fieldEditIsDisabled = computed(() => {
   )
     return true;
 
-  if (!props.field.validation || !props.field.validation.required_if)
+  if (!props.field.validation || !props.field.validation.available_if)
     return false;
 
   return !conditionalFieldIsAvailable(
