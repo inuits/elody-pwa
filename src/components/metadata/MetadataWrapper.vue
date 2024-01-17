@@ -89,7 +89,7 @@ const rules = computed(() => getValidationRules(props.metadata));
 const veeValidateField = computed(() => {
   if (isMetadataOnRelation.value)
     return `relationValues.relationMetadata.${fieldKeyWithId.value}`;
-  else if ( props.metadata.field)
+  else if (props.metadata.field)
     return `intialValues.${props.metadata.key}`;
   else if (props.linkedEntityId === undefined)
     return `intialValues.${props.metadata.key}`;
