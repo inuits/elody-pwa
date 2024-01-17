@@ -15,7 +15,7 @@ const {
     isAsc,
     setSelectedSkip, selectedSkip
 } = useLibraryBar();
-const { setEditMode, save } = useEditMode();
+const { setEditMode, save, disableEditMode } = useEditMode();
 
 
 type OrderItem = {
@@ -33,7 +33,8 @@ type SavedStateItem = {
 const orderItemsPerForm = ref<{ [key: string]: OrderItem[] }>([]);
 const changedItem = ref<OrderItem>(null);
 const savedState = ref<SavedStateItem>(null);
-const savedSkipForOrdering = ref<number>(1);
+//TODO: when skip is fixed use skip from useLibraryBar
+const savedSkipForOrdering = ref<number>(selectedSkip.value);
 const pagination = computed(() => selectedPaginationLimitOption.value?.value ? selectedPaginationLimitOption.value?.value : 20);
 
 const useOrderListItems = () => {
@@ -65,15 +66,6 @@ const useOrderListItems = () => {
         return orderItemsPerForm.value[formId];
     }
 
-    const checkIfFormHasChangedItems = (formId: number): boolean => {
-        const form = getFormOrderItems(formId);
-        let changedItems = false;
-        form.forEach((item) => {
-            if (item.status === EditStatus.Changed) changedItems = true;
-        });
-        return changedItems
-    }
-
     const addOrderItem = (formId: number, orderItem: OrderItem) => {
         createFormIfNotExists(formId);
         if (getOrderItemInList(formId, orderItem.field)) return;
@@ -96,6 +88,7 @@ const useOrderListItems = () => {
         setStatus(item);
         if (oldValue !== item.currentValue) {
             changedItem.value = item;
+            savedSkipForOrdering.value = selectedSkip.value;
             await changeOrderOfList(formId, field, oldValue, item.currentValue);
         }
     }
@@ -107,6 +100,7 @@ const useOrderListItems = () => {
         setEditMode();
     }
     const changeOrder = (form: any, indexToSave: number, countUp: boolean) => {
+        if (form.length-1 < indexToSave) return;
         if (form[indexToSave].field === changedItem.value.field)
             indexToSave += countUp ? 1 : -1;
         form[indexToSave].currentValue += countUp ? -1 : 1;
@@ -120,9 +114,7 @@ const useOrderListItems = () => {
             if (isMultipage && orderItemsPerForm.value[formId][0]?.status === EditStatus.Changed) {
                 setChangePaginationNumber(isAsc.value ? 1 : -1);
                 await saveChanges(form, formId);
-                let newSkip =  selectedSkip.value;
-                newSkip = isAsc.value ? newSkip : newSkip + 1;
-                savedSkipForOrdering.value = isAsc.value ? -1 : 1;
+                savedSkipForOrdering.value += isAsc.value ? -1 : 1;
                 setSelectedSkip(savedSkipForOrdering.value);
                 savedState.value = {
                     formId,
@@ -154,9 +146,8 @@ const useOrderListItems = () => {
     }
 
     const changeOrderOfList = async (formId: number, field: string, oldValue: number, newValue: number) => {
-        const form = orderItemsPerForm.value[formId];
+        let form = orderItemsPerForm.value[formId];
         let indexToSave = orderItemsPerForm.value[formId].map((item) => item.field).indexOf(field);
-
         if (newValue < oldValue) {
             const isMultipage = oldValue - newValue > pagination.value || isAsc.value ? oldValue - newValue > indexToSave : oldValue - newValue > pagination.value - (indexToSave+1);
             await traverseListDownwards(form, formId, oldValue, newValue, indexToSave, isMultipage);
@@ -167,7 +158,6 @@ const useOrderListItems = () => {
         }
         sortList(formId);
         EventBus.emit("orderList_changed", form);
-        // await saveChanges(form, formId);
     }
 
 
@@ -175,34 +165,38 @@ const useOrderListItems = () => {
         () => orderItemsPerForm.value[savedState.value?.formId]?.length,
         async () => {
             if (!savedState.value) return;
-            if (orderItemsPerForm.value[savedState.value.formId].length < 13) return;
+            if (orderItemsPerForm.value[savedState.value.formId].length < 1) return;
 
             const formId = savedState.value?.formId;
             let oldValue = savedState.value?.oldValue;
             const newValue = savedState.value?.newValue;
             const form = orderItemsPerForm.value[formId];
+            disableEditMode();
 
             if (newValue < oldValue) {
-                if (orderItemsPerForm.value[formId][form.length-1].initialValue > oldValue ) return;
+                if (orderItemsPerForm.value[formId][0].initialValue > oldValue ) return;
                 savedState.value = null;
-                const indexToSave = form.length-1;
+                setEditMode();
+                let indexToSave = form.length-1;
                 const isMultipage = oldValue - newValue > pagination.value || isAsc.value ? oldValue - newValue > indexToSave : oldValue - newValue > pagination.value - (indexToSave+1);
+                if (!isMultipage) indexToSave -= savedSkipForOrdering.value - 2;
                 await traverseListDownwards(form, formId, oldValue, newValue, indexToSave, isMultipage);
 
             } else {
-                if (orderItemsPerForm.value[formId][0].initialValue < oldValue ) return;
+                if (orderItemsPerForm.value[formId][form.length-1].initialValue < oldValue ) return;
                 savedState.value = null;
-                const indexToSave = 0;
+                setEditMode();
+                let indexToSave = 0;
                 const multiPageIndexCompare = orderItemsPerForm.value[formId].length - (indexToSave+1);
                 const isMultipage = newValue - oldValue > pagination.value || isAsc.value ? newValue - oldValue > pagination.value - (indexToSave+1) : newValue - oldValue > multiPageIndexCompare;
+                if (!isMultipage) indexToSave += savedSkipForOrdering.value - 2;
                 await traverseListUpwards(form, formId, oldValue, newValue, indexToSave, isMultipage);
             }
             sortList(formId);
             EventBus.emit("orderList_changed", form);
-            // await saveForm(formId);
             setChangePaginationNumber(undefined);
         }
-    )
+    );
 
     return {
         getFormOrderItems,

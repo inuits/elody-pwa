@@ -72,7 +72,7 @@ const veeValidateField = computed(() => {
     return `relationValues.relationMetadata.${fieldKeyWithId.value}`;
   else if (props.metadata.inputField || props.metadata.field)
     return `intialValues.${props.metadata.key}`;
-  elseif (props.linkedEntityId === undefined)
+  else if (props.linkedEntityId === undefined)
     return `intialValues.${props.metadata.key}`;
   else return `intialValues.${fieldKeyWithId.value}`;
 });

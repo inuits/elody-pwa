@@ -118,7 +118,6 @@ import {
   MetadataField,
   type BaseRelationValuesInput,
   type Metadata,
-  MetadataField,
   type IntialValues,
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
@@ -192,7 +191,7 @@ const setNoImage = () => {
 
 const canShowCopyRight = () => {
   if (auth.isAuthenticated.value === true) return true;
-  if (props.intialValues.length !== 0)
+  if (props.intialValues && props.intialValues.length !== 0)
     return props.intialValues.copyrightColor !== "red";
   return true;
 };

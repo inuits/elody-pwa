@@ -54,6 +54,7 @@ import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDa
 import { ref, watch } from "vue";
 import { Unicons } from "@/types";
 import {useLibraryBar} from "@/composables/useLibraryBar";
+import { savedSkipForOrdering } from "@/composables/useOrderListItems";
 
 const { setSelectedSkip } = useLibraryBar();
 
@@ -71,16 +72,19 @@ const currentPage = ref<number>(props.skip);
 
 const previous = () => {
   if (currentPage.value <= 1) return;
+  savedSkipForOrdering.value--;
   currentPage.value--;
 };
 
 const next = () => {
   if (currentPage.value >= getLastPage()) return;
+  savedSkipForOrdering.value++;
   currentPage.value++;
 };
 
 const goToPage = (page: number) => {
   if (page < 1 || page > getLastPage()) return;
+  savedSkipForOrdering.value = page;
   currentPage.value = page;
 };
 
