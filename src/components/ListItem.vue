@@ -119,6 +119,7 @@ import {
   type BaseRelationValuesInput,
   type Metadata,
   type IntialValues,
+  type IntialValues,
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
