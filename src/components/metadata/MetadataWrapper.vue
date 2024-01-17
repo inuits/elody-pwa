@@ -10,7 +10,7 @@
     :fieldKey="isMetadataOnRelation ? `${fieldKeyWithId}` : metadata.key"
     :label="metadata.label as string"
     v-model:value="value"
-    :field="metadata.field"
+    :field="metadata.field || metadata.inputField"
     :formId="formId"
     :unit="metadata.unit"
     :link-text="metadata.linkText"
