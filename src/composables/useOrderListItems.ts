@@ -179,7 +179,7 @@ const useOrderListItems = () => {
                 setEditMode();
                 let indexToSave = form.length-1;
                 const isMultipage = oldValue - newValue > pagination.value || isAsc.value ? oldValue - newValue > indexToSave : oldValue - newValue > pagination.value - (indexToSave+1);
-                if (!isMultipage) indexToSave -= savedSkipForOrdering.value - 2;
+                if (!isMultipage) indexToSave -= savedSkipForOrdering.value - 1;
                 await traverseListDownwards(form, formId, oldValue, newValue, indexToSave, isMultipage);
 
             } else {
