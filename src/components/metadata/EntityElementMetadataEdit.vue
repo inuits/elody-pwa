@@ -37,10 +37,7 @@
 </template>
 
 <script lang="ts" setup>
-import type {
-  ConditionalRequired,
-  DropdownOption,
-} from "@/generated-types/queries";
+import type { Conditional, DropdownOption } from "@/generated-types/queries";
 import {
   InputFieldTypes,
   type InputField as InputFieldType,
@@ -48,7 +45,7 @@ import {
 import BaseDropdownNew from "../base/BaseDropdownNew.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
-import { onMounted, watch, ref, computed, onUpdated } from "vue";
+import { onMounted, watch, ref, computed } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
@@ -70,7 +67,7 @@ const props = defineProps<{
 const { addEditableMetadataOnRelationKey } = useFormHelper();
 const { t } = useI18n();
 const metadataValue = ref<string | DropdownOption>(props.value);
-const { conditionalFieldIsValid } = useConditionalValidation();
+const { conditionalFieldIsAvailable } = useConditionalValidation();
 const fieldEditIsDisabled = computed(() => {
   if (
     props.field.type === InputFieldTypes.Dropdown &&
@@ -78,11 +75,11 @@ const fieldEditIsDisabled = computed(() => {
   )
     return true;
 
-  if (!props.field.validation || !props.field.validation.required_if)
+  if (!props.field.validation || !props.field.validation.available_if)
     return false;
 
-  return !conditionalFieldIsValid(
-    props.field?.validation?.required_if as ConditionalRequired,
+  return !conditionalFieldIsAvailable(
+    props.field?.validation?.available_if as Conditional,
     props.formId
   );
 });
