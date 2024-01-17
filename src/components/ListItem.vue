@@ -76,7 +76,7 @@
           :form-id="formId || 'listview'"
           v-model:metadata="metadataItem as MetadataField"
           :is-edit="isEdit"
-          :linked-entity-id="intialValues.id"
+          :linked-entity-id="intialValues.id || itemId"
         />
       </div>
     </div>
