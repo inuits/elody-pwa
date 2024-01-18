@@ -49,7 +49,7 @@ const config = inject("config") as any;
 const { openModal, getModalInfo } = useBaseModal();
 const inputValue = ref<string>("");
 const entityTypeFilters = computed(() =>
-  config.features.simpleSearch.simpleSearchEntityTypes.map((type: string) => {
+  config.features.simpleSearch.simpleSearchEntityTypes?.map((type: string) => {
     return {
       match_exact: true,
       type: AdvancedFilterTypes.Type,
@@ -59,15 +59,20 @@ const entityTypeFilters = computed(() =>
 );
 
 const applyFilterToLibrary = () => {
-  const filters = [...entityTypeFilters.value];
-  const metadataKey = config.features.simpleSearch.simpleSearchMetadataKey;
-  filters.push({
-    key: metadataKey,
-    value: inputValue.value,
-    type: AdvancedFilterTypes.Text,
-    match_exact: false,
-    parent_key: "metadata",
-  });
+  let filters;
+  if (entityTypeFilters.value !== undefined) filters = [...entityTypeFilters.value];
+  else filters = [];
+  const metadataKeys = config.features.simpleSearch.simpleSearchMetadataKey;
+  for (let index in metadataKeys) {
+    filters.push({
+      key: metadataKeys[index],
+      value: inputValue.value,
+      type: AdvancedFilterTypes.Text,
+      match_exact: false,
+      parent_key: "metadata",
+      operator: "or"
+    });
+  }
   emit("updateFilters", filters);
 };
 
