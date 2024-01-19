@@ -34,7 +34,7 @@
 import EntityElementMetadataEdit from "@/components/metadata/EntityElementMetadataEdit.vue";
 import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.vue";
 import { MetadataField } from "@/generated-types/queries";
-import { computed, onMounted, onBeforeUnmount } from "vue";
+import { computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useOrderListItems, OrderItem } from "@/composables/useOrderListItems";
 import { useField } from "vee-validate";
@@ -126,4 +126,10 @@ onBeforeUnmount(() => {
   if (props.metadata.key !== "order") return;
   removeOrderItem(props.formId, fieldKeyWithId.value);
 });
+watch(
+    () => props.isEdit,
+    () => {
+      if (!props.isEdit) setNewValue(props.metadata.value);
+    }
+);
 </script>
