@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { DamsIcons, type DropdownOption } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 
@@ -120,8 +120,6 @@ const selectItem = (event: Event) => {
   selectedItem.value = newlySelectedOption;
   emit("update:modelValue", newlySelectedOption);
 };
-
-onMounted(() => {});
 
 watch(
   () => props.options,
