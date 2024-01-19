@@ -3,23 +3,23 @@ import {
   InMemoryCache,
   type NormalizedCacheObject,
 } from "@apollo/client/core";
-import { createUploadLink } from "apollo-upload-client";
-import { createApp } from "vue";
-import { createRouter, createWebHistory } from "vue-router";
-import Unicon from "vue-unicons";
-import { DefaultApolloClient } from "@vue/apollo-composable";
-import { OpenIdConnectClient } from "session-vue-3-oidc-library";
-import App from "./App.vue";
-import { addComponentToRoutes } from "./views/router";
-import { Unicons } from "./types";
-import { i18n } from "@/helpers";
-import { createHead } from "@vueuse/head";
 import "./assets/base.css";
-import { onError } from "@apollo/client/link/error";
-import useGraphqlErrors from "./composables/useGraphqlErrors";
 import * as Sentry from "@sentry/vue";
+import App from "./App.vue";
+import Unicon from "vue-unicons";
+import useGraphqlErrors from "./composables/useGraphqlErrors";
+import { addComponentToRoutes } from "./views/router";
 import { BrowserTracing } from "@sentry/tracing";
+import { createApp } from "vue";
+import { createHead } from "@vueuse/head";
+import { createRouter, createWebHistory } from "vue-router";
+import { createUploadLink } from "apollo-upload-client";
+import { DefaultApolloClient } from "@vue/apollo-composable";
+import { getApplicationDetails, i18n } from "@/helpers";
+import { onError } from "@apollo/client/link/error";
+import { OpenIdConnectClient } from "session-vue-3-oidc-library";
 import { setIgnorePermissions } from "./composables/usePermissions";
+import { Unicons } from "./types";
 import { useFormHelper } from "@/composables/useFormHelper";
 
 export let auth: typeof OpenIdConnectClient | null;
@@ -29,20 +29,6 @@ export let bulkSelectAllSizeLimit: number = 999999;
 const applyCustomization = (rulesObject: any) => {
   if (rulesObject.applicationTitle)
     document.title = rulesObject.applicationTitle;
-};
-
-const getApplicationDetails = async () => {
-  const config = await fetch(
-    import.meta.env.VUE_APP_CONFIG_URL
-      ? import.meta.env.VUE_APP_CONFIG_URL
-      : "/api/config"
-  ).then((r) => r.json());
-  const translations = await fetch(
-    import.meta.env.VUE_APP_CONFIG_URL
-      ? import.meta.env.VUE_APP_CONFIG_URL
-      : "/api/translation"
-  ).then((r) => r.json());
-  return { config, translations };
 };
 
 const start = async () => {

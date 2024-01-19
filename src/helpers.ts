@@ -313,3 +313,17 @@ export const getEntityTitle = (entity: BaseEntity): string => {
   if (entity.intialValues?.name) title = entity.intialValues.name;
   return title;
 };
+
+export const getApplicationDetails = async () => {
+  const config = await fetch(
+    import.meta.env.VUE_APP_CONFIG_URL
+      ? import.meta.env.VUE_APP_CONFIG_URL
+      : "/api/config"
+  ).then((r) => r.json());
+  const translations = await fetch(
+    import.meta.env.VUE_APP_CONFIG_URL
+      ? import.meta.env.VUE_APP_CONFIG_URL
+      : "/api/translation"
+  ).then((r) => r.json());
+  return { config, translations };
+};
