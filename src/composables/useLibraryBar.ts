@@ -9,18 +9,18 @@ const selectedSkip = ref<DropdownOption>();
 const isAsc = ref<boolean>(false);
 const selectedSortOption = ref<DropdownOption>();
 const queryVariables = ref<GetEntitiesQueryVariables>();
-const totalItemsCount = ref<Number>();
+const totalItemsCount = ref<number>();
 
 export const useLibraryBar = () => {
-  const setSelectedPaginationLimitOption = (limit: Number) => {
+  const setSelectedPaginationLimitOption = (limit: number) => {
     if (!limit) return;
     selectedPaginationLimitOption.value = { label: `${limit}`, value: limit };
   };
-  const setSelectedSkip = (skip: Number) => {
+  const setSelectedSkip = (skip: number) => {
     if (!skip) return;
     selectedSkip.value = { label: `${skip}`, value: skip };
   };
-  const setSelectedSortOption = (sort: Number) => {
+  const setSelectedSortOption = (sort: number) => {
     if (!sort) return;
     selectedSortOption.value = { label: `${sort}`, value: sort };
   };
@@ -28,7 +28,7 @@ export const useLibraryBar = () => {
     if (!variables) return;
     queryVariables.value = variables;
   };
-  const setTotalItemsCount = (total: Number) => {
+  const setTotalItemsCount = (total: number) => {
     if (!total) return;
     totalItemsCount.value = total;
   };
