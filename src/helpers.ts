@@ -62,21 +62,27 @@ export const i18n = (translations: Object, applicationLocale: string) => {
 
 export const asString = (x: string | string[]) => (Array.isArray(x) ? x[0] : x);
 
+export const processTextWithLinks = (value: unknown) => {
+  if (value && typeof value !== "string") return value;
+
+  const stringValue = value as string;
+  const pattern = /\b(https?:\/\/\S+)\b/g;
+  const textWithLinks = stringValue.replace(
+    pattern,
+    '<a class="underline" target="_blank" href="$1">$1</a>'
+  );
+  return textWithLinks;
+};
+
 export const stringIsUrl = (value: unknown): Boolean => {
-  let isUrl: Boolean = false;
-  if (value && typeof value !== "string") {
-    return isUrl;
-  } else {
-    const stringValue = value as string;
-    try {
-      const url = new URL(stringValue);
-      isUrl = true;
-      if (url.protocol.startsWith("foto:")) isUrl = false;
-    } catch {
-      isUrl = false;
-    }
-  }
-  return isUrl;
+  if (value && typeof value !== "string") return false;
+
+  const stringValue = value as string;
+  const pattern: RegExp = /\bhttps:\/\/\S+/gi;
+  const matches: RegExpMatchArray | null = stringValue.match(pattern);
+  if (!matches || matches.length === 0) return false;
+
+  return true;
 };
 
 export const stringIsHtml = (value: unknown): boolean => {
