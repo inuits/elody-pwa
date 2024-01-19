@@ -228,8 +228,8 @@ watch(
 );
 
 watch(
-    () => isEdit.value,
-    () =>  (!isEdit.value ? isMarkedAsToBeDeleted.value = false : '')
+  () => isEdit.value,
+  () => (!isEdit.value ? (isMarkedAsToBeDeleted.value = false) : "")
 );
 const removePreviewItem = (idx: number) => {
   remove(idx);

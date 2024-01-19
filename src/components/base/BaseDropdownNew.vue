@@ -55,7 +55,7 @@ const accentAccentDropdown: Dropdown = {
   hoverStyle: defaultDropdown.hoverStyle,
 };
 const neutralLightDropdown: Dropdown = {
-  style: "text-text-body bg-neutral-light border-none rounded-lg",
+  style: "text-text-body bg-neutral-light border-none rounded-lg w-full",
   hoverStyle:
     "hover:text-[rgba(0,58,82,0.8)] hover:bg-neutral-lightest hover:border-none",
 };
