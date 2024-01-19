@@ -58,7 +58,6 @@ watch(
   () => getModalInfo(TypeModals.Create).state,
   (createModalState: ModalState) => {
     if (createModalState === ModalState.Hide) {
-      selectedEntityType.value = undefined;
       deleteForm("createEntity");
       // don't remove those commented lines, this is just temporarily disabled
       //} else if (createModalState === ModalState.Show) {
