@@ -8,7 +8,10 @@
     </div>
     <div class="flex w-full justify-end px-2">
       <LanguageSelect />
-      <tenant-switcher v-if="config.features.hasTenantSelect" />
+      <tenant-switcher
+        class="ml-6 w-64"
+        v-if="config.features.hasTenantSelect"
+      />
     </div>
     <SearchBar v-if="showSearch" :inputEnabled="false" />
   </div>
