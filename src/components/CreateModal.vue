@@ -60,16 +60,16 @@ watch(
     if (createModalState === ModalState.Hide) {
       selectedEntityType.value = undefined;
       deleteForm("createEntity");
-  // don't remove those commented lines, this is just temporarily disabled
-  //} else if (createModalState === ModalState.Show) {
-  //  entityTypes.value = [];
-  //  permittedEntitiesToCreate.value.forEach((type) => {
-  //    entityTypes.value.push({
-  //      icon: DamsIcons.NoIcon,
-  //      label: t(`types.${type}`),
-  //      value: type,
-  //    });
-  //  });
+      // don't remove those commented lines, this is just temporarily disabled
+      //} else if (createModalState === ModalState.Show) {
+      //  entityTypes.value = [];
+      //  permittedEntitiesToCreate.value.forEach((type) => {
+      //    entityTypes.value.push({
+      //      icon: DamsIcons.NoIcon,
+      //      label: t(`types.${type}`),
+      //      value: type,
+      //    });
+      //  });
     }
   }
 );

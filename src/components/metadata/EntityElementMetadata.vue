@@ -11,7 +11,7 @@
     </div>
     <div v-else>
       <div class="flex items-center" v-if="stringIsUrl(readableValue)">
-        <div class="pr-2">
+        <div v-if="(linkIcon && Unicons[linkIcon]) || linkIcon" class="pr-2">
           <unicon
             v-if="linkIcon && Unicons[linkIcon]"
             :name="Unicons[linkIcon].name"
@@ -19,9 +19,7 @@
           />
           <CustomIcon v-else-if="linkIcon" :icon="linkIcon" :size="12" />
         </div>
-        <a class="underline" target="_blank" :href="readableValue">{{
-          t(linkText) || readableValue
-        }}</a>
+        <p v-html="processTextWithLinks(t(linkText) || readableValue)"></p>
       </div>
 
       <p v-else-if="stringIsHtml(readableValue)" v-html="readableValue"></p>
@@ -36,19 +34,25 @@ import {
   convertUnitToReadbleFormat,
   stringIsUrl,
   stringIsHtml,
+  processTextWithLinks,
 } from "@/helpers";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { Unicons } from "@/types";
 import CustomIcon from "@/components/CustomIcon.vue";
 
-const props = defineProps<{
-  label?: string;
-  value?: any;
-  unit?: string;
-  linkText?: string;
-  linkIcon?: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    label?: string;
+    value?: any;
+    unit?: string;
+    linkText?: string;
+    linkIcon?: string;
+  }>(),
+  {
+    linkText: "",
+  }
+);
 
 const { t } = useI18n();
 
