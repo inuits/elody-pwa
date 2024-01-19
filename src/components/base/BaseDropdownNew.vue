@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { DamsIcons, type DropdownOption } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 
@@ -80,12 +80,14 @@ const props = withDefaults(
     modelValue: DropdownOption | string | undefined;
     options: DropdownOption[];
     dropdownStyle: DropdownStyle;
+    selectFirstOptionByDefault?: boolean;
     labelPosition?: "above" | "inline";
     labelAlignment?: "left" | "right";
     label?: string;
     disable?: boolean;
   }>(),
   {
+    selectFirstOptionByDefault: false,
     labelPosition: "above",
     labelAlignment: "left",
     disable: false,
@@ -119,6 +121,19 @@ const selectItem = (event: Event) => {
   emit("update:modelValue", newlySelectedOption);
 };
 
+onMounted(() => {});
+
+watch(
+  () => props.options,
+  () => {
+    if (props.options.length > 0)
+      if (props.selectFirstOptionByDefault) {
+        selectedItem.value = props.options[0];
+        emit("update:modelValue", selectedItem.value);
+      }
+  },
+  { immediate: true }
+);
 watch(
   () => props.modelValue,
   () => {

@@ -108,19 +108,29 @@ import {
   TranscodeType,
   TypeModals,
   GenerateTranscodeDocument,
-  GenerateTranscodeMutation, Entitytyping
+  GenerateTranscodeMutation,
+  Entitytyping,
 } from "@/generated-types/queries";
-import type {Context, InBulkProcessableItem,} from "@/composables/useBulkOperations";
-import {BulkOperationsContextEnum, useBulkOperations,} from "@/composables/useBulkOperations";
+import type {
+  Context,
+  InBulkProcessableItem,
+} from "@/composables/useBulkOperations";
+import {
+  BulkOperationsContextEnum,
+  useBulkOperations,
+} from "@/composables/useBulkOperations";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
-import {apolloClient, bulkSelectAllSizeLimit} from "@/main";
-import {computed, onMounted, ref, watch} from "vue";
-import {useBaseModal} from "@/composables/useBaseModal";
-import {useMutation, useQuery} from "@vue/apollo-composable";
-import {NotificationType, useNotification,} from "@/components/base/BaseNotification.vue";
-import {useI18n} from "vue-i18n";
-import {useRoute, useRouter} from "vue-router";
+import { apolloClient, bulkSelectAllSizeLimit } from "@/main";
+import { computed, onMounted, ref, watch } from "vue";
+import { useBaseModal } from "@/composables/useBaseModal";
+import { useMutation, useQuery } from "@vue/apollo-composable";
+import {
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
+import { useI18n } from "vue-i18n";
+import { useRoute, useRouter } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -147,7 +157,9 @@ const emit = defineEmits<{
 const route = useRoute();
 const refetchEnabled = ref<boolean>(false);
 const entityType = computed(() => props.entityType || route.meta.entityType);
-const { mutate } = useMutation<GenerateTranscodeMutation>(GenerateTranscodeDocument)
+const { mutate } = useMutation<GenerateTranscodeMutation>(
+  GenerateTranscodeDocument
+);
 const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
   GetBulkOperationsDocument,
   { entityType: entityType.value },
@@ -217,17 +229,20 @@ const enqueueItemsForManifestCollection = () => {
   }
 };
 
-const generateTranscodeFromMediafiles = (type: TranscodeType, entityIds: string[]) => {
-  mutate({mediafileIds: entityIds, transcodeType: type}).then(() => {
+const generateTranscodeFromMediafiles = (
+  type: TranscodeType,
+  entityIds: string[]
+) => {
+  mutate({ mediafileIds: entityIds, transcodeType: type }).then(() => {
     createNotificationOverwrite(
-        NotificationType.default,
-        t("notifications.default.generate-transcode.title"),
-        t("notifications.default.generate-transcode.description")
+      NotificationType.default,
+      t("notifications.default.generate-transcode.title"),
+      t("notifications.default.generate-transcode.description")
     );
-    dequeueAllItemsForBulkProcessing(props.context)
-    emit('refetch')
-  })
-}
+    dequeueAllItemsForBulkProcessing(props.context);
+    emit("refetch");
+  });
+};
 
 watch(selectedBulkOperation, () => {
   if (selectedBulkOperation.value?.value === BulkOperationTypes.ExportCsv)
@@ -241,8 +256,11 @@ watch(selectedBulkOperation, () => {
     enqueueItemsForManifestCollection();
     dequeueAllItemsForBulkProcessing(props.context);
   }
-  if (selectedBulkOperation.value?.value === BulkOperationTypes.TranscodePdf){
-  generateTranscodeFromMediafiles(TranscodeType.Pdf, getEnqueuedItems(props.context).map((entity: BaseEntity) => entity.id))
+  if (selectedBulkOperation.value?.value === BulkOperationTypes.TranscodePdf) {
+    generateTranscodeFromMediafiles(
+      TranscodeType.Pdf,
+      getEnqueuedItems(props.context).map((entity: BaseEntity) => entity.id)
+    );
   }
 });
 
@@ -254,9 +272,12 @@ watch(
   }
 );
 
-watch(() => entityType.value, (type: Entitytyping) => {
-  refetch( { entityType: type })
-})
+watch(
+  () => entityType.value,
+  (type: Entitytyping) => {
+    refetch({ entityType: type });
+  }
+);
 </script>
 
 <style lang="postcss" scoped>

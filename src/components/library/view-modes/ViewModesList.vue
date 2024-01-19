@@ -76,8 +76,7 @@ import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSele
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useRouter } from "vue-router";
 import EventBus from "../../../EventBus";
-import {useLibraryBar} from "@/composables/useLibraryBar";
-
+import { useLibraryBar } from "@/composables/useLibraryBar";
 
 const props = withDefaults(
   defineProps<{
@@ -119,7 +118,6 @@ const relations = computed<BaseRelationValuesInput[]>(
   () => getForm(entityId.value)?.values?.relationValues?.relations
 );
 
-
 const navigateToEntityPage = (
   entity: Entity,
   listItemRouteName: string,
@@ -143,16 +141,18 @@ EventBus.on("orderList_changed", (orderItems: OrderItem[]) => {
   let itemsFound: boolean = false;
   props.entities.forEach((entity) => {
     const fieldKeyWithId = `order-${entity.id}`;
-    const item = orderItems.filter(item => item.field === fieldKeyWithId)[0];
+    const item = orderItems.filter((item) => item.field === fieldKeyWithId)[0];
     if (!item) return;
     entity.intialValues.order = item.currentValue;
     entity.teaserMetadata.order.value = item.currentValue;
     itemsFound = true;
   });
   if (itemsFound) {
-    props.entities.sort((value, nextValue) => value.intialValues.order > nextValue.intialValues.order)
+    props.entities.sort(
+      (value, nextValue) =>
+        value.intialValues.order > nextValue.intialValues.order
+    );
     if (!queryVariables.value.searchValue.isAsc) props.entities.reverse();
   }
 });
-
 </script>

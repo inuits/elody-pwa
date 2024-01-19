@@ -49,7 +49,11 @@
 </template>
 
 <script lang="ts" setup>
-import { Entitytyping, type DamsIcons, type MenuItem } from "@/generated-types/queries";
+import {
+  Entitytyping,
+  type DamsIcons,
+  type MenuItem,
+} from "@/generated-types/queries";
 import CustomIcon from "../CustomIcon.vue";
 import EventBus from "../../EventBus";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
@@ -108,19 +112,17 @@ EventBus.on("permissions_updated", () => {
 
   if (props.menuitem.requiresAuth === false) allowed = true;
   else if (typeModal === "Upload") {
-    Object.values(Entitytyping).forEach(entityType => {
+    Object.values(Entitytyping).forEach((entityType) => {
       if (can(Permission.Cancreate, entityType)) allowed = true;
     });
-  }
-  else if (typeModal === "Create") {
+  } else if (typeModal === "Create") {
     permittedEntitiesToCreate.value = [];
-    Object.values(Entitytyping).forEach(entityType => {
+    Object.values(Entitytyping).forEach((entityType) => {
       if (allowed || can(Permission.Cancreate, entityType))
         permittedEntitiesToCreate.value.push(entityType);
-    })
+    });
     if (permittedEntitiesToCreate.value.length > 0) allowed = true;
-  }
-  else if (props.menuitem.entityType)
+  } else if (props.menuitem.entityType)
     allowed = allowed || can(Permission.Canread, props.menuitem.entityType);
 
   menuSubitem.value.forEach((item) => {

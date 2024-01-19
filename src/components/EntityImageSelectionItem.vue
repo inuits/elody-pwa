@@ -34,8 +34,8 @@
     </div>
     <div v-else class="relative group">
       <unicon
-          :name="getThumbnail(mediafile)"
-          class="h-10 w-10 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
+        :name="getThumbnail(mediafile)"
+        class="h-10 w-10 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
       />
     </div>
   </div>
@@ -45,10 +45,9 @@
 import type { MediaFileEntity } from "@/generated-types/queries";
 import { toBeDeleted } from "@/composables/useEdit";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
-import {useAuth} from "session-vue-3-oidc-library";
+import { useAuth } from "session-vue-3-oidc-library";
 import { ref } from "vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
-
 
 const props = defineProps<{
   mediafile: MediaFileEntity;
@@ -65,7 +64,7 @@ const setNoImage = () => {
 const canShowCopyRight = () => {
   if (auth.isAuthenticated.value === true) return true;
   return props.mediafile.intialValues.copyrightColor !== "red";
-}
+};
 
 const {
   mediafileSelectionState,

@@ -1,10 +1,11 @@
 import type { DropzoneFile } from "dropzone";
 import { ref } from "vue";
 
-
 export type UploadType = "batch" | "single";
 
-const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">("no-upload");
+const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
+  "no-upload"
+);
 
 const useUpload = () => {
   let _files: DropzoneFile[] = [];
@@ -22,13 +23,12 @@ const useUpload = () => {
   };
 
   const toggleUploadStatus = () => {
-    if (uploadStatus.value === "no-upload")
-      uploadStatus.value = "uploading";
+    if (uploadStatus.value === "no-upload") uploadStatus.value = "uploading";
     else if (uploadStatus.value === "uploading")
       uploadStatus.value = "upload-finished";
     else if (uploadStatus.value === "upload-finished")
       uploadStatus.value = "uploading";
-  }
+  };
 
   const __createMediafileForEntity = async (
     entityId: string,

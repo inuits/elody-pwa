@@ -6,6 +6,7 @@
           v-model="selectedPaginationLimitOption"
           :options="paginationLimitOptions"
           :label="t('library.items')"
+          :select-first-option-by-default="true"
           label-position="inline"
           label-alignment="right"
           dropdown-style="default"
@@ -16,6 +17,7 @@
           v-model="selectedSortOption"
           :options="sortOptions"
           :label="t('library.sort')"
+          :select-first-option-by-default="true"
           label-position="inline"
           label-alignment="left"
           dropdown-style="default"
@@ -67,16 +69,19 @@ const props = defineProps<{
     | "initialized";
 }>();
 
-const {
-  libraryBarInitializationStatus,
-} = toRefs(props);
+const { libraryBarInitializationStatus } = toRefs(props);
 const { getModalInfo } = useBaseModal();
 const {
-  setSelectedPaginationLimitOption, selectedPaginationLimitOption,
-  setSelectedSkip, selectedSkip,
-  setSelectedSortOption, selectedSortOption,
-  setQueryVariables, queryVariables,
-  setTotalItemsCount, totalItemsCount,
+  setSelectedPaginationLimitOption,
+  selectedPaginationLimitOption,
+  setSelectedSkip,
+  selectedSkip,
+  setSelectedSortOption,
+  selectedSortOption,
+  setQueryVariables,
+  queryVariables,
+  setTotalItemsCount,
+  totalItemsCount,
   isAsc,
 } = useLibraryBar();
 const { t } = useI18n();
@@ -89,9 +94,9 @@ const setDefaultOptions = () => {
 };
 
 watch(
-    () => props.totalItems,
-    () => setTotalItemsCount(props.totalItems)
-)
+  () => props.totalItems,
+  () => setTotalItemsCount(props.totalItems)
+);
 watch(
   () => libraryBarInitializationStatus.value,
   () => {
@@ -120,12 +125,17 @@ watch(isAsc, () => {
   }
 });
 watch(selectedSkip, () => {
-  if (queryVariables.value) queryVariables.value.skip = selectedSkip.value;
+  if (queryVariables.value)
+    queryVariables.value.skip = selectedSkip.value?.value;
 });
 watch(
   () => queryVariables.value?.skip,
   () => {
-    if (queryVariables.value.skip) selectedSkip.value = queryVariables.value.skip;
+    if (queryVariables.value?.skip)
+      selectedSkip.value = {
+        label: `${queryVariables.value.skip}`,
+        value: queryVariables.value.skip,
+      };
   }
 );
 watch(

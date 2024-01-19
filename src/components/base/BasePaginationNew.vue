@@ -50,25 +50,26 @@
 </template>
 
 <script lang="ts" setup>
+import type { DropdownOption } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { ref, watch } from "vue";
-import { Unicons } from "@/types";
-import {useLibraryBar} from "@/composables/useLibraryBar";
 import { savedSkipForOrdering } from "@/composables/useOrderListItems";
+import { Unicons } from "@/types";
+import { useLibraryBar } from "@/composables/useLibraryBar";
 
 const { setSelectedSkip } = useLibraryBar();
 
 const props = defineProps<{
-  skip: number;
+  skip: DropdownOption | undefined;
   limit: number;
   totalItems: number;
 }>();
 
 const emit = defineEmits<{
-  (event: "update:skip", skip: number): void;
+  (event: "update:skip", skip: DropdownOption): void;
 }>();
 
-const currentPage = ref<number>(props.skip);
+const currentPage = ref<number>(props.skip?.value || 1);
 
 const previous = () => {
   if (currentPage.value <= 1) return;
@@ -95,17 +96,21 @@ const getLastPage = () => {
 };
 
 watch(
-  () => props.skip,
-  () => (currentPage.value = props.skip)
+  () => props.skip?.value,
+  () => (currentPage.value = props.skip?.value || 1)
 );
 watch(
   () => currentPage.value,
   () => {
-    setSelectedSkip(currentPage.value)
+    setSelectedSkip(currentPage.value);
   }
 );
 watch(
   () => currentPage.value,
-  () => emit("update:skip", currentPage.value)
+  () =>
+    emit("update:skip", {
+      label: `${currentPage.value}`,
+      value: currentPage.value,
+    })
 );
 </script>
