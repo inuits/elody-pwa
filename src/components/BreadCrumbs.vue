@@ -56,7 +56,7 @@
       </div>
       <div
         :class="[
-          'flex max-w-[50vw] items-center subtitle text-neutral-black truncate',
+          'flex max-w-[45vw] items-center subtitle text-neutral-black truncate',
           { 'max-w-[40vw] truncate': !truncatePreviousRouteName },
         ]"
       >
