@@ -1,5 +1,5 @@
 <template>
-    <div v-if="!metadata.showOnlyInEditMode"class="text-text-light text-sm flex">
+  <div v-if="!metadata.showOnlyInEditMode" class="text-text-light text-sm flex">
     <p>
       {{ metadata.label ? t(metadata.label) : t("metadata.no-label") }}
     </p>
@@ -17,17 +17,17 @@
     :isMetadataOnRelation="isMetadataOnRelation"
     :error="errorMessage"
     :fieldIsDirty="fieldIsDirty"
-        @update:value="setNewValue"
-        @register-enter-pressed:value="registerEnterKeyPressed"
-    />
-    <entity-element-metadata
-        v-else
-        :label="metadata.label as string"
-        v-model:value="value"
-        :link-text="metadata.linkText"
-        :link-icon="metadata.linkIcon"
-        :unit="metadata.unit"
-    />
+    @update:value="setNewValue"
+    @register-enter-pressed:value="registerEnterKeyPressed"
+  />
+  <entity-element-metadata
+    v-else
+    :label="metadata.label as string"
+    v-model:value="value"
+    :link-text="metadata.linkText"
+    :link-icon="metadata.linkIcon"
+    :unit="metadata.unit"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -55,10 +55,10 @@ const setNewValue = (newValue: string) => {
 };
 const registerEnterKeyPressed = async (value: string) => {
   await updateOrderItem(props.formId, fieldKeyWithId.value, value);
-}
+};
 defineExpose({
-  setNewValue
-})
+  setNewValue,
+});
 
 const isMetadataOnRelation = computed(
   () => props.metadata.__typename === "PanelRelationMetaData"
@@ -89,8 +89,7 @@ const rules = computed(() => getValidationRules(props.metadata));
 const veeValidateField = computed(() => {
   if (isMetadataOnRelation.value)
     return `relationValues.relationMetadata.${fieldKeyWithId.value}`;
-  else if (props.metadata.field)
-    return `intialValues.${props.metadata.key}`;
+  else if (props.metadata.field) return `intialValues.${props.metadata.key}`;
   else if (props.linkedEntityId === undefined)
     return `intialValues.${props.metadata.key}`;
   else return `intialValues.${fieldKeyWithId.value}`;
@@ -114,11 +113,11 @@ const { errorMessage, value, meta } = useField<string>(
 
 onMounted(() => {
   if (!value.value) setNewValue(props.metadata.value);
-  if (isMetadataOnRelation && props.metadata.key === "order") {
+  if (isMetadataOnRelation.value && props.metadata.key === "order") {
     const orderItem: OrderItem = {
       field: fieldKeyWithId.value,
       initialValue: parseInt(props.metadata.value),
-      currentValue: parseInt(props.metadata.value)
+      currentValue: parseInt(props.metadata.value),
     };
     addOrderItem(props.formId, orderItem);
   }

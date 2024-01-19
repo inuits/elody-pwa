@@ -100,7 +100,7 @@ const getValueFromMetadata = (): string => {
 const keyUpEnterEvent = () => {
   const newValue = getValueFromMetadata();
   emit("registerEnterPressed:value", newValue);
-}
+};
 
 watch(
   () => metadataValue.value,

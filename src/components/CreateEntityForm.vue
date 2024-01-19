@@ -1,18 +1,25 @@
 <template>
   <div>
     <div class="px-6 pt-0 pb-20 bg-neutral-white">
-      <div v-if="loading" class="flex justify-center items-center py-2"><spinner-loader /></div>
+      <div v-if="loading" class="flex justify-center items-center py-2">
+        <spinner-loader />
+      </div>
       <div
         :class="['py-2']"
         v-show="form && !loading"
-        v-for="(metadata) in getMetadataFields(
+        v-for="metadata in getMetadataFields(
           formFields,
           PanelType.Metadata,
           'createEntity'
         )"
         :key="metadata.label"
       >
-        <metadata-wrapper class="-ml-4" form-id="createEntity" :metadata="metadata as MetadataField" :is-edit="true"/>
+        <metadata-wrapper
+          class="-ml-4"
+          form-id="createEntity"
+          :metadata="metadata as MetadataField"
+          :is-edit="true"
+        />
       </div>
       <div class="absolute left-0 bottom-6 w-full px-6">
         <BaseButtonNew
@@ -33,7 +40,8 @@ import {
   CreateEntityDocument,
   DamsIcons,
   Entitytyping,
-  GetCreateEntityFormDocument, MetadataField,
+  GetCreateEntityFormDocument,
+  MetadataField,
   PanelType,
   TypeModals,
 } from "@/generated-types/queries";
@@ -102,7 +110,8 @@ const cannotCreate = computed(() => {
   return !form.value || !form.value.meta.valid;
 });
 
-const { mutate, loading } = useMutation<CreateEntityMutation>(CreateEntityDocument);
+const { mutate, loading } =
+  useMutation<CreateEntityMutation>(CreateEntityDocument);
 const { result, onResult, refetch } = useQuery<GetCreateEntityFormQuery>(
   GetCreateEntityFormDocument,
   { type },

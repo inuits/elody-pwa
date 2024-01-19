@@ -60,7 +60,8 @@ const entityTypeFilters = computed(() =>
 
 const applyFilterToLibrary = () => {
   let filters;
-  if (entityTypeFilters.value !== undefined) filters = [...entityTypeFilters.value];
+  if (entityTypeFilters.value !== undefined)
+    filters = [...entityTypeFilters.value];
   else filters = [];
   const metadataKeys = config.features.simpleSearch.simpleSearchMetadataKey;
   for (let index in metadataKeys) {
@@ -70,7 +71,7 @@ const applyFilterToLibrary = () => {
       type: AdvancedFilterTypes.Text,
       match_exact: false,
       parent_key: "metadata",
-      operator: "or"
+      operator: "or",
     });
   }
   emit("updateFilters", filters);

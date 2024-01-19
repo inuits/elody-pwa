@@ -69,7 +69,9 @@ const setPermissionsMappings = () => {
           notifyOnNetworkStatusChange: true,
         })
         .then((result) => {
-          permissionsMappings.value.get(entity)?.set(Permission.Cancreate, result.data?.PermissionMappingCreate)
+          permissionsMappings.value
+            .get(entity)
+            ?.set(Permission.Cancreate, result.data?.PermissionMappingCreate);
           EventBus.emit("permissions_updated", permissionsMappings.value);
         });
     } catch (e) {
@@ -88,7 +90,11 @@ const usePermissions = () => {
     try {
       if (permissionsMappings.value.size < 1)
         throw Error("The mappings are not fetched yet. Wait a bit.");
-      if ((permission === Permission.Canread || permission === Permission.Cancreate) && entity != undefined) {
+      if (
+        (permission === Permission.Canread ||
+          permission === Permission.Cancreate) &&
+        entity != undefined
+      ) {
         const entityMapping = permissionsMappings.value!.get(entity);
         return entityMapping?.get(permission);
       }

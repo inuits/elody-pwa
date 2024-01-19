@@ -12,26 +12,30 @@
       { 'animate-pulse': loading },
     ]"
   >
-    <div class="flex items-center rounded-2xl p-2 bg-neutral-light" v-show="isEdit" v-if="onlyEditableTeaserMetadata.length > 0">
+    <div
+      class="flex items-center rounded-2xl p-2 bg-neutral-light"
+      v-show="isEdit"
+      v-if="onlyEditableTeaserMetadata.length > 0"
+    >
       <div class="pl-2">
         <unicon
-            :name="Unicons.Bars.name"
-            class="h-5 w-5 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
+          :name="Unicons.Bars.name"
+          class="h-5 w-5 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
         />
       </div>
       <div v-if="!loading" class="w-16 pr-2">
         <div
-            v-for="metadataItem in onlyEditableTeaserMetadata"
-            :key="metadataItem ? metadataItem.key : 'no-key'"
-            class="w-1/1"
+          v-for="metadataItem in onlyEditableTeaserMetadata"
+          :key="metadataItem ? metadataItem.key : 'no-key'"
+          class="w-1/1"
         >
           <metadata-wrapper
-              ref="orderMetadataChild"
-              :form-id="formId"
-              v-model:metadata="metadataItem as MetadataField"
-              :is-edit="isEdit"
-              :linked-entity-id="intialValues.id"
-              :should-hide="true"
+            ref="orderMetadataChild"
+            :form-id="formId"
+            v-model:metadata="metadataItem as MetadataField"
+            :is-edit="isEdit"
+            :linked-entity-id="intialValues.id"
+            :should-hide="true"
           />
         </div>
       </div>
@@ -68,7 +72,9 @@
 
     <div v-if="!loading" class="flex items-center w-full">
       <div
-        v-for="metadataItem in teaserMetadata.filter((metadata) => !metadata.showOnlyInEditMode)"
+        v-for="metadataItem in teaserMetadata.filter(
+          (metadata) => !metadata.showOnlyInEditMode
+        )"
         :key="metadataItem ? metadataItem.key : 'no-key'"
         class="flex justify-start flex-col mx-2 break-words w-1/4"
       >
@@ -197,7 +203,9 @@ const canShowCopyRight = () => {
 };
 
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
-const onlyEditableTeaserMetadata = computed(() => props.teaserMetadata.filter((metadata) => metadata.showOnlyInEditMode))
+const onlyEditableTeaserMetadata = computed(() =>
+  props.teaserMetadata.filter((metadata) => metadata.showOnlyInEditMode)
+);
 
 watch(
   () => isMarkedAsToBeDeleted.value,
