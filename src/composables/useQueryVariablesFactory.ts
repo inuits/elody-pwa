@@ -35,7 +35,7 @@ export const useQueryVariablesFactory = () => {
       pagination += changePaginationNumber.value;
     return {
       limit: pagination,
-      skip: selectedSkip.value,
+      skip: selectedSkip.value.value,
       searchValue: queryVariables.value?.searchValue,
       advancedSearchValue: [],
       advancedFilterInputs: [
