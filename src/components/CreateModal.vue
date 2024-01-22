@@ -9,6 +9,7 @@
       <div class="p-6 pb-0 mb-3">
         <h1 class="text-2xl text-text-body mb-3">{{ t("entity.create") }}</h1>
         <BaseDropdownNew
+          ref="dropDownChild"
           v-model="selectedEntityType"
           :options="entityTypes"
           label="Entity type"
@@ -45,6 +46,7 @@ const { getModalInfo, closeModal } = useBaseModal();
 const { deleteForm } = useFormHelper();
 const selectedEntityType = ref<DropdownOption>();
 const entityTypes = ref<DropdownOption[]>([]);
+const dropDownChild = ref(null);
 
 Object.values(CreateableEntityTypes).forEach((type) => {
   entityTypes.value.push({
@@ -58,6 +60,10 @@ watch(
   () => getModalInfo(TypeModals.Create).state,
   (createModalState: ModalState) => {
     if (createModalState === ModalState.Hide) {
+      if (dropDownChild.value) {
+        selectedEntityType.value = undefined;
+        dropDownChild.value.selectDefaultItem();
+      }
       deleteForm("createEntity");
       // don't remove those commented lines, this is just temporarily disabled
       //} else if (createModalState === ModalState.Show) {

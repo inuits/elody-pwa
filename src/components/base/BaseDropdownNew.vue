@@ -107,6 +107,13 @@ const defaultOption: DropdownOption = {
 const selectedItem = ref<DropdownOption>(defaultOption);
 const selectedItemLabel = computed(() => selectedItem.value.label);
 
+const selectDefaultItem = () => {
+  selectedItem.value = defaultOption;
+}
+defineExpose({
+  selectDefaultItem
+});
+
 const selectItem = (event: Event) => {
   const newlySelectedOption = props.options.find(
     (option: DropdownOption) => option.label === event.target?.value
