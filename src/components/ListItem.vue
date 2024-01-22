@@ -82,7 +82,7 @@
           :form-id="formId || 'listview'"
           v-model:metadata="metadataItem as MetadataField"
           :is-edit="isEdit"
-          :linked-entity-id="intialValues.id || itemId"
+          :linked-entity-id="intialValues?.id || itemId"
         />
       </div>
     </div>
@@ -130,6 +130,7 @@ import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
 import useEditMode from "@/composables/useEdit";
 import { useAuth } from "session-vue-3-oidc-library";
+import { useFormHelper } from "@/composables/useFormHelper";
 import { computed, ref, watch, onUpdated } from "vue";
 import { getEntityIdFromRoute, stringIsUrl } from "@/helpers";
 import { Unicons } from "@/types";
@@ -177,6 +178,7 @@ const emit = defineEmits<{
 }>();
 
 const { isEdit } = useEditMode();
+const { deleteTeaserMetadataItemInState } = useFormHelper();
 const { update, remove } = useFieldArray("relationValues.relations");
 const auth = useAuth();
 const isMarkedAsToBeDeleted = ref<boolean>(false);
@@ -232,6 +234,7 @@ watch(
   () => (!isEdit.value ? (isMarkedAsToBeDeleted.value = false) : "")
 );
 const removePreviewItem = (idx: number) => {
+  deleteTeaserMetadataItemInState(props.itemId);
   remove(idx);
 };
 </script>

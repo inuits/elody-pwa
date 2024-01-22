@@ -14,6 +14,7 @@ import * as AllRules from "@vee-validate/rules";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
+const teaserMetadataSaved = ref<{ [key: string]: object }>({});
 
 export type EntityValues = {
   intialValues?: IntialValues;
@@ -138,6 +139,19 @@ const useFormHelper = () => {
     const form = getForm(id);
     return { id, form };
   };
+
+  const getTeaserMetadataInState = (id: string): [] => {
+    return teaserMetadataSaved.value[id];
+  }
+
+  const deleteTeaserMetadataItemInState = (id: string) => {
+    delete teaserMetadataSaved.value[id]
+  }
+
+  const addTeaserMetadataToState = (id: string, teaserMetadata: object) => {
+    teaserMetadataSaved.value[id] = teaserMetadata;
+  }
+
   const addRelations = (
     selectedItems: InBulkProcessableItem[],
     relationType: string
@@ -150,6 +164,7 @@ const useFormHelper = () => {
       form.values.relationValues.relations;
     const newRelations: BaseRelationValuesInput[] = [];
     selectedItems.forEach((item) => {
+      addTeaserMetadataToState(item.id, item.teaserMetadata);
       newRelations.push({
         key: item.id,
         type: relationType,
@@ -252,6 +267,8 @@ const useFormHelper = () => {
     replaceRelationsFromSameType,
     recreateForm,
     findRelation,
+    getTeaserMetadataInState,
+    deleteTeaserMetadataItemInState
   };
 };
 
