@@ -4,7 +4,10 @@
       :button-label="$t('bulk-operations.save')"
       :button-icon="DamsIcons.Save"
       :show-delete-button="isEditToggleVisible !== 'edit-delete'"
-      @submit="save()"
+      @submit="async () => {
+        await save();
+        await getTenants();
+      }"
       @cancel="openDiscardModal()"
       @delete="openDeleteModal()"
     />
