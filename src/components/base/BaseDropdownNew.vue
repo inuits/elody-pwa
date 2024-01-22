@@ -109,9 +109,9 @@ const selectedItemLabel = computed(() => selectedItem.value.label);
 
 const selectDefaultItem = () => {
   selectedItem.value = defaultOption;
-}
+};
 defineExpose({
-  selectDefaultItem
+  selectDefaultItem,
 });
 
 const selectItem = (event: Event) => {
