@@ -11,7 +11,7 @@
       :key="item.key + '_preview'"
       :item-id="item.key"
       :bulk-operations-context="bulkOperationsContext"
-      :teaser-metadata="(item.teaserMetadata as Metadata[])"
+      :teaser-metadata="(getTeaserMetadataInState(item.key) as Metadata[])"
       :thumb-icon="entitiesLoading ? undefined : getThumbnail(item)"
       :small="listItemRouteName === 'SingleMediafile'"
       :is-preview="true"
@@ -110,7 +110,7 @@ const { mediafileSelectionState, updateSelectedEntityMediafile } =
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { queryVariables } = useLibraryBar();
 const { getThumbnail } = useThumbnailHelper();
-const { getForm, findRelation } = useFormHelper();
+const { getForm, findRelation, getTeaserMetadataInState } = useFormHelper();
 const router = useRouter();
 
 const entityId = computed(() => getEntityIdFromRoute() as string);
