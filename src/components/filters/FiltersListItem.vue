@@ -10,8 +10,12 @@
         {{ t(filter.advancedFilter.label || "") }}
       </span>
     </div>
-    <div v-if="filter.advancedFilter.tooltip" class="flex gap-x-2">
-      <base-tooltip position="top-end" :tooltip-offset="8">
+    <div class="flex gap-x-2">
+      <base-tooltip
+        v-if="filter.advancedFilter.tooltip"
+        position="top-end"
+        :tooltip-offset="8"
+      >
         <template #activator="{ on }">
           <div v-on="on">
             <unicon :name="Unicons.QuestionCircle.name" height="20" />
@@ -22,7 +26,7 @@
             <div>
               {{
                 t(
-                  `tooltip.advancedFilterTypes.${props.filter.advancedFilter.type}`
+                  `tooltip.advancedFilterTypes.${props.filter.advancedFilter.type}`,
                 )
               }}
             </div>
@@ -49,8 +53,10 @@
           v-if="selectedMatcher"
           :is="matcherComponent"
           :filter="filter.advancedFilter"
-          @new-advanced-filter-input="(input: AdvancedFilterInput) => advancedFilterInput = input"
-          @filter-options="(options: string[]) => filterOptions = options"
+          @new-advanced-filter-input="
+            (input: AdvancedFilterInput) => (advancedFilterInput = input)
+          "
+          @filter-options="(options: string[]) => (filterOptions = options)"
         />
       </div>
       <BaseButtonNew
@@ -95,7 +101,7 @@ const emit = defineEmits<{
   (event: "activateFilter", advancedFilterInput: AdvancedFilterInput): void;
   (
     event: "deactivateFilter",
-    advancedFilterKey: string | InputMaybe<string> | undefined
+    advancedFilterKey: string | InputMaybe<string> | undefined,
   ): void;
 }>();
 
@@ -123,7 +129,7 @@ const loadMatcher = async () => {
 };
 
 const icon = computed<string>(() =>
-  isOpen.value ? Unicons.Minus.name : Unicons.Plus.name
+  isOpen.value ? Unicons.Minus.name : Unicons.Plus.name,
 );
 
 const defaultMatcherMap: Partial<Record<AdvancedFilterTypes, string>> = {
@@ -138,8 +144,8 @@ watch(selectedMatcher, async () => {
   filterOptions.value.forEach((option) =>
     dequeueItemForBulkProcessing(
       BulkOperationsContextEnum.FilterOptions,
-      option
-    )
+      option,
+    ),
   );
 });
 watch(advancedFilterInput, () => {
@@ -160,7 +166,7 @@ watch(clearAllActiveFilters, () => {
 watch(matchers, () => {
   const defaultMatcher = matchers.value.find(
     (matcher) =>
-      matcher.value === defaultMatcherMap[advancedFilterInput.value.type]
+      matcher.value === defaultMatcherMap[advancedFilterInput.value.type],
   );
 
   if (defaultMatcher && !selectedMatcher.value)
