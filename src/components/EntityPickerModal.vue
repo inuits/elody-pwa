@@ -26,15 +26,19 @@
                   : SearchInputType.AdvancedInputMediaFilesType
                 : SearchInputType.AdvancedInputType
             "
-            :filter-type="
-              getAcceptedTypes().length > 0
-                ? String(getAcceptedTypes()[0])
-                : undefined
-            "
             :confirm-selection-button="true"
             :enable-navigation="false"
             :disable-new-entity-previews="true"
             :ids-of-non-selectable-entities="getAlreadySelectedEntityIds()"
+            :filters="[
+              {
+                type: AdvancedFilterTypes.Selection,
+                parent_key: '',
+                key: 'type',
+                value: getAcceptedTypes(),
+                match_exact: true,
+              }
+            ]"
             list-item-route-name="SingleEntity"
             @confirm-selection="
               (selectedItems) => {
@@ -55,6 +59,7 @@
 
 <script lang="ts" setup>
 import {
+  AdvancedFilterTypes,
   Entitytyping,
   ModalState,
   SearchInputType,

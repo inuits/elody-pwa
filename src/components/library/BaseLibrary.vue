@@ -372,7 +372,8 @@ const refetchEntities = () => {
 
 const initializeBaseLibrary = () => {
   if (!props.predefinedEntities) {
-    if (props.filterType) setEntityType(props.filterType as Entitytyping);
+    if (props.filters.length > 0) setAdvancedFilters(props.filters);
+    else if (props.filterType) setEntityType(props.filterType as Entitytyping);
     queryVariables.value.searchInputType = props.searchInputTypeOnDrawer;
     getEntities();
   }
@@ -465,7 +466,7 @@ watch(
         iconOn: DamsIcons.Apps,
         iconOff: DamsIcons.Apps,
       });
-    initializeBaseLibrary();
+    if (props.filters.length === 0) initializeBaseLibrary();
     if (viewModes.includes(ViewModesMedia.__name) || props.enablePreview)
       toggles.push({
         isOn: displayPreview,
