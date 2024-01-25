@@ -142,15 +142,15 @@ const useFormHelper = () => {
 
   const getTeaserMetadataInState = (id: string): [] => {
     return teaserMetadataSaved.value[id];
-  }
+  };
 
   const deleteTeaserMetadataItemInState = (id: string) => {
-    delete teaserMetadataSaved.value[id]
-  }
+    delete teaserMetadataSaved.value[id];
+  };
 
   const addTeaserMetadataToState = (id: string, teaserMetadata: object) => {
     teaserMetadataSaved.value[id] = teaserMetadata;
-  }
+  };
 
   const addRelations = (
     selectedItems: InBulkProcessableItem[],
@@ -268,7 +268,7 @@ const useFormHelper = () => {
     recreateForm,
     findRelation,
     getTeaserMetadataInState,
-    deleteTeaserMetadataItemInState
+    deleteTeaserMetadataItemInState,
   };
 };
 
