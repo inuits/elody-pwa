@@ -1,11 +1,10 @@
-import { ref, onMounted } from "vue";
+import { computed, ref } from "vue";
 import {
-  TypeModals,
-  ModalState,
   ModalChoices,
+  ModalState,
+  TypeModals,
 } from "@/generated-types/queries";
 import useDropzoneHelper from "@/composables/useDropzoneHelper";
-import { computed } from "vue";
 
 export type ModalPosition = "left" | "center" | "right";
 
@@ -26,7 +25,7 @@ const initialModalInfo: ModalInfo = {
 const getInitialModals = (): { [key: string]: ModalInfo } => {
   const initialModals: { [key: string]: ModalInfo } = {};
   Object.keys(TypeModals).forEach(
-    (modalType) => (initialModals[modalType] = { ...initialModalInfo })
+    (modalType) => (initialModals[modalType] = { ...initialModalInfo }),
   );
   return initialModals;
 };
@@ -42,8 +41,9 @@ export const useBaseModal = () => {
   const openModal = (
     modalType: TypeModals,
     modalTab: ModalChoices | undefined = undefined,
-    modalPosition: ModalPosition | undefined = undefined
+    modalPosition: ModalPosition | undefined = undefined,
   ): void => {
+    closeModalsWithPosition(getModalInfo(modalType).modalPosition);
     const updatedModal = {
       state: ModalState.Show,
     };
@@ -63,13 +63,23 @@ export const useBaseModal = () => {
     return isOpen;
   });
 
+  const closeModalsWithPosition = (position: ModalPosition): void => {
+    const modalsWithPosition: [ModalInfo] = Object.values(modals.value).filter(
+      (modal: ModalInfo) => modal.modalPosition === position,
+    );
+    if (!modalsWithPosition) return;
+    modalsWithPosition.forEach(
+      (modal: ModalInfo) => (modal.state = ModalState.Hide),
+    );
+  };
+
   const getModalInfo = (modalType: TypeModals): ModalInfo => {
     return modals.value[modalType];
   };
 
   const updateModal = (
     modalType: TypeModals,
-    modalInput: { [key: string]: any }
+    modalInput: { [key: string]: any },
   ): void => {
     Object.assign(modals.value[modalType], modalInput);
   };
