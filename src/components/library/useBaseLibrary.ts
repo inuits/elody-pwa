@@ -40,6 +40,7 @@ export const useBaseLibrary = (
   const sortOptions = ref<DropdownOption[]>([]);
   const paginationLimitOptionsLoaded = ref<boolean>(false);
   const sortOptionsLoaded = ref<boolean>(false);
+  const isSearchLibrary = ref<boolean>(false);
   const initializeLibraryBar = async () => {
     libraryBarInitializationStatus.value = "inProgress";
     paginationLimitOptionsLoaded.value = false;
@@ -190,6 +191,9 @@ export const useBaseLibrary = (
   const setEntityType = (type: Entitytyping | "BaseEntity"): void => {
     entityType.value = type;
   };
+  const setIsSearchLibrary = (searchLibrary: boolean): void => {
+    isSearchLibrary.value = searchLibrary;
+  };
 
   const setEntities = (newEntities: Entity[]): void => {
     entities.value = newEntities;
@@ -306,8 +310,8 @@ export const useBaseLibrary = (
         filtersBaseInitializationStatus.value === "initialized" &&
         paginationLimitOptionsLoaded.value &&
         sortOptionsLoaded.value
-      )
-        __doEntitiesCall();
+      )  if (!isSearchLibrary.value || (isSearchLibrary.value && queryVariables.value.advancedFilterInputs.length > 0))
+          __doEntitiesCall();
     }
   );
   watch(
@@ -354,6 +358,7 @@ export const useBaseLibrary = (
     setManipulationOfQuery,
     setEntities,
     setEntityType,
+    setIsSearchLibrary,
     setTotalEntityCount,
     sortOptions,
     totalEntityCount,

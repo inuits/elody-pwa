@@ -248,6 +248,7 @@ const {
   setManipulationOfQuery,
   setEntities,
   setEntityType,
+  setIsSearchLibrary,
   setTotalEntityCount,
   sortOptions,
   totalEntityCount,
@@ -371,6 +372,7 @@ const refetchEntities = () => {
 };
 
 const initializeBaseLibrary = () => {
+  setIsSearchLibrary(props.isSearchLibrary);
   if (!props.predefinedEntities) {
     if (props.filters.length > 0) setAdvancedFilters(props.filters);
     else if (props.filterType) setEntityType(props.filterType as Entitytyping);
