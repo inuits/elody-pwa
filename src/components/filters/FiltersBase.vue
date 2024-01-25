@@ -202,13 +202,16 @@ const handleAdvancedFilters = () => {
           parent_key: advancedFilter.parentKey,
           key: advancedFilter.key,
           value: advancedFilter.defaultValue,
+          item_types: advancedFilter.itemTypes,
           match_exact: true,
         };
 
         if (advancedFilter.parentKey === "relations") {
           if (props.parentEntityIdentifiers.length > 0) {
             hiddenFilter.value = props.parentEntityIdentifiers;
-            activeFilters.value.push(hiddenFilter);
+            if (advancedFilter.itemTypes)
+              activeFilters.value = [hiddenFilter];
+            else activeFilters.value.push(hiddenFilter);
           }
         } else activeFilters.value.push(hiddenFilter);
       }
