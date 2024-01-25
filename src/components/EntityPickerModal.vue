@@ -37,7 +37,7 @@
                 key: 'type',
                 value: getAcceptedTypes(),
                 match_exact: true,
-              }
+              },
             ]"
             list-item-route-name="SingleEntity"
             @confirm-selection="
