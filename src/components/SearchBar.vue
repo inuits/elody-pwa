@@ -30,7 +30,7 @@ import {
   ModalState,
   TypeModals,
 } from "@/generated-types/queries";
-import { computed, inject, ref, watch } from "vue";
+import { computed, inject, ref, watch, onBeforeMount } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -57,12 +57,13 @@ const entityTypeFilters = computed(() =>
     };
   })
 );
-
+onBeforeMount(() => applyFilterToLibrary());
 const applyFilterToLibrary = () => {
   let filters;
   if (entityTypeFilters.value !== undefined)
     filters = [...entityTypeFilters.value];
   else filters = [];
+  const item_types = config.features.simpleSearch.itemTypes
   const metadataKeys = config.features.simpleSearch.simpleSearchMetadataKey;
   for (let index in metadataKeys) {
     filters.push({
@@ -73,6 +74,7 @@ const applyFilterToLibrary = () => {
       parent_key: "metadata",
       operator: "or",
     });
+    if (item_types) filters.forEach((filter) => filter["item_types"] = item_types);
   }
   emit("updateFilters", filters);
 };
@@ -86,6 +88,7 @@ watch(
   (modalState: ModalState) => {
     if (modalState !== ModalState.Show) {
       inputValue.value = "";
+      applyFilterToLibrary();
     }
   }
 );
