@@ -51,6 +51,7 @@
             :filter-type="Entitytyping.Mediafile"
             list-item-route-name="SingleEntity"
             :entity-type="Entitytyping.Mediafile"
+            :relation-type="relationType"
             :use-other-query="newQuery"
           />
           <BaseLibrary
