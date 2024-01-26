@@ -25,11 +25,12 @@
         <transition>
           <div
             v-if="!isCollapsed"
-            class="flex flex-col w-full items-center mt-2 overflow-y-auto"
+            class="flex flex-col w-full max-h-[59vh] items-center mt-2 overflow-y-auto"
           >
             <div
               v-for="mediafile in mediafileSelectionState.mediafiles"
               :key="mediafile.id"
+              class="w-full h-full"
             >
               <EntityImageSelectionItem :mediafile="mediafile" />
             </div>

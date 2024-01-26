@@ -1,6 +1,6 @@
 <template>
   <div
-    class="px-5 py-2 flex flex-col justify-end"
+    class="py-2 flex flex-col justify-end flex items-center"
     :key="
       getValueOfMediafile('filename', mediafile)
         ? getValueOfMediafile('filename', mediafile)
@@ -35,7 +35,7 @@
     <div v-else class="relative group">
       <unicon
         :name="getThumbnail(mediafile)"
-        class="h-10 w-10 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
+        class="h-20 w-20 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
       />
     </div>
   </div>
