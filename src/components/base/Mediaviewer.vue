@@ -1,7 +1,7 @@
 <template>
   <div class="flex ml-1 h-full checkboard select-none">
     <div
-      class="w-1/3 m-5"
+      class="w-1/3 max-h-3"
       v-if="
         mediafileSelectionState.selectedMediafile &&
         mediafileSelectionState.mediafiles.length > 0
