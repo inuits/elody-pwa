@@ -88,9 +88,9 @@ const { t } = useI18n();
 
 const setDefaultOptions = () => {
   setQueryVariables(props.queryVariables);
-  setSelectedPaginationLimitOption(props.paginationLimitOptions.value?.[0]);
+  setSelectedPaginationLimitOption(props.paginationLimitOptions?.value?.[0]);
   setSelectedSkip(1);
-  setSelectedSortOption(props.sortOptions.value?.[0]);
+  setSelectedSortOption(props.sortOptions?.value?.[0]);
   if (!Number.isNaN(props.totalItems)) setTotalItemsCount(props.totalItems);
 };
 
