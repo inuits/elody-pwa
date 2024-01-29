@@ -35,6 +35,7 @@ export const goToEntityPage = (
 
   useEntitySingle().setEntityUuid(entity.uuid);
   const entityId =
+    entity.intialValues.slug ||
     entity.uuid ||
     entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")?.value;
 
