@@ -5,7 +5,7 @@
       v-for="item in relations?.filter(
         (relation) =>
           relation.editStatus === EditStatus.New &&
-          relation.type === relationType
+          relation.type === relationType,
       )"
       class="w-full"
     >
@@ -21,7 +21,7 @@
         :relation="
           relations?.find(
             (relation) =>
-              relation.key === item.key && relation.type === relationType
+              relation.key === item.key && relation.type === relationType,
           )
         "
         :relations="relations"
@@ -45,7 +45,10 @@
         :item-id="entity.uuid"
         :bulk-operations-context="bulkOperationsContext"
         :teaser-metadata="
-          formatTeaserMetadata(entity.teaserMetadata, entity.intialValues) as Metadata[]
+          formatTeaserMetadata(
+            entity.teaserMetadata,
+            entity.intialValues,
+          ) as Metadata[]
         "
         :intialValues="entity.intialValues"
         :media="
@@ -62,7 +65,7 @@
         :relation="
           relations?.find(
             (relation) =>
-              relation.key === entity.id && relation.type === relationType
+              relation.key === entity.id && relation.type === relationType,
           )
         "
         :relations="relations"
@@ -83,7 +86,11 @@ import type {
 import GridItem from "@/components/GridItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
-import { getEntityIdFromRoute, goToEntityPage } from "@/helpers";
+import {
+  getEntityIdFromRoute,
+  goToEntityPage,
+  setCssVariable,
+} from "@/helpers";
 import { computed, inject, onMounted, onUnmounted } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
@@ -110,13 +117,13 @@ const props = withDefaults(
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
     enableSelection: true,
-  }
+  },
 );
 
 const apolloClient = inject(DefaultApolloClient);
 const { formatTeaserMetadata } = useBaseLibrary(
   apolloClient as ApolloClient<any>,
-  props.parentEntityIdentifiers.length > 0
+  props.parentEntityIdentifiers.length > 0,
 );
 const { mediafileSelectionState, updateSelectedEntityMediafile } =
   useEntityMediafileSelector();
@@ -127,7 +134,7 @@ const router = useRouter();
 
 const entityId = computed(() => getEntityIdFromRoute() as string);
 const relations = computed<BaseRelationValuesInput[]>(
-  () => getForm(entityId.value)?.values.relationValues.relations
+  () => getForm(entityId.value)?.values.relationValues.relations,
 );
 
 const calculateGridColumns = () => {
@@ -141,8 +148,7 @@ const calculateGridColumns = () => {
     if (props.parentEntityIdentifiers.length > 0) --colAmount;
   }
 
-  const root = document.querySelector(":root") as HTMLElement;
-  root.style.setProperty("--grid-cols", colAmount.toString());
+  setCssVariable("--grid-cols", colAmount.toString());
 };
 
 onMounted(() => {
@@ -157,7 +163,7 @@ onUnmounted(() => {
 const navigateToEntityPage = (
   entity: Entity,
   listItemRouteName: string,
-  isDoubleClick: boolean = false
+  isDoubleClick: boolean = false,
 ) => {
   if (props.entitiesLoading || !props.enableNavigation) {
     if (
