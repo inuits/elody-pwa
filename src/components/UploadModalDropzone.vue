@@ -4,6 +4,16 @@
       view-style="p-3 h-full overflow-x-hidden mb-4"
       @update-files-in-dropzone="onUpdateFilesInDropzone"
     />
+    <div
+      v-if="uploadProgressPercentage"
+      class="w-full h-[25px] mb-4 bg-neutral-0 rounded-md"
+    >
+      <div class="relative flex w-full justify-center">
+        <p>{{ `Progress: ${Math.round(uploadProgressPercentage)}%` }}</p>
+      </div>
+
+      <div :class="`bg-accent-normal upload_bar h-full rounded-md`"></div>
+    </div>
     <div class="p-3 bg-neutral-white rounded">
       <div>
         <BaseButtonNew
@@ -30,7 +40,7 @@ import useDropzoneHelper from "@/composables/useDropzoneHelper";
 import useUpload from "@/composables/useUpload";
 import useUploadModalDropzone from "@/composables/useUploadModalDropzone";
 import { DamsIcons, TypeModals } from "@/generated-types/queries";
-import { ref, watch, inject } from "vue";
+import { ref, watch, inject, onMounted } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 
@@ -40,7 +50,14 @@ const filesInDropzone = ref<DropzoneFile[]>([]);
 const { closeModal, getModalInfo } = useBaseModal();
 const { createNotificationOverwrite } = useNotification();
 const { t } = useI18n();
-const { uploadGenerator, validateFiles, toggleUploadStatus } = useUpload();
+const {
+  uploadGenerator,
+  validateFiles,
+  toggleUploadStatus,
+  setUploadProgressPercentage,
+  calculateProgressPercentage,
+  uploadProgressPercentage,
+} = useUpload();
 const { clearDropzoneCounters, clearDropzoneErrorMessages, dropzone } =
   useDropzoneHelper();
 const { getEntityIdForLinkedUpload, getUploadType, setUploadStatus } =
@@ -52,12 +69,14 @@ const onUpdateFilesInDropzone = (files: DropzoneFile[]) => {
 };
 
 const handleUpload = async () => {
+  const totalAmountOfFiles: number = filesInDropzone.value.length;
+  let amountUploaded = 0;
   toggleUploadStatus();
   const generator = uploadGenerator(
     filesInDropzone.value,
     getUploadType(),
     config,
-    getEntityIdForLinkedUpload()
+    getEntityIdForLinkedUpload(),
   );
 
   for await (const upload of generator) {
@@ -66,6 +85,9 @@ const handleUpload = async () => {
       continue;
     }
 
+    setUploadProgressPercentage(
+      calculateProgressPercentage(amountUploaded + 1, totalAmountOfFiles),
+    );
     dropzone.value?.removeFile(upload.file);
     onUpdateFilesInDropzone(dropzone.value?.files ?? []);
 
@@ -73,23 +95,24 @@ const handleUpload = async () => {
       createNotificationOverwrite(
         NotificationType.default,
         t("dropzone.successNotification.title"),
-        t("dropzone.successNotification.description")
+        t("dropzone.successNotification.description"),
       );
       setUploadStatus("success");
       closeModal(TypeModals.Upload);
     }
+    amountUploaded++;
   }
   toggleUploadStatus();
 };
 
 const exceptionHandler = (
-  errorDescription: string = t("dropzone.errorNotification.description")
+  errorDescription: string = t("dropzone.errorNotification.description"),
 ) => {
   createNotificationOverwrite(
     NotificationType.error,
     t("dropzone.errorNotification.title"),
     errorDescription,
-    15
+    15,
   );
 };
 
@@ -98,6 +121,12 @@ watch(
   () => {
     clearDropzoneCounters();
     clearDropzoneErrorMessages();
-  }
+  },
 );
 </script>
+
+<style scoped>
+.upload_bar {
+  width: var(--upload-width-percentage);
+}
+</style>
