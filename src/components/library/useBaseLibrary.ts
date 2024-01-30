@@ -310,7 +310,12 @@ export const useBaseLibrary = (
         filtersBaseInitializationStatus.value === "initialized" &&
         paginationLimitOptionsLoaded.value &&
         sortOptionsLoaded.value
-      )  if (!isSearchLibrary.value || (isSearchLibrary.value && queryVariables.value.advancedFilterInputs.length > 0))
+      )
+        if (
+          !isSearchLibrary.value ||
+          (isSearchLibrary.value &&
+            queryVariables.value.advancedFilterInputs.length > 0)
+        )
           __doEntitiesCall();
     }
   );

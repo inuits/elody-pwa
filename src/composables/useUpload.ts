@@ -5,7 +5,7 @@ import { setCssVariable } from "@/helpers";
 export type UploadType = "batch" | "single";
 
 const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
-  "no-upload",
+  "no-upload"
 );
 const uploadProgressPercentage = ref<number>(0);
 
@@ -35,14 +35,14 @@ const useUpload = () => {
 
   const __createMediafileForEntity = async (
     entityId: string,
-    file: DropzoneFile,
+    file: DropzoneFile
   ): Promise<string> => {
     const response = await fetch(
       `/api/upload/single?entityId=${entityId}&filename=${file.name}`,
       {
         headers: { "Content-Type": "application/json" },
         method: "POST",
-      },
+      }
     );
     return JSON.parse(await response.text());
   };
@@ -60,7 +60,7 @@ const useUpload = () => {
         _prefetchedUploadUrls = await __batchEntities(__getCsvBlob(_files));
 
       uploadUrl = _prefetchedUploadUrls.find((url: string) =>
-        url.includes(file.name),
+        url.includes(file.name)
       );
     } else if (_uploadType === "single") {
       uploadUrl = await __createMediafileForEntity(entityId, file);
@@ -79,7 +79,7 @@ const useUpload = () => {
         {
           method: "POST",
           body: formData,
-        },
+        }
       ),
       file: file,
     };
@@ -89,7 +89,7 @@ const useUpload = () => {
     files: DropzoneFile[],
     uploadType: UploadType,
     config: any,
-    entityId: string = "",
+    entityId: string = ""
   ) {
     if (!validateFiles(files, uploadType)) return;
     _files = files;
@@ -106,10 +106,10 @@ const useUpload = () => {
 
   const validateFiles = (files: DropzoneFile[], uploadType: UploadType) => {
     const csvFilesCount = files.filter(
-      (file) => file.type === "text/csv",
+      (file) => file.type === "text/csv"
     ).length;
     const nonCsvFilesCount = files.filter(
-      (file) => file.type !== "text/csv",
+      (file) => file.type !== "text/csv"
     ).length;
 
     if (uploadType === "batch")
@@ -125,7 +125,7 @@ const useUpload = () => {
 
   const calculateProgressPercentage = (
     amountUploaded: number,
-    amountToUpload: number,
+    amountToUpload: number
   ): number => {
     let progress: number = 0;
 
@@ -152,10 +152,10 @@ watch(
   () => {
     setCssVariable(
       "--upload-width-percentage",
-      uploadProgressPercentage.value.toString() + "%",
+      uploadProgressPercentage.value.toString() + "%"
     );
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 export default useUpload;

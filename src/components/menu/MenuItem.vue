@@ -9,8 +9,8 @@
         isLink
           ? router.push(menuAction.action)
           : menuAction?.action
-            ? menuAction.action()
-            : undefined
+          ? menuAction.action()
+          : undefined
       "
       class="flex flex-row items-center pl-3 h-9 mt-3 cursor-pointer"
       :class="[{ 'bg-neutral-40 rounded-lg': isBeingHovered }]"
@@ -82,7 +82,7 @@ const auth = useAuth();
 const menuSubitem = ref<Array<MenuItem>>([]);
 const menuAction = computed(() => checkIfRouteOrModal(props.menuitem));
 const isLink = computed(
-  () => menuAction.value?.menuItemType === MenuItemType.link,
+  () => menuAction.value?.menuItemType === MenuItemType.link
 );
 const hasPermissionForMenuItem = ref<boolean>(ignorePermissions.value);
 
@@ -95,14 +95,14 @@ const props = defineProps<{
 
 const isActive = computed(() => props.menuitem === selectedMenuItem.value);
 const iconColor = computed(() =>
-  isActive.value ? "accent-normal" : "text-body",
+  isActive.value ? "accent-normal" : "text-body"
 );
 
 const handleSubMenu = () => {
   const submenu = props.menuitem.subMenu;
   if (submenu) {
     menuSubitem.value = Object.values(submenu).filter(
-      (menu: MenuItem) => menu.typeLink,
+      (menu: MenuItem) => menu.typeLink
     );
   }
 };

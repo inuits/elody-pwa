@@ -63,7 +63,9 @@
           </div>
           <div v-if="!loading" class="w-full">
             <div
-              v-for="metadataItem in teaserMetadata.filter((item) => !item.showOnlyInEditMode)"
+              v-for="metadataItem in teaserMetadata.filter(
+                (item) => !item.showOnlyInEditMode
+              )"
               :key="metadataItem ? metadataItem.value : 'no-key'"
             >
               <metadata-wrapper
