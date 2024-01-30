@@ -44,6 +44,7 @@ import {
   MetadataField,
   PanelType,
   TypeModals,
+type Entity,
 } from "@/generated-types/queries";
 import type {
   CreateEntityMutation,
@@ -52,7 +53,7 @@ import type {
 } from "@/generated-types/queries";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { computed, inject, onMounted, ref, watch } from "vue";
-import { getMetadataFields } from "@/helpers";
+import { getMetadataFields, goToEntityPage } from "@/helpers";
 import { NotificationType } from "@/components/base/BaseNotification.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
@@ -156,10 +157,8 @@ const create = async () => {
     });
     await getTenants();
     deleteForm(formId);
-    router.push({
-      name: "SingleEntity",
-      params: { id: createResult.data.createEntity.id },
-    });
+    createResult.data.createEntity.uuid = createResult.data.createEntity.id;
+    goToEntityPage(createResult.data.createEntity as Entity, "SingleEntity", router);
   }
 };
 

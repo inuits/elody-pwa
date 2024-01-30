@@ -34,7 +34,7 @@
             :form-id="formId"
             v-model:metadata="metadataItem as MetadataField"
             :is-edit="isEdit"
-            :linked-entity-id="intialValues.id"
+            :linked-entity-id="intialValues?.id || itemId"
             :should-hide="true"
           />
         </div>

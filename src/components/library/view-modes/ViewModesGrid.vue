@@ -65,7 +65,7 @@
         :relation="
           relations?.find(
             (relation) =>
-              relation.key === entity.id && relation.type === relationType,
+              relation.key === entity.uuid && relation.type === relationType,
           )
         "
         :relations="relations"
