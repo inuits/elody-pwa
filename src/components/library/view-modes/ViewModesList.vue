@@ -49,7 +49,7 @@
         idsOfNonSelectableEntities.includes(entity.id) ||
         idsOfNonSelectableEntities.includes(entity.uuid)
       "
-      :relation="findRelation(entity.id, relationType)"
+      :relation="findRelation(entity.uuid, relationType)"
       :has-selection="enableSelection"
     />
   </div>

@@ -76,7 +76,7 @@ const useTenant = (
           entities.results &&
           entities.results.forEach((entity) => {
             if (entity && entity.__typename === "Tenant") {
-              const id = entity.intialValues.id as string;
+              const id = entity.uuid as string;
               const label = entity.intialValues.label as string;
               if (tenants.value === "no-tenants") {
                 tenants.value = [];
