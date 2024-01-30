@@ -44,7 +44,7 @@ import {
   MetadataField,
   PanelType,
   TypeModals,
-type Entity,
+  type Entity,
 } from "@/generated-types/queries";
 import type {
   CreateEntityMutation,
@@ -158,7 +158,11 @@ const create = async () => {
     await getTenants();
     deleteForm(formId);
     createResult.data.createEntity.uuid = createResult.data.createEntity.id;
-    goToEntityPage(createResult.data.createEntity as Entity, "SingleEntity", router);
+    goToEntityPage(
+      createResult.data.createEntity as Entity,
+      "SingleEntity",
+      router
+    );
   }
 };
 

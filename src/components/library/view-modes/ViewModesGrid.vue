@@ -5,7 +5,7 @@
       v-for="item in relations?.filter(
         (relation) =>
           relation.editStatus === EditStatus.New &&
-          relation.type === relationType,
+          relation.type === relationType
       )"
       class="w-full"
     >
@@ -21,7 +21,7 @@
         :relation="
           relations?.find(
             (relation) =>
-              relation.key === item.key && relation.type === relationType,
+              relation.key === item.key && relation.type === relationType
           )
         "
         :relations="relations"
@@ -65,7 +65,7 @@
         :relation="
           relations?.find(
             (relation) =>
-              relation.key === entity.uuid && relation.type === relationType,
+              relation.key === entity.uuid && relation.type === relationType
           )
         "
         :relations="relations"
@@ -117,13 +117,13 @@ const props = withDefaults(
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
     enableSelection: true,
-  },
+  }
 );
 
 const apolloClient = inject(DefaultApolloClient);
 const { formatTeaserMetadata } = useBaseLibrary(
   apolloClient as ApolloClient<any>,
-  props.parentEntityIdentifiers.length > 0,
+  props.parentEntityIdentifiers.length > 0
 );
 const { mediafileSelectionState, updateSelectedEntityMediafile } =
   useEntityMediafileSelector();
@@ -134,7 +134,7 @@ const router = useRouter();
 
 const entityId = computed(() => getEntityIdFromRoute() as string);
 const relations = computed<BaseRelationValuesInput[]>(
-  () => getForm(entityId.value)?.values.relationValues.relations,
+  () => getForm(entityId.value)?.values.relationValues.relations
 );
 
 const calculateGridColumns = () => {
@@ -163,7 +163,7 @@ onUnmounted(() => {
 const navigateToEntityPage = (
   entity: Entity,
   listItemRouteName: string,
-  isDoubleClick: boolean = false,
+  isDoubleClick: boolean = false
 ) => {
   if (props.entitiesLoading || !props.enableNavigation) {
     if (

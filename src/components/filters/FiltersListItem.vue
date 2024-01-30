@@ -26,7 +26,7 @@
             <div>
               {{
                 t(
-                  `tooltip.advancedFilterTypes.${props.filter.advancedFilter.type}`,
+                  `tooltip.advancedFilterTypes.${props.filter.advancedFilter.type}`
                 )
               }}
             </div>
@@ -101,7 +101,7 @@ const emit = defineEmits<{
   (event: "activateFilter", advancedFilterInput: AdvancedFilterInput): void;
   (
     event: "deactivateFilter",
-    advancedFilterKey: string | InputMaybe<string> | undefined,
+    advancedFilterKey: string | InputMaybe<string> | undefined
   ): void;
 }>();
 
@@ -129,7 +129,7 @@ const loadMatcher = async () => {
 };
 
 const icon = computed<string>(() =>
-  isOpen.value ? Unicons.Minus.name : Unicons.Plus.name,
+  isOpen.value ? Unicons.Minus.name : Unicons.Plus.name
 );
 
 const defaultMatcherMap: Partial<Record<AdvancedFilterTypes, string>> = {
@@ -144,8 +144,8 @@ watch(selectedMatcher, async () => {
   filterOptions.value.forEach((option) =>
     dequeueItemForBulkProcessing(
       BulkOperationsContextEnum.FilterOptions,
-      option,
-    ),
+      option
+    )
   );
 });
 watch(advancedFilterInput, () => {
@@ -166,7 +166,7 @@ watch(clearAllActiveFilters, () => {
 watch(matchers, () => {
   const defaultMatcher = matchers.value.find(
     (matcher) =>
-      matcher.value === defaultMatcherMap[advancedFilterInput.value.type],
+      matcher.value === defaultMatcherMap[advancedFilterInput.value.type]
   );
 
   if (defaultMatcher && !selectedMatcher.value)

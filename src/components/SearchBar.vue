@@ -63,7 +63,7 @@ const applyFilterToLibrary = () => {
   if (entityTypeFilters.value !== undefined)
     filters = [...entityTypeFilters.value];
   else filters = [];
-  const item_types = config.features.simpleSearch.itemTypes
+  const item_types = config.features.simpleSearch.itemTypes;
   const metadataKeys = config.features.simpleSearch.simpleSearchMetadataKey;
   for (let index in metadataKeys) {
     filters.push({
@@ -74,7 +74,8 @@ const applyFilterToLibrary = () => {
       parent_key: "metadata",
       operator: "or",
     });
-    if (item_types) filters.forEach((filter) => filter["item_types"] = item_types);
+    if (item_types)
+      filters.forEach((filter) => (filter["item_types"] = item_types));
   }
   emit("updateFilters", filters);
 };

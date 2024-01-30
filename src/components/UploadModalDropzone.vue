@@ -76,7 +76,7 @@ const handleUpload = async () => {
     filesInDropzone.value,
     getUploadType(),
     config,
-    getEntityIdForLinkedUpload(),
+    getEntityIdForLinkedUpload()
   );
 
   for await (const upload of generator) {
@@ -86,7 +86,7 @@ const handleUpload = async () => {
     }
 
     setUploadProgressPercentage(
-      calculateProgressPercentage(amountUploaded + 1, totalAmountOfFiles),
+      calculateProgressPercentage(amountUploaded + 1, totalAmountOfFiles)
     );
     dropzone.value?.removeFile(upload.file);
     onUpdateFilesInDropzone(dropzone.value?.files ?? []);
@@ -95,7 +95,7 @@ const handleUpload = async () => {
       createNotificationOverwrite(
         NotificationType.default,
         t("dropzone.successNotification.title"),
-        t("dropzone.successNotification.description"),
+        t("dropzone.successNotification.description")
       );
       setUploadStatus("success");
       closeModal(TypeModals.Upload);
@@ -106,13 +106,13 @@ const handleUpload = async () => {
 };
 
 const exceptionHandler = (
-  errorDescription: string = t("dropzone.errorNotification.description"),
+  errorDescription: string = t("dropzone.errorNotification.description")
 ) => {
   createNotificationOverwrite(
     NotificationType.error,
     t("dropzone.errorNotification.title"),
     errorDescription,
-    15,
+    15
   );
 };
 
@@ -121,7 +121,7 @@ watch(
   () => {
     clearDropzoneCounters();
     clearDropzoneErrorMessages();
-  },
+  }
 );
 </script>
 

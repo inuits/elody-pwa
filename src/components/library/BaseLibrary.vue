@@ -222,7 +222,7 @@ const props = withDefaults(
     isSearchLibrary: false,
     useOtherQuery: undefined,
     isMultiSelectInputField: false,
-  },
+  }
 );
 
 const emit = defineEmits<{
@@ -255,7 +255,7 @@ const {
   formatTeaserMetadata,
 } = useBaseLibrary(
   apolloClient as ApolloClient<any>,
-  props.parentEntityIdentifiers.length > 0,
+  props.parentEntityIdentifiers.length > 0
 );
 const {
   getUploadStatus,
@@ -280,8 +280,8 @@ const entityType = computed(() =>
   props.entityType
     ? props.entityType
     : route.meta.entityType
-      ? (route.meta.entityType as Entitytyping)
-      : "BaseEntity",
+    ? (route.meta.entityType as Entitytyping)
+    : "BaseEntity"
 );
 const entityDropdownOptions = computed<DropdownOption[]>(() => {
   return entities.value.map((entity: BaseEntity) => {
@@ -302,7 +302,7 @@ const getSelectedOptions = () => {
   props.selectInputFieldValue.forEach((item: string) => {
     const valueOption: DropdownOption | undefined =
       entityDropdownOptions.value.find(
-        (option: DropdownOption) => option.label === item,
+        (option: DropdownOption) => option.label === item
       );
     if (!valueOption) return;
     selectedOptions.push(valueOption);
@@ -311,7 +311,7 @@ const getSelectedOptions = () => {
 };
 
 const mapDropdownOptionsToBulkProcessableItem = (
-  dropdownOptions: DropdownOption[],
+  dropdownOptions: DropdownOption[]
 ): InBulkProcessableItem[] => {
   const inBulkProcessableItems: InBulkProcessableItem[] = [];
   dropdownOptions.forEach((dropdownOption: DropdownOption) => {
@@ -344,7 +344,7 @@ if (useOtherQuery.value) {
   const { result: allEntitiesResult } = useQuery(
     GetEntitiesDocument,
     allEntitiesQueryVariables,
-    () => ({ enabled: false, fetchPolicy: "network-only" }),
+    () => ({ enabled: false, fetchPolicy: "network-only" })
   );
 }
 
@@ -359,7 +359,7 @@ const bulkSelect = (items = entities.value) => {
         id: entity.uuid,
         teaserMetadata: formatTeaserMetadata(
           entity.teaserMetadata,
-          entity.intialValues,
+          entity.intialValues
         ),
       });
     }
@@ -426,7 +426,7 @@ watch(
       queryVariables.value.searchInputType = searchInputType;
       getEntities();
     }
-  },
+  }
 );
 watch(
   () => props.predefinedEntities,
@@ -436,14 +436,14 @@ watch(
       setTotalEntityCount(props.predefinedEntities.length);
     }
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 watch(
   () => props.filters,
   () => {
     setAdvancedFilters(props.filters);
-  },
+  }
 );
 
 watch(
@@ -476,7 +476,7 @@ watch(
         iconOff: DamsIcons.Image,
       });
     setDisplayPreferences();
-  },
+  }
 );
 watch([displayGrid, expandFilters], () => {
   displayList.value = !displayGrid.value;
