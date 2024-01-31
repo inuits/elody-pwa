@@ -51,7 +51,7 @@
           <!--          <BaseButtonNew-->
           <!--            :icon="DamsIcons.EllipsisV"-->
           <!--            class="!w-1/5"-->
-          <!--            @click.stop="(event: MouseEvent) => openContextMenu({x: event.clientX, y: event.clientY})"-->
+          <!--            @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event.clientX, y: event.clientY})"-->
           <!--          />-->
         </div>
         <div>
@@ -101,7 +101,7 @@
         />
       </div>
     </div>
-    <base-context-menu><saved-searches /></base-context-menu>
+    <base-context-menu :context-menu="contextMenuHandler.getContextMenu()"><saved-searches /></base-context-menu>
   </div>
 </template>
 
@@ -123,7 +123,7 @@ import { computed, defineProps, ref, toRefs, watch } from "vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
-import { useBaseContextMenu } from "@/composables/useBaseContextMenu";
+import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler"
 import SavedSearches from "@/components/SavedSearches.vue";
 
 export type FilterListItem = {
@@ -163,7 +163,7 @@ const displayedFilterOptions = ref<DropdownOption[]>([]);
 const activeFilters = ref<AdvancedFilterInput[]>([]);
 const activeFilterCount = ref<number>(0);
 const clearAllActiveFilters = ref<boolean>(false);
-const { openContextMenu } = useBaseContextMenu();
+const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 
 const applyFilters = () => {
   emit("applyFilters", activeFilters.value);

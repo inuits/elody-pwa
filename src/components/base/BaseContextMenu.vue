@@ -11,10 +11,12 @@
   </div>
 </template>
 
-<script setup>
-import { useBaseContextMenu } from "@/composables/useBaseContextMenu";
+<script lang="ts" setup>
+import { ContextMenu } from "src/components/context-menu-actions/ContextMenuHandler";
 
-const { contextMenu } = useBaseContextMenu();
+const props = defineProps<{
+  contextMenu: ContextMenu;
+}>();
 </script>
 
 <style scoped>

@@ -36,6 +36,7 @@
       "
       :item-id="entity.uuid"
       :bulk-operations-context="bulkOperationsContext"
+      :context-menu-actions="entity.teaserMetadata?.contextMenuActions"
       :teaser-metadata="
       formatTeaserMetadata(entity.teaserMetadata, entity.intialValues) as Metadata[]
     "

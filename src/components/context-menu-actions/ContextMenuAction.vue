@@ -1,0 +1,40 @@
+<template>
+  <div
+    v-for="(element, index) in contextMenuActions"
+    :key="index">
+
+    <link-action
+      v-if="element.__typename === 'ContextMenuLinkAction'"
+      :label="element.label"
+      :action="element.action"
+      :entityId="entityId"
+    />
+    <general-action
+      v-if="element.__typename === 'ContextMenuGeneralAction'"
+      :label="element.label"
+      :action="element.action"
+    />
+    <elody-action
+      v-if="element.__typename === 'ContextMenuElodyAction'"
+      :label="element.label"
+      :action="element.action"
+    />
+
+  </div>
+</template>
+
+<script lang="ts" setup>
+import {
+  type ContextMenuActions,
+} from "@/generated-types/queries";
+
+import GeneralAction from "@/components/context-menu-actions/GeneralAction.vue";
+import ElodyAction from "@/components/context-menu-actions/ElodyAction.vue";
+import LinkAction from "@/components/context-menu-actions/LinkAction.vue";
+
+const props = defineProps<{
+  contextMenuActions?: ContextMenuActions;
+  entityId: String
+}>();
+
+</script>
