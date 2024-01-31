@@ -113,6 +113,19 @@
         />
       </slot>
     </div>
+
+    <div v-if="contextMenuActions">
+      <unicon
+        :name="Unicons.EllipsisVThinline.name"
+        @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event?.clientX, y: event?.clientY})"
+      />
+      <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
+        <context-menu-action
+          :context-menu-actions="contextMenuActions"
+          :entity-id="itemId"
+        />
+      </base-context-menu>
+    </div>
   </li>
 </template>
 
@@ -123,6 +136,7 @@ import {
   EditStatus,
   MetadataField,
   type BaseRelationValuesInput,
+  type ContextMenuActions,
   type Metadata,
   type IntialValues,
 } from "@/generated-types/queries";
@@ -136,10 +150,14 @@ import { getEntityIdFromRoute, stringIsUrl } from "@/helpers";
 import { Unicons } from "@/types";
 import { useFieldArray } from "vee-validate";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
+import ContextMenuAction from "@/components/context-menu-actions/ContextMenuAction.vue";
+import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
+import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler"
 
 const props = withDefaults(
   defineProps<{
     bulkOperationsContext: Context;
+    contextMenuActions?: ContextMenuActions;
     itemId?: string;
     loading?: boolean;
     teaserMetadata?: Metadata[];
@@ -157,6 +175,7 @@ const props = withDefaults(
     hasSelection: boolean;
   }>(),
   {
+    contextMenuActions: undefined,
     itemId: "",
     loading: false,
     teaserMetadata: () => [],
@@ -185,6 +204,7 @@ const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
 
+const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const formId = computed(() => getEntityIdFromRoute() as string);
 
 const orderMetadataChild = ref(null);
