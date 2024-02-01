@@ -33,7 +33,9 @@ export const useQueryVariablesFactory = () => {
     let pagination = selectedPaginationLimitOption.value?.value;
     if (changePaginationNumber.value)
       pagination += changePaginationNumber.value;
+
     return {
+      type: entityType.value,
       limit: pagination,
       skip: selectedSkip.value.value,
       searchValue: queryVariables.value?.searchValue,

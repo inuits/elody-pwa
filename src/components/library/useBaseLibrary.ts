@@ -15,7 +15,6 @@ import type {
   Entity,
   FilterMatcherMap,
   GetAdvancedFiltersQuery,
-  GetEntitiesQuery,
   GetEntitiesQueryVariables,
   GetFilterMatcherMappingQuery,
   GetPaginationLimitOptionsQuery,
@@ -154,7 +153,17 @@ export const useBaseLibrary = (
     );
   };
 
+  const entities = ref<Entity[]>([]);
+  const entitiesLoaded = ref<boolean>(false);
+  const entitiesLoading = ref<boolean>(false);
+  const entityType = ref<Entitytyping>(Entitytyping.BaseEntity);
+  const manipulateQuery = ref<boolean>(false);
+  const manipulationQuery = ref<object>();
+  const totalEntityCount = ref<number>(0);
+  const { createQueryVariables } = useQueryVariablesFactory();
+  const { isSaved } = useEditMode();
   const queryVariables = ref<GetEntitiesQueryVariables>({
+    type: entityType.value,
     limit: 20,
     skip: 1,
     searchValue: {
@@ -167,15 +176,6 @@ export const useBaseLibrary = (
     advancedFilterInputs: [],
     searchInputType: undefined,
   });
-  const entityType = ref<Entitytyping | "BaseEntity">("BaseEntity");
-  const entities = ref<Entity[]>([]);
-  const totalEntityCount = ref<number>(0);
-  const entitiesLoading = ref<boolean>(false);
-  const entitiesLoaded = ref<boolean>(false);
-  const { isSaved } = useEditMode();
-  const { createQueryVariables } = useQueryVariablesFactory();
-  const manipulateQuery = ref<boolean>(false);
-  const manipulationQuery = ref<object>();
 
   const setManipulationOfQuery = (
     manipulate: boolean,
@@ -188,8 +188,9 @@ export const useBaseLibrary = (
   const __setEntitiesLoading = (isLoading: boolean) =>
     (entitiesLoading.value = isLoading);
 
-  const setEntityType = (type: Entitytyping | "BaseEntity"): void => {
+  const setEntityType = (type: Entitytyping): void => {
     entityType.value = type;
+    queryVariables.value.type = type
   };
   const setIsSearchLibrary = (searchLibrary: boolean): void => {
     isSearchLibrary.value = searchLibrary;
