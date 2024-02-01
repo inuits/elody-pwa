@@ -281,7 +281,7 @@ const entityType = computed(() =>
     ? props.entityType
     : route.meta.entityType
     ? (route.meta.entityType as Entitytyping)
-    : "BaseEntity"
+    : "BaseEntity" as Entitytyping
 );
 const entityDropdownOptions = computed<DropdownOption[]>(() => {
   return entities.value.map((entity: BaseEntity) => {
@@ -329,6 +329,7 @@ if (useOtherQuery.value) {
   setManipulationOfQuery(true, props.useOtherQuery);
 } else {
   const allEntitiesQueryVariables: GetEntitiesQueryVariables = {
+    type: entityType.value,
     limit: bulkSelectAllSizeLimit,
     skip: 1,
     searchValue: {
