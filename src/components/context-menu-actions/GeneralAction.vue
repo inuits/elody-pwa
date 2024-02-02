@@ -7,10 +7,7 @@
 </template>
 
 <script setup lang="ts">
-
-import {
-  ContextMenuGeneralActionEnum
-} from "@/generated-types/queries";
+import { ContextMenuGeneralActionEnum } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
@@ -32,7 +29,7 @@ const { createNotificationOverwrite } = useNotification();
 const { setQueryName, loadDocument } = useImport();
 
 const setPrimaryMediafile = async () => {
-  setQueryName(props.action)
+  setQueryName(props.action);
   const document = await loadDocument();
   try {
     await apolloClient
@@ -61,10 +58,10 @@ const setPrimaryMediafile = async () => {
   } finally {
     emit("toggleLoading");
   }
-}
+};
 
 const doAction = () => {
-  if (props.action === ContextMenuGeneralActionEnum.SetPrimaryMediafile) setPrimaryMediafile();
-}
-
+  if (props.action === ContextMenuGeneralActionEnum.SetPrimaryMediafile)
+    setPrimaryMediafile();
+};
 </script>

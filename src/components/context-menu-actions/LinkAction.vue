@@ -1,6 +1,6 @@
 <template>
   <router-link
-    :to="{ name: props.action, params: { id: entityId }}"
+    :to="{ name: props.action, params: { id: entityId } }"
     target="_blank"
   >
     <base-context-menu-item

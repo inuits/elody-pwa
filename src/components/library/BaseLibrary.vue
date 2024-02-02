@@ -281,7 +281,7 @@ const entityType = computed(() =>
     ? props.entityType
     : route.meta.entityType
     ? (route.meta.entityType as Entitytyping)
-    : "BaseEntity" as Entitytyping
+    : ("BaseEntity" as Entitytyping)
 );
 const entityDropdownOptions = computed<DropdownOption[]>(() => {
   return entities.value.map((entity: BaseEntity) => {

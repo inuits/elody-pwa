@@ -7,10 +7,9 @@
 </template>
 
 <script setup lang="ts">
-
 import {
   EditStatus,
-  ContextMenuElodyActionEnum
+  ContextMenuElodyActionEnum,
 } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
@@ -20,7 +19,6 @@ import useEditMode from "@/composables/useEdit";
 const { t } = useI18n();
 const { update } = useFieldArray("relationValues.relations");
 const { setEditMode, save } = useEditMode();
-
 
 const props = defineProps<{
   label: String;
@@ -38,9 +36,9 @@ const deleteRelation = () => {
     });
   }
   save();
-}
+};
 
 const doAction = () => {
   if (props.action === ContextMenuElodyActionEnum.Delete) deleteRelation();
-}
+};
 </script>

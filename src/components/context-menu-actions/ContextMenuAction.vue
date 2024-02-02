@@ -1,8 +1,5 @@
 <template>
-  <div
-    v-for="(element, index) in contextMenuActions"
-    :key="index">
-
+  <div v-for="(element, index) in contextMenuActions" :key="index">
     <link-action
       v-if="element.__typename === 'ContextMenuLinkAction'"
       :label="element.label"
@@ -25,14 +22,11 @@
       :entity-id="entityId"
       :relation="relation"
     />
-
   </div>
 </template>
 
 <script lang="ts" setup>
-import {
-  type ContextMenuActions,
-} from "@/generated-types/queries";
+import { type ContextMenuActions } from "@/generated-types/queries";
 import GeneralAction from "@/components/context-menu-actions/GeneralAction.vue";
 import ElodyAction from "@/components/context-menu-actions/ElodyAction.vue";
 import LinkAction from "@/components/context-menu-actions/LinkAction.vue";
@@ -48,6 +42,5 @@ const props = defineProps<{
 
 const handleEmit = () => {
   emit("toggleLoading");
-}
-
+};
 </script>
