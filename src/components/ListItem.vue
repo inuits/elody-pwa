@@ -124,6 +124,7 @@
           :context-menu-actions="contextMenuActions"
           :parent-entity-id="formId"
           :entity-id="itemId"
+          :relation="relation"
           @toggle-loading="toggleLoading"
         />
       </base-context-menu>

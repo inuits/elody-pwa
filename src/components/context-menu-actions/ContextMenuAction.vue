@@ -22,6 +22,8 @@
       v-if="element.__typename === 'ContextMenuElodyAction'"
       :label="element.label"
       :action="element.action"
+      :entity-id="entityId"
+      :relation="relation"
     />
 
   </div>
@@ -41,6 +43,7 @@ const props = defineProps<{
   contextMenuActions?: ContextMenuActions;
   entityId: String;
   parentEntityId?: String;
+  relation: object;
 }>();
 
 const handleEmit = () => {
