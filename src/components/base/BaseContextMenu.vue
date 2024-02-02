@@ -14,7 +14,6 @@
 <script lang="ts" setup>
 import { ContextMenu } from "@/components/context-menu-actions/ContextMenuHandler";
 
-
 const props = defineProps<{
   contextMenu: ContextMenu;
 }>();

@@ -13,6 +13,10 @@
       v-if="element.__typename === 'ContextMenuGeneralAction'"
       :label="element.label"
       :action="element.action"
+      :parent-entity-id="parentEntityId"
+      :entityId="entityId"
+      @click.stop="handleEmit()"
+      @toggle-loading="emit('toggleLoading', $event)"
     />
     <elody-action
       v-if="element.__typename === 'ContextMenuElodyAction'"
@@ -27,14 +31,20 @@
 import {
   type ContextMenuActions,
 } from "@/generated-types/queries";
-
 import GeneralAction from "@/components/context-menu-actions/GeneralAction.vue";
 import ElodyAction from "@/components/context-menu-actions/ElodyAction.vue";
 import LinkAction from "@/components/context-menu-actions/LinkAction.vue";
 
+const emit = defineEmits(["toggleLoading"]);
+
 const props = defineProps<{
   contextMenuActions?: ContextMenuActions;
-  entityId: String
+  entityId: String;
+  parentEntityId?: String;
 }>();
+
+const handleEmit = () => {
+  emit("toggleLoading");
+}
 
 </script>

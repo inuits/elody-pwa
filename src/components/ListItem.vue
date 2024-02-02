@@ -122,7 +122,9 @@
       <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
         <context-menu-action
           :context-menu-actions="contextMenuActions"
+          :parent-entity-id="formId"
           :entity-id="itemId"
+          @toggle-loading="toggleLoading"
         />
       </base-context-menu>
     </div>
@@ -200,6 +202,7 @@ const { isEdit } = useEditMode();
 const { deleteTeaserMetadataItemInState } = useFormHelper();
 const { update, remove } = useFieldArray("relationValues.relations");
 const auth = useAuth();
+const loading = ref<boolean>(props.loading);
 const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
@@ -212,6 +215,10 @@ onUpdated(() => {
   if (!orderMetadataChild.value) return;
   orderMetadataChild.value[0]?.setNewValue(props.intialValues?.order);
 });
+
+const toggleLoading = () => {
+  loading.value = !loading.value;
+}
 
 const setNoImage = () => {
   imageSrcError.value = true;
