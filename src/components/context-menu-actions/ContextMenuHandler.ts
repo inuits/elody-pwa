@@ -14,12 +14,12 @@ export class ContextMenuHandler {
     this.contextMenu.value = {
       isVisible: false,
       position: { x: 0, y: 0 },
-    }
+    };
   }
 
-  public getContextMenu = (): ContextMenu  => {
+  public getContextMenu = (): ContextMenu => {
     return this.contextMenu.value;
-  }
+  };
   public openContextMenu = (position: { x: number; y: number }): void => {
     this.contextMenu.value.isVisible = true;
     this.contextMenu.value.position = position;

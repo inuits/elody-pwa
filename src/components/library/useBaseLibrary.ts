@@ -190,7 +190,7 @@ export const useBaseLibrary = (
 
   const setEntityType = (type: Entitytyping): void => {
     entityType.value = type;
-    queryVariables.value.type = type
+    queryVariables.value.type = type;
   };
   const setIsSearchLibrary = (searchLibrary: boolean): void => {
     isSearchLibrary.value = searchLibrary;

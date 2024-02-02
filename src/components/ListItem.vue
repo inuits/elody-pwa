@@ -17,12 +17,12 @@
       v-show="isEdit"
       v-if="onlyEditableTeaserMetadata.length > 0"
     >
-<!--      <div class="pl-2">-->
-<!--        <unicon-->
-<!--          :name="Unicons.Bars.name"-->
-<!--          class="h-5 w-5 text-neutral-700 rounded-sm outline-none shadow-sm self-center"-->
-<!--        />-->
-<!--      </div>-->
+      <!--      <div class="pl-2">-->
+      <!--        <unicon-->
+      <!--          :name="Unicons.Bars.name"-->
+      <!--          class="h-5 w-5 text-neutral-700 rounded-sm outline-none shadow-sm self-center"-->
+      <!--        />-->
+      <!--      </div>-->
       <div v-if="!loading" class="w-16 pr-2">
         <div
           v-for="metadataItem in onlyEditableTeaserMetadata"
@@ -155,7 +155,7 @@ import { useFieldArray } from "vee-validate";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import ContextMenuAction from "@/components/context-menu-actions/ContextMenuAction.vue";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
-import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler"
+import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 
 const props = withDefaults(
   defineProps<{
@@ -219,7 +219,7 @@ onUpdated(() => {
 
 const toggleLoading = () => {
   loading.value = !loading.value;
-}
+};
 
 const setNoImage = () => {
   imageSrcError.value = true;
