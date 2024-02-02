@@ -101,7 +101,9 @@
         />
       </div>
     </div>
-    <base-context-menu :context-menu="contextMenuHandler.getContextMenu()"><saved-searches /></base-context-menu>
+    <base-context-menu :context-menu="contextMenuHandler.getContextMenu()"
+      ><saved-searches
+    /></base-context-menu>
   </div>
 </template>
 
@@ -123,7 +125,7 @@ import { computed, defineProps, ref, toRefs, watch } from "vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
-import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler"
+import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import SavedSearches from "@/components/SavedSearches.vue";
 
 export type FilterListItem = {
@@ -205,6 +207,13 @@ const handleAdvancedFilters = () => {
           item_types: advancedFilter.itemTypes,
           match_exact: true,
         };
+        if (advancedFilter.lookup)
+          hiddenFilter.lookup = {
+            from: advancedFilter.lookup.from,
+            local_field: advancedFilter.lookup.local_field,
+            foreign_field: advancedFilter.lookup.foreign_field,
+            as: advancedFilter.lookup.as,
+          };
 
         if (advancedFilter.parentKey === "relations") {
           if (props.parentEntityIdentifiers.length > 0) {

@@ -71,6 +71,17 @@ const getAutocompleteOptions = (value: string) => {
       },
       limit: 999999,
     };
+    if (props.filter.advancedFilterInputForRetrievingOptions.lookup)
+      queryVariables.value.input.lookup = {
+        from: props.filter.advancedFilterInputForRetrievingOptions.lookup.from,
+        local_field:
+          props.filter.advancedFilterInputForRetrievingOptions.lookup
+            .local_field,
+        foreign_field:
+          props.filter.advancedFilterInputForRetrievingOptions.lookup
+            .foreign_field,
+        as: props.filter.advancedFilterInputForRetrievingOptions.lookup.as,
+      };
 
     refetchEnabled.value = true;
     refetch();
@@ -94,12 +105,20 @@ watch(input, () => {
     ? Object.values(input.value).map((option) => option.value)
     : undefined;
 
-  emit("newAdvancedFilterInput", {
+  const newAdvancedFilterInput: AdvancedFilterInput = {
     type: props.filter.type,
     parent_key: props.filter.parentKey,
     key: props.filter.key,
     value,
     match_exact: true,
-  });
+  };
+  if (props.filter.lookup)
+    newAdvancedFilterInput.lookup = {
+      from: props.filter.lookup.from,
+      local_field: props.filter.lookup.local_field,
+      foreign_field: props.filter.lookup.foreign_field,
+      as: props.filter.lookup.as,
+    };
+  emit("newAdvancedFilterInput", newAdvancedFilterInput);
 });
 </script>

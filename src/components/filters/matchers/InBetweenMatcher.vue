@@ -46,8 +46,8 @@ const min = ref<number | string>();
 const max = ref<number | string>();
 
 const emitNewAdvancedFilterInput = () => {
-  if (min.value && max.value)
-    emit("newAdvancedFilterInput", {
+  if (min.value && max.value) {
+    const newAdvancedFilterInput: AdvancedFilterInput = {
       type: props.filter.type,
       parent_key: props.filter.parentKey,
       key: props.filter.key,
@@ -55,7 +55,16 @@ const emitNewAdvancedFilterInput = () => {
         min: min.value,
         max: max.value,
       },
-    });
+    };
+    if (props.filter.lookup)
+      newAdvancedFilterInput.lookup = {
+        from: props.filter.lookup.from,
+        local_field: props.filter.lookup.local_field,
+        foreign_field: props.filter.lookup.foreign_field,
+        as: props.filter.lookup.as,
+      };
+    emit("newAdvancedFilterInput", newAdvancedFilterInput);
+  }
 };
 
 const determineInputType = computed<"number" | "datetime-local">(() => {

@@ -26,23 +26,39 @@ const emit = defineEmits<{
   ): void;
 }>();
 
-onMounted(() =>
-  emit("newAdvancedFilterInput", {
+onMounted(() => {
+  const newAdvancedFilterInput: AdvancedFilterInput = {
     type: props.filter.type,
     parent_key: props.filter.parentKey,
     key: props.filter.key,
     value: "",
-  })
-);
+  };
+  if (props.filter.lookup)
+    newAdvancedFilterInput.lookup = {
+      from: props.filter.lookup.from,
+      local_field: props.filter.lookup.local_field,
+      foreign_field: props.filter.lookup.foreign_field,
+      as: props.filter.lookup.as,
+    };
+  emit("newAdvancedFilterInput", newAdvancedFilterInput);
+});
 
-onBeforeUnmount(() =>
-  emit("newAdvancedFilterInput", {
+onBeforeUnmount(() => {
+  const newAdvancedFilterInput: AdvancedFilterInput = {
     type: props.filter.type,
     parent_key: props.filter.parentKey,
     key: props.filter.key,
     value: undefined,
-  })
-);
+  };
+  if (props.filter.lookup)
+    newAdvancedFilterInput.lookup = {
+      from: props.filter.lookup.from,
+      local_field: props.filter.lookup.local_field,
+      foreign_field: props.filter.lookup.foreign_field,
+      as: props.filter.lookup.as,
+    };
+  emit("newAdvancedFilterInput", newAdvancedFilterInput);
+});
 </script>
 
 <style></style>

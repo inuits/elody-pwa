@@ -133,6 +133,7 @@ const getAutocompleteOptions = (value: string) => {
   ) {
     autocompleteOptionsQueryVariables.value = {
       input: {
+        lookup: props.filter.advancedFilterInputForRetrievingOptions.lookup,
         type: props.filter.advancedFilterInputForRetrievingOptions.type,
         parent_key:
           props.filter.advancedFilterInputForRetrievingOptions.parent_key,
@@ -147,6 +148,17 @@ const getAutocompleteOptions = (value: string) => {
       },
       limit: 999999,
     };
+    if (props.filter.advancedFilterInputForRetrievingOptions.lookup)
+      autocompleteOptionsQueryVariables.value.input.lookup = {
+        from: props.filter.advancedFilterInputForRetrievingOptions.lookup.from,
+        local_field:
+          props.filter.advancedFilterInputForRetrievingOptions.lookup
+            .local_field,
+        foreign_field:
+          props.filter.advancedFilterInputForRetrievingOptions.lookup
+            .foreign_field,
+        as: props.filter.advancedFilterInputForRetrievingOptions.lookup.as,
+      };
 
     refetchAutocompleteOptionsEnabled.value = true;
     refetchAutocompleteOptions();
@@ -205,6 +217,17 @@ onMounted(() => {
       },
       limit: 11,
     };
+    if (props.filter.advancedFilterInputForRetrievingOptions.lookup)
+      filterOptionsQueryVariables.value.input.lookup = {
+        from: props.filter.advancedFilterInputForRetrievingOptions.lookup.from,
+        local_field:
+          props.filter.advancedFilterInputForRetrievingOptions.lookup
+            .local_field,
+        foreign_field:
+          props.filter.advancedFilterInputForRetrievingOptions.lookup
+            .foreign_field,
+        as: props.filter.advancedFilterInputForRetrievingOptions.lookup.as,
+      };
 
     refetchFilterOptionsEnabled.value = true;
     refetchFilterOptions();
@@ -230,12 +253,20 @@ watch(input, () => {
           : [];
   else value = input.value ? input.value : undefined;
 
-  emit("newAdvancedFilterInput", {
+  const newAdvancedFilterInput: AdvancedFilterInput = {
     type: props.filter.type,
     parent_key: props.filter.parentKey,
     key: props.filter.key,
     value,
     match_exact: true,
-  });
+  };
+  if (props.filter.lookup)
+    newAdvancedFilterInput.lookup = {
+      from: props.filter.lookup.from,
+      local_field: props.filter.lookup.local_field,
+      foreign_field: props.filter.lookup.foreign_field,
+      as: props.filter.lookup.as,
+    };
+  emit("newAdvancedFilterInput", newAdvancedFilterInput);
 });
 </script>

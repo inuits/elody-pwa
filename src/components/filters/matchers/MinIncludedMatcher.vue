@@ -41,8 +41,8 @@ const determinePlaceholder = computed(() => {
   return t("filters.matcher-placeholders.date");
 });
 
-watch(input, () =>
-  emit("newAdvancedFilterInput", {
+watch(input, () => {
+  const newAdvancedFilterInput: AdvancedFilterInput = {
     type: props.filter.type,
     parent_key: props.filter.parentKey,
     key: props.filter.key,
@@ -50,6 +50,14 @@ watch(input, () =>
       min: input.value,
       included: true,
     },
-  })
-);
+  };
+  if (props.filter.lookup)
+    newAdvancedFilterInput.lookup = {
+      from: props.filter.lookup.from,
+      local_field: props.filter.lookup.local_field,
+      foreign_field: props.filter.lookup.foreign_field,
+      as: props.filter.lookup.as,
+    };
+  emit("newAdvancedFilterInput", newAdvancedFilterInput);
+});
 </script>
