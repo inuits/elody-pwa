@@ -1,6 +1,6 @@
 <template>
   <base-context-menu-item
-    @clicked="doAction()"
+    @clicked="doGeneralAction()"
     :label="$t(label)"
     :icon="Unicons[icon].name"
   />
@@ -29,17 +29,14 @@ const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
 const { setQueryName, loadDocument } = useImport();
 
-const setPrimaryMediafile = async () => {
+const doGeneralAction = async () => {
   setQueryName(props.action);
   const document = await loadDocument();
   try {
     await apolloClient
       .query({
         query: document,
-        variables: {
-          entityId: props.parentEntityId,
-          mediafileId: props.entityId,
-        },
+        variables: createVariables(),
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
       })
@@ -61,8 +58,12 @@ const setPrimaryMediafile = async () => {
   }
 };
 
-const doAction = () => {
-  if (props.action === ContextMenuGeneralActionEnum.SetPrimaryMediafile)
-    setPrimaryMediafile();
+const createVariables = () => {
+  if (props.action === ContextMenuGeneralActionEnum.SetPrimaryMediafile || props.action === ContextMenuGeneralActionEnum.SetPrimaryThumbnail)
+    return {
+      entityId: props.parentEntityId,
+      mediafileId: props.entityId,
+    }
 };
+
 </script>
