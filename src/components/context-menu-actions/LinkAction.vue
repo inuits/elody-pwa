@@ -5,7 +5,7 @@
   >
     <base-context-menu-item
       :label="$t(label)"
-      :icon="Unicons.AngleRight.name"
+      :icon="Unicons[icon].name"
     />
   </router-link>
 </template>
@@ -16,6 +16,7 @@ import { Unicons } from "@/types";
 
 const props = defineProps<{
   label: String;
+  icon: String
   action: Boolean;
   entityId: String;
 }>();

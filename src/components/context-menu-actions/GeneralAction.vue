@@ -2,7 +2,7 @@
   <base-context-menu-item
     @clicked="doAction()"
     :label="$t(label)"
-    :icon="Unicons.ImageCheck.name"
+    :icon="Unicons[icon].name"
   />
 </template>
 
@@ -20,6 +20,7 @@ const emit = defineEmits(["toggleLoading"]);
 
 const props = defineProps<{
   label: String;
+  icon: String
   action: ContextMenuGeneralActionEnum;
   entityId: String;
   parentEntityId: String;
