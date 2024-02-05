@@ -3,10 +3,7 @@
     :to="{ name: props.action, params: { id: entityId } }"
     target="_blank"
   >
-    <base-context-menu-item
-      :label="$t(label)"
-      :icon="Unicons[icon].name"
-    />
+    <base-context-menu-item :label="$t(label)" :icon="Unicons[icon].name" />
   </router-link>
 </template>
 
@@ -16,7 +13,7 @@ import { Unicons } from "@/types";
 
 const props = defineProps<{
   label: String;
-  icon: String
+  icon: String;
   action: Boolean;
   entityId: String;
 }>();

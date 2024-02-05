@@ -22,7 +22,7 @@ const { save, disableEditMode } = useEditMode();
 
 const props = defineProps<{
   label: String;
-  icon: String
+  icon: String;
   action: ContextMenuElodyActionEnum;
   entityId: String;
   relation: object;
