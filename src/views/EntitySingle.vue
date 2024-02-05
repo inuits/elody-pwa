@@ -111,7 +111,7 @@ watch(
     const entity: BaseEntity = result.value?.Entity as BaseEntity;
     if (!entity || !entity.intialValues) return;
 
-    identifiers.value = [entity.uuid];
+    identifiers.value = [entity.uuid, entity.id];
     intialValues.value = entity.intialValues;
     relationValues.value = entity.relationValues as RelationValues;
     columnList.value = entity.entityView;

@@ -109,6 +109,7 @@
 
 <script lang="ts" setup>
 import {
+  AdvancedFilterTypes,
   DamsIcons,
   type AdvancedFilter,
   type AdvancedFilterInput,
@@ -215,7 +216,13 @@ const handleAdvancedFilters = () => {
             as: advancedFilter.lookup.as,
           };
 
-        if (advancedFilter.parentKey === "relations") {
+        console.log(advancedFilter);
+        if (
+          advancedFilter.parentKey === "relations" ||
+          (advancedFilter.parentKey === "" && // temporary hack
+            advancedFilter.type === AdvancedFilterTypes.Selection &&
+            advancedFilter.hidden)
+        ) {
           if (props.parentEntityIdentifiers.length > 0) {
             hiddenFilter.value = props.parentEntityIdentifiers;
             if (advancedFilter.itemTypes) activeFilters.value = [hiddenFilter];
