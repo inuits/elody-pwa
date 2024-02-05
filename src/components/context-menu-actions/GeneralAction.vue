@@ -20,7 +20,7 @@ const emit = defineEmits(["toggleLoading"]);
 
 const props = defineProps<{
   label: String;
-  icon: String
+  icon: String;
   action: ContextMenuGeneralActionEnum;
   entityId: String;
   parentEntityId: String;
@@ -59,11 +59,13 @@ const doGeneralAction = async () => {
 };
 
 const createVariables = () => {
-  if (props.action === ContextMenuGeneralActionEnum.SetPrimaryMediafile || props.action === ContextMenuGeneralActionEnum.SetPrimaryThumbnail)
+  if (
+    props.action === ContextMenuGeneralActionEnum.SetPrimaryMediafile ||
+    props.action === ContextMenuGeneralActionEnum.SetPrimaryThumbnail
+  )
     return {
       entityId: props.parentEntityId,
       mediafileId: props.entityId,
-    }
+    };
 };
-
 </script>
