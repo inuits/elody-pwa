@@ -3,7 +3,7 @@
     <entity-element-wrapper :label="label" :isCollapsed="isCollapsed">
       <template v-slot:actions>
         <div
-          v-if="isEdit"
+          v-if="isEdit && relationType"
           class="flex items-center px-2 text-text-subtitle cursor-pointer"
           @click.stop="() => {
             setAcceptedTypes(types as Entitytyping[]);
