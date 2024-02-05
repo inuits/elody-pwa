@@ -41,7 +41,7 @@ export const goToEntityPage = (
 
   router.push({
     name: listItemRouteName,
-    params: { id: entityId },
+    params: { id: entityId, type: entity.type },
   });
 };
 

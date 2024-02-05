@@ -75,7 +75,7 @@ const { getEditableMetadataKeys } = useFormHelper();
 
 const queryVariables = reactive<GetEntityByIdQueryVariables>({
   id: id,
-  type: String(route.meta.entityType),
+  type: String(route.params["type"]),
   preferredLanguage: locale.value,
 });
 const { result, refetch } = useQuery<GetEntityByIdQuery>(
