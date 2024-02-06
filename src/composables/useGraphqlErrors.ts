@@ -23,7 +23,7 @@ const createErrorNotification = (title: string, description: string) => {
 };
 
 const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
-  const handleErrorByCode = async (errorMessage: number) => {
+  const handleErrorByCode = async (errorMessage: number, message: string) => {
     const { config, translations } = await getApplicationDetails();
     let language = config.customization.applicationLocale;
 
@@ -73,7 +73,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
       default:
         createErrorNotification(
           "Error",
-          "Something went wrong, please try again later"
+          message
         );
         break;
     }
@@ -85,6 +85,12 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
     if (error.extensions?.status) return error.extensions.status as number;
     if (error.message) return parseInt(error.message.split(":")[0]);
     return 0;
+  };
+
+  const getMessageFromError = (error: GraphQLError): string => {
+    if (error.extensions?.response?.body?.message)
+      return error.extensions?.response?.body?.message;
+    return "Something went wrong, please try again later";
   };
 
   const logFormattedErrors = () => {
@@ -103,10 +109,12 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
             `Code:`,
             error.extensions?.code ? error.extensions?.code : undefined
           );
-          console.log(`Message:`, error.message);
+          console.log(`Error:`, error.message);
+          console.log(`Message:`, error.extensions?.response?.body?.message);
           console.log(`---`);
           const statusCode = getStatusCodeFromError(error);
-          handleErrorByCode(statusCode);
+          const message = getMessageFromError(error);
+          handleErrorByCode(statusCode, message);
         }
       }
     }
