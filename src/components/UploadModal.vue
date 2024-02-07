@@ -15,7 +15,7 @@
           class="h-full"
         >
           <BaseTab :title="t('upload.upload-files')">
-            <upload-modal-dropzone
+            <upload-interface-dropzone
               v-if="
                 getModalInfo(TypeModals.Upload).modalTabToOpen ===
                 ModalChoices.Import
@@ -76,7 +76,7 @@ import {
 import BaseModal from "@/components/base/BaseModal.vue";
 import BaseTab from "@/components/BaseTab.vue";
 import BaseTabs from "@/components/BaseTabs.vue";
-import UploadModalDropzone from "@/components/UploadModalDropzone.vue";
+import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
 import { ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";

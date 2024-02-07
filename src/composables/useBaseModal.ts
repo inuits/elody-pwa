@@ -4,7 +4,6 @@ import {
   ModalState,
   TypeModals,
 } from "@/generated-types/queries";
-import useDropzoneHelper from "@/composables/useDropzoneHelper";
 
 export type ModalPosition = "left" | "center" | "right";
 
@@ -12,6 +11,7 @@ export type ModalInfo = {
   state: ModalState;
   modalPosition: ModalPosition;
   destination?: string;
+  formQuery?: string;
   modalTabToOpen?: ModalChoices;
   closeConfirmation: boolean;
 };
@@ -41,16 +41,17 @@ export const useBaseModal = () => {
   const openModal = (
     modalType: TypeModals,
     modalTab: ModalChoices | undefined = undefined,
-    modalPosition: ModalPosition | undefined = undefined
+    modalPosition: ModalPosition | undefined = undefined,
+    formQuery: string | undefined = undefined,
   ): void => {
     closeModalsWithPosition(getModalInfo(modalType).modalPosition);
     const updatedModal = {
       state: ModalState.Show,
     };
     if (modalPosition) Object.assign(updatedModal, { modalPosition });
+    if (formQuery) Object.assign(updatedModal, { formQuery });
     updateModal(modalType, updatedModal);
     if (modalTab) getModalInfo(modalType).modalTabToOpen = modalTab;
-    useDropzoneHelper().resetDropzone();
   };
 
   const isLeftModalOpened = computed(() => {

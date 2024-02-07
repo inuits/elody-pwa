@@ -73,7 +73,7 @@ import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import BaseTab from "@/components/BaseTab.vue";
 import BaseTabs from "@/components/BaseTabs.vue";
-import UploadModalDropzone from "@/components/UploadModalDropzone.vue";
+import UploadModalDropzone from "@/components/UploadInterfaceDropzone.vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -92,7 +92,7 @@ const getAlreadySelectedEntityIds = (): string[] => {
   const id = route.params.id as string;
   const form = getForm(id);
   return form.values.relationValues.relations.map(
-    (relation: any) => relation.key
+    (relation: any) => relation.key,
   );
 };
 
