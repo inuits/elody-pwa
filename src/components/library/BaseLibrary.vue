@@ -165,7 +165,6 @@ import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
 import FiltersBase from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
-import useUploadModalDropzone from "@/composables/useUploadModalDropzone";
 import ViewModesGrid from "@/components/library/view-modes/ViewModesGrid.vue";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
@@ -257,12 +256,6 @@ const {
   apolloClient as ApolloClient<any>,
   props.parentEntityIdentifiers.length > 0
 );
-const {
-  getUploadStatus,
-  setUploadStatus,
-  setEntityIdForLinkedUpload,
-  setUploadType,
-} = useUploadModalDropzone();
 const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
 const { closeModal } = useBaseModal();
@@ -398,20 +391,9 @@ onMounted(() => {
   setDisplayPreferences();
 });
 
-watch(getUploadStatus, (status) => {
-  if (status === "success") {
-    getEntities(true);
-    setUploadStatus("no-upload");
-  }
-});
 watch(
   () => route.path,
   () => {
-    if (props.parentEntityIdentifiers.length === 0) {
-      setEntityIdForLinkedUpload(undefined);
-      setUploadType("batch");
-    }
-
     if (
       !props.predefinedEntities &&
       router.currentRoute.value.name !== "SingleEntity"

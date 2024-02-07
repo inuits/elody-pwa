@@ -56,7 +56,7 @@ const props = withDefaults(
     modalHeightStyle: "h-[75vh] my-[12.5vh]",
     iconHeight: 18,
     modalColor: "bg-neutral-white",
-  }
+  },
 );
 
 const emit = defineEmits(["update:modalState", "hideModal"]);
@@ -76,7 +76,7 @@ const hideModal = () => {
 const { modalState } = toRefs(props);
 
 const modalHeight = computed<string>(() =>
-  props.modalPosition === "center" ? props.modalHeightStyle : "h-screen"
+  props.modalPosition === "center" ? props.modalHeightStyle : "h-screen",
 );
 
 watch(modalState, (value: ModalState) => {

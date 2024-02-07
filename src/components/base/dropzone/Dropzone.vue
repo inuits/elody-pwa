@@ -1,49 +1,64 @@
 <template>
   <dropzone-view
     v-model="dropzoneView"
+    :dropzone-helper="dropzoneHelper"
+    :dropzone-label="dropzoneLabel"
     :file-count="fileCount"
     :style="viewStyle"
   />
-  <dropzone-preview v-model="dropzonePreview" />
+  <dropzone-preview
+    v-model="dropzonePreview"
+    :isValidationFile="isValidationFile"
+  />
 </template>
 
 <script lang="ts" setup>
 import type { DropzoneFile } from "dropzone";
 import DropzonePreview from "@/components/base/dropzone/DropzonePreview.vue";
 import DropzoneView from "@/components/base/dropzone/DropzoneView.vue";
-import useDropzoneHelper from "@/composables/useDropzoneHelper";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
+import useUpload from "@/composables/useUpload";
 
-const { initDropzone } = useDropzoneHelper();
 const dropzoneView = ref<HTMLDivElement>();
 const dropzonePreview = ref<HTMLDivElement>();
 const filesInDropzone = ref<DropzoneFile[]>([]);
 const fileCount = ref<number>(0);
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
+    dropzoneHelper: object;
+    dropzoneLabel: string;
     viewStyle: string;
+    isValidationFile: boolean;
   }>(),
   {
     viewStyle: "",
-  }
+    isValidationFile: false,
+  },
 );
 
 const emit = defineEmits<{
   (event: "updateFilesInDropzone", filesInDropzone: DropzoneFile[]): void;
 }>();
 
+const { addFileToUpload, removeFileToUpload, files } = useUpload();
+
 onMounted(() => {
-  const dropzone = initDropzone(dropzoneView.value!, dropzonePreview.value!);
+  const dropzone = props.dropzoneHelper.initDropzone(
+    dropzoneView.value!,
+    dropzonePreview.value!,
+  );
 
-  dropzone.on("addedfile", () => dropzoneEventHandler());
-  dropzone.on("removedfile", () => dropzoneEventHandler());
+  dropzone.on("addedfile", (file) => addFileToUpload(file));
+  dropzone.on("removedfile", (file) => removeFileToUpload(file));
 
-  const dropzoneEventHandler = () => {
-    filesInDropzone.value = dropzone.files;
-    fileCount.value = dropzone.files.length;
-
-    emit("updateFilesInDropzone", filesInDropzone.value);
-  };
+  watch(
+    () => files.value.length,
+    () => {
+      filesInDropzone.value = dropzone.files;
+      fileCount.value = dropzone.files.length;
+    },
+    { immediate: true },
+  );
 });
 </script>
