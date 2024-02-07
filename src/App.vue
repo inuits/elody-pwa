@@ -13,9 +13,8 @@
         </div>
         <edit-modal />
       </div>
-      <upload-modal />
-      <EntityPickerModal />
-      <create-modal />
+      <!--      <EntityPickerModal /> TODO: Fix tis -->
+      <DynamicFormModal></DynamicFormModal>
       <search-saved-searches-modal />
       <BulkoperationsModal
         v-if="route.name !== undefined"
@@ -53,10 +52,12 @@ import useTenant from "@/composables/useTenant";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
 import SearchModal from "@/components/SearchModal.vue";
+import DynamicFormModal from "@/components/dynamicForms/DynamicFormModal.vue";
 
 export default defineComponent({
   name: "App",
   components: {
+    DynamicFormModal,
     SearchModal,
     BaseNotification,
     BulkoperationsModal,
@@ -118,7 +119,9 @@ export default defineComponent({
   writing-mode: vertical-lr;
   font-size: 20px;
   font-weight: bold;
-  transition: writing-mode 300ms ease-in-out, transform 300ms ease-in-out;
+  transition:
+    writing-mode 300ms ease-in-out,
+    transform 300ms ease-in-out;
 }
 
 .move-by-nav {
