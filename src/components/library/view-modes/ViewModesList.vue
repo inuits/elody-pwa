@@ -35,6 +35,7 @@
           : ''
       "
       :item-id="entity.uuid"
+      :item-type="entity.type"
       :bulk-operations-context="bulkOperationsContext"
       :context-menu-actions="entity.teaserMetadata?.contextMenuActions"
       :teaser-metadata="
