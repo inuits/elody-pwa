@@ -124,6 +124,7 @@
           :context-menu-actions="contextMenuActions"
           :parent-entity-id="formId"
           :entity-id="itemId"
+          :entity-type="itemType"
           :relation="relation"
           @toggle-loading="toggleLoading"
         />
@@ -138,6 +139,7 @@ import {
   DamsIcons,
   EditStatus,
   MetadataField,
+  Entitytyping,
   type BaseRelationValuesInput,
   type ContextMenuActions,
   type Metadata,
@@ -162,6 +164,7 @@ const props = withDefaults(
     bulkOperationsContext: Context;
     contextMenuActions?: ContextMenuActions;
     itemId?: string;
+    itemType?: Entitytyping;
     loading?: boolean;
     teaserMetadata?: Metadata[];
     intialValues?: IntialValues | undefined;
@@ -180,6 +183,7 @@ const props = withDefaults(
   {
     contextMenuActions: undefined,
     itemId: "",
+    itemType: undefined,
     loading: false,
     teaserMetadata: () => [],
     intialValues: undefined,

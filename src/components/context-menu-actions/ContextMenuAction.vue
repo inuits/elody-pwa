@@ -6,6 +6,7 @@
       :icon="element.icon"
       :action="element.action"
       :entityId="entityId"
+      :entity-type="entityType"
     />
     <general-action
       v-if="element.__typename === 'ContextMenuGeneralAction'"
@@ -35,6 +36,9 @@ import GeneralAction from "@/components/context-menu-actions/GeneralAction.vue";
 import ElodyAction from "@/components/context-menu-actions/ElodyAction.vue";
 import LinkAction from "@/components/context-menu-actions/LinkAction.vue";
 import useEditMode from "@/composables/useEdit";
+import {
+  Entitytyping,
+} from "@/generated-types/queries";
 
 const { setEditMode } = useEditMode();
 
@@ -43,6 +47,7 @@ const emit = defineEmits(["toggleLoading"]);
 const props = defineProps<{
   contextMenuActions: ContextMenuActions;
   entityId: String;
+  entityType: Entitytyping
   parentEntityId?: String;
   relation: object;
 }>();
