@@ -38,7 +38,6 @@ import {
 import EntityColumn from "@/components/EntityColumn.vue";
 import EntityForm from "@/components/EntityForm.vue";
 import useEditMode from "@/composables/useEdit";
-import useUploadModalDropzone from "@/composables/useUploadModalDropzone";
 import { asString } from "@/helpers";
 import { reactive, ref, watch, inject } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
@@ -56,7 +55,6 @@ const route = useRoute();
 const auth = useAuth();
 const { locale, t } = useI18n();
 const { fetchUpdateAndDeletePermission } = usePermissions();
-const { setEntityIdForLinkedUpload, setUploadType } = useUploadModalDropzone();
 
 const {
   showEditToggle,
@@ -84,7 +82,7 @@ const { result, refetch } = useQuery<GetEntityByIdQuery>(
   () => ({
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "no-cache",
-  })
+  }),
 );
 
 const intialValues = ref<IntialValues | "no-values">("no-values");
@@ -120,9 +118,6 @@ watch(
       getEditableMetadataKeys(columnList.value, route.params.id as string);
     }
 
-    setEntityIdForLinkedUpload(entity.id);
-    setUploadType("single");
-
     if (entity.type.toLowerCase() === "mediafile") {
       mediafileSelectionState.mediafiles = [entity as MediaFileEntity];
       mediafileSelectionState.selectedMediafile = entity as MediaFileEntity;
@@ -145,17 +140,16 @@ watch(
             showEditToggle("edit");
           else hideEditToggle();
         } else hideEditToggle();
-      }
+      },
     );
 
     setCurrentRouteTitle(
-      entity.intialValues?.title || entity.intialValues?.name || entity.id
+      entity.intialValues?.title || entity.intialValues?.name || entity.id,
     );
     addVisitedRoute({ id: entity.id, routeName: currentRouteTitle.value });
-
     setRefetchFn(refetch);
     loading.value = false;
-  }
+  },
 );
 
 watch(
@@ -163,6 +157,6 @@ watch(
   (newLocale: string) => {
     queryVariables.preferredLanguage = newLocale;
     refetch(queryVariables);
-  }
+  },
 );
 </script>

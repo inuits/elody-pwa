@@ -1,108 +1,111 @@
 import Dropzone from "dropzone";
 import { ref } from "vue";
 
-const dropzone = ref<Dropzone>();
-const errorMessages = ref<Array<String>>([]);
-const total = ref<number>(0);
-const success = ref<number>(0);
-const failed = ref<number>(0);
-const selectedFiles = ref<any>([]);
-const isUploading = ref<boolean>(false);
-const finishedUploading = ref<boolean>(false);
+type DropzoneSettings = {
+  url: string;
+  autoProcessQueue: boolean;
+  acceptedFiles: string;
+  previewTemplate?: HTMLDivElement;
+  uploadMultiple: boolean;
+  parallelUploads: number;
+  maxFiles: number;
+  maxFileSize: number;
+  createImageThumbnails: boolean;
+};
+export class useDropzoneHelper {
+  dropzone = ref<Dropzone>;
+  errorMessages = ref<Array<String>>;
+  total = ref<number>;
+  success = ref<number>;
+  failed = ref<number>;
+  selectedFiles = ref<any>;
+  isUploading = ref<boolean>;
+  finishedUploading = ref<boolean>;
+  dropzoneSettings = ref<DropzoneSettings>;
 
-const useDropzoneHelper = () => {
-  const initDropzone = (
-    dropzoneView: HTMLDivElement,
-    dropzonePreview: HTMLDivElement
-  ) => {
-    dropzone.value = new Dropzone(
-      dropzoneView,
-      getDropzoneSettings(dropzonePreview)
-    );
-
-    return dropzone.value;
-  };
-
-  const getDropzone = () => dropzone.value;
-
-  const setDropzoneErrorMessages = (errorMessage: string): void => {
-    errorMessages.value.push(errorMessage);
-  };
-
-  const clearDropzoneErrorMessages = (): void => {
-    errorMessages.value = [];
-  };
-
-  const increaseFailedCounter = (): void => {
-    failed.value++;
-    detectUploadingState();
-  };
-
-  const increaseSuccessCounter = (): void => {
-    success.value++;
-    detectUploadingState();
-  };
-
-  const setTotalCounter = (totalCount: number): void => {
-    total.value = totalCount;
-  };
-
-  const clearDropzoneCounters = (): void => {
-    total.value = 0;
-    success.value = 0;
-    failed.value = 0;
-  };
-
-  const setSelectedMediafiles = (files: any[]) => {
-    setTotalCounter(files.length);
-    selectedFiles.value = files;
-  };
-
-  const detectUploadingState = () => {
-    finishedUploading.value =
-      total.value === failed.value + success.value && total.value !== 0;
-  };
-
-  const resetDropzone = () => {
-    dropzone.value?.removeAllFiles();
-    finishedUploading.value = false;
-    clearDropzoneCounters();
-  };
-
-  const getDropzoneSettings = (dropzonePreviewDiv: HTMLDivElement): any => {
-    return {
+  constructor() {
+    this.errorMessages = ref([]);
+    this.total = ref(0);
+    this.success = ref(0);
+    this.failed = ref(0);
+    this.selectedFiles = ref([]);
+    this.isUploading = ref(false);
+    this.finishedUploading = ref(false);
+    this.dropzoneSettings = ref({
       url: "/upload",
       autoProcessQueue: false,
       acceptedFiles: ".csv, .jpg, .jpeg, .mp3, .srt, .png, .tiff, .mp4",
-      previewTemplate: dropzonePreviewDiv.outerHTML,
       uploadMultiple: true,
       parallelUploads: 99,
       maxFiles: 99,
-      maxFilesize: 50,
-    };
+      maxFileSize: 50,
+      createImageThumbnails: true,
+    });
+  }
+
+  initDropzone = (
+    dropzoneView: HTMLDivElement,
+    dropzonePreview: HTMLDivElement,
+  ) => {
+    this.dropzone.value = new Dropzone(
+      dropzoneView,
+      this.getDropzoneSettings(dropzonePreview),
+    );
+
+    return this.dropzone.value;
   };
 
-  return {
-    dropzone,
-    initDropzone,
-    getDropzone,
-    setDropzoneErrorMessages,
-    clearDropzoneErrorMessages,
-    increaseFailedCounter,
-    increaseSuccessCounter,
-    setTotalCounter,
-    clearDropzoneCounters,
-    getDropzoneSettings,
-    setSelectedMediafiles,
-    total,
-    failed,
-    success,
-    finishedUploading,
-    errorMessages,
-    selectedFiles,
-    isUploading,
-    resetDropzone,
-  };
-};
+  getDropzone = () => this.dropzone.value;
 
-export default useDropzoneHelper;
+  setDropzoneErrorMessages = (errorMessage: string): void => {
+    this.errorMessages.value.push(errorMessage);
+  };
+
+  clearDropzoneErrorMessages = (): void => {
+    this.errorMessages.value = [];
+  };
+
+  increaseFailedCounter = (): void => {
+    this.failed.value++;
+    this.detectUploadingState();
+  };
+
+  increaseSuccessCounter = (): void => {
+    this.success.value++;
+    this.detectUploadingState();
+  };
+
+  setTotalCounter = (totalCount: number): void => {
+    this.total.value = totalCount;
+  };
+
+  clearDropzoneCounters = (): void => {
+    this.total.value = 0;
+    this.success.value = 0;
+    this.failed.value = 0;
+  };
+
+  setSelectedMediafiles = (files: any[]) => {
+    this.setTotalCounter(files.length);
+    this.selectedFiles.value = files;
+  };
+
+  detectUploadingState = () => {
+    this.finishedUploading.value =
+      this.total.value === this.failed.value + this.success.value &&
+      this.total.value !== 0;
+  };
+
+  resetDropzone = () => {
+    this.dropzone.value?.removeAllFiles();
+    this.finishedUploading.value = false;
+    this.clearDropzoneErrorMessages();
+    this.clearDropzoneCounters();
+  };
+
+  getDropzoneSettings = (dropzonePreviewDiv: HTMLDivElement): any => {
+    const settingsObject = { ...this.dropzoneSettings.value };
+    settingsObject.previewTemplate = dropzonePreviewDiv.outerHTML;
+    return settingsObject;
+  };
+}

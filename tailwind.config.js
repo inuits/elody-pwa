@@ -76,6 +76,7 @@ module.exports = {
         dark: "#9b0000",
       },
       green: {
+        light: "#DAF1DC",
         default: "#00b200",
       },
       main: {

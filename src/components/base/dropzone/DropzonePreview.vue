@@ -16,37 +16,46 @@
           data-dz-name
         ></span>
       </div>
-
-      <a
-        data-dz-remove
-        class="cursor-pointer flex justify-center items-center bg-neutral-light rounded-lg w-10 h-8 mt-1 mr-2"
-      >
-        <svg
-          width="9"
-          height="11"
-          viewBox="0 0 7 9"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
+      <div class="flex justify-between items-center">
+        <div class="px-2">
+          <!--          <base-progress-step-->
+          <!--            v-for="(step, index) in steps"-->
+          <!--            :key="index"-->
+          <!--            :step-type="step"-->
+          <!--          />-->
+        </div>
+        <a
+          data-dz-remove
+          class="cursor-pointer flex justify-center items-center bg-neutral-light rounded-lg w-10 h-8 mt-1 mr-2"
         >
-          <path
-            d="M5.5 3V8H1.5V3H5.5ZM4.75 0H2.25L1.75 0.5H0V1.5H7V0.5H5.25L4.75 0ZM6.5 2H0.5V8C0.5 8.55 0.95 9 1.5 9H5.5C6.05 9 6.5 8.55 6.5 8V2Z"
-            class="fill-text-body"
-          />
-        </svg>
-      </a>
+          <unicon :name="Unicons.Trash.name" height="14" />
+        </a>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { Unicons } from "@/types";
+import useUpload from "@/composables/useUpload";
+import BaseProgressStep from "@/components/base/BaseProgressStep.vue";
 
 const dropzonePreview = ref<HTMLDivElement>();
 
 defineProps<{
   modelValue: HTMLDivElement | undefined;
+  isValidationFile: boolean;
 }>();
+
+const { dryRunStatus } = useUpload();
+// const steps = computed((): string[] =>
+//   dryRunStatus.value === "loading"
+//     ? ["loading"]
+//     : dryRunStatus.value === "correctly-verified"
+//       ? ["complete"]
+//       : [],
+// );
 
 const emit = defineEmits<{
   (event: "update:modelValue", modelValue: HTMLDivElement | undefined): void;

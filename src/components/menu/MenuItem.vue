@@ -110,20 +110,18 @@ handleSubMenu();
 
 EventBus.on("permissions_updated", () => {
   let allowed = false;
-  const typeModal = props.menuitem.typeLink.modal?.typeModal as string;
+  const neededPermission = props.menuitem.typeLink.modal
+    ?.neededPermission as Permission;
 
   if (props.menuitem.requiresAuth === false) allowed = true;
-  else if (typeModal === "Upload") {
-    Object.values(Entitytyping).forEach((entityType) => {
-      if (can(Permission.Cancreate, entityType)) allowed = true;
-    });
-  } else if (typeModal === "Create") {
+  else if (neededPermission === Permission.Cancreate) {
     permittedEntitiesToCreate.value = [];
     Object.values(Entitytyping).forEach((entityType) => {
-      if (allowed || can(Permission.Cancreate, entityType))
+      if (can(Permission.Cancreate, entityType)) {
+        allowed = true;
         permittedEntitiesToCreate.value.push(entityType);
+      }
     });
-    if (permittedEntitiesToCreate.value.length > 0) allowed = true;
   } else if (props.menuitem.entityType)
     allowed = allowed || can(Permission.Canread, props.menuitem.entityType);
 

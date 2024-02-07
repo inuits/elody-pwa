@@ -1,5 +1,4 @@
 import type { ModalState } from "@/components/base/BaseModal.vue";
-import useDropzoneHelper from "@/composables/useDropzoneHelper";
 import { ref } from "vue";
 
 export enum modalChoices {
@@ -27,7 +26,6 @@ const useUploadModal = () => {
     updateUploadModal({
       state: "show",
     });
-    useDropzoneHelper().resetDropzone();
   };
 
   const closeUploadModal = () => {
