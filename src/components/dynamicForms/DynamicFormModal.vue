@@ -17,7 +17,7 @@
         v-else
         v-for="(field, index) in formFields"
         :key="index"
-        class="w-full"
+        class="w-full pb-2"
       >
         <metadata-wrapper
           v-if="field.__typename === 'PanelMetaData'"
@@ -80,7 +80,8 @@ const { getDynamicForm, dynamicForm } = useDynamicFormModal();
 const { upload, enableUploadButton, mediafiles } = useUpload();
 const config = inject("config");
 const formFields = computed<UploadField | PanelMetaData | undefined>(() => {
-  if (!dynamicForm.value) return undefined;
+  if (!dynamicForm.value || !dynamicForm.value[dynamicFormQuery.value])
+    return undefined;
   return Object.values(
     dynamicForm.value[dynamicFormQuery.value].formFields,
   ).filter((value) => typeof value === "object");
