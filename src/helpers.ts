@@ -1,7 +1,6 @@
 import {
   PanelType,
   Unit,
-  type InputField,
   type PanelInfo,
   type PanelMetaData,
   type WindowElementPanel,
@@ -14,14 +13,6 @@ import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSele
 import { useFormHelper } from "@/composables/useFormHelper";
 import { type Router, useRoute } from "vue-router";
 import useEntitySingle from "@/composables/useEntitySingle";
-
-type MetadataField = {
-  key: string;
-  label: string;
-  value: string;
-  unit: Unit;
-  field: InputField;
-};
 
 export const goToEntityPage = (
   entity: Entity,
@@ -179,8 +170,8 @@ export const getMetadataFields = (
   objectToGetMetadataFrom: WindowElementPanel | PanelMetaData[],
   panelType: PanelType,
   formId: string
-): Array<MetadataField | EntityListElement> => {
-  const fields: Array<MetadataField | EntityListElement> = [];
+): Array<PanelMetaData | EntityListElement> => {
+  const fields: Array<PanelMetaData | EntityListElement> = [];
 
   Object.values(objectToGetMetadataFrom).forEach((value) => {
     if (!value || typeof value !== "object") return;
@@ -196,7 +187,7 @@ export const getMetadataFields = (
         value:
           (value as PanelInfo).value ||
           getValueForPanelMetadata(panelType, key, formId),
-        field: (value as PanelMetaData).inputField,
+        inputField: (value as PanelMetaData).inputField,
       };
 
       fields.push(field);
