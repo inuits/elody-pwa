@@ -86,6 +86,7 @@ export const useMenuHelper = () => {
         const entries = Object.entries(menuItem.subMenu);
         for (let i = 2; i < entries.length; i += 1) {
           const [objectKey, objectValue] = entries[i];
+          if (!objectValue.typeLink.route) return;
           const destination = objectValue.typeLink.route.destination;
           menuDestinations.value.push(destination);
         }
