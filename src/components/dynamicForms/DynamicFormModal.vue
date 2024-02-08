@@ -24,6 +24,7 @@
           :form-id="dynamicFormQuery"
           :metadata="field"
           :is-edit="true"
+          @has-error="setFormContainsErrors"
         />
         <upload-interface-dropzone
           v-if="field.__typename === 'UploadField'"
@@ -41,7 +42,9 @@
           :icon="field.icon"
           button-style="accentAccent"
           :disabled="
-            field.actionType === ActionType.Upload ? !enableUploadButton : true
+            field.actionType === ActionType.Upload
+              ? !enableUploadButton
+              : formContainsErrors
           "
           @click="performActionButtonClickEvent(field)"
         />
@@ -62,7 +65,7 @@ import {
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicFormModal } from "@/components/dynamicForms/useDynamicFormModal";
-import { computed, inject, watch } from "vue";
+import { computed, inject, ref, watch } from "vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
@@ -86,13 +89,34 @@ const formFields = computed<UploadField | PanelMetaData | undefined>(() => {
     dynamicForm.value[dynamicFormQuery.value].formFields,
   ).filter((value) => typeof value === "object");
 });
+const formFieldErrorStatus = ref<Object[]>([]);
+const formContainsErrors = computed(() =>
+  formFieldErrorStatus.value.some(
+    (errorObject) => errorObject.hasError === true,
+  ),
+);
 const { t } = useI18n();
+
+const setFormContainsErrors = (containsErrors: Object) => {
+  if (
+    !formFieldErrorStatus.value.some(
+      (errorObject: Object) => errorObject === containsErrors,
+    )
+  ) {
+    formFieldErrorStatus.value = formFieldErrorStatus.value.filter(
+      (errorStatus) => errorStatus.key !== containsErrors.key,
+    );
+    formFieldErrorStatus.value.push(containsErrors);
+  }
+};
 
 const performActionButtonClickEvent = (field: FormAction): void => {
   if (field.actionType === ActionType.Upload) {
-    console.log("Calling upload function");
     upload(false, config, t);
     return;
+  }
+  if (field.actionType === ActionType.Submit) {
+    console.log("Submit");
   }
 };
 

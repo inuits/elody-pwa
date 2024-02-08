@@ -6,11 +6,11 @@
     <p v-if="isFieldRequired && isEdit" class="pl-1">*</p>
   </div>
   <entity-element-metadata-edit
-    v-if="(isEdit && metadata.field) || (isEdit && metadata.inputField)"
+    v-if="isEdit && metadata.inputField"
     :fieldKey="isMetadataOnRelation ? `${fieldKeyWithId}` : metadata.key"
     :label="metadata.label as string"
     v-model:value="value"
-    :field="metadata.field || metadata.inputField"
+    :field="metadata.inputField"
     :formId="formId"
     :unit="metadata.unit"
     :link-text="metadata.linkText"
@@ -33,15 +33,17 @@
 <script lang="ts" setup>
 import EntityElementMetadataEdit from "@/components/metadata/EntityElementMetadataEdit.vue";
 import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.vue";
-import { MetadataField } from "@/generated-types/queries";
+import { MetadataField, PanelMetaData } from "@/generated-types/queries";
 import { computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useOrderListItems, OrderItem } from "@/composables/useOrderListItems";
 import { useField } from "vee-validate";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 const { t } = useI18n();
 const { addOrderItem, removeOrderItem, updateOrderItem } = useOrderListItems();
+const { getForm } = useFormHelper();
 
 const props = defineProps<{
   isEdit: boolean;
@@ -50,8 +52,14 @@ const props = defineProps<{
   linkedEntityId?: String;
 }>();
 
+const emit = defineEmits(["hasError"]);
+
 const setNewValue = (newValue: string) => {
   value.value = newValue;
+  const form = getForm(props.formId);
+  if (form) {
+    form.setFieldValue(veeValidateField.value, newValue);
+  }
 };
 const registerEnterKeyPressed = async (value: string) => {
   await updateOrderItem(props.formId, fieldKeyWithId.value, value);
@@ -61,25 +69,25 @@ defineExpose({
 });
 
 const isMetadataOnRelation = computed(
-  () => props.metadata.__typename === "PanelRelationMetaData"
+  () => props.metadata.__typename === "PanelRelationMetaData",
 );
 const fieldKeyWithId = computed(
-  () => `${props.metadata.key}-${props.linkedEntityId}`
+  () => `${props.metadata.key}-${props.linkedEntityId}`,
 );
 const fieldIsDirty = computed(() => meta.dirty);
 const { conditionalFieldIsRequired } = useConditionalValidation();
 const isFieldRequired = computed(() => {
-  if (props.metadata?.field?.validation?.value?.includes("required"))
+  if (props.metadata?.inputField?.validation?.value?.includes("required"))
     return true;
-  if (props.metadata?.field?.validation?.required_if)
+  if (props.metadata?.inputField?.validation?.required_if)
     return conditionalFieldIsRequired(
-      props.metadata?.field?.validation?.required_if,
-      props.formId
+      props.metadata?.inputField?.validation?.required_if,
+      props.formId,
     );
   return false;
 });
-const getValidationRules = (metadata: MetadataField): string => {
-  const rules: string = metadata?.field?.validation?.value as string;
+const getValidationRules = (metadata: PanelMetaData): string => {
+  const rules: string = metadata?.inputField?.validation?.value as string;
   if (isFieldRequired.value)
     return rules.includes("required") ? rules : `${rules}|required`;
   return rules;
@@ -89,16 +97,11 @@ const rules = computed(() => getValidationRules(props.metadata));
 const veeValidateField = computed(() => {
   if (isMetadataOnRelation.value)
     return `relationValues.relationMetadata.${fieldKeyWithId.value}`;
-  else if (props.metadata.field) return `intialValues.${props.metadata.key}`;
+  else if (props.metadata.inputField)
+    return `intialValues.${props.metadata.key}`;
   else if (props.linkedEntityId === undefined)
     return `intialValues.${props.metadata.key}`;
   else return `intialValues.${fieldKeyWithId.value}`;
-});
-
-const validationRules = computed<string | undefined>(() => {
-  if (!props.metadata.field || props.metadata.field.validation)
-    return undefined;
-  return props.metadata.field.validation;
 });
 
 const { errorMessage, value, meta } = useField<string>(
@@ -108,7 +111,7 @@ const { errorMessage, value, meta } = useField<string>(
     label: props.metadata.label
       ? t(props.metadata.label as string)
       : t("metadata.no-label"),
-  }
+  },
 );
 
 onMounted(() => {
@@ -126,10 +129,22 @@ onBeforeUnmount(() => {
   if (props.metadata.key !== "order") return;
   removeOrderItem(props.formId, fieldKeyWithId.value);
 });
+
 watch(
   () => props.isEdit,
   () => {
     if (!props.isEdit) setNewValue(props.metadata.value);
-  }
+  },
+);
+
+watch(
+  () => errorMessage.value,
+  () => {
+    if (errorMessage.value)
+      emit("hasError", { key: props.metadata.key, hasError: true });
+    else {
+      emit("hasError", { key: props.metadata.key, hasError: false });
+    }
+  },
 );
 </script>
