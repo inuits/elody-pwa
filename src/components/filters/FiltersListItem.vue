@@ -119,10 +119,13 @@ const advancedFilterInput = ref<AdvancedFilterInput>({
 const filterOptions = ref<string[]>([]);
 
 const loadMatcher = async () => {
-  const module = await import(
-    `@/components/filters/matchers/${selectedMatcher.value?.value}.vue`
-  );
+  let matcher = selectedMatcher.value?.value;
+  if (matcher === "MetadataOnRelationExactMatcher")
+    matcher = "ExactMatcher";
+  else if (matcher === "MetadataOnRelationContainsMatcher")
+    matcher = "ContainsMatcher";
 
+  const module = await import(`@/components/filters/matchers/${matcher}.vue`);
   if (matcherComponent.value !== module.default)
     emit("deactivateFilter", advancedFilterInput.value.key);
   matcherComponent.value = markRaw(module.default);
