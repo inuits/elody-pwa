@@ -1,26 +1,35 @@
 <template>
-  <button
-    type="button"
-    :disabled="disabled"
-    class="flex justify-center items-center w-full rounded-md outline-none transition-colors duration-300 disabled:cursor-auto"
-    :class="[
-      label ? `pl-1.5` : ``,
-      `${selectedButtonStyle.textColor} ${selectedButtonStyle.bgColor}`,
-      `${selectedButtonStyle.hoverStyle.textColor} ${selectedButtonStyle.hoverStyle.bgColor}`,
-      `${selectedButtonStyle.activeStyle.textColor} ${selectedButtonStyle.activeStyle.bgColor}`,
-      `${selectedButtonStyle.disabledStyle.textColor} ${selectedButtonStyle.disabledStyle.bgColor}`,
-      { 'text-base p-3': buttonSize === 'normal' },
-      { 'text-[0.925rem] p-1.5': buttonSize === 'small' },
-    ]"
-  >
-    <unicon
-      v-if="props.icon !== DamsIcons.NoIcon"
-      :class="{ '-ml-1': label }"
-      :name="Unicons[props.icon].name"
-      :height="iconHeight"
-    />
-    <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
-  </button>
+  <div class="flex">
+    <div v-if="errors.length" class="w-full bg-red-light p-2">
+      <ul>
+        <li v-for="error in errors" class="text-red-default flex items-center">
+          - {{ error }}
+        </li>
+      </ul>
+    </div>
+    <button
+      type="button"
+      :disabled="disabled"
+      class="flex justify-center items-center w-full rounded-md outline-none transition-colors duration-300 disabled:cursor-auto"
+      :class="[
+        label ? `pl-1.5` : ``,
+        `${selectedButtonStyle.textColor} ${selectedButtonStyle.bgColor}`,
+        `${selectedButtonStyle.hoverStyle.textColor} ${selectedButtonStyle.hoverStyle.bgColor}`,
+        `${selectedButtonStyle.activeStyle.textColor} ${selectedButtonStyle.activeStyle.bgColor}`,
+        `${selectedButtonStyle.disabledStyle.textColor} ${selectedButtonStyle.disabledStyle.bgColor}`,
+        { 'text-base p-3': buttonSize === 'normal' },
+        { 'text-[0.925rem] p-1.5': buttonSize === 'small' },
+      ]"
+    >
+      <unicon
+        v-if="props.icon !== DamsIcons.NoIcon"
+        :class="{ '-ml-1': label }"
+        :name="Unicons[props.icon].name"
+        :height="iconHeight"
+      />
+      <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
+    </button>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -108,6 +117,7 @@ const props = withDefaults(
     disabled?: boolean;
     iconHeight?: number;
     loading?: boolean;
+    errors?: string[];
   }>(),
   {
     icon: DamsIcons.NoIcon,
@@ -116,10 +126,11 @@ const props = withDefaults(
     disabled: false,
     iconHeight: 18,
     loading: false,
-  }
+    errors: [],
+  },
 );
 
 const selectedButtonStyle = computed<Button>(
-  () => buttonStyles[props.buttonStyle]
+  () => buttonStyles[props.buttonStyle],
 );
 </script>

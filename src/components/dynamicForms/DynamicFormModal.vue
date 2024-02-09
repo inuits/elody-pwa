@@ -41,6 +41,7 @@
           :label="t(field.label)"
           :icon="field.icon"
           button-style="accentAccent"
+          :errors="uploadFileErrors"
           :disabled="
             field.actionType === ActionType.Upload
               ? !enableUploadButton
@@ -80,7 +81,8 @@ const dynamicFormQuery = computed(
 const { setQueryName, loadDocument } = useImport();
 const { closeModal, getModalInfo } = useBaseModal();
 const { getDynamicForm, dynamicForm } = useDynamicFormModal();
-const { upload, enableUploadButton, mediafiles } = useUpload();
+const { upload, enableUploadButton, mediafiles, fileErrors, dryRunErrors } =
+  useUpload();
 const config = inject("config");
 const formFields = computed<UploadField | PanelMetaData | undefined>(() => {
   if (!dynamicForm.value || !dynamicForm.value[dynamicFormQuery.value])
@@ -90,11 +92,17 @@ const formFields = computed<UploadField | PanelMetaData | undefined>(() => {
   ).filter((value) => typeof value === "object");
 });
 const formFieldErrorStatus = ref<Object[]>([]);
-const formContainsErrors = computed(() =>
+const formContainsErrors = computed((): boolean =>
   formFieldErrorStatus.value.some(
     (errorObject) => errorObject.hasError === true,
   ),
 );
+const uploadFileErrors = computed((): string[] => [
+  ...dryRunErrors.value,
+  ...fileErrors.value.map((error) =>
+    t(`upload-fields.errors.${error.error}`, [error.filename]),
+  ),
+]);
 const { t } = useI18n();
 
 const setFormContainsErrors = (containsErrors: Object) => {

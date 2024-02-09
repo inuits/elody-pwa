@@ -26,7 +26,7 @@ import { useI18n } from "vue-i18n";
 const config = inject("config") as any;
 const { closeModal, getModalInfo } = useBaseModal();
 const { t } = useI18n();
-const { dryRunCsv, upload, files, uploadType, resetUpload, dryRunStatus } =
+const { dryRunCsv, upload, files, uploadType, resetUpload, dryRunComplete } =
   useUpload();
 let dropzoneHelper = new useDropzoneHelper();
 
@@ -65,14 +65,6 @@ watch(
     setUseUploadVariables();
   },
   { immediate: true },
-);
-
-watch(
-  () => files.value.length,
-  () => {
-    if (dryRunStatus.value !== "correctly-verified" && props.dryRun)
-      dryRunCsv();
-  },
 );
 
 watch(
