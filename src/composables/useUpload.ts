@@ -1,18 +1,23 @@
 import type { DropzoneFile } from "dropzone";
-import { ref, watch, computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { getEntityIdFromRoute, setCssVariable } from "@/helpers";
 import {
   NotificationType,
   useNotification,
 } from "@/components/base/BaseNotification.vue";
-import { UploadFieldType } from "@/generated-types/queries";
+import { TypeModals, UploadFieldType } from "@/generated-types/queries";
+import { useBaseModal } from "@/composables/useBaseModal";
+
+type FileError = {
+  filename: string;
+  error: "missing" | "extraneous";
+};
 
 const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
   "no-upload"
 );
-const dryRunStatus = ref<
-  "not-yet-verified" | "loading" | "rejected" | "correctly-verified"
->("not-yet-verified");
+const dryRunComplete = ref<boolean>(false);
+const dryRunErrors = ref<string[]>([]);
 const files = ref<DropzoneFile[]>([]);
 const mediafiles = computed(
   (): DropzoneFile =>
@@ -21,13 +26,15 @@ const mediafiles = computed(
 const uploadProgressPercentage = ref<number>(0);
 const uploadType = ref<UploadFieldType>(UploadFieldType.Batch);
 const requiredMediafiles = ref<string[] | undefined>(undefined);
+const fileErrors = ref<FileError[]>([]);
 const enableUploadButton = computed(() => {
   if (mediafiles.value.length && uploadType.value === UploadFieldType.Single)
     return true;
   if (!requiredMediafiles.value) return false;
   return (
-    dryRunStatus.value === "correctly-verified" &&
-    useUpload().verifyAllNeededFilesArePresent()
+    !dryRunErrors.value.length &&
+    !fileErrors.value.length &&
+    mediafiles.value.length
   );
 });
 
@@ -56,6 +63,7 @@ const useUpload = () => {
       amountUploaded++;
     }
     toggleUploadStatus();
+    useBaseModal().closeModal(TypeModals.DynamicForm);
   };
 
   const __uploadExceptionHandler = (
@@ -72,14 +80,14 @@ const useUpload = () => {
     );
   };
 
-  const handleDryRunResult = (dryRunResult: any) => {
+  const handleDryRunResult = (dryRunResult: any): void => {
     try {
       const errorKeys = Object.keys(dryRunResult.errors);
-      let containsErrors: boolean = false;
+      let errors: string[] = [];
       errorKeys.forEach((key: string) => {
         const errorList = dryRunResult.errors[key];
         if (errorList.length) {
-          containsErrors = true;
+          errors.push(...errorList);
         }
       });
       if (dryRunResult?.mediafiles.length) {
@@ -87,15 +95,14 @@ const useUpload = () => {
           (mediafile: any) => mediafile.filename,
         );
       }
-      if (containsErrors) dryRunStatus.value = "rejected";
-      else dryRunStatus.value = "correctly-verified";
+      dryRunErrors.value = errors;
+      dryRunComplete.value = true;
     } catch {
-      dryRunStatus.value = "rejected";
+      dryRunErrors.value.push("upload-fields.errors.dry-run-failed");
     }
   };
 
   const dryRunCsv = async () => {
-    dryRunStatus.value = "loading";
     const dryRunResult = await __batchEntities(__getCsvBlob(), true);
     handleDryRunResult(dryRunResult);
   };
@@ -216,11 +223,15 @@ const useUpload = () => {
     return false;
   };
 
-  const removeFileToUpload = (fileToRemove: DropzoneFile) => {
+  const removeFileToUpload = (
+    fileToRemove: DropzoneFile,
+    isValidationFile: boolean = false,
+  ) => {
     if (!files.value) return;
     files.value = files.value.filter(
       (file: DropzoneFile) => file !== fileToRemove,
     );
+    if (isValidationFile) dryRunComplete.value = false;
   };
   const addFileToUpload = (fileToAdd: DropzoneFile) => {
     files.value.push(fileToAdd);
@@ -232,7 +243,7 @@ const useUpload = () => {
 
   const resetUpload = () => {
     uploadStatus.value = "no-upload";
-    dryRunStatus.value = "not-yet-verified";
+    dryRunErrors.value = [];
     files.value = [];
     requiredMediafiles.value = undefined;
     uploadProgressPercentage.value = 0;
@@ -240,20 +251,39 @@ const useUpload = () => {
   };
 
   const verifyAllNeededFilesArePresent = (): boolean => {
-    const requiredFileNames: string[] = [...requiredMediafiles.value];
-    let filesArePreset: boolean = true;
-    if (uploadType.value === UploadFieldType.Single) return true;
-    if (mediafiles.value.length !== requiredFileNames.length) return false;
-    requiredFileNames.forEach((requiredFileName: string) => {
-      const fileExists = files.value.some(
-        (file: DropzoneFile) => file.name === requiredFileName,
-      );
-      if (!fileExists) {
-        filesArePreset = false;
-        return;
-      }
-    });
-    return filesArePreset;
+    try {
+      fileErrors.value = [];
+      const requiredFileNames: string[] = [...requiredMediafiles.value];
+      let areAllFilesPresent: boolean = true;
+
+      if (uploadType.value === UploadFieldType.Single) return true;
+
+      requiredFileNames.forEach((requiredFileName: string) => {
+        const fileExists = mediafiles.value.some(
+          (file: DropzoneFile) => file.name === requiredFileName,
+        );
+        if (!fileExists) {
+          areAllFilesPresent = false;
+          fileErrors.value.push({
+            filename: requiredFileName,
+            error: "missing",
+          });
+        }
+      });
+
+      mediafiles.value.forEach((file: DropzoneFile) => {
+        if (!requiredFileNames.includes(file.name)) {
+          areAllFilesPresent = false;
+          fileErrors.value.push({
+            filename: file.name,
+            error: "extraneous",
+          });
+        }
+      });
+      return areAllFilesPresent;
+    } catch {
+      return false;
+    }
   };
 
   const calculateProgressPercentage = (
@@ -274,7 +304,7 @@ const useUpload = () => {
     addFileToUpload,
     removeFileToUpload,
     dryRunCsv,
-    dryRunStatus,
+    dryRunErrors,
     upload,
     validateFiles,
     toggleUploadStatus,
@@ -288,6 +318,8 @@ const useUpload = () => {
     mediafiles,
     requiredMediafiles,
     verifyAllNeededFilesArePresent,
+    fileErrors,
+    dryRunComplete,
   };
 };
 
@@ -300,6 +332,13 @@ watch(
     );
   },
   { immediate: true }
+);
+
+watch(
+  () => mediafiles.value.length,
+  () => {
+    useUpload().verifyAllNeededFilesArePresent();
+  },
 );
 
 export default useUpload;

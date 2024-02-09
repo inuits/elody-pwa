@@ -41,7 +41,7 @@ const emit = defineEmits<{
   (event: "updateFilesInDropzone", filesInDropzone: DropzoneFile[]): void;
 }>();
 
-const { addFileToUpload, removeFileToUpload, files } = useUpload();
+const { addFileToUpload, removeFileToUpload, files, dryRunCsv } = useUpload();
 
 onMounted(() => {
   const dropzone = props.dropzoneHelper.initDropzone(
@@ -49,8 +49,13 @@ onMounted(() => {
     dropzonePreview.value!,
   );
 
-  dropzone.on("addedfile", (file) => addFileToUpload(file));
-  dropzone.on("removedfile", (file) => removeFileToUpload(file));
+  dropzone.on("addedfile", (file) => {
+    addFileToUpload(file);
+    if (props.isValidationFile) dryRunCsv();
+  });
+  dropzone.on("removedfile", (file) =>
+    removeFileToUpload(file, props.isValidationFile),
+  );
 
   watch(
     () => files.value.length,

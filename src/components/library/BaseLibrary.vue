@@ -179,6 +179,7 @@ import { useRoute, useRouter } from "vue-router";
 import { watch, ref, onMounted, inject, computed } from "vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
+import useUpload from "@/composables/useUpload";
 
 const props = withDefaults(
   defineProps<{
@@ -260,6 +261,7 @@ const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
 const { closeModal } = useBaseModal();
 const { replaceRelationsFromSameType } = useFormHelper();
+const { uploadStatus } = useUpload();
 
 const displayList = ref<boolean>(false);
 const displayGrid = ref<boolean>(false);
@@ -468,4 +470,11 @@ watch([displayGrid, expandFilters], () => {
     expandFilters: expandFilters.value,
   });
 });
+
+watch(
+  () => uploadStatus.value,
+  () => {
+    if (uploadStatus.value === "upload-finished") refetchEntities();
+  },
+);
 </script>
