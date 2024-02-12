@@ -23,15 +23,16 @@ import {
   TypeModals,
   UploadFieldType,
 } from "@/generated-types/queries";
-import { inject, watch } from "vue";
+import { inject, watch, computed } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 
 const config = inject("config") as any;
 const { closeModal, getModalInfo } = useBaseModal();
 const { t } = useI18n();
-const { upload, files, uploadType, resetUpload } = useUpload();
+const { upload, files, uploadType, resetUpload, isCsvRequired } = useUpload();
 let dropzoneHelper = new useDropzoneHelper();
+const isRequired = computed(() => props.validation.includes("required"));
 
 const props = withDefaults(
   defineProps<{
@@ -43,6 +44,7 @@ const props = withDefaults(
     isLinkedUpload?: boolean;
     dryRun: boolean;
     uploadFieldType: UploadFieldType;
+    validation: string;
   }>(),
   {
     dropzoneSize: "big",
@@ -53,6 +55,7 @@ const props = withDefaults(
 
 const setUseUploadVariables = () => {
   uploadType.value = props.uploadFieldType as UploadFieldType;
+  if (props.dryRun && isRequired) isCsvRequired.value = true;
   if (props.acceptedFileTypes)
     dropzoneHelper.dropzoneSettings.value.acceptedFiles =
       props.acceptedFileTypes.map((type: string) => `.${type}`).join(", ");
