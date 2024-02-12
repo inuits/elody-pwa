@@ -27,11 +27,10 @@ const props = defineProps<{
 }>();
 const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
-const { setQueryName, loadDocument } = useImport();
+const { loadDocument } = useImport();
 
 const doGeneralAction = async () => {
-  setQueryName(props.action);
-  const document = await loadDocument();
+  const document = await loadDocument(props.action);
   try {
     await apolloClient
       .query({

@@ -1,5 +1,8 @@
 import { useLibraryBar } from "@/composables/useLibraryBar";
 import { ref } from "vue";
+import {
+  type AdvancedFilterInputType,
+} from "@/generated-types/queries";
 
 const { selectedPaginationLimitOption, selectedSkip, queryVariables } =
   useLibraryBar();
@@ -8,21 +11,42 @@ const entityType = ref<String>();
 const relationType = ref<String>();
 const identifiers = ref<String>();
 const searchInputType = ref<String>();
+const advancedFilterInputs = ref<AdvancedFilterInputType[]>();
 
 const changePaginationNumber = ref<number | undefined>(undefined);
 
 export const useQueryVariablesFactory = () => {
   const setEntityType = (value: String) => {
-    entityType.value = value;
+    if (value !== undefined)
+      entityType.value = value;
   };
   const setQueryRelationType = (value: String) => {
-    relationType.value = value;
+    if (value !== undefined)
+      relationType.value = value;
   };
   const setIdentifiers = (value: String) => {
-    identifiers.value = value;
+    if (value !== undefined)
+      identifiers.value = value;
   };
   const setSearchInputType = (value: String) => {
-    searchInputType.value = value;
+    if (value !== undefined)
+      searchInputType.value = value;
+  };
+  const setAdvancedFilterInputs = (value: AdvancedFilterInputType) => {
+    const advancedFilterMapping: AdvancedFilterInputType[] = [];
+    Object.entries(value).forEach((advancedFilter) => {
+      if (advancedFilter[0] === "__typename") return;
+      advancedFilterMapping.push({
+        lookup: advancedFilter[1].lookup,
+        type: advancedFilter[1].type,
+        parent_key: advancedFilter[1].parentKey,
+        key: advancedFilter[1].key,
+        value: advancedFilter[1].parentKey === "relations" ? [identifiers.value] : advancedFilter[1].defaultValue,
+        item_types: advancedFilter[1].itemTypes,
+        match_exact: true,
+      });
+    });
+    advancedFilterInputs.value = advancedFilterMapping;
   };
 
   const setChangePaginationNumber = (value: number | undefined) => {
@@ -34,29 +58,17 @@ export const useQueryVariablesFactory = () => {
     if (changePaginationNumber.value)
       pagination += changePaginationNumber.value;
 
-    return {
+    const variables = {
       type: entityType.value,
       limit: pagination,
       skip: selectedSkip.value.value,
       searchValue: queryVariables.value?.searchValue,
       advancedSearchValue: [],
-      advancedFilterInputs: [
-        {
-          type: "type",
-          value: entityType.value,
-          match_exact: true,
-        },
-        {
-          type: "selection",
-          parent_key: "relations",
-          key: relationType.value,
-          value: [identifiers.value],
-          match_exact: true,
-        },
-      ],
+      advancedFilterInputs: advancedFilterInputs.value,
       searchInputType: searchInputType.value,
       userUuid: identifiers.value,
     };
+    return variables;
   };
 
   return {
@@ -66,5 +78,6 @@ export const useQueryVariablesFactory = () => {
     setSearchInputType,
     setEntityType,
     setChangePaginationNumber,
+    setAdvancedFilterInputs,
   };
 };

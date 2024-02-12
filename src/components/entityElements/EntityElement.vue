@@ -18,6 +18,7 @@
         :types="element.entityTypes as string[]"
         :custom-query="element.customQuery"
         :custom-query-relation-type="element.customQueryRelationType"
+        :custom-query-filters="element.customQueryFilters"
         :search-input-type="element.searchInputType"
         :entity-list="(element.entityList as Entity[]) ?? []"
         :identifiers="identifiers"
