@@ -5,12 +5,14 @@
         <div
           v-if="isEdit && relationType"
           class="flex items-center px-2 text-text-subtitle cursor-pointer"
-          @click.stop="() => {
-            setAcceptedTypes(types as Entitytyping[]);
-            setRelationType(relationType);
-            openModal(TypeModals.EntityPicker, undefined, 'right');
-            toggleElementCollapse(label, false);
-          }"
+          @click.stop="
+            () => {
+              setAcceptedTypes(types as Entitytyping[]);
+              setRelationType(relationType);
+              openModal(TypeModals.EntityPicker, undefined, 'right');
+              toggleElementCollapse(label, false);
+            }
+          "
         >
           <unicon height="16" :name="Unicons.PlusCircle.name" />
           <p class="underline">
@@ -59,7 +61,7 @@
             v-else
             :bulk-operations-context="
               createCustomContext(
-                BulkOperationsContextEnum.EntityElementList + relationType
+                BulkOperationsContextEnum.EntityElementList + relationType,
               )
             "
             :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
@@ -117,7 +119,7 @@ const { createCustomContext } = useBulkOperations();
 const { toggleElementCollapse } = useEntityElementCollapseHelper();
 const { setAcceptedTypes, setRelationType } = useEntityPickerModal();
 const { openModal } = useBaseModal();
-const { setQueryName, loadDocument } = useImport();
+const { loadDocument } = useImport();
 const { isEdit } = useEditMode();
 const { t } = useI18n();
 const { mediafileSelectionState } = useEntityMediafileSelector();
@@ -147,7 +149,7 @@ const props = withDefaults(
   {
     types: () => [],
     viewMode: EntityListViewMode.Library,
-  }
+  },
 );
 
 watch(
@@ -156,11 +158,11 @@ watch(
     if (props.entityList.length > 0) {
       updateRelationForm(props.entityList);
     }
-  }
+  },
 );
 
 const entityId = computed(
-  () => getEntityUuid() || asString(useRoute().params["id"])
+  () => getEntityUuid() || asString(useRoute().params["id"]),
 );
 
 const requiresCustomQuery = computed(() => props.customQuery != undefined);
@@ -177,12 +179,11 @@ watch(
     if (!requiresCustomQuery.value) return;
     if (uploadStatus.value === "uploading") queryLoaded.value = false;
     else if (uploadStatus.value === "upload-finished") await useCustomQuery();
-  }
+  },
 );
 
 const useCustomQuery = async () => {
-  setQueryName(props.customQuery);
-  const document = await loadDocument();
+  const document = await loadDocument(props.customQuery);
   setEntityType(props.types[0]);
   setQueryRelationType(props.customQueryRelationType);
   setIdentifiers(props.identifiers[0]);

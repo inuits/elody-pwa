@@ -7,6 +7,7 @@
     @hide-modal="closeModal(TypeModals.DynamicForm)"
   >
     <dynamic-form
+      v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
       :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
     />
   </BaseModal>
@@ -15,7 +16,7 @@
 <script setup lang="ts">
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { TypeModals } from "@/generated-types/queries";
+import { ModalState, TypeModals } from "@/generated-types/queries";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 
 const { closeModal, getModalInfo } = useBaseModal();

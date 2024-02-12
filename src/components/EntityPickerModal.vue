@@ -49,8 +49,11 @@
             "
           />
         </BaseTab>
-        <BaseTab :title="t('upload.upload-files')">
+        <BaseTab :title="t('entity.upload')">
           <dynamic-form
+            v-if="
+              getModalInfo(TypeModals.EntityPicker).state === ModalState.Show
+            "
             dynamic-form-query="GetSingleEntityUploadForm"
             :has-linked-upload="true"
           />
