@@ -199,7 +199,7 @@ const useUpload = () => {
   };
 
   async function* uploadGenerator(config: any, entityId: string = "") {
-    if (!validateFiles()) return; // TODO: Show feedback to user
+    if (!validateFiles()) return;
 
     const filesToUpload = files.value.filter(
       (file) => file.type !== "text/csv",
