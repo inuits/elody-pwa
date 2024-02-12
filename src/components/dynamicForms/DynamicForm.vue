@@ -22,11 +22,11 @@
       <upload-interface-dropzone
         v-if="field.__typename === 'UploadField'"
         :dropzone-label="field.label"
-        :validation="field.inputField.validation.value"
-        :accepted-file-types="field.inputField.fileTypes"
-        :max-file-size="field.inputField.maxFileSize"
+        :validation="field.inputField?.validation?.value"
+        :accepted-file-types="field.inputField?.fileTypes"
+        :max-file-size="field.inputField?.maxFileSize"
         :dropzone-size="field.uploadFieldSize"
-        :max-amount-of-files="field.inputField.maxAmountOfFiles"
+        :max-amount-of-files="field.inputField?.maxAmountOfFiles"
         :dry-run="field.dryRunUpload"
         :upload-field-type="field.uploadFieldType"
       />
