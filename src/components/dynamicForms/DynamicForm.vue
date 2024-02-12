@@ -88,7 +88,7 @@ const { loadDocument } = useImport();
 const { closeModal, getModalInfo } = useBaseModal();
 const { getDynamicForm, dynamicForm, performSubmitAction } =
   useDynamicFormModal();
-const { upload, enableUploadButton, mediafiles, fileErrors, dryRunErrors } =
+const { upload, enableUploadButton, mediafiles, fileErrors, dryRunErrors, resetUpload } =
   useUpload();
 const config = inject("config");
 const formFields = computed<UploadField | PanelMetaData | undefined>(() => {
@@ -155,15 +155,14 @@ const performActionButtonClickEvent = async (
 
 const initializeForm = async () => {
   if (!props.dynamicFormQuery) return;
-  console.log("initializeForm");
   const document = await getQuery(props.dynamicFormQuery);
   getDynamicForm(document);
 };
 
 watch(
-  () => [props.dynamicFormQuery],
+  () => props.dynamicFormQuery,
   async () => {
-    console.log(getModalInfo(TypeModals.EntityPicker).state);
+    resetUpload()
     await initializeForm();
   },
   { immediate: true },

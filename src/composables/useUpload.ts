@@ -236,6 +236,7 @@ const useUpload = () => {
       (file: DropzoneFile) => file !== fileToRemove,
     );
     if (isValidationFile) dryRunComplete.value = false;
+    if (!files.value.length) dryRunErrors.value = []
   };
   const addFileToUpload = (fileToAdd: DropzoneFile) => {
     files.value.push(fileToAdd);
