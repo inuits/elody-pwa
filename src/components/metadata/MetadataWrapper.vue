@@ -52,7 +52,7 @@ const props = defineProps<{
   linkedEntityId?: String;
 }>();
 
-const emit = defineEmits(["hasError"]);
+const emit = defineEmits(["update:field"]);
 
 const setNewValue = (newValue: string) => {
   value.value = newValue;
@@ -138,13 +138,14 @@ watch(
 );
 
 watch(
-  () => errorMessage.value,
+  () => [errorMessage.value, value.value, meta.value],
   () => {
-    if (errorMessage.value)
-      emit("hasError", { key: props.metadata.key, hasError: true });
-    else {
-      emit("hasError", { key: props.metadata.key, hasError: false });
-    }
+    emit("update:field", {
+      fieldKey: props.metadata.key,
+      errorMessage: errorMessage.value,
+      value: value.value,
+      meta: meta.value,
+    });
   },
 );
 </script>

@@ -13,7 +13,7 @@
         </div>
         <edit-modal />
       </div>
-      <!--      <EntityPickerModal /> TODO: Fix tis -->
+      <EntityPickerModal />
       <DynamicFormModal></DynamicFormModal>
       <search-saved-searches-modal />
       <BulkoperationsModal
@@ -34,7 +34,6 @@
 import BaseNotification from "@/components/base/BaseNotification.vue";
 import BulkoperationsModal from "@/components/bulk-operations/BulkOperationsModal.vue";
 import BulkOperationsEditModal from "@/components/bulk-operations/BulkOperationsEditModal.vue";
-import CreateModal from "@/components/CreateModal.vue";
 import EditModal from "@/components/EditModal.vue";
 import EntityPickerModal from "@/components/EntityPickerModal.vue";
 import SearchSavedSearchesModal from "@/components/searchSavedSearchesModal.vue";
@@ -62,7 +61,6 @@ export default defineComponent({
     BaseNotification,
     BulkoperationsModal,
     // BulkOperationsEditModal,
-    CreateModal,
     EditModal,
     EntityPickerModal,
     SearchSavedSearchesModal,

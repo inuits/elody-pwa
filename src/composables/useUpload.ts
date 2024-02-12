@@ -1,12 +1,13 @@
 import type { DropzoneFile } from "dropzone";
 import { computed, ref, watch } from "vue";
-import { getEntityIdFromRoute, setCssVariable } from "@/helpers";
+import { setCssVariable } from "@/helpers";
 import {
   NotificationType,
   useNotification,
 } from "@/components/base/BaseNotification.vue";
 import { TypeModals, UploadFieldType } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
+import useEntitySingle from "@/composables/useEntitySingle";
 
 type FileError = {
   filename: string;
@@ -43,12 +44,15 @@ const useUpload = () => {
     "not-prefetched-yet";
 
   const upload = async (isLinkedUpload: boolean, config: any, t: Function) => {
+    const modalToClose: TypeModals = isLinkedUpload
+      ? TypeModals.EntityPicker
+      : TypeModals.DynamicForm;
     const totalAmountOfFiles: number = files.value.length;
     let amountUploaded = 0;
     toggleUploadStatus();
     const generator = uploadGenerator(
       config,
-      isLinkedUpload ? getEntityIdFromRoute() : "",
+      isLinkedUpload ? useEntitySingle().getEntityUuid() : "",
     );
 
     for await (const upload of generator) {
@@ -63,7 +67,7 @@ const useUpload = () => {
       amountUploaded++;
     }
     toggleUploadStatus();
-    useBaseModal().closeModal(TypeModals.DynamicForm);
+    useBaseModal().closeModal(modalToClose);
   };
 
   const __uploadExceptionHandler = (
@@ -247,7 +251,6 @@ const useUpload = () => {
     files.value = [];
     requiredMediafiles.value = undefined;
     uploadProgressPercentage.value = 0;
-    uploadType.value = UploadFieldType.Batch;
   };
 
   const verifyAllNeededFilesArePresent = (): boolean => {
