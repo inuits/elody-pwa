@@ -93,6 +93,7 @@ export const useBaseLibrary = (
     selection: [],
     boolean: [],
     type: [],
+    metadata_on_relation: [],
   });
   const advancedFilters = ref<Maybe<AdvancedFilters>>();
   const initializeFiltersBase = async () => {
