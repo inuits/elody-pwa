@@ -15,7 +15,7 @@ type FileError = {
 };
 
 const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
-  "no-upload"
+  "no-upload",
 );
 const dryRunComplete = ref<boolean>(false);
 const dryRunErrors = ref<string[]>([]);
@@ -28,9 +28,11 @@ const uploadProgressPercentage = ref<number>(0);
 const uploadType = ref<UploadFieldType>(UploadFieldType.Batch);
 const requiredMediafiles = ref<string[] | undefined>(undefined);
 const fileErrors = ref<FileError[]>([]);
+const isCsvRequired = ref<boolean>(false);
 const enableUploadButton = computed(() => {
   if (mediafiles.value.length && uploadType.value === UploadFieldType.Single)
     return true;
+  if (!isCsvRequired) return true;
   if (!requiredMediafiles.value) return false;
   return (
     !dryRunErrors.value.length &&
@@ -86,8 +88,13 @@ const useUpload = () => {
 
   const handleDryRunResult = (dryRunResult: any): void => {
     try {
-      const errorKeys = Object.keys(dryRunResult.errors);
+      if (dryRunResult.message) {
+        dryRunErrors.value.push(dryRunResult.message);
+        return;
+      }
+
       let errors: string[] = [];
+      const errorKeys = Object.keys(dryRunResult.errors);
       errorKeys.forEach((key: string) => {
         const errorList = dryRunResult.errors[key];
         if (errorList.length) {
@@ -138,14 +145,14 @@ const useUpload = () => {
 
   const __createMediafileForEntity = async (
     entityId: string,
-    file: DropzoneFile
+    file: DropzoneFile,
   ): Promise<string> => {
     const response = await fetch(
       `/api/upload/single?entityId=${entityId}&filename=${file.name}`,
       {
         headers: { "Content-Type": "application/json" },
         method: "POST",
-      }
+      },
     );
     return JSON.parse(await response.text());
   };
@@ -170,7 +177,7 @@ const useUpload = () => {
           __getCsvBlob(),
         )) as string[];
       uploadUrl = _prefetchedUploadUrls.find((url: string) =>
-        url.includes(file.name)
+        url.includes(file.name),
       );
     } else if (uploadType.value === UploadFieldType.Single) {
       uploadUrl = await __createMediafileForEntity(entityId, file);
@@ -192,7 +199,7 @@ const useUpload = () => {
         {
           method: "POST",
           body: formData,
-        }
+        },
       ),
       file: file,
     };
@@ -214,10 +221,10 @@ const useUpload = () => {
 
   const validateFiles = () => {
     const csvFilesCount = files.value.filter(
-      (file) => file.type === "text/csv"
+      (file) => file.type === "text/csv",
     ).length;
     const nonCsvFilesCount = files.value.filter(
-      (file) => file.type !== "text/csv"
+      (file) => file.type !== "text/csv",
     ).length;
 
     if (uploadType.value === "batch")
@@ -236,7 +243,7 @@ const useUpload = () => {
       (file: DropzoneFile) => file !== fileToRemove,
     );
     if (isValidationFile) dryRunComplete.value = false;
-    if (!files.value.length) dryRunErrors.value = []
+    if (!files.value.length) dryRunErrors.value = [];
   };
   const addFileToUpload = (fileToAdd: DropzoneFile) => {
     files.value.push(fileToAdd);
@@ -292,7 +299,7 @@ const useUpload = () => {
 
   const calculateProgressPercentage = (
     amountUploaded: number,
-    amountToUpload: number
+    amountToUpload: number,
   ): number => {
     let progress: number = 0;
 
@@ -324,6 +331,7 @@ const useUpload = () => {
     verifyAllNeededFilesArePresent,
     fileErrors,
     dryRunComplete,
+    isCsvRequired,
   };
 };
 
@@ -332,10 +340,10 @@ watch(
   () => {
     setCssVariable(
       "--upload-width-percentage",
-      uploadProgressPercentage.value.toString() + "%"
+      uploadProgressPercentage.value.toString() + "%",
     );
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(

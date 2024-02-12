@@ -22,6 +22,7 @@
       <upload-interface-dropzone
         v-if="field.__typename === 'UploadField'"
         :dropzone-label="field.label"
+        :validation="field.inputField.validation.value"
         :accepted-file-types="field.inputField.fileTypes"
         :max-file-size="field.inputField.maxFileSize"
         :dropzone-size="field.uploadFieldSize"
@@ -88,8 +89,14 @@ const { loadDocument } = useImport();
 const { closeModal, getModalInfo } = useBaseModal();
 const { getDynamicForm, dynamicForm, performSubmitAction } =
   useDynamicFormModal();
-const { upload, enableUploadButton, mediafiles, fileErrors, dryRunErrors, resetUpload } =
-  useUpload();
+const {
+  upload,
+  enableUploadButton,
+  mediafiles,
+  fileErrors,
+  dryRunErrors,
+  resetUpload,
+} = useUpload();
 const config = inject("config");
 const formFields = computed<UploadField | PanelMetaData | undefined>(() => {
   if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"])
@@ -162,7 +169,7 @@ const initializeForm = async () => {
 watch(
   () => props.dynamicFormQuery,
   async () => {
-    resetUpload()
+    resetUpload();
     await initializeForm();
   },
   { immediate: true },
