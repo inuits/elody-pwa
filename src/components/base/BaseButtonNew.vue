@@ -3,7 +3,7 @@
     <div v-if="errors.length" class="w-full bg-red-light p-2">
       <ul>
         <li v-for="error in errors" class="text-red-default flex items-center">
-          - {{ error }}
+          - {{ t(error) }}
         </li>
       </ul>
     </div>
@@ -36,6 +36,7 @@
 import { DamsIcons } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { computed } from "vue";
+import {useI18n} from "vue-i18n"
 
 type PseudoStyle = {
   textColor: string;
@@ -129,6 +130,8 @@ const props = withDefaults(
     errors: [],
   },
 );
+
+const {t} = useI18n()
 
 const selectedButtonStyle = computed<Button>(
   () => buttonStyles[props.buttonStyle],
