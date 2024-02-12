@@ -41,6 +41,9 @@
               :identifiers="identifiers"
               :relationType="metadata.relationType"
               :viewMode="metadata.viewMode"
+              :custom-query="metadata.customQuery"
+              :custom-query-relation-type="metadata.customQueryRelationType"
+              :custom-query-filters="metadata.customQueryFilters"
             />
             <metadata-wrapper
               :form-id="formId"

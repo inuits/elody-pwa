@@ -140,6 +140,7 @@ const props = withDefaults(
     type: MediaFileElementTypes;
     customQuery: string;
     customQueryRelationType: string;
+    customQueryFilters: String;
     searchInputType: string;
     entityList: Entity[];
     identifiers: string[];
@@ -183,14 +184,16 @@ watch(
 );
 
 const useCustomQuery = async () => {
-  const document = await loadDocument(props.customQuery);
+  const queryDocument = await loadDocument(props.customQuery);
+  const filtersDocument = await loadDocument(props.customQueryFilters);
   setEntityType(props.types[0]);
   setQueryRelationType(props.customQueryRelationType);
   setIdentifiers(props.identifiers[0]);
   setSearchInputType(props.searchInputType);
   newQuery.value = {
     name: props.customQuery,
-    document: document,
+    document: queryDocument,
+    filtersDocument: filtersDocument
   };
   queryLoaded.value = true;
 };
