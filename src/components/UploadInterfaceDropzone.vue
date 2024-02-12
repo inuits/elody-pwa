@@ -18,16 +18,19 @@
 import Dropzone from "@/components/base/dropzone/Dropzone.vue";
 import { useDropzoneHelper } from "@/composables/useDropzoneHelper";
 import useUpload from "@/composables/useUpload";
-import { TypeModals, UploadFieldType } from "@/generated-types/queries";
-import { watch, inject } from "vue";
+import {
+  ModalState,
+  TypeModals,
+  UploadFieldType,
+} from "@/generated-types/queries";
+import { inject, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 
 const config = inject("config") as any;
 const { closeModal, getModalInfo } = useBaseModal();
 const { t } = useI18n();
-const { dryRunCsv, upload, files, uploadType, resetUpload, dryRunComplete } =
-  useUpload();
+const { upload, files, uploadType, resetUpload } = useUpload();
 let dropzoneHelper = new useDropzoneHelper();
 
 const props = withDefaults(
@@ -49,7 +52,7 @@ const props = withDefaults(
 );
 
 const setUseUploadVariables = () => {
-  uploadType.value = props.uploadFieldType;
+  uploadType.value = props.uploadFieldType as UploadFieldType;
   if (props.acceptedFileTypes)
     dropzoneHelper.dropzoneSettings.value.acceptedFiles =
       props.acceptedFileTypes.map((type: string) => `.${type}`).join(", ");
@@ -60,7 +63,7 @@ const setUseUploadVariables = () => {
 };
 
 watch(
-  () => [props.acceptedFileTypes, props.maxFileSize],
+  () => [props.acceptedFileTypes, props.maxFileSize, props.uploadFieldType],
   () => {
     setUseUploadVariables();
   },
@@ -70,8 +73,10 @@ watch(
 watch(
   () => getModalInfo(TypeModals.DynamicForm).state,
   () => {
-    dropzoneHelper.resetDropzone();
-    resetUpload();
+    if (getModalInfo(TypeModals.DynamicForm).state === ModalState.Hide) {
+      dropzoneHelper.resetDropzone();
+      resetUpload();
+    }
   },
 );
 </script>

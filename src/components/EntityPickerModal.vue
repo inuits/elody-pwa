@@ -50,7 +50,10 @@
           />
         </BaseTab>
         <BaseTab :title="t('upload.upload-files')">
-          <upload-modal-dropzone />
+          <dynamic-form
+            dynamic-form-query="GetSingleEntityUploadForm"
+            :has-linked-upload="true"
+          />
         </BaseTab>
       </BaseTabs>
     </div>
@@ -73,12 +76,12 @@ import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import BaseTab from "@/components/BaseTab.vue";
 import BaseTabs from "@/components/BaseTabs.vue";
-import UploadModalDropzone from "@/components/UploadInterfaceDropzone.vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
+import dynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 
 const { t } = useI18n();
 const { getAcceptedTypes, getRelationType } = useEntityPickerModal();
