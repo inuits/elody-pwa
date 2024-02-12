@@ -1,36 +1,28 @@
-import { ref } from "vue";
-
-const queryName = ref<string>();
 export const useImport = () => {
-  const setQueryName = (query: string) => {
-    queryName.value = query;
-  };
-
   const getQueries = async () => {
     return await import(`/src/generated-types/queries.ts`);
   };
 
-  const loadDocument = async () => {
+  const loadDocument = async (queryName: string) => {
     try {
       const queries = await getQueries();
-      return queries[`${queryName.value}Document`];
+      return queries[`${queryName}Document`];
     } catch (e) {}
   };
-  const loadQuery = async () => {
+  const loadQuery = async (queryName: string) => {
     try {
       const queries = await getQueries();
-      return queries[`${queryName.value}Query`];
+      return queries[`${queryName}Query`];
     } catch (e) {}
   };
-  const loadQueryVariables = async () => {
+  const loadQueryVariables = async (queryName: string) => {
     try {
       const queries = await getQueries();
-      return queries[`${queryName.value}QueryVariables`];
+      return queries[`${queryName}QueryVariables`];
     } catch (e) {}
   };
 
   return {
-    setQueryName,
     loadDocument,
     loadQuery,
     loadQueryVariables,

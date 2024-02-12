@@ -56,11 +56,10 @@ import {
   PanelMetaData,
   TypeModals,
   UploadField,
-  UploadFieldType,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicFormModal } from "@/components/dynamicForms/useDynamicFormModal";
-import { computed, inject, ref, watch, onMounted } from "vue";
+import { computed, inject, ref, watch } from "vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
@@ -85,7 +84,7 @@ const props = withDefaults(
   },
 );
 
-const { setQueryName, loadDocument } = useImport();
+const { loadDocument } = useImport();
 const { closeModal, getModalInfo } = useBaseModal();
 const { getDynamicForm, dynamicForm, performSubmitAction } =
   useDynamicFormModal();
@@ -136,8 +135,7 @@ const createEntityFromFormInput = (entityType: Entitytyping): EntityInput => {
 };
 
 const getQuery = async (queryName: string) => {
-  setQueryName(queryName);
-  return await loadDocument();
+  return await loadDocument(queryName);
 };
 
 const performActionButtonClickEvent = async (
@@ -157,19 +155,18 @@ const performActionButtonClickEvent = async (
 
 const initializeForm = async () => {
   if (!props.dynamicFormQuery) return;
+  console.log("initializeForm");
   const document = await getQuery(props.dynamicFormQuery);
   getDynamicForm(document);
 };
 
-onMounted(() => {
-  initializeForm();
-});
-
 watch(
-  () => props.dynamicFormQuery,
+  () => [props.dynamicFormQuery],
   async () => {
-    initializeForm();
+    console.log(getModalInfo(TypeModals.EntityPicker).state);
+    await initializeForm();
   },
+  { immediate: true },
 );
 </script>
 
