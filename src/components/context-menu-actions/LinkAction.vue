@@ -10,9 +10,7 @@
 <script setup lang="ts">
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { Unicons } from "@/types";
-import {
-  Entitytyping,
-} from "@/generated-types/queries";
+import { Entitytyping } from "@/generated-types/queries";
 
 const props = defineProps<{
   label: String;

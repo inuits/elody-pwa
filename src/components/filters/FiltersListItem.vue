@@ -120,8 +120,7 @@ const filterOptions = ref<string[]>([]);
 
 const loadMatcher = async () => {
   let matcher = selectedMatcher.value?.value;
-  if (matcher === "MetadataOnRelationExactMatcher")
-    matcher = "ExactMatcher";
+  if (matcher === "MetadataOnRelationExactMatcher") matcher = "ExactMatcher";
   else if (matcher === "MetadataOnRelationContainsMatcher")
     matcher = "ContainsMatcher";
 

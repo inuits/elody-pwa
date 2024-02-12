@@ -71,10 +71,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
         );
         break;
       default:
-        createErrorNotification(
-          "Error",
-          message
-        );
+        createErrorNotification("Error", message);
         break;
     }
   };
