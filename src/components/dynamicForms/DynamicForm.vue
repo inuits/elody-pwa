@@ -6,43 +6,43 @@
     >
       <spinner-loader />
     </div>
-    <div
-      v-else
-      v-for="(field, index) in formFields"
-      :key="index"
-      class="w-full pb-2"
-    >
-      <metadata-wrapper
-        v-if="field.__typename === 'PanelMetaData'"
-        :form-id="dynamicFormQuery"
-        :metadata="field"
-        :is-edit="true"
-        @update:field="setFormFieldState"
-      />
-      <upload-interface-dropzone
-        v-if="field.__typename === 'UploadField'"
-        :dropzone-label="field.label"
-        :validation="field.inputField?.validation?.value"
-        :accepted-file-types="field.inputField?.fileTypes"
-        :max-file-size="field.inputField?.maxFileSize"
-        :dropzone-size="field.uploadFieldSize"
-        :max-amount-of-files="field.inputField?.maxAmountOfFiles"
-        :dry-run="field.dryRunUpload"
-        :upload-field-type="field.uploadFieldType"
-      />
-      <BaseButtonNew
-        v-if="field.__typename === 'FormAction'"
-        :label="t(field.label)"
-        :icon="field.icon"
-        button-style="accentAccent"
-        :errors="uploadFileErrors"
-        :disabled="
-          field.actionType === ActionType.Upload
-            ? !enableUploadButton
-            : formContainsErrors
-        "
-        @click="performActionButtonClickEvent(field)"
-      />
+    <div v-else class="w-full">
+      <h1 v-if="dynamicForm.GetDynamicForm.label" class="title pb-4">
+        {{ t(dynamicForm.GetDynamicForm.label) }}
+      </h1>
+      <div v-for="(field, index) in formFields" :key="index" class="pb-2">
+        <metadata-wrapper
+          v-if="field.__typename === 'PanelMetaData'"
+          :form-id="dynamicFormQuery"
+          :metadata="field"
+          :is-edit="true"
+          @update:field="setFormFieldState"
+        />
+        <upload-interface-dropzone
+          v-if="field.__typename === 'UploadField'"
+          :dropzone-label="field.label"
+          :validation="field.inputField?.validation?.value"
+          :accepted-file-types="field.inputField?.fileTypes"
+          :max-file-size="field.inputField?.maxFileSize"
+          :dropzone-size="field.uploadFieldSize"
+          :max-amount-of-files="field.inputField?.maxAmountOfFiles"
+          :dry-run="field.dryRunUpload"
+          :upload-field-type="field.uploadFieldType"
+        />
+        <BaseButtonNew
+          v-if="field.__typename === 'FormAction'"
+          :label="t(field.label)"
+          :icon="field.icon"
+          button-style="accentAccent"
+          :errors="uploadFileErrors"
+          :disabled="
+            field.actionType === ActionType.Upload
+              ? !enableUploadButton
+              : formContainsErrors
+          "
+          @click="performActionButtonClickEvent(field)"
+        />
+      </div>
     </div>
   </div>
 </template>
