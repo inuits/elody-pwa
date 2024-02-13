@@ -32,7 +32,7 @@ const isCsvRequired = ref<boolean>(false);
 const enableUploadButton = computed(() => {
   if (mediafiles.value.length && uploadType.value === UploadFieldType.Single)
     return true;
-  if (!isCsvRequired && mediafiles.value.length) return true;
+  if (!isCsvRequired.value && mediafiles.value.length) return true;
   if (!requiredMediafiles.value) return false;
   return (
     !dryRunErrors.value.length &&
