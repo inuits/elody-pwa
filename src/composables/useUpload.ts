@@ -171,7 +171,7 @@ const useUpload = () => {
   const __getUploadUrl = async (file: DropzoneFile, entityId: string = "") => {
     let uploadUrl: string | undefined = undefined;
 
-    if (uploadType.value === UploadFieldType.Batch) {
+    if (uploadType.value === UploadFieldType.Batch && isCsvRequired.value) {
       if (_prefetchedUploadUrls === "not-prefetched-yet")
         _prefetchedUploadUrls = (await __batchEntities(
           __getCsvBlob(),
@@ -228,7 +228,9 @@ const useUpload = () => {
     ).length;
 
     if (uploadType.value === "batch")
-      return csvFilesCount === 1 && nonCsvFilesCount > 0;
+      if (isCsvRequired.value)
+        return csvFilesCount === 1 && nonCsvFilesCount > 0;
+      else return nonCsvFilesCount > 0;
     if (uploadType.value === "single")
       return csvFilesCount === 0 && nonCsvFilesCount > 0;
     return false;
