@@ -32,7 +32,9 @@ const { closeModal, getModalInfo } = useBaseModal();
 const { t } = useI18n();
 const { upload, files, uploadType, resetUpload, isCsvRequired } = useUpload();
 let dropzoneHelper = new useDropzoneHelper();
-const isRequired = computed(() => props.validation.includes("required"));
+const isRequired = computed(() =>
+  props.validation ? props.validation.includes("required") : false,
+);
 
 const props = withDefaults(
   defineProps<{
@@ -44,7 +46,7 @@ const props = withDefaults(
     isLinkedUpload?: boolean;
     dryRun: boolean;
     uploadFieldType: UploadFieldType;
-    validation: string;
+    validation?: string;
   }>(),
   {
     dropzoneSize: "big",
@@ -55,7 +57,7 @@ const props = withDefaults(
 
 const setUseUploadVariables = () => {
   uploadType.value = props.uploadFieldType as UploadFieldType;
-  if (props.dryRun && isRequired) isCsvRequired.value = true;
+  if (props.dryRun && isRequired.value) isCsvRequired.value = true;
   if (props.acceptedFileTypes)
     dropzoneHelper.dropzoneSettings.value.acceptedFiles =
       props.acceptedFileTypes.map((type: string) => `.${type}`).join(", ");
