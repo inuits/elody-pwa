@@ -43,6 +43,7 @@
           class="max-h-9"
           v-model:model-value="selectedMatcher"
           :options="matchers"
+          :default-option="filter.selectedMatcher"
           label-position="inline"
           :default-label="t('filters.matcher-labels.select-filter-type')"
           dropdown-style="default"
@@ -52,9 +53,11 @@
         <component
           v-if="selectedMatcher"
           :is="matcherComponent"
-          :filter="filter.advancedFilter"
-          @new-advanced-filter-input="
-            (input: AdvancedFilterInput) => (advancedFilterInput = input)
+          :filter="filter"
+          @new-advanced-filter-input="(input: AdvancedFilterInput, _force: boolean) => {
+            force = _force;
+            advancedFilterInput = input;
+          }
           "
           @filter-options="(options: string[]) => (filterOptions = options)"
         />
@@ -66,14 +69,18 @@
         :disabled="!selectedMatcher"
         button-style="accentNormal"
         button-size="small"
-        @click="() => (selectedMatcher = undefined)"
+        @click="
+          () => {
+            selectedMatcher = undefined;
+          }
+        "
       />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import type { FilterListItem } from "@/components/filters/FiltersBase.vue";
+import type { FilterListItem } from "@/composables/useStateManagement";
 import type {
   AdvancedFilterInput,
   DropdownOption,
@@ -98,7 +105,12 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (event: "activateFilter", advancedFilterInput: AdvancedFilterInput): void;
+  (event: "selectedMatcher", selectedMatcher: DropdownOption | undefined): void;
+  (
+    event: "activateFilter",
+    advancedFilterInput: AdvancedFilterInput,
+    force: boolean
+  ): void;
   (
     event: "deactivateFilter",
     advancedFilterKey: string | InputMaybe<string> | undefined
@@ -107,8 +119,8 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
-const { filter, matchers, clearAllActiveFilters } = toRefs(props);
-const isOpen = ref<boolean>(false);
+const { matchers, clearAllActiveFilters } = toRefs(props);
+const isOpen = ref<boolean>(props.filter.isActive || false);
 const matcherComponent = ref();
 const selectedMatcher = ref<DropdownOption>();
 const advancedFilterInput = ref<AdvancedFilterInput>({
@@ -116,6 +128,7 @@ const advancedFilterInput = ref<AdvancedFilterInput>({
   key: props.filter.advancedFilter.key,
   value: undefined,
 });
+const force = ref<boolean>(false);
 const filterOptions = ref<string[]>([]);
 
 const loadMatcher = async () => {
@@ -125,9 +138,8 @@ const loadMatcher = async () => {
     matcher = "ContainsMatcher";
 
   const module = await import(`@/components/filters/matchers/${matcher}.vue`);
-  if (matcherComponent.value !== module.default)
-    emit("deactivateFilter", advancedFilterInput.value.key);
   matcherComponent.value = markRaw(module.default);
+  emit("selectedMatcher", selectedMatcher.value);
 };
 
 const icon = computed<string>(() =>
@@ -153,10 +165,10 @@ watch(selectedMatcher, async () => {
 watch(advancedFilterInput, () => {
   if (Array.isArray(advancedFilterInput.value.value))
     if (advancedFilterInput.value.value.length > 0)
-      emit("activateFilter", advancedFilterInput.value);
+      emit("activateFilter", advancedFilterInput.value, force.value);
     else emit("deactivateFilter", advancedFilterInput.value.key);
   else if (advancedFilterInput.value.value !== undefined)
-    emit("activateFilter", advancedFilterInput.value);
+    emit("activateFilter", advancedFilterInput.value, force.value);
   else emit("deactivateFilter", advancedFilterInput.value.key);
 });
 watch(clearAllActiveFilters, () => {
@@ -166,10 +178,12 @@ watch(clearAllActiveFilters, () => {
   }
 });
 watch(matchers, () => {
-  const defaultMatcher = matchers.value.find(
-    (matcher) =>
-      matcher.value === defaultMatcherMap[advancedFilterInput.value.type]
-  );
+  const defaultMatcher =
+    props.filter.selectedMatcher ||
+    matchers.value.find(
+      (matcher) =>
+        matcher.value === defaultMatcherMap[advancedFilterInput.value.type]
+    );
 
   if (defaultMatcher && !selectedMatcher.value)
     selectedMatcher.value = defaultMatcher;

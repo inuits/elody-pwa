@@ -40,6 +40,7 @@
               :filters-base-initialization-status="
                 filtersBaseInitializationStatus
               "
+              :route="route"
               @apply-filters="setAdvancedFilters"
               @expand-filters="expandFilters = !expandFilters"
             />
@@ -55,6 +56,7 @@
               :sort-options="sortOptions"
               :total-items="totalEntityCount || NaN"
               :queryVariables="queryVariables as GetEntitiesQueryVariables"
+              :entities-loading="entitiesLoading"
               :library-bar-initialization-status="
                 libraryBarInitializationStatus
               "
@@ -161,25 +163,26 @@ import type {
   Context,
   InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
+import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
 import FiltersBase from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
+import useUpload from "@/composables/useUpload";
 import ViewModesGrid from "@/components/library/view-modes/ViewModesGrid.vue";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
 import { bulkSelectAllSizeLimit } from "@/main";
 import { DefaultApolloClient } from "@vue/apollo-composable";
-import { getEntityTitle, updateLocalStorage } from "@/helpers";
+import { getEntityTitle } from "@/helpers";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
+import { useStateManagement } from "@/composables/useStateManagement";
 import { watch, ref, onMounted, inject, computed } from "vue";
-import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
-import { useFormHelper } from "@/composables/useFormHelper";
-import useUpload from "@/composables/useUpload";
 
 const props = withDefaults(
   defineProps<{
@@ -229,10 +232,11 @@ const emit = defineEmits<{
   (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
 }>();
 
-const { t } = useI18n();
 const apolloClient = inject(DefaultApolloClient);
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
+const { getGlobalState, setGlobalState } = useStateManagement();
 
 const {
   advancedFilters,
@@ -364,7 +368,7 @@ const bulkSelect = (items = entities.value) => {
 };
 
 const refetchEntities = () => {
-  getEntities(true);
+  getEntities(route, true);
 };
 
 const initializeBaseLibrary = () => {
@@ -373,24 +377,24 @@ const initializeBaseLibrary = () => {
     if (props.filters.length > 0) setAdvancedFilters(props.filters);
     else if (props.filterType) setEntityType(props.filterType as Entitytyping);
     queryVariables.value.searchInputType = props.searchInputTypeOnDrawer;
-    getEntities();
+    getEntities(route);
   }
 };
 
-const setDisplayPreferences = () => {
-  const displayPreferences = window.localStorage.getItem("_displayPreferences");
+const getDisplayPreferences = () => {
+  const displayPreferences = getGlobalState("_displayPreferences");
   if (displayPreferences) {
-    displayGrid.value = JSON.parse(displayPreferences).grid;
+    displayGrid.value = displayPreferences.grid;
     if (displayGrid.value === false) displayList.value = true;
     expandFilters.value = !props.enableAdvancedFilters
       ? false
-      : JSON.parse(displayPreferences).expandFilters;
+      : displayPreferences.expandFilters;
   }
 };
 
 onMounted(() => {
   initializeBaseLibrary();
-  setDisplayPreferences();
+  getDisplayPreferences();
 });
 
 watch(
@@ -409,7 +413,7 @@ watch(
           ? SearchInputType.AdvancedInputMediaFilesType
           : SearchInputType.AdvancedInputType;
       queryVariables.value.searchInputType = searchInputType;
-      getEntities();
+      getEntities(route);
     }
   }
 );
@@ -460,14 +464,18 @@ watch(
         iconOn: DamsIcons.Image,
         iconOff: DamsIcons.Image,
       });
-    setDisplayPreferences();
+    getDisplayPreferences();
   }
 );
 watch([displayGrid, expandFilters], () => {
+  let _expandFilters = expandFilters.value;
+  if (route.name === "SingleEntity")
+    _expandFilters = getGlobalState("_displayPreferences").expandFilters;
+
   displayList.value = !displayGrid.value;
-  updateLocalStorage("_displayPreferences", {
+  setGlobalState("_displayPreferences", {
     grid: displayPreview.value ? false : displayGrid.value,
-    expandFilters: expandFilters.value,
+    expandFilters: _expandFilters,
   });
 });
 

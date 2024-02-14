@@ -254,7 +254,7 @@ export const convertDateToReadbleFormat = (
 
 export const createPlaceholderEntities = (amount: number): any[] => {
   const placeholders = [];
-  for (let i = 0; i <= amount; i++) {
+  for (let i = 0; i < amount; i++) {
     placeholders.push({
       id: `${i}`,
       teaserMetadata: [
