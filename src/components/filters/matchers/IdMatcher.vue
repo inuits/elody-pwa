@@ -9,34 +9,36 @@
 </template>
 
 <script lang="ts" setup>
+import type { FilterListItem } from "@/composables/useStateManagement";
 import {
   AdvancedFilterTypes,
   GetFilterOptionsDocument,
-  type AdvancedFilter,
   type AdvancedFilterInput,
   type DropdownOption,
   type GetFilterOptionsQuery,
   type GetFilterOptionsQueryVariables,
 } from "@/generated-types/queries";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
-import { defineEmits, ref, watch } from "vue";
+import { defineEmits, onMounted, ref, watch } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
-  filter: AdvancedFilter;
+  filter: FilterListItem;
 }>();
 
 const emit = defineEmits<{
   (
     event: "newAdvancedFilterInput",
-    advancedFilterInput: AdvancedFilterInput
+    advancedFilterInput: AdvancedFilterInput,
+    force: boolean
   ): void;
 }>();
 
 const { t } = useI18n();
 
-const input = ref<DropdownOption[]>([]);
+const input = ref<DropdownOption[]>();
+const force = ref<boolean>(false);
 
 const refetchEnabled = ref<boolean>(false);
 const queryVariables = ref<GetFilterOptionsQueryVariables>();
@@ -52,35 +54,43 @@ const getAutocompleteOptions = (value: string) => {
   if (value.length < 3) return;
 
   if (
-    props.filter.type === AdvancedFilterTypes.Id &&
-    props.filter.advancedFilterInputForRetrievingOptions
+    props.filter.advancedFilter.type === AdvancedFilterTypes.Id &&
+    props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
   ) {
     queryVariables.value = {
       input: {
-        type: props.filter.advancedFilterInputForRetrievingOptions.type,
+        type: props.filter.advancedFilter
+          .advancedFilterInputForRetrievingOptions.type,
         parent_key:
-          props.filter.advancedFilterInputForRetrievingOptions.parent_key,
-        key: props.filter.advancedFilterInputForRetrievingOptions.key,
+          props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
+            .parent_key,
+        key: props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
+          .key,
         value,
         metadata_key_as_label:
-          props.filter.advancedFilterInputForRetrievingOptions
+          props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
             .metadata_key_as_label,
         item_types:
-          props.filter.advancedFilterInputForRetrievingOptions.item_types ?? [],
+          props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
+            .item_types ?? [],
         provide_value_options_for_key: true,
       },
       limit: 999999,
     };
-    if (props.filter.advancedFilterInputForRetrievingOptions.lookup)
+    if (
+      props.filter.advancedFilter.advancedFilterInputForRetrievingOptions.lookup
+    )
       queryVariables.value.input.lookup = {
-        from: props.filter.advancedFilterInputForRetrievingOptions.lookup.from,
+        from: props.filter.advancedFilter
+          .advancedFilterInputForRetrievingOptions.lookup.from,
         local_field:
-          props.filter.advancedFilterInputForRetrievingOptions.lookup
-            .local_field,
+          props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
+            .lookup.local_field,
         foreign_field:
-          props.filter.advancedFilterInputForRetrievingOptions.lookup
-            .foreign_field,
-        as: props.filter.advancedFilterInputForRetrievingOptions.lookup.as,
+          props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
+            .lookup.foreign_field,
+        as: props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
+          .lookup.as,
       };
 
     refetchEnabled.value = true;
@@ -100,25 +110,31 @@ const clearAutocompleteOptions = () => {
     autocompleteOption = autocompleteOptions.value.pop();
 };
 
+onMounted(() => {
+  input.value = props.filter.inputFromState?.value || [];
+  force.value = Boolean(props.filter.inputFromState);
+});
+
 watch(input, () => {
   const value = input.value
     ? Object.values(input.value).map((option) => option.value)
     : undefined;
 
   const newAdvancedFilterInput: AdvancedFilterInput = {
-    type: props.filter.type,
-    parent_key: props.filter.parentKey,
-    key: props.filter.key,
+    type: props.filter.advancedFilter.type,
+    parent_key: props.filter.advancedFilter.parentKey,
+    key: props.filter.advancedFilter.key,
     value,
     match_exact: true,
   };
-  if (props.filter.lookup)
+  if (props.filter.advancedFilter.lookup)
     newAdvancedFilterInput.lookup = {
-      from: props.filter.lookup.from,
-      local_field: props.filter.lookup.local_field,
-      foreign_field: props.filter.lookup.foreign_field,
-      as: props.filter.lookup.as,
+      from: props.filter.advancedFilter.lookup.from,
+      local_field: props.filter.advancedFilter.lookup.local_field,
+      foreign_field: props.filter.advancedFilter.lookup.foreign_field,
+      as: props.filter.advancedFilter.lookup.as,
     };
-  emit("newAdvancedFilterInput", newAdvancedFilterInput);
+  emit("newAdvancedFilterInput", newAdvancedFilterInput, force.value);
+  force.value = false;
 });
 </script>

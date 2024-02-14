@@ -80,6 +80,7 @@ const props = withDefaults(
     modelValue: DropdownOption | string | undefined;
     options: DropdownOption[];
     dropdownStyle: DropdownStyle;
+    defaultOption?: DropdownOption;
     selectFirstOptionByDefault?: boolean;
     labelPosition?: "above" | "inline";
     labelAlignment?: "left" | "right";
@@ -104,7 +105,7 @@ const defaultOption: DropdownOption = {
   label: props.label ? props.label : "dropdown.select-option",
   value: "",
 };
-const selectedItem = ref<DropdownOption>(defaultOption);
+const selectedItem = ref<DropdownOption>(props.defaultOption || defaultOption);
 const selectedItemLabel = computed(() => selectedItem.value.label);
 
 const selectDefaultItem = () => {

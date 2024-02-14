@@ -1,12 +1,5 @@
 import type { ApolloClient } from "@apollo/client/core";
-import {
-  Entitytyping,
-  GetAdvancedFiltersDocument,
-  GetEntitiesDocument,
-  GetFilterMatcherMappingDocument,
-  GetPaginationLimitOptionsDocument,
-  GetSortOptionsDocument,
-} from "@/generated-types/queries";
+import type { RouteLocationNormalizedLoaded } from "vue-router";
 import type {
   AdvancedFilterInput,
   AdvancedFilters,
@@ -19,14 +12,23 @@ import type {
   GetFilterMatcherMappingQuery,
   GetPaginationLimitOptionsQuery,
   GetSortOptionsQuery,
+  IntialValues,
   Maybe,
   Metadata,
-  IntialValues,
+} from "@/generated-types/queries";
+import {
+  Entitytyping,
+  GetAdvancedFiltersDocument,
+  GetEntitiesDocument,
+  GetFilterMatcherMappingDocument,
+  GetPaginationLimitOptionsDocument,
+  GetSortOptionsDocument,
 } from "@/generated-types/queries";
 import useEditMode from "@/composables/useEdit";
-import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
 import { createPlaceholderEntities } from "@/helpers";
 import { ref, watch } from "vue";
+import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
+import { useStateManagement } from "@/composables/useStateManagement";
 
 export const useBaseLibrary = (
   apolloClient: ApolloClient<any>,
@@ -157,18 +159,19 @@ export const useBaseLibrary = (
     );
   };
 
+  const _route = ref<RouteLocationNormalizedLoaded>();
   const entities = ref<Entity[]>([]);
-  const entitiesLoaded = ref<boolean>(false);
   const entitiesLoading = ref<boolean>(false);
   const entityType = ref<Entitytyping>(Entitytyping.BaseEntity);
   const manipulateQuery = ref<boolean>(false);
   const manipulationQuery = ref<object>();
   const totalEntityCount = ref<number>(0);
+  const { getStateForRoute, setStateForRoute } = useStateManagement();
+  const { isSaved } = useEditMode();
   const {
     setAdvancedFilterInputs,
     createQueryVariables,
   } = useQueryVariablesFactory();
-  const { isSaved } = useEditMode();
   const queryVariables = ref<GetEntitiesQueryVariables>({
     type: entityType.value,
     limit: 20,
@@ -206,7 +209,6 @@ export const useBaseLibrary = (
   const setEntities = (newEntities: Entity[]): void => {
     entities.value = newEntities;
     __setEntitiesLoading(false);
-    entitiesLoaded.value = true;
   };
 
   const setTotalEntityCount = (newCount: number): void => {
@@ -214,10 +216,10 @@ export const useBaseLibrary = (
   };
 
   const setAdvancedFilters = (filters: AdvancedFilterInput[]): void => {
-    __setEntitiesLoading(true);
     if (filters === queryVariables.value.advancedFilterInputs && !isSaved.value)
       return;
 
+    __setEntitiesLoading(true);
     queryVariables.value.advancedFilterInputs = [];
     queryVariables.value.advancedFilterInputs = filters;
     queryVariables.value.skip = 1;
@@ -237,7 +239,10 @@ export const useBaseLibrary = (
     return formatted;
   };
 
-  const getEntities = async (force: boolean = false): Promise<void> => {
+  const getEntities = async (
+    route: RouteLocationNormalizedLoaded | undefined,
+    force: boolean = false
+  ): Promise<void> => {
     if (
       !force &&
       libraryBarInitializationStatus.value === "initialized" &&
@@ -245,11 +250,8 @@ export const useBaseLibrary = (
     )
       return;
 
-    entitiesLoaded.value = false;
-    setTimeout(() => {
-      if (!entitiesLoaded.value) __setEntitiesLoading(true);
-      entitiesLoaded.value = false;
-    }, 100);
+    _route.value = route;
+    __setEntitiesLoading(true);
 
     if (libraryBarInitializationStatus.value === "not-initialized")
       await initializeLibraryBar();
@@ -287,14 +289,34 @@ export const useBaseLibrary = (
   };
 
   const __doEntitiesCall = () => {
+    const state = getStateForRoute(_route.value);
+    let variables = state?.queryVariables;
+    if (variables) {
+      queryVariables.value.type = variables.type;
+      queryVariables.value.limit = variables.limit;
+      queryVariables.value.skip = variables.skip;
+      queryVariables.value.searchValue.value = variables.searchValue.value;
+      queryVariables.value.searchValue.isAsc = variables.searchValue.isAsc;
+      queryVariables.value.searchValue.key = variables.searchValue.key;
+      queryVariables.value.searchValue.order_by =
+        variables.searchValue.order_by;
+      queryVariables.value.searchInputType = variables.searchInputType;
+    } else {
+      setStateForRoute(_route.value, {
+        entityCountOnPage: state?.entityCountOnPage || 1,
+        queryVariables: queryVariables.value,
+        filterListItems: state?.filterListItems || [],
+      });
+    }
+    if (!variables || _route.value?.name === "SingleEntity")
+      variables = queryVariables.value;
+
     apolloClient
       .query({
         query: manipulateQuery.value
           ? manipulationQuery.value.document
           : GetEntitiesDocument,
-        variables: manipulateQuery.value
-          ? createQueryVariables()
-          : queryVariables.value,
+        variables: manipulateQuery.value ? createQueryVariables() : variables,
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
       })
@@ -302,6 +324,13 @@ export const useBaseLibrary = (
         const entities = result.data.Entities;
         setEntities(entities?.results as Entity[]);
         totalEntityCount.value = entities?.count || 0;
+
+        const state = getStateForRoute(_route.value);
+        setStateForRoute(_route.value, {
+          entityCountOnPage: entities.results.length,
+          queryVariables: state?.queryVariables || queryVariables.value,
+          filterListItems: state?.filterListItems || [],
+        });
         __setEntitiesLoading(false);
       });
   };
@@ -329,9 +358,14 @@ export const useBaseLibrary = (
   );
   watch(
     () => entitiesLoading.value,
-    (isLoading) => {
-      if (isLoading) {
-        const placeholderAmount = queryVariables.value?.limit || 25;
+    () => {
+      if (entitiesLoading.value && _route.value?.name !== "SingleEntity") {
+        let placeholderAmount = 1;
+        const entityCountOnPage = getStateForRoute(
+          _route.value
+        )?.entityCountOnPage;
+        if (entityCountOnPage !== undefined)
+          placeholderAmount = entityCountOnPage;
         entities.value = createPlaceholderEntities(placeholderAmount);
       }
     }
@@ -349,7 +383,16 @@ export const useBaseLibrary = (
         libraryBarInitializationStatus.value !== "inProgress" &&
         filtersBaseInitializationStatus.value !== "inProgress"
       ) {
-        getEntities();
+        __setEntitiesLoading(true);
+
+        const state = getStateForRoute(_route.value);
+        setStateForRoute(_route.value, {
+          entityCountOnPage: state?.entityCountOnPage || 1,
+          queryVariables: queryVariables.value,
+          filterListItems: state?.filterListItems || [],
+        });
+
+        getEntities(_route.value);
         __doEntitiesCall();
       }
     },
@@ -368,10 +411,10 @@ export const useBaseLibrary = (
     paginationLimitOptions,
     queryVariables,
     setAdvancedFilters,
-    setManipulationOfQuery,
     setEntities,
     setEntityType,
     setIsSearchLibrary,
+    setManipulationOfQuery,
     setTotalEntityCount,
     sortOptions,
     totalEntityCount,

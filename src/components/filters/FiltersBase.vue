@@ -2,7 +2,7 @@
   <div
     class="relative h-full bg-neutral-white w-full"
     :class="expandFilters ? 'rounded-t' : 'rounded-xl'"
-    @keydown.enter="applyFilters()"
+    @keydown.enter="applyFilters(true)"
   >
     <div
       class="flex justify-between items-center px-4 h-12 border-t border-x select-none cursor-pointer"
@@ -46,7 +46,7 @@
           <BaseButtonNew
             :label="t('filters.apply')"
             button-style="accentNormal"
-            @click="applyFilters()"
+            @click="applyFilters(true)"
           />
           <!--          <BaseButtonNew-->
           <!--            :icon="DamsIcons.EllipsisV"-->
@@ -88,15 +88,27 @@
             )
           "
           :clear-all-active-filters="clearAllActiveFilters"
-          @activate-filter="(filter: AdvancedFilterInput) => {
-            activeFilters = activeFilters.filter(activeFilter => activeFilter.key !== filter.key);
-            activeFilters.push(filter);
+          @selected-matcher="(matcher: DropdownOption | undefined) => filter.selectedMatcher = matcher"
+          @activate-filter="(filterInput: AdvancedFilterInput, force: boolean) => {
+            filter.isActive = true;
+            filter.inputFromState = filterInput;
+            activeFilters = activeFilters.filter(activeFilter => activeFilter.key !== filterInput.key);
+            activeFilters.push(filterInput);
+            if (force) applyFilters();
           }"
           @deactivate-filter="
-            (key) =>
-              (activeFilters = activeFilters.filter(
+            (key) => {
+              const filter = filters.filter(
+                (filter) => filter.advancedFilter.key === key
+              )[0];
+              filter.isActive = false;
+              filter.inputFromState = undefined;
+              filter.selectedMatcher = undefined;
+              activeFilters = activeFilters.filter(
                 (filter) => filter.key !== key
-              ))
+              );
+              applyFilters(true);
+            }
           "
         />
       </div>
@@ -108,10 +120,10 @@
 </template>
 
 <script lang="ts" setup>
+import type { RouteLocationNormalizedLoaded } from "vue-router";
 import {
   AdvancedFilterTypes,
   DamsIcons,
-  type AdvancedFilter,
   type AdvancedFilterInput,
   type AdvancedFilters,
   type DropdownOption,
@@ -119,21 +131,19 @@ import {
   type Maybe,
 } from "@/generated-types/queries";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import FiltersListItem from "@/components/filters/FiltersListItem.vue";
+import SavedSearches from "@/components/SavedSearches.vue";
 import useEditMode from "@/composables/useEdit";
 import { computed, defineProps, ref, toRefs, watch } from "vue";
+import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
-import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
-import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
-import SavedSearches from "@/components/SavedSearches.vue";
-
-export type FilterListItem = {
-  isActive: boolean;
-  isDisplayed: boolean;
-  advancedFilter: AdvancedFilter;
-};
+import {
+  useStateManagement,
+  type FilterListItem,
+} from "@/composables/useStateManagement";
 
 const props = withDefaults(
   defineProps<{
@@ -146,6 +156,7 @@ const props = withDefaults(
       | "not-initialized"
       | "inProgress"
       | "initialized";
+    route: RouteLocationNormalizedLoaded;
   }>(),
   {
     parentEntityIdentifiers: () => [],
@@ -157,9 +168,6 @@ const emit = defineEmits<{
   (event: "expandFilters", expandFilters: boolean): void;
 }>();
 
-const { entityType, filtersBaseInitializationStatus } = toRefs(props);
-const { isSaved } = useEditMode();
-const { t } = useI18n();
 const matchers = ref<DropdownOption[]>([]);
 const filters = ref<FilterListItem[]>([]);
 const displayedFilterOptions = ref<DropdownOption[]>([]);
@@ -167,8 +175,21 @@ const activeFilters = ref<AdvancedFilterInput[]>([]);
 const activeFilterCount = ref<number>(0);
 const clearAllActiveFilters = ref<boolean>(false);
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
+const { entityType, filtersBaseInitializationStatus } = toRefs(props);
+const { getStateForRoute, setStateForRoute } = useStateManagement();
+const { isSaved } = useEditMode();
+const { t } = useI18n();
 
-const applyFilters = () => {
+const applyFilters = (saveState = false) => {
+  if (saveState) {
+    const state = getStateForRoute(props.route);
+    if (state)
+      setStateForRoute(props.route, {
+        entityCountOnPage: state.entityCountOnPage,
+        queryVariables: state.queryVariables,
+        filterListItems: JSON.parse(JSON.stringify(filters.value)),
+      });
+  }
   emit("applyFilters", activeFilters.value);
 };
 
@@ -196,51 +217,60 @@ const handleAdvancedFilters = () => {
   if (!props.advancedFilters) return;
   filters.value = [];
   activeFilters.value = [];
+  const state = getStateForRoute(props.route);
 
-  Object.values(props.advancedFilters).forEach((advancedFilter) => {
-    if (typeof advancedFilter !== "string") {
-      if (advancedFilter.hidden) {
-        const hiddenFilter: AdvancedFilterInput = {
-          type: advancedFilter.type,
-          parent_key: advancedFilter.parentKey,
-          key: advancedFilter.key,
-          value: advancedFilter.defaultValue,
-          item_types: advancedFilter.itemTypes,
-          match_exact: true,
-        };
-        if (advancedFilter.lookup)
-          hiddenFilter.lookup = {
-            from: advancedFilter.lookup.from,
-            local_field: advancedFilter.lookup.local_field,
-            foreign_field: advancedFilter.lookup.foreign_field,
-            as: advancedFilter.lookup.as,
+  if (!state?.filterListItems || state.filterListItems.length == 0) {
+    Object.values(props.advancedFilters).forEach((advancedFilter) => {
+      if (typeof advancedFilter !== "string") {
+        if (advancedFilter.hidden) {
+          const hiddenFilter: AdvancedFilterInput = {
+            type: advancedFilter.type,
+            parent_key: advancedFilter.parentKey,
+            key: advancedFilter.key,
+            value: advancedFilter.defaultValue,
+            item_types: advancedFilter.itemTypes,
+            match_exact: true,
           };
+          if (advancedFilter.lookup)
+            hiddenFilter.lookup = {
+              from: advancedFilter.lookup.from,
+              local_field: advancedFilter.lookup.local_field,
+              foreign_field: advancedFilter.lookup.foreign_field,
+              as: advancedFilter.lookup.as,
+            };
 
-        console.log(advancedFilter);
-        if (
-          advancedFilter.parentKey === "relations" ||
-          (advancedFilter.parentKey === "" && // temporary hack
-            advancedFilter.type === AdvancedFilterTypes.Selection &&
-            advancedFilter.hidden)
-        ) {
-          if (props.parentEntityIdentifiers.length > 0) {
-            hiddenFilter.value = props.parentEntityIdentifiers;
-            if (advancedFilter.itemTypes) activeFilters.value = [hiddenFilter];
-            else activeFilters.value.push(hiddenFilter);
-          }
-        } else activeFilters.value.push(hiddenFilter);
+          if (
+            advancedFilter.parentKey === "relations" ||
+            (advancedFilter.parentKey === "" && // temporary hack
+              advancedFilter.type === AdvancedFilterTypes.Selection &&
+              advancedFilter.hidden)
+          ) {
+            if (props.parentEntityIdentifiers.length > 0) {
+              hiddenFilter.value = props.parentEntityIdentifiers;
+              if (advancedFilter.itemTypes)
+                activeFilters.value = [hiddenFilter];
+              else activeFilters.value.push(hiddenFilter);
+            }
+          } else activeFilters.value.push(hiddenFilter);
+        }
+
+        filters.value.push({
+          isActive: !!advancedFilter.hidden,
+          isDisplayed: advancedFilter.isDisplayedByDefault ?? false,
+          advancedFilter,
+          inputFromState: undefined,
+          selectedMatcher: undefined,
+        });
       }
+    });
+  } else {
+    filters.value = state?.filterListItems;
+    activeFilters.value = filters.value
+      .filter((filter) => filter.isActive && filter.inputFromState)
+      .map((filter) => filter.inputFromState) as AdvancedFilterInput[];
+  }
 
-      filters.value.push({
-        isActive: !!advancedFilter.hidden,
-        isDisplayed: advancedFilter.isDisplayedByDefault ?? false,
-        advancedFilter,
-      });
-    }
-  });
-
-  if (entityType.value || props.parentEntityIdentifiers.length > 0)
-    applyFilters();
+  if (props.parentEntityIdentifiers.length > 0) applyFilters();
 };
 
 const toggleDisplayedFilters = () => {
@@ -272,11 +302,7 @@ watch(
 watch(displayedFilterOptions, () => toggleDisplayedFilters());
 watch(activeFilters, () => {
   activeFilterCount.value = 0;
-
   filters.value.forEach((filter) => {
-    filter.isActive = activeFilters.value
-      .map((activeFilter) => activeFilter.key)
-      .includes(filter.advancedFilter.key);
     if (filter.advancedFilter.hidden) return;
     activeFilterCount.value += filter.isActive ? 1 : 0;
   });
@@ -298,8 +324,8 @@ watch(clearAllActiveFilters, () => {
         .includes(activeFilter.key)
     );
     setTimeout(() => (clearAllActiveFilters.value = false), 50);
-    applyFilters();
   }
+  applyFilters(true);
 });
 </script>
 

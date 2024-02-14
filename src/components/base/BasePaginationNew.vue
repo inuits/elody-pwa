@@ -96,6 +96,12 @@ const getLastPage = () => {
 };
 
 watch(
+  () => props.limit,
+  () => {
+    if (currentPage.value > getLastPage()) currentPage.value = 1;
+  }
+);
+watch(
   () => props.skip?.value,
   () => (currentPage.value = props.skip?.value || 1)
 );

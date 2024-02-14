@@ -12,38 +12,50 @@ const queryVariables = ref<GetEntitiesQueryVariables>();
 const totalItemsCount = ref<number>();
 
 export const useLibraryBar = () => {
-  const setSelectedPaginationLimitOption = (limit: number) => {
-    if (!limit) return;
-    selectedPaginationLimitOption.value = { label: `${limit}`, value: limit };
+  const setSelectedPaginationLimitOption = (
+    limitOption: DropdownOption | undefined
+  ) => {
+    if (!limitOption) return;
+    selectedPaginationLimitOption.value = limitOption;
   };
-  const setSelectedSkip = (skip: number) => {
+
+  const setSelectedSkip = (skip: number | undefined) => {
     if (!skip) return;
     selectedSkip.value = { label: `${skip}`, value: skip };
   };
-  const setSelectedSortOption = (sort: number) => {
-    if (!sort) return;
-    selectedSortOption.value = { label: `${sort}`, value: sort };
+
+  const setSelectedSortOption = (sortOption: DropdownOption | undefined) => {
+    if (!sortOption) return;
+    selectedSortOption.value = sortOption;
   };
+
+  const setIsAsc = (asc: boolean | undefined) => {
+    if (!asc) return;
+    isAsc.value = asc;
+  };
+
   const setQueryVariables = (variables: GetEntitiesQueryVariables) => {
     if (!variables) return;
     queryVariables.value = variables;
   };
+
   const setTotalItemsCount = (total: number) => {
     if (!total) return;
     totalItemsCount.value = total;
   };
 
   return {
-    setSelectedPaginationLimitOption,
-    selectedPaginationLimitOption,
-    setSelectedSkip,
-    selectedSkip,
-    setSelectedSortOption,
-    selectedSortOption,
-    setQueryVariables,
+    isAsc,
     queryVariables,
+    selectedPaginationLimitOption,
+    selectedSkip,
+    selectedSortOption,
+    setIsAsc,
+    setQueryVariables,
+    setSelectedPaginationLimitOption,
+    setSelectedSkip,
+    setSelectedSortOption,
     setTotalItemsCount,
     totalItemsCount,
-    isAsc,
   };
 };

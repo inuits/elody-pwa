@@ -8,45 +8,51 @@
 </template>
 
 <script lang="ts" setup>
-import type {
-  AdvancedFilter,
-  AdvancedFilterInput,
-} from "@/generated-types/queries";
+import type { AdvancedFilterInput } from "@/generated-types/queries";
+import type { FilterListItem } from "@/composables/useStateManagement";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { defineEmits, ref, watch } from "vue";
+import { defineEmits, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
-  filter: AdvancedFilter;
+  filter: FilterListItem;
 }>();
 
 const emit = defineEmits<{
   (
     event: "newAdvancedFilterInput",
-    advancedFilterInput: AdvancedFilterInput
+    advancedFilterInput: AdvancedFilterInput,
+    force: boolean
   ): void;
 }>();
 
 const { t } = useI18n();
 
-const input = ref<string | number>("");
+const input = ref<string | number>();
+const force = ref<boolean>(false);
+
+onMounted(() => {
+  input.value = props.filter.inputFromState?.value || "";
+  force.value = Boolean(props.filter.inputFromState);
+});
 
 watch(input, () => {
   const newAdvancedFilterInput: AdvancedFilterInput = {
-    type: props.filter.type,
-    parent_key: props.filter.parentKey,
-    key: props.filter.key,
+    type: props.filter.advancedFilter.type,
+    parent_key: props.filter.advancedFilter.parentKey,
+    key: props.filter.advancedFilter.key,
     value: input.value ? input.value : undefined,
     match_exact: false,
   };
-  if (props.filter.lookup)
+  if (props.filter.advancedFilter.lookup)
     newAdvancedFilterInput.lookup = {
-      from: props.filter.lookup.from,
-      local_field: props.filter.lookup.local_field,
-      foreign_field: props.filter.lookup.foreign_field,
-      as: props.filter.lookup.as,
+      from: props.filter.advancedFilter.lookup.from,
+      local_field: props.filter.advancedFilter.lookup.local_field,
+      foreign_field: props.filter.advancedFilter.lookup.foreign_field,
+      as: props.filter.advancedFilter.lookup.as,
     };
-  emit("newAdvancedFilterInput", newAdvancedFilterInput);
+  emit("newAdvancedFilterInput", newAdvancedFilterInput, force.value);
+  force.value = false;
 });
 </script>
 
