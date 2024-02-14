@@ -193,6 +193,7 @@ const useUpload = () => {
     ) {
       uploadUrl = await __createStandaloneMediafile(file);
     } else if (uploadType.value === UploadFieldType.Single) {
+      console.log(entityId);
       uploadUrl = await __createMediafileForEntity(entityId, file);
     }
 
@@ -209,8 +210,6 @@ const useUpload = () => {
       urlObject.pathname +
       "?" +
       urlObject.searchParams;
-
-    console.log(externalUrl);
 
     return {
       response: await fetch(externalUrl, {
