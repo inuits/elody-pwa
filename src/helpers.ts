@@ -12,19 +12,17 @@ import { createI18n } from "vue-i18n";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { type Router, useRoute } from "vue-router";
-import useEntitySingle from "@/composables/useEntitySingle";
 
 export const goToEntityPage = (
   entity: Entity,
   listItemRouteName: string,
-  router: Router
+  router: Router,
 ) => {
   if (entity.type === "MediaFile") {
     useEntityMediafileSelector().setEntityMediafiles([]);
     useEntityMediafileSelector().updateSelectedEntityMediafile(entity);
   }
 
-  useEntitySingle().setEntityUuid(entity.uuid);
   const entityId =
     entity.intialValues.slug ||
     entity.uuid ||
@@ -66,7 +64,7 @@ export const processTextWithLinks = (value: unknown) => {
   const pattern = /\b(https?:\/\/\S+)\b/g;
   const textWithLinks = stringValue.replace(
     pattern,
-    '<a class="underline" target="_blank" href="$1">$1</a>'
+    '<a class="underline" target="_blank" href="$1">$1</a>',
   );
   return textWithLinks;
 };
@@ -98,7 +96,7 @@ export const getIdFromKey = (prefix: string = "entities", key: string) => {
 export const customSort = (
   customSortOrder: string[],
   arrayToSort: any[],
-  sortKey: string
+  sortKey: string,
 ) => {
   const ordering: any = {};
   for (let i = 0; i < customSortOrder.length; i++) {
@@ -153,7 +151,7 @@ const { mediafileSelectionState } = useEntityMediafileSelector();
 export const getValueForPanelMetadata = (
   panelType: PanelType,
   metadataItemKey: string,
-  entityId: string
+  entityId: string,
 ): string => {
   const form = useFormHelper().getForm(entityId);
   if (panelType === PanelType.Metadata && form) {
@@ -169,7 +167,7 @@ export const getValueForPanelMetadata = (
 export const getMetadataFields = (
   objectToGetMetadataFrom: WindowElementPanel | PanelMetaData[],
   panelType: PanelType,
-  formId: string
+  formId: string,
 ): Array<PanelMetaData | EntityListElement> => {
   const fields: Array<PanelMetaData | EntityListElement> = [];
 
@@ -222,7 +220,7 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
 };
 export const convertDateToReadbleFormat = (
   dateString: string,
-  format: string
+  format: string,
 ): string => {
   const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = {
@@ -282,7 +280,7 @@ export const clearLocalStorageItem = (key: string): void => {
 
 export const findPanelMetadata = (
   obj: any,
-  parentIsEditable?: boolean
+  parentIsEditable?: boolean,
 ): PanelMetaData[] => {
   const results: PanelMetaData[] = [];
 
@@ -315,12 +313,12 @@ export const getApplicationDetails = async () => {
   const config = await fetch(
     import.meta.env.VUE_APP_CONFIG_URL
       ? import.meta.env.VUE_APP_CONFIG_URL
-      : "/api/config"
+      : "/api/config",
   ).then((r) => r.json());
   const translations = await fetch(
     import.meta.env.VUE_APP_CONFIG_URL
       ? import.meta.env.VUE_APP_CONFIG_URL
-      : "/api/translation"
+      : "/api/translation",
   ).then((r) => r.json());
   return { config, translations };
 };

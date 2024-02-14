@@ -48,6 +48,7 @@ import { useI18n } from "vue-i18n";
 import { usePermissions } from "@/composables/usePermissions";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
+import useEntitySingle from "@/composables/useEntitySingle";
 
 const config: any = inject("config");
 const router = useRouter();
@@ -108,6 +109,7 @@ watch(
   () => {
     const entity: BaseEntity = result.value?.Entity as BaseEntity;
     if (!entity || !entity.intialValues) return;
+    useEntitySingle().setEntityUuid(entity.uuid || entity.id);
 
     identifiers.value = [entity.uuid, entity.id];
     intialValues.value = entity.intialValues;
