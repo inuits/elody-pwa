@@ -91,17 +91,17 @@ const {
 const setDefaultOptions = () => {
   setQueryVariables(props.queryVariables);
   setSelectedPaginationLimitOption(
-    props.paginationLimitOptions.find(
+    props.paginationLimitOptions?.find(
       (option) => option.value === props.queryVariables.limit
     )
   );
-  setSelectedSkip(props.queryVariables.skip || 1);
+  setSelectedSkip(props.queryVariables?.skip || 1);
   setSelectedSortOption(
-    props.sortOptions.find(
+    props.sortOptions?.find(
       (option) => option.value === props.queryVariables.searchValue.order_by
     )
   );
-  setIsAsc(props.queryVariables.searchValue.isAsc || isAsc.value);
+  setIsAsc(props.queryVariables?.searchValue.isAsc || isAsc.value);
   if (!Number.isNaN(props.totalItems)) setTotalItemsCount(props.totalItems);
 };
 
