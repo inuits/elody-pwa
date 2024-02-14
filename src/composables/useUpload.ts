@@ -143,12 +143,20 @@ const useUpload = () => {
       uploadStatus.value = "uploading";
   };
 
+  const __createStandaloneMediafile = async (file: DropzoneFile) => {
+    const response = await fetch(`/api/upload/single?filename=${file.name}`, {
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+    return JSON.parse(await response.text());
+  };
+
   const __createMediafileForEntity = async (
     entityId: string,
     file: DropzoneFile,
   ): Promise<string> => {
     const response = await fetch(
-      `/api/upload/single?entityId=${entityId}&filename=${file.name}`,
+      `/api/upload/single?entityId=${entityId}&filename=${file.name}&hasRelation=true`,
       {
         headers: { "Content-Type": "application/json" },
         method: "POST",
@@ -179,6 +187,11 @@ const useUpload = () => {
       uploadUrl = _prefetchedUploadUrls.find((url: string) =>
         url.includes(file.name),
       );
+    } else if (
+      uploadType.value === UploadFieldType.Batch &&
+      !isCsvRequired.value
+    ) {
+      uploadUrl = await __createStandaloneMediafile(file);
     } else if (uploadType.value === UploadFieldType.Single) {
       uploadUrl = await __createMediafileForEntity(entityId, file);
     }
@@ -190,17 +203,20 @@ const useUpload = () => {
   const __uploadFile = async (file: DropzoneFile, url: string, config: any) => {
     const formData = new FormData();
     formData.append("file", file);
+    const urlObject = new URL(url);
+    const externalUrl =
+      config.api.storageApiUrl +
+      urlObject.pathname +
+      "?" +
+      urlObject.searchParams;
+
+    console.log(externalUrl);
+
     return {
-      response: await fetch(
-        url.replace(
-          "http://storage-api-digipolis-dams:5000/",
-          config.api.storageApiUrl,
-        ),
-        {
-          method: "POST",
-          body: formData,
-        },
-      ),
+      response: await fetch(externalUrl, {
+        method: "POST",
+        body: formData,
+      }),
       file: file,
     };
   };
