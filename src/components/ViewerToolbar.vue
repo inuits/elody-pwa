@@ -48,7 +48,7 @@
       </a>
     </div>
     <a ref="homeRef" class="text-sm mr-2 text-neutral-700 cursor-pointer">{{
-      $t("upload.reset")
+      $t("entity.reset-viewer")
     }}</a>
   </div>
 </template>
