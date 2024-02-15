@@ -10,7 +10,11 @@
       <h1 v-if="dynamicForm.GetDynamicForm.label" class="title pb-4">
         {{ t(dynamicForm.GetDynamicForm.label) }}
       </h1>
-      <div v-for="(field, index) in formFields" :key="index" class="pb-2">
+      <div
+        v-for="(field, index) in formFields"
+        :key="`${dynamicFormQuery}_field_${index}`"
+        class="pb-2"
+      >
         <metadata-wrapper
           v-if="field.__typename === 'PanelMetaData'"
           :form-id="dynamicFormQuery"
@@ -54,6 +58,7 @@ import {
   EntityInput,
   Entitytyping,
   FormAction,
+  ModalState,
   PanelMetaData,
   TypeModals,
   UploadField,
