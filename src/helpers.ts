@@ -7,6 +7,7 @@ import {
   type EntityListElement,
   type Entity,
   type BaseEntity,
+  Entitytyping,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -18,7 +19,7 @@ export const goToEntityPage = (
   listItemRouteName: string,
   router: Router,
 ) => {
-  if (entity.type === "MediaFile") {
+  if (entity.type.toLowerCase() === Entitytyping.Mediafile) {
     useEntityMediafileSelector().setEntityMediafiles([]);
     useEntityMediafileSelector().updateSelectedEntityMediafile(entity);
   }
@@ -28,7 +29,7 @@ export const goToEntityPage = (
     entity.uuid ||
     entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")?.value;
 
-  router.push({
+  router.replace({
     name: listItemRouteName,
     params: { id: entityId, type: entity.type },
   });

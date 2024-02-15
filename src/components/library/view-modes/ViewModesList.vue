@@ -3,7 +3,8 @@
     v-show="!disablePreviews"
     v-for="item in relations?.filter(
       (relation) =>
-        relation.editStatus === EditStatus.New && relation.type === relationType
+        relation.editStatus === EditStatus.New &&
+        relation.type === relationType,
     )"
     :key="item.key"
   >
@@ -11,7 +12,7 @@
       :key="item.key + '_preview'"
       :item-id="item.key"
       :bulk-operations-context="bulkOperationsContext"
-      :teaser-metadata="(getTeaserMetadataInState(item.key) as Metadata[])"
+      :teaser-metadata="getTeaserMetadataInState(item.key) as Metadata[]"
       :thumb-icon="entitiesLoading ? undefined : getThumbnail(item)"
       :small="listItemRouteName === 'SingleMediafile'"
       :is-preview="true"
@@ -39,8 +40,11 @@
       :bulk-operations-context="bulkOperationsContext"
       :context-menu-actions="entity.teaserMetadata?.contextMenuActions"
       :teaser-metadata="
-      formatTeaserMetadata(entity.teaserMetadata, entity.intialValues) as Metadata[]
-    "
+        formatTeaserMetadata(
+          entity.teaserMetadata,
+          entity.intialValues,
+        ) as Metadata[]
+      "
       :intialValues="entity.intialValues"
       :media="entitiesLoading ? undefined : getMediaFilenameFromEntity(entity)"
       :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
@@ -65,6 +69,7 @@ import {
   type BaseRelationValuesInput,
   type Entity,
   type Metadata,
+  Entitytyping,
 } from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
@@ -99,13 +104,13 @@ const props = withDefaults(
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
     enableSelection: true,
-  }
+  },
 );
 
 const apolloClient = inject(DefaultApolloClient);
 const { formatTeaserMetadata } = useBaseLibrary(
   apolloClient as ApolloClient<any>,
-  props.parentEntityIdentifiers.length > 0
+  props.parentEntityIdentifiers.length > 0,
 );
 const { mediafileSelectionState, updateSelectedEntityMediafile } =
   useEntityMediafileSelector();
@@ -117,18 +122,18 @@ const router = useRouter();
 
 const entityId = computed(() => getEntityIdFromRoute() as string);
 const relations = computed<BaseRelationValuesInput[]>(
-  () => getForm(entityId.value)?.values?.relationValues?.relations
+  () => getForm(entityId.value)?.values?.relationValues?.relations,
 );
 
 const navigateToEntityPage = (
   entity: Entity,
   listItemRouteName: string,
-  isDoubleClick: boolean = false
+  isDoubleClick: boolean = false,
 ) => {
   if (props.entitiesLoading || !props.enableNavigation) {
     if (
       props.parentEntityIdentifiers.length > 0 &&
-      entity.type === "MediaFile"
+      entity.type.toLowerCase() === Entitytyping.Mediafile
     ) {
       updateSelectedEntityMediafile(entity);
       return;
@@ -152,7 +157,7 @@ EventBus.on("orderList_changed", (orderItems: OrderItem[]) => {
   if (itemsFound) {
     props.entities.sort(
       (value, nextValue) =>
-        value.intialValues.order > nextValue.intialValues.order
+        value.intialValues.order > nextValue.intialValues.order,
     );
     if (!queryVariables.value.searchValue.isAsc) props.entities.reverse();
   }
