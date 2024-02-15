@@ -4,6 +4,7 @@
       'flex flex-col w-full p-3 pb-2 overflow-y-scroll',
       `${dropzoneSize === 'small' ? 'h-[25vh]' : dropzoneSize === 'normal' ? 'h-[60vh]' : 'h-[90vh]'}`,
     ]"
+    :key="uploadFieldType"
   >
     <dropzone
       :dropzone-helper="dropzoneHelper"
@@ -68,7 +69,12 @@ const setUseUploadVariables = () => {
 };
 
 watch(
-  () => [props.acceptedFileTypes, props.maxFileSize, props.uploadFieldType],
+  () => [
+    props.uploadType,
+    props.acceptedFileTypes,
+    props.maxFileSize,
+    props.uploadFieldType,
+  ],
   () => {
     setUseUploadVariables();
   },
