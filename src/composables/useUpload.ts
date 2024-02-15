@@ -193,7 +193,6 @@ const useUpload = () => {
     ) {
       uploadUrl = await __createStandaloneMediafile(file);
     } else if (uploadType.value === UploadFieldType.Single) {
-      console.log(entityId);
       uploadUrl = await __createMediafileForEntity(entityId, file);
     }
 
@@ -201,18 +200,24 @@ const useUpload = () => {
     return uploadUrl;
   };
 
+  const __constructExternalUrlForUpload = (
+    url: string,
+    storageApiUrl: string,
+  ): string => {
+    const urlObject = new URL(url);
+    const origin = new URL(storageApiUrl).origin;
+    return origin + urlObject.pathname + "?" + urlObject.searchParams;
+  };
+
   const __uploadFile = async (file: DropzoneFile, url: string, config: any) => {
     const formData = new FormData();
     formData.append("file", file);
-    const urlObject = new URL(url);
-    const externalUrl =
-      config.api.storageApiUrl +
-      urlObject.pathname +
-      "?" +
-      urlObject.searchParams;
-
+    const extUrl = __constructExternalUrlForUpload(
+      url,
+      config.api.storageApiUrl,
+    );
     return {
-      response: await fetch(externalUrl, {
+      response: await fetch(extUrl, {
         method: "POST",
         body: formData,
       }),
