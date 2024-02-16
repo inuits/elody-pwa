@@ -117,9 +117,7 @@ export default defineComponent({
   writing-mode: vertical-lr;
   font-size: 20px;
   font-weight: bold;
-  transition:
-    writing-mode 300ms ease-in-out,
-    transform 300ms ease-in-out;
+  transition: writing-mode 300ms ease-in-out, transform 300ms ease-in-out;
 }
 
 .move-by-nav {

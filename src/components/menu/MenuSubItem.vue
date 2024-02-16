@@ -9,8 +9,8 @@
       isLink
         ? router.push(menuAction.action)
         : menuAction?.action
-          ? menuAction.action()
-          : undefined
+        ? menuAction.action()
+        : undefined
     "
   >
     <p class="overflow-hidden px-4 cursor-pointer">
@@ -42,12 +42,12 @@ const { can } = usePermissions();
 const isActive = computed(
   () =>
     route.path.replace("/", "") ===
-    (props.subMenuItem.typeLink?.route?.destination as string),
+    (props.subMenuItem.typeLink?.route?.destination as string)
 );
 const { checkIfRouteOrModal } = useMenuHelper();
 const menuAction = computed(() => checkIfRouteOrModal(props.subMenuItem));
 const isLink = computed(
-  () => menuAction.value?.menuItemType === MenuItemType.link,
+  () => menuAction.value?.menuItemType === MenuItemType.link
 );
 const isPermitted = ref<boolean>();
 const router = useRouter();

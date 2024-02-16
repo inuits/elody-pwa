@@ -100,7 +100,7 @@ const getAlreadySelectedEntityIds = (): string[] => {
   const id = route.params.id as string;
   const form = getForm(id);
   return form.values.relationValues.relations.map(
-    (relation: any) => relation.key,
+    (relation: any) => relation.key
   );
 };
 

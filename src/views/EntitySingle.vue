@@ -83,7 +83,7 @@ const { result, refetch } = useQuery<GetEntityByIdQuery>(
   () => ({
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "no-cache",
-  }),
+  })
 );
 
 const intialValues = ref<IntialValues | "no-values">("no-values");
@@ -142,16 +142,16 @@ watch(
             showEditToggle("edit");
           else hideEditToggle();
         } else hideEditToggle();
-      },
+      }
     );
 
     setCurrentRouteTitle(
-      entity.intialValues?.title || entity.intialValues?.name || entity.id,
+      entity.intialValues?.title || entity.intialValues?.name || entity.id
     );
     addVisitedRoute({ id: entity.id, routeName: currentRouteTitle.value });
     setRefetchFn(refetch);
     loading.value = false;
-  },
+  }
 );
 
 watch(
@@ -159,6 +159,6 @@ watch(
   (newLocale: string) => {
     queryVariables.preferredLanguage = newLocale;
     refetch(queryVariables);
-  },
+  }
 );
 </script>

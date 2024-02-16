@@ -32,7 +32,7 @@ withDefaults(
   }>(),
   {
     style: "",
-  },
+  }
 );
 
 const emit = defineEmits<{

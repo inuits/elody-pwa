@@ -47,7 +47,7 @@ export const useMenuHelper = () => {
             _menuItem.typeLink.modal.typeModal as TypeModals,
             ModalChoices.Import,
             "left",
-            _menuItem.typeLink.modal.formQuery,
+            _menuItem.typeLink.modal.formQuery
           );
         },
       };
@@ -70,7 +70,7 @@ export const useMenuHelper = () => {
   const getMenuEntities = () => {
     onResult((value) => {
       menuItems.value = Object.values(value.data?.Menu?.menu || {}).filter(
-        (menu) => menu?.typeLink,
+        (menu) => menu?.typeLink
       );
       setSelectedMenuItem(menuItems.value[0]);
     });

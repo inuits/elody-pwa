@@ -69,10 +69,10 @@ defineExpose({
 });
 
 const isMetadataOnRelation = computed(
-  () => props.metadata.__typename === "PanelRelationMetaData",
+  () => props.metadata.__typename === "PanelRelationMetaData"
 );
 const fieldKeyWithId = computed(
-  () => `${props.metadata.key}-${props.linkedEntityId}`,
+  () => `${props.metadata.key}-${props.linkedEntityId}`
 );
 const fieldIsDirty = computed(() => meta.dirty);
 const { conditionalFieldIsRequired } = useConditionalValidation();
@@ -82,7 +82,7 @@ const isFieldRequired = computed(() => {
   if (props.metadata?.inputField?.validation?.required_if)
     return conditionalFieldIsRequired(
       props.metadata?.inputField?.validation?.required_if,
-      props.formId,
+      props.formId
     );
   return false;
 });
@@ -111,7 +111,7 @@ const { errorMessage, value, meta } = useField<string>(
     label: props.metadata.label
       ? t(props.metadata.label as string)
       : t("metadata.no-label"),
-  },
+  }
 );
 
 onMounted(() => {
@@ -134,7 +134,7 @@ watch(
   () => props.isEdit,
   () => {
     if (!props.isEdit) setNewValue(props.metadata.value);
-  },
+  }
 );
 
 watch(
@@ -146,6 +146,6 @@ watch(
       value: value.value,
       meta: meta.value,
     });
-  },
+  }
 );
 </script>

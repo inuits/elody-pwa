@@ -115,7 +115,7 @@ export const useBaseLibrary = (
     apolloClient
       .query({
         query: manipulateQuery.value
-          ?  manipulationQuery.value.filtersDocument
+          ? manipulationQuery.value.filtersDocument
           : GetAdvancedFiltersDocument,
         variables: { entityType: entityType.value },
         fetchPolicy: "no-cache",
@@ -126,7 +126,8 @@ export const useBaseLibrary = (
           result.data?.EntityTypeFilters as BaseEntity
         )?.advancedFilters;
         if (advancedFilters.value) {
-          if(manipulateQuery.value) setAdvancedFilterInputs(advancedFilters.value);
+          if (manipulateQuery.value)
+            setAdvancedFilterInputs(advancedFilters.value);
           setAdvancedFilters([]);
           Object.values(advancedFilters.value).forEach((advancedFilter) => {
             if (
@@ -168,10 +169,8 @@ export const useBaseLibrary = (
   const totalEntityCount = ref<number>(0);
   const { getStateForRoute, setStateForRoute } = useStateManagement();
   const { isSaved } = useEditMode();
-  const {
-    setAdvancedFilterInputs,
-    createQueryVariables,
-  } = useQueryVariablesFactory();
+  const { setAdvancedFilterInputs, createQueryVariables } =
+    useQueryVariablesFactory();
   const queryVariables = ref<GetEntitiesQueryVariables>({
     type: entityType.value,
     limit: 20,

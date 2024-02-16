@@ -64,7 +64,7 @@ watch(
     } else {
       changeExpandedState(false);
     }
-  },
+  }
 );
 </script>
 
