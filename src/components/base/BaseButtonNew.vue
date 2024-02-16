@@ -36,7 +36,7 @@
 import { DamsIcons } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { computed } from "vue";
-import {useI18n} from "vue-i18n"
+import { useI18n } from "vue-i18n";
 
 type PseudoStyle = {
   textColor: string;
@@ -128,12 +128,12 @@ const props = withDefaults(
     iconHeight: 18,
     loading: false,
     errors: [],
-  },
+  }
 );
 
-const {t} = useI18n()
+const { t } = useI18n();
 
 const selectedButtonStyle = computed<Button>(
-  () => buttonStyles[props.buttonStyle],
+  () => buttonStyles[props.buttonStyle]
 );
 </script>

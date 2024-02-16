@@ -1,7 +1,15 @@
 <template>
   <div
     :class="[
-      `rounded-full h-6 w-6 p-1 flex justify-center items-center ${stepType === 'complete' ? 'bg-green-light' : stepType === 'loading' ? 'bg-accent-accent' : stepType === 'failed' ? 'bg-red-dark' : 'bg-neutral-30'}`,
+      `rounded-full h-6 w-6 p-1 flex justify-center items-center ${
+        stepType === 'complete'
+          ? 'bg-green-light'
+          : stepType === 'loading'
+          ? 'bg-accent-accent'
+          : stepType === 'failed'
+          ? 'bg-red-dark'
+          : 'bg-neutral-30'
+      }`,
     ]"
   >
     <unicon

@@ -17,7 +17,7 @@ const useDynamicFormModal = () => {
 
   const performSubmitAction = (
     queryDocument: object,
-    entity: EntityInput,
+    entity: EntityInput
   ): void => {
     apolloClient
       .mutate({

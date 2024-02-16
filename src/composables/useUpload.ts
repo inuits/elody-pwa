@@ -15,14 +15,14 @@ type FileError = {
 };
 
 const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
-  "no-upload",
+  "no-upload"
 );
 const dryRunComplete = ref<boolean>(false);
 const dryRunErrors = ref<string[]>([]);
 const files = ref<DropzoneFile[]>([]);
 const mediafiles = computed(
   (): DropzoneFile =>
-    files.value.filter((file: DropzoneFile) => file.type !== "text/csv"),
+    files.value.filter((file: DropzoneFile) => file.type !== "text/csv")
 );
 const uploadProgressPercentage = ref<number>(0);
 const uploadType = ref<UploadFieldType>(UploadFieldType.Batch);
@@ -54,7 +54,7 @@ const useUpload = () => {
     toggleUploadStatus();
     const generator = uploadGenerator(
       config,
-      isLinkedUpload ? useEntitySingle().getEntityUuid() : "",
+      isLinkedUpload ? useEntitySingle().getEntityUuid() : ""
     );
 
     for await (const upload of generator) {
@@ -64,7 +64,7 @@ const useUpload = () => {
       }
 
       setUploadProgressPercentage(
-        calculateProgressPercentage(amountUploaded + 1, totalAmountOfFiles),
+        calculateProgressPercentage(amountUploaded + 1, totalAmountOfFiles)
       );
       amountUploaded++;
     }
@@ -74,7 +74,7 @@ const useUpload = () => {
 
   const __uploadExceptionHandler = (
     errorDescription: string | undefined,
-    t: Function,
+    t: Function
   ) => {
     if (!errorDescription)
       errorDescription = t("dropzone.errorNotification.description");
@@ -82,7 +82,7 @@ const useUpload = () => {
       NotificationType.error,
       t("dropzone.errorNotification.title"),
       errorDescription,
-      15,
+      15
     );
   };
 
@@ -93,7 +93,7 @@ const useUpload = () => {
         return;
       }
 
-      let errors: string[] = [];
+      const errors: string[] = [];
       const errorKeys = Object.keys(dryRunResult.errors);
       errorKeys.forEach((key: string) => {
         const errorList = dryRunResult.errors[key];
@@ -103,7 +103,7 @@ const useUpload = () => {
       });
       if (dryRunResult?.mediafiles.length) {
         requiredMediafiles.value = dryRunResult.mediafiles.map(
-          (mediafile: any) => mediafile.filename,
+          (mediafile: any) => mediafile.filename
         );
       }
       dryRunErrors.value = errors;
@@ -120,7 +120,7 @@ const useUpload = () => {
 
   const __batchEntities = async (
     csv: Blob,
-    isDryRun: boolean = false,
+    isDryRun: boolean = false
   ): Promise<string[] | number> => {
     const response = await fetch(
       `/api/upload/batch${isDryRun ? "?dry_run=true" : ""}`,
@@ -128,7 +128,7 @@ const useUpload = () => {
         headers: { "Content-Type": "text/csv" },
         method: "POST",
         body: csv,
-      },
+      }
     );
     if (!isDryRun) return JSON.parse(await response.text());
     else return response.json();
@@ -153,14 +153,14 @@ const useUpload = () => {
 
   const __createMediafileForEntity = async (
     entityId: string,
-    file: DropzoneFile,
+    file: DropzoneFile
   ): Promise<string> => {
     const response = await fetch(
       `/api/upload/single?entityId=${entityId}&filename=${file.name}&hasRelation=true`,
       {
         headers: { "Content-Type": "application/json" },
         method: "POST",
-      },
+      }
     );
     return JSON.parse(await response.text());
   };
@@ -168,7 +168,7 @@ const useUpload = () => {
   const __getCsvBlob = () => {
     try {
       const csvFile = files.value.find(
-        (file: DropzoneFile) => file.type === "text/csv",
+        (file: DropzoneFile) => file.type === "text/csv"
       );
       return new Blob([csvFile], { type: csvFile.type });
     } catch (e) {
@@ -182,10 +182,10 @@ const useUpload = () => {
     if (uploadType.value === UploadFieldType.Batch && isCsvRequired.value) {
       if (_prefetchedUploadUrls === "not-prefetched-yet")
         _prefetchedUploadUrls = (await __batchEntities(
-          __getCsvBlob(),
+          __getCsvBlob()
         )) as string[];
       uploadUrl = _prefetchedUploadUrls.find((url: string) =>
-        url.includes(file.name),
+        url.includes(file.name)
       );
     } else if (
       uploadType.value === UploadFieldType.Batch &&
@@ -229,7 +229,7 @@ const useUpload = () => {
     if (!validateFiles()) return;
 
     const filesToUpload = files.value.filter(
-      (file) => file.type !== "text/csv",
+      (file) => file.type !== "text/csv"
     );
     for (const file of filesToUpload) {
       const url = await __getUploadUrl(file, entityId);
@@ -241,10 +241,10 @@ const useUpload = () => {
 
   const validateFiles = () => {
     const csvFilesCount = files.value.filter(
-      (file) => file.type === "text/csv",
+      (file) => file.type === "text/csv"
     ).length;
     const nonCsvFilesCount = files.value.filter(
-      (file) => file.type !== "text/csv",
+      (file) => file.type !== "text/csv"
     ).length;
 
     if (uploadType.value === "batch")
@@ -258,11 +258,11 @@ const useUpload = () => {
 
   const removeFileToUpload = (
     fileToRemove: DropzoneFile,
-    isValidationFile: boolean = false,
+    isValidationFile: boolean = false
   ) => {
     if (!files.value) return;
     files.value = files.value.filter(
-      (file: DropzoneFile) => file !== fileToRemove,
+      (file: DropzoneFile) => file !== fileToRemove
     );
     if (isValidationFile) dryRunComplete.value = false;
     if (!files.value.length) dryRunErrors.value = [];
@@ -293,7 +293,7 @@ const useUpload = () => {
 
       requiredFileNames.forEach((requiredFileName: string) => {
         const fileExists = mediafiles.value.some(
-          (file: DropzoneFile) => file.name === requiredFileName,
+          (file: DropzoneFile) => file.name === requiredFileName
         );
         if (!fileExists) {
           areAllFilesPresent = false;
@@ -321,7 +321,7 @@ const useUpload = () => {
 
   const calculateProgressPercentage = (
     amountUploaded: number,
-    amountToUpload: number,
+    amountToUpload: number
   ): number => {
     let progress: number = 0;
 
@@ -362,17 +362,17 @@ watch(
   () => {
     setCssVariable(
       "--upload-width-percentage",
-      uploadProgressPercentage.value.toString() + "%",
+      uploadProgressPercentage.value.toString() + "%"
     );
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 watch(
   () => mediafiles.value.length,
   () => {
     useUpload().verifyAllNeededFilesArePresent();
-  },
+  }
 );
 
 export default useUpload;

@@ -45,11 +45,11 @@ export class useDropzoneHelper {
 
   initDropzone = (
     dropzoneView: HTMLDivElement,
-    dropzonePreview: HTMLDivElement,
+    dropzonePreview: HTMLDivElement
   ) => {
     this.dropzone.value = new Dropzone(
       dropzoneView,
-      this.getDropzoneSettings(dropzonePreview),
+      this.getDropzoneSettings(dropzonePreview)
     );
 
     return this.dropzone.value;

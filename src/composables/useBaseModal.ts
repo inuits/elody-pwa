@@ -42,7 +42,7 @@ export const useBaseModal = () => {
     modalType: TypeModals,
     modalTab: ModalChoices | undefined = undefined,
     modalPosition: ModalPosition | undefined = undefined,
-    formQuery: string | undefined = undefined,
+    formQuery: string | undefined = undefined
   ): void => {
     closeModalsWithPosition(getModalInfo(modalType).modalPosition);
     const updatedModal = {

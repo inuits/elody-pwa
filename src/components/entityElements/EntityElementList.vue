@@ -61,7 +61,7 @@
             v-else
             :bulk-operations-context="
               createCustomContext(
-                BulkOperationsContextEnum.EntityElementList + relationType,
+                BulkOperationsContextEnum.EntityElementList + relationType
               )
             "
             :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
@@ -150,7 +150,7 @@ const props = withDefaults(
   {
     types: () => [],
     viewMode: EntityListViewMode.Library,
-  },
+  }
 );
 
 watch(
@@ -159,11 +159,11 @@ watch(
     if (props.entityList.length > 0) {
       updateRelationForm(props.entityList);
     }
-  },
+  }
 );
 
 const entityId = computed(
-  () => getEntityUuid() || asString(useRoute().params["id"]),
+  () => getEntityUuid() || asString(useRoute().params["id"])
 );
 
 const requiresCustomQuery = computed(() => props.customQuery != undefined);
@@ -180,7 +180,7 @@ watch(
     if (!requiresCustomQuery.value) return;
     if (uploadStatus.value === "uploading") queryLoaded.value = false;
     else if (uploadStatus.value === "upload-finished") await useCustomQuery();
-  },
+  }
 );
 
 const useCustomQuery = async () => {
@@ -193,7 +193,7 @@ const useCustomQuery = async () => {
   newQuery.value = {
     name: props.customQuery,
     document: queryDocument,
-    filtersDocument: filtersDocument
+    filtersDocument: filtersDocument,
   };
   queryLoaded.value = true;
 };
