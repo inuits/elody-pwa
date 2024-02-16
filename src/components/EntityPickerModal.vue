@@ -28,8 +28,6 @@
             "
             :confirm-selection-button="true"
             :enable-navigation="false"
-            :enable-bulk-operations="true"
-            :enable-preview="false"
             :disable-new-entity-previews="true"
             :ids-of-non-selectable-entities="getAlreadySelectedEntityIds()"
             :filters="[
