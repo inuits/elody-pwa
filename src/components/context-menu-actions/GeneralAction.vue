@@ -15,6 +15,7 @@ import { NotificationType } from "@/components/base/BaseNotification.vue";
 import { useNotification } from "@/components/base/BaseNotification.vue";
 import { useImport } from "@/composables/useImport";
 import { apolloClient } from "@/main";
+import EventBus from "@/EventBus";
 
 const emit = defineEmits(["toggleLoading"]);
 
@@ -45,6 +46,7 @@ const doGeneralAction = async () => {
           t("notifications.success.entityUpdated.title"),
           t("notifications.success.entityUpdated.description")
         );
+        EventBus.emit(props.action);
       });
   } catch (e) {
     createNotificationOverwrite(
