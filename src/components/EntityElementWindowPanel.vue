@@ -46,6 +46,7 @@
               :custom-query-filters="metadata.customQueryFilters"
             />
             <metadata-wrapper
+              v-else
               :form-id="formId"
               :is-edit="isEdit"
               v-model:metadata="metadata as MetadataField"
