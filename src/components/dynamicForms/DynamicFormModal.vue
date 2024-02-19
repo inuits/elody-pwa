@@ -13,6 +13,7 @@
     <dynamic-form
       v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
       :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
+      :router="useRouter()"
     />
   </BaseModal>
 </template>
@@ -22,6 +23,7 @@ import BaseModal from "@/components/base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { ModalState, TypeModals } from "@/generated-types/queries";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
+import { useRouter } from "vue-router";
 
 const { closeModal, getModalInfo } = useBaseModal();
 </script>

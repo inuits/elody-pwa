@@ -15,18 +15,14 @@ const useDynamicFormModal = () => {
       });
   };
 
-  const performSubmitAction = (
+  const performSubmitAction = async (
     queryDocument: object,
     entity: EntityInput
-  ): void => {
-    apolloClient
-      .mutate({
-        mutation: queryDocument,
-        variables: { entity },
-      })
-      .then((result: Object) => {
-        return result.data;
-      });
+  ): Promise<any> => {
+    return await apolloClient.mutate({
+      mutation: queryDocument,
+      variables: { entity },
+    });
   };
 
   return { getDynamicForm, dynamicForm, performSubmitAction };

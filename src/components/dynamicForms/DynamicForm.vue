@@ -77,6 +77,8 @@ import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";
 import useUpload from "@/composables/useUpload";
+import { goToEntityPage } from "@/helpers";
+import type { Router } from "vue-router";
 
 type FormFieldState = {
   fieldKey: string;
@@ -89,6 +91,7 @@ const props = withDefaults(
   defineProps<{
     dynamicFormQuery: string;
     hasLinkedUpload?: boolean;
+    router: Router;
   }>(),
   {
     hasLinkedUpload: false,
@@ -164,9 +167,11 @@ const performActionButtonClickEvent = async (
   }
   if (field.actionType === ActionType.Submit) {
     const document = await getQuery(field.actionQuery);
-    const entity = createEntityFromFormInput(field.creationType);
-    performSubmitAction(document, entity);
+    const entityInput = createEntityFromFormInput(field.creationType);
+    const entity = (await performSubmitAction(document, entityInput)).data
+      .CreateEntity;
     closeModal(TypeModals.DynamicForm);
+    goToEntityPage(entity, "SingleEntity", props.router);
   }
 };
 
