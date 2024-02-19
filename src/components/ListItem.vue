@@ -43,7 +43,7 @@
 
     <div>
       <BaseInputCheckbox
-        v-if="!isPreview && !isDisabled && hasSelection"
+        v-if="!basicBaseLibrary && !isPreview && !isDisabled && hasSelection"
         class="text-center"
         v-model="isChecked"
         :item="{ id: itemId, teaserMetadata }"
@@ -179,6 +179,7 @@ const props = withDefaults(
       | "no-relation-found";
     isDisabled?: boolean;
     hasSelection: boolean;
+    basicBaseLibrary?: Boolean;
   }>(),
   {
     contextMenuActions: undefined,
@@ -196,6 +197,7 @@ const props = withDefaults(
     isDisabled: false,
     hasSelection: true,
     relation: "no-relation-found",
+    basicBaseLibrary: false,
   }
 );
 

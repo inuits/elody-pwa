@@ -111,6 +111,7 @@
               :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
               :relation-type="relationType"
               :enable-selection="enableBulkOperations"
+              :basic-base-library="basicBaseLibrary"
             />
             <ViewModesGrid
               v-if="displayGrid"
