@@ -57,7 +57,7 @@ import {
   type MenuItem,
 } from "@/generated-types/queries";
 import CustomIcon from "../CustomIcon.vue";
-import EventBus from "../../EventBus";
+import EventBus from "@/EventBus";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
 import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
 import { computed, defineProps, ref } from "vue";
