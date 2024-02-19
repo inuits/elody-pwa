@@ -147,6 +147,7 @@ import type { ApolloClient } from "@apollo/client/core";
 import type { ViewModes } from "@/generated-types/type-defs";
 import {
   BaseEntity,
+  ContextMenuGeneralActionEnum,
   DamsIcons,
   DropdownOption,
   Entitytyping,
@@ -184,6 +185,7 @@ import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { watch, ref, onMounted, inject, computed } from "vue";
+import EventBus from "@/EventBus";
 
 const props = withDefaults(
   defineProps<{
@@ -489,4 +491,13 @@ watch(
     if (uploadStatus.value === "upload-finished") refetchEntities();
   }
 );
+
+EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryMediafile, () => {
+  if (props.useOtherQuery?.filtersDocument?.definitions[0]?.name?.value === "getPrimaryMediafileFilters")
+    getEntities(route, true, true);
+});
+EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryThumbnail, () => {
+  if (props.useOtherQuery?.filtersDocument?.definitions[0]?.name?.value === "getPrimaryThumbnailFilters")
+    getEntities(route, true, true);
+});
 </script>
