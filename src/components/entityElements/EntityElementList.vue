@@ -55,6 +55,7 @@
             :entity-type="Entitytyping.Mediafile"
             :relation-type="relationType"
             :use-other-query="newQuery"
+            :basic-base-library="basicBaseLibrary"
           />
           <BaseLibrary
             class="flex-1"
@@ -74,6 +75,7 @@
             :relation-type="relationType"
             :has-sticky-bars="false"
             :use-other-query="newQuery"
+            :basic-base-library="basicBaseLibrary"
           />
         </div>
       </template>
@@ -146,10 +148,12 @@ const props = withDefaults(
     identifiers: string[];
     relationType: string;
     viewMode?: EntityListViewMode;
+    basicBaseLibrary?: Boolean;
   }>(),
   {
     types: () => [],
     viewMode: EntityListViewMode.Library,
+    basicBaseLibrary: false,
   }
 );
 

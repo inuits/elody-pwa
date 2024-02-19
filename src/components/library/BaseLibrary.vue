@@ -51,7 +51,7 @@
               <BaseToggleGroup v-if="toggles.length > 1" :toggles="toggles" />
             </div>
             <LibraryBar
-              v-if="!predefinedEntities"
+              v-if="!predefinedEntities && !basicBaseLibrary"
               :pagination-limit-options="paginationLimitOptions"
               :sort-options="sortOptions"
               :total-items="totalEntityCount || NaN"
@@ -64,7 +64,7 @@
           </div>
 
           <div
-            v-if="enableBulkOperations && !displayPreview"
+            v-if="enableBulkOperations && !displayPreview && !basicBaseLibrary"
             class="my-3"
             :class="{ 'flex justify-end': expandFilters }"
           >
@@ -207,6 +207,7 @@ const props = withDefaults(
     useOtherQuery?: object;
     selectInputFieldType?: "multi" | "single";
     selectInputFieldValue?: string[];
+    basicBaseLibrary?: Boolean;
   }>(),
   {
     predefinedEntities: undefined,
@@ -225,6 +226,7 @@ const props = withDefaults(
     isSearchLibrary: false,
     useOtherQuery: undefined,
     isMultiSelectInputField: false,
+    basicBaseLibrary: false,
   }
 );
 
