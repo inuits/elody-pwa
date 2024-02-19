@@ -44,6 +44,7 @@
               :custom-query="metadata.customQuery"
               :custom-query-relation-type="metadata.customQueryRelationType"
               :custom-query-filters="metadata.customQueryFilters"
+              :basic-base-library="metadata.basicBaseLibrary"
             />
             <metadata-wrapper
               v-else
