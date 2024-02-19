@@ -11,7 +11,7 @@ import {
   Entitytyping,
   type GetPermissionMappingCreateQueryVariables,
 } from "@/generated-types/queries";
-import EventBus from "../EventBus";
+import EventBus from "@/EventBus";
 import { apolloClient } from "@/main";
 import { reactive, ref } from "vue";
 

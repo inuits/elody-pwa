@@ -82,7 +82,7 @@ import { OrderItem } from "@/composables/useOrderListItems";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useRouter } from "vue-router";
-import EventBus from "../../../EventBus";
+import EventBus from "@/EventBus";
 import { useLibraryBar } from "@/composables/useLibraryBar";
 
 const props = withDefaults(
