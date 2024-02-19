@@ -3,7 +3,11 @@
     :modal-state="getModalInfo(TypeModals.DynamicForm).state"
     :modal-position="getModalInfo(TypeModals.DynamicForm).modalPosition"
     modal-width-style="w-2/5"
-    modal-color="bg-neutral-lightest"
+    :modal-color="
+      getModalInfo(TypeModals.DynamicForm).formQuery === 'GetUploadForm'
+        ? 'bg-neutral-lightest'
+        : 'bg-neutral-white'
+    "
     @hide-modal="closeModal(TypeModals.DynamicForm)"
   >
     <dynamic-form

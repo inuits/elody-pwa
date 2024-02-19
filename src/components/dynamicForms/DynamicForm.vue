@@ -35,6 +35,11 @@
         />
         <BaseButtonNew
           v-if="field.__typename === 'FormAction'"
+          :class="
+            field.actionType === ActionType.Upload
+              ? ''
+              : 'absolute left-0 bottom-6 w-full pl-4 pr-8'
+          "
           :label="t(field.label)"
           :icon="field.icon"
           button-style="accentAccent"
