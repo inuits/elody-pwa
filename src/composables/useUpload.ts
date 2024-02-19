@@ -30,6 +30,7 @@ const requiredMediafiles = ref<string[] | undefined>(undefined);
 const fileErrors = ref<FileError[]>([]);
 const isCsvRequired = ref<boolean>(false);
 const enableUploadButton = computed(() => {
+  if (uploadStatus.value === "uploading") return false;
   if (mediafiles.value.length && uploadType.value === UploadFieldType.Single)
     return true;
   if (!isCsvRequired.value && mediafiles.value.length) return true;
@@ -267,6 +268,7 @@ const useUpload = () => {
       dryRunComplete.value = false;
       dryRunErrors.value = [];
       fileErrors.value = [];
+      requiredMediafiles.value = undefined;
     }
   };
   const addFileToUpload = (fileToAdd: DropzoneFile) => {
