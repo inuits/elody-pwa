@@ -56,6 +56,7 @@
       "
       :relation="findRelation(entity.uuid, relationType)"
       :has-selection="enableSelection"
+      :basic-base-library="basicBaseLibrary"
     />
   </div>
 </template>
@@ -96,6 +97,7 @@ const props = withDefaults(
     idsOfNonSelectableEntities?: string[];
     relationType: string;
     enableSelection: boolean;
+    basicBaseLibrary?: Boolean;
   }>(),
   {
     disablePreviews: false,
@@ -103,6 +105,7 @@ const props = withDefaults(
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
     enableSelection: true,
+    basicBaseLibrary: false,
   }
 );
 
