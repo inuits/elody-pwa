@@ -3,8 +3,7 @@
     v-show="!disablePreviews"
     v-for="item in relations?.filter(
       (relation) =>
-        relation.editStatus === EditStatus.New &&
-        relation.type === relationType,
+        relation.editStatus === EditStatus.New && relation.type === relationType
     )"
     :key="item.key"
   >
@@ -104,13 +103,13 @@ const props = withDefaults(
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
     enableSelection: true,
-  },
+  }
 );
 
 const apolloClient = inject(DefaultApolloClient);
 const { formatTeaserMetadata } = useBaseLibrary(
   apolloClient as ApolloClient<any>,
-  props.parentEntityIdentifiers.length > 0,
+  props.parentEntityIdentifiers.length > 0
 );
 const { mediafileSelectionState, updateSelectedEntityMediafile } =
   useEntityMediafileSelector();
@@ -122,13 +121,13 @@ const router = useRouter();
 
 const entityId = computed(() => getEntityIdFromRoute() as string);
 const relations = computed<BaseRelationValuesInput[]>(
-  () => getForm(entityId.value)?.values?.relationValues?.relations,
+  () => getForm(entityId.value)?.values?.relationValues?.relations
 );
 
 const navigateToEntityPage = (
   entity: Entity,
   listItemRouteName: string,
-  isDoubleClick: boolean = false,
+  isDoubleClick: boolean = false
 ) => {
   if (props.entitiesLoading || !props.enableNavigation) {
     if (
@@ -157,7 +156,7 @@ EventBus.on("orderList_changed", (orderItems: OrderItem[]) => {
   if (itemsFound) {
     props.entities.sort(
       (value, nextValue) =>
-        value.intialValues.order > nextValue.intialValues.order,
+        value.intialValues.order > nextValue.intialValues.order
     );
     if (!queryVariables.value.searchValue.isAsc) props.entities.reverse();
   }
