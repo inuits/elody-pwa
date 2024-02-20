@@ -18,7 +18,7 @@ import { DamsIcons, type DropdownOption } from "@/generated-types/queries";
 import { useStateManagement } from "@/composables/useStateManagement";
 
 const { availableLocales, locale, t } = useI18n();
-const { setGlobalState } = useStateManagement();
+const { updateGlobalState, getGlobalState } = useStateManagement();
 const selectedLanguageOption = ref<DropdownOption | undefined>();
 
 const createOptionsFromAvailableLanguages = (
@@ -35,11 +35,9 @@ const languageOptions = computed(() => {
   return createOptionsFromAvailableLanguages(availableLocales);
 });
 
-const displayPreferences = localStorage.getItem("_displayPreferences");
-if (displayPreferences) {
-  if (JSON.parse(displayPreferences).lang) {
-    locale.value = JSON.parse(displayPreferences).lang;
-  }
+const displayPreferences = getGlobalState("_displayPreferences");
+if (displayPreferences?.lang) {
+  locale.value = displayPreferences.lang;
 }
 
 const setSelectedLanguageOption = (): void => {
@@ -56,7 +54,7 @@ watch(selectedLanguageOption, () => {
   if (selectedLanguageOption.value) {
     locale.value = selectedLanguageOption.value.value;
 
-    setGlobalState("_displayPreferences", { lang: locale.value });
+    updateGlobalState("_displayPreferences", { lang: locale.value });
     createOptionsFromAvailableLanguages(availableLocales);
     setSelectedLanguageOption();
   }

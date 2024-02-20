@@ -29,6 +29,17 @@ export const useStateManagement = () => {
       window.localStorage.setItem(key, state);
   };
 
+  const updateGlobalState = (key: string, value: object) => {
+    const state = value;
+    const currentState = JSON.parse(window.localStorage.getItem(key));
+    if (!currentState) {
+      window.localStorage.setItem(key, JSON.stringify(value));
+      return;
+    }
+    const updatedState = JSON.stringify(Object.assign(currentState, state));
+    window.localStorage.setItem(key, updatedState);
+  };
+
   const getGlobalState = (key: string) => {
     const state = window.localStorage.getItem(key);
     if (state) return JSON.parse(state);
@@ -56,5 +67,11 @@ export const useStateManagement = () => {
     return undefined;
   };
 
-  return { getGlobalState, getStateForRoute, setGlobalState, setStateForRoute };
+  return {
+    getGlobalState,
+    getStateForRoute,
+    setGlobalState,
+    setStateForRoute,
+    updateGlobalState,
+  };
 };

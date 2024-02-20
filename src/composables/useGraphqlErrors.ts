@@ -27,7 +27,9 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
     const { config, translations } = await getApplicationDetails();
     let language = config.customization.applicationLocale;
 
-    const displayPreferences = localStorage.getItem("_displayPreferences");
+    const displayPreferences = useStateManagement().getGlobalState(
+      "_displayPreferences",
+    );
     if (displayPreferences) {
       const preferences = JSON.parse(displayPreferences);
       if (preferences.lang) language = preferences.lang;
