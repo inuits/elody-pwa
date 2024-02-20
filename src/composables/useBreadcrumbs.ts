@@ -103,6 +103,15 @@ export const useBreadcrumbs = (config: any, t: any) => {
     }
   });
 
+  const findLastOverviewPage = (): VisitedRoute => {
+    let lastVisitedRoute = undefined;
+    visitedRoutes.value.reverse().forEach((visitedRoute) => {
+      if (visitedRoute.id === "" && lastVisitedRoute === undefined)
+        lastVisitedRoute = visitedRoute;
+    });
+    return lastVisitedRoute;
+  }
+
   return {
     currentRouteTitle,
     setCurrentRouteTitle,
@@ -110,5 +119,6 @@ export const useBreadcrumbs = (config: any, t: any) => {
     addVisitedRoute,
     visitedRoutes,
     previousRoute,
+    findLastOverviewPage
   };
 };
