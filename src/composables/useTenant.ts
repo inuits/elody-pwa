@@ -31,6 +31,7 @@ const useTenant = (
     (config && config.features.hideSuperTenant) || false;
   const router = useRouter();
   const initTenants = async () => {
+    window.localStorage.clear();
     await getTenants();
     const tenantFromSession = await getTennantFromSession();
     if (
