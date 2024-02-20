@@ -241,7 +241,7 @@ const apolloClient = inject(DefaultApolloClient);
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-const { getGlobalState, setGlobalState } = useStateManagement();
+const { getGlobalState, updateGlobalState } = useStateManagement();
 
 const {
   advancedFilters,
@@ -479,7 +479,7 @@ watch([displayGrid, expandFilters], () => {
     _expandFilters = getGlobalState("_displayPreferences").expandFilters;
 
   displayList.value = !displayGrid.value;
-  setGlobalState("_displayPreferences", {
+  updateGlobalState("_displayPreferences", {
     grid: displayPreview.value ? false : displayGrid.value,
     expandFilters: _expandFilters,
   });
