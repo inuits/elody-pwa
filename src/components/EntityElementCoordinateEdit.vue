@@ -1,5 +1,5 @@
 <template>
-  <div v-if="field" class="text-text-light text-sm">
+  <div v-if="inputField" class="text-text-light text-sm">
     <p>
       {{ label ? t(label) : t("metadata.no-label") }}
     </p>
@@ -8,7 +8,7 @@
         <BaseInputTextNumberDatetime
           v-model="computedLongitude"
           label="Longitude"
-          :type="field.type as any"
+          :type="inputField.type as any"
           :step="decimalPointStep"
           input-style="defaultWithBorder"
           :disabled="coordinateEditIsDisabled"
@@ -19,7 +19,7 @@
         <BaseInputTextNumberDatetime
           v-model="computedLatitude"
           label="Latitude"
-          :type="field.type as any"
+          :type="inputField.type as any"
           :step="decimalPointStep"
           input-style="defaultWithBorder"
           :disabled="coordinateEditIsDisabled"
@@ -54,7 +54,7 @@ const props = defineProps({
   fieldKey: { type: String, required: true },
   label: { type: String, required: true },
   value: { type: Object as PropType<Location>, required: true },
-  field: { type: Object as PropType<InputFieldType>, required: false },
+  inputField: { type: Object as PropType<InputFieldType>, required: false },
 });
 
 const { isEdit } = useEditMode();
@@ -66,9 +66,9 @@ const { errorMessage } = useField("intialValues." + props.fieldKey);
 const { conditionalFieldIsAvailable } = useConditionalValidation();
 const coordinateEditIsDisabled = computed(() => {
   if (!isEdit.value) return true;
-  if (!props.field?.validation?.available_if) return false;
+  if (!props.inputField?.validation?.available_if) return false;
   return !conditionalFieldIsAvailable(
-    props.field.validation.available_if as Conditional,
+    props.inputField.validation.available_if as Conditional,
     getEntityIdFromRoute() as string
   );
 });

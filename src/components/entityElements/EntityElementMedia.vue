@@ -124,7 +124,7 @@ const componentMetadata = computed(() => {
           metadataItemKey,
           entityId.value
         ),
-        field: (value as PanelMetaData).inputField,
+        inputField: (value as PanelMetaData).inputField,
         unit: (value as PanelMetaData).unit,
       };
       returnArray.push(metadataObject);
