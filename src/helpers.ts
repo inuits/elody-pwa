@@ -17,7 +17,7 @@ import { type Router, useRoute } from "vue-router";
 export const goToEntityPage = (
   entity: Entity,
   listItemRouteName: string,
-  router: Router
+  router: Router,
 ) => {
   if (entity.type.toLowerCase() === Entitytyping.Mediafile) {
     useEntityMediafileSelector().setEntityMediafiles([]);
@@ -65,7 +65,7 @@ export const processTextWithLinks = (value: unknown) => {
   const pattern = /\b(https?:\/\/\S+)\b/g;
   const textWithLinks = stringValue.replace(
     pattern,
-    '<a class="underline" target="_blank" href="$1">$1</a>'
+    '<a class="underline" target="_blank" href="$1">$1</a>',
   );
   return textWithLinks;
 };
@@ -97,7 +97,7 @@ export const getIdFromKey = (prefix: string = "entities", key: string) => {
 export const customSort = (
   customSortOrder: string[],
   arrayToSort: any[],
-  sortKey: string
+  sortKey: string,
 ) => {
   const ordering: any = {};
   for (let i = 0; i < customSortOrder.length; i++) {
@@ -152,7 +152,7 @@ const { mediafileSelectionState } = useEntityMediafileSelector();
 export const getValueForPanelMetadata = (
   panelType: PanelType,
   metadataItemKey: string,
-  entityId: string
+  entityId: string,
 ): string => {
   const form = useFormHelper().getForm(entityId);
   if (panelType === PanelType.Metadata && form) {
@@ -168,7 +168,7 @@ export const getValueForPanelMetadata = (
 export const getMetadataFields = (
   objectToGetMetadataFrom: WindowElementPanel | PanelMetaData[],
   panelType: PanelType,
-  formId: string
+  formId: string,
 ): Array<PanelMetaData | EntityListElement> => {
   const fields: Array<PanelMetaData | EntityListElement> = [];
 
@@ -221,7 +221,7 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
 };
 export const convertDateToReadbleFormat = (
   dateString: string,
-  format: string
+  format: string,
 ): string => {
   const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = {
@@ -267,21 +267,9 @@ export const createPlaceholderEntities = (amount: number): any[] => {
   return placeholders;
 };
 
-export const updateLocalStorage = (key: string, data: object): void => {
-  const oldData = localStorage.getItem(key);
-  if (oldData) {
-    data = Object.assign(JSON.parse(oldData), data);
-  }
-  window.localStorage.setItem(key, JSON.stringify(data));
-};
-
-export const clearLocalStorageItem = (key: string): void => {
-  localStorage.removeItem(key);
-};
-
 export const findPanelMetadata = (
   obj: any,
-  parentIsEditable?: boolean
+  parentIsEditable?: boolean,
 ): PanelMetaData[] => {
   const results: PanelMetaData[] = [];
 
@@ -314,12 +302,12 @@ export const getApplicationDetails = async () => {
   const config = await fetch(
     import.meta.env.VUE_APP_CONFIG_URL
       ? import.meta.env.VUE_APP_CONFIG_URL
-      : "/api/config"
+      : "/api/config",
   ).then((r) => r.json());
   const translations = await fetch(
     import.meta.env.VUE_APP_CONFIG_URL
       ? import.meta.env.VUE_APP_CONFIG_URL
-      : "/api/translation"
+      : "/api/translation",
   ).then((r) => r.json());
   return { config, translations };
 };
