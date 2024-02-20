@@ -15,13 +15,14 @@ import { ref, onMounted, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import { DamsIcons, type DropdownOption } from "@/generated-types/queries";
-import { updateLocalStorage } from "@/helpers";
+import { useStateManagement } from "@/composables/useStateManagement";
 
 const { availableLocales, locale, t } = useI18n();
+const { setGlobalState } = useStateManagement();
 const selectedLanguageOption = ref<DropdownOption | undefined>();
 
 const createOptionsFromAvailableLanguages = (
-  availableLanguages: string[]
+  availableLanguages: string[],
 ): DropdownOption[] => {
   return availableLanguages.map((language) => ({
     icon: DamsIcons.NoIcon,
@@ -43,7 +44,7 @@ if (displayPreferences) {
 
 const setSelectedLanguageOption = (): void => {
   selectedLanguageOption.value = languageOptions.value.find(
-    (language) => language.value === locale.value
+    (language) => language.value === locale.value,
   );
 };
 
@@ -54,7 +55,8 @@ onMounted(() => {
 watch(selectedLanguageOption, () => {
   if (selectedLanguageOption.value) {
     locale.value = selectedLanguageOption.value.value;
-    updateLocalStorage("_displayPreferences", { lang: locale.value });
+
+    setGlobalState("_displayPreferences", { lang: locale.value });
     createOptionsFromAvailableLanguages(availableLocales);
     setSelectedLanguageOption();
   }
