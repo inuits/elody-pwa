@@ -143,7 +143,7 @@ const props = withDefaults(
   {
     totalItemsCount: 0,
     confirmSelectionButton: false,
-  },
+  }
 );
 
 const emit = defineEmits<{
@@ -158,12 +158,12 @@ const route = useRoute();
 const refetchEnabled = ref<boolean>(false);
 const entityType = computed(() => props.entityType || route.meta.entityType);
 const { mutate } = useMutation<GenerateTranscodeMutation>(
-  GenerateTranscodeDocument,
+  GenerateTranscodeDocument
 );
 const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
   GetBulkOperationsDocument,
   { entityType: entityType.value },
-  () => ({ enabled: refetchEnabled.value }),
+  () => ({ enabled: refetchEnabled.value })
 );
 const bulkOperations = ref<DropdownOption[]>([]);
 const selectedBulkOperation = ref<DropdownOption>();
@@ -188,7 +188,7 @@ onResult((result) => {
 });
 
 const itemsSelected = computed<boolean>(
-  () => getEnqueuedItemCount(props.context) > 0,
+  () => getEnqueuedItemCount(props.context) > 0
 );
 
 onMounted(() => {
@@ -202,39 +202,39 @@ const enqueueItemsForManifestCollection = () => {
       (item: InBulkProcessableItem) =>
         item.teaserMetadata?.find(
           (metadataItem: MetadataAndRelation) =>
-            metadataItem.key === "manifest_url",
-        )?.value,
+            metadataItem.key === "manifest_url"
+        )?.value
     );
     const newItems: InBulkProcessableItem[] = manifests.map(
       (manifest: string) => {
         return { id: manifest };
-      },
+      }
     );
     newItems.forEach((item: InBulkProcessableItem) =>
       enqueueItemForBulkProcessing(
         BulkOperationsContextEnum.ManifestCollection,
-        item,
-      ),
+        item
+      )
     );
     router.push({ name: RouteNames.ManifestViewer });
   } catch {
     createNotificationOverwrite(
       NotificationType.error,
       t("notifications.errors.manifest-collection-error.title"),
-      t("notifications.errors.manifest-collection-error.description"),
+      t("notifications.errors.manifest-collection-error.description")
     );
   }
 };
 
 const generateTranscodeFromMediafiles = (
   type: TranscodeType,
-  entityIds: string[],
+  entityIds: string[]
 ) => {
   mutate({ mediafileIds: entityIds, transcodeType: type }).then(() => {
     createNotificationOverwrite(
       NotificationType.default,
       t("notifications.default.generate-transcode.title"),
-      t("notifications.default.generate-transcode.description"),
+      t("notifications.default.generate-transcode.description")
     );
     dequeueAllItemsForBulkProcessing(props.context);
     emit("refetch");
@@ -256,7 +256,7 @@ watch(selectedBulkOperation, () => {
   if (selectedBulkOperation.value?.value === BulkOperationTypes.TranscodePdf) {
     generateTranscodeFromMediafiles(
       TranscodeType.Pdf,
-      getEnqueuedItems(props.context).map((entity: BaseEntity) => entity.id),
+      getEnqueuedItems(props.context).map((entity: BaseEntity) => entity.id)
     );
   }
 });
@@ -266,14 +266,14 @@ watch(
   (bulkOperationsModalState: ModalState) => {
     if (bulkOperationsModalState === ModalState.Hide)
       selectedBulkOperation.value = undefined;
-  },
+  }
 );
 
 watch(
   () => entityType.value,
   (type: Entitytyping) => {
     refetch({ entityType: type });
-  },
+  }
 );
 </script>
 

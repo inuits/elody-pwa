@@ -241,7 +241,7 @@ export const useBaseLibrary = (
   const getEntities = async (
     route: RouteLocationNormalizedLoaded | undefined,
     force: boolean = false,
-    reinitializeFilters  = false,
+    reinitializeFilters = false
   ): Promise<void> => {
     if (
       !force &&
@@ -255,7 +255,10 @@ export const useBaseLibrary = (
 
     if (libraryBarInitializationStatus.value === "not-initialized")
       await initializeLibraryBar();
-    if (reinitializeFilters || filtersBaseInitializationStatus.value === "not-initialized")
+    if (
+      reinitializeFilters ||
+      filtersBaseInitializationStatus.value === "not-initialized"
+    )
       await initializeFiltersBase();
 
     if (

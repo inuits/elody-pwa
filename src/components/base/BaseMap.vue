@@ -29,11 +29,11 @@
     <div class="bg-neutral-0 w-full pb-2">
       <div v-for="data in mapData" class="px-2 py-1" :key="data.key">
         <entity-element-coordinate-edit
-          v-if="data.field && data.unit === Unit.CoordinatesDefault"
+          v-if="data.inputField && data.unit === Unit.CoordinatesDefault"
           :fieldKey="data.key"
           :label="data.label"
           v-model:value="data.value"
-          :field="data.field"
+          :input-field="data.inputField"
         />
         <metadata-wrapper
           v-else

@@ -493,11 +493,17 @@ watch(
 );
 
 EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryMediafile, () => {
-  if (props.useOtherQuery?.filtersDocument?.definitions[0]?.name?.value === "getPrimaryMediafileFilters")
+  if (
+    props.useOtherQuery?.filtersDocument?.definitions[0]?.name?.value ===
+    "getPrimaryMediafileFilters"
+  )
     getEntities(route, true, true);
 });
 EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryThumbnail, () => {
-  if (props.useOtherQuery?.filtersDocument?.definitions[0]?.name?.value === "getPrimaryThumbnailFilters")
+  if (
+    props.useOtherQuery?.filtersDocument?.definitions[0]?.name?.value ===
+    "getPrimaryThumbnailFilters"
+  )
     getEntities(route, true, true);
 });
 </script>
