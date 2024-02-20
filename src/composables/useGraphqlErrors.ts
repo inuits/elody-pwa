@@ -7,6 +7,7 @@ import {
 import { auth } from "@/main";
 import { getApplicationDetails, i18n } from "@/helpers";
 import { useRouter } from "vue-router";
+import { useStateManagement } from "@/composables/useStateManagement";
 
 const baseGraphQLError = {
   displayTime: 10,
@@ -47,7 +48,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
       case 403:
         createErrorNotification(
           t("notifications.graphql-errors.forbidden.title"),
-          t("notifications.graphql-errors.forbidden.description")
+          t("notifications.graphql-errors.forbidden.description"),
         );
         useRouter().go(-1);
         break;
@@ -69,7 +70,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
 
         createErrorNotification(
           t(`${errorMessage}.title`),
-          `${t(`${errorMessage}.description`)}${duplicateKey}`
+          `${t(`${errorMessage}.description`)}${duplicateKey}`,
         );
         break;
       default:
@@ -102,11 +103,11 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
             `Status:`,
             error.extensions?.statusCode
               ? error.extensions?.statusCode
-              : undefined
+              : undefined,
           );
           console.log(
             `Code:`,
-            error.extensions?.code ? error.extensions?.code : undefined
+            error.extensions?.code ? error.extensions?.code : undefined,
           );
           console.log(`Error:`, error.message);
           console.log(`Message:`, error.extensions?.response?.body?.message);
