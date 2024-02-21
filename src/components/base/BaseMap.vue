@@ -87,6 +87,8 @@ const parsedMapData = computed(() => {
     (dataItem) => dataItem.key === "location"
   );
   let coordinates = coordinatesObject.value;
+  console.log(props.mapData);
+  console.log(coordinates);
 
   if (!coordinates) coordinates = createNewCoordinatesObject(coordinatesObject);
 

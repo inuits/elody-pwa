@@ -130,6 +130,7 @@ const componentMetadata = computed(() => {
       returnArray.push(metadataObject);
     }
   });
+  console.log(returnArray);
   return returnArray;
 });
 </script>
