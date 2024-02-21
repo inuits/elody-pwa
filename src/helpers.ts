@@ -48,6 +48,7 @@ export const i18n = (translations: Object, applicationLocale: string) => {
     // @ts-ignore
     messages: translations,
     missingWarn: false,
+    fallbackWarn: false,
   });
 };
 
