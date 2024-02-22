@@ -59,7 +59,7 @@ const props = withDefaults(
   }>(),
   {
     errors: [],
-  },
+  }
 );
 
 const { t } = useI18n();

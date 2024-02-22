@@ -29,7 +29,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
     let language = config.customization.applicationLocale;
 
     const displayPreferences = useStateManagement().getGlobalState(
-      "_displayPreferences",
+      "_displayPreferences"
     );
     if (displayPreferences) {
       const preferences = JSON.parse(displayPreferences);
@@ -48,7 +48,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
       case 403:
         createErrorNotification(
           t("notifications.graphql-errors.forbidden.title"),
-          t("notifications.graphql-errors.forbidden.description"),
+          t("notifications.graphql-errors.forbidden.description")
         );
         useRouter().go(-1);
         break;
@@ -70,7 +70,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
 
         createErrorNotification(
           t(`${errorMessage}.title`),
-          `${t(`${errorMessage}.description`)}${duplicateKey}`,
+          `${t(`${errorMessage}.description`)}${duplicateKey}`
         );
         break;
       default:
@@ -103,11 +103,11 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
             `Status:`,
             error.extensions?.statusCode
               ? error.extensions?.statusCode
-              : undefined,
+              : undefined
           );
           console.log(
             `Code:`,
-            error.extensions?.code ? error.extensions?.code : undefined,
+            error.extensions?.code ? error.extensions?.code : undefined
           );
           console.log(`Error:`, error.message);
           console.log(`Message:`, error.extensions?.response?.body?.message);

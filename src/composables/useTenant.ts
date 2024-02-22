@@ -144,7 +144,7 @@ const useTenant = (
     if (selectedTenantValue !== (await getTennantFromSession()).id)
       router.push({ name: "Home" });
 
-    selectedTenantValue && await setTennantInSession(selectedTenantValue);
+    selectedTenantValue && (await setTennantInSession(selectedTenantValue));
     tenantsLoaded.value = "switching";
   };
 

@@ -110,7 +110,7 @@ export const useBreadcrumbs = (config: any, t: any) => {
         lastVisitedRoute = visitedRoute;
     });
     return lastVisitedRoute;
-  }
+  };
 
   return {
     currentRouteTitle,
@@ -119,6 +119,6 @@ export const useBreadcrumbs = (config: any, t: any) => {
     addVisitedRoute,
     visitedRoutes,
     previousRoute,
-    findLastOverviewPage
+    findLastOverviewPage,
   };
 };

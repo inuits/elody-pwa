@@ -22,7 +22,7 @@ const { updateGlobalState, getGlobalState } = useStateManagement();
 const selectedLanguageOption = ref<DropdownOption | undefined>();
 
 const createOptionsFromAvailableLanguages = (
-  availableLanguages: string[],
+  availableLanguages: string[]
 ): DropdownOption[] => {
   return availableLanguages.map((language) => ({
     icon: DamsIcons.NoIcon,
@@ -42,7 +42,7 @@ if (displayPreferences?.lang) {
 
 const setSelectedLanguageOption = (): void => {
   selectedLanguageOption.value = languageOptions.value.find(
-    (language) => language.value === locale.value,
+    (language) => language.value === locale.value
   );
 };
 

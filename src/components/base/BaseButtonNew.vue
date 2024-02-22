@@ -117,12 +117,12 @@ const props = withDefaults(
     disabled: false,
     iconHeight: 18,
     loading: false,
-  },
+  }
 );
 
 const { t } = useI18n();
 
 const selectedButtonStyle = computed<Button>(
-  () => buttonStyles[props.buttonStyle],
+  () => buttonStyles[props.buttonStyle]
 );
 </script>
