@@ -1,18 +1,20 @@
 <template>
   <div>
     <div
-      v-if="!loading"
+      v-if="!loading && entity"
       class="pl-24 h-full w-full flex fixed top-0 bg-neutral-lightest pt-24 left-0"
     >
       <entity-form
         v-if="intialValues != 'no-values' && relationValues != 'no-values'"
         :intial-values="intialValues"
         :relation-values="relationValues"
+        :uuid="entity.uuid"
       >
         <entity-column
           v-if="columnList != 'no-values'"
           :columnList="columnList"
           :identifiers="identifiers"
+          :uuid="entity.uuid"
         ></entity-column>
       </entity-form>
     </div>
@@ -91,6 +93,7 @@ const relationValues = ref<RelationValues | "no-values">("no-values");
 const columnList = ref<ColumnList | "no-values">("no-values");
 const permissionToEdit = ref<boolean>();
 const permissionToDelete = ref<boolean>();
+const entity = ref<BaseEntity>();
 
 router.beforeEach(() => {
   if (isEdit) disableEditMode();
@@ -107,25 +110,26 @@ onBeforeRouteUpdate(async (to: any) => {
 watch(
   () => result.value,
   () => {
-    const entity: BaseEntity = result.value?.Entity as BaseEntity;
-    if (!entity || !entity.intialValues) return;
-    useEntitySingle().setEntityUuid(entity.uuid || entity.id);
+    entity.value = result.value?.Entity as BaseEntity;
+    if (!entity.value || !entity.value.intialValues) return;
+    useEntitySingle().setEntityUuid(entity.value.uuid || entity.value.id);
 
-    identifiers.value = [entity.uuid, entity.id];
-    intialValues.value = entity.intialValues;
-    relationValues.value = entity.relationValues as RelationValues;
-    columnList.value = entity.entityView;
+    identifiers.value = [entity.value.uuid, entity.value.id];
+    intialValues.value = entity.value.intialValues;
+    relationValues.value = entity.value.relationValues as RelationValues;
+    columnList.value = entity.value.entityView;
 
     if (typeof columnList.value !== "string") {
-      getEditableMetadataKeys(columnList.value, route.params.id as string);
+      getEditableMetadataKeys(columnList.value, entity.value.uuid);
     }
 
-    if (entity.type.toLowerCase() === "mediafile") {
-      mediafileSelectionState.mediafiles = [entity as MediaFileEntity];
-      mediafileSelectionState.selectedMediafile = entity as MediaFileEntity;
+    if (entity.value.type.toLowerCase() === "mediafile") {
+      mediafileSelectionState.mediafiles = [entity.value as MediaFileEntity];
+      mediafileSelectionState.selectedMediafile =
+        entity.value as MediaFileEntity;
     }
 
-    const mappings = fetchUpdateAndDeletePermission(entity.id);
+    const mappings = fetchUpdateAndDeletePermission(entity.value.id);
     if (mappings) {
       mappings.then((result) => {
         permissionToEdit.value = result.get(Permission.Canupdate);
@@ -146,9 +150,14 @@ watch(
     );
 
     setCurrentRouteTitle(
-      entity.intialValues?.title || entity.intialValues?.name || entity.id
+      entity.value.intialValues?.title ||
+        entity.value.intialValues?.name ||
+        entity.value.id
     );
-    addVisitedRoute({ id: entity.id, routeName: currentRouteTitle.value });
+    addVisitedRoute({
+      id: entity.value.id,
+      routeName: currentRouteTitle.value,
+    });
     setRefetchFn(refetch);
     loading.value = false;
   }

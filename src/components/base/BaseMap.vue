@@ -34,6 +34,7 @@
           :label="data.label"
           v-model:value="data.value"
           :input-field="data.inputField"
+          :entity-uuid="entityUuid"
         />
         <metadata-wrapper
           v-else
@@ -65,16 +66,16 @@ import { useEditMode } from "@/composables/useEdit";
 import EntityElementCoordinateEdit from "../EntityElementCoordinateEdit.vue";
 import type { MediaFileElement } from "@/generated-types/queries";
 import { MetadataField, Unit } from "@/generated-types/queries";
-import { getEntityIdFromRoute } from "@/helpers";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 
 const props = defineProps<{
   element: MediaFileElement;
   mapData: any[];
+  entityUuid: string;
 }>();
 
 const zoom = ref<number>(15);
-const formId = computed(() => getEntityIdFromRoute() as string);
+const formId = computed(() => props.entityUuid);
 const { isEdit } = useEditMode();
 
 const createNewCoordinatesObject = (coordinatesObject: any) => {
@@ -87,8 +88,6 @@ const parsedMapData = computed(() => {
     (dataItem) => dataItem.key === "location"
   );
   let coordinates = coordinatesObject.value;
-  console.log(props.mapData);
-  console.log(coordinates);
 
   if (!coordinates) coordinates = createNewCoordinatesObject(coordinatesObject);
 

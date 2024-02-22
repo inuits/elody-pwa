@@ -29,6 +29,7 @@
         :element="element"
         :identifiers="identifiers"
         :relationType="element.relationType"
+        :entity-uuid="uuid"
       />
       <entity-element-single-media
         v-if="element.__typename === 'SingleMediaFileElement'"
@@ -77,7 +78,6 @@ import type {
   SingleMediaFileElement,
   WindowElement,
 } from "@/generated-types/queries";
-import { getEntityIdFromRoute } from "@/helpers";
 import EntityElementMarkdownViewer from "@/components/entityElements/EntityElementMarkdownViewer.vue";
 
 export type Elements =
@@ -92,10 +92,11 @@ export type Elements =
 const props = defineProps<{
   elements: EntityViewElements;
   identifiers: string[];
+  uuid: string;
 }>();
 
 const { isEdit } = useEditMode();
-const formId = computed(() => getEntityIdFromRoute() as string);
+const formId = computed(() => props.uuid);
 const elements = computed<Elements[]>(() => {
   const returnArray: Elements[] = [];
   const graphArray: Elements[] = [];

@@ -33,8 +33,8 @@
           SearchInputType.AdvancedInputMediaFilesType
         "
         :predefined-entities="
-          entityId === mediafileSelectionState.selectedMediafile?.id ||
-          entityId === mediafileSelectionState.selectedMediafile?.uuid
+          entityUuid === mediafileSelectionState.selectedMediafile?.id ||
+          entityUuid === mediafileSelectionState.selectedMediafile?.uuid
             ? [mediafileSelectionState.selectedMediafile]
             : undefined
         "
@@ -43,8 +43,8 @@
         :enable-bulk-operations="true"
         :enable-navigation="false"
         :parent-entity-identifiers="
-          entityId === mediafileSelectionState.selectedMediafile?.id ||
-          entityId === mediafileSelectionState.selectedMediafile?.uuid
+          entityUuid === mediafileSelectionState.selectedMediafile?.id ||
+          entityUuid === mediafileSelectionState.selectedMediafile?.uuid
             ? undefined
             : identifiers
         "
@@ -62,6 +62,7 @@
         "
         :element="element"
         :mapData="componentMetadata"
+        :entity-uuid="entityUuid"
       ></base-map>
     </template>
   </entity-element-wrapper>
@@ -83,13 +84,11 @@ import BaseMap from "../base/BaseMap.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import useEditMode from "@/composables/useEdit";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import useEntitySingle from "@/composables/useEntitySingle";
-import { asString, getValueForPanelMetadata } from "@/helpers";
+import { getValueForPanelMetadata } from "@/helpers";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import { computed } from "vue";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { useRoute } from "vue-router";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useI18n } from "vue-i18n";
 
@@ -97,18 +96,14 @@ const props = defineProps<{
   element: MediaFileElement;
   identifiers: string[];
   relationType: string;
+  entityUuid: string;
 }>();
 
 const { t } = useI18n();
 const { mediafileSelectionState } = useEntityMediafileSelector();
 const { setAcceptedTypes, setRelationType } = useEntityPickerModal();
-const { getEntityUuid } = useEntitySingle();
 const { openModal } = useBaseModal();
 const { isEdit } = useEditMode();
-
-const entityId = computed(
-  () => getEntityUuid() || asString(useRoute().params["id"])
-);
 
 const componentMetadata = computed(() => {
   const returnArray: MetadataAndRelation[] = [];
@@ -122,7 +117,7 @@ const componentMetadata = computed(() => {
         value: getValueForPanelMetadata(
           PanelType.Metadata,
           metadataItemKey,
-          entityId.value
+          props.entityUuid
         ),
         inputField: (value as PanelMetaData).inputField,
         unit: (value as PanelMetaData).unit,
@@ -130,7 +125,6 @@ const componentMetadata = computed(() => {
       returnArray.push(metadataObject);
     }
   });
-  console.log(returnArray);
   return returnArray;
 });
 </script>

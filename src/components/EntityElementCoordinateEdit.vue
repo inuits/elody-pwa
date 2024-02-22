@@ -37,7 +37,6 @@ import type {
   InputField as InputFieldType,
 } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { getEntityIdFromRoute } from "@/helpers";
 import { type PropType, computed } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useField } from "vee-validate";
@@ -55,13 +54,13 @@ const props = defineProps({
   label: { type: String, required: true },
   value: { type: Object as PropType<Location>, required: true },
   inputField: { type: Object as PropType<InputFieldType>, required: false },
+  entityUuid: { type: String, required: true },
 });
 
 const { isEdit } = useEditMode();
 const decimalPointStep = 0.000001;
 const { getForm } = useFormHelper();
-const id = getEntityIdFromRoute() || "";
-const form: FormContext | undefined = getForm(id);
+const form: FormContext | undefined = getForm(props.entityUuid);
 const { errorMessage } = useField("intialValues." + props.fieldKey);
 const { conditionalFieldIsAvailable } = useConditionalValidation();
 const coordinateEditIsDisabled = computed(() => {
@@ -69,7 +68,7 @@ const coordinateEditIsDisabled = computed(() => {
   if (!props.inputField?.validation?.available_if) return false;
   return !conditionalFieldIsAvailable(
     props.inputField.validation.available_if as Conditional,
-    getEntityIdFromRoute() as string
+    props.entityUuid
   );
 });
 const { t } = useI18n();
