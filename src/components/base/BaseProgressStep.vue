@@ -7,22 +7,28 @@
     ]"
   >
     <unicon
-      v-if="stepType === 'failed'"
+      v-if="stepType === ProgressStepStatus.Empty"
+      :name="Unicons.Circle.name"
+      class="fill-neutral-black"
+      height="16"
+    />
+    <unicon
+      v-if="stepType === ProgressStepStatus.Failed"
       :name="Unicons.Ban.name"
-      fill="text-text-white"
+      class="fill-neutral-white"
       height="16"
     />
     <unicon
-      v-if="stepType === 'complete'"
+      v-if="stepType === ProgressStepStatus.Complete"
       :name="Unicons.CheckCircle.name"
-      fill="text-green-default"
+      class="fill-green-default"
       height="16"
+      loading
     />
     <unicon
-      v-if="stepType === 'loading'"
-      class="animate-spin"
+      v-if="stepType === ProgressStepStatus.Loading"
+      class="animate-spin fill-neutral-white"
       :name="Unicons.Process.name"
-      fill="text-text-white"
       height="16"
     />
     <p v-if="label" :class="`${labelColor}`">{{ t(label) }}</p>
@@ -33,23 +39,26 @@
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { computed } from "vue";
+import { ProgressStepStatus } from "@/generated-types/queries";
 
 const props = defineProps<{
   label?: string;
-  stepType: "complete" | "loading" | "empty" | "failed";
+  stepType: ProgressStepStatus;
 }>();
 
 const { t } = useI18n();
 const labelColor = computed(() => {
-  if (props.stepType === "loading") return "text-neutral-white";
-  if (props.stepType === "complete") return "bg-green-default";
-  if (props.stepType === "failed") return "bg-red-default";
+  if (props.stepType === ProgressStepStatus.Loading)
+    return "text-neutral-white";
+  if (props.stepType === ProgressStepStatus.Complete)
+    return "text-green-default";
+  if (props.stepType === ProgressStepStatus.Failed) return "text-neutral-white";
   return "bg-neutral-30";
 });
 const bgColor = computed(() => {
-  if (props.stepType === "loading") return "bg-accent-accent";
-  if (props.stepType === "complete") return "bg-green-light";
-  if (props.stepType === "failed") return "bg-red-dark";
+  if (props.stepType === ProgressStepStatus.Loading) return "bg-accent-accent";
+  if (props.stepType === ProgressStepStatus.Complete) return "bg-green-light";
+  if (props.stepType === ProgressStepStatus.Failed) return "bg-red-default";
   return "bg-neutral-30";
 });
 </script>
