@@ -9,10 +9,8 @@ import {
   type ActionProgressStep,
   ProgressStepStatus,
   ProgressStepType,
-  TypeModals,
   UploadFieldType,
 } from "@/generated-types/queries";
-import { useBaseModal } from "@/composables/useBaseModal";
 import useEntitySingle from "@/composables/useEntitySingle";
 
 type FileError = {
@@ -99,6 +97,10 @@ const useUpload = () => {
     try {
       if (dryRunResult.message) {
         dryRunErrors.value.push(dryRunResult.message);
+        __updateUploadProgress(
+          ProgressStepType.Validate,
+          ProgressStepStatus.Failed,
+        );
         return;
       }
 
@@ -117,12 +119,12 @@ const useUpload = () => {
       }
       dryRunErrors.value = errors;
       dryRunComplete.value = true;
-      if (dryRunComplete.value) {
-        __updateUploadProgress(
-          ProgressStepType.Validate,
-          ProgressStepStatus.Complete,
-        );
-      }
+      __updateUploadProgress(
+        ProgressStepType.Validate,
+        dryRunErrors.value.length
+          ? ProgressStepStatus.Failed
+          : ProgressStepStatus.Complete,
+      );
     } catch {
       dryRunErrors.value.push("upload-fields.errors.dry-run-failed");
       __updateUploadProgress(
@@ -306,6 +308,7 @@ const useUpload = () => {
     files.value = [];
     requiredMediafiles.value = undefined;
     uploadProgressPercentage.value = 0;
+    uploadProgress.value = [];
   };
 
   const verifyAllNeededFilesArePresent = (): boolean => {
@@ -315,16 +318,11 @@ const useUpload = () => {
         ProgressStepStatus.Loading,
       );
       fileErrors.value = [];
+
+      if (uploadType.value === UploadFieldType.Single) return true;
+
       const requiredFileNames: string[] = [...requiredMediafiles.value];
       let areAllFilesPresent: boolean = true;
-
-      if (uploadType.value === UploadFieldType.Single) {
-        __updateUploadProgress(
-          ProgressStepType.Prepare,
-          ProgressStepStatus.Complete,
-        );
-        return true;
-      }
 
       requiredFileNames.forEach((requiredFileName: string) => {
         const fileExists = mediafiles.value.some(
@@ -420,6 +418,7 @@ const useUpload = () => {
     mediafiles,
     requiredMediafiles,
     verifyAllNeededFilesArePresent,
+    __updateUploadProgress,
     fileErrors,
     dryRunComplete,
     isCsvRequired,
@@ -442,6 +441,12 @@ watch(
   () => mediafiles.value.length,
   () => {
     useUpload().verifyAllNeededFilesArePresent();
+    if (uploadType.value === UploadFieldType.Single) {
+      useUpload().__updateUploadProgress(
+        ProgressStepType.Prepare,
+        ProgressStepStatus.Complete,
+      );
+    }
   },
 );
 
