@@ -26,54 +26,48 @@ const permissionsMappings = ref<Map<string, Map<Permission, boolean>>>(
 
 const setPermissionsMappings = async () => {
   if (ignorePermissions.value) return;
+  const promises: Promise<void>[] = [];
 
   for (const entity of Object.values(Entitytyping)) {
     const permissions = new Map<Permission, boolean>();
 
-    try {
-      await apolloClient
-        .query<GetPermissionMappingPerEntityTypeQuery>({
-          query: GetPermissionMappingPerEntityTypeDocument,
-          variables: reactive<GetPermissionMappingPerEntityTypeQueryVariables>({
-            type: entity,
-          }),
-          fetchPolicy: "no-cache",
-          notifyOnNetworkStatusChange: true,
-        })
-        .then((result) => {
-          permissions.set(
-            Permission.Canread,
-            result.data?.PermissionMappingPerEntityType
-          );
-          permissionsMappings.value.set(entity, permissions);
-        });
-    } catch (e) {
-      console.log(
-        `Error in usePermissions set function for post entities/filter: ${e}`
-      );
-    }
+    const mappingPerEntityTypePromise = apolloClient
+      .query<GetPermissionMappingPerEntityTypeQuery>({
+        query: GetPermissionMappingPerEntityTypeDocument,
+        variables: reactive<GetPermissionMappingPerEntityTypeQueryVariables>({
+          type: entity,
+        }),
+        fetchPolicy: "no-cache",
+        notifyOnNetworkStatusChange: true,
+      })
+      .then((result) => {
+        permissions.set(
+          Permission.Canread,
+          result.data?.PermissionMappingPerEntityType
+        );
+        permissionsMappings.value.set(entity, permissions);
+      });
 
-    try {
-      await apolloClient
-        .query<GetPermissionMappingCreateQuery>({
-          query: GetPermissionMappingCreateDocument,
-          variables: reactive<GetPermissionMappingCreateQueryVariables>({
-            entityType: entity,
-          }),
-          fetchPolicy: "no-cache",
-          notifyOnNetworkStatusChange: true,
-        })
-        .then((result) => {
-          permissionsMappings.value
-            .get(entity)
-            ?.set(Permission.Cancreate, result.data?.PermissionMappingCreate);
-        });
-    } catch (e) {
-      console.log(
-        `Error in usePermissions set function for create entities: ${e}`
-      );
-    }
+    const mappingCreatePromise = apolloClient
+      .query<GetPermissionMappingCreateQuery>({
+        query: GetPermissionMappingCreateDocument,
+        variables: reactive<GetPermissionMappingCreateQueryVariables>({
+          entityType: entity,
+        }),
+        fetchPolicy: "no-cache",
+        notifyOnNetworkStatusChange: true,
+      })
+      .then((result) => {
+        permissionsMappings.value
+          .get(entity)
+          ?.set(Permission.Cancreate, result.data?.PermissionMappingCreate);
+      });
+
+    promises.push(mappingPerEntityTypePromise);
+    promises.push(mappingCreatePromise);
   }
+
+  await Promise.all(promises);
 };
 
 const usePermissions = () => {
