@@ -2,13 +2,7 @@
   <div
     :class="[
       'flex flex-col w-full p-3 pb-2 overflow-y-scroll',
-      `${
-        dropzoneSize === 'small'
-          ? 'h-[25vh]'
-          : dropzoneSize === 'normal'
-          ? 'h-[60vh]'
-          : 'h-[90vh]'
-      }`,
+      `${getDropzoneSize(dropzoneSize)}`,
     ]"
     :key="uploadFieldType"
   >
@@ -40,7 +34,7 @@ const { t } = useI18n();
 const { upload, files, uploadType, resetUpload, isCsvRequired } = useUpload();
 let dropzoneHelper = new useDropzoneHelper();
 const isRequired = computed(() =>
-  props.validation ? props.validation.includes("required") : false
+  props.validation ? props.validation.includes("required") : false,
 );
 
 const props = withDefaults(
@@ -59,8 +53,17 @@ const props = withDefaults(
     dropzoneSize: "big",
     isLinkedUpload: false,
     dryRun: false,
-  }
+  },
 );
+
+const getDropzoneSize = (size: "small" | "normal" | "big") => {
+  const sizeObject = {
+    small: "h-[25vh]",
+    normal: "h-[55vh]",
+    big: "h-[85vh]",
+  };
+  return sizeObject[size];
+};
 
 const setUseUploadVariables = () => {
   uploadType.value = props.uploadFieldType as UploadFieldType;
@@ -84,7 +87,7 @@ watch(
   () => {
     setUseUploadVariables();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
@@ -94,7 +97,7 @@ watch(
       dropzoneHelper.resetDropzone();
       resetUpload();
     }
-  }
+  },
 );
 </script>
 
