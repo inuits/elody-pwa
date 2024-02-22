@@ -35,8 +35,8 @@
               SearchInputType.AdvancedInputMediaFilesType
             "
             :predefined-entities="
-              entityId === mediafileSelectionState.selectedMediafile?.id ||
-              entityId === mediafileSelectionState.selectedMediafile?.uuid
+              entityUuid === mediafileSelectionState.selectedMediafile?.id ||
+              entityUuid === mediafileSelectionState.selectedMediafile?.uuid
                 ? [mediafileSelectionState.selectedMediafile]
                 : undefined
             "
@@ -45,8 +45,8 @@
             :enable-bulk-operations="true"
             :enable-navigation="false"
             :parent-entity-identifiers="
-              entityId === mediafileSelectionState.selectedMediafile?.id ||
-              entityId === mediafileSelectionState.selectedMediafile?.uuid
+              entityUuid === mediafileSelectionState.selectedMediafile?.id ||
+              entityUuid === mediafileSelectionState.selectedMediafile?.uuid
                 ? undefined
                 : identifiers
             "
@@ -103,16 +103,12 @@ import useEditMode from "@/composables/useEdit";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { useRoute } from "vue-router";
 import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { watch, ref, onBeforeMount, computed } from "vue";
 import { useImport } from "@/composables/useImport";
-import { bulkSelectAllSizeLimit } from "@/main";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
-import { asString } from "@/helpers";
-import useEntitySingle from "@/composables/useEntitySingle";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
 import useUpload from "@/composables/useUpload";
 
@@ -125,7 +121,6 @@ const { loadDocument } = useImport();
 const { isEdit } = useEditMode();
 const { t } = useI18n();
 const { mediafileSelectionState } = useEntityMediafileSelector();
-const { getEntityUuid } = useEntitySingle();
 const { uploadStatus } = useUpload();
 const {
   setIdentifiers,
@@ -149,6 +144,7 @@ const props = withDefaults(
     relationType: string;
     viewMode?: EntityListViewMode;
     basicBaseLibrary?: Boolean;
+    entityUuid: string;
   }>(),
   {
     types: () => [],
@@ -164,10 +160,6 @@ watch(
       updateRelationForm(props.entityList);
     }
   }
-);
-
-const entityId = computed(
-  () => getEntityUuid() || asString(useRoute().params["id"])
 );
 
 const requiresCustomQuery = computed(() => props.customQuery != undefined);

@@ -5,7 +5,11 @@
       :key="index"
       :class="['h-full p-5', convertSizeToTailwind(column.size)]"
     >
-      <entity-element :elements="column.elements" :identifiers="identifiers">
+      <entity-element
+        :elements="column.elements"
+        :identifiers="identifiers"
+        :uuid="uuid"
+      >
       </entity-element>
     </div>
   </div>
@@ -21,6 +25,7 @@ import { useEditMode } from "@/composables/useEdit";
 const props = defineProps<{
   columnList: ColumnList;
   identifiers: string[];
+  uuid: string;
 }>();
 
 const { setInitialColumns, currentColumnConfig } = useColumnResizeHelper();

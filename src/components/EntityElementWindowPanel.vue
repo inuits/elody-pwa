@@ -73,7 +73,6 @@ import { getMetadataFields } from "@/helpers";
 import { PanelType } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
-import { useRoute } from "vue-router";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 
 const props = defineProps<{
@@ -87,7 +86,6 @@ const { t } = useI18n();
 const panelType = ref<PanelType>(props.panel.panelType);
 const isCollapsed = ref<boolean>(props.panel.isCollapsed);
 const config = inject("config") as any;
-const { params: routeParams } = useRoute();
 
 const itemMustBeShown = (value: any): boolean => {
   if (config.customization.hideEmptyFields === true && !value) return false;
@@ -117,11 +115,7 @@ const relationArray = computed((): PanelRelation[] => {
 });
 
 const metadatafields = computed(() => {
-  return getMetadataFields(
-    props.panel,
-    panelType.value,
-    routeParams.id as string
-  );
+  return getMetadataFields(props.panel, panelType.value, props.formId);
 });
 </script>
 
