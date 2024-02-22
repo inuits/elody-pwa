@@ -14,7 +14,7 @@
       <button
         type="button"
         :disabled="disabled"
-        class="flex justify-center items-center w-full rounded-md outline-none transition-colors duration-300 disabled:cursor-auto text-neutral-white bg-accent-accent hover:text-accent-accent hover:bg-neutral-lightest active:text-accent-accent active:bg-accent-light disabled:text-text-disabled disabled:bg-neutral-lightest"
+        class="flex justify-center items-center w-full p-2 rounded-md outline-none transition-colors duration-300 disabled:cursor-auto text-neutral-white bg-accent-accent hover:text-accent-accent hover:bg-neutral-lightest active:text-accent-accent active:bg-accent-light disabled:text-text-disabled disabled:bg-neutral-lightest"
       >
         <unicon
           v-if="props.icon !== DamsIcons.NoIcon"
@@ -72,7 +72,7 @@ const props = withDefaults(
   }>(),
   {
     errors: [],
-  }
+  },
 );
 
 const { t } = useI18n();
