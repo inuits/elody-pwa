@@ -12,7 +12,7 @@
     >
       <entity-element-list
         v-if="element.__typename === 'EntityListElement'"
-        :label="(element.label as string)"
+        :label="element.label as string"
         :type="element.type"
         :isCollapsed="element.isCollapsed"
         :types="element.entityTypes as string[]"
@@ -23,6 +23,7 @@
         :entity-list="(element.entityList as Entity[]) ?? []"
         :identifiers="identifiers"
         :relationType="element.relationType"
+        :entity-uuid="uuid"
       />
       <entity-element-media
         v-if="element.__typename === 'MediaFileElement'"
