@@ -21,7 +21,7 @@ import useEditMode from "@/composables/useEdit";
 import useTenant from "@/composables/useTenant";
 import { DamsIcons } from "@/generated-types/queries";
 import { DefaultApolloClient } from "@vue/apollo-composable";
-import { inject, computed } from "vue";
+import { inject, computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 const apolloClient = inject(DefaultApolloClient);
@@ -31,25 +31,35 @@ const config = inject<{
 
 const { t } = useI18n();
 const { isEdit } = useEditMode();
-const { tenantsAsDropdownOptions, selectedTenant, getLabelById } = useTenant(
+const { tenantsAsDropdownOptions, selectTenant, selectedTenant, getLabelById } = useTenant(
   apolloClient as ApolloClient<any>,
   config
 );
 
+const tenant = ref<string | undefined>(selectedTenant.value);
+
 const computedValue = computed<DropdownOption>({
   get() {
-    return selectedTenant.value
+    return tenant.value
       ? {
-          value: selectedTenant.value,
-          label: getLabelById(selectedTenant.value),
+          value: tenant.value,
+          label: getLabelById(tenant.value),
           icon: DamsIcons.NoIcon,
         }
       : undefined;
   },
   set(value) {
-    selectedTenant.value = value.value;
+    tenant.value = value.value;
   },
 });
+
+watch(
+  () => tenant.value,
+  async () => {
+    if (tenant.value)
+      await selectTenant(tenant.value);
+  }
+)
 </script>
 
 <style scoped>

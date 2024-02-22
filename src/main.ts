@@ -41,6 +41,16 @@ const start = async () => {
 
   if (config.customization) applyCustomization(config.customization);
   auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
+
+  const authCode = new URLSearchParams(window.location.search).get("code");
+  auth.authCode = authCode;
+
+  if (authCode) {
+    await auth.processAuthCode(authCode);
+    if (!config.allowAnonymousUsers && !auth.isAuthenticated.value)
+      await auth.redirectToLogin();
+  }
+
   bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
 
   const head = createHead();
@@ -53,27 +63,6 @@ const start = async () => {
     const errorHandler = useGraphqlErrors(error);
     errorHandler.logFormattedErrors();
   });
-
-  router.beforeEach(async (to, _from) => {
-    await auth.verifyServerAuth();
-    if (!to.matched.some((route) => route.meta.requiresAuth)) {
-      return;
-    } else {
-      await auth.assertIsAuthenticated(to.fullPath);
-    }
-  });
-
-  router.afterEach(() => {
-    auth.changeRedirectRoute(window.location.origin + window.location.pathname);
-  });
-
-  auth.changeRedirectRoute(window.location.origin + window.location.pathname);
-  const authCode = new URLSearchParams(window.location.search).get("code");
-  auth.authCode = authCode;
-
-  if (authCode) {
-    auth.processAuthCode(authCode, router);
-  }
 
   apolloClient = new ApolloClient({
     link: graphqlErrorInterceptor.concat(

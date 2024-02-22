@@ -57,10 +57,9 @@ import {
   type MenuItem,
 } from "@/generated-types/queries";
 import CustomIcon from "../CustomIcon.vue";
-import EventBus from "@/EventBus";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
 import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
-import { computed, defineProps, ref } from "vue";
+import { computed, defineProps, onMounted, ref } from "vue";
 import { Permission } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useAuth } from "session-vue-3-oidc-library";
@@ -108,7 +107,7 @@ const handleSubMenu = () => {
 };
 handleSubMenu();
 
-EventBus.on("permissions_updated", () => {
+onMounted(() => {
   let allowed = false;
   const neededPermission = props.menuitem.typeLink.modal
     ?.neededPermission as Permission;

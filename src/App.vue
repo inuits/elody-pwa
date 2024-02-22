@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div v-if="!showSplashScreen">
     <BaseNotification />
     <the-navigation class="navbar" />
-    <div v-if="tenantsLoaded !== 'not-loaded' && tenantsLoaded !== 'switching'">
+    <div>
       <div
         class="bg-neutral-lightest"
         :class="[`pl-24 h-screen flex flex-col`]"
@@ -28,85 +28,51 @@
       <ConfirmModal><ConfirmModalView /></ConfirmModal>
     </div>
   </div>
+  <div v-else class="w-full h-screen flex justify-center items-center">
+    <img src="/logo.svg" alt="Elody logo" class="h-48" />
+  </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import type { Context } from "./composables/useBulkOperations";
 import BaseNotification from "@/components/base/BaseNotification.vue";
+//import BulkOperationsEditModal from "@/components/bulk-operations/BulkOperationsEditModal.vue";
 import BulkoperationsModal from "@/components/bulk-operations/BulkOperationsModal.vue";
-import BulkOperationsEditModal from "@/components/bulk-operations/BulkOperationsEditModal.vue";
+import ConfirmModal from "./components/base/ConfirmModal.vue";
+import ConfirmModalView from "./components/ConfirmModalView.vue";
+import DynamicFormModal from "@/components/dynamicForms/DynamicFormModal.vue";
 import EditModal from "@/components/EditModal.vue";
 import EntityPickerModal from "@/components/EntityPickerModal.vue";
+import SearchModal from "@/components/SearchModal.vue";
 import SearchSavedSearchesModal from "@/components/searchSavedSearchesModal.vue";
 import TheHeader from "@/components/TheHeader.vue";
 import TheNavigation from "@/components/menu/MenuNav.vue";
-import UploadModal from "@/components/UploadModal.vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
-import { DefaultOIDC, useAuth } from "session-vue-3-oidc-library";
-import { defineComponent, inject, ref } from "vue";
+import { inject, onMounted } from "vue";
+import { useApp } from "@/composables/useApp";
+import { useAuth } from "session-vue-3-oidc-library";
 import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
-import ConfirmModal from "./components/base/ConfirmModal.vue";
-import ConfirmModalView from "./components/ConfirmModalView.vue";
-import useTenant from "@/composables/useTenant";
-import { DefaultApolloClient } from "@vue/apollo-composable";
-import type { ApolloClient } from "@apollo/client/core";
-import SearchModal from "@/components/SearchModal.vue";
-import DynamicFormModal from "@/components/dynamicForms/DynamicFormModal.vue";
 
-export default defineComponent({
-  name: "App",
-  components: {
-    DynamicFormModal,
-    SearchModal,
-    BaseNotification,
-    BulkoperationsModal,
-    // BulkOperationsEditModal,
-    EditModal,
-    EntityPickerModal,
-    SearchSavedSearchesModal,
-    TheHeader,
-    TheNavigation,
-    UploadModal,
-    ConfirmModal,
-    ConfirmModalView,
-  },
-  inject: { DefaultOIDC },
-  setup() {
-    const auth: Object = useAuth();
-    const { isSingle } = useRouteHelpers();
-    const contentPadding = ref("24");
-    const route = useRoute();
-    const apolloClient = inject(DefaultApolloClient);
-    const { tenantsLoaded } = useTenant(apolloClient as ApolloClient<any>);
+const auth = useAuth();
+const config = inject<{
+  features: { hasTenantSelect: boolean };
+  allowAnonymousUsers: boolean;
+}>("config");
 
-    // TODO: Fix vite migrations
-    const getIndexValue = () => {
-      let indexStr = "";
-      // if (_.index) {
-      //   indexStr = "INDEX, FOLLOW";
-      // } else {
-      indexStr = "NOINDEX, NOFOLLOW";
-      // }
-      return indexStr;
-    };
+const route = useRoute();
+const { initApp, showSplashScreen } = useApp();
+const { isSingle } = useRouteHelpers();
 
-    useHead({
-      meta: [
-        {
-          name: `ROBOTS`,
-          content: getIndexValue(),
-        },
-      ],
-    });
+onMounted(async () => await initApp(auth, config));
 
-    return {
-      auth,
-      isSingle,
-      contentPadding,
-      route,
-      tenantsLoaded,
-    };
-  },
+useHead({
+  meta: [
+    {
+      name: "ROBOTS",
+      content: "NOINDEX, NOFOLLOW",
+    },
+  ],
 });
 </script>
 

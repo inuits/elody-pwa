@@ -11,7 +11,6 @@ import {
   Entitytyping,
   type GetPermissionMappingCreateQueryVariables,
 } from "@/generated-types/queries";
-import EventBus from "@/EventBus";
 import { apolloClient } from "@/main";
 import { reactive, ref } from "vue";
 
@@ -25,15 +24,14 @@ const permissionsMappings = ref<Map<string, Map<Permission, boolean>>>(
   new Map<string, Map<Permission, boolean>>()
 );
 
-const setPermissionsMappings = () => {
+const setPermissionsMappings = async () => {
   if (ignorePermissions.value) return;
-  const { numberOfEntities } = usePermissions();
 
-  Object.values(Entitytyping).forEach((entity, index) => {
+  for (const entity of Object.values(Entitytyping)) {
     const permissions = new Map<Permission, boolean>();
 
     try {
-      apolloClient
+      await apolloClient
         .query<GetPermissionMappingPerEntityTypeQuery>({
           query: GetPermissionMappingPerEntityTypeDocument,
           variables: reactive<GetPermissionMappingPerEntityTypeQueryVariables>({
@@ -48,9 +46,6 @@ const setPermissionsMappings = () => {
             result.data?.PermissionMappingPerEntityType
           );
           permissionsMappings.value.set(entity, permissions);
-          if (numberOfEntities - 1 <= index) {
-            EventBus.emit("permissions_updated", permissionsMappings.value);
-          }
         });
     } catch (e) {
       console.log(
@@ -59,7 +54,7 @@ const setPermissionsMappings = () => {
     }
 
     try {
-      apolloClient
+      await apolloClient
         .query<GetPermissionMappingCreateQuery>({
           query: GetPermissionMappingCreateDocument,
           variables: reactive<GetPermissionMappingCreateQueryVariables>({
@@ -72,14 +67,13 @@ const setPermissionsMappings = () => {
           permissionsMappings.value
             .get(entity)
             ?.set(Permission.Cancreate, result.data?.PermissionMappingCreate);
-          EventBus.emit("permissions_updated", permissionsMappings.value);
         });
     } catch (e) {
       console.log(
         `Error in usePermissions set function for create entities: ${e}`
       );
     }
-  });
+  }
 };
 
 const usePermissions = () => {
@@ -133,7 +127,6 @@ const usePermissions = () => {
         `Error in usePermissions fetch function for update & delete entities/id: ${e}`
       );
     }
-    EventBus.emit("permissions_updated", permissionsMappings.value);
   };
 
   return {
