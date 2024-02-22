@@ -42,6 +42,17 @@ const start = async () => {
   if (config.customization) applyCustomization(config.customization);
   auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
 
+  const head = createHead();
+  const router = createRouter({
+    routes: addComponentToRoutes(config.routerConfig),
+    history: createWebHistory(import.meta.env.BASE_URL),
+  });
+
+  auth.changeRedirectRoute(window.location.origin + window.location.pathname);
+  router.afterEach(() => {
+    auth.changeRedirectRoute(window.location.origin + window.location.pathname);
+  });
+
   const authCode = new URLSearchParams(window.location.search).get("code");
   auth.authCode = authCode;
 
@@ -52,12 +63,6 @@ const start = async () => {
   }
 
   bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
-
-  const head = createHead();
-  const router = createRouter({
-    routes: addComponentToRoutes(config.routerConfig),
-    history: createWebHistory(import.meta.env.BASE_URL),
-  });
 
   const graphqlErrorInterceptor = onError((error: any) => {
     const errorHandler = useGraphqlErrors(error);
