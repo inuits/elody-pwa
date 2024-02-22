@@ -31,10 +31,8 @@ const config = inject<{
 
 const { t } = useI18n();
 const { isEdit } = useEditMode();
-const { tenantsAsDropdownOptions, selectTenant, selectedTenant, getLabelById } = useTenant(
-  apolloClient as ApolloClient<any>,
-  config
-);
+const { tenantsAsDropdownOptions, selectTenant, selectedTenant, getLabelById } =
+  useTenant(apolloClient as ApolloClient<any>, config);
 
 const tenant = ref<string | undefined>(selectedTenant.value);
 
@@ -56,10 +54,9 @@ const computedValue = computed<DropdownOption>({
 watch(
   () => tenant.value,
   async () => {
-    if (tenant.value)
-      await selectTenant(tenant.value);
+    if (tenant.value) await selectTenant(tenant.value);
   }
-)
+);
 </script>
 
 <style scoped>

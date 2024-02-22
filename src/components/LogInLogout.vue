@@ -69,8 +69,7 @@ const { t } = useI18n();
 
 const performLogout = async () => {
   await auth.logout();
-  if (route.meta.requiresAuth === true)
-    await auth.redirectToLogin();
+  if (route.meta.requiresAuth === true) await auth.redirectToLogin();
   await initApp(auth, config);
 };
 </script>

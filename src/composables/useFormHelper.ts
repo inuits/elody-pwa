@@ -23,7 +23,7 @@ export type EntityValues = {
 
 const useFormHelper = () => {
   const createEntityValues = (
-    intialValueFields: PanelMetaData[],
+    intialValueFields: PanelMetaData[]
   ): EntityValues => {
     const intialValues: any = {};
     Object.values(intialValueFields).forEach((field: PanelMetaData) => {
@@ -38,7 +38,7 @@ const useFormHelper = () => {
 
   const createForm = (
     key: string,
-    formValues: EntityValues,
+    formValues: EntityValues
   ): FormContext<any> => {
     // if (forms.value[key]) {
     //   const form = forms.value[key];
@@ -88,7 +88,7 @@ const useFormHelper = () => {
 
   const recreateForm = (
     key: string,
-    newFormValues: EntityValues,
+    newFormValues: EntityValues
   ): FormContext<any> => {
     deleteForm(key);
     return createForm(key, newFormValues);
@@ -111,7 +111,7 @@ const useFormHelper = () => {
 
   const getEditableMetadataKeys = (
     columnList: Record<string, any>,
-    formId: string,
+    formId: string
   ): string[] => {
     const keyArray: string[] = [];
     const panelMetadataItems = findPanelMetadata(columnList);
@@ -127,7 +127,7 @@ const useFormHelper = () => {
 
   const addEditableMetadataOnRelationKey = (
     key: string,
-    formId: string,
+    formId: string
   ): void => {
     editableFields.value[formId].push(key);
   };
@@ -154,7 +154,7 @@ const useFormHelper = () => {
 
   const addRelations = (
     selectedItems: InBulkProcessableItem[],
-    relationType: string,
+    relationType: string
   ) => {
     const { form } = getFormByRouteId();
 
@@ -181,23 +181,23 @@ const useFormHelper = () => {
 
   const replaceRelationsFromSameType = (
     selectedItems: InBulkProcessableItem[],
-    relationType: string,
+    relationType: string
   ) => {
     const { form } = getFormByRouteId();
 
     const newRelationIds: string[] = selectedItems.map(
-      (item: InBulkProcessableItem) => item.id,
+      (item: InBulkProcessableItem) => item.id
     );
 
     const otherRelations: BaseRelationValuesInput[] =
       form.values.relationValues.relations.filter(
-        (relation: BaseRelationValuesInput) => relation.type !== relationType,
+        (relation: BaseRelationValuesInput) => relation.type !== relationType
       );
     const relationsToDelete: BaseRelationValuesInput[] =
       form.values.relationValues.relations.filter(
         (relation: BaseRelationValuesInput) =>
           relation.type === relationType &&
-          !newRelationIds.includes(relation.key),
+          !newRelationIds.includes(relation.key)
       );
     const newRelations: BaseRelationValuesInput[] = [];
     selectedItems.forEach((item) => {
@@ -226,7 +226,7 @@ const useFormHelper = () => {
 
   const findRelation = (
     key: string,
-    type: string,
+    type: string
   ):
     | { idx: number; relation: BaseRelationValuesInput }
     | "no-relation-found" => {
@@ -240,7 +240,7 @@ const useFormHelper = () => {
           idx = index;
           return true;
         }
-      },
+      }
     );
 
     return idx === "no-idx" ? "no-relation-found" : { relation, idx };
