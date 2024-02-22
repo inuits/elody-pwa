@@ -92,7 +92,7 @@ const props = withDefaults(
   }>(),
   {
     hasLinkedUpload: false,
-  }
+  },
 );
 
 const { loadDocument } = useImport();
@@ -115,20 +115,20 @@ const formFields = computed<
   if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"])
     return undefined;
   return Object.values(dynamicForm.value["GetDynamicForm"].formFields).filter(
-    (value) => typeof value === "object"
+    (value) => typeof value === "object",
   );
 });
 const formFieldsState = ref<Object[]>([]);
 const formContainsErrors = computed((): boolean =>
   formFieldsState.value.some(
     (formFieldState: FormFieldState) =>
-      formFieldState.errorMessage !== undefined
-  )
+      formFieldState.errorMessage !== undefined,
+  ),
 );
 const uploadFileErrors = computed((): string[] => [
   ...dryRunErrors.value,
   ...fileErrors.value.map((error) =>
-    t(`upload-fields.errors.${error.error}`, [error.filename])
+    t(`upload-fields.errors.${error.error}`, [error.filename]),
   ),
 ]);
 const { t } = useI18n();
@@ -136,7 +136,7 @@ const { t } = useI18n();
 const setFormFieldState = (fieldValue: FormFieldState) => {
   formFieldsState.value = formFieldsState.value.filter(
     (formFieldState: FormFieldState) =>
-      formFieldState.fieldKey !== fieldValue.fieldKey
+      formFieldState.fieldKey !== fieldValue.fieldKey,
   );
   formFieldsState.value.push(fieldValue);
 };
@@ -149,7 +149,7 @@ const createEntityFromFormInput = (entityType: Entitytyping): EntityInput => {
         key: formFieldState.fieldKey,
         value: formFieldState.value,
       };
-    }
+    },
   );
   return entity;
 };
@@ -159,7 +159,7 @@ const getQuery = async (queryName: string) => {
 };
 
 const performActionButtonClickEvent = async (
-  field: FormAction
+  field: FormAction,
 ): Promise<void> => {
   if (field.actionType === ActionType.Upload) {
     upload(props.hasLinkedUpload, config, t);
@@ -207,7 +207,7 @@ watch(
     resetUpload();
     await initializeForm();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
@@ -217,6 +217,7 @@ watch(
     if (progressIndicator)
       uploadProgress.value = getUploadProgressSteps(progressIndicator);
   },
+  { immediate: true },
 );
 </script>
 
