@@ -5,10 +5,9 @@ import {
   type DropdownOption,
   type GetTenantsQuery,
 } from "@/generated-types/queries";
-import { ref, computed, watch, onMounted } from "vue";
-import { useAuth } from "session-vue-3-oidc-library";
-import { useRouter } from "vue-router";
+import { ref, computed, watch } from "vue";
 import { setPermissionsMappings } from "@/composables/usePermissions";
+import { useRouter } from "vue-router";
 
 const TENANTS_ENDPOINT = "/api/tenants";
 
@@ -30,41 +29,37 @@ const useTenant = (
   const hideSuperTenant: boolean =
     (config && config.features.hideSuperTenant) || false;
   const router = useRouter();
+
   const initTenants = async () => {
-    window.localStorage.clear();
-    await getTenants();
-    const tenantFromSession = await getTennantFromSession();
-    if (
-      tenants.value !== "no-tenants" &&
-      tenantFromSession === "no-tenant-in-session"
-    ) {
-      try {
-        await setTennant(tenants.value[0].label, tenants.value[0].id);
-      } catch {
-        console.warn("Failed to set tenant");
+    if (hasTenantSelect) {
+      window.localStorage.clear();
+      await getTenants();
+      const tenantFromSession = await getTennantFromSession();
+      if (
+        tenants.value !== "no-tenants" &&
+        tenantFromSession === "no-tenant-in-session"
+      ) {
+        try {
+          await setTennant(tenants.value[0].label, tenants.value[0].id);
+        } catch {
+          console.warn("Failed to set tenant");
+        }
       }
-    }
 
-    if (tenantFromSession !== "no-tenant-in-session") {
-      await setTennant(tenantFromSession.label, tenantFromSession.id);
-    }
+      if (tenantFromSession !== "no-tenant-in-session") {
+        await setTennant(tenantFromSession.label, tenantFromSession.id);
+      }
 
-    tenantsLoaded.value = "loaded";
+      await setPermissionsMappings();
+      tenantsLoaded.value = "loaded";
+    } else {
+      await setPermissionsMappings();
+      tenantsLoaded.value = "no-switcher";
+    }
   };
 
-  onMounted(() => {
-    if (tenants.value === "no-tenants") {
-      if (hasTenantSelect) {
-        initTenants();
-      } else {
-        tenantsLoaded.value = "no-switcher";
-        setPermissionsMappings();
-      }
-    }
-  });
-
   const getTenants = async () => {
-    return apolloClient
+    await apolloClient
       .query<GetTenantsQuery>({
         query: GetTenantsDocument,
         fetchPolicy: "no-cache",
@@ -130,12 +125,12 @@ const useTenant = (
   };
 
   const setTennant = async (label: string, id: string) => {
-    setTennantInSession(id);
+    await setTennantInSession(id);
     selectedTenant.value = id;
   };
 
   const setTennantInSession = async (tenantId: string) => {
-    fetch(TENANTS_ENDPOINT, {
+    await fetch(TENANTS_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -144,27 +139,24 @@ const useTenant = (
     });
   };
 
-  watch(selectedTenant, async (selectedTenantValue) => {
+  const selectTenant = async (selectedTenantValue: string) => {
+    selectedTenant.value = selectedTenantValue;
     if (selectedTenantValue !== (await getTennantFromSession()).id)
       router.push({ name: "Home" });
 
-    selectedTenantValue && setTennantInSession(selectedTenantValue);
+    selectedTenantValue && await setTennantInSession(selectedTenantValue);
     tenantsLoaded.value = "switching";
-  });
+  };
 
   watch(tenantsLoaded, async (value) => {
     if (value === "switching") {
+      window.localStorage.clear();
       await apolloClient.cache.reset();
+      await setPermissionsMappings();
       tenantsLoaded.value = "loaded";
-      setPermissionsMappings();
+      router.push({ name: "Home", force: true });
     }
   });
-
-  const auth: Object = useAuth();
-  watch(
-    () => auth.isAuthenticated.value,
-    async () => await initTenants()
-  );
 
   const getLabelById = (idToFind: string) => {
     if (tenants.value !== "no-tenants") {
@@ -174,12 +166,14 @@ const useTenant = (
   };
 
   return {
+    getLabelById,
+    getTenants,
+    initTenants,
+    selectedTenant,
+    selectTenant,
     tenants,
     tenantsAsDropdownOptions,
     tenantsLoaded,
-    selectedTenant,
-    getLabelById,
-    getTenants,
   };
 };
 
