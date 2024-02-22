@@ -389,7 +389,8 @@ const initializeBaseLibrary = () => {
 const getDisplayPreferences = () => {
   const displayPreferences = getGlobalState("_displayPreferences");
   if (displayPreferences) {
-    displayGrid.value = displayPreferences.grid;
+    if (displayPreferences.grid)
+      displayGrid.value = displayPreferences.grid;
     if (displayGrid.value === false && !displayPreview.value)
       displayList.value = true;
     expandFilters.value = !props.enableAdvancedFilters
