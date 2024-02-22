@@ -54,6 +54,9 @@
 <script setup lang="ts">
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
+  ActionProgress,
+  ActionProgressIndicatorType,
+  ActionProgressStep,
   ActionType,
   EntityInput,
   Entitytyping,
@@ -102,10 +105,13 @@ const {
   mediafiles,
   fileErrors,
   dryRunErrors,
+  uploadProgress,
   resetUpload,
 } = useUpload();
 const config = inject("config");
-const formFields = computed<UploadField | PanelMetaData | undefined>(() => {
+const formFields = computed<
+  UploadField | PanelMetaData | FormAction | undefined
+>(() => {
   if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"])
     return undefined;
   return Object.values(dynamicForm.value["GetDynamicForm"].formFields).filter(
@@ -169,6 +175,26 @@ const performActionButtonClickEvent = async (
   }
 };
 
+const getFormProgressIndicator = (): ActionProgress | undefined => {
+  if (!formFields.value) return undefined;
+  const actionButton: FormAction = formFields.value.find(
+    (formField: any) => formField.__typename === "FormAction",
+  );
+  if (!actionButton) return undefined;
+  return actionButton.actionProgressIndicator;
+};
+
+const getUploadProgressSteps = (
+  progressIndicator: ActionProgress,
+): ActionProgressStep[] => {
+  if (progressIndicator.type === ActionProgressIndicatorType.Spinner) return [];
+
+  return Object.values(progressIndicator).filter(
+    (value: any) =>
+      typeof value === "object" && value.__typename === "ActionProgressStep",
+  );
+};
+
 const initializeForm = async () => {
   if (!props.dynamicFormQuery) return;
   const document = await getQuery(props.dynamicFormQuery);
@@ -182,6 +208,15 @@ watch(
     await initializeForm();
   },
   { immediate: true }
+);
+
+watch(
+  () => formFields.value,
+  () => {
+    const progressIndicator = getFormProgressIndicator();
+    if (progressIndicator)
+      uploadProgress.value = getUploadProgressSteps(progressIndicator);
+  },
 );
 </script>
 

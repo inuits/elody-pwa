@@ -1,11 +1,17 @@
 import type { DropzoneFile } from "dropzone";
-import { computed, ref, watch } from "vue";
+import { computed, ref, toRaw, watch } from "vue";
 import { setCssVariable } from "@/helpers";
 import {
   NotificationType,
   useNotification,
 } from "@/components/base/BaseNotification.vue";
-import { TypeModals, UploadFieldType } from "@/generated-types/queries";
+import {
+  type ActionProgressStep,
+  ProgressStepStatus,
+  ProgressStepType,
+  TypeModals,
+  UploadFieldType,
+} from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
 import useEntitySingle from "@/composables/useEntitySingle";
 
@@ -17,6 +23,7 @@ type FileError = {
 const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
   "no-upload"
 );
+const uploadProgress = ref<ActionProgressStep[]>([]);
 const dryRunComplete = ref<boolean>(false);
 const dryRunErrors = ref<string[]>([]);
 const files = ref<DropzoneFile[]>([]);
@@ -47,9 +54,7 @@ const useUpload = () => {
     "not-prefetched-yet";
 
   const upload = async (isLinkedUpload: boolean, config: any, t: Function) => {
-    const modalToClose: TypeModals = isLinkedUpload
-      ? TypeModals.EntityPicker
-      : TypeModals.DynamicForm;
+    updateUploadProgress(ProgressStepType.Upload, ProgressStepStatus.Loading);
     const totalAmountOfFiles: number = files.value.length;
     let amountUploaded = 0;
     toggleUploadStatus();
@@ -70,7 +75,7 @@ const useUpload = () => {
       amountUploaded++;
     }
     toggleUploadStatus();
-    useBaseModal().closeModal(modalToClose);
+    updateUploadProgress(ProgressStepType.Upload, ProgressStepStatus.Complete);
   };
 
   const __uploadExceptionHandler = (
@@ -109,12 +114,23 @@ const useUpload = () => {
       }
       dryRunErrors.value = errors;
       dryRunComplete.value = true;
+      if (dryRunComplete.value) {
+        updateUploadProgress(
+          ProgressStepType.Validate,
+          ProgressStepStatus.Complete,
+        );
+      }
     } catch {
       dryRunErrors.value.push("upload-fields.errors.dry-run-failed");
+      updateUploadProgress(
+        ProgressStepType.Validate,
+        ProgressStepStatus.Failed,
+      );
     }
   };
 
   const dryRunCsv = async () => {
+    updateUploadProgress(ProgressStepType.Validate, ProgressStepStatus.Loading);
     const dryRunResult = await __batchEntities(__getCsvBlob(), true);
     handleDryRunResult(dryRunResult);
   };
@@ -267,6 +283,7 @@ const useUpload = () => {
       dryRunErrors.value = [];
       fileErrors.value = [];
       requiredMediafiles.value = undefined;
+      resetUploadProgress();
     }
   };
   const addFileToUpload = (fileToAdd: DropzoneFile) => {
@@ -287,11 +304,21 @@ const useUpload = () => {
 
   const verifyAllNeededFilesArePresent = (): boolean => {
     try {
+      updateUploadProgress(
+        ProgressStepType.Prepare,
+        ProgressStepStatus.Loading,
+      );
       fileErrors.value = [];
       const requiredFileNames: string[] = [...requiredMediafiles.value];
       let areAllFilesPresent: boolean = true;
 
-      if (uploadType.value === UploadFieldType.Single) return true;
+      if (uploadType.value === UploadFieldType.Single) {
+        updateUploadProgress(
+          ProgressStepType.Prepare,
+          ProgressStepStatus.Complete,
+        );
+        return true;
+      }
 
       requiredFileNames.forEach((requiredFileName: string) => {
         const fileExists = mediafiles.value.some(
@@ -315,10 +342,44 @@ const useUpload = () => {
           });
         }
       });
+
+      updateUploadProgress(
+        ProgressStepType.Prepare,
+        areAllFilesPresent
+          ? ProgressStepStatus.Complete
+          : ProgressStepStatus.Failed,
+      );
+
       return areAllFilesPresent;
     } catch {
       return false;
     }
+  };
+
+  const resetUploadProgress = (): void => {
+    if (!uploadProgress.value) return;
+    const newProgress = structuredClone(toRaw(uploadProgress.value));
+
+    newProgress.forEach((step: ActionProgressStep) => {
+      step.status = ProgressStepStatus.Empty;
+    });
+
+    uploadProgress.value = newProgress;
+  };
+
+  const updateUploadProgress = (
+    stepType: ProgressStepType,
+    status: ProgressStepStatus,
+  ): void => {
+    if (!uploadProgress.value) return;
+    const newProgress = structuredClone(toRaw(uploadProgress.value));
+
+    newProgress.forEach((step: ActionProgressStep) => {
+      if (step.stepType !== stepType) return;
+      step.status = status;
+    });
+
+    uploadProgress.value = newProgress;
   };
 
   const calculateProgressPercentage = (
@@ -356,6 +417,7 @@ const useUpload = () => {
     fileErrors,
     dryRunComplete,
     isCsvRequired,
+    uploadProgress,
   };
 };
 

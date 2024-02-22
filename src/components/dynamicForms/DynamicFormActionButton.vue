@@ -32,7 +32,21 @@
       "
       class="w-full flex items-center p-2 bg-neutral-white h-[48px]"
     >
-      <base-progress-step label="Loading" step-type="loading" />
+      <div
+        v-for="progressStep in uploadProgress"
+        :key="progressStep.label"
+        class="flex"
+      >
+        <base-progress-step
+          :label="progressStep.label"
+          :step-type="progressStep.status"
+        />
+        <unicon
+          :name="Unicons.EllipsisH.name"
+          fill="text-neutral-black"
+          :height="18"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -41,13 +55,12 @@
 import {
   ActionProgress,
   ActionProgressIndicatorType,
-  ActionProgressStep,
   DamsIcons,
 } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import BaseProgressStep from "@/components/base/BaseProgressStep.vue";
-import { computed } from "vue";
+import useUpload from "@/composables/useUpload";
 
 const props = withDefaults(
   defineProps<{
@@ -63,14 +76,7 @@ const props = withDefaults(
 );
 
 const { t } = useI18n();
-const progressSteps = computed((): ActionProgressStep[] => {
-  if (
-    !props.progressIndicator ||
-    props.progressIndicator.type === ActionProgressIndicatorType.Spinner
-  )
-    return [];
-  return [];
-});
+const { uploadProgress } = useUpload();
 </script>
 
 <style scoped></style>
