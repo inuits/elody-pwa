@@ -31,19 +31,16 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
     const displayPreferences = useStateManagement().getGlobalState(
       "_displayPreferences"
     );
-    if (displayPreferences) {
-      const preferences = JSON.parse(displayPreferences);
-      if (preferences.lang) language = preferences.lang;
-    }
+    if (displayPreferences)
+      if (displayPreferences.lang)
+        language = displayPreferences.lang;
 
     const { t } = i18n(translations, language).global;
 
     switch (errorMessage) {
       case 401:
-        auth.logout();
-        setTimeout(() => {
-          auth.redirectToLogin();
-        }, 100);
+        await auth.logout();
+        await auth.redirectToLogin();
         break;
       case 403:
         createErrorNotification(
@@ -57,7 +54,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
           "notifications.graphql-errors.duplicate-upload";
         let duplicateKey = "";
 
-        if (_errorResponse.operation.operationName == "createEntity") {
+        if (_errorResponse.operation.operationName.toLowerCase() == "createentity") {
           errorMessage = "notifications.graphql-errors.duplicate-entity";
           const responseBody: string = (
             _errorResponse.graphQLErrors?.[0].extensions.response as any
