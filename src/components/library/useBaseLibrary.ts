@@ -114,7 +114,7 @@ export const useBaseLibrary = (
 
     apolloClient
       .query({
-        query: manipulateQuery.value
+        query: manipulationQuery.value?.filtersDocument
           ? manipulationQuery.value.filtersDocument
           : GetAdvancedFiltersDocument,
         variables: { entityType: entityType.value },
@@ -126,7 +126,7 @@ export const useBaseLibrary = (
           result.data?.EntityTypeFilters as BaseEntity
         )?.advancedFilters;
         if (advancedFilters.value) {
-          if (manipulateQuery.value)
+          if (manipulationQuery.value?.filtersDocument)
             setAdvancedFilterInputs(advancedFilters.value);
           setAdvancedFilters([]);
           Object.values(advancedFilters.value).forEach((advancedFilter) => {
