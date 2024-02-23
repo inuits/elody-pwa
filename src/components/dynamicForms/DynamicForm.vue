@@ -34,16 +34,21 @@
           :upload-field-type="field.uploadFieldType"
         />
         <DynamicFormActionButton
-          v-if="field.__typename === 'FormAction'"
+          v-if="field.__typename === 'FormAction' && field.actionType == ActionType.Upload"
           :label="t(field.label)"
           :icon="field.icon"
           :errors="uploadFileErrors"
-          :disabled="
-            field.actionType === ActionType.Upload
-              ? !enableUploadButton
-              : formContainsErrors
-          "
+          :disabled="!enableUploadButton"
           :progressIndicator="field?.actionProgressIndicator"
+          @click="performActionButtonClickEvent(field)"
+        />
+        <BaseButtonNew
+          v-if="field.__typename === 'FormAction' && field.actionType == ActionType.Submit"
+          class="absolute left-4 bottom-6 w-[93.5%]"
+          :label="t(field.label)"
+          :icon="field.icon"
+          :disabled="formContainsErrors"
+          button-style="accentAccent"
           @click="performActionButtonClickEvent(field)"
         />
       </div>
@@ -76,6 +81,7 @@ import useUpload from "@/composables/useUpload";
 import { goToEntityPage } from "@/helpers";
 import type { Router } from "vue-router";
 import DynamicFormActionButton from "@/components/dynamicForms/DynamicFormActionButton.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 
 type FormFieldState = {
   fieldKey: string;
