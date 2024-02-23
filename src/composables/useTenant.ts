@@ -14,6 +14,7 @@ const TENANTS_ENDPOINT = "/api/tenants";
 type tenant = { id: string; label: string };
 const tenants = ref<tenant[] | "no-tenants">("no-tenants");
 const selectedTenant = ref<string | undefined>(undefined);
+const selectedTenantName = ref<string | undefined>(undefined);
 
 const useTenant = (
   apolloClient: ApolloClient<any>,
@@ -127,6 +128,7 @@ const useTenant = (
   const setTennant = async (label: string, id: string) => {
     await setTennantInSession(id);
     selectedTenant.value = id;
+    selectedTenantName.value = label;
   };
 
   const setTennantInSession = async (tenantId: string) => {
@@ -170,6 +172,7 @@ const useTenant = (
     getTenants,
     initTenants,
     selectedTenant,
+    selectedTenantName,
     selectTenant,
     tenants,
     tenantsAsDropdownOptions,
