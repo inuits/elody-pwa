@@ -34,7 +34,10 @@
           :upload-field-type="field.uploadFieldType"
         />
         <DynamicFormActionButton
-          v-if="field.__typename === 'FormAction' && field.actionType == ActionType.Upload"
+          v-if="
+            field.__typename === 'FormAction' &&
+            field.actionType == ActionType.Upload
+          "
           :label="t(field.label)"
           :icon="field.icon"
           :errors="uploadFileErrors"
@@ -43,9 +46,22 @@
           @click="performActionButtonClickEvent(field)"
         />
         <BaseButtonNew
-          v-if="field.__typename === 'FormAction' && field.actionType == ActionType.Submit"
-          class="absolute left-4 bottom-6 w-[93.5%]"
-          :label="t(field.label)"
+          v-if="
+            field.__typename === 'FormAction' &&
+            field.actionType == ActionType.Submit
+          "
+          class="absolute left-4 bottom-6 w-[93%]"
+          :label="
+            config?.features.hasTenantSelect
+              ? `${t(field.label)} ${t(`types.${field.creationType}`)}${
+                  config.tenantDefiningTypes !== field.creationType
+                    ? ` in ${t(
+                        `navigation.tenant`
+                      ).toLowerCase()} ${currentTenant}`
+                    : ''
+                }`
+              : t(field.label)
+          "
           :icon="field.icon"
           :disabled="formContainsErrors"
           button-style="accentAccent"
@@ -82,6 +98,7 @@ import { goToEntityPage } from "@/helpers";
 import type { Router } from "vue-router";
 import DynamicFormActionButton from "@/components/dynamicForms/DynamicFormActionButton.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import { useApp } from "@/composables/useApp";
 
 type FormFieldState = {
   fieldKey: string;
@@ -101,6 +118,9 @@ const props = withDefaults(
   }
 );
 
+const config = inject("config");
+const { currentTenant } = useApp();
+
 const { loadDocument } = useImport();
 const { closeModal, getModalInfo } = useBaseModal();
 const { getDynamicForm, dynamicForm, performSubmitAction } =
@@ -114,7 +134,6 @@ const {
   uploadProgress,
   resetUpload,
 } = useUpload();
-const config = inject("config");
 const formFields = computed<
   UploadField | PanelMetaData | FormAction | undefined
 >(() => {
