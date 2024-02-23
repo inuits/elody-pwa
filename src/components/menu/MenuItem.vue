@@ -126,7 +126,16 @@ onMounted(() => {
 
   menuSubitem.value.forEach((item) => {
     if (item.requiresAuth === false) allowed = true;
-    allowed = allowed || can(Permission.Canread, item.entityType);
+    else if (item.typeLink?.modal?.neededPermission === Permission.Cancreate) {
+      permittedEntitiesToCreate.value = [];
+      Object.values(Entitytyping).forEach((entityType) => {
+        if (can(Permission.Cancreate, entityType)) {
+          allowed = true;
+          permittedEntitiesToCreate.value.push(entityType);
+        }
+      });
+    } else if (item.entityType)
+      allowed = allowed || can(Permission.Canread, item.entityType);
   });
   hasPermissionForMenuItem.value = allowed;
 });
