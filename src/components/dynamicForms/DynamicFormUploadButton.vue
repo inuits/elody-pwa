@@ -1,6 +1,6 @@
 <template>
   <div class="rounded-md pb-2">
-    <div class="flex pb-2">
+    <div class="flex">
       <div v-if="errors.length" class="w-full bg-red-light p-2">
         <ul>
           <li
@@ -12,6 +12,7 @@
         </ul>
       </div>
       <button
+        v-if="uploadStatus === 'no-upload'"
         type="button"
         :disabled="disabled"
         class="flex justify-center items-center w-full p-2 rounded-md outline-none transition-colors duration-300 disabled:cursor-auto text-neutral-white bg-accent-accent hover:text-accent-accent hover:bg-neutral-lightest active:text-accent-accent active:bg-accent-light disabled:text-text-disabled disabled:bg-neutral-lightest"
@@ -24,6 +25,11 @@
         />
         <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
       </button>
+      <progress-bar
+        :progress="amountUploaded"
+        progress-bar-type="steps"
+        :total-amount-of-steps="mediafiles.length"
+      />
     </div>
     <div
       v-if="
@@ -61,6 +67,7 @@ import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import BaseProgressStep from "@/components/base/BaseProgressStep.vue";
 import useUpload from "@/composables/useUpload";
+import ProgressBar from "@/components/ProgressBar.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -72,11 +79,12 @@ const props = withDefaults(
   }>(),
   {
     errors: [],
-  }
+  },
 );
 
 const { t } = useI18n();
-const { uploadProgress } = useUpload();
+const { uploadProgress, uploadStatus, amountUploaded, mediafiles } =
+  useUpload();
 </script>
 
 <style scoped></style>

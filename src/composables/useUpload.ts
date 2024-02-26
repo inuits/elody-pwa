@@ -1,6 +1,5 @@
 import type { DropzoneFile } from "dropzone";
 import { computed, ref, toRaw, watch } from "vue";
-import { setCssVariable } from "@/helpers";
 import {
   NotificationType,
   useNotification,
@@ -22,6 +21,7 @@ const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
   "no-upload",
 );
 const uploadProgress = ref<ActionProgressStep[]>([]);
+const amountUploaded = ref<number>(0);
 const dryRunComplete = ref<boolean>(false);
 const dryRunErrors = ref<string[]>([]);
 const files = ref<DropzoneFile[]>([]);
@@ -53,8 +53,6 @@ const useUpload = () => {
 
   const upload = async (isLinkedUpload: boolean, config: any, t: Function) => {
     __updateUploadProgress(ProgressStepType.Upload, ProgressStepStatus.Loading);
-    const totalAmountOfFiles: number = files.value.length;
-    let amountUploaded = 0;
     toggleUploadStatus();
     const generator = uploadGenerator(
       config,
@@ -67,10 +65,7 @@ const useUpload = () => {
         continue;
       }
 
-      setUploadProgressPercentage(
-        calculateProgressPercentage(amountUploaded + 1, totalAmountOfFiles),
-      );
-      amountUploaded++;
+      amountUploaded.value++;
     }
     toggleUploadStatus();
     __updateUploadProgress(
@@ -307,8 +302,8 @@ const useUpload = () => {
     dryRunErrors.value = [];
     files.value = [];
     requiredMediafiles.value = undefined;
-    uploadProgressPercentage.value = 0;
     uploadProgress.value = [];
+    amountUploaded.value = 0;
   };
 
   const verifyAllNeededFilesArePresent = (): boolean => {
@@ -386,19 +381,6 @@ const useUpload = () => {
     uploadProgress.value = newProgress;
   };
 
-  const calculateProgressPercentage = (
-    amountUploaded: number,
-    amountToUpload: number,
-  ): number => {
-    let progress: number = 0;
-
-    if (amountToUpload > 0) {
-      progress = (amountUploaded / amountToUpload) * 100;
-    }
-
-    return progress;
-  };
-
   return {
     resetUpload,
     addFileToUpload,
@@ -409,7 +391,6 @@ const useUpload = () => {
     validateFiles,
     toggleUploadStatus,
     uploadStatus,
-    calculateProgressPercentage,
     setUploadProgressPercentage,
     uploadProgressPercentage,
     files,
@@ -423,19 +404,9 @@ const useUpload = () => {
     dryRunComplete,
     isCsvRequired,
     uploadProgress,
+    amountUploaded,
   };
 };
-
-watch(
-  () => uploadProgressPercentage.value,
-  () => {
-    setCssVariable(
-      "--upload-width-percentage",
-      uploadProgressPercentage.value.toString() + "%",
-    );
-  },
-  { immediate: true },
-);
 
 watch(
   () => mediafiles.value.length,
