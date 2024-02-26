@@ -34,7 +34,7 @@ const props = withDefaults(
   {
     viewStyle: "",
     isValidationFile: false,
-  }
+  },
 );
 
 const emit = defineEmits<{
@@ -46,7 +46,7 @@ const { addFileToUpload, removeFileToUpload, files, dryRunCsv } = useUpload();
 onMounted(() => {
   const dropzone = props.dropzoneHelper.initDropzone(
     dropzoneView.value!,
-    dropzonePreview.value!
+    dropzonePreview.value!,
   );
 
   dropzone.on("addedfile", (file) => {
@@ -54,8 +54,11 @@ onMounted(() => {
     if (props.isValidationFile) dryRunCsv();
   });
   dropzone.on("removedfile", (file) =>
-    removeFileToUpload(file, props.isValidationFile)
+    removeFileToUpload(file, props.isValidationFile),
   );
+  dropzone.on("maxfilesreached", () => {
+    dropzone.removeEventListeners();
+  });
 
   watch(
     () => files.value.length,
@@ -63,7 +66,7 @@ onMounted(() => {
       filesInDropzone.value = dropzone.files;
       fileCount.value = dropzone.files.length;
     },
-    { immediate: true }
+    { immediate: true },
   );
 });
 </script>
