@@ -107,7 +107,7 @@ import { Unicons } from "../types";
 import BaseIcon from "./base/BaseIcon.vue";
 import LoadingList from "./base/LoadingList.vue";
 import BaseButton from "./base/BaseButton.vue";
-import ProgressBar from "./base/ProgressBar.vue";
+import ProgressBar from "./ProgressBar.vue";
 import BaseLabel from "./base/BaseLabel.vue";
 import SingleJob from "./SingleJob.vue";
 import { GetJobDocument, type Job } from "../generated-types/queries";
@@ -148,12 +148,12 @@ export default defineComponent({
         id: props.job._key || "",
         failed: showFailedOnly.value,
       },
-      queryOptions
+      queryOptions,
     );
     const subjobLimit = ref<number>(10);
 
     const hasSubJobs = computed<boolean>(() =>
-      props.job.amount_of_jobs && props.job.amount_of_jobs > 1 ? true : false
+      props.job.amount_of_jobs && props.job.amount_of_jobs > 1 ? true : false,
     );
 
     const toggleCollapse = () => {
