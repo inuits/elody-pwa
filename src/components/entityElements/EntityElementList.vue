@@ -56,6 +56,7 @@
             :relation-type="relationType"
             :use-other-query="newQuery"
             :basic-base-library="basicBaseLibrary"
+            :has-sticky-bars="false"
           />
           <BaseLibrary
             class="flex-1"
