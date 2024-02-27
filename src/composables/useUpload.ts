@@ -287,6 +287,11 @@ const useUpload = () => {
       fileErrors.value = [];
       requiredMediafiles.value = undefined;
     }
+    if (!mediafiles.value.length)
+      __updateUploadProgress(
+        ProgressStepType.Prepare,
+        ProgressStepStatus.Empty,
+      );
     if (!files.value.length) resetUploadProgress();
   };
   const addFileToUpload = (fileToAdd: DropzoneFile) => {
@@ -302,8 +307,8 @@ const useUpload = () => {
     dryRunErrors.value = [];
     files.value = [];
     requiredMediafiles.value = undefined;
-    uploadProgress.value = [];
     amountUploaded.value = 0;
+    resetUploadProgress();
   };
 
   const verifyAllNeededFilesArePresent = (): boolean => {
@@ -351,6 +356,10 @@ const useUpload = () => {
 
       return areAllFilesPresent;
     } catch {
+      __updateUploadProgress(
+        ProgressStepType.Prepare,
+        ProgressStepStatus.Failed,
+      );
       return false;
     }
   };

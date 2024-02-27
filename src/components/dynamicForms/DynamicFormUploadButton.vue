@@ -11,6 +11,28 @@
           </li>
         </ul>
       </div>
+      <div
+        v-if="uploadStatus === 'upload-finished' && !errors.length"
+        class="w-full bg-green-light p-2 text-green-default font-bold flex"
+      >
+        <p class="w-full flex items-center">
+          {{ t("actions.labels.success", [amountUploaded]) }}
+        </p>
+        <!--        <div class="w-1/4">-->
+        <!--          <base-button-new-->
+        <!--            icon="Redo"-->
+        <!--            :label="t('actions.labels.reset-upload')"-->
+        <!--            button-style="accentAccent"-->
+        <!--            @click="emit('resetUpload')"-->
+        <!--          />-->
+        <!--        </div>-->
+      </div>
+      <progress-bar
+        v-else
+        :progress="amountUploaded"
+        progress-bar-type="steps"
+        :total-amount-of-steps="mediafiles.length"
+      />
       <button
         v-if="uploadStatus === 'no-upload'"
         type="button"
@@ -25,11 +47,6 @@
         />
         <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
       </button>
-      <progress-bar
-        :progress="amountUploaded"
-        progress-bar-type="steps"
-        :total-amount-of-steps="mediafiles.length"
-      />
     </div>
     <div
       v-if="
@@ -68,6 +85,7 @@ import { useI18n } from "vue-i18n";
 import BaseProgressStep from "@/components/base/BaseProgressStep.vue";
 import useUpload from "@/composables/useUpload";
 import ProgressBar from "@/components/ProgressBar.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -79,8 +97,12 @@ const props = withDefaults(
   }>(),
   {
     errors: [],
-  },
+  }
 );
+
+const emit = defineEmits<{
+  (event: "resetUpload"): void;
+}>();
 
 const { t } = useI18n();
 const { uploadProgress, uploadStatus, amountUploaded, mediafiles } =

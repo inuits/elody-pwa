@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { DropzoneFile } from "dropzone";
+import type { DropzoneFile, Dropzone } from "dropzone";
 import DropzonePreview from "@/components/base/dropzone/DropzonePreview.vue";
 import DropzoneView from "@/components/base/dropzone/DropzoneView.vue";
 import { onMounted, ref, watch } from "vue";
@@ -34,7 +34,7 @@ const props = withDefaults(
   {
     viewStyle: "",
     isValidationFile: false,
-  },
+  }
 );
 
 const emit = defineEmits<{
@@ -46,7 +46,7 @@ const { addFileToUpload, removeFileToUpload, files, dryRunCsv } = useUpload();
 onMounted(() => {
   const dropzone = props.dropzoneHelper.initDropzone(
     dropzoneView.value!,
-    dropzonePreview.value!,
+    dropzonePreview.value!
   );
 
   dropzone.on("addedfile", (file) => {
@@ -67,7 +67,7 @@ onMounted(() => {
       filesInDropzone.value = dropzone.files;
       fileCount.value = dropzone.files.length;
     },
-    { immediate: true },
+    { immediate: true }
   );
 });
 </script>
