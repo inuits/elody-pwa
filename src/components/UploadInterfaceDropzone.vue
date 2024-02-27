@@ -17,7 +17,7 @@
 
 <script lang="ts" setup>
 import Dropzone from "@/components/base/dropzone/Dropzone.vue";
-import { useDropzoneHelper } from "@/composables/useDropzoneHelper";
+import { useDropzone } from "@/composables/useDropzone";
 import useUpload from "@/composables/useUpload";
 import {
   ModalState,
@@ -32,9 +32,9 @@ const config = inject("config") as any;
 const { closeModal, getModalInfo } = useBaseModal();
 const { t } = useI18n();
 const { upload, files, uploadType, resetUpload, isCsvRequired } = useUpload();
-let dropzoneHelper = new useDropzoneHelper();
+const dropzoneHelper = new useDropzone();
 const isRequired = computed(() =>
-  props.validation ? props.validation.includes("required") : false,
+  props.validation ? props.validation.includes("required") : false
 );
 
 const props = withDefaults(
@@ -48,12 +48,14 @@ const props = withDefaults(
     dryRun: boolean;
     uploadFieldType: UploadFieldType;
     validation?: string;
+    uploadMultiple: boolean;
   }>(),
   {
     dropzoneSize: "big",
     isLinkedUpload: false,
     dryRun: false,
-  },
+    uploadMultiple: false,
+  }
 );
 
 const getDropzoneSize = (size: "small" | "normal" | "big") => {
@@ -67,6 +69,7 @@ const getDropzoneSize = (size: "small" | "normal" | "big") => {
 
 const setUseUploadVariables = () => {
   uploadType.value = props.uploadFieldType as UploadFieldType;
+  dropzoneHelper.dropzoneSettings.uploadMultiple = props.uploadMultiple;
   if (props.dryRun && isRequired.value) isCsvRequired.value = true;
   if (props.acceptedFileTypes)
     dropzoneHelper.dropzoneSettings.value.acceptedFiles =
@@ -87,7 +90,7 @@ watch(
   () => {
     setUseUploadVariables();
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 watch(
@@ -97,7 +100,7 @@ watch(
       dropzoneHelper.resetDropzone();
       resetUpload();
     }
-  },
+  }
 );
 </script>
 

@@ -30,6 +30,7 @@
           :max-file-size="field.inputField?.maxFileSize"
           :dropzone-size="field.uploadFieldSize"
           :max-amount-of-files="field.inputField?.maxAmountOfFiles"
+          :upload-multiple="field.inputField?.uploadMultiple"
           :dry-run="field.dryRunUpload"
           :upload-field-type="field.uploadFieldType"
         />
@@ -44,6 +45,7 @@
           :disabled="!enableUploadButton"
           :progressIndicator="field?.actionProgressIndicator"
           @click="performActionButtonClickEvent(field)"
+          @reset-upload="initializeForm"
         />
         <BaseButtonNew
           v-if="
@@ -87,7 +89,7 @@ import {
   UploadField,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
-import { useDynamicFormModal } from "@/components/dynamicForms/useDynamicFormModal";
+import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import { computed, inject, ref, watch } from "vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
@@ -123,8 +125,7 @@ const { currentTenant } = useApp();
 
 const { loadDocument } = useImport();
 const { closeModal, getModalInfo } = useBaseModal();
-const { getDynamicForm, dynamicForm, performSubmitAction } =
-  useDynamicFormModal();
+const { getDynamicForm, dynamicForm, performSubmitAction } = useDynamicForm();
 const {
   upload,
   enableUploadButton,
@@ -187,10 +188,12 @@ const performActionButtonClickEvent = async (
   field: FormAction,
 ): Promise<void> => {
   if (field.actionType === ActionType.Upload) {
+    if (!enableUploadButton.value) return;
     upload(props.hasLinkedUpload, config, t);
     return;
   }
   if (field.actionType === ActionType.Submit) {
+    if (formContainsErrors.value) return;
     const document = await getQuery(field.actionQuery);
     const entityInput = createEntityFromFormInput(field.creationType);
     const entity = (await performSubmitAction(document, entityInput)).data
@@ -221,6 +224,7 @@ const getUploadProgressSteps = (
 };
 
 const initializeForm = async () => {
+  resetUpload();
   if (!props.dynamicFormQuery) return;
   const document = await getQuery(props.dynamicFormQuery);
   getDynamicForm(document);
@@ -229,7 +233,6 @@ const initializeForm = async () => {
 watch(
   () => props.dynamicFormQuery,
   async () => {
-    resetUpload();
     await initializeForm();
   },
   { immediate: true },

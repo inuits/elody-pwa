@@ -4,7 +4,7 @@ import { type EntityInput } from "@/generated-types/queries";
 
 const dynamicForm = ref<Object | undefined>(undefined);
 
-const useDynamicFormModal = () => {
+const useDynamicForm = () => {
   const getDynamicForm = (queryDocument: object): void => {
     apolloClient
       .query({
@@ -17,7 +17,7 @@ const useDynamicFormModal = () => {
 
   const performSubmitAction = async (
     queryDocument: object,
-    entity: EntityInput
+    entity: EntityInput,
   ): Promise<any> => {
     return await apolloClient.mutate({
       mutation: queryDocument,
@@ -28,4 +28,4 @@ const useDynamicFormModal = () => {
   return { getDynamicForm, dynamicForm, performSubmitAction };
 };
 
-export { useDynamicFormModal };
+export { useDynamicForm };

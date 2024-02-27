@@ -1,4 +1,4 @@
-import Dropzone from "dropzone";
+import Dropzone, { type DropzoneFile } from "dropzone";
 import { ref } from "vue";
 
 type DropzoneSettings = {
@@ -12,13 +12,13 @@ type DropzoneSettings = {
   maxFileSize: number;
   createImageThumbnails: boolean;
 };
-export class useDropzoneHelper {
+export class useDropzone {
   dropzone = ref<Dropzone>;
-  errorMessages = ref<Array<String>>;
+  errorMessages = ref<Array<string>>;
   total = ref<number>;
   success = ref<number>;
   failed = ref<number>;
-  selectedFiles = ref<any>;
+  selectedFiles = ref<DropzoneFile>;
   isUploading = ref<boolean>;
   finishedUploading = ref<boolean>;
   dropzoneSettings = ref<DropzoneSettings>;
@@ -35,7 +35,7 @@ export class useDropzoneHelper {
       url: "/upload",
       autoProcessQueue: false,
       acceptedFiles: ".csv, .jpg, .jpeg, .mp3, .srt, .png, .tiff, .mp4",
-      uploadMultiple: true,
+      uploadMultiple: false,
       parallelUploads: 99,
       maxFiles: 99,
       maxFileSize: 50,
