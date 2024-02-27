@@ -53,9 +53,10 @@ onMounted(() => {
     addFileToUpload(file);
     if (props.isValidationFile) dryRunCsv();
   });
-  dropzone.on("removedfile", (file) =>
-    removeFileToUpload(file, props.isValidationFile),
-  );
+  dropzone.on("removedfile", (file) => {
+    removeFileToUpload(file, props.isValidationFile);
+    dropzone.setupEventListeners();
+  });
   dropzone.on("maxfilesreached", () => {
     dropzone.removeEventListeners();
   });
