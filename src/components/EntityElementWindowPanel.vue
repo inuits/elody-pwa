@@ -32,6 +32,13 @@
             :key="index"
             class="py-2 px-2"
           >
+            <metadata-wrapper
+              v-if="metadata.__typename !== 'EntityListElement' || metadata.basicBaseLibrary"
+              :form-id="formId"
+              :is-edit="isEdit"
+              v-model:metadata="metadata as MetadataField"
+              :basic-base-library-as-value="metadata.basicBaseLibrary"
+            />
             <entity-element-list
               v-if="metadata.__typename === 'EntityListElement'"
               :label="(metadata.label as string)"
@@ -45,12 +52,7 @@
               :custom-query-relation-type="metadata.customQueryRelationType"
               :custom-query-filters="metadata.customQueryFilters"
               :basic-base-library="metadata.basicBaseLibrary"
-            />
-            <metadata-wrapper
-              v-else
-              :form-id="formId"
-              :is-edit="isEdit"
-              v-model:metadata="metadata as MetadataField"
+              class="pt-2"
             />
           </div>
         </div>

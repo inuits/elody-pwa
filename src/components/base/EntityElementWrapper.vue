@@ -3,6 +3,7 @@
     :class="['bg-accent-normal rounded-t-lg', { 'rounded-lg': isCollapsed }]"
   >
     <div
+      v-if="!basicBaseLibrary"
       class="flex items-center justify-between cursor-pointer"
       @click.self="toggleElementCollapse(label)"
     >
@@ -30,10 +31,16 @@ import { Unicons } from "@/types";
 import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
 import { useI18n } from "vue-i18n";
 
-defineProps<{
-  label: string;
-  isCollapsed: Boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    label: string;
+    isCollapsed: Boolean;
+    basicBaseLibrary?: Boolean;
+}>(),
+  {
+    basicBaseLibrary: false,
+  }
+);
 
 const { t } = useI18n();
 const { toggleElementCollapse } = useEntityElementCollapseHelper();

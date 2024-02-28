@@ -1,5 +1,5 @@
 <template>
-  <div class="text-sm">
+  <div v-if="!basicBaseLibraryAsValue" class="text-sm">
     <div v-if="Array.isArray(readableValue)">
       <div v-for="item in readableValue" :key="item">
         <p v-if="!stringIsUrl(item)">{{ item }}</p>
@@ -48,9 +48,11 @@ const props = withDefaults(
     unit?: string;
     linkText?: string;
     linkIcon?: string;
+    basicBaseLibraryAsValue?: boolean;
   }>(),
   {
     linkText: "",
+    basicBaseLibraryAsValue: false,
   }
 );
 

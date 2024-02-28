@@ -27,6 +27,7 @@
     :link-text="metadata.linkText"
     :link-icon="metadata.linkIcon"
     :unit="metadata.unit"
+    :basic-base-library-as-value="basicBaseLibraryAsValue"
   />
 </template>
 
@@ -45,12 +46,18 @@ const { t } = useI18n();
 const { addOrderItem, removeOrderItem, updateOrderItem } = useOrderListItems();
 const { getForm } = useFormHelper();
 
-const props = defineProps<{
-  isEdit: boolean;
-  formId: string;
-  metadata: MetadataField;
-  linkedEntityId?: String;
-}>();
+const props = withDefaults(
+  defineProps<{
+    isEdit: boolean;
+    formId: string;
+    metadata: MetadataField;
+    linkedEntityId?: String;
+    basicBaseLibraryAsValue?: boolean;
+  }>(),
+  {
+    basicBaseLibraryAsValue: false,
+  }
+);
 
 const emit = defineEmits(["update:field"]);
 
