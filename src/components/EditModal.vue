@@ -35,7 +35,6 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useEditMode } from "@/composables/useEdit";
-import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useMutation } from "@vue/apollo-composable";
 import { usePageInfo } from "@/composables/usePageInfo";
 import { useRoute, useRouter } from "vue-router";
@@ -51,10 +50,8 @@ const { t } = useI18n();
 const { pageInfo } = usePageInfo();
 const { isEdit, save, discard, disableEditMode, isEditToggleVisible } =
   useEditMode();
-const { setSecondaryConfirmFunction, initializeConfirmModal } =
-  useConfirmModal();
+const { initializeConfirmModal } = useConfirmModal();
 const { closeModal, openModal } = useBaseModal();
-const { mediafileSelectionState } = useEntityMediafileSelector();
 const { discardEditForForm } = useFormHelper();
 const config = inject<{
   features: { hasTenantSelect: boolean; hideSuperTenant: boolean };
@@ -89,9 +86,6 @@ const openDeleteModal = () => {
     },
     "delete-entity"
   );
-  if (mediafileSelectionState.mediafiles.length > 0) {
-    setSecondaryConfirmFunction(() => deleteEntity(true));
-  }
   openModal(TypeModals.Confirm, undefined, "center");
 };
 
