@@ -13,7 +13,7 @@
       @change="selectItem"
     >
       <option
-        v-for="option in [defaultOption, ...options]"
+        v-for="option in allOptions"
         :key="option.value"
         :value="option.label"
         :class="[dropdownStyles[dropdownStyle].hoverStyle]"
@@ -102,9 +102,10 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const defaultOption: DropdownOption = {
   icon: DamsIcons.AngleDown,
-  label: props.label ? props.label : "dropdown.select-option",
+  label: "dropdown.select-option",
   value: "",
 };
+const allOptions = computed(() => props.options.length > 0 ? props.options : [defaultOption, ...props.options]);
 const selectedItem = ref<DropdownOption>(props.defaultOption || defaultOption);
 const selectedItemLabel = computed(() => selectedItem.value.label);
 
