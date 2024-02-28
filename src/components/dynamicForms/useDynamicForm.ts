@@ -2,22 +2,23 @@ import { apolloClient } from "@/main";
 import { ref } from "vue";
 import { type EntityInput } from "@/generated-types/queries";
 
-const dynamicForm = ref<Object | undefined>(undefined);
+const dynamicForm = ref<any | undefined>(undefined);
+const dynamicFormUploadFields = ref<any[]>([]);
 
 const useDynamicForm = () => {
-  const getDynamicForm = (queryDocument: object): void => {
+  const getDynamicForm = (queryDocument: any): void => {
     apolloClient
       .query({
         query: queryDocument,
       })
-      .then((result: Object) => {
+      .then((result) => {
         dynamicForm.value = result.data;
       });
   };
 
   const performSubmitAction = async (
-    queryDocument: object,
-    entity: EntityInput,
+    queryDocument: any,
+    entity: EntityInput
   ): Promise<any> => {
     return await apolloClient.mutate({
       mutation: queryDocument,
@@ -25,7 +26,12 @@ const useDynamicForm = () => {
     });
   };
 
-  return { getDynamicForm, dynamicForm, performSubmitAction };
+  return {
+    getDynamicForm,
+    dynamicForm,
+    performSubmitAction,
+    dynamicFormUploadFields,
+  };
 };
 
 export { useDynamicForm };

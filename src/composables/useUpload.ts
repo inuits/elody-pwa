@@ -1,4 +1,4 @@
-import type { DropzoneFile } from "dropzone";
+import Dropzone, { type DropzoneFile } from "dropzone";
 import { computed, ref, toRaw, watch } from "vue";
 import {
   NotificationType,
@@ -11,6 +11,7 @@ import {
   UploadFieldType,
 } from "@/generated-types/queries";
 import useEntitySingle from "@/composables/useEntitySingle";
+import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 
 type FileError = {
   filename: string;
@@ -18,16 +19,15 @@ type FileError = {
 };
 
 const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
-  "no-upload",
+  "no-upload"
 );
 const uploadProgress = ref<ActionProgressStep[]>([]);
 const amountUploaded = ref<number>(0);
 const dryRunComplete = ref<boolean>(false);
 const dryRunErrors = ref<string[]>([]);
 const files = ref<DropzoneFile[]>([]);
-const mediafiles = computed(
-  (): DropzoneFile =>
-    files.value.filter((file: DropzoneFile) => file.type !== "text/csv"),
+const mediafiles = computed((): DropzoneFile[] =>
+  files.value.filter((file: DropzoneFile) => file.type !== "text/csv")
 );
 const uploadProgressPercentage = ref<number>(0);
 const uploadType = ref<UploadFieldType>(UploadFieldType.Batch);
@@ -39,13 +39,16 @@ const enableUploadButton = computed(() => {
   return uploadProgress.value
     .filter(
       (progressStep: ActionProgressStep) =>
-        progressStep.stepType !== ProgressStepType.Upload,
+        progressStep.stepType !== ProgressStepType.Upload
     )
     .every(
       (progressStep: ActionProgressStep) =>
-        progressStep.status === ProgressStepStatus.Complete,
+        progressStep.status === ProgressStepStatus.Complete
     );
 });
+const uploadContainsErrors = computed(
+  () => !dryRunErrors.value && fileErrors.value
+);
 
 const useUpload = () => {
   let _prefetchedUploadUrls: string[] | "not-prefetched-yet" =
@@ -56,7 +59,7 @@ const useUpload = () => {
     toggleUploadStatus();
     const generator = uploadGenerator(
       config,
-      isLinkedUpload ? useEntitySingle().getEntityUuid() : "",
+      isLinkedUpload ? useEntitySingle().getEntityUuid() : ""
     );
 
     for await (const upload of generator) {
@@ -70,13 +73,13 @@ const useUpload = () => {
     toggleUploadStatus();
     __updateUploadProgress(
       ProgressStepType.Upload,
-      ProgressStepStatus.Complete,
+      ProgressStepStatus.Complete
     );
   };
 
   const __uploadExceptionHandler = (
     errorDescription: string | undefined,
-    t: Function,
+    t: Function
   ) => {
     if (!errorDescription)
       errorDescription = t("dropzone.errorNotification.description");
@@ -84,7 +87,7 @@ const useUpload = () => {
       NotificationType.error,
       t("dropzone.errorNotification.title"),
       errorDescription,
-      15,
+      15
     );
   };
 
@@ -94,7 +97,7 @@ const useUpload = () => {
         dryRunErrors.value.push(dryRunResult.message);
         __updateUploadProgress(
           ProgressStepType.Validate,
-          ProgressStepStatus.Failed,
+          ProgressStepStatus.Failed
         );
         return;
       }
@@ -109,7 +112,7 @@ const useUpload = () => {
       });
       if (dryRunResult?.mediafiles.length) {
         requiredMediafiles.value = dryRunResult.mediafiles.map(
-          (mediafile: any) => mediafile.filename,
+          (mediafile: any) => mediafile.filename
         );
       }
       dryRunErrors.value = errors;
@@ -118,13 +121,13 @@ const useUpload = () => {
         ProgressStepType.Validate,
         dryRunErrors.value.length
           ? ProgressStepStatus.Failed
-          : ProgressStepStatus.Complete,
+          : ProgressStepStatus.Complete
       );
     } catch {
       dryRunErrors.value.push("upload-fields.errors.dry-run-failed");
       __updateUploadProgress(
         ProgressStepType.Validate,
-        ProgressStepStatus.Failed,
+        ProgressStepStatus.Failed
       );
     }
   };
@@ -132,7 +135,7 @@ const useUpload = () => {
   const dryRunCsv = async () => {
     __updateUploadProgress(
       ProgressStepType.Validate,
-      ProgressStepStatus.Loading,
+      ProgressStepStatus.Loading
     );
     const dryRunResult = await __batchEntities(__getCsvBlob(), true);
     handleDryRunResult(dryRunResult);
@@ -140,7 +143,7 @@ const useUpload = () => {
 
   const __batchEntities = async (
     csv: Blob,
-    isDryRun: boolean = false,
+    isDryRun: boolean = false
   ): Promise<string[] | number> => {
     const response = await fetch(
       `/api/upload/batch${isDryRun ? "?dry_run=true" : ""}`,
@@ -148,7 +151,7 @@ const useUpload = () => {
         headers: { "Content-Type": "text/csv" },
         method: "POST",
         body: csv,
-      },
+      }
     );
     if (!isDryRun) return JSON.parse(await response.text());
     else return response.json();
@@ -173,14 +176,14 @@ const useUpload = () => {
 
   const __createMediafileForEntity = async (
     entityId: string,
-    file: DropzoneFile,
+    file: DropzoneFile
   ): Promise<string> => {
     const response = await fetch(
       `/api/upload/single?entityId=${entityId}&filename=${file.name}&hasRelation=true`,
       {
         headers: { "Content-Type": "application/json" },
         method: "POST",
-      },
+      }
     );
     return JSON.parse(await response.text());
   };
@@ -188,7 +191,7 @@ const useUpload = () => {
   const __getCsvBlob = () => {
     try {
       const csvFile = files.value.find(
-        (file: DropzoneFile) => file.type === "text/csv",
+        (file: DropzoneFile) => file.type === "text/csv"
       );
       return new Blob([csvFile], { type: csvFile.type });
     } catch (e) {
@@ -202,10 +205,10 @@ const useUpload = () => {
     if (uploadType.value === UploadFieldType.Batch && isCsvRequired.value) {
       if (_prefetchedUploadUrls === "not-prefetched-yet")
         _prefetchedUploadUrls = (await __batchEntities(
-          __getCsvBlob(),
+          __getCsvBlob()
         )) as string[];
       uploadUrl = _prefetchedUploadUrls.find((url: string) =>
-        url.includes(file.name),
+        url.includes(file.name)
       );
     } else if (
       uploadType.value === UploadFieldType.Batch &&
@@ -222,7 +225,7 @@ const useUpload = () => {
 
   const __constructExternalUrlForUpload = (
     url: string,
-    storageApiUrl: string,
+    storageApiUrl: string
   ): string => {
     const urlObject = new URL(url);
     const origin = new URL(storageApiUrl).origin;
@@ -234,7 +237,7 @@ const useUpload = () => {
     formData.append("file", file);
     const extUrl = __constructExternalUrlForUpload(
       url,
-      config.api.storageApiUrl,
+      config.api.storageApiUrl
     );
     return {
       response: await fetch(extUrl, {
@@ -259,10 +262,10 @@ const useUpload = () => {
 
   const validateFiles = () => {
     const csvFilesCount = files.value.filter(
-      (file) => file.type === "text/csv",
+      (file) => file.type === "text/csv"
     ).length;
     const nonCsvFilesCount = files.value.filter(
-      (file) => file.type !== "text/csv",
+      (file) => file.type !== "text/csv"
     ).length;
 
     if (uploadType.value === "batch")
@@ -276,10 +279,10 @@ const useUpload = () => {
 
   const removeFileToUpload = (
     fileToRemove: DropzoneFile,
-    isValidationFile: boolean = false,
+    isValidationFile: boolean = false
   ) => {
     files.value = files.value.filter(
-      (file: DropzoneFile) => file !== fileToRemove,
+      (file: DropzoneFile) => file !== fileToRemove
     );
     if (isValidationFile) {
       dryRunComplete.value = false;
@@ -290,7 +293,7 @@ const useUpload = () => {
     if (!mediafiles.value.length)
       __updateUploadProgress(
         ProgressStepType.Prepare,
-        ProgressStepStatus.Empty,
+        ProgressStepStatus.Empty
       );
     if (!files.value.length) resetUploadProgress();
   };
@@ -302,31 +305,46 @@ const useUpload = () => {
     uploadProgressPercentage.value = newPercentage;
   };
 
+  const resetUploadDropzone = (): void => {
+    useDynamicForm().dynamicFormUploadFields.value.forEach(
+      (dropzone: Dropzone) => {
+        dropzone.removeAllFiles();
+      }
+    );
+  };
+
   const resetUpload = () => {
     uploadStatus.value = "no-upload";
     dryRunErrors.value = [];
     files.value = [];
     requiredMediafiles.value = undefined;
     amountUploaded.value = 0;
+    resetUploadDropzone();
     resetUploadProgress();
   };
 
   const verifyAllNeededFilesArePresent = (): boolean => {
     try {
-      __updateUploadProgress(
-        ProgressStepType.Prepare,
-        ProgressStepStatus.Loading,
-      );
       fileErrors.value = [];
 
       if (uploadType.value === UploadFieldType.Single) return true;
+
+      __updateUploadProgress(
+        ProgressStepType.Prepare,
+        ProgressStepStatus.Loading
+      );
+
+      if (!requiredMediafiles.value) {
+        resetUploadProgress();
+        return true;
+      }
 
       const requiredFileNames: string[] = [...requiredMediafiles.value];
       let areAllFilesPresent: boolean = true;
 
       requiredFileNames.forEach((requiredFileName: string) => {
         const fileExists = mediafiles.value.some(
-          (file: DropzoneFile) => file.name === requiredFileName,
+          (file: DropzoneFile) => file.name === requiredFileName
         );
         if (!fileExists) {
           areAllFilesPresent = false;
@@ -351,14 +369,14 @@ const useUpload = () => {
         ProgressStepType.Prepare,
         areAllFilesPresent
           ? ProgressStepStatus.Complete
-          : ProgressStepStatus.Failed,
+          : ProgressStepStatus.Failed
       );
 
       return areAllFilesPresent;
     } catch {
       __updateUploadProgress(
         ProgressStepType.Prepare,
-        ProgressStepStatus.Failed,
+        ProgressStepStatus.Failed
       );
       return false;
     }
@@ -377,7 +395,7 @@ const useUpload = () => {
 
   const __updateUploadProgress = (
     stepType: ProgressStepType,
-    status: ProgressStepStatus,
+    status: ProgressStepStatus
   ): void => {
     if (!uploadProgress.value) return;
     const newProgress = structuredClone(toRaw(uploadProgress.value));
@@ -414,6 +432,7 @@ const useUpload = () => {
     isCsvRequired,
     uploadProgress,
     amountUploaded,
+    uploadContainsErrors,
   };
 };
 
@@ -424,10 +443,10 @@ watch(
     if (uploadType.value === UploadFieldType.Single) {
       useUpload().__updateUploadProgress(
         ProgressStepType.Prepare,
-        ProgressStepStatus.Complete,
+        ProgressStepStatus.Complete
       );
     }
-  },
+  }
 );
 
 export default useUpload;

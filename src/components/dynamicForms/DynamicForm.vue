@@ -24,27 +24,27 @@
         />
         <upload-interface-dropzone
           v-if="field.__typename === 'UploadField'"
-          :dropzone-label="field.label"
-          :validation="field.inputField?.validation?.value"
-          :accepted-file-types="field.inputField?.fileTypes"
-          :max-file-size="field.inputField?.maxFileSize"
-          :dropzone-size="field.uploadFieldSize"
-          :max-amount-of-files="field.inputField?.maxAmountOfFiles"
-          :upload-multiple="field.inputField?.uploadMultiple"
-          :dry-run="field.dryRunUpload"
-          :upload-field-type="field.uploadFieldType"
+          :dropzone-label="(field as UploadField).label"
+          :validation="(field as UploadField).inputField.validation?.value"
+          :accepted-file-types="(field as UploadField).inputField.fileTypes"
+          :max-file-size="(field as UploadField).inputField.maxFileSize"
+          :dropzone-size="(field as UploadField).uploadFieldSize"
+          :max-amount-of-files="(field as UploadField).inputField.maxAmountOfFiles"
+          :upload-multiple="(field as UploadField).inputField.uploadMultiple"
+          :dry-run="(field as UploadField).dryRunUpload"
+          :upload-field-type="(field as UploadField).uploadFieldType"
+          :progress-indicator="(field as UploadField).inputField.fileProgressSteps"
         />
         <DynamicFormUploadButton
           v-if="
             field.__typename === 'FormAction' &&
-            field.actionType == ActionType.Upload
+            (field as FormAction).actionType == ActionType.Upload
           "
-          :label="t(field.label)"
-          :icon="field.icon"
-          :errors="uploadFileErrors"
+          :label="t((field as FormAction).label)"
+          :icon="(field as FormAction).icon"
           :disabled="!enableUploadButton"
-          :progressIndicator="field?.actionProgressIndicator"
-          @click="performActionButtonClickEvent(field)"
+          :progressIndicator="(field as FormAction).actionProgressIndicator"
+          @click="performActionButtonClickEvent(field as FormAction)"
           @reset-upload="initializeForm"
         />
         <BaseButtonNew
@@ -58,7 +58,7 @@
               ? `${t(field.label)} ${t(`types.${field.creationType}`)}${
                   config.tenantDefiningTypes !== field.creationType
                     ? ` in ${t(
-                        `navigation.tenant`,
+                        `navigation.tenant`
                       ).toLowerCase()} ${currentTenant}`
                     : ''
                 }`
@@ -102,13 +102,6 @@ import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUpload
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
 
-type FormFieldState = {
-  fieldKey: string;
-  errorMessage: string;
-  meta: object;
-  value: any;
-};
-
 const props = withDefaults(
   defineProps<{
     dynamicFormQuery: string;
@@ -117,7 +110,7 @@ const props = withDefaults(
   }>(),
   {
     hasLinkedUpload: false,
-  },
+  }
 );
 
 const config = inject("config");
@@ -126,57 +119,40 @@ const { currentTenant } = useApp();
 const { loadDocument } = useImport();
 const { closeModal, getModalInfo } = useBaseModal();
 const { getDynamicForm, dynamicForm, performSubmitAction } = useDynamicForm();
-const {
-  upload,
-  enableUploadButton,
-  mediafiles,
-  fileErrors,
-  dryRunErrors,
-  uploadProgress,
-  resetUpload,
-} = useUpload();
+const { upload, enableUploadButton, mediafiles, uploadProgress, resetUpload } =
+  useUpload();
 const formFields = computed<
   UploadField | PanelMetaData | FormAction | undefined
 >(() => {
   if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"])
     return undefined;
   return Object.values(dynamicForm.value["GetDynamicForm"].formFields).filter(
-    (value) => typeof value === "object",
+    (value) => typeof value === "object"
   );
 });
 const formFieldsState = ref<Object[]>([]);
 const formContainsErrors = computed((): boolean =>
   formFieldsState.value.some(
-    (formFieldState: FormFieldState) =>
-      formFieldState.errorMessage !== undefined,
-  ),
+    (formFieldState: any) => formFieldState.errorMessage !== undefined
+  )
 );
-const uploadFileErrors = computed((): string[] => [
-  ...dryRunErrors.value,
-  ...fileErrors.value.map((error) =>
-    t(`upload-fields.errors.${error.error}`, [error.filename]),
-  ),
-]);
 const { t } = useI18n();
 
-const setFormFieldState = (fieldValue: FormFieldState) => {
+const setFormFieldState = (fieldValue: any) => {
   formFieldsState.value = formFieldsState.value.filter(
-    (formFieldState: FormFieldState) =>
-      formFieldState.fieldKey !== fieldValue.fieldKey,
+    (formFieldState: any) => formFieldState.fieldKey !== fieldValue.fieldKey
   );
   formFieldsState.value.push(fieldValue);
 };
 
 const createEntityFromFormInput = (entityType: Entitytyping): EntityInput => {
   let entity: EntityInput = { type: entityType };
-  entity.metadata = formFieldsState.value.map(
-    (formFieldState: FormFieldState) => {
-      return {
-        key: formFieldState.fieldKey,
-        value: formFieldState.value,
-      };
-    },
-  );
+  entity.metadata = formFieldsState.value.map((formFieldState: any) => {
+    return {
+      key: formFieldState.fieldKey,
+      value: formFieldState.value,
+    };
+  });
   return entity;
 };
 
@@ -185,7 +161,7 @@ const getQuery = async (queryName: string) => {
 };
 
 const performActionButtonClickEvent = async (
-  field: FormAction,
+  field: FormAction
 ): Promise<void> => {
   if (field.actionType === ActionType.Upload) {
     if (!enableUploadButton.value) return;
@@ -194,7 +170,7 @@ const performActionButtonClickEvent = async (
   }
   if (field.actionType === ActionType.Submit) {
     if (formContainsErrors.value) return;
-    const document = await getQuery(field.actionQuery);
+    const document = await getQuery(field.actionQuery as string);
     const entityInput = createEntityFromFormInput(field.creationType);
     const entity = (await performSubmitAction(document, entityInput)).data
       .CreateEntity;
@@ -206,21 +182,21 @@ const performActionButtonClickEvent = async (
 const getFormProgressIndicator = (): ActionProgress | undefined => {
   if (!formFields.value) return undefined;
   const actionButton: FormAction = formFields.value.find(
-    (formField: any) => formField.__typename === "FormAction",
+    (formField: any) => formField.__typename === "FormAction"
   );
   if (!actionButton) return undefined;
-  return actionButton.actionProgressIndicator;
+  return actionButton.actionProgressIndicator || undefined;
 };
 
 const getUploadProgressSteps = (
-  progressIndicator: ActionProgress,
+  progressIndicator: ActionProgress
 ): ActionProgressStep[] => {
   if (progressIndicator.type === ActionProgressIndicatorType.Spinner) return [];
 
   return Object.values(progressIndicator).filter(
     (value: any) =>
-      typeof value === "object" && value.__typename === "ActionProgressStep",
-  );
+      typeof value === "object" && value.__typename === "ActionProgressStep"
+  ) as ActionProgressStep[];
 };
 
 const initializeForm = async () => {
@@ -235,7 +211,7 @@ watch(
   async () => {
     await initializeForm();
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 watch(
@@ -245,7 +221,7 @@ watch(
     if (progressIndicator)
       uploadProgress.value = getUploadProgressSteps(progressIndicator);
   },
-  { immediate: true },
+  { immediate: true }
 );
 </script>
 
