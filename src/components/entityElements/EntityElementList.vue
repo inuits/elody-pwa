@@ -1,6 +1,6 @@
 <template>
   <div>
-    <entity-element-wrapper :label="label" :isCollapsed="isCollapsed">
+    <entity-element-wrapper :label="label" :isCollapsed="isCollapsed" :basic-base-library="basicBaseLibrary">
       <template v-slot:actions>
         <div
           v-if="isEdit && relationType"
@@ -23,7 +23,7 @@
       <template v-slot:content>
         <div
           v-if="!requiresCustomQuery || queryLoaded"
-          class="ml-1 bg-neutral-lightest"
+          :class="[ { 'ml-1 bg-neutral-lightest': !basicBaseLibrary } ]"
         >
           <BaseLibrary
             v-if="type === MediaFileElementTypes.Media"

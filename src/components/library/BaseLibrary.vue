@@ -20,11 +20,11 @@
     <div v-else class="lg:flex bg-neutral-lightest">
       <div
         class="w-full"
-        :class="[parentEntityIdentifiers.length > 0 ? 'p-3' : 'px-6']"
+        :class="[basicBaseLibrary ? '' : parentEntityIdentifiers.length > 0 ? 'p-3' : 'px-6']"
       >
         <div
           :class="[
-            'top-0 mb-2 pt-4 bg-neutral-lightest',
+            { 'top-0 mb-2 pt-4 bg-neutral-lightest': !basicBaseLibrary},
             { sticky: hasStickyBars },
           ]"
         >
