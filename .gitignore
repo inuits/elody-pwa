@@ -35,3 +35,5 @@ session-vue-3-oidc-library
 *.sln
 *.sw?
 
+pnpm-lock.yaml
+
