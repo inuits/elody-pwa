@@ -319,7 +319,7 @@ export const useBaseLibrary = (
         query: manipulateQuery.value
           ? manipulationQuery.value.document
           : GetEntitiesDocument,
-        variables: manipulateQuery.value ? createQueryVariables() : variables,
+        variables: manipulateQuery.value ? createQueryVariables() : queryVariables.value,
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
       })
