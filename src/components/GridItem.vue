@@ -61,7 +61,7 @@
               input-style="accentNormal"
             />
           </div>
-          <div v-if="!loading" class="w-full">
+          <div v-if="!loading" class="w-full min-w-0">
             <div
               v-for="metadataItem in teaserMetadata.filter(
                 (item) => !item.showOnlyInEditMode
