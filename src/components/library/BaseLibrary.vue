@@ -90,7 +90,7 @@
             />
           </div>
         </div>
-        <div v-if="entities" :class="{ 'flex justify-end': expandFilters }">
+        <div v-if="entities.length !== 0" :class="{ 'flex justify-end': expandFilters }">
           <div
             id="gridContainer"
             :class="[
@@ -134,7 +134,7 @@
           </div>
         </div>
 
-        <div v-if="entities.length === 0" class="">
+        <div v-if="entities.length === 0 && !entitiesLoading" class="text-center my-2">
           <div>{{ t("search.noresult") }}</div>
         </div>
       </div>
