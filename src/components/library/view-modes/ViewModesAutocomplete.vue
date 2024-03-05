@@ -6,14 +6,24 @@
     :select-input-field-type="selectType"
     :relation-type="relationType"
     :select-input-field-value="dropdownValue"
+    :filters="[
+      {
+        type: AdvancedFilterTypes.Type,
+        value: [metadataKeyToGetOptionsFor],
+      },
+    ]"
   ></BaseLibrary>
 </template>
 
 <script lang="ts" setup>
-import { type DropdownOption, Entitytyping } from "@/generated-types/queries";
+import {
+  AdvancedFilterTypes,
+  type DropdownOption,
+  type Entitytyping,
+} from "@/generated-types/queries";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
-import { getEntityIdFromRoute } from "@/helpers";
 import { computed } from "vue";
+import { getEntityIdFromRoute } from "@/helpers";
 
 const props = withDefaults(
   defineProps<{
