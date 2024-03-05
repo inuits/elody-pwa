@@ -20,11 +20,17 @@
     <div v-else class="lg:flex bg-neutral-lightest">
       <div
         class="w-full"
-        :class="[basicBaseLibrary ? '' : parentEntityIdentifiers.length > 0 ? 'p-3' : 'px-6']"
+        :class="[
+          basicBaseLibrary
+            ? ''
+            : parentEntityIdentifiers.length > 0
+            ? 'p-3'
+            : 'px-6',
+        ]"
       >
         <div
           :class="[
-            { 'top-0 mb-2 pt-4 bg-neutral-lightest': !basicBaseLibrary},
+            { 'top-0 mb-2 pt-4 bg-neutral-lightest': !basicBaseLibrary },
             { sticky: hasStickyBars },
           ]"
         >
@@ -32,16 +38,21 @@
             <FiltersBase
               v-show="enableAdvancedFilters"
               class="lg:w-[46%]"
-              :filter-matcher-mapping="filterMatcherMapping"
-              :advanced-filters="advancedFilters"
-              :entity-type="filterType || entityType"
-              :parent-entity-identifiers="parentEntityIdentifiers"
               :expandFilters="expandFilters"
-              :filters-base-initialization-status="
-                filtersBaseInitializationStatus
-              "
+              :manipulation-query="manipulationQuery"
+              :parent-entity-identifiers="parentEntityIdentifiers"
               :route="route"
-              @apply-filters="setAdvancedFilters"
+              :set-advanced-filters="setAdvancedFilters"
+              @filter-matcher-mapping-promise="
+                (promise) => (filterMatcherMappingPromise = promise)
+              "
+              @advanced-filters-promise="
+                (promise) => (advancedFiltersPromise = promise)
+              "
+              @apply-filters="
+                async (filters: AdvancedFilterInput[]) =>
+                  await setAdvancedFilters(filters, true)
+              "
               @expand-filters="expandFilters = !expandFilters"
             />
             <div
@@ -52,13 +63,17 @@
             </div>
             <LibraryBar
               v-if="!predefinedEntities && !basicBaseLibrary"
-              :pagination-limit-options="paginationLimitOptions"
-              :sort-options="sortOptions"
+              :route="route"
+              :set-limit="setLimit"
+              :set-skip="setSkip"
+              :set-sort-key="setSortKey"
+              :set-sort-order="setSortOrder"
               :total-items="totalEntityCount || NaN"
-              :queryVariables="queryVariables as GetEntitiesQueryVariables"
-              :entities-loading="entitiesLoading"
-              :library-bar-initialization-status="
-                libraryBarInitializationStatus
+              @pagination-limit-options-promise="
+                (promise) => (paginationLimitOptionsPromise = promise)
+              "
+              @sort-options-promise="
+                (promise) => (sortOptionsPromise = promise)
               "
             />
           </div>
@@ -79,18 +94,20 @@
               :confirm-selection-button="confirmSelectionButton"
               :entity-type="entityType as Entitytyping"
               @select-page="bulkSelect"
-              @select-all="bulkSelect(allEntitiesResult.Entities.results)"
               @confirm-selection="
                 (selection) => emit('confirmSelection', selection)
               "
               @no-bulk-operations-available="
                 () => (enableBulkOperations = false)
               "
-              @refetch="refetchEntities()"
+              @refetch="async () => await refetchEntities()"
             />
           </div>
         </div>
-        <div v-if="entities.length !== 0" :class="{ 'flex justify-end': expandFilters }">
+        <div
+          v-if="entities.length !== 0"
+          :class="{ 'flex justify-end': expandFilters }"
+        >
           <div
             id="gridContainer"
             :class="[
@@ -134,7 +151,10 @@
           </div>
         </div>
 
-        <div v-if="entities.length === 0 && !entitiesLoading" class="text-center my-2">
+        <div
+          v-if="entities.length === 0 && !entitiesLoading"
+          class="text-center my-2"
+        >
           <div>{{ t("search.noresult") }}</div>
         </div>
       </div>
@@ -145,20 +165,15 @@
 <script lang="ts" setup>
 import type { ApolloClient } from "@apollo/client/core";
 import type { ViewModes } from "@/generated-types/type-defs";
+import type { AdvancedFilterInput, Entity } from "@/generated-types/queries";
 import {
   BaseEntity,
   ContextMenuGeneralActionEnum,
   DamsIcons,
   DropdownOption,
   Entitytyping,
-  GetEntitiesDocument,
   SearchInputType,
   TypeModals,
-} from "@/generated-types/queries";
-import type {
-  AdvancedFilterInput,
-  Entity,
-  GetEntitiesQueryVariables,
 } from "@/generated-types/queries";
 import { useBulkOperations } from "@/composables/useBulkOperations";
 import type {
@@ -168,24 +183,22 @@ import type {
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
+import EventBus from "@/EventBus";
 import FiltersBase from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import useUpload from "@/composables/useUpload";
 import ViewModesGrid from "@/components/library/view-modes/ViewModesGrid.vue";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
-import { bulkSelectAllSizeLimit } from "@/main";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { getEntityTitle } from "@/helpers";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
-import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { watch, ref, onMounted, inject, computed } from "vue";
-import EventBus from "@/EventBus";
 
 const props = withDefaults(
   defineProps<{
@@ -244,28 +257,30 @@ const { t } = useI18n();
 const { getGlobalState, updateGlobalState } = useStateManagement();
 
 const {
-  advancedFilters,
+  enqueuePromise,
   entities,
   entitiesLoading,
-  filterMatcherMapping,
-  filtersBaseInitializationStatus,
+  formatTeaserMetadata,
   getEntities,
-  libraryBarInitializationStatus,
-  paginationLimitOptions,
-  queryVariables,
+  manipulationQuery,
   setAdvancedFilters,
-  setManipulationOfQuery,
-  setEntities,
   setEntityType,
   setIsSearchLibrary,
-  setTotalEntityCount,
-  sortOptions,
+  setLimit,
+  setManipulationOfQuery,
+  setParentEntityIdentifiers,
+  setsearchInputType,
+  setSkip,
+  setSortKey,
+  setSortOrder,
   totalEntityCount,
-  formatTeaserMetadata,
-} = useBaseLibrary(
-  apolloClient as ApolloClient<any>,
-  props.parentEntityIdentifiers.length > 0
-);
+} = useBaseLibrary(apolloClient as ApolloClient<any>);
+
+let filterMatcherMappingPromise: (entityType: Entitytyping) => Promise<void>;
+let advancedFiltersPromise: (entityType: Entitytyping) => Promise<void>;
+let paginationLimitOptionsPromise: (entityType: Entitytyping) => Promise<void>;
+let sortOptionsPromise: (entityType: Entitytyping) => Promise<void>;
+
 const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
 const { closeModal } = useBaseModal();
@@ -277,7 +292,6 @@ const displayGrid = ref<boolean>(false);
 const displayPreview = ref<boolean>(props.enablePreview);
 
 const expandFilters = ref<boolean>(false);
-const isAsc = ref<boolean>(false);
 let toggles: ViewModes.type[] = [];
 
 const entityType = computed(() =>
@@ -331,26 +345,7 @@ const useOtherQuery = computed(() => props.useOtherQuery !== undefined);
 
 if (useOtherQuery.value) {
   setManipulationOfQuery(true, props.useOtherQuery);
-} else {
-  const allEntitiesQueryVariables: GetEntitiesQueryVariables = {
-    type: entityType.value,
-    limit: bulkSelectAllSizeLimit,
-    skip: 1,
-    searchValue: {
-      value: "",
-      isAsc: isAsc.value,
-      key: "title",
-      order_by: "",
-    },
-    advancedSearchValue: [],
-    advancedFilterInputs: [],
-    searchInputType: props.searchInputTypeOnDrawer,
-  };
-  const { result: allEntitiesResult } = useQuery(
-    GetEntitiesDocument,
-    allEntitiesQueryVariables,
-    () => ({ enabled: false, fetchPolicy: "network-only" })
-  );
+  setParentEntityIdentifiers(props.parentEntityIdentifiers || []);
 }
 
 const bulkSelect = (items = entities.value) => {
@@ -372,17 +367,27 @@ const bulkSelect = (items = entities.value) => {
   triggerBulkSelectionEvent(props.bulkOperationsContext);
 };
 
-const refetchEntities = () => {
-  getEntities(route, true);
+const refetchEntities = async () => {
+  await getEntities(route);
 };
 
-const initializeBaseLibrary = () => {
-  setIsSearchLibrary(props.isSearchLibrary);
+const initializeBaseLibrary = async () => {
+  setIsSearchLibrary(props.isSearchLibrary || false);
   if (!props.predefinedEntities) {
     if (props.filters.length > 0) setAdvancedFilters(props.filters);
-    else if (props.filterType) setEntityType(props.filterType as Entitytyping);
-    queryVariables.value.searchInputType = props.searchInputTypeOnDrawer;
-    getEntities(route);
+    setEntityType(
+      (props.filterType as Entitytyping) ||
+        props.entityType ||
+        Entitytyping.BaseEntity
+    );
+    setsearchInputType(
+      props.searchInputTypeOnDrawer || SearchInputType.AdvancedInputType
+    );
+    enqueuePromise(filterMatcherMappingPromise);
+    enqueuePromise(advancedFiltersPromise);
+    enqueuePromise(paginationLimitOptionsPromise);
+    enqueuePromise(sortOptionsPromise);
+    await getEntities(route);
   }
 };
 
@@ -398,28 +403,27 @@ const getDisplayPreferences = () => {
   }
 };
 
-onMounted(() => {
-  initializeBaseLibrary();
+onMounted(async () => {
+  await initializeBaseLibrary();
   getDisplayPreferences();
 });
 
 watch(
   () => route.path,
-  () => {
+  async () => {
     if (
       !props.predefinedEntities &&
       router.currentRoute.value.name !== "SingleEntity"
     ) {
-      libraryBarInitializationStatus.value = "not-initialized";
-      filtersBaseInitializationStatus.value = "not-initialized";
-      setEntityType(entityType.value);
-
-      const searchInputType =
+      setsearchInputType(
         entityType.value === Entitytyping.Mediafile
           ? SearchInputType.AdvancedInputMediaFilesType
-          : SearchInputType.AdvancedInputType;
-      queryVariables.value.searchInputType = searchInputType;
-      getEntities(route);
+          : SearchInputType.AdvancedInputType
+      );
+      setEntityType(entityType.value);
+      enqueuePromise(advancedFiltersPromise);
+      enqueuePromise(sortOptionsPromise);
+      await getEntities(route);
     }
   }
 );
@@ -427,20 +431,19 @@ watch(
   () => props.predefinedEntities,
   () => {
     if (props.predefinedEntities) {
-      setEntities(props.predefinedEntities);
-      setTotalEntityCount(props.predefinedEntities.length);
+      entities.value = props.predefinedEntities;
+      totalEntityCount.value = props.predefinedEntities.length;
     }
   },
   { immediate: true }
 );
-
 watch(
   () => props.filters,
-  () => {
+  async () => {
     setAdvancedFilters(props.filters);
+    await getEntities(route);
   }
 );
-
 watch(
   () => entities.value,
   () => {
@@ -463,7 +466,6 @@ watch(
         iconOn: DamsIcons.Apps,
         iconOff: DamsIcons.Apps,
       });
-    if (props.filters.length === 0) initializeBaseLibrary();
     if (viewModes.includes(ViewModesMedia.__name) || props.enablePreview)
       toggles.push({
         isOn: displayPreview,
@@ -484,26 +486,25 @@ watch([displayGrid, expandFilters], () => {
     expandFilters: _expandFilters,
   });
 });
-
 watch(
   () => uploadStatus.value,
-  () => {
-    if (uploadStatus.value === "upload-finished") refetchEntities();
+  async () => {
+    if (uploadStatus.value === "upload-finished") await refetchEntities();
   }
 );
 
-EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryMediafile, () => {
+EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryMediafile, async () => {
   if (
     props.useOtherQuery?.filtersDocument?.definitions[0]?.name?.value ===
     "getPrimaryMediafileFilters"
   )
-    getEntities(route, true, true);
+    await getEntities(route);
 });
-EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryThumbnail, () => {
+EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryThumbnail, async () => {
   if (
     props.useOtherQuery?.filtersDocument?.definitions[0]?.name?.value ===
     "getPrimaryThumbnailFilters"
   )
-    getEntities(route, true, true);
+    await getEntities(route);
 });
 </script>

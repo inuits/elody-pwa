@@ -33,7 +33,10 @@
             class="py-2 px-2"
           >
             <metadata-wrapper
-              v-if="metadata.__typename !== 'EntityListElement' || metadata.basicBaseLibrary"
+              v-if="
+                metadata.__typename !== 'EntityListElement' ||
+                metadata.basicBaseLibrary
+              "
               :form-id="formId"
               :is-edit="isEdit"
               v-model:metadata="metadata as MetadataField"

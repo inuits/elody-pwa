@@ -32,8 +32,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
       "_displayPreferences"
     );
     if (displayPreferences)
-      if (displayPreferences.lang)
-        language = displayPreferences.lang;
+      if (displayPreferences.lang) language = displayPreferences.lang;
 
     const { t } = i18n(translations, language).global;
 
@@ -54,7 +53,9 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
           "notifications.graphql-errors.duplicate-upload";
         let duplicateKey = "";
 
-        if (_errorResponse.operation.operationName.toLowerCase() == "createentity") {
+        if (
+          _errorResponse.operation.operationName.toLowerCase() == "createentity"
+        ) {
           errorMessage = "notifications.graphql-errors.duplicate-entity";
           const responseBody: string = (
             _errorResponse.graphQLErrors?.[0].extensions.response as any

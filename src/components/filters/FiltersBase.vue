@@ -88,13 +88,12 @@
             )
           "
           :clear-all-active-filters="clearAllActiveFilters"
-          @selected-matcher="(matcher: DropdownOption | undefined) => filter.selectedMatcher = matcher"
-          @activate-filter="(filterInput: AdvancedFilterInput, force: boolean) => {
+          @activate-filter="(filterInput: AdvancedFilterInput, matcher: DropdownOption | undefined) => {
             filter.isActive = true;
             filter.inputFromState = filterInput;
+            filter.selectedMatcher = matcher;
             activeFilters = activeFilters.filter(activeFilter => activeFilter.key !== filterInput.key);
             activeFilters.push(filterInput);
-            if (force) applyFilters();
           }"
           @deactivate-filter="
             (key) => {
@@ -107,7 +106,6 @@
               activeFilters = activeFilters.filter(
                 (filter) => filter.key !== key
               );
-              applyFilters(true);
             }
           "
         />
@@ -124,39 +122,41 @@ import type { RouteLocationNormalizedLoaded } from "vue-router";
 import {
   AdvancedFilterTypes,
   DamsIcons,
+  Entitytyping,
+  GetAdvancedFiltersDocument,
+  GetFilterMatcherMappingDocument,
   type AdvancedFilterInput,
   type AdvancedFilters,
+  type BaseEntity,
   type DropdownOption,
   type FilterMatcherMap,
+  type GetFilterMatcherMappingQuery,
   type Maybe,
 } from "@/generated-types/queries";
+import {
+  useStateManagement,
+  type FilterListItem,
+} from "@/composables/useStateManagement";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import FiltersListItem from "@/components/filters/FiltersListItem.vue";
 import SavedSearches from "@/components/SavedSearches.vue";
 import useEditMode from "@/composables/useEdit";
-import { computed, defineProps, ref, toRefs, watch } from "vue";
+import { apolloClient } from "@/main";
+import { computed, defineProps, onMounted, ref, watch } from "vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
-import {
-  useStateManagement,
-  type FilterListItem,
-} from "@/composables/useStateManagement";
+import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
 
 const props = withDefaults(
   defineProps<{
-    filterMatcherMapping: FilterMatcherMap;
-    advancedFilters: Maybe<AdvancedFilters> | undefined;
-    entityType: string;
     expandFilters: boolean;
+    manipulationQuery: object | undefined;
     parentEntityIdentifiers?: string[];
-    filtersBaseInitializationStatus:
-      | "not-initialized"
-      | "inProgress"
-      | "initialized";
     route: RouteLocationNormalizedLoaded;
+    setAdvancedFilters: Function;
   }>(),
   {
     parentEntityIdentifiers: () => [],
@@ -164,42 +164,77 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
+  (
+    event: "filterMatcherMappingPromise",
+    filterMatcherMappingPromise: (entityType: Entitytyping) => Promise<void>
+  ): void;
+  (
+    event: "advancedFiltersPromise",
+    advancedFiltersPromise: (entityType: Entitytyping) => Promise<void>
+  ): void;
   (event: "applyFilters", advancedFilterInputs: AdvancedFilterInput[]): void;
   (event: "expandFilters", expandFilters: boolean): void;
 }>();
 
-const matchers = ref<DropdownOption[]>([]);
-const filters = ref<FilterListItem[]>([]);
-const displayedFilterOptions = ref<DropdownOption[]>([]);
-const activeFilters = ref<AdvancedFilterInput[]>([]);
+const filterMatcherMapping = ref<FilterMatcherMap>({
+  id: [],
+  text: [],
+  date: [],
+  number: [],
+  selection: [],
+  boolean: [],
+  type: [],
+  metadata_on_relation: [],
+});
 const activeFilterCount = ref<number>(0);
+const activeFilters = ref<AdvancedFilterInput[]>([]);
+const advancedFilters = ref<Maybe<AdvancedFilters>>();
 const clearAllActiveFilters = ref<boolean>(false);
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
-const { entityType, filtersBaseInitializationStatus } = toRefs(props);
-const { getStateForRoute, setStateForRoute } = useStateManagement();
+const displayedFilterOptions = ref<DropdownOption[]>([]);
+const filters = ref<FilterListItem[]>([]);
+const matchers = ref<DropdownOption[]>([]);
+const { getStateForRoute, updateStateForRoute } = useStateManagement();
 const { isSaved } = useEditMode();
+const { setAdvancedFilterInputs } = useQueryVariablesFactory();
 const { t } = useI18n();
 
-const applyFilters = (saveState = false) => {
-  if (saveState) {
-    const state = getStateForRoute(props.route);
-    if (state)
-      setStateForRoute(props.route, {
-        entityCountOnPage: state.entityCountOnPage,
-        queryVariables: state.queryVariables,
-        filterListItems: JSON.parse(JSON.stringify(filters.value)),
-      });
-  }
-  emit("applyFilters", activeFilters.value);
+const filterMatcherMappingPromise = async () => {
+  return apolloClient
+    .query<GetFilterMatcherMappingQuery>({
+      query: GetFilterMatcherMappingDocument,
+    })
+    .then((result) => {
+      filterMatcherMapping.value = result.data.FilterMatcherMapping;
+      handleFilterMatcherMapping();
+    });
 };
 
-const getAngleIcon = computed<DamsIcons>(() =>
-  props.expandFilters ? DamsIcons.AngleUp : DamsIcons.AngleDown
-);
+const advancedFiltersPromise = async (entityType: Entitytyping) => {
+  return apolloClient
+    .query({
+      query: props.manipulationQuery?.filtersDocument
+        ? props.manipulationQuery.filtersDocument
+        : GetAdvancedFiltersDocument,
+      variables: { entityType },
+      fetchPolicy: "no-cache",
+      notifyOnNetworkStatusChange: true,
+    })
+    .then((result) => {
+      advancedFilters.value = (
+        result.data?.EntityTypeFilters as BaseEntity
+      )?.advancedFilters;
+      if (advancedFilters.value) {
+        //if (props.manipulationQuery?.filtersDocument)
+        //  setAdvancedFilterInputs(advancedFilters.value);
+        handleAdvancedFilters();
+      }
+    });
+};
 
 const handleFilterMatcherMapping = () => {
   const matcherSet = new Set<string>();
-  Object.values(props.filterMatcherMapping).forEach((matcherArray) => {
+  Object.values(filterMatcherMapping.value).forEach((matcherArray) => {
     if (typeof matcherArray !== "string")
       for (const matcher of matcherArray) matcherSet.add(matcher);
   });
@@ -214,16 +249,17 @@ const handleFilterMatcherMapping = () => {
 };
 
 const handleAdvancedFilters = () => {
-  if (!props.advancedFilters) return;
+  if (!advancedFilters.value) return;
   filters.value = [];
   activeFilters.value = [];
   const state = getStateForRoute(props.route);
 
   if (!state?.filterListItems || state.filterListItems.length == 0) {
-    Object.values(props.advancedFilters).forEach((advancedFilter) => {
+    Object.values(advancedFilters.value).forEach((advancedFilter) => {
       if (typeof advancedFilter !== "string") {
+        let hiddenFilter: AdvancedFilterInput | undefined;
         if (advancedFilter.hidden) {
-          const hiddenFilter: AdvancedFilterInput = {
+          hiddenFilter = {
             type: advancedFilter.type,
             parent_key: advancedFilter.parentKey,
             key: advancedFilter.key,
@@ -255,13 +291,17 @@ const handleAdvancedFilters = () => {
         }
 
         filters.value.push({
-          isActive: !!advancedFilter.hidden,
+          isActive:
+            !!advancedFilter.hidden && advancedFilter.parentKey !== "relations",
           isDisplayed: advancedFilter.isDisplayedByDefault ?? false,
           advancedFilter,
-          inputFromState: undefined,
+          inputFromState: hiddenFilter,
           selectedMatcher: undefined,
         });
       }
+    });
+    updateStateForRoute(props.route, {
+      filterListItems: JSON.parse(JSON.stringify(filters.value)),
     });
   } else {
     filters.value = state?.filterListItems;
@@ -270,8 +310,20 @@ const handleAdvancedFilters = () => {
       .map((filter) => filter.inputFromState) as AdvancedFilterInput[];
   }
 
-  if (props.parentEntityIdentifiers.length > 0) applyFilters();
+  applyFilters();
 };
+
+const applyFilters = (saveState = false) => {
+  if (saveState)
+    updateStateForRoute(props.route, {
+      filterListItems: JSON.parse(JSON.stringify(filters.value)),
+    });
+  emit("applyFilters", activeFilters.value);
+};
+
+const getAngleIcon = computed<DamsIcons>(() =>
+  props.expandFilters ? DamsIcons.AngleUp : DamsIcons.AngleDown
+);
 
 const toggleDisplayedFilters = () => {
   filters.value.forEach((filter) => {
@@ -283,6 +335,11 @@ const toggleDisplayedFilters = () => {
   });
 };
 
+onMounted(() => {
+  emit("filterMatcherMappingPromise", filterMatcherMappingPromise);
+  emit("advancedFiltersPromise", advancedFiltersPromise);
+});
+
 if (props.parentEntityIdentifiers.length > 0)
   watch(
     () => isSaved.value,
@@ -290,15 +347,6 @@ if (props.parentEntityIdentifiers.length > 0)
       if (isSaved.value) applyFilters();
     }
   );
-watch(
-  () => filtersBaseInitializationStatus.value,
-  () => {
-    if (filtersBaseInitializationStatus.value === "initialized") {
-      handleFilterMatcherMapping();
-      handleAdvancedFilters();
-    }
-  }
-);
 watch(displayedFilterOptions, () => toggleDisplayedFilters());
 watch(activeFilters, () => {
   activeFilterCount.value = 0;
@@ -323,9 +371,15 @@ watch(clearAllActiveFilters, () => {
         .map((filter) => filter.advancedFilter.key)
         .includes(activeFilter.key)
     );
+    filters.value.forEach((filter) => {
+      if (filter.advancedFilter.hidden) return;
+      filter.isActive = false;
+      filter.inputFromState = undefined;
+      filter.selectedMatcher = undefined;
+    });
     setTimeout(() => (clearAllActiveFilters.value = false), 50);
+    applyFilters(true);
   }
-  applyFilters(true);
 });
 </script>
 

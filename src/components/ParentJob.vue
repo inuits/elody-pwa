@@ -148,12 +148,12 @@ export default defineComponent({
         id: props.job._key || "",
         failed: showFailedOnly.value,
       },
-      queryOptions,
+      queryOptions
     );
     const subjobLimit = ref<number>(10);
 
     const hasSubJobs = computed<boolean>(() =>
-      props.job.amount_of_jobs && props.job.amount_of_jobs > 1 ? true : false,
+      props.job.amount_of_jobs && props.job.amount_of_jobs > 1 ? true : false
     );
 
     const toggleCollapse = () => {

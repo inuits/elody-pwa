@@ -17,7 +17,7 @@ const useDynamicForm = () => {
 
   const performSubmitAction = async (
     queryDocument: object,
-    entity: EntityInput,
+    entity: EntityInput
   ): Promise<any> => {
     return await apolloClient.mutate({
       mutation: queryDocument,

@@ -95,15 +95,15 @@ watch(
 </script>
 
 <style>
-@import '@vueform/multiselect/themes/tailwind.css';
+@import "@vueform/multiselect/themes/tailwind.css";
 
-.multiselect-search{
+.multiselect-search {
   border: none;
 }
 
-.multiselect-search:focus{
+.multiselect-search:focus {
   border: none;
   border-color: transparent;
-  outline:none;
+  outline: none;
 }
 </style>

@@ -1,156 +1,105 @@
 <template>
-  <div class="flex items-center">
-    <unicon
-      class="cursor-pointer"
-      :name="Unicons.AngleDoubleLeft.name"
-      height="16"
-      :fill="loading ? 'var(--color-neutral-20)' : 'var(--color-neutral-700)'"
-      @click="prev(5)"
-    />
-    <unicon
-      class="cursor-pointer"
-      :name="Unicons.AngleLeft.name"
-      height="16"
-      :fill="loading ? 'var(--color-neutral-20)' : 'var(--color-neutral-700)'"
-      @click="prev(1)"
-    />
-    <div
-      class="flex text-sm mx-3 flex-row items-center w-1-6"
-      data-test="page-count-label"
-    >
-      {{ $t("pagination.page") }}
-      <input
-        class="mx-2 w-16 rounded-lg"
-        type="number"
-        :max="maxPage()"
-        :min="1"
-        v-model="currentPage"
-      />{{}}
-      {{ $t("pagination.of") }}
-      {{ maxPage() }}
+  <div class="flex items-center gap-2 text-text-body select-none">
+    <div class="flex">
+      <div class="flex" @click="goToPage(1)">
+        <unicon
+          class="cursor-pointer -mr-1"
+          :name="Unicons.AngleDoubleLeft.name"
+          height="16"
+        />
+      </div>
+      <div class="flex" @click="previous()">
+        <unicon
+          class="cursor-pointer -mr-1"
+          :name="Unicons.AngleLeft.name"
+          height="16"
+        />
+      </div>
     </div>
-    <unicon
-      class="cursor-pointer"
-      :name="Unicons.AngleRight.name"
-      height="16"
-      :fill="loading ? 'var(--color-neutral-20)' : 'var(--colors-neutral-700)'"
-      @click="next(1)"
-    />
-    <unicon
-      class="cursor-pointer"
-      :name="Unicons.AngleDoubleRight.name"
-      height="16"
-      :fill="loading ? 'var(--color-neutral-20)' : 'var(--color-neutral-700)'"
-      @click="next(5)"
-    />
+
+    <span>{{ $t("pagination.page") }}</span>
+    <div class="w-14">
+      <BaseInputTextNumberDatetime
+        class="text-center"
+        v-model="currentPage"
+        type="number"
+        input-style="default"
+        :is-valid-predicate="(value: number) => value >= 1 && value <= getLastPage()"
+      />
+    </div>
+    <span>{{ $t("pagination.of") }}</span>
+    <span>{{ getLastPage() }}</span>
+
+    <div class="flex">
+      <div class="flex" @click="next()">
+        <unicon
+          class="cursor-pointer -ml-1"
+          :name="Unicons.AngleRight.name"
+          height="16"
+        />
+      </div>
+      <div class="flex" @click="goToPage(getLastPage())">
+        <unicon
+          class="cursor-pointer -ml-1"
+          :name="Unicons.AngleDoubleRight.name"
+          height="16"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, reactive, ref, watch } from "vue";
+<script lang="ts" setup>
+import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
+import { ref, toRefs, watch } from "vue";
+import { savedSkipForOrdering } from "@/composables/useOrderListItems";
 import { Unicons } from "@/types";
 
-export type PaginationInfo = {
-  limit: number;
+const props = defineProps<{
   skip: number;
+  limit: number;
+  totalItems: number;
+}>();
+
+const emit = defineEmits<{
+  (event: "update:skip", skip: number): void;
+}>();
+
+const { skip } = toRefs(props);
+const currentPage = ref<number>(skip.value);
+
+const previous = () => {
+  if (currentPage.value <= 1) return;
+  //savedSkipForOrdering.value--;
+  currentPage.value--;
 };
 
-export const paginationLimits = [20, 50, 100];
+const next = () => {
+  if (currentPage.value >= getLastPage()) return;
+  //savedSkipForOrdering.value++;
+  currentPage.value++;
+};
 
-export default defineComponent({
-  name: "BasePagination",
-  props: {
-    loading: { type: Boolean, default: false },
-    limit: { type: Number, default: 20 },
-    skip: { type: Number, default: 0 },
-    totalItems: { type: Number, default: 0 },
-  },
-  emits: ["update:skip", "update:limit"],
-  setup: (props, { emit }) => {
-    // const helper = useRouteHelpers();
-    let paginationInfo = reactive<PaginationInfo>({
-      limit: props.limit,
-      skip: props.skip,
-    });
+const goToPage = (page: number) => {
+  if (page < 1 || page > getLastPage()) return;
+  //savedSkipForOrdering.value = page;
+  currentPage.value = page;
+};
 
-    const currentPage = ref<number>(props.skip);
+const getLastPage = () => {
+  if (props.totalItems > 1)
+    return Math.ceil(props.totalItems / props.limit) || 1;
+  else return 1;
+};
 
-    const prev = (pages: number) => {
-      if (!props.loading) {
-        if (currentPage.value - pages > 1) {
-          emit("update:skip", props.skip - pages);
-          emit("update:limit", props.limit);
-        } else {
-          emit("update:skip", 1);
-          emit("update:limit", props.limit);
-        }
-      }
-    };
-
-    const next = (pages: number) => {
-      if (!props.loading) {
-        if (currentPage.value + pages <= maxPage()) {
-          emit("update:skip", props.skip + pages);
-          emit("update:limit", props.limit);
-        } else {
-          emit("update:skip", maxPage());
-          emit("update:limit", props.limit);
-        }
-      }
-    };
-
-    const goToPageNumber = (page: number) => {
-      if (!props.loading) {
-        if (page <= maxPage()) {
-          emit("update:skip", page);
-          emit("update:limit", props.limit);
-        } else {
-          emit("update:skip", maxPage());
-          emit("update:limit", props.limit);
-        }
-      }
-    };
-
-    const maxPage = () => {
-      if (props.totalItems > 1)
-        return Math.ceil(props.totalItems / props.limit);
-      else return 1;
-    };
-
-    const init = () => {
-      if (paginationInfo.skip == 0 || paginationInfo.skip > maxPage()) {
-        emit("update:skip", 0);
-        emit("update:limit", paginationInfo.limit);
-      } else {
-        emit("update:skip", paginationInfo.skip);
-        emit("update:limit", paginationInfo.limit);
-      }
-    };
-    init();
-
-    watch(
-      () => currentPage.value,
-      () => {
-        if (currentPage.value) {
-          goToPageNumber(currentPage.value);
-        }
-      }
-    );
-
-    watch(
-      () => props.skip,
-      () => {
-        currentPage.value = props.skip;
-      }
-    );
-
-    return {
-      currentPage,
-      Unicons,
-      maxPage,
-      prev,
-      next,
-    };
-  },
-});
+watch(
+  () => props.limit,
+  () => {
+    if (currentPage.value > getLastPage()) currentPage.value = 1;
+  }
+);
+watch(
+  () => currentPage.value,
+  () => emit("update:skip", currentPage.value)
+);
 </script>

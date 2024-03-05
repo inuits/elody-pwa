@@ -63,7 +63,7 @@ import ParentJob from "../components/ParentJob.vue";
 import BaseDropdown from "../components/base/BaseDropdown.vue";
 import InputField from "../components/base/InputField.vue";
 import BasePagination from "../components/base/BasePagination.vue";
-import { paginationLimits } from "../components/base/BasePagination.vue";
+//import { paginationLimits } from "../components/base/BasePagination.vue";
 import type { PaginationInfo } from "../components/base/BasePagination.vue";
 import { getJobTypes, jobTypeLabels } from "../composables/useJobHelpers";
 import ListContainer from "../components/ListContainer.vue";

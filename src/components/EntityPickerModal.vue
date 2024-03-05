@@ -19,6 +19,7 @@
               getModalInfo(TypeModals.EntityPicker).state === ModalState.Show
             "
             :bulk-operations-context="getContext()"
+            :entity-type="getAcceptedTypes()?.[0]"
             :search-input-type-on-drawer="
               getAcceptedTypes().length > 0
                 ? getAcceptedTypes()[0] !== Entitytyping.Mediafile

@@ -77,7 +77,7 @@
           (metadata) => !metadata.showOnlyInEditMode
         )"
         :key="metadataItem ? metadataItem.key : 'no-key'"
-        :class="[ { 'w-1/4': !basicBaseLibrary } ]"
+        :class="[{ 'w-1/4': !basicBaseLibrary }]"
         class="flex justify-start flex-col mx-2 break-words"
       >
         <metadata-wrapper

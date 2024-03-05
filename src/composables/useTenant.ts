@@ -33,7 +33,6 @@ const useTenant = (
 
   const initTenants = async () => {
     if (hasTenantSelect) {
-      window.localStorage.clear();
       await getTenants();
       const tenantFromSession = await getTennantFromSession();
       if (
@@ -152,7 +151,6 @@ const useTenant = (
 
   watch(tenantsLoaded, async (value) => {
     if (value === "switching") {
-      window.localStorage.clear();
       await apolloClient.cache.reset();
       await setPermissionsMappings();
       tenantsLoaded.value = "loaded";

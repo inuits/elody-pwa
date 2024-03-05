@@ -15,9 +15,10 @@ export type FilterListItem = {
 };
 
 type BaseLibraryState = {
-  entityCountOnPage: number;
-  queryVariables: GetEntitiesQueryVariables;
-  filterListItems: FilterListItem[];
+  entityCountOnPage?: number;
+  totalEntityCount?: number;
+  queryVariables?: GetEntitiesQueryVariables;
+  filterListItems?: FilterListItem[];
 };
 
 type StateObject = BaseLibraryState;
@@ -30,14 +31,9 @@ export const useStateManagement = () => {
   };
 
   const updateGlobalState = (key: string, value: object) => {
-    const state = value;
-    const currentState = JSON.parse(window.localStorage.getItem(key));
-    if (!currentState) {
-      window.localStorage.setItem(key, JSON.stringify(value));
-      return;
-    }
-    const updatedState = JSON.stringify(Object.assign(currentState, state));
-    window.localStorage.setItem(key, updatedState);
+    const state = getGlobalState(key);
+    if (!state) setGlobalState(key, value);
+    else setGlobalState(key, Object.assign(state, value));
   };
 
   const getGlobalState = (key: string) => {
@@ -52,16 +48,25 @@ export const useStateManagement = () => {
   ) => {
     if (route && route.name !== "SingleEntity") {
       const state = JSON.stringify(stateObject);
-      if (window.localStorage.getItem(route.path) !== state)
-        window.localStorage.setItem(route.path, state);
+      if (window.sessionStorage.getItem(route.path) !== state)
+        window.sessionStorage.setItem(route.path, state);
     }
+  };
+
+  const updateStateForRoute = (
+    route: RouteLocationNormalizedLoaded | undefined,
+    stateObject: StateObject
+  ) => {
+    const state = getStateForRoute(route);
+    if (!state) setStateForRoute(route, stateObject);
+    else setStateForRoute(route, Object.assign(state, stateObject));
   };
 
   const getStateForRoute = (
     route: RouteLocationNormalizedLoaded | undefined
   ): StateObject | undefined => {
     if (route) {
-      const state = window.localStorage.getItem(route.path);
+      const state = window.sessionStorage.getItem(route.path);
       if (state) return JSON.parse(state);
     }
     return undefined;
@@ -73,5 +78,6 @@ export const useStateManagement = () => {
     setGlobalState,
     setStateForRoute,
     updateGlobalState,
+    updateStateForRoute,
   };
 };

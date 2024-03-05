@@ -27,18 +27,18 @@
 </template>
 
 <script setup lang="ts">
-import BaseModal from "@/components/base/BaseModal.vue";
-import { useBaseModal } from "@/composables/useBaseModal";
 import {
-  AdvancedFilterInput,
   ModalState,
   SearchInputType,
   TypeModals,
+  type AdvancedFilterInput,
 } from "@/generated-types/queries";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
-import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
+import BaseModal from "@/components/base/BaseModal.vue";
 import SearchBar from "@/components/SearchBar.vue";
+import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import { ref } from "vue";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 const { getModalInfo, closeModal } = useBaseModal();
 const filters = ref<AdvancedFilterInput[]>([]);
