@@ -266,15 +266,8 @@ const handleAdvancedFilters = () => {
   } else {
     filters.value = state?.filterListItems;
     activeFilters.value = filters.value
-      .filter((filter) => filter.isActive && (filter.inputFromState || filter.advancedFilter?.type === 'type'))
-      .map((filter) => filter.inputFromState ? filter.inputFromState : {
-        type: filter.advancedFilter.type,
-        parent_key: filter.advancedFilter.parentKey,
-        item_types: filter.advancedFilter.itemTypes,
-        key: filter.advancedFilter.key,
-        value: filter.advancedFilter.defaultValue,
-        match_exact: true,
-      }) as AdvancedFilterInput[];
+      .filter((filter) => filter.isActive && filter.inputFromState)
+      .map((filter) => filter.inputFromState) as AdvancedFilterInput[];
   }
 
   if (props.parentEntityIdentifiers.length > 0) applyFilters();
