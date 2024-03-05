@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!basicBaseLibraryAsValue" class="text-sm break-words line-clamp-1">
+  <div v-if="!basicBaseLibraryAsValue" class="text-sm break-words">
     <div v-if="Array.isArray(readableValue)">
       <div v-for="item in readableValue" :key="item">
         <p v-if="!stringIsUrl(item)">{{ item }}</p>
