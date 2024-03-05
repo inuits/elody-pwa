@@ -36,7 +36,7 @@ const props = withDefaults(
     label: string;
     isCollapsed: Boolean;
     basicBaseLibrary?: Boolean;
-}>(),
+  }>(),
   {
     basicBaseLibrary: false,
   }

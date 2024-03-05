@@ -36,7 +36,8 @@ export const useQueryVariablesFactory = () => {
         parent_key: advancedFilter[1].parentKey,
         key: advancedFilter[1].key,
         value:
-          advancedFilter[1].parentKey === "relations" || advancedFilter[1].parentKey === "edge"
+          advancedFilter[1].parentKey === "relations" ||
+          advancedFilter[1].parentKey === "edge"
             ? [identifiers.value]
             : advancedFilter[1].defaultValue,
         item_types: advancedFilter[1].itemTypes,

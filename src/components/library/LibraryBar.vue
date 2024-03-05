@@ -1,5 +1,10 @@
 <template>
-  <div class="flex justify-between items-center w-full">
+  <div
+    v-if="
+      paginationLimitOptionsPromiseIsResolved && sortOptionsPromiseIsResolved
+    "
+    class="flex justify-between items-center w-full"
+  >
     <div class="flex justify-start gap-x-3">
       <div v-if="paginationLimitOptions">
         <BaseDropdownNew
@@ -36,128 +41,151 @@
       <BasePaginationNew
         v-model:skip="selectedSkip"
         :limit="selectedPaginationLimitOption?.value ?? NaN"
-        :total-items="totalItemsCount"
+        :total-items="
+          totalItems || getStateForRoute(props.route)?.totalEntityCount || 1
+        "
       />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import type { RouteLocationNormalizedLoaded } from "vue-router";
 import {
   DamsIcons,
-  ModalState,
-  TypeModals,
+  Entitytyping,
+  GetPaginationLimitOptionsDocument,
+  GetSortOptionsDocument,
   type DropdownOption,
-  type GetEntitiesQueryVariables,
+  type GetPaginationLimitOptionsQuery,
+  type GetSortOptionsQuery,
 } from "@/generated-types/queries";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
-import BasePaginationNew from "@/components/base/BasePaginationNew.vue";
+import BasePaginationNew from "@/components/base/BasePagination.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
-import { toRefs, watch } from "vue";
-import { useBaseModal } from "@/composables/useBaseModal";
+import { apolloClient } from "@/main";
+import { onMounted, ref, toRefs, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { useLibraryBar } from "@/composables/useLibraryBar";
+import { useStateManagement } from "@/composables/useStateManagement";
 
 const props = defineProps<{
-  paginationLimitOptions: DropdownOption[];
-  sortOptions: DropdownOption[];
+  route: RouteLocationNormalizedLoaded;
+  setLimit: Function;
+  setSkip: Function;
+  setSortKey: Function;
+  setSortOrder: Function;
   totalItems: number;
-  queryVariables: GetEntitiesQueryVariables;
-  entitiesLoading: boolean;
-  libraryBarInitializationStatus:
-    | "not-initialized"
-    | "inProgress"
-    | "initialized";
 }>();
 
-const { entitiesLoading, libraryBarInitializationStatus } = toRefs(props);
-const { getModalInfo } = useBaseModal();
-const { t } = useI18n();
-const {
-  isAsc,
-  queryVariables,
-  selectedPaginationLimitOption,
-  selectedSkip,
-  selectedSortOption,
-  setIsAsc,
-  setQueryVariables,
-  setSelectedPaginationLimitOption,
-  setSelectedSkip,
-  setSelectedSortOption,
-  setTotalItemsCount,
-  totalItemsCount,
-} = useLibraryBar();
+const emit = defineEmits<{
+  (
+    event: "paginationLimitOptionsPromise",
+    paginationLimitOptionsPromise: (entityType: Entitytyping) => Promise<void>
+  ): void;
+  (
+    event: "sortOptionsPromise",
+    sortOptionsPromise: (entityType: Entitytyping) => Promise<void>
+  ): void;
+}>();
 
-const setDefaultOptions = () => {
-  setQueryVariables(props.queryVariables);
-  setSelectedPaginationLimitOption(
-    props.paginationLimitOptions?.find(
-      (option) => option.value === props.queryVariables.limit
-    )
-  );
-  setSelectedSkip(props.queryVariables?.skip || 1);
-  setSelectedSortOption(
-    props.sortOptions?.find(
-      (option) => option.value === props.queryVariables.searchValue.order_by
-    )
-  );
-  setIsAsc(props.queryVariables?.searchValue.isAsc || isAsc.value);
-  if (!Number.isNaN(props.totalItems)) setTotalItemsCount(props.totalItems);
+const isAsc = ref<boolean>(false);
+const paginationLimitOptions = ref<DropdownOption[]>([]);
+const paginationLimitOptionsPromiseIsResolved = ref<boolean>(false);
+const selectedPaginationLimitOption = ref<DropdownOption>();
+const selectedSkip = ref<number>(1);
+const selectedSortOption = ref<DropdownOption>();
+const sortOptions = ref<DropdownOption[]>([]);
+const sortOptionsPromiseIsResolved = ref<boolean>(false);
+const { totalItems } = toRefs(props);
+const { getStateForRoute } = useStateManagement();
+const { t } = useI18n();
+
+const paginationLimitOptionsPromise = async () => {
+  return apolloClient
+    .query<GetPaginationLimitOptionsQuery>({
+      query: GetPaginationLimitOptionsDocument,
+    })
+    .then((result) => {
+      paginationLimitOptions.value =
+        result.data?.PaginationLimitOptions.options || [];
+
+      const state = getStateForRoute(props.route);
+      const limit =
+        state?.queryVariables?.limit ||
+        paginationLimitOptions.value?.[0].value ||
+        20;
+      const skip = state?.queryVariables?.skip || 1;
+
+      selectedPaginationLimitOption.value = paginationLimitOptions.value.find(
+        (option) => option.value === limit
+      );
+      selectedSkip.value = skip;
+      props.setLimit(limit);
+      props.setSkip(skip);
+      paginationLimitOptionsPromiseIsResolved.value = true;
+    });
 };
 
+const sortOptionsPromise = async (entityType: Entitytyping) => {
+  return apolloClient
+    .query<GetSortOptionsQuery>({
+      query: GetSortOptionsDocument,
+      variables: { entityType },
+      fetchPolicy: "no-cache",
+      notifyOnNetworkStatusChange: true,
+    })
+    .then((result) => {
+      sortOptions.value =
+        /* @ts-ignore */
+        result.data?.EntityTypeSortOptions.sortOptions?.options || [];
+
+      const state = getStateForRoute(props.route);
+      const sortKey =
+        state?.queryVariables?.searchValue.order_by ||
+        sortOptions.value?.[0]?.value;
+      const sortOrder = state?.queryVariables?.searchValue.isAsc
+        ? "asc"
+        : "desc";
+
+      selectedSortOption.value = sortOptions.value.find(
+        (option) => option.value === sortKey
+      );
+      isAsc.value = sortOrder === "asc";
+      props.setSortKey(sortKey);
+      props.setSortOrder(sortOrder);
+      sortOptionsPromiseIsResolved.value = true;
+    });
+};
+
+onMounted(() => {
+  emit("paginationLimitOptionsPromise", paginationLimitOptionsPromise);
+  emit("sortOptionsPromise", sortOptionsPromise);
+});
+
 watch(
-  () => props.totalItems,
-  () => setTotalItemsCount(props.totalItems)
+  () => selectedSkip.value,
+  async () => await props.setSkip(selectedSkip.value, true)
 );
 watch(
-  () => [libraryBarInitializationStatus.value, entitiesLoading.value],
-  () => {
-    if (
-      libraryBarInitializationStatus.value === "initialized" &&
-      !entitiesLoading.value
-    )
-      setDefaultOptions();
-  }
+  () => selectedPaginationLimitOption.value,
+  async () =>
+    await props.setLimit(selectedPaginationLimitOption.value?.value, true)
 );
 watch(
   () => selectedSortOption.value,
-  () => {
-    if (queryVariables.value) {
-      queryVariables.value.searchValue.order_by =
-        selectedSortOption.value?.value;
-    }
-  }
-);
-watch(selectedPaginationLimitOption, () => {
-  if (queryVariables.value)
-    queryVariables.value.limit = selectedPaginationLimitOption.value?.value;
-});
-watch(isAsc, () => {
-  if (queryVariables.value) {
-    queryVariables.value.searchValue.isAsc = isAsc.value;
-  }
-});
-watch(selectedSkip, () => {
-  if (queryVariables.value)
-    queryVariables.value.skip = selectedSkip.value?.value;
-});
-watch(
-  () => queryVariables.value?.skip,
-  () => {
-    if (queryVariables.value?.skip)
-      selectedSkip.value = {
-        label: `${queryVariables.value.skip}`,
-        value: queryVariables.value.skip,
-      };
-  }
+  async () => await props.setSortKey(selectedSortOption.value?.value, true)
 );
 watch(
-  () => getModalInfo(TypeModals.BulkOperations).state,
-  (bulkOperationsModalState: ModalState) => {
-    if (bulkOperationsModalState === ModalState.Hide) {
-      setDefaultOptions();
-      if (queryVariables.value) queryVariables.value.skip = 1;
-    }
-  }
+  () => isAsc.value,
+  async () => await props.setSortOrder(isAsc.value ? "asc" : "desc", true)
 );
+//watch(
+//  () => getModalInfo(TypeModals.BulkOperations).state,
+//  (bulkOperationsModalState: ModalState) => {
+//    if (bulkOperationsModalState === ModalState.Hide) {
+//      setDefaultOptions();
+//      if (queryVariables.value) queryVariables.value.skip = 1;
+//    }
+//  }
+//);
 </script>

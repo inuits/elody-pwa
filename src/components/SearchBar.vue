@@ -22,17 +22,17 @@
 </template>
 
 <script lang="ts" setup>
-import { Unicons } from "@/types";
-import { useBaseModal } from "@/composables/useBaseModal";
 import {
-  AdvancedFilterInput,
   AdvancedFilterTypes,
   ModalState,
   TypeModals,
+  type AdvancedFilterInput,
 } from "@/generated-types/queries";
 import { computed, inject, ref, watch, onBeforeMount } from "vue";
+import { Unicons } from "@/types";
+import { useBaseModal } from "@/composables/useBaseModal";
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     inputEnabled?: boolean;
   }>(),

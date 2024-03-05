@@ -29,7 +29,7 @@ const props = withDefaults(
   {
     progress: 0,
     progressBarType: "percentage",
-  },
+  }
 );
 
 const { t } = useI18n();
@@ -43,10 +43,10 @@ watch(
   () => {
     setCssVariable(
       "--progress-bar-width-percentage",
-      progressPercentage.value.toString() + "%",
+      progressPercentage.value.toString() + "%"
     );
   },
-  { immediate: true },
+  { immediate: true }
 );
 </script>
 

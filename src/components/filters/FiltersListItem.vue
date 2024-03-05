@@ -54,11 +54,7 @@
           v-if="selectedMatcher"
           :is="matcherComponent"
           :filter="filter"
-          @new-advanced-filter-input="(input: AdvancedFilterInput, _force: boolean) => {
-            force = _force;
-            advancedFilterInput = input;
-          }
-          "
+          @new-advanced-filter-input="(input: AdvancedFilterInput) => advancedFilterInput = input"
           @filter-options="(options: string[]) => (filterOptions = options)"
         />
       </div>
@@ -69,11 +65,7 @@
         :disabled="!selectedMatcher"
         button-style="accentNormal"
         button-size="small"
-        @click="
-          () => {
-            selectedMatcher = undefined;
-          }
-        "
+        @click="() => (selectedMatcher = undefined)"
       />
     </div>
   </div>
@@ -94,7 +86,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { AdvancedFilterTypes, DamsIcons } from "@/generated-types/queries";
-import { computed, markRaw, ref, toRefs, watch } from "vue";
+import { computed, markRaw, onMounted, ref, toRefs, watch } from "vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 
@@ -105,11 +97,10 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (event: "selectedMatcher", selectedMatcher: DropdownOption | undefined): void;
   (
     event: "activateFilter",
     advancedFilterInput: AdvancedFilterInput,
-    force: boolean
+    selectedMatcher: DropdownOption | undefined
   ): void;
   (
     event: "deactivateFilter",
@@ -128,7 +119,6 @@ const advancedFilterInput = ref<AdvancedFilterInput>({
   key: props.filter.advancedFilter.key,
   value: undefined,
 });
-const force = ref<boolean>(false);
 const filterOptions = ref<string[]>([]);
 
 const loadMatcher = async () => {
@@ -139,7 +129,6 @@ const loadMatcher = async () => {
 
   const module = await import(`@/components/filters/matchers/${matcher}.vue`);
   matcherComponent.value = markRaw(module.default);
-  emit("selectedMatcher", selectedMatcher.value);
 };
 
 const icon = computed<string>(() =>
@@ -150,6 +139,18 @@ const defaultMatcherMap: Partial<Record<AdvancedFilterTypes, string>> = {
   [AdvancedFilterTypes.Selection]: "ExactMatcher",
   [AdvancedFilterTypes.Text]: "ContainsMatcher",
 };
+
+onMounted(() => {
+  const defaultMatcher =
+    props.filter.selectedMatcher ||
+    matchers.value.find(
+      (matcher) =>
+        matcher.value === defaultMatcherMap[advancedFilterInput.value.type]
+    );
+
+  if (defaultMatcher && !selectedMatcher.value)
+    selectedMatcher.value = defaultMatcher;
+});
 
 watch(selectedMatcher, async () => {
   if (selectedMatcher.value) await loadMatcher();
@@ -165,10 +166,10 @@ watch(selectedMatcher, async () => {
 watch(advancedFilterInput, () => {
   if (Array.isArray(advancedFilterInput.value.value))
     if (advancedFilterInput.value.value.length > 0)
-      emit("activateFilter", advancedFilterInput.value, force.value);
+      emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
     else emit("deactivateFilter", advancedFilterInput.value.key);
   else if (advancedFilterInput.value.value !== undefined)
-    emit("activateFilter", advancedFilterInput.value, force.value);
+    emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
   else emit("deactivateFilter", advancedFilterInput.value.key);
 });
 watch(clearAllActiveFilters, () => {
@@ -176,16 +177,5 @@ watch(clearAllActiveFilters, () => {
     isOpen.value = false;
     selectedMatcher.value = undefined;
   }
-});
-watch(matchers, () => {
-  const defaultMatcher =
-    props.filter.selectedMatcher ||
-    matchers.value.find(
-      (matcher) =>
-        matcher.value === defaultMatcherMap[advancedFilterInput.value.type]
-    );
-
-  if (defaultMatcher && !selectedMatcher.value)
-    selectedMatcher.value = defaultMatcher;
 });
 </script>
