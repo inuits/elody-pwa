@@ -51,6 +51,7 @@
               :custom-query="metadata.customQuery"
               :custom-query-relation-type="metadata.customQueryRelationType"
               :custom-query-filters="metadata.customQueryFilters"
+              :search-input-type="metadata.searchInputType"
               :basic-base-library="metadata.basicBaseLibrary"
               class="pt-2"
             />
