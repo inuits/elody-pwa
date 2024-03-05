@@ -47,6 +47,7 @@
       :intialValues="entity.intialValues"
       :media="entitiesLoading ? undefined : getMediaFilenameFromEntity(entity)"
       :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
+      :is-media-type="[Entitytyping.Asset, Entitytyping.MediaFile].includes(entity.type)"
       :small="listItemRouteName === 'SingleMediafile'"
       :loading="entitiesLoading"
       :is-markable-as-to-be-deleted="parentEntityIdentifiers.length > 0"
