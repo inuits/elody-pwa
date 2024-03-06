@@ -291,8 +291,7 @@ const handleAdvancedFilters = () => {
         }
 
         filters.value.push({
-          isActive:
-            !!advancedFilter.hidden && advancedFilter.parentKey !== "relations",
+          isActive: advancedFilter.type === AdvancedFilterTypes.Type,
           isDisplayed: advancedFilter.isDisplayedByDefault ?? false,
           advancedFilter,
           inputFromState: hiddenFilter,
