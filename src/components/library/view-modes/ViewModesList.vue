@@ -47,6 +47,7 @@
       :intialValues="entity.intialValues"
       :media="entitiesLoading ? undefined : getMediaFilenameFromEntity(entity)"
       :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
+      :is-media-type="Object.values(MediaTypeEntities).includes(entity.type)"
       :small="listItemRouteName === 'SingleMediafile'"
       :loading="entitiesLoading"
       :is-markable-as-to-be-deleted="parentEntityIdentifiers.length > 0"
@@ -70,6 +71,7 @@ import {
   type Entity,
   type Metadata,
   Entitytyping,
+  MediaTypeEntities
 } from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";

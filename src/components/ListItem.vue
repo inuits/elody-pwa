@@ -66,7 +66,7 @@
       />
     </div>
     <unicon
-      v-if="!canShowCopyRight() || (media && imageSrcError)"
+      v-if="!canShowCopyRight() || (media && imageSrcError) || (!media && isMediaType)"
       :name="thumbIcon"
       class="h-10 w-10 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
     />
@@ -181,7 +181,8 @@ const props = withDefaults(
       | "no-relation-found";
     isDisabled?: boolean;
     hasSelection: boolean;
-    basicBaseLibrary?: Boolean;
+    basicBaseLibrary?: boolean;
+    isMediaType?: boolean;
   }>(),
   {
     contextMenuActions: undefined,
@@ -200,6 +201,7 @@ const props = withDefaults(
     hasSelection: true,
     relation: "no-relation-found",
     basicBaseLibrary: false,
+    isMediaType: false
   }
 );
 
