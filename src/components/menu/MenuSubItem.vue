@@ -1,22 +1,18 @@
 <template>
-  <div
+  <component
     v-if="isPermitted && show"
+    :is="linkTag"
     :class="[
       'flex flex-column items-center cursor-pointer ml-9 mt-1 origin-top-center hover:text-accent-accent',
       { 'text-accent-accent': isActive },
     ]"
-    @click="
-      isLink
-        ? router.push(menuAction.action)
-        : menuAction?.action
-        ? menuAction.action()
-        : undefined
-    "
+    :to="isLink ? menuAction.action : undefined"
+    @click="!isLink && menuAction?.action ? menuAction.action() : undefined"
   >
     <p class="overflow-hidden px-4 cursor-pointer">
       {{ t(subMenuItem.label || "") }}
     </p>
-  </div>
+  </component>
 </template>
 
 <script lang="ts" setup>
@@ -49,8 +45,10 @@ const menuAction = computed(() => checkIfRouteOrModal(props.subMenuItem));
 const isLink = computed(
   () => menuAction.value?.menuItemType === MenuItemType.link
 );
+const linkTag = computed(
+  () => isLink.value ? 'router-link' : 'div'
+);
 const isPermitted = ref<boolean>();
-const router = useRouter();
 
 if (props.subMenuItem.requiresAuth === false) isPermitted.value = true;
 else isPermitted.value = can(Permission.Canread, props.subMenuItem.entityType);
