@@ -1,17 +1,13 @@
 <template>
   <div>
-    <div
+    <component
       v-show="
-        (menuitem?.isLoggedIn ? auth.isAuthenticated.value : true) &&
-        hasPermissionForMenuItem
-      "
-      @click="
-        isLink
-          ? router.push(menuAction.action)
-          : menuAction?.action
-          ? menuAction.action()
-          : undefined
-      "
+          (menuitem?.isLoggedIn ? auth.isAuthenticated.value : true) &&
+          hasPermissionForMenuItem
+          "
+      :is="linkTag"
+      :to="isLink ? menuAction.action : undefined"
+      @click="!isLink && menuAction?.action ? menuAction.action() : undefined"
       class="flex flex-row items-center pl-3 h-9 mt-3 cursor-pointer"
       :class="[{ 'bg-neutral-40 rounded-lg': isBeingHovered }]"
     >
@@ -37,7 +33,7 @@
           <unicon v-else :name="Unicons.AngleRight.name" height="20" />
         </div>
       </div>
-    </div>
+    </component>
     <transition-group v-if="isExpanded">
       <div v-for="submenuItem in menuSubitem" :key="submenuItem.label">
         <MenuSubItem
@@ -64,7 +60,6 @@ import { Permission } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
 import {
   ignorePermissions,
   permittedEntitiesToCreate,
@@ -74,7 +69,6 @@ import {
 const { checkIfRouteOrModal, setSelectedMenuItem, selectedMenuItem } =
   useMenuHelper();
 const { t } = useI18n();
-const router = useRouter();
 const { can } = usePermissions();
 
 const auth = useAuth();
@@ -84,6 +78,9 @@ const isLink = computed(
   () => menuAction.value?.menuItemType === MenuItemType.link
 );
 const hasPermissionForMenuItem = ref<boolean>(ignorePermissions.value);
+const linkTag = computed(
+  () => isLink.value ? 'router-link' : 'div'
+);
 
 const props = defineProps<{
   menuitem: MenuItem;
