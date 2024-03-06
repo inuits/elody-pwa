@@ -105,7 +105,7 @@
           </div>
         </div>
         <div
-          v-if="entities.length !== 0"
+          v-if="entities.length !== 0 || relations?.length !== 0"
           :class="{ 'flex justify-end': expandFilters }"
         >
           <div
@@ -165,7 +165,7 @@
 <script lang="ts" setup>
 import type { ApolloClient } from "@apollo/client/core";
 import type { ViewModes } from "@/generated-types/type-defs";
-import type { AdvancedFilterInput, Entity } from "@/generated-types/queries";
+import type { AdvancedFilterInput, BaseRelationValuesInput, Entity } from "@/generated-types/queries";
 import {
   BaseEntity,
   ContextMenuGeneralActionEnum,
@@ -191,7 +191,7 @@ import ViewModesGrid from "@/components/library/view-modes/ViewModesGrid.vue";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
-import { getEntityTitle } from "@/helpers";
+import { getEntityIdFromRoute, getEntityTitle } from "@/helpers";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -284,7 +284,7 @@ let sortOptionsPromise: (entityType: Entitytyping) => Promise<void>;
 const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
 const { closeModal } = useBaseModal();
-const { replaceRelationsFromSameType } = useFormHelper();
+const { replaceRelationsFromSameType, getForm } = useFormHelper();
 const { uploadStatus } = useUpload();
 
 const displayList = ref<boolean>(false);
@@ -301,6 +301,12 @@ const entityType = computed(() =>
     ? (route.meta.entityType as Entitytyping)
     : ("BaseEntity" as Entitytyping)
 );
+
+const entityId = computed(() => getEntityIdFromRoute() as string);
+const relations = computed<BaseRelationValuesInput[]>(
+  () => getForm(entityId.value)?.values?.relationValues?.relations
+);
+
 const entityDropdownOptions = computed<DropdownOption[]>(() => {
   return entities.value.map((entity: BaseEntity) => {
     return {
