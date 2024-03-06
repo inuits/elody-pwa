@@ -14,7 +14,7 @@
       <div
         ref="defaultSlotRef"
         v-if="hasContent && hover"
-        class="shadow-lg rounded bg-neutral-0 w-56 p-2"
+        class="shadow-lg rounded bg-neutral-0 w-56 p-2 z-10"
         :style="floatingStyles"
       >
         <slot> </slot>
@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { computed, ref, useSlots, VNode } from "vue";
-import { offset, useFloating, Placement } from "@floating-ui/vue";
+import { offset, useFloating, Placement, autoPlacement } from "@floating-ui/vue";
 
 const { position, tooltipOffset } = withDefaults(
   defineProps<{
@@ -47,7 +47,7 @@ const slots = useSlots();
 
 const { floatingStyles } = useFloating(activatorSlotRef, defaultSlotRef, {
   placement: position,
-  middleware: [offset(tooltipOffset)],
+  middleware: [offset(tooltipOffset), autoPlacement({ placement: position, autoPlacement: true })],
   open: hover,
 });
 

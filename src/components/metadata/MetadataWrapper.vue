@@ -20,20 +20,42 @@
     @update:value="setNewValue"
     @register-enter-pressed:value="registerEnterKeyPressed"
   />
-  <entity-element-metadata
+  <base-tooltip
     v-else
-    :label="metadata.label as string"
-    v-model:value="value"
-    :link-text="metadata.linkText"
-    :link-icon="metadata.linkIcon"
-    :unit="metadata.unit"
-    :basic-base-library-as-value="basicBaseLibraryAsValue"
-  />
+    position="right-end"
+    :tooltip-offset="8"
+  >
+    <template #activator="{ on }">
+      <div v-on="on">
+        <entity-element-metadata
+        class="line-clamp-1"
+        :label="metadata.label as string"
+        v-model:value="value"
+        :link-text="metadata.linkText"
+        :link-icon="metadata.linkIcon"
+        :unit="metadata.unit"
+        :basic-base-library-as-value="basicBaseLibraryAsValue"
+      />
+      </div>
+    </template>
+    <template #default>
+      <entity-element-metadata
+        class="text-text-placeholder"
+        :label="metadata.label as string"
+        v-model:value="value"
+        :link-text="metadata.linkText"
+        :link-icon="metadata.linkIcon"
+        :unit="metadata.unit"
+        :basic-base-library-as-value="basicBaseLibraryAsValue"
+      />
+    </template>
+  </base-tooltip>
 </template>
 
 <script lang="ts" setup>
 import EntityElementMetadataEdit from "@/components/metadata/EntityElementMetadataEdit.vue";
 import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.vue";
+import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { MetadataField, PanelMetaData } from "@/generated-types/queries";
 import { computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useI18n } from "vue-i18n";
