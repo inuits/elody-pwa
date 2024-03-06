@@ -180,8 +180,9 @@ const router = useRouter();
 
 onResult((result) => {
   try {
+    if (!result.data) return;
     bulkOperations.value =
-      result.data.BulkOperations.bulkOperationOptions.options;
+      result.data?.BulkOperations?.bulkOperationOptions?.options;
   } catch (e) {
     emit("noBulkOperationsAvailable");
   }
