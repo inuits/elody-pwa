@@ -1,29 +1,36 @@
 <template>
-  <BaseLibrary
-    bulk-operations-context=""
-    :list-item-route-name="getEntityIdFromRoute() as string"
-    :filter-type="metadataKeyToGetOptionsFor as Entitytyping"
-    :select-input-field-type="selectType"
-    :relation-type="relationType"
-    :select-input-field-value="dropdownValue"
-    :filters="[
-      {
-        type: AdvancedFilterTypes.Type,
-        value: [metadataKeyToGetOptionsFor],
-      },
-    ]"
-  ></BaseLibrary>
+  <base-input-autocomplete
+          autocomplete-style="defaultWithBorder"
+          :options="options"
+          :select-type="selectType"
+          :model-value="selectedDropdownOptions"
+          @update:model-value="
+            (value) => {
+              replaceRelationsFromSameType(
+                mapDropdownOptionsToBulkProcessableItem([...value]),
+                relationType as string,
+              );
+              selectedDropdownOptions = [...value];
+            }
+          "
+        />
 </template>
 
 <script lang="ts" setup>
 import {
-  AdvancedFilterTypes,
+  AdvancedFilterTypes, type BaseEntity, DamsIcons,
   type DropdownOption,
-  type Entitytyping,
+  type Entitytyping, SearchInputType,
 } from "@/generated-types/queries";
-import BaseLibrary from "@/components/library/BaseLibrary.vue";
-import { computed } from "vue";
-import { getEntityIdFromRoute } from "@/helpers";
+import {computed, onMounted, ref, watch} from "vue";
+import {useBaseLibrary} from "@/components/library/useBaseLibrary";
+import {apolloClient} from "@/main";
+import type {ApolloClient} from "@apollo/client/core";
+import {getEntityTitle} from "@/helpers";
+import {useFormHelper} from "@/composables/useFormHelper";
+import {useGetDropdownOptions} from "@/composables/useGetDropdownOptions";
+import type {InBulkProcessableItem} from "@/composables/useBulkOperations";
+import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -40,11 +47,32 @@ const props = withDefaults(
   }
 );
 
+const selectedDropdownOptions = ref<DropdownOption[]>([]);
+const { replaceRelationsFromSameType } = useFormHelper();
+const { initialize, options } = useGetDropdownOptions(props.. as Entitytyping, "fetchAll");
+
+onMounted(async () => {
+  await initialize();
+});
+
 const dropdownValue = computed<string[]>(() => {
   if (!props.modelValue) return [];
   if (typeof props.modelValue === "string") return [props.modelValue];
   return props.modelValue;
 });
+
+ const mapDropdownOptionsToBulkProcessableItem = (
+        dropdownOptions: DropdownOption[]
+    ): InBulkProcessableItem[] => {
+        const inBulkProcessableItems: InBulkProcessableItem[] = [];
+        dropdownOptions.forEach((dropdownOption: DropdownOption) => {
+            inBulkProcessableItems.push({
+                id: dropdownOption.value,
+                value: dropdownOption.label,
+            });
+        });
+        return inBulkProcessableItems;
+    };
 </script>
 
 <style></style>

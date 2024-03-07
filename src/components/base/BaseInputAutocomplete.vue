@@ -2,6 +2,7 @@
   <Multiselect
     v-if="inputValue"
     v-model="inputValue"
+    :mode="selectType === 'multi' ? 'tags' : 'single'"
     :options="options"
     :searchable="searchable"
     :show-options="searchable"
