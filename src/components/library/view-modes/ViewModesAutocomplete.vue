@@ -1,7 +1,7 @@
 <template>
   <base-input-autocomplete
           autocomplete-style="defaultWithBorder"
-          :options="options"
+          :options="options"ta
           :select-type="selectType"
           :model-value="selectedDropdownOptions"
           @update:model-value="
@@ -49,7 +49,7 @@ const props = withDefaults(
 
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
 const { replaceRelationsFromSameType } = useFormHelper();
-const { initialize, options } = useGetDropdownOptions(props.. as Entitytyping, "fetchAll");
+const { initialize, options } = useGetDropdownOptions(props.metadataKeyToGetOptionsFor as Entitytyping, "fetchAll");
 
 onMounted(async () => {
   await initialize();
