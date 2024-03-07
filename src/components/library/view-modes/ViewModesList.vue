@@ -20,13 +20,14 @@
       :has-selection="enableSelection"
     />
   </div>
-  <div
+  <component
     v-for="entity in entities"
     :key="entity.id + '_list'"
-    @click="navigateToEntityPage(entity, listItemRouteName)"
+    :is="entitiesLoading ? 'div' : getLinkSettings(entity).tag"
+    :to="entitiesLoading ? undefined : getLinkSettings(entity, listItemRouteName).path"
   >
     <ListItem
-      @navigate-to="navigateToEntityPage(entity, listItemRouteName, true)"
+
       :class="
         parentEntityIdentifiers.length > 0 &&
         entity.id &&
@@ -59,7 +60,7 @@
       :has-selection="enableSelection"
       :basic-base-library="basicBaseLibrary"
     />
-  </div>
+  </component>
 </template>
 
 <script lang="ts" setup>
@@ -76,8 +77,8 @@ import {
 import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
-import { getEntityIdFromRoute, goToEntityPage } from "@/helpers";
-import { computed, inject, onMounted, onUpdated } from "vue";
+import { getEntityIdFromRoute, getEntityPageRoute } from "@/helpers";
+import { computed, inject } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { OrderItem } from "@/composables/useOrderListItems";
@@ -129,23 +130,24 @@ const relations = computed<BaseRelationValuesInput[]>(
   () => getForm(entityId.value)?.values?.relationValues?.relations
 );
 
-const navigateToEntityPage = (
+const getLinkSettings = (
   entity: Entity,
-  listItemRouteName: string,
-  isDoubleClick: boolean = false
+  listItemRouteName: string = '',
 ) => {
-  if (props.entitiesLoading || !props.enableNavigation) {
+  if (!props.enableNavigation) {
     if (
       props.parentEntityIdentifiers.length > 0 &&
       entity.type.toLowerCase() === Entitytyping.Mediafile
     ) {
       updateSelectedEntityMediafile(entity);
-      return;
+      return { tag: 'div', path: undefined };
     }
-    if (isDoubleClick) goToEntityPage(entity, listItemRouteName, router);
-    return;
+    return { tag: 'div', path: undefined };
   }
-  goToEntityPage(entity, listItemRouteName, router);
+  return {
+    tag: 'router-link', 
+    path: getEntityPageRoute(entity, listItemRouteName)
+  };
 };
 
 EventBus.on("orderList_changed", (orderItems: OrderItem[]) => {

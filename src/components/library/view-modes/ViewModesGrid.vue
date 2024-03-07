@@ -28,11 +28,11 @@
         :has-selection="enableSelection"
       />
     </div>
-    <div
+    <component
       v-for="entity in entities"
       :key="entity.id + '_grid'"
-      @click="navigateToEntityPage(entity, listItemRouteName)"
-      @dblclick="navigateToEntityPage(entity, listItemRouteName, true)"
+      :is="entitiesLoading ? 'div' : getLinkSettings(entity).tag"
+      :to="entitiesLoading ? undefined : getLinkSettings(entity, listItemRouteName).path"
       class="w-full"
     >
       <GridItem
@@ -71,7 +71,7 @@
         :relations="relations"
         :has-selection="enableSelection"
       />
-    </div>
+    </component>
   </div>
 </template>
 
@@ -81,15 +81,16 @@ import type { Context } from "@/composables/useBulkOperations";
 import { EditStatus, Metadata } from "@/generated-types/queries";
 import type {
   BaseRelationValuesInput,
-  Entity,
+  Entity
 } from "@/generated-types/queries";
+import { Entitytyping } from "@/generated-types/queries";
 import GridItem from "@/components/GridItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import {
   getEntityIdFromRoute,
-  goToEntityPage,
   setCssVariable,
+  getEntityPageRoute,
 } from "@/helpers";
 import { computed, inject, onMounted, onUnmounted } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
@@ -160,23 +161,25 @@ onUnmounted(() => {
   window.removeEventListener("resize", calculateGridColumns);
   window.removeEventListener("popstate", calculateGridColumns);
 });
-const navigateToEntityPage = (
+
+const getLinkSettings = (
   entity: Entity,
-  listItemRouteName: string,
-  isDoubleClick: boolean = false
+  listItemRouteName: string = '',
 ) => {
-  if (props.entitiesLoading || !props.enableNavigation) {
+  if (!props.enableNavigation) {
     if (
       props.parentEntityIdentifiers.length > 0 &&
-      entity.type === "MediaFile"
+      entity.type.toLowerCase() === Entitytyping.Mediafile
     ) {
       updateSelectedEntityMediafile(entity);
-      return;
+      return { tag: 'div', path: undefined };
     }
-    if (isDoubleClick) goToEntityPage(entity, listItemRouteName, router);
-    return;
+    return { tag: 'div', path: undefined };
   }
-  goToEntityPage(entity, listItemRouteName, router);
+  return {
+    tag: 'router-link', 
+    path: getEntityPageRoute(entity, listItemRouteName)
+  };
 };
 </script>
 
