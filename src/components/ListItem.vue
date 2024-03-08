@@ -104,7 +104,7 @@
     </div>
 
     <div
-      v-if="!isPreview"
+      v-if="!isPreview && isEnableNavigation"
       class="flex flex-row"
       @click="() => emit('navigateTo')"
     >
@@ -183,6 +183,7 @@ const props = withDefaults(
     hasSelection: boolean;
     basicBaseLibrary?: boolean;
     isMediaType?: boolean;
+    isEnableNavigation?: boolean;
   }>(),
   {
     contextMenuActions: undefined,
@@ -201,7 +202,8 @@ const props = withDefaults(
     hasSelection: true,
     relation: "no-relation-found",
     basicBaseLibrary: false,
-    isMediaType: false
+    isMediaType: false,
+    isEnableNavigation: false
   }
 );
 
