@@ -279,9 +279,8 @@ const handleAdvancedFilters = () => {
           if (
             advancedFilter.parentKey === "relations" ||
             advancedFilter.parentKey === "edge" ||
-            (advancedFilter.parentKey === "" && // temporary hack
-              advancedFilter.type === AdvancedFilterTypes.Selection &&
-              advancedFilter.hidden)
+            (advancedFilter.type === AdvancedFilterTypes.Selection &&
+              advancedFilter.hidden) // this needs a refactor
           ) {
             if (props.parentEntityIdentifiers.length > 0) {
               hiddenFilter.value = props.parentEntityIdentifiers;
