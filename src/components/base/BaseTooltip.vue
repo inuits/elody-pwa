@@ -1,6 +1,9 @@
 <template>
   <div class="flex relative" v-if="hasContent">
-    <div ref="activatorSlotRef">
+    <div 
+      ref="activatorSlotRef"
+      class="min-w-0"
+    >
       <slot
         name="activator"
         :on="{
