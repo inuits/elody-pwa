@@ -27,7 +27,6 @@
     :to="entitiesLoading ? undefined : getLinkSettings(entity, listItemRouteName).path"
   >
     <ListItem
-
       :class="
         parentEntityIdentifiers.length > 0 &&
         entity.id &&
@@ -59,6 +58,7 @@
       :relation="findRelation(entity.uuid, relationType)"
       :has-selection="enableSelection"
       :basic-base-library="basicBaseLibrary"
+      :is-enable-navigation="enableNavigation"
     />
   </component>
 </template>
