@@ -266,6 +266,7 @@ const handleAdvancedFilters = () => {
             value: advancedFilter.defaultValue,
             item_types: advancedFilter.itemTypes,
             match_exact: true,
+            edge_collection: advancedFilter.edgeCollection,
           };
           if (advancedFilter.lookup)
             hiddenFilter.lookup = {
@@ -277,6 +278,7 @@ const handleAdvancedFilters = () => {
 
           if (
             advancedFilter.parentKey === "relations" ||
+            advancedFilter.parentKey === "edge" ||
             (advancedFilter.parentKey === "" && // temporary hack
               advancedFilter.type === AdvancedFilterTypes.Selection &&
               advancedFilter.hidden)
