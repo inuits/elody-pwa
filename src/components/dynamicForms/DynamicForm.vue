@@ -52,7 +52,7 @@
             field.__typename === 'FormAction' &&
             field.actionType == ActionType.Submit
           "
-          class="absolute left-4 bottom-6 !w-[93%]"
+          class="mt-5 mb-10"
           :label="
             config?.features.hasTenantSelect
               ? `${t(field.label)} ${t(`types.${field.creationType}`)}${
