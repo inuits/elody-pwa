@@ -39,22 +39,19 @@ export const getEntityPageRoute = (
   entity: Entity,
   listItemRouteName: string
 ) => {
-  if (entity.type?.toLowerCase() === Entitytyping.Mediafile) {
+  if (entity.type.toLowerCase() === Entitytyping.Mediafile) {
     useEntityMediafileSelector().setEntityMediafiles([]);
     useEntityMediafileSelector().updateSelectedEntityMediafile(entity);
   }
 
   const entityId =
-    entity.intialValues?.slug ||
+    entity.intialValues.slug ||
     entity.uuid ||
     entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")?.value;
 
   return {
     name: listItemRouteName,
-    params: {
-      id: entityId || "placeholder",
-      type: entity?.type || "BaseEntity",
-    },
+    params: { id: entityId, type: entity.type },
   };
 };
 
