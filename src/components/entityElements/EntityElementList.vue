@@ -3,7 +3,7 @@
     <entity-element-wrapper
       :label="label"
       :isCollapsed="isCollapsed"
-      :basic-base-library="basicBaseLibrary"
+      :base-library-mode="baseLibraryMode"
     >
       <template v-slot:actions>
         <div
@@ -27,7 +27,7 @@
       <template v-slot:content>
         <div
           v-if="!requiresCustomQuery || queryLoaded"
-          :class="[{ 'ml-1 bg-neutral-lightest': !basicBaseLibrary }]"
+          :class="[{ 'ml-1 bg-neutral-lightest': baseLibraryMode === BaseLibraryModes.NormalBaseLibrary }]"
         >
           <BaseLibrary
             v-if="type === MediaFileElementTypes.Media"
@@ -59,7 +59,7 @@
             :entity-type="Entitytyping.Mediafile"
             :relation-type="relationType"
             :use-other-query="newQuery"
-            :basic-base-library="basicBaseLibrary"
+            :base-library-mode="baseLibraryMode"
             :has-sticky-bars="false"
             :entity-list-elements="entityListElements"
           />
@@ -81,7 +81,7 @@
             :relation-type="relationType"
             :has-sticky-bars="false"
             :use-other-query="newQuery"
-            :basic-base-library="basicBaseLibrary"
+            :base-library-mode="baseLibraryMode"
             :entity-list-elements="entityListElements"
           />
         </div>
@@ -99,6 +99,7 @@ import {
   Entitytyping,
   MediaFileElementTypes,
   EntityListElement,
+  BaseLibraryModes,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -151,14 +152,14 @@ const props = withDefaults(
     identifiers: string[];
     relationType: string;
     viewMode?: EntityListViewMode;
-    basicBaseLibrary?: Boolean;
+    baseLibraryMode?: BaseLibraryModes;
     entityUuid: string;
     entityListElements?: EntityListElement[];
   }>(),
   {
     types: () => [],
     viewMode: EntityListViewMode.Library,
-    basicBaseLibrary: false,
+    baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     entityListElements: undefined,
   }
 );

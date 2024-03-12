@@ -30,7 +30,7 @@
           :link-text="metadata.linkText"
           :link-icon="metadata.linkIcon"
           :unit="metadata.unit"
-          :basic-base-library-as-value="basicBaseLibraryAsValue"
+          :base-library-mode="baseLibraryMode"
         />
       </div>
     </template>
@@ -42,7 +42,7 @@
         :link-text="metadata.linkText"
         :link-icon="metadata.linkIcon"
         :unit="metadata.unit"
-        :basic-base-library-as-value="basicBaseLibraryAsValue"
+        :base-library-mode="baseLibraryMode"
       />
     </template>
   </base-tooltip>
@@ -52,7 +52,7 @@
 import EntityElementMetadataEdit from "@/components/metadata/EntityElementMetadataEdit.vue";
 import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
-import { MetadataField, PanelMetaData } from "@/generated-types/queries";
+import { BaseLibraryModes, MetadataField, PanelMetaData } from "@/generated-types/queries";
 import { computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useOrderListItems, OrderItem } from "@/composables/useOrderListItems";
@@ -70,10 +70,10 @@ const props = withDefaults(
     formId: string;
     metadata: MetadataField;
     linkedEntityId?: String;
-    basicBaseLibraryAsValue?: boolean;
+    baseLibraryMode?: BaseLibraryModes;
   }>(),
   {
-    basicBaseLibraryAsValue: false,
+    baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
   }
 );
 

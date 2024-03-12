@@ -61,7 +61,7 @@
       "
       :relation="findRelation(entity.uuid, relationType)"
       :has-selection="enableSelection"
-      :basic-base-library="basicBaseLibrary"
+      :base-library-mode="baseLibraryMode"
       :is-enable-navigation="enableNavigation"
       :entity-list-elements="entityListElements"
     />
@@ -78,7 +78,8 @@ import {
   type Metadata,
   Entitytyping,
   MediaTypeEntities,
-  EntityListElement
+  EntityListElement,
+  BaseLibraryModes,
 } from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
@@ -106,7 +107,7 @@ const props = withDefaults(
     idsOfNonSelectableEntities?: string[];
     relationType: string;
     enableSelection: boolean;
-    basicBaseLibrary?: Boolean;
+    baseLibraryMode?: BaseLibraryModes;
     entityListElements?: EntityListElement[];
   }>(),
   {
@@ -115,7 +116,7 @@ const props = withDefaults(
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
     enableSelection: true,
-    basicBaseLibrary: false,
+    baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     entityListElements: undefined,
   }
 );

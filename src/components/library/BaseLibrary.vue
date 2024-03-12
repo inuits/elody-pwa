@@ -21,7 +21,7 @@
       <div
         class="w-full"
         :class="[
-          basicBaseLibrary
+          baseLibraryMode === BaseLibraryModes.BasicBaseLibrary
             ? ''
             : parentEntityIdentifiers.length > 0
             ? 'p-3'
@@ -30,7 +30,7 @@
       >
         <div
           :class="[
-            { 'top-0 mb-2 pt-4 bg-neutral-lightest': !basicBaseLibrary },
+            { 'top-0 mb-2 pt-4 bg-neutral-lightest': baseLibraryMode === BaseLibraryModes.NormalBaseLibrary },
             { sticky: hasStickyBars },
           ]"
         >
@@ -62,7 +62,7 @@
               <BaseToggleGroup v-if="toggles.length > 1" :toggles="toggles" />
             </div>
             <LibraryBar
-              v-if="!predefinedEntities && !basicBaseLibrary"
+              v-if="!predefinedEntities && baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
               :route="route"
               :set-limit="setLimit"
               :set-skip="setSkip"
@@ -79,7 +79,7 @@
           </div>
 
           <div
-            v-if="enableBulkOperations && !displayPreview && !basicBaseLibrary"
+            v-if="enableBulkOperations && !displayPreview && baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
             class="my-3"
             :class="{ 'flex justify-end': expandFilters }"
           >
@@ -128,7 +128,7 @@
               :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
               :relation-type="relationType"
               :enable-selection="enableBulkOperations"
-              :basic-base-library="basicBaseLibrary"
+              :base-library-mode="baseLibraryMode"
               :entity-list-elements="entityListElements"
             />
             <ViewModesGrid
@@ -166,8 +166,9 @@
 <script lang="ts" setup>
 import type { ApolloClient } from "@apollo/client/core";
 import type { ViewModes } from "@/generated-types/type-defs";
-import type {
+import {
   AdvancedFilterInput,
+  BaseLibraryModes,
   BaseRelationValuesInput,
   Entity,
   EntityListElement
@@ -229,7 +230,7 @@ const props = withDefaults(
     useOtherQuery?: object;
     selectInputFieldType?: "multi" | "single";
     selectInputFieldValue?: string[];
-    basicBaseLibrary?: Boolean;
+    baseLibraryMode?: BaseLibraryModes;
     entityListElements?: EntityListElement[];
   }>(),
   {
@@ -249,7 +250,7 @@ const props = withDefaults(
     isSearchLibrary: false,
     useOtherQuery: undefined,
     isMultiSelectInputField: false,
-    basicBaseLibrary: false,
+    baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     entityListElements: undefined,
   }
 );

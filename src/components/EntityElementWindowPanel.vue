@@ -35,12 +35,12 @@
             <metadata-wrapper
               v-if="
                 metadata.__typename !== 'EntityListElement' ||
-                metadata.basicBaseLibrary
+                metadata.baseLibraryMode === BaseLibraryModes.BasicBaseLibrary
               "
               :form-id="formId"
               :is-edit="isEdit"
               v-model:metadata="metadata as MetadataField"
-              :basic-base-library-as-value="metadata.basicBaseLibrary"
+              :base-library-mode="metadata.baseLibraryMode"
             />
             <entity-element-list
               v-if="metadata.__typename === 'EntityListElement'"
@@ -55,7 +55,7 @@
               :custom-query-relation-type="metadata.customQueryRelationType"
               :custom-query-filters="metadata.customQueryFilters"
               :search-input-type="metadata.searchInputType"
-              :basic-base-library="metadata.basicBaseLibrary"
+              :base-library-mode="metadata.baseLibraryMode"
               :entity-list-elements="getObjectsBasedOnTypename(metadata, 'EntityListElement')"
               class="pt-2"
             />
@@ -67,11 +67,12 @@
 </template>
 
 <script lang="ts" setup>
-import type {
+import {
   PanelRelation,
   WindowElementPanel,
   Entity,
   MetadataField,
+  BaseLibraryModes,
 } from "@/generated-types/queries";
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
 import EntityElementList from "@/components/entityElements/EntityElementList.vue";
