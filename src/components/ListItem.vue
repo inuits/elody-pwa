@@ -2,7 +2,7 @@
   <li
     :class="[
       'flex items-center gap-6 px-8 py-4 bg-neutral-white border border-neutral-light rounded cursor-pointer',
-      { 'mb-2 ': !basicBaseLibrary },
+      { 'mb-2 ': baseLibraryMode === BaseLibraryModes.NormalBaseLibrary },
       {
         'border-dashed border-2 !border-accent-normal':
           isPreview || isMarkedAsToBeDeleted,
@@ -44,7 +44,7 @@
 
     <div>
       <BaseInputCheckbox
-        v-if="!basicBaseLibrary && !isPreview && !isDisabled && hasSelection"
+        v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary && !isPreview && !isDisabled && hasSelection"
         class="text-center"
         v-model="isChecked"
         :item="{ id: itemId, teaserMetadata }"
@@ -81,7 +81,7 @@
           (metadata) => !metadata.showOnlyInEditMode
         )"
         :key="metadataItem ? metadataItem.key : 'no-key'"
-        :class="[{ 'w-1/4': !basicBaseLibrary }]"
+        :class="[{ 'w-1/4': baseLibraryMode === BaseLibraryModes.NormalBaseLibrary }]"
         class="flex justify-start flex-col mx-2 break-words"
       >
         <metadata-wrapper
@@ -153,7 +153,7 @@
       :custom-query-relation-type="entityListElement.customQueryRelationType"
       :custom-query-filters="entityListElement.customQueryFilters"
       :search-input-type="entityListElement.searchInputType"
-      :basic-base-library="entityListElement.basicBaseLibrary"
+      :base-library-mode="entityListElement.baseLibraryMode"
       :entity-uuid="[itemId]"
       :entity-list-elements="getObjectsBasedOnTypename(entityListElement, 'EntityListElement')"
     />
@@ -172,7 +172,8 @@ import {
   type ContextMenuActions,
   type Metadata,
   type IntialValues,
-  type Entity
+  type Entity,
+  BaseLibraryModes,
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
@@ -209,7 +210,7 @@ const props = withDefaults(
       | "no-relation-found";
     isDisabled?: boolean;
     hasSelection: boolean;
-    basicBaseLibrary?: boolean;
+    baseLibraryMode?: BaseLibraryModes;
     isMediaType?: boolean;
     isEnableNavigation?: boolean;
     entityListElements?: EntityListElement[];
@@ -230,7 +231,7 @@ const props = withDefaults(
     isDisabled: false,
     hasSelection: true,
     relation: "no-relation-found",
-    basicBaseLibrary: false,
+    baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     isMediaType: false,
     isEnableNavigation: false,
     entityListElements: undefined,

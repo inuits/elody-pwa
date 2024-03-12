@@ -3,7 +3,7 @@
     :class="['bg-accent-normal rounded-t-lg', { 'rounded-lg': isCollapsed }]"
   >
     <div
-      v-if="!basicBaseLibrary"
+      v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
       class="flex items-center justify-between cursor-pointer"
       @click.self="toggleElementCollapse(label)"
     >
@@ -30,15 +30,16 @@
 import { Unicons } from "@/types";
 import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
 import { useI18n } from "vue-i18n";
+import { BaseLibraryModes } from "@/generated-types/queries";
 
 const props = withDefaults(
   defineProps<{
     label: string;
     isCollapsed: Boolean;
-    basicBaseLibrary?: Boolean;
+    baseLibraryMode?: BaseLibraryModes;
   }>(),
   {
-    basicBaseLibrary: false,
+    baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
   }
 );
 
