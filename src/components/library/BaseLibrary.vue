@@ -165,7 +165,11 @@
 <script lang="ts" setup>
 import type { ApolloClient } from "@apollo/client/core";
 import type { ViewModes } from "@/generated-types/type-defs";
-import type { AdvancedFilterInput, BaseRelationValuesInput, Entity } from "@/generated-types/queries";
+import type {
+  AdvancedFilterInput,
+  BaseRelationValuesInput,
+  Entity,
+} from "@/generated-types/queries";
 import {
   BaseEntity,
   ContextMenuGeneralActionEnum,

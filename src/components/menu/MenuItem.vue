@@ -2,9 +2,9 @@
   <div>
     <component
       v-show="
-          (menuitem?.isLoggedIn ? auth.isAuthenticated.value : true) &&
-          hasPermissionForMenuItem
-          "
+        (menuitem?.isLoggedIn ? auth.isAuthenticated.value : true) &&
+        hasPermissionForMenuItem
+      "
       :is="linkTag"
       :to="isLink ? menuAction.action : undefined"
       @click="!isLink && menuAction?.action ? menuAction.action() : undefined"
@@ -78,9 +78,7 @@ const isLink = computed(
   () => menuAction.value?.menuItemType === MenuItemType.link
 );
 const hasPermissionForMenuItem = ref<boolean>(ignorePermissions.value);
-const linkTag = computed(
-  () => isLink.value ? 'router-link' : 'div'
-);
+const linkTag = computed(() => (isLink.value ? "router-link" : "div"));
 
 const props = defineProps<{
   menuitem: MenuItem;

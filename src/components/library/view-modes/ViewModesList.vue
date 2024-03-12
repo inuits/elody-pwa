@@ -24,7 +24,11 @@
     v-for="entity in entities"
     :key="entity.id + '_list'"
     :is="entitiesLoading ? 'div' : getLinkSettings(entity).tag"
-    :to="entitiesLoading ? undefined : getLinkSettings(entity, listItemRouteName).path"
+    :to="
+      entitiesLoading
+        ? undefined
+        : getLinkSettings(entity, listItemRouteName).path
+    "
   >
     <ListItem
       :class="
@@ -72,7 +76,7 @@ import {
   type Entity,
   type Metadata,
   Entitytyping,
-  MediaTypeEntities
+  MediaTypeEntities,
 } from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
@@ -130,23 +134,20 @@ const relations = computed<BaseRelationValuesInput[]>(
   () => getForm(entityId.value)?.values?.relationValues?.relations
 );
 
-const getLinkSettings = (
-  entity: Entity,
-  listItemRouteName: string = '',
-) => {
+const getLinkSettings = (entity: Entity, listItemRouteName: string = "") => {
   if (!props.enableNavigation) {
     if (
       props.parentEntityIdentifiers.length > 0 &&
       entity.type.toLowerCase() === Entitytyping.Mediafile
     ) {
       updateSelectedEntityMediafile(entity);
-      return { tag: 'div', path: undefined };
+      return { tag: "div", path: undefined };
     }
-    return { tag: 'div', path: undefined };
+    return { tag: "div", path: undefined };
   }
   return {
-    tag: 'router-link', 
-    path: getEntityPageRoute(entity, listItemRouteName)
+    tag: "router-link",
+    path: getEntityPageRoute(entity, listItemRouteName),
   };
 };
 

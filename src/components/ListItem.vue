@@ -66,7 +66,11 @@
       />
     </div>
     <unicon
-      v-if="!canShowCopyRight() || (media && imageSrcError) || (!media && isMediaType)"
+      v-if="
+        !canShowCopyRight() ||
+        (media && imageSrcError) ||
+        (!media && isMediaType)
+      "
       :name="thumbIcon"
       class="h-10 w-10 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
     />
@@ -203,7 +207,7 @@ const props = withDefaults(
     relation: "no-relation-found",
     basicBaseLibrary: false,
     isMediaType: false,
-    isEnableNavigation: false
+    isEnableNavigation: false,
   }
 );
 

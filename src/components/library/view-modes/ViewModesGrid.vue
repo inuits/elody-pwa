@@ -32,7 +32,11 @@
       v-for="entity in entities"
       :key="entity.id + '_grid'"
       :is="entitiesLoading ? 'div' : getLinkSettings(entity).tag"
-      :to="entitiesLoading ? undefined : getLinkSettings(entity, listItemRouteName).path"
+      :to="
+        entitiesLoading
+          ? undefined
+          : getLinkSettings(entity, listItemRouteName).path
+      "
       class="w-full"
     >
       <GridItem
@@ -81,7 +85,7 @@ import type { Context } from "@/composables/useBulkOperations";
 import { EditStatus, Metadata } from "@/generated-types/queries";
 import type {
   BaseRelationValuesInput,
-  Entity
+  Entity,
 } from "@/generated-types/queries";
 import { Entitytyping } from "@/generated-types/queries";
 import GridItem from "@/components/GridItem.vue";
@@ -162,23 +166,20 @@ onUnmounted(() => {
   window.removeEventListener("popstate", calculateGridColumns);
 });
 
-const getLinkSettings = (
-  entity: Entity,
-  listItemRouteName: string = '',
-) => {
+const getLinkSettings = (entity: Entity, listItemRouteName: string = "") => {
   if (!props.enableNavigation) {
     if (
       props.parentEntityIdentifiers.length > 0 &&
       entity.type.toLowerCase() === Entitytyping.Mediafile
     ) {
       updateSelectedEntityMediafile(entity);
-      return { tag: 'div', path: undefined };
+      return { tag: "div", path: undefined };
     }
-    return { tag: 'div', path: undefined };
+    return { tag: "div", path: undefined };
   }
   return {
-    tag: 'router-link', 
-    path: getEntityPageRoute(entity, listItemRouteName)
+    tag: "router-link",
+    path: getEntityPageRoute(entity, listItemRouteName),
   };
 };
 </script>
