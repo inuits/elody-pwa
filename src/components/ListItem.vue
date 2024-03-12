@@ -137,6 +137,27 @@
       </base-context-menu>
     </div>
   </li>
+  <div
+    v-if="entityListElements"
+    v-for="entityListElement in entityListElements"
+  >
+    <entity-element-list
+      :label="(entityListElement.label as string)"
+      :is-collapsed="entityListElement.isCollapsed"
+      :types="entityListElement.type as string[]"
+      :entity-list="(entityListElement.entityList as Entity[]) ?? []"
+      :identifiers="[itemId]"
+      :relation-type="entityListElement.relationType"
+      :view-mode="entityListElement.viewMode"
+      :custom-query="entityListElement.customQuery"
+      :custom-query-relation-type="entityListElement.customQueryRelationType"
+      :custom-query-filters="entityListElement.customQueryFilters"
+      :search-input-type="entityListElement.searchInputType"
+      :basic-base-library="entityListElement.basicBaseLibrary"
+      :entity-uuid="[itemId]"
+      :entity-list-elements="getObjectsBasedOnTypename(entityListElement, 'EntityListElement')"
+    />
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -146,10 +167,12 @@ import {
   EditStatus,
   MetadataField,
   Entitytyping,
+  EntityListElement,
   type BaseRelationValuesInput,
   type ContextMenuActions,
   type Metadata,
   type IntialValues,
+  type Entity
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
@@ -157,13 +180,14 @@ import useEditMode from "@/composables/useEdit";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { computed, ref, watch, onUpdated } from "vue";
-import { getEntityIdFromRoute, stringIsUrl } from "@/helpers";
+import { getEntityIdFromRoute, stringIsUrl, getObjectsBasedOnTypename } from "@/helpers";
 import { Unicons } from "@/types";
 import { useFieldArray } from "vee-validate";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import ContextMenuAction from "@/components/context-menu-actions/ContextMenuAction.vue";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
+import EntityElementList from "@/components/entityElements/EntityElementList.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -188,6 +212,7 @@ const props = withDefaults(
     basicBaseLibrary?: boolean;
     isMediaType?: boolean;
     isEnableNavigation?: boolean;
+    entityListElements?: EntityListElement[];
   }>(),
   {
     contextMenuActions: undefined,
@@ -208,6 +233,7 @@ const props = withDefaults(
     basicBaseLibrary: false,
     isMediaType: false,
     isEnableNavigation: false,
+    entityListElements: undefined,
   }
 );
 

@@ -63,6 +63,7 @@
       :has-selection="enableSelection"
       :basic-base-library="basicBaseLibrary"
       :is-enable-navigation="enableNavigation"
+      :entity-list-elements="entityListElements"
     />
   </component>
 </template>
@@ -77,6 +78,7 @@ import {
   type Metadata,
   Entitytyping,
   MediaTypeEntities,
+  EntityListElement
 } from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
@@ -105,6 +107,7 @@ const props = withDefaults(
     relationType: string;
     enableSelection: boolean;
     basicBaseLibrary?: Boolean;
+    entityListElements?: EntityListElement[];
   }>(),
   {
     disablePreviews: false,
@@ -113,6 +116,7 @@ const props = withDefaults(
     idsOfNonSelectableEntities: () => [],
     enableSelection: true,
     basicBaseLibrary: false,
+    entityListElements: undefined,
   }
 );
 

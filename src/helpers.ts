@@ -335,3 +335,12 @@ export const getApplicationDetails = async () => {
   ).then((r) => r.json());
   return { config, translations };
 };
+
+export const getObjectsBasedOnTypename = (parent, typename) => {
+  const objects = [];
+  Object.values(parent).forEach((child) => {
+    if (child.__typename === typename)
+      objects.push(child);
+  });
+  return objects;
+}
