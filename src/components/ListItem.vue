@@ -140,6 +140,7 @@
   <div
     v-if="entityListElements"
     v-for="entityListElement in entityListElements"
+    class="mb-5 bg-neutral-50"
   >
     <entity-element-list
       :label="(entityListElement.label as string)"
@@ -156,6 +157,7 @@
       :base-library-mode="entityListElement.baseLibraryMode"
       :entity-uuid="[itemId]"
       :entity-list-elements="getObjectsBasedOnTypename(entityListElement, 'EntityListElement')"
+      :is-first-item="false"
     />
   </div>
 </template>
