@@ -61,6 +61,7 @@
             :use-other-query="newQuery"
             :basic-base-library="basicBaseLibrary"
             :has-sticky-bars="false"
+            :entity-list-elements="entityListElements"
           />
           <BaseLibrary
             class="flex-1"
@@ -81,6 +82,7 @@
             :has-sticky-bars="false"
             :use-other-query="newQuery"
             :basic-base-library="basicBaseLibrary"
+            :entity-list-elements="entityListElements"
           />
         </div>
       </template>
@@ -96,6 +98,7 @@ import {
   type Entity,
   Entitytyping,
   MediaFileElementTypes,
+  EntityListElement,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -150,11 +153,13 @@ const props = withDefaults(
     viewMode?: EntityListViewMode;
     basicBaseLibrary?: Boolean;
     entityUuid: string;
+    entityListElements?: EntityListElement[];
   }>(),
   {
     types: () => [],
     viewMode: EntityListViewMode.Library,
     basicBaseLibrary: false,
+    entityListElements: undefined,
   }
 );
 

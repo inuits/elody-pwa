@@ -56,6 +56,7 @@
               :custom-query-filters="metadata.customQueryFilters"
               :search-input-type="metadata.searchInputType"
               :basic-base-library="metadata.basicBaseLibrary"
+              :entity-list-elements="getObjectsBasedOnTypename(metadata, 'EntityListElement')"
               class="pt-2"
             />
           </div>
@@ -75,7 +76,7 @@ import type {
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
 import EntityElementList from "@/components/entityElements/EntityElementList.vue";
 import { computed, inject, ref } from "vue";
-import { getMetadataFields } from "@/helpers";
+import { getMetadataFields, getObjectsBasedOnTypename } from "@/helpers";
 import { PanelType } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";

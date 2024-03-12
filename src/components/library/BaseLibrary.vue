@@ -129,6 +129,7 @@
               :relation-type="relationType"
               :enable-selection="enableBulkOperations"
               :basic-base-library="basicBaseLibrary"
+              :entity-list-elements="entityListElements"
             />
             <ViewModesGrid
               v-if="displayGrid"
@@ -169,6 +170,7 @@ import type {
   AdvancedFilterInput,
   BaseRelationValuesInput,
   Entity,
+  EntityListElement
 } from "@/generated-types/queries";
 import {
   BaseEntity,
@@ -228,6 +230,7 @@ const props = withDefaults(
     selectInputFieldType?: "multi" | "single";
     selectInputFieldValue?: string[];
     basicBaseLibrary?: Boolean;
+    entityListElements?: EntityListElement[];
   }>(),
   {
     predefinedEntities: undefined,
@@ -247,6 +250,7 @@ const props = withDefaults(
     useOtherQuery: undefined,
     isMultiSelectInputField: false,
     basicBaseLibrary: false,
+    entityListElements: undefined,
   }
 );
 
