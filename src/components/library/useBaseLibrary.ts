@@ -164,6 +164,11 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
           entityCountOnPage: fetchedEntities.results.length,
           totalEntityCount: fetchedEntities.count,
         });
+      })
+      .catch(() => {
+        entities.value = [];
+      })
+      .finally(() => {
         entitiesLoading.value = false;
       });
   };
