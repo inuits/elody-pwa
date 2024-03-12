@@ -4,6 +4,7 @@
       :label="label"
       :isCollapsed="isCollapsed"
       :base-library-mode="baseLibraryMode"
+      :show-label="!isFirstItem"
     >
       <template v-slot:actions>
         <div
@@ -155,12 +156,14 @@ const props = withDefaults(
     baseLibraryMode?: BaseLibraryModes;
     entityUuid: string;
     entityListElements?: EntityListElement[];
+    isFirstItem?: boolean;
   }>(),
   {
     types: () => [],
     viewMode: EntityListViewMode.Library,
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     entityListElements: undefined,
+    isFirstItem: true,
   }
 );
 
