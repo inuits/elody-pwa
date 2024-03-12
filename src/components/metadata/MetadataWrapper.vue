@@ -20,22 +20,18 @@
     @update:value="setNewValue"
     @register-enter-pressed:value="registerEnterKeyPressed"
   />
-  <base-tooltip
-    v-else
-    position="right-end"
-    :tooltip-offset="8"
-  >
+  <base-tooltip v-else position="right-end" :tooltip-offset="8">
     <template #activator="{ on }">
       <div v-on="on">
         <entity-element-metadata
-        class="line-clamp-1"
-        :label="metadata.label as string"
-        v-model:value="value"
-        :link-text="metadata.linkText"
-        :link-icon="metadata.linkIcon"
-        :unit="metadata.unit"
-        :basic-base-library-as-value="basicBaseLibraryAsValue"
-      />
+          class="line-clamp-1"
+          :label="metadata.label as string"
+          v-model:value="value"
+          :link-text="metadata.linkText"
+          :link-icon="metadata.linkIcon"
+          :unit="metadata.unit"
+          :basic-base-library-as-value="basicBaseLibraryAsValue"
+        />
       </div>
     </template>
     <template #default>

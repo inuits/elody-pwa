@@ -45,9 +45,7 @@ const menuAction = computed(() => checkIfRouteOrModal(props.subMenuItem));
 const isLink = computed(
   () => menuAction.value?.menuItemType === MenuItemType.link
 );
-const linkTag = computed(
-  () => isLink.value ? 'router-link' : 'div'
-);
+const linkTag = computed(() => (isLink.value ? "router-link" : "div"));
 const isPermitted = ref<boolean>();
 
 if (props.subMenuItem.requiresAuth === false) isPermitted.value = true;

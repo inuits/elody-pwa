@@ -1,9 +1,6 @@
 <template>
   <div class="flex relative" v-if="hasContent">
-    <div 
-      ref="activatorSlotRef"
-      class="min-w-0"
-    >
+    <div ref="activatorSlotRef" class="min-w-0">
       <slot
         name="activator"
         :on="{
@@ -28,7 +25,12 @@
 
 <script setup lang="ts">
 import { computed, ref, useSlots, VNode } from "vue";
-import { offset, useFloating, Placement, autoPlacement } from "@floating-ui/vue";
+import {
+  offset,
+  useFloating,
+  Placement,
+  autoPlacement,
+} from "@floating-ui/vue";
 
 const { position, tooltipOffset } = withDefaults(
   defineProps<{
@@ -50,7 +52,10 @@ const slots = useSlots();
 
 const { floatingStyles } = useFloating(activatorSlotRef, defaultSlotRef, {
   placement: position,
-  middleware: [offset(tooltipOffset), autoPlacement({ placement: position, autoPlacement: true })],
+  middleware: [
+    offset(tooltipOffset),
+    autoPlacement({ placement: position, autoPlacement: true }),
+  ],
   open: hover,
 });
 
