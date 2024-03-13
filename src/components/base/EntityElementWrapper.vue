@@ -1,12 +1,5 @@
 <template>
   <div
-    :class="['bg-accent-normal']"
-    v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary && showLabel"
-  >
-    <p class="text-text-subtitle text-xs">{{t(label)}}</p>
-  </div>
-
-  <div
     :class="['bg-accent-normal rounded-t-lg', { 'rounded-lg': isCollapsed }]"
   >
     <div
@@ -44,11 +37,9 @@ const props = withDefaults(
     label: string;
     isCollapsed: Boolean;
     baseLibraryMode?: BaseLibraryModes;
-    showLabel?: boolean;
   }>(),
   {
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
-    showLabel: true,
   }
 );
 

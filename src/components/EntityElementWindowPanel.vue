@@ -4,7 +4,7 @@
       @click="toggleIsCollapsed()"
       class="flex items-center justify-between cursor-pointer"
     >
-      <h2>{{ t(panel.label) }}</h2>
+      <h2 v-if="showLabel">{{ t(panel.label) }}</h2>
       <div>
         <unicon :name="!isCollapsed ? Unicons.Minus.name : Unicons.Plus.name" />
       </div>
@@ -83,12 +83,18 @@ import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 
-const props = defineProps<{
-  panel: WindowElementPanel;
-  identifiers: string[];
-  isEdit: boolean;
-  formId: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    panel: WindowElementPanel;
+    identifiers: string[];
+    isEdit: boolean;
+    formId: string;
+    showLabel?: boolean;
+  }>(),
+  {
+    showLabel: true,
+  }
+);
 
 const { t } = useI18n();
 const panelType = ref<PanelType>(props.panel.panelType);
