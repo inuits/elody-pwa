@@ -333,7 +333,7 @@ export const getApplicationDetails = async () => {
   return { config, translations };
 };
 
-export const getObjectsBasedOnTypename = (parent, typename) => {
+export const getObjectsBasedOnTypename = (parent: any, typename: string): [] => {
   const objects = [];
   Object.values(parent).forEach((child) => {
     if (child.__typename === typename)

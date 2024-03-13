@@ -140,24 +140,13 @@
   <div
     v-if="entityListElements"
     v-for="entityListElement in entityListElements"
-    class="mb-5 bg-neutral-50"
   >
-    <entity-element-list
-      :label="(entityListElement.label as string)"
-      :is-collapsed="entityListElement.isCollapsed"
-      :types="entityListElement.type as string[]"
-      :entity-list="(entityListElement.entityList as Entity[]) ?? []"
+    <entity-element-window-panel
+      :form-id="itemId"
       :identifiers="[itemId]"
-      :relation-type="entityListElement.relationType"
-      :view-mode="entityListElement.viewMode"
-      :custom-query="entityListElement.customQuery"
-      :custom-query-relation-type="entityListElement.customQueryRelationType"
-      :custom-query-filters="entityListElement.customQueryFilters"
-      :search-input-type="entityListElement.searchInputType"
-      :base-library-mode="entityListElement.baseLibraryMode"
-      :entity-uuid="[itemId]"
-      :entity-list-elements="getObjectsBasedOnTypename(entityListElement, 'EntityListElement')"
-      :is-first-item="false"
+      :is-edit="false"
+      :show-label="false"
+      :panel="createWindowPanelsFromEntityListElements(entityListElement)"
     />
   </div>
 </template>
@@ -165,17 +154,18 @@
 <script lang="ts" setup>
 import type { Context } from "@/composables/useBulkOperations";
 import {
-  DamsIcons,
-  EditStatus,
-  MetadataField,
-  Entitytyping,
-  EntityListElement,
+  BaseLibraryModes,
   type BaseRelationValuesInput,
   type ContextMenuActions,
-  type Metadata,
+  DamsIcons,
+  EditStatus,
+  EntityListElement,
+  Entitytyping,
   type IntialValues,
-  type Entity,
-  BaseLibraryModes,
+  type Metadata,
+  MetadataField,
+  PanelType,
+  WindowElementPanel
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
@@ -183,14 +173,14 @@ import useEditMode from "@/composables/useEdit";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { computed, ref, watch, onUpdated } from "vue";
-import { getEntityIdFromRoute, stringIsUrl, getObjectsBasedOnTypename } from "@/helpers";
+import { getEntityIdFromRoute, stringIsUrl } from "@/helpers";
 import { Unicons } from "@/types";
 import { useFieldArray } from "vee-validate";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import ContextMenuAction from "@/components/context-menu-actions/ContextMenuAction.vue";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
-import EntityElementList from "@/components/entityElements/EntityElementList.vue";
+import EntityElementWindowPanel from "@/components/EntityElementWindowPanel.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -310,4 +300,15 @@ const removePreviewItem = (idx: number) => {
   deleteTeaserMetadataItemInState(props.itemId);
   remove(idx);
 };
+
+const createWindowPanelsFromEntityListElements = (entityListElement: EntityListElement) => {
+  const panel: WindowElementPanel = {
+    label: entityListElement.label,
+    panelType: PanelType.Relation,
+    isEditable: false,
+    isCollapsed: false,
+    entityListElement
+  }
+  return panel;
+}
 </script>
