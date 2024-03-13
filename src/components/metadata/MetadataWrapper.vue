@@ -20,10 +20,26 @@
     @update:value="setNewValue"
     @register-enter-pressed:value="registerEnterKeyPressed"
   />
-  <base-tooltip v-else position="right-end" :tooltip-offset="8">
+  <base-tooltip
+    v-else
+    class="w-full"
+    position="right-end"
+    :tooltip-offset="8"
+  >
     <template #activator="{ on }">
-      <div v-on="on">
+      <div v-on="on" class="w-full">
+        <ViewModesAutocomplete
+          v-if="
+            (metadata.inputField?.type === InputFieldTypes.DropdownMultiselect ||
+            metadata.inputField?.type === InputFieldTypes.DropdownSingleselect) && !!value
+          "
+          v-model="value"
+          :metadata-key-to-get-options-for="metadata.key"
+          :options="metadata.inputField.options"
+          :edit-mode="false"
+        />
         <entity-element-metadata
+          v-else
           class="line-clamp-1"
           :label="metadata.label as string"
           v-model:value="value"
@@ -31,6 +47,7 @@
           :link-icon="metadata.linkIcon"
           :unit="metadata.unit"
           :base-library-mode="baseLibraryMode"
+          :basic-base-library-as-value="basicBaseLibraryAsValue"
         />
       </div>
     </template>
@@ -52,13 +69,14 @@
 import EntityElementMetadataEdit from "@/components/metadata/EntityElementMetadataEdit.vue";
 import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
-import { BaseLibraryModes, MetadataField, PanelMetaData } from "@/generated-types/queries";
+import { BaseLibraryModes, MetadataField, PanelMetaData, InputFieldTypes } from "@/generated-types/queries";
 import { computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useOrderListItems, OrderItem } from "@/composables/useOrderListItems";
 import { useField } from "vee-validate";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useFormHelper } from "@/composables/useFormHelper";
+import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
 
 const { t } = useI18n();
 const { addOrderItem, removeOrderItem, updateOrderItem } = useOrderListItems();
