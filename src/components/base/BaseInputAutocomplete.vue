@@ -8,6 +8,8 @@
     :show-options="searchable"
     :close-on-select="true"
     :classes="classes"
+    :caret="!disabled"
+    :loading="loading"
     :disabled="disabled"
     :object="true"
     label="label"
@@ -25,7 +27,7 @@ import Multiselect from "@vueform/multiselect";
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
-type AutocompleteStyle = "default" | "defaultWithBorder";
+type AutocompleteStyle = "default" | "defaultWithBorder" | "readOnly";
 
 const props = withDefaults(
   defineProps<{
@@ -36,12 +38,14 @@ const props = withDefaults(
     placeholder?: string;
     disabled?: boolean;
     relation?: boolean;
+    loading?: boolean
   }>(),
   {
     selectType: "multi",
     placeholder: "",
     disabled: false,
     relation: false,
+    loading: false
   }
 );
 
@@ -81,9 +85,14 @@ const setClasses = () => {
       : {};
 
   if (props.autocompleteStyle === "defaultWithBorder") {
-    classes.value["container"] = "multiselect multiselect-border";
+    classes.value["container"] = "multiselect multiselect-border border-[rgba(0,58,82,0.6)]";
     classes.value["dropdown"] =
       "multiselect-dropdown multiselect-dropdown-border";
+  }
+
+  if (props.autocompleteStyle === "readOnly") {
+    classes.value["container"] = "multiselect border-none !bg-white";
+    classes.value["tags"] = "flex-grow flex-shrink flex flex-wrap items-center mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
   }
 };
 
