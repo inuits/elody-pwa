@@ -13,7 +13,6 @@
       :relationType="field.relationType"
       :fromRelationType="field.fromRelationType"
       :options="field.options"
-      :formId="formId"
     />
     <BaseDropdownNew
       v-else-if="field.type === InputFieldTypes.Dropdown"

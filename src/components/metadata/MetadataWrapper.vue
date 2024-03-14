@@ -27,7 +27,7 @@
     :tooltip-offset="8"
   >
     <template #activator="{ on }">
-      <div v-on="on" class="w-full">
+      <div v-on="on">
         <ViewModesAutocomplete
           v-if="
             metadata.inputField?.type === InputFieldTypes.DropdownMultiselect ||
@@ -52,7 +52,6 @@
     </template>
     <template #default>
       <entity-element-metadata
-        v-if="false"
         class="text-text-placeholder"
         :label="metadata.label as string"
         v-model:value="value"
