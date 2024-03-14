@@ -9,7 +9,6 @@ import {
 import { computed, inject } from "vue";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { DefaultApolloClient } from "@vue/apollo-composable";
-// import {apolloClient} from "@/main";
 import type { ApolloClient } from "@apollo/client/core";
 import { getEntityTitle } from "@/helpers";
 

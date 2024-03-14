@@ -161,7 +161,7 @@ const useFormHelper = () => {
     if (selectedItems.length <= 0 || !form) return;
 
     const oldRelations: BaseRelationValuesInput[] =
-      form.values.relationValues?.relations;
+      form.values.relationValues.relations;
     const newRelations: BaseRelationValuesInput[] = [];
     selectedItems.forEach((item) => {
       addTeaserMetadataToState(item.id, item.teaserMetadata);
