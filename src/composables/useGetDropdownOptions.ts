@@ -16,25 +16,9 @@ import { getEntityTitle } from "@/helpers";
 export const useGetDropdownOptions = (
   entityType: Entitytyping,
   parent: "fetchAll" | string,
-  relationType?: string | undefined
+  relationType?: string
 ) => {
-  // parent id
-  const options: DropdownOption[] = [];
   const apolloClient = inject(DefaultApolloClient);
-  const baseTypeFilter = {
-    type: "type",
-    value: entityType,
-    match_exact: true,
-  };
-  const relationFilter = (parentId: string) => {
-    return {
-      type: "selection",
-      parent_key: "relations",
-      key: "hasLanguage",
-      value: [parentId, parentId],
-      match_exact: true,
-    };
-  };
   const {
     entities,
     entitiesLoading,
@@ -45,11 +29,27 @@ export const useGetDropdownOptions = (
     setsearchInputType,
   } = useBaseLibrary(apolloClient as ApolloClient<any>);
 
+  const baseTypeFilter = {
+    type: "type",
+    value: entityType,
+    match_exact: true,
+  };
+
+  const getRelationFilter = (parentId: string, relationType: string) => {
+    return {
+      type: "selection",
+      parent_key: "relations",
+      key: relationType,
+      value: [parentId],
+      match_exact: true,
+    };
+  };
+
   const initialize = async () => {
     const filters =
-      parent === "fetchAll" && !relationType
+      parent === "fetchAll" || !relationType
         ? [baseTypeFilter]
-        : [baseTypeFilter, relationFilter(parent)];
+        : [getRelationFilter(parent, relationType)];
     setIsSearchLibrary(false);
     setAdvancedFilters(filters as AdvancedFilterInput[]);
     setsearchInputType(SearchInputType.AdvancedInputType);
@@ -57,15 +57,6 @@ export const useGetDropdownOptions = (
 
     await getEntities(undefined);
   };
-
-  // {
-  //   "type": "selection",
-  //   "parent_key": "relations",
-  //   "key": "isControlledAssetFor", // relation type - hasLanguage smth like that
-  //   "value": ["urn:ngsi-ld:IotDevice:5345ANT664ADJ1"], //should be ids of parent ids
-  //   "item_types": ["PoliceAsset", "PoliceVehicle"]
-  //   "match_exact": true
-  // }
 
   const setSearchInput = (searchValue: string) => {
     const advancedFilters =
