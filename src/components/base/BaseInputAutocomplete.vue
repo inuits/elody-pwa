@@ -85,7 +85,7 @@ const setClasses = () => {
       : {};
 
   if (props.autocompleteStyle === "defaultWithBorder") {
-    classes.value["container"] = "multiselect multiselect-border border-[rgba(0,58,82,0.6)]";
+    classes.value["container"] = "multiselect multiselect-border rounded-lg border-[rgba(0,58,82,0.6)]";
     classes.value["dropdown"] =
       "multiselect-dropdown multiselect-dropdown-border";
   }
