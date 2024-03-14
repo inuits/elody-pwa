@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!metadata.showOnlyInEditMode" class="text-text-light text-sm">
+  <div v-if="!metadata.showOnlyInEditMode" class="text-text-light text-sm flex">
     <p>
       {{ metadata.label ? t(metadata.label) : t("metadata.no-label") }}
     </p>
