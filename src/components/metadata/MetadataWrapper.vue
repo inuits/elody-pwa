@@ -30,12 +30,11 @@
       <div v-on="on" class="w-full">
         <ViewModesAutocomplete
           v-if="
-            (metadata.inputField?.type === InputFieldTypes.DropdownMultiselect ||
-            metadata.inputField?.type === InputFieldTypes.DropdownSingleselect) && !!value
+            metadata.inputField?.type === InputFieldTypes.DropdownMultiselect ||
+            metadata.inputField?.type === InputFieldTypes.DropdownSingleselect
           "
-          v-model="value"
           :metadata-key-to-get-options-for="metadata.key"
-          :options="metadata.inputField.options"
+          :from-relation-type="metadata.inputField?.fromRelationType"
           :edit-mode="false"
         />
         <entity-element-metadata
@@ -53,6 +52,7 @@
     </template>
     <template #default>
       <entity-element-metadata
+        v-if="false"
         class="text-text-placeholder"
         :label="metadata.label as string"
         v-model:value="value"
