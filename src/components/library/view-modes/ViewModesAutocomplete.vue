@@ -1,10 +1,10 @@
 <template>
   <base-input-autocomplete
-    :autocomplete-style="editMode ? 'defaultWithBorder' : 'readOnly'"
-    :options="editMode ? entityDropdownOptions : selectedDropdownOptions"
+    :autocomplete-style="isEditMode ? 'defaultWithBorder' : 'readOnly'"
+    :options="isEditMode ? entityDropdownOptions : selectedDropdownOptions"
     :select-type="selectType"
     :model-value="selectedDropdownOptions"
-    :disabled="!editMode"
+    :disabled="!isEditMode"
     :loading="entitiesLoading || relatedEntitiesLoading"
     @search-change="
       (value) => {
@@ -38,13 +38,13 @@ const props = withDefaults(
     options: DropdownOption[];
     relationType: string;
     fromRelationType: string;
-    editMode: boolean;
+    isEditMode: boolean;
   }>(),
   {
     selectType: "multi",
     label: "",
     metadataKeyToGetOptionsFor: "no-key",
-    editMode: true,
+    isEditMode: true,
   }
 );
 
@@ -75,7 +75,7 @@ onMounted(async () => {
 });
 
 const initAutocompleteOption = async () => {
-  if (props.editMode) { 
+  if (props.isEditMode) { 
     await initialize();
   }
   if (entityId && props.fromRelationType) {

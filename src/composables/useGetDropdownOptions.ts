@@ -6,7 +6,7 @@ import {
   SearchInputType,
   type AdvancedFilterInput,
 } from "@/generated-types/queries";
-import { computed, ref, inject } from "vue";
+import { computed, inject } from "vue";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 // import {apolloClient} from "@/main";
