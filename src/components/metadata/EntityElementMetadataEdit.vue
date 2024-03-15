@@ -12,6 +12,7 @@
       "
       :relationType="field.relationType"
       :fromRelationType="field.fromRelationType"
+      :mode="formFlow"
       :options="field.options"
     />
     <BaseDropdownNew
@@ -64,6 +65,7 @@ const props = defineProps<{
   isMetadataOnRelation?: boolean;
   error?: string;
   fieldIsDirty: boolean;
+  formFlow?: string;
 }>();
 const { addEditableMetadataOnRelationKey } = useFormHelper();
 const { t } = useI18n();
