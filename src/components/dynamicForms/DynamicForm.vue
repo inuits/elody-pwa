@@ -22,6 +22,7 @@
           :is-edit="true"
           form-flow="create"
           @update:field="setFormFieldState"
+          @update:relations="setRelationFormFieldState"
         />
         <upload-interface-dropzone
           v-if="field.__typename === 'UploadField'"
@@ -88,7 +89,10 @@ import {
   PanelMetaData,
   TypeModals,
   UploadField,
+  EditStatus,
+  type RelationFieldInput
 } from "@/generated-types/queries";
+import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import { computed, inject, ref, watch } from "vue";
@@ -146,6 +150,7 @@ const formFields = computed<
   );
 });
 const formFieldsState = ref<Object[]>([]);
+const formRelationsFieldsState = ref<RelationFieldInput[]>([]);
 const formContainsErrors = computed((): boolean =>
   formFieldsState.value.some(
     (formFieldState: FormFieldState) =>
@@ -168,6 +173,21 @@ const setFormFieldState = (fieldValue: FormFieldState) => {
   formFieldsState.value.push(fieldValue);
 };
 
+const setRelationFormFieldState = (relations: { selectedItems: InBulkProcessableItem[], relationType: string }) => {
+  const { selectedItems, relationType} = relations;
+  const newRelations: RelationFieldInput[] = [];
+  selectedItems.forEach((item) => {
+      newRelations.push({
+        key: item.id,
+        type: relationType,
+        editStatus: EditStatus.New,
+        value: item.value,
+      });
+    });
+
+  formRelationsFieldsState.value = newRelations;
+};
+
 const createEntityFromFormInput = (entityType: Entitytyping): EntityInput => {
   let entity: EntityInput = { type: entityType };
   entity.metadata = formFieldsState.value.map(
@@ -178,6 +198,7 @@ const createEntityFromFormInput = (entityType: Entitytyping): EntityInput => {
       };
     }
   );
+  entity.relations = formRelationsFieldsState.value;
   return entity;
 };
 

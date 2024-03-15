@@ -11,13 +11,11 @@
         setSearchInput(value);
       }
     "
-    @update:model-value="(value) => {
-      replaceRelationsFromSameType(
-        mapDropdownOptionsToBulkProcessableItem([...value]),
-        relationType as string,
-      );
-      selectedDropdownOptions = [...value];
-    }"
+    @update:model-value="
+      (value) => {
+        handleSelect(value);
+      }
+    "
   />
 </template>
 
@@ -39,26 +37,27 @@ const props = withDefaults(
     relationType: string;
     fromRelationType: string;
     isEditMode: boolean;
+    mode: "edit" | "create";
   }>(),
   {
     selectType: "multi",
     label: "",
     metadataKeyToGetOptionsFor: "no-key",
     isEditMode: true,
+    mode: "edit",
   }
 );
+
+const emit = defineEmits(["update:relations"]);
 
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
 const { replaceRelationsFromSameType } = useFormHelper();
 const entityId = getEntityIdFromRoute();
-const { initialize, 
-  entityDropdownOptions, 
-  entitiesLoading, 
-  setSearchInput 
-} = useGetDropdownOptions(
-  props.metadataKeyToGetOptionsFor as Entitytyping,
-  "fetchAll"
-);
+const { initialize, entityDropdownOptions, entitiesLoading, setSearchInput } =
+  useGetDropdownOptions(
+    props.metadataKeyToGetOptionsFor as Entitytyping,
+    "fetchAll"
+  );
 
 const {
   initialize: relatedEntitiesInitialize,
@@ -75,14 +74,14 @@ onMounted(async () => {
 });
 
 const initAutocompleteOption = async () => {
-  if (props.isEditMode) { 
+  if (props.isEditMode) {
     await initialize();
   }
-  if (entityId && props.fromRelationType) {
+  if (entityId && props.fromRelationType && props.mode !== 'create') {
     await relatedEntitiesInitialize();
   }
   populateSelectedOptions(relatedEntitiesOptions.value);
-}
+};
 
 const mapDropdownOptionsToBulkProcessableItem = (
   dropdownOptions: DropdownOption[]
@@ -100,5 +99,26 @@ const mapDropdownOptionsToBulkProcessableItem = (
 const populateSelectedOptions = (options: DropdownOption[]) => {
   if (options.length === 0) return;
   selectedDropdownOptions.value = options;
+};
+
+const handleSelect = (options: DropdownOption[] | undefined) => {
+  if (options === undefined) return;
+  const bulkProcessableItems: InBulkProcessableItem[] = mapDropdownOptionsToBulkProcessableItem([...options]);
+
+  if (props.mode === "create") {
+    emit("update:relations", {
+      selectedItems: bulkProcessableItems,
+      relationType: props.relationType,
+    });
+  }
+
+  if (props.mode === "edit") {
+    replaceRelationsFromSameType(
+      bulkProcessableItems,
+      props.relationType as string
+    );
+  }
+
+  selectedDropdownOptions.value = [...options];
 };
 </script>
