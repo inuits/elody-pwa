@@ -20,6 +20,7 @@
           :form-id="dynamicFormQuery"
           :metadata="field"
           :is-edit="true"
+          form-flow="create"
           @update:field="setFormFieldState"
         />
         <upload-interface-dropzone
