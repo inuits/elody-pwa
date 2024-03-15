@@ -38,14 +38,14 @@ const props = withDefaults(
     placeholder?: string;
     disabled?: boolean;
     relation?: boolean;
-    loading?: boolean
+    loading?: boolean;
   }>(),
   {
     selectType: "multi",
     placeholder: "",
     disabled: false,
     relation: false,
-    loading: false
+    loading: false,
   }
 );
 
@@ -88,12 +88,16 @@ const setClasses = () => {
     classes.value["container"] = "multiselect multiselect-border rounded-lg border-[rgba(0,58,82,0.6)]";
     classes.value["dropdown"] =
       "multiselect-dropdown multiselect-dropdown-border";
+    classes.value["containerActive"] = "";
+    classes.value["tagsSearch"] = "multiselect-tags-search !border-none focus:ring-0 pl-0";
   }
 
   if (props.autocompleteStyle === "readOnly") {
     classes.value["container"] = "multiselect border-none !bg-white";
     classes.value["tags"] = "flex-grow flex-shrink flex flex-wrap items-center mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
   }
+
+  classes.value["tag"] = "multiselect-tag bg-accent-normal !opacity-100";
 };
 
 onMounted(() => setClasses());
