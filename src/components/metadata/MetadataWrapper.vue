@@ -12,6 +12,7 @@
     v-model:value="value"
     :field="metadata.inputField"
     :formId="formId"
+    :formFlow="formFlow"
     :unit="metadata.unit"
     :link-text="metadata.linkText"
     :isMetadataOnRelation="isMetadataOnRelation"
@@ -88,9 +89,11 @@ const props = withDefaults(
     metadata: MetadataField;
     linkedEntityId?: String;
     baseLibraryMode?: BaseLibraryModes;
+    formFlow: "edit" | "create";
   }>(),
   {
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    formFlow: "edit",
   }
 );
 
