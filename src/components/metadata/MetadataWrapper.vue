@@ -19,6 +19,7 @@
     :error="errorMessage"
     :fieldIsDirty="fieldIsDirty"
     @update:value="setNewValue"
+    @update:relations="updateRelations"
     @register-enter-pressed:value="registerEnterKeyPressed"
   />
   <base-tooltip
@@ -70,6 +71,7 @@ import EntityElementMetadataEdit from "@/components/metadata/EntityElementMetada
 import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { BaseLibraryModes, MetadataField, PanelMetaData, InputFieldTypes } from "@/generated-types/queries";
+import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useOrderListItems, OrderItem } from "@/composables/useOrderListItems";
@@ -97,7 +99,11 @@ const props = withDefaults(
   }
 );
 
-const emit = defineEmits(["update:field"]);
+const emit = defineEmits(["update:field", "update:relations"]);
+
+const updateRelations = (relations: { selectedItems: InBulkProcessableItem[], relationType: string  }) => {
+  emit("update:relations", relations);
+};
 
 const setNewValue = (newValue: string) => {
   value.value = newValue;
