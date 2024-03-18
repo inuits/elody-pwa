@@ -90,7 +90,7 @@ import {
   TypeModals,
   UploadField,
   EditStatus,
-  type RelationFieldInput
+  type RelationFieldInput,
 } from "@/generated-types/queries";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { useImport } from "@/composables/useImport";
@@ -173,17 +173,20 @@ const setFormFieldState = (fieldValue: FormFieldState) => {
   formFieldsState.value.push(fieldValue);
 };
 
-const setRelationFormFieldState = (relations: { selectedItems: InBulkProcessableItem[], relationType: string }) => {
-  const { selectedItems, relationType} = relations;
+const setRelationFormFieldState = (relations: {
+  selectedItems: InBulkProcessableItem[];
+  relationType: string;
+}) => {
+  const { selectedItems, relationType } = relations;
   const newRelations: RelationFieldInput[] = [];
   selectedItems.forEach((item) => {
-      newRelations.push({
-        key: item.id,
-        type: relationType,
-        editStatus: EditStatus.New,
-        value: item.value,
-      });
+    newRelations.push({
+      key: item.id,
+      type: relationType,
+      editStatus: EditStatus.New,
+      value: item.value,
     });
+  });
 
   formRelationsFieldsState.value = newRelations;
 };
