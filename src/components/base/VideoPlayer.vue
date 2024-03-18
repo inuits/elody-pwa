@@ -13,35 +13,13 @@
   </div>
 </template>
 <script lang="ts" setup>
-// import { useAuth } from "session-vue-3-oidc-library";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 
-const props = defineProps<{
+defineProps<{
   source?: any;
 }>();
 
 const { getValueOfMediafile } = useEntityMediafileSelector();
-// const auth = useAuth();
 const fileName =
   getValueOfMediafile("filename") || getValueOfMediafile("transcode_filename");
-
-// fetch("/api/mediafile/" + fileName, {
-//   method: "GET",
-//   headers: {
-//     "Content-Type": "video/mp4",
-//     Token: auth.to,
-//   },
-// })
-//   .then((response) => {
-//     if (!response.ok) {
-//       throw new Error("Network response was not ok");
-//     }
-//     return response.blob();
-//   })
-//   .then((blob) => {
-//     // Handle the blob data here
-//   })
-//   .catch((error) => {
-//     console.error("Error fetching data:", error);
-//   });
 </script>
