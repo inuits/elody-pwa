@@ -39,11 +39,6 @@ export const getEntityPageRoute = (
   entity: Entity,
   listItemRouteName: string
 ) => {
-  if (entity.type.toLowerCase() === Entitytyping.Mediafile) {
-    useEntityMediafileSelector().setEntityMediafiles([]);
-    useEntityMediafileSelector().updateSelectedEntityMediafile(entity);
-  }
-
   const entityId =
     entity.intialValues.slug ||
     entity.uuid ||
@@ -54,6 +49,13 @@ export const getEntityPageRoute = (
     params: { id: entityId, type: entity.type },
   };
 };
+
+export const updateEntityMediafileOnlyForMediafiles = (entity: Entity) => {
+  if (entity.type.toLowerCase() === Entitytyping.Mediafile) {
+    useEntityMediafileSelector().setEntityMediafiles([]);
+    useEntityMediafileSelector().updateSelectedEntityMediafile(entity);
+  }
+}
 
 export const getEntityIdFromRoute = (): string | undefined => {
   return asString(useRoute().params["id"]) || undefined;
