@@ -37,6 +37,7 @@
           ? undefined
           : getLinkSettings(entity, listItemRouteName).path
       "
+      @click="() => updateEntityMediafileOnlyForMediafiles(entity)"
       class="w-full"
     >
       <GridItem
@@ -95,6 +96,7 @@ import {
   getEntityIdFromRoute,
   setCssVariable,
   getEntityPageRoute,
+  updateEntityMediafileOnlyForMediafiles,
 } from "@/helpers";
 import { computed, inject, onMounted, onUnmounted } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";

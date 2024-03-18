@@ -29,6 +29,7 @@
         ? undefined
         : getLinkSettings(entity, listItemRouteName).path
     "
+    @click="() => updateEntityMediafileOnlyForMediafiles(entity)"
   >
     <ListItem
       :class="
@@ -84,7 +85,7 @@ import {
 import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
-import { getEntityIdFromRoute, getEntityPageRoute } from "@/helpers";
+import { getEntityIdFromRoute, getEntityPageRoute, updateEntityMediafileOnlyForMediafiles } from "@/helpers";
 import { computed, inject } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
