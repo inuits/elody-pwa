@@ -88,8 +88,9 @@ const setClasses = () => {
   const defaultContainerStyles = "multiselect rounded-lg items-stretch";
   classes.value["container"] = `${defaultContainerStyles} border-none`;
   classes.value["containerActive"] = "outline-1 outline-accent-normal outline-offset-0";
-  classes.value["tagsSearch"] = "multiselect-tags-search !border-none focus:ring-0 pl-0";
+  classes.value["tagsSearch"] = "multiselect-tags-search !border-none focus:ring-0 p-0";
   classes.value["tag"] = "multiselect-tag bg-accent-normal !opacity-100";
+  classes.value["dropdown"] = "multiselect-dropdown -bottom-px";
 
   if (props.autocompleteStyle === "defaultWithBorder") {
     classes.value["container"] = `${defaultContainerStyles} border-[rgba(0,58,82,0.6)]`;
