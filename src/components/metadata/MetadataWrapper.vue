@@ -22,18 +22,16 @@
     @update:relations="updateRelations"
     @register-enter-pressed:value="registerEnterKeyPressed"
   />
-  <base-tooltip
-    v-else
-    class="w-full"
-    position="right-end"
-    :tooltip-offset="8"
-  >
+  <base-tooltip v-else class="w-full" position="right-end" :tooltip-offset="8">
     <template #activator="{ on }">
       <div v-on="on">
         <ViewModesAutocomplete
           v-if="
-            metadata.inputField?.type === InputFieldTypes.DropdownMultiselect ||
-            metadata.inputField?.type === InputFieldTypes.DropdownSingleselect
+            (metadata.inputField?.type ===
+              InputFieldTypes.DropdownMultiselect ||
+              metadata.inputField?.type ===
+                InputFieldTypes.DropdownSingleselect) &&
+            metadata.value
           "
           :metadata-key-to-get-options-for="metadata.key"
           :from-relation-type="metadata.inputField?.fromRelationType"
@@ -70,7 +68,12 @@
 import EntityElementMetadataEdit from "@/components/metadata/EntityElementMetadataEdit.vue";
 import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
-import { BaseLibraryModes, MetadataField, PanelMetaData, InputFieldTypes } from "@/generated-types/queries";
+import {
+  BaseLibraryModes,
+  MetadataField,
+  PanelMetaData,
+  InputFieldTypes,
+} from "@/generated-types/queries";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -101,7 +104,10 @@ const props = withDefaults(
 
 const emit = defineEmits(["update:field", "update:relations"]);
 
-const updateRelations = (relations: { selectedItems: InBulkProcessableItem[], relationType: string  }) => {
+const updateRelations = (relations: {
+  selectedItems: InBulkProcessableItem[];
+  relationType: string;
+}) => {
   emit("update:relations", relations);
 };
 
