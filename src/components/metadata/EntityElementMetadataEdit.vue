@@ -5,13 +5,15 @@
         field.type === InputFieldTypes.DropdownMultiselect ||
         field.type === InputFieldTypes.DropdownSingleselect
       "
+      :key="fieldKey"
       v-model="metadataValue"
       :metadata-key-to-get-options-for="fieldKey"
       :select-type="
         field.type === InputFieldTypes.DropdownSingleselect ? 'single' : 'multi'
       "
-      :relationType="field.relationType"
-      :fromRelationType="field.fromRelationType"
+      :relation-type="field.relationType"
+      :from-relation-type="field.fromRelationType"
+      :advanced-filter-input-for-searching-options="field.advancedFilterInputForSearchingOptions"
       :mode="formFlow"
       :options="field.options"
       @update:relations="updateRelations"
