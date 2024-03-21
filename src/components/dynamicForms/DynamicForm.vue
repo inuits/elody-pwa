@@ -44,7 +44,7 @@
           :errors="uploadFileErrors"
           :disabled="!enableUploadButton"
           :progressIndicator="field?.actionProgressIndicator"
-          @click="performActionButtonClickEvent(field)"
+          @click-upload-button="performActionButtonClickEvent(field)"
           @reset-upload="initializeForm"
         />
         <BaseButtonNew
