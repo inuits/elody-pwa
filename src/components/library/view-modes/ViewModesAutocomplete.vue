@@ -7,12 +7,12 @@
     :disabled="!isEditMode"
     :loading="entitiesLoading || relatedEntitiesLoading"
     @search-change="
-      (value) => {
+      (value: string) => {
         setSearchInput(value);
       }
     "
     @update:model-value="
-      (value) => {
+      (value: DropdownOption[]) => {
         handleSelect(value);
       }
     "
@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { DropdownOption, Entitytyping } from "@/generated-types/queries";
+import type { DropdownOption, Entitytyping, AdvancedFilterInput } from "@/generated-types/queries";
 import { onMounted, ref } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
@@ -33,6 +33,7 @@ const props = withDefaults(
     modelValue: string[] | string | undefined;
     metadataKeyToGetOptionsFor?: string | "no-key";
     selectType?: "multi" | "single";
+    advancedFilterInputForSearchingOptions: AdvancedFilterInput
     options: DropdownOption[];
     relationType: string;
     fromRelationType: string;
@@ -56,7 +57,9 @@ const entityId = getEntityIdFromRoute();
 const { initialize, entityDropdownOptions, entitiesLoading, setSearchInput } =
   useGetDropdownOptions(
     props.metadataKeyToGetOptionsFor as Entitytyping,
-    "fetchAll"
+    "fetchAll",
+    undefined,
+    props.advancedFilterInputForSearchingOptions
   );
 
 const {
@@ -77,7 +80,7 @@ const initAutocompleteOption = async () => {
   if (props.isEditMode) {
     await initialize();
   }
-  if (entityId && props.fromRelationType && props.mode !== 'create') {
+  if (entityId && props.fromRelationType && props.mode !== "create") {
     await relatedEntitiesInitialize();
   }
   populateSelectedOptions(relatedEntitiesOptions.value);
@@ -103,7 +106,8 @@ const populateSelectedOptions = (options: DropdownOption[]) => {
 
 const handleSelect = (options: DropdownOption[] | undefined) => {
   if (options === undefined) return;
-  const bulkProcessableItems: InBulkProcessableItem[] = mapDropdownOptionsToBulkProcessableItem([...options]);
+  const bulkProcessableItems: InBulkProcessableItem[] =
+    mapDropdownOptionsToBulkProcessableItem([...options]);
 
   if (props.mode === "create") {
     emit("update:relations", {
