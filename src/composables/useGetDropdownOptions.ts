@@ -58,7 +58,7 @@ export const useGetDropdownOptions = (
     await getEntities(undefined);
   };
 
-  const setSearchInput = (searchValue: string) => {
+  const getAutocompleteOptions = (searchValue: string) => {
     const isEmptyAdvancedSearchFilter = !searchFilterInput || Object.values(searchFilterInput).includes(null);
     if (isEmptyAdvancedSearchFilter) return;
 
@@ -66,6 +66,7 @@ export const useGetDropdownOptions = (
       searchValue === ""
         ? [baseTypeFilter]
         : [baseTypeFilter, getSearchFilter(searchValue, searchFilterInput)];
+
     setAdvancedFilters(advancedFilters as AdvancedFilterInput[]);
     getEntities(undefined);
   };
@@ -88,7 +89,7 @@ export const useGetDropdownOptions = (
 
   return {
     initialize,
-    setSearchInput,
+    getAutocompleteOptions,
     entitiesLoading,
     entityDropdownOptions,
   };

@@ -8,7 +8,7 @@
     :loading="entitiesLoading || relatedEntitiesLoading"
     @search-change="
       (value: string) => {
-        setSearchInput(value);
+        getAutocompleteOptions(value);
       }
     "
     @update:model-value="
@@ -54,7 +54,7 @@ const emit = defineEmits(["update:relations"]);
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
 const { replaceRelationsFromSameType } = useFormHelper();
 const entityId = getEntityIdFromRoute();
-const { initialize, entityDropdownOptions, entitiesLoading, setSearchInput } =
+const { initialize, entityDropdownOptions, entitiesLoading, getAutocompleteOptions } =
   useGetDropdownOptions(
     props.metadataKeyToGetOptionsFor as Entitytyping,
     "fetchAll",
