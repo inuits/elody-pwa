@@ -37,6 +37,7 @@
         v-if="uploadStatus === 'no-upload'"
         type="button"
         :disabled="disabled"
+        @click="emit('clickUploadButton')"
         class="flex justify-center items-center w-full p-2 rounded-md outline-none transition-colors duration-300 disabled:cursor-auto text-neutral-white bg-accent-accent hover:text-accent-accent hover:bg-neutral-lightest active:text-accent-accent active:bg-accent-light disabled:text-text-disabled disabled:bg-neutral-lightest"
       >
         <unicon
@@ -102,6 +103,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (event: "resetUpload"): void;
+  (event: "clickUploadButton"): void;
 }>();
 
 const { t } = useI18n();
