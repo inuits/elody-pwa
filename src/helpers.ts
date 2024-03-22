@@ -50,9 +50,10 @@ export const getEntityPageRoute = (
   };
 };
 
-export const updateEntityMediafileOnlyForMediafiles = (entity: Entity) => {
+export const updateEntityMediafileOnlyForMediafiles = (entity: Entity, onlyRemove: boolean = false) => {
   if (entity.type.toLowerCase() === Entitytyping.Mediafile) {
     useEntityMediafileSelector().setEntityMediafiles([]);
+    if (onlyRemove) return;
     useEntityMediafileSelector().updateSelectedEntityMediafile(entity);
   }
 }

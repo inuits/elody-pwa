@@ -158,7 +158,7 @@ import {
   type BaseRelationValuesInput,
   type ContextMenuActions,
   DamsIcons,
-  EditStatus,
+  EditStatus, Entity,
   EntityListElement,
   Entitytyping,
   type IntialValues,
@@ -173,7 +173,7 @@ import useEditMode from "@/composables/useEdit";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { computed, ref, watch, onUpdated } from "vue";
-import { getEntityIdFromRoute, stringIsUrl } from "@/helpers";
+import { getEntityIdFromRoute, stringIsUrl, updateEntityMediafileOnlyForMediafiles } from "@/helpers";
 import { Unicons } from "@/types";
 import { useFieldArray } from "vee-validate";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
@@ -206,6 +206,7 @@ const props = withDefaults(
     isMediaType?: boolean;
     isEnableNavigation?: boolean;
     entityListElements?: EntityListElement[];
+    entity?: Entity;
   }>(),
   {
     contextMenuActions: undefined,
@@ -227,6 +228,7 @@ const props = withDefaults(
     isMediaType: false,
     isEnableNavigation: false,
     entityListElements: undefined,
+    entity: undefined,
   }
 );
 
@@ -251,6 +253,12 @@ onUpdated(() => {
   if (!orderMetadataChild.value) return;
   orderMetadataChild.value[0]?.setNewValue(props.intialValues?.order);
 });
+
+watch(
+  () => isChecked.value,
+  () => {
+  updateEntityMediafileOnlyForMediafiles(props.entity, !isChecked.value);
+})
 
 const toggleLoading = () => {
   loading.value = !loading.value;

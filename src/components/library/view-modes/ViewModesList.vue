@@ -65,6 +65,7 @@
       :base-library-mode="baseLibraryMode"
       :is-enable-navigation="enableNavigation"
       :entity-list-elements="entityListElements"
+      :entity="entity"
     />
   </component>
 </template>
