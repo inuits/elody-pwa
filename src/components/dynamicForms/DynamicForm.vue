@@ -178,9 +178,11 @@ const setRelationFormFieldState = (relations: {
   relationType: string;
 }) => {
   const { selectedItems, relationType } = relations;
-  const filteredOldRelations: RelationFieldInput[] = 
-    formRelationsFieldsState.value.filter((field: RelationFieldInput) => field.type !== relationType);
-  
+  const filteredOldRelations: RelationFieldInput[] =
+    formRelationsFieldsState.value.filter(
+      (field: RelationFieldInput) => field.type !== relationType
+    );
+
   const newRelations: RelationFieldInput[] = [];
   selectedItems.forEach((item) => {
     newRelations.push({
