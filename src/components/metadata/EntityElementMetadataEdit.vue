@@ -5,13 +5,20 @@
         field.type === InputFieldTypes.DropdownMultiselect ||
         field.type === InputFieldTypes.DropdownSingleselect
       "
+      :key="fieldKey"
       v-model="metadataValue"
       :metadata-key-to-get-options-for="fieldKey"
       :select-type="
         field.type === InputFieldTypes.DropdownSingleselect ? 'single' : 'multi'
       "
-      :relationType="field.relationType"
+      :relation-type="field.relationType"
+      :from-relation-type="field.fromRelationType"
+      :advanced-filter-input-for-searching-options="
+        field.advancedFilterInputForSearchingOptions
+      "
+      :mode="formFlow"
       :options="field.options"
+      @update:relations="updateRelations"
     />
     <BaseDropdownNew
       v-else-if="field.type === InputFieldTypes.Dropdown"
@@ -42,6 +49,7 @@ import {
   InputFieldTypes,
   type InputField as InputFieldType,
 } from "@/generated-types/queries";
+import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import BaseDropdownNew from "../base/BaseDropdownNew.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
@@ -50,7 +58,11 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 
-const emit = defineEmits(["update:value", "registerEnterPressed:value"]);
+const emit = defineEmits([
+  "update:value",
+  "registerEnterPressed:value",
+  "update:relations",
+]);
 
 const props = defineProps<{
   fieldKey: string;
@@ -63,6 +75,7 @@ const props = defineProps<{
   isMetadataOnRelation?: boolean;
   error?: string;
   fieldIsDirty: boolean;
+  formFlow?: string;
 }>();
 const { addEditableMetadataOnRelationKey } = useFormHelper();
 const { t } = useI18n();
@@ -91,6 +104,13 @@ onMounted(() => {
 onUpdated(() => {
   metadataValue.value = props.value;
 });
+
+const updateRelations = (relations: {
+  selectedItems: InBulkProcessableItem[];
+  relationType: string;
+}) => {
+  emit("update:relations", relations);
+};
 
 const getValueFromMetadata = (): string => {
   if (typeof metadataValue.value !== "object") return metadataValue.value;
