@@ -8,6 +8,9 @@
     :show-options="searchable"
     :close-on-select="true"
     :classes="classes"
+    :caret="!disabled"
+    :placeholder="placeholder"
+    :loading="loading"
     :disabled="disabled"
     :object="true"
     label="label"
@@ -25,7 +28,7 @@ import Multiselect from "@vueform/multiselect";
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
-type AutocompleteStyle = "default" | "defaultWithBorder";
+type AutocompleteStyle = "default" | "defaultWithBorder" | "readOnly";
 
 const props = withDefaults(
   defineProps<{
@@ -36,12 +39,14 @@ const props = withDefaults(
     placeholder?: string;
     disabled?: boolean;
     relation?: boolean;
+    loading?: boolean;
   }>(),
   {
     selectType: "multi",
     placeholder: "",
     disabled: false,
     relation: false,
+    loading: false,
   }
 );
 
@@ -80,10 +85,20 @@ const setClasses = () => {
       ? { tags: "multiselect-tags multiselect-tags-margin" }
       : {};
 
+  const defaultContainerStyles = "multiselect rounded-lg items-stretch";
+  classes.value["container"] = `${defaultContainerStyles} border-none`;
+  classes.value["containerActive"] = "outline-1 outline-accent-normal outline-offset-0";
+  classes.value["tagsSearch"] = "multiselect-tags-search !border-none focus:ring-0 p-0";
+  classes.value["tag"] = "multiselect-tag bg-accent-normal !opacity-100";
+  classes.value["dropdown"] = "multiselect-dropdown -bottom-px";
+
   if (props.autocompleteStyle === "defaultWithBorder") {
-    classes.value["container"] = "multiselect multiselect-border";
-    classes.value["dropdown"] =
-      "multiselect-dropdown multiselect-dropdown-border";
+    classes.value["container"] = `${defaultContainerStyles} border-[rgba(0,58,82,0.6)]`;
+  }
+
+  if (props.autocompleteStyle === "readOnly") {
+    classes.value["container"] = "multiselect border-none !bg-white";
+    classes.value["tags"] = "flex-grow flex-shrink flex flex-wrap items-center mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
   }
 };
 

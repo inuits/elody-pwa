@@ -1,72 +1,90 @@
 <template>
   <base-input-autocomplete
-    autocomplete-style="defaultWithBorder"
-    :options="options"
-    ta
+    :autocomplete-style="isEditMode ? 'defaultWithBorder' : 'readOnly'"
+    :options="isEditMode ? entityDropdownOptions : selectedDropdownOptions"
     :select-type="selectType"
     :model-value="selectedDropdownOptions"
+    :disabled="!isEditMode"
+    :loading="entitiesLoading || relatedEntitiesLoading"
+    @search-change="
+      (value: string) => {
+        getAutocompleteOptions(value);
+      }
+    "
     @update:model-value="
-            (value) => {
-              replaceRelationsFromSameType(
-                mapDropdownOptionsToBulkProcessableItem([...value]),
-                relationType as string,
-              );
-              selectedDropdownOptions = [...value];
-            }
-          "
+      (value: DropdownOption[]) => {
+        handleSelect(value);
+      }
+    "
   />
 </template>
 
 <script lang="ts" setup>
-import {
-  AdvancedFilterTypes,
-  type BaseEntity,
-  DamsIcons,
-  type DropdownOption,
-  type Entitytyping,
-  SearchInputType,
-} from "@/generated-types/queries";
-import { computed, onMounted, ref, watch } from "vue";
-import { useBaseLibrary } from "@/components/library/useBaseLibrary";
-import { apolloClient } from "@/main";
-import type { ApolloClient } from "@apollo/client/core";
-import { getEntityTitle } from "@/helpers";
+import type { DropdownOption, Entitytyping, AdvancedFilterInput } from "@/generated-types/queries";
+import { onMounted, ref } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
+import { getEntityIdFromRoute } from "@/helpers";
 
 const props = withDefaults(
   defineProps<{
     modelValue: string[] | string | undefined;
     metadataKeyToGetOptionsFor?: string | "no-key";
     selectType?: "multi" | "single";
-    dropdownOptions: DropdownOption[];
+    advancedFilterInputForSearchingOptions: AdvancedFilterInput
+    options: DropdownOption[];
     relationType: string;
+    fromRelationType: string;
+    isEditMode: boolean;
+    mode: "edit" | "create";
   }>(),
   {
     selectType: "multi",
     label: "",
     metadataKeyToGetOptionsFor: "no-key",
+    isEditMode: true,
+    mode: "edit",
   }
 );
 
+const emit = defineEmits(["update:relations"]);
+
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
 const { replaceRelationsFromSameType } = useFormHelper();
-const { initialize, options } = useGetDropdownOptions(
+const entityId = getEntityIdFromRoute();
+const { initialize, entityDropdownOptions, entitiesLoading, getAutocompleteOptions } =
+  useGetDropdownOptions(
+    props.metadataKeyToGetOptionsFor as Entitytyping,
+    "fetchAll",
+    undefined,
+    props.advancedFilterInputForSearchingOptions
+  );
+
+const {
+  initialize: relatedEntitiesInitialize,
+  entityDropdownOptions: relatedEntitiesOptions,
+  entitiesLoading: relatedEntitiesLoading,
+} = useGetDropdownOptions(
   props.metadataKeyToGetOptionsFor as Entitytyping,
-  "fetchAll"
+  entityId,
+  props.fromRelationType
 );
 
 onMounted(async () => {
-  await initialize();
+  await initAutocompleteOption();
 });
 
-const dropdownValue = computed<string[]>(() => {
-  if (!props.modelValue) return [];
-  if (typeof props.modelValue === "string") return [props.modelValue];
-  return props.modelValue;
-});
+const initAutocompleteOption = async () => {
+  if (props.isEditMode) {
+    await initialize();
+  }
+  if (entityId && props.fromRelationType && props.mode !== "create") {
+    await relatedEntitiesInitialize();
+  }
+  populateSelectedOptions(relatedEntitiesOptions.value);
+};
 
 const mapDropdownOptionsToBulkProcessableItem = (
   dropdownOptions: DropdownOption[]
@@ -80,6 +98,31 @@ const mapDropdownOptionsToBulkProcessableItem = (
   });
   return inBulkProcessableItems;
 };
-</script>
 
-<style></style>
+const populateSelectedOptions = (options: DropdownOption[]) => {
+  if (options.length === 0) return;
+  selectedDropdownOptions.value = options;
+};
+
+const handleSelect = (options: DropdownOption[] | undefined) => {
+  if (options === undefined) return;
+  const bulkProcessableItems: InBulkProcessableItem[] =
+    mapDropdownOptionsToBulkProcessableItem([...options]);
+
+  if (props.mode === "create") {
+    emit("update:relations", {
+      selectedItems: bulkProcessableItems,
+      relationType: props.relationType,
+    });
+  }
+
+  if (props.mode === "edit") {
+    replaceRelationsFromSameType(
+      bulkProcessableItems,
+      props.relationType as string
+    );
+  }
+
+  selectedDropdownOptions.value = [...options];
+};
+</script>
