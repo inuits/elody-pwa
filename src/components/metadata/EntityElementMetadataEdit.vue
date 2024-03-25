@@ -13,7 +13,9 @@
       "
       :relation-type="field.relationType"
       :from-relation-type="field.fromRelationType"
-      :advanced-filter-input-for-searching-options="field.advancedFilterInputForSearchingOptions"
+      :advanced-filter-input-for-searching-options="
+        field.advancedFilterInputForSearchingOptions
+      "
       :mode="formFlow"
       :options="field.options"
       @update:relations="updateRelations"
@@ -56,7 +58,11 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 
-const emit = defineEmits(["update:value", "registerEnterPressed:value", "update:relations"]);
+const emit = defineEmits([
+  "update:value",
+  "registerEnterPressed:value",
+  "update:relations",
+]);
 
 const props = defineProps<{
   fieldKey: string;
@@ -99,7 +105,10 @@ onUpdated(() => {
   metadataValue.value = props.value;
 });
 
-const updateRelations = (relations: { selectedItems: InBulkProcessableItem[], relationType: string  }) => {
+const updateRelations = (relations: {
+  selectedItems: InBulkProcessableItem[];
+  relationType: string;
+}) => {
   emit("update:relations", relations);
 };
 
