@@ -9,17 +9,17 @@
   >
     <div v-show="fileCount === 0" class="inline-block w-9/12 text-center">
       <div class="dz-message" data-dz-message>
-        <span class="text-body">
+        <div class="text-body">
           {{ $t(dropzoneLabel) }}
-        </span>
-        <span v-if="isValidation">
+        </div>
+        <div v-if="isValidation">
           <a
             class="underline text-accent-accent"
             href="/upload-csv-template.csv"
             download
             >{{ $t("upload-fields.csv-template-link") }}</a
           >
-        </span>
+        </div>
       </div>
     </div>
   </div>
