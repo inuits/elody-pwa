@@ -12,6 +12,14 @@
         <span class="text-body">
           {{ $t(dropzoneLabel) }}
         </span>
+        <div v-if="isValidation">
+          <a
+            class="underline text-accent-accent"
+            href="/upload-csv-template.csv"
+            download
+            >{{ $t("upload-fields.csv-template-link") }}</a
+          >
+        </div>
       </div>
     </div>
   </div>
@@ -25,14 +33,15 @@ const dropzoneView = ref<HTMLDivElement>();
 withDefaults(
   defineProps<{
     modelValue: HTMLDivElement | undefined;
-    dropzoneHelper: object;
     dropzoneLabel: string;
+    isValidation: boolean;
     fileCount: number;
     style: string;
   }>(),
   {
     style: "",
-  }
+    isValidation: false,
+  },
 );
 
 const emit = defineEmits<{
