@@ -12,7 +12,7 @@
         <div class="text-body">
           {{ $t(dropzoneLabel) }}
         </div>
-        <div v-if="isValidation">
+        <div v-if="isValidation" @click.stop>
           <a
             class="underline text-accent-accent"
             href="/upload-csv-template.csv"
