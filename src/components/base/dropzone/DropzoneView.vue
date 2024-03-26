@@ -37,7 +37,6 @@ withDefaults(
     isValidation: boolean;
     fileCount: number;
     style: string;
-    isValidation: boolean;
   }>(),
   {
     style: "",
