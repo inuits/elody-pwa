@@ -419,8 +419,8 @@ const getDisplayPreferences = () => {
 };
 
 onMounted(async () => {
-  getDisplayPreferences();
   await initializeBaseLibrary();
+  getDisplayPreferences();
 });
 
 watch(
