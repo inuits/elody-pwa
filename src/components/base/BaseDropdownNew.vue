@@ -105,9 +105,7 @@ const defaultOption: DropdownOption = {
   label: "dropdown.select-option",
   value: "",
 };
-const allOptions = computed(() =>
-  props.options.length > 0 ? props.options : [defaultOption, ...props.options]
-);
+const allOptions = computed(() => props.options.length > 0 ? props.options : [defaultOption, ...props.options]);
 const selectedItem = ref<DropdownOption>(props.defaultOption || defaultOption);
 const selectedItemLabel = computed(() => selectedItem.value.label);
 
