@@ -25,6 +25,8 @@
         type="number"
         input-style="default"
         :is-valid-predicate="(value: number) => value >= 1 && value <= getLastPage()"
+        @focusout="emit('update:skip', currentPage)"
+        @keyup.enter="emit('update:skip', currentPage)"
       />
     </div>
     <span>{{ $t("pagination.of") }}</span>
@@ -72,18 +74,21 @@ const previous = () => {
   if (currentPage.value <= 1) return;
   //savedSkipForOrdering.value--;
   currentPage.value--;
+  emit("update:skip", currentPage.value)
 };
 
 const next = () => {
   if (currentPage.value >= getLastPage()) return;
   //savedSkipForOrdering.value++;
   currentPage.value++;
+  emit("update:skip", currentPage.value)
 };
 
 const goToPage = (page: number) => {
   if (page < 1 || page > getLastPage()) return;
   //savedSkipForOrdering.value = page;
   currentPage.value = page;
+  emit("update:skip", currentPage.value)
 };
 
 const getLastPage = () => {
@@ -97,9 +102,5 @@ watch(
   () => {
     if (currentPage.value > getLastPage()) currentPage.value = 1;
   }
-);
-watch(
-  () => currentPage.value,
-  () => emit("update:skip", currentPage.value)
 );
 </script>
