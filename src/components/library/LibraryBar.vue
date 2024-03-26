@@ -44,6 +44,7 @@
         :total-items="
           totalItems || getStateForRoute(props.route)?.totalEntityCount || 1
         "
+        @update:skip="setSkip"
       />
     </div>
   </div>
@@ -162,10 +163,9 @@ onMounted(() => {
   emit("sortOptionsPromise", sortOptionsPromise);
 });
 
-watch(
-  () => selectedSkip.value,
-  async () => await props.setSkip(selectedSkip.value, true)
-);
+const setSkip = async (newSkip: number) => {
+  await props.setSkip(newSkip, true);
+}
 watch(
   () => selectedPaginationLimitOption.value,
   async () =>
