@@ -1,5 +1,6 @@
 import Dropzone, { type DropzoneFile } from "dropzone";
 import { ref } from "vue";
+import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 
 type DropzoneSettings = {
   url: string;
@@ -51,7 +52,6 @@ export class useDropzone {
       dropzoneView,
       this.getDropzoneSettings(dropzonePreview)
     );
-
     return this.dropzone.value;
   };
 

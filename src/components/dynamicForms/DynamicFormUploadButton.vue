@@ -1,31 +1,21 @@
 <template>
   <div class="rounded-md pb-2">
     <div class="flex">
-      <div v-if="errors.length" class="w-full bg-red-light p-2">
-        <ul>
-          <li
-            v-for="error in errors"
-            class="text-red-default flex items-center"
-          >
-            - {{ t(error) }}
-          </li>
-        </ul>
-      </div>
       <div
-        v-if="uploadStatus === 'upload-finished' && !errors.length"
+        v-if="uploadStatus === 'upload-finished' && !uploadContainsErrors"
         class="w-full bg-green-light p-2 text-green-default font-bold flex"
       >
         <p class="w-full flex items-center">
           {{ t("actions.labels.success", [amountUploaded]) }}
         </p>
-        <!--        <div class="w-1/4">-->
-        <!--          <base-button-new-->
-        <!--            icon="Redo"-->
-        <!--            :label="t('actions.labels.reset-upload')"-->
-        <!--            button-style="accentAccent"-->
-        <!--            @click="emit('resetUpload')"-->
-        <!--          />-->
-        <!--        </div>-->
+        <div class="w-1/4">
+          <base-button-new
+            icon="Redo"
+            :label="t('actions.labels.reset-upload')"
+            button-style="accentAccent"
+            @click="resetUpload"
+          />
+        </div>
       </div>
       <progress-bar
         v-else
@@ -63,7 +53,7 @@
       >
         <base-progress-step
           :label="progressStep.label"
-          :step-type="progressStep.status"
+          :status="progressStep.status"
         />
         <unicon
           :name="Unicons.EllipsisH.name"
@@ -93,12 +83,9 @@ const props = withDefaults(
     label: string;
     icon: DamsIcons;
     disabled: boolean;
-    errors?: string[];
     progressIndicator?: ActionProgress;
   }>(),
-  {
-    errors: [],
-  }
+  {}
 );
 
 const emit = defineEmits<{
@@ -107,8 +94,14 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const { uploadProgress, uploadStatus, amountUploaded, mediafiles } =
-  useUpload();
+const {
+  uploadProgress,
+  uploadStatus,
+  amountUploaded,
+  mediafiles,
+  resetUpload,
+  uploadContainsErrors,
+} = useUpload();
 </script>
 
 <style scoped></style>

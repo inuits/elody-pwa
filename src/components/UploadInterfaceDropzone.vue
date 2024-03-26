@@ -7,10 +7,11 @@
     :key="uploadFieldType"
   >
     <dropzone
-      :dropzone-helper="dropzoneHelper"
+      :dropzone="dropzone"
       :dropzone-label="dropzoneLabel"
       view-style="p-3 h-full overflow-x-hidden mb-4"
       :isValidationFile="dryRun"
+      :progress-steps="fileProgressSteps"
     />
   </div>
 </template>
@@ -20,6 +21,7 @@ import Dropzone from "@/components/base/dropzone/Dropzone.vue";
 import { useDropzone } from "@/composables/useDropzone";
 import useUpload from "@/composables/useUpload";
 import {
+  type FileProgress,
   ModalState,
   TypeModals,
   UploadFieldType,
@@ -32,10 +34,11 @@ const config = inject("config") as any;
 const { closeModal, getModalInfo } = useBaseModal();
 const { t } = useI18n();
 const { upload, files, uploadType, resetUpload, isCsvRequired } = useUpload();
-const dropzoneHelper = new useDropzone();
+const dropzone = new useDropzone();
 const isRequired = computed(() =>
   props.validation ? props.validation.includes("required") : false,
 );
+const fileProgressSteps = computed(() => props.progressIndicator.steps);
 
 const props = withDefaults(
   defineProps<{
@@ -49,6 +52,7 @@ const props = withDefaults(
     uploadFieldType: UploadFieldType;
     validation?: string;
     uploadMultiple: boolean;
+    progressIndicator: FileProgress;
   }>(),
   {
     dropzoneSize: "big",
@@ -69,24 +73,19 @@ const getDropzoneSize = (size: "small" | "normal" | "big") => {
 
 const setUseUploadVariables = () => {
   uploadType.value = props.uploadFieldType as UploadFieldType;
-  dropzoneHelper.dropzoneSettings.uploadMultiple = props.uploadMultiple;
   if (props.dryRun && isRequired.value) isCsvRequired.value = true;
   if (props.acceptedFileTypes)
-    dropzoneHelper.dropzoneSettings.value.acceptedFiles =
-      props.acceptedFileTypes.map((type: string) => `.${type}`).join(", ");
+    dropzone.dropzoneSettings.value.acceptedFiles = props.acceptedFileTypes
+      .map((type: string) => `.${type}`)
+      .join(", ");
   if (props.maxFileSize)
-    dropzoneHelper.dropzoneSettings.value.maxFileSize = props.maxFileSize;
+    dropzone.dropzoneSettings.value.maxFileSize = props.maxFileSize;
   if (props.maxAmountOfFiles)
-    dropzoneHelper.dropzoneSettings.value.maxFiles = props.maxAmountOfFiles;
+    dropzone.dropzoneSettings.value.maxFiles = props.maxAmountOfFiles;
 };
 
 watch(
-  () => [
-    props.uploadType,
-    props.acceptedFileTypes,
-    props.maxFileSize,
-    props.uploadFieldType,
-  ],
+  () => [props.acceptedFileTypes, props.maxFileSize, props.uploadFieldType],
   () => {
     setUseUploadVariables();
   },
@@ -97,7 +96,7 @@ watch(
   () => getModalInfo(TypeModals.DynamicForm).state,
   () => {
     if (getModalInfo(TypeModals.DynamicForm).state === ModalState.Hide) {
-      dropzoneHelper.resetDropzone();
+      dropzone.resetDropzone();
       resetUpload();
     }
   },

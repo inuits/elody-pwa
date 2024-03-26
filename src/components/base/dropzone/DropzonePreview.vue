@@ -17,13 +17,16 @@
         ></span>
       </div>
       <div class="flex justify-between items-center">
-        <div class="px-2">
-          <!--          <base-progress-step-->
-          <!--            v-for="(step, index) in steps"-->
-          <!--            :key="index"-->
-          <!--            :step-type="step"-->
-          <!--          />-->
+        <div class="flex px-2 items-center">
+          <div
+            v-for="(step, index) in progressSteps"
+            :key="index"
+            class="px-0.5"
+          >
+            <base-progress-step :status="step.status" :title="step.label" />
+          </div>
         </div>
+
         <a
           data-dz-remove
           class="cursor-pointer flex justify-center items-center bg-neutral-light rounded-lg w-10 h-8 mt-1 mr-2"
@@ -36,26 +39,18 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref } from "vue";
 import { Unicons } from "@/types";
-import useUpload from "@/composables/useUpload";
 import BaseProgressStep from "@/components/base/BaseProgressStep.vue";
+import type { FileProgressStep } from "@/generated-types/queries";
 
 const dropzonePreview = ref<HTMLDivElement>();
 
 defineProps<{
   modelValue: HTMLDivElement | undefined;
   isValidationFile: boolean;
+  progressSteps: FileProgressStep[];
 }>();
-
-const { dryRunStatus } = useUpload();
-// const steps = computed((): string[] =>
-//   dryRunStatus.value === "loading"
-//     ? ["loading"]
-//     : dryRunStatus.value === "correctly-verified"
-//       ? ["complete"]
-//       : [],
-// );
 
 const emit = defineEmits<{
   (event: "update:modelValue", modelValue: HTMLDivElement | undefined): void;
