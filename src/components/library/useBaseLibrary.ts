@@ -176,7 +176,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     () => entitiesLoading.value,
     () => {
       if (entitiesLoading.value && _route?.name !== "SingleEntity") {
-        let placeholderAmount = 1;
+        let placeholderAmount = 20;
         const entityCountOnPage = getStateForRoute(_route)?.entityCountOnPage;
         if (entityCountOnPage !== undefined)
           placeholderAmount = entityCountOnPage;
