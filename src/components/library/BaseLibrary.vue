@@ -117,7 +117,7 @@
             @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
           >
             <ViewModesList
-              v-if="displayList"
+              v-if="displayList || (entitiesLoading && route?.name !== 'SingleEntity')"
               :entities="entities as Entity[]"
               :entities-loading="entitiesLoading"
               :bulk-operations-context="bulkOperationsContext"
