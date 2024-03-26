@@ -1,8 +1,8 @@
 <template>
   <dropzone-view
     v-model="dropzoneView"
-    :dropzone-helper="dropzoneHelper"
     :dropzone-label="dropzoneLabel"
+    :isValidation="isValidationFile"
     :file-count="fileCount"
     :style="viewStyle"
   />
@@ -34,7 +34,7 @@ const props = withDefaults(
   {
     viewStyle: "",
     isValidationFile: false,
-  }
+  },
 );
 
 const emit = defineEmits<{
@@ -46,7 +46,7 @@ const { addFileToUpload, removeFileToUpload, files, dryRunCsv } = useUpload();
 onMounted(() => {
   const dropzone = props.dropzoneHelper.initDropzone(
     dropzoneView.value!,
-    dropzonePreview.value!
+    dropzonePreview.value!,
   );
 
   dropzone.on("addedfile", (file) => {
@@ -67,7 +67,7 @@ onMounted(() => {
       filesInDropzone.value = dropzone.files;
       fileCount.value = dropzone.files.length;
     },
-    { immediate: true }
+    { immediate: true },
   );
 });
 </script>
