@@ -1,4 +1,4 @@
-import type { DropzoneFile } from "dropzone";
+import Dropzone, { type DropzoneFile } from "dropzone";
 import { computed, ref, toRaw, watch } from "vue";
 import {
   NotificationType,
@@ -11,6 +11,7 @@ import {
   UploadFieldType,
 } from "@/generated-types/queries";
 import useEntitySingle from "@/composables/useEntitySingle";
+import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 
 type FileError = {
   filename: string;
@@ -25,9 +26,8 @@ const amountUploaded = ref<number>(0);
 const dryRunComplete = ref<boolean>(false);
 const dryRunErrors = ref<string[]>([]);
 const files = ref<DropzoneFile[]>([]);
-const mediafiles = computed(
-  (): DropzoneFile =>
-    files.value.filter((file: DropzoneFile) => file.type !== "text/csv")
+const mediafiles = computed((): DropzoneFile[] =>
+  files.value.filter((file: DropzoneFile) => file.type !== "text/csv")
 );
 const uploadProgressPercentage = ref<number>(0);
 const uploadType = ref<UploadFieldType>(UploadFieldType.Batch);
@@ -46,6 +46,9 @@ const enableUploadButton = computed(() => {
         progressStep.status === ProgressStepStatus.Complete
     );
 });
+const uploadContainsErrors = computed(
+  () => !dryRunErrors.value && fileErrors.value
+);
 
 const useUpload = () => {
   let _prefetchedUploadUrls: string[] | "not-prefetched-yet" =
@@ -302,12 +305,21 @@ const useUpload = () => {
     uploadProgressPercentage.value = newPercentage;
   };
 
+  const resetUploadDropzone = (): void => {
+    useDynamicForm().dynamicFormUploadFields.value.forEach(
+      (dropzone: Dropzone) => {
+        dropzone.removeAllFiles();
+      }
+    );
+  };
+
   const resetUpload = () => {
     uploadStatus.value = "no-upload";
     dryRunErrors.value = [];
     files.value = [];
     requiredMediafiles.value = undefined;
     amountUploaded.value = 0;
+    resetUploadDropzone();
     resetUploadProgress();
   };
 
@@ -430,6 +442,7 @@ const useUpload = () => {
     isCsvRequired,
     uploadProgress,
     amountUploaded,
+    uploadContainsErrors,
   };
 };
 
