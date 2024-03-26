@@ -349,6 +349,16 @@ const useUpload = () => {
         return true;
       }
 
+      __updateUploadProgress(
+        ProgressStepType.Prepare,
+        ProgressStepStatus.Loading
+      );
+
+      if (!requiredMediafiles.value) {
+        resetUploadProgress();
+        return true;
+      }
+
       const requiredFileNames: string[] = [...requiredMediafiles.value];
       let areAllFilesPresent: boolean = true;
 
