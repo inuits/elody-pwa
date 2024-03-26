@@ -20,6 +20,14 @@
             >{{ $t("upload-fields.csv-template-link") }}</a
           >
         </div>
+        <div v-if="isValidation">
+          <a
+            class="underline text-accent-accent"
+            href="/upload-csv-template.csv"
+            download
+            >{{ $t("upload-fields.csv-template-link") }}</a
+          >
+        </div>
       </div>
     </div>
   </div>
@@ -34,6 +42,7 @@ withDefaults(
   defineProps<{
     modelValue: HTMLDivElement | undefined;
     dropzoneLabel: string;
+    isValidation: boolean;
     fileCount: number;
     style: string;
     isValidation: boolean;
