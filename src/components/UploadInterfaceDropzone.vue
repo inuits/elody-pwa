@@ -34,7 +34,7 @@ const { t } = useI18n();
 const { upload, files, uploadType, resetUpload, isCsvRequired } = useUpload();
 const dropzoneHelper = new useDropzone();
 const isRequired = computed(() =>
-  props.validation ? props.validation.includes("required") : false
+  props.validation ? props.validation.includes("required") : false,
 );
 
 const props = withDefaults(
@@ -55,13 +55,13 @@ const props = withDefaults(
     isLinkedUpload: false,
     dryRun: false,
     uploadMultiple: false,
-  }
+  },
 );
 
 const getDropzoneSize = (size: "small" | "normal" | "big") => {
   const sizeObject = {
-    small: "h-[25vh]",
-    normal: "h-[55vh]",
+    small: "h-[20vh]",
+    normal: "h-[60vh]",
     big: "h-[85vh]",
   };
   return sizeObject[size];
@@ -90,7 +90,7 @@ watch(
   () => {
     setUseUploadVariables();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
@@ -100,7 +100,7 @@ watch(
       dropzoneHelper.resetDropzone();
       resetUpload();
     }
-  }
+  },
 );
 </script>
 
