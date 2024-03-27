@@ -108,6 +108,8 @@ const updateRelations = (relations: {
   selectedItems: InBulkProcessableItem[];
   relationType: string;
 }) => {
+  const value = relations.selectedItems.length > 0 ? relations.relationType : undefined;
+  setNewValue(value);
   emit("update:relations", relations);
 };
 
