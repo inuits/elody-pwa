@@ -21,6 +21,8 @@
           :metadata="field"
           :is-edit="true"
           form-flow="create"
+          @update:field="setFormFieldState"
+          @update:relations="setRelationFormFieldState"
         />
         <upload-interface-dropzone
           v-if="field.__typename === 'UploadField'"
@@ -84,11 +86,13 @@ import {
   EntityInput,
   Entitytyping,
   FormAction,
-  type MetadataInput,
   PanelMetaData,
   TypeModals,
   UploadField,
+  EditStatus,
+  type RelationFieldInput,
 } from "@/generated-types/queries";
+import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import { computed, inject, ref, watch } from "vue";
@@ -102,8 +106,6 @@ import type { Router } from "vue-router";
 import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUploadButton.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
-import type { FormContext } from "vee-validate";
-import { useFormHelper } from "@/composables/useFormHelper";
 
 type FormFieldState = {
   fieldKey: string;
@@ -126,7 +128,6 @@ const props = withDefaults(
 const config = inject("config");
 const { currentTenant } = useApp();
 
-const { createForm, deleteForm } = useFormHelper();
 const { loadDocument } = useImport();
 const { closeModal, getModalInfo } = useBaseModal();
 const { getDynamicForm, dynamicForm, performSubmitAction } = useDynamicForm();
@@ -148,8 +149,14 @@ const formFields = computed<
     (value) => typeof value === "object"
   );
 });
-const form = ref<FormContext<any>>();
-const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
+const formFieldsState = ref<Object[]>([]);
+const formRelationsFieldsState = ref<RelationFieldInput[]>([]);
+const formContainsErrors = computed((): boolean =>
+  formFieldsState.value.some(
+    (formFieldState: FormFieldState) =>
+      formFieldState.errorMessage !== undefined
+  )
+);
 const uploadFileErrors = computed((): string[] => [
   ...dryRunErrors.value,
   ...fileErrors.value.map((error) =>
@@ -158,14 +165,48 @@ const uploadFileErrors = computed((): string[] => [
 ]);
 const { t } = useI18n();
 
+const setFormFieldState = (fieldValue: FormFieldState) => {
+  formFieldsState.value = formFieldsState.value.filter(
+    (formFieldState: FormFieldState) =>
+      formFieldState.fieldKey !== fieldValue.fieldKey
+  );
+  formFieldsState.value.push(fieldValue);
+};
+
+const setRelationFormFieldState = (relations: {
+  selectedItems: InBulkProcessableItem[];
+  relationType: string;
+}) => {
+  const { selectedItems, relationType } = relations;
+  const filteredOldRelations: RelationFieldInput[] =
+    formRelationsFieldsState.value.filter(
+      (field: RelationFieldInput) => field.type !== relationType
+    );
+
+  const newRelations: RelationFieldInput[] = [];
+  selectedItems.forEach((item) => {
+    newRelations.push({
+      key: item.id,
+      type: relationType,
+      editStatus: EditStatus.New,
+      value: item.value,
+    });
+  });
+
+  formRelationsFieldsState.value = [...filteredOldRelations, ...newRelations];
+};
+
 const createEntityFromFormInput = (entityType: Entitytyping): EntityInput => {
   let entity: EntityInput = { type: entityType };
-  entity.metadata = Object.keys(form.value?.values.intialValues)
-    .map((key) => {
-      return { key, value: form.value?.values.intialValues[key] };
-    })
-    .filter((metadataItem: MetadataInput) => metadataItem.value);
-  entity.relations = form.value?.values.relationValues.relations;
+  entity.metadata = formFieldsState.value.map(
+    (formFieldState: FormFieldState) => {
+      return {
+        key: formFieldState.fieldKey,
+        value: formFieldState.value,
+      };
+    }
+  );
+  entity.relations = formRelationsFieldsState.value;
   return entity;
 };
 
@@ -188,7 +229,6 @@ const performActionButtonClickEvent = async (
     const entity = (await performSubmitAction(document, entityInput)).data
       .CreateEntity;
     closeModal(TypeModals.DynamicForm);
-    deleteForm(props.dynamicFormQuery);
     goToEntityPage(entity, "SingleEntity", props.router);
   }
 };
@@ -210,7 +250,7 @@ const getUploadProgressSteps = (
   return Object.values(progressIndicator).filter(
     (value: any) =>
       typeof value === "object" && value.__typename === "ActionProgressStep"
-  ) as ActionProgressStep[];
+  );
 };
 
 const initializeForm = async () => {
@@ -223,14 +263,6 @@ const initializeForm = async () => {
 watch(
   () => props.dynamicFormQuery,
   async () => {
-    deleteForm(props.dynamicFormQuery);
-    if (!form.value)
-      form.value = createForm(props.dynamicFormQuery, {
-        intialValues: {},
-        relationValues: {},
-      } as {
-        [key: string]: object;
-      });
     await initializeForm();
   },
   { immediate: true }
