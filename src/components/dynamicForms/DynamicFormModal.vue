@@ -10,11 +10,29 @@
     "
     @hide-modal="closeModal(TypeModals.DynamicForm)"
   >
-    <dynamic-form
-      v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
-      :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
-      :router="useRouter()"
-    />
+    <div class="flex flex-col w-full h-full overflow-auto">
+      <template v-if="getModalInfo(TypeModals.DynamicForm).formQuery === 'GetUploadForm'">
+        <BaseTabs class="h-full" :onTabClick="onTabClick">
+          <BaseTab :title="t('entity.upload')">
+            <DynamicForm
+              v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
+              :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
+              :router="useRouter()"
+            />
+          </BaseTab>
+          <BaseTab :title="'Import'">
+            <ImportComponent :selectedIndex="selectedIndex" />
+          </BaseTab>
+        </BaseTabs>
+      </template>
+      <template v-else>
+        <DynamicForm
+          v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
+          :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
+          :router="useRouter()"
+        />
+      </template>
+    </div>
   </BaseModal>
 </template>
 
@@ -24,8 +42,19 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { ModalState, TypeModals } from "@/generated-types/queries";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import { useRouter } from "vue-router";
+import BaseTabs from "@/components/BaseTabs.vue";
+import BaseTab from "@/components/BaseTab.vue";
+import { useI18n } from "vue-i18n";
+import ImportComponent from "@/components/ImportComponent.vue";
+import { ref } from 'vue';
 
 const { closeModal, getModalInfo } = useBaseModal();
+const { t } = useI18n();
+const selectedIndex = ref(0);
+
+const onTabClick = (index: number) => {
+  selectedIndex.value = index;
+};
 </script>
 
 <style scoped></style>

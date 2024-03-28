@@ -28,7 +28,7 @@ import {
   onBeforeMount,
   toRefs,
 } from "vue";
-import type { VNode } from "vue";
+import type { VNode, Slots } from "vue";
 
 interface TabProps {
   title?: string;
@@ -36,7 +36,7 @@ interface TabProps {
 
 export default defineComponent({
   name: "BaseTabs",
-  setup(props, { slots }) {
+  setup(props, { slots, emit }) {
     const state = reactive({
       selectedIndex: 0,
       tabs: [] as VNode<TabProps>[],
@@ -44,9 +44,9 @@ export default defineComponent({
     });
 
     provide("TabsProvider", state);
-
     const selectTab = (i: number) => {
       state.selectedIndex = i;
+      emit("tab-click", i);
     };
 
     onBeforeMount(() => {
