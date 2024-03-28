@@ -18,7 +18,7 @@
       "
       :mode="formFlow"
       :options="field.options"
-      @update:relations="updateRelations"
+      :form-id="formId"
     />
     <BaseDropdownNew
       v-else-if="field.type === InputFieldTypes.Dropdown"
@@ -58,11 +58,7 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 
-const emit = defineEmits([
-  "update:value",
-  "registerEnterPressed:value",
-  "update:relations",
-]);
+const emit = defineEmits(["update:value", "registerEnterPressed:value"]);
 
 const props = defineProps<{
   fieldKey: string;
@@ -104,13 +100,6 @@ onMounted(() => {
 onUpdated(() => {
   metadataValue.value = props.value;
 });
-
-const updateRelations = (relations: {
-  selectedItems: InBulkProcessableItem[];
-  relationType: string;
-}) => {
-  emit("update:relations", relations);
-};
 
 const getValueFromMetadata = (): string => {
   if (typeof metadataValue.value !== "object") return metadataValue.value;
