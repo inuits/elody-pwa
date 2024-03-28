@@ -1,76 +1,67 @@
 <template>
-  <div :key="label">
-    <div
-      v-if="!metadata.showOnlyInEditMode"
-      class="text-text-light text-sm flex"
-    >
-      <p>
-        {{ metadata.label ? t(metadata.label) : t("metadata.no-label") }}
-      </p>
-      <p v-if="isFieldRequired && isEdit" class="pl-1">*</p>
-    </div>
-    <entity-element-metadata-edit
-      v-if="isEdit && metadata.inputField"
-      :fieldKey="isMetadataOnRelation ? `${fieldKeyWithId}` : metadata.key"
-      :label="metadata.label as string"
-      v-model:value="value"
-      :field="metadata.inputField"
-      :formId="formId"
-      :formFlow="formFlow"
-      :unit="metadata.unit"
-      :link-text="metadata.linkText"
-      :isMetadataOnRelation="isMetadataOnRelation"
-      :error="errorMessage"
-      :fieldIsDirty="fieldIsDirty"
-      @update:value="setNewValue"
-      @register-enter-pressed:value="registerEnterKeyPressed"
-    />
-    <base-tooltip
-      v-else
-      class="w-full"
-      position="right-end"
-      :tooltip-offset="8"
-    >
-      <template #activator="{ on }">
-        <div v-on="on">
-          <ViewModesAutocomplete
-            v-if="
-              (metadata.inputField?.type ===
-                InputFieldTypes.DropdownMultiselect ||
-                metadata.inputField?.type ===
-                  InputFieldTypes.DropdownSingleselect) &&
-              metadata.value
-            "
-            :metadata-key-to-get-options-for="metadata.key"
-            :from-relation-type="metadata.inputField?.fromRelationType"
-            :is-edit-mode="false"
-          />
-          <entity-element-metadata
-            v-else
-            class="line-clamp-1"
-            :label="metadata.label as string"
-            v-model:value="value"
-            :link-text="metadata.linkText"
-            :link-icon="metadata.linkIcon"
-            :unit="metadata.unit"
-            :base-library-mode="baseLibraryMode"
-            :basic-base-library-as-value="basicBaseLibraryAsValue"
-          />
-        </div>
-      </template>
-      <template #default>
+  <div v-if="!metadata.showOnlyInEditMode" class="text-text-light text-sm flex">
+    <p>
+      {{ metadata.label ? t(metadata.label) : t("metadata.no-label") }}
+    </p>
+    <p v-if="isFieldRequired && isEdit" class="pl-1">*</p>
+  </div>
+  <entity-element-metadata-edit
+    v-if="isEdit && metadata.inputField"
+    :fieldKey="isMetadataOnRelation ? `${fieldKeyWithId}` : metadata.key"
+    :label="metadata.label as string"
+    v-model:value="value"
+    :field="metadata.inputField"
+    :formId="formId"
+    :formFlow="formFlow"
+    :unit="metadata.unit"
+    :link-text="metadata.linkText"
+    :isMetadataOnRelation="isMetadataOnRelation"
+    :error="errorMessage"
+    :fieldIsDirty="fieldIsDirty"
+    @update:value="setNewValue"
+    @update:relations="updateRelations"
+    @register-enter-pressed:value="registerEnterKeyPressed"
+  />
+  <base-tooltip v-else class="w-full" position="right-end" :tooltip-offset="8">
+    <template #activator="{ on }">
+      <div v-on="on">
+        <ViewModesAutocomplete
+          v-if="
+            (metadata.inputField?.type ===
+              InputFieldTypes.DropdownMultiselect ||
+              metadata.inputField?.type ===
+                InputFieldTypes.DropdownSingleselect) &&
+            metadata.value
+          "
+          :metadata-key-to-get-options-for="metadata.key"
+          :from-relation-type="metadata.inputField?.fromRelationType"
+          :is-edit-mode="false"
+        />
         <entity-element-metadata
-          class="text-text-placeholder"
+          v-else
+          class="line-clamp-1"
           :label="metadata.label as string"
           v-model:value="value"
           :link-text="metadata.linkText"
           :link-icon="metadata.linkIcon"
           :unit="metadata.unit"
           :base-library-mode="baseLibraryMode"
+          :basic-base-library-as-value="basicBaseLibraryAsValue"
         />
-      </template>
-    </base-tooltip>
-  </div>
+      </div>
+    </template>
+    <template #default>
+      <entity-element-metadata
+        class="text-text-placeholder"
+        :label="metadata.label as string"
+        v-model:value="value"
+        :link-text="metadata.linkText"
+        :link-icon="metadata.linkIcon"
+        :unit="metadata.unit"
+        :base-library-mode="baseLibraryMode"
+      />
+    </template>
+  </base-tooltip>
 </template>
 
 <script lang="ts" setup>
@@ -100,7 +91,7 @@ const props = withDefaults(
   defineProps<{
     isEdit: boolean;
     formId: string;
-    metadata: PanelMetaData;
+    metadata: MetadataField;
     linkedEntityId?: String;
     baseLibraryMode?: BaseLibraryModes;
     formFlow: "edit" | "create";
@@ -111,7 +102,16 @@ const props = withDefaults(
   }
 );
 
-const emit = defineEmits(["update:relations"]);
+const emit = defineEmits(["update:field", "update:relations"]);
+
+const updateRelations = (relations: {
+  selectedItems: InBulkProcessableItem[];
+  relationType: string;
+}) => {
+  const value = relations.selectedItems.length > 0 ? relations.relationType : undefined;
+  setNewValue(value);
+  emit("update:relations", relations);
+};
 
 const setNewValue = (newValue: string) => {
   value.value = newValue;
@@ -152,11 +152,6 @@ const getValidationRules = (metadata: PanelMetaData): string => {
   return rules;
 };
 const rules = computed(() => getValidationRules(props.metadata));
-const label = computed(() =>
-  props.metadata.label
-    ? t(props.metadata.label as string)
-    : t("metadata.no-label")
-);
 
 const veeValidateField = computed(() => {
   if (isMetadataOnRelation.value)
@@ -171,7 +166,11 @@ const veeValidateField = computed(() => {
 const { errorMessage, value, meta } = useField<string>(
   veeValidateField,
   rules,
-  { label: label }
+  {
+    label: props.metadata.label
+      ? t(props.metadata.label as string)
+      : t("metadata.no-label"),
+  }
 );
 
 onMounted(() => {
@@ -194,6 +193,18 @@ watch(
   () => props.isEdit,
   () => {
     if (!props.isEdit) setNewValue(props.metadata.value);
+  }
+);
+
+watch(
+  () => [errorMessage.value, value.value, meta.value],
+  () => {
+    emit("update:field", {
+      fieldKey: props.metadata.key,
+      errorMessage: errorMessage.value,
+      value: value.value,
+      meta: meta.value,
+    });
   }
 );
 </script>
