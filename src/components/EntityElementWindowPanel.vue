@@ -5,7 +5,7 @@
       class="flex items-center justify-between cursor-pointer"
     >
       <h2 v-if="showLabel">{{ t(panel.label) }}</h2>
-      <div>
+      <div class="w-full flex justify-end">
         <unicon :name="!isCollapsed ? Unicons.Minus.name : Unicons.Plus.name" />
       </div>
     </div>
@@ -136,7 +136,7 @@ const metadatafields = computed(() => {
 <style scoped>
 .v-enter-active,
 .v-leave-active {
-  transition: transform 0.5s ease;
+  transition: transform 0.1s linear;
   transform-origin: top;
 }
 
