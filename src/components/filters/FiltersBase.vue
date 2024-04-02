@@ -100,12 +100,14 @@
               const filter = filters.filter(
                 (filter) => filter.advancedFilter.key === key
               )[0];
+              if (filter.advancedFilter.hidden) return;
               filter.isActive = false;
               filter.inputFromState = undefined;
               filter.selectedMatcher = undefined;
               activeFilters = activeFilters.filter(
                 (filter) => filter.key !== key
               );
+              applyFilters(true);
             }
           "
         />
