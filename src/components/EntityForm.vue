@@ -85,6 +85,7 @@ const parseFormValuesToFormInput = (values: EntityValues) => {
     });
 
   const relations: BaseRelationValuesInput[] = [];
+  console.log(values.relationValues?.relations);
   values?.relationValues?.relations?.forEach((relation) => {
     const relationInput: any = {};
     Object.keys(relation)
