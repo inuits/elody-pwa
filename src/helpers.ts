@@ -40,7 +40,7 @@ export const getEntityPageRoute = (
   listItemRouteName: string
 ) => {
   const entityId =
-    entity.intialValues.slug ||
+    entity.intialValues?.slug ||
     entity.uuid ||
     entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")?.value;
 
