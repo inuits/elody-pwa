@@ -122,7 +122,6 @@ const handleSelect = (options: DropdownOption[] | undefined) => {
   }
 
   if (props.mode === "edit") {
-    console.log("edit", bulkProcessableItems);
     replaceRelationsFromSameType(
       bulkProcessableItems,
       props.relationType as string,

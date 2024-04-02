@@ -229,8 +229,6 @@ const useFormHelper = () => {
     const relationsToSet: BaseRelationValuesInput[] = otherRelations || [];
     if (newRelations) relationsToSet.push(...newRelations);
 
-    console.log(relationsToSet);
-
     form.setFieldValue("relationValues.relations", relationsToSet);
   };
 
