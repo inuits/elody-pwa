@@ -20,7 +20,11 @@
 </template>
 
 <script lang="ts" setup>
-import type { DropdownOption, Entitytyping, AdvancedFilterInput } from "@/generated-types/queries";
+import type {
+  DropdownOption,
+  Entitytyping,
+  AdvancedFilterInput,
+} from "@/generated-types/queries";
 import { onMounted, ref } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
@@ -33,12 +37,13 @@ const props = withDefaults(
     modelValue: string[] | string | undefined;
     metadataKeyToGetOptionsFor?: string | "no-key";
     selectType?: "multi" | "single";
-    advancedFilterInputForSearchingOptions: AdvancedFilterInput
+    advancedFilterInputForSearchingOptions: AdvancedFilterInput;
     options: DropdownOption[];
     relationType: string;
     fromRelationType: string;
     isEditMode: boolean;
     mode: "edit" | "create";
+    formId: string | undefined;
   }>(),
   {
     selectType: "multi",
@@ -46,21 +51,24 @@ const props = withDefaults(
     metadataKeyToGetOptionsFor: "no-key",
     isEditMode: true,
     mode: "edit",
+    formId: undefined,
   }
 );
 
-const emit = defineEmits(["update:relations"]);
-
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
-const { replaceRelationsFromSameType } = useFormHelper();
+const { replaceRelationsFromSameType, addRelations } = useFormHelper();
 const entityId = getEntityIdFromRoute();
-const { initialize, entityDropdownOptions, entitiesLoading, getAutocompleteOptions } =
-  useGetDropdownOptions(
-    props.metadataKeyToGetOptionsFor as Entitytyping,
-    "fetchAll",
-    undefined,
-    props.advancedFilterInputForSearchingOptions
-  );
+const {
+  initialize,
+  entityDropdownOptions,
+  entitiesLoading,
+  getAutocompleteOptions,
+} = useGetDropdownOptions(
+  props.metadataKeyToGetOptionsFor as Entitytyping,
+  "fetchAll",
+  undefined,
+  props.advancedFilterInputForSearchingOptions
+);
 
 const {
   initialize: relatedEntitiesInitialize,
@@ -110,16 +118,15 @@ const handleSelect = (options: DropdownOption[] | undefined) => {
     mapDropdownOptionsToBulkProcessableItem([...options]);
 
   if (props.mode === "create") {
-    emit("update:relations", {
-      selectedItems: bulkProcessableItems,
-      relationType: props.relationType,
-    });
+    addRelations(bulkProcessableItems, props.relationType, props.formId);
   }
 
   if (props.mode === "edit") {
+    console.log("edit", bulkProcessableItems);
     replaceRelationsFromSameType(
       bulkProcessableItems,
-      props.relationType as string
+      props.relationType as string,
+      props.formId
     );
   }
 

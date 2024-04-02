@@ -6,7 +6,13 @@ import {
   type RelationValues,
 } from "@/generated-types/queries";
 import { findPanelMetadata } from "@/helpers";
-import { defineRule, type FormContext, useField, useForm } from "vee-validate";
+import {
+  defineRule,
+  type FormContext,
+  useField,
+  useForm,
+  useResetForm,
+} from "vee-validate";
 import { ref } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
@@ -40,17 +46,9 @@ const useFormHelper = () => {
     key: string,
     formValues: EntityValues
   ): FormContext<any> => {
-    // if (forms.value[key]) {
-    //   const form = forms.value[key];
-    //   form.values = formValues;
-    //   return form;
-    // }
     const form = useForm<EntityValues>({
       initialValues: formValues,
     });
-    // formValues.relationValues?.relations &&  form.setFieldValue("relationValues.relations", [
-    //   ...formValues.relationValues?.relations
-    // ]);
     const { resetField } = useField("relationValues.relations");
     formValues.relationValues?.relations &&
       resetField({ value: formValues.relationValues?.relations });
@@ -79,7 +77,11 @@ const useFormHelper = () => {
   };
 
   const deleteForm = (key: string) => {
-    delete forms.value[key];
+    try {
+      delete forms.value[key];
+    } catch {
+      console.warn(`Form with key, ${key} does not exist. Deletion aborted`);
+    }
   };
 
   const deleteForms = () => {
@@ -154,10 +156,12 @@ const useFormHelper = () => {
 
   const addRelations = (
     selectedItems: InBulkProcessableItem[],
-    relationType: string
+    relationType: string,
+    formId: string | undefined = undefined
   ) => {
-    const { form } = getFormByRouteId();
-
+    let form: FormContext<any> | undefined = formId
+      ? getForm(formId)
+      : getFormByRouteId().form;
     if (selectedItems.length <= 0 || !form) return;
 
     const oldRelations: BaseRelationValuesInput[] =
@@ -173,18 +177,21 @@ const useFormHelper = () => {
       });
     });
 
-    form.setFieldValue("relationValues.relations", [
-      ...oldRelations,
-      ...newRelations,
-    ]);
+    const relationsToSet: BaseRelationValuesInput[] = oldRelations || [];
+    if (newRelations) relationsToSet.push(...newRelations);
+
+    form.setFieldValue("relationValues.relations", relationsToSet);
   };
 
   const replaceRelationsFromSameType = (
     selectedItems: InBulkProcessableItem[],
-    relationType: string
+    relationType: string,
+    formId: string | undefined = undefined
   ) => {
-    const { form } = getFormByRouteId();
-
+    let form: FormContext<any> | undefined = formId
+      ? getForm(formId)
+      : getFormByRouteId().form;
+    if (!form) return;
     const newRelationIds: string[] = selectedItems.map(
       (item: InBulkProcessableItem) => item.id
     );
@@ -199,6 +206,7 @@ const useFormHelper = () => {
           relation.type === relationType &&
           !newRelationIds.includes(relation.key)
       );
+
     const newRelations: BaseRelationValuesInput[] = [];
     selectedItems.forEach((item) => {
       newRelations.push({
@@ -218,10 +226,12 @@ const useFormHelper = () => {
       });
     });
 
-    form.setFieldValue("relationValues.relations", [
-      ...otherRelations,
-      ...newRelations,
-    ]);
+    const relationsToSet: BaseRelationValuesInput[] = otherRelations || [];
+    if (newRelations) relationsToSet.push(...newRelations);
+
+    console.log(relationsToSet);
+
+    form.setFieldValue("relationValues.relations", relationsToSet);
   };
 
   const findRelation = (
