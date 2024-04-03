@@ -73,7 +73,7 @@ import {
 } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
-import BaseProgressStep from "@/components/base/BaseProgressStep.vue";
+import BaseProgressStep from "@/components/base/progressStep/BaseProgressStep.vue";
 import useUpload from "@/composables/useUpload";
 import ProgressBar from "@/components/ProgressBar.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";

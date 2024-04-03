@@ -11,7 +11,6 @@
       :dropzone-label="dropzoneLabel"
       view-style="p-3 h-full overflow-x-hidden mb-4"
       :isValidationFile="dryRun"
-      :progress-steps="fileProgressSteps"
     />
   </div>
 </template>
@@ -21,7 +20,6 @@ import Dropzone from "@/components/base/dropzone/Dropzone.vue";
 import { useDropzone } from "@/composables/useDropzone";
 import useUpload from "@/composables/useUpload";
 import {
-  type FileProgress,
   ModalState,
   TypeModals,
   UploadFieldType,
@@ -36,9 +34,8 @@ const { t } = useI18n();
 const { upload, files, uploadType, resetUpload, isCsvRequired } = useUpload();
 const dropzone = new useDropzone();
 const isRequired = computed(() =>
-  props.validation ? props.validation.includes("required") : false,
+  props.validation ? props.validation.includes("required") : false
 );
-const fileProgressSteps = computed(() => props.progressIndicator.steps);
 
 const props = withDefaults(
   defineProps<{
@@ -52,14 +49,13 @@ const props = withDefaults(
     uploadFieldType: UploadFieldType;
     validation?: string;
     uploadMultiple: boolean;
-    progressIndicator: FileProgress;
   }>(),
   {
     dropzoneSize: "big",
     isLinkedUpload: false,
     dryRun: false,
     uploadMultiple: false,
-  },
+  }
 );
 
 const getDropzoneSize = (size: "small" | "normal" | "big") => {
@@ -89,7 +85,7 @@ watch(
   () => {
     setUseUploadVariables();
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 watch(
@@ -99,7 +95,7 @@ watch(
       dropzone.resetDropzone();
       resetUpload();
     }
-  },
+  }
 );
 </script>
 

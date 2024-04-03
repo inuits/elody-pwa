@@ -16,17 +16,8 @@
           data-dz-name
         ></span>
       </div>
-      <div class="flex justify-between items-center">
-        <div class="flex px-2 items-center">
-          <div
-            v-for="(step, index) in progressSteps"
-            :key="index"
-            class="px-0.5"
-          >
-            <base-progress-step :status="step.status" :title="step.label" />
-          </div>
-        </div>
-
+      <upload-file-preview-progress :isValidationFile="isValidationFile" />
+      <div>
         <a
           data-dz-remove
           class="cursor-pointer flex justify-center items-center bg-neutral-light rounded-lg w-10 h-8 mt-1 mr-2"
@@ -41,15 +32,13 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 import { Unicons } from "@/types";
-import BaseProgressStep from "@/components/base/BaseProgressStep.vue";
-import type { FileProgressStep } from "@/generated-types/queries";
+import UploadFilePreviewProgress from "@/components/dynamicForms/UploadFilePreviewProgress.vue";
 
 const dropzonePreview = ref<HTMLDivElement>();
 
 defineProps<{
   modelValue: HTMLDivElement | undefined;
   isValidationFile: boolean;
-  progressSteps: FileProgressStep[];
 }>();
 
 const emit = defineEmits<{

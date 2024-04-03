@@ -35,7 +35,6 @@
           :upload-multiple="(field as UploadField).inputField.uploadMultiple"
           :dry-run="(field as UploadField).dryRunUpload"
           :upload-field-type="(field as UploadField).uploadFieldType"
-          :progress-indicator="(field as UploadField).inputField.fileProgressSteps"
         />
         <DynamicFormUploadButton
           v-if="
@@ -46,7 +45,9 @@
           :icon="(field as FormAction).icon"
           :disabled="!enableUploadButton"
           :progressIndicator="(field as FormAction).actionProgressIndicator"
-          @click-upload-button="performActionButtonClickEvent(field as FormAction)"
+          @click-upload-button="
+            performActionButtonClickEvent(field as FormAction)
+          "
           @reset-upload="initializeForm"
         />
         <BaseButtonNew
@@ -181,7 +182,8 @@ const createEntityFromFormInput = (entityType: Entitytyping): EntityInput => {
       key: formFieldState.fieldKey,
       value: formFieldState.value,
     };
-  });entity.relations = formRelationsFieldsState.value;
+  });
+  entity.relations = formRelationsFieldsState.value;
   return entity;
 };
 
