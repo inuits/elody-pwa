@@ -1,10 +1,6 @@
 import Dropzone, { type DropzoneFile } from "dropzone";
 import { computed, ref, toRaw, watch } from "vue";
 import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
-import {
   type ActionProgressStep,
   ProgressStepStatus,
   ProgressStepType,
@@ -35,7 +31,11 @@ const requiredMediafiles = ref<string[] | undefined>(undefined);
 const fileErrors = ref<FileError[]>([]);
 const isCsvRequired = ref<boolean>(false);
 const enableUploadButton = computed(() => {
-  if (!uploadProgress.value && mediafiles.value) return true;
+  if (
+    (!uploadProgress.value || !isCsvRequired.value) &&
+    mediafiles.value.length
+  )
+    return true;
   return uploadProgress.value
     .filter(
       (progressStep: ActionProgressStep) =>
@@ -55,7 +55,10 @@ const useUpload = () => {
     "not-prefetched-yet";
 
   const upload = async (isLinkedUpload: boolean, config: any, t: Function) => {
-    __updateUploadProgress(ProgressStepType.Upload, ProgressStepStatus.Loading);
+    __updateGlobalUploadProgress(
+      ProgressStepType.Upload,
+      ProgressStepStatus.Loading
+    );
     toggleUploadStatus();
     const generator = uploadGenerator(
       config,
@@ -64,14 +67,19 @@ const useUpload = () => {
 
     for await (const upload of generator) {
       if (!upload?.response.ok) {
-        __uploadExceptionHandler(await upload?.response.text(), t);
+        __uploadExceptionHandler(await upload?.response.text(), upload.file, t);
         continue;
       }
 
+      updateFileThumbnails(
+        upload.file,
+        ProgressStepType.Upload,
+        ProgressStepStatus.Complete
+      );
       amountUploaded.value++;
     }
     toggleUploadStatus();
-    __updateUploadProgress(
+    __updateGlobalUploadProgress(
       ProgressStepType.Upload,
       ProgressStepStatus.Complete
     );
@@ -79,15 +87,16 @@ const useUpload = () => {
 
   const __uploadExceptionHandler = (
     errorDescription: string | undefined,
+    file: DropzoneFile,
     t: Function
   ) => {
     if (!errorDescription)
-      errorDescription = t("dropzone.errorNotification.description");
-    useNotification().createNotificationOverwrite(
-      NotificationType.error,
-      t("dropzone.errorNotification.title"),
-      errorDescription,
-      15
+      errorDescription = t("dropzone.errorNotification.description") as string;
+    updateFileThumbnails(
+      file,
+      ProgressStepType.Upload,
+      ProgressStepStatus.Failed,
+      errorDescription
     );
   };
 
@@ -95,7 +104,7 @@ const useUpload = () => {
     try {
       if (dryRunResult.message) {
         dryRunErrors.value.push(dryRunResult.message);
-        __updateUploadProgress(
+        __updateGlobalUploadProgress(
           ProgressStepType.Validate,
           ProgressStepStatus.Failed
         );
@@ -117,7 +126,7 @@ const useUpload = () => {
       }
       dryRunErrors.value = errors;
       dryRunComplete.value = true;
-      __updateUploadProgress(
+      __updateGlobalUploadProgress(
         ProgressStepType.Validate,
         dryRunErrors.value.length
           ? ProgressStepStatus.Failed
@@ -125,7 +134,7 @@ const useUpload = () => {
       );
     } catch {
       dryRunErrors.value.push("upload-fields.errors.dry-run-failed");
-      __updateUploadProgress(
+      __updateGlobalUploadProgress(
         ProgressStepType.Validate,
         ProgressStepStatus.Failed
       );
@@ -133,7 +142,7 @@ const useUpload = () => {
   };
 
   const dryRunCsv = async () => {
-    __updateUploadProgress(
+    __updateGlobalUploadProgress(
       ProgressStepType.Validate,
       ProgressStepStatus.Loading
     );
@@ -233,6 +242,11 @@ const useUpload = () => {
   };
 
   const __uploadFile = async (file: DropzoneFile, url: string, config: any) => {
+    updateFileThumbnails(
+      file,
+      ProgressStepType.Upload,
+      ProgressStepStatus.Loading
+    );
     const formData = new FormData();
     formData.append("file", file);
     const extUrl = __constructExternalUrlForUpload(
@@ -250,10 +264,28 @@ const useUpload = () => {
 
   async function* uploadGenerator(config: any, entityId: string = "") {
     if (!validateFiles()) return;
+    __updateGlobalUploadProgress(
+      ProgressStepType.Validate,
+      ProgressStepStatus.Complete
+    );
+    __updateGlobalUploadProgress(
+      ProgressStepType.Prepare,
+      ProgressStepStatus.Complete
+    );
 
     const filesToUpload = mediafiles.value;
     for (const file of filesToUpload) {
+      updateFileThumbnails(
+        file,
+        ProgressStepType.Prepare,
+        ProgressStepStatus.Loading
+      );
       const url = await __getUploadUrl(file, entityId);
+      updateFileThumbnails(
+        file,
+        ProgressStepType.Prepare,
+        ProgressStepStatus.Complete
+      );
       yield __uploadFile(file, url, config);
     }
 
@@ -291,7 +323,7 @@ const useUpload = () => {
       requiredMediafiles.value = undefined;
     }
     if (!mediafiles.value.length)
-      __updateUploadProgress(
+      __updateGlobalUploadProgress(
         ProgressStepType.Prepare,
         ProgressStepStatus.Empty
       );
@@ -299,6 +331,11 @@ const useUpload = () => {
   };
   const addFileToUpload = (fileToAdd: DropzoneFile) => {
     files.value.push(fileToAdd);
+    updateFileThumbnails(
+      fileToAdd,
+      ProgressStepType.Validate,
+      ProgressStepStatus.Complete
+    );
   };
 
   const setUploadProgressPercentage = (newPercentage: number): void => {
@@ -327,19 +364,10 @@ const useUpload = () => {
     try {
       fileErrors.value = [];
 
-      if (uploadType.value === UploadFieldType.Single || !isCsvRequired.value) {
-        __updateUploadProgress(
-          ProgressStepType.Validate,
-          ProgressStepStatus.Complete
-        );
-        __updateUploadProgress(
-          ProgressStepType.Prepare,
-          ProgressStepStatus.Complete
-        );
+      if (uploadType.value === UploadFieldType.Single || !isCsvRequired.value)
         return true;
-      }
 
-      __updateUploadProgress(
+      __updateGlobalUploadProgress(
         ProgressStepType.Prepare,
         ProgressStepStatus.Loading
       );
@@ -349,7 +377,7 @@ const useUpload = () => {
         return true;
       }
 
-      __updateUploadProgress(
+      __updateGlobalUploadProgress(
         ProgressStepType.Prepare,
         ProgressStepStatus.Loading
       );
@@ -385,7 +413,7 @@ const useUpload = () => {
         }
       });
 
-      __updateUploadProgress(
+      __updateGlobalUploadProgress(
         ProgressStepType.Prepare,
         areAllFilesPresent
           ? ProgressStepStatus.Complete
@@ -394,7 +422,7 @@ const useUpload = () => {
 
       return areAllFilesPresent;
     } catch {
-      __updateUploadProgress(
+      __updateGlobalUploadProgress(
         ProgressStepType.Prepare,
         ProgressStepStatus.Failed
       );
@@ -413,7 +441,7 @@ const useUpload = () => {
     uploadProgress.value = newProgress;
   };
 
-  const __updateUploadProgress = (
+  const __updateGlobalUploadProgress = (
     stepType: ProgressStepType,
     status: ProgressStepStatus
   ): void => {
@@ -426,6 +454,43 @@ const useUpload = () => {
     });
 
     uploadProgress.value = newProgress;
+  };
+
+  const __hideAllFileProgressSteps = (stepTypeContainer: Element): void => {
+    Array.from(stepTypeContainer.children).forEach((child: Element) => {
+      if (!child.classList.contains("hidden")) child.classList.add("hidden");
+    });
+  };
+
+  const updateFileThumbnails = (
+    file: DropzoneFile,
+    stepType: ProgressStepType,
+    status: ProgressStepStatus,
+    error: string = ""
+  ): void => {
+    const stepClass: string = `file-${stepType}-${status}`;
+    const stepTypeContainerClass: string = `file-${stepType}-container`;
+
+    const stepNode: Element | null = file.previewTemplate
+      .getElementsByClassName(stepClass)
+      .item(0);
+    const stepTypeContainer = file.previewTemplate
+      .getElementsByClassName(stepTypeContainerClass)
+      .item(0);
+
+    if (!stepNode || !stepTypeContainer) return;
+    __hideAllFileProgressSteps(stepTypeContainer);
+    stepNode.classList.remove("hidden");
+
+    if (!error) return;
+    __handleFileThumbnailError(file, error);
+  };
+
+  const __handleFileThumbnailError = (
+    file: DropzoneFile,
+    error: string
+  ): void => {
+    file.previewTemplate;
   };
 
   return {
@@ -446,13 +511,14 @@ const useUpload = () => {
     mediafiles,
     requiredMediafiles,
     verifyAllNeededFilesArePresent,
-    __updateUploadProgress,
+    __updateGlobalUploadProgress,
     fileErrors,
     dryRunComplete,
     isCsvRequired,
     uploadProgress,
     amountUploaded,
     uploadContainsErrors,
+    updateFileThumbnails,
   };
 };
 
@@ -461,7 +527,7 @@ watch(
   () => {
     useUpload().verifyAllNeededFilesArePresent();
     if (uploadType.value === UploadFieldType.Single) {
-      useUpload().__updateUploadProgress(
+      useUpload().__updateGlobalUploadProgress(
         ProgressStepType.Prepare,
         ProgressStepStatus.Complete
       );

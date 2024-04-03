@@ -9,7 +9,6 @@
   <dropzone-preview
     v-model="dropzonePreview"
     :isValidationFile="isValidationFile"
-    :progress-steps="progressSteps"
   />
 </template>
 
@@ -19,7 +18,6 @@ import DropzonePreview from "@/components/base/dropzone/DropzonePreview.vue";
 import DropzoneView from "@/components/base/dropzone/DropzoneView.vue";
 import { onMounted, ref, watch } from "vue";
 import useUpload from "@/composables/useUpload";
-import type { FileProgressStep } from "@/generated-types/queries";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 
 const dropzoneView = ref<HTMLDivElement>();
@@ -33,12 +31,11 @@ const props = withDefaults(
     dropzoneLabel: string;
     viewStyle: string;
     isValidationFile: boolean;
-    progressSteps: FileProgressStep[];
   }>(),
   {
     viewStyle: "",
     isValidationFile: false,
-  },
+  }
 );
 
 const emit = defineEmits<{
@@ -51,7 +48,7 @@ const { addFileToUpload, removeFileToUpload, files, dryRunCsv } = useUpload();
 onMounted(() => {
   const dropzone = props.dropzone.initDropzone(
     dropzoneView.value!,
-    dropzonePreview.value!,
+    dropzonePreview.value!
   );
 
   dropzone.on("addedfile", (file: DropzoneFile) => {
@@ -76,7 +73,7 @@ onMounted(() => {
       filesInDropzone.value = dropzone.files;
       fileCount.value = dropzone.files.length;
     },
-    { immediate: true },
+    { immediate: true }
   );
 });
 </script>
