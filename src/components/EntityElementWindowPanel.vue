@@ -1,10 +1,13 @@
 <template>
-  <div class="border-solid border-neutral-30 border-b-2 p-2">
+  <div
+    class="border-solid border-neutral-30 border-b-2 p-2"
+    :class="[{ 'pl-10  py-0 mb-5': parentIsListItem }]"
+  >
     <div
       @click="toggleIsCollapsed()"
       class="flex items-center justify-between cursor-pointer"
     >
-      <h2 v-if="showLabel">{{ t(panel.label) }}</h2>
+      <h2>{{ t(panel.label) }}</h2>
       <div class="w-full flex justify-end">
         <unicon :name="!isCollapsed ? Unicons.Minus.name : Unicons.Plus.name" />
       </div>
@@ -34,8 +37,10 @@
           >
             <metadata-wrapper
               v-if="
-                metadata.__typename !== 'EntityListElement' ||
-                metadata.baseLibraryMode === BaseLibraryModes.BasicBaseLibrary
+                (
+                  metadata.__typename !== 'EntityListElement' ||
+                  metadata.baseLibraryMode === BaseLibraryModes.BasicBaseLibrary
+                ) && !parentIsListItem
               "
               :form-id="formId"
               :is-edit="isEdit"
@@ -89,10 +94,10 @@ const props = withDefaults(
     identifiers: string[];
     isEdit: boolean;
     formId: string;
-    showLabel?: boolean;
+    parentIsListItem?: boolean;
   }>(),
   {
-    showLabel: true,
+    parentIsListItem: false,
   }
 );
 
