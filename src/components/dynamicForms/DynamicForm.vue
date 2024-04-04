@@ -22,18 +22,21 @@
           :is-edit="true"
           form-flow="create"
         />
-        <upload-interface-dropzone
-          v-if="field.__typename === 'UploadField'"
-          :dropzone-label="(field as UploadField).label"
-          :validation="(field as UploadField).inputField.validation?.value"
-          :accepted-file-types="(field as UploadField).inputField.fileTypes"
-          :max-file-size="(field as UploadField).inputField.maxFileSize"
-          :dropzone-size="(field as UploadField).uploadFieldSize"
-          :max-amount-of-files="(field as UploadField).inputField.maxAmountOfFiles"
-          :upload-multiple="(field as UploadField).inputField.uploadMultiple"
-          :dry-run="(field as UploadField).dryRunUpload"
-          :upload-field-type="(field as UploadField).uploadFieldType"
-        />
+        <div v-if="field.__typename === 'UploadContainer'">
+          <upload-interface-dropzone
+            v-for="uploadField in Object.values(field as UploadField).filter((uploadContainerField) => typeof uploadContainerField === 'object')"
+            :dropzone-label="(uploadField as UploadField).label"
+            :validation="(uploadField as UploadField).inputField.validation?.value"
+            :accepted-file-types="(uploadField as UploadField).inputField.fileTypes"
+            :max-file-size="(uploadField as UploadField).inputField.maxFileSize"
+            :dropzone-size="(uploadField as UploadField).uploadFieldSize"
+            :max-amount-of-files="(uploadField as UploadField).inputField.maxAmountOfFiles"
+            :upload-multiple="(uploadField as UploadField).inputField.uploadMultiple"
+            :dry-run="(uploadField as UploadField).dryRunUpload"
+            :upload-field-type="(uploadField as UploadField).uploadFieldType"
+          />
+        </div>
+
         <DynamicFormUploadButton
           v-if="
             field.__typename === 'FormAction' &&
