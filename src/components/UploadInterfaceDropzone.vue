@@ -57,13 +57,11 @@ const props = withDefaults(
     dryRun: boolean;
     uploadFieldType: UploadFieldType;
     validation?: string;
-    uploadMultiple: boolean;
   }>(),
   {
     dropzoneSize: "big",
     isLinkedUpload: false,
     dryRun: false,
-    uploadMultiple: false,
   }
 );
 
