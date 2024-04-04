@@ -54,7 +54,6 @@
             :link-icon="metadata.linkIcon"
             :unit="metadata.unit"
             :base-library-mode="baseLibraryMode"
-            :basic-base-library-as-value="basicBaseLibraryAsValue"
           />
         </div>
       </template>
