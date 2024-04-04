@@ -103,7 +103,7 @@ const props = withDefaults(
     metadata: PanelMetaData;
     linkedEntityId?: String;
     baseLibraryMode?: BaseLibraryModes;
-    formFlow: "edit" | "create";
+    formFlow?: "edit" | "create";
   }>(),
   {
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
