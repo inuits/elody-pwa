@@ -93,7 +93,7 @@ const useUpload = () => {
       );
   };
 
-  const __uploadWithPossibleCsv = async (
+  const __uploadMediafilesWithTicketUrl = async (
     isLinkedUpload: boolean,
     config: any,
     t: Function
@@ -122,32 +122,6 @@ const useUpload = () => {
     );
   };
 
-  const __uploadMediafilesOnly = (t: Function) => {
-    const filesToUpload: DropzoneFile[] = mediafiles.value;
-    for (const file of filesToUpload) {
-      try {
-        __updateFileThumbnails(
-          file,
-          ProgressStepType.Upload,
-          ProgressStepStatus.Loading
-        );
-
-        __createMediafileForEntity(
-          useEntitySingle().getEntityUuid() as string,
-          file
-        );
-
-        __updateFileThumbnails(
-          file,
-          ProgressStepType.Upload,
-          ProgressStepStatus.Complete
-        );
-      } catch (e: any) {
-        __uploadExceptionHandler(e, file, t);
-      }
-    }
-  };
-
   const upload = async (isLinkedUpload: boolean, config: any, t: Function) => {
     if (!validateFiles()) return;
     __updateGlobalUploadProgress(
@@ -159,10 +133,14 @@ const useUpload = () => {
       uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv ||
       uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv
     )
-      __uploadWithPossibleCsv(isLinkedUpload, config, t);
+      __uploadMediafilesWithTicketUrl(isLinkedUpload, config, t);
 
     if (uploadFlow.value === UploadFlow.MediafilesOnly)
-      __uploadMediafilesOnly(t);
+      __updateGlobalUploadProgress(
+        ProgressStepType.Prepare,
+        ProgressStepStatus.Complete
+      );
+    __uploadMediafilesWithTicketUrl(isLinkedUpload, config, t);
   };
 
   const __uploadExceptionHandler = (
@@ -271,7 +249,7 @@ const useUpload = () => {
       uploadStatus.value = "uploading";
   };
 
-  const __createStandaloneMediafile = async (file: DropzoneFile) => {
+  const __getUploadUrlForStandaloneMediafile = async (file: DropzoneFile) => {
     const response = await fetch(`/api/upload/single?filename=${file.name}`, {
       headers: { "Content-Type": "application/json" },
       method: "POST",
@@ -279,7 +257,7 @@ const useUpload = () => {
     return JSON.parse(await response.text());
   };
 
-  const __createMediafileForEntity = async (
+  const __getUploadUrlForMediafileOnEntity = async (
     entityId: string,
     file: DropzoneFile
   ): Promise<string> => {
@@ -320,8 +298,11 @@ const useUpload = () => {
           url.includes(file.name)
         );
       } else {
-        uploadUrl = await __createStandaloneMediafile(file);
+        uploadUrl = await __getUploadUrlForStandaloneMediafile(file);
       }
+    }
+    if (uploadFlow.value === UploadFlow.MediafilesOnly) {
+      uploadUrl = await __getUploadUrlForMediafileOnEntity(entityId, file);
     }
 
     if (!uploadUrl) throw new Error("Upload url is undefined.");
@@ -391,11 +372,13 @@ const useUpload = () => {
     if (
       uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv ||
       uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv
-    )
+    ) {
       if (uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv)
         return containsCsv.value && mediafiles.value.length > 0;
       else return mediafiles.value.length > 0;
-    if (uploadType.value === "single")
+    }
+
+    if (uploadFlow.value === UploadFlow.MediafilesOnly)
       return !containsCsv.value && mediafiles.value.length > 0;
     return false;
   };
@@ -462,7 +445,6 @@ const useUpload = () => {
 
   const verifyAllNeededFilesArePresent = (): boolean => {
     try {
-      console.log(uploadFlow.value);
       fileErrors.value = [];
 
       if (
