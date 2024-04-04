@@ -25,6 +25,7 @@
         :relationType="element.relationType"
         :entity-uuid="uuid"
         :entity-list-elements="getObjectsBasedOnTypename(element, 'EntityListElement')"
+        :base-library-mode="element.baseLibraryMode"
       />
       <entity-element-media
         v-if="element.__typename === 'MediaFileElement'"
