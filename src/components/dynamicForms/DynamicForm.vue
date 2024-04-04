@@ -25,6 +25,7 @@
         <div v-if="field.__typename === 'UploadContainer'">
           <upload-interface-dropzone
             v-for="uploadField in Object.values(field as UploadField).filter((uploadContainerField) => typeof uploadContainerField === 'object')"
+            :upload-flow="(field as UploadContainer).uploadFlow"
             :dropzone-label="(uploadField as UploadField).label"
             :validation="(uploadField as UploadField).inputField.validation?.value"
             :accepted-file-types="(uploadField as UploadField).inputField.fileTypes"
@@ -91,6 +92,7 @@ import {
   type MetadataInput,
   PanelMetaData,
   TypeModals,
+  type UploadContainer,
   UploadField,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";

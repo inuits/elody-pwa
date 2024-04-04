@@ -5,6 +5,7 @@ import {
   ProgressStepStatus,
   ProgressStepType,
   UploadFieldType,
+  UploadFlow,
 } from "@/generated-types/queries";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -12,6 +13,11 @@ import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 type FileError = {
   filename: string;
   error: "missing" | "extraneous";
+};
+
+type UploadSettings = {
+  uploadType: UploadFieldType;
+  uploadFlow: UploadFlow;
 };
 
 const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
@@ -29,23 +35,14 @@ const uploadProgressPercentage = ref<number>(0);
 const uploadType = ref<UploadFieldType>(UploadFieldType.Batch);
 const requiredMediafiles = ref<string[] | undefined>(undefined);
 const fileErrors = ref<FileError[]>([]);
-const isCsvRequired = ref<boolean>(false);
-const enableUploadButton = computed(() => {
-  if (
-    (!uploadProgress.value || !isCsvRequired.value) &&
-    mediafiles.value.length
-  )
-    return true;
-  return uploadProgress.value
-    .filter(
-      (progressStep: ActionProgressStep) =>
-        progressStep.stepType !== ProgressStepType.Upload
-    )
-    .every(
-      (progressStep: ActionProgressStep) =>
-        progressStep.status === ProgressStepStatus.Complete
-    );
+const containsCsv = computed(
+  () => !!files.value.find((file: DropzoneFile) => file.type === "text/csv")
+);
+const uploadFlow = ref<UploadFlow>(UploadFlow.MediafilesOnly);
+const uploadValidationFn = ref<Function>(() => {
+  return false;
 });
+const enableUploadButton = computed(() => uploadValidationFn.value());
 const uploadContainsErrors = computed(
   () => !dryRunErrors.value && fileErrors.value
 );
@@ -54,12 +51,53 @@ const useUpload = () => {
   let _prefetchedUploadUrls: string[] | "not-prefetched-yet" =
     "not-prefetched-yet";
 
-  const upload = async (isLinkedUpload: boolean, config: any, t: Function) => {
-    __updateGlobalUploadProgress(
-      ProgressStepType.Upload,
-      ProgressStepStatus.Loading
+  const initializeUpload = (uploadSettings: UploadSettings): void => {
+    uploadFlow.value = uploadSettings.uploadFlow;
+
+    const settingsObject: {
+      [key: string]: {
+        checkUploadValidityFn: Function;
+      };
+    } = {
+      mediafilesOnly: {
+        checkUploadValidityFn: () => __checkUploadValidityMediafilesOnly(),
+      },
+      mediafilesWithRequiredCsv: {
+        checkUploadValidityFn: () => __checkUploadValidityMediafilesWithCsv(),
+      },
+      mediafilesWithOptionalCsv: {
+        checkUploadValidityFn: () => __checkUploadValidityMediafilesWithCsv(),
+      },
+    };
+    uploadValidationFn.value =
+      settingsObject[uploadSettings.uploadFlow].checkUploadValidityFn;
+  };
+
+  const __checkUploadValidityMediafilesOnly = (): boolean => {
+    return !!(
+      (!uploadProgress.value ||
+        uploadFlow.value === UploadFlow.MediafilesOnly) &&
+      mediafiles.value.length
     );
-    toggleUploadStatus();
+  };
+
+  const __checkUploadValidityMediafilesWithCsv = (): boolean => {
+    return uploadProgress.value
+      .filter(
+        (progressStep: ActionProgressStep) =>
+          progressStep.stepType !== ProgressStepType.Upload
+      )
+      .every(
+        (progressStep: ActionProgressStep) =>
+          progressStep.status === ProgressStepStatus.Complete
+      );
+  };
+
+  const __uploadWithPossibleCsv = async (
+    isLinkedUpload: boolean,
+    config: any,
+    t: Function
+  ) => {
     const generator = uploadGenerator(
       config,
       isLinkedUpload ? useEntitySingle().getEntityUuid() : ""
@@ -70,8 +108,7 @@ const useUpload = () => {
         __uploadExceptionHandler(await upload?.response.text(), upload.file, t);
         continue;
       }
-
-      updateFileThumbnails(
+      __updateFileThumbnails(
         upload.file,
         ProgressStepType.Upload,
         ProgressStepStatus.Complete
@@ -85,6 +122,49 @@ const useUpload = () => {
     );
   };
 
+  const __uploadMediafilesOnly = (t: Function) => {
+    const filesToUpload: DropzoneFile[] = mediafiles.value;
+    for (const file of filesToUpload) {
+      try {
+        __updateFileThumbnails(
+          file,
+          ProgressStepType.Upload,
+          ProgressStepStatus.Loading
+        );
+
+        __createMediafileForEntity(
+          useEntitySingle().getEntityUuid() as string,
+          file
+        );
+
+        __updateFileThumbnails(
+          file,
+          ProgressStepType.Upload,
+          ProgressStepStatus.Complete
+        );
+      } catch (e: any) {
+        __uploadExceptionHandler(e, file, t);
+      }
+    }
+  };
+
+  const upload = async (isLinkedUpload: boolean, config: any, t: Function) => {
+    if (!validateFiles()) return;
+    __updateGlobalUploadProgress(
+      ProgressStepType.Upload,
+      ProgressStepStatus.Loading
+    );
+    toggleUploadStatus();
+    if (
+      uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv ||
+      uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv
+    )
+      __uploadWithPossibleCsv(isLinkedUpload, config, t);
+
+    if (uploadFlow.value === UploadFlow.MediafilesOnly)
+      __uploadMediafilesOnly(t);
+  };
+
   const __uploadExceptionHandler = (
     errorDescription: string | undefined,
     file: DropzoneFile,
@@ -92,7 +172,7 @@ const useUpload = () => {
   ) => {
     if (!errorDescription)
       errorDescription = t("dropzone.errorNotification.description") as string;
-    updateFileThumbnails(
+    __updateFileThumbnails(
       file,
       ProgressStepType.Upload,
       ProgressStepStatus.Failed,
@@ -100,11 +180,16 @@ const useUpload = () => {
     );
   };
 
-  const handleDryRunResult = (dryRunResult: any): void => {
+  const handleDryRunResult = (dryRunResult: any, file: DropzoneFile): void => {
     try {
       if (dryRunResult.message) {
         dryRunErrors.value.push(dryRunResult.message);
         __updateGlobalUploadProgress(
+          ProgressStepType.Validate,
+          ProgressStepStatus.Failed
+        );
+        __updateFileThumbnails(
+          file,
           ProgressStepType.Validate,
           ProgressStepStatus.Failed
         );
@@ -126,28 +211,39 @@ const useUpload = () => {
       }
       dryRunErrors.value = errors;
       dryRunComplete.value = true;
-      __updateGlobalUploadProgress(
-        ProgressStepType.Validate,
-        dryRunErrors.value.length
-          ? ProgressStepStatus.Failed
-          : ProgressStepStatus.Complete
-      );
+
+      const dryRunStatus: ProgressStepStatus = dryRunErrors.value.length
+        ? ProgressStepStatus.Failed
+        : ProgressStepStatus.Complete;
+
+      __updateGlobalUploadProgress(ProgressStepType.Validate, dryRunStatus);
+      __updateFileThumbnails(file, ProgressStepType.Validate, dryRunStatus);
     } catch {
       dryRunErrors.value.push("upload-fields.errors.dry-run-failed");
       __updateGlobalUploadProgress(
         ProgressStepType.Validate,
         ProgressStepStatus.Failed
       );
+      __updateFileThumbnails(
+        file,
+        ProgressStepType.Validate,
+        ProgressStepStatus.Failed
+      );
     }
   };
 
-  const dryRunCsv = async () => {
+  const dryRunCsv = async (file: DropzoneFile) => {
     __updateGlobalUploadProgress(
       ProgressStepType.Validate,
       ProgressStepStatus.Loading
     );
+    __updateFileThumbnails(
+      file,
+      ProgressStepType.Validate,
+      ProgressStepStatus.Loading
+    );
     const dryRunResult = await __batchEntities(__getCsvBlob(), true);
-    handleDryRunResult(dryRunResult);
+    handleDryRunResult(dryRunResult, file);
   };
 
   const __batchEntities = async (
@@ -211,21 +307,21 @@ const useUpload = () => {
   const __getUploadUrl = async (file: DropzoneFile, entityId: string = "") => {
     let uploadUrl: string | undefined = undefined;
 
-    if (uploadType.value === UploadFieldType.Batch && isCsvRequired.value) {
-      if (_prefetchedUploadUrls === "not-prefetched-yet")
-        _prefetchedUploadUrls = (await __batchEntities(
-          __getCsvBlob()
-        )) as string[];
-      uploadUrl = _prefetchedUploadUrls.find((url: string) =>
-        url.includes(file.name)
-      );
-    } else if (
-      uploadType.value === UploadFieldType.Batch &&
-      !isCsvRequired.value
+    if (
+      uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv ||
+      uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv
     ) {
-      uploadUrl = await __createStandaloneMediafile(file);
-    } else if (uploadType.value === UploadFieldType.Single) {
-      uploadUrl = await __createMediafileForEntity(entityId, file);
+      if (containsCsv.value) {
+        if (_prefetchedUploadUrls === "not-prefetched-yet")
+          _prefetchedUploadUrls = (await __batchEntities(
+            __getCsvBlob()
+          )) as string[];
+        uploadUrl = _prefetchedUploadUrls.find((url: string) =>
+          url.includes(file.name)
+        );
+      } else {
+        uploadUrl = await __createStandaloneMediafile(file);
+      }
     }
 
     if (!uploadUrl) throw new Error("Upload url is undefined.");
@@ -242,7 +338,7 @@ const useUpload = () => {
   };
 
   const __uploadFile = async (file: DropzoneFile, url: string, config: any) => {
-    updateFileThumbnails(
+    __updateFileThumbnails(
       file,
       ProgressStepType.Upload,
       ProgressStepStatus.Loading
@@ -263,7 +359,6 @@ const useUpload = () => {
   };
 
   async function* uploadGenerator(config: any, entityId: string = "") {
-    if (!validateFiles()) return;
     __updateGlobalUploadProgress(
       ProgressStepType.Validate,
       ProgressStepStatus.Complete
@@ -275,13 +370,13 @@ const useUpload = () => {
 
     const filesToUpload = mediafiles.value;
     for (const file of filesToUpload) {
-      updateFileThumbnails(
+      __updateFileThumbnails(
         file,
         ProgressStepType.Prepare,
         ProgressStepStatus.Loading
       );
       const url = await __getUploadUrl(file, entityId);
-      updateFileThumbnails(
+      __updateFileThumbnails(
         file,
         ProgressStepType.Prepare,
         ProgressStepStatus.Complete
@@ -293,19 +388,15 @@ const useUpload = () => {
   }
 
   const validateFiles = () => {
-    const csvFilesCount = files.value.filter(
-      (file) => file.type === "text/csv"
-    ).length;
-    const nonCsvFilesCount = files.value.filter(
-      (file) => file.type !== "text/csv"
-    ).length;
-
-    if (uploadType.value === "batch")
-      if (isCsvRequired.value)
-        return csvFilesCount === 1 && nonCsvFilesCount > 0;
-      else return nonCsvFilesCount > 0;
+    if (
+      uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv ||
+      uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv
+    )
+      if (uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv)
+        return containsCsv.value && mediafiles.value.length > 0;
+      else return mediafiles.value.length > 0;
     if (uploadType.value === "single")
-      return csvFilesCount === 0 && nonCsvFilesCount > 0;
+      return !containsCsv.value && mediafiles.value.length > 0;
     return false;
   };
 
@@ -329,13 +420,22 @@ const useUpload = () => {
       );
     if (!files.value.length) resetUploadProgress();
   };
-  const addFileToUpload = (fileToAdd: DropzoneFile) => {
+
+  const addFileToUpload = (
+    fileToAdd: DropzoneFile,
+    isValidationFile: boolean
+  ) => {
     files.value.push(fileToAdd);
-    updateFileThumbnails(
-      fileToAdd,
-      ProgressStepType.Validate,
-      ProgressStepStatus.Complete
-    );
+
+    if (!isValidationFile) {
+      __updateFileThumbnails(
+        fileToAdd,
+        ProgressStepType.Validate,
+        ProgressStepStatus.Complete
+      );
+      return;
+    }
+    dryRunCsv(fileToAdd);
   };
 
   const setUploadProgressPercentage = (newPercentage: number): void => {
@@ -362,25 +462,14 @@ const useUpload = () => {
 
   const verifyAllNeededFilesArePresent = (): boolean => {
     try {
+      console.log(uploadFlow.value);
       fileErrors.value = [];
 
-      if (uploadType.value === UploadFieldType.Single || !isCsvRequired.value)
+      if (
+        uploadFlow.value === UploadFlow.MediafilesOnly ||
+        uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv
+      )
         return true;
-
-      __updateGlobalUploadProgress(
-        ProgressStepType.Prepare,
-        ProgressStepStatus.Loading
-      );
-
-      if (!requiredMediafiles.value) {
-        resetUploadProgress();
-        return true;
-      }
-
-      __updateGlobalUploadProgress(
-        ProgressStepType.Prepare,
-        ProgressStepStatus.Loading
-      );
 
       if (!requiredMediafiles.value) {
         resetUploadProgress();
@@ -390,11 +479,16 @@ const useUpload = () => {
       const requiredFileNames: string[] = [...requiredMediafiles.value];
       let areAllFilesPresent: boolean = true;
 
+      __updateGlobalUploadProgress(
+        ProgressStepType.Prepare,
+        ProgressStepStatus.Loading
+      );
+
       requiredFileNames.forEach((requiredFileName: string) => {
-        const fileExists = mediafiles.value.some(
+        const file: DropzoneFile | undefined = mediafiles.value.find(
           (file: DropzoneFile) => file.name === requiredFileName
         );
-        if (!fileExists) {
+        if (!file) {
           areAllFilesPresent = false;
           fileErrors.value.push({
             filename: requiredFileName,
@@ -405,6 +499,11 @@ const useUpload = () => {
 
       mediafiles.value.forEach((file: DropzoneFile) => {
         if (!requiredFileNames.includes(file.name)) {
+          __updateFileThumbnails(
+            file,
+            ProgressStepType.Validate,
+            ProgressStepStatus.Failed
+          );
           areAllFilesPresent = false;
           fileErrors.value.push({
             filename: file.name,
@@ -462,7 +561,7 @@ const useUpload = () => {
     });
   };
 
-  const updateFileThumbnails = (
+  const __updateFileThumbnails = (
     file: DropzoneFile,
     stepType: ProgressStepType,
     status: ProgressStepStatus,
@@ -514,11 +613,12 @@ const useUpload = () => {
     __updateGlobalUploadProgress,
     fileErrors,
     dryRunComplete,
-    isCsvRequired,
     uploadProgress,
     amountUploaded,
     uploadContainsErrors,
-    updateFileThumbnails,
+    __updateFileThumbnails,
+    initializeUpload,
+    uploadFlow,
   };
 };
 
@@ -526,12 +626,6 @@ watch(
   () => mediafiles.value.length,
   () => {
     useUpload().verifyAllNeededFilesArePresent();
-    if (uploadType.value === UploadFieldType.Single) {
-      useUpload().__updateGlobalUploadProgress(
-        ProgressStepType.Prepare,
-        ProgressStepStatus.Complete
-      );
-    }
   }
 );
 
