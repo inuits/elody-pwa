@@ -89,7 +89,7 @@ const emit = defineEmits<{
   ): void;
 }>();
 
-const isAsc = ref<boolean>(false);
+const isAsc = ref<boolean>(true);
 const paginationLimitOptions = ref<DropdownOption[]>([]);
 const paginationLimitOptionsPromiseIsResolved = ref<boolean>(false);
 const selectedPaginationLimitOption = ref<DropdownOption>();
@@ -136,22 +136,24 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
       notifyOnNetworkStatusChange: true,
     })
     .then((result) => {
-      sortOptions.value =
-        /* @ts-ignore */
-        result.data?.EntityTypeSortOptions.sortOptions?.options || [];
+      const sortingOptionsResult = result.data?.EntityTypeSortOptions.sortOptions;
+      sortOptions.value = sortingOptionsResult?.options || [];
 
       const state = getStateForRoute(props.route);
       const sortKey =
         state?.queryVariables?.searchValue.order_by ||
         sortOptions.value?.[0]?.value;
-      const sortOrder = state?.queryVariables?.searchValue.isAsc
-        ? "asc"
-        : "desc";
-
       selectedSortOption.value = sortOptions.value.find(
         (option) => option.value === sortKey
       );
+      let sortOrder = sortingOptionsResult?.isAsc?.toLowerCase();
+      if (!sortOrder) {
+        sortOrder = state?.queryVariables?.searchValue.isAsc
+          ? "asc"
+          : "desc";
+      }
       isAsc.value = sortOrder === "asc";
+
       props.setSortKey(sortKey);
       props.setSortOrder(sortOrder);
       sortOptionsPromiseIsResolved.value = true;

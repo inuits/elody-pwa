@@ -145,7 +145,7 @@
       :form-id="itemId"
       :identifiers="[itemId]"
       :is-edit="false"
-      :show-label="false"
+      :parent-is-list-item="true"
       :panel="createWindowPanelsFromEntityListElements(entityListElement)"
     />
   </div>
