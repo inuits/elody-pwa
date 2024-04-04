@@ -66,7 +66,7 @@ const start = async () => {
 
   const graphqlErrorInterceptor = onError((error: any) => {
     const errorHandler = useGraphqlErrors(error);
-    errorHandler.logFormattedErrors();
+    errorHandler.logFormattedErrors(router);
   });
 
   apolloClient = new ApolloClient({

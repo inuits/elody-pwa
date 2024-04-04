@@ -65,7 +65,10 @@
         :disabled="!selectedMatcher"
         button-style="accentNormal"
         button-size="small"
-        @click="() => (selectedMatcher = undefined)"
+        @click="() => {
+          emit('deactivateFilter', advancedFilterInput.key);
+          reloadMatcherComponent();
+        }"
       />
     </div>
   </div>
@@ -140,6 +143,11 @@ const defaultMatcherMap: Partial<Record<AdvancedFilterTypes, string>> = {
   [AdvancedFilterTypes.Text]: "ContainsMatcher",
 };
 
+const reloadMatcherComponent = () => {
+  matcherComponent.value = undefined;
+  loadMatcher();
+}
+
 onMounted(() => {
   const defaultMatcher =
     props.filter.selectedMatcher ||
@@ -175,7 +183,7 @@ watch(advancedFilterInput, () => {
 watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
     isOpen.value = false;
-    selectedMatcher.value = undefined;
+    reloadMatcherComponent();
   }
 });
 </script>

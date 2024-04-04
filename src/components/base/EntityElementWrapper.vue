@@ -3,7 +3,7 @@
     :class="['bg-accent-normal rounded-t-lg', { 'rounded-lg': isCollapsed }]"
   >
     <div
-      v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
+      v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary || baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder"
       class="flex items-center justify-between cursor-pointer"
       @click.self="toggleElementCollapse(label)"
     >

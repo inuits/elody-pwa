@@ -6,8 +6,8 @@ import {
 } from "../components/base/BaseNotification.vue";
 import { auth } from "@/main";
 import { getApplicationDetails, i18n } from "@/helpers";
-import { useRouter } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
+import type { Router } from "vue-router";
 
 const baseGraphQLError = {
   displayTime: 10,
@@ -24,7 +24,11 @@ const createErrorNotification = (title: string, description: string) => {
 };
 
 const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
-  const handleErrorByCode = async (errorMessage: number, message: string) => {
+  const handleErrorByCode = async (
+    errorMessage: number,
+    message: string,
+    router: Router
+  ) => {
     const { config, translations } = await getApplicationDetails();
     let language = config.customization.applicationLocale;
 
@@ -46,7 +50,11 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
           t("notifications.graphql-errors.forbidden.title"),
           t("notifications.graphql-errors.forbidden.description")
         );
-        useRouter().go(-1);
+        try {
+          router.go(-1);
+        } catch {
+          router.push("/");
+        }
         break;
       case 409:
         let errorMessage: string =
@@ -91,7 +99,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
     return "Something went wrong, please try again later";
   };
 
-  const logFormattedErrors = () => {
+  const logFormattedErrors = (router: Router) => {
     const gqlErrors = _errorResponse.graphQLErrors;
     if (gqlErrors) {
       for (const error of gqlErrors) {
@@ -112,7 +120,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
           console.log(`---`);
           const statusCode = getStatusCodeFromError(error);
           const message = getMessageFromError(error);
-          handleErrorByCode(statusCode, message);
+          handleErrorByCode(statusCode, message, router);
         }
       }
     }

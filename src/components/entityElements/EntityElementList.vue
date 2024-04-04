@@ -27,7 +27,7 @@
       <template v-slot:content>
         <div
           v-if="!requiresCustomQuery || queryLoaded"
-          :class="[{ 'ml-1 bg-neutral-lightest': baseLibraryMode === BaseLibraryModes.NormalBaseLibrary }]"
+          :class="[{ 'ml-1 bg-neutral-lightest': baseLibraryMode === BaseLibraryModes.NormalBaseLibrary || baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder }]"
         >
           <BaseLibrary
             v-if="type === MediaFileElementTypes.Media"
