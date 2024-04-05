@@ -8,13 +8,18 @@ import {
   UploadFlow,
 } from "@/generated-types/queries";
 import useEntitySingle from "@/composables/useEntitySingle";
+<<<<<<< HEAD
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
+=======
+import useHttpErrors from "@/composables/useHttpErrors";
+>>>>>>> 15a74de (wip)
 
 type UploadSettings = {
   uploadType: UploadFieldType;
   uploadFlow: UploadFlow;
 };
 
+const { logFormattedErrors } = useHttpErrors();
 const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
   "no-upload"
 );
@@ -215,7 +220,12 @@ const useUpload = () => {
       ProgressStepType.Validate,
       ProgressStepStatus.Loading
     );
-    const dryRunResult = await __batchEntities(__getCsvBlob(), true);
+    let dryRunResult;
+    try {
+      dryRunResult = await __batchEntities(__getCsvBlob(), true);
+    } catch (error) {
+      logFormattedErrors(error);
+    }
     handleDryRunResult(dryRunResult, file);
   };
 
@@ -231,6 +241,10 @@ const useUpload = () => {
         body: csv,
       }
     );
+    if (!response.ok) {
+      return Promise.reject(response);
+    }
+
     if (!isDryRun) return JSON.parse(await response.text());
     else return response.json();
   };
@@ -249,6 +263,11 @@ const useUpload = () => {
       headers: { "Content-Type": "application/json" },
       method: "POST",
     });
+
+    if (!response.ok) {
+      return Promise.reject(response);
+    }
+
     return JSON.parse(await response.text());
   };
 
@@ -263,6 +282,10 @@ const useUpload = () => {
         method: "POST",
       }
     );
+
+    if (!response.ok) {
+      return Promise.reject(response);
+    }
     return JSON.parse(await response.text());
   };
 
@@ -341,11 +364,17 @@ const useUpload = () => {
       config.api.storageApiUrl,
       file
     );
+    const response = await fetch(extUrl, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      return Promise.reject(response);
+    }
+
     return {
-      response: await fetch(extUrl, {
-        method: "POST",
-        body: formData,
-      }),
+      response,
       file: file,
     };
   };
@@ -367,15 +396,18 @@ const useUpload = () => {
         ProgressStepType.Prepare,
         ProgressStepStatus.Loading
       );
-      const url = await __getUploadUrl(file, entityId);
-      __updateFileThumbnails(
-        file,
-        ProgressStepType.Prepare,
-        ProgressStepStatus.Complete
-      );
-      yield __uploadFile(file, url, config);
+      try {
+        const url = await __getUploadUrl(file, entityId);
+        __updateFileThumbnails(
+          file,
+          ProgressStepType.Prepare,
+          ProgressStepStatus.Complete
+        );
+        yield __uploadFile(file, url, config);
+      } catch (error) {
+        logFormattedErrors(error);
+      }
     }
-
     _prefetchedUploadUrls = "not-prefetched-yet";
   }
 
