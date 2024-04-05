@@ -339,7 +339,7 @@ export const getApplicationDetails = async () => {
 export const getObjectsBasedOnTypename = (parent: any, typename: string): [] => {
   const objects = [];
   Object.values(parent).forEach((child) => {
-    if (child.__typename === typename)
+    if (child?.__typename === typename)
       objects.push(child);
   });
   return objects;
