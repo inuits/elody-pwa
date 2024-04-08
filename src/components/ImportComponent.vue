@@ -1,15 +1,15 @@
 <template>
   <div>
-    <h2>Import Directories</h2>
     <div v-if="loading">Loading...</div>
     <div v-else>
-      <h3>Directories:</h3>
       <ul>
         <li v-for="directory in directories" :key="directory.id">
           <folder-tree-line
-            :directory="directory"
-            :dictionary="directories"
-            :default-open="false"
+              :directory="directory"
+              :dictionary="directories"
+              :default-open="false"
+              :selected-directory="selectedDirectory"
+              :update-selected-directory="updateSelectedDirectory"
           />
         </li>
       </ul>
@@ -18,35 +18,38 @@
 </template>
 
 <script setup>
-import { ref, defineProps, watchEffect } from 'vue';
-import FolderTreeLine from '@/components/FolderTreeLine.vue';
+import { ref, defineProps, onMounted } from 'vue';
+import { useQuery } from "@vue/apollo-composable";
+import { GetDirectoriesDocument } from "@/generated-types/queries";
+import { provide } from 'vue';
+import FolderTreeLine from "@/components/FolderTreeLine.vue";
 
 const props = defineProps({
-  selectedIndex: Number,
+  selectedIndex: Number
 });
 
 const directories = ref([]);
 const loading = ref(false);
+const selectedDirectory = ref(null);
 
-const fetchDirectories = async () => {
-  loading.value = true;
-  try {
-    const response = await fetch(`http://filesystem-importer-service.coghent-dams.localhost:8000/import/list-directories`);
-    if (response.ok) {
-      directories.value = await response.json();
-    } else {
-      console.error('Failed to fetch directories:', response.statusText);
-    }
-  } catch (error) {
-    console.error('Error fetching directories:', error);
-  } finally {
-    loading.value = false;
-  }
-};
+let queryResult;
 
-watchEffect(() => {
-  if (props.selectedIndex === 1) {
-    fetchDirectories();
+onMounted(() => {
+  console.log('Mounted. selectedIndex:', props.selectedIndex);
+});
+
+const { onResult } = useQuery(GetDirectoriesDocument, {});
+
+onResult((result) => {
+  if (result && result.data && result.data.Directories) {
+    directories.value = result.data.Directories;
   }
 });
+
+const updateSelectedDirectory = (directory) => {
+  selectedDirectory.value = directory;
+};
+
+provide('selectedDirectory', selectedDirectory);
+provide('updateSelectedDirectory', updateSelectedDirectory);
 </script>
