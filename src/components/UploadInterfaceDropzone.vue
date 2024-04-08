@@ -25,25 +25,15 @@ import {
   UploadFieldType,
   UploadFlow,
 } from "@/generated-types/queries";
-import { inject, watch, computed } from "vue";
+import { inject, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 
 const config = inject("config") as any;
 const { closeModal, getModalInfo } = useBaseModal();
 const { t } = useI18n();
-const {
-  upload,
-  files,
-  uploadType,
-  resetUpload,
-  isCsvRequired,
-  initializeUpload,
-} = useUpload();
+const { upload, files, resetUpload, initializeUpload } = useUpload();
 const dropzone = new useDropzone();
-const isRequired = computed(() =>
-  props.validation ? props.validation.includes("required") : false
-);
 
 const props = withDefaults(
   defineProps<{
