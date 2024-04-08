@@ -159,13 +159,16 @@ const useFormHelper = () => {
     relationType: string,
     formId: string | undefined = undefined
   ) => {
-    let form: FormContext<any> | undefined = formId
+    const form: FormContext<any> | undefined = formId
       ? getForm(formId)
       : getFormByRouteId().form;
-    if (selectedItems.length <= 0 || !form) return;
+    if (!form) return;
 
-    const oldRelations: BaseRelationValuesInput[] =
-      form.values.relationValues.relations;
+    let oldRelations: BaseRelationValuesInput[] =
+      form.values.relationValues.relations || [];
+    oldRelations = oldRelations.filter(
+      (relation: BaseRelationValuesInput) => relation.type !== relationType
+    );
     const newRelations: BaseRelationValuesInput[] = [];
     selectedItems.forEach((item) => {
       addTeaserMetadataToState(item.id, item.teaserMetadata);
@@ -177,7 +180,7 @@ const useFormHelper = () => {
       });
     });
 
-    const relationsToSet: BaseRelationValuesInput[] = oldRelations || [];
+    const relationsToSet: BaseRelationValuesInput[] = oldRelations;
     if (newRelations) relationsToSet.push(...newRelations);
 
     form.setFieldValue("relationValues.relations", relationsToSet);
@@ -188,7 +191,7 @@ const useFormHelper = () => {
     relationType: string,
     formId: string | undefined = undefined
   ) => {
-    let form: FormContext<any> | undefined = formId
+    const form: FormContext<any> | undefined = formId
       ? getForm(formId)
       : getFormByRouteId().form;
     if (!form) return;
