@@ -2,7 +2,18 @@
   <div class="rounded-md pb-2">
     <div class="flex">
       <div
-        v-if="uploadStatus === 'upload-finished' && !uploadContainsErrors"
+        v-if="missingFileNames.length"
+        class="w-full bg-red-light p-2 text-red-default font-bold flex"
+      >
+        <p>
+          {{
+            t("actions.upload.errors", [missingFileNames.length]) +
+            t("actions.upload.missing", [missingFileNames.join(", ")])
+          }}
+        </p>
+      </div>
+      <div
+        v-if="uploadStatus === 'upload-finished'"
         class="w-full bg-green-light p-2 text-green-default font-bold flex"
       >
         <p class="w-full flex items-center">
@@ -96,7 +107,7 @@ const {
   amountUploaded,
   mediafiles,
   resetUpload,
-  uploadContainsErrors,
+  missingFileNames,
 } = useUpload();
 </script>
 
