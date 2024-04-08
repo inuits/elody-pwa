@@ -40,14 +40,11 @@
       </button>
     </div>
     <div
-      v-if="
-        progressIndicator &&
-        progressIndicator.type === ActionProgressIndicatorType.ProgressSteps
-      "
+      v-if="progressIndicatorType === ActionProgressIndicatorType.ProgressSteps"
       class="w-full flex items-center p-2 bg-neutral-white h-[48px]"
     >
       <div
-        v-for="progressStep in progressSteps"
+        v-for="progressStep in uploadProgress"
         :key="progressStep.label"
         class="flex"
       >
@@ -67,7 +64,6 @@
 
 <script setup lang="ts">
 import {
-  ActionProgress,
   ActionProgressIndicatorType,
   DamsIcons,
 } from "@/generated-types/queries";
@@ -77,24 +73,15 @@ import BaseProgressStep from "@/components/base/progressStep/BaseProgressStep.vu
 import useUpload from "@/composables/useUpload";
 import ProgressBar from "@/components/ProgressBar.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import { computed } from "vue";
 
 const props = withDefaults(
   defineProps<{
     label: string;
     icon: DamsIcons;
     disabled: boolean;
-    progressIndicator?: ActionProgress;
+    progressIndicatorType?: ActionProgressIndicatorType;
   }>(),
-  {}
-);
-
-const progressSteps = computed(() =>
-  props.progressIndicator
-    ? Object.values(props.progressIndicator).filter(
-        (indicatorValue: any) => typeof indicatorValue === "object"
-      )
-    : []
+  { progressIndicatorType: ActionProgressIndicatorType.Spinner }
 );
 
 const emit = defineEmits<{

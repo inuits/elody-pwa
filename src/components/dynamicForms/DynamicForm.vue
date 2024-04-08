@@ -46,7 +46,7 @@
           :label="t((field as FormAction).label)"
           :icon="(field as FormAction).icon"
           :disabled="!enableUploadButton"
-          :progressIndicator="(field as FormAction).actionProgressIndicator"
+          :progressIndicatorType="(field as FormAction).actionProgressIndicator.type"
           @click-upload-button="
             performActionButtonClickEvent(field as FormAction)
           "
