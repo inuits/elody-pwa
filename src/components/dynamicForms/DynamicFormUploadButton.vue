@@ -47,7 +47,7 @@
       class="w-full flex items-center p-2 bg-neutral-white h-[48px]"
     >
       <div
-        v-for="progressStep in uploadProgress"
+        v-for="progressStep in progressSteps"
         :key="progressStep.label"
         class="flex"
       >
@@ -77,6 +77,7 @@ import BaseProgressStep from "@/components/base/progressStep/BaseProgressStep.vu
 import useUpload from "@/composables/useUpload";
 import ProgressBar from "@/components/ProgressBar.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import { computed } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -86,6 +87,14 @@ const props = withDefaults(
     progressIndicator?: ActionProgress;
   }>(),
   {}
+);
+
+const progressSteps = computed(() =>
+  props.progressIndicator
+    ? Object.values(props.progressIndicator).filter(
+        (indicatorValue: any) => typeof indicatorValue === "object"
+      )
+    : []
 );
 
 const emit = defineEmits<{
