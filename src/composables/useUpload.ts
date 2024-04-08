@@ -10,11 +10,6 @@ import {
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 
-type FileError = {
-  filename: string;
-  error: "missing" | "extraneous";
-};
-
 type UploadSettings = {
   uploadType: UploadFieldType;
   uploadFlow: UploadFlow;
@@ -34,7 +29,6 @@ const mediafiles = computed((): DropzoneFile[] =>
 const uploadProgressPercentage = ref<number>(0);
 const uploadType = ref<UploadFieldType>(UploadFieldType.Batch);
 const requiredMediafiles = ref<string[] | undefined>(undefined);
-const fileErrors = ref<FileError[]>([]);
 const containsCsv = computed(
   () => !!files.value.find((file: DropzoneFile) => file.type === "text/csv")
 );
@@ -43,9 +37,7 @@ const uploadValidationFn = ref<Function>(() => {
   return false;
 });
 const enableUploadButton = computed(() => uploadValidationFn.value());
-const uploadContainsErrors = computed(
-  () => !dryRunErrors.value && fileErrors.value
-);
+const missingFileNames = ref<string[]>([]);
 
 const useUpload = () => {
   let _prefetchedUploadUrls: string[] | "not-prefetched-yet" =
@@ -169,7 +161,8 @@ const useUpload = () => {
         __updateFileThumbnails(
           file,
           ProgressStepType.Validate,
-          ProgressStepStatus.Failed
+          ProgressStepStatus.Failed,
+          dryRunResult.message
         );
         return;
       }
@@ -393,7 +386,6 @@ const useUpload = () => {
     if (isValidationFile) {
       dryRunComplete.value = false;
       dryRunErrors.value = [];
-      fileErrors.value = [];
       requiredMediafiles.value = undefined;
     }
     if (!mediafiles.value.length)
@@ -436,6 +428,7 @@ const useUpload = () => {
   const resetUpload = () => {
     uploadStatus.value = "no-upload";
     dryRunErrors.value = [];
+    missingFileNames.value = [];
     files.value = [];
     requiredMediafiles.value = undefined;
     amountUploaded.value = 0;
@@ -445,7 +438,7 @@ const useUpload = () => {
 
   const verifyAllNeededFilesArePresent = (): boolean => {
     try {
-      fileErrors.value = [];
+      missingFileNames.value = [];
 
       if (
         uploadFlow.value === UploadFlow.MediafilesOnly ||
@@ -472,25 +465,19 @@ const useUpload = () => {
         );
         if (!file) {
           areAllFilesPresent = false;
-          fileErrors.value.push({
-            filename: requiredFileName,
-            error: "missing",
-          });
+          missingFileNames.value.push(requiredFileName);
         }
       });
 
       mediafiles.value.forEach((file: DropzoneFile) => {
         if (!requiredFileNames.includes(file.name)) {
+          areAllFilesPresent = false;
           __updateFileThumbnails(
             file,
             ProgressStepType.Validate,
-            ProgressStepStatus.Failed
+            ProgressStepStatus.Failed,
+            `${file.name} is extraneous`
           );
-          areAllFilesPresent = false;
-          fileErrors.value.push({
-            filename: file.name,
-            error: "extraneous",
-          });
         }
       });
 
@@ -563,7 +550,7 @@ const useUpload = () => {
     __hideAllFileProgressSteps(stepTypeContainer);
     stepNode.classList.remove("hidden");
 
-    if (!error) return;
+    if (status !== ProgressStepStatus.Failed) return;
     __handleFileThumbnailError(file, error);
   };
 
@@ -571,7 +558,17 @@ const useUpload = () => {
     file: DropzoneFile,
     error: string
   ): void => {
-    file.previewTemplate;
+    console.log("Error handling");
+    const filePreview: HTMLElement = file.previewTemplate;
+
+    filePreview.classList.add("border-2", "border-red-default");
+    const errorContainer: Element | null = filePreview
+      .getElementsByClassName("error-message-container")
+      .item(0);
+
+    if (!errorContainer || !error) return;
+    errorContainer.innerHTML = error;
+    errorContainer.classList.remove("hidden");
   };
 
   return {
@@ -593,14 +590,13 @@ const useUpload = () => {
     requiredMediafiles,
     verifyAllNeededFilesArePresent,
     __updateGlobalUploadProgress,
-    fileErrors,
     dryRunComplete,
     uploadProgress,
     amountUploaded,
-    uploadContainsErrors,
     __updateFileThumbnails,
     initializeUpload,
     uploadFlow,
+    missingFileNames,
   };
 };
 
