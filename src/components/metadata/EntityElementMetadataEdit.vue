@@ -49,7 +49,6 @@ import {
   InputFieldTypes,
   type InputField as InputFieldType,
 } from "@/generated-types/queries";
-import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import BaseDropdownNew from "../base/BaseDropdownNew.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
