@@ -32,12 +32,6 @@ const directories = ref([]);
 const loading = ref(false);
 const selectedDirectory = ref(null);
 
-let queryResult;
-
-onMounted(() => {
-  console.log('Mounted. selectedIndex:', props.selectedIndex);
-});
-
 const { onResult } = useQuery(GetDirectoriesDocument, {});
 
 onResult((result) => {
