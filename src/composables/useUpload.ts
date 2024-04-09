@@ -38,6 +38,7 @@ const uploadValidationFn = ref<Function>(() => {
 });
 const enableUploadButton = computed(() => uploadValidationFn.value());
 const missingFileNames = ref<string[]>([]);
+const failedUploads = ref<string[]>([]);
 
 const useUpload = () => {
   let _prefetchedUploadUrls: string[] | "not-prefetched-yet" =
@@ -138,6 +139,10 @@ const useUpload = () => {
   ) => {
     if (!errorDescription)
       errorDescription = t("dropzone.errorNotification.description") as string;
+    __updateGlobalUploadProgress(
+      ProgressStepType.Upload,
+      ProgressStepStatus.Failed
+    );
     __updateFileThumbnails(
       file,
       ProgressStepType.Upload,
@@ -430,6 +435,7 @@ const useUpload = () => {
     missingFileNames.value = [];
     files.value = [];
     requiredMediafiles.value = undefined;
+    failedUploads.value = [];
     amountUploaded.value = 0;
     resetUploadDropzone();
     resetUploadProgress();
@@ -559,6 +565,7 @@ const useUpload = () => {
     errors: string[]
   ): void => {
     const filePreview: HTMLElement = file.previewTemplate;
+    failedUploads.value.push(file.name);
 
     filePreview.classList.add("border-2", "border-red-default");
     const errorContainer: Element | null = filePreview
@@ -600,6 +607,7 @@ const useUpload = () => {
     initializeUpload,
     uploadFlow,
     missingFileNames,
+    failedUploads,
   };
 };
 
