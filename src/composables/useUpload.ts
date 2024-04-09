@@ -104,7 +104,7 @@ const useUpload = () => {
         ProgressStepType.Upload,
         ProgressStepStatus.Complete
       );
-      console.log(amountUploaded.value);
+
       amountUploaded.value++;
     }
     toggleUploadStatus();
