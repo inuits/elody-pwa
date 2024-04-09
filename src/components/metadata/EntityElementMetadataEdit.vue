@@ -101,6 +101,7 @@ onUpdated(() => {
 });
 
 const getValueFromMetadata = (): string => {
+  if (Array.isArray(metadataValue.value)) return metadataValue.value;
   if (typeof metadataValue.value !== "object") return metadataValue.value;
   return metadataValue.value.value;
 };
