@@ -81,7 +81,7 @@ const useUpload = () => {
             progressStep.status === ProgressStepStatus.Complete
         );
     }
-    return !!mediafiles.value.length;
+    return !!mediafiles.value.length && !missingFileNames.value.length;
   };
 
   const __uploadMediafilesWithTicketUrl = async (
@@ -385,9 +385,7 @@ const useUpload = () => {
       (file: DropzoneFile) => file !== fileToRemove
     );
     if (isValidationFile) {
-      dryRunComplete.value = false;
-      dryRunErrors.value = [];
-      requiredMediafiles.value = undefined;
+      resetUpload();
     }
     if (!mediafiles.value.length)
       __updateGlobalUploadProgress(
@@ -443,7 +441,8 @@ const useUpload = () => {
 
       if (
         uploadFlow.value === UploadFlow.MediafilesOnly ||
-        uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv
+        (uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv &&
+          !containsCsv)
       )
         return true;
 
