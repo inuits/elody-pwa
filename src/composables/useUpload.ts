@@ -173,7 +173,7 @@ const useUpload = () => {
       });
       if (dryRunResult?.mediafiles.length) {
         requiredMediafiles.value = dryRunResult.mediafiles.map(
-          (mediafile: any) => mediafile.filename
+          (mediafile: any) => mediafile.filename ? mediafile.filename : mediafile.identifier
         );
       }
       dryRunErrors.value = errors;
@@ -288,9 +288,11 @@ const useUpload = () => {
           _prefetchedUploadUrls = (await __batchEntities(
             __getCsvBlob()
           )) as string[];
+        const regex = /\?.*/;
         uploadUrl = _prefetchedUploadUrls.find((url: string) =>
           url.includes(file.name)
-        );
+        )
+        uploadUrl = uploadUrl.replace(regex, '');
       } else {
         uploadUrl = await __getUploadUrlForStandaloneMediafile(file);
       }
@@ -328,6 +330,7 @@ const useUpload = () => {
       response: await fetch(extUrl, {
         method: "POST",
         body: formData,
+        headers: { "Content-Type": "application/octet-stream" },
       }),
       file: file,
     };
