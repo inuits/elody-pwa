@@ -66,23 +66,22 @@ const useUpload = () => {
   };
 
   const __checkUploadValidityMediafilesOnly = (): boolean => {
-    return !!(
-      (!uploadProgress.value ||
-        uploadFlow.value === UploadFlow.MediafilesOnly) &&
-      mediafiles.value.length
-    );
+    return !!mediafiles.value.length;
   };
 
   const __checkUploadValidityMediafilesWithCsv = (): boolean => {
-    return uploadProgress.value
-      .filter(
-        (progressStep: ActionProgressStep) =>
-          progressStep.stepType !== ProgressStepType.Upload
-      )
-      .every(
-        (progressStep: ActionProgressStep) =>
-          progressStep.status === ProgressStepStatus.Complete
-      );
+    if (uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv) {
+      return uploadProgress.value
+        .filter(
+          (progressStep: ActionProgressStep) =>
+            progressStep.stepType !== ProgressStepType.Upload
+        )
+        .every(
+          (progressStep: ActionProgressStep) =>
+            progressStep.status === ProgressStepStatus.Complete
+        );
+    }
+    return !!mediafiles.value.length;
   };
 
   const __uploadMediafilesWithTicketUrl = async (
@@ -105,6 +104,7 @@ const useUpload = () => {
         ProgressStepType.Upload,
         ProgressStepStatus.Complete
       );
+      console.log(amountUploaded.value);
       amountUploaded.value++;
     }
     toggleUploadStatus();
@@ -121,17 +121,13 @@ const useUpload = () => {
       ProgressStepStatus.Loading
     );
     toggleUploadStatus();
-    if (
-      uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv ||
-      uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv
-    )
-      __uploadMediafilesWithTicketUrl(isLinkedUpload, config, t);
 
     if (uploadFlow.value === UploadFlow.MediafilesOnly)
       __updateGlobalUploadProgress(
         ProgressStepType.Prepare,
         ProgressStepStatus.Complete
       );
+
     __uploadMediafilesWithTicketUrl(isLinkedUpload, config, t);
   };
 
