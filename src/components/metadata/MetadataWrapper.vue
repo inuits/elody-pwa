@@ -89,7 +89,17 @@ import { useOrderListItems, OrderItem } from "@/composables/useOrderListItems";
 import { useField } from "vee-validate";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { defineRule } from "vee-validate";
 import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
+
+defineRule("at_least_one_value_with_key", (value: any, type: any) => {
+  if (!Array.isArray(value)) {
+    return false;
+  }
+
+  const relationType = type[0];
+  return value.some((item: any) => item?.type === relationType);
+});
 
 const { t } = useI18n();
 const { addOrderItem, removeOrderItem, updateOrderItem } = useOrderListItems();
@@ -146,6 +156,11 @@ const isFieldRequired = computed(() => {
 });
 const getValidationRules = (metadata: PanelMetaData): string => {
   const rules: string = metadata?.inputField?.validation?.value as string;
+  if (
+    metadata.inputField?.type === InputFieldTypes.DropdownMultiselect ||
+    metadata.inputField?.type === InputFieldTypes.DropdownSingleselect
+  )
+    return `at_least_one_value_with_key:${metadata.inputField.relationType}`;
   if (isFieldRequired.value)
     return rules.includes("required") ? rules : `${rules}|required`;
   return rules;
@@ -160,6 +175,11 @@ const label = computed(() =>
 const veeValidateField = computed(() => {
   if (isMetadataOnRelation.value)
     return `relationValues.relationMetadata.${fieldKeyWithId.value}`;
+  else if (
+    props.metadata.inputField?.type === InputFieldTypes.DropdownMultiselect ||
+    props.metadata.inputField?.type === InputFieldTypes.DropdownSingleselect
+  )
+    return "relationValues.relations";
   else if (props.metadata.inputField)
     return `intialValues.${props.metadata.key}`;
   else if (props.linkedEntityId === undefined)
