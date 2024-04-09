@@ -146,7 +146,7 @@ const useUpload = () => {
       file,
       ProgressStepType.Upload,
       ProgressStepStatus.Failed,
-      errorDescription
+      [errorDescription]
     );
   };
 
@@ -188,7 +188,12 @@ const useUpload = () => {
         : ProgressStepStatus.Complete;
 
       __updateGlobalUploadProgress(ProgressStepType.Validate, dryRunStatus);
-      __updateFileThumbnails(file, ProgressStepType.Validate, dryRunStatus);
+      __updateFileThumbnails(
+        file,
+        ProgressStepType.Validate,
+        dryRunStatus,
+        dryRunErrors.value || []
+      );
     } catch {
       dryRunErrors.value.push("upload-fields.errors.dry-run-failed");
       __updateGlobalUploadProgress(
@@ -476,7 +481,7 @@ const useUpload = () => {
             file,
             ProgressStepType.Validate,
             ProgressStepStatus.Failed,
-            `${file.name} is extraneous`
+            [`${file.name} is extraneous`]
           );
         }
       });
@@ -534,7 +539,7 @@ const useUpload = () => {
     file: DropzoneFile,
     stepType: ProgressStepType,
     status: ProgressStepStatus,
-    error: string = ""
+    errors: string[] = []
   ): void => {
     const stepClass: string = `file-${stepType}-${status}`;
     const stepTypeContainerClass: string = `file-${stepType}-container`;
@@ -551,23 +556,26 @@ const useUpload = () => {
     stepNode.classList.remove("hidden");
 
     if (status !== ProgressStepStatus.Failed) return;
-    __handleFileThumbnailError(file, error);
+    __handleFileThumbnailError(file, errors);
   };
 
   const __handleFileThumbnailError = (
     file: DropzoneFile,
-    error: string
+    errors: string[]
   ): void => {
-    console.log("Error handling");
     const filePreview: HTMLElement = file.previewTemplate;
 
     filePreview.classList.add("border-2", "border-red-default");
     const errorContainer: Element | null = filePreview
-      .getElementsByClassName("error-message-container")
+      .getElementsByClassName("error-message-container"
       .item(0);
 
-    if (!errorContainer || !error) return;
-    errorContainer.innerHTML = error;
+    if (!errorContainer || !errors) return;
+    errors.forEach((error: string) => {
+      const errorNode = document.createElement("p");
+      errorNode.innerHTML = error;
+      errorContainer.appendChild(errorNode);
+    });
     errorContainer.classList.remove("hidden");
   };
 
