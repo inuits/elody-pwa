@@ -162,6 +162,7 @@ const useFormHelper = () => {
     const form: FormContext<any> | undefined = formId
       ? getForm(formId)
       : getFormByRouteId().form;
+    console.log(form)
     if (!form) return;
 
     let oldRelations: BaseRelationValuesInput[] =
