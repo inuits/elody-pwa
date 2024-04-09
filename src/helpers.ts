@@ -25,13 +25,13 @@ export const goToEntityPage = (
   }
 
   const entityId =
-    entity.intialValues.slug ||
+    entity.intialValues?.slug ||
     entity.uuid ||
     entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")?.value;
 
   router.replace({
     name: listItemRouteName,
-    params: { id: entityId, type: entity.type },
+    params: { id: entityId, type: entityId.includes("tracker") ? "IotDeviceTracker" : entity.type },
   });
 };
 
@@ -46,7 +46,7 @@ export const getEntityPageRoute = (
 
   return {
     name: listItemRouteName,
-    params: { id: entityId, type: entity.type },
+    params: { id: entityId, type: entityId.includes("tracker") ? "IotDeviceTracker" : entity.type },
   };
 };
 
