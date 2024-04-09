@@ -14,10 +14,21 @@
       </div>
       <div
         v-if="uploadStatus === 'upload-finished'"
-        class="w-full bg-green-light p-2 text-green-default font-bold flex"
+        class="w-full bg-green-light p-2 font-bold flex"
+        :class="[
+          { 'text-green-default bg-green-light': !failedUploads.length },
+          { 'text-red-default bg-red-light': failedUploads.length },
+        ]"
       >
         <p class="w-full flex items-center">
-          {{ t("actions.labels.success", [amountUploaded]) }}
+          {{
+            t(
+              failedUploads.length
+                ? "actions.upload.errors"
+                : "actions.labels.success",
+              [amountUploaded]
+            )
+          }}
         </p>
         <div class="w-1/4">
           <base-button-new
@@ -108,6 +119,7 @@ const {
   mediafiles,
   resetUpload,
   missingFileNames,
+  failedUploads,
 } = useUpload();
 </script>
 
