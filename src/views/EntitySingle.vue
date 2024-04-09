@@ -9,6 +9,7 @@
         :intial-values="intialValues"
         :relation-values="relationValues"
         :uuid="entity.uuid"
+        :type="String(route.params['type'])"
       >
         <entity-column
           v-if="columnList != 'no-values'"
