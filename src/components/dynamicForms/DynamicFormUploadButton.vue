@@ -26,7 +26,7 @@
               failedUploads.length
                 ? "actions.upload.errors"
                 : "actions.labels.success",
-              [amountUploaded]
+              [failedUploads.length ? failedUploads.length : amountUploaded]
             )
           }}
         </p>

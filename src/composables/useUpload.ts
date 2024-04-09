@@ -109,10 +109,10 @@ const useUpload = () => {
       amountUploaded.value++;
     }
     toggleUploadStatus();
-    __updateGlobalUploadProgress(
-      ProgressStepType.Upload,
-      ProgressStepStatus.Complete
-    );
+    const uploadStatus: ProgressStepStatus = failedUploads.value.length
+      ? ProgressStepStatus.Failed
+      : ProgressStepStatus.Complete;
+    __updateGlobalUploadProgress(ProgressStepType.Upload, uploadStatus);
   };
 
   const upload = async (isLinkedUpload: boolean, config: any, t: Function) => {
@@ -139,10 +139,6 @@ const useUpload = () => {
   ) => {
     if (!errorDescription)
       errorDescription = t("dropzone.errorNotification.description") as string;
-    __updateGlobalUploadProgress(
-      ProgressStepType.Upload,
-      ProgressStepStatus.Failed
-    );
     __updateFileThumbnails(
       file,
       ProgressStepType.Upload,
