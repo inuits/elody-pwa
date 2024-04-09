@@ -567,7 +567,7 @@ const useUpload = () => {
 
     filePreview.classList.add("border-2", "border-red-default");
     const errorContainer: Element | null = filePreview
-      .getElementsByClassName("error-message-container"
+      .getElementsByClassName("error-message-container")
       .item(0);
 
     if (!errorContainer || !errors) return;
