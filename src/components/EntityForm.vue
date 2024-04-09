@@ -4,7 +4,6 @@
 
 <script lang="ts" setup>
 import {
-  Collection,
   EditStatus,
   MutateEntityValuesDocument,
   TypeModals,
@@ -24,22 +23,24 @@ import {
   useNotification,
   NotificationType,
 } from "@/components/base/BaseNotification.vue";
-import { onMounted, onUnmounted, unref, watch } from "vue";
+import { inject, onMounted, onUnmounted, unref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper, type EntityValues } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { useMutation } from "@vue/apollo-composable";
-import { useRoute, onBeforeRouteLeave } from "vue-router";
+import { onBeforeRouteLeave } from "vue-router";
 import { useSubmitForm } from "vee-validate";
 
 const props = defineProps<{
   intialValues: IntialValues;
   relationValues: RelationValues;
   uuid: string;
+  type: string;
 }>();
 
+const config: any = inject("config");
 const {
   initializeConfirmModal,
   performRoute,
@@ -53,7 +54,7 @@ const { createForm, editableFields } = useFormHelper();
 const { createNotification } = useNotification();
 const { closeModal, openModal } = useBaseModal();
 const { t } = useI18n();
-const route = useRoute();
+const childRoutes = config.routerConfig[0].children.map((route: any) => route.meta)
 
 const { mutate } = useMutation<
   MutateEntityValuesMutation,
@@ -124,7 +125,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
   const result = await mutate({
     id: props.uuid,
     formInput: parseFormValuesToFormInput(form.values),
-    collection: route.meta.type as Collection,
+    collection: childRoutes.find((route: any) => route.entityType === props.type).type,
   });
 
   if (!result?.data?.mutateEntityValues) return;
