@@ -159,7 +159,7 @@ const useUpload = () => {
           file,
           ProgressStepType.Validate,
           ProgressStepStatus.Failed,
-          dryRunResult.message
+          [dryRunResult.message]
         );
         return;
       }
