@@ -98,19 +98,29 @@ const useFormHelper = () => {
 
   const defineValidationRules = () => {
     Object.keys(AllRules).forEach((rule: string) => {
-      console.log(rule);
       defineRule(rule, AllRules[rule]);
     });
 
-    defineRule("at_least_one_value_with_key", (value: any, type: any) => {
-      if (!Array.isArray(value)) {
-        return false;
-      }
+    defineRule("has_specific_relation", getHasSpecificRelationRule);
+  };
 
-      const relationType = type[0];
-      console.log(`relationType: ${relationType}`, value.some((item: any) => item?.type === relationType));
-      return value.some((item: any) => item?.type === relationType);
-    });
+  const getHasSpecificRelationRule = (
+    value: any,
+    parameters: string[]
+  ): boolean => {
+    if (!Array.isArray(value)) {
+      return false;
+    }
+
+    const relations = value.filter(
+      (item: { editStatus: string | undefined }) =>
+        item.editStatus !== EditStatus.Deleted
+    );
+    const [relationType, amount = 0] = parameters[0].split(":");
+    const specificRelationsLength =
+      relations.filter((item: any) => item?.type === relationType)?.length || 0;
+
+    return specificRelationsLength >= Number(amount);
   };
 
   const __isNotEmpty = (str: any) => str.trim() !== "";
@@ -173,7 +183,6 @@ const useFormHelper = () => {
     const form: FormContext<any> | undefined = formId
       ? getForm(formId)
       : getFormByRouteId().form;
-    console.log(form);
     if (!form) return;
 
     let oldRelations: BaseRelationValuesInput[] =

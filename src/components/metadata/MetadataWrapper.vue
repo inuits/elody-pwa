@@ -78,9 +78,9 @@ import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.v
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import {
   BaseLibraryModes,
-  MetadataField,
-  PanelMetaData,
+  type PanelMetaData,
   InputFieldTypes,
+  type BaseRelationValuesInput,
 } from "@/generated-types/queries";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { computed, onMounted, onBeforeUnmount, watch, unref } from "vue";
@@ -112,12 +112,11 @@ const props = withDefaults(
 
 const emit = defineEmits(["update:relations"]);
 
-const setNewValue = (newValue: string) => {
+const setNewValue = (newValue: string | BaseRelationValuesInput[]) => {
   value.value = newValue;
   const form = getForm(props.formId);
-  console.log("update", unref(newValue));
   if (form) {
-    form.setFieldValue(veeValidateField.value, unref(newValue));
+    form.setFieldValue(veeValidateField.value, newValue);
   }
 };
 const registerEnterKeyPressed = async (value: string) => {
@@ -135,6 +134,16 @@ const fieldKeyWithId = computed(
 );
 const fieldIsDirty = computed(() => meta.dirty);
 const { conditionalFieldIsRequired } = useConditionalValidation();
+
+const isFieldHasRelationRule = computed(() => {
+  if (
+    props.metadata?.inputField?.validation?.value?.includes(
+      "has_specific_relation"
+    )
+  )
+    return true;
+  return false;
+});
 const isFieldRequired = computed(() => {
   if (props.metadata?.inputField?.validation?.value?.includes("required"))
     return true;
@@ -147,12 +156,13 @@ const isFieldRequired = computed(() => {
 });
 const getValidationRules = (metadata: PanelMetaData): string => {
   const rules: string = metadata?.inputField?.validation?.value as string;
-  if (
-    (metadata.inputField?.type === InputFieldTypes.DropdownMultiselect ||
-      metadata.inputField?.type === InputFieldTypes.DropdownSingleselect) &&
-    isFieldRequired.value
-  )
-    return `at_least_one_value_with_key:${metadata.inputField.relationType}`;
+  if (isFieldHasRelationRule.value) {
+    const relationType =
+      metadata?.inputField?.validation?.has_specific_relation?.relationType;
+    const amountOfTypes =
+      metadata?.inputField?.validation?.has_specific_relation?.amount;
+    return `${rules}:${relationType}:${amountOfTypes}`;
+  }
   if (isFieldRequired.value)
     return rules.includes("required") ? rules : `${rules}|required`;
   return rules;
@@ -167,10 +177,7 @@ const label = computed(() =>
 const veeValidateField = computed(() => {
   if (isMetadataOnRelation.value)
     return `relationValues.relationMetadata.${fieldKeyWithId.value}`;
-  else if (
-    props.metadata.inputField?.type === InputFieldTypes.DropdownMultiselect ||
-    props.metadata.inputField?.type === InputFieldTypes.DropdownSingleselect
-  )
+  else if (isFieldHasRelationRule.value && props.isEdit)
     return "relationValues.relations";
   else if (props.metadata.inputField)
     return `intialValues.${props.metadata.key}`;
@@ -179,11 +186,9 @@ const veeValidateField = computed(() => {
   else return `intialValues.${fieldKeyWithId.value}`;
 });
 
-const { errorMessage, value, meta } = useField<string>(
-  veeValidateField,
-  rules,
-  { label: label }
-);
+const { errorMessage, value, meta } = useField<
+  string | BaseRelationValuesInput[]
+>(veeValidateField, rules, { label: label });
 
 onMounted(() => {
   if (!value.value) setNewValue(props.metadata.value);
