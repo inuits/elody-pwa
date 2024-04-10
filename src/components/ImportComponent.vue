@@ -54,7 +54,7 @@ const doImport = (folder) => {
 
   startImport({ folder })
     .then(() => {
-      createNotificationOverwrite(NotificationType.default, 'Success', 'Import successful');
+      createNotificationOverwrite(NotificationType.success, 'Success', 'Import successful');
     })
     .catch((error) => {
       createNotificationOverwrite(NotificationType.error, 'Error', 'Error importing: ' + error.message);
