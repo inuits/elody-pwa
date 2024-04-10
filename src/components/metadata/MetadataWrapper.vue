@@ -83,23 +83,13 @@ import {
   InputFieldTypes,
 } from "@/generated-types/queries";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
-import { computed, onMounted, onBeforeUnmount, watch } from "vue";
+import { computed, onMounted, onBeforeUnmount, watch, unref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useOrderListItems, OrderItem } from "@/composables/useOrderListItems";
 import { useField } from "vee-validate";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { defineRule } from "vee-validate";
 import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
-
-defineRule("at_least_one_value_with_key", (value: any, type: any) => {
-  if (!Array.isArray(value)) {
-    return false;
-  }
-
-  const relationType = type[0];
-  return value.some((item: any) => item?.type === relationType);
-});
 
 const { t } = useI18n();
 const { addOrderItem, removeOrderItem, updateOrderItem } = useOrderListItems();
@@ -125,8 +115,9 @@ const emit = defineEmits(["update:relations"]);
 const setNewValue = (newValue: string) => {
   value.value = newValue;
   const form = getForm(props.formId);
+  console.log("update", unref(newValue));
   if (form) {
-    form.setFieldValue(veeValidateField.value, newValue);
+    form.setFieldValue(veeValidateField.value, unref(newValue));
   }
 };
 const registerEnterKeyPressed = async (value: string) => {
@@ -157,8 +148,9 @@ const isFieldRequired = computed(() => {
 const getValidationRules = (metadata: PanelMetaData): string => {
   const rules: string = metadata?.inputField?.validation?.value as string;
   if (
-    metadata.inputField?.type === InputFieldTypes.DropdownMultiselect ||
-    metadata.inputField?.type === InputFieldTypes.DropdownSingleselect
+    (metadata.inputField?.type === InputFieldTypes.DropdownMultiselect ||
+      metadata.inputField?.type === InputFieldTypes.DropdownSingleselect) &&
+    isFieldRequired.value
   )
     return `at_least_one_value_with_key:${metadata.inputField.relationType}`;
   if (isFieldRequired.value)

@@ -97,6 +97,7 @@ onMounted(() => {
     addEditableMetadataOnRelationKey(props.fieldKey, props.formId);
 });
 onUpdated(() => {
+  if (JSON.stringify(props.value) === JSON.stringify(metadataValue.value)) return;
   metadataValue.value = props.value;
 });
 

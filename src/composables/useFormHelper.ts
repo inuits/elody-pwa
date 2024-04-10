@@ -98,7 +98,18 @@ const useFormHelper = () => {
 
   const defineValidationRules = () => {
     Object.keys(AllRules).forEach((rule: string) => {
+      console.log(rule);
       defineRule(rule, AllRules[rule]);
+    });
+
+    defineRule("at_least_one_value_with_key", (value: any, type: any) => {
+      if (!Array.isArray(value)) {
+        return false;
+      }
+
+      const relationType = type[0];
+      console.log(`relationType: ${relationType}`, value.some((item: any) => item?.type === relationType));
+      return value.some((item: any) => item?.type === relationType);
     });
   };
 
@@ -162,7 +173,7 @@ const useFormHelper = () => {
     const form: FormContext<any> | undefined = formId
       ? getForm(formId)
       : getFormByRouteId().form;
-    console.log(form)
+    console.log(form);
     if (!form) return;
 
     let oldRelations: BaseRelationValuesInput[] =
