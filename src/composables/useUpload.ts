@@ -568,6 +568,7 @@ const useUpload = () => {
       .item(0);
 
     if (!errorContainer || !errors) return;
+    errorContainer.innerHTML = "";
     errors.forEach((error: string) => {
       const errorNode = document.createElement("p");
       errorNode.innerHTML = error;
