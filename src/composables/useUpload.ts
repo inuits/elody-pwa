@@ -385,7 +385,7 @@ const useUpload = () => {
     files.value = files.value.filter(
       (file: DropzoneFile) => file !== fileToRemove
     );
-    if (isValidationFile) {
+    if (isValidationFile || !files.value.length) {
       resetUpload();
     }
     if (!mediafiles.value.length)
@@ -393,7 +393,6 @@ const useUpload = () => {
         ProgressStepType.Prepare,
         ProgressStepStatus.Empty
       );
-    if (!files.value.length) resetUploadProgress();
   };
 
   const addFileToUpload = (
