@@ -105,7 +105,7 @@ const useFormHelper = () => {
   };
 
   const getHasSpecificRelationRule = (
-    value: any,
+    value: BaseRelationValuesInput[],
     parameters: string[]
   ): boolean => {
     if (!Array.isArray(value)) {
@@ -113,12 +113,14 @@ const useFormHelper = () => {
     }
 
     const relations = value.filter(
-      (item: { editStatus: string | undefined }) =>
-        item.editStatus !== EditStatus.Deleted
+      (relation: BaseRelationValuesInput) =>
+        relation.editStatus !== EditStatus.Deleted
     );
-    const [relationType, amount = 0] = parameters[0].split(":");
+    const [relationType, amount = 1] = parameters[0].split(":");
     const specificRelationsLength =
-      relations.filter((item: any) => item?.type === relationType)?.length || 0;
+      relations.filter(
+        (relation: BaseRelationValuesInput) => relation.type === relationType
+      )?.length || 0;
 
     return specificRelationsLength >= Number(amount);
   };
