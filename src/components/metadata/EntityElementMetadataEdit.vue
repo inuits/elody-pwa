@@ -98,13 +98,17 @@ onMounted(() => {
     addEditableMetadataOnRelationKey(props.fieldKey, props.formId);
 });
 onUpdated(() => {
-  if (JSON.stringify(props.value) === JSON.stringify(metadataValue.value)) return;
+  if (JSON.stringify(props.value) === JSON.stringify(metadataValue.value))
+    return;
   metadataValue.value = props.value;
 });
 
 const getValueFromMetadata = (): string | BaseRelationValuesInput[] => {
-  if (Array.isArray(metadataValue.value)) return metadataValue.value;
-  if (typeof metadataValue.value !== "object") return metadataValue.value;
+  if (
+    typeof metadataValue.value !== "object" ||
+    Array.isArray(metadataValue.value)
+  )
+    return metadataValue.value;
   return metadataValue.value.value;
 };
 
