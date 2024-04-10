@@ -47,6 +47,7 @@
 import type { Conditional, DropdownOption } from "@/generated-types/queries";
 import {
   InputFieldTypes,
+  BaseRelationValuesInput,
   type InputField as InputFieldType,
 } from "@/generated-types/queries";
 import BaseDropdownNew from "../base/BaseDropdownNew.vue";
@@ -101,7 +102,7 @@ onUpdated(() => {
   metadataValue.value = props.value;
 });
 
-const getValueFromMetadata = (): string => {
+const getValueFromMetadata = (): string | BaseRelationValuesInput[] => {
   if (Array.isArray(metadataValue.value)) return metadataValue.value;
   if (typeof metadataValue.value !== "object") return metadataValue.value;
   return metadataValue.value.value;
