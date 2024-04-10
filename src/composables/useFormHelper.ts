@@ -162,7 +162,7 @@ const useFormHelper = () => {
     const form: FormContext<any> | undefined = formId
       ? getForm(formId)
       : getFormByRouteId().form;
-    if (selectedItems.length <= 0 || !form) return;
+    if (!form) return;
 
     let oldRelations: BaseRelationValuesInput[] =
       form.values.relationValues.relations || [];
