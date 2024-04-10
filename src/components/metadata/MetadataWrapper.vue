@@ -82,8 +82,7 @@ import {
   InputFieldTypes,
   type BaseRelationValuesInput,
 } from "@/generated-types/queries";
-import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
-import { computed, onMounted, onBeforeUnmount, watch, unref } from "vue";
+import { computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useOrderListItems, OrderItem } from "@/composables/useOrderListItems";
 import { useField } from "vee-validate";
