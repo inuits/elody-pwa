@@ -306,11 +306,26 @@ const useUpload = () => {
 
   const __constructExternalUrlForUpload = (
     url: string,
-    storageApiUrl: string
+    storageApiUrl: string,
+    file: DropzoneFile
   ): string => {
-    const urlObject = new URL(url);
-    const origin = new URL(storageApiUrl).origin;
-    return origin + urlObject.pathname + "?" + urlObject.searchParams;
+    try {
+      const urlObject = new URL(url);
+      const origin = new URL(storageApiUrl).origin;
+      return origin + urlObject.pathname + "?" + urlObject.searchParams;
+    } catch (e: any) {
+      __updateFileThumbnails(
+        file,
+        ProgressStepType.Upload,
+        ProgressStepStatus.Failed,
+        ["Something went wrong during upload"]
+      );
+      __updateGlobalUploadProgress(
+        ProgressStepType.Upload,
+        ProgressStepStatus.Failed
+      );
+      throw Error(e);
+    }
   };
 
   const __uploadFile = async (file: DropzoneFile, url: string, config: any) => {
@@ -323,7 +338,8 @@ const useUpload = () => {
     formData.append("file", file);
     const extUrl = __constructExternalUrlForUpload(
       url,
-      config.api.storageApiUrl
+      config.api.storageApiUrl,
+      file
     );
     return {
       response: await fetch(extUrl, {
