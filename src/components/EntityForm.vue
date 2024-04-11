@@ -23,7 +23,7 @@ import {
   useNotification,
   NotificationType,
 } from "@/components/base/BaseNotification.vue";
-import { inject, onMounted, onUnmounted, unref, watch } from "vue";
+import { inject, onMounted, onUnmounted, unref, watch, computed } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useEditMode } from "@/composables/useEdit";
@@ -49,12 +49,15 @@ const {
   pathToNavigate,
 } = useConfirmModal();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
-const { isEdit, addSaveCallback, refetchFn, disableEditMode } = useEditMode();
+const { isEdit, addSaveCallback, refetchFn, disableEditMode, setDisableState } =
+  useEditMode();
 const { createForm, editableFields } = useFormHelper();
 const { createNotification } = useNotification();
 const { closeModal, openModal } = useBaseModal();
 const { t } = useI18n();
-const childRoutes = config.routerConfig[0].children.map((route: any) => route.meta)
+const childRoutes = config.routerConfig[0].children.map(
+  (route: any) => route.meta
+);
 
 const { mutate } = useMutation<
   MutateEntityValuesMutation,
@@ -66,6 +69,7 @@ let form = createForm(props.uuid, {
   relationValues: unref(props.relationValues),
 });
 let mutatedEntity: Entity | undefined;
+const formContainsErrors = computed((): boolean => !form?.meta.value.valid);
 
 const { setValues } = form;
 
@@ -125,7 +129,9 @@ const submit = useSubmitForm<EntityValues>(async () => {
   const result = await mutate({
     id: props.uuid,
     formInput: parseFormValuesToFormInput(form.values),
-    collection: childRoutes.find((route: any) => route.entityType === props.type).type,
+    collection: childRoutes.find(
+      (route: any) => route.entityType === props.type
+    ).type,
   });
 
   if (!result?.data?.mutateEntityValues) return;
@@ -150,7 +156,9 @@ const callRefetchFn = () => {
   if (refetch) refetch();
 };
 
-onMounted(() => document.addEventListener("discardEdit", () => callRefetchFn));
+onMounted(async () =>
+  document.addEventListener("discardEdit", () => callRefetchFn)
+);
 onUnmounted(() =>
   document.removeEventListener("discardEdit", () => callRefetchFn)
 );
@@ -179,6 +187,15 @@ watch(
       relationValues: props.relationValues,
     });
   }
+);
+
+watch(
+  () => form.values,
+  async () => {
+    await form.validate();
+    setDisableState(formContainsErrors.value);
+  },
+  { deep: true }
 );
 
 onBeforeRouteLeave((to, from, next) => {

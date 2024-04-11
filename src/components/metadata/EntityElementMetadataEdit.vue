@@ -47,7 +47,7 @@
 import type { Conditional, DropdownOption } from "@/generated-types/queries";
 import {
   InputFieldTypes,
-  BaseRelationValuesInput,
+  type BaseRelationValuesInput,
   type InputField as InputFieldType,
 } from "@/generated-types/queries";
 import BaseDropdownNew from "../base/BaseDropdownNew.vue";

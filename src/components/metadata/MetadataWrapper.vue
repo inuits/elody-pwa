@@ -109,8 +109,6 @@ const props = withDefaults(
   }
 );
 
-const emit = defineEmits(["update:relations"]);
-
 const setNewValue = (newValue: string | BaseRelationValuesInput[]) => {
   value.value = newValue;
   const form = getForm(props.formId);
@@ -134,10 +132,10 @@ const fieldKeyWithId = computed(
 const fieldIsDirty = computed(() => meta.dirty);
 const { conditionalFieldIsRequired } = useConditionalValidation();
 
-const isFieldHasRelationRule = computed(() => {
+const isRelationField = computed(() => {
   if (
     props.metadata?.inputField?.validation?.value?.includes(
-      "has_specific_relation"
+      "has_required_relation"
     )
   )
     return true;
@@ -155,12 +153,12 @@ const isFieldRequired = computed(() => {
 });
 const getValidationRules = (metadata: PanelMetaData): string => {
   const rules: string = metadata?.inputField?.validation?.value as string;
-  if (isFieldHasRelationRule.value) {
+  if (isRelationField.value) {
     const relationType =
-      metadata?.inputField?.validation?.has_specific_relation?.relationType;
-    const amountOfTypes =
-      metadata?.inputField?.validation?.has_specific_relation?.amount;
-    return `${rules}:${relationType}:${amountOfTypes}`;
+      metadata?.inputField?.validation?.has_required_relation?.relationType;
+    const amount =
+      metadata?.inputField?.validation?.has_required_relation?.amount;
+    return `${rules}:${relationType}:${amount}`;
   }
   if (isFieldRequired.value)
     return rules.includes("required") ? rules : `${rules}|required`;
@@ -176,7 +174,7 @@ const label = computed(() =>
 const veeValidateField = computed(() => {
   if (isMetadataOnRelation.value)
     return `relationValues.relationMetadata.${fieldKeyWithId.value}`;
-  else if (isFieldHasRelationRule.value && props.isEdit)
+  else if (isRelationField.value && props.isEdit)
     return "relationValues.relations";
   else if (props.metadata.inputField)
     return `intialValues.${props.metadata.key}`;

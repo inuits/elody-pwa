@@ -101,7 +101,7 @@ const useFormHelper = () => {
       defineRule(rule, AllRules[rule]);
     });
 
-    defineRule("has_specific_relation", getHasSpecificRelationRule);
+    defineRule("has_required_relation", getHasSpecificRelationRule);
   };
 
   const getHasSpecificRelationRule = (
