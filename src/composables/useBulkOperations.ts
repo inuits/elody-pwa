@@ -67,7 +67,7 @@ export const useBulkOperations = () => {
     items.value[context]?.length ?? 0;
 
   const isEnqueued = (context: Context, itemId: string) =>
-    items.value[context].find((item) => item.id == itemId) !== undefined;
+    items.value[context]?.find((item) => item.id == itemId) !== undefined;
 
   const triggerBulkSelectionEvent = (context: Context) => {
     contextWhereSelectionEventIsTriggered.value = context;

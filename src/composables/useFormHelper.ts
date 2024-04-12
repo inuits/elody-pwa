@@ -203,9 +203,8 @@ const useFormHelper = () => {
       });
     });
 
-    const relationsToSet: BaseRelationValuesInput[] = oldRelations;
-    if (newRelations) relationsToSet.push(...newRelations);
-
+    const relationsToSet: BaseRelationValuesInput[] = newRelations;
+    relationsToSet.push(...oldRelations);
     form.setFieldValue("relationValues.relations", relationsToSet);
   };
 
