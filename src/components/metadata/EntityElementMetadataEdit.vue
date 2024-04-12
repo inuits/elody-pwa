@@ -57,6 +57,7 @@ import { onMounted, watch, ref, computed, onUpdated } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
+import isEqual from "lodash.isequal";
 
 const emit = defineEmits(["update:value", "registerEnterPressed:value"]);
 
@@ -98,8 +99,7 @@ onMounted(() => {
     addEditableMetadataOnRelationKey(props.fieldKey, props.formId);
 });
 onUpdated(() => {
-  if (JSON.stringify(props.value) === JSON.stringify(metadataValue.value))
-    return;
+  if (isEqual(props.value, metadataValue.value)) return;
   metadataValue.value = props.value;
 });
 

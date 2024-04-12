@@ -80,6 +80,8 @@ import {
   BaseLibraryModes,
   type PanelMetaData,
   InputFieldTypes,
+  ValidationRules,
+  ValidationFields,
   type BaseRelationValuesInput,
 } from "@/generated-types/queries";
 import { computed, onMounted, onBeforeUnmount, watch } from "vue";
@@ -135,14 +137,18 @@ const { conditionalFieldIsRequired } = useConditionalValidation();
 const isRelationField = computed(() => {
   if (
     props.metadata?.inputField?.validation?.value?.includes(
-      "has_required_relation"
+      ValidationRules.HasRequiredRelation
     )
   )
     return true;
   return false;
 });
 const isFieldRequired = computed(() => {
-  if (props.metadata?.inputField?.validation?.value?.includes("required"))
+  if (
+    props.metadata?.inputField?.validation?.value?.includes(
+      ValidationRules.Required
+    )
+  )
     return true;
   if (props.metadata?.inputField?.validation?.required_if)
     return conditionalFieldIsRequired(
@@ -161,7 +167,9 @@ const getValidationRules = (metadata: PanelMetaData): string => {
     return `${rules}:${relationType}:${amount}`;
   }
   if (isFieldRequired.value)
-    return rules.includes("required") ? rules : `${rules}|required`;
+    return rules.includes(ValidationRules.Required)
+      ? rules
+      : `${rules}|required`;
   return rules;
 };
 const rules = computed(() => getValidationRules(props.metadata));
@@ -173,14 +181,14 @@ const label = computed(() =>
 
 const veeValidateField = computed(() => {
   if (isMetadataOnRelation.value)
-    return `relationValues.relationMetadata.${fieldKeyWithId.value}`;
+    return `${ValidationFields.RelationValues}.${ValidationFields.RelationMetadata}.${fieldKeyWithId.value}`;
   else if (isRelationField.value && props.isEdit)
-    return "relationValues.relations";
+    return `${ValidationFields.RelationValues}.${ValidationFields.Relations}`;
   else if (props.metadata.inputField)
-    return `intialValues.${props.metadata.key}`;
+    return `${ValidationFields.IntialValues}.${props.metadata.key}`;
   else if (props.linkedEntityId === undefined)
-    return `intialValues.${props.metadata.key}`;
-  else return `intialValues.${fieldKeyWithId.value}`;
+    return `${ValidationFields.RelationValues}.${props.metadata.key}`;
+  else return `${ValidationFields.RelationValues}.${fieldKeyWithId.value}`;
 });
 
 const { errorMessage, value, meta } = useField<
