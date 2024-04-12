@@ -6,6 +6,7 @@ export type callback = (e?: Event | undefined) => Promise<unknown>;
 export const toBeDeleted = ref<string[]>([]);
 export const isSaved = ref<boolean>(false);
 
+const isDisabled = ref<boolean>(false);
 const editMode = ref<EditModes>("view");
 const saveCallbacks = ref<callback[]>([]);
 const isEditToggleVisible = ref<"no-edit" | "edit" | "edit-delete">("no-edit");
@@ -60,6 +61,10 @@ export const useEditMode = () => {
     document.dispatchEvent(discardEvent);
   };
 
+  const setDisableState = (value: boolean) => {
+    isDisabled.value = value;
+  };
+
   return {
     save,
     isEdit,
@@ -74,6 +79,8 @@ export const useEditMode = () => {
     setRefetchFn,
     refetchFn,
     isSaved,
+    isDisabled,
+    setDisableState,
   };
 };
 
