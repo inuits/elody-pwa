@@ -47,9 +47,9 @@
 import type { Conditional, DropdownOption } from "@/generated-types/queries";
 import {
   InputFieldTypes,
+  type BaseRelationValuesInput,
   type InputField as InputFieldType,
 } from "@/generated-types/queries";
-import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import BaseDropdownNew from "../base/BaseDropdownNew.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
@@ -57,6 +57,7 @@ import { onMounted, watch, ref, computed, onUpdated } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
+import isEqual from "lodash.isequal";
 
 const emit = defineEmits(["update:value", "registerEnterPressed:value"]);
 
@@ -98,11 +99,16 @@ onMounted(() => {
     addEditableMetadataOnRelationKey(props.fieldKey, props.formId);
 });
 onUpdated(() => {
+  if (isEqual(props.value, metadataValue.value)) return;
   metadataValue.value = props.value;
 });
 
-const getValueFromMetadata = (): string => {
-  if (typeof metadataValue.value !== "object") return metadataValue.value;
+const getValueFromMetadata = (): string | BaseRelationValuesInput[] => {
+  if (
+    typeof metadataValue.value !== "object" ||
+    Array.isArray(metadataValue.value)
+  )
+    return metadataValue.value;
   return metadataValue.value.value;
 };
 

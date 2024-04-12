@@ -4,6 +4,7 @@
       :button-label="$t('bulk-operations.save')"
       :button-icon="DamsIcons.Save"
       :show-delete-button="isEditToggleVisible !== 'edit-delete'"
+      :disabled="isDisabled"
       @submit="
         async () => {
           await save();
@@ -47,7 +48,7 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const { pageInfo } = usePageInfo();
-const { isEdit, save, discard, disableEditMode, isEditToggleVisible } =
+const { isEdit, save, discard, disableEditMode, isEditToggleVisible, isDisabled } =
   useEditMode();
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal, openModal } = useBaseModal();

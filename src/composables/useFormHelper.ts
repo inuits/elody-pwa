@@ -100,6 +100,29 @@ const useFormHelper = () => {
     Object.keys(AllRules).forEach((rule: string) => {
       defineRule(rule, AllRules[rule]);
     });
+
+    defineRule("has_required_relation", getHasSpecificRelationRule);
+  };
+
+  const getHasSpecificRelationRule = (
+    value: BaseRelationValuesInput[],
+    parameters: string[]
+  ): boolean => {
+    if (!Array.isArray(value)) {
+      return false;
+    }
+
+    const relations = value.filter(
+      (relation: BaseRelationValuesInput) =>
+        relation.editStatus !== EditStatus.Deleted
+    );
+    const [relationType, amount = 1] = parameters[0].split(":");
+    const specificRelationsLength =
+      relations.filter(
+        (relation: BaseRelationValuesInput) => relation.type === relationType
+      )?.length || 0;
+
+    return specificRelationsLength >= Number(amount);
   };
 
   const __isNotEmpty = (str: any) => str.trim() !== "";
@@ -191,7 +214,7 @@ const useFormHelper = () => {
     relationType: string,
     formId: string | undefined = undefined
   ) => {
-    let form: FormContext<any> | undefined = formId
+    const form: FormContext<any> | undefined = formId
       ? getForm(formId)
       : getFormByRouteId().form;
     if (!form) return;

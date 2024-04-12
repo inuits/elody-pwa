@@ -78,11 +78,12 @@ import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.v
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import {
   BaseLibraryModes,
-  MetadataField,
-  PanelMetaData,
+  type PanelMetaData,
   InputFieldTypes,
+  ValidationRules,
+  ValidationFields,
+  type BaseRelationValuesInput,
 } from "@/generated-types/queries";
-import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useOrderListItems, OrderItem } from "@/composables/useOrderListItems";
@@ -110,9 +111,7 @@ const props = withDefaults(
   }
 );
 
-const emit = defineEmits(["update:relations"]);
-
-const setNewValue = (newValue: string) => {
+const setNewValue = (newValue: string | BaseRelationValuesInput[]) => {
   value.value = newValue;
   const form = getForm(props.formId);
   if (form) {
@@ -134,8 +133,22 @@ const fieldKeyWithId = computed(
 );
 const fieldIsDirty = computed(() => meta.dirty);
 const { conditionalFieldIsRequired } = useConditionalValidation();
+
+const isRelationField = computed(() => {
+  if (
+    props.metadata?.inputField?.validation?.value?.includes(
+      ValidationRules.HasRequiredRelation
+    )
+  )
+    return true;
+  return false;
+});
 const isFieldRequired = computed(() => {
-  if (props.metadata?.inputField?.validation?.value?.includes("required"))
+  if (
+    props.metadata?.inputField?.validation?.value?.includes(
+      ValidationRules.Required
+    )
+  )
     return true;
   if (props.metadata?.inputField?.validation?.required_if)
     return conditionalFieldIsRequired(
@@ -146,8 +159,17 @@ const isFieldRequired = computed(() => {
 });
 const getValidationRules = (metadata: PanelMetaData): string => {
   const rules: string = metadata?.inputField?.validation?.value as string;
+  if (isRelationField.value) {
+    const relationType =
+      metadata?.inputField?.validation?.has_required_relation?.relationType;
+    const amount =
+      metadata?.inputField?.validation?.has_required_relation?.amount;
+    return `${rules}:${relationType}:${amount}`;
+  }
   if (isFieldRequired.value)
-    return rules.includes("required") ? rules : `${rules}|required`;
+    return rules.includes(ValidationRules.Required)
+      ? rules
+      : `${rules}|required`;
   return rules;
 };
 const rules = computed(() => getValidationRules(props.metadata));
@@ -159,19 +181,19 @@ const label = computed(() =>
 
 const veeValidateField = computed(() => {
   if (isMetadataOnRelation.value)
-    return `relationValues.relationMetadata.${fieldKeyWithId.value}`;
+    return `${ValidationFields.RelationValues}.${ValidationFields.RelationMetadata}.${fieldKeyWithId.value}`;
+  else if (isRelationField.value && props.isEdit)
+    return `${ValidationFields.RelationValues}.${ValidationFields.Relations}`;
   else if (props.metadata.inputField)
-    return `intialValues.${props.metadata.key}`;
+    return `${ValidationFields.IntialValues}.${props.metadata.key}`;
   else if (props.linkedEntityId === undefined)
-    return `intialValues.${props.metadata.key}`;
-  else return `intialValues.${fieldKeyWithId.value}`;
+    return `${ValidationFields.RelationValues}.${props.metadata.key}`;
+  else return `${ValidationFields.RelationValues}.${fieldKeyWithId.value}`;
 });
 
-const { errorMessage, value, meta } = useField<string>(
-  veeValidateField,
-  rules,
-  { label: label }
-);
+const { errorMessage, value, meta } = useField<
+  string | BaseRelationValuesInput[]
+>(veeValidateField, rules, { label: label });
 
 onMounted(() => {
   if (!value.value) setNewValue(props.metadata.value);
