@@ -6,7 +6,6 @@ import { auth } from "@/main";
 import { getApplicationDetails, i18n } from "@/helpers";
 import { useStateManagement } from "@/composables/useStateManagement";
 import type { Router } from "vue-router";
-import { useRouter } from "vue-router";
 
 const baseHttpError = {
   displayTime: 10,
@@ -23,7 +22,11 @@ const createErrorNotification = (title: string, description: string) => {
 };
 
 const useHttpErrors = () => {
-  const handleErrorByCode = async (errorMessage: number, message: string) => {
+  const handleErrorByCode = async (
+    errorMessage: number,
+    message: string,
+    router: Router
+  ) => {
     const { config, translations } = await getApplicationDetails();
     let language = config.customization.applicationLocale;
 
@@ -37,8 +40,8 @@ const useHttpErrors = () => {
 
     switch (errorMessage) {
       case 401:
-        // await auth.logout();
-        // await auth.redirectToLogin();
+        await auth.logout();
+        await auth.redirectToLogin();
         break;
       case 403:
         createErrorNotification(
@@ -46,9 +49,9 @@ const useHttpErrors = () => {
           t("notifications.graphql-errors.forbidden.description")
         );
         try {
-          useRouter()?.go(-1);
+          router.go(-1);
         } catch {
-          useRouter()?.push("/");
+          router.push("/");
         }
         break;
       default:
@@ -71,14 +74,15 @@ const useHttpErrors = () => {
     return "Something went wrong, please try again later";
   };
 
-  const logFormattedErrors = (error: any) => {
-    console.log(`Http error:`);
-    console.log(`Status:`, error?.status ? error?.status : undefined);
-    console.log(`Message:`, error?.statusText);
-    console.log(`---`);
+  const logFormattedErrors = (router: Router, error: any) => {
     const statusCode = getStatusCodeFromError(error);
     const message = getMessageFromError(error);
-    handleErrorByCode(statusCode, message);
+    console.log(`Http error:`);
+    console.log(`Status:`, statusCode);
+    console.log(`Message:`, message);
+    console.log(`---`);
+
+    handleErrorByCode(statusCode, message, router);
   };
 
   return {
