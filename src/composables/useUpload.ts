@@ -8,17 +8,16 @@ import {
   UploadFlow,
 } from "@/generated-types/queries";
 import useEntitySingle from "@/composables/useEntitySingle";
-<<<<<<< HEAD
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
-=======
 import useHttpErrors from "@/composables/useHttpErrors";
->>>>>>> 15a74de (wip)
+import { useRouter } from "vue-router";
 
 type UploadSettings = {
   uploadType: UploadFieldType;
   uploadFlow: UploadFlow;
 };
 
+const router = useRouter();
 const { logFormattedErrors } = useHttpErrors();
 const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
   "no-upload"
@@ -224,7 +223,7 @@ const useUpload = () => {
     try {
       dryRunResult = await __batchEntities(__getCsvBlob(), true);
     } catch (error) {
-      logFormattedErrors(error);
+      __handleHttpError(error);
     }
     handleDryRunResult(dryRunResult, file);
   };
@@ -295,7 +294,7 @@ const useUpload = () => {
         (file: DropzoneFile) => file.type === "text/csv"
       );
       return new Blob([csvFile], { type: csvFile.type });
-    } catch (e) {
+    } catch (e: any) {
       throw Error(e);
     }
   };
@@ -405,7 +404,7 @@ const useUpload = () => {
         );
         yield __uploadFile(file, url, config);
       } catch (error) {
-        logFormattedErrors(error);
+        __handleHttpError(error);
       }
     }
     _prefetchedUploadUrls = "not-prefetched-yet";
@@ -623,6 +622,10 @@ const useUpload = () => {
       errorContainer.appendChild(errorNode);
     });
     errorContainer.classList.remove("hidden");
+  };
+
+  const __handleHttpError = (error: any) => {
+    logFormattedErrors(router, error);
   };
 
   return {
