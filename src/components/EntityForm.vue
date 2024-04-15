@@ -115,7 +115,8 @@ const parseFormValuesToFormInput = (values: EntityValues) => {
         const id = linkedEntityId(entry[0]);
         for (let i = 0; i < relations.length; i++) {
           if (relations[i].key === id) {
-            relations[i].metadata = [newRelationObject];
+            if (relations[i].metadata === undefined) relations[i].metadata = [];
+            relations[i].metadata.push(newRelationObject);
             if (relations[i].editStatus !== EditStatus.Deleted)
               relations[i].editStatus = EditStatus.Changed;
           }
