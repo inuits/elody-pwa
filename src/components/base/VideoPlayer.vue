@@ -14,6 +14,7 @@
 </template>
 <script lang="ts" setup>
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
+import { onMounted } from "vue";
 
 defineProps<{
   source?: any;
@@ -22,4 +23,23 @@ defineProps<{
 const { getValueOfMediafile } = useEntityMediafileSelector();
 const fileName =
   getValueOfMediafile("filename") || getValueOfMediafile("transcode_filename");
+
+let video = "no-src";
+const getVideo = async () => {
+  const response = await fetch(`/api/mediafile/${fileName}`, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    return Promise.reject(response);
+  }
+
+  console.log(response);
+
+  // return JSON.parse(await response.text());
+};
+
+onMounted(() => {
+  getVideo();
+});
 </script>
