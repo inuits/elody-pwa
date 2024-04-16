@@ -43,7 +43,7 @@
             "
             :metadata-key-to-get-options-for="metadata.key"
             :from-relation-type="metadata.inputField?.fromRelationType"
-            :is-edit-mode="false"
+            :disabled="true"
           />
           <entity-element-metadata
             v-else

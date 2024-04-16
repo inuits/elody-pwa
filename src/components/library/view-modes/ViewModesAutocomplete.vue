@@ -1,10 +1,10 @@
 <template>
   <base-input-autocomplete
-    :autocomplete-style="isEditMode ? 'defaultWithBorder' : 'readOnly'"
-    :options="isEditMode ? entityDropdownOptions : selectedDropdownOptions"
+    :autocomplete-style="!disabled ? 'defaultWithBorder' : 'readOnly'"
+    :options="!disabled ? entityDropdownOptions : selectedDropdownOptions"
     :select-type="selectType"
     :model-value="selectedDropdownOptions"
-    :disabled="!isEditMode"
+    :disabled="disabled"
     :loading="entitiesLoading || relatedEntitiesLoading"
     @search-change="
       (value: string) => {
@@ -41,17 +41,19 @@ const props = withDefaults(
     options: DropdownOption[];
     relationType: string;
     fromRelationType: string;
-    isEditMode: boolean;
     mode: "edit" | "create";
     formId: string | undefined;
+    autoSelectable: boolean;
+    disabled: boolean;
   }>(),
   {
     selectType: "multi",
     label: "",
     metadataKeyToGetOptionsFor: "no-key",
-    isEditMode: true,
     mode: "edit",
     formId: undefined,
+    autoSelectable: false,
+    disabled: false,
   }
 );
 
@@ -85,13 +87,21 @@ onMounted(async () => {
 });
 
 const initAutocompleteOption = async () => {
-  if (props.isEditMode) {
-    await initialize();
-  }
+  await initialize();
   if (entityId && props.fromRelationType && props.mode !== "create") {
     await relatedEntitiesInitialize();
   }
-  populateSelectedOptions(relatedEntitiesOptions.value);
+
+  if (
+    props.autoSelectable &&
+    entityDropdownOptions.value.length === 1 &&
+    relatedEntitiesOptions.value.length === 0
+  ) {
+    populateSelectedOptions(entityDropdownOptions.value);
+    handleSelect(entityDropdownOptions.value);
+  } else {
+    populateSelectedOptions(relatedEntitiesOptions.value);
+  }
 };
 
 const mapDropdownOptionsToBulkProcessableItem = (
