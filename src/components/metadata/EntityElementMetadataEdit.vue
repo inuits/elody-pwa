@@ -19,6 +19,8 @@
       :mode="formFlow"
       :options="field.options"
       :form-id="formId"
+      :auto-selectable="field.autoSelectable"
+      :disabled="field.disabled"
     />
     <BaseDropdownNew
       v-else-if="field.type === InputFieldTypes.Dropdown"
