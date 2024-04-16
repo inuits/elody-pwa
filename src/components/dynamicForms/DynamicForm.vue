@@ -142,12 +142,6 @@ const formFields = computed<
 });
 const form = ref<FormContext<any>>();
 const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
-// const uploadFileErrors = computed((): string[] => [
-//   ...dryRunErrors.value,
-//   ...fileErrors.value.map((error) =>
-//     t(`upload-fields.errors.${error.error}`, [error.filename])
-//   ),
-// ]);
 const { t } = useI18n();
 
 const createEntityFromFormInput = (entityType: Entitytyping): EntityInput => {
