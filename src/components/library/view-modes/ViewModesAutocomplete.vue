@@ -44,6 +44,7 @@ const props = withDefaults(
     isEditMode: boolean;
     mode: "edit" | "create";
     formId: string | undefined;
+    autoSelectable: boolean | undefined;
   }>(),
   {
     selectType: "multi",
@@ -52,6 +53,7 @@ const props = withDefaults(
     isEditMode: true,
     mode: "edit",
     formId: undefined,
+    autoSelectable: false,
   }
 );
 
@@ -91,7 +93,17 @@ const initAutocompleteOption = async () => {
   if (entityId && props.fromRelationType && props.mode !== "create") {
     await relatedEntitiesInitialize();
   }
-  populateSelectedOptions(relatedEntitiesOptions.value);
+
+  if (
+    props.autoSelectable &&
+    entityDropdownOptions.value.length === 1 &&
+    relatedEntitiesOptions.value.length === 0
+  ) {
+    populateSelectedOptions(entityDropdownOptions.value);
+    handleSelect(entityDropdownOptions.value);
+  } else {
+    populateSelectedOptions(relatedEntitiesOptions.value);
+  }
 };
 
 const mapDropdownOptionsToBulkProcessableItem = (
