@@ -18,24 +18,41 @@
         <metadata-wrapper
           v-if="field.__typename === 'PanelMetaData'"
           :form-id="dynamicFormQuery"
-          :metadata="field"
+          :metadata="field as PanelMetaData"
           :is-edit="true"
           form-flow="create"
         />
         <div v-if="field.__typename === 'UploadContainer'">
-          <upload-interface-dropzone
-            v-for="uploadField in Object.values(field as UploadField).filter((uploadContainerField) => typeof uploadContainerField === 'object')"
-            :upload-flow="(field as UploadContainer).uploadFlow"
-            :dropzone-label="(uploadField as UploadField).label"
-            :validation="(uploadField as UploadField).inputField.validation?.value"
-            :accepted-file-types="(uploadField as UploadField).inputField.fileTypes"
-            :max-file-size="(uploadField as UploadField).inputField.maxFileSize"
-            :dropzone-size="(uploadField as UploadField).uploadFieldSize"
-            :max-amount-of-files="(uploadField as UploadField).inputField.maxAmountOfFiles"
-            :upload-multiple="(uploadField as UploadField).inputField.uploadMultiple"
-            :dry-run="(uploadField as UploadField).dryRunUpload"
-            :upload-field-type="(uploadField as UploadField).uploadFieldType"
-          />
+          <div
+            v-for="uploadContainerField in Object.values(field as any).filter(
+              (containerField) => typeof containerField === 'object'
+            )"
+          >
+            <div class="pb-2">
+              <upload-interface-dropzone
+                v-if="uploadContainerField.__typename === 'UploadField'"
+                :upload-flow="(field as UploadContainer).uploadFlow"
+                :dropzone-label="(uploadContainerField as UploadField).label"
+                :validation="(uploadContainerField as UploadField).inputField.validation?.value"
+                :accepted-file-types="(uploadContainerField as UploadField).inputField.fileTypes"
+                :max-file-size="(uploadContainerField as UploadField).inputField.maxFileSize"
+                :dropzone-size="(uploadContainerField as UploadField).uploadFieldSize"
+                :max-amount-of-files="(uploadContainerField as UploadField).inputField.maxAmountOfFiles"
+                :upload-multiple="(uploadContainerField as UploadField).inputField.uploadMultiple"
+                :dry-run="(uploadContainerField as UploadField).dryRunUpload"
+                :upload-field-type="(uploadContainerField as UploadField).uploadFieldType"
+              />
+            </div>
+            <div class="pb-2">
+              <metadata-wrapper
+                v-if="uploadContainerField.__typename === 'PanelMetaData'"
+                :form-id="dynamicFormQuery"
+                :metadata="uploadContainerField"
+                :is-edit="true"
+                form-flow="create"
+              />
+            </div>
+          </div>
         </div>
 
         <DynamicFormUploadButton
@@ -82,18 +99,18 @@
 <script setup lang="ts">
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
-  ActionProgress,
+  type ActionProgress,
   ActionProgressIndicatorType,
-  ActionProgressStep,
+  type ActionProgressStep,
   ActionType,
-  EntityInput,
+  type EntityInput,
   Entitytyping,
-  FormAction,
+  type FormAction,
   type MetadataInput,
-  PanelMetaData,
+  type PanelMetaData,
   TypeModals,
   type UploadContainer,
-  UploadField,
+  type UploadField,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -127,10 +144,15 @@ const { currentTenant } = useApp();
 
 const { createForm, deleteForm } = useFormHelper();
 const { loadDocument } = useImport();
-const { closeModal, getModalInfo } = useBaseModal();
+const { closeModal } = useBaseModal();
 const { getDynamicForm, dynamicForm, performSubmitAction } = useDynamicForm();
-const { upload, enableUploadButton, mediafiles, uploadProgress, resetUpload } =
-  useUpload();
+const {
+  upload,
+  enableUploadButton,
+  uploadProgress,
+  resetUpload,
+  standaloneFileType,
+} = useUpload();
 const formFields = computed<
   UploadField | PanelMetaData | FormAction | undefined
 >(() => {
@@ -230,6 +252,15 @@ watch(
       uploadProgress.value = getUploadProgressSteps(progressIndicator);
   },
   { immediate: true }
+);
+
+watch(
+  () => form.value?.values.intialValues,
+  (intialValues: { [key: string]: any }) => {
+    if (intialValues.standaloneUploadType)
+      standaloneFileType.value = intialValues.standaloneUploadType;
+  },
+  { deep: true }
 );
 </script>
 

@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'flex flex-col w-full p-3 pb-2 overflow-y-scroll',
+      'flex flex-col w-full overflow-y-scroll',
       `${getDropzoneSize(dropzoneSize)}`,
     ]"
     :key="uploadFieldType"
@@ -28,11 +28,12 @@ import {
 import { inject, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
+import type { FormContext } from "vee-validate";
 
 const config = inject("config") as any;
-const { closeModal, getModalInfo } = useBaseModal();
+const { getModalInfo } = useBaseModal();
 const { t } = useI18n();
-const { upload, files, resetUpload, initializeUpload } = useUpload();
+const { resetUpload, initializeUpload, standaloneFileType } = useUpload();
 const dropzone = new useDropzone();
 
 const props = withDefaults(
