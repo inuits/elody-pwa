@@ -31,7 +31,10 @@ export const goToEntityPage = (
 
   router.replace({
     name: listItemRouteName,
-    params: { id: entityId, type: entityId.includes("tracker") ? "IotDeviceTracker" : entity.type },
+    params: {
+      id: entityId,
+      type: entityId.includes("tracker") ? "IotDeviceTracker" : entity.type,
+    },
   });
 };
 
@@ -46,17 +49,23 @@ export const getEntityPageRoute = (
 
   return {
     name: listItemRouteName,
-    params: { id: entityId, type: entityId.includes("tracker") ? "IotDeviceTracker" : entity.type },
+    params: {
+      id: entityId,
+      type: entityId.includes("tracker") ? "IotDeviceTracker" : entity.type,
+    },
   };
 };
 
-export const updateEntityMediafileOnlyForMediafiles = (entity: Entity, onlyRemove: boolean = false) => {
+export const updateEntityMediafileOnlyForMediafiles = (
+  entity: Entity,
+  onlyRemove: boolean = false
+) => {
   if (entity.type.toLowerCase() === Entitytyping.Mediafile) {
     useEntityMediafileSelector().setEntityMediafiles([]);
     if (onlyRemove) return;
     useEntityMediafileSelector().updateSelectedEntityMediafile(entity);
   }
-}
+};
 
 export const getEntityIdFromRoute = (): string | undefined => {
   return asString(useRoute().params["id"]) || undefined;
@@ -135,40 +144,20 @@ export const customSort = (
 };
 
 export const convertSizeToTailwind = (size: string): string => {
-  let tailwindSize = "";
-  switch (size) {
-    case "ten":
-      tailwindSize = "w-1/10";
-      break;
-    case "twenty":
-      tailwindSize = "w-2/10";
-      break;
-    case "thirty":
-      tailwindSize = "w-3/10";
-      break;
-    case "forty":
-      tailwindSize = "w-4/10";
-      break;
-    case "fifty":
-      tailwindSize = "w-5/10";
-      break;
-    case "sixty":
-      tailwindSize = "w-6/10";
-      break;
-    case "seventy":
-      tailwindSize = "w-7/10";
-      break;
-    case "eighty":
-      tailwindSize = "w-8/10";
-      break;
-    case "ninety":
-      tailwindSize = "w-9/10";
-      break;
-    default:
-      tailwindSize = "w-full";
-  }
+  const sizeObject: { [key: string]: string } = {
+    ten: "w-1/10",
+    twenty: "w-2/10",
+    thirty: "w-3/10",
+    forty: "w-4/10",
+    fifty: "w-5/10",
+    sixty: "w-6/10",
+    seventy: "w-7/10",
+    eighty: "w-8/10",
+    ninety: "w-9/10",
+    hundred: "w-full",
+  };
 
-  return tailwindSize;
+  return sizeObject[size];
 };
 
 const { mediafileSelectionState } = useEntityMediafileSelector();
@@ -336,11 +325,13 @@ export const getApplicationDetails = async () => {
   return { config, translations };
 };
 
-export const getObjectsBasedOnTypename = (parent: any, typename: string): [] => {
+export const getObjectsBasedOnTypename = (
+  parent: any,
+  typename: string
+): [] => {
   const objects = [];
   Object.values(parent).forEach((child) => {
-    if (child?.__typename === typename)
-      objects.push(child);
+    if (child?.__typename === typename) objects.push(child);
   });
   return objects;
-}
+};
