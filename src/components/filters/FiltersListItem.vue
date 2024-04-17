@@ -171,14 +171,14 @@ watch(selectedMatcher, async () => {
     )
   );
 });
-watch(advancedFilterInput, () => {
+watch(advancedFilterInput, (newValue, oldValue) => {
   if (Array.isArray(advancedFilterInput.value.value))
     if (advancedFilterInput.value.value.length > 0)
       emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
-    else emit("deactivateFilter", advancedFilterInput.value.key);
+    else emit("deactivateFilter", advancedFilterInput.value.key, oldValue?.value?.length > 0);
   else if (advancedFilterInput.value.value !== undefined)
     emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
-  else emit("deactivateFilter", advancedFilterInput.value.key);
+  else emit("deactivateFilter", advancedFilterInput.value.key, oldValue?.value !== undefined);
 });
 watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
