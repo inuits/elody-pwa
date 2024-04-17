@@ -11,7 +11,7 @@
 import type { AdvancedFilterInput } from "@/generated-types/queries";
 import type { FilterListItem } from "@/composables/useStateManagement";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { defineEmits, onMounted, ref, watch } from "vue";
+import { defineEmits, onMounted, onUpdated, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
@@ -31,9 +31,15 @@ const { t } = useI18n();
 const input = ref<string | number>();
 const force = ref<boolean>(false);
 
-onMounted(() => {
+const setVariablesFromInput = () => {
   input.value = props.filter.inputFromState?.value || "";
   force.value = Boolean(props.filter.inputFromState);
+}
+onMounted(() => {
+  setVariablesFromInput();
+});
+onUpdated(() => {
+  setVariablesFromInput();
 });
 
 watch(input, () => {
