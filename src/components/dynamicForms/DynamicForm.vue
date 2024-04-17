@@ -143,9 +143,9 @@ const {
 const formFields = computed<
   UploadField | PanelMetaData | FormAction | undefined
 >(() => {
-  if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"])
+  if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"].formTab)
     return undefined;
-  return Object.values(dynamicForm.value["GetDynamicForm"].formFields).filter(
+  return Object.values(dynamicForm.value["GetDynamicForm"].formTab.formFields).filter(
     (value) => typeof value === "object"
   );
 });
