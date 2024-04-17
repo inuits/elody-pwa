@@ -2,10 +2,12 @@ import Dropzone, { type DropzoneFile } from "dropzone";
 import { computed, ref, toRaw, watch } from "vue";
 import {
   type ActionProgressStep,
+  Entitytyping,
   ProgressStepStatus,
   ProgressStepType,
   UploadFieldType,
   UploadFlow,
+  UploadEntityTypes,
 } from "@/generated-types/queries";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -43,6 +45,7 @@ const uploadValidationFn = ref<Function>(() => {
 const enableUploadButton = computed(() => uploadValidationFn.value());
 const missingFileNames = ref<string[]>([]);
 const failedUploads = ref<string[]>([]);
+const standaloneFileType = ref<UploadEntityTypes | undefined>(undefined);
 
 const useUpload = () => {
   let _prefetchedUploadUrls: string[] | "not-prefetched-yet" =
@@ -86,7 +89,11 @@ const useUpload = () => {
             progressStep.status === ProgressStepStatus.Complete
         );
     }
-    return !!mediafiles.value.length && !missingFileNames.value.length;
+    return (
+      !!mediafiles.value.length &&
+      !missingFileNames.value.length &&
+      !!standaloneFileType.value
+    );
   };
 
   const __uploadMediafilesWithTicketUrl = async (
@@ -257,11 +264,17 @@ const useUpload = () => {
       uploadStatus.value = "uploading";
   };
 
-  const __getUploadUrlForStandaloneMediafile = async (file: DropzoneFile) => {
-    const response = await fetch(`/api/upload/single?filename=${file.name}`, {
-      headers: { "Content-Type": "application/json" },
-      method: "POST",
-    });
+  const __getUploadUrlForStandaloneMediafile = async (
+    file: DropzoneFile,
+    type?: Entitytyping
+  ) => {
+    const response = await fetch(
+      `/api/upload/single?filename=${file.name}${type ? "&type=" + type : ""}`,
+      {
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      }
+    );
 
     if (!response.ok) {
       return Promise.reject(response);
@@ -315,7 +328,10 @@ const useUpload = () => {
           url.includes(file.name)
         );
       } else {
-        uploadUrl = await __getUploadUrlForStandaloneMediafile(file);
+        uploadUrl = await __getUploadUrlForStandaloneMediafile(
+          file,
+          standaloneFileType.value as UploadEntityTypes
+        );
       }
     }
     if (uploadFlow.value === UploadFlow.MediafilesOnly) {
@@ -472,6 +488,7 @@ const useUpload = () => {
   };
 
   const resetUpload = () => {
+    standaloneFileType.value = undefined;
     uploadStatus.value = "no-upload";
     dryRunErrors.value = [];
     missingFileNames.value = [];
@@ -655,6 +672,7 @@ const useUpload = () => {
     uploadFlow,
     missingFileNames,
     failedUploads,
+    standaloneFileType,
   };
 };
 
