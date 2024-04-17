@@ -50,8 +50,8 @@
                 (promise) => (advancedFiltersPromise = promise)
               "
               @apply-filters="
-                async (filters: AdvancedFilterInput[]) =>
-                  await setAdvancedFilters(filters, true)
+                async (filters: AdvancedFilterInput[], force: Boolean = true) =>
+                  await setAdvancedFilters(filters, force)
               "
               @expand-filters="expandFilters = !expandFilters"
             />

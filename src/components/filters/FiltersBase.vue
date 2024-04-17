@@ -96,7 +96,7 @@
             activeFilters.push(filterInput);
           }"
           @deactivate-filter="
-            (key) => {
+            (key, force = true) => {
               const filter = filters.filter(
                 (filter) => filter.advancedFilter.key === key
               )[0];
@@ -107,7 +107,7 @@
               activeFilters = activeFilters.filter(
                 (filter) => filter.key !== key
               );
-              applyFilters(true);
+              applyFilters(true, force);
             }
           "
         />
@@ -315,12 +315,12 @@ const handleAdvancedFilters = () => {
   applyFilters();
 };
 
-const applyFilters = (saveState = false) => {
+const applyFilters = (saveState = false, force = true) => {
   if (saveState)
     updateStateForRoute(props.route, {
       filterListItems: JSON.parse(JSON.stringify(filters.value)),
     });
-  emit("applyFilters", activeFilters.value);
+  emit("applyFilters", activeFilters.value, force);
 };
 
 const getAngleIcon = computed<DamsIcons>(() =>
