@@ -105,7 +105,7 @@
           </div>
         </div>
         <div
-          v-if="entities.length !== 0 || relations?.length !== 0"
+          v-if="entities?.length !== 0 || relations?.length !== 0"
           :class="{ 'flex justify-end': expandFilters }"
         >
           <div
@@ -153,7 +153,7 @@
         </div>
 
         <div
-          v-if="entities.length === 0 && !entitiesLoading"
+          v-if="entities?.length === 0 && !entitiesLoading"
           class="text-center my-2"
         >
           <div>{{ t("search.noresult") }}</div>
@@ -466,7 +466,7 @@ watch(
       selectedDropdownOptions.value = getSelectedOptions();
     }
     toggles = [];
-    if (entities.value.length === 0 || !entities.value[0].allowedViewModes)
+    if (!entities.value || entities.value?.length === 0 || !entities.value[0]?.allowedViewModes)
       return;
     const viewModes: any[] = entities.value[0].allowedViewModes.viewModes;
     if (viewModes.includes(ViewModesList.__name))
