@@ -11,7 +11,7 @@ import { onMounted, ref } from "vue";
 import { useGetMediafile } from "@/composables/useGetMediafile";
 
 const props = defineProps<{
-  src?: any;
+  url?: any;
 }>();
 
 const emit = defineEmits<{
@@ -24,7 +24,7 @@ const isLoading = ref(true);
 
 const getImage = async () => {
   try {
-    const response = await getMediafile(props.src);
+    const response = await getMediafile(props.url);
     const videoBlob = await response.blob();
     imageUrl.value = URL.createObjectURL(videoBlob);
     isLoading.value = false;

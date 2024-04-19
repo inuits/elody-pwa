@@ -24,7 +24,7 @@
           <ImageViewer
             v-if="canShowCopyRight() && media && !imageSrcError"
             class="h-48 w-48 object-cover"
-            :src="
+            :url="
               mediaIsLink
                 ? media
                 : `/api/iiif/3/${media}/square/^500,/0/default.jpg`
