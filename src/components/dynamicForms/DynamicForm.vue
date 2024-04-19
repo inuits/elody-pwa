@@ -18,55 +18,35 @@
         <metadata-wrapper
           v-if="field.__typename === 'PanelMetaData'"
           :form-id="dynamicFormQuery"
-          :metadata="field as PanelMetaData"
+          :metadata="field"
           :is-edit="true"
           form-flow="create"
+          @update:field="setFormFieldState"
+          @update:relations="setRelationFormFieldState"
         />
-        <div v-if="field.__typename === 'UploadContainer'">
-          <div
-            v-for="uploadContainerField in Object.values(field as any).filter(
-              (containerField) => typeof containerField === 'object'
-            )"
-          >
-            <div class="pb-2">
-              <upload-interface-dropzone
-                v-if="uploadContainerField.__typename === 'UploadField'"
-                :upload-flow="(field as UploadContainer).uploadFlow"
-                :dropzone-label="(uploadContainerField as UploadField).label"
-                :validation="(uploadContainerField as UploadField).inputField.validation?.value"
-                :accepted-file-types="(uploadContainerField as UploadField).inputField.fileTypes"
-                :max-file-size="(uploadContainerField as UploadField).inputField.maxFileSize"
-                :dropzone-size="(uploadContainerField as UploadField).uploadFieldSize"
-                :max-amount-of-files="(uploadContainerField as UploadField).inputField.maxAmountOfFiles"
-                :upload-multiple="(uploadContainerField as UploadField).inputField.uploadMultiple"
-                :dry-run="(uploadContainerField as UploadField).dryRunUpload"
-                :upload-field-type="(uploadContainerField as UploadField).uploadFieldType"
-              />
-            </div>
-            <div class="pb-2">
-              <metadata-wrapper
-                v-if="uploadContainerField.__typename === 'PanelMetaData'"
-                :form-id="dynamicFormQuery"
-                :metadata="uploadContainerField"
-                :is-edit="true"
-                form-flow="create"
-              />
-            </div>
-          </div>
-        </div>
-
+        <upload-interface-dropzone
+          v-if="field.__typename === 'UploadField'"
+          :dropzone-label="field.label"
+          :validation="field.inputField?.validation?.value"
+          :accepted-file-types="field.inputField?.fileTypes"
+          :max-file-size="field.inputField?.maxFileSize"
+          :dropzone-size="field.uploadFieldSize"
+          :max-amount-of-files="field.inputField?.maxAmountOfFiles"
+          :upload-multiple="field.inputField?.uploadMultiple"
+          :dry-run="field.dryRunUpload"
+          :upload-field-type="field.uploadFieldType"
+        />
         <DynamicFormUploadButton
           v-if="
             field.__typename === 'FormAction' &&
-            (field as FormAction).actionType == ActionType.Upload
+            field.actionType == ActionType.Upload
           "
-          :label="t((field as FormAction).label)"
-          :icon="(field as FormAction).icon"
+          :label="t(field.label)"
+          :icon="field.icon"
+          :errors="uploadFileErrors"
           :disabled="!enableUploadButton"
-          :progressIndicatorType="(field as FormAction).actionProgressIndicator.type"
-          @click-upload-button="
-            performActionButtonClickEvent(field as FormAction)
-          "
+          :progressIndicator="field?.actionProgressIndicator"
+          @click-upload-button="performActionButtonClickEvent(field)"
           @reset-upload="initializeForm"
         />
         <BaseButtonNew
@@ -99,19 +79,20 @@
 <script setup lang="ts">
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
-  type ActionProgress,
+  ActionProgress,
   ActionProgressIndicatorType,
-  type ActionProgressStep,
+  ActionProgressStep,
   ActionType,
-  type EntityInput,
+  EntityInput,
   Entitytyping,
-  type FormAction,
-  type MetadataInput,
-  type PanelMetaData,
+  FormAction,
+  PanelMetaData,
   TypeModals,
-  type UploadContainer,
-  type UploadField,
+  UploadField,
+  EditStatus,
+  type RelationFieldInput,
 } from "@/generated-types/queries";
+import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import { computed, inject, ref, watch, onMounted, getCurrentInstance} from "vue";
@@ -125,8 +106,13 @@ import type { Router } from "vue-router";
 import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUploadButton.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
-import type { FormContext } from "vee-validate";
-import { useFormHelper } from "@/composables/useFormHelper";
+
+type FormFieldState = {
+  fieldKey: string;
+  errorMessage: string;
+  meta: object;
+  value: any;
+};
 
 const props = withDefaults(
   defineProps<{
@@ -142,16 +128,17 @@ const props = withDefaults(
 const config = inject("config");
 const { currentTenant } = useApp();
 
-const { createForm, deleteForm } = useFormHelper();
 const { loadDocument } = useImport();
-const { closeModal } = useBaseModal();
+const { closeModal, getModalInfo } = useBaseModal();
 const { getDynamicForm, dynamicForm, performSubmitAction } = useDynamicForm();
 const {
   upload,
   enableUploadButton,
+  mediafiles,
+  fileErrors,
+  dryRunErrors,
   uploadProgress,
   resetUpload,
-  standaloneFileType,
 } = useUpload();
 const formFields = computed<UploadField | PanelMetaData | FormAction | undefined>(() => {
   if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"]) {
@@ -170,17 +157,6 @@ const formFields = computed<UploadField | PanelMetaData | FormAction | undefined
 
   return allFormFields;
 });
-const form = ref<FormContext<any>>();
-const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
-
-const findFormTabObjects = (dynamicForm: any): any[] => {
-  if (!dynamicForm) {
-    return [];
-  }
-
-  return Object.values(dynamicForm).filter(value => value && value.__typename === "FormTab");
-};
-
 const formFieldsState = ref<Object[]>([]);
 const formRelationsFieldsState = ref<RelationFieldInput[]>([]);
 const formContainsErrors = computed((): boolean =>
@@ -197,14 +173,48 @@ const uploadFileErrors = computed((): string[] => [
 ]);
 const { t } = useI18n();
 
+const setFormFieldState = (fieldValue: FormFieldState) => {
+  formFieldsState.value = formFieldsState.value.filter(
+    (formFieldState: FormFieldState) =>
+      formFieldState.fieldKey !== fieldValue.fieldKey
+  );
+  formFieldsState.value.push(fieldValue);
+};
+
+const setRelationFormFieldState = (relations: {
+  selectedItems: InBulkProcessableItem[];
+  relationType: string;
+}) => {
+  const { selectedItems, relationType } = relations;
+  const filteredOldRelations: RelationFieldInput[] =
+    formRelationsFieldsState.value.filter(
+      (field: RelationFieldInput) => field.type !== relationType
+    );
+
+  const newRelations: RelationFieldInput[] = [];
+  selectedItems.forEach((item) => {
+    newRelations.push({
+      key: item.id,
+      type: relationType,
+      editStatus: EditStatus.New,
+      value: item.value,
+    });
+  });
+
+  formRelationsFieldsState.value = [...filteredOldRelations, ...newRelations];
+};
+
 const createEntityFromFormInput = (entityType: Entitytyping): EntityInput => {
   let entity: EntityInput = { type: entityType };
-  entity.metadata = Object.keys(form.value?.values.intialValues)
-    .map((key) => {
-      return { key, value: form.value?.values.intialValues[key] };
-    })
-    .filter((metadataItem: MetadataInput) => metadataItem.value);
-  entity.relations = form.value?.values.relationValues.relations;
+  entity.metadata = formFieldsState.value.map(
+    (formFieldState: FormFieldState) => {
+      return {
+        key: formFieldState.fieldKey,
+        value: formFieldState.value,
+      };
+    }
+  );
+  entity.relations = formRelationsFieldsState.value;
   return entity;
 };
 
@@ -222,12 +232,11 @@ const performActionButtonClickEvent = async (
   }
   if (field.actionType === ActionType.Submit) {
     if (formContainsErrors.value) return;
-    const document = await getQuery(field.actionQuery as string);
+    const document = await getQuery(field.actionQuery);
     const entityInput = createEntityFromFormInput(field.creationType);
     const entity = (await performSubmitAction(document, entityInput)).data
       .CreateEntity;
     closeModal(TypeModals.DynamicForm);
-    deleteForm(props.dynamicFormQuery);
     goToEntityPage(entity, "SingleEntity", props.router);
   }
 };
@@ -238,7 +247,7 @@ const getFormProgressIndicator = (): ActionProgress | undefined => {
     (formField: any) => formField.__typename === "FormAction"
   );
   if (!actionButton) return undefined;
-  return actionButton.actionProgressIndicator || undefined;
+  return actionButton.actionProgressIndicator;
 };
 
 const getUploadProgressSteps = (
@@ -249,7 +258,7 @@ const getUploadProgressSteps = (
   return Object.values(progressIndicator).filter(
     (value: any) =>
       typeof value === "object" && value.__typename === "ActionProgressStep"
-  ) as ActionProgressStep[];
+  );
 };
 
 const initializeForm = async () => {
@@ -262,14 +271,6 @@ const initializeForm = async () => {
 watch(
   () => props.dynamicFormQuery,
   async () => {
-    deleteForm(props.dynamicFormQuery);
-    if (!form.value)
-      form.value = createForm(props.dynamicFormQuery, {
-        intialValues: {},
-        relationValues: {},
-      } as {
-        [key: string]: object;
-      });
     await initializeForm();
   },
   { immediate: true }
@@ -285,14 +286,6 @@ watch(
   { immediate: true }
 );
 
-watch(
-  () => form.value?.values.intialValues,
-  (intialValues: { [key: string]: any }) => {
-    if (intialValues.standaloneUploadType)
-      standaloneFileType.value = intialValues.standaloneUploadType;
-  },
-  { deep: true }
-);
 const { emit } = getCurrentInstance();
 
 watch([formFields], ([fields]) => {
