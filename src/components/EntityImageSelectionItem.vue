@@ -8,7 +8,7 @@
     "
   >
     <div v-if="canShowCopyRight() && !imageSrcError" class="relative group">
-      <img
+      <ImageViewer
         :class="[
           'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
           toBeDeleted.includes(mediafile.id) ? 'filter blur-xs grayscale' : '',
@@ -48,6 +48,7 @@ import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSele
 import { useAuth } from "session-vue-3-oidc-library";
 import { ref } from "vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
+import ImageViewer from "@/components/base/ImageViewer.vue";
 
 const props = defineProps<{
   mediafile: MediaFileEntity;

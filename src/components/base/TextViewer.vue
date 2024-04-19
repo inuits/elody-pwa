@@ -7,6 +7,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, onMounted, ref } from "vue";
+import { useGetMediafile } from "@/composables/useGetMediafile";
 
 export default defineComponent({
   name: "TextViewer",
@@ -19,11 +20,18 @@ export default defineComponent({
   },
   setup(props) {
     const fileContent = ref<string>();
+    const { getMediafile } = useGetMediafile();
+
+    const getText = async () => {
+      const response = await getMediafile(
+        "/api/mediafile/" + props.source.intialValues.filename
+      );
+      const text = await response.text();
+      fileContent.value = text.split(/\r\n|\n/).join("<br/>");
+    };
 
     onMounted(() => {
-      fetch("/api/mediafile/" + props.source.filename).then(async (res) => {
-        fileContent.value = (await res.text()).split(/\r\n|\n/).join("<br/>");
-      });
+      getText();
     });
 
     return { fileContent };
