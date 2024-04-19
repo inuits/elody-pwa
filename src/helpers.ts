@@ -143,7 +143,7 @@ export const customSort = (
   return arrayToSort;
 };
 
-export const convertSizeToTailwind = (size: string): string => {
+export const convertSizeToTailwind = (size: string = "hundred"): string => {
   const sizeObject: { [key: string]: string } = {
     ten: "w-1/10",
     twenty: "w-2/10",
