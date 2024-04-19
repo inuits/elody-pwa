@@ -59,7 +59,7 @@
       <ImageViewer
         v-if="canShowCopyRight() && media && !imageSrcError"
         class="h-10 w-10 object-cover self-center outline-none"
-        :src="
+        :url="
           mediaIsLink ? media : `/api/iiif/3/${media}/square/100,/0/default.jpg`
         "
         @error="setNoImage()"

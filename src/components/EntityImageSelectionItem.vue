@@ -18,7 +18,7 @@
             ? 'p-6 border-2 border-accent-normal'
             : '',
         ]"
-        :src="
+        :url="
           getValueOfMediafile('mimetype', mediafile) &&
           !getValueOfMediafile('mimetype', mediafile).includes('pdf') &&
           !getValueOfMediafile('mimetype', mediafile).includes('json/manifest')
