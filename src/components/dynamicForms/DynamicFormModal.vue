@@ -11,13 +11,14 @@
     @hide-modal="closeModal(TypeModals.DynamicForm)"
   >
     <div class="flex flex-col w-full h-full overflow-auto">
-      <template v-if="getModalInfo(TypeModals.DynamicForm).formQuery === 'GetUploadForm'">
+      <template v-if="getModalInfo(TypeModals.DynamicForm).formQuery === 'GetUploadForm' && importComponentAvailable === true">
         <BaseTabs class="h-full" :onTabClick="onTabClick">
           <BaseTab :title="t('entity.upload')">
             <DynamicForm
               v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
               :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
               :router="useRouter()"
+              @dynamicFormReady="handleDynamicFormReady"
             />
           </BaseTab>
           <BaseTab :title="'Import'">
@@ -30,6 +31,7 @@
           v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
           :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
           :router="useRouter()"
+          @dynamicFormReady="handleDynamicFormReady"
         />
       </template>
     </div>
@@ -46,15 +48,31 @@ import BaseTabs from "@/components/BaseTabs.vue";
 import BaseTab from "@/components/BaseTab.vue";
 import { useI18n } from "vue-i18n";
 import ImportComponent from "@/components/ImportComponent.vue";
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 
 const { closeModal, getModalInfo } = useBaseModal();
 const { t } = useI18n();
 const selectedIndex = ref(0);
-
 const onTabClick = (index: number) => {
   selectedIndex.value = index;
 };
+const importComponentAvailable = ref(false);
+
+const handleDynamicFormReady = (obj) => {
+  importComponentAvailable.value = obj.importComponentAvailable;
+};
+
+onMounted(() => {
+  window.addEventListener('dynamicFormReady', () => {
+    const isAvailable = true;
+    handleDynamicFormReady(isAvailable);
+  });
+
+  onUnmounted(() => {
+    window.removeEventListener('dynamicFormReady', handleDynamicFormReady);
+  });
+});
+
 </script>
 
 <style scoped></style>
