@@ -87,6 +87,7 @@ const useHttpErrors = () => {
 
   return {
     logFormattedErrors,
+    getStatusCodeFromError,
   };
 };
 
