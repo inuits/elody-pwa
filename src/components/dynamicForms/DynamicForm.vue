@@ -114,7 +114,7 @@ import {
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
-import { computed, inject, ref, watch } from "vue";
+import { computed, inject, ref, watch, onMounted, getCurrentInstance} from "vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
@@ -153,14 +153,22 @@ const {
   resetUpload,
   standaloneFileType,
 } = useUpload();
-const formFields = computed<
-  UploadField | PanelMetaData | FormAction | undefined
->(() => {
-  if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"].formTab)
+const formFields = computed<UploadField | PanelMetaData | FormAction | undefined>(() => {
+  if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"]) {
     return undefined;
-  return Object.values(dynamicForm.value["GetDynamicForm"].formTab.formFields).filter(
-    (value) => typeof value === "object"
-  );
+  }
+  const formTabObjects = findFormTabObjects(dynamicForm.value["GetDynamicForm"]);
+  if (formTabObjects.length === 0) {
+    return undefined;
+  }
+
+  const allFormFields: any[] = [];
+  for (const formTab of formTabObjects) {
+    const formFields = Object.values(formTab.formFields).filter(value => typeof value === "object");
+    allFormFields.push(...formFields);
+  }
+
+  return allFormFields;
 });
 const form = ref<FormContext<any>>();
 const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
@@ -262,6 +270,16 @@ watch(
   },
   { deep: true }
 );
+
+const { emit } = getCurrentInstance();
+
+watch([formFields], ([fields]) => {
+  if (fields !== undefined ) {
+    const importComponentAvailable = fields.some(obj => obj.__typename === "ImportContainer");
+    emit('dynamicFormReady', { importComponentAvailable: importComponentAvailable });
+  }
+});
+
 </script>
 
 <style scoped></style>
