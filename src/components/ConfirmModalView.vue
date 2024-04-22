@@ -9,14 +9,14 @@
             :label="t(`confirm.${translationKey}.confirm`)"
             button-style="redDefault"
             button-size="small"
-            @click="confirmFunction()"
+            @click="performConfirmFunction(confirmFunction)"
           />
           <BaseButtonNew
             v-if="secondaryConfirmFunction"
             :label="t(`confirm.${translationKey}.secondary-confirm`)"
             button-style="redDefault"
             button-size="small"
-            @click="secondaryConfirmFunction()"
+            @click="performConfirmFunction(secondaryConfirmFunction)"
           />
         </div>
       </div>
@@ -37,6 +37,8 @@
 import { useI18n } from "vue-i18n";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { useConfirmModal } from "@/composables/useConfirmModal";
+import { useBaseModal } from "@/composables/useBaseModal";
+import { TypeModals } from "@/generated-types/queries";
 
 const { t } = useI18n();
 const {
@@ -45,4 +47,10 @@ const {
   declineFunction,
   secondaryConfirmFunction,
 } = useConfirmModal();
+const { closeModal } = useBaseModal();
+
+const performConfirmFunction = (callback: Function) => {
+  callback();
+  closeModal(TypeModals.Confirm);
+};
 </script>

@@ -42,9 +42,11 @@ export const useBaseModal = () => {
     modalType: TypeModals,
     modalTab: ModalChoices | undefined = undefined,
     modalPosition: ModalPosition | undefined = undefined,
-    formQuery: string | undefined = undefined
+    formQuery: string | undefined = undefined,
+    askForCloseConfirmation: boolean | undefined = undefined
   ): void => {
-    closeModalsWithPosition(getModalInfo(modalType).modalPosition);
+    if (modalType !== TypeModals.Confirm)
+      closeModalsWithPosition(getModalInfo(modalType).modalPosition);
     const updatedModal = {
       state: ModalState.Show,
     };
@@ -52,6 +54,8 @@ export const useBaseModal = () => {
     if (formQuery) Object.assign(updatedModal, { formQuery });
     updateModal(modalType, updatedModal);
     if (modalTab) getModalInfo(modalType).modalTabToOpen = modalTab;
+    if (askForCloseConfirmation)
+      getModalInfo(modalType).closeConfirmation = askForCloseConfirmation;
   };
 
   const isLeftModalOpened = computed(() => {
@@ -65,7 +69,7 @@ export const useBaseModal = () => {
   });
 
   const closeModalsWithPosition = (position: ModalPosition): void => {
-    const modalsWithPosition: [ModalInfo] = Object.values(modals.value).filter(
+    const modalsWithPosition: ModalInfo[] = Object.values(modals.value).filter(
       (modal: ModalInfo) => modal.modalPosition === position
     );
     if (!modalsWithPosition) return;

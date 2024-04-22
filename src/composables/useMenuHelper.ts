@@ -44,10 +44,11 @@ export const useMenuHelper = () => {
         menuItemType: MenuItemType.modal,
         action: function () {
           openModal(
-            _menuItem.typeLink.modal.typeModal as TypeModals,
+            _menuItem.typeLink?.modal?.typeModal as TypeModals,
             ModalChoices.Import,
             "left",
-            _menuItem.typeLink.modal.formQuery
+            _menuItem.typeLink?.modal?.formQuery,
+            _menuItem.typeLink?.modal?.askForCloseConfirmation
           );
         },
       };

@@ -24,8 +24,23 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { ModalState, TypeModals } from "@/generated-types/queries";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import { useRouter } from "vue-router";
+import { useConfirmModal } from "@/composables/useConfirmModal";
+import { onMounted } from "vue";
 
-const { closeModal, getModalInfo } = useBaseModal();
+const { closeModal, getModalInfo, changeCloseConfirmation } = useBaseModal();
+const { initializeConfirmModal } = useConfirmModal();
+
+onMounted(() => {
+  initializeConfirmModal(
+    () => {
+      changeCloseConfirmation(TypeModals.DynamicForm, false);
+      closeModal(TypeModals.DynamicForm);
+    },
+    undefined,
+    () => closeModal(TypeModals.Confirm),
+    "discard-create"
+  );
+});
 </script>
 
 <style scoped></style>
