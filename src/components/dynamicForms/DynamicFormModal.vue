@@ -38,7 +38,7 @@ onMounted(() => {
     },
     undefined,
     () => closeModal(TypeModals.Confirm),
-    "discard-create"
+    "discard-modal"
   );
 });
 </script>

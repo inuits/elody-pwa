@@ -154,7 +154,7 @@ const {
   standaloneFileType,
 } = useUpload();
 const formFields = computed<
-  UploadField | PanelMetaData | FormAction | undefined
+  UploadContainer | PanelMetaData | FormAction | undefined
 >(() => {
   if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"])
     return undefined;
@@ -184,6 +184,7 @@ const getQuery = async (queryName: string) => {
 const performActionButtonClickEvent = async (
   field: FormAction
 ): Promise<void> => {
+  useBaseModal().changeCloseConfirmation(TypeModals.DynamicForm, false);
   if (field.actionType === ActionType.Upload) {
     if (!enableUploadButton.value) return;
     upload(props.hasLinkedUpload, config, t);
@@ -259,8 +260,12 @@ watch(
   (intialValues: { [key: string]: any }) => {
     if (intialValues.standaloneUploadType)
       standaloneFileType.value = intialValues.standaloneUploadType;
+    useBaseModal().changeCloseConfirmation(
+      TypeModals.DynamicForm,
+      form.value?.meta.dirty
+    );
   },
-  { deep: true }
+  { deep: true, immediate: true }
 );
 </script>
 
