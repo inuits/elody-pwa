@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'flex flex-col w-full overflow-y-scroll',
+      'flex flex-col w-full overflow-y-auto',
       `${getDropzoneSize(dropzoneSize)}`,
     ]"
     :key="uploadFieldType"
