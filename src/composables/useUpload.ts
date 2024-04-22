@@ -8,11 +8,13 @@ import {
   UploadFieldType,
   UploadFlow,
   UploadEntityTypes,
+  TypeModals,
 } from "@/generated-types/queries";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import useHttpErrors from "@/composables/useHttpErrors";
 import { useRouter } from "vue-router";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 type UploadSettings = {
   uploadType: UploadFieldType;
@@ -681,6 +683,18 @@ watch(
   () => {
     useUpload().verifyAllNeededFilesArePresent();
   }
+);
+
+watch(
+  () => files.value.length,
+  (amountOfFiles: number) => {
+    const containsFiles = !!amountOfFiles;
+    useBaseModal().changeCloseConfirmation(
+      TypeModals.DynamicForm,
+      containsFiles
+    );
+  },
+  { immediate: true }
 );
 
 export default useUpload;

@@ -47,8 +47,7 @@ export const useMenuHelper = () => {
             _menuItem.typeLink?.modal?.typeModal as TypeModals,
             ModalChoices.Import,
             "left",
-            _menuItem.typeLink?.modal?.formQuery,
-            _menuItem.typeLink?.modal?.askForCloseConfirmation
+            _menuItem.typeLink?.modal?.formQuery
           );
         },
       };
