@@ -56,10 +56,10 @@
       v-if="canShowCopyRight() && media && !imageSrcError"
       class="flex items-center"
     >
-      <img
+      <ImageViewer
         v-if="canShowCopyRight() && media && !imageSrcError"
         class="h-10 w-10 object-cover self-center outline-none"
-        :src="
+        :url="
           mediaIsLink ? media : `/api/iiif/3/${media}/square/100,/0/default.jpg`
         "
         @error="setNoImage()"
@@ -181,6 +181,7 @@ import ContextMenuAction from "@/components/context-menu-actions/ContextMenuActi
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import EntityElementWindowPanel from "@/components/EntityElementWindowPanel.vue";
+import ImageViewer from "@/components/base/ImageViewer.vue";
 
 const props = withDefaults(
   defineProps<{

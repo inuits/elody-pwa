@@ -53,6 +53,7 @@ const pdfjsLib: typeof import("pdfjs-dist") = pdfjsLibImport;
 import "pdfjs-dist/build/pdf.worker.entry";
 import { Unicons } from "../../types";
 import PdfToolbar from "../PdfToolbar.vue";
+import { useGetMediafile } from "@/composables/useGetMediafile";
 
 export default defineComponent({
   name: "PdfViewer",
@@ -79,6 +80,7 @@ export default defineComponent({
     const ctx = ref(null);
     const decentralizeFromLeft = ref<boolean>(false);
     const decentralizeFromTop = ref<boolean>(false);
+    const { getMediafile } = useGetMediafile();
 
     const determineDecentralization = (): void => {
       decentralizeFromLeft.value =
@@ -147,14 +149,16 @@ export default defineComponent({
       queueRenderPage(pageNum.value);
     };
 
-    const initialRender = (): void => {
-      console.log(source.value);
+    const initialRender = async () => {
       url.value = source.value
         ? "/api/mediafile/" + source.value.intialValues.filename
         : "no-src";
+      const response = await getMediafile(url.value);
+      const pdf = await response.blob();
+      const pdfUrl = URL.createObjectURL(pdf);
       pageNum.value = 1;
       scale.value = 1;
-      pdfjsLib.getDocument(url.value).promise.then(function (pdfDoc_) {
+      pdfjsLib.getDocument(pdfUrl).promise.then(function (pdfDoc_) {
         pdfDoc = pdfDoc_;
         numPages.value = pdfDoc.numPages;
         // Initial/first page rendering

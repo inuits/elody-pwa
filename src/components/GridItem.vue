@@ -21,10 +21,10 @@
     >
       <div class="w-full h-full">
         <div class="h-[50%] flex justify-center items-center">
-          <img
+          <ImageViewer
             v-if="canShowCopyRight() && media && !imageSrcError"
-            class="h-full w-48 object-cover"
-            :src="
+            class="h-48 w-48 object-cover"
+            :url="
               mediaIsLink
                 ? media
                 : `/api/iiif/3/${media}/square/^500,/0/default.jpg`
@@ -110,6 +110,7 @@ import { useAuth } from "session-vue-3-oidc-library";
 import { computed, ref, watch } from "vue";
 import { getEntityIdFromRoute, stringIsUrl } from "@/helpers";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
+import ImageViewer from "@/components/base/ImageViewer.vue";
 
 const props = withDefaults(
   defineProps<{
