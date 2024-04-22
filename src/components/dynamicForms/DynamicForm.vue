@@ -231,10 +231,9 @@ const initializeForm = async () => {
 
 watch(
   () => props.dynamicFormQuery,
-  async () => {
-    deleteForm(props.dynamicFormQuery);
-    if (!form.value)
-      form.value = createForm(props.dynamicFormQuery, {
+  async (newValue, oldValue) => {
+    if (deleteForm(oldValue))
+      form.value = createForm(newValue, {
         intialValues: {},
         relationValues: {},
       } as {

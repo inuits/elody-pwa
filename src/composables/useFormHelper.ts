@@ -76,11 +76,13 @@ const useFormHelper = () => {
     return forms.value;
   };
 
-  const deleteForm = (key: string) => {
+  const deleteForm = (key: string): boolean => {
     try {
       delete forms.value[key];
+      return true;
     } catch {
       console.warn(`Form with key, ${key} does not exist. Deletion aborted`);
+      return false;
     }
   };
 
