@@ -15,21 +15,11 @@ type DropzoneSettings = {
 };
 export class useDropzone {
   dropzone = ref<Dropzone>;
-  errorMessages = ref<Array<string>>;
-  total = ref<number>;
-  success = ref<number>;
-  failed = ref<number>;
-  selectedFiles = ref<DropzoneFile>;
   isUploading = ref<boolean>;
   finishedUploading = ref<boolean>;
   dropzoneSettings = ref<DropzoneSettings>;
 
   constructor() {
-    this.errorMessages = ref([]);
-    this.total = ref(0);
-    this.success = ref(0);
-    this.failed = ref(0);
-    this.selectedFiles = ref([]);
     this.isUploading = ref(false);
     this.finishedUploading = ref(false);
     this.dropzoneSettings = ref({
@@ -57,43 +47,12 @@ export class useDropzone {
 
   getDropzone = () => this.dropzone.value;
 
-  setDropzoneErrorMessages = (errorMessage: string): void => {
-    this.errorMessages.value.push(errorMessage);
-  };
-
   clearDropzoneErrorMessages = (): void => {
     this.errorMessages.value = [];
   };
 
-  increaseFailedCounter = (): void => {
-    this.failed.value++;
-    this.detectUploadingState();
-  };
-
-  increaseSuccessCounter = (): void => {
-    this.success.value++;
-    this.detectUploadingState();
-  };
-
-  setTotalCounter = (totalCount: number): void => {
-    this.total.value = totalCount;
-  };
-
   clearDropzoneCounters = (): void => {
     this.total.value = 0;
-    this.success.value = 0;
-    this.failed.value = 0;
-  };
-
-  setSelectedMediafiles = (files: any[]) => {
-    this.setTotalCounter(files.length);
-    this.selectedFiles.value = files;
-  };
-
-  detectUploadingState = () => {
-    this.finishedUploading.value =
-      this.total.value === this.failed.value + this.success.value &&
-      this.total.value !== 0;
   };
 
   resetDropzone = () => {
