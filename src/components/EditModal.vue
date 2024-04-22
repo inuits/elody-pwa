@@ -23,6 +23,8 @@ import {
   DamsIcons,
   DeleteDataDocument,
   TypeModals,
+  Entitytyping,
+  Collection,
   type DeleteDataMutation,
 } from "@/generated-types/queries";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
@@ -48,8 +50,14 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const { pageInfo } = usePageInfo();
-const { isEdit, save, discard, disableEditMode, isEditToggleVisible, isDisabled } =
-  useEditMode();
+const {
+  isEdit,
+  save,
+  discard,
+  disableEditMode,
+  isEditToggleVisible,
+  isDisabled,
+} = useEditMode();
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal, openModal } = useBaseModal();
 const { discardEditForForm } = useFormHelper();
@@ -61,8 +69,15 @@ const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const deleteEntity = async (deleteMediafiles: boolean = false) => {
   const id = asString(route.params["id"]);
   const type = asString(route.params["type"]);
-  const childRoutes = config.routerConfig[0].children.map((route: any) => route.meta)
-  const collection = childRoutes.find((route: any) => route.entityType === type).type
+  const childRoutes = config.routerConfig[0].children.map(
+    (route: any) => route.meta
+  );
+  let collection;
+  if (type.toLowerCase() === Entitytyping.Mediafile) {
+    collection = Collection.Mediafiles;
+  } else {
+    collection = childRoutes.find((route: any) => route.entityType === type).type;
+  }
   await mutate({ id, path: collection, deleteMediafiles });
   await getTenants();
   closeModal(TypeModals.Confirm);
