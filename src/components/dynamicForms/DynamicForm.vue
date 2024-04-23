@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 h-full w-full overflow-y-scroll">
+  <div class="p-4 pt-0 h-full w-full overflow-y-auto">
     <div
       v-if="!formFields && !dynamicForm"
       class="h-full w-full flex justify-center items-center"
