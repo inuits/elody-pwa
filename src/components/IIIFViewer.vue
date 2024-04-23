@@ -74,8 +74,12 @@ export default defineComponent({
           () => props.imageFilename,
           (value: string) => {
             if (value) {
-              loading.value = true;
-              viewer.open(`/api/iiif/3/${value}/info.json`);
+              try {
+                loading.value = true;
+                viewer.open(`/api/iiif/3/${value}/info.json`);
+              } catch (e) {
+                loading.value = false;
+              }
             }
           }
         );
