@@ -110,6 +110,10 @@ const props = withDefaults(
     formFlow: "edit",
   }
 );
+watch(
+  () => props.metadata,
+  () => setNewValue(props.metadata.value)
+);
 
 const setNewValue = (newValue: string | BaseRelationValuesInput[]) => {
   value.value = newValue;
