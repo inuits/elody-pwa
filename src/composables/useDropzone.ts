@@ -47,19 +47,9 @@ export class useDropzone {
 
   getDropzone = () => this.dropzone.value;
 
-  clearDropzoneErrorMessages = (): void => {
-    this.errorMessages.value = [];
-  };
-
-  clearDropzoneCounters = (): void => {
-    this.total.value = 0;
-  };
-
   resetDropzone = () => {
     this.dropzone.value?.removeAllFiles();
     this.finishedUploading.value = false;
-    this.clearDropzoneErrorMessages();
-    this.clearDropzoneCounters();
   };
 
   getDropzoneSettings = (dropzonePreviewDiv: HTMLDivElement): any => {
