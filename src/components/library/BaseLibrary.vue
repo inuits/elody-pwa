@@ -30,7 +30,10 @@
       >
         <div
           :class="[
-            { 'top-0 mb-2 pt-4 bg-neutral-lightest': baseLibraryMode === BaseLibraryModes.NormalBaseLibrary },
+            {
+              'top-0 mb-2 pt-4 bg-neutral-lightest':
+                baseLibraryMode === BaseLibraryModes.NormalBaseLibrary,
+            },
             { sticky: hasStickyBars },
           ]"
         >
@@ -62,7 +65,10 @@
               <BaseToggleGroup v-if="toggles.length > 1" :toggles="toggles" />
             </div>
             <LibraryBar
-              v-if="!predefinedEntities && baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
+              v-if="
+                !predefinedEntities &&
+                baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
+              "
               :route="route"
               :set-limit="setLimit"
               :set-skip="setSkip"
@@ -79,7 +85,11 @@
           </div>
 
           <div
-            v-if="enableBulkOperations && !displayPreview && baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
+            v-if="
+              enableBulkOperations &&
+              !displayPreview &&
+              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
+            "
             class="my-3"
             :class="{ 'flex justify-end': expandFilters }"
           >
@@ -117,7 +127,10 @@
             @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
           >
             <ViewModesList
-              v-if="displayList || (entitiesLoading && route?.name !== 'SingleEntity')"
+              v-if="
+                displayList ||
+                (entitiesLoading && route?.name !== 'SingleEntity')
+              "
               :entities="entities as Entity[]"
               :entities-loading="entitiesLoading"
               :bulk-operations-context="bulkOperationsContext"
@@ -167,17 +180,17 @@
 import type { ApolloClient } from "@apollo/client/core";
 import type { ViewModes } from "@/generated-types/type-defs";
 import {
-  AdvancedFilterInput,
+  type AdvancedFilterInput,
   BaseLibraryModes,
-  BaseRelationValuesInput,
-  Entity,
-  EntityListElement
+  type BaseRelationValuesInput,
+  type Entity,
+  type EntityListElement,
 } from "@/generated-types/queries";
 import {
-  BaseEntity,
+  type BaseEntity,
   ContextMenuGeneralActionEnum,
   DamsIcons,
-  DropdownOption,
+  type DropdownOption,
   Entitytyping,
   SearchInputType,
   TypeModals,
@@ -207,53 +220,52 @@ import { useRoute, useRouter } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { watch, ref, onMounted, inject, computed } from "vue";
 
-const props = withDefaults(
-  defineProps<{
-    bulkOperationsContext: Context;
-    listItemRouteName: string;
-    predefinedEntities?: Entity[];
-    searchInputTypeOnDrawer?: SearchInputType;
-    enablePreview?: boolean;
-    enableAdvancedFilters?: boolean;
-    enableBulkOperations?: boolean;
-    entityType?: Entitytyping;
-    filterType?: string;
-    parentEntityIdentifiers?: string[];
-    confirmSelectionButton?: boolean;
-    enableNavigation?: boolean;
-    disableNewEntityPreviews?: boolean;
-    idsOfNonSelectableEntities?: string[];
-    relationType?: string;
-    hasStickyBars?: boolean;
-    filters?: AdvancedFilterInput[];
-    isSearchLibrary?: boolean;
-    useOtherQuery?: object;
-    selectInputFieldType?: "multi" | "single";
-    selectInputFieldValue?: string[];
-    baseLibraryMode?: BaseLibraryModes;
-    entityListElements?: EntityListElement[];
-  }>(),
-  {
-    predefinedEntities: undefined,
-    searchInputTypeOnDrawer: SearchInputType.AdvancedInputType,
-    enablePreview: false,
-    enableAdvancedFilters: true,
-    enableBulkOperations: true,
-    filterType: undefined,
-    parentEntityIdentifiers: () => [],
-    confirmSelectionButton: false,
-    enableNavigation: true,
-    disableNewEntityPreviews: false,
-    idsOfNonSelectableEntities: () => [],
-    hasStickyBars: true,
-    filters: () => [],
-    isSearchLibrary: false,
-    useOtherQuery: undefined,
-    isMultiSelectInputField: false,
-    baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
-    entityListElements: undefined,
-  }
-);
+export type BaseLibraryProps = {
+  bulkOperationsContext: Context;
+  listItemRouteName: string;
+  predefinedEntities?: Entity[];
+  searchInputTypeOnDrawer?: SearchInputType;
+  enablePreview?: boolean;
+  enableAdvancedFilters?: boolean;
+  enableBulkOperations?: boolean;
+  entityType?: Entitytyping;
+  filterType?: string;
+  parentEntityIdentifiers?: string[];
+  confirmSelectionButton?: boolean;
+  enableNavigation?: boolean;
+  disableNewEntityPreviews?: boolean;
+  idsOfNonSelectableEntities?: string[];
+  relationType?: string;
+  hasStickyBars?: boolean;
+  filters?: AdvancedFilterInput[];
+  isSearchLibrary?: boolean;
+  useOtherQuery?: object;
+  selectInputFieldType?: "multi" | "single";
+  selectInputFieldValue?: string[];
+  baseLibraryMode?: BaseLibraryModes;
+  entityListElements?: EntityListElement[];
+};
+
+const props = withDefaults(defineProps<BaseLibraryProps>(), {
+  predefinedEntities: undefined,
+  searchInputTypeOnDrawer: SearchInputType.AdvancedInputType,
+  enablePreview: false,
+  enableAdvancedFilters: true,
+  enableBulkOperations: true,
+  filterType: undefined,
+  parentEntityIdentifiers: () => [],
+  confirmSelectionButton: false,
+  enableNavigation: true,
+  disableNewEntityPreviews: false,
+  idsOfNonSelectableEntities: () => [],
+  hasStickyBars: true,
+  filters: () => [],
+  isSearchLibrary: false,
+  useOtherQuery: undefined,
+  isMultiSelectInputField: false,
+  baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+  entityListElements: undefined,
+});
 
 const emit = defineEmits<{
   (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
@@ -466,7 +478,11 @@ watch(
       selectedDropdownOptions.value = getSelectedOptions();
     }
     toggles = [];
-    if (!entities.value || entities.value?.length === 0 || !entities.value[0]?.allowedViewModes)
+    if (
+      !entities.value ||
+      entities.value?.length === 0 ||
+      !entities.value[0]?.allowedViewModes
+    )
       return;
     const viewModes: any[] = entities.value[0].allowedViewModes.viewModes;
     if (viewModes.includes(ViewModesList.__name))
