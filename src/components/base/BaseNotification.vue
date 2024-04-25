@@ -27,6 +27,7 @@ export enum NotificationType {
   default = "default",
   warning = "warning",
   error = "error",
+  success = "success",
 }
 
 export type Notification = {
@@ -76,6 +77,7 @@ export default defineComponent({
         text: "text-yellow-default",
       },
       error: { border: "border-red-default", text: "text-red-default" },
+      success: { border: "border-green-default", text: "text-green-default" },
     };
 
     const secondsToMilliseconds = (seconds: number): number => {
