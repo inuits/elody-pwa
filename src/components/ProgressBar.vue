@@ -8,7 +8,7 @@
       <p v-if="progressBarType === 'percentage'">
         {{ t("actions.progress-bar.percentage", [progressPercentage]) }}
       </p>
-      <p class="" v-else>
+      <p v-else>
         {{ t("actions.progress-bar.steps", [progress, totalAmountOfSteps]) }}
       </p>
     </div>

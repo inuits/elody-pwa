@@ -30,10 +30,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 import type { FormContext } from "vee-validate";
 
-const config = inject("config") as any;
-const { getModalInfo } = useBaseModal();
-const { t } = useI18n();
-const { resetUpload, initializeUpload, standaloneFileType } = useUpload();
+const { initializeUpload } = useUpload();
 const dropzone = new useDropzone();
 
 const props = withDefaults(
@@ -86,16 +83,6 @@ watch(
     setUseUploadVariables();
   },
   { immediate: true }
-);
-
-watch(
-  () => getModalInfo(TypeModals.DynamicForm).state,
-  () => {
-    if (getModalInfo(TypeModals.DynamicForm).state === ModalState.Hide) {
-      dropzone.resetDropzone();
-      resetUpload();
-    }
-  }
 );
 </script>
 

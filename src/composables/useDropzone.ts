@@ -45,8 +45,6 @@ export class useDropzone {
     return this.dropzone.value;
   };
 
-  getDropzone = () => this.dropzone.value;
-
   resetDropzone = () => {
     this.dropzone.value?.removeAllFiles();
     this.finishedUploading.value = false;

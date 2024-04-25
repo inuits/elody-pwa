@@ -146,13 +146,8 @@ const { createForm, deleteForm } = useFormHelper();
 const { loadDocument } = useImport();
 const { closeModal } = useBaseModal();
 const { getDynamicForm, dynamicForm, performSubmitAction } = useDynamicForm();
-const {
-  upload,
-  enableUploadButton,
-  uploadProgress,
-  resetUpload,
-  standaloneFileType,
-} = useUpload();
+const { upload, enableUploadButton, uploadProgress, standaloneFileType } =
+  useUpload();
 const formFields = computed<
   UploadContainer | PanelMetaData | FormAction | undefined
 >(() => {
@@ -223,7 +218,6 @@ const getUploadProgressSteps = (
 };
 
 const initializeForm = async () => {
-  resetUpload();
   if (!props.dynamicFormQuery) return;
   const document = await getQuery(props.dynamicFormQuery);
   getDynamicForm(document);
