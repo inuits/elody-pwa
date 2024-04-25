@@ -5,12 +5,13 @@
         {{ t(dynamicForm.GetDynamicForm.label) }}
       </h1>
       <div
-        v-for="(field, index) in formFields"
+        v-for="(field, index) in getFieldArray"
         :key="`${dynamicFormQuery}_field_${index}`"
         class="pb-2"
       >
+        <ImportComponent v-if="field.inputField?.type === 'baseFileSystemImportField'" />
         <metadata-wrapper
-          v-if="field.__typename === 'PanelMetaData'"
+          v-else-if="field.__typename === 'PanelMetaData'"
           :form-id="dynamicFormQuery"
           :metadata="field as PanelMetaData"
           :is-edit="true"
@@ -129,6 +130,7 @@ import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useMenuHelper from "@/composables/useMenuHelper";
+import ImportComponent from "@/components/ImportComponent.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -136,14 +138,17 @@ const props = withDefaults(
     hasLinkedUpload?: boolean;
     savedContext?: any | undefined;
     router: Router;
+    modalFormFields?: object;
   }>(),
   {
     hasLinkedUpload: false,
+    modalFormFields: undefined,
   }
 );
 
 type FormFieldTypes = UploadContainer | PanelMetaData | FormAction;
 
+const modalFormFields = props.modalFormFields;
 const config = inject("config");
 const { currentTenant } = useApp();
 const { createForm, deleteForm, parseRelationValuesForFormSubmit } =
@@ -166,13 +171,33 @@ const {
   reinitializeDynamicFormFunc,
 } = useUpload();
 const { resetForm } = useForm();
+interface FormObject {
+  __typename: string;
+}
+const findFormTabObjects = (dynamicForm: Record<string, FormObject>): FormObject[] => {
+  if (!dynamicForm) {
+    return [];
+  }
+
+  return Object.values(dynamicForm).filter(value => value && value.__typename === "FormTab");
+};
+
 const formFields = computed<FormFieldTypes[] | undefined>(() => {
-  if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"])
-    return undefined;
-  return Object.values(dynamicForm.value["GetDynamicForm"].formFields).filter(
-    (value) => typeof value === "object"
+  const formTabs = dynamicForm.value?.GetDynamicForm;
+  if (!formTabs) return undefined;
+
+  const formTabObjects = findFormTabObjects(formTabs);
+  if (!formTabObjects.length) return undefined;
+
+  return formTabObjects.flatMap(formTab =>
+      Object.values(formTab.formFields).filter(value => typeof value === "object")
   );
 });
+
+const getFieldArray = computed(() => {
+  return modalFormFields ? modalFormFields : formFields.value || [];
+});
+
 const form = ref<FormContext<any>>();
 const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
 const showErrors = ref<boolean>(false);
