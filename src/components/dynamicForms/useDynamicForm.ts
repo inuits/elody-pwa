@@ -9,6 +9,10 @@ const isPerformingAction = ref<boolean>(false);
 const { selectedTenant } = useTenant(undefined);
 
 const useDynamicForm = () => {
+  const getDynamicFormTabs = () => {
+    return dynamicForm.value;
+  };
+
   const getDynamicForm = (queryDocument: any): void => {
     apolloClient
       .query({
@@ -16,6 +20,9 @@ const useDynamicForm = () => {
       })
       .then((result) => {
         dynamicForm.value = result.data;
+      })
+      .catch((error) => {
+        console.error('Error fetching dynamicFormTabs:', error);
       });
   };
 
@@ -64,7 +71,13 @@ const useDynamicForm = () => {
     dynamicFormUploadFields,
     resetDynamicForm,
     isPerformingAction,
+    getDynamicFormTabs,
   };
 };
 
-export { useDynamicForm };
+const getDynamicFormTabs = async () => {
+  const dynamicFormInstance = useDynamicForm();
+  return dynamicFormInstance.getDynamicFormTabs();
+};
+
+export { useDynamicForm, getDynamicFormTabs };
