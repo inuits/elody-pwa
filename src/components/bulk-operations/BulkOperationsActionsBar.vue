@@ -261,6 +261,20 @@ watch(selectedBulkOperation, () => {
       getEnqueuedItems(props.context).map((entity: BaseEntity) => entity.id)
     );
   }
+  if (
+    selectedBulkOperation.value?.value === BulkOperationTypes.DownloadMediafiles
+    && selectedBulkOperation.value?.bulkOperationModal
+  ) {
+      let modal = selectedBulkOperation.value?.bulkOperationModal;
+      openModal(
+        modal.typeModal,
+        undefined,
+        "right",
+        modal.formQuery,
+        modal.askForCloseConfirmation,
+        props.context
+      );
+  }
 });
 
 watch(
