@@ -85,6 +85,7 @@
       </div>
       <div v-else class="w-full !m-0">
         <BaseDropdownNew
+          v-if="bulkOperations !== undefined"
           v-model="selectedBulkOperation"
           :options="bulkOperations"
           dropdown-style="accentAccent"
