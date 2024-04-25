@@ -1,47 +1,53 @@
 <template>
-  <input
-    v-if="type !== 'textarea' && type !== 'checkbox'"
-    class="w-full h-full border rounded-lg focus:ring-0"
-    :class="[
-      `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
-      `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
-    ]"
-    v-model="inputValue"
-    :type="type"
-    :step="step"
-    :disabled="disabled"
-    :placeholder="placeholder"
-    @change.stop
-    @click.stop
-  />
-  <input
-    v-else-if="type === 'checkbox'"
-    class="w-4 h-4 rounded-md ml-2"
-    v-model="inputValue"
-    :type="type"
-    :disabled="disabled"
-    :placeholder="placeholder"
-    @change.stop
-    @click.stop
-  />
-  <textarea
-    v-else
-    class="w-full h-full border rounded-lg focus:ring-0"
-    :class="[
-      `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
-      `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
-    ]"
-    v-model="inputValue"
-    :disabled="disabled"
-    :placeholder="placeholder"
-    @change.stop
-    @click.stop
-    rows="3"
-  ></textarea>
+  <template v-if="type === 'fileSystemImport'">
+    <ImportComponent />
+  </template>
+  <template v-else>
+    <input
+      v-if="type !== 'textarea' && type !== 'checkbox'"
+      class="w-full h-full border rounded-lg focus:ring-0"
+      :class="[
+        `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
+        `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
+      ]"
+      v-model="inputValue"
+      :type="type"
+      :step="step"
+      :disabled="disabled"
+      :placeholder="placeholder"
+      @change.stop
+      @click.stop
+    />
+    <input
+      v-else-if="type === 'checkbox'"
+      class="w-4 h-4 rounded-md ml-2"
+      v-model="inputValue"
+      :type="type"
+      :disabled="disabled"
+      :placeholder="placeholder"
+      @change.stop
+      @click.stop
+    />
+    <textarea
+      v-else
+      class="w-full h-full border rounded-lg focus:ring-0"
+      :class="[
+        `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
+        `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
+      ]"
+      v-model="inputValue"
+      :disabled="disabled"
+      :placeholder="placeholder"
+      @change.stop
+      @click.stop
+      rows="3"
+    ></textarea>
+  </template>
 </template>
 
 <script lang="ts" setup>
 import { computed } from "vue";
+import ImportComponent from "@/components/ImportComponent.vue";
 
 type PseudoStyle = {
   textColor: string;

@@ -15,6 +15,7 @@
         :key="`${dynamicFormQuery}_field_${index}`"
         class="pb-2"
       >
+       <template v-if="hasImportAvailable">
         <metadata-wrapper
           v-if="field.__typename === 'PanelMetaData'"
           :form-id="dynamicFormQuery"
@@ -22,6 +23,15 @@
           :is-edit="true"
           form-flow="create"
         />
+       </template>
+       <template v-else-if="!hasImportAvailable">
+         <metadata-wrapper
+             v-if="field.__typename === 'PanelMetaData' && field.key !== 'fileSystemImport'"
+             :form-id="dynamicFormQuery"
+             :metadata="field as PanelMetaData"
+             :is-edit="true"
+             form-flow="create"
+         />
         <div v-if="field.__typename === 'UploadContainer'">
           <div
             v-for="uploadContainerField in Object.values(field as any).filter(
@@ -54,28 +64,27 @@
             </div>
           </div>
         </div>
-
-        <DynamicFormUploadButton
-          v-if="
+         <DynamicFormUploadButton
+             v-if="
             field.__typename === 'FormAction' &&
             (field as FormAction).actionType == ActionType.Upload
           "
-          :label="t((field as FormAction).label)"
-          :icon="(field as FormAction).icon"
-          :disabled="!enableUploadButton"
-          :progressIndicatorType="(field as FormAction).actionProgressIndicator.type"
-          @click-upload-button="
+             :label="t((field as FormAction).label)"
+             :icon="(field as FormAction).icon"
+             :disabled="!enableUploadButton"
+             :progressIndicatorType="(field as FormAction).actionProgressIndicator.type"
+             @click-upload-button="
             performActionButtonClickEvent(field as FormAction)
           "
-          @reset-upload="initializeForm"
-        />
-        <BaseButtonNew
-          v-if="
+             @reset-upload="initializeForm"
+         />
+         <BaseButtonNew
+             v-if="
             field.__typename === 'FormAction' &&
             field.actionType == ActionType.Submit
           "
-          class="mt-5 mb-10"
-          :label="
+             class="mt-5 mb-10"
+             :label="
             config?.features.hasTenantSelect
               ? `${t(field.label)} ${t(`types.${field.creationType}`)}${
                   config.tenantDefiningTypes !== field.creationType
@@ -86,11 +95,12 @@
                 }`
               : t(field.label)
           "
-          :icon="field.icon"
-          :disabled="formContainsErrors"
-          button-style="accentAccent"
-          @click="performActionButtonClickEvent(field)"
-        />
+             :icon="field.icon"
+             :disabled="formContainsErrors"
+             button-style="accentAccent"
+             @click="performActionButtonClickEvent(field)"
+         />
+        </template>
       </div>
     </div>
   </div>
@@ -115,7 +125,7 @@ import {
 import { useImport } from "@/composables/useImport";
 import type { Context } from "@/composables/useBulkOperations";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
-import { computed, inject, ref, watch } from "vue";
+import { computed, inject, ref, watch, defineEmits} from "vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
@@ -136,11 +146,15 @@ const props = withDefaults(
     hasLinkedUpload?: boolean;
     contextFromBulkOperations?: Context;
     router: Router;
+    importAvailable?: boolean;
   }>(),
   {
     hasLinkedUpload: false,
+    importAvailable: false,
   }
 );
+
+const hasImportAvailable = props.importAvailable;
 
 const config = inject("config");
 const { currentTenant } = useApp();
@@ -150,16 +164,44 @@ const { loadDocument } = useImport();
 const { closeModal } = useBaseModal();
 const { getDynamicForm, dynamicForm, performSubmitAction } = useDynamicForm();
 const { upload, enableUploadButton, uploadProgress, standaloneFileType } =
-  useUpload();
-const formFields = computed<
-  UploadContainer | PanelMetaData | FormAction | undefined
->(() => {
-  if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"])
+    useUpload();
+
+interface FormObject {
+  __typename: string;
+}
+const findFormTabObjects = (dynamicForm: Record<string, FormObject>): FormObject[] => {
+  if (!dynamicForm) {
+    return [];
+  }
+
+  return Object.values(dynamicForm).filter(value => value && value.__typename === "FormTab");
+};
+
+const formFields = computed<UploadField | PanelMetaData | FormAction | undefined>(() => {
+  if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"]) {
     return undefined;
-  return Object.values(dynamicForm.value["GetDynamicForm"].formFields).filter(
-    (value) => typeof value === "object"
-  );
+  }
+  const formTabObjects = findFormTabObjects(dynamicForm.value["GetDynamicForm"]);
+  if (formTabObjects.length === 0) {
+    return undefined;
+  }
+
+  const allFormFields: (UploadField | PanelMetaData | FormAction)[] = [];
+  for (const formTab of formTabObjects) {
+    const formFields = Object.values(formTab.formFields).filter(value => typeof value === "object");
+    allFormFields.push(...formFields);
+  }
+
+  return allFormFields;
 });
+
+const formTabs = computed<UploadField | PanelMetaData | FormAction | undefined>(() => {
+  if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"]) {
+    return [];
+  }
+  return dynamicForm.value.GetDynamicForm;
+});
+
 const form = ref<FormContext<any>>();
 const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
 const { getMenuDestinations } = useMenuHelper();
@@ -270,6 +312,12 @@ watch(
   },
   { deep: true, immediate: true }
 );
+
+const emits = defineEmits(['dynamicFormReady']);
+
+watch([formTabs, formFields], ([tabs, fields]) => {
+  emits('dynamicFormReady', { formTabs: tabs, formFields: fields });
+});
 </script>
 
 <style scoped></style>
