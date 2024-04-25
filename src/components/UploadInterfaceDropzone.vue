@@ -55,8 +55,8 @@ const props = withDefaults(
 
 const getDropzoneSize = (size: "small" | "normal" | "big") => {
   const sizeObject = {
-    small: "h-[10vh]",
-    normal: "h-[60vh]",
+    small: "h-[15vh]",
+    normal: "h-[55vh]",
     big: "h-[85vh]",
   };
   return sizeObject[size];
