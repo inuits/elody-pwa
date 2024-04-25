@@ -2,9 +2,9 @@ import { computed, ref } from "vue";
 import {
   ModalChoices,
   ModalState,
-  TypeModals,
+  TypeModals
 } from "@/generated-types/queries";
-
+import type { Context } from "@/composables/useBulkOperations";
 export type ModalPosition = "left" | "center" | "right";
 
 export type ModalInfo = {
@@ -14,6 +14,7 @@ export type ModalInfo = {
   formQuery?: string;
   modalTabToOpen?: ModalChoices;
   closeConfirmation: boolean;
+  contextFromBulkOperations?: Context;
 };
 
 const initialModalInfo: ModalInfo = {
@@ -43,7 +44,8 @@ export const useBaseModal = () => {
     modalTab: ModalChoices | undefined = undefined,
     modalPosition: ModalPosition | undefined = undefined,
     formQuery: string | undefined = undefined,
-    askForCloseConfirmation: boolean | undefined = undefined
+    askForCloseConfirmation: boolean | undefined = undefined,
+    contextFromBulkOperations: Context | undefined = undefined
   ): void => {
     if (modalType !== TypeModals.Confirm)
       closeModalsWithPosition(getModalInfo(modalType).modalPosition);
@@ -52,6 +54,7 @@ export const useBaseModal = () => {
     };
     if (modalPosition) Object.assign(updatedModal, { modalPosition });
     if (formQuery) Object.assign(updatedModal, { formQuery });
+    if (contextFromBulkOperations) Object.assign(updatedModal, { contextFromBulkOperations });
     updateModal(modalType, updatedModal);
     if (modalTab) getModalInfo(modalType).modalTabToOpen = modalTab;
     if (askForCloseConfirmation)

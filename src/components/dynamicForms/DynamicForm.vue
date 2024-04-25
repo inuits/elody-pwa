@@ -113,6 +113,7 @@ import {
   type UploadField,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
+import type { Context } from "@/composables/useBulkOperations";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import { computed, inject, ref, watch } from "vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
@@ -132,6 +133,7 @@ const props = withDefaults(
   defineProps<{
     dynamicFormQuery: string;
     hasLinkedUpload?: boolean;
+    contextFromBulkOperations?: Context;
     router: Router;
   }>(),
   {

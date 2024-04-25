@@ -13,6 +13,7 @@
     <dynamic-form
       v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
       :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
+      :context-from-bulk-operations="getModalInfo(TypeModals.DynamicForm).contextFromBulkOperations"
       :router="useRouter()"
     />
   </BaseModal>
