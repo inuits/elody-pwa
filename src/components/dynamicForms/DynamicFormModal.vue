@@ -11,29 +11,31 @@
     @hide-modal="closeModal(TypeModals.DynamicForm)"
   >
     <div class="flex flex-col w-full h-full overflow-auto">
-      <template v-if="getModalInfo(TypeModals.DynamicForm).formQuery === 'GetUploadForm' && importComponentAvailable === true">
-        <BaseTabs class="h-full" :onTabClick="onTabClick">
+        <BaseTabs v-if="shouldRenderTabs" class="h-full">
           <BaseTab :title="t('entity.upload')">
             <DynamicForm
-              v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
-              :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
-              :router="useRouter()"
-              @dynamicFormReady="handleDynamicFormReady"
+                v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
+                :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
+                :router="useRouter()"
+                @dynamicFormReady="handleDynamicFormReady"
             />
           </BaseTab>
-          <BaseTab :title="'Import'">
-            <ImportComponent :selectedIndex="selectedIndex" />
+          <BaseTab v-if="hasFileSystemImport" :title="t('entity.import')">
+            <DynamicForm
+                v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
+                :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
+                :router="useRouter()"
+                @dynamicFormReady="handleDynamicFormReady"
+                :import-available="true"
+            />
           </BaseTab>
         </BaseTabs>
-      </template>
-      <template v-else>
         <DynamicForm
-          v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
-          :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
-          :router="useRouter()"
-          @dynamicFormReady="handleDynamicFormReady"
+            v-else-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
+            :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
+            :router="useRouter()"
+            @dynamicFormReady="handleDynamicFormReady"
         />
-      </template>
     </div>
   </BaseModal>
 </template>
@@ -47,32 +49,42 @@ import { useRouter } from "vue-router";
 import BaseTabs from "@/components/BaseTabs.vue";
 import BaseTab from "@/components/BaseTab.vue";
 import { useI18n } from "vue-i18n";
-import ImportComponent from "@/components/ImportComponent.vue";
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 
 const { closeModal, getModalInfo } = useBaseModal();
 const { t } = useI18n();
-const selectedIndex = ref(0);
-const onTabClick = (index: number) => {
-  selectedIndex.value = index;
-};
-const importComponentAvailable = ref(false);
 
-const handleDynamicFormReady = (obj) => {
-  importComponentAvailable.value = obj.importComponentAvailable;
+const formTabs = ref([]);
+const formFields = ref([]);
+const handleDynamicFormReady = (event) => {
+  formTabs.value = event.formTabs;
+  formFields.value = event.formFields;
 };
 
 onMounted(() => {
-  window.addEventListener('dynamicFormReady', () => {
-    const isAvailable = true;
-    handleDynamicFormReady(isAvailable);
-  });
+  window.addEventListener('dynamicFormReady', handleDynamicFormReady);
 
   onUnmounted(() => {
     window.removeEventListener('dynamicFormReady', handleDynamicFormReady);
   });
 });
 
+const hasFileSystemImport = computed(() => {
+  const obj = formFields.value;
+  if (!obj || typeof obj !== 'object') return false;
+
+  const hasFileSystemImport = Object.values(obj).some(item => item && item.key === "fileSystemImport");
+
+  return hasFileSystemImport;
+});
+
+const shouldRenderTabs = computed(() => {
+  const obj = { ...formTabs.value };
+  const formTabValues = Object.values(obj);
+  const formTabArray = formTabValues.filter(item => item.__typename === "FormTab");
+
+  return formTabArray.length > 1;
+});
 </script>
 
 <style scoped></style>
