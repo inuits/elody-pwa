@@ -157,6 +157,7 @@ const useFormHelper = () => {
     formId: string
   ): void => {
     editableFields.value[formId].push(key);
+    // editableFields.value[formId]?.push(key);
   };
 
   const route = useRoute();
