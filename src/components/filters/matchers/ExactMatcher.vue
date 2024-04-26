@@ -89,7 +89,10 @@ const { refetch: refetchFilterOptions, onResult: onFilterOptionsResult } =
   useQuery<GetFilterOptionsQuery>(
     GetFilterOptionsDocument,
     filterOptionsQueryVariables,
-    () => ({ enabled: refetchFilterOptionsEnabled.value })
+    () => ({
+      enabled: refetchFilterOptionsEnabled.value,
+      fetchPolicy: "no-cache"
+    })
   );
 
 const filterOptions = reactive<
@@ -255,6 +258,7 @@ onMounted(() => {
       };
 
     refetchFilterOptionsEnabled.value = true;
+    console.log("GOING TO REFETCH!");
     refetchFilterOptions();
   }
 
