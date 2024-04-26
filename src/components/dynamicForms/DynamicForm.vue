@@ -16,7 +16,8 @@
         class="pb-2"
       >
        <template v-if="hasImportAvailable">
-        <metadata-wrapper
+         <ImportComponent v-if="field.key === 'fileSystemImport'" />
+         <metadata-wrapper v-else
           v-if="field.__typename === 'PanelMetaData'"
           :form-id="dynamicFormQuery"
           :metadata="field as PanelMetaData"
@@ -138,6 +139,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
 import type { FormContext } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
+import ImportComponent from "@/components/ImportComponent.vue";
 
 const props = withDefaults(
   defineProps<{
