@@ -121,13 +121,14 @@ import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
 import { useI18n } from "vue-i18n";
 import useUpload from "@/composables/useUpload";
-import { goToEntityPage } from "@/helpers";
+import { goToEntityPage, goToEntityTypeRoute } from "@/helpers";
 import type { Router } from "vue-router";
 import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUploadButton.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
 import type { FormContext } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
+import useMenuHelper from "@/composables/useMenuHelper";
 
 const props = withDefaults(
   defineProps<{
@@ -161,6 +162,7 @@ const formFields = computed<
 });
 const form = ref<FormContext<any>>();
 const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
+const { getMenuDestinations } = useMenuHelper();
 const { t } = useI18n();
 
 const createEntityFromFormInput = (entityType: Entitytyping): EntityInput => {
@@ -185,6 +187,11 @@ const performActionButtonClickEvent = async (
   if (field.actionType === ActionType.Upload) {
     if (!enableUploadButton.value) return;
     upload(props.hasLinkedUpload, config, t);
+    goToEntityTypeRoute(
+      standaloneFileType.value,
+      getMenuDestinations(),
+      props.router
+    );
     return;
   }
   if (field.actionType === ActionType.Submit) {
