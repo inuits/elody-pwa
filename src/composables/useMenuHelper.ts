@@ -33,7 +33,7 @@ export const useMenuHelper = () => {
     selectedMenuItem.value = menuItem;
     const menu = ref<Array<MenuItem>>([menuItem]);
     const destinations = getMenuDestinations(menu);
-    if (destinations)
+    if (destinations && destinations.length > 0)
       selectedMenuItemPath.value = `/${destinations[0].destination}`;
   };
 
