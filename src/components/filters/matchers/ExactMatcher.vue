@@ -258,7 +258,6 @@ onMounted(() => {
       };
 
     refetchFilterOptionsEnabled.value = true;
-    console.log("GOING TO REFETCH!");
     refetchFilterOptions();
   }
 
