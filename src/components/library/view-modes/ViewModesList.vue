@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="Array.isArray(relations)"
     v-show="!disablePreviews"
     v-for="item in relations?.filter(
       (relation) =>
