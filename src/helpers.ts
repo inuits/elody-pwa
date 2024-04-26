@@ -68,7 +68,7 @@ export const updateEntityMediafileOnlyForMediafiles = (
 };
 
 export const getEntityIdFromRoute = (): string | undefined => {
-  return asString(useRoute().params["id"]) || undefined;
+  return asString(useRoute()?.params["id"]) || undefined;
 };
 
 export const i18n = (translations: Object, applicationLocale: string) => {
