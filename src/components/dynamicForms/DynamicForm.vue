@@ -187,11 +187,12 @@ const performActionButtonClickEvent = async (
   if (field.actionType === ActionType.Upload) {
     if (!enableUploadButton.value) return;
     upload(props.hasLinkedUpload, config, t);
-    goToEntityTypeRoute(
-      standaloneFileType.value,
-      getMenuDestinations(),
-      props.router
-    );
+    if (standaloneFileType.value)
+      goToEntityTypeRoute(
+        standaloneFileType.value,
+        getMenuDestinations(),
+        props.router
+      );
     return;
   }
   if (field.actionType === ActionType.Submit) {
