@@ -13,6 +13,7 @@ import { createI18n } from "vue-i18n";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { type Router, useRoute } from "vue-router";
+import { useMenuHelper } from "@/composables/useMenuHelper";
 
 export const goToEntityPage = (
   entity: Entity,
@@ -36,6 +37,22 @@ export const goToEntityPage = (
       type: entityId.includes("tracker") ? "IotDeviceTracker" : entity.type,
     },
   });
+};
+
+export const goToEntityTypeRoute = (
+  entityType: Entitytyping,
+  destinations: { entityType: string; destination: string }[],
+  router: Router
+) => {
+  try {
+    const route = destinations.find(
+      (destination: { entityType: string; destination: string }) =>
+        destination.entityType === entityType
+    );
+    if (route) router.push(`/${route.destination}`);
+  } catch (e) {
+    console.log("Unable to navigate to this route", e);
+  }
 };
 
 export const getEntityPageRoute = (

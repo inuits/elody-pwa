@@ -91,7 +91,9 @@ export const useBreadcrumbs = (config: any, t: any) => {
       return;
     }
     const valueToMatch = to.path.slice(1);
-    const destinations = getMenuDestinations().value;
+    const destinations = getMenuDestinations().map(
+      (destinationObject: any) => destinationObject.destination
+    );
     route = {
       id: "",
       routeName: to.meta.title,

@@ -6,15 +6,16 @@ import {
   type GetMenuQuery,
   GetMenuDocument,
 } from "@/generated-types/queries";
-import { useRouter } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { reactive, ref } from "vue";
+import { reactive, ref, computed } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 const { openModal } = useBaseModal();
+
 const selectedMenuItem = ref<MenuItem | undefined>(undefined);
 const selectedMenuItemPath = ref<string>(undefined);
 const menuItems = ref<Array<MenuItem>>([]);
-const menuDestinations = ref<Array<string>>([]);
+const menuDestinations = ref<{ entityType: string; destination: string }[]>([]);
+const entityTypeRoutes = computed(() => {});
 
 export enum MenuItemType {
   modal = "modal",
@@ -27,14 +28,13 @@ type MenuAction = {
 };
 
 export const useMenuHelper = () => {
-  const router = useRouter();
-
   const setSelectedMenuItem = (menuItem: MenuItem) => {
     if (!menuItem) return;
     selectedMenuItem.value = menuItem;
     const menu = ref<Array<MenuItem>>([menuItem]);
     const destinations = getMenuDestinations(menu);
-    if (destinations) selectedMenuItemPath.value = `/${destinations.value[0]}`;
+    if (destinations)
+      selectedMenuItemPath.value = `/${destinations[0].destination}`;
   };
 
   const checkIfRouteOrModal = (_menuItem: MenuItem): MenuAction | undefined => {
@@ -87,15 +87,23 @@ export const useMenuHelper = () => {
         for (let i = 2; i < entries.length; i += 1) {
           const [objectKey, objectValue] = entries[i];
           if (!objectValue.typeLink.route) return;
-          const destination = objectValue.typeLink.route.destination;
-          menuDestinations.value.push(destination);
+          const destination = objectValue?.typeLink?.route.destination;
+          if (destination)
+            menuDestinations.value.push({
+              entityType: objectValue.entityType,
+              destination,
+            });
         }
       } else {
         const destination = menuItem.typeLink.route?.destination;
-        menuDestinations.value.push(destination);
+        if (destination)
+          menuDestinations.value.push({
+            entityType: menuItem.entityType,
+            destination,
+          });
       }
     });
-    return menuDestinations;
+    return menuDestinations.value;
   };
 
   return {
