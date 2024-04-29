@@ -228,7 +228,7 @@ const performActionButtonClickEvent = async (
     const entity = (await performDownloadAction(document, props.enqueuedItems, entityInput, form.value.values)).data.DownloadItemsInZip;
     closeModal(TypeModals.DynamicForm);
     deleteForm(props.dynamicFormQuery);
-    // goToEntityPage(entity, "SingleEntity", props.router);
+    goToEntityPage(entity, "SingleEntity", props.router);
   }
 };
 
