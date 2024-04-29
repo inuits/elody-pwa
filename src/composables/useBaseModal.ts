@@ -14,7 +14,7 @@ export type ModalInfo = {
   formQuery?: string;
   modalTabToOpen?: ModalChoices;
   closeConfirmation: boolean;
-  contextFromBulkOperations?: Context;
+  enqueuedItems?: any;
 };
 
 const initialModalInfo: ModalInfo = {
@@ -45,7 +45,7 @@ export const useBaseModal = () => {
     modalPosition: ModalPosition | undefined = undefined,
     formQuery: string | undefined = undefined,
     askForCloseConfirmation: boolean | undefined = undefined,
-    contextFromBulkOperations: Context | undefined = undefined
+    enqueuedItems: any | undefined = undefined
   ): void => {
     if (modalType !== TypeModals.Confirm)
       closeModalsWithPosition(getModalInfo(modalType).modalPosition);
@@ -54,7 +54,7 @@ export const useBaseModal = () => {
     };
     if (modalPosition) Object.assign(updatedModal, { modalPosition });
     if (formQuery) Object.assign(updatedModal, { formQuery });
-    if (contextFromBulkOperations) Object.assign(updatedModal, { contextFromBulkOperations });
+    if (enqueuedItems) Object.assign(updatedModal, { enqueuedItems });
     updateModal(modalType, updatedModal);
     if (modalTab) getModalInfo(modalType).modalTabToOpen = modalTab;
     if (askForCloseConfirmation)
