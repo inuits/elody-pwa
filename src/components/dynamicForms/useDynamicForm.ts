@@ -26,10 +26,29 @@ const useDynamicForm = () => {
     });
   };
 
+  const performDownloadAction = async (
+    queryDocument: any,
+    listOfIds: any,
+    downloadEntity: any,
+    form: any
+  ): Promise<any> => {
+    const variables = {
+      downloadEntity: downloadEntity,
+      entities: listOfIds.entities,
+      mediafiles: listOfIds.mediafiles,
+      includeCsv: !!form.intialValues.include_csv,
+    };
+    return await apolloClient.query({
+      query: queryDocument,
+      variables
+    });
+  };
+
   return {
     getDynamicForm,
     dynamicForm,
     performSubmitAction,
+    performDownloadAction,
     dynamicFormUploadFields,
   };
 };

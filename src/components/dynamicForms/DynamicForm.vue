@@ -91,6 +91,18 @@
           button-style="accentAccent"
           @click="performActionButtonClickEvent(field)"
         />
+        <BaseButtonNew
+          v-if="
+            field.__typename === 'FormAction' &&
+            field.actionType == ActionType.Download
+          "
+          class="mt-5 mb-10"
+          :label="t((field as FormAction).label)"
+          :icon="field.icon"
+          :disabled="formContainsErrors"
+          button-style="accentAccent"
+          @click="performActionButtonClickEvent(field)"
+        />
       </div>
     </div>
   </div>
@@ -134,7 +146,7 @@ const props = withDefaults(
   defineProps<{
     dynamicFormQuery: string;
     hasLinkedUpload?: boolean;
-    contextFromBulkOperations?: Context;
+    enqueuedItems?: Context;
     router: Router;
   }>(),
   {
@@ -148,7 +160,7 @@ const { currentTenant } = useApp();
 const { createForm, deleteForm } = useFormHelper();
 const { loadDocument } = useImport();
 const { closeModal } = useBaseModal();
-const { getDynamicForm, dynamicForm, performSubmitAction } = useDynamicForm();
+const { getDynamicForm, dynamicForm, performSubmitAction, performDownloadAction } = useDynamicForm();
 const { upload, enableUploadButton, uploadProgress, standaloneFileType } =
   useUpload();
 const formFields = computed<
@@ -169,6 +181,10 @@ const createEntityFromFormInput = (entityType: Entitytyping): EntityInput => {
   let entity: EntityInput = { type: entityType };
   entity.metadata = Object.keys(form.value?.values.intialValues)
     .map((key) => {
+      if (typeof form.value?.values.intialValues[key] === "boolean") {
+        let bool = form.value?.values.intialValues[key] ? "true" : "false";
+        return { key, value: bool };
+      }
       return { key, value: form.value?.values.intialValues[key] };
     })
     .filter((metadataItem: MetadataInput) => metadataItem.value);
@@ -204,6 +220,15 @@ const performActionButtonClickEvent = async (
     closeModal(TypeModals.DynamicForm);
     deleteForm(props.dynamicFormQuery);
     goToEntityPage(entity, "SingleEntity", props.router);
+  }
+  if (field.actionType === ActionType.Download) {
+    if (formContainsErrors.value) return;
+    const document = await getQuery(field.actionQuery as string);
+    const entityInput = createEntityFromFormInput(field.creationType);
+    const entity = (await performDownloadAction(document, props.enqueuedItems, entityInput, form.value.values)).data.DownloadItemsInZip;
+    closeModal(TypeModals.DynamicForm);
+    deleteForm(props.dynamicFormQuery);
+    // goToEntityPage(entity, "SingleEntity", props.router);
   }
 };
 
