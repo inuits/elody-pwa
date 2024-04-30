@@ -112,9 +112,10 @@ import {
   GenerateTranscodeMutation,
   Entitytyping,
 } from "@/generated-types/queries";
-import type {
+import {
   Context,
   InBulkProcessableItem,
+  SavedContextForBulkOperationsForm
 } from "@/composables/useBulkOperations";
 import {
   BulkOperationsContextEnum,
@@ -267,11 +268,12 @@ watch(selectedBulkOperation, () => {
   ) {
       let modal = selectedBulkOperation.value?.bulkOperationModal;
       const enqueuedItems = getEnqueuedItems(props.context);
-      const savedContext = {
+      const savedContext: SavedContextForBulkOperationsForm = {
         mediafiles: [],
         entities: [],
-        includeAssetCsv: props.context !== RouteNames.Mediafile
-      }
+        includeAssetCsv: props.context !== RouteNames.Mediafile,
+        relationType: modal.formRelationType,
+      };
       if (props.context === RouteNames.Assets) savedContext.entities = enqueuedItems.map((item) => item.id);
       else savedContext.mediafiles = enqueuedItems.map((item) => item.id);
       openModal(

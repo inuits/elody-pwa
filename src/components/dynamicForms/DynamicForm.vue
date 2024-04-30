@@ -115,6 +115,8 @@ import {
   ActionProgressIndicatorType,
   type ActionProgressStep,
   ActionType,
+  type BaseRelationValuesInput,
+  EditStatus,
   type EntityInput,
   Entitytyping,
   type FormAction,
@@ -125,7 +127,6 @@ import {
   type UploadField,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
-import type { Context } from "@/composables/useBulkOperations";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import { computed, inject, ref, watch } from "vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
@@ -274,13 +275,31 @@ const initializeForm = async () => {
 watch(
   () => props.dynamicFormQuery,
   async (newValue, oldValue) => {
-    if (deleteForm(oldValue))
+    if (deleteForm(oldValue)) {
+      const relations: BaseRelationValuesInput[] = [];
+      if(props.savedContext) {
+        props.savedContext.mediafiles.forEach((mediafile) => {
+          relations.push({
+            key: mediafile,
+            type: props.savedContext.relationType,
+            editStatus: EditStatus.New
+          });
+        });
+        props.savedContext.entities.forEach((entity) => {
+          relations.push({
+            key: entity,
+            type: props.savedContext.relationType,
+            editStatus: EditStatus.New
+          });
+        });
+      }
       form.value = createForm(newValue, {
         intialValues: {},
-        relationValues: {},
+        relationValues: { relations }
       } as {
         [key: string]: object;
       });
+    }
     await initializeForm();
   },
   { immediate: true }
