@@ -146,7 +146,7 @@ const props = withDefaults(
   defineProps<{
     dynamicFormQuery: string;
     hasLinkedUpload?: boolean;
-    enqueuedItems?: Context;
+    savedContext?: any | undefined;
     router: Router;
   }>(),
   {
@@ -225,7 +225,7 @@ const performActionButtonClickEvent = async (
     if (formContainsErrors.value) return;
     const document = await getQuery(field.actionQuery as string);
     const entityInput = createEntityFromFormInput(field.creationType);
-    const entity = (await performDownloadAction(document, props.enqueuedItems, entityInput, form.value.values)).data.DownloadItemsInZip;
+    const entity = (await performDownloadAction(document, props.savedContext, entityInput, form.value.values)).data.DownloadItemsInZip;
     closeModal(TypeModals.DynamicForm);
     deleteForm(props.dynamicFormQuery);
     goToEntityPage(entity, "SingleEntity", props.router);
