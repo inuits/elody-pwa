@@ -160,7 +160,12 @@ const { currentTenant } = useApp();
 const { createForm, deleteForm } = useFormHelper();
 const { loadDocument } = useImport();
 const { closeModal } = useBaseModal();
-const { getDynamicForm, dynamicForm, performSubmitAction, performDownloadAction } = useDynamicForm();
+const {
+  getDynamicForm,
+  dynamicForm,
+  performSubmitAction,
+  performDownloadAction,
+} = useDynamicForm();
 const { upload, enableUploadButton, uploadProgress, standaloneFileType } =
   useUpload();
 const formFields = computed<
@@ -206,6 +211,7 @@ const performActionButtonClickEvent = async (
     if (standaloneFileType.value)
       goToEntityTypeRoute(
         standaloneFileType.value,
+        { key: "date_updated", asc: true },
         getMenuDestinations(),
         props.router
       );
@@ -225,7 +231,14 @@ const performActionButtonClickEvent = async (
     if (formContainsErrors.value) return;
     const document = await getQuery(field.actionQuery as string);
     const entityInput = createEntityFromFormInput(field.creationType);
-    const entity = (await performDownloadAction(document, props.savedContext, entityInput, form.value.values)).data.DownloadItemsInZip;
+    const entity = (
+      await performDownloadAction(
+        document,
+        props.savedContext,
+        entityInput,
+        form.value.values
+      )
+    ).data.DownloadItemsInZip;
     closeModal(TypeModals.DynamicForm);
     deleteForm(props.dynamicFormQuery);
     goToEntityPage(entity, "SingleEntity", props.router);
