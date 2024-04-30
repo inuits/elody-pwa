@@ -274,8 +274,8 @@ watch(selectedBulkOperation, () => {
         includeAssetCsv: props.context !== RouteNames.Mediafile,
         relationType: modal.formRelationType,
       };
-      if (props.context === RouteNames.Assets) savedContext.entities = enqueuedItems.map((item) => item.id);
-      else savedContext.mediafiles = enqueuedItems.map((item) => item.id);
+      if (props.context === RouteNames.Mediafile || props.context === BulkOperationsContextEnum.EntityElementMedia) savedContext.mediafiles = enqueuedItems.map((item) => item.id);
+      else savedContext.entities = enqueuedItems.map((item) => item.id);
       openModal(
         modal.typeModal,
         undefined,
