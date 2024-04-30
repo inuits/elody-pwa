@@ -12,8 +12,12 @@ import {
 import { createI18n } from "vue-i18n";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { type Router, useRoute } from "vue-router";
-import { useMenuHelper } from "@/composables/useMenuHelper";
+import {
+  type RouteLocationNormalizedLoaded,
+  type Router,
+  useRoute,
+} from "vue-router";
+import { useStateManagement } from "@/composables/useStateManagement";
 
 export const goToEntityPage = (
   entity: Entity,
@@ -41,6 +45,7 @@ export const goToEntityPage = (
 
 export const goToEntityTypeRoute = (
   entityType: Entitytyping,
+  sorting: { key: string; asc: boolean } | undefined = undefined,
   destinations: { entityType: string; destination: string }[],
   router: Router
 ) => {
@@ -49,10 +54,29 @@ export const goToEntityTypeRoute = (
       (destination: { entityType: string; destination: string }) =>
         destination.entityType === entityType
     );
-    if (route) router.push(`/${route.destination}`);
+
+    if (route) {
+      router.push(`/${route.destination}`);
+      if (sorting)
+        setSortConfigurationForRoute(router.currentRoute.value, sorting);
+    }
   } catch (e) {
     console.log("Unable to navigate to this route", e);
   }
+};
+
+export const setSortConfigurationForRoute = (
+  route: RouteLocationNormalizedLoaded,
+  sorting: { key: string; asc: boolean }
+) => {
+  const currentRouteState = useStateManagement().getStateForRoute(route);
+  const newRouteState = { ...currentRouteState };
+  console.log(newRouteState);
+  if (newRouteState.queryVariables) {
+    newRouteState.queryVariables.searchValue.order_by = sorting.key;
+    newRouteState.queryVariables.searchValue.isAsc = sorting.asc;
+  }
+  useStateManagement().updateStateForRoute(route, newRouteState);
 };
 
 export const getEntityPageRoute = (
