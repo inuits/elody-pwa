@@ -13,12 +13,12 @@
 </template>
 
 <script lang="ts" setup>
-import type { DropzoneFile } from "dropzone";
 import DropzonePreview from "@/components/base/dropzone/DropzonePreview.vue";
 import DropzoneView from "@/components/base/dropzone/DropzoneView.vue";
 import { onMounted, ref, watch } from "vue";
 import useUpload from "@/composables/useUpload";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
+import type { DropzoneFile } from "dropzone";
 
 const dropzoneView = ref<HTMLDivElement>();
 const dropzonePreview = ref<HTMLDivElement>();
@@ -43,7 +43,8 @@ const emit = defineEmits<{
 }>();
 const { dynamicFormUploadFields } = useDynamicForm();
 
-const { addFileToUpload, removeFileToUpload, files, dryRunCsv } = useUpload();
+const { addFileToUpload, removeFileToUpload, files, uploadStatus } =
+  useUpload();
 
 onMounted(() => {
   const dropzone = props.dropzone.initDropzone(
@@ -71,6 +72,17 @@ onMounted(() => {
       fileCount.value = dropzone.files.length;
     },
     { immediate: true }
+  );
+
+  watch(
+    () => uploadStatus.value,
+    () => {
+      if (uploadStatus.value !== "upload-finished") {
+        dropzone.setupEventListeners();
+        return;
+      }
+      dropzone.removeEventListeners();
+    }
   );
 });
 </script>
