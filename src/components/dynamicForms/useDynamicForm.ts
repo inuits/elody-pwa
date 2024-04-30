@@ -28,15 +28,16 @@ const useDynamicForm = () => {
 
   const performDownloadAction = async (
     queryDocument: any,
-    listOfIds: any,
+    savedContext: any,
     downloadEntity: any,
     form: any
   ): Promise<any> => {
     const variables = {
-      downloadEntity: downloadEntity,
-      entities: listOfIds.entities,
-      mediafiles: listOfIds.mediafiles,
+      entities: savedContext.entities,
+      mediafiles: savedContext.mediafiles,
       includeCsv: !!form.intialValues.include_csv,
+      includeAssetCsv: savedContext.includeAssetCsv,
+      downloadEntity: downloadEntity,
     };
     return await apolloClient.query({
       query: queryDocument,

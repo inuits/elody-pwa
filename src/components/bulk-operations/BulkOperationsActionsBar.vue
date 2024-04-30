@@ -267,19 +267,20 @@ watch(selectedBulkOperation, () => {
   ) {
       let modal = selectedBulkOperation.value?.bulkOperationModal;
       const enqueuedItems = getEnqueuedItems(props.context);
-      const items = {
+      const savedContext = {
         mediafiles: [],
-        entities: []
+        entities: [],
+        includeAssetCsv: props.context !== RouteNames.Mediafile
       }
-      if (props.context === RouteNames.Mediafile) items.mediafiles = enqueuedItems.map((item) => item.id);
-      else items.entities = enqueuedItems.map((item) => item.id);
+      if (props.context === RouteNames.Assets) savedContext.entities = enqueuedItems.map((item) => item.id);
+      else savedContext.mediafiles = enqueuedItems.map((item) => item.id);
       openModal(
         modal.typeModal,
         undefined,
         "right",
         modal.formQuery,
         modal.askForCloseConfirmation,
-        items,
+        savedContext,
       );
   }
 });
