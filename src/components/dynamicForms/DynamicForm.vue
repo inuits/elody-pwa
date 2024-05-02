@@ -285,13 +285,14 @@ const getUploadProgressSteps = (
 
 const resetVeeValidateForDynamicForm = (
   newQueryName: string,
-  oldQueryName: string | undefined
+  oldQueryName: string | undefined,
+  relations: BaseRelationValuesInput[]
 ) => {
   resetForm();
   if (oldQueryName) deleteForm(oldQueryName);
   form.value = createForm(newQueryName, {
     intialValues: {},
-    relationValues: {},
+    relationValues: { relations },
   } as {
     [key: string]: object;
   });
@@ -302,7 +303,6 @@ const initializeForm = async (
   newQueryName: string,
   oldQueryName: string | undefined
 ) => {
-  resetVeeValidateForDynamicForm(newQueryName, oldQueryName);
   const relations: BaseRelationValuesInput[] = [];
   if(props.savedContext) {
     props.savedContext.mediafiles.forEach((mediafile) => {
@@ -320,6 +320,7 @@ const initializeForm = async (
       });
     });
   }
+  resetVeeValidateForDynamicForm(newQueryName, oldQueryName, relations);
   if (!props.dynamicFormQuery) return;
   const document = await getQuery(props.dynamicFormQuery);
   getDynamicForm(document);
