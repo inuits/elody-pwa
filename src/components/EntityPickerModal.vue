@@ -12,8 +12,8 @@
     "
   >
     <div class="flex flex-col w-full h-full overflow-auto">
-      <BaseTabs class="h-full">
-        <BaseTab :title="t('entity.pick')">
+      <BaseTabs class="h-full" :tabs="tabs">
+        <BaseTab :title="tabs[0]">
           <BaseLibrary
             v-if="
               getModalInfo(TypeModals.EntityPicker).state === ModalState.Show
@@ -51,7 +51,7 @@
             "
           />
         </BaseTab>
-        <BaseTab :title="t('entity.upload')">
+        <BaseTab :title="tabs[1]">
           <dynamic-form
             v-if="
               getModalInfo(TypeModals.EntityPicker).state === ModalState.Show
@@ -93,6 +93,7 @@ const { getAcceptedTypes, getRelationType } = useEntityPickerModal();
 const { closeModal, getModalInfo } = useBaseModal();
 const { addRelations, getForm } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
+const tabs: string[] = [t("entity.pick"), t("entity.upload")];
 
 const route = useRoute();
 

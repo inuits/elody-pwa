@@ -142,6 +142,8 @@ import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useMenuHelper from "@/composables/useMenuHelper";
+import BaseTabs from "@/components/BaseTabs.vue";
+import BaseTab from "@/components/BaseTab.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -157,7 +159,7 @@ const props = withDefaults(
 
 const config = inject("config");
 const { currentTenant } = useApp();
-
+const tabs = ["Upload", "Import"];
 const { createForm, deleteForm } = useFormHelper();
 const { loadDocument } = useImport();
 const { closeModal } = useBaseModal();
@@ -304,19 +306,19 @@ const initializeForm = async (
   oldQueryName: string | undefined
 ) => {
   const relations: BaseRelationValuesInput[] = [];
-  if(props.savedContext) {
+  if (props.savedContext) {
     props.savedContext.mediafiles.forEach((mediafile) => {
       relations.push({
         key: mediafile,
         type: props.savedContext.relationType,
-        editStatus: EditStatus.New
+        editStatus: EditStatus.New,
       });
     });
     props.savedContext.entities.forEach((entity) => {
       relations.push({
         key: entity,
         type: props.savedContext.relationType,
-        editStatus: EditStatus.New
+        editStatus: EditStatus.New,
       });
     });
   }
