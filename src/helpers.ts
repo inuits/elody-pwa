@@ -71,7 +71,6 @@ export const setSortConfigurationForRoute = (
 ) => {
   const currentRouteState = useStateManagement().getStateForRoute(route);
   const newRouteState = { ...currentRouteState };
-  console.log(newRouteState);
   if (newRouteState.queryVariables) {
     newRouteState.queryVariables.searchValue.order_by = sorting.key;
     newRouteState.queryVariables.searchValue.isAsc = sorting.asc;
