@@ -38,7 +38,6 @@ const props = withDefaults(
     metadataKeyToGetOptionsFor?: string | "no-key";
     selectType?: "multi" | "single";
     advancedFilterInputForSearchingOptions: AdvancedFilterInput;
-    options: DropdownOption[];
     relationType: string;
     fromRelationType: string;
     mode: "edit" | "create";
