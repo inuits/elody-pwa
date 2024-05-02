@@ -148,7 +148,7 @@ export const stringIsUrl = (value: unknown): Boolean => {
   if (value && typeof value !== "string") return false;
 
   const stringValue = value as string;
-  const pattern: RegExp = /\bhttps:\/\/\S+/gi;
+  const pattern: RegExp = /\bhttps?:\/\/\S+/gi;
   const matches: RegExpMatchArray | null = stringValue.match(pattern);
   if (!matches || matches.length === 0) return false;
 
