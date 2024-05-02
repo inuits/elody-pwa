@@ -43,7 +43,7 @@
                 :upload-field-type="(uploadContainerField as UploadField).uploadFieldType"
               />
             </div>
-            <div class="pb-2">
+            <div class="pb-4">
               <metadata-wrapper
                 v-if="uploadContainerField.__typename === 'PanelMetaData'"
                 :form-id="dynamicFormQuery"
@@ -139,7 +139,7 @@ import type { Router } from "vue-router";
 import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUploadButton.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
-import type { FormContext } from "vee-validate";
+import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useMenuHelper from "@/composables/useMenuHelper";
 
@@ -167,8 +167,14 @@ const {
   performSubmitAction,
   performDownloadAction,
 } = useDynamicForm();
-const { upload, enableUploadButton, uploadProgress, standaloneFileType } =
-  useUpload();
+const {
+  upload,
+  enableUploadButton,
+  uploadProgress,
+  standaloneFileType,
+  dynamicUploadForm,
+} = useUpload();
+const { resetForm } = useForm();
 const formFields = computed<
   UploadContainer | PanelMetaData | FormAction | undefined
 >(() => {
@@ -202,48 +208,59 @@ const getQuery = async (queryName: string) => {
   return await loadDocument(queryName);
 };
 
+const uploadActionFunction = (field: FormAction) => {
+  if (!enableUploadButton.value) return;
+  upload(props.hasLinkedUpload, config, t);
+  if (standaloneFileType.value)
+    goToEntityTypeRoute(
+      standaloneFileType.value,
+      { key: "date_updated", asc: true },
+      getMenuDestinations(),
+      props.router
+    );
+  return;
+};
+
+const submitActionFunction = async (field: FormAction) => {
+  if (formContainsErrors.value) return;
+  const document = await getQuery(field.actionQuery as string);
+  const entityInput = createEntityFromFormInput(field.creationType);
+  const entity = (await performSubmitAction(document, entityInput)).data
+    .CreateEntity;
+  closeModal(TypeModals.DynamicForm);
+  deleteForm(props.dynamicFormQuery);
+  goToEntityPage(entity, "SingleEntity", props.router);
+};
+
+const downloadActionFunction = async (field: FormAction) => {
+  if (formContainsErrors.value) return;
+  const document = await getQuery(field.actionQuery as string);
+  const entityInput = createEntityFromFormInput(field.creationType);
+  const entity = (
+    await performDownloadAction(
+      document,
+      props.savedContext,
+      entityInput,
+      form.value.values
+    )
+  ).data.DownloadItemsInZip;
+  closeModal(TypeModals.DynamicForm);
+  deleteForm(props.dynamicFormQuery);
+  goToEntityPage(entity, "SingleEntity", props.router);
+};
+
 const performActionButtonClickEvent = async (
   field: FormAction
 ): Promise<void> => {
   useBaseModal().changeCloseConfirmation(TypeModals.DynamicForm, false);
-  if (field.actionType === ActionType.Upload) {
-    if (!enableUploadButton.value) return;
-    upload(props.hasLinkedUpload, config, t);
-    if (standaloneFileType.value)
-      goToEntityTypeRoute(
-        standaloneFileType.value,
-        { key: "date_updated", asc: true },
-        getMenuDestinations(),
-        props.router
-      );
-    return;
-  }
-  if (field.actionType === ActionType.Submit) {
-    if (formContainsErrors.value) return;
-    const document = await getQuery(field.actionQuery as string);
-    const entityInput = createEntityFromFormInput(field.creationType);
-    const entity = (await performSubmitAction(document, entityInput)).data
-      .CreateEntity;
-    closeModal(TypeModals.DynamicForm);
-    deleteForm(props.dynamicFormQuery);
-    goToEntityPage(entity, "SingleEntity", props.router);
-  }
-  if (field.actionType === ActionType.Download) {
-    if (formContainsErrors.value) return;
-    const document = await getQuery(field.actionQuery as string);
-    const entityInput = createEntityFromFormInput(field.creationType);
-    const entity = (
-      await performDownloadAction(
-        document,
-        props.savedContext,
-        entityInput,
-        form.value.values
-      )
-    ).data.DownloadItemsInZip;
-    closeModal(TypeModals.DynamicForm);
-    deleteForm(props.dynamicFormQuery);
-    goToEntityPage(entity, "SingleEntity", props.router);
-  }
+  const actionFunctions: { [key: string]: Function } = {
+    upload: () => uploadActionFunction(field),
+    submit: () => submitActionFunction(field),
+    download: () => downloadActionFunction(field),
+  };
+  if (!field.actionType) return;
+
+  actionFunctions[field.actionType]();
 };
 
 const getFormProgressIndicator = (): ActionProgress | undefined => {
@@ -266,7 +283,43 @@ const getUploadProgressSteps = (
   ) as ActionProgressStep[];
 };
 
-const initializeForm = async () => {
+const resetVeeValidateForDynamicForm = (
+  newQueryName: string,
+  oldQueryName: string | undefined
+) => {
+  resetForm();
+  if (oldQueryName) deleteForm(oldQueryName);
+  form.value = createForm(newQueryName, {
+    intialValues: {},
+    relationValues: {},
+  } as {
+    [key: string]: object;
+  });
+  dynamicUploadForm.value = form.value;
+};
+
+const initializeForm = async (
+  newQueryName: string,
+  oldQueryName: string | undefined
+) => {
+  resetVeeValidateForDynamicForm(newQueryName, oldQueryName);
+  const relations: BaseRelationValuesInput[] = [];
+  if(props.savedContext) {
+    props.savedContext.mediafiles.forEach((mediafile) => {
+      relations.push({
+        key: mediafile,
+        type: props.savedContext.relationType,
+        editStatus: EditStatus.New
+      });
+    });
+    props.savedContext.entities.forEach((entity) => {
+      relations.push({
+        key: entity,
+        type: props.savedContext.relationType,
+        editStatus: EditStatus.New
+      });
+    });
+  }
   if (!props.dynamicFormQuery) return;
   const document = await getQuery(props.dynamicFormQuery);
   getDynamicForm(document);
@@ -275,32 +328,7 @@ const initializeForm = async () => {
 watch(
   () => props.dynamicFormQuery,
   async (newValue, oldValue) => {
-    if (deleteForm(oldValue)) {
-      const relations: BaseRelationValuesInput[] = [];
-      if(props.savedContext) {
-        props.savedContext.mediafiles.forEach((mediafile) => {
-          relations.push({
-            key: mediafile,
-            type: props.savedContext.relationType,
-            editStatus: EditStatus.New
-          });
-        });
-        props.savedContext.entities.forEach((entity) => {
-          relations.push({
-            key: entity,
-            type: props.savedContext.relationType,
-            editStatus: EditStatus.New
-          });
-        });
-      }
-      form.value = createForm(newValue, {
-        intialValues: {},
-        relationValues: { relations }
-      } as {
-        [key: string]: object;
-      });
-    }
-    await initializeForm();
+    await initializeForm(newValue, oldValue);
   },
   { immediate: true }
 );
