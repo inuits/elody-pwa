@@ -35,7 +35,7 @@
           : ''
       "
     >
-      <div v-if="expandFilters" class="p-4">
+      <div v-if="expandFilters" class="p-4 sticky top-0 bg-white z-10">
         <div class="flex justify-between gap-4 pb-4">
           <BaseButtonNew
             class="!w-1/3"
