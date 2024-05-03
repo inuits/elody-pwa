@@ -15,7 +15,6 @@ import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import useHttpErrors from "@/composables/useHttpErrors";
 import { useRouter } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
-import type { FormContext } from "vee-validate";
 
 type UploadSettings = {
   uploadType: UploadFieldType;
@@ -24,6 +23,7 @@ type UploadSettings = {
 
 const router = useRouter();
 const { logFormattedErrors } = useHttpErrors();
+const { resetDynamicForm } = useDynamicForm();
 const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
   "no-upload"
 );
@@ -49,7 +49,7 @@ const enableUploadButton = computed(() => uploadValidationFn.value());
 const missingFileNames = ref<string[]>([]);
 const failedUploads = ref<string[]>([]);
 const standaloneFileType = ref<UploadEntityTypes | undefined>(undefined);
-const dynamicUploadForm = ref<FormContext<any> | undefined>(undefined);
+const reinitializeDynamicFormFunc = ref<Function | undefined>(undefined);
 
 const useUpload = () => {
   let _prefetchedUploadUrls: string[] | "not-prefetched-yet" =
@@ -502,7 +502,8 @@ const useUpload = () => {
     amountUploaded.value = 0;
     resetUploadDropzone();
     resetUploadProgress();
-    dynamicUploadForm.value?.resetForm();
+    resetDynamicForm();
+    if (reinitializeDynamicFormFunc.value) reinitializeDynamicFormFunc.value();
   };
 
   const verifyAllNeededFilesArePresent = (): boolean => {
@@ -678,7 +679,7 @@ const useUpload = () => {
     missingFileNames,
     failedUploads,
     standaloneFileType,
-    dynamicUploadForm,
+    reinitializeDynamicFormFunc,
   };
 };
 

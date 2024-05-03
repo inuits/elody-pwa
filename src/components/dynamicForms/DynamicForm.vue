@@ -142,8 +142,6 @@ import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useMenuHelper from "@/composables/useMenuHelper";
-import BaseTabs from "@/components/BaseTabs.vue";
-import BaseTab from "@/components/BaseTab.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -159,7 +157,6 @@ const props = withDefaults(
 
 const config = inject("config");
 const { currentTenant } = useApp();
-const tabs = ["Upload", "Import"];
 const { createForm, deleteForm } = useFormHelper();
 const { loadDocument } = useImport();
 const { closeModal } = useBaseModal();
@@ -168,13 +165,14 @@ const {
   dynamicForm,
   performSubmitAction,
   performDownloadAction,
+  resetDynamicForm,
 } = useDynamicForm();
 const {
   upload,
   enableUploadButton,
   uploadProgress,
   standaloneFileType,
-  dynamicUploadForm,
+  reinitializeDynamicFormFunc,
 } = useUpload();
 const { resetForm } = useForm();
 const formFields = computed<
@@ -298,7 +296,6 @@ const resetVeeValidateForDynamicForm = (
   } as {
     [key: string]: object;
   });
-  dynamicUploadForm.value = form.value;
 };
 
 const initializeForm = async (
@@ -331,6 +328,9 @@ const initializeForm = async (
 watch(
   () => props.dynamicFormQuery,
   async (newValue, oldValue) => {
+    resetDynamicForm();
+    reinitializeDynamicFormFunc.value = () =>
+      initializeForm(newValue, oldValue);
     await initializeForm(newValue, oldValue);
   },
   { immediate: true }
