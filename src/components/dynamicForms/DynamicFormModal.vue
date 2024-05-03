@@ -20,17 +20,19 @@
                 :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
                 :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
                 :router="useRouter()"
+                 @dynamicFormReady="handleDynamicFormReady"
                 :import-available=formTabs[tabName].formFields.fileSystemImporter
             />
           </baseTab>
         </baseTabs>
       </template>
       <dynamic-form
-          v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
+          v-else-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
           key="getModalInfo(TypeModals.DynamicForm).formQuery"
           :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
           :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
           :router="useRouter()"
+          @dynamicFormReady="handleDynamicFormReady"
       />
     </div>
   </BaseModal>
