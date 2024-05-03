@@ -41,8 +41,13 @@ const useDynamicForm = () => {
     };
     return await apolloClient.query({
       query: queryDocument,
-      variables
+      variables,
     });
+  };
+
+  const resetDynamicForm = () => {
+    dynamicForm.value = undefined;
+    dynamicFormUploadFields.value = [];
   };
 
   return {
@@ -51,6 +56,7 @@ const useDynamicForm = () => {
     performSubmitAction,
     performDownloadAction,
     dynamicFormUploadFields,
+    resetDynamicForm,
   };
 };
 
