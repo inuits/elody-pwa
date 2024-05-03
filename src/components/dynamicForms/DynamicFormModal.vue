@@ -11,28 +11,21 @@
     @hide-modal="closeModal(TypeModals.DynamicForm)"
   >
     <div class="flex flex-col w-full h-full overflow-auto">
-        <BaseTabs v-if="shouldRenderTabs" class="h-full">
-          <BaseTab :title="t('entity.upload')">
-            <dynamic-form
-                v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
-                :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
-                :context-from-bulk-operations="getModalInfo(TypeModals.DynamicForm).contextFromBulkOperations"
-                :router="useRouter()"
-                @dynamicFormReady="handleDynamicFormReady"
-            />
-          </BaseTab>
-          <BaseTab v-if="hasFileSystemImport" :title="t('entity.import')">
-            <dynamic-form
-                v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
-                :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
-                :context-from-bulk-operations="getModalInfo(TypeModals.DynamicForm).contextFromBulkOperations"
-                :router="useRouter()"
-                @dynamicFormReady="handleDynamicFormReady"
-                :import-available="true"
-            />
-          </BaseTab>
-        </BaseTabs>
-        <dynamic-form
+      <template v-if="shouldRenderTabs" class="h-full">
+        <baseTabs :tabs="tabsTitles">
+          <baseTab v-for="(tabName, tabIndex) in filteredTabs" :title="tabName" :key="tabIndex">
+              <dynamic-form
+                  v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
+                  :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
+                  :context-from-bulk-operations="getModalInfo(TypeModals.DynamicForm).contextFromBulkOperations"
+                  :router="useRouter()"
+                  @dynamicFormReady="handleDynamicFormReady"
+                  :import-available=formTabs[tabName].formFields.fileSystemImporter
+              />
+          </baseTab>
+        </baseTabs>
+      </template>
+      <dynamic-form
             v-else-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
             :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
             :context-from-bulk-operations="getModalInfo(TypeModals.DynamicForm).contextFromBulkOperations"
@@ -61,9 +54,11 @@ const { t } = useI18n();
 
 const formTabs = ref([]);
 const formFields = ref([]);
+const tabsTitle = ref([]);
 const handleDynamicFormReady = (event) => {
   formTabs.value = event.formTabs;
   formFields.value = event.formFields;
+  tabsTitle.value = event.tabsTitle;
 };
 
 onMounted(() => {
@@ -93,12 +88,25 @@ const hasFileSystemImport = computed(() => {
   return hasFileSystemImport;
 });
 
+const tabsTitles = computed(() => {
+  const filteredArray = Object.values(tabsTitle._rawValue)
+      .filter(item => item && item.title)
+      .map(item => t("entity."+item.title));
+
+  return filteredArray;
+});
+
 const shouldRenderTabs = computed(() => {
   const obj = { ...formTabs.value };
   const formTabValues = Object.values(obj);
   const formTabArray = formTabValues.filter(item => item.__typename === "FormTab");
 
   return formTabArray.length > 1;
+});
+
+const filteredTabs = computed(() => {
+  const filtered = Object.keys(formTabs.value).filter(key => key !== '__typename');
+  return filtered;
 });
 </script>
 

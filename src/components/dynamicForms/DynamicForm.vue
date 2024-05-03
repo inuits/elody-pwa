@@ -204,6 +204,16 @@ const formTabs = computed<UploadField | PanelMetaData | FormAction | undefined>(
   return dynamicForm.value.GetDynamicForm;
 });
 
+const tabsTitle = computed(() => {
+  if (!formTabs.value) {
+    return [];
+  }
+  const tabsArray = Object.entries(formTabs.value)
+      .filter(([key, value]) => value.__typename === 'FormTab')
+      .map(([key, value]) => ({ title: key, value }));
+  return tabsArray;
+});
+
 const form = ref<FormContext<any>>();
 const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
 const { getMenuDestinations } = useMenuHelper();
@@ -317,8 +327,8 @@ watch(
 
 const emits = defineEmits(['dynamicFormReady']);
 
-watch([formTabs, formFields], ([tabs, fields]) => {
-  emits('dynamicFormReady', { formTabs: tabs, formFields: fields });
+watch([formTabs, formFields, tabsTitle], ([tabs, fields, tabsTitle]) => {
+  emits('dynamicFormReady', { formTabs: tabs, formFields: fields, tabsTitle: tabsTitle });
 });
 </script>
 
