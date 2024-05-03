@@ -24,6 +24,7 @@ type UploadSettings = {
 
 const router = useRouter();
 const { logFormattedErrors } = useHttpErrors();
+const { resetDynamicForm } = useDynamicForm();
 const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
   "no-upload"
 );
@@ -49,7 +50,7 @@ const enableUploadButton = computed(() => uploadValidationFn.value());
 const missingFileNames = ref<string[]>([]);
 const failedUploads = ref<string[]>([]);
 const standaloneFileType = ref<UploadEntityTypes | undefined>(undefined);
-const dynamicUploadForm = ref<FormContext<any> | undefined>(undefined);
+const reinitializeDynamicFormFunc = ref<Function | undefined>(undefined);
 
 const useUpload = () => {
   let _prefetchedUploadUrls: string[] | "not-prefetched-yet" =
@@ -189,7 +190,8 @@ const useUpload = () => {
       });
       if (dryRunResult?.mediafiles.length) {
         requiredMediafiles.value = dryRunResult.mediafiles.map(
-          (mediafile: any) => mediafile.filename ? mediafile.filename : mediafile.identifier
+          (mediafile: any) =>
+            mediafile.filename ? mediafile.filename : mediafile.identifier
         );
       }
       dryRunErrors.value = errors;
@@ -331,8 +333,8 @@ const useUpload = () => {
         const regex = /\?.*/;
         uploadUrl = _prefetchedUploadUrls.find((url: string) =>
           url.includes(file.name)
-        )
-        uploadUrl = uploadUrl.replace(regex, '');
+        );
+        uploadUrl = uploadUrl.replace(regex, "");
       } else {
         uploadUrl = await __getUploadUrlForStandaloneMediafile(
           file,
@@ -386,10 +388,10 @@ const useUpload = () => {
       file
     );
     const response = await fetch(extUrl, {
-        method: "POST",
-        body: formData,
-        headers: { "Content-Type": "application/octet-stream" },
-      });
+      method: "POST",
+      body: formData,
+      headers: { "Content-Type": "application/octet-stream" },
+    });
 
     if (!response.ok) {
       return Promise.reject(response);
@@ -505,7 +507,8 @@ const useUpload = () => {
     amountUploaded.value = 0;
     resetUploadDropzone();
     resetUploadProgress();
-    dynamicUploadForm.value?.resetForm();
+    resetDynamicForm();
+    if (reinitializeDynamicFormFunc.value) reinitializeDynamicFormFunc.value();
   };
 
   const verifyAllNeededFilesArePresent = (): boolean => {
@@ -681,7 +684,7 @@ const useUpload = () => {
     missingFileNames,
     failedUploads,
     standaloneFileType,
-    dynamicUploadForm,
+    reinitializeDynamicFormFunc,
   };
 };
 
