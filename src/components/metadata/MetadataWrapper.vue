@@ -22,6 +22,7 @@
       :isMetadataOnRelation="isMetadataOnRelation"
       :error="errorMessage"
       :fieldIsDirty="fieldIsDirty"
+      :field-is-valid="fieldIsValid"
       @update:value="setNewValue"
       @register-enter-pressed:value="registerEnterKeyPressed"
     />
@@ -139,6 +140,8 @@ const fieldKeyWithId = computed(
   () => `${props.metadata.key}-${props.linkedEntityId}`
 );
 const fieldIsDirty = computed(() => meta.dirty);
+const fieldIsValid = computed(() => meta.valid);
+
 const { conditionalFieldIsRequired } = useConditionalValidation();
 
 const isRelationField = computed(() => {

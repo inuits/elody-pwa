@@ -39,7 +39,7 @@
       @focusout="keyUpEnterEvent()"
       :disabled="fieldEditIsDisabled"
     />
-    <p v-if="fieldIsDirty" class="text-red-default">
+    <p v-if="fieldIsDirty && !fieldIsValid" class="text-red-default">
       {{ error }}
     </p>
   </div>
@@ -74,6 +74,7 @@ const props = defineProps<{
   isMetadataOnRelation?: boolean;
   error?: string;
   fieldIsDirty: boolean;
+  fieldIsValid: boolean;
   formFlow?: string;
 }>();
 const { addEditableMetadataOnRelationKey } = useFormHelper();
