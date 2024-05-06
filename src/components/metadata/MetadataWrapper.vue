@@ -112,7 +112,10 @@ const props = withDefaults(
 );
 watch(
   () => props.metadata,
-  () => setNewValue(props.metadata.value)
+  (newvalue, oldvalue) => {
+    if (oldvalue.value !== newvalue.value)
+      setNewValue(newvalue.value);
+  }
 );
 
 const setNewValue = (newValue: string | BaseRelationValuesInput[]) => {
