@@ -214,7 +214,7 @@ const uploadActionFunction = (field: FormAction) => {
   if (standaloneFileType.value)
     goToEntityTypeRoute(
       standaloneFileType.value,
-      { key: "date_updated", asc: true },
+      { key: "date_updated", asc: false },
       getMenuDestinations(),
       props.router
     );
