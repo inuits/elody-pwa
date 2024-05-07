@@ -33,13 +33,6 @@
     @click="() => updateEntityMediafileOnlyForMediafiles(entity)"
   >
     <ListItem
-      :class="
-        parentEntityIdentifiers.length > 0 &&
-        entity.id &&
-        mediafileSelectionState.selectedMediafile?.id === entity.id
-          ? '!border-2 !border-accent-normal'
-          : ''
-      "
       :item-id="entity.uuid"
       :item-type="entity.type"
       :bulk-operations-context="bulkOperationsContext"
@@ -87,7 +80,11 @@ import {
 import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
-import { getEntityIdFromRoute, getEntityPageRoute, updateEntityMediafileOnlyForMediafiles } from "@/helpers";
+import {
+  getEntityIdFromRoute,
+  getEntityPageRoute,
+  updateEntityMediafileOnlyForMediafiles,
+} from "@/helpers";
 import { computed, inject } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
