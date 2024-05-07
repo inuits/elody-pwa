@@ -22,6 +22,7 @@
         :options="autocompleteOptions"
         autocomplete-style="default"
         :placeholder="determinePlaceholder"
+        :noOptionsText="dropdownNoOptionsText"
         @search-change="(value: string) => getAutocompleteOptions(value)"
       />
     </div>
@@ -80,6 +81,12 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const input = ref<string | number | DropdownOption[]>();
+const dropdownInputLength = ref<number>(0);
+const dropdownNoOptionsText = computed(() =>
+  dropdownInputLength.value < 3
+    ? t("filters.minDropdownSearchCharacters")
+    : undefined
+);
 const force = ref<boolean>(false);
 const showSpinner = ref<boolean>(false);
 
@@ -91,7 +98,7 @@ const { refetch: refetchFilterOptions, onResult: onFilterOptionsResult } =
     filterOptionsQueryVariables,
     () => ({
       enabled: refetchFilterOptionsEnabled.value,
-      fetchPolicy: "no-cache"
+      fetchPolicy: "no-cache",
     })
   );
 
@@ -131,6 +138,7 @@ const {
 const autocompleteOptions = ref<DropdownOption[]>([]);
 const getAutocompleteOptions = (value: string) => {
   clearAutocompleteOptions();
+  dropdownInputLength.value = value.length;
   if (value.length < 3) return;
 
   if (
