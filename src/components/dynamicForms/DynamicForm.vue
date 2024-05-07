@@ -1,12 +1,6 @@
 <template>
-  <div class="p-4 pt-0 h-full w-full overflow-y-auto">
-    <div
-      v-if="!formFields && !dynamicForm"
-      class="h-full w-full flex justify-center items-center"
-    >
-      <spinner-loader />
-    </div>
-    <div v-else class="w-full">
+  <div class="p-4 pt-0 h-full w-full overflow-y-auto" :key="dynamicFormQuery">
+    <div v-if="formFields && dynamicFormQuery" class="w-full">
       <h1 v-if="dynamicForm.GetDynamicForm.label" class="title pb-4">
         {{ t(dynamicForm.GetDynamicForm.label) }}
       </h1>
@@ -21,6 +15,7 @@
           :metadata="field as PanelMetaData"
           :is-edit="true"
           form-flow="create"
+          :key="`${dynamicFormQuery}_field_${index}`"
         />
         <div v-if="field.__typename === 'UploadContainer'">
           <div
@@ -50,6 +45,7 @@
                 :metadata="uploadContainerField"
                 :is-edit="true"
                 form-flow="create"
+                :key="`${dynamicFormQuery}_field_${index}`"
               />
             </div>
           </div>
@@ -105,6 +101,9 @@
         />
       </div>
     </div>
+    <div v-else class="h-screen w-full flex justify-center items-center">
+      <spinner-loader />
+    </div>
   </div>
 </template>
 
@@ -155,6 +154,8 @@ const props = withDefaults(
   }
 );
 
+type FormFieldTypes = UploadContainer | PanelMetaData | FormAction;
+
 const config = inject("config");
 const { currentTenant } = useApp();
 const { createForm, deleteForm } = useFormHelper();
@@ -175,9 +176,7 @@ const {
   reinitializeDynamicFormFunc,
 } = useUpload();
 const { resetForm } = useForm();
-const formFields = computed<
-  UploadContainer | PanelMetaData | FormAction | undefined
->(() => {
+const formFields = computed<FormFieldTypes[] | undefined>(() => {
   if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"])
     return undefined;
   return Object.values(dynamicForm.value["GetDynamicForm"].formFields).filter(
@@ -265,7 +264,7 @@ const performActionButtonClickEvent = async (
 
 const getFormProgressIndicator = (): ActionProgress | undefined => {
   if (!formFields.value) return undefined;
-  const actionButton: FormAction = formFields.value.find(
+  const actionButton: FormAction | undefined = formFields.value.find(
     (formField: any) => formField.__typename === "FormAction"
   );
   if (!actionButton) return undefined;
