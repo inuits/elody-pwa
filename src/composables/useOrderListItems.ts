@@ -23,7 +23,7 @@ type OrderItem = {
   status?: EditStatus;
 };
 type SavedStateItem = {
-  formId: number;
+  formId: string;
   oldValue: number;
   newValue: number;
 };
@@ -40,41 +40,41 @@ const pagination = computed(() =>
 );
 
 const useOrderListItems = () => {
-  const formExists = (formId: number) => {
+  const formExists = (formId: string) => {
     return orderItemsPerForm.value[formId] !== undefined;
   };
-  const createFormIfNotExists = (formId: number) => {
+  const createFormIfNotExists = (formId: string) => {
     if (!formExists(formId)) orderItemsPerForm.value[formId] = [];
   };
-  const isFormEmpty = (formId: number) => {
+  const isFormEmpty = (formId: string) => {
     return orderItemsPerForm.value[formId].length <= 0;
   };
-  const getOrderItemInList = (formId: number, field: String): OrderItem => {
+  const getOrderItemInList = (formId: string, field: String): OrderItem => {
     return orderItemsPerForm.value[formId].filter(
       (item) => item.field === field
     )[0];
   };
-  const sortList = (formId: number) => {
+  const sortList = (formId: string) => {
     orderItemsPerForm.value[formId].sort(
       (value, nextValue) => value.currentValue > nextValue.currentValue
     );
   };
-  const setStatus = (item) => {
+  const setStatus = (item: any): EditStatus => {
     return (item.status =
       item.initialValue == item.currentValue
         ? EditStatus.Unchanged
         : EditStatus.Changed);
   };
-  const saveForm = async (formId: number) => {
+  const saveForm = async (formId: string) => {
     await save();
     orderItemsPerForm.value[formId] = [];
   };
 
-  const getFormOrderItems = (formId: number) => {
+  const getFormOrderItems = (formId: string) => {
     return orderItemsPerForm.value[formId];
   };
 
-  const addOrderItem = (formId: number, orderItem: OrderItem) => {
+  const addOrderItem = (formId: string, orderItem: OrderItem) => {
     createFormIfNotExists(formId);
     if (getOrderItemInList(formId, orderItem.field)) return;
     orderItem.status = EditStatus.Unchanged;
@@ -82,7 +82,7 @@ const useOrderListItems = () => {
     sortList(formId);
   };
 
-  const removeOrderItem = (formId: number, field: string) => {
+  const removeOrderItem = (formId: string, field: string) => {
     if (!formExists(formId) || isFormEmpty(formId)) return;
     orderItemsPerForm.value[formId] = orderItemsPerForm.value[formId].filter(
       (item) => item.field !== field
@@ -90,7 +90,7 @@ const useOrderListItems = () => {
   };
 
   const updateOrderItem = async (
-    formId: number,
+    formId: string,
     field: string,
     newValue: string
   ) => {
@@ -113,7 +113,7 @@ const useOrderListItems = () => {
     }
   };
 
-  const saveChanges = async (form: any, formId: number) => {
+  const saveChanges = async (form: any, formId: string) => {
     sortList(formId);
     EventBus.emit("orderList_changed", form);
     await saveForm(formId);
@@ -131,11 +131,11 @@ const useOrderListItems = () => {
 
   const traverseListDownwards = async (
     form: any,
-    formId: number,
-    oldValue,
-    newValue,
-    indexToSave,
-    isMultipage
+    formId: string,
+    oldValue: any,
+    newValue: any,
+    indexToSave: any,
+    isMultipage: any
   ) => {
     for (oldValue; oldValue > newValue; oldValue--) {
       if (
@@ -158,11 +158,11 @@ const useOrderListItems = () => {
   };
   const traverseListUpwards = async (
     form: any,
-    formId: number,
-    oldValue,
-    newValue,
-    indexToSave,
-    isMultipage
+    formId: string,
+    oldValue: any,
+    newValue: any,
+    indexToSave: any,
+    isMultipage: any
   ) => {
     for (oldValue; oldValue < newValue; oldValue++) {
       const checkIndex = orderItemsPerForm.value[formId].length - 1;
@@ -187,7 +187,7 @@ const useOrderListItems = () => {
   };
 
   const changeOrderOfList = async (
-    formId: number,
+    formId: string,
     field: string,
     oldValue: number,
     newValue: number

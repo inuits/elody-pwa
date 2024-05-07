@@ -12,6 +12,7 @@
   >
     <dynamic-form
       v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
+      :key="getModalInfo(TypeModals.DynamicForm).formQuery"
       :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
       :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
       :router="useRouter()"

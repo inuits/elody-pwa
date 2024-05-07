@@ -84,10 +84,14 @@ import {
   ValidationRules,
   ValidationFields,
   type BaseRelationValuesInput,
+  type PanelRelationMetaData,
 } from "@/generated-types/queries";
 import { computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { useOrderListItems, OrderItem } from "@/composables/useOrderListItems";
+import {
+  useOrderListItems,
+  type OrderItem,
+} from "@/composables/useOrderListItems";
 import { useField } from "vee-validate";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -101,7 +105,7 @@ const props = withDefaults(
   defineProps<{
     isEdit: boolean;
     formId: string;
-    metadata: PanelMetaData;
+    metadata: PanelMetaData | PanelRelationMetaData;
     linkedEntityId?: String;
     baseLibraryMode?: BaseLibraryModes;
     formFlow?: "edit" | "create";
@@ -114,8 +118,7 @@ const props = withDefaults(
 watch(
   () => props.metadata,
   (newvalue, oldvalue) => {
-    if (oldvalue.value !== newvalue.value)
-      setNewValue(newvalue.value);
+    if (oldvalue.value !== newvalue.value) setNewValue(newvalue.value);
   }
 );
 
@@ -137,7 +140,10 @@ const isMetadataOnRelation = computed(
   () => props.metadata.__typename === "PanelRelationMetaData"
 );
 const fieldKeyWithId = computed(
-  () => `${props.metadata.key}-${props.linkedEntityId}`
+  () =>
+    `${props.metadata.key}${
+      props.linkedEntityId ? "-" + props.linkedEntityId : ""
+    }`
 );
 const fieldIsDirty = computed(() => meta.dirty);
 const fieldIsValid = computed(() => meta.valid);

@@ -44,7 +44,12 @@
 
     <div>
       <BaseInputCheckbox
-        v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary && !isPreview && !isDisabled && hasSelection"
+        v-if="
+          baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
+          !isPreview &&
+          !isDisabled &&
+          hasSelection
+        "
         class="text-center"
         v-model="isChecked"
         :item="{ id: itemId, teaserMetadata }"
@@ -81,7 +86,9 @@
           (metadata) => !metadata.showOnlyInEditMode
         )"
         :key="metadataItem ? metadataItem.key : 'no-key'"
-        :class="[{ 'w-1/4': baseLibraryMode === BaseLibraryModes.NormalBaseLibrary }]"
+        :class="[
+          { 'w-1/4': baseLibraryMode === BaseLibraryModes.NormalBaseLibrary },
+        ]"
         class="flex justify-start flex-col mx-2 break-words"
       >
         <metadata-wrapper
@@ -158,14 +165,15 @@ import {
   type BaseRelationValuesInput,
   type ContextMenuActions,
   DamsIcons,
-  EditStatus, Entity,
+  EditStatus,
+  Entity,
   EntityListElement,
   Entitytyping,
   type IntialValues,
   type Metadata,
   MetadataField,
   PanelType,
-  WindowElementPanel
+  WindowElementPanel,
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
@@ -173,7 +181,11 @@ import useEditMode from "@/composables/useEdit";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { computed, ref, watch, onUpdated } from "vue";
-import { getEntityIdFromRoute, stringIsUrl, updateEntityMediafileOnlyForMediafiles } from "@/helpers";
+import {
+  getEntityIdFromRoute,
+  stringIsUrl,
+  updateEntityMediafileOnlyForMediafiles,
+} from "@/helpers";
 import { Unicons } from "@/types";
 import { useFieldArray } from "vee-validate";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
@@ -258,8 +270,9 @@ onUpdated(() => {
 watch(
   () => isChecked.value,
   () => {
-  updateEntityMediafileOnlyForMediafiles(props.entity, !isChecked.value);
-})
+    updateEntityMediafileOnlyForMediafiles(props.entity, !isChecked.value);
+  }
+);
 
 const toggleLoading = () => {
   loading.value = !loading.value;
@@ -310,14 +323,16 @@ const removePreviewItem = (idx: number) => {
   remove(idx);
 };
 
-const createWindowPanelsFromEntityListElements = (entityListElement: EntityListElement) => {
+const createWindowPanelsFromEntityListElements = (
+  entityListElement: EntityListElement
+) => {
   const panel: WindowElementPanel = {
     label: entityListElement.label,
     panelType: PanelType.Relation,
     isEditable: false,
     isCollapsed: false,
-    entityListElement
-  }
+    entityListElement,
+  };
   return panel;
-}
+};
 </script>
