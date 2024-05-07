@@ -97,7 +97,7 @@
             activeFilters.push(filterInput);
           }"
           @deactivate-filter="
-            (key, force = true) => {
+            (key) => {
               const filter = filters.filter(
                 (filter) => filter.advancedFilter.key === key
               )[0];
@@ -108,7 +108,6 @@
               activeFilters = activeFilters.filter(
                 (filter) => filter.key !== key
               );
-              applyFilters(true, force);
             }
           "
         />
@@ -175,7 +174,11 @@ const emit = defineEmits<{
     event: "advancedFiltersPromise",
     advancedFiltersPromise: (entityType: Entitytyping) => Promise<void>
   ): void;
-  (event: "applyFilters", advancedFilterInputs: AdvancedFilterInput[]): void;
+  (
+    event: "applyFilters",
+    advancedFilterInputs: AdvancedFilterInput[],
+    force: boolean
+  ): void;
   (event: "expandFilters", expandFilters: boolean): void;
 }>();
 

@@ -66,10 +66,12 @@
         :disabled="!selectedMatcher"
         button-style="accentNormal"
         button-size="small"
-        @click="() => {
-          emit('deactivateFilter', advancedFilterInput.key);
-          reloadMatcherComponent();
-        }"
+        @click="
+          () => {
+            emit('deactivateFilter', advancedFilterInput.key);
+            reloadMatcherComponent();
+          }
+        "
       />
     </div>
   </div>
@@ -148,7 +150,7 @@ const defaultMatcherMap: Partial<Record<AdvancedFilterTypes, string>> = {
 const reloadMatcherComponent = () => {
   matcherComponent.value = undefined;
   loadMatcher();
-}
+};
 
 onMounted(() => {
   const defaultMatcher =
@@ -163,8 +165,8 @@ onMounted(() => {
 });
 
 watch(selectedMatcher, async () => {
+  emit("deactivateFilter", advancedFilterInput.value.key);
   if (selectedMatcher.value) await loadMatcher();
-  else emit("deactivateFilter", advancedFilterInput.value.key);
 
   filterOptions.value.forEach((option) =>
     dequeueItemForBulkProcessing(
@@ -173,14 +175,14 @@ watch(selectedMatcher, async () => {
     )
   );
 });
-watch(advancedFilterInput, (newValue, oldValue) => {
+watch(advancedFilterInput, () => {
   if (Array.isArray(advancedFilterInput.value.value))
     if (advancedFilterInput.value.value.length > 0)
       emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
-    else emit("deactivateFilter", advancedFilterInput.value.key, oldValue?.value?.length > 0);
+    else emit("deactivateFilter", advancedFilterInput.value.key);
   else if (advancedFilterInput.value.value !== undefined)
     emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
-  else emit("deactivateFilter", advancedFilterInput.value.key, oldValue?.value !== undefined);
+  else emit("deactivateFilter", advancedFilterInput.value.key);
 });
 watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
