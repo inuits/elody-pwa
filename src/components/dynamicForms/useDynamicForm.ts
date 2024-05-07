@@ -35,7 +35,7 @@ const useDynamicForm = () => {
     const variables = {
       entities: savedContext.entities,
       mediafiles: savedContext.mediafiles,
-      includeCsv: !!form.intialValues.include_csv,
+      basicCsv: !!form.intialValues.basic_csv,
       includeAssetCsv: savedContext.includeAssetCsv,
       downloadEntity: downloadEntity,
     };
