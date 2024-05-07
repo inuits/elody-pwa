@@ -1,13 +1,12 @@
 <template>
   <div class="flex items-center">
     <div
-      class="flex-none flex items-center justify-center w-10 h-10 rounded-lg"
+      class="flex-none flex items-center justify-center w-10 h-10 rounded-lg box-border"
       :class="[
         inputValue ? `${divSelectedBgColor}` : '',
         { 'cursor-pointer': !disabled },
       ]"
-      @change.stop
-      @click.stop="handleItemSelection"
+      @click.prevent="handleItemSelection"
     >
       <input
         class="border-2 focus:ring-0"
@@ -20,6 +19,8 @@
         v-model="inputValue"
         type="checkbox"
         :disabled="disabled"
+        @change.stop
+        @click.stop="handleItemSelection"
       />
     </div>
     <span
