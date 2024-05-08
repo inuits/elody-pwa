@@ -66,6 +66,7 @@ import { useQuery } from "@vue/apollo-composable";
 
 const props = defineProps<{
   filter: FilterListItem;
+  relatedActiveFilters: string[];
 }>();
 
 const emit = defineEmits<{
@@ -264,6 +265,16 @@ onMounted(() => {
   input.value = props.filter.inputFromState?.value;
   force.value = Boolean(props.filter.inputFromState);
 });
+
+watch(
+  () => props.relatedActiveFilters,
+  () => {
+    if (!props.relatedActiveFilters) return;
+    filterOptions.filter((filter) => {
+      filter.isSelected = props.relatedActiveFilters.includes(filter.option.value);
+    })
+  }
+)
 
 watch(
   filterOptions,

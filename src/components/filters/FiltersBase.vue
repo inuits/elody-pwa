@@ -80,6 +80,7 @@
           v-for="filter in filters.filter((filter) => filter.isDisplayed)"
           :key="filter.advancedFilter.key || ''"
           :filter="filter"
+          :related-active-filters="activeFilters.filter((activeFilter) => activeFilter.key === filter.advancedFilter.key)[0]?.value"
           :matchers="
             matchers.filter((option) =>
               filterMatcherMapping[filter.advancedFilter.type].includes(
