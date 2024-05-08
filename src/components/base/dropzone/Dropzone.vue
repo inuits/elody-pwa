@@ -82,7 +82,8 @@ onMounted(() => {
         return;
       }
       dropzone.removeEventListeners();
-    }
+    },
+    { immediate: true }
   );
 });
 </script>
