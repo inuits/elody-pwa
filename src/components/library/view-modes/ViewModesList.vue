@@ -126,14 +126,12 @@ const { formatTeaserMetadata } = useBaseLibrary(
   apolloClient as ApolloClient<any>,
   props.parentEntityIdentifiers.length > 0
 );
-const { mediafileSelectionState, updateSelectedEntityMediafile } =
+const { updateSelectedEntityMediafile, mediafileSelectionState } =
   useEntityMediafileSelector();
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { queryVariables } = useLibraryBar();
 const { getThumbnail } = useThumbnailHelper();
 const { getForm, findRelation, getTeaserMetadataInState } = useFormHelper();
-const router = useRouter();
-
 const entityId = computed(() => getEntityIdFromRoute() as string);
 const relations = computed<BaseRelationValuesInput[]>(
   () => getForm(entityId.value)?.values?.relationValues?.relations
