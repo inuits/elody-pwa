@@ -54,6 +54,7 @@
           v-if="selectedMatcher"
           :is="matcherComponent"
           :filter="filter"
+          :related-active-filters="relatedActiveFilters"
           @new-advanced-filter-input="(input: AdvancedFilterInput) => advancedFilterInput = input"
           @filter-options="(options: string[]) => (filterOptions = options)"
         />
@@ -97,6 +98,7 @@ const props = defineProps<{
   filter: FilterListItem;
   matchers: DropdownOption[];
   clearAllActiveFilters: boolean;
+  relatedActiveFilters: string[];
 }>();
 
 const emit = defineEmits<{
