@@ -12,6 +12,7 @@
     :placeholder="placeholder"
     :loading="loading"
     :disabled="disabled"
+    :noOptionsText="noOptionsText"
     :object="true"
     label="label"
     valueProp="value"
@@ -40,6 +41,7 @@ const props = withDefaults(
     disabled?: boolean;
     relation?: boolean;
     loading?: boolean;
+    noOptionsText?: string;
   }>(),
   {
     selectType: "multi",
