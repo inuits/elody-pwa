@@ -40,6 +40,7 @@
           :item="{ id: filterOption.option.value }"
           :bulk-operations-context="BulkOperationsContextEnum.FilterOptions"
           input-style="accentNormal"
+          :ignore-bulk-operations="true"
         />
       </div>
     </div>
