@@ -53,10 +53,12 @@ const props = withDefaults(
     bulkOperationsContext: Context;
     inputStyle: InputStyle;
     disabled?: boolean;
+    ignoreBulkOperations?: boolean;
   }>(),
   {
     label: "",
     disabled: false,
+    ignoreBulkOperations: false,
   }
 );
 
@@ -128,10 +130,10 @@ const divSelectedBgColor = computed<string>(() =>
   selectedInputStyle.value.textColor.replace(/^text/, "bg")
 );
 
-onMounted(
-  () =>
-    (inputValue.value = isEnqueued(props.bulkOperationsContext, props.item.id))
-);
+onMounted(() => {
+  if (props.ignoreBulkOperations) return;
+  inputValue.value = isEnqueued(props.bulkOperationsContext, props.item.id);
+});
 
 watch(
   contextWhereSelectionEventIsTriggered,
