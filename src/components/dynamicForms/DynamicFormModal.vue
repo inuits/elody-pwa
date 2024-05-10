@@ -55,11 +55,9 @@ const { initializeConfirmModal } = useConfirmModal();
 const { t } = useI18n();
 
 const formTabs = ref([]);
-const formFields = ref([]);
 const tabsTitle = ref([]);
 const handleDynamicFormReady = (event) => {
   formTabs.value = event.formTabs;
-  formFields.value = event.formFields;
   tabsTitle.value = event.tabsTitle;
 };
 
