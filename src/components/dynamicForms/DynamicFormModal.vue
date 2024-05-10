@@ -81,15 +81,6 @@ onMounted(() => {
   });
 });
 
-const hasFileSystemImport = computed(() => {
-  const obj = formFields.value;
-  if (!obj || typeof obj !== 'object') return false;
-
-  const hasFileSystemImport = Object.values(obj).some(item => item && item.key === "fileSystemImport");
-
-  return hasFileSystemImport;
-});
-
 const tabsTitles = computed(() => {
   const filteredArray = Object.values(tabsTitle._rawValue)
       .filter(item => item && item.title)
