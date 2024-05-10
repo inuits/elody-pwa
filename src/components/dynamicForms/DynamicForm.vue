@@ -434,8 +434,8 @@ watch(
 
 const emits = defineEmits(['dynamicFormReady']);
 
-watch([formTabs, formFields, tabsTitle], ([tabs, fields, tabsTitle]) => {
-  emits('dynamicFormReady', { formTabs: tabs, formFields: fields, tabsTitle: tabsTitle });
+watch([formTabs, tabsTitle], ([tabs, tabsTitle]) => {
+  emits('dynamicFormReady', { formTabs: tabs, tabsTitle: tabsTitle });
 });
 </script>
 
