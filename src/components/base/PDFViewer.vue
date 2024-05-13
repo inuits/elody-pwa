@@ -80,7 +80,7 @@ export default defineComponent({
     const ctx = ref(null);
     const decentralizeFromLeft = ref<boolean>(false);
     const decentralizeFromTop = ref<boolean>(false);
-    const { getMediafile } = useGetMediafile();
+    const { getMediafile, getMediafilePath } = useGetMediafile();
 
     const determineDecentralization = (): void => {
       decentralizeFromLeft.value =
@@ -150,9 +150,12 @@ export default defineComponent({
     };
 
     const initialRender = async () => {
-      url.value = source.value
-        ? "/api/mediafile/" + source.value.intialValues.filename
-        : "no-src";
+      url.value =
+        source.value &&
+        getMediafilePath(source.value.intialValues.originalFileLocation)
+          ? "/api/mediafile/" +
+            getMediafilePath(source.value.intialValues.originalFileLocation)
+          : "no-src";
       const response = await getMediafile(url.value);
       const pdf = await response.blob();
       const pdfUrl = URL.createObjectURL(pdf);
