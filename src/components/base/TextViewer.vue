@@ -20,11 +20,12 @@ export default defineComponent({
   },
   setup(props) {
     const fileContent = ref<string>();
-    const { getMediafile } = useGetMediafile();
+    const { getMediafile, getMediafilePath } = useGetMediafile();
 
     const getText = async () => {
       const response = await getMediafile(
-        "/api/mediafile/" + props.source.intialValues.filename
+        "/api/mediafile/" +
+          getMediafilePath(props.source.intialValues.originalFileLocation)
       );
       const text = await response.text();
       fileContent.value = text.split(/\r\n|\n/).join("<br/>");
