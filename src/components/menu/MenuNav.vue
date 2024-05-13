@@ -1,25 +1,24 @@
 <template>
   <nav
+    ref="navigation"
     :class="[
       'navbar fixed left-0 top-0 w-24 h-screen align-center pt-10 bg-neutral-white px-5 z-50',
       { 'w-80': isExpanded },
     ]"
     @click="changeExpandedState(true)"
-    @mouseleave="changeExpandedState(false)"
   >
-    <router-link
-      :to="{ name: 'Home' }"
-      @click="setSelectedMenuItem(menuItems[0])"
-      class="mt-4 text-neutral-700 font-semibold mb-8 text-xl flex justify-center"
-    >
-      <img src="/logo.svg" alt="Elody logo" class="h-12" />
-    </router-link>
-    <div class="h-[75vh] overflow-y-auto overflow-x-hidden">
+    <div>
+      <router-link
+        :to="{ name: 'Home' }"
+        @click="setSelectedMenuItem(menuItems[0])"
+        class="mt-4 text-neutral-700 font-semibold mb-8 text-xl flex justify-center"
+      >
+        <img src="/logo.svg" alt="Elody logo" class="h-12" />
+      </router-link>
       <div
         v-for="menuItem in menuItems"
         :key="menuItem.label"
-        @mouseenter="changeHoveredItem(menuItem)"
-        @mouseleave="changeHoveredItem(undefined)"
+        @click="changeHoveredItem(menuItem)"
       >
         <Menuitem
           :icon="menuItem.icon"
@@ -46,10 +45,11 @@ import type { MenuItem } from "@/generated-types/queries";
 import LogInLogout from "@/components/LogInLogout.vue";
 import Menuitem from "@/components/menu/MenuItem.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
-import { ref, watch } from "vue";
+import { ref, watch, onMounted, onUnmounted } from "vue";
 import { RouterLink } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
 
+const navigation = ref<any>(null);
 const isExpanded = ref<boolean>(false);
 const hoveredItem = ref<MenuItem | undefined>(undefined);
 const { getMenuEntities, menuItems, setSelectedMenuItem } = useMenuHelper();
@@ -62,7 +62,11 @@ const changeExpandedState = (newState: boolean) => {
 };
 
 const changeHoveredItem = (item: MenuItem | undefined) => {
-  hoveredItem.value = item;
+  if (hoveredItem.value === item) {
+    hoveredItem.value = undefined;
+  } else {
+    hoveredItem.value = item;
+  }
 };
 
 watch(
@@ -75,6 +79,25 @@ watch(
     }
   }
 );
+
+onMounted(() => {
+  document.body.addEventListener("click", closeExpanded);
+});
+
+onUnmounted(() => {
+  document.body.removeEventListener("click", closeExpanded);
+});
+
+const closeExpanded = (event: any) => {
+  if (!navigation.value) return;
+
+  const isClickedOutsideNavigation =
+    navigation.value && !navigation.value.contains(event.target);
+  if (isClickedOutsideNavigation && !isLeftModalOpened.value) {
+    changeExpandedState(false);
+    changeHoveredItem(undefined);
+  }
+};
 </script>
 
 <style>
