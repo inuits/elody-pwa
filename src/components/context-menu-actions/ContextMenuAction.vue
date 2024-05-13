@@ -4,7 +4,6 @@
       v-if="element.__typename === 'ContextMenuLinkAction'"
       :label="element.label"
       :icon="element.icon"
-      :action="element.action"
       :entityId="entityId"
       :entity-type="entityType"
     />
