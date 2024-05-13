@@ -21,7 +21,7 @@ export const useGetMediafile = () => {
       const response = await fetchFile(path);
       return response;
     } catch (error: any) {
-      const errorCode = getStatusCodeFromError(error)
+      const errorCode = getStatusCodeFromError(error);
       const shouldLogError = errorCodesToReact.includes(Number(errorCode));
       if (shouldLogError) {
         logFormattedErrors(router, error);
@@ -30,7 +30,17 @@ export const useGetMediafile = () => {
     }
   };
 
+  const getMediafilePath = (originalFileLocation?: string) => {
+    if (!originalFileLocation) return null;
+
+    return originalFileLocation.replace(
+      /.*\/download-with-ticket\//,
+      "download-with-ticket/"
+    );
+  };
+
   return {
     getMediafile,
+    getMediafilePath,
   };
 };

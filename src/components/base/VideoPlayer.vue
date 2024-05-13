@@ -17,19 +17,21 @@ import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSele
 import { onMounted, ref } from "vue";
 import { useGetMediafile } from "@/composables/useGetMediafile";
 
-defineProps<{
+const props = defineProps<{
   source?: any;
 }>();
 
 const { getValueOfMediafile } = useEntityMediafileSelector();
-const fileName =
-  getValueOfMediafile("filename") || getValueOfMediafile("transcode_filename");
-const { getMediafile } = useGetMediafile();
+const { getMediafile, getMediafilePath } = useGetMediafile();
 
 const videoUrl = ref("");
 
 const getVideo = async () => {
-  const response = await getMediafile(`/api/mediafile/${fileName}`);
+  const response = await getMediafile(
+    `/api/mediafile/${getMediafilePath(
+      props.source?.intialValues?.originalFileLocation
+    )}`
+  );
   const videoBlob = await response.blob();
 
   videoUrl.value = URL.createObjectURL(videoBlob);
