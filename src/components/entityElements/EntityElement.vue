@@ -67,8 +67,9 @@ import EntityElementManifestViewer from "@/components/entityElements/EntityEleme
 import EntityElementMedia from "@/components/entityElements/EntityElementMedia.vue";
 import EntityElementSingleMedia from "@/components/entityElements/EntityElementSingleMedia.vue";
 import EntityElementWindow from "@/components/entityElements/EntityElementWindow.vue";
-import { computed } from "vue";
+import { computed, watch, } from "vue";
 import { useEditMode } from "@/composables/useEdit";
+import { useRoute } from "vue-router";
 
 import type {
   Entity,
@@ -83,6 +84,7 @@ import type {
 } from "@/generated-types/queries";
 import EntityElementMarkdownViewer from "@/components/entityElements/EntityElementMarkdownViewer.vue";
 import { getObjectsBasedOnTypename } from "@/helpers";
+import { useStateManagement } from "@/composables/useStateManagement";
 
 export type Elements =
   | EntityListElement
@@ -99,13 +101,19 @@ const props = defineProps<{
   uuid: string;
 }>();
 
-const { isEdit } = useEditMode();
 const formId = computed(() => props.uuid);
+const { isEdit } = useEditMode();
+const { getStateForRoute, updateStateForRoute } = useStateManagement();
+const route = useRoute();
+
 const elements = computed<Elements[]>(() => {
   const returnArray: Elements[] = [];
   const graphArray: Elements[] = [];
   Object.values(props.elements).forEach((value) => {
     if (value != null && typeof value !== "string") {
+      const collapsedState = getCollapsedStateForElement(value);
+      if (collapsedState !== undefined)
+        value.isCollapsed = collapsedState;
       if (value.__typename === "GraphElement") {
         value.isCollapsed = true;
         graphArray.push(value);
@@ -115,4 +123,27 @@ const elements = computed<Elements[]>(() => {
   graphArray.forEach((graph) => returnArray.push(graph));
   return returnArray;
 });
+
+const getCollapsedStateForElement = (element: object): boolean => {
+  if (!element.entityTypes) return;
+  const state = getStateForRoute(route);
+  return state?.UIPanelStateCollapsed.filter((panelState) => panelState.key === element.entityTypes[0])[0]?.value;
+}
+
+watch(
+  () => isEdit.value,
+  () => {
+    if (isEdit.value) {
+      const state: [{ key: string, value: boolean }] = []
+      elements.value.forEach((element) => {
+        if (element.entityTypes === undefined) return;
+        state.push({ key: element.entityTypes[0], value: element.isCollapsed });
+      })
+      if (state.length > 0)
+        updateStateForRoute(route, {
+          UIPanelStateCollapsed: state
+        });
+    }
+  }
+);
 </script>
