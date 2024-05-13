@@ -29,12 +29,11 @@ const props = defineProps<{
 }>();
 
 const deleteRelation = async () => {
-  if (props.relation !== "no-relation-found") {
+  if (props.relation !== "no-relation-found")
     update(props.relation.idx, {
       ...props.relation.relation,
       editStatus: EditStatus.Deleted,
     });
-  }
   await save();
   disableEditMode();
 };
