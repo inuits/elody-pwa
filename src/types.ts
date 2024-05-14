@@ -66,6 +66,7 @@ import {
   uniWindowGrid,
   uniWindowMaximize,
   uniFocus,
+  uniFileEditAlt,
   uniSetting,
   uniKeyholeSquareFull,
 } from "vue-unicons/dist/icons";
@@ -136,6 +137,7 @@ export const Unicons: Record<DamsIcons, { name: string }> = {
   Text: uniText,
   Trash: uniTrashAlt,
   Upload: uniCloudUpload,
+  Update: uniFileEditAlt,
   User: uniUser,
   UserCircle: uniUserCircle,
   WindowGrid: uniWindowGrid,

@@ -99,6 +99,18 @@
           button-style="accentAccent"
           @click="performActionButtonClickEvent(field)"
         />
+        <BaseButtonNew
+          v-if="
+            field.__typename === 'FormAction' &&
+            field.actionType == ActionType.Update
+          "
+          class="mt-5 mb-10"
+          :label="t((field as FormAction).label)"
+          :icon="field.icon"
+          :disabled="formContainsErrors"
+          button-style="accentAccent"
+          @click="performActionButtonClickEvent(field)"
+        />
       </div>
     </div>
     <div v-else class="h-screen w-full flex justify-center items-center">
@@ -248,6 +260,11 @@ const downloadActionFunction = async (field: FormAction) => {
   goToEntityPage(entity, "SingleEntity", props.router);
 };
 
+const updateMetdataActionFunction = async (field: FormAction) => {
+  if (formContainsErrors.value) return;
+  //TODO: put code here that calls graphql function to the bulk edit endpoint in the collection-api
+};
+
 const performActionButtonClickEvent = async (
   field: FormAction
 ): Promise<void> => {
@@ -256,6 +273,7 @@ const performActionButtonClickEvent = async (
     upload: () => uploadActionFunction(field),
     submit: () => submitActionFunction(field),
     download: () => downloadActionFunction(field),
+    update: () => updateMetdataActionFunction(field),
   };
   if (!field.actionType) return;
 
