@@ -60,8 +60,6 @@ const start = async () => {
     await auth.processAuthCode(authCode);
     if (!config.allowAnonymousUsers && !auth.isAuthenticated.value)
       await auth.redirectToLogin();
-  } else {
-    await auth.logout();
   }
 
   bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
