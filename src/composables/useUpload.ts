@@ -63,6 +63,9 @@ const useUpload = () => {
         checkUploadValidityFn: Function;
       };
     } = {
+      updateMetadata: {
+        checkUploadValidityFn: () => __checkUploadValidityUpdateMetadata(),
+      },
       mediafilesOnly: {
         checkUploadValidityFn: () => __checkUploadValidityMediafilesOnly(),
       },
@@ -75,6 +78,10 @@ const useUpload = () => {
     };
     uploadValidationFn.value =
       settingsObject[uploadSettings.uploadFlow].checkUploadValidityFn;
+  };
+
+  const __checkUploadValidityUpdateMetadata = (): boolean => {
+    return true;
   };
 
   const __checkUploadValidityMediafilesOnly = (): boolean => {
