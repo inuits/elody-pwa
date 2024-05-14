@@ -30,7 +30,9 @@ import { useMutation, useQuery } from "@vue/apollo-composable";
 import { GetDirectoriesDocument, PostStartImportDocument } from "@/generated-types/queries";
 import FolderTreeLine from "@/components/FolderTreeLine.vue";
 import { useNotification, NotificationType } from "../components/base/BaseNotification.vue";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const directories = ref([]);
 const loading = ref(false);
 const selectedDirectory = ref(null);
@@ -52,13 +54,24 @@ const doImport = (folder) => {
     return;
   }
 
-  startImport({ folder })
-    .then(() => {
-      createNotificationOverwrite(NotificationType.success, 'Success', 'Import successful');
-    })
-    .catch((error) => {
-      createNotificationOverwrite(NotificationType.error, 'Error', 'Error importing: ' + error.message);
-    });
+startImport({ folder })
+  .then((obj) => {
+    if (obj.data.postStartImport.status === 400) {
+      const messageId = obj.data.postStartImport.message_id;
+      if (messageId === 'error-csv-count') {
+        const folder = selectedDirectory.value.dir;
+        const count = obj.data.postStartImport.count;
+        createNotificationOverwrite(NotificationType.error, t(`import.import-error`), t(`import.${messageId}`, { folder, count }));
+      } else {
+        createNotificationOverwrite(NotificationType.error, t(`import.import-error`), t(messageId));
+      }
+    }else{
+      createNotificationOverwrite(NotificationType.success, 'Success', t(`import.import-success`));
+    }
+  })
+  .catch((error) => {
+    createNotificationOverwrite(NotificationType.error, t(`import.import-error`), '' + error.message);
+  });
 };
 
 const buttonClass = computed(() => {
