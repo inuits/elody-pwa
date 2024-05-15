@@ -85,7 +85,7 @@ const parseFormValuesToFormInput = (values: EntityValues) => {
   Object.keys(values.intialValues)
     .filter((key) => key !== "__typename")
     .forEach((key) => {
-      if (!editableFields.value[props.uuid].includes(key)) return;
+      if (!editableFields.value[props.uuid]?.includes(key)) return;
       metadata.push({ key, value: (values.intialValues as any)[key] });
     });
 
