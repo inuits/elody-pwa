@@ -100,9 +100,15 @@ const route = useRoute();
 const getAlreadySelectedEntityIds = (): string[] => {
   const id = route.params.id as string;
   const form = getForm(id);
-  return form?.values.relationValues.relations.map(
-    (relation: any) => relation.key
+  const relationValues = form?.values.relationValues;
+  console.log(
+    Object.keys(relationValues)
+      .filter((relationKey: any) => Array.isArray(relationValues[relationKey]))
+      .map((relationKey: string) => relationValues[relationKey].key)
   );
+  return Object.keys(relationValues)
+    .filter((relationKey: string) => Array.isArray(relationValues[relationKey]))
+    .map((relationKey: string) => relationValues[relationKey].key);
 };
 
 const getContext = () => {

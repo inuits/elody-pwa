@@ -42,6 +42,7 @@
                   InputFieldTypes.DropdownSingleselect) &&
               metadata.value
             "
+            :field-name="metadata.key"
             :metadata-key-to-get-options-for="metadata.key"
             :from-relation-type="metadata.inputField?.fromRelationType"
             :disabled="true"
@@ -129,6 +130,7 @@ const setNewValue = (newValue: string | BaseRelationValuesInput[]) => {
     form.setFieldValue(veeValidateField.value, newValue);
   }
 };
+
 const registerEnterKeyPressed = async (value: string) => {
   await updateOrderItem(props.formId, fieldKeyWithId.value, value);
 };
@@ -151,14 +153,11 @@ const fieldIsValid = computed(() => meta.valid);
 const { conditionalFieldIsRequired } = useConditionalValidation();
 
 const isRelationField = computed(() => {
-  if (
-    props.metadata?.inputField?.validation?.value?.includes(
-      ValidationRules.HasRequiredRelation
-    )
-  )
-    return true;
-  return false;
+  return !!props.metadata?.inputField?.validation?.value?.includes(
+    ValidationRules.HasRequiredRelation
+  );
 });
+
 const isFieldRequired = computed(() => {
   if (
     props.metadata?.inputField?.validation?.value?.includes(
@@ -173,6 +172,7 @@ const isFieldRequired = computed(() => {
     );
   return false;
 });
+
 const getValidationRules = (metadata: PanelMetaData): string => {
   const rules: string = metadata?.inputField?.validation?.value as string;
   if (isRelationField.value) {
@@ -188,6 +188,7 @@ const getValidationRules = (metadata: PanelMetaData): string => {
       : `${rules}|required`;
   return rules;
 };
+
 const rules = computed(() => getValidationRules(props.metadata));
 const label = computed(() =>
   props.metadata.label
@@ -199,7 +200,7 @@ const veeValidateField = computed(() => {
   if (isMetadataOnRelation.value)
     return `${ValidationFields.RelationValues}.${ValidationFields.RelationMetadata}.${fieldKeyWithId.value}`;
   else if (isRelationField.value && props.isEdit)
-    return `${ValidationFields.RelationValues}.${ValidationFields.Relations}`;
+    return `${ValidationFields.RelationValues}.${props.metadata.inputField.relationType}`;
   else if (props.metadata.inputField)
     return `${ValidationFields.IntialValues}.${props.metadata.key}`;
   else if (props.linkedEntityId === undefined)
