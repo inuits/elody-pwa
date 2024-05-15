@@ -2,7 +2,7 @@
   <div>
     <div v-if="loading">Loading...</div>
     <div v-else>
-      <ul>
+      <ul class="h-40vh p-4 overflow-y-auto">
         <li v-for="directory in directories" :key="directory.id">
           <folder-tree-line
               :default-open="false"
