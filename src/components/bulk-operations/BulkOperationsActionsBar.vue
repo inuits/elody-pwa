@@ -274,8 +274,6 @@ watch(selectedBulkOperation, () => {
         includeAssetCsv: props.context !== RouteNames.Mediafile,
         relationType: modal.formRelationType,
       };
-      console.log("PRINTING CONTEXT");
-      console.log(props.context);
       if (props.context === RouteNames.Mediafile || props.context === RouteNames.Mediafiles || props.context === BulkOperationsContextEnum.EntityElementMedia)
         savedContext.mediafiles = enqueuedItems.map((item) => item.id);
       else savedContext.entities = enqueuedItems.map((item) => item.id);
