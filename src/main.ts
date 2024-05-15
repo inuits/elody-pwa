@@ -61,7 +61,9 @@ const start = async () => {
     if (!config.allowAnonymousUsers && !auth.isAuthenticated.value)
       await auth.redirectToLogin();
   } else {
+    console.log("started veryfing");
     await auth.verifyServerAuth();
+    console.log("finished");
   }
 
   bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
