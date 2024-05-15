@@ -38,7 +38,7 @@ const useFormHelper = () => {
     });
     return {
       intialValues: intialValues,
-      relationValues: { label: "", relations: [] },
+      relationValues: {},
     };
   };
 
@@ -49,9 +49,6 @@ const useFormHelper = () => {
     const form = useForm<EntityValues>({
       initialValues: formValues,
     });
-    const { resetField } = useField("relationValues.relations");
-    formValues.relationValues?.relations &&
-      resetField({ value: formValues.relationValues?.relations });
     addForm(key, form);
     return form;
   };
@@ -189,15 +186,10 @@ const useFormHelper = () => {
       : getFormByRouteId().form;
     if (!form) return;
 
-    let oldRelations: BaseRelationValuesInput[] =
-      form.values.relationValues.relations || [];
-    oldRelations = oldRelations.filter(
-      (relation: BaseRelationValuesInput) => relation.type !== relationType
-    );
-    const newRelations: BaseRelationValuesInput[] = [];
+    const relationsToSet: BaseRelationValuesInput[] = [];
     selectedItems.forEach((item) => {
       addTeaserMetadataToState(item.id, item.teaserMetadata);
-      newRelations.push({
+      relationsToSet.push({
         key: item.id,
         type: relationType,
         editStatus: EditStatus.New,
@@ -205,9 +197,7 @@ const useFormHelper = () => {
       });
     });
 
-    const relationsToSet: BaseRelationValuesInput[] = newRelations;
-    relationsToSet.push(...oldRelations);
-    form.setFieldValue("relationValues.relations", relationsToSet);
+    form.setFieldValue(`relationValues.${relationType}`, relationsToSet);
   };
 
   const replaceRelationsFromSameType = (
@@ -219,24 +209,23 @@ const useFormHelper = () => {
       ? getForm(formId)
       : getFormByRouteId().form;
     if (!form) return;
-    const newRelationIds: string[] = selectedItems.map(
+    const relationIds: string[] = selectedItems.map(
       (item: InBulkProcessableItem) => item.id
     );
+    // TODO: Find something better to unref this
+    const relationValues = JSON.parse(
+      JSON.stringify(form.values.relationValues)
+    );
 
-    const otherRelations: BaseRelationValuesInput[] =
-      form.values.relationValues.relations.filter(
-        (relation: BaseRelationValuesInput) => relation.type !== relationType
-      );
-    const relationsToDelete: BaseRelationValuesInput[] =
-      form.values.relationValues.relations.filter(
-        (relation: BaseRelationValuesInput) =>
-          relation.type === relationType &&
-          !newRelationIds.includes(relation.key)
-      );
+    const relationsToDelete: BaseRelationValuesInput[] = relationValues[
+      relationType
+    ]?.filter(
+      (relation: BaseRelationValuesInput) => !relationIds.includes(relation.key)
+    );
 
-    const newRelations: BaseRelationValuesInput[] = [];
+    const relationsToSet: BaseRelationValuesInput[] = [];
     selectedItems.forEach((item) => {
-      newRelations.push({
+      relationsToSet.push({
         key: item.id,
         type: relationType,
         editStatus: EditStatus.New,
@@ -244,21 +233,20 @@ const useFormHelper = () => {
       });
     });
 
-    relationsToDelete.forEach((relation: BaseRelationValuesInput) => {
-      newRelations.push({
-        key: relation.key,
-        type: relation.type,
-        editStatus: EditStatus.Deleted,
-        value: relation.value,
+    if (relationsToDelete)
+      relationsToDelete.forEach((relation: BaseRelationValuesInput) => {
+        relationsToSet.push({
+          key: relation.key,
+          type: relation.type,
+          editStatus: EditStatus.Deleted,
+          value: relation.value,
+        });
       });
-    });
 
-    const relationsToSet: BaseRelationValuesInput[] = otherRelations || [];
-    if (newRelations) relationsToSet.push(...newRelations);
-
-    form.setFieldValue("relationValues.relations", relationsToSet);
+    form.setFieldValue(`relationValues.${relationType}`, relationsToSet);
   };
 
+  // TODO Let this work wit new relation structure in vee-validate
   const findRelation = (
     key: string,
     type: string
