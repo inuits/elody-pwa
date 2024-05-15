@@ -60,7 +60,7 @@ const start = async () => {
     await auth.processAuthCode(authCode);
     if (!config.allowAnonymousUsers && !auth.isAuthenticated.value)
       await auth.redirectToLogin();
-  } else if (config.allowAnonymousUsers) {
+  } else {
     await auth.verifyServerAuth();
   }
 
