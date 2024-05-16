@@ -2,7 +2,7 @@
   <nav
     ref="navigation"
     :class="[
-      'navbar fixed left-0 top-0 w-24 h-screen align-center pt-10 bg-neutral-white px-5 z-50',
+      'navbar fixed left-0 top-0 w-24 h-screen align-center pt-10 bg-neutral-white px-5 pb-16 z-50',
       { 'w-80': isExpanded },
     ]"
     @click="changeExpandedState(true)"
@@ -29,6 +29,7 @@
         />
       </div>
     </div>
+<<<<<<< HEAD
     <div
       :class="[
         'fixed bottom-0 left-0 py-8 pl-4 cursor-pointer bg-neutral-white',
@@ -37,6 +38,15 @@
     >
       <LogInLogout :is-expanded="isExpanded" />
     </div>
+=======
+    <LogInLogout
+      :is-expanded="isExpanded"
+      :class="[
+        'fixed bg-white pb-8 bottom-0 left-0 pl-4 w-100 w-20 logInOut',
+        { 'w-72': isExpanded },
+      ]"
+    />
+>>>>>>> e893f8b (rewrited styles for sidebar menu)
   </nav>
 </template>
 
@@ -101,7 +111,8 @@ const closeExpanded = (event: any) => {
 </script>
 
 <style>
-.navbar {
+.navbar,
+.logInOut {
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 300ms;
