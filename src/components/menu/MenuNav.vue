@@ -14,21 +14,30 @@
     >
       <img src="/logo.svg" alt="Elody logo" class="h-12" />
     </router-link>
-    <div
-      v-for="menuItem in menuItems"
-      :key="menuItem.label"
-      @mouseenter="changeHoveredItem(menuItem)"
-      @mouseleave="changeHoveredItem(undefined)"
-    >
-      <Menuitem
-        :icon="menuItem.icon"
-        :menuitem="menuItem"
-        :isExpanded="isExpanded"
-        :isBeingHovered="menuItem === hoveredItem"
-        @onclick="changeExpandedState(true)"
-      />
+    <div class="h-[75vh] overflow-y-scroll">
+      <div
+        v-for="menuItem in menuItems"
+        :key="menuItem.label"
+        @mouseenter="changeHoveredItem(menuItem)"
+        @mouseleave="changeHoveredItem(undefined)"
+      >
+        <Menuitem
+          :icon="menuItem.icon"
+          :menuitem="menuItem"
+          :isExpanded="isExpanded"
+          :isBeingHovered="menuItem === hoveredItem"
+          @onclick="changeExpandedState(true)"
+        />
+      </div>
     </div>
-    <LogInLogout :is-expanded="isExpanded" class="mt-5 ml-3" />
+    <div
+      :class="[
+        'fixed bottom-0 left-0 py-8 pl-4 cursor-pointer bg-neutral-white',
+        { 'w-80': isExpanded },
+      ]"
+    >
+      <LogInLogout :is-expanded="isExpanded" />
+    </div>
   </nav>
 </template>
 
