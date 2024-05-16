@@ -5,6 +5,7 @@
         field.type === InputFieldTypes.DropdownMultiselect ||
         field.type === InputFieldTypes.DropdownSingleselect
       "
+      :key="fieldKey"
       v-model="metadataValue"
       :metadata-key-to-get-options-for="fieldKey"
       :select-type="
@@ -99,6 +100,10 @@ const fieldEditIsDisabled = computed(() => {
 onMounted(() => {
   if (props.isMetadataOnRelation)
     addEditableMetadataOnRelationKey(props.fieldKey, props.formId);
+});
+onUpdated(() => {
+  if (isEqual(props.value, metadataValue.value)) return;
+  metadataValue.value = props.value;
 });
 
 const getValueFromMetadata = (): string | BaseRelationValuesInput[] => {

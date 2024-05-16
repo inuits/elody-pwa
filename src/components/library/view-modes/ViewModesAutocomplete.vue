@@ -47,6 +47,7 @@ const props = withDefaults(
   }>(),
   {
     selectType: "multi",
+    label: "",
     metadataKeyToGetOptionsFor: "no-key",
     mode: "edit",
     formId: undefined,

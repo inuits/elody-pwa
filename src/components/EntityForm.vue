@@ -63,6 +63,7 @@ const { mutate } = useMutation<
   MutateEntityValuesMutation,
   MutateEntityValuesMutationVariables
 >(MutateEntityValuesDocument);
+
 let form = createForm(props.uuid, {
   intialValues: unref(props.intialValues),
   relationValues: unref(props.relationValues),
@@ -89,18 +90,18 @@ const parseFormValuesToFormInput = (values: EntityValues) => {
     });
 
   const relations: BaseRelationValuesInput[] = [];
-  Object.keys(values?.relationValues).forEach((relationType: string) => {
-    const typedRelations: BaseRelationValuesInput[] =
-      values.relationValues[relationType];
-    if (!Array.isArray(typedRelations)) return;
+  values?.relationValues?.relations?.forEach((relation) => {
+    const relationInput: any = {};
+    Object.keys(relation)
+      .filter((key) => key !== "__typename")
+      .forEach((key) => {
+        relationInput[key] = (relation as any)[key];
+      });
 
-    typedRelations.forEach((relation: BaseRelationValuesInput) => {
-      // TODO: Find something better to unref this
-      relation = JSON.parse(JSON.stringify(relation));
-
-      if (!relation.editStatus) relation.editStatus = EditStatus.Unchanged;
-      relations.push(relation);
-    });
+    if (!(relationInput as BaseRelationValuesInput).editStatus)
+      (relationInput as BaseRelationValuesInput).editStatus =
+        EditStatus.Unchanged;
+    relations.push(relationInput);
   });
 
   if (values.relationValues?.relationMetadata) {
@@ -128,7 +129,7 @@ const parseFormValuesToFormInput = (values: EntityValues) => {
 const submit = useSubmitForm<EntityValues>(async () => {
   const result = await mutate({
     id: props.uuid,
-    formInput: parseFormValuesToFormInput(unref(form.values)),
+    formInput: parseFormValuesToFormInput(form.values),
     collection: childRoutes.find(
       (route: any) => route.entityType === props.type
     ).type,
