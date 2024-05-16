@@ -18,7 +18,7 @@
       />
       <CustomIcon v-else :icon="icon" :size="24" :color="iconColor" />
       <div v-if="isExpanded" class="w-full flex">
-        <span class="px-4 font-bold">
+        <span class="w-3/4 px-4 font-bold">
           {{ t(menuitem?.label) }}
         </span>
         <div
