@@ -1,8 +1,6 @@
 <template>
   <div>
-    <div
-      class="flex flex-row items-center fixed bottom-8 left-4 hover:text-accent-accent cursor-pointer"
-    >
+    <div class="flex flex-row items-center hover:text-accent-accent">
       <unicon
         v-if="auth.isAuthenticated.value === false"
         @click="auth.redirectToLogin()"
@@ -22,9 +20,7 @@
       </transition>
     </div>
 
-    <div
-      class="flex flex-row items-center fixed bottom-8 left-4 hover:text-accent-accent cursor-pointer"
-    >
+    <div class="flex flex-row items-center hover:text-accent-accent">
       <unicon
         v-if="auth.isAuthenticated.value === true"
         @click="async () => await performLogout()"
