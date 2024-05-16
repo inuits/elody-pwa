@@ -14,7 +14,7 @@
     >
       <img src="/logo.svg" alt="Elody logo" class="h-12" />
     </router-link>
-    <div class="h-[75vh] overflow-y-scroll">
+    <div class="h-[75vh] overflow-y-auto overflow-x-hidden">
       <div
         v-for="menuItem in menuItems"
         :key="menuItem.label"
