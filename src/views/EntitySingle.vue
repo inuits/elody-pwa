@@ -33,6 +33,7 @@ import {
   type ColumnList,
   type GetEntityByIdQueryVariables,
   type IntialValues,
+  type RelationValues,
   type GetEntityByIdQuery,
   type BaseEntity,
   type MediaFileEntity,
@@ -89,9 +90,7 @@ const { result, refetch } = useQuery<GetEntityByIdQuery>(
 );
 
 const intialValues = ref<IntialValues | "no-values">("no-values");
-const relationValues = ref<{ [key: string]: Object } | "no-values">(
-  "no-values"
-);
+const relationValues = ref<RelationValues | "no-values">("no-values");
 const columnList = ref<ColumnList | "no-values">("no-values");
 const permissionToEdit = ref<boolean>();
 const permissionToDelete = ref<boolean>();
@@ -118,7 +117,7 @@ watch(
 
     identifiers.value = [entity.value.uuid, entity.value.id];
     intialValues.value = entity.value.intialValues;
-    relationValues.value = entity.value.relationValues;
+    relationValues.value = entity.value.relationValues as RelationValues;
     columnList.value = entity.value.entityView;
 
     if (typeof columnList.value !== "string") {
