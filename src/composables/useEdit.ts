@@ -22,7 +22,7 @@ export const useEditMode = () => {
 
   const addSaveCallback = (input: callback, order?: string) => {
     if (order === "first") {
-      saveCallbacks.value.unshift(input);
+      saveCallbacks.value.splice(0, 0, input);
     } else if (order === "second") {
       saveCallbacks.value.splice(1, 0, input);
     } else {
