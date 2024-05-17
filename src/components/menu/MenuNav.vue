@@ -29,16 +29,6 @@
         />
       </div>
     </div>
-<<<<<<< HEAD
-    <div
-      :class="[
-        'fixed bottom-0 left-0 py-8 pl-4 cursor-pointer bg-neutral-white',
-        { 'w-80': isExpanded },
-      ]"
-    >
-      <LogInLogout :is-expanded="isExpanded" />
-    </div>
-=======
     <LogInLogout
       :is-expanded="isExpanded"
       :class="[
@@ -46,7 +36,6 @@
         { 'w-72': isExpanded },
       ]"
     />
->>>>>>> e893f8b (rewrited styles for sidebar menu)
   </nav>
 </template>
 
