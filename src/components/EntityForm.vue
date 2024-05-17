@@ -23,7 +23,15 @@ import {
   useNotification,
   NotificationType,
 } from "@/components/base/BaseNotification.vue";
-import { inject, onMounted, onUnmounted, unref, watch, computed } from "vue";
+import {
+  inject,
+  onMounted,
+  onUnmounted,
+  unref,
+  watch,
+  computed,
+  provide,
+} from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useEditMode } from "@/composables/useEdit";
@@ -157,6 +165,8 @@ const submit = useSubmitForm<EntityValues>(async () => {
   form.resetForm({ values: form.values });
   disableEditMode();
 });
+
+provide("submitForm", submit);
 
 const callRefetchFn = () => {
   const refetch = refetchFn.value;
