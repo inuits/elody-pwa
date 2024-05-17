@@ -14,11 +14,10 @@ import {
 import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { useFieldArray } from "vee-validate";
-import { useI18n } from "vue-i18n";
-import useEditMode from "@/composables/useEdit";
-const { t } = useI18n();
+import useEditMode, { type callback } from "@/composables/useEdit";
 const { update } = useFieldArray("relationValues.relations");
-const { save, disableEditMode } = useEditMode();
+const { save, disableEditMode, addSaveCallback, clearSaveCallbacks } = useEditMode();
+import { inject } from "vue";
 
 const props = defineProps<{
   label: String;
@@ -27,6 +26,8 @@ const props = defineProps<{
   entityId: String;
   relation: object;
 }>();
+
+const submitForm: callback = inject("submitForm") as callback;
 
 const deleteRelation = async () => {
   if (props.relation !== "no-relation-found")
@@ -38,7 +39,15 @@ const deleteRelation = async () => {
   disableEditMode();
 };
 
+const addSaveHandler = () => {
+  clearSaveCallbacks();
+  addSaveCallback(submitForm, "first");
+};
+
 const doAction = () => {
-  if (props.action === ContextMenuElodyActionEnum.Delete) deleteRelation();
+  if (props.action === ContextMenuElodyActionEnum.Delete) {
+    addSaveHandler();
+    deleteRelation();
+  }
 };
 </script>
