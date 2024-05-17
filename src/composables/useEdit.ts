@@ -22,7 +22,7 @@ export const useEditMode = () => {
 
   const addSaveCallback = (input: callback, order?: string) => {
     if (order === "first") {
-      saveCallbacks.value.splice(0, 0, input);
+      saveCallbacks.value.unshift(input);
     } else if (order === "second") {
       saveCallbacks.value.splice(1, 0, input);
     } else {
@@ -38,6 +38,7 @@ export const useEditMode = () => {
     }
   };
   const hideEditToggle = () => (isEditToggleVisible.value = "no-edit");
+  const clearSaveCallbacks = () => (saveCallbacks.value = []);
 
   const save = async () => {
     isSaved.value = false;
@@ -81,6 +82,7 @@ export const useEditMode = () => {
     isSaved,
     isDisabled,
     setDisableState,
+    clearSaveCallbacks,
   };
 };
 

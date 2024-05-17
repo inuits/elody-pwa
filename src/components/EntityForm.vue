@@ -49,8 +49,14 @@ const {
   pathToNavigate,
 } = useConfirmModal();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
-const { isEdit, addSaveCallback, refetchFn, disableEditMode, setDisableState } =
-  useEditMode();
+const {
+  isEdit,
+  addSaveCallback,
+  refetchFn,
+  disableEditMode,
+  setDisableState,
+  clearSaveCallbacks,
+} = useEditMode();
 const { createForm, editableFields } = useFormHelper();
 const { createNotification } = useNotification();
 const { closeModal, openModal } = useBaseModal();
@@ -165,7 +171,10 @@ onUnmounted(() =>
 );
 
 watch(isEdit, () => {
-  if (isEdit.value) addSaveCallback(submit, "first");
+  if (isEdit.value) {
+    clearSaveCallbacks();
+    addSaveCallback(submit, "first");
+  }
   dequeueAllItemsForBulkProcessing(
     BulkOperationsContextEnum.EntityElementListEntityPickerModal
   );
