@@ -8,6 +8,7 @@
         ? 'bg-neutral-lightest'
         : 'bg-neutral-white'
     "
+    modalHeightStyle="max-h-[75vh] my-[12.5vh]"
     @hide-modal="closeModal(TypeModals.DynamicForm)"
   >
     <dynamic-form

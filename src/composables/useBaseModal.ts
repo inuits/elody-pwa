@@ -61,11 +61,11 @@ export const useBaseModal = () => {
       getModalInfo(modalType).closeConfirmation = askForCloseConfirmation;
   };
 
-  const isLeftModalOpened = computed(() => {
+  const isCenterModalOpened = computed(() => {
     let isOpen: boolean = false;
     Object.keys(modals.value).forEach((modalKey: string) => {
       const modal: ModalInfo = modals.value[modalKey];
-      if (modal.state === ModalState.Show && modal.modalPosition === "left")
+      if (modal.state === ModalState.Show && modal.modalPosition === "center")
         isOpen = true;
     });
     return isOpen;
@@ -115,7 +115,7 @@ export const useBaseModal = () => {
     updateModal,
     closeModal,
     openModal,
-    isLeftModalOpened,
+    isCenterModalOpened,
     changeCloseConfirmation,
     modalToCloseAfterConfirm,
   };

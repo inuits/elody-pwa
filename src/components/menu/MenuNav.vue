@@ -52,11 +52,11 @@ const navigation = ref<any>(null);
 const isExpanded = ref<boolean>(false);
 const hoveredItem = ref<MenuItem | undefined>(undefined);
 const { getMenuEntities, menuItems, setSelectedMenuItem } = useMenuHelper();
-const { isLeftModalOpened } = useBaseModal();
+const { isCenterModalOpened } = useBaseModal();
 getMenuEntities();
 
 const changeExpandedState = (newState: boolean) => {
-  if (!isLeftModalOpened.value || (isLeftModalOpened.value && newState))
+  if (!isCenterModalOpened.value || (isCenterModalOpened.value && newState))
     isExpanded.value = newState;
 };
 
@@ -69,9 +69,9 @@ const changeHoveredItem = (item: MenuItem | undefined) => {
 };
 
 watch(
-  () => isLeftModalOpened.value,
+  () => isCenterModalOpened.value,
   () => {
-    if (isLeftModalOpened.value) {
+    if (isCenterModalOpened.value) {
       changeExpandedState(true);
     } else {
       changeExpandedState(false);
@@ -92,7 +92,7 @@ const closeExpanded = (event: any) => {
 
   const isClickedOutsideNavigation =
     navigation.value && !navigation.value.contains(event.target);
-  if (isClickedOutsideNavigation && !isLeftModalOpened.value) {
+  if (isClickedOutsideNavigation && !isCenterModalOpened.value) {
     changeExpandedState(false);
     changeHoveredItem(undefined);
   }

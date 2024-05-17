@@ -3,7 +3,7 @@
     v-if="isPermitted && show"
     :is="linkTag"
     :class="[
-      'flex flex-column items-center cursor-pointer ml-9 mt-1 origin-top-center hover:text-accent-accent',
+      'flex flex-column justify-between items-center cursor-pointer ml-9 mt-1 origin-top-center hover:text-accent-accent',
       { 'text-accent-accent': isActive },
     ]"
     :to="isLink ? menuAction.action : undefined"
@@ -12,6 +12,7 @@
     <p class="overflow-hidden px-4 cursor-pointer">
       {{ t(subMenuItem.label || "") }}
     </p>
+    <unicon v-if="!isLink" :name="Unicons.Plus.name" height="10" />
   </component>
 </template>
 
@@ -23,6 +24,7 @@ import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
 import { usePermissions } from "@/composables/usePermissions";
 import { Permission, type MenuItem } from "@/generated-types/queries";
 import { ref } from "vue";
+import { Unicons } from "@/types";
 
 const props = defineProps({
   show: {
