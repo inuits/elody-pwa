@@ -68,17 +68,6 @@ const changeHoveredItem = (item: MenuItem | undefined) => {
   }
 };
 
-watch(
-  () => isCenterModalOpened.value,
-  () => {
-    if (isCenterModalOpened.value) {
-      changeExpandedState(true);
-    } else {
-      changeExpandedState(false);
-    }
-  }
-);
-
 onMounted(() => {
   document.body.addEventListener("click", closeExpanded);
 });
