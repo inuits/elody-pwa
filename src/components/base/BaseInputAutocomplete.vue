@@ -16,6 +16,7 @@
     :object="true"
     label="label"
     valueProp="value"
+    appendToBody
     @search-change="(value: string) => {
         searchValue = value;
         emit('searchChange', value);

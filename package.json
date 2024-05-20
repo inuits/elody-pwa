@@ -32,7 +32,7 @@
     "@vitest/coverage-c8": "^0.24.0",
     "@vue-leaflet/vue-leaflet": "^0.10.1",
     "@vue/apollo-composable": "^4.0.0-alpha.14",
-    "@vueform/multiselect": "^2.3.2",
+    "@vueform/multiselect": "^2.6.3",
     "@vueuse/head": "^0.6.0",
     "apollo-upload-client": "^17.0.0",
     "c8": "^7.12.0",

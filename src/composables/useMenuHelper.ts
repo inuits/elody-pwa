@@ -46,7 +46,7 @@ export const useMenuHelper = () => {
           openModal(
             _menuItem.typeLink?.modal?.typeModal as TypeModals,
             ModalChoices.Import,
-            "left",
+            "center",
             _menuItem.typeLink?.modal?.formQuery
           );
         },

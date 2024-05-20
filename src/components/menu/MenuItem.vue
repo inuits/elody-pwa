@@ -8,7 +8,7 @@
       :is="linkTag"
       :to="isLink ? menuAction.action : undefined"
       @click="!isLink && menuAction?.action ? menuAction.action() : undefined"
-      class="flex flex-row items-center pl-3 h-9 mt-3 cursor-pointer"
+      class="flex flex-row items-center pl-3 h-9 mt-3 cursor-pointer hover:bg-neutral-40 hover:rounded-lg"
       :class="[{ 'bg-neutral-40 rounded-lg': isBeingHovered }]"
     >
       <unicon
