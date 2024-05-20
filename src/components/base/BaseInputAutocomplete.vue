@@ -14,6 +14,7 @@
     :disabled="disabled"
     :noOptionsText="noOptionsText"
     :object="true"
+    :create-option="true"
     label="label"
     valueProp="value"
     appendToBody
@@ -21,6 +22,7 @@
         searchValue = value;
         emit('searchChange', value);
       }"
+    :on-create="handleTagCreate"
   />
 </template>
 
@@ -43,6 +45,7 @@ const props = withDefaults(
     relation?: boolean;
     loading?: boolean;
     noOptionsText?: string;
+    canCreateOption: boolean;
   }>(),
   {
     selectType: "multi",
@@ -50,12 +53,14 @@ const props = withDefaults(
     disabled: false,
     relation: false,
     loading: false,
+    canCreateOption: false,
   }
 );
 
 const emit = defineEmits<{
   (event: "update:modelValue", modelValue: DropdownOption[] | undefined): void;
   (event: "searchChange", value: string): void;
+  (event: "addTag", option: DropdownOption[]): void;
 }>();
 
 const { t } = useI18n();
@@ -90,18 +95,23 @@ const setClasses = () => {
 
   const defaultContainerStyles = "multiselect rounded-lg items-stretch";
   classes.value["container"] = `${defaultContainerStyles} border-none`;
-  classes.value["containerActive"] = "outline-1 outline-accent-normal outline-offset-0";
-  classes.value["tagsSearch"] = "multiselect-tags-search !border-none focus:ring-0 p-0";
+  classes.value["containerActive"] =
+    "outline-1 outline-accent-normal outline-offset-0";
+  classes.value["tagsSearch"] =
+    "multiselect-tags-search !border-none focus:ring-0 p-0";
   classes.value["tag"] = "multiselect-tag bg-accent-normal !opacity-100";
   classes.value["dropdown"] = "multiselect-dropdown -bottom-px";
 
   if (props.autocompleteStyle === "defaultWithBorder") {
-    classes.value["container"] = `${defaultContainerStyles} border-[rgba(0,58,82,0.6)]`;
+    classes.value[
+      "container"
+    ] = `${defaultContainerStyles} border-[rgba(0,58,82,0.6)]`;
   }
 
   if (props.autocompleteStyle === "readOnly") {
     classes.value["container"] = "multiselect border-none !bg-white";
-    classes.value["tags"] = "flex-grow flex-shrink flex flex-wrap items-center mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
+    classes.value["tags"] =
+      "flex-grow flex-shrink flex flex-wrap items-center mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
   }
 };
 
@@ -111,6 +121,11 @@ watch(
   () => [inputValue.value, props.options],
   () => setClasses()
 );
+
+const handleTagCreate = async (option: any) => {
+  emit("addTag", option);
+  return false;
+};
 </script>
 
 <style>

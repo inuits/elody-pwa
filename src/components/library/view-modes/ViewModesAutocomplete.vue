@@ -5,17 +5,19 @@
     :select-type="selectType"
     :model-value="selectedDropdownOptions"
     :disabled="disabled"
-    :loading="entitiesLoading || relatedEntitiesLoading"
+    :loading="entitiesLoading || relatedEntitiesLoading || isCreatingEntity"
     @search-change="
       (value: string) => {
         getAutocompleteOptions(value);
       }
     "
     @update:model-value="
-      (value: DropdownOption[]) => {
+      (value: DropdownOption[] | undefined) => {
         handleSelect(value);
       }
     "
+    :canCreateOption="metadataKeyToGetOptionsFor === 'keyword'"
+    @add-tag="addNewTag"
   />
 </template>
 
@@ -24,6 +26,7 @@ import type {
   DropdownOption,
   Entitytyping,
   AdvancedFilterInput,
+  EntityInput,
 } from "@/generated-types/queries";
 import { onMounted, ref } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -31,6 +34,10 @@ import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import { getEntityIdFromRoute } from "@/helpers";
+
+//new imports to create new entity
+import { useImport } from "@/composables/useImport";
+import { apolloClient } from "@/main";
 
 const props = withDefaults(
   defineProps<{
@@ -56,6 +63,7 @@ const props = withDefaults(
   }
 );
 
+const isCreatingEntity = ref<boolean>(false);
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
 const { replaceRelationsFromSameType, addRelations } = useFormHelper();
 const entityId = getEntityIdFromRoute();
@@ -139,5 +147,61 @@ const handleSelect = (options: DropdownOption[] | undefined) => {
   }
 
   selectedDropdownOptions.value = [...options];
+};
+
+// what possibly we need to create an entity from tag
+const { loadDocument } = useImport();
+const addNewTag = async (option: any) => {
+  isCreatingEntity.value = true;
+
+  // call to create new entity & normalize response to the dropdown option
+  const newEntity = await createEntity(option.label);
+  const normalizedOption = {
+    value: newEntity?.data?.CreateEntity?.uuid,
+    label: option.label,
+  };
+
+  // handle selected option
+  setTimeout(() => {
+    handleSelect([...selectedDropdownOptions.value, normalizedOption]);
+    isCreatingEntity.value = false;
+  }, 350);
+};
+
+const createEntityFromFormInput = (
+  entityType: Entitytyping,
+  title: string
+): EntityInput => {
+  let entity: EntityInput = { type: entityType };
+  entity.metadata = [{ key: "title", value: title }];
+  entity.relations = [];
+  return entity;
+};
+
+const getQuery = async (queryName: string = "CreateEntity") => {
+  // queryName should be in graphql
+  return await loadDocument(queryName);
+};
+
+const createEntity = async (title: string) => {
+  const query = await getQuery();
+  const response = await performCreatingEnty(
+    query,
+    createEntityFromFormInput(
+      props.metadataKeyToGetOptionsFor as Entitytyping,
+      title
+    )
+  );
+  return response;
+};
+
+const performCreatingEnty = async (
+  queryDocument: any,
+  entity: EntityInput
+): Promise<any> => {
+  return await apolloClient.mutate({
+    mutation: queryDocument,
+    variables: { entity },
+  });
 };
 </script>
