@@ -21,7 +21,7 @@
         @click="hideModal"
       ></div>
       <div class="w-full transform" :class="[modalHeight, modalColor]">
-        <div :class="modalHeight">
+        <div :class="['flex flex-col', modalHeight]">
           <div class="flex justify-end p-2">
             <unicon
               :name="Unicons.Close.name"
