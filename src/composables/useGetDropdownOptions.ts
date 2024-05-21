@@ -5,18 +5,20 @@ import {
   Entitytyping,
   SearchInputType,
   type AdvancedFilterInput,
+  type EntityInput,
 } from "@/generated-types/queries";
 import { computed, inject } from "vue";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
 import { getEntityTitle } from "@/helpers";
+import { useImport } from "@/composables/useImport";
 
 export const useGetDropdownOptions = (
   entityType: Entitytyping,
   parent: "fetchAll" | string,
-  relationType: string = '',
-  searchFilterInput?: AdvancedFilterInput,
+  relationType: string = "",
+  searchFilterInput?: AdvancedFilterInput
 ) => {
   const apolloClient = inject(DefaultApolloClient);
   const {
@@ -28,6 +30,7 @@ export const useGetDropdownOptions = (
     setIsSearchLibrary,
     setsearchInputType,
   } = useBaseLibrary(apolloClient as ApolloClient<any>);
+  const { loadDocument } = useImport();
 
   const baseTypeFilter = {
     type: "type",
@@ -59,7 +62,8 @@ export const useGetDropdownOptions = (
   };
 
   const getAutocompleteOptions = (searchValue: string) => {
-    const isEmptyAdvancedSearchFilter = !searchFilterInput || Object.values(searchFilterInput).includes(null);
+    const isEmptyAdvancedSearchFilter =
+      !searchFilterInput || Object.values(searchFilterInput).includes(null);
     if (isEmptyAdvancedSearchFilter) return;
 
     const advancedFilters =
@@ -71,7 +75,10 @@ export const useGetDropdownOptions = (
     getEntities(undefined);
   };
 
-  const getSearchFilter = (value: string, searchFilterInput: AdvancedFilterInput) => {
+  const getSearchFilter = (
+    value: string,
+    searchFilterInput: AdvancedFilterInput
+  ) => {
     const { __typename, ...filterProps } = searchFilterInput;
     return { ...filterProps, value };
   };
@@ -87,10 +94,43 @@ export const useGetDropdownOptions = (
     });
   });
 
+  const createEntityFromInput = (
+    entityType: Entitytyping,
+    // key should be provided by graphql
+    metadata: { key: string; value: string }
+  ): EntityInput => {
+    const entity: EntityInput = { type: entityType };
+    entity.metadata = [metadata];
+    return entity;
+  };
+
+  const createEntity = async (metadata: {
+    key: string;
+    value: string;
+  }): Promise<BaseEntity> => {
+    const query = await loadDocument("CreateEntity");
+    const response = await performCreatingEnty(
+      query,
+      createEntityFromInput(entityType, metadata)
+    );
+    return response.data.CreateEntity;
+  };
+
+  const performCreatingEnty = async (
+    queryDocument: any,
+    entity: EntityInput
+  ): Promise<any> => {
+    return await (apolloClient as ApolloClient<any>).mutate({
+      mutation: queryDocument,
+      variables: { entity },
+    });
+  };
+
   return {
     initialize,
     getAutocompleteOptions,
     entitiesLoading,
     entityDropdownOptions,
+    createEntity,
   };
 };

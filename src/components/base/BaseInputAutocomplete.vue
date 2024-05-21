@@ -14,7 +14,7 @@
     :disabled="disabled"
     :noOptionsText="noOptionsText"
     :object="true"
-    :create-option="true"
+    :create-option="canCreateOption"
     label="label"
     valueProp="value"
     appendToBody
@@ -30,7 +30,6 @@
 import type { DropdownOption } from "@/generated-types/queries";
 import Multiselect from "@vueform/multiselect";
 import { computed, onMounted, ref, watch } from "vue";
-import { useI18n } from "vue-i18n";
 
 type AutocompleteStyle = "default" | "defaultWithBorder" | "readOnly";
 
@@ -60,10 +59,9 @@ const props = withDefaults(
 const emit = defineEmits<{
   (event: "update:modelValue", modelValue: DropdownOption[] | undefined): void;
   (event: "searchChange", value: string): void;
-  (event: "addTag", option: DropdownOption[]): void;
+  (event: "addOption", option: DropdownOption[]): void;
 }>();
 
-const { t } = useI18n();
 const classes = ref();
 const searchValue = ref<string>();
 
@@ -123,7 +121,7 @@ watch(
 );
 
 const handleTagCreate = async (option: any) => {
-  emit("addTag", option);
+  emit("addOption", option);
   return false;
 };
 </script>
