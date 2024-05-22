@@ -21,6 +21,10 @@
       :form-id="formId"
       :auto-selectable="field.autoSelectable"
       :disabled="field.disabled"
+      :canCreateOption="field.canCreateEntityFromOption"
+      :metadataKeyToCreateEntityFromOption="
+        field.metadataKeyToCreateEntityFromOption
+      "
     />
     <BaseDropdownNew
       v-else-if="field.type === InputFieldTypes.Dropdown"
