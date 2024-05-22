@@ -280,10 +280,12 @@ watch(
   () => {
     if (!props.relatedActiveFilters) return;
     filterOptions.filter((filter) => {
-      filter.isSelected = props.relatedActiveFilters.includes(filter.option.value);
-    })
+      filter.isSelected = props.relatedActiveFilters.includes(
+        filter.option.value
+      );
+    });
   }
-)
+);
 
 watch(
   filterOptions,

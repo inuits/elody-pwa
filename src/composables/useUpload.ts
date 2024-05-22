@@ -520,7 +520,7 @@ const useUpload = () => {
       if (
         uploadFlow.value === UploadFlow.MediafilesOnly ||
         (uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv &&
-          !containsCsv)
+          !containsCsv.value)
       )
         return true;
 

@@ -136,7 +136,8 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
       notifyOnNetworkStatusChange: true,
     })
     .then((result) => {
-      const sortingOptionsResult = result.data?.EntityTypeSortOptions.sortOptions;
+      const sortingOptionsResult =
+        result.data?.EntityTypeSortOptions.sortOptions;
       sortOptions.value = sortingOptionsResult?.options || [];
 
       const state = getStateForRoute(props.route);
@@ -148,9 +149,7 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
       );
       let sortOrder = sortingOptionsResult?.isAsc?.toLowerCase();
       if (!sortOrder) {
-        sortOrder = state?.queryVariables?.searchValue.isAsc
-          ? "asc"
-          : "desc";
+        sortOrder = state?.queryVariables?.searchValue.isAsc ? "asc" : "desc";
       }
       isAsc.value = sortOrder === "asc";
 
@@ -167,7 +166,7 @@ onMounted(() => {
 
 const setSkip = async (newSkip: number) => {
   await props.setSkip(newSkip, true);
-}
+};
 watch(
   () => selectedPaginationLimitOption.value,
   async () =>

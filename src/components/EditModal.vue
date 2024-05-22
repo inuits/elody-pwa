@@ -76,7 +76,9 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
   if (type.toLowerCase() === Entitytyping.Mediafile) {
     collection = Collection.Mediafiles;
   } else {
-    collection = childRoutes.find((route: any) => route.entityType === type).type;
+    collection = childRoutes.find(
+      (route: any) => route.entityType === type
+    ).type;
   }
   await mutate({ id, path: collection, deleteMediafiles });
   await getTenants();

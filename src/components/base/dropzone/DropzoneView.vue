@@ -41,7 +41,7 @@ withDefaults(
   {
     style: "",
     isValidation: false,
-  },
+  }
 );
 
 const emit = defineEmits<{

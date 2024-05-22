@@ -20,11 +20,11 @@ export type InBulkProcessableItem = {
   value?: string;
 };
 export type SavedContextForBulkOperationsForm = {
-  mediafiles: [],
-  entities: [],
-  includeAssetCsv: boolean,
-  relationType: string,
-}
+  mediafiles: [];
+  entities: [];
+  includeAssetCsv: boolean;
+  relationType: string;
+};
 
 const items = ref<{ [key: string]: InBulkProcessableItem[] }>({});
 for (const key of [

@@ -37,10 +37,10 @@
           >
             <metadata-wrapper
               v-if="
-                (
-                  metadata.__typename !== 'EntityListElement' ||
-                  metadata.baseLibraryMode === BaseLibraryModes.BasicBaseLibrary
-                ) && !parentIsListItem
+                (metadata.__typename !== 'EntityListElement' ||
+                  metadata.baseLibraryMode ===
+                    BaseLibraryModes.BasicBaseLibrary) &&
+                !parentIsListItem
               "
               :form-id="formId"
               :is-edit="isEdit"
@@ -61,7 +61,9 @@
               :custom-query-filters="metadata.customQueryFilters"
               :search-input-type="metadata.searchInputType"
               :base-library-mode="metadata.baseLibraryMode"
-              :entity-list-elements="getObjectsBasedOnTypename(metadata, 'EntityListElement')"
+              :entity-list-elements="
+                getObjectsBasedOnTypename(metadata, 'EntityListElement')
+              "
               class="pt-2"
             />
           </div>
