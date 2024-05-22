@@ -1,5 +1,8 @@
 <template>
-  <div v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary" class="text-sm break-words">
+  <div
+    v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
+    class="text-sm break-words"
+  >
     <div v-if="Array.isArray(readableValue)">
       <div v-for="item in readableValue" :key="item">
         <p v-if="!stringIsUrl(item)">{{ item }}</p>
@@ -30,7 +33,12 @@
 
 <script lang="ts" setup>
 import { BaseLibraryModes, Unit } from "@/generated-types/queries";
-import { convertUnitToReadbleFormat, processTextWithLinks, stringIsHtml, stringIsUrl } from "@/helpers";
+import {
+  convertUnitToReadbleFormat,
+  processTextWithLinks,
+  stringIsHtml,
+  stringIsUrl,
+} from "@/helpers";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { Unicons } from "@/types";
@@ -43,7 +51,7 @@ const props = withDefaults(
     unit?: string;
     linkText?: string;
     linkIcon?: string;
-    baseLibraryMode?: BaseLibraryModes,
+    baseLibraryMode?: BaseLibraryModes;
   }>(),
   {
     linkText: "",

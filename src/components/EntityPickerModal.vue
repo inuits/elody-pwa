@@ -44,7 +44,7 @@
             list-item-route-name="SingleEntity"
             @confirm-selection="
               (selectedItems) => {
-                addRelations(selectedItems, getRelationType());
+                addRelations(selectedItems, getRelationType(), getEntityUuid());
                 dequeueAllItemsForBulkProcessing(getContext());
                 closeModal(TypeModals.EntityPicker);
               }
@@ -85,21 +85,18 @@ import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
-import { useRoute } from "vue-router";
 import dynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 
 const { t } = useI18n();
-const { getAcceptedTypes, getRelationType } = useEntityPickerModal();
+const { getAcceptedTypes, getEntityUuid, getRelationType } =
+  useEntityPickerModal();
 const { closeModal, getModalInfo } = useBaseModal();
 const { addRelations, getForm } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const tabs: string[] = [t("entity.pick"), t("entity.upload")];
 
-const route = useRoute();
-
 const getAlreadySelectedEntityIds = (): string[] => {
-  const id = route.params.id as string;
-  const form = getForm(id);
+  const form = getForm(getEntityUuid());
   return form?.values.relationValues.relations.map(
     (relation: any) => relation.key
   );
