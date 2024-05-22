@@ -5,7 +5,7 @@ import type {
   BaseEntity,
   Entitytyping,
   MetadataInput,
-  RelationFieldInput
+  RelationFieldInput,
 } from "@/generated-types/queries";
 
 type CreateEntityParams = {
