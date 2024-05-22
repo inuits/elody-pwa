@@ -33,6 +33,7 @@ import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import { getEntityIdFromRoute } from "@/helpers";
+import { useManageEntities } from "@/composables/useManageEntities";
 
 const props = withDefaults(
   defineProps<{
@@ -65,12 +66,12 @@ const isCreatingEntity = ref<boolean>(false);
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
 const { replaceRelationsFromSameType, addRelations } = useFormHelper();
 const entityId = getEntityIdFromRoute();
+const { createEntity } = useManageEntities();
 const {
   initialize,
   entityDropdownOptions,
   entitiesLoading,
   getAutocompleteOptions,
-  createEntity,
 } = useGetDropdownOptions(
   props.metadataKeyToGetOptionsFor as Entitytyping,
   "fetchAll",
@@ -154,8 +155,13 @@ const handleCreatingFromTag = async (option: any) => {
   isCreatingEntity.value = true;
 
   const newEntity = await createEntity({
-    key: props.metadataKeyToCreateEntityFromOption,
-    value: option.label,
+    entityType: props.metadataKeyToCreateEntityFromOption as Entitytyping,
+    metadata: [
+      {
+        key: props.metadataKeyToCreateEntityFromOption,
+        value: option.label,
+      },
+    ],
   });
   const normalizedOption = {
     value: newEntity.uuid,
