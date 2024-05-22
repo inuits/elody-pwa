@@ -90,7 +90,7 @@ const openConfirmationModal = () => {
     "logout-modal"
   );
   openModal(TypeModals.Confirm, undefined, "center");
-}
+};
 </script>
 
 <style></style>

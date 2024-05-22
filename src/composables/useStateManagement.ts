@@ -19,14 +19,14 @@ type BaseLibraryState = {
   totalEntityCount?: number;
   queryVariables?: GetEntitiesQueryVariables;
   filterListItems?: FilterListItem[];
-  UIPanelStateCollapsed?: [ { key: string, value: boolean } ];
+  UIPanelStateCollapsed?: [{ key: string; value: boolean }];
 };
 
 type StateObject = BaseLibraryState;
 
 const sliceSingleEntityRoutePath = (path): string => {
   return path.slice(0, path.indexOf("/", 1));
-}
+};
 
 export const useStateManagement = () => {
   const setGlobalState = (key: string, value: object) => {
@@ -56,8 +56,10 @@ export const useStateManagement = () => {
       const state = JSON.stringify(stateObject);
       if (window.sessionStorage.getItem(route.path) !== state)
         window.sessionStorage.setItem(route.path, state);
-    }
-    else if (Object.keys(stateObject).length === 1 && Object.keys(stateObject)[0] === "UIPanelStateCollapsed") {
+    } else if (
+      Object.keys(stateObject).length === 1 &&
+      Object.keys(stateObject)[0] === "UIPanelStateCollapsed"
+    ) {
       const path = sliceSingleEntityRoutePath(route.path);
       window.sessionStorage.setItem(path, JSON.stringify(stateObject));
     }
@@ -79,9 +81,10 @@ export const useStateManagement = () => {
     if (route.name !== "SingleEntity") {
       const state = window.sessionStorage.getItem(route.path);
       if (state) return JSON.parse(state);
-    }
-    else {
-      const state = window.sessionStorage.getItem(sliceSingleEntityRoutePath(route.path));
+    } else {
+      const state = window.sessionStorage.getItem(
+        sliceSingleEntityRoutePath(route.path)
+      );
       if (state) return JSON.parse(state);
     }
     return undefined;

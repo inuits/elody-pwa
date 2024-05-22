@@ -115,7 +115,7 @@ import {
 import {
   Context,
   InBulkProcessableItem,
-  SavedContextForBulkOperationsForm
+  SavedContextForBulkOperationsForm,
 } from "@/composables/useBulkOperations";
 import {
   BulkOperationsContextEnum,
@@ -263,28 +263,33 @@ watch(selectedBulkOperation, () => {
     );
   }
   if (
-    selectedBulkOperation.value?.value === BulkOperationTypes.DownloadMediafiles
-    && selectedBulkOperation.value?.bulkOperationModal
+    selectedBulkOperation.value?.value ===
+      BulkOperationTypes.DownloadMediafiles &&
+    selectedBulkOperation.value?.bulkOperationModal
   ) {
-      let modal = selectedBulkOperation.value?.bulkOperationModal;
-      const enqueuedItems = getEnqueuedItems(props.context);
-      const savedContext: SavedContextForBulkOperationsForm = {
-        mediafiles: [],
-        entities: [],
-        includeAssetCsv: props.context !== RouteNames.Mediafile,
-        relationType: modal.formRelationType,
-      };
-      if (props.context === RouteNames.Mediafile || props.context === RouteNames.Mediafiles || props.context === BulkOperationsContextEnum.EntityElementMedia)
-        savedContext.mediafiles = enqueuedItems.map((item) => item.id);
-      else savedContext.entities = enqueuedItems.map((item) => item.id);
-      openModal(
-        modal.typeModal,
-        undefined,
-        "right",
-        modal.formQuery,
-        modal.askForCloseConfirmation,
-        savedContext,
-      );
+    let modal = selectedBulkOperation.value?.bulkOperationModal;
+    const enqueuedItems = getEnqueuedItems(props.context);
+    const savedContext: SavedContextForBulkOperationsForm = {
+      mediafiles: [],
+      entities: [],
+      includeAssetCsv: props.context !== RouteNames.Mediafile,
+      relationType: modal.formRelationType,
+    };
+    if (
+      props.context === RouteNames.Mediafile ||
+      props.context === RouteNames.Mediafiles ||
+      props.context === BulkOperationsContextEnum.EntityElementMedia
+    )
+      savedContext.mediafiles = enqueuedItems.map((item) => item.id);
+    else savedContext.entities = enqueuedItems.map((item) => item.id);
+    openModal(
+      modal.typeModal,
+      undefined,
+      "right",
+      modal.formQuery,
+      modal.askForCloseConfirmation,
+      savedContext
+    );
   }
 });
 

@@ -2,7 +2,7 @@ import { computed, ref } from "vue";
 import {
   ModalChoices,
   ModalState,
-  TypeModals
+  TypeModals,
 } from "@/generated-types/queries";
 import type { Context } from "@/composables/useBulkOperations";
 export type ModalPosition = "left" | "center" | "right";
