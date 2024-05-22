@@ -211,7 +211,7 @@ import ViewModesGrid from "@/components/library/view-modes/ViewModesGrid.vue";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
-import { getEntityIdFromRoute, getEntityTitle } from "@/helpers";
+import { getEntityTitle } from "@/helpers";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -323,9 +323,9 @@ const entityType = computed(() =>
     : ("BaseEntity" as Entitytyping)
 );
 
-const entityId = computed(() => getEntityIdFromRoute() as string);
 const relations = computed<BaseRelationValuesInput[]>(
-  () => getForm(entityId.value)?.values?.relationValues?.relations
+  () =>
+    getForm(props.parentEntityIdentifiers[0])?.values?.relationValues?.relations
 );
 
 const entityDropdownOptions = computed<DropdownOption[]>(() => {
@@ -421,7 +421,8 @@ const initializeBaseLibrary = async () => {
 const getDisplayPreferences = () => {
   const displayPreferences = getGlobalState("_displayPreferences");
   if (displayPreferences) {
-    if (!displayPreview.value && displayPreferences.grid) displayGrid.value = displayPreferences.grid;
+    if (!displayPreview.value && displayPreferences.grid)
+      displayGrid.value = displayPreferences.grid;
     if (displayGrid.value === false && !displayPreview.value)
       displayList.value = true;
     expandFilters.value = !props.enableAdvancedFilters

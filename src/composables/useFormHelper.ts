@@ -261,11 +261,12 @@ const useFormHelper = () => {
 
   const findRelation = (
     key: string,
-    type: string
+    type: string,
+    parentEntityId: string
   ):
     | { idx: number; relation: BaseRelationValuesInput }
     | "no-relation-found" => {
-    const { form } = getFormByRouteId();
+    const form = getForm(parentEntityId);
     if (!form || form.values.relationValues?.relations <= 0)
       return "no-relation-found";
     let idx: number | "no-idx" = "no-idx";

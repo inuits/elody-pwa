@@ -17,7 +17,9 @@
       :small="listItemRouteName === 'SingleMediafile'"
       :is-preview="true"
       :is-markable-as-to-be-deleted="parentEntityIdentifiers.length > 0"
-      :relation="findRelation(item.key, relationType)"
+      :relation="
+        findRelation(item.key, relationType, props.parentEntityIdentifiers[0])
+      "
       :has-selection="enableSelection"
     />
   </div>
@@ -54,7 +56,13 @@
         idsOfNonSelectableEntities.includes(entity.id) ||
         idsOfNonSelectableEntities.includes(entity.uuid)
       "
-      :relation="findRelation(entity.uuid, relationType)"
+      :relation="
+        findRelation(
+          entity.uuid,
+          relationType,
+          props.parentEntityIdentifiers[0]
+        )
+      "
       :has-selection="enableSelection"
       :base-library-mode="baseLibraryMode"
       :is-enable-navigation="enableNavigation"
@@ -81,7 +89,6 @@ import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import {
-  getEntityIdFromRoute,
   getEntityPageRoute,
   updateEntityMediafileOnlyForMediafiles,
 } from "@/helpers";
@@ -91,7 +98,6 @@ import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { OrderItem } from "@/composables/useOrderListItems";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { useRouter } from "vue-router";
 import EventBus from "@/EventBus";
 import { useLibraryBar } from "@/composables/useLibraryBar";
 
@@ -126,15 +132,14 @@ const { formatTeaserMetadata } = useBaseLibrary(
   apolloClient as ApolloClient<any>,
   props.parentEntityIdentifiers.length > 0
 );
-const { updateSelectedEntityMediafile, mediafileSelectionState } =
-  useEntityMediafileSelector();
+const { updateSelectedEntityMediafile } = useEntityMediafileSelector();
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { queryVariables } = useLibraryBar();
 const { getThumbnail } = useThumbnailHelper();
 const { getForm, findRelation, getTeaserMetadataInState } = useFormHelper();
-const entityId = computed(() => getEntityIdFromRoute() as string);
 const relations = computed<BaseRelationValuesInput[]>(
-  () => getForm(entityId.value)?.values?.relationValues?.relations
+  () =>
+    getForm(props.parentEntityIdentifiers[0])?.values?.relationValues?.relations
 );
 
 const getLinkSettings = (entity: Entity, listItemRouteName: string = "") => {

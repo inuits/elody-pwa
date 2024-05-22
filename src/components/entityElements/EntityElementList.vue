@@ -12,6 +12,7 @@
           @click.stop="
             () => {
               setAcceptedTypes(types as Entitytyping[]);
+              setEntityUuid(entityUuid);
               setRelationType(relationType);
               openModal(TypeModals.EntityPicker, undefined, 'right');
               toggleElementCollapse(label, false);
@@ -27,7 +28,13 @@
       <template v-slot:content>
         <div
           v-if="!requiresCustomQuery || queryLoaded"
-          :class="[{ 'ml-1 bg-neutral-lightest': baseLibraryMode === BaseLibraryModes.NormalBaseLibrary || baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder }]"
+          :class="[
+            {
+              'ml-1 bg-neutral-lightest':
+                baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+                baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder,
+            },
+          ]"
         >
           <BaseLibrary
             v-if="type === MediaFileElementTypes.Media"
@@ -124,7 +131,8 @@ import useUpload from "@/composables/useUpload";
 const { addRelations } = useFormHelper();
 const { createCustomContext } = useBulkOperations();
 const { toggleElementCollapse } = useEntityElementCollapseHelper();
-const { setAcceptedTypes, setRelationType } = useEntityPickerModal();
+const { setAcceptedTypes, setEntityUuid, setRelationType } =
+  useEntityPickerModal();
 const { openModal } = useBaseModal();
 const { loadDocument } = useImport();
 const { isEdit } = useEditMode();
@@ -213,6 +221,6 @@ const updateRelationForm = (newTags: String[]) => {
     id: str,
   }));
   setRelationType(props.relationType);
-  addRelations(InBulkProcessableItems);
+  addRelations(InBulkProcessableItems, props.relationType, props.entityUuid);
 };
 </script>
