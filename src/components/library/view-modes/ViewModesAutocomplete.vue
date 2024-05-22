@@ -148,13 +148,11 @@ const handleSelect = (options: DropdownOption[] | undefined) => {
   selectedDropdownOptions.value = [...options];
 };
 
-// what possibly we need to create an entity from tag
 const handleCreatingFromTag = async (option: any) => {
   if (!props.metadataKeyToCreateEntityFromOption || !props.canCreateOption)
     return;
   isCreatingEntity.value = true;
 
-  // call to create new entity & normalize response to the dropdown option
   const newEntity = await createEntity({
     key: props.metadataKeyToCreateEntityFromOption,
     value: option.label,
@@ -164,7 +162,6 @@ const handleCreatingFromTag = async (option: any) => {
     label: option.label,
   };
 
-  // handle selected option
   handleSelect([...selectedDropdownOptions.value, normalizedOption]);
   isCreatingEntity.value = false;
 };

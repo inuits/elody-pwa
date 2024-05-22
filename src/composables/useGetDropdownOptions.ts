@@ -96,7 +96,6 @@ export const useGetDropdownOptions = (
 
   const createEntityFromInput = (
     entityType: Entitytyping,
-    // key should be provided by graphql
     metadata: { key: string; value: string }
   ): EntityInput => {
     const entity: EntityInput = { type: entityType };
