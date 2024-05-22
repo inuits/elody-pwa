@@ -5,17 +5,19 @@
     :select-type="selectType"
     :model-value="selectedDropdownOptions"
     :disabled="disabled"
-    :loading="entitiesLoading || relatedEntitiesLoading"
+    :loading="entitiesLoading || relatedEntitiesLoading || isCreatingEntity"
     @search-change="
       (value: string) => {
         getAutocompleteOptions(value);
       }
     "
     @update:model-value="
-      (value: DropdownOption[]) => {
+      (value: DropdownOption[] | undefined) => {
         handleSelect(value);
       }
     "
+    :can-create-option="canCreateOption"
+    @add-option="handleCreatingFromTag"
   />
 </template>
 
@@ -31,6 +33,7 @@ import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import { getEntityIdFromRoute } from "@/helpers";
+import { useManageEntities } from "@/composables/useManageEntities";
 
 const props = withDefaults(
   defineProps<{
@@ -44,6 +47,8 @@ const props = withDefaults(
     formId: string | undefined;
     autoSelectable: boolean;
     disabled: boolean;
+    canCreateOption: boolean;
+    metadataKeyToCreateEntityFromOption?: string;
   }>(),
   {
     selectType: "multi",
@@ -53,12 +58,15 @@ const props = withDefaults(
     formId: undefined,
     autoSelectable: false,
     disabled: false,
+    canCreateOption: false,
   }
 );
 
+const isCreatingEntity = ref<boolean>(false);
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
 const { replaceRelationsFromSameType, addRelations } = useFormHelper();
 const entityId = getEntityIdFromRoute();
+const { createEntity } = useManageEntities();
 const {
   initialize,
   entityDropdownOptions,
@@ -139,5 +147,28 @@ const handleSelect = (options: DropdownOption[] | undefined) => {
   }
 
   selectedDropdownOptions.value = [...options];
+};
+
+const handleCreatingFromTag = async (option: any) => {
+  if (!props.metadataKeyToCreateEntityFromOption || !props.canCreateOption)
+    return;
+  isCreatingEntity.value = true;
+
+  const newEntity = await createEntity({
+    entityType: props.metadataKeyToCreateEntityFromOption as Entitytyping,
+    metadata: [
+      {
+        key: props.metadataKeyToCreateEntityFromOption,
+        value: option.label,
+      },
+    ],
+  });
+  const normalizedOption = {
+    value: newEntity.uuid,
+    label: option.label,
+  };
+
+  handleSelect([...selectedDropdownOptions.value, normalizedOption]);
+  isCreatingEntity.value = false;
 };
 </script>

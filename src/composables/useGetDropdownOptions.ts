@@ -15,8 +15,8 @@ import { getEntityTitle } from "@/helpers";
 export const useGetDropdownOptions = (
   entityType: Entitytyping,
   parent: "fetchAll" | string,
-  relationType: string = '',
-  searchFilterInput?: AdvancedFilterInput,
+  relationType: string = "",
+  searchFilterInput?: AdvancedFilterInput
 ) => {
   const apolloClient = inject(DefaultApolloClient);
   const {
@@ -59,7 +59,8 @@ export const useGetDropdownOptions = (
   };
 
   const getAutocompleteOptions = (searchValue: string) => {
-    const isEmptyAdvancedSearchFilter = !searchFilterInput || Object.values(searchFilterInput).includes(null);
+    const isEmptyAdvancedSearchFilter =
+      !searchFilterInput || Object.values(searchFilterInput).includes(null);
     if (isEmptyAdvancedSearchFilter) return;
 
     const advancedFilters =
@@ -71,7 +72,10 @@ export const useGetDropdownOptions = (
     getEntities(undefined);
   };
 
-  const getSearchFilter = (value: string, searchFilterInput: AdvancedFilterInput) => {
+  const getSearchFilter = (
+    value: string,
+    searchFilterInput: AdvancedFilterInput
+  ) => {
     const { __typename, ...filterProps } = searchFilterInput;
     return { ...filterProps, value };
   };
