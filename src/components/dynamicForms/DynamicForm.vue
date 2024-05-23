@@ -1,6 +1,8 @@
 <template>
   <div class="p-4 pt-0 h-full w-full overflow-y-auto" :key="dynamicFormQuery">
-    <div v-if="formFields && dynamicFormQuery" class="w-full">
+    <div v-if="formFields && dynamicFormQuery"
+         class="w-full [&>*>button:last-child]:mb-0"
+    >
       <h1 v-if="dynamicForm.GetDynamicForm.label" class="title pb-4">
         {{ t(dynamicForm.GetDynamicForm.label) }}
       </h1>
@@ -99,8 +101,8 @@
           button-style="accentAccent"
           @click="performActionButtonClickEvent(field)"
         />
-        <BaseButtonNew
-          v-if="
+         <BaseButtonNew
+             v-if="
             field.__typename === 'FormAction' &&
             field.actionType == ActionType.Download
           "
@@ -111,7 +113,19 @@
              button-style="accentAccent"
              @click="performActionButtonClickEvent(field)"
          />
-        </template>
+         <BaseButtonNew
+             v-if="
+            field.__typename === 'FormAction' &&
+            field.actionType == ActionType.Update
+          "
+             class="mt-5 mb-10"
+             :label="t((field as FormAction).label)"
+             :icon="field.icon"
+             :disabled="formContainsErrors"
+             button-style="accentAccent"
+             @click="performActionButtonClickEvent(field)"
+         />
+       </template>
       </div>
     </div>
     <div v-else class="h-screen w-full flex justify-center items-center">
@@ -302,6 +316,11 @@ const downloadActionFunction = async (field: FormAction) => {
   goToEntityPage(entity, "SingleEntity", props.router);
 };
 
+const updateMetdataActionFunction = async (field: FormAction) => {
+  if (formContainsErrors.value) return;
+  //TODO: put code here that calls graphql function to the bulk edit endpoint in the collection-api
+};
+
 const performActionButtonClickEvent = async (
   field: FormAction
 ): Promise<void> => {
@@ -310,6 +329,7 @@ const performActionButtonClickEvent = async (
     upload: () => uploadActionFunction(field),
     submit: () => submitActionFunction(field),
     download: () => downloadActionFunction(field),
+    update: () => updateMetdataActionFunction(field),
   };
   if (!field.actionType) return;
 
