@@ -9,7 +9,12 @@
       :to="isLink ? menuAction.action : undefined"
       @click="!isLink && menuAction?.action ? menuAction.action() : undefined"
       class="flex flex-row items-center pl-3 h-9 mt-3 cursor-pointer hover:bg-neutral-40 hover:rounded-lg"
-      :class="[{ 'bg-neutral-40 rounded-lg': isBeingHovered }]"
+      :class="[
+        {
+          'bg-neutral-40 rounded-lg': isBeingHovered,
+          'text-accent-accent': isActiveParentOrSubmenu,
+        },
+      ]"
     >
       <unicon
         v-if="icon && Unicons[icon]"
@@ -40,6 +45,7 @@
           @click="setSelectedMenuItem(menuitem)"
           :subMenuItem="submenuItem"
           :show="isBeingHovered as boolean"
+          @isActive="(isActiveChild: boolean) => isActiveChild = isActiveChild"
         />
       </div>
     </transition-group>
@@ -60,6 +66,7 @@ import { Permission } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useI18n } from "vue-i18n";
+import { useRoute } from "vue-router";
 import {
   ignorePermissions,
   permittedEntitiesToCreate,
@@ -79,6 +86,7 @@ const isLink = computed(
 );
 const hasPermissionForMenuItem = ref<boolean>(ignorePermissions.value);
 const linkTag = computed(() => (isLink.value ? "router-link" : "div"));
+const route = useRoute();
 
 const props = defineProps<{
   menuitem: MenuItem;
@@ -91,6 +99,16 @@ const isActive = computed(() => props.menuitem === selectedMenuItem.value);
 const iconColor = computed(() =>
   isActive.value ? "accent-normal" : "text-body"
 );
+const isActiveParentOrSubmenu = computed(() => {
+  const routePath = route.path.replace("/", "");
+  const isMenuActive =
+    routePath === (props.menuitem.typeLink?.route?.destination as string);
+  const isSubmenuActive = menuSubitem.value.some((subMenuItem: MenuItem) => {
+    return routePath === (subMenuItem.typeLink?.route?.destination as string);
+  });
+
+  return isMenuActive || isSubmenuActive;
+});
 
 const handleSubMenu = () => {
   const submenu = props.menuitem.subMenu;
