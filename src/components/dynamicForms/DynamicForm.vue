@@ -421,5 +421,3 @@ watch([formTabs, tabsTitle], ([tabs, tabsTitle]) => {
   emits('dynamicFormReady', { formTabs: tabs, tabsTitle: tabsTitle });
 });
 </script>
-
-<style scoped></style>
