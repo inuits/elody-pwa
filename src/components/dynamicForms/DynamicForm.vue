@@ -1,9 +1,6 @@
 <template>
   <div class="p-4 pt-0 h-full w-full overflow-y-auto" :key="dynamicFormQuery">
-    <div
-      v-if="formFields && dynamicFormQuery"
-      class="w-full [&>*>button:last-child]:mb-0"
-    >
+    <div v-if="formFields && dynamicFormQuery" class="w-full">
       <h1 v-if="dynamicForm.GetDynamicForm.label" class="title pb-4">
         {{ t(dynamicForm.GetDynamicForm.label) }}
       </h1>
@@ -12,9 +9,7 @@
         :key="`${dynamicFormQuery}_field_${index}`"
         class="pb-2"
       >
-       <template v-if="hasImportAvailable">
-         <ImportComponent v-if="field.key === 'fileSystemImport'" />
-         <metadata-wrapper v-else
+        <metadata-wrapper
           v-if="field.__typename === 'PanelMetaData'"
           :form-id="dynamicFormQuery"
           :metadata="field as PanelMetaData"
@@ -22,16 +17,6 @@
           form-flow="create"
           :key="`${dynamicFormQuery}_field_${index}`"
         />
-       </template>
-       <template v-else-if="!hasImportAvailable">
-         <metadata-wrapper
-             v-if="field.__typename === 'PanelMetaData' && field.key !== 'fileSystemImport'"
-             :form-id="dynamicFormQuery"
-             :metadata="field as PanelMetaData"
-             :is-edit="true"
-             form-flow="create"
-             :key="`${dynamicFormQuery}_field_${index}`"
-         />
         <div v-if="field.__typename === 'UploadContainer'">
           <div
             v-for="uploadContainerField in Object.values(field as any).filter(
@@ -154,7 +139,7 @@ import {
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
-import { computed, inject, ref, watch, defineEmits} from "vue";
+import { computed, inject, ref, watch } from "vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
@@ -168,7 +153,6 @@ import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useMenuHelper from "@/composables/useMenuHelper";
-import ImportComponent from "@/components/ImportComponent.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -176,17 +160,14 @@ const props = withDefaults(
     hasLinkedUpload?: boolean;
     savedContext?: any | undefined;
     router: Router;
-    importAvailable?: boolean;
   }>(),
   {
     hasLinkedUpload: false,
-    importAvailable: false,
   }
 );
 
 type FormFieldTypes = UploadContainer | PanelMetaData | FormAction;
 
-const hasImportAvailable = props.importAvailable;
 const config = inject("config");
 const { currentTenant } = useApp();
 const { createForm, deleteForm } = useFormHelper();
@@ -207,50 +188,13 @@ const {
   reinitializeDynamicFormFunc,
 } = useUpload();
 const { resetForm } = useForm();
-interface FormObject {
-  __typename: string;
-}
-const findFormTabObjects = (dynamicForm: Record<string, FormObject>): FormObject[] => {
-  if (!dynamicForm) {
-    return [];
-  }
-
-  return Object.values(dynamicForm).filter(value => value && value.__typename === "FormTab");
-};
 const formFields = computed<FormFieldTypes[] | undefined>(() => {
   if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"])
     return undefined;
-  const formTabObjects = findFormTabObjects(dynamicForm.value["GetDynamicForm"]);
-  if (formTabObjects.length === 0) {
-    return undefined;
-  }
-
-  const allFormFields: (UploadField | PanelMetaData | FormAction)[] = [];
-  for (const formTab of formTabObjects) {
-    const formFields = Object.values(formTab.formFields).filter(value => typeof value === "object");
-    allFormFields.push(...formFields);
-  }
-
-  return allFormFields;
+  return Object.values(dynamicForm.value["GetDynamicForm"].formFields).filter(
+    (value) => typeof value === "object"
+  );
 });
-
-const formTabs = computed<UploadField | PanelMetaData | FormAction | undefined>(() => {
-  if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"]) {
-    return [];
-  }
-  return dynamicForm.value.GetDynamicForm;
-});
-
-const tabsTitle = computed(() => {
-  if (!formTabs.value) {
-    return [];
-  }
-  const tabsArray = Object.entries(formTabs.value)
-      .filter(([key, value]) => value.__typename === 'FormTab')
-      .map(([key, value]) => ({ title: key, value }));
-  return tabsArray;
-});
-
 const form = ref<FormContext<any>>();
 const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
 const { getMenuDestinations } = useMenuHelper();
@@ -431,12 +375,6 @@ watch(
   },
   { deep: true, immediate: true }
 );
-
-const emits = defineEmits(['dynamicFormReady']);
-
-watch([formTabs, tabsTitle], ([tabs, tabsTitle]) => {
-  emits('dynamicFormReady', { formTabs: tabs, tabsTitle: tabsTitle });
-});
 </script>
 
 <style scoped></style>
