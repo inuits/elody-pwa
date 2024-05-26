@@ -14,7 +14,7 @@
     <div class="flex flex-col w-full h-full overflow-auto">
       <template v-if="shouldRenderTabs" class="h-full">
         <baseTabs :tabs="tabsTitles">
-          <baseTab v-for="(tabName, tabIndex) in filteredTabs" :title="tabName" :key="tabIndex">
+          <baseTab v-for="(formTab, tabIndex) in formTabArray" :key="tabIndex">
             <dynamic-form
                 v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
                 key="getModalInfo(TypeModals.DynamicForm).formQuery"
@@ -22,7 +22,7 @@
                 :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
                 :router="useRouter()"
                  @dynamicFormReady="handleDynamicFormReady"
-                :import-available=formTabs[tabName].formFields.fileSystemImporter
+                :modal-form-fields="formTab.formFields"
             />
           </baseTab>
         </baseTabs>
@@ -96,9 +96,11 @@ const shouldRenderTabs = computed(() => {
   return formTabArray.length > 1;
 });
 
-const filteredTabs = computed(() => {
-  const filtered = Object.keys(formTabs.value).filter(key => key !== '__typename');
-  return filtered;
+const formTabArray = computed(() => {
+  const formTabValues = Object.values(formTabs.value);
+  const filteredFormTabs = formTabValues.filter(item => item.__typename === "FormTab");
+
+  return filteredFormTabs;
 });
 </script>
 
