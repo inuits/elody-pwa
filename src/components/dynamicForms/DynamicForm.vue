@@ -12,15 +12,15 @@
         :key="`${dynamicFormQuery}_field_${index}`"
         class="pb-2"
       >
-         <ImportComponent v-if="field.key === 'fileSystemImport'" />
-         <metadata-wrapper
-             v-if="field.__typename === 'PanelMetaData' && field.key !== 'fileSystemImport'"
-             :form-id="dynamicFormQuery"
-             :metadata="field as PanelMetaData"
-             :is-edit="true"
-             form-flow="create"
-             :key="`${dynamicFormQuery}_field_${index}`"
-         />
+        <ImportComponent v-if="field.key === 'fileSystemImport'" />
+        <metadata-wrapper
+          v-if="field.__typename === 'PanelMetaData' && field.key !== 'fileSystemImport'"
+          :form-id="dynamicFormQuery"
+          :metadata="field as PanelMetaData"
+          :is-edit="true"
+          form-flow="create"
+          :key="`${dynamicFormQuery}_field_${index}`"
+        />
         <div v-if="field.__typename === 'UploadContainer'">
           <div
             v-for="uploadContainerField in Object.values(field as any).filter(
@@ -76,8 +76,8 @@
           "
           class="mt-5 mb-10"
           :label="
-          config?.features.hasTenantSelect
-            ? `${t(field.label)} ${t(`types.${field.creationType}`)}${
+            config?.features.hasTenantSelect
+              ? `${t(field.label)} ${t(`types.${field.creationType}`)}${
                 config.tenantDefiningTypes !== field.creationType
                     ? ` in ${t(
                         `navigation.tenant`
