@@ -78,7 +78,7 @@
           :label="
             config?.features.hasTenantSelect
               ? `${t(field.label)} ${t(`types.${field.creationType}`)}${
-                config.tenantDefiningTypes !== field.creationType
+                  config.tenantDefiningTypes !== field.creationType
                     ? ` in ${t(
                         `navigation.tenant`
                       ).toLowerCase()} ${currentTenant}`
