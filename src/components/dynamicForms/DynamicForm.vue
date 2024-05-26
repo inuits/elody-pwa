@@ -70,15 +70,15 @@
           @reset-upload="initializeForm"
         />
         <BaseButtonNew
-            v-if="
+          v-if="
             field.__typename === 'FormAction' &&
             field.actionType == ActionType.Submit
           "
-            class="mt-5 mb-10"
-            :label="
-            config?.features.hasTenantSelect
-              ? `${t(field.label)} ${t(`types.${field.creationType}`)}${
-                  config.tenantDefiningTypes !== field.creationType
+          class="mt-5 mb-10"
+          :label="
+          config?.features.hasTenantSelect
+            ? `${t(field.label)} ${t(`types.${field.creationType}`)}${
+                config.tenantDefiningTypes !== field.creationType
                     ? ` in ${t(
                         `navigation.tenant`
                       ).toLowerCase()} ${currentTenant}`
@@ -86,34 +86,34 @@
                 }`
               : t(field.label)
           "
-            :icon="field.icon"
-            :disabled="formContainsErrors"
-            button-style="accentAccent"
-            @click="performActionButtonClickEvent(field)"
+          :icon="field.icon"
+          :disabled="formContainsErrors"
+          button-style="accentAccent"
+          @click="performActionButtonClickEvent(field)"
         />
         <BaseButtonNew
-            v-if="
+          v-if="
             field.__typename === 'FormAction' &&
             field.actionType == ActionType.Download
           "
-            class="mt-5 mb-10"
-            :label="t((field as FormAction).label)"
-            :icon="field.icon"
-            :disabled="formContainsErrors"
-            button-style="accentAccent"
-            @click="performActionButtonClickEvent(field)"
+          class="mt-5 mb-10"
+          :label="t((field as FormAction).label)"
+          :icon="field.icon"
+          :disabled="formContainsErrors"
+          button-style="accentAccent"
+          @click="performActionButtonClickEvent(field)"
         />
         <BaseButtonNew
-            v-if="
+          v-if="
             field.__typename === 'FormAction' &&
             field.actionType == ActionType.Update
           "
-            class="mt-5 mb-10"
-            :label="t((field as FormAction).label)"
-            :icon="field.icon"
-            :disabled="formContainsErrors"
-            button-style="accentAccent"
-            @click="performActionButtonClickEvent(field)"
+          class="mt-5 mb-10"
+          :label="t((field as FormAction).label)"
+          :icon="field.icon"
+          :disabled="formContainsErrors"
+          button-style="accentAccent"
+          @click="performActionButtonClickEvent(field)"
         />
       </div>
     </div>
