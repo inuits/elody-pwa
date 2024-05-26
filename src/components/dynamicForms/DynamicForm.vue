@@ -7,22 +7,11 @@
         {{ t(dynamicForm.GetDynamicForm.label) }}
       </h1>
       <div
-        v-for="(field, index) in formFields"
+        v-for="(field, index) in getFieldArray"
         :key="`${dynamicFormQuery}_field_${index}`"
         class="pb-2"
       >
-       <template v-if="hasImportAvailable">
          <ImportComponent v-if="field.key === 'fileSystemImport'" />
-         <metadata-wrapper v-else
-          v-if="field.__typename === 'PanelMetaData'"
-          :form-id="dynamicFormQuery"
-          :metadata="field as PanelMetaData"
-          :is-edit="true"
-          form-flow="create"
-          :key="`${dynamicFormQuery}_field_${index}`"
-        />
-       </template>
-       <template v-else-if="!hasImportAvailable">
          <metadata-wrapper
              v-if="field.__typename === 'PanelMetaData' && field.key !== 'fileSystemImport'"
              :form-id="dynamicFormQuery"
@@ -125,7 +114,6 @@
              button-style="accentAccent"
              @click="performActionButtonClickEvent(field)"
          />
-       </template>
       </div>
     </div>
     <div v-else class="h-screen w-full flex justify-center items-center">
@@ -176,17 +164,17 @@ const props = withDefaults(
     hasLinkedUpload?: boolean;
     savedContext?: any | undefined;
     router: Router;
-    importAvailable?: boolean;
+    modalFormFields?: object;
   }>(),
   {
     hasLinkedUpload: false,
-    importAvailable: false,
+    modalFormFields: [],
   }
 );
 
 type FormFieldTypes = UploadContainer | PanelMetaData | FormAction;
 
-const hasImportAvailable = props.importAvailable;
+const modalFormFields = props.modalFormFields;
 const config = inject("config");
 const { currentTenant } = useApp();
 const { createForm, deleteForm } = useFormHelper();
@@ -249,6 +237,10 @@ const tabsTitle = computed(() => {
       .filter(([key, value]) => value.__typename === 'FormTab')
       .map(([key, value]) => ({ title: key, value }));
   return tabsArray;
+});
+
+const getFieldArray = computed(() => {
+  return modalFormFields ? modalFormFields : formFields.value || [];
 });
 
 const form = ref<FormContext<any>>();
