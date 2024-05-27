@@ -2,7 +2,7 @@
   <nav
     ref="navigation"
     :class="[
-      'navbar fixed left-0 top-0 w-24 h-screen align-center pt-10 bg-neutral-white px-5 pb-16 z-50',
+      'navbar fixed left-0 top-0 w-24 h-screen align-center pt-10 bg-neutral-white px-5 pb-16 z-40',
       { 'w-80': isExpanded },
     ]"
     @click="changeExpandedState(true)"
@@ -44,7 +44,7 @@ import type { MenuItem } from "@/generated-types/queries";
 import LogInLogout from "@/components/LogInLogout.vue";
 import Menuitem from "@/components/menu/MenuItem.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
-import { ref, watch, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { RouterLink } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
 
@@ -80,7 +80,8 @@ const closeExpanded = (event: any) => {
   if (!navigation.value) return;
 
   const isClickedOutsideNavigation =
-    navigation.value && !navigation.value.contains(event.target);
+    navigation.value &&
+    !navigation.value.innerHTML.includes(event.target.innerHTML);
   if (isClickedOutsideNavigation && !isCenterModalOpened.value) {
     changeExpandedState(false);
     changeHoveredItem(undefined);

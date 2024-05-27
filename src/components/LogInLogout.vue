@@ -8,7 +8,7 @@
         @click="auth.redirectToLogin()"
         :name="Unicons.UserCircle.name"
         height="21"
-        class="mt-1 ml-4"
+        class="mt-1 ml-5"
       />
       <transition v-if="isExpanded">
         <span
@@ -30,7 +30,7 @@
         @click="() => openConfirmationModal()"
         :name="Unicons.SignOut.name"
         height="20"
-        class="mt-1 ml-4"
+        class="mt-1 ml-5"
       />
       <transition v-if="isExpanded">
         <span

@@ -11,14 +11,16 @@
     </div>
 
     <Transition>
-      <div
-        ref="defaultSlotRef"
-        v-if="hasContent && hover"
-        class="shadow-lg rounded bg-neutral-0 w-56 p-2 z-10"
-        :style="floatingStyles"
-      >
-        <slot> </slot>
-      </div>
+      <Teleport to="body" v-if="hasContent && hover">
+        <div
+          ref="defaultSlotRef"
+          v-if="hasContent && hover"
+          class="shadow-lg rounded bg-neutral-0 max-w-56 p-2 z-50"
+          :style="floatingStyles"
+        >
+          <slot> </slot>
+        </div>
+      </Teleport>
     </Transition>
   </div>
 </template>
@@ -28,7 +30,7 @@ import { computed, ref, useSlots, VNode } from "vue";
 import {
   offset,
   useFloating,
-  Placement,
+  type Placement,
   autoPlacement,
 } from "@floating-ui/vue";
 
