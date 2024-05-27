@@ -2,6 +2,7 @@ import type { EntityInput } from "@/generated-types/queries";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import { ref } from "vue";
+import { setDynamicForm } from '@/store/store';
 
 const dynamicForm = ref<any | undefined>(undefined);
 const dynamicFormUploadFields = ref<any[]>([]);
@@ -15,6 +16,7 @@ const useDynamicForm = () => {
       })
       .then((result) => {
         dynamicForm.value = result.data;
+        setDynamicForm(result.data);
       });
   };
 
