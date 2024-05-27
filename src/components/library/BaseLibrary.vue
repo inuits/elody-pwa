@@ -54,7 +54,7 @@
               "
               @apply-filters="
                 async (filters: AdvancedFilterInput[], force: Boolean = true) =>
-                  await setAdvancedFilters(filters, force)
+                  await setAdvancedFilters(filters, force, route)
               "
               @expand-filters="expandFilters = !expandFilters"
             />
@@ -401,7 +401,7 @@ const refetchEntities = async () => {
 const initializeBaseLibrary = async () => {
   setIsSearchLibrary(props.isSearchLibrary || false);
   if (!props.predefinedEntities) {
-    if (props.filters.length > 0) setAdvancedFilters(props.filters);
+    if (props.filters.length > 0) setAdvancedFilters(props.filters, false, route);
     setEntityType(
       (props.filterType as Entitytyping) ||
         props.entityType ||

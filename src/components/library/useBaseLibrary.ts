@@ -70,10 +70,12 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
 
   const setAdvancedFilters = async (
     filters: AdvancedFilterInput[],
-    forceFetch: boolean = false
+    forceFetch: boolean = false,
+    route?: RouteLocationNormalizedLoaded
   ): Promise<void> => {
     if (filters === queryVariables.advancedFilterInputs && !isSaved.value)
       return;
+    if (route) _route = route;
 
     queryVariables.advancedFilterInputs = [];
     queryVariables.advancedFilterInputs = filters;
