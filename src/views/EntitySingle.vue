@@ -2,7 +2,7 @@
   <div>
     <div
       v-if="!loading && entity"
-      class="pl-24 h-full w-full flex fixed top-0 bg-neutral-lightest pt-24 left-0"
+      class="pl-24 h-full w-full flex fixed top-0 bg-neutral-lightest pt-24 left-0 z-2"
     >
       <entity-form
         v-if="intialValues != 'no-values' && relationValues != 'no-values'"
@@ -21,7 +21,7 @@
     </div>
     <div
       v-else
-      class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0 animate-pulse text-neutral-20"
+      class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0 animate-pulse text-neutral-20 z-2"
     />
   </div>
 </template>
