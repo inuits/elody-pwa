@@ -9,7 +9,7 @@
       },
       { '!border-status-new': isPreview },
       { '!border-status-deleted': isMarkedAsToBeDeleted },
-      { 'bg-gray-100 !cursor-default': isDisabled },
+      { 'grayscale brightness-95 !cursor-default': isDisabled },
       { 'animate-pulse': loading },
     ]"
   >
