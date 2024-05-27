@@ -21,7 +21,6 @@
                 :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
                 :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
                 :router="useRouter()"
-                 @dynamicFormReady="handleDynamicFormReady"
                 :modal-form-fields="formTab.formFields"
             />
           </baseTab>
@@ -33,7 +32,6 @@
           :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
           :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
           :router="useRouter()"
-          @dynamicFormReady="handleDynamicFormReady"
       />
     </div>
   </BaseModal>
@@ -48,19 +46,14 @@ import { useRouter } from "vue-router";
 import BaseTabs from "@/components/BaseTabs.vue";
 import BaseTab from "@/components/BaseTab.vue";
 import { useI18n } from "vue-i18n";
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { onMounted, computed } from 'vue';
 import { useConfirmModal } from "@/composables/useConfirmModal";
+import { state } from '@/store/store';
 
 const { closeModal, getModalInfo, changeCloseConfirmation } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const { t } = useI18n();
-
-const formTabs = ref([]);
-const tabsTitle = ref([]);
-const handleDynamicFormReady = (event) => {
-  formTabs.value = event.formTabs;
-  tabsTitle.value = event.tabsTitle;
-};
+const formTabs = computed(() => state.dynamicForm?.GetDynamicForm ?? {});
 
 onMounted(() => {
   initializeConfirmModal(
@@ -72,20 +65,12 @@ onMounted(() => {
     () => closeModal(TypeModals.Confirm),
     "discard-modal"
   );
-
-  window.addEventListener('dynamicFormReady', handleDynamicFormReady);
-
-  onUnmounted(() => {
-    window.removeEventListener('dynamicFormReady', handleDynamicFormReady);
-  });
 });
 
 const tabsTitles = computed(() => {
-  const filteredArray = Object.values(tabsTitle._rawValue)
-      .filter(item => item && item.title)
-      .map(item => t("entity."+item.title));
-
-  return filteredArray;
+  return Object.entries(formTabs.value ?? {})
+      .filter(([_, value]) => value.__typename === 'FormTab')
+      .map(([key]) => t("entity." + key));
 });
 
 const shouldRenderTabs = computed(() => {
