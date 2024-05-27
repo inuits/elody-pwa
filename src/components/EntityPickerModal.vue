@@ -11,9 +11,9 @@
       }
     "
   >
-    <div class="flex flex-col w-full h-full overflow-auto">
+    <div class="flex flex-col w-full h-full overflow-hidden">
       <BaseTabs class="h-full" :tabs="tabs">
-        <BaseTab :title="tabs[0]">
+        <BaseTab :title="tabs[0]" class="overflow-auto">
           <BaseLibrary
             v-if="
               getModalInfo(TypeModals.EntityPicker).state === ModalState.Show
@@ -53,6 +53,7 @@
         </BaseTab>
         <BaseTab :title="tabs[1]">
           <dynamic-form
+            class="overflow-auto"
             v-if="
               getModalInfo(TypeModals.EntityPicker).state === ModalState.Show
             "
