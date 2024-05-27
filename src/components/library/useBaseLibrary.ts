@@ -160,7 +160,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
       })
       .then((result) => {
         const fetchedEntities = result.data.Entities;
-        entities.value = [...fetchedEntities?.results, ...fetchedEntities?.results] as Entity[];
+        entities.value = fetchedEntities?.results as Entity[];
         totalEntityCount.value = fetchedEntities?.count || 0;
         updateStateForRoute(_route, {
           entityCountOnPage: fetchedEntities.results.length,
