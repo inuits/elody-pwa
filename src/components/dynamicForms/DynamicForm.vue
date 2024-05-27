@@ -143,7 +143,7 @@ import {
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
-import { computed, inject, ref, watch, defineEmits} from "vue";
+import { computed, inject, ref, watch} from "vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
@@ -207,38 +207,17 @@ const findFormTabObjects = (dynamicForm: Record<string, FormObject>): FormObject
 
   return Object.values(dynamicForm).filter(value => value && value.__typename === "FormTab");
 };
+
 const formFields = computed<FormFieldTypes[] | undefined>(() => {
-  if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"])
-    return undefined;
-  const formTabObjects = findFormTabObjects(dynamicForm.value["GetDynamicForm"]);
-  if (formTabObjects.length === 0) {
-    return undefined;
-  }
+  const formTabs = dynamicForm.value?.GetDynamicForm;
+  if (!formTabs) return undefined;
 
-  const allFormFields: (UploadField | PanelMetaData | FormAction)[] = [];
-  for (const formTab of formTabObjects) {
-    const formFields = Object.values(formTab.formFields).filter(value => typeof value === "object");
-    allFormFields.push(...formFields);
-  }
+  const formTabObjects = findFormTabObjects(formTabs);
+  if (!formTabObjects.length) return undefined;
 
-  return allFormFields;
-});
-
-const formTabs = computed<UploadField | PanelMetaData | FormAction | undefined>(() => {
-  if (!dynamicForm.value || !dynamicForm.value["GetDynamicForm"]) {
-    return [];
-  }
-  return dynamicForm.value.GetDynamicForm;
-});
-
-const tabsTitle = computed(() => {
-  if (!formTabs.value) {
-    return [];
-  }
-  const tabsArray = Object.entries(formTabs.value)
-      .filter(([key, value]) => value.__typename === 'FormTab')
-      .map(([key, value]) => ({ title: key, value }));
-  return tabsArray;
+  return formTabObjects.flatMap(formTab =>
+      Object.values(formTab.formFields).filter(value => typeof value === "object")
+  );
 });
 
 const getFieldArray = computed(() => {
@@ -427,12 +406,6 @@ watch(
   },
   { deep: true, immediate: true }
 );
-
-const emits = defineEmits(['dynamicFormReady']);
-
-watch([formTabs, tabsTitle], ([tabs, tabsTitle]) => {
-  emits('dynamicFormReady', { formTabs: tabs, tabsTitle: tabsTitle });
-});
 </script>
 
 <style scoped></style>
