@@ -8,7 +8,7 @@
       :is="linkTag"
       :to="isLink ? menuAction.action : undefined"
       @click="!isLink && menuAction?.action ? menuAction.action() : undefined"
-      class="flex flex-row items-center pl-3 h-9 mt-3 cursor-pointer hover:bg-neutral-40 hover:rounded-lg"
+      class="flex flex-row items-center pl-4 h-9 mt-3 cursor-pointer hover:bg-neutral-40 hover:rounded-lg"
       :class="[
         {
           'bg-neutral-40 rounded-lg': isBeingHovered,
@@ -16,13 +16,40 @@
         },
       ]"
     >
+      <base-tooltip v-if="!isExpanded" position="right" :tooltip-offset="24">
+        <template #activator="{ on }">
+          <div
+            v-on="on"
+            :class="icon && Unicons[icon] ? 'h-[18px]' : 'h-[24px]'"
+          >
+            <unicon
+              v-if="icon && Unicons[icon]"
+              v-on="on"
+              :name="Unicons[icon].name"
+              height="18"
+            />
+            <CustomIcon v-else :icon="icon" :size="24" :color="iconColor" />
+          </div>
+        </template>
+        <template #default>
+          <span class="text-sm w-max font-bold">
+            <div class="w-max">
+              {{ t(menuitem?.label) }}
+            </div>
+          </span>
+        </template>
+      </base-tooltip>
+
       <unicon
-        v-if="icon && Unicons[icon]"
+        v-if="icon && Unicons[icon] && isExpanded"
         :name="Unicons[icon].name"
         height="18"
       />
       <CustomIcon v-else :icon="icon" :size="24" :color="iconColor" />
-      <div v-if="isExpanded" class="w-full flex">
+      <div
+        v-if="isExpanded"
+        class="w-full grid grid-cols-[1fr_auto] items-center"
+      >
         <span class="w-3/4 px-4 font-bold">
           {{ t(menuitem?.label) }}
         </span>
@@ -72,6 +99,7 @@ import {
   permittedEntitiesToCreate,
   usePermissions,
 } from "@/composables/usePermissions";
+import BaseTooltip from "@/components/base/BaseTooltip.vue";
 
 const { checkIfRouteOrModal, setSelectedMenuItem, selectedMenuItem } =
   useMenuHelper();
