@@ -111,6 +111,10 @@ module.exports = {
       },
     },
     extend: {
+      zIndex: {
+        1: 1,
+        2: 2,
+      },
       spacing: {
         76: "305px",
       },
