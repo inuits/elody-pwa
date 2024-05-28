@@ -1,6 +1,6 @@
 <template>
-  <div class="w-full relative">
-    <video class="w-full h-full" :src="videoUrl" controls refs="myVideo">
+  <div class="w-full h-full relative">
+    <video class="w-full h-full bg-white" :src="videoUrl" controls refs="myVideo">
       <source
         :src="videoUrl"
         :type="
