@@ -45,7 +45,12 @@
         :name="Unicons[icon].name"
         height="18"
       />
-      <CustomIcon v-else :icon="icon" :size="24" :color="iconColor" />
+      <CustomIcon
+        v-if="icon && !Unicons[icon] && isExpanded"
+        :icon="icon"
+        :size="24"
+        :color="iconColor"
+      />
       <div
         v-if="isExpanded"
         class="w-full grid grid-cols-[1fr_auto] items-center"
