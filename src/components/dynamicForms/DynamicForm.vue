@@ -12,9 +12,9 @@
         :key="`${dynamicFormQuery}_field_${index}`"
         class="pb-2"
       >
-        <ImportComponent v-if="field.key === 'fileSystemImport'" />
+        <ImportComponent v-if="field.inputField?.type === 'baseFileSystemImportField'" />
         <metadata-wrapper
-          v-if="field.__typename === 'PanelMetaData' && field.key !== 'fileSystemImport'"
+          v-else-if="field.__typename === 'PanelMetaData'"
           :form-id="dynamicFormQuery"
           :metadata="field as PanelMetaData"
           :is-edit="true"
