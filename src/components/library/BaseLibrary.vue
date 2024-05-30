@@ -401,7 +401,8 @@ const refetchEntities = async () => {
 const initializeBaseLibrary = async () => {
   setIsSearchLibrary(props.isSearchLibrary || false);
   if (!props.predefinedEntities) {
-    if (props.filters.length > 0) setAdvancedFilters(props.filters, false, route);
+    if (props.filters.length > 0)
+      setAdvancedFilters(props.filters, false, route);
     setEntityType(
       (props.filterType as Entitytyping) ||
         props.entityType ||

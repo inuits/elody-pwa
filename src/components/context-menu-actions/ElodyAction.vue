@@ -16,7 +16,8 @@ import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { useFieldArray } from "vee-validate";
 import useEditMode, { type callback } from "@/composables/useEdit";
 const { update } = useFieldArray("relationValues.relations");
-const { save, disableEditMode, addSaveCallback, clearSaveCallbacks } = useEditMode();
+const { save, disableEditMode, addSaveCallback, clearSaveCallbacks } =
+  useEditMode();
 import { inject } from "vue";
 
 const props = defineProps<{
