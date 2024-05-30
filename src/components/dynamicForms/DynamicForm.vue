@@ -169,7 +169,7 @@ const props = withDefaults(
   }>(),
   {
     hasLinkedUpload: false,
-    modalFormFields: [],
+    modalFormFields: undefined,
   }
 );
 
