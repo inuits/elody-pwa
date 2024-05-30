@@ -234,11 +234,7 @@ const advancedFiltersPromise = async (entityType: Entitytyping) => {
       advancedFilters.value = (
         result.data?.EntityTypeFilters as BaseEntity
       )?.advancedFilters;
-      if (advancedFilters.value) {
-        //if (props.manipulationQuery?.filtersDocument)
-        //  setAdvancedFilterInputs(advancedFilters.value);
-        handleAdvancedFilters();
-      }
+      handleAdvancedFilters();
     });
 };
 
@@ -259,65 +255,66 @@ const handleFilterMatcherMapping = () => {
 };
 
 const handleAdvancedFilters = () => {
-  if (!advancedFilters.value) return;
   filters.value = [];
   activeFilters.value = [];
-  const state = getStateForRoute(props.route);
 
-  if (!state?.filterListItems || state.filterListItems.length == 0) {
-    Object.values(advancedFilters.value).forEach((advancedFilter) => {
-      if (typeof advancedFilter !== "string") {
-        let hiddenFilter: AdvancedFilterInput | undefined;
-        if (advancedFilter.hidden) {
-          hiddenFilter = {
-            type: advancedFilter.type,
-            parent_key: advancedFilter.parentKey,
-            key: advancedFilter.key,
-            value: advancedFilter.defaultValue,
-            item_types: advancedFilter.itemTypes,
-            match_exact: true,
-            edge_collection: advancedFilter.edgeCollection,
-          };
-          if (advancedFilter.lookup)
-            hiddenFilter.lookup = {
-              from: advancedFilter.lookup.from,
-              local_field: advancedFilter.lookup.local_field,
-              foreign_field: advancedFilter.lookup.foreign_field,
-              as: advancedFilter.lookup.as,
+  if (advancedFilters.value) {
+    const state = getStateForRoute(props.route);
+    if (!state?.filterListItems || state.filterListItems.length == 0) {
+      Object.values(advancedFilters.value).forEach((advancedFilter) => {
+        if (typeof advancedFilter !== "string") {
+          let hiddenFilter: AdvancedFilterInput | undefined;
+          if (advancedFilter.hidden) {
+            hiddenFilter = {
+              type: advancedFilter.type,
+              parent_key: advancedFilter.parentKey,
+              key: advancedFilter.key,
+              value: advancedFilter.defaultValue,
+              item_types: advancedFilter.itemTypes,
+              match_exact: true,
+              edge_collection: advancedFilter.edgeCollection,
             };
+            if (advancedFilter.lookup)
+              hiddenFilter.lookup = {
+                from: advancedFilter.lookup.from,
+                local_field: advancedFilter.lookup.local_field,
+                foreign_field: advancedFilter.lookup.foreign_field,
+                as: advancedFilter.lookup.as,
+              };
 
-          if (
-            advancedFilter.parentKey === "relations" ||
-            advancedFilter.parentKey === "edge" ||
-            (advancedFilter.type === AdvancedFilterTypes.Selection &&
-              advancedFilter.hidden) // this needs a refactor
-          ) {
-            if (props.parentEntityIdentifiers.length > 0) {
-              hiddenFilter.value = props.parentEntityIdentifiers;
-              if (advancedFilter.itemTypes)
-                activeFilters.value = [hiddenFilter];
-              else activeFilters.value.push(hiddenFilter);
-            }
-          } else activeFilters.value.push(hiddenFilter);
+            if (
+              advancedFilter.parentKey === "relations" ||
+              advancedFilter.parentKey === "edge" ||
+              (advancedFilter.type === AdvancedFilterTypes.Selection &&
+                advancedFilter.hidden) // this needs a refactor
+            ) {
+              if (props.parentEntityIdentifiers.length > 0) {
+                hiddenFilter.value = props.parentEntityIdentifiers;
+                if (advancedFilter.itemTypes)
+                  activeFilters.value = [hiddenFilter];
+                else activeFilters.value.push(hiddenFilter);
+              }
+            } else activeFilters.value.push(hiddenFilter);
+          }
+
+          filters.value.push({
+            isActive: advancedFilter.hidden,
+            isDisplayed: advancedFilter.isDisplayedByDefault ?? false,
+            advancedFilter,
+            inputFromState: hiddenFilter,
+            selectedMatcher: undefined,
+          });
         }
-
-        filters.value.push({
-          isActive: advancedFilter.type === AdvancedFilterTypes.Type,
-          isDisplayed: advancedFilter.isDisplayedByDefault ?? false,
-          advancedFilter,
-          inputFromState: hiddenFilter,
-          selectedMatcher: undefined,
-        });
-      }
-    });
-    updateStateForRoute(props.route, {
-      filterListItems: JSON.parse(JSON.stringify(filters.value)),
-    });
-  } else {
-    filters.value = state?.filterListItems;
-    activeFilters.value = filters.value
-      .filter((filter) => filter.isActive && filter.inputFromState)
-      .map((filter) => filter.inputFromState) as AdvancedFilterInput[];
+      });
+      updateStateForRoute(props.route, {
+        filterListItems: JSON.parse(JSON.stringify(filters.value)),
+      });
+    } else {
+      filters.value = state?.filterListItems;
+      activeFilters.value = filters.value
+        .filter((filter) => filter.isActive && filter.inputFromState)
+        .map((filter) => filter.inputFromState) as AdvancedFilterInput[];
+    }
   }
 
   applyFilters();
