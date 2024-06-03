@@ -173,7 +173,8 @@ type FormFieldTypes = UploadContainer | PanelMetaData | FormAction;
 
 const config = inject("config");
 const { currentTenant } = useApp();
-const { createForm, deleteForm } = useFormHelper();
+const { createForm, deleteForm, parseRelationValuesForFormSubmit } =
+  useFormHelper();
 const { loadDocument } = useImport();
 const { closeModal } = useBaseModal();
 const {
@@ -214,7 +215,9 @@ const createEntityFromFormInput = (entityType: Entitytyping): EntityInput => {
       return { key, value: form.value?.values.intialValues[key] };
     })
     .filter((metadataItem: MetadataInput) => metadataItem.value);
-  entity.relations = form.value?.values.relationValues.relations;
+  entity.relations = parseRelationValuesForFormSubmit(
+    form.value?.values.relationValues
+  );
   return entity;
 };
 
