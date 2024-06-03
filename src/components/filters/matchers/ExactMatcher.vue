@@ -65,6 +65,7 @@ import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import { computed, defineEmits, onMounted, reactive, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
+import { useRoute } from "vue-router";
 
 const props = defineProps<{
   filter: FilterListItem;
@@ -80,6 +81,7 @@ const emit = defineEmits<{
   (event: "filterOptions", filterOptions: string[]): void;
 }>();
 
+const route = useRoute();
 const { t } = useI18n();
 
 const input = ref<string | number | DropdownOption[]>();
@@ -169,6 +171,7 @@ const getAutocompleteOptions = (value: string) => {
         provide_value_options_for_key: true,
       },
       limit: 999999,
+      entityType: route.meta.entityType as string
     };
     if (
       props.filter.advancedFilter.advancedFilterInputForRetrievingOptions.lookup
@@ -250,6 +253,7 @@ onMounted(() => {
         provide_value_options_for_key: true,
       },
       limit: 11,
+      entityType: route.meta.entityType as string
     };
     if (
       props.filter.advancedFilter.advancedFilterInputForRetrievingOptions.lookup
