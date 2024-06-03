@@ -65,7 +65,13 @@ const {
   setDisableState,
   clearSaveCallbacks,
 } = useEditMode();
-const { createForm, editableFields } = useFormHelper();
+const {
+  createForm,
+  editableFields,
+  parseIntialValuesForFormSubmit,
+  parseRelationValuesForFormSubmit,
+  parseRelationMetadataForFormSubmit,
+} = useFormHelper();
 const { createNotification } = useNotification();
 const { closeModal, openModal } = useBaseModal();
 const { t } = useI18n();
@@ -87,66 +93,35 @@ const formContainsErrors = computed((): boolean => !form?.meta.value.valid);
 
 const { setValues } = form;
 
-const linkedEntityId = (key: string) => {
-  return key.slice(key.indexOf("-") + 1, key.length);
-};
-const fieldKeyWithoutId = (key: string) => {
-  return key.slice(0, key.indexOf("-"));
-};
-
 const parseFormValuesToFormInput = (values: EntityValues) => {
-  const metadata: MetadataValuesInput[] = [];
-  Object.keys(values.intialValues)
-    .filter((key) => key !== "__typename")
-    .forEach((key) => {
-      if (!editableFields.value[props.uuid]?.includes(key)) return;
-      metadata.push({ key, value: (values.intialValues as any)[key] });
-    });
+  let metadata: MetadataValuesInput[] = [];
+  let relations: BaseRelationValuesInput[] = [];
 
-  const relations: BaseRelationValuesInput[] = [];
-  values?.relationValues?.relations?.forEach((relation) => {
-    const relationInput: any = {};
-    Object.keys(relation)
-      .filter((key) => key !== "__typename")
-      .forEach((key) => {
-        relationInput[key] = (relation as any)[key];
-      });
+  if (values.intialValues)
+    metadata = parseIntialValuesForFormSubmit(values.intialValues, props.uuid);
+  if (values.relationValues)
+    relations = parseRelationValuesForFormSubmit(values.relationValues);
+  if (values.relationMetadata && relations)
+    relations = parseRelationMetadataForFormSubmit(
+      values.relationMetadata,
+      relations,
+      props.uuid
+    );
 
-    if (!(relationInput as BaseRelationValuesInput).editStatus)
-      (relationInput as BaseRelationValuesInput).editStatus =
-        EditStatus.Unchanged;
-    relations.push(relationInput);
-  });
-
-  if (values.relationValues?.relationMetadata) {
-    Object.entries(values.relationValues?.relationMetadata)
-      .filter((entry) => !editableFields.value[props.uuid].includes(entry.key))
-      .forEach((entry) => {
-        const newRelationObject = {
-          key: fieldKeyWithoutId(entry[0]),
-          value: entry[1],
-        };
-        const id = linkedEntityId(entry[0]);
-        for (let i = 0; i < relations.length; i++) {
-          if (relations[i].key === id) {
-            if (relations[i].metadata === undefined) relations[i].metadata = [];
-            relations[i].metadata.push(newRelationObject);
-            if (relations[i].editStatus !== EditStatus.Deleted)
-              relations[i].editStatus = EditStatus.Changed;
-          }
-        }
-      });
-  }
   return { metadata, relations };
 };
 
 const submit = useSubmitForm<EntityValues>(async () => {
+  const collection = childRoutes.find(
+    (route: any) => route.entityType?.toLowerCase() === props.type.toLowerCase()
+  ).type;
+
+  if (!collection) throw Error("Could not determine collection for submit");
+
   const result = await mutate({
     id: props.uuid,
-    formInput: parseFormValuesToFormInput(form.values),
-    collection: childRoutes.find(
-      (route: any) => route.entityType === props.type
-    ).type,
+    formInput: parseFormValuesToFormInput(unref(form.values)),
+    collection,
   });
 
   if (!result?.data?.mutateEntityValues) return;
@@ -192,11 +167,6 @@ watch(isEdit, () => {
     BulkOperationsContextEnum.EntityElementMediaEntityPickerModal
   );
   mutatedEntity = undefined;
-  // if (isEdit && !getForm(entityId.value))
-  //   createForm(entityId.value, {
-  //     intialValues: props.intialValues,
-  //     relationValues: props.relationValues,
-  //   });
 });
 
 watch(

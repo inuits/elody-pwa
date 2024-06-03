@@ -98,9 +98,10 @@ const tabs: string[] = [t("entity.pick"), t("entity.upload")];
 
 const getAlreadySelectedEntityIds = (): string[] => {
   const form = getForm(getEntityUuid());
-  return form?.values.relationValues.relations.map(
-    (relation: any) => relation.key
-  );
+  const relationValues = form?.values.relationValues;
+  return Object.keys(relationValues)
+    .filter((relationKey: string) => Array.isArray(relationValues[relationKey]))
+    .map((relationKey: string) => relationValues[relationKey].key);
 };
 
 const getContext = () => {

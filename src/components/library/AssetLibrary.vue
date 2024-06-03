@@ -7,11 +7,7 @@
         : SearchInputType.AdvancedInputType
     "
     :enable-bulk-operations="config.features.hasBulkSelect"
-    :list-item-route-name="
-      route.meta.type === 'mediafiles'
-        ? RouteNames.SingleMediafile
-        : RouteNames.SingleEntity
-    "
+    :list-item-route-name="RouteNames.SingleEntity"
     :filter-type="entityType"
   />
 </template>

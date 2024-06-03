@@ -44,7 +44,7 @@ const props = withDefaults(
     relationType: string;
     fromRelationType: string;
     mode: "edit" | "create";
-    formId: string | undefined;
+    formId: string;
     autoSelectable: boolean;
     disabled: boolean;
     canCreateOption: boolean;
@@ -52,10 +52,8 @@ const props = withDefaults(
   }>(),
   {
     selectType: "multi",
-    label: "",
     metadataKeyToGetOptionsFor: "no-key",
     mode: "edit",
-    formId: undefined,
     autoSelectable: false,
     disabled: false,
     canCreateOption: false,
@@ -85,7 +83,7 @@ const {
   entitiesLoading: relatedEntitiesLoading,
 } = useGetDropdownOptions(
   props.metadataKeyToGetOptionsFor as Entitytyping,
-  entityId,
+  entityId as string,
   props.fromRelationType
 );
 
