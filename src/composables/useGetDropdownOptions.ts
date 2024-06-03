@@ -80,16 +80,16 @@ export const useGetDropdownOptions = (
     return { ...filterProps, value };
   };
 
-  const entityDropdownOptions = computed<DropdownOption[]>(() => {
-    if (entitiesLoading.value) return [];
-    return entities.value.map((entity: BaseEntity) => {
-      return {
-        icon: DamsIcons.NoIcon,
-        label: getEntityTitle(entity),
-        value: entity.id,
-      };
-    });
-  });
+  const entityDropdownOptions = computed<DropdownOption[]>(
+    () =>
+      entities.value.map((entity: BaseEntity) => {
+        return {
+          icon: DamsIcons.NoIcon,
+          label: getEntityTitle(entity),
+          value: entity.id,
+        };
+      }) || []
+  );
 
   return {
     initialize,

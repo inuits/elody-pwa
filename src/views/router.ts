@@ -17,7 +17,6 @@ const routeComponentConfig: RouteComponentConfig[] = [
   { routeName: "Home", routeComponent: Home },
   { routeName: "HomeWrapper", routeComponent: HomeWrapper },
   { routeName: "SingleEntity", routeComponent: SingleEntity },
-  { routeName: "SingleMediafile", routeComponent: SingleEntity },
   { routeName: "History", routeComponent: History },
   { routeName: "Manifest", routeComponent: ManifestViewer },
   { routeName: "NotFound", routeComponent: NotFound },

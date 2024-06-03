@@ -2,17 +2,12 @@ import {
   type BaseRelationValuesInput,
   EditStatus,
   type IntialValues,
+  type MetadataValuesInput,
   type PanelMetaData,
   type RelationValues,
 } from "@/generated-types/queries";
 import { findPanelMetadata } from "@/helpers";
-import {
-  defineRule,
-  type FormContext,
-  useField,
-  useForm,
-  useResetForm,
-} from "vee-validate";
+import { defineRule, type FormContext, useForm } from "vee-validate";
 import { ref } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
@@ -25,6 +20,8 @@ const teaserMetadataSaved = ref<{ [key: string]: object }>({});
 export type EntityValues = {
   intialValues?: IntialValues;
   relationValues?: RelationValues;
+  relationMetadata?: IntialValues | {};
+  relatedEntityData?: IntialValues | {};
 };
 
 const useFormHelper = () => {
@@ -38,7 +35,9 @@ const useFormHelper = () => {
     });
     return {
       intialValues: intialValues,
-      relationValues: { label: "", relations: [] },
+      relationValues: {},
+      relationMetadata: {},
+      relatedEntityData: {},
     };
   };
 
@@ -49,9 +48,6 @@ const useFormHelper = () => {
     const form = useForm<EntityValues>({
       initialValues: formValues,
     });
-    const { resetField } = useField("relationValues.relations");
-    formValues.relationValues?.relations &&
-      resetField({ value: formValues.relationValues?.relations });
     addForm(key, form);
     return form;
   };
@@ -189,15 +185,10 @@ const useFormHelper = () => {
       : getFormByRouteId().form;
     if (!form) return;
 
-    let oldRelations: BaseRelationValuesInput[] =
-      form.values.relationValues.relations || [];
-    oldRelations = oldRelations.filter(
-      (relation: BaseRelationValuesInput) => relation.type !== relationType
-    );
-    const newRelations: BaseRelationValuesInput[] = [];
+    const relationsToSet: BaseRelationValuesInput[] = [];
     selectedItems.forEach((item) => {
       addTeaserMetadataToState(item.id, item.teaserMetadata);
-      newRelations.push({
+      relationsToSet.push({
         key: item.id,
         type: relationType,
         editStatus: EditStatus.New,
@@ -205,9 +196,7 @@ const useFormHelper = () => {
       });
     });
 
-    const relationsToSet: BaseRelationValuesInput[] = newRelations;
-    relationsToSet.push(...oldRelations);
-    form.setFieldValue("relationValues.relations", relationsToSet);
+    form.setFieldValue(`relationValues.${relationType}`, relationsToSet);
   };
 
   const replaceRelationsFromSameType = (
@@ -219,24 +208,23 @@ const useFormHelper = () => {
       ? getForm(formId)
       : getFormByRouteId().form;
     if (!form) return;
-    const newRelationIds: string[] = selectedItems.map(
+    const relationIds: string[] = selectedItems.map(
       (item: InBulkProcessableItem) => item.id
     );
+    // TODO: Find something better to unref this
+    const relationValues = JSON.parse(
+      JSON.stringify(form.values.relationValues)
+    );
 
-    const otherRelations: BaseRelationValuesInput[] =
-      form.values.relationValues.relations.filter(
-        (relation: BaseRelationValuesInput) => relation.type !== relationType
-      );
-    const relationsToDelete: BaseRelationValuesInput[] =
-      form.values.relationValues.relations.filter(
-        (relation: BaseRelationValuesInput) =>
-          relation.type === relationType &&
-          !newRelationIds.includes(relation.key)
-      );
+    const relationsToDelete: BaseRelationValuesInput[] = relationValues[
+      relationType
+    ]?.filter(
+      (relation: BaseRelationValuesInput) => !relationIds.includes(relation.key)
+    );
 
-    const newRelations: BaseRelationValuesInput[] = [];
+    const relationsToSet: BaseRelationValuesInput[] = [];
     selectedItems.forEach((item) => {
-      newRelations.push({
+      relationsToSet.push({
         key: item.id,
         type: relationType,
         editStatus: EditStatus.New,
@@ -244,21 +232,20 @@ const useFormHelper = () => {
       });
     });
 
-    relationsToDelete.forEach((relation: BaseRelationValuesInput) => {
-      newRelations.push({
-        key: relation.key,
-        type: relation.type,
-        editStatus: EditStatus.Deleted,
-        value: relation.value,
+    if (relationsToDelete)
+      relationsToDelete.forEach((relation: BaseRelationValuesInput) => {
+        relationsToSet.push({
+          key: relation.key,
+          type: relation.type,
+          editStatus: EditStatus.Deleted,
+          value: relation.value,
+        });
       });
-    });
 
-    const relationsToSet: BaseRelationValuesInput[] = otherRelations || [];
-    if (newRelations) relationsToSet.push(...newRelations);
-
-    form.setFieldValue("relationValues.relations", relationsToSet);
+    form.setFieldValue(`relationValues.${relationType}`, relationsToSet);
   };
 
+  // TODO Let this work wit new relation structure in vee-validate
   const findRelation = (
     key: string,
     type: string,
@@ -282,6 +269,82 @@ const useFormHelper = () => {
     return idx === "no-idx" ? "no-relation-found" : { relation, idx };
   };
 
+  const parseIntialValuesForFormSubmit = (
+    intialValues: IntialValues,
+    entityId: string
+  ): MetadataValuesInput[] => {
+    const metadata: any[] = [];
+    Object.keys(intialValues)
+      .filter((key) => key !== "__typename")
+      .forEach((key) => {
+        if (!editableFields.value[entityId]?.includes(key)) return;
+        metadata.push({ key, value: (intialValues as any)[key] || "" });
+      });
+    return metadata;
+  };
+
+  const parseRelationValuesForFormSubmit = (
+    relationValues: RelationValues
+  ): BaseRelationValuesInput[] => {
+    const relations: any[] = [];
+    Object.keys(relationValues).forEach((relationType: string) => {
+      const typedRelations: BaseRelationValuesInput[] =
+        relationValues[relationType];
+      if (!Array.isArray(typedRelations)) return;
+
+      typedRelations.forEach((relation: BaseRelationValuesInput) => {
+        // TODO: Find something better to unref this
+        relation = JSON.parse(JSON.stringify(relation));
+
+        if (!relation.editStatus) relation.editStatus = EditStatus.Unchanged;
+        relations.push(relation);
+      });
+    });
+    return relations;
+  };
+
+  const __linkedEntityId = (key: string) => {
+    return key.slice(key.indexOf("-") + 1, key.length);
+  };
+  const __fieldKeyWithoutId = (key: string) => {
+    return key.slice(0, key.indexOf("-"));
+  };
+
+  const parseRelationMetadataForFormSubmit = (
+    relationMetadata: IntialValues,
+    relations: BaseRelationValuesInput[],
+    entityId: string
+  ): BaseRelationValuesInput[] => {
+    const editableRelationMetadataItems = Object.entries(
+      relationMetadata
+    ).filter((entry) => !editableFields.value[entityId].includes(entry.key));
+
+    editableRelationMetadataItems.forEach((entry) => {
+      const fieldKey: string = __fieldKeyWithoutId(entry[0]);
+      const fieldValue: any = entry[1];
+
+      const id = __linkedEntityId(entry[0]);
+      for (let i = 0; i < relations.length; i++) {
+        const relation = relations[i];
+        if (relation.key === id) {
+          if (!relation.metadata) relation.metadata = [];
+          const existingField = relation.metadata.find(
+            (metadataItem: any) => metadataItem.key === fieldKey
+          );
+          if (existingField) {
+            existingField.value = fieldValue;
+          } else {
+            relation.metadata.push({ key: fieldKey, value: fieldValue });
+          }
+
+          if (relation.editStatus !== EditStatus.Deleted)
+            relation.editStatus = EditStatus.Changed;
+        }
+      }
+    });
+    return relations;
+  };
+
   return {
     createForm,
     addForm,
@@ -303,6 +366,9 @@ const useFormHelper = () => {
     findRelation,
     getTeaserMetadataInState,
     deleteTeaserMetadataItemInState,
+    parseIntialValuesForFormSubmit,
+    parseRelationValuesForFormSubmit,
+    parseRelationMetadataForFormSubmit,
   };
 };
 
