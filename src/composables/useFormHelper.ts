@@ -4,7 +4,6 @@ import {
   type IntialValues,
   type MetadataValuesInput,
   type PanelMetaData,
-  type RelationValues,
 } from "@/generated-types/queries";
 import { findPanelMetadata } from "@/helpers";
 import { defineRule, type FormContext, useForm } from "vee-validate";
@@ -19,7 +18,7 @@ const teaserMetadataSaved = ref<{ [key: string]: object }>({});
 
 export type EntityValues = {
   intialValues?: IntialValues;
-  relationValues?: RelationValues;
+  relationValues?: { [key: string]: any };
   relationMetadata?: IntialValues | {};
   relatedEntityData?: IntialValues | {};
 };
@@ -283,9 +282,9 @@ const useFormHelper = () => {
     return metadata;
   };
 
-  const parseRelationValuesForFormSubmit = (
-    relationValues: RelationValues
-  ): BaseRelationValuesInput[] => {
+  const parseRelationValuesForFormSubmit = (relationValues: {
+    [key: string]: any;
+  }): BaseRelationValuesInput[] => {
     const relations: any[] = [];
     Object.keys(relationValues).forEach((relationType: string) => {
       const typedRelations: BaseRelationValuesInput[] =
