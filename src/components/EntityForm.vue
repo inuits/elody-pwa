@@ -12,7 +12,6 @@ import {
   type MetadataValuesInput,
   type MutateEntityValuesMutation,
   type MutateEntityValuesMutationVariables,
-  type RelationValues,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -42,7 +41,7 @@ import { useSubmitForm } from "vee-validate";
 
 const props = defineProps<{
   intialValues: IntialValues;
-  relationValues: RelationValues;
+  relationValues: { [key: string]: any };
   uuid: string;
   type: string;
 }>();
@@ -66,7 +65,6 @@ const {
 } = useEditMode();
 const {
   createForm,
-  editableFields,
   parseIntialValuesForFormSubmit,
   parseRelationValuesForFormSubmit,
   parseRelationMetadataForFormSubmit,
