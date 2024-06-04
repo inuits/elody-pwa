@@ -28,7 +28,7 @@
     "@types/dropzone": "^5.7.4",
     "@types/openseadragon": "^2.4.7",
     "@types/tailwindcss": "^2.2.1",
-    "@vee-validate/rules": "^4.11.7",
+    "@vee-validate/rules": "4.13.0",
     "@vitest/coverage-c8": "^0.24.0",
     "@vue-leaflet/vue-leaflet": "^0.10.1",
     "@vue/apollo-composable": "^4.0.0-alpha.14",
