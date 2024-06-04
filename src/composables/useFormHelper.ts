@@ -11,7 +11,7 @@ import { defineRule, type FormContext, useForm } from "vee-validate";
 import { ref } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
-import * as AllRules from "@vee-validate/rules";
+import { all } from "@vee-validate/rules";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
@@ -95,8 +95,8 @@ const useFormHelper = () => {
   };
 
   const defineValidationRules = () => {
-    Object.keys(AllRules).forEach((rule: string) => {
-      defineRule(rule, AllRules[rule]);
+    Object.entries(all).forEach(([name, rule]) => {
+      defineRule(name, rule);
     });
 
     defineRule("has_required_relation", getHasSpecificRelationRule);
