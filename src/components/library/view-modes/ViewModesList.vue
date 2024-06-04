@@ -20,6 +20,7 @@
       :relation="
         findRelation(item.key, relationType, props.parentEntityIdentifiers[0])
       "
+      :relation-type="relationType"
       :has-selection="enableSelection"
     />
   </div>
@@ -63,6 +64,7 @@
           props.parentEntityIdentifiers[0]
         )
       "
+      :relation-type="relationType"
       :has-selection="enableSelection"
       :base-library-mode="baseLibraryMode"
       :is-enable-navigation="enableNavigation"
@@ -138,8 +140,7 @@ const { queryVariables } = useLibraryBar();
 const { getThumbnail } = useThumbnailHelper();
 const { getForm, findRelation, getTeaserMetadataInState } = useFormHelper();
 const relations = computed<BaseRelationValuesInput[]>(
-  () =>
-    getForm(props.parentEntityIdentifiers[0])?.values?.relationValues?.relations
+  () => getForm(props.parentEntityIdentifiers[0])?.values?.relationValues
 );
 
 const getLinkSettings = (entity: Entity, listItemRouteName: string = "") => {

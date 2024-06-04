@@ -166,14 +166,14 @@ import {
   type ContextMenuActions,
   DamsIcons,
   EditStatus,
-  Entity,
-  EntityListElement,
+  type Entity,
+  type EntityListElement,
   Entitytyping,
   type IntialValues,
   type Metadata,
-  MetadataField,
+  type MetadataField,
   PanelType,
-  WindowElementPanel,
+  type WindowElementPanel,
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
@@ -213,6 +213,7 @@ const props = withDefaults(
     relation:
       | { idx: number; relation: BaseRelationValuesInput }
       | "no-relation-found";
+    relationType?: string | undefined;
     isDisabled?: boolean;
     hasSelection: boolean;
     baseLibraryMode?: BaseLibraryModes;
@@ -237,6 +238,7 @@ const props = withDefaults(
     isDisabled: false,
     hasSelection: true,
     relation: "no-relation-found",
+    relationType: "no-relation-found",
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     isMediaType: false,
     isEnableNavigation: false,
@@ -251,7 +253,9 @@ const emit = defineEmits<{
 
 const { isEdit } = useEditMode();
 const { deleteTeaserMetadataItemInState } = useFormHelper();
-const { update, remove } = useFieldArray("relationValues.relations");
+const { update, remove } = useFieldArray(
+  `relationValues.${props.relationType}`
+);
 const auth = useAuth();
 const loading = ref<boolean>(props.loading);
 const isMarkedAsToBeDeleted = ref<boolean>(false);

@@ -244,7 +244,6 @@ const useFormHelper = () => {
     form.setFieldValue(`relationValues.${relationType}`, relationsToSet);
   };
 
-  // TODO Let this work wit new relation structure in vee-validate
   const findRelation = (
     key: string,
     type: string,
@@ -253,12 +252,12 @@ const useFormHelper = () => {
     | { idx: number; relation: BaseRelationValuesInput }
     | "no-relation-found" => {
     const form = getForm(parentEntityId);
-    if (!form || form.values.relationValues?.relations <= 0)
-      return "no-relation-found";
+    if (!form || !form.values.relationValues) return "no-relation-found";
     let idx: number | "no-idx" = "no-idx";
-    const relation = form.values.relationValues?.relations?.find(
+    const relationsWithSameType = form.values.relationValues[type];
+    const relation = relationsWithSameType.find(
       (relation: BaseRelationValuesInput, index: number) => {
-        if (relation.key === key && relation.type === type) {
+        if (relation.key === key) {
           idx = index;
           return true;
         }
