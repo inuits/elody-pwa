@@ -162,6 +162,7 @@
               :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
               :relation-type="relationType"
               :enable-selection="enableBulkOperations"
+              :keep-selected-mediafiles="keepSelectedMediafiles"
             />
             <ViewModesMedia
               v-if="displayPreview"

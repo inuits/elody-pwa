@@ -7,6 +7,7 @@ import {
   type EntityListElement,
   type Entity,
   type BaseEntity,
+  type MediaFileEntity,
   Entitytyping,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
@@ -98,12 +99,49 @@ export const getEntityPageRoute = (
 
 export const updateEntityMediafileOnlyForMediafiles = (
   entity: Entity,
-  onlyRemove: boolean = false
+  onlyRemove: boolean = false,
+  keepEntityMediafiles: boolean = false
 ) => {
-  if (entity.type.toLowerCase() === Entitytyping.Mediafile) {
+  if (entity.type.toLowerCase() !== Entitytyping.Mediafile) return;
+  if (keepEntityMediafiles) {
+    const mediafileIndex =
+      useEntityMediafileSelector().mediafileSelectionState.mediafiles.indexOf(
+        entity
+      );
+    addOrRemoveEntityMediafileFromEntity(
+      entity,
+      mediafileIndex === -1 ? "add" : "remove"
+    );
+  } else {
     useEntityMediafileSelector().setEntityMediafiles([]);
-    if (onlyRemove) return;
-    useEntityMediafileSelector().updateSelectedEntityMediafile(entity);
+  }
+  if (onlyRemove) return;
+  useEntityMediafileSelector().updateSelectedEntityMediafile(entity);
+};
+
+type actionType = "add" | "remove";
+const addOrRemoveEntityMediafileFromEntity = (
+  entity: Entity,
+  action: actionType
+) => {
+  const mediafiles: MediaFileEntity[] =
+    useEntityMediafileSelector().mediafileSelectionState.mediafiles;
+
+  if (action === "add") {
+    const filteredMediafiles = mediafiles.filter(
+      (mediafile: MediaFileEntity) => mediafile.uuid !== entity.uuid
+    );
+    useEntityMediafileSelector().setEntityMediafiles([
+      ...filteredMediafiles,
+      entity,
+    ]);
+  }
+
+  if (action === "remove") {
+    const filteredMediafiles = mediafiles.filter(
+      (mediafile: MediaFileEntity) => mediafile.uuid !== entity.uuid
+    );
+    useEntityMediafileSelector().setEntityMediafiles(filteredMediafiles);
   }
 };
 
