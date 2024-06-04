@@ -178,7 +178,8 @@ const useFormHelper = () => {
   const addRelations = (
     selectedItems: InBulkProcessableItem[],
     relationType: string,
-    formId: string | undefined = undefined
+    formId: string | undefined = undefined,
+    keepExisted: boolean = false
   ) => {
     const form: FormContext<any> | undefined = formId
       ? getForm(formId)
@@ -186,6 +187,14 @@ const useFormHelper = () => {
     if (!form) return;
 
     const relationsToSet: BaseRelationValuesInput[] = [];
+    if (keepExisted) {
+      const currentRelations =
+        form.values.relationValues[relationType]?.filter(
+          (relation: BaseRelationValuesInput) =>
+            !relation.editStatus || relation.editStatus !== EditStatus.New
+        ) || [];
+      relationsToSet.push(...currentRelations);
+    }
     selectedItems.forEach((item) => {
       addTeaserMetadataToState(item.id, item.teaserMetadata);
       relationsToSet.push({
