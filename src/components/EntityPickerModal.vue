@@ -44,11 +44,17 @@
             list-item-route-name="SingleEntity"
             @confirm-selection="
               (selectedItems) => {
-                addRelations(selectedItems, getRelationType(), getEntityUuid());
+                addRelations(
+                  selectedItems,
+                  getRelationType(),
+                  getEntityUuid(),
+                  true
+                );
                 dequeueAllItemsForBulkProcessing(getContext());
                 closeModal(TypeModals.EntityPicker);
               }
             "
+            :keep-selected-mediafiles="true"
           />
         </BaseTab>
         <BaseTab :title="tabs[1]">
@@ -73,6 +79,7 @@ import {
   ModalState,
   SearchInputType,
   TypeModals,
+  type BaseRelationValuesInput,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -99,9 +106,20 @@ const tabs: string[] = [t("entity.pick"), t("entity.upload")];
 const getAlreadySelectedEntityIds = (): string[] => {
   const form = getForm(getEntityUuid());
   const relationValues = form?.values.relationValues;
-  return Object.keys(relationValues)
+  const normalizedRelationIds = Object.keys(relationValues)
     .filter((relationKey: string) => Array.isArray(relationValues[relationKey]))
-    .map((relationKey: string) => relationValues[relationKey].key);
+    .map((relationKey: string) =>
+      relationValues[relationKey].map(
+        (relation: BaseRelationValuesInput) => relation
+      )
+    )
+    .flat();
+
+  const filteredRelationIds = normalizedRelationIds
+    .filter((relation: BaseRelationValuesInput) => !relation.editStatus)
+    .map((relation: BaseRelationValuesInput) => relation.key);
+
+  return filteredRelationIds;
 };
 
 const getContext = () => {
