@@ -92,7 +92,7 @@ const usePermissions = () => {
     }
   };
 
-  const fetchUpdateAndDeletePermission = (id: string) => {
+  const fetchUpdateAndDeletePermission = (id: string, entityType: string) => {
     const permissions = new Map<Permission, boolean>();
     try {
       return apolloClient
@@ -100,6 +100,7 @@ const usePermissions = () => {
           query: GetPermissionMappingEntityDetailDocument,
           variables: reactive<GetPermissionMappingEntityDetailQueryVariables>({
             id: id,
+            entityType: entityType,
           }),
           fetchPolicy: "no-cache",
           notifyOnNetworkStatusChange: true,

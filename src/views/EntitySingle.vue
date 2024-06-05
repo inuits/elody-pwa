@@ -131,7 +131,7 @@ watch(
         entity.value as MediaFileEntity;
     }
 
-    const mappings = fetchUpdateAndDeletePermission(entity.value.id);
+    const mappings = fetchUpdateAndDeletePermission(entity.value.id, entity.value.type);
     if (mappings) {
       mappings.then((result) => {
         permissionToEdit.value = result.get(Permission.Canupdate);
