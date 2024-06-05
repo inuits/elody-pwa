@@ -38,8 +38,7 @@ export const useGetDropdownOptions = (
   const getRelationFilter = (parentId: string, relationType: string) => {
     return {
       type: "selection",
-      parent_key: "relations",
-      key: relationType,
+      key: [`elody:1|relations.${relationType}.key`],
       value: [parentId],
       match_exact: true,
     };
