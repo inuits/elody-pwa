@@ -1,7 +1,7 @@
 <template>
   <div
-      v-show="isActive"
-      class="flex flex-col h-full p-3 bg-[var(--color-neutral-lightest)]"
+    v-show="isActive"
+    class="flex flex-col h-full p-3 bg-[var(--color-neutral-lightest)]"
   >
     <slot></slot>
   </div>
@@ -18,10 +18,10 @@ export default defineComponent({
     const tabs: any = inject("TabsProvider");
 
     watch(
-        () => tabs.selectedIndex,
-        () => {
-          isActive.value = index.value === tabs.selectedIndex;
-        }
+      () => tabs.selectedIndex,
+      () => {
+        isActive.value = index.value === tabs.selectedIndex;
+      }
     );
 
     onBeforeMount(() => {
