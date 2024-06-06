@@ -459,7 +459,7 @@ const useUpload = () => {
     files.value = files.value.filter(
       (file: DropzoneFile) => file !== fileToRemove
     );
-    if (isValidationFile || !files.value.length) {
+    if (!files.value.length) {
       resetUpload();
     }
     if (!mediafiles.value.length)
