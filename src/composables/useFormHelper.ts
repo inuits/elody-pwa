@@ -255,7 +255,7 @@ const useFormHelper = () => {
     if (!form || !form.values.relationValues) return "no-relation-found";
     let idx: number | "no-idx" = "no-idx";
     const relationsWithSameType = form.values.relationValues[type];
-    const relation = relationsWithSameType.find(
+    const relation = relationsWithSameType?.find(
       (relation: BaseRelationValuesInput, index: number) => {
         if (relation.key === key) {
           idx = index;

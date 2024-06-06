@@ -128,7 +128,7 @@ const elements = computed<Elements[]>(() => {
 const getCollapsedStateForElement = (element: object): boolean => {
   if (!element.entityTypes) return;
   const state = getStateForRoute(route);
-  return state?.UIPanelStateCollapsed.filter(
+  return state?.UIPanelStateCollapsed?.filter(
     (panelState) => panelState.key === element.entityTypes[0]
   )[0]?.value;
 };
