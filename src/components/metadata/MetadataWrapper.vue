@@ -42,8 +42,11 @@
                   InputFieldTypes.DropdownSingleselect) &&
               metadata.value
             "
-            :field-name="metadata.key"
-            :metadata-key-to-get-options-for="metadata.key"
+            :field-name="metadata.label"
+            :metadata-key-to-get-options-for="
+              metadata.inputField.advancedFilterInputForSearchingOptions
+                ?.item_types[0]
+            "
             :from-relation-type="metadata.inputField?.fromRelationType"
             :disabled="true"
           />
