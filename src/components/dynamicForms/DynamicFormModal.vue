@@ -40,20 +40,28 @@
 <script setup lang="ts">
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { ModalState, TypeModals } from "@/generated-types/queries";
+import {Form, FormTab, ModalState, TypeModals} from "@/generated-types/queries";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import { useRouter } from "vue-router";
 import BaseTabs from "@/components/BaseTabs.vue";
 import BaseTab from "@/components/BaseTab.vue";
 import { useI18n } from "vue-i18n";
-import { onMounted, computed } from 'vue';
+import { onMounted, computed, ref, watchEffect } from 'vue';
 import { useConfirmModal } from "@/composables/useConfirmModal";
-import { state } from '@/store/store';
+import { getDynamicFormTabs } from '@/components/dynamicForms/useDynamicForm';
 
+const formTabs = ref<Form | null>(null);
 const { closeModal, getModalInfo, changeCloseConfirmation } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const { t } = useI18n();
-const formTabs = computed(() => state.dynamicForm?.GetDynamicForm ?? {});
+
+watchEffect(() => {
+  (async () => {
+    if (!formTabs.value) {
+      formTabs.value = await getDynamicFormTabs();
+    }
+  })();
+});
 
 onMounted(() => {
   initializeConfirmModal(
@@ -68,24 +76,33 @@ onMounted(() => {
 });
 
 const tabsTitles = computed(() => {
-  return Object.entries(formTabs.value ?? {})
-      .filter(([_, value]) => value.__typename === 'FormTab')
-      .map(([key]) => t("entity." + key));
+  return Object.values(formTabs.value ?? {})
+      .flatMap(value =>
+          Object.entries(value)
+              .filter(([_, nestedValue]) => nestedValue.__typename === 'FormTab')
+              .map(([nestedKey, _]) => t("entity." + nestedKey))
+      );
 });
 
 const shouldRenderTabs = computed(() => {
-  const obj = { ...formTabs.value };
-  const formTabValues = Object.values(obj);
-  const formTabArray = formTabValues.filter(item => item.__typename === "FormTab");
+  const countFormTabs = (obj: Record<string, any>): number =>
+      Object.values(obj).reduce((count, value) =>
+              count + (value?.__typename === 'FormTab' ? 1 : typeof value === 'object' ? countFormTabs(value) : 0),
+          0
+      );
 
-  return formTabArray.length > 1;
+  return formTabs.value ? countFormTabs(formTabs.value) > 1 : false;
 });
 
 const formTabArray = computed(() => {
-  const formTabValues = Object.values(formTabs.value);
-  const filteredFormTabs = formTabValues.filter(item => item.__typename === "FormTab");
+  const extractFormTabs = (obj: Record<string, any>): FormTab[] =>
+      Object.values(obj).flatMap(value =>
+          (value?.__typename === 'FormTab' && [value]) ||
+          (typeof value === 'object' && value !== null && extractFormTabs(value)) ||
+          []
+      );
 
-  return filteredFormTabs;
+  return formTabs.value ? extractFormTabs(formTabs.value) : [];
 });
 </script>
 
