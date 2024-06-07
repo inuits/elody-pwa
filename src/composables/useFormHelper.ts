@@ -288,7 +288,7 @@ const useFormHelper = () => {
     Object.keys(relationValues).forEach((relationType: string) => {
       const typedRelations: BaseRelationValuesInput[] =
         relationValues[relationType];
-      if (!Array.isArray(typedRelations)) return;
+      if (!Array.isArray(typedRelations) || typeof typedRelations[0] !== "object") return;
 
       typedRelations.forEach((relation: BaseRelationValuesInput) => {
         // TODO: Find something better to unref this

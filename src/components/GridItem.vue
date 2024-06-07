@@ -99,18 +99,19 @@ import {
   DamsIcons,
   EditStatus,
   type BaseRelationValuesInput,
-  type MetadataAndRelation,
   type Metadata,
-  MetadataField,
+  type MetadataAndRelation,
+  type MetadataField,
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
-import useEditMode from "@/composables/useEdit";
-import { useAuth } from "session-vue-3-oidc-library";
-import { computed, ref, watch } from "vue";
-import { getEntityIdFromRoute, stringIsUrl } from "@/helpers";
-import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import ImageViewer from "@/components/base/ImageViewer.vue";
+import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
+import useEditMode from "@/composables/useEdit";
+import useEntitySingle from "@/composables/useEntitySingle";
+import { computed, ref, watch } from "vue";
+import { stringIsUrl } from "@/helpers";
+import { useAuth } from "session-vue-3-oidc-library";
 
 const props = withDefaults(
   defineProps<{
@@ -151,7 +152,8 @@ const auth = useAuth();
 const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
-const formId = computed(() => getEntityIdFromRoute() as string);
+const { getEntityUuid } = useEntitySingle();
+const formId = computed(() => getEntityUuid());
 
 const setNoImage = () => {
   imageSrcError.value = true;

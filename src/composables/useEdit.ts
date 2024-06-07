@@ -48,7 +48,7 @@ export const useEditMode = () => {
       await callback();
     }
     const refetch = refetchFn.value;
-    if (refetch) refetch();
+    //if (refetch) refetch();
     saveCallbacks.value = [];
     isSaved.value = true;
   };
