@@ -47,8 +47,6 @@ export const useEditMode = () => {
     for (const callback of saveCallbacks.value) {
       await callback();
     }
-    const refetch = refetchFn.value;
-    //if (refetch) refetch();
     saveCallbacks.value = [];
     isSaved.value = true;
   };
