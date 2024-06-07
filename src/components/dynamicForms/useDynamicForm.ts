@@ -1,9 +1,11 @@
+import type { EntityInput } from "@/generated-types/queries";
+import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import { ref } from "vue";
-import { type EntityInput } from "@/generated-types/queries";
 
 const dynamicForm = ref<any | undefined>(undefined);
 const dynamicFormUploadFields = ref<any[]>([]);
+const { selectedTenant } = useTenant(undefined)
 
 const useDynamicForm = () => {
   const getDynamicForm = (queryDocument: any): void => {
@@ -22,7 +24,7 @@ const useDynamicForm = () => {
   ): Promise<any> => {
     return await apolloClient.mutate({
       mutation: queryDocument,
-      variables: { entity },
+      variables: { entity, tenantId: selectedTenant.value },
     });
   };
 

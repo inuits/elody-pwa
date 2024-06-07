@@ -162,38 +162,39 @@
 import type { Context } from "@/composables/useBulkOperations";
 import {
   BaseLibraryModes,
-  type BaseRelationValuesInput,
-  type ContextMenuActions,
   DamsIcons,
   EditStatus,
+  Entitytyping,
+  PanelType,
+  type BaseRelationValuesInput,
+  type ContextMenuActions,
   type Entity,
   type EntityListElement,
-  Entitytyping,
   type IntialValues,
   type Metadata,
   type MetadataField,
-  PanelType,
   type WindowElementPanel,
 } from "@/generated-types/queries";
-import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
-import BaseToggle from "@/components/base/BaseToggle.vue";
-import useEditMode from "@/composables/useEdit";
-import { useAuth } from "session-vue-3-oidc-library";
-import { useFormHelper } from "@/composables/useFormHelper";
-import { computed, ref, watch, onUpdated } from "vue";
 import {
   getEntityIdFromRoute,
   stringIsUrl,
   updateEntityMediafileOnlyForMediafiles,
 } from "@/helpers";
-import { Unicons } from "@/types";
-import { useFieldArray } from "vee-validate";
-import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
-import ContextMenuAction from "@/components/context-menu-actions/ContextMenuAction.vue";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
-import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
+import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
+import BaseToggle from "@/components/base/BaseToggle.vue";
+import ContextMenuAction from "@/components/context-menu-actions/ContextMenuAction.vue";
 import EntityElementWindowPanel from "@/components/EntityElementWindowPanel.vue";
 import ImageViewer from "@/components/base/ImageViewer.vue";
+import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
+import useEditMode from "@/composables/useEdit";
+import useEntitySingle from "@/composables/useEntitySingle";
+import { computed, ref, watch, onUpdated } from "vue";
+import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
+import { Unicons } from "@/types";
+import { useAuth } from "session-vue-3-oidc-library";
+import { useFieldArray } from "vee-validate";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 const props = withDefaults(
   defineProps<{
@@ -256,6 +257,7 @@ const { deleteTeaserMetadataItemInState } = useFormHelper();
 const { update, remove } = useFieldArray(
   `relationValues.${props.relationType}`
 );
+const { getEntityUuid } = useEntitySingle();
 const auth = useAuth();
 const loading = ref<boolean>(props.loading);
 const isMarkedAsToBeDeleted = ref<boolean>(false);
@@ -263,7 +265,7 @@ const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
 
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
-const formId = computed(() => getEntityIdFromRoute() as string);
+const formId = computed(() => getEntityUuid());
 
 const orderMetadataChild = ref(null);
 onUpdated(() => {
