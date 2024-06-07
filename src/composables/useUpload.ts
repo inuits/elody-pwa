@@ -299,7 +299,7 @@ const useUpload = () => {
     file: DropzoneFile
   ): Promise<string> => {
     const response = await fetch(
-      `/api/upload/single?entityId=${entityId}&filename=${file.name}&hasRelation=true`,
+      `/api/upload/single?entityId=${entityId}&hasRelation=true&filename=${encodeURIComponent(file.name)}`,
       {
         headers: { "Content-Type": "application/json" },
         method: "POST",
