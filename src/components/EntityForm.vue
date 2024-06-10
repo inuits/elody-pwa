@@ -58,6 +58,7 @@ const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const {
   isEdit,
   addSaveCallback,
+  save,
   refetchFn,
   disableEditMode,
   setDisableState,
@@ -202,7 +203,12 @@ const openNavigationModal = () => {
       performRoute();
       closeModal(TypeModals.Confirm);
     },
-    undefined,
+    async () => {
+      await save();
+      performRoute();
+      deletePathToNavigate();
+      closeModal(TypeModals.Confirm);
+    },
     () => {
       deletePathToNavigate();
       closeModal(TypeModals.Confirm);
