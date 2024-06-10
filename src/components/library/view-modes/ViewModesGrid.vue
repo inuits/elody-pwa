@@ -117,6 +117,7 @@ const props = withDefaults(
     idsOfNonSelectableEntities?: string[];
     relationType: string;
     enableSelection: boolean;
+    keepSelectedMediafiles?: boolean;
   }>(),
   {
     disablePreviews: false,
@@ -124,6 +125,7 @@ const props = withDefaults(
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
     enableSelection: true,
+    keepSelectedMediafiles: false,
   }
 );
 
