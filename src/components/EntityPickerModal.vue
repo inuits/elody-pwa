@@ -50,6 +50,7 @@
                   getEntityUuid(),
                   true
                 );
+                dequeueAllItemsForBulkProcessing(getContext());
                 closeModal(TypeModals.EntityPicker);
               }
             "

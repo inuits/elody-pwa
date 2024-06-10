@@ -110,11 +110,12 @@ import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import useEditMode from "@/composables/useEdit";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, ref, watch } from "vue";
-import { stringIsUrl } from "@/helpers";
+import { stringIsUrl, updateEntityMediafileOnlyForMediafiles } from "@/helpers";
 import { useAuth } from "session-vue-3-oidc-library";
 
 const props = withDefaults(
   defineProps<{
+    entity?: Entity;
     itemId?: string;
     bulkOperationsContext: Context;
     loading?: boolean;
@@ -123,13 +124,13 @@ const props = withDefaults(
     media?: string;
     thumbIcon?: string;
     small?: boolean;
-    isChecked?: boolean;
     isPreview?: boolean;
     isMarkableAsToBeDeleted?: boolean;
     relation?: BaseRelationValuesInput;
     isDisabled?: boolean;
     relations?: BaseRelationValuesInput[];
     hasSelection: boolean;
+    keepSelectedMediafiles?: boolean;
   }>(),
   {
     itemId: "",
@@ -139,11 +140,12 @@ const props = withDefaults(
     media: "",
     thumbIcon: "",
     small: false,
-    isChecked: false,
     isPreview: false,
     isMarkableAsToBeDeleted: false,
     isDisabled: false,
     hasSelection: true,
+    entity: undefined,
+    keepSelectedMediafiles: false,
   }
 );
 
@@ -178,6 +180,17 @@ watch(
         props.relation.editStatus = EditStatus.Deleted;
       // @ts-ignore
       else props.relation.editStatus = EditStatus.Unchanged;
+  }
+);
+
+watch(
+  () => isChecked.value,
+  () => {
+    updateEntityMediafileOnlyForMediafiles(
+      props.entity,
+      !isChecked.value,
+      props.keepSelectedMediafiles
+    );
   }
 );
 
