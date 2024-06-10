@@ -1,16 +1,6 @@
-import { expect, test, beforeAll } from "vitest";
+import { expect, test } from "vitest";
 import { useFormHelper } from "@/composables/useFormHelper";
-
 const { addRelations, createForm, addForm, getForm } = useFormHelper();
-const formId = "useFormHelperTests";
-const initializeForm = () => {
-  const form = createForm(formId, {
-    intialValues: {},
-    relationValues: {},
-  });
-
-  addForm(formId, form);
-};
 
 const getRelationIds = (form, relationType) => {
   return form.values.relationValues[relationType]
@@ -18,17 +8,14 @@ const getRelationIds = (form, relationType) => {
     .map((item) => item.key);
 };
 
-beforeAll(async () => {
-  // called once before all tests run
-  await initializeForm();
-
-  // clean up function, called once after all tests run
-  return async () => {
-    await initializeForm();
-  };
-});
-
 test("adds new relations to the form", () => {
+  const formId = "ef78b938";
+  const form = createForm(formId, {
+    intialValues: {},
+    relationValues: {},
+  });
+  addForm(formId, form);
+
   const relationsToBeAdded = [
     {
       id: "ef78b938-6bd5-49469717",
@@ -96,7 +83,7 @@ test("adds new relation without removing old ones", () => {
     },
   ];
   const initialRelationIds = initialRelations.map((item) => item.key);
-  const newFormId = "keepRelationId";
+  const newFormId = "b88c8bdd";
 
   const form = createForm(newFormId, {
     intialValues: {},
@@ -104,8 +91,8 @@ test("adds new relation without removing old ones", () => {
       hasRelation: initialRelations,
     },
   });
-
   addForm(newFormId, form);
+
   const relationsToBeAdded = [
     {
       id: "ef78b938-6bd5-49469717",
