@@ -45,7 +45,7 @@
       <BaseInputCheckbox
         v-if="
           baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
-          !isPreview && 
+          !isPreview &&
           hasSelection
         "
         :class="[{ invisible: isDisabled }, 'text-center']"
@@ -203,7 +203,6 @@ const props = withDefaults(
     media?: string;
     thumbIcon?: string;
     small?: boolean;
-    isChecked?: boolean;
     isPreview?: boolean;
     isMarkableAsToBeDeleted?: boolean;
     relation:
@@ -217,6 +216,7 @@ const props = withDefaults(
     isEnableNavigation?: boolean;
     entityListElements?: EntityListElement[];
     entity?: Entity;
+    keepSelectedMediafiles: boolean;
   }>(),
   {
     contextMenuActions: undefined,
@@ -228,7 +228,6 @@ const props = withDefaults(
     media: "",
     thumbIcon: "",
     small: false,
-    isChecked: false,
     isPreview: false,
     isMarkableAsToBeDeleted: false,
     isDisabled: false,
@@ -240,6 +239,7 @@ const props = withDefaults(
     isEnableNavigation: false,
     entityListElements: undefined,
     entity: undefined,
+    keepSelectedMediafiles: false,
   }
 );
 
@@ -271,7 +271,11 @@ onUpdated(() => {
 watch(
   () => isChecked.value,
   () => {
-    updateEntityMediafileOnlyForMediafiles(props.entity, !isChecked.value, true);
+    updateEntityMediafileOnlyForMediafiles(
+      props.entity,
+      !isChecked.value,
+      props.keepSelectedMediafiles
+    );
   }
 );
 

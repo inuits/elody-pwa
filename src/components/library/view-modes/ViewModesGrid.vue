@@ -37,7 +37,7 @@
           ? undefined
           : getLinkSettings(entity, listItemRouteName).path
       "
-      @click="() => updateEntityMediafileOnlyForMediafiles(entity)"
+      @click="entityWrapperHandler(entity)"
       class="w-full"
     >
       <GridItem
@@ -63,10 +63,7 @@
         :small="listItemRouteName === 'SingleMediafile'"
         :loading="entitiesLoading"
         :is-markable-as-to-be-deleted="parentEntityIdentifiers.length > 0"
-        :is-disabled="
-          idsOfNonSelectableEntities.includes(entity.id) ||
-          idsOfNonSelectableEntities.includes(entity.uuid)
-        "
+        :is-disabled="isEntityDisabled(entity)"
         :relation="
           relations?.find(
             (relation) =>
@@ -75,6 +72,7 @@
         "
         :relations="relations"
         :has-selection="enableSelection"
+        :keep-selected-mediafiles="keepSelectedMediafiles"
       />
     </component>
   </div>
@@ -185,6 +183,18 @@ const getLinkSettings = (entity: Entity, listItemRouteName: string = "") => {
     tag: "router-link",
     path: getEntityPageRoute(entity, listItemRouteName),
   };
+};
+
+const isEntityDisabled = (entity: Entity) => {
+  return (
+    props.idsOfNonSelectableEntities.includes(entity.id) ||
+    props.idsOfNonSelectableEntities.includes(entity.uuid)
+  );
+};
+
+const entityWrapperHandler = (entity: Entity) => {
+  if (isEntityDisabled(entity) || props.keepSelectedMediafiles) return;
+  updateEntityMediafileOnlyForMediafiles(entity);
 };
 </script>
 
