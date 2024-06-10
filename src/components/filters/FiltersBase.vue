@@ -267,7 +267,6 @@ const handleAdvancedFilters = () => {
           if (advancedFilter.hidden) {
             hiddenFilter = {
               type: advancedFilter.type,
-              parent_key: advancedFilter.parentKey,
               key: advancedFilter.key,
               value: advancedFilter.defaultValue,
               item_types: advancedFilter.itemTypes,
