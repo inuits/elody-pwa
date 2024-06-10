@@ -23,13 +23,13 @@ test("adds new relations to the form", () => {
         {
           label: "",
           key: "filename",
-          __typename: "PanelMetaData",
+          __typename: "randomTypeName",
           value: "",
         },
         {
           label: "",
           key: "mimetype",
-          __typename: "PanelMetaData",
+          __typename: "randomTypeName",
           value: "",
         },
       ],
@@ -40,13 +40,13 @@ test("adds new relations to the form", () => {
         {
           label: "",
           key: "filename",
-          __typename: "PanelMetaData",
+          __typename: "randomTypeName",
           value: "",
         },
         {
           label: "",
           key: "mimetype",
-          __typename: "PanelMetaData",
+          __typename: "randomTypeName",
           value: "",
         },
       ],
@@ -100,13 +100,13 @@ test("adds new relation without removing old ones", () => {
         {
           label: "",
           key: "filename",
-          __typename: "PanelMetaData",
+          __typename: "randomTypeName",
           value: "",
         },
         {
           label: "",
           key: "mimetype",
-          __typename: "PanelMetaData",
+          __typename: "randomTypeName",
           value: "",
         },
       ],
@@ -117,13 +117,13 @@ test("adds new relation without removing old ones", () => {
         {
           label: "",
           key: "filename",
-          __typename: "PanelMetaData",
+          __typename: "randomTypeName",
           value: "",
         },
         {
           label: "",
           key: "mimetype",
-          __typename: "PanelMetaData",
+          __typename: "randomTypeName",
           value: "",
         },
       ],
