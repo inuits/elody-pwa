@@ -33,7 +33,14 @@
         ? undefined
         : getLinkSettings(entity, listItemRouteName).path
     "
-    @click="() => updateEntityMediafileOnlyForMediafiles(entity)"
+    @click="
+      () =>
+        updateEntityMediafileOnlyForMediafiles(
+          entity,
+          false,
+          keepSelectedMediafiles
+        )
+    "
   >
     <ListItem
       :item-id="entity.uuid"
@@ -117,6 +124,7 @@ const props = withDefaults(
     enableSelection: boolean;
     baseLibraryMode?: BaseLibraryModes;
     entityListElements?: EntityListElement[];
+    keepSelectedMediafiles?: boolean;
   }>(),
   {
     disablePreviews: false,
@@ -126,6 +134,7 @@ const props = withDefaults(
     enableSelection: true,
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     entityListElements: undefined,
+    keepSelectedMediafiles: false,
   }
 );
 
