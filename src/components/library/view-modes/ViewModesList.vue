@@ -33,7 +33,14 @@
         ? undefined
         : getLinkSettings(entity, listItemRouteName).path
     "
-    @click="() => updateEntityMediafileOnlyForMediafiles(entity)"
+    @click="
+      () =>
+        updateEntityMediafileOnlyForMediafiles(
+          entity,
+          false,
+          keepSelectedMediafiles
+        )
+    "
   >
     <ListItem
       :item-id="entity.uuid"
