@@ -270,6 +270,7 @@ const handleAdvancedFilters = () => {
               key: advancedFilter.key,
               value: advancedFilter.defaultValue,
               item_types: advancedFilter.itemTypes,
+              parent_key: advancedFilter.parentKey,
               match_exact: true,
               edge_collection: advancedFilter.edgeCollection,
             };
