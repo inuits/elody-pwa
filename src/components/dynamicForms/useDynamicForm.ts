@@ -5,7 +5,8 @@ import { ref } from "vue";
 
 const dynamicForm = ref<any | undefined>(undefined);
 const dynamicFormUploadFields = ref<any[]>([]);
-const { selectedTenant } = useTenant(undefined)
+const isPerformingAction = ref<boolean>(false);
+const { selectedTenant } = useTenant(undefined);
 
 const useDynamicForm = () => {
   const getDynamicForm = (queryDocument: any): void => {
@@ -22,10 +23,13 @@ const useDynamicForm = () => {
     queryDocument: any,
     entity: EntityInput
   ): Promise<any> => {
-    return await apolloClient.mutate({
+    isPerformingAction.value = true;
+    const submitResult = await apolloClient.mutate({
       mutation: queryDocument,
       variables: { entity, tenantId: selectedTenant.value },
     });
+    isPerformingAction.value = false;
+    return submitResult;
   };
 
   const performDownloadAction = async (
@@ -59,6 +63,7 @@ const useDynamicForm = () => {
     performDownloadAction,
     dynamicFormUploadFields,
     resetDynamicForm,
+    isPerformingAction,
   };
 };
 

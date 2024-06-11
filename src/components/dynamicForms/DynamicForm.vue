@@ -1,9 +1,6 @@
 <template>
   <div class="p-4 pt-0 h-full w-full overflow-y-auto" :key="dynamicFormQuery">
-    <div
-      v-if="formFields && dynamicFormQuery"
-      class="w-full [&>*>button:last-child]:mb-0"
-    >
+    <div v-if="!isLoading" class="w-full [&>*>button:last-child]:mb-0">
       <h1 v-if="dynamicForm.GetDynamicForm.label" class="title pb-4">
         {{ t(dynamicForm.GetDynamicForm.label) }}
       </h1>
@@ -71,7 +68,7 @@
         <BaseButtonNew
           v-if="
             field.__typename === 'FormAction' &&
-            field.actionType == ActionType.Submit
+            field.actionType !== ActionType.Upload
           "
           class="mt-5 mb-10"
           :label="
@@ -90,34 +87,10 @@
           button-style="accentAccent"
           @click="performActionButtonClickEvent(field)"
         />
-        <BaseButtonNew
-          v-if="
-            field.__typename === 'FormAction' &&
-            field.actionType == ActionType.Download
-          "
-          class="mt-5 mb-10"
-          :label="t((field as FormAction).label)"
-          :icon="field.icon"
-          :disabled="formContainsErrors"
-          button-style="accentAccent"
-          @click="performActionButtonClickEvent(field)"
-        />
-        <BaseButtonNew
-          v-if="
-            field.__typename === 'FormAction' &&
-            field.actionType == ActionType.Update
-          "
-          class="mt-5 mb-10"
-          :label="t((field as FormAction).label)"
-          :icon="field.icon"
-          :disabled="formContainsErrors"
-          button-style="accentAccent"
-          @click="performActionButtonClickEvent(field)"
-        />
       </div>
     </div>
-    <div v-else class="h-screen w-full flex justify-center items-center">
-      <spinner-loader />
+    <div v-else class="min-h-[20rem] w-full flex justify-center items-center">
+      <spinner-loader theme="accent" />
     </div>
   </div>
 </template>
@@ -183,6 +156,7 @@ const {
   performSubmitAction,
   performDownloadAction,
   resetDynamicForm,
+  isPerformingAction,
 } = useDynamicForm();
 const {
   upload,
@@ -202,6 +176,10 @@ const formFields = computed<FormFieldTypes[] | undefined>(() => {
 const form = ref<FormContext<any>>();
 const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
 const { getMenuDestinations } = useMenuHelper();
+const isLoading = computed(() => {
+  if (isPerformingAction.value) return true;
+  return !formFields.value && !dynamicForm.value;
+});
 const { t } = useI18n();
 
 const createEntityFromFormInput = (entityType: Entitytyping): EntityInput => {
@@ -225,7 +203,7 @@ const getQuery = async (queryName: string) => {
   return await loadDocument(queryName);
 };
 
-const uploadActionFunction = (field: FormAction) => {
+const uploadActionFunction = async (field: FormAction) => {
   if (!enableUploadButton.value) return;
   upload(props.hasLinkedUpload, config, t);
   if (standaloneFileType.value)
@@ -271,9 +249,7 @@ const updateMetdataActionFunction = async (field: FormAction) => {
   //TODO: put code here that calls graphql function to the bulk edit endpoint in the collection-api
 };
 
-const performActionButtonClickEvent = async (
-  field: FormAction
-): Promise<void> => {
+const performActionButtonClickEvent = (field: FormAction): void => {
   useBaseModal().changeCloseConfirmation(TypeModals.DynamicForm, false);
   const actionFunctions: { [key: string]: Function } = {
     upload: () => uploadActionFunction(field),
@@ -372,7 +348,7 @@ watch(
 watch(
   () => form.value?.values.intialValues,
   (intialValues: { [key: string]: any }) => {
-    if (intialValues.standaloneUploadType)
+    if (intialValues && intialValues.standaloneUploadType)
       standaloneFileType.value = intialValues.standaloneUploadType;
     useBaseModal().changeCloseConfirmation(
       TypeModals.DynamicForm,
