@@ -122,7 +122,7 @@ const props = withDefaults(
 watch(
   () => props.metadata,
   (newvalue, oldvalue) => {
-    if (oldvalue.value !== newvalue.value) setNewValue(newvalue.value);
+    setNewValue(newvalue.value);
   }
 );
 
@@ -234,7 +234,7 @@ onBeforeUnmount(() => {
 watch(
   () => props.isEdit,
   () => {
-    if (!props.isEdit) setNewValue(props.metadata.value);
+    setNewValue(props.metadata.value);
   }
 );
 </script>
