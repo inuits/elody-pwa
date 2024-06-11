@@ -174,11 +174,7 @@ import {
   type MetadataField,
   type WindowElementPanel,
 } from "@/generated-types/queries";
-import {
-  getEntityIdFromRoute,
-  stringIsUrl,
-  updateEntityMediafileOnlyForMediafiles,
-} from "@/helpers";
+import { stringIsUrl } from "@/helpers";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
@@ -219,8 +215,6 @@ const props = withDefaults(
     isMediaType?: boolean;
     isEnableNavigation?: boolean;
     entityListElements?: EntityListElement[];
-    entity?: Entity;
-    keepSelectedMediafiles: boolean;
   }>(),
   {
     contextMenuActions: undefined,
@@ -242,8 +236,6 @@ const props = withDefaults(
     isMediaType: false,
     isEnableNavigation: false,
     entityListElements: undefined,
-    entity: undefined,
-    keepSelectedMediafiles: false,
   }
 );
 
@@ -271,17 +263,6 @@ onUpdated(() => {
   if (!orderMetadataChild.value) return;
   orderMetadataChild.value[0]?.setNewValue(props.intialValues?.order);
 });
-
-watch(
-  () => isChecked.value,
-  () => {
-    updateEntityMediafileOnlyForMediafiles(
-      props.entity,
-      !isChecked.value,
-      props.keepSelectedMediafiles
-    );
-  }
-);
 
 const toggleLoading = () => {
   loading.value = !loading.value;

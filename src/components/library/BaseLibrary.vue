@@ -143,7 +143,6 @@
               :enable-selection="enableBulkOperations"
               :base-library-mode="baseLibraryMode"
               :entity-list-elements="entityListElements"
-              :keep-selected-mediafiles="keepSelectedMediafiles"
             />
             <ViewModesGrid
               v-if="displayGrid"
@@ -157,7 +156,6 @@
               :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
               :relation-type="relationType"
               :enable-selection="enableBulkOperations"
-              :keep-selected-mediafiles="keepSelectedMediafiles"
             />
             <ViewModesMedia
               v-if="displayPreview"

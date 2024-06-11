@@ -99,53 +99,12 @@ export const getEntityPageRoute = (
 
 export const updateEntityMediafileOnlyForMediafiles = (
   entity: Entity,
-  onlyRemove: boolean = false,
-  keepEntityMediafiles: boolean = false
+  onlyRemove: boolean = false
 ) => {
-  if (entity.type.toLowerCase() !== Entitytyping.Mediafile) return;
-  if (keepEntityMediafiles) {
-    const mediafileIndex =
-      useEntityMediafileSelector().mediafileSelectionState.mediafiles.indexOf(
-        entity
-      );
-    addOrRemoveEntityMediafileFromEntity(
-      entity,
-      mediafileIndex === -1 ? ActionType.Add : ActionType.Remove
-    );
-  } else {
+  if (entity.type.toLowerCase() === Entitytyping.Mediafile) {
     useEntityMediafileSelector().setEntityMediafiles([]);
-  }
-  if (onlyRemove) return;
-  useEntityMediafileSelector().updateSelectedEntityMediafile(entity);
-};
-
-enum ActionType {
-  Add = "add",
-  Remove = "remove",
-}
-
-const addOrRemoveEntityMediafileFromEntity = (
-  entity: Entity,
-  action: ActionType
-) => {
-  const mediafiles: MediaFileEntity[] =
-    useEntityMediafileSelector().mediafileSelectionState.mediafiles;
-
-  if (action === ActionType.Add) {
-    const filteredMediafiles = mediafiles.filter(
-      (mediafile: MediaFileEntity) => mediafile.uuid !== entity.uuid
-    );
-    useEntityMediafileSelector().setEntityMediafiles([
-      ...filteredMediafiles,
-      entity,
-    ]);
-  }
-
-  if (action === ActionType.Remove) {
-    const filteredMediafiles = mediafiles.filter(
-      (mediafile: MediaFileEntity) => mediafile.uuid !== entity.uuid
-    );
-    useEntityMediafileSelector().setEntityMediafiles(filteredMediafiles);
+    if (onlyRemove) return;
+    useEntityMediafileSelector().updateSelectedEntityMediafile(entity);
   }
 };
 

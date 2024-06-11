@@ -72,7 +72,6 @@
         "
         :relations="relations"
         :has-selection="enableSelection"
-        :keep-selected-mediafiles="keepSelectedMediafiles"
       />
     </component>
   </div>
