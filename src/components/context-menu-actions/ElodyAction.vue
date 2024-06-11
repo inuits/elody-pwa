@@ -22,7 +22,7 @@ const props = defineProps<{
   icon: String;
   action: ContextMenuElodyActionEnum;
   entityId: String;
-  relation: object;
+  relation: { idx: number; relation: object } | "no-relation-found";
 }>();
 
 const { update } = useFieldArray(
@@ -33,7 +33,6 @@ const { save, disableEditMode, addSaveCallback, clearSaveCallbacks } =
 const submitForm: callback = inject("submitForm") as callback;
 
 const deleteRelation = async () => {
-  console.log(props.relation);
   if (props.relation !== "no-relation-found")
     update(props.relation.idx, {
       ...props.relation.relation,
