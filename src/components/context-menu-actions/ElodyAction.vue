@@ -15,9 +15,6 @@ import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { useFieldArray } from "vee-validate";
 import useEditMode, { type callback } from "@/composables/useEdit";
-const { update } = useFieldArray("relationValues.relations");
-const { save, disableEditMode, addSaveCallback, clearSaveCallbacks } =
-  useEditMode();
 import { inject } from "vue";
 
 const props = defineProps<{
@@ -28,9 +25,15 @@ const props = defineProps<{
   relation: object;
 }>();
 
+const { update } = useFieldArray(
+  `relationValues.${props.relation.relation.type}`
+);
+const { save, disableEditMode, addSaveCallback, clearSaveCallbacks } =
+  useEditMode();
 const submitForm: callback = inject("submitForm") as callback;
 
 const deleteRelation = async () => {
+  console.log(props.relation);
   if (props.relation !== "no-relation-found")
     update(props.relation.idx, {
       ...props.relation.relation,
