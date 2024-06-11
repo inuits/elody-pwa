@@ -109,7 +109,7 @@ import {
   type Entity,
   Entitytyping,
   MediaFileElementTypes,
-  EntityListElement,
+  type EntityListElement,
   BaseLibraryModes,
   RelationActions
 } from "@/generated-types/queries";

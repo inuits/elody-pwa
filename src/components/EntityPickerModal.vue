@@ -43,7 +43,7 @@
             ]"
             list-item-route-name="SingleEntity"
             @confirm-selection="
-              (selectedItems) => {
+              async (selectedItems) => {
                 addRelations(
                   selectedItems,
                   getRelationType(),
@@ -51,10 +51,10 @@
                   true
                 );
                 dequeueAllItemsForBulkProcessing(getContext());
+                save();
                 closeModal(TypeModals.EntityPicker);
               }
             "
-            :keep-selected-mediafiles="true"
           />
         </BaseTab>
         <BaseTab :title="tabs[1]">
@@ -94,6 +94,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import dynamicForm from "@/components/dynamicForms/DynamicForm.vue";
+import { useEditMode } from "@/composables/useEdit";
 
 const { t } = useI18n();
 const { getAcceptedTypes, getEntityUuid, getRelationType } =
@@ -102,6 +103,7 @@ const { closeModal, getModalInfo } = useBaseModal();
 const { addRelations, getForm } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const tabs: string[] = [t("entity.pick"), t("entity.upload")];
+const { save } = useEditMode();
 
 const getAlreadySelectedEntityIds = (): string[] => {
   const form = getForm(getEntityUuid());
