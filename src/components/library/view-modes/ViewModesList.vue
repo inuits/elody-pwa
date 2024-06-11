@@ -67,7 +67,6 @@
       :is-enable-navigation="enableNavigation"
       :entity-list-elements="entityListElements"
       :entity="entity"
-      :keep-selected-mediafiles="keepSelectedMediafiles"
     />
   </component>
 </template>

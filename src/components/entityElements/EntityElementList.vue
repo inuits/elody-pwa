@@ -105,7 +105,7 @@ import {
   type Entity,
   Entitytyping,
   MediaFileElementTypes,
-  EntityListElement,
+  type EntityListElement,
   BaseLibraryModes,
 } from "@/generated-types/queries";
 import {
@@ -168,7 +168,7 @@ const props = withDefaults(
     types: () => [],
     viewMode: EntityListViewMode.Library,
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
-    entityListElements: undefined,
+    entityListElements: undefined
   }
 );
 
