@@ -110,7 +110,7 @@ export const updateEntityMediafileOnlyForMediafiles = (
       );
     addOrRemoveEntityMediafileFromEntity(
       entity,
-      mediafileIndex === -1 ? "add" : "remove"
+      mediafileIndex === -1 ? ActionType.Add : ActionType.Remove
     );
   } else {
     useEntityMediafileSelector().setEntityMediafiles([]);
@@ -119,15 +119,19 @@ export const updateEntityMediafileOnlyForMediafiles = (
   useEntityMediafileSelector().updateSelectedEntityMediafile(entity);
 };
 
-type actionType = "add" | "remove";
+enum ActionType {
+  Add = "add",
+  Remove = "remove",
+}
+
 const addOrRemoveEntityMediafileFromEntity = (
   entity: Entity,
-  action: actionType
+  action: ActionType
 ) => {
   const mediafiles: MediaFileEntity[] =
     useEntityMediafileSelector().mediafileSelectionState.mediafiles;
 
-  if (action === "add") {
+  if (action === ActionType.Add) {
     const filteredMediafiles = mediafiles.filter(
       (mediafile: MediaFileEntity) => mediafile.uuid !== entity.uuid
     );
@@ -137,7 +141,7 @@ const addOrRemoveEntityMediafileFromEntity = (
     ]);
   }
 
-  if (action === "remove") {
+  if (action === ActionType.Remove) {
     const filteredMediafiles = mediafiles.filter(
       (mediafile: MediaFileEntity) => mediafile.uuid !== entity.uuid
     );
