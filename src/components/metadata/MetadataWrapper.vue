@@ -216,7 +216,7 @@ const { errorMessage, value, meta } = useField<
 >(veeValidateField, rules, { label: label });
 
 onMounted(() => {
-  if (!value.value) setNewValue(props.metadata.value);
+  setNewValue(props.metadata.value);
   if (isMetadataOnRelation.value && props.metadata.key === "order") {
     const orderItem: OrderItem = {
       field: fieldKeyWithId.value,
