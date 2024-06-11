@@ -114,7 +114,6 @@ const props = withDefaults(
     idsOfNonSelectableEntities?: string[];
     relationType: string;
     enableSelection: boolean;
-    keepSelectedMediafiles?: boolean;
   }>(),
   {
     disablePreviews: false,
@@ -122,7 +121,6 @@ const props = withDefaults(
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
     enableSelection: true,
-    keepSelectedMediafiles: false,
   }
 );
 
@@ -192,7 +190,7 @@ const isEntityDisabled = (entity: Entity) => {
 };
 
 const entityWrapperHandler = (entity: Entity) => {
-  if (isEntityDisabled(entity) || props.keepSelectedMediafiles) return;
+  if (isEntityDisabled(entity)) return;
   updateEntityMediafileOnlyForMediafiles(entity);
 };
 </script>

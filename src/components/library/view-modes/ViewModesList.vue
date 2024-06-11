@@ -114,7 +114,6 @@ const props = withDefaults(
     enableSelection: boolean;
     baseLibraryMode?: BaseLibraryModes;
     entityListElements?: EntityListElement[];
-    keepSelectedMediafiles?: boolean;
   }>(),
   {
     disablePreviews: false,
@@ -124,7 +123,6 @@ const props = withDefaults(
     enableSelection: true,
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     entityListElements: undefined,
-    keepSelectedMediafiles: false,
   }
 );
 
@@ -167,7 +165,7 @@ const isEntityDisabled = (entity: Entity) => {
 };
 
 const entityWrapperHandler = (entity: Entity) => {
-  if (isEntityDisabled(entity) || props.keepSelectedMediafiles) return;
+  if (isEntityDisabled(entity)) return;
   updateEntityMediafileOnlyForMediafiles(entity);
 };
 
