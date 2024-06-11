@@ -39,7 +39,7 @@
       :item-id="entity.uuid"
       :item-type="entity.type"
       :bulk-operations-context="bulkOperationsContext"
-      :context-menu-actions="entity.teaserMetadata?.contextMenuActions"
+      :context-menu-actions="parentEntityIdentifiers?.length > 0 ? entity.teaserMetadata?.contextMenuActions : undefined"
       :teaser-metadata="
         formatTeaserMetadata(
           entity.teaserMetadata,
