@@ -57,11 +57,10 @@ import {
 import BaseDropdownNew from "../base/BaseDropdownNew.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
-import { onMounted, watch, ref, computed, onUpdated } from "vue";
-import { useFormHelper } from "@/composables/useFormHelper";
-import { useI18n } from "vue-i18n";
+import { addCurrentTimeZoneToDateTimeString, isDateTime } from "@/helpers";
+import { onMounted, watch, ref, computed } from "vue";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
-import isEqual from "lodash.isequal";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 const emit = defineEmits(["update:value", "registerEnterPressed:value"]);
 
@@ -80,7 +79,6 @@ const props = defineProps<{
   formFlow?: string;
 }>();
 const { addEditableMetadataOnRelationKey } = useFormHelper();
-const { t } = useI18n();
 const metadataValue = ref<string | DropdownOption>(props.value);
 const { conditionalFieldIsAvailable } = useConditionalValidation();
 const fieldEditIsDisabled = computed(() => {
@@ -108,8 +106,12 @@ const getValueFromMetadata = (): string | BaseRelationValuesInput[] => {
   if (
     typeof metadataValue.value !== "object" ||
     Array.isArray(metadataValue.value)
-  )
+  ) {
+    if (isDateTime(metadataValue.value)) {
+      return addCurrentTimeZoneToDateTimeString(metadataValue.value);
+    }
     return metadataValue.value;
+  }
   return metadataValue.value.value;
 };
 

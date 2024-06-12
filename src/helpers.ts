@@ -376,3 +376,23 @@ export const getObjectsBasedOnTypename = (
   });
   return objects;
 };
+
+export const isDateTime = (dateTimeString: any): boolean => {
+  if (typeof dateTimeString !== "string")
+    return false;
+  const date = new Date(dateTimeString);
+  return !isNaN(date.getTime());
+}
+
+export const addCurrentTimeZoneToDateTimeString = (dateTimeString: any): string => {
+  if (typeof dateTimeString !== "string")
+    return dateTimeString;
+  const date = new Date();
+  const timeZoneOffset = -date.getTimezoneOffset();
+  const sign = timeZoneOffset >= 0 ? "+" : "-";
+  const hours = Math.floor(Math.abs(timeZoneOffset) / 60).toString().padStart(2, "0");
+  const minutes = (Math.abs(timeZoneOffset) % 60).toString().padStart(2, "0");
+  const timeZoneString = `${sign}${hours}:${minutes}`;
+
+  return dateTimeString + timeZoneString;
+}
