@@ -9,7 +9,7 @@
         :key="`${dynamicFormQuery}_field_${index}`"
         class="pb-2"
       >
-        <ImportComponent v-if="field.inputField?.type === 'baseFileSystemImportField'" />
+        <ImportComponent v-if="tabName?.length && field.inputField?.type === 'baseFileSystemImportField'" />
         <metadata-wrapper
           v-else-if="field.__typename === 'PanelMetaData'"
           :form-id="dynamicFormQuery"
@@ -139,6 +139,7 @@ const props = withDefaults(
     savedContext?: any | undefined;
     router: Router;
     modalFormFields?: object;
+    tabName?: string;
   }>(),
   {
     hasLinkedUpload: false,
@@ -148,6 +149,7 @@ const props = withDefaults(
 
 type FormFieldTypes = UploadContainer | PanelMetaData | FormAction;
 
+const { getFormByTabName } = useDynamicForm();
 const modalFormFields = props.modalFormFields;
 const config = inject("config");
 const { currentTenant } = useApp();
@@ -157,7 +159,8 @@ const { loadDocument } = useImport();
 const { closeModal } = useBaseModal();
 const {
   getDynamicForm,
-  dynamicForm,
+  dynamicForm: dynamicFormValue,
+  getDynamicFormTabs,
   performSubmitAction,
   performDownloadAction,
   resetDynamicForm,
@@ -170,10 +173,16 @@ const {
   standaloneFileType,
   reinitializeDynamicFormFunc,
 } = useUpload();
+
+const dynamicForm = computed(() => {
+  return props.tabName ? getDynamicFormTabs(props.tabName) : dynamicFormValue.value;
+});
+
 const { resetForm } = useForm();
 interface FormObject {
   __typename: string;
 }
+
 const findFormTabObjects = (dynamicForm: Record<string, FormObject>): FormObject[] => {
   if (!dynamicForm) {
     return [];
@@ -182,11 +191,15 @@ const findFormTabObjects = (dynamicForm: Record<string, FormObject>): FormObject
   return Object.values(dynamicForm).filter(value => value && value.__typename === "FormTab");
 };
 
-const formFields = computed<FormFieldTypes[] | undefined>(() => {
-  const formTabs = dynamicForm.value?.GetDynamicForm;
-  if (!formTabs) return undefined;
+const formTabs = computed(() => {
+  return dynamicForm.value?.GetDynamicForm;
+});
 
-  const formTabObjects = findFormTabObjects(formTabs);
+const formFields = computed<FormFieldTypes[] | undefined>(() => {
+  const formTabsValue = formTabs.value;
+  if (!formTabsValue) return undefined;
+
+  const formTabObjects = findFormTabObjects(formTabsValue);
   if (!formTabObjects.length) return undefined;
 
   return formTabObjects.flatMap(formTab =>
@@ -346,7 +359,7 @@ const initializeForm = async (
   resetVeeValidateForDynamicForm(newQueryName, oldQueryName, relations);
   if (!props.dynamicFormQuery) return;
   const document = await getQuery(props.dynamicFormQuery);
-  getDynamicForm(document);
+  getDynamicForm(document, props.tabName);
 };
 
 watch(

@@ -22,6 +22,7 @@
                 :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
                 :router="useRouter()"
                 :modal-form-fields="formTab.formFields"
+                :tab-name="tabsTitles[tabIndex]"
             />
           </baseTab>
         </baseTabs>
@@ -32,6 +33,7 @@
           :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
           :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
           :router="useRouter()"
+          :tab-name="''"
       />
     </div>
   </BaseModal>
@@ -48,17 +50,19 @@ import BaseTab from "@/components/BaseTab.vue";
 import { useI18n } from "vue-i18n";
 import { onMounted, computed, ref, watchEffect } from 'vue';
 import { useConfirmModal } from "@/composables/useConfirmModal";
-import { getDynamicFormTabs } from '@/components/dynamicForms/useDynamicForm';
+import { useDynamicForm } from '@/components/dynamicForms/useDynamicForm';
 
 const formTabs = ref<Form | null>(null);
 const { closeModal, getModalInfo, changeCloseConfirmation } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const { t } = useI18n();
+const { getDynamicFormTabs } = useDynamicForm();
 
 watchEffect(() => {
   (async () => {
     if (!formTabs.value) {
-      formTabs.value = await getDynamicFormTabs();
+      const tabs = await getDynamicFormTabs();
+      formTabs.value = tabs;
     }
   })();
 });
