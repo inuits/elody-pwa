@@ -9,21 +9,30 @@ const isPerformingAction = ref<boolean>(false);
 const { selectedTenant } = useTenant(undefined);
 
 const useDynamicForm = () => {
-  const getDynamicFormTabs = () => {
-    return dynamicForm.value;
+  const getDynamicFormTabs = (tabName?: string) => {
+    if (tabName?.length && dynamicForm.value) {
+      return dynamicForm.value[tabName];
+    } else {
+      return dynamicForm.value;
+    }
   };
 
-  const getDynamicForm = (queryDocument: any): void => {
+  const getDynamicForm = (queryDocument: any, tabName?: string): void => {
     apolloClient
       .query({
         query: queryDocument,
       })
       .then((result) => {
-        dynamicForm.value = result.data;
+        if (!dynamicForm.value) {
+          dynamicForm.value = {};
+        }
+
+        if (tabName?.length) {
+          dynamicForm.value[tabName] = result.data;
+        } else {
+          dynamicForm.value = result.data;
+        }
       })
-      .catch((error) => {
-        console.error('Error fetching dynamicFormTabs:', error);
-      });
   };
 
   const performSubmitAction = async (
@@ -58,8 +67,12 @@ const useDynamicForm = () => {
     });
   };
 
-  const resetDynamicForm = () => {
-    dynamicForm.value = undefined;
+  const resetDynamicForm = (tabName?: string) => {
+    if(tabName?.length){
+      delete dynamicForm.value[tabName];
+    } else {
+      dynamicForm.value = undefined;
+    }
     dynamicFormUploadFields.value = [];
   };
 
@@ -75,9 +88,4 @@ const useDynamicForm = () => {
   };
 };
 
-const getDynamicFormTabs = async () => {
-  const dynamicFormInstance = useDynamicForm();
-  return dynamicFormInstance.getDynamicFormTabs();
-};
-
-export { useDynamicForm, getDynamicFormTabs };
+export { useDynamicForm };
