@@ -1,6 +1,7 @@
 import {
   type BaseRelationValuesInput,
   EditStatus,
+  ValidationRules,
   type IntialValues,
   type MetadataValuesInput,
   type PanelMetaData,
@@ -97,8 +98,8 @@ const useFormHelper = () => {
     Object.entries(all).forEach(([name, rule]) => {
       defineRule(name, rule);
     });
-
-    defineRule("has_required_relation", getHasSpecificRelationRule);
+    defineRule(ValidationRules.HasRequiredRelation, getHasSpecificRelationRule);
+    defineRule(ValidationRules.HasOneOfRequiredRelations, getHasOneOfSpecificRelationsRule);
   };
 
   const getHasSpecificRelationRule = (
@@ -108,18 +109,41 @@ const useFormHelper = () => {
     if (!Array.isArray(value)) {
       return false;
     }
-
     const relations = value.filter(
       (relation: BaseRelationValuesInput) =>
         relation.editStatus !== EditStatus.Deleted
     );
-    const [relationType, amount = 1] = parameters[0].split(":");
+    const [amount = 1, relationType] = parameters[0].split(":");
     const specificRelationsLength =
       relations.filter(
         (relation: BaseRelationValuesInput) => relation.type === relationType
       )?.length || 0;
 
     return specificRelationsLength >= Number(amount);
+  };
+
+  const getHasOneOfSpecificRelationsRule = (
+    value: BaseRelationValuesInput[],
+    parameters: string[],
+    ctx: any
+  ) => {
+    if (!Array.isArray(value)) {
+      return false;
+    }
+    const relationValues = ctx.form.relationValues;
+    const [amount = 1, ...relationTypes] = parameters[0].split(":");
+    let specificRelationsLength = 0;
+    relationTypes.forEach(async (relationType: string) => {
+      specificRelationsLength += relationValues[relationType]?.length || 0;
+    })
+    const isValid = specificRelationsLength >= Number(amount);
+    if (isValid) {
+      relationTypes.forEach((relationType) => {
+        if (relationValues[relationType] === undefined )
+          relationValues[relationType] = [];
+      })
+    }
+    return isValid;
   };
 
   const __isNotEmpty = (str: any) => str.trim() !== "";

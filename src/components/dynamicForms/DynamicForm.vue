@@ -83,7 +83,6 @@
               : t(field.label)
           "
           :icon="field.icon"
-          :disabled="formContainsErrors"
           button-style="accentAccent"
           @click="performActionButtonClickEvent(field)"
         />
@@ -217,6 +216,7 @@ const uploadActionFunction = async (field: FormAction) => {
 };
 
 const submitActionFunction = async (field: FormAction) => {
+  await form.value.validate();
   if (formContainsErrors.value) return;
   const document = await getQuery(field.actionQuery as string);
   const entityInput = createEntityFromFormInput(field.creationType);
@@ -228,6 +228,7 @@ const submitActionFunction = async (field: FormAction) => {
 };
 
 const downloadActionFunction = async (field: FormAction) => {
+  await form.value.validate();
   if (formContainsErrors.value) return;
   const document = await getQuery(field.actionQuery as string);
   const entityInput = createEntityFromFormInput(field.creationType);
@@ -245,6 +246,7 @@ const downloadActionFunction = async (field: FormAction) => {
 };
 
 const updateMetdataActionFunction = async (field: FormAction) => {
+  await form.value.validate();
   if (formContainsErrors.value) return;
   //TODO: put code here that calls graphql function to the bulk edit endpoint in the collection-api
 };
