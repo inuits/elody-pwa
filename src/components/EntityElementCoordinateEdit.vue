@@ -6,8 +6,8 @@
     <div class="flex justify-between">
       <div class="h-10 block">
         <BaseInputTextNumberDatetime
-          v-model="computedLongitude"
-          label="Longitude"
+          v-model="computedLatitude"
+          label="Latitude"
           :type="inputField.type as any"
           :step="decimalPointStep"
           input-style="defaultWithBorder"
@@ -17,8 +17,8 @@
       </div>
       <div class="h-10 block">
         <BaseInputTextNumberDatetime
-          v-model="computedLatitude"
-          label="Latitude"
+          v-model="computedLongitude"
+          label="Longitude"
           :type="inputField.type as any"
           :step="decimalPointStep"
           input-style="defaultWithBorder"
