@@ -21,7 +21,7 @@
       :link-text="metadata.linkText"
       :isMetadataOnRelation="isMetadataOnRelation"
       :error="errorMessage"
-      :fieldIsDirty="fieldIsDirty"
+      :show-errors="showErrors"
       :field-is-valid="fieldIsValid"
       @update:value="setNewValue"
       @register-enter-pressed:value="registerEnterKeyPressed"
@@ -113,10 +113,12 @@ const props = withDefaults(
     linkedEntityId?: String;
     baseLibraryMode?: BaseLibraryModes;
     formFlow?: "edit" | "create";
+    showErrors?: boolean;
   }>(),
   {
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     formFlow: "edit",
+    showErrors: false,
   }
 );
 watch(
@@ -150,7 +152,6 @@ const fieldKeyWithId = computed(
       props.linkedEntityId ? "-" + props.linkedEntityId : ""
     }`
 );
-const fieldIsDirty = computed(() => meta.dirty);
 const fieldIsValid = computed(() => meta.valid);
 
 const { conditionalFieldIsRequired } = useConditionalValidation();

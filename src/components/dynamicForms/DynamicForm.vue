@@ -15,6 +15,7 @@
           :metadata="field as PanelMetaData"
           :is-edit="true"
           form-flow="create"
+          :show-errors="showErrors"
           :key="`${dynamicFormQuery}_field_${index}`"
         />
         <div v-if="field.__typename === 'UploadContainer'">
@@ -174,6 +175,7 @@ const formFields = computed<FormFieldTypes[] | undefined>(() => {
 });
 const form = ref<FormContext<any>>();
 const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
+const showErrors = ref<boolean>(false);
 const { getMenuDestinations } = useMenuHelper();
 const isLoading = computed(() => {
   if (isPerformingAction.value) return true;
@@ -260,7 +262,7 @@ const performActionButtonClickEvent = (field: FormAction): void => {
     update: () => updateMetdataActionFunction(field),
   };
   if (!field.actionType) return;
-
+  showErrors.value = true;
   actionFunctions[field.actionType]();
 };
 
