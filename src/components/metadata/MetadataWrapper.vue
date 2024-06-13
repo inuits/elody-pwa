@@ -183,7 +183,11 @@ const isFieldRequired = computed(() => {
 });
 
 const getValidationRules = (metadata: PanelMetaData): string => {
-  const rules: string = metadata?.inputField?.validation?.value?.join("|") as string;
+  let rules: string;
+  if (metadata?.inputField?.validation?.value === ValidationRules.CustomValue)
+    rules = metadata?.inputField?.validation?.customValue
+  else
+    rules = metadata?.inputField?.validation?.value?.join("|") as string;
   if (isRequiredRelationField.value) {
     const relationType =
       metadata?.inputField?.validation?.has_required_relation?.relationType;
