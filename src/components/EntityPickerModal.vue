@@ -16,7 +16,8 @@
         <BaseTab :title="tabs[0]" class="overflow-auto">
           <BaseLibrary
             v-if="
-              getModalInfo(TypeModals.EntityPicker).state === ModalState.Show
+              getModalInfo(TypeModals.EntityPicker).state === ModalState.Show &&
+              (queryLoaded || ignoreCustomQuery)
             "
             :bulk-operations-context="getContext()"
             :entity-type="getAcceptedTypes()?.[0]"
@@ -31,16 +32,8 @@
             :enable-navigation="false"
             :enable-bulk-operations="true"
             :disable-new-entity-previews="true"
+            :use-other-query="ignoreCustomQuery ? undefined : newQuery"
             :ids-of-non-selectable-entities="getAlreadySelectedEntityIds()"
-            :filters="[
-              {
-                type: AdvancedFilterTypes.Selection,
-                parent_key: '',
-                key: 'type',
-                value: getAcceptedTypes(),
-                match_exact: true,
-              },
-            ]"
             list-item-route-name="SingleEntity"
             @confirm-selection="
               async (selectedItems) => {
@@ -74,7 +67,6 @@
 
 <script lang="ts" setup>
 import {
-  AdvancedFilterTypes,
   Entitytyping,
   ModalState,
   SearchInputType,
@@ -95,15 +87,40 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import dynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import { useEditMode } from "@/composables/useEdit";
+import { watch, ref } from "vue";
+import { useImport } from "@/composables/useImport";
 
 const { t } = useI18n();
-const { getAcceptedTypes, getEntityUuid, getRelationType } =
-  useEntityPickerModal();
+const {
+  getAcceptedTypes,
+  getEntityUuid,
+  getRelationType,
+  getCustomGetEntitiesQuery,
+  getCustomGetEntitiesFiltersQuery,
+} = useEntityPickerModal();
 const { closeModal, getModalInfo } = useBaseModal();
 const { addRelations, getForm } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const tabs: string[] = [t("entity.pick"), t("entity.upload")];
 const { save } = useEditMode();
+const { loadDocument } = useImport();
+const queryLoaded = ref<boolean>(false);
+const ignoreCustomQuery = ref<boolean>(false);
+const newQuery = ref<object | undefined>(undefined);
+
+const useCustomQuery = async () => {
+  const queryDocument = await loadDocument(getCustomGetEntitiesQuery());
+  const filtersDocument = await loadDocument(
+    getCustomGetEntitiesFiltersQuery()
+  );
+
+  newQuery.value = {
+    name: getCustomGetEntitiesQuery(),
+    document: queryDocument,
+    filtersDocument: filtersDocument,
+  };
+  queryLoaded.value = true;
+};
 
 const getAlreadySelectedEntityIds = (): string[] => {
   const form = getForm(getEntityUuid());
@@ -136,4 +153,19 @@ const getContext = () => {
     return BulkOperationsContextEnum.EntityElementListEntityPickerModal;
   }
 };
+
+watch(
+  () => getModalInfo(TypeModals.EntityPicker).state,
+  async () => {
+    const isModalOpened =
+      getModalInfo(TypeModals.EntityPicker).state === ModalState.Show;
+    const hasCustomQuery = !!getCustomGetEntitiesQuery();
+    if (isModalOpened && hasCustomQuery) {
+      await useCustomQuery();
+    } else if (isModalOpened && !hasCustomQuery) {
+      ignoreCustomQuery.value = true;
+    }
+  },
+  { immediate: true }
+);
 </script>

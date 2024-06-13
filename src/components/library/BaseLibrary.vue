@@ -244,7 +244,6 @@ export type BaseLibraryProps = {
   selectInputFieldValue?: string[];
   baseLibraryMode?: BaseLibraryModes;
   entityListElements?: EntityListElement[];
-  keepSelectedMediafiles?: boolean;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -266,7 +265,6 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   isMultiSelectInputField: false,
   baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
   entityListElements: undefined,
-  keepSelectedMediafiles: false,
 });
 
 const emit = defineEmits<{

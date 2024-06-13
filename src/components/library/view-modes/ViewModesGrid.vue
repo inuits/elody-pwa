@@ -80,7 +80,7 @@
 <script lang="ts" setup>
 import type { ApolloClient } from "@apollo/client/core";
 import type { Context } from "@/composables/useBulkOperations";
-import { EditStatus, Metadata } from "@/generated-types/queries";
+import { EditStatus, type Metadata } from "@/generated-types/queries";
 import type {
   BaseRelationValuesInput,
   Entity,
@@ -100,7 +100,6 @@ import { DefaultApolloClient } from "@vue/apollo-composable";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { useRouter } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -134,7 +133,6 @@ const { mediafileSelectionState, updateSelectedEntityMediafile } =
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { getThumbnail } = useThumbnailHelper();
 const { getForm } = useFormHelper();
-const router = useRouter();
 
 const entityId = computed(() => getEntityIdFromRoute() as string);
 const relations = computed<BaseRelationValuesInput[]>(
@@ -190,7 +188,7 @@ const isEntityDisabled = (entity: Entity) => {
 };
 
 const entityWrapperHandler = (entity: Entity) => {
-  if (isEntityDisabled(entity)) return;
+  if (isEntityDisabled(entity) || !props.enableNavigation) return;
   updateEntityMediafileOnlyForMediafiles(entity);
 };
 </script>

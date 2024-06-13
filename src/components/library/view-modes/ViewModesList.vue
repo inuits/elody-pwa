@@ -165,7 +165,7 @@ const isEntityDisabled = (entity: Entity) => {
 };
 
 const entityWrapperHandler = (entity: Entity) => {
-  if (isEntityDisabled(entity)) return;
+  if (isEntityDisabled(entity) || !props.enableNavigation) return;
   updateEntityMediafileOnlyForMediafiles(entity);
 };
 
