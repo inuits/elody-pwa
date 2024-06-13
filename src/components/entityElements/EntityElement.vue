@@ -20,6 +20,10 @@
         :custom-query-relation-type="element.customQueryRelationType"
         :custom-query-filters="element.customQueryFilters"
         :custom-bulk-operations="element.customBulkOperations"
+        :custom-query-entity-picker-list="element.customQueryEntityPickerList"
+        :custom-query-entity-picker-list-filters="
+          element.customQueryEntityPickerListFilters
+        "
         :search-input-type="element.searchInputType"
         :entity-list="(element.entityList as Entity[]) ?? []"
         :identifiers="identifiers"

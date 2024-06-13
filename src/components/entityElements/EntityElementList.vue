@@ -14,6 +14,8 @@
               setAcceptedTypes(types as Entitytyping[]);
               setEntityUuid(entityUuid);
               setRelationType(relationType);
+              setCustomGetEntitiesQuery(customQueryEntityPickerList);
+              setCustomGetEntitiesFiltersQuery(customQueryEntityPickerListFilters);
               openModal(TypeModals.EntityPicker, undefined, 'right');
               toggleElementCollapse(label, false);
             }
@@ -38,7 +40,7 @@
         >
           <BaseLibrary
             v-if="type === MediaFileElementTypes.Media"
-            class="flex-1"
+            class="flex-1 123"
             :bulk-operations-context="
               BulkOperationsContextEnum.EntityElementMedia
             "
@@ -73,7 +75,7 @@
             :custom-bulk-operations="customBulkOperations"
           />
           <BaseLibrary
-            class="flex-1"
+            class="flex-1 345"
             v-else
             :bulk-operations-context="
               createCustomContext(
@@ -136,8 +138,13 @@ import useUpload from "@/composables/useUpload";
 const { addRelations } = useFormHelper();
 const { createCustomContext } = useBulkOperations();
 const { toggleElementCollapse } = useEntityElementCollapseHelper();
-const { setAcceptedTypes, setEntityUuid, setRelationType } =
-  useEntityPickerModal();
+const {
+  setAcceptedTypes,
+  setEntityUuid,
+  setRelationType,
+  setCustomGetEntitiesQuery,
+  setCustomGetEntitiesFiltersQuery,
+} = useEntityPickerModal();
 const { openModal } = useBaseModal();
 const { loadDocument } = useImport();
 const { isEdit } = useEditMode();
@@ -159,8 +166,10 @@ const props = withDefaults(
     type: MediaFileElementTypes;
     customQuery: string;
     customQueryRelationType: string;
-    customQueryFilters: String;
     customBulkOperations?: string | undefined;
+    customQueryFilters: string;
+    customQueryEntityPickerList: string;
+    customQueryEntityPickerListFilters: string;
     searchInputType: string;
     entityList: Entity[];
     identifiers: string[];
@@ -214,6 +223,7 @@ const useCustomQuery = async () => {
   setQueryRelationType(props.customQueryRelationType);
   setIdentifiers(props.identifiers[0]);
   setSearchInputType(props.searchInputType);
+
   newQuery.value = {
     name: props.customQuery,
     document: queryDocument,
