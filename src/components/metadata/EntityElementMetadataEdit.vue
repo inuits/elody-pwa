@@ -41,7 +41,7 @@
       @focusout="keyUpEnterEvent()"
       :disabled="fieldEditIsDisabled"
     />
-    <p v-if="fieldIsDirty && !fieldIsValid" class="text-red-default">
+    <p v-if="showErrors && !fieldIsValid" class="text-red-default">
       {{ error }}
     </p>
   </div>
@@ -74,7 +74,7 @@ const props = defineProps<{
   linkText?: string;
   isMetadataOnRelation?: boolean;
   error?: string;
-  fieldIsDirty: boolean;
+  showErrors: boolean;
   fieldIsValid: boolean;
   formFlow?: string;
 }>();
