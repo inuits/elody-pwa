@@ -149,7 +149,6 @@ const props = withDefaults(
 
 type FormFieldTypes = UploadContainer | PanelMetaData | FormAction;
 
-const { getFormByTabName } = useDynamicForm();
 const modalFormFields = props.modalFormFields;
 const config = inject("config");
 const { currentTenant } = useApp();
