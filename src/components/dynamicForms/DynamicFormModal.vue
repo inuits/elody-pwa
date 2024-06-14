@@ -9,7 +9,7 @@
         : 'bg-neutral-white'
     "
     modalHeightStyle="max-h-[75vh] my-[12.5vh]"
-    @hide-modal="closeModal(TypeModals.DynamicForm)"
+    @hide-modal="handleCloseModal"
   >
     <div class="flex flex-col w-full h-full overflow-auto">
       <template v-if="shouldRenderTabs" class="h-full">
@@ -22,7 +22,6 @@
                 :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
                 :router="useRouter()"
                 :modal-form-fields="formTab.formFields"
-                :tab-name="tabsTitles[tabIndex]"
             />
           </baseTab>
         </baseTabs>
@@ -33,7 +32,6 @@
           :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
           :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
           :router="useRouter()"
-          :tab-name="''"
       />
     </div>
   </BaseModal>
@@ -48,24 +46,43 @@ import { useRouter } from "vue-router";
 import BaseTabs from "@/components/BaseTabs.vue";
 import BaseTab from "@/components/BaseTab.vue";
 import { useI18n } from "vue-i18n";
-import { onMounted, computed, ref, watchEffect } from 'vue';
+import { onMounted, computed, ref, watch,watchEffect } from 'vue';
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useDynamicForm } from '@/components/dynamicForms/useDynamicForm';
 
 const formTabs = ref<Form | null>(null);
+const { getDynamicFormTabs } = useDynamicForm();
 const { closeModal, getModalInfo, changeCloseConfirmation } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const { t } = useI18n();
-const { getDynamicFormTabs } = useDynamicForm();
 
 watchEffect(() => {
   (async () => {
     if (!formTabs.value) {
-      const tabs = await getDynamicFormTabs();
-      formTabs.value = tabs;
+      formTabs.value = await getDynamicFormTabs();
+      console.log(formTabs.value)
     }
   })();
 });
+
+const fetchFormTabs = async () => {
+  formTabs.value = await getDynamicFormTabs();
+  console.log(formTabs.value);
+};
+
+const clearFormTabs = () => {
+  formTabs.value = null;
+};
+
+watch(
+    () => getModalInfo(TypeModals.DynamicForm).state,
+    (newState) => {
+      if (newState === ModalState.Show) {
+        clearFormTabs();
+        fetchFormTabs();
+      }
+    }
+);
 
 onMounted(() => {
   initializeConfirmModal(
@@ -108,6 +125,11 @@ const formTabArray = computed(() => {
 
   return formTabs.value ? extractFormTabs(formTabs.value) : [];
 });
+
+const handleCloseModal = () => {
+  closeModal(TypeModals.DynamicForm);
+  clearFormTabs();
+};
 </script>
 
 <style scoped></style>
