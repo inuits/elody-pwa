@@ -52,7 +52,7 @@ export const useStateManagement = () => {
     stateObject: StateObject
   ) => {
     if (!route) return;
-    if (route.name !== "SingleEntity") {
+    if (route.name !== "SingleEntity" && route.name !== "SingleMediafile") {
       const state = JSON.stringify(stateObject);
       if (window.sessionStorage.getItem(route.path) !== state)
         window.sessionStorage.setItem(route.path, state);
