@@ -60,15 +60,9 @@ watchEffect(() => {
   (async () => {
     if (!formTabs.value) {
       formTabs.value = await getDynamicFormTabs();
-      console.log(formTabs.value)
     }
   })();
 });
-
-const fetchFormTabs = async () => {
-  formTabs.value = await getDynamicFormTabs();
-  console.log(formTabs.value);
-};
 
 const clearFormTabs = () => {
   formTabs.value = null;
