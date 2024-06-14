@@ -1,6 +1,9 @@
 <template>
   <div class="p-4 pt-0 h-full w-full overflow-y-auto" :key="dynamicFormQuery">
-    <div v-if="!isLoading" class="w-full [&>*>button:last-child]:mb-0">
+    <div
+      v-if="formFields && dynamicFormQuery"
+      class="w-full [&>*>button:last-child]:mb-0"
+    >
       <h1 v-if="dynamicForm.GetDynamicForm.label" class="title pb-4">
         {{ t(dynamicForm.GetDynamicForm.label) }}
       </h1>
@@ -9,7 +12,7 @@
         :key="`${dynamicFormQuery}_field_${index}`"
         class="pb-2"
       >
-        <ImportComponent v-if="tabName?.length && field.inputField?.type === 'baseFileSystemImportField'" />
+        <ImportComponent v-if="field.inputField?.type === 'baseFileSystemImportField'" />
         <metadata-wrapper
           v-else-if="field.__typename === 'PanelMetaData'"
           :form-id="dynamicFormQuery"
@@ -69,7 +72,7 @@
         <BaseButtonNew
           v-if="
             field.__typename === 'FormAction' &&
-            field.actionType !== ActionType.Upload
+            field.actionType == ActionType.Submit
           "
           class="mt-5 mb-10"
           :label="
@@ -88,10 +91,34 @@
           button-style="accentAccent"
           @click="performActionButtonClickEvent(field)"
         />
+        <BaseButtonNew
+          v-if="
+            field.__typename === 'FormAction' &&
+            field.actionType == ActionType.Download
+          "
+          class="mt-5 mb-10"
+          :label="t((field as FormAction).label)"
+          :icon="field.icon"
+          :disabled="formContainsErrors"
+          button-style="accentAccent"
+          @click="performActionButtonClickEvent(field)"
+        />
+        <BaseButtonNew
+          v-if="
+            field.__typename === 'FormAction' &&
+            field.actionType == ActionType.Update
+          "
+          class="mt-5 mb-10"
+          :label="t((field as FormAction).label)"
+          :icon="field.icon"
+          :disabled="formContainsErrors"
+          button-style="accentAccent"
+          @click="performActionButtonClickEvent(field)"
+        />
       </div>
     </div>
-    <div v-else class="min-h-[20rem] w-full flex justify-center items-center">
-      <spinner-loader theme="accent" />
+    <div v-else class="h-screen w-full flex justify-center items-center">
+      <spinner-loader />
     </div>
   </div>
 </template>
@@ -139,7 +166,6 @@ const props = withDefaults(
     savedContext?: any | undefined;
     router: Router;
     modalFormFields?: object;
-    tabName?: string;
   }>(),
   {
     hasLinkedUpload: false,
@@ -158,12 +184,10 @@ const { loadDocument } = useImport();
 const { closeModal } = useBaseModal();
 const {
   getDynamicForm,
-  dynamicForm: dynamicFormValue,
-  getDynamicFormTabs,
+  dynamicForm,
   performSubmitAction,
   performDownloadAction,
   resetDynamicForm,
-  isPerformingAction,
 } = useDynamicForm();
 const {
   upload,
@@ -172,16 +196,10 @@ const {
   standaloneFileType,
   reinitializeDynamicFormFunc,
 } = useUpload();
-
-const dynamicForm = computed(() => {
-  return props.tabName ? getDynamicFormTabs(props.tabName) : dynamicFormValue.value;
-});
-
 const { resetForm } = useForm();
 interface FormObject {
   __typename: string;
 }
-
 const findFormTabObjects = (dynamicForm: Record<string, FormObject>): FormObject[] => {
   if (!dynamicForm) {
     return [];
@@ -190,15 +208,11 @@ const findFormTabObjects = (dynamicForm: Record<string, FormObject>): FormObject
   return Object.values(dynamicForm).filter(value => value && value.__typename === "FormTab");
 };
 
-const formTabs = computed(() => {
-  return dynamicForm.value?.GetDynamicForm;
-});
-
 const formFields = computed<FormFieldTypes[] | undefined>(() => {
-  const formTabsValue = formTabs.value;
-  if (!formTabsValue) return undefined;
+  const formTabs = dynamicForm.value?.GetDynamicForm;
+  if (!formTabs) return undefined;
 
-  const formTabObjects = findFormTabObjects(formTabsValue);
+  const formTabObjects = findFormTabObjects(formTabs);
   if (!formTabObjects.length) return undefined;
 
   return formTabObjects.flatMap(formTab =>
@@ -213,10 +227,6 @@ const getFieldArray = computed(() => {
 const form = ref<FormContext<any>>();
 const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
 const { getMenuDestinations } = useMenuHelper();
-const isLoading = computed(() => {
-  if (isPerformingAction.value) return true;
-  return !formFields.value && !dynamicForm.value;
-});
 const { t } = useI18n();
 
 const createEntityFromFormInput = (entityType: Entitytyping): EntityInput => {
@@ -240,7 +250,7 @@ const getQuery = async (queryName: string) => {
   return await loadDocument(queryName);
 };
 
-const uploadActionFunction = async (field: FormAction) => {
+const uploadActionFunction = (field: FormAction) => {
   if (!enableUploadButton.value) return;
   upload(props.hasLinkedUpload, config, t);
   if (standaloneFileType.value)
@@ -286,7 +296,9 @@ const updateMetdataActionFunction = async (field: FormAction) => {
   //TODO: put code here that calls graphql function to the bulk edit endpoint in the collection-api
 };
 
-const performActionButtonClickEvent = (field: FormAction): void => {
+const performActionButtonClickEvent = async (
+  field: FormAction
+): Promise<void> => {
   useBaseModal().changeCloseConfirmation(TypeModals.DynamicForm, false);
   const actionFunctions: { [key: string]: Function } = {
     upload: () => uploadActionFunction(field),
@@ -358,7 +370,7 @@ const initializeForm = async (
   resetVeeValidateForDynamicForm(newQueryName, oldQueryName, relations);
   if (!props.dynamicFormQuery) return;
   const document = await getQuery(props.dynamicFormQuery);
-  getDynamicForm(document, props.tabName);
+  getDynamicForm(document);
 };
 
 watch(
@@ -385,7 +397,7 @@ watch(
 watch(
   () => form.value?.values.intialValues,
   (intialValues: { [key: string]: any }) => {
-    if (intialValues && intialValues.standaloneUploadType)
+    if (intialValues.standaloneUploadType)
       standaloneFileType.value = intialValues.standaloneUploadType;
     useBaseModal().changeCloseConfirmation(
       TypeModals.DynamicForm,

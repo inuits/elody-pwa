@@ -1,51 +1,35 @@
-import type { EntityInput } from "@/generated-types/queries";
-import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import { ref } from "vue";
+import { type EntityInput } from "@/generated-types/queries";
 
 const dynamicForm = ref<any | undefined>(undefined);
 const dynamicFormUploadFields = ref<any[]>([]);
-const isPerformingAction = ref<boolean>(false);
-const { selectedTenant } = useTenant(undefined);
-
 const useDynamicForm = () => {
-  const getDynamicFormTabs = (tabName?: string) => {
-    if (tabName?.length && dynamicForm.value) {
-      return dynamicForm.value[tabName];
-    } else {
-      return dynamicForm.value;
-    }
-  };
-
-  const getDynamicForm = (queryDocument: any, tabName?: string): void => {
+  const getDynamicForm = (queryDocument: any): void => {
     apolloClient
       .query({
         query: queryDocument,
       })
       .then((result) => {
-        if (!dynamicForm.value) {
-          dynamicForm.value = {};
-        }
-
-        if (tabName?.length) {
-          dynamicForm.value[tabName] = result.data;
-        } else {
-          dynamicForm.value = result.data;
-        }
+        dynamicForm.value = result.data;
       })
+      .catch((error) => {
+        console.error('Error fetching dynamicFormTabs:', error);
+      });
+  };
+
+  const getDynamicFormTabs = () => {
+    return dynamicForm.value;
   };
 
   const performSubmitAction = async (
     queryDocument: any,
     entity: EntityInput
   ): Promise<any> => {
-    isPerformingAction.value = true;
-    const submitResult = await apolloClient.mutate({
+    return await apolloClient.mutate({
       mutation: queryDocument,
-      variables: { entity, tenantId: selectedTenant.value },
+      variables: { entity },
     });
-    isPerformingAction.value = false;
-    return submitResult;
   };
 
   const performDownloadAction = async (
@@ -67,12 +51,8 @@ const useDynamicForm = () => {
     });
   };
 
-  const resetDynamicForm = (tabName?: string) => {
-    if(tabName?.length){
-      delete dynamicForm.value[tabName];
-    } else {
-      dynamicForm.value = undefined;
-    }
+  const resetDynamicForm = () => {
+    dynamicForm.value = undefined;
     dynamicFormUploadFields.value = [];
   };
 
@@ -83,9 +63,10 @@ const useDynamicForm = () => {
     performDownloadAction,
     dynamicFormUploadFields,
     resetDynamicForm,
-    isPerformingAction,
     getDynamicFormTabs,
   };
 };
+
+
 
 export { useDynamicForm };
