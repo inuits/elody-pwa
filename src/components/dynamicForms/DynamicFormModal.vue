@@ -79,7 +79,6 @@ watch(
     (newState) => {
       if (newState === ModalState.Show) {
         clearFormTabs();
-        fetchFormTabs();
       }
     }
 );
