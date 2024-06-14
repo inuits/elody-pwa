@@ -155,6 +155,14 @@ const useFormHelper = () => {
     return values.some(__isNotEmpty);
   };
 
+  const getKeyBasedOnInputField = (
+    metadataItem: PanelMetaData
+  ) => {
+    if (metadataItem.inputField.fieldKeyToSave != undefined)
+      return metadataItem.inputField.fieldKeyToSave;
+    return metadataItem.key;
+  }
+
   const getEditableMetadataKeys = (
     columnList: Record<string, any>,
     formId: string
@@ -165,7 +173,7 @@ const useFormHelper = () => {
     panelMetadataItems.forEach((metadataItem: PanelMetaData) => {
       if (!metadataItem.inputField || keyArray.includes(metadataItem.key))
         return;
-      keyArray.push(metadataItem.key);
+      keyArray.push(getKeyBasedOnInputField(metadataItem));
     });
     editableFields.value[formId] = keyArray;
     return keyArray;
@@ -376,6 +384,7 @@ const useFormHelper = () => {
     deleteForms,
     forms,
     getEditableMetadataKeys,
+    getKeyBasedOnInputField,
     addEditableMetadataOnRelationKey,
     editableFields,
     createEntityValues,
