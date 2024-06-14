@@ -103,7 +103,7 @@ import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAuto
 
 const { t } = useI18n();
 const { addOrderItem, removeOrderItem, updateOrderItem } = useOrderListItems();
-const { getForm } = useFormHelper();
+const { getForm, getKeyBasedOnInputField } = useFormHelper();
 
 const props = withDefaults(
   defineProps<{
@@ -222,7 +222,7 @@ const veeValidateField = computed(() => {
   else if ((isRequiredRelationField.value || isOneOfRequiredRelationField.value) && props.isEdit)
     return `${ValidationFields.RelationValues}.${props.metadata.inputField.relationType}`;
   else if (props.metadata.inputField)
-    return `${ValidationFields.IntialValues}.${props.metadata.key}`;
+    return `${ValidationFields.IntialValues}.${getKeyBasedOnInputField(props.metadata)}`;
   else if (props.linkedEntityId === undefined)
     return `${ValidationFields.RelationValues}.${props.metadata.key}`;
   else return `${ValidationFields.RelatedEntityData}.${fieldKeyWithId.value}`;
