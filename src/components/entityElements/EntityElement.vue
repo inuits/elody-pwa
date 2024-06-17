@@ -28,6 +28,7 @@
           getObjectsBasedOnTypename(element, 'EntityListElement')
         "
         :base-library-mode="element.baseLibraryMode"
+        :allowed-actions-on-relations="element.allowedActionsOnRelations"
       />
       <entity-element-media
         v-if="element.__typename === 'MediaFileElement'"

@@ -7,7 +7,7 @@
     >
       <template v-slot:actions>
         <div
-          v-if="isEdit && relationType"
+          v-if="isEdit && relationType && allowedActionsOnRelations.includes(RelationActions.AddRelation)"
           class="flex items-center px-2 text-text-subtitle cursor-pointer"
           @click.stop="
             () => {
@@ -69,6 +69,7 @@
             :base-library-mode="baseLibraryMode"
             :has-sticky-bars="false"
             :entity-list-elements="entityListElements"
+            :allowed-actions-on-relations="allowedActionsOnRelations"
           />
           <BaseLibrary
             class="flex-1"
@@ -90,6 +91,7 @@
             :use-other-query="newQuery"
             :base-library-mode="baseLibraryMode"
             :entity-list-elements="entityListElements"
+            :allowed-actions-on-relations="allowedActionsOnRelations"
           />
         </div>
       </template>
@@ -107,6 +109,7 @@ import {
   MediaFileElementTypes,
   EntityListElement,
   BaseLibraryModes,
+  RelationActions
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -163,12 +166,14 @@ const props = withDefaults(
     baseLibraryMode?: BaseLibraryModes;
     entityUuid: string;
     entityListElements?: EntityListElement[];
+    allowedActionsOnRelations?: RelationActions[];
   }>(),
   {
     types: () => [],
     viewMode: EntityListViewMode.Library,
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     entityListElements: undefined,
+    allowedActionsOnRelations: [],
   }
 );
 
