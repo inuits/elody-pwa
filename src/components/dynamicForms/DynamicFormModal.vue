@@ -77,6 +77,7 @@ watchEffect(() => {
   })();
 });
 
+// TODO: Move formTab code to dynamicForm composable
 const clearFormTabs = () => {
   formTabs.value = null;
 };
