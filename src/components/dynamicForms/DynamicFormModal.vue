@@ -16,24 +16,30 @@
         <baseTabs :tabs="tabsTitles">
           <baseTab v-for="(formTab, tabIndex) in formTabArray" :key="tabIndex">
             <dynamic-form
-                v-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
-                key="getModalInfo(TypeModals.DynamicForm).formQuery"
-                :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
-                :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
-                :router="useRouter()"
-                :modal-form-fields="formTab.formFields"
-                :tab-name="tabsTitles[tabIndex]"
+              v-if="
+                getModalInfo(TypeModals.DynamicForm).state === ModalState.Show
+              "
+              key="getModalInfo(TypeModals.DynamicForm).formQuery"
+              :dynamic-form-query="
+                getModalInfo(TypeModals.DynamicForm).formQuery
+              "
+              :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
+              :router="useRouter()"
+              :modal-form-fields="formTab.formFields"
+              :tab-name="tabsTitles[tabIndex]"
             />
           </baseTab>
         </baseTabs>
       </template>
       <dynamic-form
-          v-else-if="getModalInfo(TypeModals.DynamicForm).state === ModalState.Show"
-          key="getModalInfo(TypeModals.DynamicForm).formQuery"
-          :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
-          :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
-          :router="useRouter()"
-          :tab-name="''"
+        v-else-if="
+          getModalInfo(TypeModals.DynamicForm).state === ModalState.Show
+        "
+        key="getModalInfo(TypeModals.DynamicForm).formQuery"
+        :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
+        :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
+        :router="useRouter()"
+        :tab-name="''"
       />
     </div>
   </BaseModal>
@@ -42,15 +48,20 @@
 <script setup lang="ts">
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
-import {Form, FormTab, ModalState, TypeModals} from "@/generated-types/queries";
+import {
+  type Form,
+  type FormTab,
+  ModalState,
+  TypeModals,
+} from "@/generated-types/queries";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import { useRouter } from "vue-router";
 import BaseTabs from "@/components/BaseTabs.vue";
 import BaseTab from "@/components/BaseTab.vue";
 import { useI18n } from "vue-i18n";
-import { onMounted, computed, ref, watch, watchEffect } from 'vue';
+import { onMounted, computed, ref, watch, watchEffect } from "vue";
 import { useConfirmModal } from "@/composables/useConfirmModal";
-import { useDynamicForm } from '@/components/dynamicForms/useDynamicForm';
+import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 
 const formTabs = ref<Form | null>(null);
 const { closeModal, getModalInfo, changeCloseConfirmation } = useBaseModal();
@@ -71,12 +82,12 @@ const clearFormTabs = () => {
 };
 
 watch(
-    () => getModalInfo(TypeModals.DynamicForm).state,
-    (newState) => {
-      if (newState === ModalState.Show) {
-        clearFormTabs();
-      }
+  () => getModalInfo(TypeModals.DynamicForm).state,
+  (newState) => {
+    if (newState === ModalState.Show) {
+      clearFormTabs();
     }
+  }
 );
 
 onMounted(() => {
@@ -92,31 +103,39 @@ onMounted(() => {
 });
 
 const tabsTitles = computed(() => {
-  return Object.values(formTabs.value ?? {})
-      .flatMap(value =>
-          Object.entries(value)
-              .filter(([_, nestedValue]) => nestedValue.__typename === 'FormTab')
-              .map(([nestedKey, _]) => t("entity." + nestedKey))
-      );
+  return Object.values(formTabs.value ?? {}).flatMap((value) =>
+    Object.entries(value)
+      .filter(([_, nestedValue]) => nestedValue.__typename === "FormTab")
+      .map(([nestedKey, _]) => t("entity." + nestedKey))
+  );
 });
 
 const shouldRenderTabs = computed(() => {
   const countFormTabs = (obj: Record<string, any>): number =>
-      Object.values(obj).reduce((count, value) =>
-              count + (value?.__typename === 'FormTab' ? 1 : typeof value === 'object' ? countFormTabs(value) : 0),
-          0
-      );
+    Object.values(obj).reduce(
+      (count, value) =>
+        count +
+        (value?.__typename === "FormTab"
+          ? 1
+          : typeof value === "object"
+          ? countFormTabs(value)
+          : 0),
+      0
+    );
 
   return formTabs.value ? countFormTabs(formTabs.value) > 1 : false;
 });
 
 const formTabArray = computed(() => {
   const extractFormTabs = (obj: Record<string, any>): FormTab[] =>
-      Object.values(obj).flatMap(value =>
-          (value?.__typename === 'FormTab' && [value]) ||
-          (typeof value === 'object' && value !== null && extractFormTabs(value)) ||
-          []
-      );
+    Object.values(obj).flatMap(
+      (value) =>
+        (value?.__typename === "FormTab" && [value]) ||
+        (typeof value === "object" &&
+          value !== null &&
+          extractFormTabs(value)) ||
+        []
+    );
 
   return formTabs.value ? extractFormTabs(formTabs.value) : [];
 });
