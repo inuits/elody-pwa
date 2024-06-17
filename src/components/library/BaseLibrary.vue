@@ -143,6 +143,7 @@
               :enable-selection="enableBulkOperations"
               :base-library-mode="baseLibraryMode"
               :entity-list-elements="entityListElements"
+              :allowed-actions-on-relations="allowedActionsOnRelations"
             />
             <ViewModesGrid
               v-if="displayGrid"
@@ -185,6 +186,7 @@ import {
   type BaseRelationValuesInput,
   type Entity,
   type EntityListElement,
+  RelationActions
 } from "@/generated-types/queries";
 import {
   type BaseEntity,
@@ -244,6 +246,7 @@ export type BaseLibraryProps = {
   selectInputFieldValue?: string[];
   baseLibraryMode?: BaseLibraryModes;
   entityListElements?: EntityListElement[];
+  allowedActionsOnRelations?: RelationActions[];
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -265,6 +268,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   isMultiSelectInputField: false,
   baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
   entityListElements: undefined,
+  allowedActionsOnRelations: [],
 });
 
 const emit = defineEmits<{

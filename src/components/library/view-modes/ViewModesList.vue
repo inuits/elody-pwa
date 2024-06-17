@@ -52,7 +52,7 @@
       :is-media-type="Object.values(MediaTypeEntities).includes(entity.type)"
       :small="listItemRouteName === 'SingleMediafile'"
       :loading="entitiesLoading"
-      :is-markable-as-to-be-deleted="parentEntityIdentifiers.length > 0"
+      :is-markable-as-to-be-deleted="allowedActionsOnRelations.includes(RelationActions.RemoveRelation) && parentEntityIdentifiers.length > 0"
       :is-disabled="
         idsOfNonSelectableEntities.includes(entity.id) ||
         idsOfNonSelectableEntities.includes(entity.uuid)
@@ -86,6 +86,7 @@ import {
   MediaTypeEntities,
   EntityListElement,
   BaseLibraryModes,
+  RelationActions
 } from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
@@ -117,6 +118,7 @@ const props = withDefaults(
     enableSelection: boolean;
     baseLibraryMode?: BaseLibraryModes;
     entityListElements?: EntityListElement[];
+    allowedActionsOnRelations?: RelationActions[];
   }>(),
   {
     disablePreviews: false,
@@ -126,6 +128,7 @@ const props = withDefaults(
     enableSelection: true,
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     entityListElements: undefined,
+    allowedActionsOnRelations: [],
   }
 );
 
