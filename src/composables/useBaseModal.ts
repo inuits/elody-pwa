@@ -4,7 +4,7 @@ import {
   ModalState,
   TypeModals,
 } from "@/generated-types/queries";
-import type { Context } from "@/composables/useBulkOperations";
+import { ContextForBulkOperationsFormTypes } from "@/composables/useBulkOperations";
 export type ModalPosition = "left" | "center" | "right";
 
 export type ModalInfo = {
@@ -14,7 +14,7 @@ export type ModalInfo = {
   formQuery?: string;
   modalTabToOpen?: ModalChoices;
   closeConfirmation: boolean;
-  savedContext?: any;
+  savedContext?: ContextForBulkOperationsFormTypes;
 };
 
 const initialModalInfo: ModalInfo = {
@@ -45,7 +45,7 @@ export const useBaseModal = () => {
     modalPosition: ModalPosition | undefined = undefined,
     formQuery: string | undefined = undefined,
     askForCloseConfirmation: boolean | undefined = undefined,
-    savedContext: any | undefined = undefined
+    savedContext: ContextForBulkOperationsFormTypes | undefined = undefined
   ): void => {
     if (modalType !== TypeModals.Confirm)
       closeModalsWithPosition(getModalInfo(modalType).modalPosition);
