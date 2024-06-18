@@ -86,20 +86,15 @@ const useFormHelper = () => {
     forms.value = {};
   };
 
-  const recreateForm = (
-    key: string,
-    newFormValues: EntityValues
-  ): FormContext<any> => {
-    deleteForm(key);
-    return createForm(key, newFormValues);
-  };
-
   const defineValidationRules = () => {
     Object.entries(all).forEach(([name, rule]) => {
       defineRule(name, rule);
     });
     defineRule(ValidationRules.HasRequiredRelation, getHasSpecificRelationRule);
-    defineRule(ValidationRules.HasOneOfRequiredRelations, getHasOneOfSpecificRelationsRule);
+    defineRule(
+      ValidationRules.HasOneOfRequiredRelations,
+      getHasOneOfSpecificRelationsRule
+    );
   };
 
   const getHasSpecificRelationRule = (
@@ -135,13 +130,13 @@ const useFormHelper = () => {
     let specificRelationsLength = 0;
     relationTypes.forEach(async (relationType: string) => {
       specificRelationsLength += relationValues[relationType]?.length || 0;
-    })
+    });
     const isValid = specificRelationsLength >= Number(amount);
     if (isValid) {
       relationTypes.forEach((relationType) => {
-        if (relationValues[relationType] === undefined )
+        if (relationValues[relationType] === undefined)
           relationValues[relationType] = [];
-      })
+      });
     }
     return isValid;
   };
@@ -155,13 +150,11 @@ const useFormHelper = () => {
     return values.some(__isNotEmpty);
   };
 
-  const getKeyBasedOnInputField = (
-    metadataItem: PanelMetaData
-  ) => {
+  const getKeyBasedOnInputField = (metadataItem: PanelMetaData) => {
     if (metadataItem.inputField.fieldKeyToSave != undefined)
       return metadataItem.inputField.fieldKeyToSave;
     return metadataItem.key;
-  }
+  };
 
   const getEditableMetadataKeys = (
     columnList: Record<string, any>,
@@ -320,7 +313,11 @@ const useFormHelper = () => {
     Object.keys(relationValues).forEach((relationType: string) => {
       const typedRelations: BaseRelationValuesInput[] =
         relationValues[relationType];
-      if (!Array.isArray(typedRelations) || typeof typedRelations[0] !== "object") return;
+      if (
+        !Array.isArray(typedRelations) ||
+        typeof typedRelations[0] !== "object"
+      )
+        return;
 
       typedRelations.forEach((relation: BaseRelationValuesInput) => {
         // TODO: Find something better to unref this
@@ -393,7 +390,6 @@ const useFormHelper = () => {
     discardEditForForm,
     addRelations,
     replaceRelationsFromSameType,
-    recreateForm,
     findRelation,
     getTeaserMetadataInState,
     deleteTeaserMetadataItemInState,
