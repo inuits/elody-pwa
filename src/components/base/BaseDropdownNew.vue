@@ -13,7 +13,7 @@
       @change="selectItem"
     >
       <option
-        v-for="option in allOptions"
+        v-for="option in filterDropdownOptions"
         :key="option.value"
         :value="option.label"
         :class="[dropdownStyles[dropdownStyle].hoverStyle]"
@@ -26,8 +26,14 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
-import { DamsIcons, type DropdownOption } from "@/generated-types/queries";
+import {
+  ActionContextEntitiesSelectionType,
+  ActionContextViewModeTypes,
+  DamsIcons,
+  type DropdownOption
+} from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
+import useEditMode from "@/composables/useEdit";
 
 type Dropdown = {
   style: string;
@@ -86,12 +92,14 @@ const props = withDefaults(
     labelAlignment?: "left" | "right";
     label?: string;
     disable?: boolean;
+    itemsSelected?: boolean;
   }>(),
   {
     selectFirstOptionByDefault: false,
     labelPosition: "above",
     labelAlignment: "left",
     disable: false,
+    itemsSelected: false,
   }
 );
 
@@ -100,6 +108,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const { isEdit } = useEditMode();
 const defaultOption: DropdownOption = {
   icon: DamsIcons.AngleDown,
   label: "dropdown.select-option",
@@ -129,6 +138,19 @@ const selectItem = (event: Event) => {
   selectedItem.value = newlySelectedOption;
   emit("update:modelValue", newlySelectedOption);
 };
+
+const filterDropdownOptions = computed<DropdownOption[]>(
+  () => {
+    return allOptions.value.filter((dropdownOption) => {
+      if (!dropdownOption.actionContext) return true;
+      const activeViewMode = dropdownOption.actionContext.activeViewMode;
+      const entitiesSelectionType = dropdownOption.actionContext.entitiesSelectionType;
+      const viewMode = isEdit.value ? activeViewMode === ActionContextViewModeTypes.EditMode : activeViewMode === ActionContextViewModeTypes.ReadMode;
+      const numberOfEntities = props.itemsSelected ? entitiesSelectionType === ActionContextEntitiesSelectionType.SelectionOfEntities : entitiesSelectionType === ActionContextEntitiesSelectionType.AllEntities;
+      return viewMode && numberOfEntities;
+    });
+  }
+);
 
 watch(
   () => props.options,
