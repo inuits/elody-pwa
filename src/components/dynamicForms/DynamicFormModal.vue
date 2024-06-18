@@ -92,15 +92,16 @@ watch(
 );
 
 onMounted(() => {
-  initializeConfirmModal(
-    () => {
-      changeCloseConfirmation(TypeModals.DynamicForm, false);
-      closeModal(TypeModals.DynamicForm);
+  initializeConfirmModal({
+    confirmButton: {
+      buttonCallback: () => {
+        changeCloseConfirmation(TypeModals.DynamicForm, false);
+        closeModal(TypeModals.DynamicForm);
+      },
     },
-    undefined,
-    () => closeModal(TypeModals.Confirm),
-    "discard-modal"
-  );
+    declineButton: { buttonCallback: () => closeModal(TypeModals.Confirm) },
+    translationKey: "discard-modal",
+  });
 });
 
 const tabsTitles = computed(() => {

@@ -79,17 +79,20 @@ const performLogout = async () => {
 };
 
 const openConfirmationModal = () => {
-  initializeConfirmModal(
-    async () => {
-      await performLogout();
+  initializeConfirmModal({
+    confirmButton: {
+      buttonCallback: async () => {
+        await performLogout();
+      },
     },
-    undefined,
-    () => {
-      closeModal(TypeModals.Confirm);
+    declineButton: {
+      buttonCallback: () => {
+        closeModal(TypeModals.Confirm);
+      },
     },
-    "logout-modal"
-  );
-  openModal(TypeModals.Confirm, undefined, "center");
+    translationKey: "logout-modal",
+    openImmediately: true,
+  });
 };
 </script>
 

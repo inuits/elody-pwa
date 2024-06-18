@@ -85,6 +85,8 @@ const { mutate } = useMutation<
 let form = createForm(props.uuid, {
   intialValues: unref(props.intialValues),
   relationValues: unref(props.relationValues),
+  relationMetadata: {},
+  relatedEntityData: {},
 });
 let mutatedEntity: Entity | undefined;
 const formContainsErrors = computed((): boolean => !form?.meta.value.valid);
@@ -198,23 +200,30 @@ onBeforeRouteLeave((to, from, next) => {
 });
 
 const openNavigationModal = () => {
-  initializeConfirmModal(
-    () => {
-      performRoute();
-      closeModal(TypeModals.Confirm);
+  initializeConfirmModal({
+    confirmButton: {
+      buttonCallback: () => {
+        performRoute();
+        closeModal(TypeModals.Confirm);
+      },
     },
-    async () => {
-      await save();
-      performRoute();
-      deletePathToNavigate();
-      closeModal(TypeModals.Confirm);
+    secondaryConfirmButton: {
+      buttonCallback: async () => {
+        await save();
+        performRoute();
+        deletePathToNavigate();
+        closeModal(TypeModals.Confirm);
+      },
+      buttonStyle: "accentAccent",
     },
-    () => {
-      deletePathToNavigate();
-      closeModal(TypeModals.Confirm);
+    declineButton: {
+      buttonCallback: () => {
+        deletePathToNavigate();
+        closeModal(TypeModals.Confirm);
+      },
     },
-    "discard-edit"
-  );
+    translationKey: "discard-edit",
+  });
   openModal(TypeModals.Confirm, undefined, "center");
 };
 </script>
