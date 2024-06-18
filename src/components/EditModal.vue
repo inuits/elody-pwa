@@ -95,31 +95,35 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
 };
 
 const openDeleteModal = () => {
-  initializeConfirmModal(
-    deleteEntity,
-    undefined,
-    () => {
-      closeModal(TypeModals.Confirm);
+  initializeConfirmModal({
+    confirmButton: { buttonCallback: deleteEntity },
+    declineButton: {
+      buttonCallback: () => {
+        closeModal(TypeModals.Confirm);
+      },
     },
-    "delete-entity"
-  );
-  openModal(TypeModals.Confirm, undefined, "center");
+    translationKey: "delete-entity",
+    openImmediately: true,
+  });
 };
 
 const openDiscardModal = () => {
-  initializeConfirmModal(
-    () => {
-      discard();
-      const id = asString(route.params["id"]);
-      discardEditForForm(id);
-      closeModal(TypeModals.Confirm);
+  initializeConfirmModal({
+    confirmButton: {
+      buttonCallback: () => {
+        discard();
+        const id = asString(route.params["id"]);
+        discardEditForForm(id);
+        closeModal(TypeModals.Confirm);
+      },
     },
-    undefined,
-    () => {
-      closeModal(TypeModals.Confirm);
+    declineButton: {
+      buttonCallback: () => {
+        closeModal(TypeModals.Confirm);
+      },
     },
-    "discard-edit"
-  );
-  openModal(TypeModals.Confirm, undefined, "center");
+    translationKey: "discard-edit",
+    openImmediately: true,
+  });
 };
 </script>

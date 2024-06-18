@@ -90,7 +90,11 @@ const redDefaultButton: Button = {
   disabledStyle: defaultButton.disabledStyle,
 };
 
-type ButtonStyle = "default" | "accentAccent" | "accentNormal" | "redDefault";
+export type ButtonStyle =
+  | "default"
+  | "accentAccent"
+  | "accentNormal"
+  | "redDefault";
 const buttonStyles: Record<ButtonStyle, Button> = {
   default: defaultButton,
   accentAccent: accentAccentButton,
@@ -98,7 +102,7 @@ const buttonStyles: Record<ButtonStyle, Button> = {
   redDefault: redDefaultButton,
 };
 
-type ButtonSize = "normal" | "small";
+export type ButtonSize = "normal" | "small";
 
 const props = withDefaults(
   defineProps<{
