@@ -2,7 +2,7 @@
   <div
     class="flex justify-between items-center rounded alignment-nested-divs"
     :class="[
-      useExtendedBulkOperations && itemsSelected
+      useExtendedBulkOperations
         ? `px-3 !py-2 bg-neutral-white`
         : `bg-transparent`,
       { 'py-3': useExtendedBulkOperations },
@@ -71,7 +71,7 @@
     </div>
 
     <div
-      v-if="useExtendedBulkOperations && itemsSelected"
+      v-if="useExtendedBulkOperations"
       class="flex justify-end w-60"
     >
       <div v-if="confirmSelectionButton" class="w-full !m-0">
@@ -88,6 +88,7 @@
           v-if="bulkOperations !== undefined"
           v-model="selectedBulkOperation"
           :options="bulkOperations"
+          :itemsSelected="itemsSelected"
           dropdown-style="accentAccent"
         />
       </div>
