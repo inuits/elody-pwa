@@ -131,12 +131,13 @@ import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useMenuHelper from "@/composables/useMenuHelper";
 import ImportComponent from "@/components/ImportComponent.vue";
+import { ContextForBulkOperationsFormTypes } from "@/composables/useBulkOperations";
 
 const props = withDefaults(
   defineProps<{
     dynamicFormQuery: string;
     hasLinkedUpload?: boolean;
-    savedContext?: any | undefined;
+    savedContext?: ContextForBulkOperationsFormTypes | undefined;
     router: Router;
     modalFormFields?: object;
     tabName?: string;
@@ -290,6 +291,22 @@ const updateMetdataActionFunction = async (field: FormAction) => {
   //TODO: put code here that calls graphql function to the bulk edit endpoint in the collection-api
 };
 
+const callEndpointInGraphql = async (field: FormAction) => {
+  if (!field.endpointInformation) return;
+  const endpoint = field.endpointInformation;
+  const body = {};
+  endpoint.variables.forEach((variable) => {
+    body[variable] = props.savedContext[variable];
+  })
+  const response = await fetch(
+    `${endpoint.endpointName}`,
+    {
+      method: endpoint.method,
+      body: body,
+    }
+  );
+};
+
 const performActionButtonClickEvent = (field: FormAction): void => {
   useBaseModal().changeCloseConfirmation(TypeModals.DynamicForm, false);
   const actionFunctions: { [key: string]: Function } = {
@@ -297,6 +314,7 @@ const performActionButtonClickEvent = (field: FormAction): void => {
     submit: () => submitActionFunction(field),
     download: () => downloadActionFunction(field),
     update: () => updateMetdataActionFunction(field),
+    endpoint: () => callEndpointInGraphql(field),
   };
   if (!field.actionType) return;
   showErrors.value = true;
@@ -343,7 +361,7 @@ const initializeForm = async (
   oldQueryName: string | undefined
 ) => {
   const relations: BaseRelationValuesInput[] = [];
-  if (props.savedContext) {
+  if (props.savedContext && typeof props.savedContext === ContextForBulkOperationsFormTypes.DownloadMediafilesContextForBulkOperationsForm.toString()) {
     props.savedContext.mediafiles.forEach((mediafile) => {
       relations.push({
         key: mediafile,
