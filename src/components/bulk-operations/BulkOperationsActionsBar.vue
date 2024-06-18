@@ -116,7 +116,8 @@ import {
 import {
   Context,
   InBulkProcessableItem,
-  SavedContextForBulkOperationsForm,
+  DownloadMediafilesContextForBulkOperationsForm,
+  ReorderEntitiesContextForBulkOperationsForm,
 } from "@/composables/useBulkOperations";
 import {
   BulkOperationsContextEnum,
@@ -270,7 +271,7 @@ watch(selectedBulkOperation, () => {
   ) {
     let modal = selectedBulkOperation.value?.bulkOperationModal;
     const enqueuedItems = getEnqueuedItems(props.context);
-    const savedContext: SavedContextForBulkOperationsForm = {
+    const savedContext: DownloadMediafilesContextForBulkOperationsForm = {
       mediafiles: [],
       entities: [],
       includeAssetCsv: props.context !== RouteNames.Mediafile,
@@ -283,6 +284,25 @@ watch(selectedBulkOperation, () => {
     )
       savedContext.mediafiles = enqueuedItems.map((item) => item.id);
     else savedContext.entities = enqueuedItems.map((item) => item.id);
+    openModal(
+      modal.typeModal,
+      undefined,
+      "right",
+      modal.formQuery,
+      modal.askForCloseConfirmation,
+      savedContext
+    );
+  }
+  if (
+    selectedBulkOperation.value?.value ===
+      BulkOperationTypes.ReorderEntities &&
+    selectedBulkOperation.value?.bulkOperationModal
+  ) {
+    let modal = selectedBulkOperation.value?.bulkOperationModal;
+    const savedContext: ReorderEntitiesContextForBulkOperationsForm = {
+      relationType: modal.formRelationType,
+      parentId: route.params.id,
+    };
     openModal(
       modal.typeModal,
       undefined,
