@@ -1,8 +1,7 @@
 <template>
   <li
     :class="[
-      'flex items-center gap-6 px-8 py-4 bg-neutral-white border border-neutral-light rounded cursor-pointer',
-      { 'mb-2 ': baseLibraryMode === BaseLibraryModes.NormalBaseLibrary },
+      'flex items-center gap-6 px-8 py-4 bg-neutral-white border border-neutral-light rounded cursor-pointer mb-2',
       {
         'border-dashed border-2 !border-accent-normal':
           isPreview || isMarkedAsToBeDeleted,
@@ -86,10 +85,7 @@
           (metadata) => !metadata.showOnlyInEditMode
         )"
         :key="metadataItem ? metadataItem.key : 'no-key'"
-        :class="[
-          { 'w-1/4': baseLibraryMode === BaseLibraryModes.NormalBaseLibrary },
-        ]"
-        class="flex justify-start flex-col mx-2 break-words"
+        class="flex justify-start flex-col mx-2 break-words w-1/4"
       >
         <metadata-wrapper
           :form-id="formId || 'listview'"
