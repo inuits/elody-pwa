@@ -132,6 +132,9 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import useMenuHelper from "@/composables/useMenuHelper";
 import ImportComponent from "@/components/ImportComponent.vue";
 import { ContextForBulkOperationsFormTypes } from "@/composables/useBulkOperations";
+import useTenant from "@/composables/useTenant";
+import { apolloClient } from "@/main";
+import type { ApolloClient } from "@apollo/client/core";
 
 const props = withDefaults(
   defineProps<{
@@ -151,7 +154,8 @@ const props = withDefaults(
 type FormFieldTypes = UploadContainer | PanelMetaData | FormAction;
 
 const modalFormFields = props.modalFormFields;
-const config = inject("config");
+const config: any = inject("config");
+const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const { currentTenant } = useApp();
 const { createForm, deleteForm, parseRelationValuesForFormSubmit } =
   useFormHelper();
@@ -262,6 +266,7 @@ const submitActionFunction = async (field: FormAction) => {
   const entityInput = createEntityFromFormInput(field.creationType);
   const entity = (await performSubmitAction(document, entityInput)).data
     .CreateEntity;
+  await getTenants();
   closeModal(TypeModals.DynamicForm);
   deleteForm(props.dynamicFormQuery);
   goToEntityPage(entity, "SingleEntity", props.router);
