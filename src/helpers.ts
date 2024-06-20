@@ -378,9 +378,9 @@ export const getObjectsBasedOnTypename = (
 };
 
 export const isDateTime = (dateTimeString: any): boolean => {
-  if (typeof dateTimeString !== "string")
+  if (typeof dateTimeString !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(dateTimeString))
     return false;
-  const date = new Date(dateTimeString.replace(' ', ''));
+  const date = new Date(dateTimeString);
   return !isNaN(date.getTime());
 }
 
