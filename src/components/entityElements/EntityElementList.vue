@@ -7,7 +7,11 @@
     >
       <template v-slot:actions>
         <div
-          v-if="isEdit && relationType && allowedActionsOnRelations.includes(RelationActions.AddRelation)"
+          v-if="
+            isEdit &&
+            relationType &&
+            allowedActionsOnRelations.includes(RelationActions.AddRelation)
+          "
           class="flex items-center px-2 text-text-subtitle cursor-pointer"
           @click.stop="
             () => {
@@ -40,7 +44,7 @@
         >
           <BaseLibrary
             v-if="type === MediaFileElementTypes.Media"
-            class="flex-1 123"
+            class="flex-1"
             :bulk-operations-context="
               BulkOperationsContextEnum.EntityElementMedia
             "
@@ -75,7 +79,7 @@
             :custom-bulk-operations="customBulkOperations"
           />
           <BaseLibrary
-            class="flex-1 345"
+            class="flex-1"
             v-else
             :bulk-operations-context="
               createCustomContext(
@@ -113,7 +117,7 @@ import {
   MediaFileElementTypes,
   type EntityListElement,
   BaseLibraryModes,
-  RelationActions
+  RelationActions,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -186,7 +190,7 @@ const props = withDefaults(
     viewMode: EntityListViewMode.Library,
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     entityListElements: undefined,
-    allowedActionsOnRelations: [],
+    allowedActionsOnRelations: () => [],
   }
 );
 
