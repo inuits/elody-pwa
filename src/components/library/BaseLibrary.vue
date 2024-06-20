@@ -103,6 +103,10 @@
               :use-extended-bulk-operations="true"
               :confirm-selection-button="confirmSelectionButton"
               :entity-type="entityType as Entitytyping"
+              :custom-bulk-operations="customBulkOperations"
+              @custom-bulk-operations-promise="
+                (promise) => (customBulkOperationsPromise = promise)
+              "
               @select-page="bulkSelect"
               @confirm-selection="
                 (selection) => emit('confirmSelection', selection)
@@ -110,6 +114,7 @@
               @no-bulk-operations-available="
                 () => (enableBulkOperations = false)
               "
+              @apply-custom-bulk-operations="async () => await applyCustomBulkOperations()"
               @refetch="async () => await refetchEntities()"
             />
           </div>
@@ -247,6 +252,7 @@ export type BaseLibraryProps = {
   baseLibraryMode?: BaseLibraryModes;
   entityListElements?: EntityListElement[];
   allowedActionsOnRelations?: RelationActions[];
+  customBulkOperations?: String | undefined;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -269,6 +275,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
   entityListElements: undefined,
   allowedActionsOnRelations: [],
+  customBulkOperations: undefined,
 });
 
 const emit = defineEmits<{
@@ -286,6 +293,7 @@ const {
   entities,
   entitiesLoading,
   formatTeaserMetadata,
+  getCustomBulkOperations,
   getEntities,
   manipulationQuery,
   setAdvancedFilters,
@@ -305,6 +313,7 @@ let filterMatcherMappingPromise: (entityType: Entitytyping) => Promise<void>;
 let advancedFiltersPromise: (entityType: Entitytyping) => Promise<void>;
 let paginationLimitOptionsPromise: (entityType: Entitytyping) => Promise<void>;
 let sortOptionsPromise: (entityType: Entitytyping) => Promise<void>;
+let customBulkOperationsPromise: () => Promise<void>;
 
 const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
@@ -435,6 +444,12 @@ const getDisplayPreferences = () => {
       : displayPreferences.expandFilters;
   }
 };
+
+const applyCustomBulkOperations = async () => {
+  if (!props.customBulkOperations) return;
+  enqueuePromise(customBulkOperationsPromise);
+  await getCustomBulkOperations();
+}
 
 onMounted(async () => {
   await initializeBaseLibrary();
