@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="bulkOperationsPromiseIsResolved"
     class="flex justify-between items-center rounded alignment-nested-divs"
     :class="[
       useExtendedBulkOperations
@@ -129,6 +130,7 @@ import { apolloClient, bulkSelectAllSizeLimit } from "@/main";
 import { computed, onMounted, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useMutation, useQuery } from "@vue/apollo-composable";
+import { useImport } from "@/composables/useImport";
 import {
   NotificationType,
   useNotification,
@@ -143,10 +145,12 @@ const props = withDefaults(
     useExtendedBulkOperations: boolean;
     confirmSelectionButton?: boolean;
     entityType: Entitytyping;
+    customBulkOperations?: String | undefined;
   }>(),
   {
     totalItemsCount: 0,
     confirmSelectionButton: false,
+    customBulkOperations: undefined,
   }
 );
 
@@ -156,9 +160,15 @@ const emit = defineEmits<{
   (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
   (event: "noBulkOperationsAvailable"): void;
   (event: "refetch"): void;
+  (
+    event: "customBulkOperationsPromise",
+    bulkOperationsPromise: () => Promise<void>
+  ): void;
+  (event: "applyCustomBulkOperations"): void;
 }>();
 
 const route = useRoute();
+const { loadDocument } = useImport();
 const refetchEnabled = ref<boolean>(false);
 const entityType = computed(() => props.entityType || route.meta.entityType);
 const { mutate } = useMutation<GenerateTranscodeMutation>(
@@ -171,6 +181,7 @@ const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
 );
 const bulkOperations = ref<DropdownOption[]>([]);
 const selectedBulkOperation = ref<DropdownOption>();
+const bulkOperationsPromiseIsResolved = ref<boolean>(!props.customBulkOperations);
 const {
   getEnqueuedItemCount,
   getEnqueuedItems,
@@ -195,6 +206,21 @@ onResult((result) => {
 const itemsSelected = computed<boolean>(
   () => getEnqueuedItemCount(props.context) > 0
 );
+
+const customBulkOperationsPromise = async () => {
+  const query = await loadDocument(props.customBulkOperations);
+  return apolloClient.query({
+      query: query,
+      fetchPolicy: "no-cache",
+      notifyOnNetworkStatusChange: true,
+  })
+  .then((result) => {
+    const bulkOperationsResult =
+      result.data?.CustomBulkOperations.bulkOperationOptions;
+    bulkOperations.value = bulkOperationsResult?.options || [];
+    bulkOperationsPromiseIsResolved.value = true;
+  });
+};
 
 onMounted(() => {
   refetchEnabled.value = true;
@@ -327,6 +353,16 @@ watch(
   (type: Entitytyping) => {
     refetch({ entityType: type });
   }
+);
+
+watch(
+  () => props.customBulkOperations,
+  () => {
+    if (!props.customBulkOperations || bulkOperationsPromiseIsResolved.value) return;
+    emit("customBulkOperationsPromise", customBulkOperationsPromise);
+    emit("applyCustomBulkOperations");
+  },
+  { immediate: true }
 );
 </script>
 

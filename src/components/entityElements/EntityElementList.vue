@@ -70,6 +70,7 @@
             :has-sticky-bars="false"
             :entity-list-elements="entityListElements"
             :allowed-actions-on-relations="allowedActionsOnRelations"
+            :custom-bulk-operations="customBulkOperations"
           />
           <BaseLibrary
             class="flex-1"
@@ -92,6 +93,7 @@
             :base-library-mode="baseLibraryMode"
             :entity-list-elements="entityListElements"
             :allowed-actions-on-relations="allowedActionsOnRelations"
+            :custom-bulk-operations="customBulkOperations"
           />
         </div>
       </template>
@@ -158,6 +160,7 @@ const props = withDefaults(
     customQuery: string;
     customQueryRelationType: string;
     customQueryFilters: String;
+    customBulkOperations?: string | undefined;
     searchInputType: string;
     entityList: Entity[];
     identifiers: string[];
@@ -170,6 +173,7 @@ const props = withDefaults(
   }>(),
   {
     types: () => [],
+    customBulkOperations: undefined,
     viewMode: EntityListViewMode.Library,
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     entityListElements: undefined,

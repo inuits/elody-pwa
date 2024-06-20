@@ -19,6 +19,7 @@
         :custom-query="element.customQuery"
         :custom-query-relation-type="element.customQueryRelationType"
         :custom-query-filters="element.customQueryFilters"
+        :custom-bulk-operations="element.customBulkOperations"
         :search-input-type="element.searchInputType"
         :entity-list="(element.entityList as Entity[]) ?? []"
         :identifiers="identifiers"
