@@ -2,6 +2,7 @@ import type { EntityInput } from "@/generated-types/queries";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import { ref } from "vue";
+import { OcrType } from "@/generated-types/queries";
 
 const dynamicForm = ref<any | undefined>(undefined);
 const dynamicFormUploadFields = ref<any[]>([]);
@@ -68,6 +69,24 @@ const useDynamicForm = () => {
     });
   };
 
+  const performOcrAction = async (
+    queryDocument: any,
+    savedContext: any,
+    form: any
+  ): Promise<any> => {
+    const operation = [form.intialValues.ocr_type]
+    if (operation[0] === OcrType.Pdf) operation.unshift(OcrType.Alto);
+    const variables = {
+      assetId: savedContext.parentId,
+      operation: operation,
+      language: form.intialValues.ocr_language,
+    };
+    return await apolloClient.query({
+      query: queryDocument,
+      variables,
+    });
+  };
+
   const resetDynamicForm = (tabName: string | undefined = undefined) => {
     dynamicFormUploadFields.value = [];
     if (tabName) {
@@ -82,6 +101,7 @@ const useDynamicForm = () => {
     dynamicForm,
     performSubmitAction,
     performDownloadAction,
+    performOcrAction,
     dynamicFormUploadFields,
     resetDynamicForm,
     isPerformingAction,

@@ -131,7 +131,6 @@ import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useMenuHelper from "@/composables/useMenuHelper";
 import ImportComponent from "@/components/ImportComponent.vue";
-import { ContextForBulkOperationsFormTypes } from "@/composables/useBulkOperations";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import type { ApolloClient } from "@apollo/client/core";
@@ -140,7 +139,7 @@ const props = withDefaults(
   defineProps<{
     dynamicFormQuery: string;
     hasLinkedUpload?: boolean;
-    savedContext?: ContextForBulkOperationsFormTypes | undefined;
+    savedContext?: any | undefined;
     router: Router;
     modalFormFields?: object;
     tabName?: string;
@@ -167,6 +166,7 @@ const {
   getDynamicFormTabs,
   performSubmitAction,
   performDownloadAction,
+  performOcrAction,
   resetDynamicForm,
   isPerformingAction,
 } = useDynamicForm();
@@ -312,13 +312,25 @@ const callEndpointInGraphql = async (field: FormAction) => {
   );
 };
 
+const startOcrActionFunction = async (field: FormAction) => {
+  await form.value.validate();
+  if (formContainsErrors.value) return;
+  const document = await getQuery(field.actionQuery as string);
+  const result = await performOcrAction(
+      document,
+      props.savedContext,
+      form.value.values
+  ).data.GenerateOcrWithAsset;
+}
+
 const performActionButtonClickEvent = (field: FormAction): void => {
   useBaseModal().changeCloseConfirmation(TypeModals.DynamicForm, false);
   const actionFunctions: { [key: string]: Function } = {
-    upload: () => uploadActionFunction(field),
     submit: () => submitActionFunction(field),
-    download: () => downloadActionFunction(field),
     update: () => updateMetdataActionFunction(field),
+    upload: () => uploadActionFunction(field),
+    download: () => downloadActionFunction(field),
+    ocr: () => startOcrActionFunction(field),
     endpoint: () => callEndpointInGraphql(field),
   };
   if (!field.actionType) return;
@@ -366,7 +378,7 @@ const initializeForm = async (
   oldQueryName: string | undefined
 ) => {
   const relations: BaseRelationValuesInput[] = [];
-  if (props.savedContext && typeof props.savedContext === ContextForBulkOperationsFormTypes.DownloadMediafilesContextForBulkOperationsForm.toString()) {
+  if (props.savedContext && ("mediafiles" in props.savedContext || "entities" in props.savedContext)) {
     props.savedContext.mediafiles.forEach((mediafile) => {
       relations.push({
         key: mediafile,
