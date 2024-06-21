@@ -118,7 +118,7 @@ import {
   Context,
   InBulkProcessableItem,
   DownloadMediafilesContextForBulkOperationsForm,
-  ReorderEntitiesContextForBulkOperationsForm,
+  GenericContextForBulkOperationsForm,
 } from "@/composables/useBulkOperations";
 import {
   BulkOperationsContextEnum,
@@ -284,59 +284,51 @@ watch(selectedBulkOperation, () => {
     enqueueItemsForManifestCollection();
     dequeueAllItemsForBulkProcessing(props.context);
   }
-  if (selectedBulkOperation.value?.value === BulkOperationTypes.TranscodePdf) {
-    generateTranscodeFromMediafiles(
-      TranscodeType.Pdf,
-      getEnqueuedItems(props.context).map((entity: BaseEntity) => entity.id)
-    );
-  }
-  if (
-    selectedBulkOperation.value?.value ===
-      BulkOperationTypes.DownloadMediafiles &&
-    selectedBulkOperation.value?.bulkOperationModal
-  ) {
-    let modal = selectedBulkOperation.value?.bulkOperationModal;
-    const enqueuedItems = getEnqueuedItems(props.context);
-    const savedContext: DownloadMediafilesContextForBulkOperationsForm = {
-      mediafiles: [],
-      entities: [],
-      includeAssetCsv: props.context !== RouteNames.Mediafile,
-      relationType: modal.formRelationType,
-    };
+  if (selectedBulkOperation.value?.bulkOperationModal) {
+    if (selectedBulkOperation.value?.value === BulkOperationTypes.DownloadMediafiles) {
+      let modal = selectedBulkOperation.value?.bulkOperationModal;
+      const enqueuedItems = getEnqueuedItems(props.context);
+      const savedContext: DownloadMediafilesContextForBulkOperationsForm = {
+        mediafiles: [],
+        entities: [],
+        includeAssetCsv: props.context !== RouteNames.Mediafile,
+        relationType: modal.formRelationType,
+      };
+      if (
+        props.context === RouteNames.Mediafile ||
+        props.context === RouteNames.Mediafiles ||
+        props.context === BulkOperationsContextEnum.EntityElementMedia
+      )
+        savedContext.mediafiles = enqueuedItems.map((item) => item.id);
+      else savedContext.entities = enqueuedItems.map((item) => item.id);
+      openModal(
+        modal.typeModal,
+        undefined,
+        "right",
+        modal.formQuery,
+        modal.askForCloseConfirmation,
+        savedContext
+      );
+    }
+
     if (
-      props.context === RouteNames.Mediafile ||
-      props.context === RouteNames.Mediafiles ||
-      props.context === BulkOperationsContextEnum.EntityElementMedia
-    )
-      savedContext.mediafiles = enqueuedItems.map((item) => item.id);
-    else savedContext.entities = enqueuedItems.map((item) => item.id);
-    openModal(
-      modal.typeModal,
-      undefined,
-      "right",
-      modal.formQuery,
-      modal.askForCloseConfirmation,
-      savedContext
-    );
-  }
-  if (
-    selectedBulkOperation.value?.value ===
-      BulkOperationTypes.ReorderEntities &&
-    selectedBulkOperation.value?.bulkOperationModal
-  ) {
-    let modal = selectedBulkOperation.value?.bulkOperationModal;
-    const savedContext: ReorderEntitiesContextForBulkOperationsForm = {
-      relationType: modal.formRelationType,
-      parentId: route.params.id,
-    };
-    openModal(
-      modal.typeModal,
-      undefined,
-      "right",
-      modal.formQuery,
-      modal.askForCloseConfirmation,
-      savedContext
-    );
+      selectedBulkOperation.value?.value === BulkOperationTypes.ReorderEntities ||
+      selectedBulkOperation.value?.value === BulkOperationTypes.TranscodePdf
+    ) {
+      let modal = selectedBulkOperation.value?.bulkOperationModal;
+      const savedContext: GenericContextForBulkOperationsForm = {
+        relationType: modal.formRelationType,
+        parentId: route.params.id,
+      };
+      openModal(
+        modal.typeModal,
+        undefined,
+        "right",
+        modal.formQuery,
+        modal.askForCloseConfirmation,
+        savedContext
+      );
+    }
   }
 });
 

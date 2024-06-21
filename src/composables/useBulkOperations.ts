@@ -19,18 +19,14 @@ export type InBulkProcessableItem = {
   id: string;
   value?: string;
 };
-export enum ContextForBulkOperationsFormTypes {
-  DownloadMediafilesContextForBulkOperationsForm,
-  ReorderEntitiesContextForBulkOperationsForm,
-}
+export type GenericContextForBulkOperationsForm = {
+  parentId: string;
+  relationType: string;
+};
 export type DownloadMediafilesContextForBulkOperationsForm = {
   mediafiles: [];
   entities: [];
   includeAssetCsv: boolean;
-  relationType: string;
-};
-export type ReorderEntitiesContextForBulkOperationsForm = {
-  parentId: string;
   relationType: string;
 };
 
