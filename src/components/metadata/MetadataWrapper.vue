@@ -1,7 +1,8 @@
 <template>
-  <div :key="label">
+  <div
+    v-if="!metadata.showOnlyInEditMode || (metadata.showOnlyInEditMode && isEdit)"
+    :key="label">
     <div
-      v-if="!metadata.showOnlyInEditMode"
       class="text-text-light text-sm flex"
     >
       <p>
