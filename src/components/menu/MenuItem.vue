@@ -8,7 +8,7 @@
       :is="linkTag"
       :to="isLink ? menuAction.action : undefined"
       @click="!isLink && menuAction?.action ? menuAction.action() : undefined"
-      class="flex flex-row items-center pl-4 h-9 mt-3 cursor-pointer hover:bg-neutral-40 hover:rounded-lg"
+      class="flex flex-row items-center pl-4 min-h-9 mt-3 cursor-pointer hover:bg-neutral-40 hover:rounded-lg"
       :class="[
         {
           'bg-neutral-40 rounded-lg': isBeingHovered,
@@ -55,7 +55,7 @@
         v-if="isExpanded"
         class="w-full grid grid-cols-[1fr_auto] items-center"
       >
-        <span class="w-3/4 px-4 font-bold">
+        <span class="w-100 px-4 font-bold">
           {{ t(menuitem?.label) }}
         </span>
         <div
