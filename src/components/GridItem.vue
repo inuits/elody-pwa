@@ -123,7 +123,6 @@ const props = withDefaults(
     media?: string;
     thumbIcon?: string;
     small?: boolean;
-    isChecked?: boolean;
     isPreview?: boolean;
     isMarkableAsToBeDeleted?: boolean;
     relation?: BaseRelationValuesInput;
@@ -139,7 +138,6 @@ const props = withDefaults(
     media: "",
     thumbIcon: "",
     small: false,
-    isChecked: false,
     isPreview: false,
     isMarkableAsToBeDeleted: false,
     isDisabled: false,

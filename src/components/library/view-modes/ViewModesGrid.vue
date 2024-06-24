@@ -37,7 +37,7 @@
           ? undefined
           : getLinkSettings(entity, listItemRouteName).path
       "
-      @click="() => updateEntityMediafileOnlyForMediafiles(entity)"
+      @click="entityWrapperHandler(entity)"
       class="w-full"
     >
       <GridItem
@@ -63,10 +63,7 @@
         :small="listItemRouteName === 'SingleMediafile'"
         :loading="entitiesLoading"
         :is-markable-as-to-be-deleted="parentEntityIdentifiers.length > 0"
-        :is-disabled="
-          idsOfNonSelectableEntities.includes(entity.id) ||
-          idsOfNonSelectableEntities.includes(entity.uuid)
-        "
+        :is-disabled="isEntityDisabled(entity)"
         :relation="
           relations?.find(
             (relation) =>
@@ -83,7 +80,7 @@
 <script lang="ts" setup>
 import type { ApolloClient } from "@apollo/client/core";
 import type { Context } from "@/composables/useBulkOperations";
-import { EditStatus, Metadata } from "@/generated-types/queries";
+import { EditStatus, type Metadata } from "@/generated-types/queries";
 import type {
   BaseRelationValuesInput,
   Entity,
@@ -103,7 +100,6 @@ import { DefaultApolloClient } from "@vue/apollo-composable";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { useRouter } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -137,7 +133,6 @@ const { mediafileSelectionState, updateSelectedEntityMediafile } =
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { getThumbnail } = useThumbnailHelper();
 const { getForm } = useFormHelper();
-const router = useRouter();
 
 const entityId = computed(() => getEntityIdFromRoute() as string);
 const relations = computed<BaseRelationValuesInput[]>(
@@ -183,6 +178,18 @@ const getLinkSettings = (entity: Entity, listItemRouteName: string = "") => {
     tag: "router-link",
     path: getEntityPageRoute(entity, listItemRouteName),
   };
+};
+
+const isEntityDisabled = (entity: Entity) => {
+  return (
+    props.idsOfNonSelectableEntities.includes(entity.id) ||
+    props.idsOfNonSelectableEntities.includes(entity.uuid)
+  );
+};
+
+const entityWrapperHandler = (entity: Entity) => {
+  if (isEntityDisabled(entity) || !props.enableNavigation) return;
+  updateEntityMediafileOnlyForMediafiles(entity);
 };
 </script>
 

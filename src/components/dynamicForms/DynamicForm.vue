@@ -9,7 +9,12 @@
         :key="`${dynamicFormQuery}_field_${index}`"
         class="pb-2"
       >
-        <ImportComponent v-if="tabName?.length && field.inputField?.type === 'baseFileSystemImportField'" />
+        <ImportComponent
+          v-if="
+            tabName?.length &&
+            field.inputField?.type === 'baseFileSystemImportField'
+          "
+        />
         <metadata-wrapper
           v-else-if="field.__typename === 'PanelMetaData'"
           :form-id="dynamicFormQuery"
@@ -21,9 +26,10 @@
         />
         <div v-if="field.__typename === 'UploadContainer'">
           <div
-            v-for="uploadContainerField in Object.values(field as any).filter(
+            v-for="(uploadContainerField, idx) in Object.values(field as any).filter(
               (containerField) => typeof containerField === 'object'
             )"
+            :key="idx"
           >
             <div class="pb-2">
               <upload-interface-dropzone
@@ -179,7 +185,9 @@ const {
 } = useUpload();
 
 const dynamicForm = computed(() => {
-  return props.tabName ? getDynamicFormTabs(props.tabName) : dynamicFormValue.value;
+  return props.tabName
+    ? getDynamicFormTabs(props.tabName)
+    : dynamicFormValue.value;
 });
 
 const { resetForm } = useForm();
@@ -187,12 +195,16 @@ interface FormObject {
   __typename: string;
 }
 
-const findFormTabObjects = (dynamicForm: Record<string, FormObject>): FormObject[] => {
+const findFormTabObjects = (
+  dynamicForm: Record<string, FormObject>
+): FormObject[] => {
   if (!dynamicForm) {
     return [];
   }
 
-  return Object.values(dynamicForm).filter(value => value && value.__typename === "FormTab");
+  return Object.values(dynamicForm).filter(
+    (value) => value && value.__typename === "FormTab"
+  );
 };
 
 const formTabs = computed(() => {
@@ -203,12 +215,20 @@ const formFields = computed<FormFieldTypes[] | undefined>(() => {
   const formTabsValue = formTabs.value;
   if (!formTabsValue) return undefined;
 
-  const formTabObjects = findFormTabObjects(formTabsValue);
-  if (!formTabObjects.length) return undefined;
+  const normalizeFields = (formFields: FormObject[]) => {
+    return formFields.flatMap((formTab) =>
+      Object.values(formTab.formFields).filter(
+        (value) => typeof value === "object"
+      )
+    );
+  };
 
-  return formTabObjects.flatMap(formTab =>
-      Object.values(formTab.formFields).filter(value => typeof value === "object")
-  );
+  const formTabObjects = findFormTabObjects(formTabsValue);
+  if (formTabObjects.length === 0 && !props.tabName)
+    return normalizeFields([formTabsValue]);
+  if (formTabObjects.length === 0) return undefined;
+
+  return normalizeFields(formTabObjects);
 });
 
 const getFieldArray = computed(() => {
@@ -246,7 +266,7 @@ const getQuery = async (queryName: string) => {
   return await loadDocument(queryName);
 };
 
-const uploadActionFunction = async (field: FormAction) => {
+const uploadActionFunction = async () => {
   if (!enableUploadButton.value) return;
   upload(props.hasLinkedUpload, config, t);
   if (standaloneFileType.value)
@@ -290,7 +310,7 @@ const downloadActionFunction = async (field: FormAction) => {
   goToEntityPage(entity, "SingleEntity", props.router);
 };
 
-const updateMetdataActionFunction = async (field: FormAction) => {
+const updateMetdataActionFunction = async () => {
   await form.value.validate();
   if (formContainsErrors.value) return;
   //TODO: put code here that calls graphql function to the bulk edit endpoint in the collection-api
@@ -302,14 +322,11 @@ const callEndpointInGraphql = async (field: FormAction) => {
   const body = {};
   endpoint.variables.forEach((variable) => {
     body[variable] = props.savedContext[variable];
-  })
-  const response = await fetch(
-    `${endpoint.endpointName}`,
-    {
-      method: endpoint.method,
-      body: body,
-    }
-  );
+  });
+  await fetch(`${endpoint.endpointName}`, {
+    method: endpoint.method,
+    body: body,
+  });
 };
 
 const startOcrActionFunction = async (field: FormAction) => {
@@ -317,11 +334,11 @@ const startOcrActionFunction = async (field: FormAction) => {
   if (formContainsErrors.value) return;
   const document = await getQuery(field.actionQuery as string);
   const result = await performOcrAction(
-      document,
-      props.savedContext,
-      form.value.values
+    document,
+    props.savedContext,
+    form.value.values
   ).data.GenerateOcrWithAsset;
-}
+};
 
 const performActionButtonClickEvent = (field: FormAction): void => {
   useBaseModal().changeCloseConfirmation(TypeModals.DynamicForm, false);
@@ -378,7 +395,10 @@ const initializeForm = async (
   oldQueryName: string | undefined
 ) => {
   const relations: BaseRelationValuesInput[] = [];
-  if (props.savedContext && ("mediafiles" in props.savedContext || "entities" in props.savedContext)) {
+  if (
+    props.savedContext &&
+    ("mediafiles" in props.savedContext || "entities" in props.savedContext)
+  ) {
     props.savedContext.mediafiles.forEach((mediafile) => {
       relations.push({
         key: mediafile,
