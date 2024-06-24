@@ -135,6 +135,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import ImportComponent from "@/components/ImportComponent.vue";
 import useTenant from "@/composables/useTenant";
@@ -164,6 +165,7 @@ const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const { currentTenant } = useApp();
 const { createForm, deleteForm, parseRelationValuesForFormSubmit } =
   useFormHelper();
+const { createNotificationOverwrite } = useNotification();
 const { loadDocument } = useImport();
 const { closeModal } = useBaseModal();
 const {
@@ -334,11 +336,18 @@ const startOcrActionFunction = async (field: FormAction) => {
   await form.value.validate();
   if (formContainsErrors.value) return;
   const document = await getQuery(field.actionQuery as string);
-  const result = await performOcrAction(
-    document,
-    props.savedContext,
-    form.value.values
+  const response = (
+    await performOcrAction(
+      document,
+      props.savedContext,
+      form.value.values
+    )
   ).data.GenerateOcrWithAsset;
+  createNotificationOverwrite(
+    NotificationType.default,
+    t("notifications.default.generate-ocr.title"),
+    t("notifications.default.generate-ocr.description")
+  );
 };
 
 const performActionButtonClickEvent = (field: FormAction): void => {
