@@ -7,6 +7,7 @@ import {
   type EntityListElement,
   type Entity,
   type BaseEntity,
+  type MediaFileEntity,
   Entitytyping,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";

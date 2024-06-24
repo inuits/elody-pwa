@@ -7,13 +7,19 @@
     >
       <template v-slot:actions>
         <div
-          v-if="isEdit && relationType && allowedActionsOnRelations.includes(RelationActions.AddRelation)"
+          v-if="
+            isEdit &&
+            relationType &&
+            allowedActionsOnRelations.includes(RelationActions.AddRelation)
+          "
           class="flex items-center px-2 text-text-subtitle cursor-pointer"
           @click.stop="
             () => {
               setAcceptedTypes(types as Entitytyping[]);
               setEntityUuid(entityUuid);
               setRelationType(relationType);
+              setCustomGetEntitiesQuery(customQueryEntityPickerList);
+              setCustomGetEntitiesFiltersQuery(customQueryEntityPickerListFilters);
               openModal(TypeModals.EntityPicker, undefined, 'right');
               toggleElementCollapse(label, false);
             }
@@ -109,9 +115,9 @@ import {
   type Entity,
   Entitytyping,
   MediaFileElementTypes,
-  EntityListElement,
+  type EntityListElement,
   BaseLibraryModes,
-  RelationActions
+  RelationActions,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -136,8 +142,13 @@ import useUpload from "@/composables/useUpload";
 const { addRelations } = useFormHelper();
 const { createCustomContext } = useBulkOperations();
 const { toggleElementCollapse } = useEntityElementCollapseHelper();
-const { setAcceptedTypes, setEntityUuid, setRelationType } =
-  useEntityPickerModal();
+const {
+  setAcceptedTypes,
+  setEntityUuid,
+  setRelationType,
+  setCustomGetEntitiesQuery,
+  setCustomGetEntitiesFiltersQuery,
+} = useEntityPickerModal();
 const { openModal } = useBaseModal();
 const { loadDocument } = useImport();
 const { isEdit } = useEditMode();
@@ -159,8 +170,10 @@ const props = withDefaults(
     type: MediaFileElementTypes;
     customQuery: string;
     customQueryRelationType: string;
-    customQueryFilters: String;
     customBulkOperations?: string | undefined;
+    customQueryFilters: string;
+    customQueryEntityPickerList: string;
+    customQueryEntityPickerListFilters: string;
     searchInputType: string;
     entityList: Entity[];
     identifiers: string[];
@@ -177,7 +190,7 @@ const props = withDefaults(
     viewMode: EntityListViewMode.Library,
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     entityListElements: undefined,
-    allowedActionsOnRelations: [],
+    allowedActionsOnRelations: () => [],
   }
 );
 
@@ -214,6 +227,7 @@ const useCustomQuery = async () => {
   setQueryRelationType(props.customQueryRelationType);
   setIdentifiers(props.identifiers[0]);
   setSearchInputType(props.searchInputType);
+
   newQuery.value = {
     name: props.customQuery,
     document: queryDocument,

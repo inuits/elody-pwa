@@ -46,10 +46,9 @@
         v-if="
           baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
           !isPreview &&
-          !isDisabled &&
           hasSelection
         "
-        class="text-center"
+        :class="[{ invisible: isDisabled }, 'text-center']"
         v-model="isChecked"
         :item="{ id: itemId, teaserMetadata }"
         :bulk-operations-context="bulkOperationsContext"
@@ -171,11 +170,7 @@ import {
   type MetadataField,
   type WindowElementPanel,
 } from "@/generated-types/queries";
-import {
-  getEntityIdFromRoute,
-  stringIsUrl,
-  updateEntityMediafileOnlyForMediafiles,
-} from "@/helpers";
+import { stringIsUrl } from "@/helpers";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
@@ -204,7 +199,6 @@ const props = withDefaults(
     media?: string;
     thumbIcon?: string;
     small?: boolean;
-    isChecked?: boolean;
     isPreview?: boolean;
     isMarkableAsToBeDeleted?: boolean;
     relation:
@@ -217,7 +211,6 @@ const props = withDefaults(
     isMediaType?: boolean;
     isEnableNavigation?: boolean;
     entityListElements?: EntityListElement[];
-    entity?: Entity;
   }>(),
   {
     contextMenuActions: undefined,
@@ -229,7 +222,6 @@ const props = withDefaults(
     media: "",
     thumbIcon: "",
     small: false,
-    isChecked: false,
     isPreview: false,
     isMarkableAsToBeDeleted: false,
     isDisabled: false,
@@ -240,7 +232,6 @@ const props = withDefaults(
     isMediaType: false,
     isEnableNavigation: false,
     entityListElements: undefined,
-    entity: undefined,
   }
 );
 
@@ -268,13 +259,6 @@ onUpdated(() => {
   if (!orderMetadataChild.value) return;
   orderMetadataChild.value[0]?.setNewValue(props.intialValues?.order);
 });
-
-watch(
-  () => isChecked.value,
-  () => {
-    updateEntityMediafileOnlyForMediafiles(props.entity, !isChecked.value);
-  }
-);
 
 const toggleLoading = () => {
   loading.value = !loading.value;

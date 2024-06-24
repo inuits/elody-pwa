@@ -33,7 +33,7 @@
         ? undefined
         : getLinkSettings(entity, listItemRouteName).path
     "
-    @click="() => updateEntityMediafileOnlyForMediafiles(entity)"
+    @click="entityWrapperHandler(entity)"
   >
     <ListItem
       :item-id="entity.uuid"
@@ -53,10 +53,7 @@
       :small="listItemRouteName === 'SingleMediafile'"
       :loading="entitiesLoading"
       :is-markable-as-to-be-deleted="allowedActionsOnRelations.includes(RelationActions.RemoveRelation) && parentEntityIdentifiers.length > 0"
-      :is-disabled="
-        idsOfNonSelectableEntities.includes(entity.id) ||
-        idsOfNonSelectableEntities.includes(entity.uuid)
-      "
+      :is-disabled="isEntityDisabled(entity)"
       :relation="
         findRelation(
           entity.uuid,
@@ -161,6 +158,18 @@ const getLinkSettings = (entity: Entity, listItemRouteName: string = "") => {
     tag: "router-link",
     path: getEntityPageRoute(entity, listItemRouteName),
   };
+};
+
+const isEntityDisabled = (entity: Entity) => {
+  return (
+    props.idsOfNonSelectableEntities.includes(entity.id) ||
+    props.idsOfNonSelectableEntities.includes(entity.uuid)
+  );
+};
+
+const entityWrapperHandler = (entity: Entity) => {
+  if (isEntityDisabled(entity) || !props.enableNavigation) return;
+  updateEntityMediafileOnlyForMediafiles(entity);
 };
 
 EventBus.on("orderList_changed", (orderItems: OrderItem[]) => {
