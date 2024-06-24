@@ -59,7 +59,7 @@ const entityTypeFilters = computed(() =>
 );
 onBeforeMount(() => applyFilterToLibrary());
 const applyFilterToLibrary = () => {
-  let filters;
+  let filters: object[];
   if (entityTypeFilters.value !== undefined)
     filters = [...entityTypeFilters.value];
   else filters = [];
