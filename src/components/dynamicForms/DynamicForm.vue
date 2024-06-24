@@ -26,9 +26,10 @@
         />
         <div v-if="field.__typename === 'UploadContainer'">
           <div
-            v-for="uploadContainerField in Object.values(field as any).filter(
+            v-for="(uploadContainerField, idx) in Object.values(field as any).filter(
               (containerField) => typeof containerField === 'object'
             )"
+            :key="idx"
           >
             <div class="pb-2">
               <upload-interface-dropzone
@@ -265,7 +266,7 @@ const getQuery = async (queryName: string) => {
   return await loadDocument(queryName);
 };
 
-const uploadActionFunction = async (field: FormAction) => {
+const uploadActionFunction = async () => {
   if (!enableUploadButton.value) return;
   upload(props.hasLinkedUpload, config, t);
   if (standaloneFileType.value)
@@ -309,7 +310,7 @@ const downloadActionFunction = async (field: FormAction) => {
   goToEntityPage(entity, "SingleEntity", props.router);
 };
 
-const updateMetdataActionFunction = async (field: FormAction) => {
+const updateMetdataActionFunction = async () => {
   await form.value.validate();
   if (formContainsErrors.value) return;
   //TODO: put code here that calls graphql function to the bulk edit endpoint in the collection-api
@@ -322,7 +323,7 @@ const callEndpointInGraphql = async (field: FormAction) => {
   endpoint.variables.forEach((variable) => {
     body[variable] = props.savedContext[variable];
   });
-  const response = await fetch(`${endpoint.endpointName}`, {
+  await fetch(`${endpoint.endpointName}`, {
     method: endpoint.method,
     body: body,
   });
