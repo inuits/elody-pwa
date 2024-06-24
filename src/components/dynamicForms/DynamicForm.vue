@@ -9,7 +9,12 @@
         :key="`${dynamicFormQuery}_field_${index}`"
         class="pb-2"
       >
-        <ImportComponent v-if="tabName?.length && field.inputField?.type === 'baseFileSystemImportField'" />
+        <ImportComponent
+          v-if="
+            tabName?.length &&
+            field.inputField?.type === 'baseFileSystemImportField'
+          "
+        />
         <metadata-wrapper
           v-else-if="field.__typename === 'PanelMetaData'"
           :form-id="dynamicFormQuery"
@@ -179,7 +184,9 @@ const {
 } = useUpload();
 
 const dynamicForm = computed(() => {
-  return props.tabName ? getDynamicFormTabs(props.tabName) : dynamicFormValue.value;
+  return props.tabName
+    ? getDynamicFormTabs(props.tabName)
+    : dynamicFormValue.value;
 });
 
 const { resetForm } = useForm();
@@ -187,12 +194,16 @@ interface FormObject {
   __typename: string;
 }
 
-const findFormTabObjects = (dynamicForm: Record<string, FormObject>): FormObject[] => {
+const findFormTabObjects = (
+  dynamicForm: Record<string, FormObject>
+): FormObject[] => {
   if (!dynamicForm) {
     return [];
   }
 
-  return Object.values(dynamicForm).filter(value => value && value.__typename === "FormTab");
+  return Object.values(dynamicForm).filter(
+    (value) => value && value.__typename === "FormTab"
+  );
 };
 
 const formTabs = computed(() => {
@@ -203,12 +214,20 @@ const formFields = computed<FormFieldTypes[] | undefined>(() => {
   const formTabsValue = formTabs.value;
   if (!formTabsValue) return undefined;
 
-  const formTabObjects = findFormTabObjects(formTabsValue);
-  if (!formTabObjects.length) return undefined;
+  const normalizeFields = (formFields: FormObject[]) => {
+    return formFields.flatMap((formTab) =>
+      Object.values(formTab.formFields).filter(
+        (value) => typeof value === "object"
+      )
+    );
+  };
 
-  return formTabObjects.flatMap(formTab =>
-      Object.values(formTab.formFields).filter(value => typeof value === "object")
-  );
+  const formTabObjects = findFormTabObjects(formTabsValue);
+  if (formTabObjects.length === 0 && !props.tabName)
+    return normalizeFields([formTabsValue]);
+  if (formTabObjects.length === 0) return undefined;
+
+  return normalizeFields(formTabObjects);
 });
 
 const getFieldArray = computed(() => {
@@ -302,14 +321,11 @@ const callEndpointInGraphql = async (field: FormAction) => {
   const body = {};
   endpoint.variables.forEach((variable) => {
     body[variable] = props.savedContext[variable];
-  })
-  const response = await fetch(
-    `${endpoint.endpointName}`,
-    {
-      method: endpoint.method,
-      body: body,
-    }
-  );
+  });
+  const response = await fetch(`${endpoint.endpointName}`, {
+    method: endpoint.method,
+    body: body,
+  });
 };
 
 const performActionButtonClickEvent = (field: FormAction): void => {
@@ -366,7 +382,11 @@ const initializeForm = async (
   oldQueryName: string | undefined
 ) => {
   const relations: BaseRelationValuesInput[] = [];
-  if (props.savedContext && typeof props.savedContext === ContextForBulkOperationsFormTypes.DownloadMediafilesContextForBulkOperationsForm.toString()) {
+  if (
+    props.savedContext &&
+    typeof props.savedContext ===
+      ContextForBulkOperationsFormTypes.DownloadMediafilesContextForBulkOperationsForm.toString()
+  ) {
     props.savedContext.mediafiles.forEach((mediafile) => {
       relations.push({
         key: mediafile,

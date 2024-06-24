@@ -32,7 +32,7 @@
             :enable-navigation="false"
             :enable-bulk-operations="true"
             :disable-new-entity-previews="true"
-            :use-other-query="ignoreCustomQuery ? undefined : newQuery"
+            :use-other-query="newQuery"
             :ids-of-non-selectable-entities="getAlreadySelectedEntityIds()"
             list-item-route-name="SingleEntity"
             @confirm-selection="
@@ -88,7 +88,7 @@ import { useI18n } from "vue-i18n";
 import dynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import { useEditMode } from "@/composables/useEdit";
 import { watch, ref } from "vue";
-import { useImport } from "@/composables/useImport";
+import { useCustomQuery } from "@/composables/useCustomQuery";
 
 const { t } = useI18n();
 const {
@@ -103,22 +103,17 @@ const { addRelations, getForm } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const tabs: string[] = [t("entity.pick"), t("entity.upload")];
 const { save } = useEditMode();
-const { loadDocument } = useImport();
-const queryLoaded = ref<boolean>(false);
 const ignoreCustomQuery = ref<boolean>(false);
 const newQuery = ref<object | undefined>(undefined);
+const { loadDocument, getDocument } = useCustomQuery();
+const queryLoaded = ref<boolean>(false);
 
-const useCustomQuery = async () => {
-  const queryDocument = await loadDocument(getCustomGetEntitiesQuery());
-  const filtersDocument = await loadDocument(
+const getCustomQuery = async () => {
+  await loadDocument(
+    getCustomGetEntitiesQuery(),
     getCustomGetEntitiesFiltersQuery()
   );
-
-  newQuery.value = {
-    name: getCustomGetEntitiesQuery(),
-    document: queryDocument,
-    filtersDocument: filtersDocument,
-  };
+  newQuery.value = getDocument();
   queryLoaded.value = true;
 };
 
@@ -160,8 +155,8 @@ watch(
     const isModalOpened =
       getModalInfo(TypeModals.EntityPicker).state === ModalState.Show;
     const hasCustomQuery = !!getCustomGetEntitiesQuery();
-    if (isModalOpened && hasCustomQuery) {
-      await useCustomQuery();
+    if (isModalOpened && hasCustomQuery && !newQuery.value) {
+      await getCustomQuery();
     } else if (isModalOpened && !hasCustomQuery) {
       ignoreCustomQuery.value = true;
     }
