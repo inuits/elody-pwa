@@ -238,7 +238,7 @@ const getFieldArray = computed(() => {
 const form = ref<FormContext<any>>();
 const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
 const showErrors = ref<boolean>(false);
-const { getMenuDestinations } = useMenuHelper();
+const { getMenuDestinations, changeExpandedState } = useMenuHelper();
 const isLoading = computed(() => {
   if (isPerformingAction.value) return true;
   return !formFields.value && !dynamicForm.value;
@@ -288,6 +288,7 @@ const submitActionFunction = async (field: FormAction) => {
     .CreateEntity;
   await getTenants();
   closeModal(TypeModals.DynamicForm);
+  changeExpandedState(false);
   deleteForm(props.dynamicFormQuery);
   goToEntityPage(entity, "SingleEntity", props.router);
 };

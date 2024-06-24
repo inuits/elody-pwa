@@ -14,8 +14,8 @@ const { openModal } = useBaseModal();
 const selectedMenuItem = ref<MenuItem | undefined>(undefined);
 const selectedMenuItemPath = ref<string>(undefined);
 const menuItems = ref<Array<MenuItem>>([]);
+const isExpanded = ref<boolean>(false);
 const menuDestinations = ref<{ entityType: string; destination: string }[]>([]);
-const entityTypeRoutes = computed(() => {});
 
 export enum MenuItemType {
   modal = "modal",
@@ -106,6 +106,10 @@ export const useMenuHelper = () => {
     return menuDestinations.value;
   };
 
+  const changeExpandedState = (newState: boolean) => {
+    isExpanded.value = newState;
+  };
+
   return {
     setSelectedMenuItem,
     checkIfRouteOrModal,
@@ -115,6 +119,8 @@ export const useMenuHelper = () => {
     getMenuEntities,
     menuItems,
     getMenuDestinations,
+    changeExpandedState,
+    isExpanded,
   };
 };
 
