@@ -5,7 +5,7 @@
       'navbar fixed left-0 top-0 w-24 h-screen align-center pt-10 bg-neutral-white px-5 pb-16 z-40',
       { 'w-80': isExpanded },
     ]"
-    @click="changeExpandedState(true)"
+    @click="changeExpandedStateOfMenu(true)"
   >
     <div>
       <router-link
@@ -25,7 +25,7 @@
           :menuitem="menuItem"
           :isExpanded="isExpanded"
           :isBeingHovered="menuItem === hoveredItem"
-          @onclick="changeExpandedState(true)"
+          @onclick="changeExpandedStateOfMenu(true)"
         />
       </div>
     </div>
@@ -49,15 +49,20 @@ import { RouterLink } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
 
 const navigation = ref<any>(null);
-const isExpanded = ref<boolean>(false);
 const hoveredItem = ref<MenuItem | undefined>(undefined);
-const { getMenuEntities, menuItems, setSelectedMenuItem } = useMenuHelper();
+const {
+  getMenuEntities,
+  menuItems,
+  setSelectedMenuItem,
+  changeExpandedState,
+  isExpanded,
+} = useMenuHelper();
 const { isCenterModalOpened } = useBaseModal();
 getMenuEntities();
 
-const changeExpandedState = (newState: boolean) => {
+const changeExpandedStateOfMenu = (newState: boolean) => {
   if (!isCenterModalOpened.value || (isCenterModalOpened.value && newState))
-    isExpanded.value = newState;
+    changeExpandedState(newState);
 };
 
 const changeHoveredItem = (item: MenuItem | undefined) => {
@@ -83,7 +88,7 @@ const closeExpanded = (event: any) => {
     navigation.value &&
     !navigation.value.innerHTML.includes(event.target.innerHTML);
   if (isClickedOutsideNavigation && !isCenterModalOpened.value) {
-    changeExpandedState(false);
+    changeExpandedStateOfMenu(false);
     changeHoveredItem(undefined);
   }
 };
