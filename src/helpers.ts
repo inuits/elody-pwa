@@ -241,6 +241,7 @@ export const getMetadataFields = (
           (value as PanelInfo).value ||
           getValueForPanelMetadata(panelType, key, formId),
         inputField: (value as PanelMetaData).inputField,
+        showOnlyInEditMode: (value as PanelMetaData).showOnlyInEditMode,
       };
 
       fields.push(field);
