@@ -51,11 +51,11 @@
             button-style="accentNormal"
             @click="applyFilters(true)"
           />
-          <!--          <BaseButtonNew-->
-          <!--            :icon="DamsIcons.EllipsisV"-->
-          <!--            class="!w-1/5"-->
-          <!--            @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event.clientX, y: event.clientY})"-->
-          <!--          />-->
+          <BaseButtonNew
+            :icon="DamsIcons.EllipsisV"
+            class="!w-1/5"
+            @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event.clientX, y: event.clientY})"
+          />
         </div>
         <div>
           <BaseInputAutocomplete
@@ -122,9 +122,12 @@
         />
       </div>
     </div>
-    <base-context-menu :context-menu="contextMenuHandler.getContextMenu()"
-      ><saved-searches
-    /></base-context-menu>
+    <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
+      <saved-searches
+        :active-filters="activeFilters"
+        :has-active-filters="activeFilterCount > 0"
+      />
+    </base-context-menu>
   </div>
 </template>
 
