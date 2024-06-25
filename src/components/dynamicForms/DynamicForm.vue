@@ -121,7 +121,7 @@ import {
   type UploadField,
   MutateEntityValuesMutation,
   MutateEntityValuesMutationVariables,
-  MutateEntityValuesDocument,
+  MutateEntityValuesDocument, OcrType
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -361,21 +361,27 @@ const startOcrActionFunction = async (field: FormAction) => {
       relations: relations
     },
     collection: props.savedContext.collection,
+  }).then(() => {
+    createNotificationOverwrite(
+      NotificationType.default,
+      t("notifications.success.entityUpdated.title"),
+      t("notifications.success.entityUpdated.description")
+    );
   });
+  if (form.value.values.intialValues.ocr_type === OcrType.ManualUpload) return;
 
   const document = await getQuery(field.actionQuery as string);
-  const response = (
-    await performOcrAction(
+  await performOcrAction(
       document,
       props.savedContext,
       form.value.values
-    )
-  ).data.GenerateOcrWithAsset;
-  createNotificationOverwrite(
-    NotificationType.default,
-    t("notifications.default.generate-ocr.title"),
-    t("notifications.default.generate-ocr.description")
-  );
+  ).then(() => {
+    createNotificationOverwrite(
+      NotificationType.default,
+      t("notifications.default.generate-ocr.title"),
+      t("notifications.default.generate-ocr.description")
+    );
+  });
 };
 
 const performActionButtonClickEvent = (field: FormAction): void => {
