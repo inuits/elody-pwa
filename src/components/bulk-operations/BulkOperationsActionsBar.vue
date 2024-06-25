@@ -319,6 +319,7 @@ watch(selectedBulkOperation, () => {
       const savedContext: GenericContextForBulkOperationsForm = {
         relationType: modal.formRelationType,
         parentId: route.params.id,
+        collection: route.meta.type,
       };
       openModal(
         modal.typeModal,

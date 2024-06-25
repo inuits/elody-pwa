@@ -119,6 +119,9 @@ import {
   TypeModals,
   type UploadContainer,
   type UploadField,
+  MutateEntityValuesMutation,
+  MutateEntityValuesMutationVariables,
+  MutateEntityValuesDocument,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -140,6 +143,7 @@ import useMenuHelper from "@/composables/useMenuHelper";
 import ImportComponent from "@/components/ImportComponent.vue";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
+import { useMutation } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
 
 const props = withDefaults(
@@ -163,8 +167,13 @@ const modalFormFields = props.modalFormFields;
 const config: any = inject("config");
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const { currentTenant } = useApp();
-const { createForm, deleteForm, parseRelationValuesForFormSubmit } =
-  useFormHelper();
+const {
+  createForm,
+  deleteForm,
+  parseRelationValuesForFormSubmit,
+  parseIntialValuesForFormSubmit,
+  addEditableMetadataKeys,
+} = useFormHelper();
 const { createNotificationOverwrite } = useNotification();
 const { loadDocument } = useImport();
 const { closeModal } = useBaseModal();
@@ -185,6 +194,11 @@ const {
   standaloneFileType,
   reinitializeDynamicFormFunc,
 } = useUpload();
+
+const { mutate } = useMutation<
+  MutateEntityValuesMutation,
+  MutateEntityValuesMutationVariables
+>(MutateEntityValuesDocument);
 
 const dynamicForm = computed(() => {
   return props.tabName
@@ -335,6 +349,20 @@ const callEndpointInGraphql = async (field: FormAction) => {
 const startOcrActionFunction = async (field: FormAction) => {
   await form.value.validate();
   if (formContainsErrors.value) return;
+
+  const id = props.savedContext.parentId;
+  addEditableMetadataKeys(Object.keys(form.value.values.intialValues), id);
+  const metadata = parseIntialValuesForFormSubmit(form.value.values.intialValues, id);
+  const relations = parseRelationValuesForFormSubmit(form.value.values.relationValues);
+  await mutate({
+    id: id,
+    formInput: {
+      metadata: metadata,
+      relations: relations
+    },
+    collection: props.savedContext.collection,
+  });
+
   const document = await getQuery(field.actionQuery as string);
   const response = (
     await performOcrAction(

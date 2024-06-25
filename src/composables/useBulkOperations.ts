@@ -1,4 +1,4 @@
-import { RouteNames } from "@/generated-types/queries";
+import { Collection, RouteNames } from "@/generated-types/queries";
 import { bulkSelectAllSizeLimit } from "@/main";
 import { ref } from "vue";
 
@@ -22,6 +22,7 @@ export type InBulkProcessableItem = {
 export type GenericContextForBulkOperationsForm = {
   parentId: string;
   relationType: string;
+  collection: Collection
 };
 export type DownloadMediafilesContextForBulkOperationsForm = {
   mediafiles: [];
