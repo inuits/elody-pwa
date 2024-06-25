@@ -6,19 +6,13 @@
         :label="$t('saved-searches.save-changes')"
         :icon="Unicons.Save.name"
         :disable="isNoChangesOriginal(pickedSavedSearch, initialFilters)"
-        v-show="auth.isAuthenticated.value === true"
       />
 
       <base-context-menu-item
-        @clicked="openCreateModal()"
+        @clicked="handleOpenModal"
         :label="$t('saved-searches.new')"
         :icon="Unicons.PlusCircle.name"
-        :disable="
-          initialFilters.every((e) => {
-            return e.isActive === false;
-          })
-        "
-        v-show="auth.isAuthenticated.value === true"
+        :disable="!hasActiveFilters"
       />
 
       <base-context-menu-item
@@ -26,7 +20,6 @@
         :label="$t('saved-searches.edit-label')"
         :icon="Unicons.Edit.name"
         :disable="!pickedSavedSearch"
-        v-show="auth.isAuthenticated.value === true"
       />
 
       <base-context-menu-item
@@ -41,7 +34,6 @@
         :label="$t('saved-searches.delete')"
         :icon="Unicons.Trash.name"
         :disable="!pickedSavedSearch"
-        v-show="auth.isAuthenticated.value === true"
       />
 
       <hr class="border-t-1 border-neutral-50" />
@@ -68,10 +60,7 @@
     </div>
   </div>
 
-  <create-saved-search-modal
-    @refetchSavedSearches="refetchSavedSearches"
-    :initialFilters="initialFilters"
-  />
+  <create-saved-search-modal />
 </template>
 
 <script lang="ts" setup>
@@ -82,6 +71,7 @@ import {
   DeleteSavedSearchDocument,
   PatchSavedSearchDefinitionDocument,
   GetSavedSearchByIdDocument,
+  TypeModals,
   type Definition,
 } from "@/generated-types/queries";
 import type {
@@ -93,20 +83,26 @@ import type {
 import { useSavedSearchHelper } from "../composables/useSavedSearchHelper";
 import CreateSavedSearchModal from "@/components/CreateSavedSearchModal.vue";
 import BaseContextMenuItem from "./base/BaseContextMenuItem.vue";
-import type { FilterInList } from "@/composables/useFilterHelper";
 import { useAuth } from "session-vue-3-oidc-library";
+import { useBaseModal } from "@/composables/useBaseModal";
+const { openModal } = useBaseModal();
 const auth = useAuth();
 
 const props = withDefaults(
   defineProps<{
-    initialFilters: FilterInList[];
+    activeFilters: any[];
+    hasActiveFilters: boolean;
   }>(),
   {
-    initialFilters: () => {
-      return [];
-    },
+    activeFilters: () => [],
+    hasActiveFilters: false,
   }
 );
+
+const handleOpenModal = () => {
+  console.log("triggered", new Date());
+  openModal(TypeModals.SaveSearch, undefined, "center");
+};
 
 const emit = defineEmits(["removedSelectedSearch"]);
 
@@ -122,9 +118,9 @@ const {
   isNoChangesOriginal,
 } = useSavedSearchHelper();
 
-const { mutate, onDone } = useMutation<SavedSearchesMutation>(
-  SavedSearchesDocument
-);
+// const { mutate, onDone } = useMutation<SavedSearchesMutation>(
+//   SavedSearchesDocument
+// );
 
 const { mutate: deleteSavedSearchMutate, onDone: onDoneDelete } =
   useMutation<DeleteSavedSearchMutation>(DeleteSavedSearchDocument);
@@ -139,24 +135,24 @@ const {
 const { mutate: getByIdMutate, onDone: onDoneGetById } =
   useMutation<GetSavedSearchByIdMutation>(GetSavedSearchByIdDocument);
 
-mutate();
+// mutate();
 
-onDone((result: any) => {
-  savedSearches.value = result.data.savedSearches.results;
-});
+// onDone((result: any) => {
+//   savedSearches.value = result.data.savedSearches.results;
+// });
 
-const refetchSavedSearches = () => {
-  mutate();
-};
+// const refetchSavedSearches = () => {
+//   mutate();
+// };
 
-const deleteSavedSearch = () => {
-  deleteSavedSearchMutate({ uuid: pickedSavedSearch.value?._key });
-  onDoneDelete(() => {
-    setPickedSavedSearch(undefined);
-    mutate();
-    emit("removedSelectedSearch");
-  });
-};
+// const deleteSavedSearch = () => {
+//   deleteSavedSearchMutate({ uuid: pickedSavedSearch.value?._key });
+//   onDoneDelete(() => {
+//     setPickedSavedSearch(undefined);
+//     mutate();
+//     emit("removedSelectedSearch");
+//   });
+// };
 
 const showConfirmation = () => {
   // TODO:
@@ -177,7 +173,7 @@ const resetSelectedSavedSearch = () => {
 const updateSelectedSearch = () => {
   if (pickedSavedSearch.value) {
     var definition: Array<Definition> = [];
-    props.initialFilters.forEach((filter: FilterInList) => {
+    props.initialFilters.forEach((filter: any) => {
       if (filter.isActive) {
         clearTypename(filter.input);
         definition.push(filter.input);
