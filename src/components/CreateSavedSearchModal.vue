@@ -1,9 +1,11 @@
 <template>
   <base-modal
-    :modal-state="createModalState.state"
-    modal-position="left"
-    modal-width-style="w-8/12"
-    @hide-modal="closeModal"
+    :modal-state="getModalInfo(TypeModals.SaveSearch).state"
+    :modal-position="getModalInfo(TypeModals.SaveSearch).modalPosition"
+    modal-width-style="w-2/5"
+    modal-color="bg-neutral-white"
+    modalHeightStyle="max-h-[75vh] my-[12.5vh]"
+    @hide-modal="handleCloseModal"
   >
     <div class="bg-neutral-0 w-full">
       <div class="p-6">
@@ -34,135 +36,40 @@
     </div>
   </base-modal>
 </template>
-<script lang="ts">
+
+<script setup lang="ts">
 import BaseModal from "@/components/base/BaseModal.vue";
-import { Entitytyping, type SavedSearchInput } from "@/generated-types/queries";
-import { defineComponent, ref, watch, type PropType } from "vue";
+import { useBaseModal } from "@/composables/useBaseModal";
 import BaseButton from "./base/BaseButton.vue";
-import { useSavedSearchHelper } from "../composables/useSavedSearchHelper";
-import { useMutation } from "@vue/apollo-composable";
 import {
-  CreateSavedSearchDocument,
-  PatchSavedSearchTitleDocument,
+  type Form,
+  type FormTab,
+  ModalState,
+  TypeModals,
 } from "@/generated-types/queries";
-import type {
-  CreateSavedSearchMutation,
-  PatchSavedSearchTitleMutation,
-} from "@/generated-types/queries";
-import type { FilterInList } from "@/composables/useFilterHelper";
-export default defineComponent({
-  name: "CreateSavedSearchModal",
-  components: { BaseButton, BaseModal },
-  props: {
-    initialFilters: {
-      type: Array as PropType<Array<FilterInList>>,
+import { useI18n } from "vue-i18n";
+import { onMounted, ref } from "vue";
+import { useConfirmModal } from "@/composables/useConfirmModal";
+
+const { closeModal, getModalInfo, changeCloseConfirmation } = useBaseModal();
+const { initializeConfirmModal } = useConfirmModal();
+const { t } = useI18n();
+const searchTitle = ref<string>("");
+
+onMounted(() => {
+  initializeConfirmModal({
+    confirmButton: {
+      buttonCallback: () => {
+        changeCloseConfirmation(TypeModals.SaveSearch, false);
+        closeModal(TypeModals.SaveSearch);
+      },
     },
-  },
-  emits: ["refetchSavedSearches"],
-  setup(props, { emit }) {
-    const {
-      closeCreateModal,
-      createModalState,
-      pickedSavedSearch,
-      clearTypename,
-      setPickedSavedSearch,
-      initSavedSearch,
-    } = useSavedSearchHelper();
-    const searchTitle = ref<string>("");
-    const savedSearch = ref<SavedSearchInput>(initSavedSearch());
-
-    const emptySearchTitle = () => {
-      searchTitle.value = "";
-    };
-
-    watch(
-      () => createModalState.value.action,
-      () => {
-        if (
-          createModalState.value.action === "edit" &&
-          pickedSavedSearch?.value?.metadata[0]?.value
-        ) {
-          searchTitle.value = pickedSavedSearch?.value?.metadata[0]?.value;
-        } else {
-          emptySearchTitle();
-        }
-      }
-    );
-
-    savedSearch.value = initSavedSearch();
-
-    const { mutate, onDone } = useMutation<CreateSavedSearchMutation>(
-      CreateSavedSearchDocument
-    );
-
-    const { mutate: mutatePatchTitle, onDone: onDonePatchTitle } =
-      useMutation<PatchSavedSearchTitleMutation>(PatchSavedSearchTitleDocument);
-
-    const create = () => {
-      if (createModalState.value.action === "create") {
-        savedSearch.value = initSavedSearch();
-        if (
-          savedSearch.value &&
-          savedSearch.value.metadata &&
-          savedSearch.value.metadata[0]
-        ) {
-          savedSearch.value.metadata[0].value = searchTitle.value;
-        }
-        props.initialFilters?.forEach((filter: FilterInList) => {
-          if (filter.isActive) {
-            savedSearch.value.definition.push(filter.input);
-          }
-        });
-        if (searchTitle.value.length > 0) {
-          savedSearch.value.definition.forEach((def) => {
-            clearTypename(def);
-          });
-          mutate({ savedSearchInput: savedSearch.value });
-          onDone((res: any) => {
-            setPickedSavedSearch(res.data.createSavedSearch);
-            emit("refetchSavedSearches", true);
-            emptySearchTitle();
-            closeCreateModal();
-          });
-        }
-      }
-
-      if (
-        createModalState.value.action === "edit" &&
-        searchTitle.value.length > 0
-      ) {
-        mutatePatchTitle({
-          uuid: pickedSavedSearch.value?._key,
-          title: searchTitle.value,
-        });
-        onDonePatchTitle((res) => {
-          if (
-            res?.data?.patchSavedSearchTitle?.metadata[0] &&
-            pickedSavedSearch.value?.metadata[0]
-          ) {
-            pickedSavedSearch.value.metadata[0].value =
-              res.data.patchSavedSearchTitle.metadata[0].value;
-          }
-          emit("refetchSavedSearches", true);
-          emptySearchTitle();
-          closeCreateModal();
-        });
-      }
-    };
-
-    const closeModal = () => {
-      closeCreateModal();
-      emptySearchTitle();
-    };
-    return {
-      pickedSavedSearch,
-      create,
-      searchTitle,
-      Entitytyping,
-      closeCreateModal,
-      createModalState,
-      closeModal,
-    };
-  },
+    declineButton: { buttonCallback: () => closeModal(TypeModals.SaveSearch) },
+    translationKey: "discard-modal",
+  });
 });
+
+const handleCloseModal = () => {
+  closeModal(TypeModals.SaveSearch);
+};
 </script>
