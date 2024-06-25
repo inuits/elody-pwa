@@ -78,7 +78,7 @@ const props = defineProps<{
   fieldIsValid: boolean;
   formFlow?: string;
 }>();
-const { addEditableMetadataOnRelationKey } = useFormHelper();
+const { addEditableMetadataKeys } = useFormHelper();
 const metadataValue = ref<string | DropdownOption>(props.value);
 const { conditionalFieldIsAvailable } = useConditionalValidation();
 const fieldEditIsDisabled = computed(() => {
@@ -99,7 +99,7 @@ const fieldEditIsDisabled = computed(() => {
 
 onMounted(() => {
   if (props.isMetadataOnRelation)
-    addEditableMetadataOnRelationKey(props.fieldKey, props.formId);
+    addEditableMetadataKeys([props.fieldKey], props.formId);
 });
 
 const getValueFromMetadata = (): string | BaseRelationValuesInput[] => {
