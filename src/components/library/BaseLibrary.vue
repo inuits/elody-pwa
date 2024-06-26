@@ -401,6 +401,7 @@ const bulkSelect = (items = entities.value) => {
           entity.teaserMetadata,
           entity.intialValues
         ),
+        type: entity.type
       });
     }
   }

@@ -20,12 +20,12 @@
 <script lang="ts" setup>
 import type { ApolloClient } from "@apollo/client/core";
 import {
+  Collection,
   DamsIcons,
   DeleteDataDocument,
-  TypeModals,
-  Entitytyping,
-  Collection,
   type DeleteDataMutation,
+  Entitytyping,
+  TypeModals
 } from "@/generated-types/queries";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
 import useTenant from "@/composables/useTenant";
@@ -33,7 +33,7 @@ import { apolloClient } from "@/main";
 import { useI18n } from "vue-i18n";
 import { asString } from "@/helpers";
 import { inject } from "vue";
-import { useBaseModal } from "@/composables/useBaseModal";
+import { GenericContextForModals, useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useEditMode } from "@/composables/useEdit";
@@ -41,10 +41,7 @@ import { useMutation } from "@vue/apollo-composable";
 import { usePageInfo } from "@/composables/usePageInfo";
 import { useRoute, useRouter } from "vue-router";
 import { useFormHelper } from "@/composables/useFormHelper";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -59,13 +56,14 @@ const {
   isDisabled,
 } = useEditMode();
 const { initializeConfirmModal } = useConfirmModal();
-const { closeModal, openModal } = useBaseModal();
+const { closeModal, openModal, deleteQueryOptions } = useBaseModal();
 const { discardEditForForm } = useFormHelper();
 const config: any = inject("config");
 const { findLastOverviewPage } = useBreadcrumbs(config, t);
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const { createNotificationOverwrite } = useNotification();
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
+
 const deleteEntity = async (deleteMediafiles: boolean = false) => {
   const id = asString(route.params["id"]);
   const type = asString(route.params["type"]);
@@ -95,16 +93,34 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
 };
 
 const openDeleteModal = () => {
-  initializeConfirmModal({
-    confirmButton: { buttonCallback: deleteEntity },
-    declineButton: {
-      buttonCallback: () => {
-        closeModal(TypeModals.Confirm);
+  if (deleteQueryOptions.value) {
+    const savedContext: GenericContextForModals = {
+      parentId: route.params.id,
+      collection: route.meta.type,
+      callbackFunction: deleteEntity,
+    };
+    openModal(
+      TypeModals.Delete,
+      undefined,
+      "center",
+      undefined,
+      deleteQueryOptions,
+      undefined,
+      savedContext
+    );
+  }
+  else {
+    initializeConfirmModal({
+      confirmButton: { buttonCallback: deleteEntity },
+      declineButton: {
+        buttonCallback: () => {
+          closeModal(TypeModals.Confirm);
+        },
       },
-    },
-    translationKey: "delete-entity",
-    openImmediately: true,
-  });
+      translationKey: "delete-entity",
+      openImmediately: true,
+    });
+  }
 };
 
 const openDiscardModal = () => {

@@ -15,6 +15,7 @@
       </div>
       <EntityPickerModal />
       <DynamicFormModal></DynamicFormModal>
+      <DeleteModal></DeleteModal>
       <search-saved-searches-modal />
       <BulkoperationsModal
         v-if="route.name !== undefined"
@@ -41,6 +42,7 @@ import BulkoperationsModal from "@/components/bulk-operations/BulkOperationsModa
 import ConfirmModal from "./components/base/ConfirmModal.vue";
 import ConfirmModalView from "./components/ConfirmModalView.vue";
 import DynamicFormModal from "@/components/dynamicForms/DynamicFormModal.vue";
+import DeleteModal from "@/components/DeleteModal.vue";
 import EditModal from "@/components/EditModal.vue";
 import EntityPickerModal from "@/components/EntityPickerModal.vue";
 import SearchModal from "@/components/SearchModal.vue";

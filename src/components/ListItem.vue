@@ -50,7 +50,7 @@
         "
         :class="[{ invisible: isDisabled }, 'text-center']"
         v-model="isChecked"
-        :item="{ id: itemId, teaserMetadata }"
+        :item="{ id: itemId, teaserMetadata, type: itemType }"
         :bulk-operations-context="bulkOperationsContext"
         input-style="accentNormal"
       />

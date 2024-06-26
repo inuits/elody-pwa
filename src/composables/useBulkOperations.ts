@@ -18,11 +18,7 @@ export type Context = RouteNames | BulkOperationsContextEnum;
 export type InBulkProcessableItem = {
   id: string;
   value?: string;
-};
-export type GenericContextForBulkOperationsForm = {
-  parentId: string;
-  relationType: string;
-  collection: Collection
+  type?: string;
 };
 export type DownloadMediafilesContextForBulkOperationsForm = {
   mediafiles: [];

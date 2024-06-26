@@ -1,8 +1,10 @@
 import { computed, ref } from "vue";
 import {
+  Collection,
+  type DeleteQueryOptions,
   ModalChoices,
   ModalState,
-  TypeModals,
+  TypeModals
 } from "@/generated-types/queries";
 export type ModalPosition = "left" | "center" | "right";
 
@@ -12,8 +14,16 @@ export type ModalInfo = {
   destination?: string;
   formQuery?: string;
   modalTabToOpen?: ModalChoices;
+  deleteQueryOptions?: DeleteQueryOptions;
   closeConfirmation: boolean;
   savedContext?: any;
+};
+
+export type GenericContextForModals = {
+  parentId: string;
+  relationType: string;
+  collection: Collection;
+  callbackFunction: Function;
 };
 
 const initialModalInfo: ModalInfo = {
@@ -32,6 +42,7 @@ const getInitialModals = (): { [key: string]: ModalInfo } => {
 
 const modals = ref<{ [key: string]: ModalInfo }>(getInitialModals());
 const modalToCloseAfterConfirm = ref<TypeModals | undefined>(undefined);
+const deleteQueryOptions = ref<DeleteQueryOptions | undefined>(undefined);
 
 export const useBaseModal = () => {
   const getModal = (modalType: TypeModals): ModalInfo => {
@@ -43,6 +54,7 @@ export const useBaseModal = () => {
     modalTab: ModalChoices | undefined = undefined,
     modalPosition: ModalPosition | undefined = undefined,
     formQuery: string | undefined = undefined,
+    deleteQueryOptions: DeleteQueryOptions | undefined = undefined,
     askForCloseConfirmation: boolean | undefined = undefined,
     savedContext: any | undefined = undefined
   ): void => {
@@ -54,6 +66,7 @@ export const useBaseModal = () => {
     if (modalPosition) Object.assign(updatedModal, { modalPosition });
     if (formQuery) Object.assign(updatedModal, { formQuery });
     if (savedContext) Object.assign(updatedModal, { savedContext });
+    if (deleteQueryOptions) Object.assign(updatedModal, { deleteQueryOptions });
     updateModal(modalType, updatedModal);
     if (modalTab) getModalInfo(modalType).modalTabToOpen = modalTab;
     if (askForCloseConfirmation)
@@ -107,11 +120,17 @@ export const useBaseModal = () => {
     modals.value[modalType].closeConfirmation = value;
   };
 
+  const updateDeleteQueryOptions = (value: string) => {
+    deleteQueryOptions.value = value;
+  };
+
   return {
     getModal,
     modals,
     getModalInfo,
     updateModal,
+    deleteQueryOptions,
+    updateDeleteQueryOptions,
     closeModal,
     openModal,
     isCenterModalOpened,
