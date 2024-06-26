@@ -6,7 +6,6 @@ import type {
   SavedSearchInput,
 } from "@/generated-types/queries";
 import { ref } from "vue";
-import type { FilterInList } from "./useFilterHelper";
 type ModalState = "initial" | "show" | "hide" | "loading";
 type ModalActions = "create" | "edit";
 
@@ -140,12 +139,12 @@ export const useSavedSearchHelper = () => {
 
   const isNoChangesOriginal = (
     original: SavedSearchedEntity | undefined,
-    change: Array<FilterInList>
+    change: Array<any>
   ) => {
     if (original?.definition) {
       const tmp = ref<SavedSearchInput>(initSavedSearch());
 
-      change.forEach((filter: FilterInList) => {
+      change.forEach((filter: any) => {
         if (filter.isActive) {
           tmp.value.definition.push(filter.input);
         }
