@@ -11,7 +11,7 @@ export enum BulkOperationsContextEnum {
   EntityElementListEntityPickerModal = "EntityElementListEntityPickerModal",
   EntityElementMediaEntityPickerModal = "EntityElementMediaEntityPickerModal",
   ManifestCollection = "ManifestCollection",
-  SearchModal = "SearchModal",
+  SavedSearchFilterModal = "SavedSearchFilterModal",
 }
 
 export type Context = RouteNames | BulkOperationsContextEnum;
@@ -22,7 +22,7 @@ export type InBulkProcessableItem = {
 export type GenericContextForBulkOperationsForm = {
   parentId: string;
   relationType: string;
-  collection: Collection
+  collection: Collection;
 };
 export type DownloadMediafilesContextForBulkOperationsForm = {
   mediafiles: [];

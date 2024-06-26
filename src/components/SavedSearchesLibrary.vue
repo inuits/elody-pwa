@@ -1,49 +1,31 @@
 <template>
   <BaseLibrary
-    :hasFilters="false"
-    :has-simple-search="true"
     :search-input-type="SearchInputType.AdvancedSavedSearchType"
-    :list-item-route-name="'SavedSearch'"
     :search-placeholder="$t('saved-searches.search-saved-searches')"
-    :advanced-filters-choice="'entityFilters'"
+    :confirm-selection-button="true"
+    :enable-navigation="false"
+    :enable-bulk-operations="true"
+    :disable-new-entity-previews="true"
+    :enableAdvancedFilters="false"
     @add-selection="addSelection"
+    :entityType="Entitytyping.Asset"
     :enable-selection="true"
-    :isHideFilters="true"
-    bulk-operations-context="savedSearches"
+    :bulk-operations-context="BulkOperationsContextEnum.SavedSearchFilterModal"
   />
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
-import { defineComponent } from "vue";
-import { SearchInputType } from "@/generated-types/queries";
+import { Entitytyping, SearchInputType } from "@/generated-types/queries";
 import { useSavedSearchHelper } from "@/composables/useSavedSearchHelper";
+import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 
-export default defineComponent({
-  name: "SavedSearchesLibrary",
-  components: {
-    BaseLibrary,
-  },
-  props: {
-    enableSelection: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  emits: ["addSelection"],
-  setup: () => {
-    const { closeSearchSavedSearchesModal, setPickedSavedSearch } =
-      useSavedSearchHelper();
+const { closeSearchSavedSearchesModal, setPickedSavedSearch } =
+  useSavedSearchHelper();
 
-    const addSelection = (entity: any) => {
-      setPickedSavedSearch(entity);
-      closeSearchSavedSearchesModal();
-    };
-
-    return {
-      SearchInputType,
-      addSelection,
-    };
-  },
-});
+const addSelection = (entity: any) => {
+  setPickedSavedSearch(entity);
+  closeSearchSavedSearchesModal();
+  // TODO(savedSearch): remove this component
+};
 </script>
