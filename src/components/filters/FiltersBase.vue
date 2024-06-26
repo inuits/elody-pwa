@@ -135,6 +135,7 @@
         :active-filters="activeFilters"
         :has-active-filters="activeFilterCount > 0"
         @applyFilter="(filters: AdvancedFilterInput[]) => {
+          // TODO(savedSearch): it should contain the whole logic as @activate-filter on line #105
           activeFilters = filters
           applyFilters(true)
         }"
