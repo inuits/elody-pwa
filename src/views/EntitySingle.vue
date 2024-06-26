@@ -10,6 +10,7 @@
         :relation-values="relationValues"
         :uuid="entity.uuid"
         :type="String(route.params['type'])"
+        :delete-query-options="entity.deleteQueryOptions"
       >
         <entity-column
           v-if="columnList != 'no-values'"

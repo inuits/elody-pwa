@@ -118,7 +118,6 @@ import {
   Context,
   InBulkProcessableItem,
   DownloadMediafilesContextForBulkOperationsForm,
-  GenericContextForBulkOperationsForm,
 } from "@/composables/useBulkOperations";
 import {
   BulkOperationsContextEnum,
@@ -128,7 +127,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import { apolloClient, bulkSelectAllSizeLimit } from "@/main";
 import { computed, onMounted, ref, watch } from "vue";
-import { useBaseModal } from "@/composables/useBaseModal";
+import { GenericContextForModals, useBaseModal } from "@/composables/useBaseModal";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import { useImport } from "@/composables/useImport";
 import {
@@ -316,7 +315,7 @@ watch(selectedBulkOperation, () => {
       selectedBulkOperation.value?.value === BulkOperationTypes.TranscodePdf
     ) {
       let modal = selectedBulkOperation.value?.bulkOperationModal;
-      const savedContext: GenericContextForBulkOperationsForm = {
+      const savedContext: GenericContextForModals = {
         relationType: modal.formRelationType,
         parentId: route.params.id,
         collection: route.meta.type,

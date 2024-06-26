@@ -12,6 +12,7 @@ import {
   type MetadataValuesInput,
   type MutateEntityValuesMutation,
   type MutateEntityValuesMutationVariables,
+  DeleteQueryOptions
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -44,6 +45,7 @@ const props = defineProps<{
   relationValues: { [key: string]: any };
   uuid: string;
   type: string;
+  deleteQueryOptions?: DeleteQueryOptions;
 }>();
 
 const config: any = inject("config");
@@ -71,7 +73,7 @@ const {
   parseRelationMetadataForFormSubmit,
 } = useFormHelper();
 const { createNotification } = useNotification();
-const { closeModal, openModal } = useBaseModal();
+const { closeModal, openModal, updateDeleteQueryOptions } = useBaseModal();
 const { t } = useI18n();
 const childRoutes = config.routerConfig[0].children.map(
   (route: any) => route.meta
@@ -148,9 +150,10 @@ const callRefetchFn = () => {
   if (refetch) refetch();
 };
 
-onMounted(async () =>
-  document.addEventListener("discardEdit", () => callRefetchFn)
-);
+onMounted(async () => {
+    document.addEventListener("discardEdit", () => callRefetchFn);
+    updateDeleteQueryOptions(props.deleteQueryOptions);
+});
 onUnmounted(() =>
   document.removeEventListener("discardEdit", () => callRefetchFn)
 );
