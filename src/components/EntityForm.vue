@@ -12,7 +12,7 @@ import {
   type MetadataValuesInput,
   type MutateEntityValuesMutation,
   type MutateEntityValuesMutationVariables,
-  DeleteQueryOptions
+  DeleteQueryOptions,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -151,8 +151,8 @@ const callRefetchFn = () => {
 };
 
 onMounted(async () => {
-    document.addEventListener("discardEdit", () => callRefetchFn);
-    updateDeleteQueryOptions(props.deleteQueryOptions);
+  document.addEventListener("discardEdit", () => callRefetchFn);
+  updateDeleteQueryOptions(props.deleteQueryOptions);
 });
 onUnmounted(() =>
   document.removeEventListener("discardEdit", () => callRefetchFn)

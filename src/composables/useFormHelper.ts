@@ -172,11 +172,10 @@ const useFormHelper = () => {
     return keyArray;
   };
 
-  const addEditableMetadataKeys = (
-    keys: string[],
-    formId: string
-  ): void => {
-    keys.forEach((key: string) => { editableFields.value[formId]?.push(key) });
+  const addEditableMetadataKeys = (keys: string[], formId: string): void => {
+    keys.forEach((key: string) => {
+      editableFields.value[formId]?.push(key);
+    });
   };
 
   const route = useRoute();

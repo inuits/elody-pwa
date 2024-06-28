@@ -4,7 +4,7 @@ import {
   type DeleteQueryOptions,
   ModalChoices,
   ModalState,
-  TypeModals
+  TypeModals,
 } from "@/generated-types/queries";
 export type ModalPosition = "left" | "center" | "right";
 

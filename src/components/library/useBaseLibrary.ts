@@ -134,10 +134,14 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
   };
 
   const getCustomBulkOperations = async () => {
-    const bulkOperationsPromise = promiseQueue.value.find(promise => promise.name === "customBulkOperationsPromise");
+    const bulkOperationsPromise = promiseQueue.value.find(
+      (promise) => promise.name === "customBulkOperationsPromise"
+    );
     if (bulkOperationsPromise) await bulkOperationsPromise();
-    promiseQueue.value = promiseQueue.value.filter(promise => promise.name !== "customBulkOperationsPromise")
-  }
+    promiseQueue.value = promiseQueue.value.filter(
+      (promise) => promise.name !== "customBulkOperationsPromise"
+    );
+  };
 
   const getEntities = async (
     route: RouteLocationNormalizedLoaded | undefined

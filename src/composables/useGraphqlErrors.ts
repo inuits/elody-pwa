@@ -96,8 +96,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
   const getMessageFromError = (error: GraphQLError): string => {
     if (error.extensions?.response?.body?.message)
       return error.extensions?.response?.body?.message;
-    if (error.message)
-      return error.message;
+    if (error.message) return error.message;
     return "Something went wrong, please try again later";
   };
 

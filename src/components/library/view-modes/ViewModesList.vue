@@ -39,7 +39,11 @@
       :item-id="entity.uuid"
       :item-type="entity.type"
       :bulk-operations-context="bulkOperationsContext"
-      :context-menu-actions="parentEntityIdentifiers?.length > 0 ? entity.teaserMetadata?.contextMenuActions : undefined"
+      :context-menu-actions="
+        parentEntityIdentifiers?.length > 0
+          ? entity.teaserMetadata?.contextMenuActions
+          : undefined
+      "
       :teaser-metadata="
         formatTeaserMetadata(
           entity.teaserMetadata,
@@ -52,7 +56,10 @@
       :is-media-type="Object.values(MediaTypeEntities).includes(entity.type)"
       :small="listItemRouteName === 'SingleMediafile'"
       :loading="entitiesLoading"
-      :is-markable-as-to-be-deleted="allowedActionsOnRelations.includes(RelationActions.RemoveRelation) && parentEntityIdentifiers.length > 0"
+      :is-markable-as-to-be-deleted="
+        allowedActionsOnRelations.includes(RelationActions.RemoveRelation) &&
+        parentEntityIdentifiers.length > 0
+      "
       :is-disabled="isEntityDisabled(entity)"
       :relation="
         findRelation(
@@ -83,7 +90,7 @@ import {
   MediaTypeEntities,
   EntityListElement,
   BaseLibraryModes,
-  RelationActions
+  RelationActions,
 } from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";

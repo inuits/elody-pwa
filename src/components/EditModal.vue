@@ -25,7 +25,7 @@ import {
   DeleteDataDocument,
   type DeleteDataMutation,
   Entitytyping,
-  TypeModals
+  TypeModals,
 } from "@/generated-types/queries";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
 import useTenant from "@/composables/useTenant";
@@ -33,7 +33,10 @@ import { apolloClient } from "@/main";
 import { useI18n } from "vue-i18n";
 import { asString } from "@/helpers";
 import { inject } from "vue";
-import { GenericContextForModals, useBaseModal } from "@/composables/useBaseModal";
+import {
+  GenericContextForModals,
+  useBaseModal,
+} from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useEditMode } from "@/composables/useEdit";
@@ -41,7 +44,10 @@ import { useMutation } from "@vue/apollo-composable";
 import { usePageInfo } from "@/composables/usePageInfo";
 import { useRoute, useRouter } from "vue-router";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
+import {
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -108,8 +114,7 @@ const openDeleteModal = () => {
       undefined,
       savedContext
     );
-  }
-  else {
+  } else {
     initializeConfirmModal({
       confirmButton: { buttonCallback: deleteEntity },
       declineButton: {
