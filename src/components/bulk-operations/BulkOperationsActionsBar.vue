@@ -71,10 +71,7 @@
       </div>
     </div>
 
-    <div
-      v-if="useExtendedBulkOperations"
-      class="flex justify-end w-60"
-    >
+    <div v-if="useExtendedBulkOperations" class="flex justify-end w-60">
       <div v-if="confirmSelectionButton" class="w-full !m-0">
         <BaseButtonNew
           :label="$t('bulk-operations.confirm-selection')"
@@ -127,7 +124,10 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import { apolloClient, bulkSelectAllSizeLimit } from "@/main";
 import { computed, onMounted, ref, watch } from "vue";
-import { GenericContextForModals, useBaseModal } from "@/composables/useBaseModal";
+import {
+  GenericContextForModals,
+  useBaseModal,
+} from "@/composables/useBaseModal";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import { useImport } from "@/composables/useImport";
 import {
@@ -180,7 +180,9 @@ const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
 );
 const bulkOperations = ref<DropdownOption[]>([]);
 const selectedBulkOperation = ref<DropdownOption>();
-const bulkOperationsPromiseIsResolved = ref<boolean>(!props.customBulkOperations);
+const bulkOperationsPromiseIsResolved = ref<boolean>(
+  !props.customBulkOperations
+);
 const {
   getEnqueuedItemCount,
   getEnqueuedItems,
@@ -208,17 +210,18 @@ const itemsSelected = computed<boolean>(
 
 const customBulkOperationsPromise = async () => {
   const query = await loadDocument(props.customBulkOperations);
-  return apolloClient.query({
+  return apolloClient
+    .query({
       query: query,
       fetchPolicy: "no-cache",
       notifyOnNetworkStatusChange: true,
-  })
-  .then((result) => {
-    const bulkOperationsResult =
-      result.data?.CustomBulkOperations.bulkOperationOptions;
-    bulkOperations.value = bulkOperationsResult?.options || [];
-    bulkOperationsPromiseIsResolved.value = true;
-  });
+    })
+    .then((result) => {
+      const bulkOperationsResult =
+        result.data?.CustomBulkOperations.bulkOperationOptions;
+      bulkOperations.value = bulkOperationsResult?.options || [];
+      bulkOperationsPromiseIsResolved.value = true;
+    });
 };
 
 onMounted(() => {
@@ -284,7 +287,10 @@ watch(selectedBulkOperation, () => {
     dequeueAllItemsForBulkProcessing(props.context);
   }
   if (selectedBulkOperation.value?.bulkOperationModal) {
-    if (selectedBulkOperation.value?.value === BulkOperationTypes.DownloadMediafiles) {
+    if (
+      selectedBulkOperation.value?.value ===
+      BulkOperationTypes.DownloadMediafiles
+    ) {
       let modal = selectedBulkOperation.value?.bulkOperationModal;
       const enqueuedItems = getEnqueuedItems(props.context);
       const savedContext: DownloadMediafilesContextForBulkOperationsForm = {
@@ -311,7 +317,8 @@ watch(selectedBulkOperation, () => {
     }
 
     if (
-      selectedBulkOperation.value?.value === BulkOperationTypes.ReorderEntities ||
+      selectedBulkOperation.value?.value ===
+        BulkOperationTypes.ReorderEntities ||
       selectedBulkOperation.value?.value === BulkOperationTypes.TranscodePdf
     ) {
       let modal = selectedBulkOperation.value?.bulkOperationModal;
@@ -350,7 +357,8 @@ watch(
 watch(
   () => props.customBulkOperations,
   () => {
-    if (!props.customBulkOperations || bulkOperationsPromiseIsResolved.value) return;
+    if (!props.customBulkOperations || bulkOperationsPromiseIsResolved.value)
+      return;
     emit("customBulkOperationsPromise", customBulkOperationsPromise);
     emit("applyCustomBulkOperations");
   },

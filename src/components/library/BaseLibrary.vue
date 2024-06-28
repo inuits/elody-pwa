@@ -114,7 +114,9 @@
               @no-bulk-operations-available="
                 () => (enableBulkOperations = false)
               "
-              @apply-custom-bulk-operations="async () => await applyCustomBulkOperations()"
+              @apply-custom-bulk-operations="
+                async () => await applyCustomBulkOperations()
+              "
               @refetch="async () => await refetchEntities()"
             />
           </div>
@@ -191,7 +193,7 @@ import {
   type BaseRelationValuesInput,
   type Entity,
   type EntityListElement,
-  RelationActions
+  RelationActions,
 } from "@/generated-types/queries";
 import {
   type BaseEntity,
@@ -401,7 +403,7 @@ const bulkSelect = (items = entities.value) => {
           entity.teaserMetadata,
           entity.intialValues
         ),
-        type: entity.type
+        type: entity.type,
       });
     }
   }
@@ -450,7 +452,7 @@ const applyCustomBulkOperations = async () => {
   if (!props.customBulkOperations) return;
   enqueuePromise(customBulkOperationsPromise);
   await getCustomBulkOperations();
-}
+};
 
 onMounted(async () => {
   await initializeBaseLibrary();

@@ -30,7 +30,7 @@ import {
   ActionContextEntitiesSelectionType,
   ActionContextViewModeTypes,
   DamsIcons,
-  type DropdownOption
+  type DropdownOption,
 } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 import useEditMode from "@/composables/useEdit";
@@ -139,18 +139,23 @@ const selectItem = (event: Event) => {
   emit("update:modelValue", newlySelectedOption);
 };
 
-const filterDropdownOptions = computed<DropdownOption[]>(
-  () => {
-    return allOptions.value.filter((dropdownOption) => {
-      if (!dropdownOption.actionContext) return true;
-      const activeViewMode = dropdownOption.actionContext.activeViewMode;
-      const entitiesSelectionType = dropdownOption.actionContext.entitiesSelectionType;
-      const viewMode = isEdit.value ? activeViewMode === ActionContextViewModeTypes.EditMode : activeViewMode === ActionContextViewModeTypes.ReadMode;
-      const numberOfEntities = props.itemsSelected ? entitiesSelectionType === ActionContextEntitiesSelectionType.SelectionOfEntities : entitiesSelectionType === ActionContextEntitiesSelectionType.AllEntities;
-      return viewMode && numberOfEntities;
-    });
-  }
-);
+const filterDropdownOptions = computed<DropdownOption[]>(() => {
+  return allOptions.value.filter((dropdownOption) => {
+    if (!dropdownOption.actionContext) return true;
+    const activeViewMode = dropdownOption.actionContext.activeViewMode;
+    const entitiesSelectionType =
+      dropdownOption.actionContext.entitiesSelectionType;
+    const viewMode = isEdit.value
+      ? activeViewMode === ActionContextViewModeTypes.EditMode
+      : activeViewMode === ActionContextViewModeTypes.ReadMode;
+    const numberOfEntities = props.itemsSelected
+      ? entitiesSelectionType ===
+        ActionContextEntitiesSelectionType.SelectionOfEntities
+      : entitiesSelectionType ===
+        ActionContextEntitiesSelectionType.AllEntities;
+    return viewMode && numberOfEntities;
+  });
+});
 
 watch(
   () => props.options,

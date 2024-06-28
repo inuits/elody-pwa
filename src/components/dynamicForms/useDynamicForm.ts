@@ -74,7 +74,7 @@ const useDynamicForm = () => {
     savedContext: any,
     form: any
   ): Promise<any> => {
-    const operation = [form.intialValues.ocr_type]
+    const operation = [form.intialValues.ocr_type];
     if (operation[0] === OcrType.Pdf) operation.unshift(OcrType.Alto);
     const variables = {
       assetId: savedContext.parentId,

@@ -1,10 +1,11 @@
 <template>
   <div
-    v-if="!metadata.showOnlyInEditMode || (metadata.showOnlyInEditMode && isEdit)"
-    :key="label">
-    <div
-      class="text-text-light text-sm flex"
-    >
+    v-if="
+      !metadata.showOnlyInEditMode || (metadata.showOnlyInEditMode && isEdit)
+    "
+    :key="label"
+  >
+    <div class="text-text-light text-sm flex">
       <p>
         {{ metadata.label ? t(metadata.label) : t("metadata.no-label") }}
       </p>
@@ -186,9 +187,8 @@ const isFieldRequired = computed(() => {
 const getValidationRules = (metadata: PanelMetaData): string => {
   let rules: string;
   if (metadata?.inputField?.validation?.value === ValidationRules.CustomValue)
-    rules = metadata?.inputField?.validation?.customValue
-  else
-    rules = metadata?.inputField?.validation?.value?.join("|") as string;
+    rules = metadata?.inputField?.validation?.customValue;
+  else rules = metadata?.inputField?.validation?.value?.join("|") as string;
   if (isRequiredRelationField.value) {
     const relationType =
       metadata?.inputField?.validation?.has_required_relation?.relationType;
@@ -198,7 +198,9 @@ const getValidationRules = (metadata: PanelMetaData): string => {
   }
   if (isOneOfRequiredRelationField.value) {
     const relationTypes =
-      metadata?.inputField?.validation?.has_one_of_required_relations?.relationTypes.join(':');
+      metadata?.inputField?.validation?.has_one_of_required_relations?.relationTypes.join(
+        ":"
+      );
     const amount =
       metadata?.inputField?.validation?.has_one_of_required_relations?.amount;
     return `${rules}:${amount}:${relationTypes}`;
@@ -220,10 +222,15 @@ const label = computed(() =>
 const veeValidateField = computed(() => {
   if (isMetadataOnRelation.value)
     return `${ValidationFields.RelationMetadata}.${fieldKeyWithId.value}`;
-  else if ((isRequiredRelationField.value || isOneOfRequiredRelationField.value) && props.isEdit)
+  else if (
+    (isRequiredRelationField.value || isOneOfRequiredRelationField.value) &&
+    props.isEdit
+  )
     return `${ValidationFields.RelationValues}.${props.metadata.inputField.relationType}`;
   else if (props.metadata.inputField)
-    return `${ValidationFields.IntialValues}.${getKeyBasedOnInputField(props.metadata)}`;
+    return `${ValidationFields.IntialValues}.${getKeyBasedOnInputField(
+      props.metadata
+    )}`;
   else if (props.linkedEntityId === undefined)
     return `${ValidationFields.RelationValues}.${props.metadata.key}`;
   else return `${ValidationFields.RelatedEntityData}.${fieldKeyWithId.value}`;
