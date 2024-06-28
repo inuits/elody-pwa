@@ -61,6 +61,7 @@ import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import { addCurrentTimeZoneToDateTimeString, isDateTime } from "@/helpers";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import { computed, defineEmits, onMounted, reactive, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -171,7 +172,7 @@ const getAutocompleteOptions = (value: string) => {
         provide_value_options_for_key: true,
       },
       limit: 999999,
-      entityType: route.meta.entityType as string
+      entityType: route.meta.entityType as string,
     };
     if (
       props.filter.advancedFilter.advancedFilterInputForRetrievingOptions.lookup
@@ -253,7 +254,7 @@ onMounted(() => {
         provide_value_options_for_key: true,
       },
       limit: 11,
-      entityType: route.meta.entityType as string
+      entityType: route.meta.entityType as string,
     };
     if (
       props.filter.advancedFilter.advancedFilterInputForRetrievingOptions.lookup
@@ -308,7 +309,12 @@ watch(input, () => {
         input.value.length > 0
           ? input.value.map((filterOption) => filterOption.value)
           : [];
-  else value = input.value ? input.value : undefined;
+  else
+    value = input.value
+      ? isDateTime(input.value)
+        ? addCurrentTimeZoneToDateTimeString(input.value)
+        : input.value
+      : undefined;
 
   const newAdvancedFilterInput: AdvancedFilterInput = {
     type: props.filter.advancedFilter.type,

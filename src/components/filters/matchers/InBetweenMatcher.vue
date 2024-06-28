@@ -21,11 +21,12 @@
 
 <script lang="ts" setup>
 import type { FilterListItem } from "@/composables/useStateManagement";
-import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import {
   AdvancedFilterTypes,
   type AdvancedFilterInput,
 } from "@/generated-types/queries";
+import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
+import { addCurrentTimeZoneToDateTimeString, isDateTime } from "@/helpers";
 import { computed, defineEmits, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -54,8 +55,12 @@ const emitNewAdvancedFilterInput = () => {
       parent_key: props.filter.advancedFilter.parentKey,
       key: props.filter.advancedFilter.key,
       value: {
-        min: min.value,
-        max: max.value,
+        min: isDateTime(min.value)
+          ? addCurrentTimeZoneToDateTimeString(min.value)
+          : min.value,
+        max: isDateTime(max.value)
+          ? addCurrentTimeZoneToDateTimeString(max.value)
+          : max.value,
       },
     };
     if (props.filter.advancedFilter.lookup)
