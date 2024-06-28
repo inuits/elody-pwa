@@ -130,7 +130,7 @@ import {
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
-import { computed, inject, ref, watch } from "vue";
+import { computed, inject, ref, watch, toRaw } from "vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
@@ -168,6 +168,8 @@ const props = withDefaults(
     modalFormFields: undefined,
   }
 );
+
+const emit = defineEmits(["entityCreated"]);
 
 type FormFieldTypes = UploadContainer | PanelMetaData | FormAction;
 
@@ -317,6 +319,21 @@ const submitActionFunction = async (field: FormAction) => {
   goToEntityPage(entity, "SingleEntity", props.router);
 };
 
+const submitWithExtraMetadata = async (field: FormAction) => {
+  await form.value.validate();
+  if (formContainsErrors.value) return;
+  const document = await getQuery(field.actionQuery as string);
+  const entityInput = createEntityFromFormInput(field.creationType);
+  entityInput.metadata?.push(...toRaw(props.savedContext));
+  const entity = (await performSubmitAction(document, entityInput)).data
+    .CreateEntity;
+  emit("entityCreated", { ...entity, metadata: entityInput.metadata });
+  await getTenants();
+  closeModal(TypeModals.DynamicForm);
+  changeExpandedState(false);
+  deleteForm(props.dynamicFormQuery);
+};
+
 const downloadActionFunction = async (field: FormAction) => {
   await form.value.validate();
   if (formContainsErrors.value) return;
@@ -404,6 +421,7 @@ const performActionButtonClickEvent = (field: FormAction): void => {
     download: () => downloadActionFunction(field),
     ocr: () => startOcrActionFunction(field),
     endpoint: () => callEndpointInGraphql(field),
+    submitWithExtraMetadata: () => submitWithExtraMetadata(field),
   };
   if (!field.actionType) return;
   showErrors.value = true;
