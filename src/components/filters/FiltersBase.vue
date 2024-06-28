@@ -16,10 +16,18 @@
       <span class="text-text-body text-xl font-bold">
         {{ t("filters.filter") }}
       </span>
-      <div class="flex">
+      <div class="flex items-center">
         <span class="text-text-body">
           {{ activeFilterCount }} {{ t("filters.active") }}
         </span>
+        <div
+          v-if="selectedSavedFilter"
+          class="bg-neutral-light border-neutral-light rounded py-1 px-2 ml-2"
+        >
+          <span class="text-text-body">
+            {{ selectedSavedFilter.title }}
+          </span>
+        </div>
         <unicon
           class="text-text-body ml-4"
           :name="Unicons[getAngleIcon].name"
@@ -48,11 +56,12 @@
             button-style="accentNormal"
             @click="applyFilters(true)"
           />
-          <!--          <BaseButtonNew-->
-          <!--            :icon="DamsIcons.EllipsisV"-->
-          <!--            class="!w-1/5"-->
-          <!--            @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event.clientX, y: event.clientY})"-->
-          <!--          />-->
+          <BaseButtonNew
+            v-if="enableSaveSearchFilters"
+            :icon="DamsIcons.EllipsisV"
+            class="!w-1/5"
+            @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event.clientX, y: event.clientY})"
+          />
         </div>
         <div>
           <BaseInputAutocomplete
@@ -117,9 +126,14 @@
         />
       </div>
     </div>
-    <base-context-menu :context-menu="contextMenuHandler.getContextMenu()"
-      ><saved-searches
-    /></base-context-menu>
+    <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
+      <saved-searches
+        :active-filters="filters"
+        :has-active-filters="activeFilterCount > 0"
+        :entityType="entityType"
+        @filterDeleted="() => (clearAllActiveFilters = true)"
+      />
+    </base-context-menu>
   </div>
 </template>
 
@@ -155,6 +169,7 @@ import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMen
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
+import { useSaveSearchHepler } from "@/composables/useSaveSearchHepler";
 
 const props = withDefaults(
   defineProps<{
@@ -163,9 +178,12 @@ const props = withDefaults(
     parentEntityIdentifiers?: string[];
     route: RouteLocationNormalizedLoaded;
     setAdvancedFilters: Function;
+    enableSaveSearchFilters: boolean;
+    entityType: Entitytyping;
   }>(),
   {
     parentEntityIdentifiers: () => [],
+    enableSaveSearchFilters: true,
   }
 );
 
@@ -208,6 +226,12 @@ const { getStateForRoute, updateStateForRoute } = useStateManagement();
 const { isSaved } = useEditMode();
 const { setAdvancedFilterInputs } = useQueryVariablesFactory();
 const { t } = useI18n();
+const { setActiveFilter: setActiveSavedFilter, getActiveFilter } =
+  useSaveSearchHepler();
+
+const selectedSavedFilter = computed(() => {
+  return getActiveFilter();
+});
 
 const filterMatcherMappingPromise = async () => {
   return apolloClient
@@ -384,9 +408,22 @@ watch(clearAllActiveFilters, () => {
       filter.inputFromState = undefined;
       filter.selectedMatcher = undefined;
     });
+    setActiveSavedFilter(null);
     setTimeout(() => (clearAllActiveFilters.value = false), 50);
     applyFilters(true);
   }
+});
+watch(selectedSavedFilter, () => {
+  if (!selectedSavedFilter.value) {
+    clearAllActiveFilters.value = true;
+    return;
+  }
+
+  filters.value = selectedSavedFilter.value.value;
+  activeFilters.value = filters.value
+    .filter((filter) => filter.isActive && filter.inputFromState)
+    .map((filter) => filter.inputFromState) as AdvancedFilterInput[];
+  applyFilters(true);
 });
 </script>
 

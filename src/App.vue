@@ -15,7 +15,8 @@
       </div>
       <EntityPickerModal />
       <DynamicFormModal></DynamicFormModal>
-      <search-saved-searches-modal />
+      <SavedSearchesPickerModal />
+      <CreateSavedSearchModal />
       <BulkoperationsModal
         v-if="route.name !== undefined"
         :context="route.name as Context"
@@ -44,7 +45,7 @@ import DynamicFormModal from "@/components/dynamicForms/DynamicFormModal.vue";
 import EditModal from "@/components/EditModal.vue";
 import EntityPickerModal from "@/components/EntityPickerModal.vue";
 import SearchModal from "@/components/SearchModal.vue";
-import SearchSavedSearchesModal from "@/components/searchSavedSearchesModal.vue";
+import SavedSearchesPickerModal from "@/components/SavedSearchesPickerModal.vue";
 import TheHeader from "@/components/TheHeader.vue";
 import TheNavigation from "@/components/menu/MenuNav.vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
@@ -53,6 +54,7 @@ import { useApp } from "@/composables/useApp";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
+import CreateSavedSearchModal from "./components/CreateSavedSearchModal.vue";
 
 const auth = useAuth();
 const config = inject<{
