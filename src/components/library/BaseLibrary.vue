@@ -46,6 +46,8 @@
               :parent-entity-identifiers="parentEntityIdentifiers"
               :route="route"
               :set-advanced-filters="setAdvancedFilters"
+              :enable-save-search-filters="enableSaveSearchFilters"
+              :entity-type="entityType as Entitytyping"
               @filter-matcher-mapping-promise="
                 (promise) => (filterMatcherMappingPromise = promise)
               "
@@ -257,6 +259,8 @@ export type BaseLibraryProps = {
   entityListElements?: EntityListElement[];
   allowedActionsOnRelations?: RelationActions[];
   customBulkOperations?: String | undefined;
+  enableSaveSearchFilters?: boolean;
+  limitSelections?: number;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -281,6 +285,8 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   entityListElements: undefined,
   allowedActionsOnRelations: [],
   customBulkOperations: undefined,
+  enableSaveSearchFilters: true,
+  limitSelections: 0,
 });
 
 const emit = defineEmits<{
