@@ -57,6 +57,7 @@
             @click="applyFilters(true)"
           />
           <BaseButtonNew
+            v-if="enableSaveSearchFilters"
             :icon="DamsIcons.EllipsisV"
             class="!w-1/5"
             @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event.clientX, y: event.clientY})"
@@ -127,14 +128,10 @@
     </div>
     <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
       <saved-searches
-        :active-filters="activeFilters"
+        :active-filters="filters"
         :has-active-filters="activeFilterCount > 0"
-        @applyFilter="(filters: AdvancedFilterInput[]) => {
-          // TODO(savedSearch): it should contain the whole logic as @activate-filter on line #105
-          activeFilters = filters
-          applyFilters(true)
-        }"
-        @deleteFilter="() => (clearAllActiveFilters = true)"
+        :entityType="entityType"
+        @filterDeleted="() => (clearAllActiveFilters = true)"
       />
     </base-context-menu>
   </div>
@@ -181,9 +178,12 @@ const props = withDefaults(
     parentEntityIdentifiers?: string[];
     route: RouteLocationNormalizedLoaded;
     setAdvancedFilters: Function;
+    enableSaveSearchFilters: boolean;
+    entityType: Entitytyping;
   }>(),
   {
     parentEntityIdentifiers: () => [],
+    enableSaveSearchFilters: true,
   }
 );
 
@@ -412,6 +412,18 @@ watch(clearAllActiveFilters, () => {
     setTimeout(() => (clearAllActiveFilters.value = false), 50);
     applyFilters(true);
   }
+});
+watch(selectedSavedFilter, () => {
+  if (!selectedSavedFilter.value) {
+    clearAllActiveFilters.value = true;
+    return;
+  }
+
+  filters.value = selectedSavedFilter.value.value;
+  activeFilters.value = filters.value
+    .filter((filter) => filter.isActive && filter.inputFromState)
+    .map((filter) => filter.inputFromState) as AdvancedFilterInput[];
+  applyFilters(true);
 });
 </script>
 

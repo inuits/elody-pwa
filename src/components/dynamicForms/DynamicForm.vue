@@ -121,11 +121,12 @@ import {
   type UploadField,
   MutateEntityValuesMutation,
   MutateEntityValuesMutationVariables,
-  MutateEntityValuesDocument, OcrType
+  MutateEntityValuesDocument,
+  OcrType,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
-import { computed, inject, ref, watch } from "vue";
+import { computed, inject, ref, watch, toRaw } from "vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
@@ -138,7 +139,10 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
+import {
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import ImportComponent from "@/components/ImportComponent.vue";
 import useTenant from "@/composables/useTenant";
@@ -160,6 +164,8 @@ const props = withDefaults(
     modalFormFields: undefined,
   }
 );
+
+const emit = defineEmits(["entityCreated"]);
 
 type FormFieldTypes = UploadContainer | PanelMetaData | FormAction;
 
@@ -309,6 +315,21 @@ const submitActionFunction = async (field: FormAction) => {
   goToEntityPage(entity, "SingleEntity", props.router);
 };
 
+const submitWithExtraMetadata = async (field: FormAction) => {
+  await form.value.validate();
+  if (formContainsErrors.value) return;
+  const document = await getQuery(field.actionQuery as string);
+  const entityInput = createEntityFromFormInput(field.creationType);
+  entityInput.metadata?.push(...toRaw(props.savedContext));
+  const entity = (await performSubmitAction(document, entityInput)).data
+    .CreateEntity;
+  emit("entityCreated", { ...entity, metadata: entityInput.metadata });
+  await getTenants();
+  closeModal(TypeModals.DynamicForm);
+  changeExpandedState(false);
+  deleteForm(props.dynamicFormQuery);
+};
+
 const downloadActionFunction = async (field: FormAction) => {
   await form.value.validate();
   if (formContainsErrors.value) return;
@@ -352,13 +373,18 @@ const startOcrActionFunction = async (field: FormAction) => {
 
   const id = props.savedContext.parentId;
   addEditableMetadataKeys(Object.keys(form.value.values.intialValues), id);
-  const metadata = parseIntialValuesForFormSubmit(form.value.values.intialValues, id);
-  const relations = parseRelationValuesForFormSubmit(form.value.values.relationValues);
+  const metadata = parseIntialValuesForFormSubmit(
+    form.value.values.intialValues,
+    id
+  );
+  const relations = parseRelationValuesForFormSubmit(
+    form.value.values.relationValues
+  );
   await mutate({
     id: id,
     formInput: {
       metadata: metadata,
-      relations: relations
+      relations: relations,
     },
     collection: props.savedContext.collection,
   }).then(() => {
@@ -371,17 +397,15 @@ const startOcrActionFunction = async (field: FormAction) => {
   if (form.value.values.intialValues.ocr_type === OcrType.ManualUpload) return;
 
   const document = await getQuery(field.actionQuery as string);
-  await performOcrAction(
-      document,
-      props.savedContext,
-      form.value.values
-  ).then(() => {
-    createNotificationOverwrite(
-      NotificationType.default,
-      t("notifications.default.generate-ocr.title"),
-      t("notifications.default.generate-ocr.description")
-    );
-  });
+  await performOcrAction(document, props.savedContext, form.value.values).then(
+    () => {
+      createNotificationOverwrite(
+        NotificationType.default,
+        t("notifications.default.generate-ocr.title"),
+        t("notifications.default.generate-ocr.description")
+      );
+    }
+  );
 };
 
 const performActionButtonClickEvent = (field: FormAction): void => {
@@ -393,6 +417,7 @@ const performActionButtonClickEvent = (field: FormAction): void => {
     download: () => downloadActionFunction(field),
     ocr: () => startOcrActionFunction(field),
     endpoint: () => callEndpointInGraphql(field),
+    submitWithExtraMetadata: () => submitWithExtraMetadata(field),
   };
   if (!field.actionType) return;
   showErrors.value = true;
