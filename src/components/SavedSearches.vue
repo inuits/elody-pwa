@@ -23,7 +23,7 @@
       />
 
       <base-context-menu-item
-        @clicked="deleteFilter"
+        @clicked="openDeleteModal"
         :label="$t('saved-searches.delete')"
         :icon="Unicons.Trash.name"
         :disable="!selectedFilter"
@@ -42,12 +42,15 @@
             : false
         "
       /> -->
-
-      <base-context-menu-item
-        @clicked="selectFilter"
-        :label="'my fancy filter'"
-        :highlight="selectedFilter?.id === 2424"
-      />
+      <template v-if="!entitiesLoading">
+        <base-context-menu-item
+          v-for="(savedSearch, index) in entitiesList.slice(0, 5)"
+          :key="index"
+          @clicked="selectFilter(savedSearch)"
+          :label="savedSearch.title"
+          :highlight="selectedFilter?.id === savedSearch.id"
+        />
+      </template>
 
       <hr class="border-t-1 border-neutral-50" />
 
@@ -62,33 +65,24 @@
 
 <script lang="ts" setup>
 import { Unicons } from "@/types";
-import { useMutation } from "@vue/apollo-composable";
 import {
-  SavedSearchesDocument,
-  DeleteSavedSearchDocument,
-  PatchSavedSearchDefinitionDocument,
-  GetSavedSearchByIdDocument,
   TypeModals,
-  type Definition,
   Entitytyping,
-} from "@/generated-types/queries";
-import type {
-  SavedSearchesMutation,
-  DeleteSavedSearchMutation,
-  PatchSavedSearchDefinitionMutation,
-  GetSavedSearchByIdMutation,
+  ModalChoices,
 } from "@/generated-types/queries";
 import { useSaveSearchHepler } from "@/composables/useSaveSearchHepler";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { ref, computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
-
+import { useConfirmModal } from "@/composables/useConfirmModal";
+// import { provideApolloClient, useMutation } from "@vue/apollo-composable";
 const props = withDefaults(
   defineProps<{
     activeFilters: any[];
     savedSearches?: any[];
     hasActiveFilters: boolean;
+    entityType: Entitytyping;
   }>(),
   {
     activeFilters: () => [],
@@ -96,11 +90,18 @@ const props = withDefaults(
     hasActiveFilters: false,
   }
 );
-const emit = defineEmits(["applyFilter", "deleteFilter"]);
 
-const { openModal } = useBaseModal();
-const { setActiveFilter, getActiveFilter, setFilterToEdit } =
-  useSaveSearchHepler();
+const { openModal, closeModal } = useBaseModal();
+const { initializeConfirmModal } = useConfirmModal();
+const {
+  setActiveFilter,
+  getActiveFilter,
+  setFilterToEdit,
+  deleteSavedSearch,
+  initialize,
+  entitiesList,
+  entitiesLoading,
+} = useSaveSearchHepler();
 const { setEntityType } = useQueryVariablesFactory();
 
 const selectedFilter = computed(() => {
@@ -111,8 +112,19 @@ const getDeepCopy = (obj: any) => {
   return JSON.parse(JSON.stringify(obj));
 };
 
-const handleOpenModal = () => {
-  openModal(TypeModals.SaveSearch, undefined, "center");
+onMounted(() => {
+  initialize(props.entityType);
+});
+
+const handleOpenModal = (context: any = undefined) => {
+  openModal(
+    TypeModals.SaveSearch,
+    undefined,
+    "center",
+    "GetSaveSearchForm",
+    undefined,
+    context
+  );
 };
 
 const saveChanges = () => {
@@ -131,90 +143,54 @@ const createNew = () => {
     title: "",
     value: props.activeFilters,
   });
-  handleOpenModal();
+  openModal(
+    TypeModals.SaveSearch,
+    ModalChoices.Import,
+    "center",
+    "GetSaveSearchForm",
+    undefined,
+    [
+      {
+        key: "applicableType",
+        value: props.entityType,
+      },
+      {
+        key: "filters",
+        // TODO(savedSearch): probably not necessary to make deep copy as it will not changed before saved in the backend
+        value: getDeepCopy(props.activeFilters),
+      },
+    ]
+  );
 };
 
-const selectFilter = (filter: any) => {
-  // TODO(savedSearch): pass real filter as the argument to setActiveFilter
-  setActiveFilter({
-    id: 2424,
-    title: "my new fancy filter",
-    value: [
-      {
-        type: "type",
-        value: "asset",
-        match_exact: true,
+const selectFilter = async (filter: any) => {
+  setActiveFilter(filter);
+};
+
+const openDeleteModal = () => {
+  initializeConfirmModal({
+    confirmButton: {
+      buttonCallback: deleteFilter,
+    },
+    declineButton: {
+      buttonCallback: () => {
+        closeModal(TypeModals.Confirm);
       },
-      {
-        type: "text",
-        key: ["elody:1|metadata.title.value"],
-        value: "text",
-        match_exact: false,
-      },
-    ],
+    },
+    // TODO(savedSearch): translation (?)
+    translationKey: "delete-entity",
+    openImmediately: true,
   });
-  emit("applyFilter", selectedFilter.value.value);
 };
 
-const deleteFilter = () => {
-  // TODO(savedSearch): call delete the filter
+const deleteFilter = async () => {
   // TODO(savedSearch): show a notification 'deleted'
-  emit("deleteFilter");
+  await deleteSavedSearch(selectedFilter.value.id);
+  setActiveFilter(null);
 };
 
 const openFindAllFiltersModal = () => {
-  setEntityType(Entitytyping.Asset);
+  setEntityType(Entitytyping.SavedSearch);
   openModal(TypeModals.SaveSearchPicker, undefined, "right");
 };
-
-// const { mutate, onDone } = useMutation<SavedSearchesMutation>(
-//   SavedSearchesDocument
-// );
-
-// const { mutate: deleteSavedSearchMutate, onDone: onDoneDelete } =
-//   useMutation<DeleteSavedSearchMutation>(DeleteSavedSearchDocument);
-
-// const {
-//   mutate: patchSavedSearchDefinitionMutate,
-//   onDone: onDonePatchDefinition,
-// } = useMutation<PatchSavedSearchDefinitionMutation>(
-//   PatchSavedSearchDefinitionDocument
-// );
-
-// const { mutate: getByIdMutate, onDone: onDoneGetById } =
-//   useMutation<GetSavedSearchByIdMutation>(GetSavedSearchByIdDocument);
-
-// mutate();
-
-// onDone((result: any) => {
-//   savedSearches.value = result.data.savedSearches.results;
-// });
-
-// const refetchSavedSearches = () => {
-//   mutate();
-// };
-
-// const deleteSavedSearch = () => {
-//   deleteSavedSearchMutate({ uuid: pickedSavedSearch.value?._key });
-//   onDoneDelete(() => {
-//     setPickedSavedSearch(undefined);
-//     mutate();
-//     emit("removedSelectedSearch");
-//   });
-// };
-
-// const showConfirmation = () => {
-//   // TODO:
-// };
-
-// const pick = (savedSearch: any) => {
-//   setPickedSavedSearch(savedSearch);
-// };
-
-// const resetSelectedSavedSearch = () => {
-//   getByIdMutate({ uuid: pickedSavedSearch.value?._key });
-//   onDoneGetById((res) => {
-//     pick(res?.data?.getSavedSearchById);
-//   });
-// };
 </script>
