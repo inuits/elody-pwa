@@ -172,6 +172,7 @@ const useTenant = (
     selectedTenant,
     selectedTenantName,
     selectTenant,
+    setTennantInSession,
     tenants,
     tenantsAsDropdownOptions,
     tenantsLoaded,

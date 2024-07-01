@@ -8,6 +8,7 @@ import { auth } from "@/main";
 import { getApplicationDetails, i18n } from "@/helpers";
 import { useStateManagement } from "@/composables/useStateManagement";
 import type { Router } from "vue-router";
+import useTenant from "./useTenant";
 
 const baseGraphQLError = {
   displayTime: 10,
@@ -42,7 +43,10 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
 
     switch (errorMessage) {
       case 401:
+        const { setTennantInSession } = useTenant()
+
         await auth.logout();
+        setTennantInSession("");
         await auth.redirectToLogin();
         break;
       case 403:
