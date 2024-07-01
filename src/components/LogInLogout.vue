@@ -46,15 +46,16 @@
 </template>
 
 <script lang="ts" setup>
+import useTenant from "@/composables/useTenant";
 import { inject } from "vue";
+import { TypeModals } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useApp } from "@/composables/useApp";
 import { useAuth } from "session-vue-3-oidc-library";
+import { useBaseModal } from "@/composables/useBaseModal";
+import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
-import { useConfirmModal } from "@/composables/useConfirmModal";
-import { useBaseModal } from "@/composables/useBaseModal";
-import { TypeModals } from "@/generated-types/queries";
 
 defineProps({
   isExpanded: Boolean,
@@ -70,10 +71,12 @@ const route = useRoute();
 const { initApp } = useApp();
 const { t } = useI18n();
 const { initializeConfirmModal } = useConfirmModal();
-const { closeModal, openModal } = useBaseModal();
+const { closeModal } = useBaseModal();
+const { setTennantInSession } = useTenant()
 
 const performLogout = async () => {
   await auth.logout();
+  setTennantInSession("");
   if (route.meta.requiresAuth === true) await auth.redirectToLogin();
   await initApp(auth, config);
 };
