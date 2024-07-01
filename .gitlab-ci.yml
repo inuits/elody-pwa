@@ -5,7 +5,7 @@
 
 include:
   - project: 'inuits/gitlab-ci/pipeline-templates'
-    file: 'npm-pipeline.yml'
+    file: 'pipelines/build-and-deliver-no-uat.yml'
     ref: 'v3.2.0'
 
 variables:
