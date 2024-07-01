@@ -5,8 +5,8 @@
 
 include:
   - project: 'inuits/gitlab-ci/pipeline-templates'
-    file: 'npm-pipeline.yml'
-    ref: 'v1.7.0'
+    file: 'jobs/build-variant/npm.yml'
+    ref: 'v3.2.0'
 
 variables:
   CUSTOMER: 'inuits'
