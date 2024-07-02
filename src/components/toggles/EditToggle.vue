@@ -1,5 +1,6 @@
 <template>
   <div
+    data-cy="edit-toggle"
     v-if="
       isEditToggleVisible === 'edit' || isEditToggleVisible === 'edit-delete'
     "

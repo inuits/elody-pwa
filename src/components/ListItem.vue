@@ -1,5 +1,6 @@
 <template>
   <li
+    data-cy="list-item"
     :class="[
       'flex items-center gap-6 px-8 py-4 bg-neutral-white border border-neutral-light rounded cursor-pointer mb-2',
       {

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-height-custom block">
+  <div data-cy="tenant-switcher" class="min-height-custom block">
     <div>
       <BaseDropdownNew
         v-model="computedValue"

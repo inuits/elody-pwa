@@ -1,5 +1,6 @@
 <template>
   <component
+    data-cy="menu-sub-item"
     v-if="isPermitted && show"
     :is="linkTag"
     :class="[

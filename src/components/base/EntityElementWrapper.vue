@@ -1,5 +1,6 @@
 <template>
   <div
+    data-cy="entity-element-wrapper"
     :class="['bg-accent-normal rounded-t-lg', { 'rounded-lg': isCollapsed }]"
   >
     <div
@@ -11,7 +12,7 @@
       @click.self="toggleElementCollapse(label)"
     >
       <div class="flex p-2">
-        <span class="subtitle mr-2">{{ t(label) }}</span>
+        <span data-cy="entity-element-wrapper-title" class="subtitle mr-2">{{ t(label) }}</span>
         <slot name="actions"></slot>
       </div>
       <span

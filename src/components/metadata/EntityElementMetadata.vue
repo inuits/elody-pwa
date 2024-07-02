@@ -1,11 +1,12 @@
 <template>
   <div
+    data-cy="entity-element-metadata"
     v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
     class="text-sm break-words"
   >
     <div v-if="Array.isArray(readableValue)">
       <div v-for="item in readableValue" :key="item">
-        <p v-if="!stringIsUrl(item)">{{ item }}</p>
+        <p data-cy="metadata-value" v-if="!stringIsUrl(item)">{{ item }}</p>
         <a v-else class="underline" target="_blank" :href="item">{{
           t(linkText) || item
         }}</a>
@@ -22,11 +23,11 @@
           />
           <CustomIcon v-else-if="linkIcon" :icon="linkIcon" :size="12" />
         </div>
-        <p v-html="processTextWithLinks(t(linkText) || readableValue)"></p>
+        <p data-cy="metadata-value" v-html="processTextWithLinks(t(linkText) || readableValue)"></p>
       </div>
 
-      <p v-else-if="stringIsHtml(readableValue)" v-html="readableValue"></p>
-      <p v-else>{{ (readableValue as string) || "-" }}</p>
+      <p data-cy="metadata-value" v-else-if="stringIsHtml(readableValue)" v-html="readableValue"></p>
+      <p data-cy="metadata-value" v-else>{{ (readableValue as string) || "-" }}</p>
     </div>
   </div>
 </template>

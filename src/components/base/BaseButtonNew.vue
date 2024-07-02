@@ -1,5 +1,6 @@
 <template>
   <button
+    data-cy="base-button-new"
     type="button"
     :disabled="disabled"
     class="flex justify-center items-center w-full rounded-md outline-none transition-colors duration-300 disabled:cursor-auto"

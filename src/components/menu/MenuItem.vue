@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div data-cy="menu-item">
     <component
       v-show="
         (menuitem?.isLoggedIn ? auth.isAuthenticated.value : true) &&
