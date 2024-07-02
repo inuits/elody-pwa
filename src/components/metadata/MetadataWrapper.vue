@@ -1,12 +1,13 @@
 <template>
   <div
+    data-cy="metadata-wrapper"
     v-if="
       !metadata.showOnlyInEditMode || (metadata.showOnlyInEditMode && isEdit)
     "
     :key="label"
   >
     <div class="text-text-light text-sm flex">
-      <p>
+      <p data-cy="metadata-label">
         {{ metadata.label ? t(metadata.label) : t("metadata.no-label") }}
       </p>
       <p v-if="isFieldRequired && isEdit" class="pl-1">*</p>
@@ -129,6 +130,8 @@ watch(
     setNewValue(newvalue.value);
   }
 );
+
+console.log('_____________________________________', props.metadata)
 
 const setNewValue = (newValue: string | BaseRelationValuesInput[]) => {
   value.value = newValue;

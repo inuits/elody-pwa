@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full flex flex-1">
+  <div data-cy="entity-element-window" class="h-full flex flex-1">
     <base-expand-button
       v-if="
         element.expandButtonOptions?.shown &&
@@ -12,7 +12,7 @@
       class="h-full w-full border-solid border-neutral-30 border-2 bg-neutral-0 rounded-t-md"
     >
       <div class="border-solid border-neutral-30 border-b-2 pb-2 rounded-t-md">
-        <h1 class="subtitle text-text-body p-2">{{ t(element.label) }}</h1>
+        <h1 data-cy="entity-element-window-title" class="subtitle text-text-body p-2">{{ t(element.label) }}</h1>
       </div>
 
       <div v-for="(panel, index) in panels" :key="index">

@@ -1,6 +1,7 @@
 <template>
   <transition>
     <div
+      data-cy="base-notification"
       v-if="notification.shown && notification.title"
       class="absolute m-4 p-4 w-2/12 bg-neutral-20 top-0 right-0 rounded-md z-[100]"
     >
@@ -9,12 +10,12 @@
           typeColors[notification.type].border
         }`"
       >
-        <h2 :class="`${typeColors[notification.type].text}`">
+        <h2 data-cy="notification-title" :class="`${typeColors[notification.type].text}`">
           {{ notification.title }}
         </h2>
       </div>
       <div>
-        <p class="break-words">{{ notification.description }}</p>
+        <p data-cy="notification-description" class="break-words">{{ notification.description }}</p>
       </div>
     </div>
   </transition>

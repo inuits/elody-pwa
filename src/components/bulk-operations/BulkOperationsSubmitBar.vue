@@ -1,5 +1,6 @@
 <template>
   <div
+    data-cy="bulk-operation-submit-bar"
     class="flex justify-between rounded-2xl p-3 w-full h-full bg-neutral-white"
   >
     <div class="flex items-center">

@@ -1,9 +1,9 @@
 <template>
-  <div v-if="inputField" class="text-text-light text-sm">
-    <p>
+  <div data-cy="metadata-wrapper" v-if="inputField" class="text-text-light text-sm">
+    <p data-cy="metadata-label">
       {{ label ? t(label) : t("metadata.no-label") }}
     </p>
-    <div class="flex justify-between">
+    <div data-cy="metadata-value" class="flex justify-between">
       <div class="h-10 block">
         <BaseInputTextNumberDatetime
           v-model="computedLatitude"

@@ -1,5 +1,6 @@
 <template>
   <label
+    data-cy="input-field"
     class="block"
     :class="{ 'justify-end flex flex-row-reverse gap-2': type === 'checkbox' }"
   >
