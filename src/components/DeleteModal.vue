@@ -12,18 +12,40 @@
         {{ t("navigation.delete-entity-window") }}
       </h1>
     </div>
-    <div class="h-full flex flex-col justify-between p-4" v-if="modalOpenend">
+    <div
+      class="h-full flex flex-col justify-between p-4"
+      v-if="modalOpenend && deleteQueryOptions.customQueryBlockingRelations"
+      v-show="numberOfBlockingQueryEntities > 0"
+    >
+      <div class="title p-4">
+        {{ t("actions.labels.blocking-relations") }}
+      </div>
+      <entity-picker-component
+        :entity-uuid="savedContext.parentId"
+        :accepted-types="deleteQueryOptions.customQueryBlockingEntityTypes"
+        :custom-query="deleteQueryOptions.customQueryBlockingRelations"
+        :custom-filters-query="
+          deleteQueryOptions.customQueryBlockingRelationsFilters
+        "
+        :enable-bulk-operations="false"
+        :enable-advanced-filters="false"
+        @entities-updated="(numberOfEntities) => numberOfBlockingQueryEntities = numberOfEntities"
+        class="mb-5"
+      />
+    </div>
+    <div class="h-full flex flex-col justify-between p-4" v-if="modalOpenend && numberOfBlockingQueryEntities <= 0">
       <div class="title p-4">
         {{ t("actions.labels.delete-relation-entities") }}
       </div>
       <entity-picker-component
         :entity-uuid="savedContext.parentId"
-        :accepted-types="[Entitytyping.Mediafile]"
+        :accepted-types="deleteQueryOptions.customQueryEntityTypes"
         :custom-query="deleteQueryOptions.customQueryDeleteRelations"
         :custom-filters-query="
           deleteQueryOptions.customQueryDeleteRelationsFilters
         "
-        :relation-type="deleteQueryOptions.customQueryRelationType"
+        :enable-bulk-operations="true"
+        :enable-advanced-filters="true"
         @delete-selected-items="
           async (selectedItems: InBulkProcessableItem[]) =>
             await deleteSelectedItems(selectedItems)
@@ -37,16 +59,19 @@
 
 <script setup lang="ts">
 import type { ApolloClient } from "@apollo/client/core";
+import { useMutation } from "@vue/apollo-composable";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
 import ConfirmModalView from "@/components/ConfirmModalView.vue";
 import { useI18n } from "vue-i18n";
 import { ref, watch, inject } from "vue";
 import {
   Collection,
+  DeleteDataDocument,
+  type DeleteDataMutation,
   DeleteQueryOptions,
   Entitytyping,
   ModalState,
-  TypeModals,
+  TypeModals
 } from "@/generated-types/queries";
 import BaseModal from "@/components/base/BaseModal.vue";
 import {
@@ -73,42 +98,46 @@ const { closeModal, getModalInfo } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const { createNotificationOverwrite } = useNotification();
 
+const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const router = useRouter();
 const { disableEditMode } = useEditMode();
 const { pageInfo } = usePageInfo();
+
 const modalOpenend = ref<boolean>(false);
 const deleteQueryOptions = ref<DeleteQueryOptions | undefined>(undefined);
 const savedContext = ref<GenericContextForModals | undefined>(undefined);
+const numberOfBlockingQueryEntities = ref<number | undefined>(undefined);
 
 const deleteSelectedItems = async (selectedItems: InBulkProcessableItem[]) => {
-  //   const childRoutes = config.routerConfig[0].children.map(
-  //     (route: any) => route.meta
-  //   );
-  //   for (const selectedItem of selectedItems) {
-  //     const id = selectedItems.id;
-  //     let collection;
-  //     if (selectedItem.type.toLowerCase() === Entitytyping.Mediafile) {
-  //       collection = Collection.Mediafiles;
-  //     }
-  //     else {
-  //       collection = childRoutes.find(
-  //         (route: any) => route.entityType === selectedItem.type
-  //       ).type;
-  //     }
-  //     // Call to delete entity/mediafile
-  //   }
-  //   await getTenants();
-  //   closeModal(TypeModals.Confirm);
-  //   disableEditMode();
-  //   const lastOverviewPage = findLastOverviewPage();
-  //   if (lastOverviewPage !== undefined) router.push(lastOverviewPage.path);
-  //   else router.push({ name: pageInfo.value.parentRouteName });
-  //   createNotificationOverwrite(
-  //     NotificationType.default,
-  //     t("notifications.success.entityDeleted.title"),
-  //     t("notifications.success.entityDeleted.description")
-  //   );
+    const childRoutes = config.routerConfig[0].children.map(
+      (route: any) => route.meta
+    );
+    for (const selectedItem of selectedItems) {
+      const id = selectedItem.id;
+      let collection;
+      if (selectedItem.type.toLowerCase() === Entitytyping.Mediafile) {
+        collection = Collection.Mediafiles;
+      }
+      else {
+        collection = childRoutes.find(
+          (route: any) => route.entityType === selectedItem.type
+        ).type;
+      }
+      // Call to delete entity/mediafile
+      // await mutate({ id, path: collection, deleteMediafiles: false });
+    }
+    // await getTenants();
+    // closeModal(TypeModals.Delete);
+    // disableEditMode();
+    // const lastOverviewPage = findLastOverviewPage();
+    // if (lastOverviewPage !== undefined) router.push(lastOverviewPage.path);
+    // else router.push({ name: pageInfo.value.parentRouteName });
+    // createNotificationOverwrite(
+    //   NotificationType.default,
+    //   t("notifications.success.entityDeleted.title"),
+    //   t("notifications.success.entityDeleted.description")
+    // );
 };
 
 watch(
