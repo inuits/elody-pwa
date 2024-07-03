@@ -13,7 +13,8 @@
       "
       :confirm-selection-button="true"
       :enable-navigation="false"
-      :enable-bulk-operations="true"
+      :enable-bulk-operations="enableBulkOperations"
+      :enable-advanced-filters="enableAdvancedFilters"
       :disable-new-entity-previews="true"
       :use-other-query="newQuery"
       :parent-entity-identifiers="[entityUuid]"
@@ -24,6 +25,7 @@
           dequeueAllItemsForBulkProcessing(getContext());
         }
       "
+      @entities-updated="(numberOfEntities) => emit('entitiesUpdated', numberOfEntities)"
     />
   </div>
 </template>
@@ -44,6 +46,7 @@ const { loadDocument, getDocument } = useCustomQuery();
 
 const emit = defineEmits<{
   (event: "deleteSelectedItems", selectedItems: InBulkProcessableItem[]): void;
+  (event: "entitiesUpdated", numberOfEntities: number): void;
 }>();
 
 const props = withDefaults(
@@ -52,7 +55,8 @@ const props = withDefaults(
     acceptedTypes: string[];
     customQuery: string;
     customFiltersQuery: string;
-    relationType: string;
+    enableBulkOperations: boolean;
+    enableAdvancedFilters: boolean;
   }>(),
   {}
 );

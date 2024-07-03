@@ -282,6 +282,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
 
 const emit = defineEmits<{
   (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
+  (event: "entitiesUpdated", numberOfEntities: number): void;
 }>();
 
 const apolloClient = inject(DefaultApolloClient);
@@ -498,6 +499,7 @@ watch(
 watch(
   () => entities.value,
   () => {
+    emit('entitiesUpdated', entities.value.length)
     if (props.selectInputFieldType) {
       selectedDropdownOptions.value = getSelectedOptions();
     }
