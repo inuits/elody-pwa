@@ -131,8 +131,6 @@ watch(
   }
 );
 
-console.log('_____________________________________', props.metadata)
-
 const setNewValue = (newValue: string | BaseRelationValuesInput[]) => {
   value.value = newValue;
   const form = getForm(props.formId);
