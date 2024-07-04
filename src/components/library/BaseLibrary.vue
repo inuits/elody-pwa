@@ -101,6 +101,7 @@
               :context="bulkOperationsContext"
               :total-items-count="totalEntityCount"
               :use-extended-bulk-operations="true"
+              :show-button="showButton"
               :confirm-selection-button="confirmSelectionButton"
               :entity-type="entityType as Entitytyping"
               :custom-bulk-operations="customBulkOperations"
@@ -240,6 +241,7 @@ export type BaseLibraryProps = {
   entityType?: Entitytyping;
   filterType?: string;
   parentEntityIdentifiers?: string[];
+  showButton?: boolean;
   confirmSelectionButton?: boolean;
   enableNavigation?: boolean;
   disableNewEntityPreviews?: boolean;
@@ -265,6 +267,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   enableBulkOperations: true,
   filterType: undefined,
   parentEntityIdentifiers: () => [],
+  showButton: true,
   confirmSelectionButton: false,
   enableNavigation: true,
   disableNewEntityPreviews: false,

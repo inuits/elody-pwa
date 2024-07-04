@@ -11,6 +11,7 @@
             : SearchInputType.AdvancedInputMediaFilesType
           : SearchInputType.AdvancedInputType
       "
+      :show-button="showButton"
       :confirm-selection-button="true"
       :enable-navigation="false"
       :enable-bulk-operations="enableBulkOperations"
@@ -19,12 +20,6 @@
       :use-other-query="newQuery"
       :parent-entity-identifiers="[entityUuid]"
       list-item-route-name="SingleEntity"
-      @confirm-selection="
-        async (selectedItems) => {
-          emit('deleteSelectedItems', selectedItems);
-          dequeueAllItemsForBulkProcessing(getContext());
-        }
-      "
       @entities-updated="(numberOfEntities) => emit('entitiesUpdated', numberOfEntities)"
     />
   </div>
@@ -41,11 +36,9 @@ import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import { ref, onMounted } from "vue";
 import { useCustomQuery } from "@/composables/useCustomQuery";
 
-const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const { loadDocument, getDocument } = useCustomQuery();
 
 const emit = defineEmits<{
-  (event: "deleteSelectedItems", selectedItems: InBulkProcessableItem[]): void;
   (event: "entitiesUpdated", numberOfEntities: number): void;
 }>();
 
@@ -55,6 +48,7 @@ const props = withDefaults(
     acceptedTypes: string[];
     customQuery: string;
     customFiltersQuery: string;
+    showButton: boolean;
     enableBulkOperations: boolean;
     enableAdvancedFilters: boolean;
   }>(),

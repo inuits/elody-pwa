@@ -71,7 +71,7 @@
       </div>
     </div>
 
-    <div v-if="useExtendedBulkOperations" class="flex justify-end w-60">
+    <div v-if="showButton && useExtendedBulkOperations" class="flex justify-end w-60">
       <div v-if="confirmSelectionButton" class="w-full !m-0">
         <BaseButtonNew
           :label="$t('bulk-operations.confirm-selection')"
@@ -142,12 +142,14 @@ const props = withDefaults(
     context: Context;
     totalItemsCount: number;
     useExtendedBulkOperations: boolean;
+    showButton?: boolean;
     confirmSelectionButton?: boolean;
     entityType: Entitytyping;
     customBulkOperations?: String | undefined;
   }>(),
   {
     totalItemsCount: 0,
+    showButton: true,
     confirmSelectionButton: false,
     customBulkOperations: undefined,
   }
