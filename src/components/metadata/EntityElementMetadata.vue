@@ -23,11 +23,20 @@
           />
           <CustomIcon v-else-if="linkIcon" :icon="linkIcon" :size="12" />
         </div>
-        <p data-cy="metadata-value" v-html="processTextWithLinks(t(linkText) || readableValue)"></p>
+        <p
+          data-cy="metadata-value"
+          v-html="processTextWithLinks(t(linkText) || readableValue)"
+        ></p>
       </div>
 
-      <p data-cy="metadata-value" v-else-if="stringIsHtml(readableValue)" v-html="readableValue"></p>
-      <p data-cy="metadata-value" v-else>{{ (readableValue as string) || "-" }}</p>
+      <p
+        data-cy="metadata-value"
+        v-else-if="stringIsHtml(readableValue)"
+        v-html="readableValue"
+      ></p>
+      <p data-cy="metadata-value" v-else>
+        {{ (readableValue as string) || "-" }}
+      </p>
     </div>
   </div>
 </template>

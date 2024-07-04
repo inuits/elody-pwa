@@ -43,7 +43,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
 
     switch (errorMessage) {
       case 401:
-        const { setTennantInSession } = useTenant()
+        const { setTennantInSession } = useTenant();
 
         await auth.logout();
         setTennantInSession("");

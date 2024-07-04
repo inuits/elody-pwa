@@ -1,5 +1,9 @@
 <template>
-  <div data-cy="metadata-wrapper" v-if="inputField" class="text-text-light text-sm">
+  <div
+    data-cy="metadata-wrapper"
+    v-if="inputField"
+    class="text-text-light text-sm"
+  >
     <p data-cy="metadata-label">
       {{ label ? t(label) : t("metadata.no-label") }}
     </p>

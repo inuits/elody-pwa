@@ -71,7 +71,10 @@
       </div>
     </div>
 
-    <div v-if="showButton && useExtendedBulkOperations" class="flex justify-end w-60">
+    <div
+      v-if="showButton && useExtendedBulkOperations"
+      class="flex justify-end w-60"
+    >
       <div v-if="confirmSelectionButton" class="w-full !m-0">
         <BaseButtonNew
           :label="$t('bulk-operations.confirm-selection')"

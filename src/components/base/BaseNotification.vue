@@ -10,12 +10,17 @@
           typeColors[notification.type].border
         }`"
       >
-        <h2 data-cy="notification-title" :class="`${typeColors[notification.type].text}`">
+        <h2
+          data-cy="notification-title"
+          :class="`${typeColors[notification.type].text}`"
+        >
           {{ notification.title }}
         </h2>
       </div>
       <div>
-        <p data-cy="notification-description" class="break-words">{{ notification.description }}</p>
+        <p data-cy="notification-description" class="break-words">
+          {{ notification.description }}
+        </p>
       </div>
     </div>
   </transition>

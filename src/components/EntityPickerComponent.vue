@@ -20,7 +20,9 @@
       :use-other-query="newQuery"
       :parent-entity-identifiers="[entityUuid]"
       list-item-route-name="SingleEntity"
-      @entities-updated="(numberOfEntities) => emit('entitiesUpdated', numberOfEntities)"
+      @entities-updated="
+        (numberOfEntities) => emit('entitiesUpdated', numberOfEntities)
+      "
     />
   </div>
 </template>
