@@ -27,6 +27,7 @@
         :custom-filters-query="
           deleteQueryOptions.customQueryBlockingRelationsFilters
         "
+        :show-button="false"
         :enable-bulk-operations="false"
         :enable-advanced-filters="false"
         @entities-updated="(numberOfEntities) => numberOfBlockingQueryEntities = numberOfEntities"
@@ -44,12 +45,9 @@
         :custom-filters-query="
           deleteQueryOptions.customQueryDeleteRelationsFilters
         "
+        :show-button="false"
         :enable-bulk-operations="true"
         :enable-advanced-filters="true"
-        @delete-selected-items="
-          async (selectedItems: InBulkProcessableItem[]) =>
-            await deleteSelectedItems(selectedItems)
-        "
         class="mb-5"
       />
       <ConfirmModalView></ConfirmModalView>
@@ -79,7 +77,7 @@ import {
   useBaseModal,
 } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
-import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
+import { BulkOperationsContextEnum, InBulkProcessableItem, useBulkOperations } from "@/composables/useBulkOperations";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useEditMode } from "@/composables/useEdit";
 import { useRouter } from "vue-router";
@@ -97,6 +95,7 @@ const { findLastOverviewPage } = useBreadcrumbs(config, t);
 const { closeModal, getModalInfo } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const { createNotificationOverwrite } = useNotification();
+const { getEnqueuedItems, dequeueAllItemsForBulkProcessing } = useBulkOperations();
 
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
@@ -109,7 +108,9 @@ const deleteQueryOptions = ref<DeleteQueryOptions | undefined>(undefined);
 const savedContext = ref<GenericContextForModals | undefined>(undefined);
 const numberOfBlockingQueryEntities = ref<number | undefined>(undefined);
 
-const deleteSelectedItems = async (selectedItems: InBulkProcessableItem[]) => {
+const deleteSelectedItems = async () => {
+    const selectedItems: InBulkProcessableItem[] = getEnqueuedItems(getContext());
+    if (selectedItems.length <= 0) return;
     const childRoutes = config.routerConfig[0].children.map(
       (route: any) => route.meta
     );
@@ -124,20 +125,41 @@ const deleteSelectedItems = async (selectedItems: InBulkProcessableItem[]) => {
           (route: any) => route.entityType === selectedItem.type
         ).type;
       }
-      // Call to delete entity/mediafile
-      // await mutate({ id, path: collection, deleteMediafiles: false });
+      await mutate({ id, path: collection, deleteMediafiles: false });
     }
-    // await getTenants();
-    // closeModal(TypeModals.Delete);
-    // disableEditMode();
-    // const lastOverviewPage = findLastOverviewPage();
-    // if (lastOverviewPage !== undefined) router.push(lastOverviewPage.path);
-    // else router.push({ name: pageInfo.value.parentRouteName });
-    // createNotificationOverwrite(
-    //   NotificationType.default,
-    //   t("notifications.success.entityDeleted.title"),
-    //   t("notifications.success.entityDeleted.description")
-    // );
+    dequeueAllItemsForBulkProcessing(getContext());
+};
+
+const cleanupAfterDeletion = async () => {
+  await getTenants();
+  closeModal(TypeModals.Delete);
+  disableEditMode();
+  const lastOverviewPage = findLastOverviewPage();
+  if (lastOverviewPage !== undefined) router.push(lastOverviewPage.path);
+  else router.push({ name: pageInfo.value.parentRouteName });
+  createNotificationOverwrite(
+    NotificationType.default,
+    t("notifications.success.entityDeleted.title"),
+    t("notifications.success.entityDeleted.description")
+  );
+}
+
+const deleteButtonClicked = async () => {
+  await deleteSelectedItems();
+  savedContext.value?.callbackFunction();
+  await cleanupAfterDeletion();
+}
+
+const getContext = () => {
+  if (deleteQueryOptions.value.customQueryEntityTypes.length > 0) {
+    if (deleteQueryOptions.value.customQueryEntityTypes[0] !== Entitytyping.Mediafile) {
+      return BulkOperationsContextEnum.EntityElementListEntityPickerModal;
+    } else {
+      return BulkOperationsContextEnum.EntityElementMediaEntityPickerModal;
+    }
+  } else {
+    return BulkOperationsContextEnum.EntityElementListEntityPickerModal;
+  }
 };
 
 watch(
@@ -152,7 +174,7 @@ watch(
       savedContext.value = getModalInfo(TypeModals.Delete).savedContext;
     }
     initializeConfirmModal({
-      confirmButton: { buttonCallback: savedContext.value?.callbackFunction },
+      confirmButton: { buttonCallback: deleteButtonClicked },
       declineButton: {
         buttonCallback: () => {
           closeModal(TypeModals.Delete);
