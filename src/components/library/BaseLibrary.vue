@@ -502,7 +502,7 @@ watch(
 watch(
   () => entities.value,
   () => {
-    emit('entitiesUpdated', entities.value.length)
+    emit("entitiesUpdated", entities.value.length);
     if (props.selectInputFieldType) {
       selectedDropdownOptions.value = getSelectedOptions();
     }

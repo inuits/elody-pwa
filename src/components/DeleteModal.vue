@@ -30,11 +30,17 @@
         :show-button="false"
         :enable-bulk-operations="false"
         :enable-advanced-filters="false"
-        @entities-updated="(numberOfEntities) => numberOfBlockingQueryEntities = numberOfEntities"
+        @entities-updated="
+          (numberOfEntities) =>
+            (numberOfBlockingQueryEntities = numberOfEntities)
+        "
         class="mb-5"
       />
     </div>
-    <div class="h-full flex flex-col justify-between p-4" v-if="modalOpenend && numberOfBlockingQueryEntities <= 0">
+    <div
+      class="h-full flex flex-col justify-between p-4"
+      v-if="modalOpenend && numberOfBlockingQueryEntities <= 0"
+    >
       <div class="title p-4">
         {{ t("actions.labels.delete-relation-entities") }}
       </div>
@@ -69,7 +75,7 @@ import {
   DeleteQueryOptions,
   Entitytyping,
   ModalState,
-  TypeModals
+  TypeModals,
 } from "@/generated-types/queries";
 import BaseModal from "@/components/base/BaseModal.vue";
 import {
@@ -77,7 +83,11 @@ import {
   useBaseModal,
 } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
-import { BulkOperationsContextEnum, InBulkProcessableItem, useBulkOperations } from "@/composables/useBulkOperations";
+import {
+  BulkOperationsContextEnum,
+  InBulkProcessableItem,
+  useBulkOperations,
+} from "@/composables/useBulkOperations";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useEditMode } from "@/composables/useEdit";
 import { useRouter } from "vue-router";
@@ -95,7 +105,8 @@ const { findLastOverviewPage } = useBreadcrumbs(config, t);
 const { closeModal, getModalInfo } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const { createNotificationOverwrite } = useNotification();
-const { getEnqueuedItems, dequeueAllItemsForBulkProcessing } = useBulkOperations();
+const { getEnqueuedItems, dequeueAllItemsForBulkProcessing } =
+  useBulkOperations();
 
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
@@ -109,25 +120,24 @@ const savedContext = ref<GenericContextForModals | undefined>(undefined);
 const numberOfBlockingQueryEntities = ref<number | undefined>(undefined);
 
 const deleteSelectedItems = async () => {
-    const selectedItems: InBulkProcessableItem[] = getEnqueuedItems(getContext());
-    if (selectedItems.length <= 0) return;
-    const childRoutes = config.routerConfig[0].children.map(
-      (route: any) => route.meta
-    );
-    for (const selectedItem of selectedItems) {
-      const id = selectedItem.id;
-      let collection;
-      if (selectedItem.type.toLowerCase() === Entitytyping.Mediafile) {
-        collection = Collection.Mediafiles;
-      }
-      else {
-        collection = childRoutes.find(
-          (route: any) => route.entityType === selectedItem.type
-        ).type;
-      }
-      await mutate({ id, path: collection, deleteMediafiles: false });
+  const selectedItems: InBulkProcessableItem[] = getEnqueuedItems(getContext());
+  if (selectedItems.length <= 0) return;
+  const childRoutes = config.routerConfig[0].children.map(
+    (route: any) => route.meta
+  );
+  for (const selectedItem of selectedItems) {
+    const id = selectedItem.id;
+    let collection;
+    if (selectedItem.type.toLowerCase() === Entitytyping.Mediafile) {
+      collection = Collection.Mediafiles;
+    } else {
+      collection = childRoutes.find(
+        (route: any) => route.entityType === selectedItem.type
+      ).type;
     }
-    dequeueAllItemsForBulkProcessing(getContext());
+    await mutate({ id, path: collection, deleteMediafiles: false });
+  }
+  dequeueAllItemsForBulkProcessing(getContext());
 };
 
 const cleanupAfterDeletion = async () => {
@@ -142,17 +152,20 @@ const cleanupAfterDeletion = async () => {
     t("notifications.success.entityDeleted.title"),
     t("notifications.success.entityDeleted.description")
   );
-}
+};
 
 const deleteButtonClicked = async () => {
   await deleteSelectedItems();
   savedContext.value?.callbackFunction();
   await cleanupAfterDeletion();
-}
+};
 
 const getContext = () => {
   if (deleteQueryOptions.value.customQueryEntityTypes.length > 0) {
-    if (deleteQueryOptions.value.customQueryEntityTypes[0] !== Entitytyping.Mediafile) {
+    if (
+      deleteQueryOptions.value.customQueryEntityTypes[0] !==
+      Entitytyping.Mediafile
+    ) {
       return BulkOperationsContextEnum.EntityElementListEntityPickerModal;
     } else {
       return BulkOperationsContextEnum.EntityElementMediaEntityPickerModal;

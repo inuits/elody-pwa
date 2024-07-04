@@ -1,5 +1,9 @@
 <template>
-  <div data-cy="dynamic-form" class="p-4 pt-0 h-full w-full overflow-y-auto" :key="dynamicFormQuery">
+  <div
+    data-cy="dynamic-form"
+    class="p-4 pt-0 h-full w-full overflow-y-auto"
+    :key="dynamicFormQuery"
+  >
     <div v-if="!isLoading" class="w-full [&>*>button:last-child]:mb-0">
       <h1 v-if="dynamicForm.GetDynamicForm.label" class="title pb-4">
         {{ t(dynamicForm.GetDynamicForm.label) }}

@@ -72,7 +72,7 @@ const { initApp } = useApp();
 const { t } = useI18n();
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal } = useBaseModal();
-const { setTennantInSession } = useTenant()
+const { setTennantInSession } = useTenant();
 
 const performLogout = async () => {
   await auth.logout();

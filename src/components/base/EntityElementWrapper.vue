@@ -12,7 +12,9 @@
       @click.self="toggleElementCollapse(label)"
     >
       <div class="flex p-2">
-        <span data-cy="entity-element-wrapper-title" class="subtitle mr-2">{{ t(label) }}</span>
+        <span data-cy="entity-element-wrapper-title" class="subtitle mr-2">{{
+          t(label)
+        }}</span>
         <slot name="actions"></slot>
       </div>
       <span
