@@ -24,7 +24,10 @@
         />
       </span>
     </div>
-    <div class="h-full" v-if="!isCollapsed">
+    <div class="h-full" v-if="!useVshowInsteadOfVif && !isCollapsed">
+      <slot name="content"></slot>
+    </div>
+    <div class="h-full" v-if="useVshowInsteadOfVif" v-show="!isCollapsed">
       <slot name="content"></slot>
     </div>
   </div>
@@ -36,14 +39,16 @@ import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
 import { useI18n } from "vue-i18n";
 import { BaseLibraryModes } from "@/generated-types/queries";
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     label: string;
     isCollapsed: Boolean;
     baseLibraryMode?: BaseLibraryModes;
+    useVshowInsteadOfVif?: boolean;
   }>(),
   {
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    useVshowInsteadOfVif: false,
   }
 );
 

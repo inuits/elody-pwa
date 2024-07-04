@@ -2,6 +2,7 @@
   <entity-element-wrapper
     :isCollapsed="element.isCollapsed"
     :label="element.label"
+    :use-vshow-instead-of-vif="element.type === MediaFileElementTypes.Map"
     class="flex flex-col h-full"
   >
     <template v-slot:actions>
@@ -55,11 +56,8 @@
       />
       <!-- Not yet refactored old component -->
       <base-map
-        v-if="
-          !element.isCollapsed &&
-          element.type === MediaFileElementTypes.Map &&
-          componentMetadata
-        "
+        v-show="!element.isCollapsed"
+        v-if="element.type === MediaFileElementTypes.Map && componentMetadata"
         :element="element"
         :mapData="componentMetadata"
         :entity-uuid="entityUuid"
