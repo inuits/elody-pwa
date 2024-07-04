@@ -3,28 +3,28 @@
     :modal-state="getModalInfo(TypeModals.Delete).state"
     :modal-position="getModalInfo(TypeModals.Delete).modalPosition"
     modal-width-style="w-10/12"
-    modal-height-style="my-[15vh]"
     modal-color="bg-neutral-lightest"
     @hide-modal="closeModal(TypeModals.Delete)"
   >
-    <div class="w-full">
-      <h1 class="title flex justify-center">
-        {{ t("navigation.delete-entity-window") }}
-      </h1>
-    </div>
-    <div
-      class="h-full flex flex-col justify-between p-4"
-      v-if="modalOpenend && deleteQueryOptions.customQueryBlockingRelations"
-      v-show="numberOfBlockingQueryEntities > 0"
-    >
-      <div class="title p-4">
-        {{ t("actions.labels.blocking-relations") }}
+    <div class="flex flex-col w-full h-full overflow-hidden">
+      <div class="w-full">
+        <h1 class="title flex justify-center">
+          {{ t("navigation.delete-entity-window") }}
+        </h1>
       </div>
-      <entity-picker-component
-        :entity-uuid="savedContext.parentId"
-        :accepted-types="deleteQueryOptions.customQueryBlockingEntityTypes"
-        :custom-query="deleteQueryOptions.customQueryBlockingRelations"
-        :custom-filters-query="
+      <div
+        class="h-full flex flex-col justify-between p-4"
+        v-if="modalOpenend && deleteQueryOptions.customQueryBlockingRelations"
+        v-show="numberOfBlockingQueryEntities > 0"
+      >
+        <div class="title pt-4">
+          {{ t("actions.labels.blocking-relations") }}
+        </div>
+        <entity-picker-component
+          :entity-uuid="savedContext.parentId"
+          :accepted-types="deleteQueryOptions.customQueryBlockingEntityTypes"
+          :custom-query="deleteQueryOptions.customQueryBlockingRelations"
+          :custom-filters-query="
           deleteQueryOptions.customQueryBlockingRelationsFilters
         "
         :show-button="false"
@@ -36,27 +36,27 @@
         "
         class="mb-5"
       />
-    </div>
-    <div
-      class="h-full flex flex-col justify-between p-4"
-      v-if="modalOpenend && numberOfBlockingQueryEntities <= 0"
-    >
-      <div class="title p-4">
-        {{ t("actions.labels.delete-relation-entities") }}
       </div>
-      <entity-picker-component
-        :entity-uuid="savedContext.parentId"
-        :accepted-types="deleteQueryOptions.customQueryEntityTypes"
-        :custom-query="deleteQueryOptions.customQueryDeleteRelations"
-        :custom-filters-query="
-          deleteQueryOptions.customQueryDeleteRelationsFilters
-        "
-        :show-button="false"
-        :enable-bulk-operations="true"
-        :enable-advanced-filters="true"
-        class="mb-5"
-      />
-      <ConfirmModalView></ConfirmModalView>
+      <div
+        class="h-full flex flex-col justify-between p-4"
+        v-if="modalOpenend && numberOfBlockingQueryEntities <= 0"
+      >
+        <div class="title pl-4">
+          {{ t("actions.labels.delete-relation-entities") }}
+        </div>
+        <entity-picker-component
+          :entity-uuid="savedContext.parentId"
+          :accepted-types="deleteQueryOptions.customQueryEntityTypes"
+          :custom-query="deleteQueryOptions.customQueryDeleteRelations"
+          :custom-filters-query="
+            deleteQueryOptions.customQueryDeleteRelationsFilters
+          "
+          :show-button="false"
+          :enable-bulk-operations="true"
+          :enable-advanced-filters="true"
+        />
+        <ConfirmModalView class="mb-10 h-max"></ConfirmModalView>
+      </div>
     </div>
   </BaseModal>
 </template>
@@ -121,6 +121,7 @@ const numberOfBlockingQueryEntities = ref<number | undefined>(undefined);
 
 const deleteSelectedItems = async () => {
   const selectedItems: InBulkProcessableItem[] = getEnqueuedItems(getContext());
+  dequeueAllItemsForBulkProcessing(getContext());
   if (selectedItems.length <= 0) return;
   const childRoutes = config.routerConfig[0].children.map(
     (route: any) => route.meta
@@ -135,9 +136,13 @@ const deleteSelectedItems = async () => {
         (route: any) => route.entityType === selectedItem.type
       ).type;
     }
-    await mutate({ id, path: collection, deleteMediafiles: false });
+    try {
+      await mutate({ id, path: collection, deleteMediafiles: false });
+    }
+    catch (e) {
+      console.log(e);
+    }
   }
-  dequeueAllItemsForBulkProcessing(getContext());
 };
 
 const cleanupAfterDeletion = async () => {
