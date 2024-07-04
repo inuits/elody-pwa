@@ -1,6 +1,7 @@
 <template>
   <div class="flex flex-col w-full h-full overflow-hidden">
     <BaseLibrary
+      class="overflow-auto"
       v-if="queryLoaded || ignoreCustomQuery"
       :bulk-operations-context="getContext()"
       :entity-type="acceptedTypes?.[0]"
