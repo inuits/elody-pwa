@@ -316,6 +316,7 @@ watch(selectedBulkOperation, () => {
         undefined,
         "right",
         modal.formQuery,
+        undefined,
         modal.askForCloseConfirmation,
         savedContext
       );
