@@ -353,7 +353,7 @@ const submitWithExtraMetadata = async (field: FormAction) => {
   if (formContainsErrors.value) return;
   const document = await getQuery(field.actionQuery as string);
   const entityInput = createEntityFromFormInput(field.creationType);
-  entityInput.metadata?.push(...toRaw(props.savedContext));
+  entityInput.metadata?.push(...props.savedContext);
   const entity = (await performSubmitAction(document, entityInput)).data
     .CreateEntity;
   emit("entityCreated", { ...entity, metadata: entityInput.metadata });
