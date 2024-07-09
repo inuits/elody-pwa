@@ -260,7 +260,7 @@ export type BaseLibraryProps = {
   allowedActionsOnRelations?: RelationActions[];
   customBulkOperations?: String | undefined;
   enableSaveSearchFilters?: boolean;
-  limitSelections?: number;
+  ignoreStateForRoute?: boolean;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -286,7 +286,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   allowedActionsOnRelations: [],
   customBulkOperations: undefined,
   enableSaveSearchFilters: true,
-  limitSelections: 0,
+  ignoreStateForRoute: false,
 });
 
 const emit = defineEmits<{
@@ -319,7 +319,10 @@ const {
   setSortKey,
   setSortOrder,
   totalEntityCount,
-} = useBaseLibrary(apolloClient as ApolloClient<any>);
+} = useBaseLibrary(
+  apolloClient as ApolloClient<any>,
+  props.ignoreStateForRoute
+);
 
 let filterMatcherMappingPromise: (entityType: Entitytyping) => Promise<void>;
 let advancedFiltersPromise: (entityType: Entitytyping) => Promise<void>;

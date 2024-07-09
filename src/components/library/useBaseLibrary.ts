@@ -15,7 +15,10 @@ import { createPlaceholderEntities } from "@/helpers";
 import { ref, watch } from "vue";
 import { useStateManagement } from "@/composables/useStateManagement";
 
-export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
+export const useBaseLibrary = (
+  apolloClient: ApolloClient<any>,
+  ignoreStateForRoute: boolean = false
+) => {
   let entityType: Entitytyping = Entitytyping.BaseEntity;
   let _route: RouteLocationNormalizedLoaded | undefined;
   const entities = ref<Entity[]>([]);
@@ -80,8 +83,9 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     queryVariables.advancedFilterInputs = [];
     queryVariables.advancedFilterInputs = filters;
     queryVariables.skip = 1;
+    console.log(filters)
 
-    updateStateForRoute(_route, { queryVariables });
+    if (!ignoreStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
@@ -90,7 +94,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     forceFetch: boolean = false
   ): Promise<void> => {
     queryVariables.skip = skip;
-    updateStateForRoute(_route, { queryVariables });
+    if (!ignoreStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
@@ -99,7 +103,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     forceFetch: boolean = false
   ): Promise<void> => {
     queryVariables.limit = limit;
-    updateStateForRoute(_route, { queryVariables });
+    if (!ignoreStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
@@ -108,7 +112,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     forceFetch: boolean = false
   ): Promise<void> => {
     queryVariables.searchValue.order_by = sortKey;
-    updateStateForRoute(_route, { queryVariables });
+    if (!ignoreStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
@@ -117,7 +121,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     forceFetch: boolean = false
   ): Promise<void> => {
     queryVariables.searchValue.isAsc = sortOrder === "asc";
-    updateStateForRoute(_route, { queryVariables });
+    if (!ignoreStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
@@ -153,11 +157,16 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     while (promiseQueue.value.length > 0) promiseQueue.value.shift();
 
     _route = route;
-    let variables = getStateForRoute(_route)?.queryVariables;
+    let variables =
+      !ignoreStateForRoute && getStateForRoute(_route)?.queryVariables;
     if (variables) queryVariables = variables;
-    else updateStateForRoute(_route, { queryVariables });
-    if (!variables || _route?.name === "SingleEntity")
+    else if (!variables && !ignoreStateForRoute)
+      updateStateForRoute(_route, { queryVariables });
+    if (!variables || _route?.name === "SingleEntity" || ignoreStateForRoute)
       variables = queryVariables;
+    console.log('ignore: ', ignoreStateForRoute)
+    console.log("test: ", variables);
+    console.log('query: ', queryVariables);
 
     await apolloClient
       .query({
@@ -172,10 +181,11 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
         const fetchedEntities = result.data.Entities;
         entities.value = fetchedEntities?.results as Entity[];
         totalEntityCount.value = fetchedEntities?.count || 0;
-        updateStateForRoute(_route, {
-          entityCountOnPage: fetchedEntities.results.length,
-          totalEntityCount: fetchedEntities.count,
-        });
+        if (!ignoreStateForRoute)
+          updateStateForRoute(_route, {
+            entityCountOnPage: fetchedEntities.results.length,
+            totalEntityCount: fetchedEntities.count,
+          });
         entitiesLoading.value = false;
       })
       .catch(() => {

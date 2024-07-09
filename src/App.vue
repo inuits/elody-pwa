@@ -15,7 +15,7 @@
       </div>
       <EntityPickerModal />
       <DynamicFormModal></DynamicFormModal>
-      <DeleteModal></DeleteModal>
+      <!-- <DeleteModal></DeleteModal> -->
       <search-saved-searches-modal />
       <SavedSearchesPickerModal />
       <CreateSavedSearchModal />
