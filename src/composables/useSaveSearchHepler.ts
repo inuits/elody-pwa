@@ -5,16 +5,24 @@ import {
   Entitytyping,
   Collection,
   SearchInputType,
+  MutateEntityValuesDocument,
   type BaseEntity,
   type AdvancedFilterInput,
   type GetEntityByIdQueryVariables,
   type SavedSearch,
   type DeleteDataMutation,
+  type MutateEntityValuesMutation,
+  type MutateEntityValuesMutationVariables,
+  type Entity,
 } from "@/generated-types/queries";
 import type { FilterListItem } from "@/composables/useStateManagement";
 import { useI18n } from "vue-i18n";
 import type { ApolloClient } from "@apollo/client/core";
-import { DefaultApolloClient, useMutation, provideApolloClient } from "@vue/apollo-composable";
+import {
+  DefaultApolloClient,
+  useMutation,
+  provideApolloClient,
+} from "@vue/apollo-composable";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { computed } from "vue";
 import { apolloClient } from "@/main";
@@ -71,9 +79,7 @@ export const useSaveSearchHepler = () => {
     filerToEdit.value = filter;
   };
 
-  const fetchSavedSearchById = async (
-    id: string
-  ): Promise<SavedSearchType | null> => {
+  const fetchSavedSearchById = async (id: string): Promise<SavedSearch> => {
     const queryVariables: GetEntityByIdQueryVariables = {
       id,
       type: Entitytyping.SavedSearch,
@@ -89,15 +95,8 @@ export const useSaveSearchHepler = () => {
       })
       .then((result: any) => {
         const entity = result.data?.Entity as SavedSearch;
-        return {
-          id: entity.uuid || entity.id,
-          title: entity.intialValues?.title,
-          value: entity.intialValues.filters,
-        };
+        return entity;
       })
-      .catch(() => {
-        return null;
-      });
   };
 
   const deleteSavedSearch = async (id: string) => {
@@ -108,17 +107,58 @@ export const useSaveSearchHepler = () => {
     return await mutate({ id, path: collection, deleteMediafiles: false });
   };
 
+  const saveExistedSearch = async (entity: SavedSearch, newFilters: any) => {
+    provideApolloClient(apolloClient);
+    const { mutate } = useMutation<
+      MutateEntityValuesMutation,
+      MutateEntityValuesMutationVariables
+    >(MutateEntityValuesDocument);
+
+    const initialValues = { ...entity.intialValues };
+    initialValues.filters = newFilters;
+
+    const { __typename, ...filters } = initialValues;
+
+    const result = await mutate({
+      id: entity.uuid,
+      formInput: {
+        metadata: Object.keys(filters).map((key: string) => ({
+          key,
+          value: filters[key],
+        })),
+        relations: [],
+      },
+      collection: Collection.Entities,
+    });
+
+    if (!result?.data?.mutateEntityValues) return;
+    // createNotification({
+    //   displayTime: 10,
+    //   type: NotificationType.default,
+    //   title: t("notifications.success.entityCreated.title"),
+    //   description: t("notifications.success.entityCreated.description"),
+    //   shown: true,
+    // });
+    return result.data.mutateEntityValues;
+  };
+
   const getActiveFilter = () => activeFilter.value;
   const getFilterToEdit = () => filerToEdit.value;
+  const extractFiltersFromEntity = (entity: Entity) =>
+    entity?.intialValues?.filters;
+
+  const normalizeSavedSearchFromEntity = (entity: SavedSearch) => {
+    return {
+      id: entity?.uuid || entity?.id,
+      title: entity?.intialValues?.title,
+      value: entity?.intialValues?.filters,
+    };
+  };
 
   const entitiesList = computed<SavedSearchType[]>(
     () =>
-      entities.value.map((entity: BaseEntity) => {
-        return {
-          id: entity?.uuid || entity?.id,
-          title: entity?.intialValues?.title,
-          value: entity?.intialValues?.filters,
-        };
+      entities.value.map((entity: SavedSearch) => {
+        return normalizeSavedSearchFromEntity(entity);
       }) || []
   );
 
@@ -132,5 +172,9 @@ export const useSaveSearchHepler = () => {
     initialize,
     entitiesLoading,
     entitiesList,
+    entities,
+    saveExistedSearch,
+    extractFiltersFromEntity,
+    normalizeSavedSearchFromEntity,
   };
 };

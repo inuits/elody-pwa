@@ -65,17 +65,16 @@
 
 <script lang="ts" setup>
 import { Unicons } from "@/types";
-import {
-  TypeModals,
-  Entitytyping,
-  ModalChoices,
-} from "@/generated-types/queries";
+import { TypeModals, Entitytyping } from "@/generated-types/queries";
 import { useSaveSearchHepler } from "@/composables/useSaveSearchHepler";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { computed, onMounted } from "vue";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
 import { useConfirmModal } from "@/composables/useConfirmModal";
+import { useRouter } from "vue-router";
+import { goToEntityPage } from "@/helpers";
+import { useEditMode } from "@/composables/useEdit";
 // import { provideApolloClient, useMutation } from "@vue/apollo-composable";
 const props = withDefaults(
   defineProps<{
@@ -96,13 +95,17 @@ const { initializeConfirmModal } = useConfirmModal();
 const {
   setActiveFilter,
   getActiveFilter,
-  setFilterToEdit,
   deleteSavedSearch,
   initialize,
+  entities,
   entitiesList,
   entitiesLoading,
+  saveExistedSearch,
+  fetchSavedSearchById,
 } = useSaveSearchHepler();
 const { setEntityType } = useQueryVariablesFactory();
+
+const router = useRouter();
 
 const selectedFilter = computed(() => {
   return getActiveFilter();
@@ -123,44 +126,39 @@ const handleOpenModal = (context: any = undefined) => {
     "center",
     "GetSaveSearchForm",
     undefined,
+    undefined,
     context
   );
 };
 
-const saveChanges = () => {
-  setActiveFilter(selectedFilter.value);
+const saveChanges = async () => {
+  const savedFilter = await fetchSavedSearchById(selectedFilter.value.id);
+
+  await saveExistedSearch(savedFilter, props.activeFilters);
+  setActiveFilter({
+    ...selectedFilter.value,
+    filters: getDeepCopy(props.activeFilters),
+  });
   // TODO(savedSearch): saveCurrentFilter
   // TODO(savedSearch): show notification
 };
 
-const updateLabel = () => {
-  setFilterToEdit(getDeepCopy(selectedFilter.value));
-  handleOpenModal();
+const updateLabel = async () => {
+  goToEntityPage(selectedFilter.value.id, "SingleEntity", router);
 };
 
 const createNew = () => {
-  setFilterToEdit({
-    title: "",
-    value: props.activeFilters,
-  });
-  openModal(
-    TypeModals.SaveSearch,
-    ModalChoices.Import,
-    "center",
-    "GetSaveSearchForm",
-    undefined,
-    [
-      {
-        key: "applicableType",
-        value: props.entityType,
-      },
-      {
-        key: "filters",
-        // TODO(savedSearch): probably not necessary to make deep copy as it will not changed before saved in the backend
-        value: getDeepCopy(props.activeFilters),
-      },
-    ]
-  );
+  handleOpenModal([
+    {
+      key: "applicableType",
+      value: props.entityType,
+    },
+    {
+      key: "filters",
+      // TODO(savedSearch): probably not necessary to make deep copy as it will not changed before saved in the backend
+      value: props.activeFilters,
+    },
+  ]);
 };
 
 const selectFilter = async (filter: any) => {

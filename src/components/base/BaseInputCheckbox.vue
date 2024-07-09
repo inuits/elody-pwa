@@ -18,7 +18,7 @@
         ]"
         v-model="inputValue"
         type="checkbox"
-        :disabled="disabled"
+        :disabled="disabled || isDisabledByContextLimit"
         @change.stop
         @click.stop="handleItemSelection"
       />
@@ -108,6 +108,7 @@ const {
   dequeueItemForBulkProcessing,
   isEnqueued,
   getEnqueuedItemCount,
+  isBulkSelectionLimitReached,
 } = useBulkOperations();
 const route = useRoute();
 
@@ -129,6 +130,12 @@ const selectedInputStyle = computed<Input>(() => inputStyles[props.inputStyle]);
 const divSelectedBgColor = computed<string>(() =>
   selectedInputStyle.value.textColor.replace(/^text/, "bg")
 );
+const isDisabledByContextLimit = computed<boolean>(() => {
+  return (
+    !isEnqueued(props.bulkOperationsContext, props.item.id) &&
+    isBulkSelectionLimitReached(props.bulkOperationsContext)
+  );
+});
 
 onMounted(() => {
   if (props.ignoreBulkOperations) return;

@@ -29,14 +29,19 @@ import DynamicForm from "./dynamicForms/DynamicForm.vue";
 
 const { closeModal, getModalInfo } = useBaseModal();
 const { t } = useI18n();
-const { setFilterToEdit, setActiveFilter, fetchSavedSearchById } = useSaveSearchHepler();
+const {
+  setFilterToEdit,
+  setActiveFilter,
+  fetchSavedSearchById,
+  normalizeSavedSearchFromEntity,
+} = useSaveSearchHepler();
 
 const saveFilter = async (entity: any) => {
   const savedSearch = await fetchSavedSearchById(entity.uuid || entity.id);
   if (!entity) {
     return closeModal(TypeModals.SaveSearch);
   }
-  setActiveFilter(savedSearch);
+  setActiveFilter(normalizeSavedSearchFromEntity(savedSearch));
   closeModal(TypeModals.SaveSearch);
 };
 
