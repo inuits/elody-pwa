@@ -39,7 +39,7 @@
       </div>
       <div
         class="h-full flex flex-col justify-between p-4"
-        v-if="modalOpenend && numberOfBlockingQueryEntities <= 0"
+        v-if="modalOpenend && (!numberOfBlockingQueryEntities || numberOfBlockingQueryEntities <= 0)"
       >
         <div class="title pl-4">
           {{ t("actions.labels.delete-relation-entities") }}
