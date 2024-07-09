@@ -11,7 +11,7 @@
           await getTenants();
         }
       "
-      @cancel="openDiscardModal()"
+      @close="openDiscardModal()"
       @delete="openDeleteModal()"
     />
   </div>
