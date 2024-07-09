@@ -10,7 +10,8 @@
     <div class="bg-neutral-20 w-full h-full flex flex-col overflow-auto">
       <BaseLibrary
         v-if="
-          getModalInfo(TypeModals.SaveSearchPicker).state === ModalState.Show
+          getModalInfo(TypeModals.SaveSearchPicker).state === ModalState.Show &&
+          isAdvancedFiltersUpdated
         "
         :search-input-type="SearchInputType.AdvancedSavedSearchType"
         :search-placeholder="$t('saved-searches.search-saved-searches')"
@@ -25,8 +26,8 @@
           BulkOperationsContextEnum.SavedSearchFilterModal
         "
         :enableSaveSearchFilters="false"
-        :limit-selections="1"
         @confirm-selection="updateActiveFilter"
+        :ignore-state-for-route="true"
       />
     </div>
   </base-modal>
@@ -39,46 +40,65 @@ import {
   ModalState,
   Entitytyping,
   SearchInputType,
+  type AdvancedFilterInput,
 } from "@/generated-types/queries";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
+import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import {
   BulkOperationsContextEnum,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { useSaveSearchHepler } from "@/composables/useSaveSearchHepler";
+import { ref, inject, watch } from "vue";
+import type { ApolloClient } from "@apollo/client/core";
+import { DefaultApolloClient } from "@vue/apollo-composable";
 
 // TODO(savedSearch): it doesn't request needed entities because baseLibrary uses queryVariables from session storage which is defined
 // for other entities. I think we should use the useCustomQuery composable here. You can see it in useBaseLibrary from line #152
 
 const { closeModal, getModalInfo } = useBaseModal();
+const isAdvancedFiltersUpdated = ref<boolean>(false);
+const apolloClient = inject(DefaultApolloClient);
+const { setAdvancedFilters } = useBaseLibrary(
+  apolloClient as ApolloClient<any>
+);
 const handleCloseModal = () => {
   dequeueAllItemsForBulkProcessing(
     BulkOperationsContextEnum.SavedSearchFilterModal
   );
   closeModal(TypeModals.SaveSearchPicker);
 };
-const { setActiveFilter } = useSaveSearchHepler();
-const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
+const { normalizeSavedSearchFromEntity } = useSaveSearchHepler();
+const { dequeueAllItemsForBulkProcessing, setBulkSelectionLimit } =
+  useBulkOperations();
+setBulkSelectionLimit(BulkOperationsContextEnum.SavedSearchFilterModal, 1);
 const updateActiveFilter = (selectedItems: any[]) => {
   // TODO(savedSearch): define type and normalize filters
   // TODO(savedSearch): Entity picker should limit amount of selected entities to 1
-  setActiveFilter({
-    id: 13,
-    title: "my filter from picker",
-    value: [
-      {
-        type: "type",
-        value: "asset",
-        match_exact: true,
-      },
-      {
-        type: "text",
-        key: ["elody:1|metadata.title.value"],
-        value: "2",
-        match_exact: false,
-      },
-    ],
-  });
+  console.log('selected: ', selectedItems);
+  // setActiveFilter(normalizeSavedSearchFromEntity(selectedItems[0]));
   handleCloseModal();
 };
+
+watch(
+  () => getModalInfo(TypeModals.SaveSearchPicker).state,
+  async () => {
+    if (getModalInfo(TypeModals.SaveSearchPicker).state === ModalState.Show) {
+      dequeueAllItemsForBulkProcessing(
+        BulkOperationsContextEnum.SavedSearchFilterModal
+      );
+      setAdvancedFilters([
+        {
+          type: "type",
+          value: "savedSearch",
+          match_exact: true,
+        },
+      ] as AdvancedFilterInput[]);
+      isAdvancedFiltersUpdated.value = true;
+    } else {
+      isAdvancedFiltersUpdated.value = false;
+    }
+  },
+  { immediate: true }
+);
 </script>

@@ -39,6 +39,7 @@ for (const key of [
 ])
   items.value[key] = [];
 const contextWhereSelectionEventIsTriggered = ref<"" | Context>("");
+const bulkItemsSelectionLimit = ref<{ [key: string]: number }>({});
 
 export const useBulkOperations = () => {
   const createCustomContext = (bulkOperation: string) => {
@@ -86,6 +87,18 @@ export const useBulkOperations = () => {
     setTimeout(() => (contextWhereSelectionEventIsTriggered.value = ""), 50);
   };
 
+  const setBulkSelectionLimit = (context: Context, limit: number) => {
+    bulkItemsSelectionLimit.value[context] = limit;
+  };
+
+  const isBulkSelectionLimitReached = (context: Context) => {
+    const currentContextLimit = bulkItemsSelectionLimit.value[context];
+    if (currentContextLimit === undefined || currentContextLimit === 0)
+      return false;
+
+    return currentContextLimit <= getEnqueuedItemCount(context);
+  };
+
   return {
     contextWhereSelectionEventIsTriggered,
     createCustomContext,
@@ -96,5 +109,7 @@ export const useBulkOperations = () => {
     getEnqueuedItemCount,
     isEnqueued,
     triggerBulkSelectionEvent,
+    setBulkSelectionLimit,
+    isBulkSelectionLimitReached,
   };
 };
