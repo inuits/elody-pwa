@@ -17,7 +17,7 @@
         v-if="modalOpenend && deleteQueryOptions.customQueryBlockingRelations"
         v-show="numberOfBlockingQueryEntities > 0"
       >
-        <div class="title pt-4">
+        <div class="title p-4">
           {{ t("actions.labels.blocking-relations") }}
         </div>
         <entity-picker-component
@@ -185,12 +185,11 @@ watch(
   async () => {
     modalOpenend.value =
       getModalInfo(TypeModals.Delete).state === ModalState.Show;
-    if (modalOpenend.value) {
-      deleteQueryOptions.value = getModalInfo(
-        TypeModals.Delete
-      ).deleteQueryOptions;
-      savedContext.value = getModalInfo(TypeModals.Delete).savedContext;
-    }
+    if (!modalOpenend.value) return
+    deleteQueryOptions.value = getModalInfo(
+      TypeModals.Delete
+    ).deleteQueryOptions;
+    savedContext.value = getModalInfo(TypeModals.Delete).savedContext;
     initializeConfirmModal({
       confirmButton: { buttonCallback: deleteButtonClicked },
       declineButton: {
