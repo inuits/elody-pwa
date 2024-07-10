@@ -186,6 +186,7 @@ watch(
     modalOpenend.value =
       getModalInfo(TypeModals.Delete).state === ModalState.Show;
     if (!modalOpenend.value) return
+    numberOfBlockingQueryEntities.value = undefined;
     deleteQueryOptions.value = getModalInfo(
       TypeModals.Delete
     ).deleteQueryOptions;
