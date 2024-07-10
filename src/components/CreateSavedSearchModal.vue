@@ -30,7 +30,6 @@ import DynamicForm from "./dynamicForms/DynamicForm.vue";
 const { closeModal, getModalInfo } = useBaseModal();
 const { t } = useI18n();
 const {
-  setFilterToEdit,
   setActiveFilter,
   fetchSavedSearchById,
   normalizeSavedSearchFromEntity,
@@ -47,6 +46,5 @@ const saveFilter = async (entity: any) => {
 
 const handleCloseModal = () => {
   closeModal(TypeModals.SaveSearch);
-  setFilterToEdit(null);
 };
 </script>

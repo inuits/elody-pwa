@@ -31,17 +31,6 @@
 
       <hr class="border-t-1 border-neutral-50" />
 
-      <!-- <base-context-menu-item
-        v-for="(savedSearch, index) in savedSearches.slice(0, 5)"
-        :key="index"
-        @clicked="pick(savedSearch)"
-        :label="savedSearch.metadata[0]?.value"
-        :highlight="
-          pickedSavedSearch
-            ? pickedSavedSearch._key === savedSearch._key
-            : false
-        "
-      /> -->
       <template v-if="!entitiesLoading">
         <base-context-menu-item
           v-for="(savedSearch, index) in entitiesList.slice(0, 5)"
@@ -52,7 +41,7 @@
         />
       </template>
 
-      <hr class="border-t-1 border-neutral-50" />
+      <hr class="border-t-1 border-neutral-50" v-if="entitiesList.length > 0" />
 
       <base-context-menu-item
         @clicked="openFindAllFiltersModal"
@@ -74,8 +63,12 @@ import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useRouter } from "vue-router";
 import { goToEntityPage } from "@/helpers";
-import { useEditMode } from "@/composables/useEdit";
-// import { provideApolloClient, useMutation } from "@vue/apollo-composable";
+import {
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
+import { useI18n } from "vue-i18n";
+
 const props = withDefaults(
   defineProps<{
     activeFilters: any[];
@@ -90,6 +83,8 @@ const props = withDefaults(
   }
 );
 
+const { t } = useI18n();
+const { createNotificationOverwrite } = useNotification();
 const { openModal, closeModal } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const {
@@ -97,7 +92,6 @@ const {
   getActiveFilter,
   deleteSavedSearch,
   initialize,
-  entities,
   entitiesList,
   entitiesLoading,
   saveExistedSearch,
@@ -139,8 +133,11 @@ const saveChanges = async () => {
     ...selectedFilter.value,
     filters: getDeepCopy(props.activeFilters),
   });
-  // TODO(savedSearch): saveCurrentFilter
-  // TODO(savedSearch): show notification
+  createNotificationOverwrite(
+    NotificationType.default,
+    t("notifications.success.entityUpdated.title"),
+    t("notifications.success.entityUpdated.description")
+  );
 };
 
 const updateLabel = async () => {
@@ -155,14 +152,13 @@ const createNew = () => {
     },
     {
       key: "filters",
-      // TODO(savedSearch): probably not necessary to make deep copy as it will not changed before saved in the backend
       value: props.activeFilters,
     },
   ]);
 };
 
 const selectFilter = async (filter: any) => {
-  setActiveFilter(filter);
+  setActiveFilter(getDeepCopy(filter));
 };
 
 const openDeleteModal = () => {
@@ -175,16 +171,19 @@ const openDeleteModal = () => {
         closeModal(TypeModals.Confirm);
       },
     },
-    // TODO(savedSearch): translation (?)
     translationKey: "delete-entity",
     openImmediately: true,
   });
 };
 
 const deleteFilter = async () => {
-  // TODO(savedSearch): show a notification 'deleted'
   await deleteSavedSearch(selectedFilter.value.id);
   setActiveFilter(null);
+  createNotificationOverwrite(
+    NotificationType.default,
+    t("notifications.success.entityDeleted.title"),
+    t("notifications.success.entityDeleted.description")
+  );
 };
 
 const openFindAllFiltersModal = () => {
