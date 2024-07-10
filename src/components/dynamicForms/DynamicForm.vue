@@ -357,6 +357,11 @@ const submitWithExtraMetadata = async (field: FormAction) => {
   const entity = (await performSubmitAction(document, entityInput)).data
     .CreateEntity;
   emit("entityCreated", { ...entity, metadata: entityInput.metadata });
+  createNotificationOverwrite(
+    NotificationType.default,
+    t("notifications.success.entityCreated.title"),
+    t("notifications.success.entityCreated.description")
+  );
   await getTenants();
   closeModal(TypeModals.DynamicForm);
   changeExpandedState(false);

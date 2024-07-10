@@ -17,7 +17,7 @@ import { useStateManagement } from "@/composables/useStateManagement";
 
 export const useBaseLibrary = (
   apolloClient: ApolloClient<any>,
-  ignoreStateForRoute: boolean = false
+  shouldUseStateForRoute: boolean = true
 ) => {
   let entityType: Entitytyping = Entitytyping.BaseEntity;
   let _route: RouteLocationNormalizedLoaded | undefined;
@@ -83,9 +83,8 @@ export const useBaseLibrary = (
     queryVariables.advancedFilterInputs = [];
     queryVariables.advancedFilterInputs = filters;
     queryVariables.skip = 1;
-    console.log(filters)
 
-    if (!ignoreStateForRoute) updateStateForRoute(_route, { queryVariables });
+    if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
@@ -94,7 +93,7 @@ export const useBaseLibrary = (
     forceFetch: boolean = false
   ): Promise<void> => {
     queryVariables.skip = skip;
-    if (!ignoreStateForRoute) updateStateForRoute(_route, { queryVariables });
+    if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
@@ -103,7 +102,7 @@ export const useBaseLibrary = (
     forceFetch: boolean = false
   ): Promise<void> => {
     queryVariables.limit = limit;
-    if (!ignoreStateForRoute) updateStateForRoute(_route, { queryVariables });
+    if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
@@ -112,7 +111,7 @@ export const useBaseLibrary = (
     forceFetch: boolean = false
   ): Promise<void> => {
     queryVariables.searchValue.order_by = sortKey;
-    if (!ignoreStateForRoute) updateStateForRoute(_route, { queryVariables });
+    if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
@@ -121,7 +120,7 @@ export const useBaseLibrary = (
     forceFetch: boolean = false
   ): Promise<void> => {
     queryVariables.searchValue.isAsc = sortOrder === "asc";
-    if (!ignoreStateForRoute) updateStateForRoute(_route, { queryVariables });
+    if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
@@ -158,15 +157,16 @@ export const useBaseLibrary = (
 
     _route = route;
     let variables =
-      !ignoreStateForRoute && getStateForRoute(_route)?.queryVariables;
+      shouldUseStateForRoute && getStateForRoute(_route)?.queryVariables;
     if (variables) queryVariables = variables;
-    else if (!variables && !ignoreStateForRoute)
+    else if (!variables && shouldUseStateForRoute)
       updateStateForRoute(_route, { queryVariables });
-    if (!variables || _route?.name === "SingleEntity" || ignoreStateForRoute)
+    if (
+      !variables ||
+      _route?.name === "SingleEntity" ||
+      !shouldUseStateForRoute
+    )
       variables = queryVariables;
-    console.log('ignore: ', ignoreStateForRoute)
-    console.log("test: ", variables);
-    console.log('query: ', queryVariables);
 
     await apolloClient
       .query({
@@ -181,7 +181,7 @@ export const useBaseLibrary = (
         const fetchedEntities = result.data.Entities;
         entities.value = fetchedEntities?.results as Entity[];
         totalEntityCount.value = fetchedEntities?.count || 0;
-        if (!ignoreStateForRoute)
+        if (shouldUseStateForRoute)
           updateStateForRoute(_route, {
             entityCountOnPage: fetchedEntities.results.length,
             totalEntityCount: fetchedEntities.count,
