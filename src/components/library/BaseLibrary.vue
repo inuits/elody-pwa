@@ -48,6 +48,7 @@
               :set-advanced-filters="setAdvancedFilters"
               :enable-save-search-filters="enableSaveSearchFilters"
               :entity-type="entityType as Entitytyping"
+              :should-use-state-for-route="shouldUseStateForRoute"
               @filter-matcher-mapping-promise="
                 (promise) => (filterMatcherMappingPromise = promise)
               "
@@ -260,7 +261,7 @@ export type BaseLibraryProps = {
   allowedActionsOnRelations?: RelationActions[];
   customBulkOperations?: String | undefined;
   enableSaveSearchFilters?: boolean;
-  ignoreStateForRoute?: boolean;
+  shouldUseStateForRoute?: boolean;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -286,7 +287,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   allowedActionsOnRelations: [],
   customBulkOperations: undefined,
   enableSaveSearchFilters: true,
-  ignoreStateForRoute: false,
+  shouldUseStateForRoute: true,
 });
 
 const emit = defineEmits<{
@@ -321,7 +322,7 @@ const {
   totalEntityCount,
 } = useBaseLibrary(
   apolloClient as ApolloClient<any>,
-  props.ignoreStateForRoute
+  props.shouldUseStateForRoute
 );
 
 let filterMatcherMappingPromise: (entityType: Entitytyping) => Promise<void>;

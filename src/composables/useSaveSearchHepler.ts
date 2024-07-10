@@ -1,4 +1,4 @@
-import { ref, inject } from "vue";
+import { ref, toRaw } from "vue";
 import {
   GetEntityByIdDocument,
   DeleteDataDocument,
@@ -6,7 +6,6 @@ import {
   Collection,
   SearchInputType,
   MutateEntityValuesDocument,
-  type BaseEntity,
   type AdvancedFilterInput,
   type GetEntityByIdQueryVariables,
   type SavedSearch,
@@ -18,24 +17,18 @@ import {
 import type { FilterListItem } from "@/composables/useStateManagement";
 import { useI18n } from "vue-i18n";
 import type { ApolloClient } from "@apollo/client/core";
-import {
-  DefaultApolloClient,
-  useMutation,
-  provideApolloClient,
-} from "@vue/apollo-composable";
+import { useMutation, provideApolloClient } from "@vue/apollo-composable";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { computed } from "vue";
 import { apolloClient } from "@/main";
 
-// TODO(savedSearch): move to graphql
-export type SavedSearchType = {
+type SavedSearchType = {
   id: string;
   title: string;
   value: FilterListItem[];
 };
 
-const activeFilter = ref<any>(null);
-const filerToEdit = ref<any>(null);
+const selectedFilter = ref<any>(null);
 
 export const useSaveSearchHepler = () => {
   const {
@@ -71,12 +64,8 @@ export const useSaveSearchHepler = () => {
     await getEntities(undefined);
   };
 
-  const setActiveFilter = (filter: any) => {
-    activeFilter.value = filter;
-  };
-
-  const setFilterToEdit = (filter: any) => {
-    filerToEdit.value = filter;
+  const setActiveFilter = (filter: SavedSearchType | null) => {
+    selectedFilter.value = JSON.parse(JSON.stringify(filter));
   };
 
   const fetchSavedSearchById = async (id: string): Promise<SavedSearch> => {
@@ -96,11 +85,10 @@ export const useSaveSearchHepler = () => {
       .then((result: any) => {
         const entity = result.data?.Entity as SavedSearch;
         return entity;
-      })
+      });
   };
 
   const deleteSavedSearch = async (id: string) => {
-    // TODO(savedSearch): delete throws an error regarding appolo id :(
     provideApolloClient(apolloClient);
     const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
     const collection = Collection.Entities;
@@ -131,19 +119,14 @@ export const useSaveSearchHepler = () => {
       collection: Collection.Entities,
     });
 
-    if (!result?.data?.mutateEntityValues) return;
-    // createNotification({
-    //   displayTime: 10,
-    //   type: NotificationType.default,
-    //   title: t("notifications.success.entityCreated.title"),
-    //   description: t("notifications.success.entityCreated.description"),
-    //   shown: true,
-    // });
+    if (!result?.data?.mutateEntityValues) return null;
     return result.data.mutateEntityValues;
   };
 
-  const getActiveFilter = () => activeFilter.value;
-  const getFilterToEdit = () => filerToEdit.value;
+  const getActiveFilter = () => {
+    return toRaw(selectedFilter.value);
+  };
+
   const extractFiltersFromEntity = (entity: Entity) =>
     entity?.intialValues?.filters;
 
@@ -165,8 +148,6 @@ export const useSaveSearchHepler = () => {
   return {
     setActiveFilter,
     getActiveFilter,
-    setFilterToEdit,
-    getFilterToEdit,
     fetchSavedSearchById,
     deleteSavedSearch,
     initialize,
