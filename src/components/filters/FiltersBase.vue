@@ -175,6 +175,7 @@ import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
 import { useSaveSearchHepler } from "@/composables/useSaveSearchHepler";
+import { useRoute } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -185,10 +186,12 @@ const props = withDefaults(
     setAdvancedFilters: Function;
     enableSaveSearchFilters: boolean;
     entityType: Entitytyping;
+    shouldUseStateForRoute: boolean;
   }>(),
   {
     parentEntityIdentifiers: () => [],
     enableSaveSearchFilters: true,
+    shouldUseStateForRoute: true,
   }
 );
 
@@ -233,6 +236,7 @@ const { setAdvancedFilterInputs } = useQueryVariablesFactory();
 const { t } = useI18n();
 const { setActiveFilter: setActiveSavedFilter, getActiveFilter } =
   useSaveSearchHepler();
+const router = useRoute();
 
 const selectedSavedFilter = computed(() => {
   return getActiveFilter();
@@ -288,7 +292,7 @@ const handleAdvancedFilters = () => {
   activeFilters.value = [];
 
   if (advancedFilters.value) {
-    const state = getStateForRoute(props.route);
+    const state = props.shouldUseStateForRoute && getStateForRoute(props.route);
     if (!state?.filterListItems || state.filterListItems.length == 0) {
       Object.values(advancedFilters.value).forEach((advancedFilter) => {
         if (typeof advancedFilter !== "string") {
@@ -310,6 +314,13 @@ const handleAdvancedFilters = () => {
                 foreign_field: advancedFilter.lookup.foreign_field,
                 as: advancedFilter.lookup.as,
               };
+
+            if (
+              advancedFilter.hidden &&
+              advancedFilter.defaultValue === "entityType"
+            ) {
+              hiddenFilter.value = router.meta.entityType;
+            }
 
             if (
               advancedFilter.parentKey === "relations" ||
@@ -335,9 +346,10 @@ const handleAdvancedFilters = () => {
           });
         }
       });
-      updateStateForRoute(props.route, {
-        filterListItems: JSON.parse(JSON.stringify(filters.value)),
-      });
+      if (props.shouldUseStateForRoute)
+        updateStateForRoute(props.route, {
+          filterListItems: JSON.parse(JSON.stringify(filters.value)),
+        });
     } else {
       filters.value = state?.filterListItems;
       activeFilters.value = filters.value
@@ -350,7 +362,7 @@ const handleAdvancedFilters = () => {
 };
 
 const applyFilters = (saveState = false, force = true) => {
-  if (saveState)
+  if (saveState && props.shouldUseStateForRoute)
     updateStateForRoute(props.route, {
       filterListItems: JSON.parse(JSON.stringify(filters.value)),
     });
@@ -428,8 +440,17 @@ watch(selectedSavedFilter, () => {
   activeFilters.value = filters.value
     .filter((filter) => filter.isActive && filter.inputFromState)
     .map((filter) => filter.inputFromState) as AdvancedFilterInput[];
+
   applyFilters(true);
 });
+
+watch(
+  filters,
+  () => {
+    console.log("updated filters: ", filters.value);
+  },
+  { deep: true }
+);
 </script>
 
 <style>
