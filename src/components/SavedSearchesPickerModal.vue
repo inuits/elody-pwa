@@ -66,16 +66,9 @@ setBulkSelectionLimit(BulkOperationsContextEnum.SavedSearchFilterModal, 1);
 const updateActiveFilter = async (selectedItems: InBulkProcessableItem[]) => {
   const savedFilter = await fetchSavedSearchById(selectedItems[0].id);
   setActiveFilter(normalizeSavedSearchFromEntity(savedFilter));
+  dequeueAllItemsForBulkProcessing(
+    BulkOperationsContextEnum.SavedSearchFilterModal
+  );
   handleCloseModal();
 };
-
-watch(
-  () => getModalInfo(TypeModals.SaveSearchPicker).state,
-  async () => {
-    dequeueAllItemsForBulkProcessing(
-      BulkOperationsContextEnum.SavedSearchFilterModal
-    );
-  },
-  { immediate: true }
-);
 </script>
