@@ -125,6 +125,7 @@ const handleOpenModal = (context: any = undefined) => {
 };
 
 const saveChanges = async () => {
+  if (!selectedFilter.value) return;
   const savedFilter = await fetchSavedSearchById(selectedFilter.value.id);
   await saveExistedSearch(savedFilter, props.activeFilters);
   createNotificationOverwrite(
@@ -135,6 +136,7 @@ const saveChanges = async () => {
 };
 
 const updateLabel = async () => {
+  if (!selectedFilter.value) return;
   const savedFilterEntity = await fetchSavedSearchById(selectedFilter.value.id);
   goToEntityPage(savedFilterEntity, "SingleEntity", router);
 };
@@ -173,6 +175,7 @@ const openDeleteModal = () => {
 };
 
 const deleteFilter = async () => {
+  if (!selectedFilter.value) return;
   await deleteSavedSearch(selectedFilter.value.id);
   setActiveFilter(null);
   createNotificationOverwrite(

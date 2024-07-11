@@ -28,7 +28,7 @@ type SavedSearchType = {
   value: FilterListItem[];
 };
 
-const selectedFilter = ref<any>(null);
+const selectedFilter = ref<SavedSearchType | null>(null);
 
 export const useSaveSearchHepler = () => {
   const {
