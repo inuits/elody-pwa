@@ -89,8 +89,8 @@
 
       <div v-if="expandFilters && matchers.length > 0">
         <FiltersListItem
-          v-for="filter in filters.filter((filter) => filter.isDisplayed)"
-          :key="filter.advancedFilter.key || ''"
+          v-for="filter in displayedFilters"
+          :key="filter.advancedFilter.key[0] || ''"
           :filter="filter"
           :related-active-filter="
             activeFilters.filter(
@@ -237,6 +237,9 @@ const { t } = useI18n();
 const { setActiveFilter: setActiveSavedFilter, getActiveFilter } =
   useSaveSearchHepler();
 const router = useRoute();
+const displayedFilters = computed(() => {
+  return filters.value.filter((filter) => filter.isDisplayed);
+});
 
 const selectedSavedFilter = computed(() => {
   return getActiveFilter();
