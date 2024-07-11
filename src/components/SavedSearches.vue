@@ -127,12 +127,7 @@ const handleOpenModal = (context: any = undefined) => {
 
 const saveChanges = async () => {
   const savedFilter = await fetchSavedSearchById(selectedFilter.value.id);
-
   await saveExistedSearch(savedFilter, props.activeFilters);
-  setActiveFilter({
-    ...selectedFilter.value,
-    filters: getDeepCopy(props.activeFilters),
-  });
   createNotificationOverwrite(
     NotificationType.default,
     t("notifications.success.entityUpdated.title"),
@@ -141,7 +136,8 @@ const saveChanges = async () => {
 };
 
 const updateLabel = async () => {
-  goToEntityPage(selectedFilter.value.id, "SingleEntity", router);
+  const savedFilterEntity = await fetchSavedSearchById(selectedFilter.value.id);
+  goToEntityPage(savedFilterEntity, "SingleEntity", router);
 };
 
 const createNew = () => {

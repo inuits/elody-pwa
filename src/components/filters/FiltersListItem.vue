@@ -183,7 +183,6 @@ watch(advancedFilterInput, () => {
   else if (advancedFilterInput.value.value !== undefined)
     emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
   else emit("deactivateFilter", advancedFilterInput.value.key);
-  console.log(advancedFilterInput?.value)
 });
 watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
