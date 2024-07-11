@@ -31,7 +31,8 @@
 
       <hr class="border-t-1 border-neutral-50" />
 
-      <template v-if="!entitiesLoading">
+      <!-- TODO(savedSearch): save selected to session/local storage and show it there -->
+      <!-- <template v-if="!entitiesLoading">
         <base-context-menu-item
           v-for="(savedSearch, index) in entitiesList.slice(0, 5)"
           :key="index"
@@ -41,7 +42,7 @@
         />
       </template>
 
-      <hr class="border-t-1 border-neutral-50" v-if="entitiesList.length > 0" />
+      <hr class="border-t-1 border-neutral-50" v-if="entitiesList.length > 0" /> -->
 
       <base-context-menu-item
         @clicked="openFindAllFiltersModal"
@@ -92,8 +93,6 @@ const {
   getActiveFilter,
   deleteSavedSearch,
   initialize,
-  entitiesList,
-  entitiesLoading,
   saveExistedSearch,
   fetchSavedSearchById,
 } = useSaveSearchHepler();
@@ -153,6 +152,7 @@ const createNew = () => {
   ]);
 };
 
+// TODO(savedSearch): should be used once selected filters will be saved in session/local storage
 const selectFilter = async (filter: any) => {
   setActiveFilter(getDeepCopy(filter));
 };
