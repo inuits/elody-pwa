@@ -446,14 +446,6 @@ watch(selectedSavedFilter, () => {
 
   applyFilters(true);
 });
-
-watch(
-  filters,
-  () => {
-    console.log("updated filters: ", filters.value);
-  },
-  { deep: true }
-);
 </script>
 
 <style>
