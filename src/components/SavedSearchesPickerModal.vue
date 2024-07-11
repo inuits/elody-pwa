@@ -47,7 +47,6 @@ import {
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { useSaveSearchHepler } from "@/composables/useSaveSearchHepler";
-import { watch } from "vue";
 
 const { closeModal, getModalInfo } = useBaseModal();
 const handleCloseModal = () => {
