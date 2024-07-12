@@ -150,9 +150,9 @@ const filterDropdownOptions = computed<DropdownOption[]>(() => {
       : activeViewMode === ActionContextViewModeTypes.ReadMode;
     const numberOfEntities = props.itemsSelected
       ? entitiesSelectionType ===
-        ActionContextEntitiesSelectionType.SelectionOfEntities
+        ActionContextEntitiesSelectionType.SomeSelected
       : entitiesSelectionType ===
-        ActionContextEntitiesSelectionType.AllEntities;
+        ActionContextEntitiesSelectionType.NoneSelected;
     return viewMode && numberOfEntities;
   });
 });

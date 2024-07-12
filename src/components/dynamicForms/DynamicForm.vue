@@ -114,19 +114,20 @@ import {
   type ActionProgressStep,
   ActionType,
   type BaseRelationValuesInput,
+  BulkOperationTypes,
   EditStatus,
   type EntityInput,
   Entitytyping,
   type FormAction,
   type MetadataInput,
+  MutateEntityValuesDocument,
+  MutateEntityValuesMutation,
+  MutateEntityValuesMutationVariables,
+  OcrType,
   type PanelMetaData,
   TypeModals,
   type UploadContainer,
-  type UploadField,
-  MutateEntityValuesMutation,
-  MutateEntityValuesMutationVariables,
-  MutateEntityValuesDocument,
-  OcrType,
+  type UploadField
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -143,10 +144,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import ImportComponent from "@/components/ImportComponent.vue";
 import useTenant from "@/composables/useTenant";
@@ -450,10 +448,7 @@ const initializeForm = async (
   oldQueryName: string | undefined
 ) => {
   const relations: BaseRelationValuesInput[] = [];
-  if (
-    props.savedContext &&
-    ("mediafiles" in props.savedContext || "entities" in props.savedContext)
-  ) {
+  if (props.savedContext && props.savedContext.type === BulkOperationTypes.DownloadMediafiles) {
     props.savedContext.mediafiles.forEach((mediafile) => {
       relations.push({
         key: mediafile,
@@ -467,6 +462,13 @@ const initializeForm = async (
         type: props.savedContext.relationType,
         editStatus: EditStatus.New,
       });
+    });
+  }
+  if (props.savedContext && props.savedContext.type === BulkOperationTypes.CreateEntity) {
+    relations.push({
+      key: props.savedContext.parentId,
+      type: props.savedContext.relationType,
+      editStatus: EditStatus.New,
     });
   }
   resetVeeValidateForDynamicForm(newQueryName, oldQueryName, relations);
