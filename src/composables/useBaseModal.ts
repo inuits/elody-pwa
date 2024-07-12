@@ -65,10 +65,10 @@ export const useBaseModal = () => {
     const updatedModal = {
       state: ModalState.Show,
     };
-    if (modalPosition) Object.assign(updatedModal, { modalPosition });
-    if (formQuery) Object.assign(updatedModal, { formQuery });
-    if (savedContext) Object.assign(updatedModal, { savedContext });
-    if (deleteQueryOptions) Object.assign(updatedModal, { deleteQueryOptions });
+    Object.assign(updatedModal, { modalPosition });
+    Object.assign(updatedModal, { formQuery });
+    Object.assign(updatedModal, { savedContext });
+    Object.assign(updatedModal, { deleteQueryOptions });
     updateModal(modalType, updatedModal);
     if (modalTab) getModalInfo(modalType).modalTabToOpen = modalTab;
     if (askForCloseConfirmation)
