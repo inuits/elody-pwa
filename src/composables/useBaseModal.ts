@@ -1,10 +1,11 @@
 import { computed, ref } from "vue";
 import {
+  BulkOperationTypes,
   Collection,
   type DeleteQueryOptions,
   ModalChoices,
   ModalState,
-  TypeModals,
+  TypeModals
 } from "@/generated-types/queries";
 export type ModalPosition = "left" | "center" | "right";
 
@@ -20,10 +21,11 @@ export type ModalInfo = {
 };
 
 export type GenericContextForModals = {
+  type: BulkOperationTypes
   parentId: string;
   relationType: string;
   collection: Collection;
-  callbackFunction: Function;
+  callbackFunction?: Function;
 };
 
 const initialModalInfo: ModalInfo = {

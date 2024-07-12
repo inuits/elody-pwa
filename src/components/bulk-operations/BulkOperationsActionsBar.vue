@@ -99,44 +99,35 @@
 
 <script lang="ts" setup>
 import {
-  BaseEntity,
   BulkOperationTypes,
   DamsIcons,
   type DropdownOption,
+  Entitytyping,
+  GenerateTranscodeDocument,
+  GenerateTranscodeMutation,
   GetBulkOperationsDocument,
   type GetBulkOperationsQuery,
   MetadataAndRelation,
   ModalState,
   RouteNames,
   TranscodeType,
-  TypeModals,
-  GenerateTranscodeDocument,
-  GenerateTranscodeMutation,
-  Entitytyping,
+  TypeModals
 } from "@/generated-types/queries";
 import {
-  Context,
-  InBulkProcessableItem,
-  DownloadMediafilesContextForBulkOperationsForm,
-} from "@/composables/useBulkOperations";
-import {
   BulkOperationsContextEnum,
-  useBulkOperations,
+  Context,
+  DownloadMediafilesContextForBulkOperationsForm,
+  InBulkProcessableItem,
+  useBulkOperations
 } from "@/composables/useBulkOperations";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import { apolloClient, bulkSelectAllSizeLimit } from "@/main";
 import { computed, onMounted, ref, watch } from "vue";
-import {
-  GenericContextForModals,
-  useBaseModal,
-} from "@/composables/useBaseModal";
+import { GenericContextForModals, useBaseModal } from "@/composables/useBaseModal";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import { useImport } from "@/composables/useImport";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 
@@ -299,6 +290,7 @@ watch(selectedBulkOperation, () => {
       let modal = selectedBulkOperation.value?.bulkOperationModal;
       const enqueuedItems = getEnqueuedItems(props.context);
       const savedContext: DownloadMediafilesContextForBulkOperationsForm = {
+        type: selectedBulkOperation.value?.value,
         mediafiles: [],
         entities: [],
         includeAssetCsv: props.context !== RouteNames.Mediafile,
@@ -323,14 +315,15 @@ watch(selectedBulkOperation, () => {
     }
 
     if (
-      selectedBulkOperation.value?.value ===
-        BulkOperationTypes.ReorderEntities ||
-      selectedBulkOperation.value?.value === BulkOperationTypes.TranscodePdf
+      selectedBulkOperation.value?.value === BulkOperationTypes.ReorderEntities ||
+      selectedBulkOperation.value?.value === BulkOperationTypes.TranscodePdf ||
+      selectedBulkOperation.value?.value === BulkOperationTypes.CreateEntity
     ) {
       let modal = selectedBulkOperation.value?.bulkOperationModal;
       const savedContext: GenericContextForModals = {
-        relationType: modal.formRelationType,
+        type: selectedBulkOperation.value?.value,
         parentId: route.params.id,
+        relationType: modal.formRelationType,
         collection: route.meta.type,
       };
       openModal(
@@ -338,6 +331,7 @@ watch(selectedBulkOperation, () => {
         undefined,
         "right",
         modal.formQuery,
+        undefined,
         modal.askForCloseConfirmation,
         savedContext
       );
