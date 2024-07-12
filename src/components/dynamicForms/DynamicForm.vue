@@ -448,29 +448,32 @@ const initializeForm = async (
   oldQueryName: string | undefined
 ) => {
   const relations: BaseRelationValuesInput[] = [];
-  if (props.savedContext && props.savedContext.type === BulkOperationTypes.DownloadMediafiles) {
-    props.savedContext.mediafiles.forEach((mediafile) => {
+  if (props.savedContext) {
+    if (props.savedContext.type === BulkOperationTypes.DownloadMediafiles) {
+      props.savedContext.mediafiles.forEach((mediafile) => {
+        relations.push({
+          key: mediafile,
+          type: props.savedContext.relationType,
+          editStatus: EditStatus.New
+        });
+      });
+      props.savedContext.entities.forEach((entity) => {
+        relations.push({
+          key: entity,
+          type: props.savedContext.relationType,
+          editStatus: EditStatus.New
+        });
+      });
+    }
+    if (props.savedContext.type === BulkOperationTypes.CreateEntity && props.savedContext.parentId !== undefined) {
       relations.push({
-        key: mediafile,
+        key: props.savedContext.parentId,
         type: props.savedContext.relationType,
         editStatus: EditStatus.New,
       });
-    });
-    props.savedContext.entities.forEach((entity) => {
-      relations.push({
-        key: entity,
-        type: props.savedContext.relationType,
-        editStatus: EditStatus.New,
-      });
-    });
+    }
   }
-  if (props.savedContext && props.savedContext.type === BulkOperationTypes.CreateEntity) {
-    relations.push({
-      key: props.savedContext.parentId,
-      type: props.savedContext.relationType,
-      editStatus: EditStatus.New,
-    });
-  }
+
   resetVeeValidateForDynamicForm(newQueryName, oldQueryName, relations);
   if (!props.dynamicFormQuery) return;
   const document = await getQuery(props.dynamicFormQuery);
