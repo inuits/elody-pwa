@@ -15,10 +15,23 @@
         <div v-if="isValidation" @click.stop>
           <a
             class="underline text-accent-accent"
-            href="/upload-csv-template.csv"
+            :href="`/upload-csv-template-${selectedItem}.csv`"
             download
-            >{{ $t("upload-fields.csv-template-link") }}</a
+            >{{ $t("upload-fields.csv-template-link") }}
+          </a>
+          <select
+            v-if="entityTypesForUpload"
+            v-model="selectedItem"
+            class="inline-block min-w-0 max-w-full pl-2 pr-8 border-none border-b appearance-none"
           >
+            <option
+              v-for="entityType in entityTypesForUpload"
+              :key="entityType"
+              :value="entityType"
+            >
+              {{ entityType }}
+            </option>
+          </select>
         </div>
       </div>
     </div>
@@ -30,19 +43,23 @@ import { onMounted, ref } from "vue";
 
 const dropzoneView = ref<HTMLDivElement>();
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     modelValue: HTMLDivElement | undefined;
     dropzoneLabel: string;
     isValidation: boolean;
     fileCount: number;
     style: string;
+    entityTypesForUpload?: string | undefined;
   }>(),
   {
     style: "",
     isValidation: false,
+    entityTypesForUpload: undefined,
   }
 );
+
+const selectedItem = ref<string | undefined>(props.entityTypesForUpload ? props.entityTypesForUpload[0] : undefined);
 
 const emit = defineEmits<{
   (event: "update:modelValue", modelValue: HTMLDivElement | undefined): void;
