@@ -11,6 +11,7 @@
       :dropzone-label="dropzoneLabel"
       view-style="p-3 h-full overflow-x-hidden mb-4"
       :isValidationFile="dryRun"
+      :entity-types-for-upload="entityTypesForUpload"
     />
   </div>
 </template>
@@ -45,11 +46,13 @@ const props = withDefaults(
     dryRun: boolean;
     uploadFieldType: UploadFieldType;
     validation?: string;
+    entityTypesForUpload?: string | undefined;
   }>(),
   {
     dropzoneSize: "big",
     isLinkedUpload: false,
     dryRun: false,
+    entityTypesForUpload: undefined,
   }
 );
 

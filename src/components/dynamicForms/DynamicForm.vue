@@ -48,6 +48,7 @@
                 :upload-multiple="(uploadContainerField as UploadField).inputField.uploadMultiple"
                 :dry-run="(uploadContainerField as UploadField).dryRunUpload"
                 :upload-field-type="(uploadContainerField as UploadField).uploadFieldType"
+                :entity-types-for-upload="(uploadContainerField as UploadField).entityTypesForUpload"
               />
             </div>
             <div class="pb-4">
