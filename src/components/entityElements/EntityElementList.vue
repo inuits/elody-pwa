@@ -7,6 +7,7 @@
     >
       <template v-slot:actions>
         <div
+          data-cy="entity-element-list-add-button"
           v-if="
             isEdit &&
             relationType &&

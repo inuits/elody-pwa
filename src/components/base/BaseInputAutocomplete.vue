@@ -1,5 +1,6 @@
 <template>
   <Multiselect
+    data-cy="multiselect"
     v-if="inputValue"
     v-model="inputValue"
     :mode="selectType === 'multi' ? 'tags' : 'single'"

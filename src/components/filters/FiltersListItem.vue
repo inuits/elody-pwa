@@ -1,12 +1,13 @@
 <template>
   <div
+    data-cy="filters-list-item"
     v-show="!filter.advancedFilter.hidden"
     class="flex relative items-center justify-between px-6 py-4 border-t-2 border-neutral-light cursor-pointer select-none"
     :class="{ 'bg-accent-normal text-neutral-white': filter.isActive }"
     @click="isOpen = !isOpen"
   >
     <div class="flex flex-col">
-      <span class="text-lg">
+      <span data-cy="filters-list-item-label" class="text-lg">
         {{ t(filter.advancedFilter.label || "") }}
       </span>
     </div>
@@ -36,10 +37,11 @@
       <unicon :name="icon" height="20" />
     </div>
   </div>
-  <div v-show="isOpen" class="flex flex-row gap-4 p-6 bg-neutral-light">
+  <div data-cy="filters-list-item-panel" v-show="isOpen" class="flex flex-row gap-4 p-6 bg-neutral-light">
     <div class="flex w-full justify-start gap-4">
       <div>
         <BaseDropdownNew
+          data-cy="filter-matcher-dropdown"
           class="max-h-9"
           v-model:model-value="selectedMatcher"
           :options="matchers"

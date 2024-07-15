@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center">
+  <div data-cy="base-input-checkbox" class="flex items-center">
     <div
       class="flex-none flex items-center justify-center w-10 h-10 rounded-lg box-border"
       :class="[

@@ -1,5 +1,6 @@
 <template>
   <div
+    data-cy="view-modes-list"
     v-if="Array.isArray(relations)"
     v-show="!disablePreviews"
     v-for="item in relations?.filter(

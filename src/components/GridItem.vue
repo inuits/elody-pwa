@@ -1,5 +1,6 @@
 <template>
   <li
+    data-cy="grid-item"
     :class="[
       'w-full align-middle border border-neutral-light rounded cursor-pointer list-none',
       {
