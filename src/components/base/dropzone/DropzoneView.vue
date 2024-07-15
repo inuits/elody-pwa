@@ -22,7 +22,7 @@
           <select
             v-if="entityTypesForUpload"
             v-model="selectedItem"
-            class="inline-block min-w-0 max-w-full pl-2 pr-8 border-none border-b appearance-none"
+            class="inline-block min-w-0 max-w-full pl-2 pr-8 border-none border-b underline text-accent-accent"
           >
             <option
               v-for="entityType in entityTypesForUpload"
