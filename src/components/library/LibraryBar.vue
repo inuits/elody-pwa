@@ -19,6 +19,7 @@
       </div>
       <div v-if="sortOptions" class="w-auto">
         <BaseDropdownNew
+          data-cy="sort-options"
           v-model="selectedSortOption"
           :options="sortOptions"
           :label="t('library.sort')"
@@ -30,6 +31,7 @@
       </div>
       <div v-if="sortOptions" class="flex items-center">
         <BaseToggle
+          data-cy="sort-toggle"
           v-model="isAsc"
           :icon-on="DamsIcons.AngleUp"
           :icon-off="DamsIcons.AngleDown"

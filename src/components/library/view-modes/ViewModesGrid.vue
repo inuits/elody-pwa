@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid_cols gap-2 justify-items-center">
+  <div data-cy="view-modes-grid" class="grid grid_cols gap-2 justify-items-center">
     <div
       v-show="!disablePreviews"
       v-for="item in relations?.filter(

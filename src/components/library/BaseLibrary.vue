@@ -127,6 +127,7 @@
           :class="{ 'flex justify-end': expandFilters }"
         >
           <div
+            data-cy="base-library-grid-container"
             id="gridContainer"
             :class="[
               { 'w-[67%]': expandFilters && toggles.length <= 1 },

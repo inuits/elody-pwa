@@ -1,5 +1,6 @@
 <template>
   <div
+    data-cy="filter-base"
     class="relative h-full bg-neutral-white w-full"
     :class="expandFilters ? 'rounded-t' : 'rounded-xl'"
     @keydown.enter="applyFilters(true)"
@@ -38,12 +39,14 @@
       <div v-if="expandFilters" class="p-4 sticky top-0 bg-white z-10">
         <div class="flex justify-between gap-4 pb-4">
           <BaseButtonNew
+            data-cy="filters-clear-button"
             class="!w-1/3"
             :label="t('filters.clear')"
             button-style="default"
             @click="() => (clearAllActiveFilters = true)"
           />
           <BaseButtonNew
+            data-cy="filters-search-button"
             :label="t('filters.apply')"
             button-style="accentNormal"
             @click="applyFilters(true)"

@@ -1,5 +1,6 @@
 <template>
   <input
+    data-cy="base-input-text"
     v-if="type !== 'textarea' && type !== 'checkbox'"
     class="w-full h-full border rounded-lg focus:ring-0"
     :class="[
@@ -15,6 +16,7 @@
     @click.stop
   />
   <input
+    data-cy="base-input-checkbox"
     v-else-if="type === 'checkbox'"
     class="w-4 h-4 rounded-md ml-2"
     v-model="inputValue"
@@ -25,6 +27,7 @@
     @click.stop
   />
   <textarea
+    data-cy="base-input-text-area"
     v-else
     class="w-full h-full border rounded-lg focus:ring-0"
     :class="[
