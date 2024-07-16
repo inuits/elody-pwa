@@ -2,6 +2,7 @@
   <BaseModal
     :modal-state="getModalInfo(TypeModals.Search).state"
     :modal-position="getModalInfo(TypeModals.Search).modalPosition"
+    :cancel-button-availabe="false"
     modal-width-style="w-7/12"
     @hide-modal="closeModal(TypeModals.Search)"
   >

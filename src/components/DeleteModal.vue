@@ -2,6 +2,7 @@
   <BaseModal
     :modal-state="getModalInfo(TypeModals.Delete).state"
     :modal-position="getModalInfo(TypeModals.Delete).modalPosition"
+    :cancel-button-availabe="true"
     modal-width-style="w-10/12"
     modal-color="bg-neutral-lightest"
     @hide-modal="closeModal(TypeModals.Delete)"

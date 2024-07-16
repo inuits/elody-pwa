@@ -2,6 +2,7 @@
   <BaseModal
     :modal-state="getModalInfo(TypeModals.DynamicForm).state"
     :modal-position="getModalInfo(TypeModals.DynamicForm).modalPosition"
+    :cancel-button-availabe="false"
     modal-width-style="w-2/5"
     :modal-color="
       getModalInfo(TypeModals.DynamicForm).formQuery === 'GetUploadForm'

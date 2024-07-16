@@ -24,6 +24,7 @@
         <div :class="['flex flex-col', modalHeight]">
           <div class="flex justify-end p-2">
             <unicon
+              v-show="!cancelButtonAvailabe"
               :name="Unicons.Close.name"
               :height="iconHeight"
               class="cursor-pointer"
@@ -38,7 +39,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, toRefs, watch, onMounted, onUnmounted } from "vue";
+import { computed, toRefs, watch, onMounted, onUnmounted, ref } from "vue";
 import { ModalState } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 export type ModalPosition = "center" | "left" | "right";
@@ -51,15 +52,19 @@ const props = withDefaults(
     modalHeightStyle?: string;
     iconHeight?: number;
     modalColor?: String;
+    cancelButtonAvailabe?: boolean;
   }>(),
   {
     modalHeightStyle: "h-[75vh] my-[12.5vh]",
     iconHeight: 18,
     modalColor: "bg-neutral-white",
+    cancelButtonAvailabe: false,
   }
 );
 
 const emit = defineEmits(["update:modalState", "hideModal"]);
+
+const cancelButtonAvailabe = ref<boolean>(props.cancelButtonAvailabe);
 
 const hideOnEscape = (e) => {
   if (e.key === "Escape") hideModal();
