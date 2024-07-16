@@ -2,6 +2,7 @@
   <BaseModal
     :modal-state="getModalInfo(TypeModals.Confirm).state"
     :modal-position="modalPosition"
+    :cancel-button-availabe="true"
     modal-width-style="w-1/2"
     modal-height-style="my-[37.5vh]"
     @hide-modal="closeModal(TypeModals.Confirm)"

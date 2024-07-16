@@ -2,6 +2,7 @@
   <BaseModal
     :modal-state="getModalInfo(TypeModals.EntityPicker).state"
     :modal-position="getModalInfo(TypeModals.EntityPicker).modalPosition"
+    :cancel-button-availabe="false"
     modal-width-style="w-10/12"
     modal-color="bg-neutral-lightest"
     @hide-modal="
