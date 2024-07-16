@@ -59,36 +59,40 @@ const useTenant = (
   };
 
   const getTenants = async () => {
-    await apolloClient
-      .query<GetTenantsQuery>({
-        query: GetTenantsDocument,
-        fetchPolicy: "no-cache",
-        notifyOnNetworkStatusChange: true,
-      })
-      .then((result) => {
-        tenants.value = [];
-        const entities = result.data.Tenants;
-        entities &&
-          entities.results &&
-          entities.results.forEach((entity) => {
-            if (entity && entity.__typename === "Tenant") {
-              const id = entity.uuid as string;
-              const label = entity.intialValues.label as string;
-              if (tenants.value === "no-tenants") {
-                tenants.value = [];
-              }
+    if (config && config?.features.hasTenantSelect) {
+      await apolloClient
+        .query<GetTenantsQuery>({
+          query: GetTenantsDocument,
+          fetchPolicy: "no-cache",
+          notifyOnNetworkStatusChange: true,
+        })
+        .then((result) => {
+          tenants.value = [];
+          const entities = result.data.Tenants;
+          entities &&
+            entities.results &&
+            entities.results.forEach((entity) => {
+              if (entity && entity.__typename === "Tenant") {
+                const id = entity.uuid as string;
+                const label = entity.intialValues.label as string;
+                if (tenants.value === "no-tenants") {
+                  tenants.value = [];
+                }
 
-              if (
-                !hideSuperTenant ||
-                (hideSuperTenant && id !== "tenant:super")
-              )
-                tenants.value.push({
-                  id,
-                  label,
-                });
-            }
-          });
-      });
+                if (
+                  !hideSuperTenant ||
+                  (hideSuperTenant && id !== "tenant:super")
+                )
+                  tenants.value.push({
+                    id,
+                    label,
+                  });
+              }
+            });
+        });
+    } else {
+      console.info("Tenants not fetched because no tenant selected.");
+    }
   };
 
   const tenantsAsDropdownOptions = computed<DropdownOption[]>(() => {
