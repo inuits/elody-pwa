@@ -70,7 +70,7 @@ import { useRoute } from "vue-router";
 
 const props = defineProps<{
   filter: FilterListItem;
-  relatedActiveFilters: string[];
+  relatedActiveFilter: string[];
 }>();
 
 const emit = defineEmits<{
@@ -114,8 +114,10 @@ onFilterOptionsResult((result) => {
   const options = result.data?.FilterOptions;
   if (options) {
     input.value = [];
-    options.forEach((option) =>
-      filterOptions.push({ isSelected: false, option })
+    options.forEach((option) => {
+      const isSelected = props.relatedActiveFilter && props.relatedActiveFilter?.value.includes(option.value);
+      filterOptions.push({ isSelected: isSelected, option });
+    }
     );
     emit(
       "filterOptions",
@@ -281,15 +283,14 @@ onMounted(() => {
 });
 
 watch(
-  () => props.relatedActiveFilters,
+  () => props.relatedActiveFilter,
   () => {
-    if (!props.relatedActiveFilters) return;
+    if (props.relatedActiveFilter) return;
     filterOptions.filter((filter) => {
-      filter.isSelected = props.relatedActiveFilters.includes(
-        filter.option.value
-      );
+      filter.isSelected = false;
     });
-  }
+  },
+  { immediate: true }
 );
 
 watch(

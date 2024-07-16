@@ -83,10 +83,10 @@
           v-for="filter in filters.filter((filter) => filter.isDisplayed)"
           :key="filter.advancedFilter.key || ''"
           :filter="filter"
-          :related-active-filters="
+          :related-active-filter="
             activeFilters.filter(
-              (activeFilter) => activeFilter.key === filter.advancedFilter.key
-            )[0]?.value
+              (activeFilter) => JSON.stringify(activeFilter.key) === JSON.stringify(filter.advancedFilter.key)
+            )[0]
           "
           :matchers="
             matchers.filter((option) =>
@@ -101,7 +101,9 @@
             filter.inputFromState = filterInput;
             filter.selectedMatcher = matcher;
             activeFilters = activeFilters.filter(activeFilter => activeFilter.key !== filterInput.key);
-            activeFilters.push(filterInput);
+            if(activeFilters.filter((activeFilter) => JSON.stringify(activeFilter.key) === JSON.stringify(filterInput.key)).length <= 0) {
+              activeFilters.push(filterInput);
+            }
           }"
           @deactivate-filter="
             (key) => {
