@@ -101,9 +101,9 @@
             filter.inputFromState = filterInput;
             filter.selectedMatcher = matcher;
             activeFilters = activeFilters.filter(activeFilter => activeFilter.key !== filterInput.key);
-            if(activeFilters.filter((activeFilter) => JSON.stringify(activeFilter.key) === JSON.stringify(filterInput.key)).length <= 0) {
-              activeFilters.push(filterInput);
-            }
+            let index = activeFilters.findIndex((activeFilter) => JSON.stringify(activeFilter.key) === JSON.stringify(filterInput.key))
+            if(index !== -1) activeFilters.splice(index, 1, filterInput)
+            else activeFilters.push(filterInput);
           }"
           @deactivate-filter="
             (key) => {
@@ -115,7 +115,7 @@
               filter.inputFromState = undefined;
               filter.selectedMatcher = undefined;
               activeFilters = activeFilters.filter(
-                (filter) => filter.key !== key
+                (filter) => JSON.stringify(filter.key) !== JSON.stringify(key)
               );
             }
           "
