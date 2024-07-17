@@ -10,7 +10,7 @@
       <p data-cy="metadata-label">
         {{ metadata.label ? t(metadata.label) : t("metadata.no-label") }}
       </p>
-      <p v-if="isFieldRequired && isEdit" class="pl-1">*</p>
+      <p v-if="!isFieldRequired && isEdit" class="pl-1">(optional)</p>
     </div>
     <entity-element-metadata-edit
       v-if="isEdit && metadata.inputField"
@@ -174,6 +174,12 @@ const isFieldRequired = computed(() => {
   if (
     props.metadata?.inputField?.validation?.value?.includes(
       ValidationRules.Required
+    ) ||
+    props.metadata?.inputField?.validation?.value?.includes(
+      ValidationRules.HasRequiredRelation
+    ) ||
+    props.metadata?.inputField?.validation?.value?.includes(
+      ValidationRules.HasOneOfRequiredRelations
     )
   )
     return true;
