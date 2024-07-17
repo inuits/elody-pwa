@@ -166,8 +166,9 @@ onMounted(() => {
     selectedMatcher.value = defaultMatcher;
 });
 
-watch(selectedMatcher, async () => {
-  emit("deactivateFilter", advancedFilterInput.value.key);
+watch(selectedMatcher, async (newValue, oldValue) => {
+  if (oldValue !== undefined)
+    emit("deactivateFilter", advancedFilterInput.value.key);
   if (selectedMatcher.value) await loadMatcher();
 
   filterOptions.value.forEach((option) =>
@@ -177,14 +178,29 @@ watch(selectedMatcher, async () => {
     )
   );
 });
-watch(advancedFilterInput, () => {
-  if (Array.isArray(advancedFilterInput.value.value))
+watch(advancedFilterInput, (newValue, oldValue) => {
+  if (Array.isArray(advancedFilterInput.value.value)) {
+    if (Array.isArray(oldValue?.value) !== Array.isArray(newValue?.value) || oldValue?.value.length === 0 || newValue?.value.length === 0) {
+      oldValue = Array.isArray(oldValue?.value) ? oldValue?.value[0] : oldValue?.value;
+      newValue = Array.isArray(newValue?.value) ? newValue?.value[0] : newValue?.value;
+    }
+    else {
+      oldValue = oldValue?.value;
+      newValue = newValue?.value;
+    }
+    if (newValue === oldValue) return;
     if (advancedFilterInput.value.value.length > 0)
       emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
-    else emit("deactivateFilter", advancedFilterInput.value.key);
-  else if (advancedFilterInput.value.value !== undefined)
-    emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
-  else emit("deactivateFilter", advancedFilterInput.value.key);
+    else
+      emit("deactivateFilter", advancedFilterInput.value.key);
+  }
+  else {
+    if (newValue?.value === oldValue?.value) return;
+    if (advancedFilterInput.value.value !== undefined)
+      emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
+    else
+      emit("deactivateFilter", advancedFilterInput.value.key);
+  }
 });
 watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
