@@ -95,6 +95,7 @@
                 }`
               : t(field.label)
           "
+          :disabled="showErrors ? formContainsErrors : false"
           :icon="field.icon"
           button-style="accentAccent"
           @click="performActionButtonClickEvent(field)"
