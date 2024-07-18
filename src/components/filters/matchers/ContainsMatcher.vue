@@ -52,6 +52,7 @@ watch(input, () => {
     key: props.filter.advancedFilter.key,
     value: input.value ? input.value : undefined,
     match_exact: false,
+    aggregation: props.filter.advancedFilter.aggregation,
   };
   if (props.filter.advancedFilter.lookup)
     newAdvancedFilterInput.lookup = {

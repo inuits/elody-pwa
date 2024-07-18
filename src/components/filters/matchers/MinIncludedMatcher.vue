@@ -61,6 +61,7 @@ watch(input, () => {
         : input.value,
       included: true,
     },
+    aggregation: props.filter.advancedFilter.aggregation,
   };
   if (props.filter.advancedFilter.lookup)
     newAdvancedFilterInput.lookup = {

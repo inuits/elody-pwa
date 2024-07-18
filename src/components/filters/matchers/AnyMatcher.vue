@@ -52,6 +52,7 @@ onBeforeUnmount(() => {
     parent_key: props.filter.advancedFilter.parentKey,
     key: props.filter.advancedFilter.key,
     value: undefined,
+    aggregation: props.filter.advancedFilter.aggregation,
   };
   if (props.filter.advancedFilter.lookup)
     newAdvancedFilterInput.lookup = {
