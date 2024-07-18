@@ -83,7 +83,8 @@
             field.__typename === 'FormAction' &&
             field.actionType !== ActionType.Upload
           "
-          class="mt-5 mb-10"
+          class="mt-5"
+          :class="{ 'mb-10': !isButtonDisabled }"
           :label="
             config?.features.hasTenantSelect
               ? `${t(field.label)} ${t(`types.${field.creationType}`)}${
@@ -95,11 +96,35 @@
                 }`
               : t(field.label)
           "
-          :disabled="showErrors ? formContainsErrors : false"
+          :disabled="isButtonDisabled"
           :icon="field.icon"
           button-style="accentAccent"
           @click="performActionButtonClickEvent(field)"
         />
+        <div
+          v-if="isButtonDisabled && field.__typename === 'FormAction'"
+          class="h-auto mt-1"
+        >
+          <base-tooltip
+            position="top-right"
+            :tooltip-offset="8"
+          >
+            <template #activator="{ on }">
+              <div v-on="on">
+                <unicon :name="Unicons.QuestionCircle.name" height="20" />
+              </div>
+            </template>
+            <template #default>
+                <span class="text-sm text-text-placeholder">
+                  <div>
+                    {{
+                      t(`tooltip.buttons.disabled-submit-button`)
+                    }}
+                  </div>
+                </span>
+            </template>
+          </base-tooltip>
+        </div>
       </div>
     </div>
     <div v-else class="min-h-[20rem] w-full flex justify-center items-center">
@@ -153,6 +178,8 @@ import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import { useMutation } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
+import { Unicons } from "@/types";
+import BaseTooltip from "@/components/base/BaseTooltip.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -262,6 +289,7 @@ const getFieldArray = computed(() => {
 const form = ref<FormContext<any>>();
 const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
 const showErrors = ref<boolean>(false);
+const isButtonDisabled = computed((): boolean => showErrors.value ? formContainsErrors.value : false);
 const { getMenuDestinations, changeExpandedState } = useMenuHelper();
 const isLoading = computed(() => {
   if (isPerformingAction.value) return true;
