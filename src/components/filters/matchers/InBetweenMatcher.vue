@@ -62,6 +62,7 @@ const emitNewAdvancedFilterInput = () => {
           ? addCurrentTimeZoneToDateTimeString(max.value)
           : max.value,
       },
+      aggregation: props.filter.advancedFilter.aggregation,
     };
     if (props.filter.advancedFilter.lookup)
       newAdvancedFilterInput.lookup = {

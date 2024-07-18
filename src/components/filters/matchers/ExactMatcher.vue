@@ -323,6 +323,7 @@ watch(input, () => {
     key: props.filter.advancedFilter.key,
     value,
     match_exact: true,
+    aggregation: props.filter.advancedFilter.aggregation,
   };
   if (props.filter.advancedFilter.lookup)
     newAdvancedFilterInput.lookup = {
