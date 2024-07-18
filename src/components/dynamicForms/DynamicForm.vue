@@ -289,6 +289,7 @@ const form = ref<FormContext<any>>();
 const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
 const showErrors = ref<boolean>(false);
 const isButtonDisabled = computed((): boolean => showErrors.value ? formContainsErrors.value : false);
+const formClosing = ref<boolean>(false);
 const { getMenuDestinations, changeExpandedState } = useMenuHelper();
 const isLoading = computed(() => {
   if (isPerformingAction.value) return true;
@@ -333,6 +334,7 @@ const uploadActionFunction = async () => {
 const submitActionFunction = async (field: FormAction) => {
   await form.value.validate();
   if (formContainsErrors.value) return;
+  formClosing.value = true;
   const document = await getQuery(field.actionQuery as string);
   const entityInput = createEntityFromFormInput(field.creationType);
   const entity = (await performSubmitAction(document, entityInput)).data
@@ -537,7 +539,7 @@ watch(
       standaloneFileType.value = intialValues.standaloneUploadType;
     useBaseModal().changeCloseConfirmation(
       TypeModals.DynamicForm,
-      form.value?.meta.dirty
+      form.value?.meta.dirty && !formClosing.value
     );
   },
   { deep: true, immediate: true }
