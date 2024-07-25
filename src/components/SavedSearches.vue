@@ -149,7 +149,7 @@ const createNew = () => {
     },
     {
       key: "filters",
-      value: props.activeFilters,
+      value: getDeepCopy(props.activeFilters),
     },
   ]);
 };
