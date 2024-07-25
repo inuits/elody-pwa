@@ -138,17 +138,20 @@ const isDisabledByContextLimit = computed<boolean>(() => {
 });
 
 onMounted(() => {
-  if (props.ignoreBulkOperations) return;
+  if (props.ignoreBulkOperations) {
+    inputValue.value = props.modelValue;
+    return;
+  }
+
   inputValue.value = isEnqueued(props.bulkOperationsContext, props.item.id);
 });
 
-watch(
-  contextWhereSelectionEventIsTriggered,
-  () =>
-    (inputValue.value = isEnqueued(props.bulkOperationsContext, props.item.id))
-);
-watch(
-  route,
-  () => (inputValue.value = isEnqueued(route.name as Context, props.item.id))
-);
+watch(contextWhereSelectionEventIsTriggered, () => {
+  if (props.ignoreBulkOperations) return;
+  inputValue.value = isEnqueued(props.bulkOperationsContext, props.item.id);
+});
+watch(route, () => {
+  if (props.ignoreBulkOperations) return;
+  inputValue.value = isEnqueued(route.name as Context, props.item.id);
+});
 </script>

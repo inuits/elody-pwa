@@ -38,7 +38,7 @@
           :class="{ 'mb-2': filterOption.isSelected }"
           :label="filterOption.option.label"
           :item="{ id: filterOption.option.value }"
-          :bulk-operations-context="BulkOperationsContextEnum.FilterOptions"
+          :bulkOperationsContext="BulkOperationsContextEnum.FilterOptions"
           input-style="accentNormal"
           :ignore-bulk-operations="true"
         />
@@ -63,7 +63,15 @@ import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDa
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { addCurrentTimeZoneToDateTimeString, isDateTime } from "@/helpers";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
-import { computed, defineEmits, onMounted, reactive, ref, watch } from "vue";
+import {
+  computed,
+  defineEmits,
+  onMounted,
+  onUpdated,
+  reactive,
+  ref,
+  watch,
+} from "vue";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute } from "vue-router";
@@ -115,10 +123,11 @@ onFilterOptionsResult((result) => {
   if (options) {
     input.value = [];
     options.forEach((option) => {
-      const isSelected = props.relatedActiveFilter && props.relatedActiveFilter?.value.includes(option.value);
+      const isSelected =
+        props.relatedActiveFilter &&
+        props.relatedActiveFilter?.value.includes(option.value);
       filterOptions.push({ isSelected: isSelected, option });
-    }
-    );
+    });
     emit(
       "filterOptions",
       filterOptions.map((filterOption) => filterOption.option.value)
@@ -284,13 +293,21 @@ onMounted(() => {
 
 watch(
   () => props.relatedActiveFilter,
-  () => {
-    if (props.relatedActiveFilter) return;
+  async () => {
+    if (props.relatedActiveFilter) {
+      filterOptions.forEach((option) => {
+        let isSelected = props.relatedActiveFilter?.value.includes(
+          option.option.value
+        );
+        option.isSelected = isSelected;
+      });
+      return;
+    }
     filterOptions.filter((filter) => {
       filter.isSelected = false;
     });
   },
-  { immediate: true }
+  { immediate: true, deep: true }
 );
 
 watch(

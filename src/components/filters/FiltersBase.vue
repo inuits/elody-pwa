@@ -94,7 +94,9 @@
           :filter="filter"
           :related-active-filter="
             activeFilters.filter(
-              (activeFilter) => JSON.stringify(activeFilter.key) === JSON.stringify(filter.advancedFilter.key)
+              (activeFilter) =>
+                JSON.stringify(activeFilter.key) ===
+                JSON.stringify(filter.advancedFilter.key)
             )[0]
           "
           :matchers="
@@ -175,7 +177,7 @@ import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
 import { useSaveSearchHepler } from "@/composables/useSaveSearchHepler";
-import { useRoute } from "vue-router";
+import { useRoute, onBeforeRouteLeave } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -433,19 +435,27 @@ watch(clearAllActiveFilters, () => {
     applyFilters(true);
   }
 });
-watch(selectedSavedFilter, () => {
-  if (!selectedSavedFilter.value) {
-    clearAllActiveFilters.value = true;
-    return;
-  }
+// watch(selectedSavedFilter, () => {
+//   if (!selectedSavedFilter.value) {
+//     clearAllActiveFilters.value = true;
+//     return;
+//   }
 
-  filters.value = selectedSavedFilter.value.value;
-  activeFilters.value = filters.value
-    .filter((filter) => filter.isActive && filter.inputFromState)
-    .map((filter) => filter.inputFromState) as AdvancedFilterInput[];
+//   filters.value = selectedSavedFilter.value.value;
+//   activeFilters.value = filters.value
+//     .filter((filter) => filter.isActive && filter.inputFromState)
+//     .map((filter) => filter.inputFromState) as AdvancedFilterInput[];
 
-  applyFilters(true);
-});
+//   applyFilters(true);
+//   // debugger;
+// });
+
+// onBeforeRouteLeave((to, from, next) => {
+//   // setActiveSavedFilter(null);
+//   debugger;
+//   console.log('me???')
+//   next();
+// });
 </script>
 
 <style>
