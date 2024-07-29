@@ -1,5 +1,5 @@
 <template>
-  <div :key="locale" class="float-right">
+  <div data-cy="language-select" :key="locale" class="float-right">
     <BaseDropdownNew
       v-if="languageOptions"
       v-model:model-value="selectedLanguageOption"
