@@ -90,7 +90,7 @@
       <div v-if="expandFilters && matchers.length > 0">
         <FiltersListItem
           v-for="filter in displayedFilters"
-          :key="filter.advancedFilter.key[0] || ''"
+          :key="filter.advancedFilter.key || ''"
           :filter="filter"
           :related-active-filter="
             activeFilters.filter(
@@ -177,7 +177,12 @@ import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
 import { useSaveSearchHepler } from "@/composables/useSaveSearchHepler";
-import { useRoute, onBeforeRouteLeave } from "vue-router";
+import { useRoute } from "vue-router";
+import {
+  useBulkOperations,
+  BulkOperationsContextEnum,
+} from "@/composables/useBulkOperations";
+import { useFiltersBase } from "@/composables/useFiltersBase";
 
 const props = withDefaults(
   defineProps<{
@@ -224,13 +229,11 @@ const filterMatcherMapping = ref<FilterMatcherMap>({
   type: [],
   metadata_on_relation: [],
 });
-const activeFilterCount = ref<number>(0);
-const activeFilters = ref<AdvancedFilterInput[]>([]);
 const advancedFilters = ref<Maybe<AdvancedFilters>>();
 const clearAllActiveFilters = ref<boolean>(false);
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const displayedFilterOptions = ref<DropdownOption[]>([]);
-const filters = ref<FilterListItem[]>([]);
+// const filters = ref<FilterListItem[]>([]);
 const matchers = ref<DropdownOption[]>([]);
 const { getStateForRoute, updateStateForRoute } = useStateManagement();
 const { isSaved } = useEditMode();
@@ -239,9 +242,9 @@ const { t } = useI18n();
 const { setActiveFilter: setActiveSavedFilter, getActiveFilter } =
   useSaveSearchHepler();
 const router = useRoute();
-const displayedFilters = computed(() => {
-  return filters.value.filter((filter) => filter.isDisplayed);
-});
+const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
+const { filters, activeFilters, activeFilterCount, displayedFilters } =
+  useFiltersBase();
 
 const selectedSavedFilter = computed(() => {
   return getActiveFilter();
@@ -401,61 +404,64 @@ if (props.parentEntityIdentifiers.length > 0)
     }
   );
 watch(displayedFilterOptions, () => toggleDisplayedFilters());
-watch(activeFilters, () => {
-  activeFilterCount.value = 0;
-  filters.value.forEach((filter) => {
-    if (filter.advancedFilter.hidden) return;
-    activeFilterCount.value += filter.isActive ? 1 : 0;
-  });
-});
 watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
-    let displayedFilterOption: DropdownOption | undefined = {
-      label: "",
-      value: "",
-    };
-    while (displayedFilterOption !== undefined)
-      displayedFilterOption = displayedFilterOptions.value.pop();
-    toggleDisplayedFilters();
-
-    activeFilters.value = activeFilters.value.filter((activeFilter) =>
-      filters.value
-        .filter((filter) => !!filter.advancedFilter.hidden)
-        .map((filter) => filter.advancedFilter.key)
-        .includes(activeFilter.key)
-    );
-    filters.value.forEach((filter) => {
-      if (filter.advancedFilter.hidden) return;
-      filter.isActive = false;
-      filter.inputFromState = undefined;
-      filter.selectedMatcher = undefined;
-    });
-    setActiveSavedFilter(null);
-    setTimeout(() => (clearAllActiveFilters.value = false), 50);
-    applyFilters(true);
+    clearAllFilters({ saveState: true, clearSavedFilter: true });
   }
 });
-// watch(selectedSavedFilter, () => {
-//   if (!selectedSavedFilter.value) {
-//     clearAllActiveFilters.value = true;
-//     return;
-//   }
 
-//   filters.value = selectedSavedFilter.value.value;
-//   activeFilters.value = filters.value
-//     .filter((filter) => filter.isActive && filter.inputFromState)
-//     .map((filter) => filter.inputFromState) as AdvancedFilterInput[];
+watch(selectedSavedFilter, () => {
+  if (!selectedSavedFilter.value) {
+    return clearAllFilters({ saveState: false, clearSavedFilter: false });
+  }
 
-//   applyFilters(true);
-//   // debugger;
-// });
+  filters.value = selectedSavedFilter.value.value;
+  activeFilters.value = filters.value
+    .filter((filter) => filter.isActive && filter.inputFromState)
+    .map((filter) => filter.inputFromState) as AdvancedFilterInput[];
 
-// onBeforeRouteLeave((to, from, next) => {
-//   // setActiveSavedFilter(null);
-//   debugger;
-//   console.log('me???')
-//   next();
-// });
+  applyFilters(true);
+});
+
+watch(
+  () => props.entityType,
+  () => {
+    setActiveSavedFilter(null);
+    dequeueAllItemsForBulkProcessing(BulkOperationsContextEnum.FilterOptions);
+  }
+);
+
+const clearAllFilters = async ({
+  saveState = false,
+  clearSavedFilter = false,
+}: {
+  saveState: boolean;
+  clearSavedFilter?: boolean;
+}) => {
+  let displayedFilterOption: DropdownOption | undefined = {
+    label: "",
+    value: "",
+  };
+  while (displayedFilterOption !== undefined)
+    displayedFilterOption = displayedFilterOptions.value.pop();
+  toggleDisplayedFilters();
+
+  activeFilters.value = activeFilters.value.filter((activeFilter) =>
+    filters.value
+      .filter((filter) => !!filter.advancedFilter.hidden)
+      .map((filter) => filter.advancedFilter.key)
+      .includes(activeFilter.key)
+  );
+  filters.value.forEach((filter) => {
+    if (filter.advancedFilter.hidden) return;
+    filter.isActive = false;
+    filter.inputFromState = undefined;
+    filter.selectedMatcher = undefined;
+  });
+  setTimeout(() => (clearAllActiveFilters.value = false), 50);
+  if (clearSavedFilter) setActiveSavedFilter(null);
+  applyFilters(saveState);
+};
 </script>
 
 <style>

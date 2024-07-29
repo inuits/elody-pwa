@@ -98,15 +98,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { AdvancedFilterTypes, DamsIcons } from "@/generated-types/queries";
-import {
-  computed,
-  markRaw,
-  onMounted,
-  onUpdated,
-  ref,
-  toRefs,
-  watch,
-} from "vue";
+import { computed, markRaw, onMounted, ref, toRefs, watch } from "vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import isEqual from "lodash.isequal";
