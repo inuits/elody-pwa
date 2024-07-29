@@ -28,7 +28,10 @@
             </div>
           </div>
         </div>
-        <div v-else>
+        <div
+          v-else
+          :class="[{ 'grid grid-cols-2 gap-2': canBeMultipleColumns }]"
+        >
           <div
             v-for="(metadata, index) in metadatafields"
             v-show="itemMustBeShown(metadata.value)"
@@ -106,6 +109,9 @@ const props = withDefaults(
 const { t } = useI18n();
 const panelType = ref<PanelType>(props.panel.panelType);
 const isCollapsed = ref<boolean>(props.panel.isCollapsed);
+const canBeMultipleColumns = ref<boolean>(
+  props.panel.canBeMultipleColumns || false
+);
 const config = inject("config") as any;
 
 const itemMustBeShown = (value: any): boolean => {
