@@ -13,6 +13,7 @@ import {
   type MutateEntityValuesMutation,
   type MutateEntityValuesMutationVariables,
   DeleteQueryOptions,
+  Collection,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -114,9 +115,11 @@ const parseFormValuesToFormInput = (values: EntityValues) => {
 };
 
 const submit = useSubmitForm<EntityValues>(async () => {
-  const collection = childRoutes.find(
-    (route: any) => route.entityType?.toLowerCase() === props.type.toLowerCase()
-  ).type;
+  const collection =
+    childRoutes.find(
+      (route: any) =>
+        route.entityType?.toLowerCase() === props.type.toLowerCase()
+    )?.type || Collection.Entities;
 
   if (!collection) throw Error("Could not determine collection for submit");
 

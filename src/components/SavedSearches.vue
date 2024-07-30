@@ -1,196 +1,192 @@
 <template>
-  <div v-show="auth.isAuthenticated.value === true">
+  <div>
     <div role="none">
       <base-context-menu-item
-        @clicked="updateSelectedSearch()"
+        @clicked="saveChanges"
         :label="$t('saved-searches.save-changes')"
         :icon="Unicons.Save.name"
-        :disable="isNoChangesOriginal(pickedSavedSearch, initialFilters)"
-        v-show="auth.isAuthenticated.value === true"
+        :disable="!selectedFilter?.id"
       />
 
       <base-context-menu-item
-        @clicked="openCreateModal()"
+        @clicked="createNew"
         :label="$t('saved-searches.new')"
         :icon="Unicons.PlusCircle.name"
-        :disable="
-          initialFilters.every((e) => {
-            return e.isActive === false;
-          })
-        "
-        v-show="auth.isAuthenticated.value === true"
+        :disable="!hasActiveFilters && !selectedFilter"
       />
 
       <base-context-menu-item
-        @clicked="openEditModal()"
+        @clicked="updateLabel"
         :label="$t('saved-searches.edit-label')"
         :icon="Unicons.Edit.name"
-        :disable="!pickedSavedSearch"
-        v-show="auth.isAuthenticated.value === true"
+        :disable="!selectedFilter"
       />
 
       <base-context-menu-item
-        @clicked="resetSelectedSavedSearch()"
-        :label="$t('saved-searches.reset')"
-        :icon="Unicons.Redo.name"
-        :disable="!pickedSavedSearch"
-      />
-
-      <base-context-menu-item
-        @clicked="showConfirmation()"
+        @clicked="openDeleteModal"
         :label="$t('saved-searches.delete')"
         :icon="Unicons.Trash.name"
-        :disable="!pickedSavedSearch"
-        v-show="auth.isAuthenticated.value === true"
+        :disable="!selectedFilter"
       />
 
       <hr class="border-t-1 border-neutral-50" />
 
-      <base-context-menu-item
-        v-for="(savedSearch, index) in savedSearches.slice(0, 5)"
-        :key="index"
-        @clicked="pick(savedSearch)"
-        :label="savedSearch.metadata[0]?.value"
-        :highlight="
-          pickedSavedSearch
-            ? pickedSavedSearch._key === savedSearch._key
-            : false
-        "
-      />
+      <!-- TODO(savedSearch): save selected to session/local storage and show it there -->
+      <!-- <template v-if="!entitiesLoading">
+        <base-context-menu-item
+          v-for="(savedSearch, index) in entitiesList.slice(0, 5)"
+          :key="index"
+          @clicked="selectFilter(savedSearch)"
+          :label="savedSearch.title"
+          :highlight="selectedFilter?.id === savedSearch.id"
+        />
+      </template>
 
-      <hr class="border-t-1 border-neutral-50" />
+      <hr class="border-t-1 border-neutral-50" v-if="entitiesList.length > 0" /> -->
 
       <base-context-menu-item
-        @clicked="openSearchSavedSearchesModal()"
+        @clicked="openFindAllFiltersModal"
         :icon="Unicons.SearchGlass.name"
         :label="$t('saved-searches.all-filters')"
       />
     </div>
   </div>
-
-  <create-saved-search-modal
-    @refetchSavedSearches="refetchSavedSearches"
-    :initialFilters="initialFilters"
-  />
 </template>
 
 <script lang="ts" setup>
 import { Unicons } from "@/types";
-import { useMutation } from "@vue/apollo-composable";
+import { TypeModals, Entitytyping } from "@/generated-types/queries";
+import { useSaveSearchHepler } from "@/composables/useSaveSearchHepler";
+import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
+import { useBaseModal } from "@/composables/useBaseModal";
+import { computed, onMounted } from "vue";
+import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
+import { useConfirmModal } from "@/composables/useConfirmModal";
+import { useRouter } from "vue-router";
+import { goToEntityPage } from "@/helpers";
 import {
-  SavedSearchesDocument,
-  DeleteSavedSearchDocument,
-  PatchSavedSearchDefinitionDocument,
-  GetSavedSearchByIdDocument,
-  type Definition,
-} from "@/generated-types/queries";
-import type {
-  SavedSearchesMutation,
-  DeleteSavedSearchMutation,
-  PatchSavedSearchDefinitionMutation,
-  GetSavedSearchByIdMutation,
-} from "@/generated-types/queries";
-import { useSavedSearchHelper } from "../composables/useSavedSearchHelper";
-import CreateSavedSearchModal from "@/components/CreateSavedSearchModal.vue";
-import BaseContextMenuItem from "./base/BaseContextMenuItem.vue";
-import type { FilterInList } from "@/composables/useFilterHelper";
-import { useAuth } from "session-vue-3-oidc-library";
-const auth = useAuth();
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
+import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
   defineProps<{
-    initialFilters: FilterInList[];
+    activeFilters: any[];
+    savedSearches?: any[];
+    hasActiveFilters: boolean;
+    entityType: Entitytyping;
   }>(),
   {
-    initialFilters: () => {
-      return [];
-    },
+    activeFilters: () => [],
+    savedSearches: () => [],
+    hasActiveFilters: false,
   }
 );
 
-const emit = defineEmits(["removedSelectedSearch"]);
-
+const { t } = useI18n();
+const { createNotificationOverwrite } = useNotification();
+const { openModal, closeModal } = useBaseModal();
+const { initializeConfirmModal } = useConfirmModal();
 const {
-  openEditModal,
-  openCreateModal,
-  isDisplayingContextMenu,
-  pickedSavedSearch,
-  savedSearches,
-  openSearchSavedSearchesModal,
-  clearTypename,
-  setPickedSavedSearch,
-  isNoChangesOriginal,
-} = useSavedSearchHelper();
+  setActiveFilter,
+  getActiveFilter,
+  deleteSavedSearch,
+  initialize,
+  saveExistedSearch,
+  fetchSavedSearchById,
+} = useSaveSearchHepler();
+const { setEntityType } = useQueryVariablesFactory();
 
-const { mutate, onDone } = useMutation<SavedSearchesMutation>(
-  SavedSearchesDocument
-);
+const router = useRouter();
 
-const { mutate: deleteSavedSearchMutate, onDone: onDoneDelete } =
-  useMutation<DeleteSavedSearchMutation>(DeleteSavedSearchDocument);
-
-const {
-  mutate: patchSavedSearchDefinitionMutate,
-  onDone: onDonePatchDefinition,
-} = useMutation<PatchSavedSearchDefinitionMutation>(
-  PatchSavedSearchDefinitionDocument
-);
-
-const { mutate: getByIdMutate, onDone: onDoneGetById } =
-  useMutation<GetSavedSearchByIdMutation>(GetSavedSearchByIdDocument);
-
-mutate();
-
-onDone((result: any) => {
-  savedSearches.value = result.data.savedSearches.results;
+const selectedFilter = computed(() => {
+  return getActiveFilter();
 });
 
-const refetchSavedSearches = () => {
-  mutate();
+const getDeepCopy = (obj: any) => {
+  return JSON.parse(JSON.stringify(obj));
 };
 
-const deleteSavedSearch = () => {
-  deleteSavedSearchMutate({ uuid: pickedSavedSearch.value?._key });
-  onDoneDelete(() => {
-    setPickedSavedSearch(undefined);
-    mutate();
-    emit("removedSelectedSearch");
+onMounted(() => {
+  initialize(props.entityType);
+});
+
+const handleOpenModal = (context: any = undefined) => {
+  openModal(
+    TypeModals.SaveSearch,
+    undefined,
+    "center",
+    "GetSaveSearchForm",
+    undefined,
+    undefined,
+    context
+  );
+};
+
+const saveChanges = async () => {
+  if (!selectedFilter.value) return;
+  const savedFilter = await fetchSavedSearchById(selectedFilter.value.id);
+  await saveExistedSearch(savedFilter, props.activeFilters);
+  createNotificationOverwrite(
+    NotificationType.default,
+    t("notifications.success.entityUpdated.title"),
+    t("notifications.success.entityUpdated.description")
+  );
+};
+
+const updateLabel = async () => {
+  if (!selectedFilter.value) return;
+  const savedFilterEntity = await fetchSavedSearchById(selectedFilter.value.id);
+  goToEntityPage(savedFilterEntity, "SingleEntity", router);
+};
+
+const createNew = () => {
+  handleOpenModal([
+    {
+      key: "applicableType",
+      value: props.entityType,
+    },
+    {
+      key: "filters",
+      value: getDeepCopy(props.activeFilters),
+    },
+  ]);
+};
+
+// TODO(savedSearch): should be used once selected filters will be saved in session/local storage
+const selectFilter = async (filter: any) => {
+  setActiveFilter(getDeepCopy(filter));
+};
+
+const openDeleteModal = () => {
+  initializeConfirmModal({
+    confirmButton: {
+      buttonCallback: deleteFilter,
+    },
+    declineButton: {
+      buttonCallback: () => {
+        closeModal(TypeModals.Confirm);
+      },
+    },
+    translationKey: "delete-entity",
+    openImmediately: true,
   });
 };
 
-const showConfirmation = () => {
-  // TODO:
+const deleteFilter = async () => {
+  if (!selectedFilter.value) return;
+  await deleteSavedSearch(selectedFilter.value.id);
+  setActiveFilter(null);
+  createNotificationOverwrite(
+    NotificationType.default,
+    t("notifications.success.entityDeleted.title"),
+    t("notifications.success.entityDeleted.description")
+  );
 };
 
-const pick = (savedSearch: any) => {
-  setPickedSavedSearch(savedSearch);
-  isDisplayingContextMenu.value = false;
-};
-
-const resetSelectedSavedSearch = () => {
-  getByIdMutate({ uuid: pickedSavedSearch.value?._key });
-  onDoneGetById((res) => {
-    pick(res?.data?.getSavedSearchById);
-  });
-};
-
-const updateSelectedSearch = () => {
-  if (pickedSavedSearch.value) {
-    var definition: Array<Definition> = [];
-    props.initialFilters.forEach((filter: FilterInList) => {
-      if (filter.isActive) {
-        clearTypename(filter.input);
-        definition.push(filter.input);
-      }
-    });
-    patchSavedSearchDefinitionMutate({
-      uuid: pickedSavedSearch.value._key,
-      definition: definition,
-    });
-    onDonePatchDefinition((res: any) => {
-      setPickedSavedSearch(res.data.patchSavedSearchDefinition);
-      refetchSavedSearches();
-    });
-  }
+const openFindAllFiltersModal = () => {
+  setEntityType(Entitytyping.SavedSearch);
+  openModal(TypeModals.SaveSearchPicker, undefined, "right");
 };
 </script>

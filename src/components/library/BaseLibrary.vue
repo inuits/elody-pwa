@@ -46,6 +46,9 @@
               :parent-entity-identifiers="parentEntityIdentifiers"
               :route="route"
               :set-advanced-filters="setAdvancedFilters"
+              :enable-save-search-filters="enableSaveSearchFilters"
+              :entity-type="entityType as Entitytyping"
+              :should-use-state-for-route="shouldUseStateForRoute"
               @filter-matcher-mapping-promise="
                 (promise) => (filterMatcherMappingPromise = promise)
               "
@@ -258,6 +261,8 @@ export type BaseLibraryProps = {
   entityListElements?: EntityListElement[];
   allowedActionsOnRelations?: RelationActions[];
   customBulkOperations?: String | undefined;
+  enableSaveSearchFilters?: boolean;
+  shouldUseStateForRoute?: boolean;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -282,6 +287,8 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   entityListElements: undefined,
   allowedActionsOnRelations: [],
   customBulkOperations: undefined,
+  enableSaveSearchFilters: true,
+  shouldUseStateForRoute: true,
 });
 
 const emit = defineEmits<{
@@ -314,7 +321,10 @@ const {
   setSortKey,
   setSortOrder,
   totalEntityCount,
-} = useBaseLibrary(apolloClient as ApolloClient<any>);
+} = useBaseLibrary(
+  apolloClient as ApolloClient<any>,
+  props.shouldUseStateForRoute
+);
 
 let filterMatcherMappingPromise: (entityType: Entitytyping) => Promise<void>;
 let advancedFiltersPromise: (entityType: Entitytyping) => Promise<void>;
