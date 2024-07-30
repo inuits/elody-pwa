@@ -60,7 +60,7 @@
             @click="applyFilters(true)"
           />
           <BaseButtonNew
-            v-if="enableSaveSearchFilters"
+            v-if="hasSavedSearch && enableSaveSearchFilters"
             :icon="DamsIcons.EllipsisV"
             class="!w-1/5"
             @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event.clientX, y: event.clientY})"
@@ -171,7 +171,7 @@ import FiltersListItem from "@/components/filters/FiltersListItem.vue";
 import SavedSearches from "@/components/SavedSearches.vue";
 import useEditMode from "@/composables/useEdit";
 import { apolloClient } from "@/main";
-import { computed, defineProps, onMounted, ref, watch } from "vue";
+import { computed, defineProps, onMounted, ref, watch, inject } from "vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
@@ -245,6 +245,9 @@ const router = useRoute();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const { filters, activeFilters, activeFilterCount, displayedFilters } =
   useFiltersBase();
+const config = inject("config") as any;
+
+const hasSavedSearch = config.features.hasSavedSearch || false;
 
 const selectedSavedFilter = computed(() => {
   return getActiveFilter();
