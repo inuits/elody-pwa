@@ -15,7 +15,10 @@ import { createPlaceholderEntities } from "@/helpers";
 import { ref, watch } from "vue";
 import { useStateManagement } from "@/composables/useStateManagement";
 
-export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
+export const useBaseLibrary = (
+  apolloClient: ApolloClient<any>,
+  shouldUseStateForRoute: boolean = true
+) => {
   let entityType: Entitytyping = Entitytyping.BaseEntity;
   let _route: RouteLocationNormalizedLoaded | undefined;
   const entities = ref<Entity[]>([]);
@@ -81,7 +84,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     queryVariables.advancedFilterInputs = filters;
     queryVariables.skip = 1;
 
-    updateStateForRoute(_route, { queryVariables });
+    if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
@@ -90,7 +93,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     forceFetch: boolean = false
   ): Promise<void> => {
     queryVariables.skip = skip;
-    updateStateForRoute(_route, { queryVariables });
+    if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
@@ -99,7 +102,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     forceFetch: boolean = false
   ): Promise<void> => {
     queryVariables.limit = limit;
-    updateStateForRoute(_route, { queryVariables });
+    if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
@@ -108,7 +111,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     forceFetch: boolean = false
   ): Promise<void> => {
     queryVariables.searchValue.order_by = sortKey;
-    updateStateForRoute(_route, { queryVariables });
+    if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
@@ -117,7 +120,7 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     forceFetch: boolean = false
   ): Promise<void> => {
     queryVariables.searchValue.isAsc = sortOrder === "asc";
-    updateStateForRoute(_route, { queryVariables });
+    if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
@@ -153,10 +156,16 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
     while (promiseQueue.value.length > 0) promiseQueue.value.shift();
 
     _route = route;
-    let variables = getStateForRoute(_route)?.queryVariables;
+    let variables =
+      shouldUseStateForRoute && getStateForRoute(_route)?.queryVariables;
     if (variables) queryVariables = variables;
-    else updateStateForRoute(_route, { queryVariables });
-    if (!variables || _route?.name === "SingleEntity")
+    else if (!variables && shouldUseStateForRoute)
+      updateStateForRoute(_route, { queryVariables });
+    if (
+      !variables ||
+      _route?.name === "SingleEntity" ||
+      !shouldUseStateForRoute
+    )
       variables = queryVariables;
 
     await apolloClient
@@ -172,10 +181,11 @@ export const useBaseLibrary = (apolloClient: ApolloClient<any>) => {
         const fetchedEntities = result.data.Entities;
         entities.value = fetchedEntities?.results as Entity[];
         totalEntityCount.value = fetchedEntities?.count || 0;
-        updateStateForRoute(_route, {
-          entityCountOnPage: fetchedEntities.results.length,
-          totalEntityCount: fetchedEntities.count,
-        });
+        if (shouldUseStateForRoute)
+          updateStateForRoute(_route, {
+            entityCountOnPage: fetchedEntities.results.length,
+            totalEntityCount: fetchedEntities.count,
+          });
         entitiesLoading.value = false;
       })
       .catch(() => {

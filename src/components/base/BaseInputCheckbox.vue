@@ -18,7 +18,7 @@
         ]"
         v-model="inputValue"
         type="checkbox"
-        :disabled="disabled"
+        :disabled="disabled || isDisabledByContextLimit"
         @change.stop
         @click.stop="handleItemSelection"
       />
@@ -108,6 +108,7 @@ const {
   dequeueItemForBulkProcessing,
   isEnqueued,
   getEnqueuedItemCount,
+  isBulkSelectionLimitReached,
 } = useBulkOperations();
 const route = useRoute();
 
@@ -129,19 +130,28 @@ const selectedInputStyle = computed<Input>(() => inputStyles[props.inputStyle]);
 const divSelectedBgColor = computed<string>(() =>
   selectedInputStyle.value.textColor.replace(/^text/, "bg")
 );
+const isDisabledByContextLimit = computed<boolean>(() => {
+  return (
+    !isEnqueued(props.bulkOperationsContext, props.item.id) &&
+    isBulkSelectionLimitReached(props.bulkOperationsContext)
+  );
+});
 
 onMounted(() => {
-  if (props.ignoreBulkOperations) return;
+  if (props.ignoreBulkOperations) {
+    inputValue.value = props.modelValue;
+    return;
+  }
+
   inputValue.value = isEnqueued(props.bulkOperationsContext, props.item.id);
 });
 
-watch(
-  contextWhereSelectionEventIsTriggered,
-  () =>
-    (inputValue.value = isEnqueued(props.bulkOperationsContext, props.item.id))
-);
-watch(
-  route,
-  () => (inputValue.value = isEnqueued(route.name as Context, props.item.id))
-);
+watch(contextWhereSelectionEventIsTriggered, () => {
+  if (props.ignoreBulkOperations) return;
+  inputValue.value = isEnqueued(props.bulkOperationsContext, props.item.id);
+});
+watch(route, () => {
+  if (props.ignoreBulkOperations) return;
+  inputValue.value = isEnqueued(route.name as Context, props.item.id);
+});
 </script>

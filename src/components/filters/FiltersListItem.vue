@@ -37,7 +37,11 @@
       <unicon :name="icon" height="20" />
     </div>
   </div>
-  <div data-cy="filters-list-item-panel" v-show="isOpen" class="flex flex-row gap-4 p-6 bg-neutral-light">
+  <div
+    data-cy="filters-list-item-panel"
+    v-show="isOpen"
+    class="flex flex-row gap-4 p-6 bg-neutral-light"
+  >
     <div class="flex w-full justify-start gap-4">
       <div>
         <BaseDropdownNew
@@ -97,6 +101,7 @@ import { AdvancedFilterTypes, DamsIcons } from "@/generated-types/queries";
 import { computed, markRaw, onMounted, ref, toRefs, watch } from "vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
+import isEqual from "lodash.isequal";
 
 const props = defineProps<{
   filter: FilterListItem;
@@ -178,28 +183,34 @@ watch(selectedMatcher, async (newValue, oldValue) => {
     )
   );
 });
+
 watch(advancedFilterInput, (newValue, oldValue) => {
   if (Array.isArray(advancedFilterInput.value.value)) {
-    if (Array.isArray(oldValue?.value) !== Array.isArray(newValue?.value) || oldValue?.value.length === 0 || newValue?.value.length === 0) {
-      oldValue = Array.isArray(oldValue?.value) ? oldValue?.value[0] : oldValue?.value;
-      newValue = Array.isArray(newValue?.value) ? newValue?.value[0] : newValue?.value;
-    }
-    else {
+    if (
+      Array.isArray(oldValue?.value) !== Array.isArray(newValue?.value) ||
+      oldValue?.value.length === 0 ||
+      newValue?.value.length === 0
+    ) {
+      oldValue = Array.isArray(oldValue?.value)
+        ? oldValue?.value[0]
+        : oldValue?.value;
+      newValue = Array.isArray(newValue?.value)
+        ? newValue?.value[0]
+        : newValue?.value;
+    } else {
       oldValue = oldValue?.value;
       newValue = newValue?.value;
     }
-    if (newValue === oldValue) return;
+
+    if (isEqual(newValue) === isEqual(oldValue)) return;
     if (advancedFilterInput.value.value.length > 0)
       emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
-    else
-      emit("deactivateFilter", advancedFilterInput.value.key);
-  }
-  else {
+    else emit("deactivateFilter", advancedFilterInput.value.key);
+  } else {
     if (newValue?.value === oldValue?.value) return;
     if (advancedFilterInput.value.value !== undefined)
       emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
-    else
-      emit("deactivateFilter", advancedFilterInput.value.key);
+    else emit("deactivateFilter", advancedFilterInput.value.key);
   }
 });
 watch(clearAllActiveFilters, () => {

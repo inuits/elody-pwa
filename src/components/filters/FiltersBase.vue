@@ -17,10 +17,18 @@
       <span class="text-text-body text-xl font-bold">
         {{ t("filters.filter") }}
       </span>
-      <div class="flex">
+      <div class="flex items-center">
         <span class="text-text-body">
           {{ activeFilterCount }} {{ t("filters.active") }}
         </span>
+        <div
+          v-if="selectedSavedFilter"
+          class="bg-neutral-light border-neutral-light rounded py-1 px-2 ml-2"
+        >
+          <span class="text-text-body">
+            {{ selectedSavedFilter.title }}
+          </span>
+        </div>
         <unicon
           class="text-text-body ml-4"
           :name="Unicons[getAngleIcon].name"
@@ -51,11 +59,12 @@
             button-style="accentNormal"
             @click="applyFilters(true)"
           />
-          <!--          <BaseButtonNew-->
-          <!--            :icon="DamsIcons.EllipsisV"-->
-          <!--            class="!w-1/5"-->
-          <!--            @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event.clientX, y: event.clientY})"-->
-          <!--          />-->
+          <BaseButtonNew
+            v-if="hasSavedSearch && enableSaveSearchFilters"
+            :icon="DamsIcons.EllipsisV"
+            class="!w-1/5"
+            @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event.clientX, y: event.clientY})"
+          />
         </div>
         <div>
           <BaseInputAutocomplete
@@ -80,12 +89,14 @@
 
       <div v-if="expandFilters && matchers.length > 0">
         <FiltersListItem
-          v-for="filter in filters.filter((filter) => filter.isDisplayed)"
+          v-for="filter in displayedFilters"
           :key="filter.advancedFilter.key || ''"
           :filter="filter"
           :related-active-filter="
             activeFilters.filter(
-              (activeFilter) => JSON.stringify(activeFilter.key) === JSON.stringify(filter.advancedFilter.key)
+              (activeFilter) =>
+                JSON.stringify(activeFilter.key) ===
+                JSON.stringify(filter.advancedFilter.key)
             )[0]
           "
           :matchers="
@@ -122,9 +133,14 @@
         />
       </div>
     </div>
-    <base-context-menu :context-menu="contextMenuHandler.getContextMenu()"
-      ><saved-searches
-    /></base-context-menu>
+    <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
+      <saved-searches
+        :active-filters="filters"
+        :has-active-filters="activeFilterCount > 0"
+        :entityType="entityType"
+        @filterDeleted="() => (clearAllActiveFilters = true)"
+      />
+    </base-context-menu>
   </div>
 </template>
 
@@ -155,11 +171,18 @@ import FiltersListItem from "@/components/filters/FiltersListItem.vue";
 import SavedSearches from "@/components/SavedSearches.vue";
 import useEditMode from "@/composables/useEdit";
 import { apolloClient } from "@/main";
-import { computed, defineProps, onMounted, ref, watch } from "vue";
+import { computed, defineProps, onMounted, ref, watch, inject } from "vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
+import { useSaveSearchHepler } from "@/composables/useSaveSearchHepler";
+import { useRoute } from "vue-router";
+import {
+  useBulkOperations,
+  BulkOperationsContextEnum,
+} from "@/composables/useBulkOperations";
+import { useFiltersBase } from "@/composables/useFiltersBase";
 
 const props = withDefaults(
   defineProps<{
@@ -168,9 +191,14 @@ const props = withDefaults(
     parentEntityIdentifiers?: string[];
     route: RouteLocationNormalizedLoaded;
     setAdvancedFilters: Function;
+    enableSaveSearchFilters: boolean;
+    entityType: Entitytyping;
+    shouldUseStateForRoute: boolean;
   }>(),
   {
     parentEntityIdentifiers: () => [],
+    enableSaveSearchFilters: true,
+    shouldUseStateForRoute: true,
   }
 );
 
@@ -201,18 +229,29 @@ const filterMatcherMapping = ref<FilterMatcherMap>({
   type: [],
   metadata_on_relation: [],
 });
-const activeFilterCount = ref<number>(0);
-const activeFilters = ref<AdvancedFilterInput[]>([]);
 const advancedFilters = ref<Maybe<AdvancedFilters>>();
 const clearAllActiveFilters = ref<boolean>(false);
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const displayedFilterOptions = ref<DropdownOption[]>([]);
-const filters = ref<FilterListItem[]>([]);
+// const filters = ref<FilterListItem[]>([]);
 const matchers = ref<DropdownOption[]>([]);
 const { getStateForRoute, updateStateForRoute } = useStateManagement();
 const { isSaved } = useEditMode();
 const { setAdvancedFilterInputs } = useQueryVariablesFactory();
 const { t } = useI18n();
+const { setActiveFilter: setActiveSavedFilter, getActiveFilter } =
+  useSaveSearchHepler();
+const router = useRoute();
+const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
+const { filters, activeFilters, activeFilterCount, displayedFilters } =
+  useFiltersBase();
+const config = inject("config") as any;
+
+const hasSavedSearch = config.features.hasSavedSearch || false;
+
+const selectedSavedFilter = computed(() => {
+  return getActiveFilter();
+});
 
 const filterMatcherMappingPromise = async () => {
   return apolloClient
@@ -264,7 +303,7 @@ const handleAdvancedFilters = () => {
   activeFilters.value = [];
 
   if (advancedFilters.value) {
-    const state = getStateForRoute(props.route);
+    const state = props.shouldUseStateForRoute && getStateForRoute(props.route);
     if (!state?.filterListItems || state.filterListItems.length == 0) {
       Object.values(advancedFilters.value).forEach((advancedFilter) => {
         if (typeof advancedFilter !== "string") {
@@ -286,6 +325,13 @@ const handleAdvancedFilters = () => {
                 foreign_field: advancedFilter.lookup.foreign_field,
                 as: advancedFilter.lookup.as,
               };
+
+            if (
+              advancedFilter.hidden &&
+              advancedFilter.defaultValue === "entityType"
+            ) {
+              hiddenFilter.value = router.meta.entityType;
+            }
 
             if (
               advancedFilter.parentKey === "relations" ||
@@ -311,9 +357,10 @@ const handleAdvancedFilters = () => {
           });
         }
       });
-      updateStateForRoute(props.route, {
-        filterListItems: JSON.parse(JSON.stringify(filters.value)),
-      });
+      if (props.shouldUseStateForRoute)
+        updateStateForRoute(props.route, {
+          filterListItems: JSON.parse(JSON.stringify(filters.value)),
+        });
     } else {
       filters.value = state?.filterListItems;
       activeFilters.value = filters.value
@@ -326,7 +373,7 @@ const handleAdvancedFilters = () => {
 };
 
 const applyFilters = (saveState = false, force = true) => {
-  if (saveState)
+  if (saveState && props.shouldUseStateForRoute)
     updateStateForRoute(props.route, {
       filterListItems: JSON.parse(JSON.stringify(filters.value)),
     });
@@ -360,39 +407,64 @@ if (props.parentEntityIdentifiers.length > 0)
     }
   );
 watch(displayedFilterOptions, () => toggleDisplayedFilters());
-watch(activeFilters, () => {
-  activeFilterCount.value = 0;
-  filters.value.forEach((filter) => {
-    if (filter.advancedFilter.hidden) return;
-    activeFilterCount.value += filter.isActive ? 1 : 0;
-  });
-});
 watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
-    let displayedFilterOption: DropdownOption | undefined = {
-      label: "",
-      value: "",
-    };
-    while (displayedFilterOption !== undefined)
-      displayedFilterOption = displayedFilterOptions.value.pop();
-    toggleDisplayedFilters();
-
-    activeFilters.value = activeFilters.value.filter((activeFilter) =>
-      filters.value
-        .filter((filter) => !!filter.advancedFilter.hidden)
-        .map((filter) => filter.advancedFilter.key)
-        .includes(activeFilter.key)
-    );
-    filters.value.forEach((filter) => {
-      if (filter.advancedFilter.hidden) return;
-      filter.isActive = false;
-      filter.inputFromState = undefined;
-      filter.selectedMatcher = undefined;
-    });
-    setTimeout(() => (clearAllActiveFilters.value = false), 50);
-    applyFilters(true);
+    clearAllFilters({ saveState: true, clearSavedFilter: true });
   }
 });
+
+watch(selectedSavedFilter, () => {
+  if (!selectedSavedFilter.value) {
+    return clearAllFilters({ saveState: false, clearSavedFilter: false });
+  }
+
+  filters.value = selectedSavedFilter.value.value;
+  activeFilters.value = filters.value
+    .filter((filter) => filter.isActive && filter.inputFromState)
+    .map((filter) => filter.inputFromState) as AdvancedFilterInput[];
+
+  applyFilters(true);
+});
+
+watch(
+  () => props.entityType,
+  () => {
+    setActiveSavedFilter(null);
+    dequeueAllItemsForBulkProcessing(BulkOperationsContextEnum.FilterOptions);
+  }
+);
+
+const clearAllFilters = async ({
+  saveState = false,
+  clearSavedFilter = false,
+}: {
+  saveState: boolean;
+  clearSavedFilter?: boolean;
+}) => {
+  let displayedFilterOption: DropdownOption | undefined = {
+    label: "",
+    value: "",
+  };
+  while (displayedFilterOption !== undefined)
+    displayedFilterOption = displayedFilterOptions.value.pop();
+  toggleDisplayedFilters();
+
+  activeFilters.value = activeFilters.value.filter((activeFilter) =>
+    filters.value
+      .filter((filter) => !!filter.advancedFilter.hidden)
+      .map((filter) => filter.advancedFilter.key)
+      .includes(activeFilter.key)
+  );
+  filters.value.forEach((filter) => {
+    if (filter.advancedFilter.hidden) return;
+    filter.isActive = false;
+    filter.inputFromState = undefined;
+    filter.selectedMatcher = undefined;
+  });
+  setTimeout(() => (clearAllActiveFilters.value = false), 50);
+  if (clearSavedFilter) setActiveSavedFilter(null);
+  applyFilters(saveState);
+};
 </script>
 
 <style>
