@@ -153,7 +153,7 @@ const handleCreatingFromTag = async (option: any) => {
   isCreatingEntity.value = true;
 
   const newEntity = await createEntity({
-    entityType: props.metadataKeyToCreateEntityFromOption as Entitytyping,
+    entityType: props.metadataKeyToGetOptionsFor as Entitytyping,
     metadata: [
       {
         key: props.metadataKeyToCreateEntityFromOption,
