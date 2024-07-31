@@ -58,8 +58,14 @@ export const goToEntityTypeRoute = (
 
     if (route) {
       router.push(`/${route.destination}`);
-      if (sorting)
-        setSortConfigurationForRoute(router.currentRoute.value, sorting);
+      if (sorting) {
+        const routes = router.getRoutes();
+        const routeLocation = routes.find(
+          (routeLocation: RouteLocationNormalizedLoaded) =>
+            routeLocation.path.includes(route.destination)
+        );
+        setSortConfigurationForRoute(routeLocation, sorting);
+      }
     }
   } catch (e) {
     console.log("Unable to navigate to this route", e);
