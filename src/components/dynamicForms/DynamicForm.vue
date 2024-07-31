@@ -124,6 +124,11 @@
           button-style="accentAccent"
           @click="performActionButtonClickEvent(field)"
         />
+        <p v-if="submitErrors">
+          {{
+            t("actions.submit.errors", submitErrors)
+          }}
+        </p>
       </div>
     </div>
     <div v-else class="min-h-[20rem] w-full flex justify-center items-center">
@@ -156,6 +161,7 @@ import {
   type UploadField
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
+import type { ErrorResponse } from "@apollo/client/link/error";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import { computed, inject, ref, watch, toRaw } from "vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
@@ -292,6 +298,7 @@ const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
 const showErrors = ref<boolean>(false);
 const isButtonDisabled = computed((): boolean => showErrors.value ? formContainsErrors.value : false);
 const formClosing = ref<boolean>(false);
+const submitErrors = ref<string | undefined>(undefined);
 const { getMenuDestinations, changeExpandedState } = useMenuHelper();
 const isLoading = computed(() => {
   if (isPerformingAction.value) return true;
@@ -341,6 +348,7 @@ const submitActionFunction = async (field: FormAction) => {
   const entityInput = createEntityFromFormInput(field.creationType);
   const entity = (await performSubmitAction(document, entityInput)).data
     .CreateEntity;
+  showErrors.value = false;
   await getTenants();
   closeModal(TypeModals.DynamicForm);
   changeExpandedState(false);
