@@ -6,6 +6,8 @@ export type callback = (e?: Event | undefined) => Promise<unknown>;
 export const toBeDeleted = ref<string[]>([]);
 export const isSaved = ref<boolean>(false);
 
+const showErrors = computed<boolean>(() => buttonClicked.value && isDisabled.value);
+const buttonClicked = ref<boolean>(false);
 const isDisabled = ref<boolean>(false);
 const editMode = ref<EditModes>("view");
 const saveCallbacks = ref<callback[]>([]);
@@ -15,7 +17,10 @@ const refetchFn = ref<Function>();
 export const useEditMode = () => {
   const { linkMediaFilesToEntity, clearMediaFilesToLinkToEntity } =
     useMediaAssetLinkHelper();
-  const setEditMode = () => (editMode.value = "edit");
+  const setEditMode = () => {
+    editMode.value = "edit";
+    resetButtonClicked();
+  };
   const disableEditMode = () => (editMode.value = "view");
   const isEdit = computed<boolean>(() => editMode.value === "edit");
   const setRefetchFn = (refetch: Function) => (refetchFn.value = refetch);
@@ -41,6 +46,7 @@ export const useEditMode = () => {
   const clearSaveCallbacks = () => (saveCallbacks.value = []);
 
   const save = async () => {
+    if (isDisabled.value) return;
     isSaved.value = false;
     linkMediaFilesToEntity(addSaveCallback);
 
@@ -64,6 +70,13 @@ export const useEditMode = () => {
     isDisabled.value = value;
   };
 
+  const clickButton = () => {
+    buttonClicked.value = true;
+  };
+  const resetButtonClicked = () => {
+    buttonClicked.value = false;
+  };
+
   return {
     save,
     isEdit,
@@ -78,8 +91,12 @@ export const useEditMode = () => {
     setRefetchFn,
     refetchFn,
     isSaved,
+    showErrors,
     isDisabled,
     setDisableState,
+    buttonClicked,
+    clickButton,
+    resetButtonClicked,
     clearSaveCallbacks,
   };
 };

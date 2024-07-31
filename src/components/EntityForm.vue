@@ -66,6 +66,8 @@ const {
   disableEditMode,
   setDisableState,
   clearSaveCallbacks,
+  resetButtonClicked,
+  buttonClicked,
 } = useEditMode();
 const {
   createForm,
@@ -188,11 +190,24 @@ watch(
 watch(
   () => form.values,
   async () => {
-    await form.validate();
-    setDisableState(formContainsErrors.value);
+    await validateAndSetDisableState();
+    if (!formContainsErrors.value && buttonClicked.value)
+      resetButtonClicked();
   },
   { deep: true }
 );
+watch(
+  () => buttonClicked.value,
+  async () => {
+    if (!buttonClicked.value) return;
+    await validateAndSetDisableState();
+  },
+);
+
+const validateAndSetDisableState = async () => {
+  await form.validate();
+  setDisableState(formContainsErrors.value);
+}
 
 onBeforeRouteLeave((to, from, next) => {
   if (!isEdit.value || !form.meta.value.dirty) return next();

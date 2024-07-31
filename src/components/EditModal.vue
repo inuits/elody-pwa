@@ -4,9 +4,10 @@
       :button-label="$t('bulk-operations.save')"
       :button-icon="DamsIcons.Save"
       :show-delete-button="isEditToggleVisible !== 'edit-delete'"
-      :disabled="isDisabled"
+      :disabled="showErrors"
       @submit="
         async () => {
+          clickButton();
           await save();
           await getTenants();
         }
@@ -58,8 +59,9 @@ const {
   save,
   discard,
   disableEditMode,
+  showErrors,
+  clickButton,
   isEditToggleVisible,
-  isDisabled,
 } = useEditMode();
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal, openModal, deleteQueryOptions } = useBaseModal();
