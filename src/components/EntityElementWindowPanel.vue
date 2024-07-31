@@ -48,6 +48,7 @@
               :form-id="formId"
               :is-edit="isEdit"
               v-model:metadata="metadata as MetadataField"
+              :show-errors="showErrors"
               :base-library-mode="metadata.baseLibraryMode"
             />
             <entity-element-list
@@ -91,6 +92,7 @@ import { getMetadataFields, getObjectsBasedOnTypename } from "@/helpers";
 import { PanelType } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
+import { useEditMode } from "@/composables/useEdit";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 
 const props = withDefaults(
@@ -107,6 +109,7 @@ const props = withDefaults(
 );
 
 const { t } = useI18n();
+const { showErrors } = useEditMode();
 const panelType = ref<PanelType>(props.panel.panelType);
 const isCollapsed = ref<boolean>(props.panel.isCollapsed);
 const canBeMultipleColumns = ref<boolean>(
