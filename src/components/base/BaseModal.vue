@@ -88,6 +88,7 @@ const hideModal = () => {
 <style scoped>
 dialog {
   z-index: 100;
+  max-height: 100vh;
 }
 
 dialog::backdrop {
