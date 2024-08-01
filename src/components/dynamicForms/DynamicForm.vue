@@ -106,9 +106,8 @@
             field.__typename === 'FormAction' &&
             field.actionType !== ActionType.Upload
           "
-          class="mt-5"
           :class="[
-            { 'mb-10': !isButtonDisabled },
+            { 'mt-5 mb-10': !isButtonDisabled },
             { 'mt-0': isButtonDisabled }
           ]"
           :label="
