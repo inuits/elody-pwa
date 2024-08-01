@@ -1,7 +1,6 @@
 <template>
   <BaseModal
-    :modal-state="getModalInfo(TypeModals.Search).state"
-    :modal-position="getModalInfo(TypeModals.Search).modalPosition"
+    :modal-type="TypeModals.Search"
     :cancel-button-availabe="false"
     modal-width-style="w-7/12"
     @hide-modal="closeModal(TypeModals.Search)"
@@ -13,7 +12,7 @@
       />
       <div class="overflow-y-scroll h-full">
         <base-library
-          v-if="getModalInfo(TypeModals.Search).state === ModalState.Show"
+          v-if="getModalInfo(TypeModals.Search).modal?.open"
           :bulk-operations-context="BulkOperationsContextEnum.SearchModal"
           list-item-route-name="SingleEntity"
           :enable-advanced-filters="false"
@@ -29,10 +28,10 @@
 
 <script setup lang="ts">
 import {
+  type AdvancedFilterInput,
   ModalState,
   SearchInputType,
   TypeModals,
-  type AdvancedFilterInput,
 } from "@/generated-types/queries";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "@/components/base/BaseModal.vue";

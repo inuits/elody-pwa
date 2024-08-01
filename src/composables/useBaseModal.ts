@@ -1,16 +1,15 @@
-import { computed, ref } from "vue";
+import { computed, isReactive, isRef, ref, toRef, toRefs, watch } from "vue";
 import {
   BulkOperationTypes,
   Collection,
   type DeleteQueryOptions,
   ModalChoices,
-  ModalState,
-  TypeModals
+  TypeModals,
 } from "@/generated-types/queries";
 export type ModalPosition = "left" | "center" | "right";
 
 export type ModalInfo = {
-  state: ModalState;
+  modal?: HTMLDialogElement;
   modalPosition: ModalPosition;
   destination?: string;
   formQuery?: string;
@@ -21,7 +20,7 @@ export type ModalInfo = {
 };
 
 export type GenericContextForModals = {
-  type: BulkOperationTypes
+  type: BulkOperationTypes;
   parentId: string;
   relationType: string;
   collection: Collection;
@@ -29,7 +28,6 @@ export type GenericContextForModals = {
 };
 
 const initialModalInfo: ModalInfo = {
-  state: ModalState.Initial,
   modalPosition: "left",
   closeConfirmation: false,
 };
@@ -51,6 +49,13 @@ export const useBaseModal = () => {
     return modals.value[modalType];
   };
 
+  const setModalElement = (
+    modalElement: HTMLDialogElement,
+    modalType: TypeModals
+  ) => {
+    updateModal(modalType, { modal: modalElement });
+  };
+
   const openModal = (
     modalType: TypeModals,
     modalTab: ModalChoices | undefined = undefined,
@@ -62,14 +67,14 @@ export const useBaseModal = () => {
   ): void => {
     if (modalType !== TypeModals.Confirm)
       closeModalsWithPosition(getModalInfo(modalType).modalPosition);
-    const updatedModal = {
-      state: ModalState.Show,
-    };
+    const updatedModal = {};
     Object.assign(updatedModal, { modalPosition });
     Object.assign(updatedModal, { formQuery });
     Object.assign(updatedModal, { savedContext });
     Object.assign(updatedModal, { deleteQueryOptions });
     updateModal(modalType, updatedModal);
+    modals.value[modalType].modal?.showModal();
+    console.log(`${modalType} open?`, modals.value[modalType].modal?.open);
     if (modalTab) getModalInfo(modalType).modalTabToOpen = modalTab;
     if (askForCloseConfirmation)
       getModalInfo(modalType).closeConfirmation = askForCloseConfirmation;
@@ -79,8 +84,7 @@ export const useBaseModal = () => {
     let isOpen: boolean = false;
     Object.keys(modals.value).forEach((modalKey: string) => {
       const modal: ModalInfo = modals.value[modalKey];
-      if (modal.state === ModalState.Show && modal.modalPosition === "center")
-        isOpen = true;
+      if (modal.modal?.open && modal.modalPosition === "center") isOpen = true;
     });
     return isOpen;
   });
@@ -90,9 +94,7 @@ export const useBaseModal = () => {
       (modal: ModalInfo) => modal.modalPosition === position
     );
     if (!modalsWithPosition) return;
-    modalsWithPosition.forEach(
-      (modal: ModalInfo) => (modal.state = ModalState.Hide)
-    );
+    modalsWithPosition.forEach((modal: ModalInfo) => !modal.modal?.open);
   };
 
   const getModalInfo = (modalType: TypeModals): ModalInfo => {
@@ -103,7 +105,7 @@ export const useBaseModal = () => {
     modalType: TypeModals,
     modalInput: { [key: string]: any }
   ): void => {
-    Object.assign(modals.value[modalType], modalInput);
+    console.log(modalType, modalInput);
   };
 
   const closeModal = (modalType: TypeModals): void => {
@@ -111,7 +113,7 @@ export const useBaseModal = () => {
       if (modals.value[modalType].closeConfirmation) {
         openModal(TypeModals.Confirm, undefined, "center");
       } else {
-        modals.value[modalType].state = ModalState.Hide;
+        modals.value[modalType].modal?.close();
       }
     } catch (e) {
       console.info(`Could not close ${modalType} modal`);
@@ -128,6 +130,7 @@ export const useBaseModal = () => {
 
   return {
     getModal,
+    setModalElement,
     modals,
     getModalInfo,
     updateModal,

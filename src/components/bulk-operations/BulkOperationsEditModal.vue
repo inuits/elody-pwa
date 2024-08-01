@@ -1,8 +1,7 @@
 <template>
   <BaseModal
     v-if="modal && form"
-    :modal-state="modal.state"
-    :modal-position="modal.modalPosition"
+    :modal-type="TypeModals.BulkOperationsEdit"
     modal-width-style="w-11/12"
     @hide-modal="closeModal(TypeModals.BulkOperationsEdit)"
   >
@@ -57,28 +56,28 @@ import type {
   Context,
   InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
-import {
-  DamsIcons,
-  ModalState,
-  TypeModals,
-  GetBulkOperationsRelationFormDocument,
-  BulkAddRelationsDocument,
-} from "@/generated-types/queries";
+import { useBulkOperations } from "@/composables/useBulkOperations";
 import type {
   BulkAddRelationsMutation,
   BulkAddRelationsMutationVariables,
+  GetBulkOperationsRelationFormQuery,
   PanelMetaData,
   WindowElement,
-  GetBulkOperationsRelationFormQuery,
+} from "@/generated-types/queries";
+import {
+  BulkAddRelationsDocument,
+  DamsIcons,
+  GetBulkOperationsRelationFormDocument,
+  ModalState,
+  TypeModals,
 } from "@/generated-types/queries";
 import BaseModal from "@/components/base/BaseModal.vue";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import ListItem from "@/components/ListItem.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
-import { ref, inject, watch, computed } from "vue";
+import { computed, inject, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { useBulkOperations } from "@/composables/useBulkOperations";
 import { useI18n } from "vue-i18n";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import EntityElementWindow from "../entityElements/EntityElementWindow.vue";

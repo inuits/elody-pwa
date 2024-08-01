@@ -182,13 +182,4 @@ watch(
   () => isAsc.value,
   async () => await props.setSortOrder(isAsc.value ? "asc" : "desc", true)
 );
-//watch(
-//  () => getModalInfo(TypeModals.BulkOperations).state,
-//  (bulkOperationsModalState: ModalState) => {
-//    if (bulkOperationsModalState === ModalState.Hide) {
-//      setDefaultOptions();
-//      if (queryVariables.value) queryVariables.value.skip = 1;
-//    }
-//  }
-//);
 </script>

@@ -1,7 +1,6 @@
 <template>
   <BaseModal
-    :modal-state="getModalInfo(TypeModals.Delete).state"
-    :modal-position="getModalInfo(TypeModals.Delete).modalPosition"
+    :modal-type="TypeModals.Delete"
     :cancel-button-availabe="true"
     modal-width-style="w-10/12"
     modal-color="bg-neutral-lightest"
@@ -26,21 +25,24 @@
           :accepted-types="deleteQueryOptions.customQueryBlockingEntityTypes"
           :custom-query="deleteQueryOptions.customQueryBlockingRelations"
           :custom-filters-query="
-          deleteQueryOptions.customQueryBlockingRelationsFilters
-        "
-        :show-button="false"
-        :enable-bulk-operations="false"
-        :enable-advanced-filters="false"
-        @entities-updated="
-          (numberOfEntities) =>
-            (numberOfBlockingQueryEntities = numberOfEntities)
-        "
-        class="mb-5"
-      />
+            deleteQueryOptions.customQueryBlockingRelationsFilters
+          "
+          :show-button="false"
+          :enable-bulk-operations="false"
+          :enable-advanced-filters="false"
+          @entities-updated="
+            (numberOfEntities) =>
+              (numberOfBlockingQueryEntities = numberOfEntities)
+          "
+          class="mb-5"
+        />
       </div>
       <div
         class="h-full flex flex-col justify-between p-4"
-        v-if="modalOpenend && (!numberOfBlockingQueryEntities || numberOfBlockingQueryEntities <= 0)"
+        v-if="
+          modalOpenend &&
+          (!numberOfBlockingQueryEntities || numberOfBlockingQueryEntities <= 0)
+        "
       >
         <div class="title pl-4">
           {{ t("actions.labels.delete-relation-entities") }}
@@ -139,8 +141,7 @@ const deleteSelectedItems = async () => {
     }
     try {
       await mutate({ id, path: collection, deleteMediafiles: false });
-    }
-    catch (e) {
+    } catch (e) {
       console.log(e);
     }
   }
@@ -182,11 +183,10 @@ const getContext = () => {
 };
 
 watch(
-  () => getModalInfo(TypeModals.Delete).state,
+  () => getModalInfo(TypeModals.Delete).modal?.open,
   async () => {
-    modalOpenend.value =
-      getModalInfo(TypeModals.Delete).state === ModalState.Show;
-    if (!modalOpenend.value) return
+    modalOpenend.value = getModalInfo(TypeModals.Delete).modal?.open!!;
+    if (!modalOpenend.value) return;
     numberOfBlockingQueryEntities.value = undefined;
     deleteQueryOptions.value = getModalInfo(
       TypeModals.Delete

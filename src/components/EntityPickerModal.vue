@@ -1,7 +1,6 @@
 <template>
   <BaseModal
-    :modal-state="getModalInfo(TypeModals.EntityPicker).state"
-    :modal-position="getModalInfo(TypeModals.EntityPicker).modalPosition"
+    :modal-type="TypeModals.EntityPicker"
     :cancel-button-availabe="false"
     modal-width-style="w-10/12"
     modal-color="bg-neutral-lightest"
@@ -15,9 +14,12 @@
     <div class="flex flex-col w-full h-full overflow-hidden">
       <BaseTabs class="h-full" :tabs="tabs">
         <BaseTab :title="tabs[0]" class="overflow-auto">
+          {{ entityPickerModal?.open }}
+          {{ queryLoaded }}
+          {{ ignoreCustomQuery }}
           <BaseLibrary
             v-if="
-              getModalInfo(TypeModals.EntityPicker).state === ModalState.Show &&
+              getModalInfo(TypeModals.EntityPicker).modal?.open &&
               (queryLoaded || ignoreCustomQuery)
             "
             :bulk-operations-context="getContext()"
@@ -54,9 +56,7 @@
         <BaseTab :title="tabs[1]">
           <dynamic-form
             class="overflow-auto"
-            v-if="
-              getModalInfo(TypeModals.EntityPicker).state === ModalState.Show
-            "
+            v-if="entityPickerModal?.open"
             dynamic-form-query="GetSingleEntityUploadForm"
             :has-linked-upload="true"
           />
@@ -88,7 +88,7 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import dynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import { useEditMode } from "@/composables/useEdit";
-import { watch, ref } from "vue";
+import { watch, ref, computed } from "vue";
 import { useCustomQuery } from "@/composables/useCustomQuery";
 
 const { t } = useI18n();
@@ -108,6 +108,9 @@ const ignoreCustomQuery = ref<boolean>(false);
 const newQuery = ref<object | undefined>(undefined);
 const { loadDocument, getDocument } = useCustomQuery();
 const queryLoaded = ref<boolean>(false);
+const entityPickerModal = computed(
+  () => getModalInfo(TypeModals.EntityPicker).modal
+);
 
 const getCustomQuery = async () => {
   await loadDocument(
@@ -151,11 +154,11 @@ const getContext = () => {
 };
 
 watch(
-  () => getModalInfo(TypeModals.EntityPicker).state,
-  async () => {
-    const isModalOpened =
-      getModalInfo(TypeModals.EntityPicker).state === ModalState.Show;
+  () => entityPickerModal.value?.open,
+  async (isModalOpened: boolean | undefined) => {
     const hasCustomQuery = !!getCustomGetEntitiesQuery();
+    console.log(entityPickerModal.value);
+    console.log(isModalOpened, hasCustomQuery, newQuery.value);
     if (isModalOpened && hasCustomQuery && !newQuery.value) {
       await getCustomQuery();
     } else if (isModalOpened && !hasCustomQuery) {

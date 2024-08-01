@@ -1,8 +1,7 @@
 <template>
   <BaseModal
     v-if="modal"
-    :modal-state="modal.state"
-    :modal-position="modal.modalPosition"
+    :modal-type="TypeModals.BulkOperations"
     modal-width-style="w-11/12"
     @hide-modal="closeModal(TypeModals.BulkOperations)"
   >
@@ -78,14 +77,14 @@ import {
   BulkOperationsContextEnum,
   type Context,
   type InBulkProcessableItem,
+  useBulkOperations,
 } from "@/composables/useBulkOperations";
 import {
   DamsIcons,
-  GetBulkOperationCsvExportKeysDocument,
-  ModalState,
-  TypeModals,
   type DropdownOption,
+  GetBulkOperationCsvExportKeysDocument,
   type GetBulkOperationCsvExportKeysQuery,
+  TypeModals,
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
@@ -98,9 +97,8 @@ import {
   NotificationType,
   useNotification,
 } from "@/components/base/BaseNotification.vue";
-import { ref, watch, inject } from "vue";
+import { inject, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { useBulkOperations } from "@/composables/useBulkOperations";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 
@@ -196,20 +194,20 @@ onResult((result) => {
 });
 
 watch(
-  () => modal.state,
-  (bulkOperationsModalState: ModalState) => {
-    if (bulkOperationsModalState === ModalState.Show) {
+  () => modal.modal?.open,
+  (isBulkOperationsModalOpen: boolean | undefined) => {
+    if (isBulkOperationsModalOpen) {
       if (csvExportOptions.value.length <= 0) {
         refetchEnabled.value = true;
         refetch();
       }
       loadItems();
+      return;
     }
 
-    if (bulkOperationsModalState === ModalState.Hide)
-      dequeueAllItemsForBulkProcessing(
-        BulkOperationsContextEnum.BulkOperationsCsvExport
-      );
+    dequeueAllItemsForBulkProcessing(
+      BulkOperationsContextEnum.BulkOperationsCsvExport
+    );
   }
 );
 </script>
