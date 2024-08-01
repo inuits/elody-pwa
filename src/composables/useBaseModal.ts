@@ -50,6 +50,13 @@ export const useBaseModal = () => {
     return modals[modalType];
   };
 
+  const setModalElement = (
+    modalElement: HTMLDialogElement,
+    modalType: TypeModals
+  ) => {
+    updateModal(modalType, { modal: modalElement });
+  };
+
   const openModal = (
     modalType: TypeModals,
     modalTab: ModalChoices | undefined = undefined,
@@ -67,6 +74,8 @@ export const useBaseModal = () => {
     Object.assign(updatedModal, { savedContext });
     Object.assign(updatedModal, { deleteQueryOptions });
     updateModal(modalType, updatedModal);
+    modals.value[modalType].modal?.showModal();
+    console.log(`${modalType} open?`, modals.value[modalType].modal?.open);
     if (modalTab) getModalInfo(modalType).modalTabToOpen = modalTab;
     if (askForCloseConfirmation)
       getModalInfo(modalType).closeConfirmation = askForCloseConfirmation;
@@ -122,6 +131,7 @@ export const useBaseModal = () => {
 
   return {
     getModal,
+    setModalElement,
     modals,
     getModalInfo,
     updateModal,
