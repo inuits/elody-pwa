@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted, computed, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import type { TypeModals } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
@@ -39,7 +39,7 @@ const props = withDefaults(
 const emit = defineEmits(["update:modalState", "hideModal"]);
 
 const cancelButtonAvailabe = ref<boolean>(props.cancelButtonAvailabe);
-const { getModalInfo, closeModal } = useBaseModal();
+const { getModalInfo } = useBaseModal();
 const dialog = ref<HTMLDialogElement>();
 const modalStyle = computed(
   () => modalStyles[getModalInfo(props.modalType).modalPosition]
