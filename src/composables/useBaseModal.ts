@@ -1,4 +1,4 @@
-import { computed, isReactive, isRef, ref, toRef, toRefs, watch } from "vue";
+import { computed, ref } from "vue";
 import {
   BulkOperationTypes,
   Collection,
@@ -105,7 +105,7 @@ export const useBaseModal = () => {
     modalType: TypeModals,
     modalInput: { [key: string]: any }
   ): void => {
-    console.log(modalType, modalInput);
+    Object.assign(modals.value[modalType], modalInput);
   };
 
   const closeModal = (modalType: TypeModals): void => {
