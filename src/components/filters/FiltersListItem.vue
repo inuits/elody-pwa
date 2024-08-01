@@ -103,6 +103,13 @@ import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import isEqual from "lodash.isequal";
 
+enum Matchers {
+  EXACT_MATCHER = "ExactMatcher",
+  CONTAINS_MATCHERS = "ContainsMatcher",
+  ANY_MATCHER = "AnyMatcher",
+  NONE_MATCHER = "NoneMatcher",
+}
+
 const props = defineProps<{
   filter: FilterListItem;
   matchers: DropdownOption[];
@@ -150,8 +157,8 @@ const icon = computed<string>(() =>
 );
 
 const defaultMatcherMap: Partial<Record<AdvancedFilterTypes, string>> = {
-  [AdvancedFilterTypes.Selection]: "ExactMatcher",
-  [AdvancedFilterTypes.Text]: "ContainsMatcher",
+  [AdvancedFilterTypes.Selection]: Matchers.EXACT_MATCHER,
+  [AdvancedFilterTypes.Text]: Matchers.CONTAINS_MATCHERS,
 };
 
 const reloadMatcherComponent = () => {
@@ -159,13 +166,15 @@ const reloadMatcherComponent = () => {
   loadMatcher();
 };
 
+const getDefaultMatcher = () => {
+  return matchers.value.find(
+    (matcher) =>
+      matcher.value === defaultMatcherMap[advancedFilterInput.value.type]
+  );
+};
+
 onMounted(() => {
-  const defaultMatcher =
-    props.filter.selectedMatcher ||
-    matchers.value.find(
-      (matcher) =>
-        matcher.value === defaultMatcherMap[advancedFilterInput.value.type]
-    );
+  const defaultMatcher = props.filter.selectedMatcher || getDefaultMatcher();
 
   if (defaultMatcher && !selectedMatcher.value)
     selectedMatcher.value = defaultMatcher;
@@ -216,7 +225,15 @@ watch(advancedFilterInput, (newValue, oldValue) => {
 watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
     isOpen.value = false;
-    reloadMatcherComponent();
+    const matchersToResetToDefault = [
+      Matchers.ANY_MATCHER,
+      Matchers.NONE_MATCHER,
+    ];
+    const matcher = selectedMatcher.value?.value;
+    if (!matchersToResetToDefault.includes(matcher))
+      return reloadMatcherComponent();
+
+    selectedMatcher.value = getDefaultMatcher();
   }
 });
 </script>
