@@ -1,7 +1,6 @@
 <template>
   <BaseModal
-    :modal-state="getModalInfo(TypeModals.Confirm).state"
-    :modal-position="modalPosition"
+    :modal-type="TypeModals.Confirm"
     :cancel-button-availabe="true"
     modal-width-style="w-1/2"
     modal-height-style="my-[37.5vh]"
@@ -17,9 +16,5 @@ import { TypeModals } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { computed } from "vue";
 
-const { closeModal, getModalInfo, modals } = useBaseModal();
-
-const modalPosition = computed(
-  () => modals.value[TypeModals.Confirm].modalPosition
-);
+const { closeModal } = useBaseModal();
 </script>

@@ -1,53 +1,32 @@
 <template>
-  <div
-    v-show="modalState === ModalState.Show || modalState === ModalState.Loading"
-    class="fixed h-full z-50"
-    :class="[
-      `${modalWidthStyle}`,
-      {
-        'inset-y-0 left-80': modalPosition === 'left',
-        'inset-0 mx-auto': modalPosition === 'center',
-        'inset-y-0 right-0': modalPosition === 'right',
-      },
-    ]"
+  <dialog
+    ref="dialog"
+    @close="hideModal"
+    :class="`${modalStyles[getModalInfo(modalType).modalPosition]}`"
   >
-    <div>
-      <div
-        class="fixed backdrop-blur-sm bg-background-frosted"
-        :class="
-          modalPosition === 'left' ? 'left-80 right-0 inset-y-0' : 'inset-0'
-        "
-        aria-hidden="true"
+    <div class="flex justify-end p-2">
+      <unicon
+        v-show="!cancelButtonAvailabe"
+        :name="Unicons.Close.name"
+        :height="iconHeight"
+        class="cursor-pointer"
         @click="hideModal"
-      ></div>
-      <div class="w-full transform" :class="[modalHeight, modalColor]">
-        <div :class="['flex flex-col', modalHeight]">
-          <div class="flex justify-end p-2">
-            <unicon
-              v-show="!cancelButtonAvailabe"
-              :name="Unicons.Close.name"
-              :height="iconHeight"
-              class="cursor-pointer"
-              @click="hideModal"
-            />
-          </div>
-          <slot />
-        </div>
-      </div>
+      />
     </div>
-  </div>
+    <slot />
+  </dialog>
 </template>
 
 <script lang="ts" setup>
-import { computed, toRefs, watch, onMounted, onUnmounted, ref } from "vue";
-import { ModalState } from "@/generated-types/queries";
+import { ref, onMounted, onUnmounted } from "vue";
+import type { TypeModals } from "@/generated-types/queries";
 import { Unicons } from "@/types";
-export type ModalPosition = "center" | "left" | "right";
+import { useBaseModal } from "@/composables/useBaseModal";
+import ClickEvent = JQuery.ClickEvent;
 
 const props = withDefaults(
   defineProps<{
-    modalState: ModalState;
-    modalPosition: ModalPosition;
+    modalType: TypeModals;
     modalWidthStyle: string;
     modalHeightStyle?: string;
     iconHeight?: number;
@@ -64,29 +43,55 @@ const props = withDefaults(
 
 const emit = defineEmits(["update:modalState", "hideModal"]);
 
+const dialog = ref<HTMLDialogElement>();
 const cancelButtonAvailabe = ref<boolean>(props.cancelButtonAvailabe);
+const { setModalElement, getModalInfo } = useBaseModal();
 
-const hideOnEscape = (e) => {
-  if (e.key === "Escape") hideModal();
+onMounted(() => {
+  setModalElement(dialog.value!!, props.modalType);
+  dialog.value?.addEventListener("click", (event) => {
+    closeDialogOnBackdropClick(event);
+  });
+});
+
+onUnmounted(() => {
+  dialog.value?.removeEventListener("click", (event) =>
+    closeDialogOnBackdropClick(event)
+  );
+});
+
+const modalStyles: { [key: string]: string } = {
+  right: "w-2/5 h-screen absolute mr-0 my-0",
+  center: "t-[40vh] w-1/4",
+  left: "",
 };
-const keyDownEvent = window.addEventListener("keydown", hideOnEscape);
-onMounted(() => keyDownEvent);
-onUnmounted(() => keyDownEvent);
+
+const closeDialogOnBackdropClick = (event: MouseEvent) => {
+  if (!dialog.value) return;
+  const rect = dialog.value.getBoundingClientRect();
+  const isInDialog =
+    rect.top <= event.clientY &&
+    event.clientY <= rect.top + rect.height &&
+    rect.left <= event.clientX &&
+    event.clientX <= rect.left + rect.width;
+  if (isInDialog) return;
+
+  dialog.value.close();
+};
 
 const hideModal = () => {
   emit("update:modalState", "hide");
   emit("hideModal", "hide");
 };
-
-const { modalState } = toRefs(props);
-
-const modalHeight = computed<string>(() =>
-  props.modalPosition === "center" ? props.modalHeightStyle : "h-screen"
-);
-
-watch(modalState, (value: ModalState) => {
-  if (value == ModalState.Show || value == ModalState.Loading)
-    document.body.classList.add("overflow-hidden");
-  else document.body.classList.remove("overflow-hidden");
-});
 </script>
+
+<style scoped>
+dialog {
+  z-index: 100;
+}
+
+dialog::backdrop {
+  background-color: theme("colors.accent.normal");
+  opacity: 0.3;
+}
+</style>

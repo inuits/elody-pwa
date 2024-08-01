@@ -1,7 +1,6 @@
 <template>
   <BaseModal
-    :modal-state="getModalInfo(TypeModals.DynamicForm).state"
-    :modal-position="getModalInfo(TypeModals.DynamicForm).modalPosition"
+    :modalType="TypeModals.DynamicForm"
     :cancel-button-availabe="false"
     modal-width-style="w-2/5"
     :modal-color="
@@ -17,9 +16,7 @@
         <baseTabs :tabs="tabsTitles">
           <baseTab v-for="(formTab, tabIndex) in formTabArray" :key="tabIndex">
             <dynamic-form
-              v-if="
-                getModalInfo(TypeModals.DynamicForm).state === ModalState.Show
-              "
+              v-if="getModalInfo(TypeModals.DynamicForm).modal?.open"
               key="getModalInfo(TypeModals.DynamicForm).formQuery"
               :dynamic-form-query="
                 getModalInfo(TypeModals.DynamicForm).formQuery
@@ -33,9 +30,7 @@
         </baseTabs>
       </template>
       <dynamic-form
-        v-else-if="
-          getModalInfo(TypeModals.DynamicForm).state === ModalState.Show
-        "
+        v-else-if="getModalInfo(TypeModals.DynamicForm).modal?.open"
         key="getModalInfo(TypeModals.DynamicForm).formQuery"
         :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
         :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
@@ -84,9 +79,10 @@ const clearFormTabs = () => {
 };
 
 watch(
-  () => getModalInfo(TypeModals.DynamicForm).state,
-  (newState) => {
-    if (newState === ModalState.Show) {
+  () => getModalInfo(TypeModals.DynamicForm).modal?.open,
+  (modalIsOpen) => {
+    if (modalIsOpen) {
+      console.log("Opened");
       clearFormTabs();
     }
   }

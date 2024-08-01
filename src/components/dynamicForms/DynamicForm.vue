@@ -64,26 +64,26 @@
           </div>
         </div>
         <div
-          v-if="(isButtonDisabled || (field.actionType === ActionType.Upload && !enableUploadButton)) && field.__typename === 'FormAction'"
+          v-if="
+            (isButtonDisabled ||
+              (field.actionType === ActionType.Upload &&
+                !enableUploadButton)) &&
+            field.__typename === 'FormAction'
+          "
           class="h-auto mt-5"
         >
-          <base-tooltip
-            position="top-right"
-            :tooltip-offset="8"
-          >
+          <base-tooltip position="top-right" :tooltip-offset="8">
             <template #activator="{ on }">
               <div v-on="on">
                 <unicon :name="Unicons.QuestionCircle.name" height="20" />
               </div>
             </template>
             <template #default>
-                <span class="text-sm text-text-placeholder">
-                  <div>
-                    {{
-                      t(`tooltip.buttons.disabled-${field.actionType}-button`)
-                    }}
-                  </div>
-                </span>
+              <span class="text-sm text-text-placeholder">
+                <div>
+                  {{ t(`tooltip.buttons.disabled-${field.actionType}-button`) }}
+                </div>
+              </span>
             </template>
           </base-tooltip>
         </div>
@@ -155,13 +155,13 @@ import {
   type FormAction,
   type MetadataInput,
   MutateEntityValuesDocument,
-  MutateEntityValuesMutation,
-  MutateEntityValuesMutationVariables,
+  type MutateEntityValuesMutation,
+  type MutateEntityValuesMutationVariables,
   OcrType,
   type PanelMetaData,
   TypeModals,
   type UploadContainer,
-  type UploadField
+  type UploadField,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -178,7 +178,10 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
+import {
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import ImportComponent from "@/components/ImportComponent.vue";
 import useTenant from "@/composables/useTenant";
@@ -298,7 +301,9 @@ const getFieldArray = computed(() => {
 const form = ref<FormContext<any>>();
 const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
 const showErrors = ref<boolean>(false);
-const isButtonDisabled = computed((): boolean => showErrors.value ? formContainsErrors.value : false);
+const isButtonDisabled = computed((): boolean =>
+  showErrors.value ? formContainsErrors.value : false
+);
 const formClosing = ref<boolean>(false);
 const submitErrors = ref<string | undefined>(undefined);
 const { getMenuDestinations, changeExpandedState } = useMenuHelper();
@@ -529,18 +534,21 @@ const initializeForm = async (
         relations.push({
           key: mediafile,
           type: props.savedContext.relationType,
-          editStatus: EditStatus.New
+          editStatus: EditStatus.New,
         });
       });
       props.savedContext.entities.forEach((entity) => {
         relations.push({
           key: entity,
           type: props.savedContext.relationType,
-          editStatus: EditStatus.New
+          editStatus: EditStatus.New,
         });
       });
     }
-    if (props.savedContext.type === BulkOperationTypes.CreateEntity && props.savedContext.parentId !== undefined) {
+    if (
+      props.savedContext.type === BulkOperationTypes.CreateEntity &&
+      props.savedContext.parentId !== undefined
+    ) {
       relations.push({
         key: props.savedContext.parentId,
         type: props.savedContext.relationType,

@@ -85,9 +85,9 @@ const openSearchModal = () => {
 };
 
 watch(
-  () => getModalInfo(TypeModals.Search).state,
-  (modalState: ModalState) => {
-    if (modalState !== ModalState.Show) {
+  () => getModalInfo(TypeModals.Search).modal?.open,
+  (modalIsOpen: boolean | undefined) => {
+    if (!modalIsOpen) {
       inputValue.value = "";
       applyFilterToLibrary();
     }
