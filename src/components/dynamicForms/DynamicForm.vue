@@ -65,7 +65,7 @@
         </div>
         <div
           v-if="(isButtonDisabled || (field.actionType === ActionType.Upload && !enableUploadButton)) && field.__typename === 'FormAction'"
-          class="h-auto mt-1"
+          class="h-auto mt-5"
         >
           <base-tooltip
             position="top-right"
@@ -107,7 +107,10 @@
             field.actionType !== ActionType.Upload
           "
           class="mt-5"
-          :class="{ 'mb-10': !isButtonDisabled }"
+          :class="[
+            { 'mb-10': !isButtonDisabled },
+            { 'mt-0': isButtonDisabled }
+          ]"
           :label="
             config?.features.hasTenantSelect
               ? `${t(field.label)} ${t(`types.${field.creationType}`)}${
@@ -124,10 +127,11 @@
           button-style="accentAccent"
           @click="performActionButtonClickEvent(field)"
         />
-        <p v-if="submitErrors">
-          {{
-            t("actions.submit.errors", submitErrors)
-          }}
+        <p
+          v-if="submitErrors && field.__typename === 'FormAction'"
+          class="text-red-default"
+        >
+          {{ submitErrors }}
         </p>
       </div>
     </div>
@@ -161,7 +165,6 @@ import {
   type UploadField
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
-import type { ErrorResponse } from "@apollo/client/link/error";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import { computed, inject, ref, watch, toRaw } from "vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
@@ -346,8 +349,15 @@ const submitActionFunction = async (field: FormAction) => {
   formClosing.value = true;
   const document = await getQuery(field.actionQuery as string);
   const entityInput = createEntityFromFormInput(field.creationType);
-  const entity = (await performSubmitAction(document, entityInput)).data
-    .CreateEntity;
+  let entity;
+  try {
+    entity = (await performSubmitAction(document, entityInput)).data
+      .CreateEntity;
+  } catch (e) {
+    isPerformingAction.value = false;
+    submitErrors.value = e.message;
+  }
+  if (submitErrors.value) return;
   showErrors.value = false;
   await getTenants();
   closeModal(TypeModals.DynamicForm);
@@ -359,6 +369,7 @@ const submitActionFunction = async (field: FormAction) => {
 const submitWithExtraMetadata = async (field: FormAction) => {
   await form.value.validate();
   if (formContainsErrors.value) return;
+  formClosing.value = true;
   const document = await getQuery(field.actionQuery as string);
   const entityInput = createEntityFromFormInput(field.creationType);
   entityInput.metadata?.push(...props.savedContext);
@@ -379,6 +390,7 @@ const submitWithExtraMetadata = async (field: FormAction) => {
 const downloadActionFunction = async (field: FormAction) => {
   await form.value.validate();
   if (formContainsErrors.value) return;
+  formClosing.value = true;
   const document = await getQuery(field.actionQuery as string);
   const entityInput = createEntityFromFormInput(field.creationType);
   const entity = (
@@ -397,6 +409,7 @@ const downloadActionFunction = async (field: FormAction) => {
 const updateMetdataActionFunction = async () => {
   await form.value.validate();
   if (formContainsErrors.value) return;
+  formClosing.value = true;
   //TODO: put code here that calls graphql function to the bulk edit endpoint in the collection-api
 };
 
@@ -416,7 +429,7 @@ const callEndpointInGraphql = async (field: FormAction) => {
 const startOcrActionFunction = async (field: FormAction) => {
   await form.value.validate();
   if (formContainsErrors.value) return;
-
+  formClosing.value = true;
   const id = props.savedContext.parentId;
   addEditableMetadataKeys(Object.keys(form.value.values.intialValues), id);
   const metadata = parseIntialValuesForFormSubmit(
