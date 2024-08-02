@@ -221,12 +221,12 @@ const clearAutocompleteOptions = () => {
 const useAutocomplete = computed<boolean>(
   () => filterOptions.length > 10 || filterOptions.length === 0
 );
-const determineInputType = computed<"text" | "number" | "datetime-local">(
+const determineInputType = computed<"text" | "number" | "date">(
   () => {
     if (props.filter.advancedFilter.type === AdvancedFilterTypes.Number)
       return "number";
     if (props.filter.advancedFilter.type === AdvancedFilterTypes.Date)
-      return "datetime-local";
+      return "date";
     return "text";
   }
 );
