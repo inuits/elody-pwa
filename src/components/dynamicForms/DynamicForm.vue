@@ -420,8 +420,9 @@ const callEndpointInGraphql = async (field: FormAction) => {
     body[variable] = props.savedContext[variable];
   });
   await fetch(`${endpoint.endpointName}`, {
+    headers: { "Content-Type": "application/json" },
     method: endpoint.method,
-    body: body,
+    body: JSON.stringify(body),
   });
 };
 
