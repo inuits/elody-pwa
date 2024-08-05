@@ -60,7 +60,11 @@
             @click="applyFilters(true)"
           />
           <BaseButtonNew
-            v-if="hasSavedSearch && enableSaveSearchFilters"
+            v-if="
+              hasSavedSearch &&
+              enableSaveSearchFilters &&
+              auth.isAuthenticated.value === true
+            "
             :icon="DamsIcons.EllipsisV"
             class="!w-1/5"
             @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event.clientX, y: event.clientY})"
@@ -178,6 +182,7 @@ import { useI18n } from "vue-i18n";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
 import { useSaveSearchHepler } from "@/composables/useSaveSearchHepler";
 import { useRoute } from "vue-router";
+import { useAuth } from "session-vue-3-oidc-library";
 import {
   useBulkOperations,
   BulkOperationsContextEnum,
@@ -229,6 +234,7 @@ const filterMatcherMapping = ref<FilterMatcherMap>({
   type: [],
   metadata_on_relation: [],
 });
+const auth = useAuth();
 const advancedFilters = ref<Maybe<AdvancedFilters>>();
 const clearAllActiveFilters = ref<boolean>(false);
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
