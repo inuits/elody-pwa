@@ -31,7 +31,6 @@
 
       <hr class="border-t-1 border-neutral-50" />
 
-      <!-- TODO(savedSearch): save selected to session/local storage and show it there -->
       <template v-if="lastUsedFilters.length > 0">
         <base-context-menu-item
           v-for="(filter, index) in lastUsedFilters"
