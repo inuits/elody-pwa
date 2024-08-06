@@ -68,7 +68,6 @@ import {
   BulkAddRelationsDocument,
   DamsIcons,
   GetBulkOperationsRelationFormDocument,
-  ModalState,
   TypeModals,
 } from "@/generated-types/queries";
 import BaseModal from "@/components/base/BaseModal.vue";
@@ -145,11 +144,9 @@ const loadItems = () =>
   (items.value = getEnqueuedItems(props.context, skip.value, limit.value));
 
 watch(
-  () => modal.state,
-  (modalState) => {
-    if (modalState === ModalState.Show) {
-      loadItems();
-    }
+  () => modal.modal?.open,
+  (isModalOpen) => {
+    if (isModalOpen) loadItems();
   }
 );
 </script>

@@ -77,7 +77,6 @@ import {
   type DeleteDataMutation,
   DeleteQueryOptions,
   Entitytyping,
-  ModalState,
   TypeModals,
 } from "@/generated-types/queries";
 import BaseModal from "@/components/base/BaseModal.vue";
@@ -183,9 +182,9 @@ const getContext = () => {
 };
 
 watch(
-  () => getModalInfo(TypeModals.Delete).modal?.open,
-  async () => {
-    modalOpenend.value = getModalInfo(TypeModals.Delete).modal?.open!!;
+  () => getModalInfo(TypeModals.Delete).open,
+  async (isDeleteModalOpen: boolean) => {
+    modalOpenend.value = isDeleteModalOpen;
     if (!modalOpenend.value) return;
     numberOfBlockingQueryEntities.value = undefined;
     deleteQueryOptions.value = getModalInfo(

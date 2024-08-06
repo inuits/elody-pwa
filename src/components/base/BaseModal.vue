@@ -1,9 +1,5 @@
 <template>
-  <dialog
-    ref="dialog"
-    @close="hideModal"
-    :class="`${modalStyles[getModalInfo(modalType).modalPosition]}`"
-  >
+  <dialog ref="dialog" @close="hideModal" :class="modalStyle">
     <div class="flex justify-end p-2">
       <unicon
         v-show="!cancelButtonAvailabe"
@@ -18,11 +14,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import type { TypeModals } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
-import ClickEvent = JQuery.ClickEvent;
 
 const props = withDefaults(
   defineProps<{
@@ -43,9 +38,12 @@ const props = withDefaults(
 
 const emit = defineEmits(["update:modalState", "hideModal"]);
 
-const dialog = ref<HTMLDialogElement>();
 const cancelButtonAvailabe = ref<boolean>(props.cancelButtonAvailabe);
-const { setModalElement, getModalInfo } = useBaseModal();
+const { getModalInfo, setModalElement } = useBaseModal();
+const dialog = ref<HTMLDialogElement>();
+const modalStyle = computed(
+  () => modalStyles[getModalInfo(props.modalType).modalPosition]
+);
 
 onMounted(() => {
   setModalElement(dialog.value!!, props.modalType);
@@ -61,8 +59,10 @@ onUnmounted(() => {
 });
 
 const modalStyles: { [key: string]: string } = {
-  right: "w-2/5 h-screen absolute mr-0 my-0",
-  center: "t-[40vh] w-1/4",
+  right: `${props.modalWidthStyle || "w-2/5"} ${
+    props.modalHeightStyle || "h-screen"
+  } absolute mr-0 my-0`,
+  center: `t-[40vh] ${props.modalWidthStyle || "w-1/4"}`,
   left: "",
 };
 
@@ -79,6 +79,17 @@ const closeDialogOnBackdropClick = (event: MouseEvent) => {
   dialog.value.close();
 };
 
+watch(
+  () => getModalInfo(props.modalType).open,
+  (isModalOpen: boolean) => {
+    if (isModalOpen) {
+      dialog.value?.showModal();
+      return;
+    }
+    dialog.value?.close();
+  }
+);
+
 const hideModal = () => {
   emit("update:modalState", "hide");
   emit("hideModal", "hide");
@@ -89,6 +100,7 @@ const hideModal = () => {
 dialog {
   z-index: 100;
   max-height: 100vh;
+  max-width: 100vw;
 }
 
 dialog::backdrop {

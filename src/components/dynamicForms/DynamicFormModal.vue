@@ -16,7 +16,7 @@
         <baseTabs :tabs="tabsTitles">
           <baseTab v-for="(formTab, tabIndex) in formTabArray" :key="tabIndex">
             <dynamic-form
-              v-if="getModalInfo(TypeModals.DynamicForm).modal?.open"
+              v-if="getModalInfo(TypeModals.DynamicForm).open"
               key="getModalInfo(TypeModals.DynamicForm).formQuery"
               :dynamic-form-query="
                 getModalInfo(TypeModals.DynamicForm).formQuery
@@ -30,7 +30,7 @@
         </baseTabs>
       </template>
       <dynamic-form
-        v-else-if="getModalInfo(TypeModals.DynamicForm).modal?.open"
+        v-else-if="getModalInfo(TypeModals.DynamicForm).open"
         key="getModalInfo(TypeModals.DynamicForm).formQuery"
         :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
         :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
@@ -44,20 +44,15 @@
 <script setup lang="ts">
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
-import {
-  type Form,
-  type FormTab,
-  ModalState,
-  TypeModals,
-} from "@/generated-types/queries";
+import { type Form, type FormTab, TypeModals } from "@/generated-types/queries";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import { useRouter } from "vue-router";
-import BaseTabs from "@/components/BaseTabs.vue";
-import BaseTab from "@/components/BaseTab.vue";
 import { useI18n } from "vue-i18n";
 import { onMounted, computed, ref, watch, watchEffect } from "vue";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
+import BaseTab from "@/components/BaseTab.vue";
+import BaseTabs from "@/components/BaseTabs.vue";
 
 const formTabs = ref<Form | null>(null);
 const { closeModal, getModalInfo, changeCloseConfirmation } = useBaseModal();
@@ -79,10 +74,9 @@ const clearFormTabs = () => {
 };
 
 watch(
-  () => getModalInfo(TypeModals.DynamicForm).modal?.open,
+  () => getModalInfo(TypeModals.DynamicForm).open,
   (modalIsOpen) => {
     if (modalIsOpen) {
-      console.log("Opened");
       clearFormTabs();
     }
   }

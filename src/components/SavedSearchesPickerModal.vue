@@ -1,17 +1,13 @@
 <template>
   <base-modal
-    :modal-state="getModalInfo(TypeModals.SaveSearchPicker).state"
-    :modal-position="getModalInfo(TypeModals.SaveSearchPicker).modalPosition"
+    :modal-type="TypeModals.SaveSearchPicker"
     modal-width-style="w-10/12"
     modal-color="bg-neutral-white"
-    modalHeightStyle="h-[75vh] my-[12.5vh]"
     @hide-modal="handleCloseModal"
   >
     <div class="bg-neutral-20 w-full h-full flex flex-col overflow-auto">
       <BaseLibrary
-        v-if="
-          getModalInfo(TypeModals.SaveSearchPicker).state === ModalState.Show
-        "
+        v-if="getModalInfo(TypeModals.SaveSearchPicker).open"
         :search-input-type="SearchInputType.AdvancedSavedSearchType"
         :search-placeholder="$t('saved-searches.search-saved-searches')"
         :confirm-selection-button="true"
@@ -36,7 +32,6 @@ import BaseModal from "./base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
   TypeModals,
-  ModalState,
   Entitytyping,
   SearchInputType,
 } from "@/generated-types/queries";

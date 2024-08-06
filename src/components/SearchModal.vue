@@ -12,7 +12,7 @@
       />
       <div class="overflow-y-scroll h-full">
         <base-library
-          v-if="getModalInfo(TypeModals.Search).modal?.open"
+          v-if="getModalInfo(TypeModals.Search).open"
           :bulk-operations-context="BulkOperationsContextEnum.SearchModal"
           list-item-route-name="SingleEntity"
           :enable-advanced-filters="false"
@@ -29,7 +29,6 @@
 <script setup lang="ts">
 import {
   type AdvancedFilterInput,
-  ModalState,
   SearchInputType,
   TypeModals,
 } from "@/generated-types/queries";

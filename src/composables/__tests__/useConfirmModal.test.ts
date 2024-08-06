@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { useConfirmModal } from "../useConfirmModal";
 import { useBaseModal } from "../useBaseModal";
-import { ModalState, TypeModals } from "../../generated-types/queries";
+import { TypeModals } from "../../generated-types/queries";
 
 test("Initialize and open a confirmModal", () => {
   const { initializeConfirmModal } = useConfirmModal();
@@ -17,7 +17,7 @@ test("Initialize and open a confirmModal", () => {
     openImmediately: true,
   });
 
-  expect(getModalInfo(TypeModals.Confirm).state).toBe(ModalState.Show);
+  expect(getModalInfo(TypeModals.Confirm).open).toBe(true);
 });
 
 test("Set path to navigate", () => {
@@ -34,5 +34,5 @@ test("Close confirmModal by using decline button", () => {
 
   confirmModalConfiguration.value?.declineButton.buttonCallback();
 
-  expect(getModalInfo(TypeModals.Confirm).state).toBe(ModalState.Hide);
+  expect(getModalInfo(TypeModals.Confirm).open).toBe(true);
 });

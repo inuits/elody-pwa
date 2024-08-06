@@ -1,7 +1,6 @@
 <template>
   <base-modal
-    :modal-state="getModalInfo(TypeModals.SaveSearch).state"
-    :modal-position="getModalInfo(TypeModals.SaveSearch).modalPosition"
+    :modal-type="TypeModals.SaveSearch"
     modal-width-style="w-2/5"
     modal-color="bg-neutral-white"
     modalHeightStyle="max-h-[75vh] my-[12.5vh]"
@@ -9,7 +8,7 @@
   >
     <div class="bg-neutral-0 w-full">
       <dynamic-form
-        v-if="getModalInfo(TypeModals.SaveSearch).state === ModalState.Show"
+        v-if="getModalInfo(TypeModals.SaveSearch).open"
         :dynamic-form-query="getModalInfo(TypeModals.SaveSearch).formQuery"
         :saved-context="getModalInfo(TypeModals.SaveSearch).savedContext"
         :tab-name="''"
@@ -22,7 +21,7 @@
 <script setup lang="ts">
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { TypeModals, ModalState } from "@/generated-types/queries";
+import { TypeModals } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 import { useSaveSearchHepler } from "@/composables/useSaveSearchHepler";
 import DynamicForm from "./dynamicForms/DynamicForm.vue";

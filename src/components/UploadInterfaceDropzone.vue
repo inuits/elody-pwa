@@ -21,15 +21,11 @@ import Dropzone from "@/components/base/dropzone/Dropzone.vue";
 import { useDropzone } from "@/composables/useDropzone";
 import useUpload from "@/composables/useUpload";
 import {
-  ModalState,
   TypeModals,
   UploadFieldType,
   UploadFlow,
 } from "@/generated-types/queries";
-import { inject, watch } from "vue";
-import { useBaseModal } from "@/composables/useBaseModal";
-import { useI18n } from "vue-i18n";
-import type { FormContext } from "vee-validate";
+import { watch } from "vue";
 
 const { initializeUpload } = useUpload();
 const dropzone = new useDropzone();
