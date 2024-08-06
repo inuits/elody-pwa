@@ -211,7 +211,7 @@ watch(advancedFilterInput, (newValue, oldValue) => {
       newValue = newValue?.value;
     }
 
-    if (isEqual(newValue) === isEqual(oldValue)) return;
+    if (isEqual(newValue, oldValue)) return;
     if (advancedFilterInput.value.value.length > 0)
       emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
     else emit("deactivateFilter", advancedFilterInput.value.key);
@@ -233,7 +233,10 @@ watch(clearAllActiveFilters, () => {
     if (!matchersToResetToDefault.includes(matcher))
       return reloadMatcherComponent();
 
-    selectedMatcher.value = getDefaultMatcher();
+    const defaultMatcher = getDefaultMatcher();
+    if (!defaultMatcher) return;
+
+    selectedMatcher.value = defaultMatcher;
   }
 });
 </script>
