@@ -108,7 +108,6 @@ import {
   GetBulkOperationsDocument,
   type GetBulkOperationsQuery,
   MetadataAndRelation,
-  ModalState,
   RouteNames,
   TranscodeType,
   TypeModals,
@@ -347,7 +346,7 @@ watch(selectedBulkOperation, () => {
 });
 
 watch(
-  () => getModalInfo(TypeModals.BulkOperations).modal?.open,
+  () => getModalInfo(TypeModals.BulkOperations).open,
   (isBulkOperationModalOpen: boolean | undefined) => {
     if (!isBulkOperationModalOpen) selectedBulkOperation.value = undefined;
   }

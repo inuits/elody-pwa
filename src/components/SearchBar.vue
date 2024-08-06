@@ -24,7 +24,6 @@
 <script lang="ts" setup>
 import {
   AdvancedFilterTypes,
-  ModalState,
   TypeModals,
   type AdvancedFilterInput,
 } from "@/generated-types/queries";
@@ -85,7 +84,7 @@ const openSearchModal = () => {
 };
 
 watch(
-  () => getModalInfo(TypeModals.Search).modal?.open,
+  () => getModalInfo(TypeModals.Search).open,
   (modalIsOpen: boolean | undefined) => {
     if (!modalIsOpen) {
       inputValue.value = "";

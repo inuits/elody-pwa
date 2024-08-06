@@ -3,6 +3,7 @@
     :modal-type="TypeModals.EntityPicker"
     :cancel-button-availabe="false"
     modal-width-style="w-10/12"
+    modal-height-style="h-screen"
     modal-color="bg-neutral-lightest"
     @hide-modal="
       () => {
@@ -14,12 +15,9 @@
     <div class="flex flex-col w-full h-full overflow-hidden">
       <BaseTabs class="h-full" :tabs="tabs">
         <BaseTab :title="tabs[0]" class="overflow-auto">
-          {{ entityPickerModal?.open }}
-          {{ queryLoaded }}
-          {{ ignoreCustomQuery }}
           <BaseLibrary
             v-if="
-              getModalInfo(TypeModals.EntityPicker).modal?.open &&
+              getModalInfo(TypeModals.EntityPicker).open &&
               (queryLoaded || ignoreCustomQuery)
             "
             :bulk-operations-context="getContext()"
@@ -56,7 +54,7 @@
         <BaseTab :title="tabs[1]">
           <dynamic-form
             class="overflow-auto"
-            v-if="entityPickerModal?.open"
+            v-if="entityPickerModalOpen"
             dynamic-form-query="GetSingleEntityUploadForm"
             :has-linked-upload="true"
           />
@@ -69,7 +67,6 @@
 <script lang="ts" setup>
 import {
   Entitytyping,
-  ModalState,
   SearchInputType,
   TypeModals,
   type BaseRelationValuesInput,
@@ -108,8 +105,8 @@ const ignoreCustomQuery = ref<boolean>(false);
 const newQuery = ref<object | undefined>(undefined);
 const { loadDocument, getDocument } = useCustomQuery();
 const queryLoaded = ref<boolean>(false);
-const entityPickerModal = computed(
-  () => getModalInfo(TypeModals.EntityPicker).modal
+const entityPickerModalOpen = computed(
+  () => getModalInfo(TypeModals.EntityPicker).open
 );
 
 const getCustomQuery = async () => {
@@ -154,11 +151,9 @@ const getContext = () => {
 };
 
 watch(
-  () => entityPickerModal.value?.open,
+  () => entityPickerModalOpen.value,
   async (isModalOpened: boolean | undefined) => {
     const hasCustomQuery = !!getCustomGetEntitiesQuery();
-    console.log(entityPickerModal.value);
-    console.log(isModalOpened, hasCustomQuery, newQuery.value);
     if (isModalOpened && hasCustomQuery && !newQuery.value) {
       await getCustomQuery();
     } else if (isModalOpened && !hasCustomQuery) {
