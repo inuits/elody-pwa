@@ -5,6 +5,7 @@ import type {
   DropdownOption,
   GetEntitiesQueryVariables,
 } from "@/generated-types/queries";
+import type { SavedSearchType } from "@/composables/useSaveSearchHepler";
 
 export type FilterListItem = {
   isActive: boolean;
@@ -19,6 +20,8 @@ type BaseLibraryState = {
   totalEntityCount?: number;
   queryVariables?: GetEntitiesQueryVariables;
   filterListItems?: FilterListItem[];
+  lastUsedFilters?: SavedSearchType[];
+  lastUsedFilter?: SavedSearchType;
   UIPanelStateCollapsed?: [{ key: string; value: boolean }];
 };
 

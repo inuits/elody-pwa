@@ -22,11 +22,14 @@
           {{ activeFilterCount }} {{ t("filters.active") }}
         </span>
         <div
-          v-if="selectedSavedFilter"
+          v-if="
+            (selectedSavedFilter || lastActiveFilter) &&
+            auth.isAuthenticated.value === true
+          "
           class="bg-neutral-light border-neutral-light rounded py-1 px-2 ml-2"
         >
           <span class="text-text-body">
-            {{ selectedSavedFilter.title }}
+            {{ selectedSavedFilter?.title || lastActiveFilter?.title }}
           </span>
         </div>
         <unicon
@@ -143,6 +146,7 @@
         :has-active-filters="activeFilterCount > 0"
         :entityType="entityType"
         @filterDeleted="() => (clearAllActiveFilters = true)"
+        :route="route"
       />
     </base-context-menu>
   </div>
@@ -164,10 +168,7 @@ import {
   type GetFilterMatcherMappingQuery,
   type Maybe,
 } from "@/generated-types/queries";
-import {
-  useStateManagement,
-  type FilterListItem,
-} from "@/composables/useStateManagement";
+import { useStateManagement } from "@/composables/useStateManagement";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
@@ -180,7 +181,10 @@ import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMen
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
-import { useSaveSearchHepler } from "@/composables/useSaveSearchHepler";
+import {
+  SavedSearchType,
+  useSaveSearchHepler,
+} from "@/composables/useSaveSearchHepler";
 import { useRoute } from "vue-router";
 import { useAuth } from "session-vue-3-oidc-library";
 import {
@@ -239,14 +243,19 @@ const advancedFilters = ref<Maybe<AdvancedFilters>>();
 const clearAllActiveFilters = ref<boolean>(false);
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const displayedFilterOptions = ref<DropdownOption[]>([]);
-// const filters = ref<FilterListItem[]>([]);
+const lastActiveFilter = ref<SavedSearchType | undefined>(undefined);
 const matchers = ref<DropdownOption[]>([]);
 const { getStateForRoute, updateStateForRoute } = useStateManagement();
 const { isSaved } = useEditMode();
 const { setAdvancedFilterInputs } = useQueryVariablesFactory();
 const { t } = useI18n();
-const { setActiveFilter: setActiveSavedFilter, getActiveFilter } =
-  useSaveSearchHepler();
+const {
+  setActiveFilter: setActiveSavedFilter,
+  getActiveFilter,
+  getLastUsedFilterForRoute,
+  addNewSavedFilterToLastUsedFiltersForRoute,
+  addLastUsedFilterToStateForRoute,
+} = useSaveSearchHepler();
 const router = useRoute();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const { filters, activeFilters, activeFilterCount, displayedFilters } =
@@ -403,6 +412,7 @@ const toggleDisplayedFilters = () => {
 onMounted(() => {
   emit("filterMatcherMappingPromise", filterMatcherMappingPromise);
   emit("advancedFiltersPromise", advancedFiltersPromise);
+  lastActiveFilter.value = getLastUsedFilterForRoute(props.route);
 });
 
 if (props.parentEntityIdentifiers.length > 0)
@@ -421,6 +431,8 @@ watch(clearAllActiveFilters, () => {
 
 watch(selectedSavedFilter, () => {
   if (!selectedSavedFilter.value) {
+    addLastUsedFilterToStateForRoute(props.route, undefined);
+    lastActiveFilter.value = undefined;
     return clearAllFilters({ saveState: false, clearSavedFilter: false });
   }
 
@@ -429,6 +441,12 @@ watch(selectedSavedFilter, () => {
     .filter((filter) => filter.isActive && filter.inputFromState)
     .map((filter) => filter.inputFromState) as AdvancedFilterInput[];
 
+  addNewSavedFilterToLastUsedFiltersForRoute(
+    props.route,
+    selectedSavedFilter.value
+  );
+  addLastUsedFilterToStateForRoute(props.route, selectedSavedFilter.value);
+  lastActiveFilter.value = selectedSavedFilter.value;
   applyFilters(true);
 });
 
@@ -436,6 +454,7 @@ watch(
   () => props.entityType,
   () => {
     setActiveSavedFilter(null);
+    lastActiveFilter.value = getLastUsedFilterForRoute(props.route);
     dequeueAllItemsForBulkProcessing(BulkOperationsContextEnum.FilterOptions);
   }
 );
@@ -468,7 +487,11 @@ const clearAllFilters = async ({
     filter.selectedMatcher = undefined;
   });
   setTimeout(() => (clearAllActiveFilters.value = false), 50);
-  if (clearSavedFilter) setActiveSavedFilter(null);
+  if (clearSavedFilter) {
+    setActiveSavedFilter(null);
+    lastActiveFilter.value = undefined;
+    addLastUsedFilterToStateForRoute(props.route, undefined);
+  }
   applyFilters(saveState);
 };
 </script>

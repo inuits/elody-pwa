@@ -32,17 +32,20 @@
       <hr class="border-t-1 border-neutral-50" />
 
       <!-- TODO(savedSearch): save selected to session/local storage and show it there -->
-      <!-- <template v-if="!entitiesLoading">
+      <template v-if="lastUsedFilters.length > 0">
         <base-context-menu-item
-          v-for="(savedSearch, index) in entitiesList.slice(0, 5)"
+          v-for="(filter, index) in lastUsedFilters"
           :key="index"
-          @clicked="selectFilter(savedSearch)"
-          :label="savedSearch.title"
-          :highlight="selectedFilter?.id === savedSearch.id"
+          @clicked="selectFilter(filter)"
+          :label="filter.title"
+          :highlight="isFilterActive(filter.id)"
         />
       </template>
 
-      <hr class="border-t-1 border-neutral-50" v-if="entitiesList.length > 0" /> -->
+      <hr
+        class="border-t-1 border-neutral-50"
+        v-if="lastUsedFilters.length > 0"
+      />
 
       <base-context-menu-item
         @clicked="openFindAllFiltersModal"
@@ -56,10 +59,13 @@
 <script lang="ts" setup>
 import { Unicons } from "@/types";
 import { TypeModals, Entitytyping } from "@/generated-types/queries";
-import { useSaveSearchHepler } from "@/composables/useSaveSearchHepler";
+import {
+  useSaveSearchHepler,
+  SavedSearchType,
+} from "@/composables/useSaveSearchHepler";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useRouter } from "vue-router";
@@ -69,6 +75,7 @@ import {
   useNotification,
 } from "@/components/base/BaseNotification.vue";
 import { useI18n } from "vue-i18n";
+import type { RouteLocationNormalizedLoaded } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -76,6 +83,7 @@ const props = withDefaults(
     savedSearches?: any[];
     hasActiveFilters: boolean;
     entityType: Entitytyping;
+    route: RouteLocationNormalizedLoaded;
   }>(),
   {
     activeFilters: () => [],
@@ -95,6 +103,8 @@ const {
   initialize,
   saveExistedSearch,
   fetchSavedSearchById,
+  getLastUsedFiltersForRoute,
+  getLastUsedFilterForRoute,
 } = useSaveSearchHepler();
 const { setEntityType } = useQueryVariablesFactory();
 
@@ -104,12 +114,22 @@ const selectedFilter = computed(() => {
   return getActiveFilter();
 });
 
+const lastActiveFilter = ref<SavedSearchType | undefined>(undefined);
+
 const getDeepCopy = (obj: any) => {
   return JSON.parse(JSON.stringify(obj));
 };
 
+const isFilterActive = (filterId: string) => {
+  return (
+    lastActiveFilter.value?.id === filterId ||
+    selectedFilter.value?.id === filterId
+  );
+};
+
 onMounted(() => {
   initialize(props.entityType);
+  lastActiveFilter.value = getLastUsedFilterForRoute(props.route);
 });
 
 const handleOpenModal = (context: any = undefined) => {
@@ -173,6 +193,8 @@ const openDeleteModal = () => {
     openImmediately: true,
   });
 };
+
+const lastUsedFilters = computed(() => getLastUsedFiltersForRoute(props.route));
 
 const deleteFilter = async () => {
   if (!selectedFilter.value) return;
