@@ -104,6 +104,7 @@ const {
   fetchSavedSearchById,
   getLastUsedFiltersForRoute,
   getLastUsedFilterForRoute,
+  removeFilterFromStateForRoute,
 } = useSaveSearchHepler();
 const { setEntityType } = useQueryVariablesFactory();
 
@@ -198,6 +199,7 @@ const lastUsedFilters = computed(() => getLastUsedFiltersForRoute(props.route));
 const deleteFilter = async () => {
   if (!selectedFilter.value) return;
   await deleteSavedSearch(selectedFilter.value.id);
+  removeFilterFromStateForRoute(props.route, selectedFilter.value);
   setActiveFilter(null);
   createNotificationOverwrite(
     NotificationType.default,

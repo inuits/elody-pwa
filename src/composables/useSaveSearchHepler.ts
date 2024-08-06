@@ -185,12 +185,24 @@ export const useSaveSearchHepler = () => {
     });
   };
 
+  const removeFilterFromStateForRoute = (
+    route: RouteLocationNormalizedLoaded,
+    filter: SavedSearchType
+  ) => {
+    const routeFilters = getLastUsedFiltersForRoute(route);
+    const filteredFilters = routeFilters.filter(
+      (item: SavedSearchType) => item.id !== filter.id
+    );
+
+    stateManager.updateStateForRoute(route, {
+      lastUsedFilters: JSON.parse(JSON.stringify(filteredFilters)),
+    });
+  };
+
   const addLastUsedFilterToStateForRoute = (
     route: RouteLocationNormalizedLoaded,
     filter: SavedSearchType | undefined
   ) => {
-    console.log("route: ", route);
-    console.log("filter: ", filter);
     stateManager.updateStateForRoute(route, {
       lastUsedFilter: filter ? JSON.parse(JSON.stringify(filter)) : undefined,
     });
@@ -212,5 +224,6 @@ export const useSaveSearchHepler = () => {
     getLastUsedFilterForRoute,
     addNewSavedFilterToLastUsedFiltersForRoute,
     addLastUsedFilterToStateForRoute,
+    removeFilterFromStateForRoute,
   };
 };
