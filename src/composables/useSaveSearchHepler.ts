@@ -21,8 +21,9 @@ import { useMutation, provideApolloClient } from "@vue/apollo-composable";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { computed } from "vue";
 import { apolloClient } from "@/main";
-
-type SavedSearchType = {
+import { useStateManagement } from "@/composables/useStateManagement";
+import type { RouteLocationNormalizedLoaded } from "vue-router";
+export type SavedSearchType = {
   id: string;
   title: string;
   value: FilterListItem[];
@@ -41,6 +42,8 @@ export const useSaveSearchHepler = () => {
     setsearchInputType,
   } = useBaseLibrary(apolloClient as ApolloClient<any>);
   const { locale } = useI18n();
+
+  const stateManager = useStateManagement();
 
   const initialize = async (entityType: string) => {
     const filters = [
@@ -145,6 +148,54 @@ export const useSaveSearchHepler = () => {
       }) || []
   );
 
+  const getLastUsedFiltersForRoute = (
+    path: RouteLocationNormalizedLoaded
+  ): SavedSearchType[] => {
+    const stateForRoute = stateManager.getStateForRoute(path);
+    const lastUsedFilters = stateForRoute?.lastUsedFilters;
+
+    return lastUsedFilters || [];
+  };
+
+  const getLastUsedFilterForRoute = (
+    path: RouteLocationNormalizedLoaded
+  ): SavedSearchType | undefined => {
+    const stateForRoute = stateManager.getStateForRoute(path);
+    const lastUsedFilters = stateForRoute?.lastUsedFilter;
+
+    return lastUsedFilters || undefined;
+  };
+
+  const addNewSavedFilterToLastUsedFiltersForRoute = (
+    route: RouteLocationNormalizedLoaded,
+    filter: SavedSearchType
+  ) => {
+    let lastUsedFilters = getLastUsedFiltersForRoute(route);
+    lastUsedFilters = lastUsedFilters.filter(
+      (item: SavedSearchType) => item.id !== filter.id
+    );
+
+    lastUsedFilters.unshift(filter);
+    if (lastUsedFilters.length > 5) {
+      lastUsedFilters.length = 5;
+    }
+
+    stateManager.updateStateForRoute(route, {
+      lastUsedFilters: JSON.parse(JSON.stringify(lastUsedFilters)),
+    });
+  };
+
+  const addLastUsedFilterToStateForRoute = (
+    route: RouteLocationNormalizedLoaded,
+    filter: SavedSearchType | undefined
+  ) => {
+    console.log("route: ", route);
+    console.log("filter: ", filter);
+    stateManager.updateStateForRoute(route, {
+      lastUsedFilter: filter ? JSON.parse(JSON.stringify(filter)) : undefined,
+    });
+  };
+
   return {
     setActiveFilter,
     getActiveFilter,
@@ -157,5 +208,9 @@ export const useSaveSearchHepler = () => {
     saveExistedSearch,
     extractFiltersFromEntity,
     normalizeSavedSearchFromEntity,
+    getLastUsedFiltersForRoute,
+    getLastUsedFilterForRoute,
+    addNewSavedFilterToLastUsedFiltersForRoute,
+    addLastUsedFilterToStateForRoute,
   };
 };
