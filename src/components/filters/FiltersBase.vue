@@ -476,12 +476,9 @@ const clearAllFilters = async ({
     displayedFilterOption = displayedFilterOptions.value.pop();
   toggleDisplayedFilters();
 
-  activeFilters.value = activeFilters.value.filter((activeFilter) =>
-    filters.value
-      .filter((filter) => !!filter.advancedFilter.hidden)
-      .map((filter) => filter.advancedFilter.key)
-      .includes(activeFilter.key)
-  );
+  activeFilters.value = filters.value
+    .filter((filter) => !!filter.advancedFilter.hidden)
+    .map((filter) => filter.inputFromState);
   filters.value.forEach((filter) => {
     if (filter.advancedFilter.hidden) return;
     filter.isActive = false;
