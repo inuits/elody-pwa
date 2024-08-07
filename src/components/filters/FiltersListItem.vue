@@ -68,7 +68,8 @@
       <BaseButtonNew
         class="!w-9 h-9"
         label=""
-        :icon="DamsIcons.Redo"
+        :icon="DamsIcons.Cross"
+        :icon-height="22"
         :disabled="!selectedMatcher"
         button-style="accentNormal"
         button-size="small"
