@@ -5,7 +5,7 @@ import {
   type DeleteQueryOptions,
   ModalChoices,
   ModalState,
-  TypeModals
+  TypeModals,
 } from "@/generated-types/queries";
 export type ModalPosition = "left" | "center" | "right";
 
@@ -21,7 +21,7 @@ export type ModalInfo = {
 };
 
 export type GenericContextForModals = {
-  type: BulkOperationTypes
+  type: BulkOperationTypes;
   parentId: string;
   relationType: string;
   collection: Collection;
