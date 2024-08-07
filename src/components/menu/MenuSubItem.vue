@@ -51,7 +51,11 @@ const linkTag = computed(() => (isLink.value ? "router-link" : "div"));
 const isPermitted = ref<boolean>();
 
 if (props.subMenuItem.requiresAuth === false) isPermitted.value = true;
-else isPermitted.value = can(Permission.Canread, props.subMenuItem.entityType);
+else
+  isPermitted.value = can(
+    props.subMenuItem.typeLink?.modal?.neededPermission || Permission.Canread,
+    props.subMenuItem.entityType
+  );
 
 const handleClick = (event: Event, menuAction: any) => {
   if (!isLink.value && menuAction?.action) {
