@@ -6,7 +6,9 @@ export type callback = (e?: Event | undefined) => Promise<unknown>;
 export const toBeDeleted = ref<string[]>([]);
 export const isSaved = ref<boolean>(false);
 
-const showErrors = computed<boolean>(() => buttonClicked.value && isDisabled.value);
+const showErrors = computed<boolean>(
+  () => buttonClicked.value && isDisabled.value
+);
 const buttonClicked = ref<boolean>(false);
 const isDisabled = ref<boolean>(false);
 const editMode = ref<EditModes>("view");

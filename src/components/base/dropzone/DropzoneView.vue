@@ -59,7 +59,9 @@ const props = withDefaults(
   }
 );
 
-const selectedItem = ref<string | undefined>(props.entityTypesForUpload ? props.entityTypesForUpload[0] : undefined);
+const selectedItem = ref<string | undefined>(
+  props.entityTypesForUpload ? props.entityTypesForUpload[0] : undefined
+);
 
 const emit = defineEmits<{
   (event: "update:modelValue", modelValue: HTMLDivElement | undefined): void;

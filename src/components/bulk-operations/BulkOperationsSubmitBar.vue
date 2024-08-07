@@ -4,27 +4,19 @@
     class="flex justify-between rounded-2xl p-3 w-full h-full bg-neutral-white"
   >
     <div class="flex items-center">
-      <div
-        v-if="disabled"
-        class="h-auto mt-1"
-      >
-        <base-tooltip
-          position="top-right"
-          :tooltip-offset="8"
-        >
+      <div v-if="disabled" class="h-auto mt-1">
+        <base-tooltip position="top-right" :tooltip-offset="8">
           <template #activator="{ on }">
             <div v-on="on">
               <unicon :name="Unicons.QuestionCircle.name" height="20" />
             </div>
           </template>
           <template #default>
-                <span class="text-sm text-text-placeholder">
-                  <div>
-                    {{
-                      t(`tooltip.buttons.disabled-${buttonLabel}-button`)
-                    }}
-                  </div>
-                </span>
+            <span class="text-sm text-text-placeholder">
+              <div>
+                {{ t(`tooltip.buttons.disabled-${buttonLabel}-button`) }}
+              </div>
+            </span>
           </template>
         </base-tooltip>
       </div>
