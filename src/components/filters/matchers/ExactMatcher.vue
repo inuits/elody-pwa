@@ -221,15 +221,13 @@ const clearAutocompleteOptions = () => {
 const useAutocomplete = computed<boolean>(
   () => filterOptions.length > 10 || filterOptions.length === 0
 );
-const determineInputType = computed<"text" | "number" | "date">(
-  () => {
-    if (props.filter.advancedFilter.type === AdvancedFilterTypes.Number)
-      return "number";
-    if (props.filter.advancedFilter.type === AdvancedFilterTypes.Date)
-      return "date";
-    return "text";
-  }
-);
+const determineInputType = computed<"text" | "number" | "date">(() => {
+  if (props.filter.advancedFilter.type === AdvancedFilterTypes.Number)
+    return "number";
+  if (props.filter.advancedFilter.type === AdvancedFilterTypes.Date)
+    return "date";
+  return "text";
+});
 const determinePlaceholder = computed(() => {
   if (props.filter.advancedFilter.type === AdvancedFilterTypes.Number)
     return t("filters.matcher-placeholders.number");
