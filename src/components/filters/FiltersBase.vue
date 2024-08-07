@@ -53,6 +53,8 @@
             data-cy="filters-clear-button"
             class="!w-1/3"
             :label="t('filters.clear')"
+            :icon="DamsIcons.Cross"
+            :icon-height="22"
             button-style="default"
             @click="() => (clearAllActiveFilters = true)"
           />
