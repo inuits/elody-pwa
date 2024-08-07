@@ -76,9 +76,9 @@ const emitNewAdvancedFilterInput = () => {
   }
 };
 
-const determineInputType = computed<"number" | "date">(() => {
+const determineInputType = computed<"number" | "datetime-local">(() => {
   if (props.filter.advancedFilter.type === AdvancedFilterTypes.Date)
-    return "date";
+    return "datetime-local";
   return "number";
 });
 const determinePlaceholder = computed(() => {
