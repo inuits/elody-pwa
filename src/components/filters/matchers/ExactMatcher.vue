@@ -221,7 +221,7 @@ const clearAutocompleteOptions = () => {
 const useAutocomplete = computed<boolean>(
   () => filterOptions.length > 10 || filterOptions.length === 0
 );
-const determineInputType = computed<"text" | "number" | "date">(() => {
+const determineInputType = computed<"text" | "number" | "datetime-local">(() => {
   if (props.filter.advancedFilter.type === AdvancedFilterTypes.Number)
     return "number";
   if (props.filter.advancedFilter.type === AdvancedFilterTypes.Date)
