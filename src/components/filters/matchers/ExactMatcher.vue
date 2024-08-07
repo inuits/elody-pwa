@@ -225,7 +225,7 @@ const determineInputType = computed<"text" | "number" | "date">(() => {
   if (props.filter.advancedFilter.type === AdvancedFilterTypes.Number)
     return "number";
   if (props.filter.advancedFilter.type === AdvancedFilterTypes.Date)
-    return "date";
+    return "datetime-local";
   return "text";
 });
 const determinePlaceholder = computed(() => {
