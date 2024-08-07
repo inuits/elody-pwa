@@ -1,5 +1,8 @@
 <template>
-  <div data-cy="base-dropdown-new" :class="[labelPosition === 'inline' ? 'flex items-center' : undefined]">
+  <div
+    data-cy="base-dropdown-new"
+    :class="[labelPosition === 'inline' ? 'flex items-center' : undefined]"
+  >
     <p :class="['pr-2']" v-if="label">{{ t(label) }}</p>
     <select
       :disabled="disable"

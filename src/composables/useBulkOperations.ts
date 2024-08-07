@@ -1,7 +1,4 @@
-import {
-  BulkOperationTypes,
-  RouteNames,
-} from "@/generated-types/queries";
+import { BulkOperationTypes, RouteNames } from "@/generated-types/queries";
 import { bulkSelectAllSizeLimit } from "@/main";
 import { ref } from "vue";
 
@@ -29,7 +26,7 @@ export type GenericContextForBulkOperationsForm = {
   collection: Collection;
 };
 export type DownloadMediafilesContextForBulkOperationsForm = {
-  type: BulkOperationTypes
+  type: BulkOperationTypes;
   mediafiles: [];
   entities: [];
   includeAssetCsv: boolean;

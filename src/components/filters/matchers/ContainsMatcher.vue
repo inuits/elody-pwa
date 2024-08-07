@@ -34,8 +34,7 @@ const force = ref<boolean>(false);
 
 const setVariablesFromInput = () => {
   input.value = props.filter.inputFromState?.value || "";
-  if (props.relatedActiveFilter)
-    input.value = props.relatedActiveFilter?.value;
+  if (props.relatedActiveFilter) input.value = props.relatedActiveFilter?.value;
   force.value = Boolean(props.filter.inputFromState);
 };
 onMounted(() => {

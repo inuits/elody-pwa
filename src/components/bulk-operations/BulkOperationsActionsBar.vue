@@ -111,23 +111,29 @@ import {
   ModalState,
   RouteNames,
   TranscodeType,
-  TypeModals
+  TypeModals,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
   Context,
   DownloadMediafilesContextForBulkOperationsForm,
   InBulkProcessableItem,
-  useBulkOperations
+  useBulkOperations,
 } from "@/composables/useBulkOperations";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import { apolloClient, bulkSelectAllSizeLimit } from "@/main";
 import { computed, onMounted, ref, watch } from "vue";
-import { GenericContextForModals, useBaseModal } from "@/composables/useBaseModal";
+import {
+  GenericContextForModals,
+  useBaseModal,
+} from "@/composables/useBaseModal";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import { useImport } from "@/composables/useImport";
-import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
+import {
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 
@@ -315,7 +321,8 @@ watch(selectedBulkOperation, () => {
     }
 
     if (
-      selectedBulkOperation.value?.value === BulkOperationTypes.ReorderEntities ||
+      selectedBulkOperation.value?.value ===
+        BulkOperationTypes.ReorderEntities ||
       selectedBulkOperation.value?.value === BulkOperationTypes.TranscodePdf ||
       selectedBulkOperation.value?.value === BulkOperationTypes.CreateEntity
     ) {
