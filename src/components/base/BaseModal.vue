@@ -58,9 +58,11 @@ watch(
   (isModalOpen: boolean) => {
     if (isModalOpen) {
       dialog.value?.showModal();
+      document.body.classList.add("overflow-hidden");
       return;
     }
     dialog.value?.close();
+    document.body.classList.remove("overflow-hidden");
   }
 );
 
