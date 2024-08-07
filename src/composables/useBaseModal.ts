@@ -50,14 +50,6 @@ export const useBaseModal = () => {
     return modals[modalType];
   };
 
-  const setModalElement = (
-    modalElement: HTMLDialogElement,
-    modalType: TypeModals
-  ) => {
-    updateModal(modalType, { modal: modalElement });
-    console.log(modals[modalType]);
-  };
-
   const openModal = (
     modalType: TypeModals,
     modalTab: ModalChoices | undefined = undefined,
@@ -130,7 +122,6 @@ export const useBaseModal = () => {
 
   return {
     getModal,
-    setModalElement,
     modals,
     getModalInfo,
     updateModal,
