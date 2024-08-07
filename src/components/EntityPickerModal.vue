@@ -15,9 +15,6 @@
     <div class="flex flex-col w-full h-full overflow-hidden">
       <BaseTabs class="h-full" :tabs="tabs">
         <BaseTab :title="tabs[0]" class="overflow-auto">
-          {{ entityPickerModal?.open }}
-          {{ queryLoaded }}
-          {{ ignoreCustomQuery }}
           <BaseLibrary
             v-if="
               getModalInfo(TypeModals.EntityPicker).open &&
@@ -157,8 +154,6 @@ watch(
   () => entityPickerModalOpen.value,
   async (isModalOpened: boolean | undefined) => {
     const hasCustomQuery = !!getCustomGetEntitiesQuery();
-    console.log(entityPickerModal.value);
-    console.log(isModalOpened, hasCustomQuery, newQuery.value);
     if (isModalOpened && hasCustomQuery && !newQuery.value) {
       await getCustomQuery();
     } else if (isModalOpened && !hasCustomQuery) {
