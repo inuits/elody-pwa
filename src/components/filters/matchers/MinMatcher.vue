@@ -1,10 +1,28 @@
 <template>
-  <BaseInputTextNumberDatetime
-    v-model="input"
-    input-style="default"
-    :type="determineInputType"
-    :placeholder="determinePlaceholder"
-  />
+  <div v-if="Array.isArray(determineInputType) && determineInputType?.length === 2">
+    <BaseInputTextNumberDatetime
+      class="mb-2"
+      v-model="input"
+      input-style="default"
+      :type="determineInputType[0]"
+      :placeholder="determinePlaceholder"
+    />
+    <BaseInputTextNumberDatetime
+      v-if="filter.advancedFilter.showTimeForDateFilter"
+      v-model="inputTime"
+      input-style="default"
+      :type="determineInputType[1]"
+      :placeholder="determinePlaceholder"
+    />
+  </div>
+  <div v-else>
+    <BaseInputTextNumberDatetime
+      v-model="input"
+      input-style="default"
+      :type="determineInputType"
+      :placeholder="determinePlaceholder"
+    />
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -14,7 +32,7 @@ import {
   type AdvancedFilterInput,
 } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { addCurrentTimeZoneToDateTimeString, isDateTime } from "@/helpers";
+import { addCurrentTimeZoneToDateTimeString, extractDate, extractTime, isDateTime } from "@/helpers";
 import { computed, defineEmits, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -33,10 +51,13 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const input = ref<number | string>();
+const inputTime = ref<number | string | undefined>(undefined);
+const totalInput = computed(() => inputTime.value ? `${input.value}T${inputTime.value}` : input.value );
+
 const force = ref<boolean>(false);
-const determineInputType = computed<"number" | "datetime-local">(() => {
+const determineInputType = computed<"number" | ["date", "time"]>(() => {
   if (props.filter.advancedFilter.type === AdvancedFilterTypes.Date)
-    return "datetime-local";
+    return ["date", "time"];
   return "number";
 });
 const determinePlaceholder = computed(() => {
@@ -46,19 +67,21 @@ const determinePlaceholder = computed(() => {
 });
 
 onMounted(() => {
-  input.value = props.filter.inputFromState?.value;
+  input.value = extractDate(props.filter.inputFromState?.value?.min);
+  inputTime.value = extractTime(props.filter.inputFromState?.value?.min);
+  force.value = Boolean(props.filter.inputFromState);
   force.value = Boolean(props.filter.inputFromState);
 });
 
-watch(input, () => {
+const emitNewAdvancedFilterInput = () => {
   const newAdvancedFilterInput: AdvancedFilterInput = {
     type: props.filter.advancedFilter.type,
     parent_key: props.filter.advancedFilter.parentKey,
     key: props.filter.advancedFilter.key,
     value: {
-      min: isDateTime(input.value)
-        ? addCurrentTimeZoneToDateTimeString(input.value)
-        : input.value,
+      min: isDateTime(totalInput.value)
+        ? addCurrentTimeZoneToDateTimeString(totalInput.value)
+        : totalInput.value,
       included: false,
     },
     aggregation: props.filter.advancedFilter.aggregation,
@@ -72,5 +95,8 @@ watch(input, () => {
     };
   emit("newAdvancedFilterInput", newAdvancedFilterInput, force.value);
   force.value = false;
-});
+};
+
+watch(input, () => emitNewAdvancedFilterInput());
+watch(inputTime, () => emitNewAdvancedFilterInput());
 </script>

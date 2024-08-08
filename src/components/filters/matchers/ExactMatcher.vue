@@ -6,12 +6,30 @@
       !Array.isArray(input)
     "
   >
-    <BaseInputTextNumberDatetime
-      v-model="input"
-      input-style="default"
-      :type="determineInputType"
-      :placeholder="determinePlaceholder"
-    />
+    <div v-if="Array.isArray(determineInputType) && determineInputType?.length === 2">
+      <BaseInputTextNumberDatetime
+        class="mb-2"
+        v-model="input"
+        input-style="default"
+        :type="determineInputType[0]"
+        :placeholder="determinePlaceholder"
+      />
+      <BaseInputTextNumberDatetime
+        v-if="filter.advancedFilter.showTimeForDateFilter"
+        v-model="inputTime"
+        input-style="default"
+        :type="determineInputType[1]"
+        :placeholder="determinePlaceholder"
+      />
+    </div>
+    <div v-else>
+      <BaseInputTextNumberDatetime
+        v-model="input"
+        input-style="default"
+        :type="determineInputType"
+        :placeholder="determinePlaceholder"
+      />
+    </div>
   </div>
   <div v-else class="grow">
     <div
@@ -61,7 +79,7 @@ import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
-import { addCurrentTimeZoneToDateTimeString, isDateTime } from "@/helpers";
+import { addCurrentTimeZoneToDateTimeString, extractDate, extractTime, isDateTime } from "@/helpers";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import {
   computed,
@@ -94,6 +112,9 @@ const route = useRoute();
 const { t } = useI18n();
 
 const input = ref<string | number | DropdownOption[]>();
+const inputTime = ref<number | string | undefined>(undefined);
+const totalInput = computed(() => inputTime.value ? `${input.value}T${inputTime.value}` : input.value );
+
 const dropdownInputLength = ref<number>(0);
 const dropdownNoOptionsText = computed(() =>
   dropdownInputLength.value < 3
@@ -221,11 +242,11 @@ const clearAutocompleteOptions = () => {
 const useAutocomplete = computed<boolean>(
   () => filterOptions.length > 10 || filterOptions.length === 0
 );
-const determineInputType = computed<"text" | "number" | "datetime-local">(() => {
+const determineInputType = computed<"text" | "number" | ["date", "time"]>(() => {
   if (props.filter.advancedFilter.type === AdvancedFilterTypes.Number)
     return "number";
   if (props.filter.advancedFilter.type === AdvancedFilterTypes.Date)
-    return "datetime-local";
+    return ["date", "time"];
   return "text";
 });
 const determinePlaceholder = computed(() => {
@@ -285,7 +306,8 @@ onMounted(() => {
     refetchFilterOptions();
   }
 
-  input.value = props.filter.inputFromState?.value;
+  input.value = props.filter.advancedFilter.type === "date" ? extractDate(props.filter.inputFromState?.value) : props.filter.inputFromState?.value;
+  inputTime.value = props.filter.advancedFilter.type === "date" ? extractTime(props.filter.inputFromState?.value) : undefined;
   force.value = Boolean(props.filter.inputFromState);
 });
 
@@ -315,7 +337,7 @@ watch(
       .filter((filterOption) => filterOption.isSelected)
       .map((filterOption) => filterOption.option))
 );
-watch(input, () => {
+const emitNewAdvancedFilterInput = () => {
   let value;
   if (Array.isArray(input.value))
     if (useAutocomplete.value)
@@ -326,10 +348,10 @@ watch(input, () => {
           ? input.value.map((filterOption) => filterOption.value)
           : [];
   else
-    value = input.value
-      ? isDateTime(input.value)
-        ? addCurrentTimeZoneToDateTimeString(input.value)
-        : input.value
+    value = totalInput.value
+      ? isDateTime(totalInput.value)
+        ? addCurrentTimeZoneToDateTimeString(totalInput.value)
+        : totalInput.value
       : undefined;
 
   const newAdvancedFilterInput: AdvancedFilterInput = {
@@ -349,5 +371,8 @@ watch(input, () => {
     };
   emit("newAdvancedFilterInput", newAdvancedFilterInput, force.value);
   force.value = false;
-});
+};
+
+watch(input, () => emitNewAdvancedFilterInput());
+watch(inputTime, () => emitNewAdvancedFilterInput());
 </script>
