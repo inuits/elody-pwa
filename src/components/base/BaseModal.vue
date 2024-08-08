@@ -74,7 +74,6 @@ const hideModal = () => {
 
 <style scoped>
 dialog {
-  z-index: 100;
   max-width: 100vw;
   border: 0;
 }
