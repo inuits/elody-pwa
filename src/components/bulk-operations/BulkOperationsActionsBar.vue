@@ -86,11 +86,16 @@
       </div>
       <div v-else class="w-full !m-0">
         <BaseDropdownNew
-          v-if="bulkOperations !== undefined"
+          v-if="bulkOperations !== undefined && false"
           v-model="selectedBulkOperation"
           :options="bulkOperations"
           :itemsSelected="itemsSelected"
           dropdown-style="accentAccent"
+        />
+        <ActionMenuGroup
+          v-if="bulkOperations !== undefined"
+          v-model="selectedBulkOperation"
+          :options="bulkOperations"
         />
       </div>
     </div>
@@ -135,6 +140,7 @@ import {
 } from "@/components/base/BaseNotification.vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
+import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
 
 const props = withDefaults(
   defineProps<{

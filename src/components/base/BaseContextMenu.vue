@@ -1,12 +1,5 @@
 <template>
-  <div
-    v-if="contextMenu.isVisible"
-    class="context-menu"
-    :style="{
-      top: `${contextMenu.position.y}px`,
-      left: `${contextMenu.position.x}px`,
-    }"
-  >
+  <div v-if="contextMenu.isVisible" class="context-menu" :style="getStyles()">
     <slot></slot>
   </div>
 </template>
@@ -14,9 +7,25 @@
 <script lang="ts" setup>
 import { ContextMenu } from "@/components/context-menu-actions/ContextMenuHandler";
 
+// TODO (action menu group): specify the direction in prop
 const props = defineProps<{
   contextMenu: ContextMenu;
+  direction?: string;
 }>();
+
+const getStyles = () => {
+  const styles: { [key: string]: string } = {
+    top: `${props.contextMenu.position.y}px`,
+  };
+
+  if (props.direction === "left") {
+    styles["right"] = `${window.innerWidth - props.contextMenu.position.x}px`;
+  } else {
+    styles["left"] = `${props.contextMenu.position.x}px`;
+  }
+
+  return styles;
+};
 </script>
 
 <style scoped>
