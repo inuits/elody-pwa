@@ -410,3 +410,19 @@ export const addCurrentTimeZoneToDateTimeString = (
 
   return dateTimeString + timeZoneString;
 };
+
+export const extractDate = (dateTimeStr: string): string => {
+  const dt = new Date(dateTimeStr);
+  const year = dt.getFullYear();
+  const month = String(dt.getMonth() + 1).padStart(2, '0')
+  const day = String(dt.getDate()).padStart(2, '0');
+
+  if (isNaN(year) || isNaN(month) || isNaN(day)) return undefined;
+  return `${year}-${month}-${day}`;
+}
+
+export const extractTime = (dateTimeStr: string): string => {
+  const dt = new Date(dateTimeStr);
+  const time = dt.toTimeString().split(' ')[0];
+  return time === "Invalid" ? undefined : time;
+}
