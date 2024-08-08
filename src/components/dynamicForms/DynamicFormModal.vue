@@ -2,13 +2,13 @@
   <BaseModal
     :modalType="TypeModals.DynamicForm"
     :cancel-button-availabe="false"
-    modal-width-style="w-2/5"
+    modal-width-style="w-5/10"
     :modal-color="
       getModalInfo(TypeModals.DynamicForm).formQuery === 'GetUploadForm'
         ? 'bg-neutral-lightest'
         : 'bg-neutral-white'
     "
-    modalHeightStyle="max-h-[75vh] my-[12.5vh]"
+    modalHeightStyle="max-h-[90vh] my-auto"
     @hide-modal="handleCloseModal"
   >
     <div class="flex flex-col w-full h-full overflow-auto">
