@@ -1,7 +1,11 @@
 <template>
   <div>
     <span class="text-sm text-text-body">minimum</span>
-    <div v-if="Array.isArray(determineInputType) && determineInputType?.length === 2">
+    <div
+      v-if="
+        Array.isArray(determineInputType) && determineInputType?.length === 2
+      "
+    >
       <BaseInputTextNumberDatetime
         class="mb-2"
         v-model="min"
@@ -28,7 +32,11 @@
   </div>
   <div>
     <span class="text-sm text-text-body">maximum</span>
-    <div v-if="Array.isArray(determineInputType) && determineInputType?.length === 2">
+    <div
+      v-if="
+        Array.isArray(determineInputType) && determineInputType?.length === 2
+      "
+    >
       <BaseInputTextNumberDatetime
         class="mb-2"
         v-model="max"
@@ -62,7 +70,12 @@ import {
   type AdvancedFilterInput,
 } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { addCurrentTimeZoneToDateTimeString, extractDate, extractTime, isDateTime } from "@/helpers";
+import {
+  addCurrentTimeZoneToDateTimeString,
+  extractDate,
+  extractTime,
+  isDateTime,
+} from "@/helpers";
 import { computed, defineEmits, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -86,8 +99,12 @@ const max = ref<number | string>();
 const maxTime = ref<number | string | undefined>(undefined);
 const force = ref<boolean>(false);
 
-const totalMin = computed(() => minTime.value ? `${min.value}T${minTime.value}` : min.value );
-const totalMax = computed(() => maxTime.value ? `${max.value}T${maxTime.value}` : max.value );
+const totalMin = computed(() =>
+  minTime.value ? `${min.value}T${minTime.value}` : min.value
+);
+const totalMax = computed(() =>
+  maxTime.value ? `${max.value}T${maxTime.value}` : max.value
+);
 
 const emitNewAdvancedFilterInput = () => {
   if (min.value && max.value) {
