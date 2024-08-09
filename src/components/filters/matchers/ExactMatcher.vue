@@ -74,6 +74,7 @@ import {
   type DropdownOption,
   type GetFilterOptionsQuery,
   type GetFilterOptionsQueryVariables,
+  AutocompleteSelectionOptions
 } from "@/generated-types/queries";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
@@ -240,7 +241,13 @@ const clearAutocompleteOptions = () => {
 };
 
 const useAutocomplete = computed<boolean>(
-  () => filterOptions.length > 10 || filterOptions.length === 0
+  () => {
+    if (props.filter.advancedFilter.selectionOption === AutocompleteSelectionOptions.Autocomplete)
+      return true;
+    if (props.filter.advancedFilter.selectionOption === AutocompleteSelectionOptions.Checkboxlist)
+      return false;
+    return filterOptions.length > 10 || filterOptions.length === 0
+  }
 );
 const determineInputType = computed<"text" | "number" | ["date", "time"]>(() => {
   if (props.filter.advancedFilter.type === AdvancedFilterTypes.Number)
