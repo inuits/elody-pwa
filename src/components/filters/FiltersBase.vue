@@ -357,8 +357,14 @@ const handleAdvancedFilters = () => {
                 advancedFilter.hidden) // this needs a refactor
             ) {
               if (props.parentEntityIdentifiers.length > 0) {
-                if (Array.isArray(hiddenFilter.value) && hiddenFilter?.value.length > 0) {
-                  hiddenFilter.value = [...props.parentEntityIdentifiers, ...hiddenFilter?.value];
+                if (
+                  Array.isArray(hiddenFilter.value) &&
+                  hiddenFilter?.value.length > 0
+                ) {
+                  hiddenFilter.value = [
+                    ...props.parentEntityIdentifiers,
+                    ...hiddenFilter?.value,
+                  ];
                 } else {
                   hiddenFilter.value = props.parentEntityIdentifiers;
                 }

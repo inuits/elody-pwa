@@ -6,7 +6,11 @@
       !Array.isArray(input)
     "
   >
-    <div v-if="Array.isArray(determineInputType) && determineInputType?.length === 2">
+    <div
+      v-if="
+        Array.isArray(determineInputType) && determineInputType?.length === 2
+      "
+    >
       <BaseInputTextNumberDatetime
         class="mb-2"
         v-model="input"
@@ -74,13 +78,18 @@ import {
   type DropdownOption,
   type GetFilterOptionsQuery,
   type GetFilterOptionsQueryVariables,
-  AutocompleteSelectionOptions
+  AutocompleteSelectionOptions,
 } from "@/generated-types/queries";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
-import { addCurrentTimeZoneToDateTimeString, extractDate, extractTime, isDateTime } from "@/helpers";
+import {
+  addCurrentTimeZoneToDateTimeString,
+  extractDate,
+  extractTime,
+  isDateTime,
+} from "@/helpers";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import {
   computed,
@@ -114,7 +123,9 @@ const { t } = useI18n();
 
 const input = ref<string | number | DropdownOption[]>();
 const inputTime = ref<number | string | undefined>(undefined);
-const totalInput = computed(() => inputTime.value ? `${input.value}T${inputTime.value}` : input.value );
+const totalInput = computed(() =>
+  inputTime.value ? `${input.value}T${inputTime.value}` : input.value
+);
 
 const dropdownInputLength = ref<number>(0);
 const dropdownNoOptionsText = computed(() =>
@@ -240,22 +251,28 @@ const clearAutocompleteOptions = () => {
     autocompleteOption = autocompleteOptions.value.pop();
 };
 
-const useAutocomplete = computed<boolean>(
+const useAutocomplete = computed<boolean>(() => {
+  if (
+    props.filter.advancedFilter.selectionOption ===
+    AutocompleteSelectionOptions.Autocomplete
+  )
+    return true;
+  if (
+    props.filter.advancedFilter.selectionOption ===
+    AutocompleteSelectionOptions.Checkboxlist
+  )
+    return false;
+  return filterOptions.length > 10 || filterOptions.length === 0;
+});
+const determineInputType = computed<"text" | "number" | ["date", "time"]>(
   () => {
-    if (props.filter.advancedFilter.selectionOption === AutocompleteSelectionOptions.Autocomplete)
-      return true;
-    if (props.filter.advancedFilter.selectionOption === AutocompleteSelectionOptions.Checkboxlist)
-      return false;
-    return filterOptions.length > 10 || filterOptions.length === 0
+    if (props.filter.advancedFilter.type === AdvancedFilterTypes.Number)
+      return "number";
+    if (props.filter.advancedFilter.type === AdvancedFilterTypes.Date)
+      return ["date", "time"];
+    return "text";
   }
 );
-const determineInputType = computed<"text" | "number" | ["date", "time"]>(() => {
-  if (props.filter.advancedFilter.type === AdvancedFilterTypes.Number)
-    return "number";
-  if (props.filter.advancedFilter.type === AdvancedFilterTypes.Date)
-    return ["date", "time"];
-  return "text";
-});
 const determinePlaceholder = computed(() => {
   if (props.filter.advancedFilter.type === AdvancedFilterTypes.Number)
     return t("filters.matcher-placeholders.number");
@@ -313,8 +330,14 @@ onMounted(() => {
     refetchFilterOptions();
   }
 
-  input.value = props.filter.advancedFilter.type === "date" ? extractDate(props.filter.inputFromState?.value) : props.filter.inputFromState?.value;
-  inputTime.value = props.filter.advancedFilter.type === "date" ? extractTime(props.filter.inputFromState?.value) : undefined;
+  input.value =
+    props.filter.advancedFilter.type === "date"
+      ? extractDate(props.filter.inputFromState?.value)
+      : props.filter.inputFromState?.value;
+  inputTime.value =
+    props.filter.advancedFilter.type === "date"
+      ? extractTime(props.filter.inputFromState?.value)
+      : undefined;
   force.value = Boolean(props.filter.inputFromState);
 });
 

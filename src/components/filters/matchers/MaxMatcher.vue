@@ -1,5 +1,7 @@
 <template>
-  <div v-if="Array.isArray(determineInputType) && determineInputType?.length === 2">
+  <div
+    v-if="Array.isArray(determineInputType) && determineInputType?.length === 2"
+  >
     <BaseInputTextNumberDatetime
       class="mb-2"
       v-model="input"
@@ -32,7 +34,12 @@ import {
   type AdvancedFilterInput,
 } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { addCurrentTimeZoneToDateTimeString, extractDate, extractTime, isDateTime } from "@/helpers";
+import {
+  addCurrentTimeZoneToDateTimeString,
+  extractDate,
+  extractTime,
+  isDateTime,
+} from "@/helpers";
 import { computed, defineEmits, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -52,7 +59,9 @@ const { t } = useI18n();
 
 const input = ref<number | string>();
 const inputTime = ref<number | string | undefined>(undefined);
-const totalInput = computed(() => inputTime.value ? `${input.value}T${inputTime.value}` : input.value );
+const totalInput = computed(() =>
+  inputTime.value ? `${input.value}T${inputTime.value}` : input.value
+);
 
 const force = ref<boolean>(false);
 const determineInputType = computed<"number" | ["date", "time"]>(() => {

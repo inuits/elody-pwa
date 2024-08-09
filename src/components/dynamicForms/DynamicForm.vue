@@ -162,7 +162,7 @@ import {
   type PanelMetaData,
   TypeModals,
   type UploadContainer,
-  type UploadField
+  type UploadField,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -179,7 +179,10 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
+import {
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import ImportComponent from "@/components/ImportComponent.vue";
 import useTenant from "@/composables/useTenant";
@@ -428,7 +431,8 @@ const callEndpointInGraphql = async (field: FormAction) => {
     body: JSON.stringify(body),
   });
   const data = await result.text();
-  if (endpoint.responseAction === EndpointResponseActions.DownloadResponse) downloadDataFromResponse(data);
+  if (endpoint.responseAction === EndpointResponseActions.DownloadResponse)
+    downloadDataFromResponse(data);
 };
 
 const startOcrActionFunction = async (field: FormAction) => {
@@ -564,14 +568,14 @@ const initializeForm = async (
 };
 
 const downloadDataFromResponse = (data: any) => {
-  let blob = new Blob([data], { type: 'text/csv' });
+  let blob = new Blob([data], { type: "text/csv" });
   let url = window.URL.createObjectURL(blob);
-  let a = document.createElement('a');
+  let a = document.createElement("a");
   a.href = url;
-  a.download = 'data.csv';
+  a.download = "data.csv";
   a.click();
   window.URL.revokeObjectURL(url);
-}
+};
 
 watch(
   () => props.dynamicFormQuery,
