@@ -26,7 +26,7 @@ const props = defineProps<{
 }>();
 
 const { update } = useFieldArray(
-  `relationValues.${props.relation.relation.type}`
+  `relationValues.${props.relation?.relation?.type}`
 );
 const { save, disableEditMode, addSaveCallback, clearSaveCallbacks } =
   useEditMode();
