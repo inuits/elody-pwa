@@ -6,11 +6,11 @@
 
 <script lang="ts" setup>
 import { ContextMenu } from "@/components/context-menu-actions/ContextMenuHandler";
+import { ContextMenuDirection } from "@/generated-types/queries";
 
-// TODO (action menu group): specify the direction in prop
 const props = defineProps<{
   contextMenu: ContextMenu;
-  direction?: string;
+  direction?: ContextMenuDirection;
 }>();
 
 const getStyles = () => {
@@ -18,8 +18,10 @@ const getStyles = () => {
     top: `${props.contextMenu.position.y}px`,
   };
 
-  if (props.direction === "left") {
-    styles["right"] = `${window.innerWidth - props.contextMenu.position.x}px`;
+  if (props.direction === ContextMenuDirection.Left) {
+    styles["right"] = `${
+      document.body.clientWidth - props.contextMenu.position.x
+    }px`;
   } else {
     styles["left"] = `${props.contextMenu.position.x}px`;
   }
