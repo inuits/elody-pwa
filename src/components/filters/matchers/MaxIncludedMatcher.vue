@@ -25,7 +25,6 @@
       :placeholder="determinePlaceholder"
     />
   </div>
-  >
 </template>
 
 <script lang="ts" setup>
