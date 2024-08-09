@@ -150,6 +150,7 @@ import {
   type BaseRelationValuesInput,
   BulkOperationTypes,
   EditStatus,
+  EndpointResponseActions,
   type EntityInput,
   Entitytyping,
   type FormAction,
@@ -161,11 +162,11 @@ import {
   type PanelMetaData,
   TypeModals,
   type UploadContainer,
-  type UploadField,
+  type UploadField
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
-import { computed, inject, ref, watch, toRaw } from "vue";
+import { computed, inject, ref, watch } from "vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
@@ -178,10 +179,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import ImportComponent from "@/components/ImportComponent.vue";
 import useTenant from "@/composables/useTenant";
@@ -424,11 +422,13 @@ const callEndpointInGraphql = async (field: FormAction) => {
   endpoint.variables.forEach((variable) => {
     body[variable] = props.savedContext[variable];
   });
-  await fetch(`${endpoint.endpointName}`, {
+  const result = await fetch(`${endpoint.endpointName}`, {
     headers: { "Content-Type": "application/json" },
     method: endpoint.method,
     body: JSON.stringify(body),
   });
+  const data = await result.text();
+  if (endpoint.responseAction === EndpointResponseActions.DownloadResponse) downloadDataFromResponse(data);
 };
 
 const startOcrActionFunction = async (field: FormAction) => {
@@ -562,6 +562,16 @@ const initializeForm = async (
   const document = await getQuery(props.dynamicFormQuery);
   getDynamicForm(document, props.tabName);
 };
+
+const downloadDataFromResponse = (data: any) => {
+  let blob = new Blob([data], { type: 'text/csv' });
+  let url = window.URL.createObjectURL(blob);
+  let a = document.createElement('a');
+  a.href = url;
+  a.download = 'data.csv';
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
 
 watch(
   () => props.dynamicFormQuery,
