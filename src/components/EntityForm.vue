@@ -140,8 +140,8 @@ const submit = useSubmitForm<EntityValues>(async () => {
   createNotification({
     displayTime: 10,
     type: NotificationType.default,
-    title: t("notifications.success.entityCreated.title"),
-    description: t("notifications.success.entityCreated.description"),
+    title: t("notifications.success.entityUpdated.title"),
+    description: t("notifications.success.entityUpdated.description"),
     shown: true,
   });
   form.resetForm({ values: form.values });
