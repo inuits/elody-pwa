@@ -8,10 +8,15 @@
 import { ContextMenu } from "@/components/context-menu-actions/ContextMenuHandler";
 import { ContextMenuDirection } from "@/generated-types/queries";
 
-const props = defineProps<{
-  contextMenu: ContextMenu;
-  direction?: ContextMenuDirection;
-}>();
+const props = withDefaults(
+  defineProps<{
+    contextMenu: ContextMenu;
+    direction?: ContextMenuDirection;
+  }>(),
+  {
+    direction: ContextMenuDirection.Right,
+  }
+);
 
 const getStyles = () => {
   const styles: { [key: string]: string } = {
