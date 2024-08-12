@@ -56,8 +56,13 @@
                 (promise) => (advancedFiltersPromise = promise)
               "
               @apply-filters="
-                async (filters: AdvancedFilterInput[], force: Boolean = true) =>
-                  await setAdvancedFilters(filters, force, route)
+                async (
+                  filters: AdvancedFilterInput[],
+                  force: Boolean = true
+                ) => {
+                  activeFilters = filters;
+                  await setAdvancedFilters(filters, force, route);
+                }
               "
               @expand-filters="expandFilters = !expandFilters"
             />
@@ -105,6 +110,7 @@
               :total-items-count="totalEntityCount"
               :use-extended-bulk-operations="true"
               :show-button="showButton"
+              :filters="activeFilters"
               :confirm-selection-button="confirmSelectionButton"
               :entity-type="entityType as Entitytyping"
               :custom-bulk-operations="customBulkOperations"
@@ -194,6 +200,7 @@ import type { ApolloClient } from "@apollo/client/core";
 import type { ViewModes } from "@/generated-types/type-defs";
 import {
   type AdvancedFilterInput,
+  AdvancedFilterInputType,
   BaseLibraryModes,
   type BaseRelationValuesInput,
   type Entity,
@@ -399,6 +406,7 @@ const mapDropdownOptionsToBulkProcessableItem = (
 };
 
 const useOtherQuery = computed(() => props.useOtherQuery !== undefined);
+const activeFilters: AdvancedFilterInput[] = [];
 
 if (useOtherQuery.value) {
   setManipulationOfQuery(true, props.useOtherQuery);

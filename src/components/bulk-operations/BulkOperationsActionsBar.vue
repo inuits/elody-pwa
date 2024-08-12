@@ -21,7 +21,9 @@
         <span>
           <span v-if="itemsSelected" class="font-bold"
             >{{ getEnqueuedItemCount(context) }}/</span
-          >{{ totalItemsCount }}
+          >
+          <!-- {{ totalItemsCount }} -->
+          <TotalCount :filters="filters" :entity-type="entityType" />
           {{ $t("bulk-operations.items") }}
           <span v-if="itemsSelected">{{ $t("bulk-operations.selected") }}</span>
         </span>
@@ -98,6 +100,7 @@
 
 <script lang="ts" setup>
 import {
+  AdvancedFilterInput,
   BulkOperationTypes,
   DamsIcons,
   type DropdownOption,
@@ -135,6 +138,7 @@ import {
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
+import TotalCount from "../TotalCount.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -145,6 +149,7 @@ const props = withDefaults(
     confirmSelectionButton?: boolean;
     entityType: Entitytyping;
     customBulkOperations?: String | undefined;
+    filters: AdvancedFilterInput[];
   }>(),
   {
     totalItemsCount: 0,
