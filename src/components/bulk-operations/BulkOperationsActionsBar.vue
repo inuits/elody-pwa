@@ -85,12 +85,10 @@
         />
       </div>
       <div v-else class="w-full !m-0">
-        <BaseDropdownNew
+        <ActionMenuGroup
           v-if="bulkOperations !== undefined"
           v-model="selectedBulkOperation"
           :options="bulkOperations"
-          :itemsSelected="itemsSelected"
-          dropdown-style="accentAccent"
         />
       </div>
     </div>
@@ -120,7 +118,6 @@ import {
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import { apolloClient, bulkSelectAllSizeLimit } from "@/main";
 import { computed, onMounted, ref, watch } from "vue";
 import {
@@ -135,6 +132,7 @@ import {
 } from "@/components/base/BaseNotification.vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
+import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
 
 const props = withDefaults(
   defineProps<{
