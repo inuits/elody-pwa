@@ -41,11 +41,17 @@ const setPermissionsMappings = async () => {
         notifyOnNetworkStatusChange: true,
       })
       .then((result) => {
-        permissions.set(
-          Permission.Canread,
-          result.data?.PermissionMappingPerEntityType
-        );
-        permissionsMappings.value.set(entity, permissions);
+        if (permissionsMappings.value.get(entity))
+          permissionsMappings.value
+            .get(entity)
+            ?.set(Permission.Canread, result.data?.PermissionMappingPerEntityType);
+        else {
+          permissions.set(
+            Permission.Canread,
+            result.data?.PermissionMappingPerEntityType
+          );
+          permissionsMappings.value.set(entity, permissions);
+        }
       });
 
     const mappingCreatePromise = apolloClient
@@ -58,9 +64,17 @@ const setPermissionsMappings = async () => {
         notifyOnNetworkStatusChange: true,
       })
       .then((result) => {
-        permissionsMappings.value
-          .get(entity)
-          ?.set(Permission.Cancreate, result.data?.PermissionMappingCreate);
+        if (permissionsMappings.value.get(entity))
+          permissionsMappings.value
+            .get(entity)
+            ?.set(Permission.Cancreate, result.data?.PermissionMappingCreate);
+        else {
+          permissions.set(
+            Permission.Cancreate,
+            result.data?.PermissionMappingCreate
+          );
+          permissionsMappings.value.set(entity, permissions);
+        }
       });
 
     promises.push(mappingPerEntityTypePromise);
