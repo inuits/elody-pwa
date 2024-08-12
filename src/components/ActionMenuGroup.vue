@@ -4,6 +4,7 @@
       v-if="primaryOption"
       class="-mr-4 pr-6"
       button-style="accentNormal"
+      :disabled="isMainActionDisabled"
       :label="t(primaryOption.label)"
       @click="handleEmit(primaryOption)"
     />
@@ -43,10 +44,17 @@ import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 
 const emit = defineEmits(["update:modelValue"]);
 
-const props = defineProps<{
-  modelValue?: DropdownOption;
-  options: DropdownOption[];
-}>();
+const props = withDefaults(
+  defineProps<{
+    modelValue?: DropdownOption;
+    options: DropdownOption[];
+    isMainActionDisabled: boolean;
+  }>(),
+  {
+    isMainActionDisabled: false,
+    options: () => [],
+  }
+);
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const { t } = useI18n();
 
