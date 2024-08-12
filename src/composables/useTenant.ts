@@ -5,7 +5,7 @@ import {
   type DropdownOption,
   type GetTenantsQuery,
 } from "@/generated-types/queries";
-import { ref, computed, watch } from "vue";
+import { ref, computed } from "vue";
 import { setPermissionsMappings } from "@/composables/usePermissions";
 import { useRouter } from "vue-router";
 
@@ -33,6 +33,7 @@ const useTenant = (
 
   const initTenants = async () => {
     if (hasTenantSelect) {
+      await apolloClient.cache.reset();
       await getTenants();
       const tenantFromSession = await getTennantFromSession();
       if (
@@ -52,6 +53,7 @@ const useTenant = (
 
       await setPermissionsMappings();
       tenantsLoaded.value = "loaded";
+      router.push({ name: "Home", force: true });
     } else {
       await setPermissionsMappings();
       tenantsLoaded.value = "no-switcher";
@@ -156,15 +158,6 @@ const useTenant = (
     selectedTenantValue && (await setTennantInSession(selectedTenantValue));
     tenantsLoaded.value = "switching";
   };
-
-  watch(tenantsLoaded, async (value) => {
-    if (value === "switching") {
-      await apolloClient.cache.reset();
-      await setPermissionsMappings();
-      tenantsLoaded.value = "loaded";
-      router.push({ name: "Home", force: true });
-    }
-  });
 
   const getLabelById = (idToFind: string) => {
     if (tenants.value !== "no-tenants") {
