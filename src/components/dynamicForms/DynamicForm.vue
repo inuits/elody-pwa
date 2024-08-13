@@ -90,12 +90,13 @@
         <DynamicFormUploadButton
           v-if="
             field.__typename === 'FormAction' &&
-            (field as FormAction).actionType == ActionType.Upload
+            (field as FormAction).actionType == ActionType.Upload ||
+            (field as FormAction).actionType == ActionType.UploadCsvForReordening
           "
           :label="t((field as FormAction).label)"
           :icon="(field as FormAction).icon"
           :disabled="!enableUploadButton"
-          :progressIndicatorType="(field as FormAction).actionProgressIndicator.type"
+          :progressIndicatorType="(field as FormAction).actionProgressIndicator?.type"
           @click-upload-button="
             performActionButtonClickEvent(field as FormAction)
           "
@@ -104,7 +105,8 @@
         <BaseButtonNew
           v-if="
             field.__typename === 'FormAction' &&
-            field.actionType !== ActionType.Upload
+            field.actionType !== ActionType.Upload &&
+            field.actionType !== ActionType.UploadCsvForReordening
           "
           :class="[
             { 'mt-5 mb-10': !isButtonDisabled },
@@ -241,6 +243,8 @@ const {
   uploadProgress,
   standaloneFileType,
   reinitializeDynamicFormFunc,
+  uploadCsvForReordering,
+  __handleHttpError,
 } = useUpload();
 
 const { mutate } = useMutation<
@@ -365,9 +369,7 @@ const submitActionFunction = async (field: FormAction) => {
   if (submitErrors.value) return;
   showErrors.value = false;
   await getTenants();
-  closeModal(TypeModals.DynamicForm);
-  changeExpandedState(false);
-  deleteForm(props.dynamicFormQuery);
+  closeAndDeleteForm();
   goToEntityPage(entity, "SingleEntity", props.router);
 };
 
@@ -387,9 +389,7 @@ const submitWithExtraMetadata = async (field: FormAction) => {
     t("notifications.success.entityCreated.description")
   );
   await getTenants();
-  closeModal(TypeModals.DynamicForm);
-  changeExpandedState(false);
-  deleteForm(props.dynamicFormQuery);
+  closeAndDeleteForm();
 };
 
 const downloadActionFunction = async (field: FormAction) => {
@@ -406,8 +406,7 @@ const downloadActionFunction = async (field: FormAction) => {
       form.value.values
     )
   ).data.DownloadItemsInZip;
-  closeModal(TypeModals.DynamicForm);
-  deleteForm(props.dynamicFormQuery);
+  closeAndDeleteForm();
   goToEntityPage(entity, "SingleEntity", props.router);
 };
 
@@ -425,15 +424,38 @@ const callEndpointInGraphql = async (field: FormAction) => {
   endpoint.variables.forEach((variable) => {
     body[variable] = props.savedContext[variable];
   });
+
   const result = await fetch(`${endpoint.endpointName}`, {
     headers: { "Content-Type": "application/json" },
     method: endpoint.method,
     body: JSON.stringify(body),
   });
+  if (result.status !== 200) {
+    const error = new Error(result.statusText);
+    __handleHttpError(error);
+    closeAndDeleteForm();
+    throw error;
+  }
   const data = await result.text();
   if (endpoint.responseAction === EndpointResponseActions.DownloadResponse)
     downloadDataFromResponse(data);
 };
+
+const reorderEntitiesWithCsvUpload = async () => {
+  await form.value.validate();
+  if (formContainsErrors.value) return;
+  try {
+    await uploadCsvForReordering(props.savedContext.parentId);
+  } catch (error) {
+    __handleHttpError(error);
+  }
+  createNotificationOverwrite(
+    NotificationType.success,
+    t("notifications.success.csvReordering.title"),
+    t("notifications.success.csvReordering.description")
+  );
+  closeAndDeleteForm();
+}
 
 const startOcrActionFunction = async (field: FormAction) => {
   await form.value.validate();
@@ -485,6 +507,7 @@ const performActionButtonClickEvent = (field: FormAction): void => {
     download: () => downloadActionFunction(field),
     ocr: () => startOcrActionFunction(field),
     endpoint: () => callEndpointInGraphql(field),
+    uploadCsvForReordening: () => reorderEntitiesWithCsvUpload(),
     submitWithExtraMetadata: () => submitWithExtraMetadata(field),
   };
   if (!field.actionType) return;
@@ -566,6 +589,12 @@ const initializeForm = async (
   const document = await getQuery(props.dynamicFormQuery);
   getDynamicForm(document, props.tabName);
 };
+
+const closeAndDeleteForm = () => {
+  closeModal(TypeModals.DynamicForm);
+  changeExpandedState(false);
+  deleteForm(props.dynamicFormQuery);
+}
 
 const downloadDataFromResponse = (data: any) => {
   let blob = new Blob([data], { type: "text/csv" });
