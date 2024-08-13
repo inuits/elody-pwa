@@ -10,12 +10,13 @@
           class="text-neutral-700 cursor-pointer"
         />
       </a>
-      <a ref="zoomInRef" class="mr-2"
-        ><unicon
+      <a ref="zoomInRef" class="mr-2">
+        <unicon
           :name="Unicons.SearchPlus.name"
           height="20"
           class="text-neutral-700 cursor-pointer"
-      /></a>
+        />
+      </a>
       <a ref="zoomOutRef">
         <unicon
           :name="Unicons.SearchMinus.name"
@@ -46,6 +47,20 @@
           class="text-neutral-700 cursor-pointer"
         />
       </a>
+      <a @click="setDrawingTool('polygon')">
+        <unicon
+          :name="Unicons.Polygon.name"
+          height="20"
+          class="text-neutral-700 cursor-pointer"
+        />
+      </a>
+      <a @click="setDrawingTool('rect')">
+        <unicon
+          :name="Unicons.Square.name"
+          height="20"
+          class="text-neutral-700 cursor-pointer"
+        />
+      </a>
     </div>
     <a ref="homeRef" class="text-sm mr-2 text-neutral-700 cursor-pointer">{{
       $t("entity.reset-viewer")
@@ -54,13 +69,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from "vue";
+import { defineComponent, onMounted, ref, nextTick } from "vue";
 import type { PropType } from "vue";
 import { Unicons } from "../types";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
+
 export default defineComponent({
   name: "ViewerToolbar",
-  components: {},
   props: {
     zoomIn: {
       type: Object as PropType<HTMLDivElement | string | null>,
@@ -93,10 +108,12 @@ export default defineComponent({
       useEntityMediafileSelector();
 
     onMounted(() => {
-      emit("update:zoomIn", zoomInRef.value);
-      emit("update:zoomOut", zoomOutRef.value);
-      emit("update:fullPage", fullPageRef.value);
-      emit("update:home", homeRef.value);
+      nextTick(() => {
+        if (zoomInRef.value) emit("update:zoomIn", zoomInRef.value);
+        if (zoomOutRef.value) emit("update:zoomOut", zoomOutRef.value);
+        if (fullPageRef.value) emit("update:fullPage", fullPageRef.value);
+        if (homeRef.value) emit("update:home", homeRef.value);
+      });
     });
 
     const downloadImage = () => {
@@ -105,8 +122,12 @@ export default defineComponent({
       }
     };
 
+    const setDrawingTool = (tool: string) => {
+      // Emit the selected tool to the parent component
+      emit("setDrawingTool", tool);
+    };
+
     return {
-      Unicons,
       zoomInRef,
       zoomOutRef,
       fullPageRef,
@@ -114,6 +135,8 @@ export default defineComponent({
       downloadImage,
       selectNextMediafile,
       selectPreviousMediafile,
+      Unicons,
+      setDrawingTool,
     };
   },
 });

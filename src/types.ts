@@ -76,6 +76,8 @@ import {
   uniVolume,
   uniWindowGrid,
   uniWindowMaximize,
+  uniPolygon,
+  uniSquare,
 } from "vue-unicons/dist/icons";
 
 export const Unicons: Record<DamsIcons, { name: string }> = {
@@ -135,6 +137,7 @@ export const Unicons: Record<DamsIcons, { name: string }> = {
   NoImage: uniImageSlash,
   Plus: uniPlus,
   PlusCircle: uniPlusCircle,
+  Polygon: uniPolygon,
   Process: uniProcess,
   QuestionCircle: uniQuestionCircle,
   Redo: uniRedo,
@@ -143,6 +146,7 @@ export const Unicons: Record<DamsIcons, { name: string }> = {
   SearchMinus: uniSearchMinus,
   SearchPlus: uniSearchPlus,
   Settings: uniSetting,
+  Square: uniSquare,
   SignOut: uniSignout,
   Sort: uniSort,
   SortDown: uniSortAmountDown,
