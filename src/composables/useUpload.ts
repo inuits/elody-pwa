@@ -75,6 +75,9 @@ const useUpload = () => {
       mediafilesWithOptionalCsv: {
         checkUploadValidityFn: () => __checkUploadValidityMediafilesWithCsv(),
       },
+      uploadCsvForReordening: {
+        checkUploadValidityFn: () => __checkUploadValidityuploadCsvForReordening(),
+      }
     };
     uploadValidationFn.value =
       settingsObject[uploadSettings.uploadFlow].checkUploadValidityFn;
@@ -106,6 +109,10 @@ const useUpload = () => {
       !!standaloneFileType.value
     );
   };
+
+  const __checkUploadValidityuploadCsvForReordening = (): boolean => {
+    return containsCsv.value;
+  }
 
   const __uploadMediafilesWithTicketUrl = async (
     isLinkedUpload: boolean,
@@ -153,6 +160,17 @@ const useUpload = () => {
 
     __uploadMediafilesWithTicketUrl(isLinkedUpload, config, t);
   };
+
+  const uploadCsvForReordering = async (parentId: string) => {
+    const response = await fetch(`/api/upload/csv?parentId=${parentId}`, {
+      headers: { "Content-Type": "text/csv" },
+      method: "POST",
+      body: __getCsvBlob(),
+    });
+    if (!response.ok) {
+      return Promise.reject(response);
+    }
+  }
 
   const __uploadExceptionHandler = (
     errorDescription: string | undefined,
@@ -684,6 +702,8 @@ const useUpload = () => {
     amountUploaded,
     __updateFileThumbnails,
     initializeUpload,
+    uploadCsvForReordering,
+    __handleHttpError,
     uploadFlow,
     missingFileNames,
     failedUploads,
