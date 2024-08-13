@@ -30,6 +30,9 @@ const setPermissionsMappings = async () => {
 
   for (const entity of Object.values(Entitytyping)) {
     const permissions = new Map<Permission, boolean>();
+    permissions.set(Permission.Canread, false);
+    permissions.set(Permission.Cancreate, false);
+    permissionsMappings.value.set(entity, permissions);
 
     const mappingPerEntityTypePromise = apolloClient
       .query<GetPermissionMappingPerEntityTypeQuery>({
@@ -41,17 +44,9 @@ const setPermissionsMappings = async () => {
         notifyOnNetworkStatusChange: true,
       })
       .then((result) => {
-        if (permissionsMappings.value.get(entity))
-          permissionsMappings.value
-            .get(entity)
-            ?.set(Permission.Canread, result.data?.PermissionMappingPerEntityType);
-        else {
-          permissions.set(
-            Permission.Canread,
-            result.data?.PermissionMappingPerEntityType
-          );
-          permissionsMappings.value.set(entity, permissions);
-        }
+        permissionsMappings.value
+          .get(entity)
+          ?.set(Permission.Canread, result.data?.PermissionMappingPerEntityType);
       });
 
     const mappingCreatePromise = apolloClient
@@ -64,17 +59,9 @@ const setPermissionsMappings = async () => {
         notifyOnNetworkStatusChange: true,
       })
       .then((result) => {
-        if (permissionsMappings.value.get(entity))
-          permissionsMappings.value
-            .get(entity)
-            ?.set(Permission.Cancreate, result.data?.PermissionMappingCreate);
-        else {
-          permissions.set(
-            Permission.Cancreate,
-            result.data?.PermissionMappingCreate
-          );
-          permissionsMappings.value.set(entity, permissions);
-        }
+        permissionsMappings.value
+          .get(entity)
+          ?.set(Permission.Cancreate, result.data?.PermissionMappingCreate);
       });
 
     promises.push(mappingPerEntityTypePromise);
