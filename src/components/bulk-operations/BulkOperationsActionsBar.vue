@@ -89,6 +89,7 @@
           v-if="bulkOperations !== undefined"
           v-model="selectedBulkOperation"
           :options="bulkOperations"
+          :items-selected="itemsSelected"
         />
       </div>
     </div>
