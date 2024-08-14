@@ -53,7 +53,6 @@ const useTenant = (
 
       await setPermissionsMappings();
       tenantsLoaded.value = "loaded";
-      router.push({ name: "Home", force: true });
     } else {
       await setPermissionsMappings();
       tenantsLoaded.value = "no-switcher";
@@ -156,6 +155,7 @@ const useTenant = (
       router.push({ name: "Home" });
 
     selectedTenantValue && (await setTennantInSession(selectedTenantValue));
+    router.push({ name: "Home", force: true });
     tenantsLoaded.value = "switching";
   };
 
