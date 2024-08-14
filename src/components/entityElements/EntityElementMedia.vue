@@ -17,7 +17,11 @@
             () => {
               setAcceptedTypes([Entitytyping.Mediafile]);
               setRelationType(relationType);
-              openModal(TypeModals.EntityPicker, undefined, 'right');
+              openModal(
+                TypeModals.DynamicForm,
+                ModalStyle.RightWide,
+                'GetEntityPickerForm'
+              );
             }
           "
         >
@@ -72,6 +76,7 @@ import {
   type MediaFileElement,
   MediaFileElementTypes,
   type MetadataAndRelation,
+  ModalStyle,
   type PanelMetaData,
   PanelType,
   SearchInputType,

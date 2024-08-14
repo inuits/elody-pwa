@@ -13,7 +13,6 @@
         </div>
         <edit-modal />
       </div>
-      <EntityPickerModal />
       <DynamicFormModal></DynamicFormModal>
       <DeleteModal></DeleteModal>
       <search-saved-searches-modal />
@@ -46,7 +45,6 @@ import ConfirmModalView from "./components/ConfirmModalView.vue";
 import DynamicFormModal from "@/components/dynamicForms/DynamicFormModal.vue";
 import DeleteModal from "@/components/DeleteModal.vue";
 import EditModal from "@/components/EditModal.vue";
-import EntityPickerModal from "@/components/EntityPickerModal.vue";
 import SearchModal from "@/components/SearchModal.vue";
 import SavedSearchesPickerModal from "@/components/SavedSearchesPickerModal.vue";
 import TheHeader from "@/components/TheHeader.vue";

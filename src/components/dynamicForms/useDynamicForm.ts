@@ -1,4 +1,4 @@
-import type { EntityInput } from "@/generated-types/queries";
+import { type EntityInput, ModalStyle } from "@/generated-types/queries";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import { ref } from "vue";

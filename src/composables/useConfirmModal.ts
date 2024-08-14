@@ -5,7 +5,7 @@ import type {
   ButtonStyle,
 } from "@/components/base/BaseButtonNew.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { TypeModals } from "@/generated-types/queries";
+import { ModalStyle, TypeModals } from "@/generated-types/queries";
 
 const { openModal } = useBaseModal();
 
@@ -34,7 +34,7 @@ export const useConfirmModal = () => {
   const initializeConfirmModal = (configuration: ConfirmModalConfiguration) => {
     confirmModalConfiguration.value = configuration;
     if (configuration.openImmediately)
-      openModal(TypeModals.Confirm, undefined, "center");
+      openModal(TypeModals.Confirm, ModalStyle.Center);
   };
 
   const setPathToNavigate = (choice: string): void => {

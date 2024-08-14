@@ -26,6 +26,7 @@ import {
   AdvancedFilterTypes,
   TypeModals,
   type AdvancedFilterInput,
+  ModalStyle,
 } from "@/generated-types/queries";
 import { computed, inject, ref, watch, onBeforeMount } from "vue";
 import { Unicons } from "@/types";
@@ -80,7 +81,7 @@ const applyFilterToLibrary = () => {
 };
 
 const openSearchModal = () => {
-  openModal(TypeModals.Search, undefined, "right");
+  openModal(TypeModals.Search, ModalStyle.RightWide);
 };
 
 watch(

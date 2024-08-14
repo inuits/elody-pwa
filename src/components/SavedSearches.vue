@@ -57,7 +57,11 @@
 
 <script lang="ts" setup>
 import { Unicons } from "@/types";
-import { TypeModals, Entitytyping } from "@/generated-types/queries";
+import {
+  TypeModals,
+  Entitytyping,
+  ModalStyle,
+} from "@/generated-types/queries";
 import {
   useSaveSearchHepler,
   SavedSearchType,
@@ -135,8 +139,7 @@ onMounted(() => {
 const handleOpenModal = (context: any = undefined) => {
   openModal(
     TypeModals.SaveSearch,
-    undefined,
-    "center",
+    ModalStyle.Center,
     "GetSaveSearchForm",
     undefined,
     undefined,
@@ -210,6 +213,6 @@ const deleteFilter = async () => {
 
 const openFindAllFiltersModal = () => {
   setEntityType(Entitytyping.SavedSearch);
-  openModal(TypeModals.SaveSearchPicker, undefined, "right");
+  openModal(TypeModals.SaveSearchPicker, ModalStyle.Right);
 };
 </script>

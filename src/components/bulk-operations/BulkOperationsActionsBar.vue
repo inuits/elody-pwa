@@ -107,6 +107,7 @@ import {
   GetBulkOperationsDocument,
   type GetBulkOperationsQuery,
   MetadataAndRelation,
+  ModalStyle,
   RouteNames,
   TranscodeType,
   TypeModals,
@@ -276,9 +277,9 @@ const generateTranscodeFromMediafiles = (
 
 watch(selectedBulkOperation, () => {
   if (selectedBulkOperation.value?.value === BulkOperationTypes.ExportCsv)
-    openModal(TypeModals.BulkOperations, undefined, "right");
+    openModal(TypeModals.BulkOperations, ModalStyle.Right);
   if (selectedBulkOperation.value?.value === BulkOperationTypes.Edit)
-    openModal(TypeModals.BulkOperationsEdit, undefined, "right");
+    openModal(TypeModals.BulkOperationsEdit, ModalStyle.Right);
   if (
     selectedBulkOperation.value?.value ===
     BulkOperationTypes.AddToManifestViewerCollection
@@ -333,8 +334,7 @@ watch(selectedBulkOperation, () => {
       };
       openModal(
         modal.typeModal,
-        undefined,
-        "right",
+        ModalStyle.Right,
         modal.formQuery,
         undefined,
         modal.askForCloseConfirmation,

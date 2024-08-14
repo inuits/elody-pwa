@@ -1,13 +1,13 @@
 import {
   type MenuItem,
   TypeModals,
-  ModalChoices,
   type GetMenuQueryVariables,
   type GetMenuQuery,
   GetMenuDocument,
+  ModalStyle,
 } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { reactive, ref, computed } from "vue";
+import { reactive, ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 const { openModal } = useBaseModal();
 
@@ -45,8 +45,7 @@ export const useMenuHelper = () => {
         action: function () {
           openModal(
             _menuItem.typeLink?.modal?.typeModal as TypeModals,
-            undefined,
-            "center",
+            ModalStyle.Center,
             _menuItem.typeLink?.modal?.formQuery
           );
         },

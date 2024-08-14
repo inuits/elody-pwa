@@ -14,6 +14,7 @@ import {
   type MutateEntityValuesMutationVariables,
   DeleteQueryOptions,
   Collection,
+  ModalStyle,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -244,6 +245,6 @@ const openNavigationModal = () => {
     },
     translationKey: "discard-edit",
   });
-  openModal(TypeModals.Confirm, undefined, "center");
+  openModal(TypeModals.Confirm, ModalStyle.Center);
 };
 </script>
