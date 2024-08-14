@@ -24,7 +24,7 @@
       :link-text="metadata.linkText"
       :isMetadataOnRelation="isMetadataOnRelation"
       :error="errorMessage"
-      :show-errors="showErrors"
+      :show-errors="showErrors || (meta.dirty && !fieldIsValid)"
       :field-is-valid="fieldIsValid"
       @update:value="setNewValue"
       @register-enter-pressed:value="registerEnterKeyPressed"
