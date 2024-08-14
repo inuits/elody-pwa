@@ -22,8 +22,10 @@
       <BaseContextMenuItem
         v-for="(option, idx) in filterSecondaryDropdownOptions"
         :key="idx"
+        :label="t(option?.label)"
+        :tooltip-label="option?.actionContext?.labelForTooltip"
+        :disable="!option.active"
         @clicked="handleEmit(option)"
-        :label="t(option.label)"
       />
     </BaseContextMenu>
   </div>
@@ -70,24 +72,30 @@ const primaryOption = computed(() => {
 });
 
 const secondaryOptions = computed(() => {
-  return props.options.filter((item: DropdownOption) => !item?.primary);
+  return props.options
+    .filter((item: DropdownOption) => !item?.primary)
+    .map((item: DropdownOption) => ({...item, active: true }));
 });
 
 const filterSecondaryDropdownOptions = computed<DropdownOption[]>(() => {
-  return secondaryOptions.value.filter((dropdownOption) => {
-    if (!dropdownOption.actionContext) return true;
-    const activeViewMode = dropdownOption.actionContext.activeViewMode;
-    const entitiesSelectionType =
-      dropdownOption.actionContext.entitiesSelectionType;
-    const viewMode = isEdit.value
-      ? activeViewMode === ActionContextViewModeTypes.EditMode
-      : activeViewMode === ActionContextViewModeTypes.ReadMode;
-    const numberOfEntities = props.itemsSelected
-      ? entitiesSelectionType ===
-      ActionContextEntitiesSelectionType.SomeSelected
-      : entitiesSelectionType ===
-      ActionContextEntitiesSelectionType.NoneSelected;
-    return viewMode && numberOfEntities;
+  return secondaryOptions.value.map((dropdownOption) => {
+    if (!dropdownOption.actionContext)
+      dropdownOption.active = true;
+    else {
+      const activeViewMode = dropdownOption.actionContext.activeViewMode;
+      const entitiesSelectionType =
+        dropdownOption.actionContext.entitiesSelectionType;
+      const viewMode = isEdit.value
+        ? activeViewMode === ActionContextViewModeTypes.EditMode
+        : activeViewMode === ActionContextViewModeTypes.ReadMode;
+      const numberOfEntities = props.itemsSelected
+        ? entitiesSelectionType ===
+        ActionContextEntitiesSelectionType.SomeSelected
+        : entitiesSelectionType ===
+        ActionContextEntitiesSelectionType.NoneSelected;
+      dropdownOption.active = viewMode && numberOfEntities;
+    }
+    return dropdownOption;
   });
 });
 
