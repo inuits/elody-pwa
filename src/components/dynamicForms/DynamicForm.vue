@@ -15,12 +15,25 @@
       >
         <ImportComponent
           v-if="
-            tabName?.length &&
-            field.inputField?.type === 'baseFileSystemImportField'
+            field.inputField?.type === BaseFieldType.BaseFileSystemImportField
           "
         />
+        <EntityPickerComponent
+          v-if="field.inputField?.type === BaseFieldType.BaseEntityPickerField"
+          :enable-bulk-operations="true"
+          :entity-uuid="getEntityUuid()"
+          :custom-filters-query="getCustomGetEntitiesFiltersQuery()"
+          :accepted-types="getAcceptedTypes()"
+          :custom-query="getCustomGetEntitiesQuery()"
+          :entity-picker-mode="EntityPickerMode.Save"
+          :show-button="true"
+          :enable-advanced-filters="true"
+        />
         <metadata-wrapper
-          v-else-if="field.__typename === 'PanelMetaData'"
+          v-if="
+            field.__typename === 'PanelMetaData' &&
+            !nonStandardFieldTypes.includes(field.inputField.type)
+          "
           :form-id="dynamicFormQuery"
           :metadata="field as PanelMetaData"
           :is-edit="true"
@@ -149,11 +162,13 @@ import {
   ActionProgressIndicatorType,
   type ActionProgressStep,
   ActionType,
+  BaseFieldType,
   type BaseRelationValuesInput,
   BulkOperationTypes,
   EditStatus,
   EndpointResponseActions,
   type EntityInput,
+  EntityPickerMode,
   Entitytyping,
   type FormAction,
   type MetadataInput,
@@ -193,6 +208,8 @@ import { useMutation } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
 import { Unicons } from "@/types";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
+import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
+import useEntityPickerModal from "@/composables/useEntityPickerModal";
 
 const props = withDefaults(
   defineProps<{
@@ -212,6 +229,10 @@ const props = withDefaults(
 const emit = defineEmits(["entityCreated"]);
 
 type FormFieldTypes = UploadContainer | PanelMetaData | FormAction;
+const nonStandardFieldTypes: BaseFieldType[] = [
+  BaseFieldType.BaseFileSystemImportField,
+  BaseFieldType.BaseEntityPickerField,
+];
 
 const modalFormFields = props.modalFormFields;
 const config: any = inject("config");
@@ -246,6 +267,12 @@ const {
   uploadCsvForReordering,
   __handleHttpError,
 } = useUpload();
+const {
+  getAcceptedTypes,
+  getEntityUuid,
+  getCustomGetEntitiesFiltersQuery,
+  getCustomGetEntitiesQuery,
+} = useEntityPickerModal();
 
 const { mutate } = useMutation<
   MutateEntityValuesMutation,

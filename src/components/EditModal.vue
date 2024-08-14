@@ -27,6 +27,7 @@ import {
   DeleteDataDocument,
   type DeleteDataMutation,
   Entitytyping,
+  ModalStyle,
   TypeModals,
 } from "@/generated-types/queries";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
@@ -110,8 +111,7 @@ const openDeleteModal = () => {
     };
     openModal(
       TypeModals.Delete,
-      undefined,
-      "center",
+      ModalStyle.Center,
       undefined,
       deleteQueryOptions,
       undefined,

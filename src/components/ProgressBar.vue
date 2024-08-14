@@ -41,10 +41,11 @@ const progressPercentage = computed((): number => {
 watch(
   () => progressPercentage.value,
   () => {
-    setCssVariable(
-      "--progress-bar-width-percentage",
-      progressPercentage.value.toString() + "%"
-    );
+    if (progressPercentage.value)
+      setCssVariable(
+        "--progress-bar-width-percentage",
+        progressPercentage.value.toString() + "%"
+      );
   },
   { immediate: true }
 );

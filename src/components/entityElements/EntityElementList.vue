@@ -21,7 +21,7 @@
               setRelationType(relationType);
               setCustomGetEntitiesQuery(customQueryEntityPickerList);
               setCustomGetEntitiesFiltersQuery(customQueryEntityPickerListFilters);
-              openModal(TypeModals.EntityPicker, undefined, 'right');
+              openModal(TypeModals.DynamicForm, ModalStyle.RightWide,'GetEntityPickerForm');
               toggleElementCollapse(label, false);
             }
           "
@@ -119,6 +119,7 @@ import {
   type EntityListElement,
   BaseLibraryModes,
   RelationActions,
+  ModalStyle,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,

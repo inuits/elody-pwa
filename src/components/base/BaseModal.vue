@@ -39,17 +39,14 @@ const props = withDefaults(
 const emit = defineEmits(["update:modalState", "hideModal"]);
 
 const cancelButtonAvailabe = ref<boolean>(props.cancelButtonAvailabe);
-const { getModalInfo } = useBaseModal();
+const { currentModalStyle, getModalInfo } = useBaseModal();
 const dialog = ref<HTMLDialogElement>();
-const modalStyle = computed(
-  () => modalStyles[getModalInfo(props.modalType).modalPosition]
-);
+const modalStyle = computed(() => modalStyles[currentModalStyle.value]);
 
 const modalStyles: { [key: string]: string } = {
-  right: `${
-    props.modalWidthStyle || "w-2/5"
-  } h-screen max-h-screen absolute mr-0 my-0`,
-  center: `${props.modalWidthStyle || "w-1/4"} ${props.modalHeightStyle}`,
+  right: `w-2/5 h-screen max-h-screen mr-0 my-0`,
+  rightWide: `w-10/12 h-screen max-h-screen mr-0 my-0`,
+  center: `w-1/2 ${props.modalHeightStyle}`,
   left: "",
 };
 
