@@ -9,6 +9,8 @@ import {
 import { ref } from "vue";
 
 export const useTotalCount = (apolloClient: ApolloClient<any>) => {
+  let abortController: any | null = null;
+  
   let entityType: Entitytyping = Entitytyping.BaseEntity;
   const entitiesLoading = ref<boolean>(false);
   const totalEntityCount = ref<number>(0);
@@ -43,24 +45,25 @@ export const useTotalCount = (apolloClient: ApolloClient<any>) => {
   const getEntitiesTotalCount = async (): Promise<void> => {
     if (entitiesLoading.value) return;
     entitiesLoading.value = true;
+    totalEntityCount.value = 0;
     const variables = queryVariables;
 
-    await apolloClient
-      .query({
-        query: GetEntitiesTotalCountDocument,
-        variables,
-        fetchPolicy: "no-cache",
-        notifyOnNetworkStatusChange: true,
-      })
-      .then((result) => {
-        const fetchedEntities = result.data.Entities;
-        totalEntityCount.value = fetchedEntities?.count || 0;
-        entitiesLoading.value = false;
-      })
-      .catch(() => {
-        totalEntityCount.value = 0;
-        entitiesLoading.value = false;
-      });
+    // await apolloClient
+    //   .query({
+    //     query: GetEntitiesTotalCountDocument,
+    //     variables,
+    //     fetchPolicy: "no-cache",
+    //     notifyOnNetworkStatusChange: true,
+    //   })
+    //   .then((result) => {
+    //     const fetchedEntities = result.data.Entities;
+    //     totalEntityCount.value = fetchedEntities?.count || 0;
+    //     entitiesLoading.value = false;
+    //   })
+    //   .catch(() => {
+    //     totalEntityCount.value = 0;
+    //     entitiesLoading.value = false;
+    //   });
   };
 
   return {
