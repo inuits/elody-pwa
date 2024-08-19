@@ -47,6 +47,7 @@ const modalStyles: { [key: string]: string } = {
   right: `w-2/5 h-screen max-h-screen mr-0 my-0`,
   rightWide: `w-10/12 h-screen max-h-screen mr-0 my-0`,
   center: `w-1/2 ${props.modalHeightStyle}`,
+  centerWide: `w-10/12 max-h-screen`,
   left: "",
 };
 
