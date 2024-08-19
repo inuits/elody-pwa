@@ -63,6 +63,7 @@
             ) === 0
           "
           :selected-items-count="getEnqueuedItemCount(context)"
+          :showDeleteButton="false"
           @submit="exportCsv()"
           @cancel="closeModal(TypeModals.BulkOperations)"
         />
