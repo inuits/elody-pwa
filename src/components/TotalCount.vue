@@ -1,7 +1,6 @@
 <template>
   <span :class="[entitiesLoading ? 'animate-pulse' : '']">
-    <span v-if="entitiesLoading" class="w-[19px] h-[19px]"></span>
-    {{ entitiesLoading ? "" : totalEntityCount }}
+    {{ totalEntityCount }}
   </span>
 </template>
 
@@ -33,17 +32,14 @@ const {
 onMounted(() => {
   if (!props.filters?.length || !props.entityType) return;
 
-  setEntityType(props.entityType);
-  setAdvancedFilters(props.filters);
-  getEntitiesTotalCount();
+  getTotalCount(props.entityType, props.filters);
 });
 
 watch(
   () => props.entityType,
   () => {
     if (!props.entityType) return;
-    setEntityType(props.entityType);
-    getEntitiesTotalCount();
+    getTotalCount(props.entityType, props.filters);
   }
 );
 
@@ -51,9 +47,19 @@ watch(
   () => props.filters,
   () => {
     if (!props.filters?.length) return;
-    setAdvancedFilters(props.filters);
-    getEntitiesTotalCount();
+    getTotalCount(props.entityType, props.filters);
   },
   { deep: true }
 );
+
+const getTotalCount = (
+  entityType: Entitytyping,
+  filters: AdvancedFilterInput[]
+) => {
+  if (!entityType || !filters?.length) return;
+
+  setEntityType(props.entityType);
+  setAdvancedFilters(props.filters);
+  getEntitiesTotalCount();
+};
 </script>

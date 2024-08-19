@@ -22,8 +22,8 @@
           <span v-if="itemsSelected" class="font-bold"
             >{{ getEnqueuedItemCount(context) }}/</span
           >
-          <!-- {{ totalItemsCount }} -->
-          <TotalCount :filters="filters" :entity-type="entityType" />
+          {{ totalItemsCount }}
+          <!-- <TotalCount :filters="filters" :entity-type="entityType" /> -->
           {{ $t("bulk-operations.items") }}
           <span v-if="itemsSelected">{{ $t("bulk-operations.selected") }}</span>
         </span>
