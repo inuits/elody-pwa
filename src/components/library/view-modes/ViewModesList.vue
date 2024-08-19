@@ -37,7 +37,7 @@
     @click="entityWrapperHandler(entity)"
   >
     <ListItem
-      :item-id="entity.uuid"
+      :item-id="entity.id"
       :item-type="entity.type"
       :bulk-operations-context="bulkOperationsContext"
       :context-menu-actions="
