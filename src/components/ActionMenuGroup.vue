@@ -39,13 +39,14 @@ import {
   DamsIcons,
   ContextMenuDirection,
   ActionContextViewModeTypes,
-  ActionContextEntitiesSelectionType
+  ActionContextEntitiesSelectionType,
 } from "@/generated-types/queries";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import useEditMode from "@/composables/useEdit";
+import { useAuth } from "session-vue-3-oidc-library";
 
 const { isEdit } = useEditMode();
 
@@ -67,20 +68,30 @@ const props = withDefaults(
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const { t } = useI18n();
 
+const auth = useAuth();
+
+const availableOptions = computed(() => {
+  return props.options.filter((item: DropdownOption) => {
+    return (
+      !item?.requiresAuth ||
+      (item?.requiresAuth && auth.isAuthenticated.value === true)
+    );
+  });
+});
+
 const primaryOption = computed(() => {
-  return props.options.find((item: DropdownOption) => item.primary);
+  return availableOptions.value.find((item: DropdownOption) => item.primary);
 });
 
 const secondaryOptions = computed(() => {
-  return props.options
+  return availableOptions.value
     .filter((item: DropdownOption) => !item?.primary)
-    .map((item: DropdownOption) => ({...item, active: true }));
+    .map((item: DropdownOption) => ({ ...item, active: true }));
 });
 
 const filterSecondaryDropdownOptions = computed<DropdownOption[]>(() => {
   return secondaryOptions.value.map((dropdownOption) => {
-    if (!dropdownOption.actionContext)
-      dropdownOption.active = true;
+    if (!dropdownOption.actionContext) dropdownOption.active = true;
     else {
       const activeViewMode = dropdownOption.actionContext.activeViewMode;
       const entitiesSelectionType =
@@ -90,9 +101,9 @@ const filterSecondaryDropdownOptions = computed<DropdownOption[]>(() => {
         : activeViewMode === ActionContextViewModeTypes.ReadMode;
       const numberOfEntities = props.itemsSelected
         ? entitiesSelectionType ===
-        ActionContextEntitiesSelectionType.SomeSelected
+          ActionContextEntitiesSelectionType.SomeSelected
         : entitiesSelectionType ===
-        ActionContextEntitiesSelectionType.NoneSelected;
+          ActionContextEntitiesSelectionType.NoneSelected;
       dropdownOption.active = viewMode && numberOfEntities;
     }
     return dropdownOption;
