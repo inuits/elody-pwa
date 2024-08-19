@@ -2,7 +2,6 @@
   <BaseModal
     :modalType="TypeModals.DynamicForm"
     :cancel-button-availabe="false"
-    :modal-width-style="'w-10/12'"
     :modal-color="
       getModalInfo(TypeModals.DynamicForm).formQuery === 'GetUploadForm'
         ? 'bg-neutral-lightest'

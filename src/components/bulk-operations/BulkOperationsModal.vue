@@ -2,11 +2,10 @@
   <BaseModal
     v-if="modal"
     :modal-type="TypeModals.BulkOperations"
-    modal-width-style="w-11/12"
     @hide-modal="closeModal(TypeModals.BulkOperations)"
   >
     <div class="flex flex-wrap p-8 h-full">
-      <div class="flex basis-full gap-8 h-[94%]">
+      <div class="flex basis-full gap-8 h-full">
         <div class="h-full basis-[56%]">
           <div class="h-[40px] mb-6">
             <LibraryBar
@@ -154,14 +153,13 @@ const exportCsv = async () => {
       fieldQueryParameter += `&field[]=${option.key.value}`;
   });
 
-  await fetch(
-    `/api/export/csv?ids=${getEnqueuedItems(props.context)
-      .map((item) => item.id)
-      .join(",")}${fieldQueryParameter}`,
-    {
-      method: "GET",
-    }
-  )
+  const exportURL = `/api/export/csv?ids=${getEnqueuedItems(props.context)
+    .map((item) => item.id)
+    .join(",")}${fieldQueryParameter}`;
+
+  await fetch(encodeURI(exportURL), {
+    method: "GET",
+  })
     .then((response: Response) => {
       if (!response.ok) throw response;
       return response.text();
@@ -194,7 +192,7 @@ onResult((result) => {
 });
 
 watch(
-  () => modal.modal?.open,
+  () => modal?.open,
   (isBulkOperationsModalOpen: boolean | undefined) => {
     if (isBulkOperationsModalOpen) {
       if (csvExportOptions.value.length <= 0) {
@@ -202,6 +200,7 @@ watch(
         refetch();
       }
       loadItems();
+      console.log(items.value);
       return;
     }
 

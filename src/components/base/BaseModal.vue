@@ -22,7 +22,6 @@ import { useBaseModal } from "@/composables/useBaseModal";
 const props = withDefaults(
   defineProps<{
     modalType: TypeModals;
-    modalWidthStyle: string;
     modalHeightStyle?: string;
     iconHeight?: number;
     modalColor?: String;
