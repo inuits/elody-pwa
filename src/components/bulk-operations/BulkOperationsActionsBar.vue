@@ -310,8 +310,7 @@ watch(selectedBulkOperation, () => {
       else savedContext.entities = enqueuedItems.map((item) => item.id);
       openModal(
         modal.typeModal,
-        undefined,
-        "right",
+        ModalStyle.Center,
         modal.formQuery,
         undefined,
         modal.askForCloseConfirmation,
@@ -334,7 +333,7 @@ watch(selectedBulkOperation, () => {
       };
       openModal(
         modal.typeModal,
-        ModalStyle.Right,
+        ModalStyle.Center,
         modal.formQuery,
         undefined,
         modal.askForCloseConfirmation,
