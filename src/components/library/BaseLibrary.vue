@@ -327,6 +327,7 @@ const {
   setSkip,
   setSortKey,
   setSortOrder,
+  getEntitiesTotalCount,
   totalEntityCount,
 } = useBaseLibrary(
   apolloClient as ApolloClient<any>,
@@ -434,7 +435,7 @@ const bulkSelect = (items = entities.value) => {
 };
 
 const refetchEntities = async () => {
-  await getEntities(route);
+  await Promise.allSettled([getEntities(route), getEntitiesTotalCount(route)]);
 };
 
 const initializeBaseLibrary = async () => {
@@ -454,7 +455,7 @@ const initializeBaseLibrary = async () => {
     enqueuePromise(advancedFiltersPromise);
     enqueuePromise(paginationLimitOptionsPromise);
     enqueuePromise(sortOptionsPromise);
-    await getEntities(route);
+    await Promise.allSettled([getEntities(route), getEntitiesTotalCount(route)]);
   }
 };
 
@@ -497,7 +498,7 @@ watch(
       setEntityType(entityType.value);
       enqueuePromise(advancedFiltersPromise);
       enqueuePromise(sortOptionsPromise);
-      await getEntities(route);
+      await Promise.allSettled([getEntities(route), getEntitiesTotalCount(route)]);
     }
   }
 );
@@ -515,7 +516,7 @@ watch(
   () => props.filters,
   async () => {
     setAdvancedFilters(props.filters);
-    await getEntities(route);
+    await Promise.allSettled([getEntities(route), getEntitiesTotalCount(route)]);
   }
 );
 watch(
@@ -577,13 +578,13 @@ EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryMediafile, async () => {
     props.useOtherQuery?.filtersDocument?.definitions[0]?.name?.value ===
     "getPrimaryMediafileFilters"
   )
-    await getEntities(route);
+    await Promise.allSettled([getEntities(route), getEntitiesTotalCount(route)]);
 });
 EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryThumbnail, async () => {
   if (
     props.useOtherQuery?.filtersDocument?.definitions[0]?.name?.value ===
     "getPrimaryThumbnailFilters"
   )
-    await getEntities(route);
+    await Promise.allSettled([getEntities(route), getEntitiesTotalCount(route)]);
 });
 </script>
