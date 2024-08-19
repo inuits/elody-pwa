@@ -91,6 +91,7 @@
             :enable-advanced-filters="false"
             :enable-bulk-operations="true"
             :enable-navigation="false"
+            :entity-type="types[0]"
             :parent-entity-identifiers="identifiers"
             :filter-type="types[0]"
             list-item-route-name="SingleEntity"
