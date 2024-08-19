@@ -1,7 +1,6 @@
 <template>
   <base-modal
     :modal-type="TypeModals.SaveSearch"
-    modal-width-style="w-2/5"
     modal-color="bg-neutral-white"
     modalHeightStyle="max-h-[75vh] my-[12.5vh]"
     @hide-modal="handleCloseModal"

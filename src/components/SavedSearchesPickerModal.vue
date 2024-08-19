@@ -1,7 +1,6 @@
 <template>
   <base-modal
     :modal-type="TypeModals.SaveSearchPicker"
-    modal-width-style="w-10/12"
     modal-color="bg-neutral-white"
     @hide-modal="handleCloseModal"
   >

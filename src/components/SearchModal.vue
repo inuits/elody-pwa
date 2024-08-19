@@ -2,7 +2,6 @@
   <BaseModal
     :modal-type="TypeModals.Search"
     :cancel-button-availabe="false"
-    modal-width-style="w-7/12"
     @hide-modal="closeModal(TypeModals.Search)"
   >
     <div class="bg-neutral-lightest h-full">

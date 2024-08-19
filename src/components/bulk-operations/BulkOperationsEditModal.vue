@@ -2,7 +2,6 @@
   <BaseModal
     v-if="modal && form"
     :modal-type="TypeModals.BulkOperationsEdit"
-    modal-width-style="w-11/12"
     @hide-modal="closeModal(TypeModals.BulkOperationsEdit)"
   >
     <div class="flex flex-wrap p-8 h-full">
