@@ -56,8 +56,8 @@
                 (promise) => (advancedFiltersPromise = promise)
               "
               @apply-filters="
-                async (filters: AdvancedFilterInput[], force: Boolean = true) =>
-                  await setAdvancedFilters(filters, force, route)
+                async (filters: AdvancedFilterInput[], stateSaved: Boolean = false, force: Boolean = true) =>
+                  await setAdvancedFilters(filters, stateSaved, force, route)
               "
               @expand-filters="expandFilters = !expandFilters"
             />
@@ -433,7 +433,7 @@ const initializeBaseLibrary = async () => {
   setIsSearchLibrary(props.isSearchLibrary || false);
   if (!props.predefinedEntities) {
     if (props.filters.length > 0)
-      setAdvancedFilters(props.filters, false, route);
+      setAdvancedFilters(props.filters, false, false, route);
     setEntityType(
       (props.filterType as Entitytyping) ||
         props.entityType ||

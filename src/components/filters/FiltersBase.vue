@@ -225,6 +225,7 @@ const emit = defineEmits<{
   (
     event: "applyFilters",
     advancedFilterInputs: AdvancedFilterInput[],
+    stateSaved: boolean,
     force: boolean
   ): void;
   (event: "expandFilters", expandFilters: boolean): void;
@@ -404,7 +405,7 @@ const applyFilters = (saveState = false, force = true) => {
     updateStateForRoute(props.route, {
       filterListItems: JSON.parse(JSON.stringify(filters.value)),
     });
-  emit("applyFilters", activeFilters.value, force);
+  emit("applyFilters", activeFilters.value, saveState, force);
 };
 
 const getAngleIcon = computed<DamsIcons>(() =>

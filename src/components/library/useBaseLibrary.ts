@@ -73,6 +73,7 @@ export const useBaseLibrary = (
 
   const setAdvancedFilters = async (
     filters: AdvancedFilterInput[],
+    stateSaved: boolean = false,
     forceFetch: boolean = false,
     route?: RouteLocationNormalizedLoaded
   ): Promise<void> => {
@@ -82,7 +83,7 @@ export const useBaseLibrary = (
 
     queryVariables.advancedFilterInputs = [];
     queryVariables.advancedFilterInputs = filters;
-    queryVariables.skip = 1;
+    if (stateSaved) queryVariables.skip = 1;
 
     if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);

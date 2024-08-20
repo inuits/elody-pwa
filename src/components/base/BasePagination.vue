@@ -98,7 +98,7 @@ const getLastPage = () => {
 };
 
 watch(
-  () => props.limit,
+  () => [props.limit, props.totalItems],
   () => {
     if (currentPage.value > getLastPage()) currentPage.value = 1;
   }
