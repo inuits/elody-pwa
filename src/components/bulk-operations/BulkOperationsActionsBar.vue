@@ -37,7 +37,7 @@
           {{ $t("bulk-operations.undo-selection") }}
         </span>
       </div>
-      <div v-if="hasBulkOperationsItemsSelection">
+      <div v-if="hasBulkOperationsWithItemsSelection">
         <span
           class="select-actions"
           :class="
@@ -50,7 +50,7 @@
           {{ $t("bulk-operations.select-page") }}
         </span>
       </div>
-      <div v-if="hasBulkOperationsItemsSelection">
+      <div v-if="hasBulkOperationsWithItemsSelection">
         <span
           :class="[
             totalItemsCount <= bulkSelectAllSizeLimit
@@ -209,7 +209,7 @@ onResult((result) => {
   }
 });
 
-const hasBulkOperationsItemsSelection = computed<boolean>(() => {
+const hasBulkOperationsWithItemsSelection = computed<boolean>(() => {
   const operationsWithContext = bulkOperations.value?.filter(
     (item: DropdownOption) => {
       return (
@@ -386,7 +386,7 @@ watch(
 
 watch(
   () => hasBulkOperationsItemsSelection.value,
-  (hasBulkOperations: boolean) => {
+  (hasBulWithkOperations: boolean) => {
     emit("setBulkOperationsAvailable", hasBulkOperations);
   }
 );
