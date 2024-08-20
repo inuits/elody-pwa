@@ -56,8 +56,11 @@
                 (promise) => (advancedFiltersPromise = promise)
               "
               @apply-filters="
-                async (filters: AdvancedFilterInput[], stateSaved: Boolean = false, force: Boolean = true) =>
-                  await setAdvancedFilters(filters, stateSaved, force, route)
+                async (
+                  filters: AdvancedFilterInput[],
+                  stateSaved: Boolean = false,
+                  force: Boolean = true
+                ) => await setAdvancedFilters(filters, stateSaved, force, route)
               "
               @expand-filters="expandFilters = !expandFilters"
             />

@@ -46,7 +46,10 @@ const setPermissionsMappings = async () => {
       .then((result) => {
         permissionsMappings.value
           .get(entity)
-          ?.set(Permission.Canread, result.data?.PermissionMappingPerEntityType);
+          ?.set(
+            Permission.Canread,
+            result.data?.PermissionMappingPerEntityType
+          );
       });
 
     const mappingCreatePromise = apolloClient

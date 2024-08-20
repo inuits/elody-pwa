@@ -482,7 +482,7 @@ const reorderEntitiesWithCsvUpload = async () => {
     t("notifications.success.csvReordering.description")
   );
   closeAndDeleteForm();
-}
+};
 
 const startOcrActionFunction = async (field: FormAction) => {
   await form.value.validate();
@@ -621,7 +621,7 @@ const closeAndDeleteForm = () => {
   closeModal(TypeModals.DynamicForm);
   changeExpandedState(false);
   deleteForm(props.dynamicFormQuery);
-}
+};
 
 const downloadDataFromResponse = (data: any) => {
   let blob = new Blob([data], { type: "text/csv" });

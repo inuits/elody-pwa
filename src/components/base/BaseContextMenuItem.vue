@@ -17,10 +17,7 @@
       {{ label }}
     </a>
 
-    <div
-      v-if="disable && tooltipLabel"
-      class="mr-3"
-    >
+    <div v-if="disable && tooltipLabel" class="mr-3">
       <base-tooltip position="top-right" :tooltip-offset="8">
         <template #activator="{ on }">
           <div v-on="on">
