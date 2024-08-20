@@ -41,9 +41,17 @@
       @focusout="keyUpEnterEvent()"
       :disabled="fieldEditIsDisabled"
     />
-    <p v-if="showErrors && !fieldIsValid" class="text-red-default">
-      {{ error }}
-    </p>
+    <div
+      v-if="showErrors && !fieldIsValid"
+      class="text-red-default"
+    >
+      <p v-if="field.validation.fastValidationMessage">
+        {{ t(field.validation.fastValidationMessage) }}
+      </p>
+      <p v-else>
+        {{ error }}
+      </p>
+    </div>
   </div>
 </template>
 
@@ -61,8 +69,10 @@ import { addCurrentTimeZoneToDateTimeString, isDateTime } from "@/helpers";
 import { onMounted, watch, ref, computed } from "vue";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useI18n } from "vue-i18n";
 
 const emit = defineEmits(["update:value", "registerEnterPressed:value"]);
+const { t } = useI18n();
 
 const props = defineProps<{
   fieldKey: string;
