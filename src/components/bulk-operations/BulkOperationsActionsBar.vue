@@ -99,7 +99,6 @@
 
 <script lang="ts" setup>
 import {
-  AdvancedFilterInput,
   BulkOperationTypes,
   DamsIcons,
   type DropdownOption,
@@ -147,7 +146,6 @@ const props = withDefaults(
     confirmSelectionButton?: boolean;
     entityType: Entitytyping;
     customBulkOperations?: String | undefined;
-    filters: AdvancedFilterInput[];
   }>(),
   {
     totalItemsCount: 0,

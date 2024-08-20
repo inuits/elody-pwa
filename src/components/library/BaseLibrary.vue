@@ -56,13 +56,8 @@
                 (promise) => (advancedFiltersPromise = promise)
               "
               @apply-filters="
-                async (
-                  filters: AdvancedFilterInput[],
-                  force: Boolean = true
-                ) => {
-                  activeFilters = filters;
-                  await setAdvancedFilters(filters, force, route);
-                }
+                async (filters: AdvancedFilterInput[], force: Boolean = true) =>
+                  await setAdvancedFilters(filters, force, route)
               "
               @expand-filters="expandFilters = !expandFilters"
             />
@@ -110,7 +105,6 @@
               :total-items-count="totalEntityCount"
               :use-extended-bulk-operations="true"
               :show-button="showButton"
-              :filters="activeFilters"
               :confirm-selection-button="confirmSelectionButton"
               :entity-type="entityType as Entitytyping"
               :custom-bulk-operations="customBulkOperations"
@@ -407,7 +401,6 @@ const mapDropdownOptionsToBulkProcessableItem = (
 };
 
 const useOtherQuery = computed(() => props.useOtherQuery !== undefined);
-const activeFilters: AdvancedFilterInput[] = [];
 
 if (useOtherQuery.value) {
   setManipulationOfQuery(true, props.useOtherQuery);
@@ -455,7 +448,10 @@ const initializeBaseLibrary = async () => {
     enqueuePromise(advancedFiltersPromise);
     enqueuePromise(paginationLimitOptionsPromise);
     enqueuePromise(sortOptionsPromise);
-    await Promise.allSettled([getEntities(route), getEntitiesTotalCount(route)]);
+    await Promise.allSettled([
+      getEntities(route),
+      getEntitiesTotalCount(route),
+    ]);
   }
 };
 
@@ -498,7 +494,10 @@ watch(
       setEntityType(entityType.value);
       enqueuePromise(advancedFiltersPromise);
       enqueuePromise(sortOptionsPromise);
-      await Promise.allSettled([getEntities(route), getEntitiesTotalCount(route)]);
+      await Promise.allSettled([
+        getEntities(route),
+        getEntitiesTotalCount(route),
+      ]);
     }
   }
 );
@@ -516,7 +515,10 @@ watch(
   () => props.filters,
   async () => {
     setAdvancedFilters(props.filters);
-    await Promise.allSettled([getEntities(route), getEntitiesTotalCount(route)]);
+    await Promise.allSettled([
+      getEntities(route),
+      getEntitiesTotalCount(route),
+    ]);
   }
 );
 watch(
@@ -578,13 +580,19 @@ EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryMediafile, async () => {
     props.useOtherQuery?.filtersDocument?.definitions[0]?.name?.value ===
     "getPrimaryMediafileFilters"
   )
-    await Promise.allSettled([getEntities(route), getEntitiesTotalCount(route)]);
+    await Promise.allSettled([
+      getEntities(route),
+      getEntitiesTotalCount(route),
+    ]);
 });
 EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryThumbnail, async () => {
   if (
     props.useOtherQuery?.filtersDocument?.definitions[0]?.name?.value ===
     "getPrimaryThumbnailFilters"
   )
-    await Promise.allSettled([getEntities(route), getEntitiesTotalCount(route)]);
+    await Promise.allSettled([
+      getEntities(route),
+      getEntitiesTotalCount(route),
+    ]);
 });
 </script>
