@@ -37,7 +37,7 @@
           {{ $t("bulk-operations.undo-selection") }}
         </span>
       </div>
-      <div>
+      <div v-if="hasBulkOperationsItemsSelection">
         <span
           class="select-actions"
           :class="
@@ -50,7 +50,7 @@
           {{ $t("bulk-operations.select-page") }}
         </span>
       </div>
-      <div>
+      <div v-if="hasBulkOperationsItemsSelection">
         <span
           :class="[
             totalItemsCount <= bulkSelectAllSizeLimit
@@ -100,6 +100,7 @@
 import {
   BulkOperationTypes,
   DamsIcons,
+  ActionContextEntitiesSelectionType,
   type DropdownOption,
   Entitytyping,
   GenerateTranscodeDocument,
@@ -158,7 +159,10 @@ const emit = defineEmits<{
   (event: "selectPage"): void;
   (event: "selectAll"): void;
   (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
-  (event: "noBulkOperationsAvailable"): void;
+  (
+    event: "setBulkOperationsAvailable",
+    isBulkOperationsAvailable: boolean
+  ): void;
   (event: "refetch"): void;
   (
     event: "customBulkOperationsPromise",
@@ -201,8 +205,20 @@ onResult((result) => {
     bulkOperations.value =
       result.data?.BulkOperations?.bulkOperationOptions?.options;
   } catch (e) {
-    emit("noBulkOperationsAvailable");
+    emit("setBulkOperationsAvailable", false);
   }
+});
+
+const hasBulkOperationsItemsSelection = computed<boolean>(() => {
+  const operationsWithContext = bulkOperations.value?.filter(
+    (item: DropdownOption) => {
+      return (
+        item.actionContext?.entitiesSelectionType ===
+        ActionContextEntitiesSelectionType.SomeSelected
+      );
+    }
+  );
+  return (bulkOperations.value && operationsWithContext?.length > 0) || false;
 });
 
 const itemsSelected = computed<boolean>(
@@ -366,6 +382,13 @@ watch(
     emit("applyCustomBulkOperations");
   },
   { immediate: true }
+);
+
+watch(
+  () => hasBulkOperationsItemsSelection.value,
+  (hasBulkOperations: boolean) => {
+    emit("setBulkOperationsAvailable", hasBulkOperations);
+  }
 );
 </script>
 
