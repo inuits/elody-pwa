@@ -41,10 +41,7 @@
       @focusout="keyUpEnterEvent()"
       :disabled="fieldEditIsDisabled"
     />
-    <div
-      v-if="showErrors && !fieldIsValid"
-      class="text-red-default"
-    >
+    <div v-if="showErrors && !fieldIsValid" class="text-red-default">
       <p v-if="field.validation.fastValidationMessage">
         {{ t(field.validation.fastValidationMessage) }}
       </p>

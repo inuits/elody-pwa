@@ -76,8 +76,9 @@ const useUpload = () => {
         checkUploadValidityFn: () => __checkUploadValidityMediafilesWithCsv(),
       },
       uploadCsvForReordening: {
-        checkUploadValidityFn: () => __checkUploadValidityuploadCsvForReordening(),
-      }
+        checkUploadValidityFn: () =>
+          __checkUploadValidityuploadCsvForReordening(),
+      },
     };
     uploadValidationFn.value =
       settingsObject[uploadSettings.uploadFlow].checkUploadValidityFn;
@@ -112,7 +113,7 @@ const useUpload = () => {
 
   const __checkUploadValidityuploadCsvForReordening = (): boolean => {
     return containsCsv.value;
-  }
+  };
 
   const __uploadMediafilesWithTicketUrl = async (
     isLinkedUpload: boolean,
@@ -170,7 +171,7 @@ const useUpload = () => {
     if (!response.ok) {
       return Promise.reject(response);
     }
-  }
+  };
 
   const __uploadExceptionHandler = (
     errorDescription: string | undefined,
