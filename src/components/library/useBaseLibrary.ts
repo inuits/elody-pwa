@@ -181,11 +181,9 @@ export const useBaseLibrary = (
       .then((result) => {
         const fetchedEntities = result.data.Entities;
         entities.value = fetchedEntities?.results as Entity[];
-        // totalEntityCount.value = fetchedEntities?.count || 0;
         if (shouldUseStateForRoute)
           updateStateForRoute(_route, {
             entityCountOnPage: fetchedEntities.results.length,
-            // totalEntityCount: fetchedEntities.count,
           });
         entitiesLoading.value = false;
       })
