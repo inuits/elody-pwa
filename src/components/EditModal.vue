@@ -3,7 +3,7 @@
     <BulkOperationsSubmitBar
       :button-label="$t('bulk-operations.save')"
       :button-icon="DamsIcons.Save"
-      :show-delete-button="isEditToggleVisible !== 'edit-delete'"
+      :show-delete-button="isEditToggleVisible === 'edit-delete'"
       :disabled="showErrors"
       @submit="
         async () => {
