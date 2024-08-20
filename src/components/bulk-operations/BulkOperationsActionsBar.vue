@@ -385,8 +385,8 @@ watch(
 );
 
 watch(
-  () => hasBulkOperationsItemsSelection.value,
-  (hasBulWithkOperations: boolean) => {
+  () => hasBulkOperationsWithItemsSelection.value,
+  (hasBulkOperations: boolean) => {
     emit("setBulkOperationsAvailable", hasBulkOperations);
   }
 );
