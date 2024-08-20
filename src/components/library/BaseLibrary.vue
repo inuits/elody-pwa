@@ -115,9 +115,7 @@
               @confirm-selection="
                 (selection) => emit('confirmSelection', selection)
               "
-              @no-bulk-operations-available="
-                () => (enableBulkOperations = false)
-              "
+              @set-bulk-operations-available="(value: boolean) => (hasBulkOperations = value)"
               @apply-custom-bulk-operations="
                 async () => await applyCustomBulkOperations()
               "
@@ -152,7 +150,7 @@
               :parent-entity-identifiers="parentEntityIdentifiers"
               :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
               :relation-type="relationType"
-              :enable-selection="enableBulkOperations"
+              :enable-selection="enableSelection"
               :base-library-mode="baseLibraryMode"
               :entity-list-elements="entityListElements"
               :allowed-actions-on-relations="allowedActionsOnRelations"
@@ -168,7 +166,7 @@
               :parent-entity-identifiers="parentEntityIdentifiers"
               :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
               :relation-type="relationType"
-              :enable-selection="enableBulkOperations"
+              :enable-selection="enableSelection"
             />
             <ViewModesMedia
               v-if="displayPreview"
@@ -301,6 +299,11 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const { getGlobalState, updateGlobalState } = useStateManagement();
+
+const hasBulkOperations = ref<boolean>(true);
+const enableSelection = computed<boolean>(() => {
+  return hasBulkOperations.value && props.enableBulkOperations;
+});
 
 const {
   enqueuePromise,
