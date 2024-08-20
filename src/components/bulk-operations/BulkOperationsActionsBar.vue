@@ -23,7 +23,6 @@
             >{{ getEnqueuedItemCount(context) }}/</span
           >
           {{ totalItemsCount }}
-          <!-- <TotalCount :filters="filters" :entity-type="entityType" /> -->
           {{ $t("bulk-operations.items") }}
           <span v-if="itemsSelected">{{ $t("bulk-operations.selected") }}</span>
         </span>
@@ -138,7 +137,6 @@ import {
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
-import TotalCount from "../TotalCount.vue";
 
 const props = withDefaults(
   defineProps<{
