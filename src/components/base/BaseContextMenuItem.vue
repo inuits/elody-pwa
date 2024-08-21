@@ -8,7 +8,7 @@
           : 'hover:bg-neutral-50 cursor-pointer') +
         (highlight ? 'text-neutral-900 bg-blue-50' : '')
       "
-      class="text-gray-700 block px-4 py-2 text-sm flex items-center gap-2"
+      class="text-gray-700 block px-4 py-2 text-sm flex items-center gap-2 w-full"
       role="menuitem"
       tabindex="-1"
       id="menu-item-add"
