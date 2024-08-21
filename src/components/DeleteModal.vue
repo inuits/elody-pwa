@@ -29,6 +29,7 @@
           :show-button="false"
           :enable-bulk-operations="false"
           :enable-advanced-filters="false"
+          base-library-height="h-fit"
           @entities-updated="
             (numberOfEntities) =>
               (numberOfBlockingQueryEntities = numberOfEntities)
@@ -56,6 +57,7 @@
           :show-button="false"
           :enable-bulk-operations="true"
           :enable-advanced-filters="true"
+          base-library-height="h-fit"
         />
         <ConfirmModalView class="mb-10 h-max"></ConfirmModalView>
       </div>
