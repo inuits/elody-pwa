@@ -46,7 +46,6 @@ const props = withDefaults(
 
 const emit = defineEmits(["update:modalState", "hideModal"]);
 
-const cancelButtonAvailabe = ref<boolean>(props.cancelButtonAvailabe);
 const { currentModalStyle, getModalInfo } = useBaseModal();
 const dialog = ref<HTMLDialogElement>();
 const modalStyle = computed(() => modalStyles[currentModalStyle.value]);
