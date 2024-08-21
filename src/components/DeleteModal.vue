@@ -1,7 +1,7 @@
 <template>
   <BaseModal
     :modal-type="TypeModals.Delete"
-    :cancel-button-availabe="true"
+    :cancel-button-availabe="numberOfBlockingQueryEntities<=0"
     modal-color="bg-neutral-lightest"
     @hide-modal="closeModal(TypeModals.Delete)"
   >
