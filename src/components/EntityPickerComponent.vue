@@ -2,6 +2,7 @@
   <div class="flex flex-col w-full overflow-hidden">
     <BaseLibrary
       class="overflow-auto"
+      :class="baseLibraryHeight"
       v-if="queryLoaded || ignoreCustomQuery"
       :bulk-operations-context="getContext()"
       :entity-type="acceptedTypes?.[0]"
@@ -80,9 +81,11 @@ const props = withDefaults(
     enableBulkOperations: boolean;
     enableAdvancedFilters: boolean;
     entityPickerMode: EntityPickerMode;
+    baseLibraryHeight?: string;
   }>(),
   {
     entityPickerMode: EntityPickerMode.Emit,
+    baseLibraryHeight: "h-[95vh]",
   }
 );
 
