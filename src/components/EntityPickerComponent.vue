@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col w-full overflow-hidden">
     <BaseLibrary
-      class="overflow-auto h-[95vh]"
+      class="overflow-auto"
       v-if="queryLoaded || ignoreCustomQuery"
       :bulk-operations-context="getContext()"
       :entity-type="acceptedTypes?.[0]"
@@ -125,6 +125,7 @@ const getContext = () => {
 
 const getAlreadySelectedEntityIds = (): string[] => {
   const form = getForm(getEntityUuid());
+  if (!form) return [];
   const relationValues = form?.values.relationValues;
   const normalizedRelationIds = Object.keys(relationValues)
     .filter((relationKey: string) => Array.isArray(relationValues[relationKey]))
