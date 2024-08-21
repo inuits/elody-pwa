@@ -213,6 +213,6 @@ const deleteFilter = async () => {
 
 const openFindAllFiltersModal = () => {
   setEntityType(Entitytyping.SavedSearch);
-  openModal(TypeModals.SaveSearchPicker, ModalStyle.Right);
+  openModal(TypeModals.SaveSearchPicker, ModalStyle.RightWide);
 };
 </script>
