@@ -83,7 +83,18 @@ watch(
   }
 );
 
+watch(
+  () => formTabs.value,
+  () => {
+    if (formTabs.value) initializeModal();
+  }
+);
+
 onMounted(() => {
+  initializeModal();
+});
+
+const initializeModal = () => {
   initializeConfirmModal({
     confirmButton: {
       buttonCallback: () => {
@@ -94,7 +105,7 @@ onMounted(() => {
     declineButton: { buttonCallback: () => closeModal(TypeModals.Confirm) },
     translationKey: "discard-modal",
   });
-});
+}
 
 const tabsTitles = computed(() => {
   return Object.values(formTabs.value ?? {}).flatMap((value) =>
