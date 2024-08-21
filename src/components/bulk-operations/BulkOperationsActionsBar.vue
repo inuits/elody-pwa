@@ -337,7 +337,7 @@ watch(selectedBulkOperation, () => {
     if (
       selectedBulkOperation.value?.value ===
         BulkOperationTypes.ReorderEntities ||
-      selectedBulkOperation.value?.value === BulkOperationTypes.TranscodePdf ||
+      selectedBulkOperation.value?.value === BulkOperationTypes.StartOcr ||
       selectedBulkOperation.value?.value === BulkOperationTypes.CreateEntity
     ) {
       let modal = selectedBulkOperation.value?.bulkOperationModal;
