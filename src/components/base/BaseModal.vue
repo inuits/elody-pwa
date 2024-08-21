@@ -1,5 +1,14 @@
 <template>
-  <dialog ref="dialog" @close="hideModal" :class="modalStyle">
+  <dialog
+    ref="dialog"
+    @close="hideModal"
+    :class="[
+      {
+        'grid grid-rows-[max-content_1fr]': getModalInfo(props.modalType).open,
+      },
+      modalStyle,
+    ]"
+  >
     <div class="flex justify-end p-2">
       <unicon
         v-show="!cancelButtonAvailabe"
