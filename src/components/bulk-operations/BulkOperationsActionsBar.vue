@@ -388,7 +388,8 @@ watch(
   () => hasBulkOperationsWithItemsSelection.value,
   (hasBulkOperations: boolean) => {
     emit("setBulkOperationsAvailable", hasBulkOperations);
-  }
+  },
+  { immediate: true }
 );
 </script>
 
