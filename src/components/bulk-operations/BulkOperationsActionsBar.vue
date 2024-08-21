@@ -360,7 +360,7 @@ watch(selectedBulkOperation, () => {
 });
 
 watch(
-  () => getModalInfo(TypeModals.BulkOperations).open,
+  () => getModalInfo(TypeModals.DynamicForm).open,
   (isBulkOperationModalOpen: boolean | undefined) => {
     if (!isBulkOperationModalOpen) selectedBulkOperation.value = undefined;
   }
