@@ -523,6 +523,7 @@ const startOcrActionFunction = async (field: FormAction) => {
       );
     }
   );
+  closeAndDeleteForm();
 };
 
 const performActionButtonClickEvent = (field: FormAction): void => {
