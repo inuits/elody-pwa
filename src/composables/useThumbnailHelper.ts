@@ -5,7 +5,6 @@ const useThumbnailHelper = (): {
 } => {
   const getThumbnail = (data: any) => {
     try {
-      console.log(data.intialValues.mimetype);
       if (data.intialValues.mimetype.includes("audio")) {
         return Unicons.Music.name;
       }
