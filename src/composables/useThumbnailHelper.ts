@@ -5,25 +5,19 @@ const useThumbnailHelper = (): {
 } => {
   const getThumbnail = (data: any) => {
     try {
-      if (
-        data?.label === "audio" ||
-        (data?.media?.mediafiles?.length > 0 &&
-          data?.media?.mediafiles[0]?.mimetype.includes("audio"))
-      ) {
-        // @ts-ignore
+      console.log(data.intialValues.mimetype);
+      if (data.intialValues.mimetype.includes("audio")) {
         return Unicons.Music.name;
       }
 
-      if (
-        data?.label === "subtitle" ||
-        (data?.media?.mediafiles?.length > 0 &&
-          data?.media?.mediafiles[0]?.mimetype.includes("text"))
-      ) {
-        // @ts-ignore
+      if (data.intialValues.mimetype.includes("zip")) {
+        return Unicons.Folder.name;
+      }
+
+      if (data.intialValues.mimetype.includes("text")) {
         return Unicons.Text.name;
       }
 
-      // @ts-ignore
       return Unicons.NoImage.name;
     } catch (e) {
       console.log("Unable to get thumbnail, fallback to default");
