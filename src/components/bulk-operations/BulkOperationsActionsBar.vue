@@ -212,6 +212,7 @@ onResult((result) => {
 const hasBulkOperationsWithItemsSelection = computed<boolean>(() => {
   const operationsWithContext = bulkOperations.value?.filter(
     (item: DropdownOption) => {
+      if (!item.actionContext) return true;
       return (
         item.actionContext?.entitiesSelectionType ===
         ActionContextEntitiesSelectionType.SomeSelected
