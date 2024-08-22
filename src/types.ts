@@ -75,6 +75,7 @@ import {
   uniUser,
   uniUserCircle,
   uniVolume,
+  uniVideoSlash,
   uniWindowGrid,
   uniWindowMaximize,
 } from "vue-unicons/dist/icons";
@@ -156,6 +157,7 @@ export const Unicons: Record<DamsIcons, { name: string }> = {
   Upload: uniCloudUpload,
   User: uniUser,
   UserCircle: uniUserCircle,
+  videoSlash: uniVideoSlash,
   WindowGrid: uniWindowGrid,
   WindowMaximize: uniWindowMaximize,
 };
