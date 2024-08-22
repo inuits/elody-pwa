@@ -151,14 +151,16 @@ export const processTextWithLinks = (value: unknown) => {
 };
 
 export const stringIsUrl = (value: unknown): Boolean => {
-  if (value && typeof value !== "string") return false;
+  try {
+    if (value && typeof value !== "string") return false;
 
-  const stringValue = value as string;
-  const pattern: RegExp = /\bhttps?:\/\/\S+/gi;
-  const matches: RegExpMatchArray | null = stringValue.match(pattern);
-  if (!matches || matches.length === 0) return false;
-
-  return true;
+    const stringValue = value as string;
+    const pattern: RegExp = /\bhttps?:\/\/\S+/gi;
+    const matches: RegExpMatchArray | null = stringValue.match(pattern);
+    return !(!matches || matches.length === 0);
+  } catch {
+    return false;
+  }
 };
 
 export const stringIsHtml = (value: unknown): boolean => {
@@ -231,6 +233,15 @@ export const getMetadataFields = (
   formId: string
 ): Array<PanelMetaData | EntityListElement> => {
   const fields: Array<PanelMetaData | EntityListElement> = [];
+
+  if (panelType === PanelType.BulkData && objectToGetMetadataFrom.bulkData)
+    return objectToGetMetadataFrom.bulkData.map((bulkDataItem: any) => {
+      return {
+        label: bulkDataItem.key,
+        key: bulkDataItem.key,
+        value: bulkDataItem.value,
+      };
+    });
 
   Object.values(objectToGetMetadataFrom).forEach((value) => {
     if (!value || typeof value !== "object") return;
