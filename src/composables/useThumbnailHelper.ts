@@ -18,6 +18,10 @@ const useThumbnailHelper = (): {
         return Unicons.Text.name;
       }
 
+      if (data.intialValues.mimetype.includes("video")) {
+        return Unicons.VideoSlash.name;
+      }
+
       return Unicons.NoImage.name;
     } catch (e) {
       console.log("Unable to get thumbnail, fallback to default");
