@@ -243,6 +243,7 @@ export type BaseLibraryProps = {
   enablePreview?: boolean;
   enableAdvancedFilters?: boolean;
   enableBulkOperations?: boolean;
+  selectionEnabled?: boolean;
   entityType?: Entitytyping;
   filterType?: string;
   parentEntityIdentifiers?: string[];
@@ -272,6 +273,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   enablePreview: false,
   enableAdvancedFilters: true,
   enableBulkOperations: true,
+  selectionEnabled: false,
   filterType: undefined,
   parentEntityIdentifiers: () => [],
   showButton: true,
@@ -305,7 +307,7 @@ const { getGlobalState, updateGlobalState } = useStateManagement();
 
 const hasBulkOperations = ref<boolean>(true);
 const enableSelection = computed<boolean>(() => {
-  return hasBulkOperations.value && props.enableBulkOperations;
+  return (hasBulkOperations.value && props.enableBulkOperations || props.selectionEnabled);
 });
 
 const {
