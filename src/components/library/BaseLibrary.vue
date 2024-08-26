@@ -307,7 +307,10 @@ const { getGlobalState, updateGlobalState } = useStateManagement();
 
 const hasBulkOperations = ref<boolean>(true);
 const enableSelection = computed<boolean>(() => {
-  return (hasBulkOperations.value && props.enableBulkOperations || props.selectionEnabled);
+  return (
+    (hasBulkOperations.value && props.enableBulkOperations) ||
+    props.selectionEnabled
+  );
 });
 
 const {

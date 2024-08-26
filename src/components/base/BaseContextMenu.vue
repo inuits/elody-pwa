@@ -23,7 +23,10 @@ const getStyles = () => {
     top: `${props.contextMenu.position.y}px`,
   };
 
-  if (document.body.clientWidth - props.contextMenu.position.x < 250 || props.direction === ContextMenuDirection.Left) {
+  if (
+    document.body.clientWidth - props.contextMenu.position.x < 250 ||
+    props.direction === ContextMenuDirection.Left
+  ) {
     styles["right"] = `${
       document.body.clientWidth - props.contextMenu.position.x
     }px`;
