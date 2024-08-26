@@ -4,14 +4,14 @@
     class="flex justify-between items-center rounded alignment-nested-divs"
     :class="[
       useExtendedBulkOperations
-        ? `px-3 !py-2 bg-neutral-white`
+        ? `px-3 !py-1 bg-neutral-white`
         : `bg-transparent`,
       { 'py-3': useExtendedBulkOperations },
     ]"
   >
-    <div class="flex justify-start">
+    <div class="flex justify-start items-center">
       <div
-        class="px-2 rounded-md"
+        class="px-2 my-2.5 rounded-md"
         :class="
           useExtendedBulkOperations && itemsSelected
             ? `text-neutral-white bg-accent-normal`

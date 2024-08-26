@@ -1,17 +1,19 @@
 <template>
-  <div class="flex flex-row justify-end items-center">
+  <div class="flex flex-row justify-end items-center !m-0">
     <BaseButtonNew
       v-if="primaryOption"
       class="-mr-4 pr-6"
       button-style="accentNormal"
+      button-size="small"
       :disabled="isMainActionDisabled"
       :label="t(primaryOption.label)"
       @click="handleEmit(primaryOption)"
     />
     <BaseButtonNew
       v-if="filterSecondaryDropdownOptions.length > 0"
+      button-size="small"
       :icon="DamsIcons.EllipsisV"
-      class="!w-max !border-l-2 border-white"
+      class="!w-max !p-2"
       @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event.clientX, y: event.clientY})"
     />
 
