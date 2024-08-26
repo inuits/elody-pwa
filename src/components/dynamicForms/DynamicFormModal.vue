@@ -105,7 +105,7 @@ const initializeModal = () => {
     declineButton: { buttonCallback: () => closeModal(TypeModals.Confirm) },
     translationKey: "discard-modal",
   });
-}
+};
 
 const tabsTitles = computed(() => {
   return Object.values(formTabs.value ?? {}).flatMap((value) =>
