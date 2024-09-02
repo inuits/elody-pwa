@@ -52,11 +52,7 @@ const useHttpErrors = () => {
           t("notifications.graphql-errors.forbidden.title"),
           t("notifications.graphql-errors.forbidden.description")
         );
-        try {
-          router.go(-1);
-        } catch {
-          router.push("/");
-        }
+        router.push("/");
         break;
       default:
         createErrorNotification("Error", message);
