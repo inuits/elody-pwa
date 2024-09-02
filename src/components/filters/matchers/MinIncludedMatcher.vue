@@ -60,7 +60,11 @@ const { t } = useI18n();
 const input = ref<number | string>();
 const inputTime = ref<number | string | undefined>(undefined);
 const totalInput = computed(() =>
-  inputTime.value ? `${input.value}T${inputTime.value}` : input.value
+  inputTime.value
+    ? input.value
+      ? `${input.value}T${inputTime.value}`
+      : undefined
+    : input.value
 );
 
 const force = ref<boolean>(false);
@@ -77,7 +81,8 @@ const determinePlaceholder = computed(() => {
 
 onMounted(() => {
   input.value = extractDate(props.filter.inputFromState?.value?.min);
-  inputTime.value = extractTime(props.filter.inputFromState?.value?.min);
+  inputTime.value =
+    extractTime(props.filter.inputFromState?.value?.min) || "00:00:00";
   force.value = Boolean(props.filter.inputFromState);
   force.value = Boolean(props.filter.inputFromState);
 });
@@ -87,12 +92,14 @@ const emitNewAdvancedFilterInput = () => {
     type: props.filter.advancedFilter.type,
     parent_key: props.filter.advancedFilter.parentKey,
     key: props.filter.advancedFilter.key,
-    value: {
-      min: isDateTime(totalInput.value)
-        ? addCurrentTimeZoneToDateTimeString(totalInput.value)
-        : totalInput.value,
-      included: true,
-    },
+    value: totalInput.value
+      ? {
+          min: isDateTime(totalInput.value)
+            ? addCurrentTimeZoneToDateTimeString(totalInput.value)
+            : totalInput.value,
+          included: true,
+        }
+      : undefined,
     aggregation: props.filter.advancedFilter.aggregation,
   };
   if (props.filter.advancedFilter.lookup)

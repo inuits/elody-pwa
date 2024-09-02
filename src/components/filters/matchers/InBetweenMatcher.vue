@@ -146,10 +146,13 @@ const determinePlaceholder = computed(() => {
 });
 
 onMounted(() => {
-  max.value = extractDate(props.filter.inputFromState?.value?.max);
-  maxTime.value = extractTime(props.filter.inputFromState?.value?.max);
+  const dateToday = new Date().toISOString().split("T")[0];
   min.value = extractDate(props.filter.inputFromState?.value?.min);
-  minTime.value = extractTime(props.filter.inputFromState?.value?.min);
+  minTime.value =
+    extractTime(props.filter.inputFromState?.value?.min) || "00:00:00";
+  max.value = extractDate(props.filter.inputFromState?.value?.max) || dateToday;
+  maxTime.value =
+    extractTime(props.filter.inputFromState?.value?.max) || "00:00:00";
   force.value = Boolean(props.filter.inputFromState);
 });
 
