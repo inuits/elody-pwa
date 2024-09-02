@@ -11,7 +11,7 @@
     <div
       class="h-full w-full border-solid border-neutral-30 border-2 bg-neutral-0 rounded-t-md"
     >
-      <div class="border-solid border-neutral-30 border-b-2 pb-2 rounded-t-md">
+      <div class="border-solid border-neutral-30 border-b-2 rounded-t-md">
         <h1
           data-cy="entity-element-window-title"
           class="subtitle text-text-body p-2"
