@@ -8,7 +8,7 @@
           { 'rounded-xl': !showHistory },
         ]"
       >
-        <div
+        <!--<div
           class="flex items-center px-2 cursor-pointer"
           @click="navigateToEntity(visitedRoutes[0])"
         >
@@ -23,7 +23,7 @@
             :size="24"
             color="text-body"
           />
-        </div>
+        </div>-->
         <div
           v-if="visitedRoutes.length > 3"
           @click="toggleList()"
@@ -33,10 +33,15 @@
           <p class="ml-1">{{ visitedRoutes.length - 2 }}</p>
         </div>
         <unicon
-          v-if="visitedRoutes.length > 2"
+          v-if="visitedRoutes.length > 3"
           height="24"
           :name="Unicons.AngleRight.name"
         ></unicon>
+        <!--<unicon
+          v-if="visitedRoutes.length > 2"
+          height="24"
+          :name="Unicons.AngleRight.name"
+          ></unicon>-->
         <p
           v-if="previousRoute?.routeName && previousRoute !== visitedRoutes[0]"
           :class="[
@@ -51,7 +56,13 @@
           {{ t(previousRoute?.routeName) }}
         </p>
       </div>
-      <div class="flex h-full justify-center items-center px-2">
+      <!--<div class="flex h-full justify-center items-center px-2">
+        <unicon height="24" :name="Unicons.AngleRight.name" />
+      </div>-->
+      <div
+        v-if="previousRoute"
+        class="flex h-full justify-center items-center px-2"
+      >
         <unicon height="24" :name="Unicons.AngleRight.name" />
       </div>
       <div
