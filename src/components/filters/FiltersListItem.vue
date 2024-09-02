@@ -75,7 +75,7 @@
         button-size="small"
         @click="
           () => {
-            emit('deactivateFilter', advancedFilterInput.key);
+            emit('deactivateFilter', advancedFilterInput.key, true);
             reloadMatcherComponent();
           }
         "
@@ -126,7 +126,8 @@ const emit = defineEmits<{
   ): void;
   (
     event: "deactivateFilter",
-    advancedFilterKey: string | InputMaybe<string> | undefined
+    advancedFilterKey: string | InputMaybe<string> | undefined,
+    forceApply: Boolean | undefined
   ): void;
 }>();
 

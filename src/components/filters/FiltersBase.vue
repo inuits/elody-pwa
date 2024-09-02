@@ -116,7 +116,7 @@
             else activeFilters.push(filterInput);
           }"
           @deactivate-filter="
-            (key) => {
+            (key, forceApply = false) => {
               const filter = filters.filter(
                 (filter) => filter.advancedFilter.key === key
               )[0];
@@ -127,6 +127,7 @@
               activeFilters = activeFilters.filter(
                 (filter) => JSON.stringify(filter.key) !== JSON.stringify(key)
               );
+              if (forceApply) applyFilters(true);
             }
           "
         />
