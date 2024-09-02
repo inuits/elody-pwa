@@ -51,7 +51,7 @@
         <div class="flex justify-between gap-4 pb-4">
           <BaseButtonNew
             data-cy="filters-clear-button"
-            class="!w-1/3"
+            class="!w-1/3 !p-2.5"
             :label="t('filters.clear')"
             :icon="DamsIcons.Cross"
             :icon-height="22"
@@ -77,19 +77,9 @@
         </div>
         <div>
           <BaseInputAutocomplete
+            v-if="addFilterOptions.length > 0"
             v-model="displayedFilterOptions"
-            :options="
-              filters
-                .filter((filter) => !filter.advancedFilter.isDisplayedByDefault)
-                .filter((filter) => !filter.advancedFilter.hidden)
-                .filter((filter) => filter.advancedFilter.label)
-                .map((filter) => {
-                  return {
-                    label: t(filter.advancedFilter.label || ''),
-                    value: t(filter.advancedFilter.label || ''),
-                  };
-                })
-            "
+            :options="addFilterOptions"
             :placeholder="t('filters.add-filter')"
             autocomplete-style="defaultWithBorder"
           />
@@ -182,9 +172,8 @@ import { computed, defineProps, onMounted, ref, watch, inject } from "vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
-import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
 import {
-  SavedSearchType,
+  type SavedSearchType,
   useSaveSearchHepler,
 } from "@/composables/useSaveSearchHepler";
 import { useRoute } from "vue-router";
@@ -250,7 +239,6 @@ const lastActiveFilter = ref<SavedSearchType | undefined>(undefined);
 const matchers = ref<DropdownOption[]>([]);
 const { getStateForRoute, updateStateForRoute } = useStateManagement();
 const { isSaved } = useEditMode();
-const { setAdvancedFilterInputs } = useQueryVariablesFactory();
 const { t } = useI18n();
 const {
   setActiveFilter: setActiveSavedFilter,
@@ -267,6 +255,18 @@ const config = inject("config") as any;
 
 const hasSavedSearch = config.features.hasSavedSearch || false;
 
+const addFilterOptions = computed(() =>
+  filters.value
+    .filter((filter) => !filter.advancedFilter.isDisplayedByDefault)
+    .filter((filter) => !filter.advancedFilter.hidden)
+    .filter((filter) => filter.advancedFilter.label)
+    .map((filter) => {
+      return {
+        label: t(filter.advancedFilter.label || ""),
+        value: t(filter.advancedFilter.label || ""),
+      };
+    })
+);
 const selectedSavedFilter = computed(() => {
   return getActiveFilter();
 });
