@@ -3,7 +3,7 @@
     v-if="confirmModalConfiguration?.translationKey"
     class="h-full flex flex-col justify-between p-4"
   >
-    <div class="title">
+    <div class="text-xl">
       {{ t(`confirm.${confirmModalConfiguration?.translationKey}.message`) }}
     </div>
     <div class="flex justify-between pt-8">
