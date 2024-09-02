@@ -54,11 +54,7 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
           t("notifications.graphql-errors.forbidden.title"),
           t("notifications.graphql-errors.forbidden.description")
         );
-        try {
-          router.go(-1);
-        } catch {
-          router.push("/");
-        }
+        router.push("/");
         break;
       case 409:
         let errorMessage: string =
