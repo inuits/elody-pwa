@@ -2,7 +2,8 @@
   <div class="flex flex-row justify-end items-center !m-0">
     <BaseButtonNew
       v-if="primaryOption"
-      class="-mr-4 pr-6"
+      class="pr-6"
+      :class="{ '-mr-4': filterSecondaryDropdownOptions.length > 0 }"
       button-style="accentNormal"
       button-size="small"
       :disabled="isMainActionDisabled"
