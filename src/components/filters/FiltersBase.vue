@@ -373,7 +373,8 @@ const handleAdvancedFilters = () => {
                 if (advancedFilter.itemTypes)
                   activeFilters.value = [hiddenFilter];
                 else activeFilters.value.push(hiddenFilter);
-              }
+              } else if (advancedFilter.key === "type")
+                activeFilters.value.push(hiddenFilter);
             } else activeFilters.value.push(hiddenFilter);
           }
 
