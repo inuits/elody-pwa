@@ -37,7 +37,7 @@
           v-if="!requiresCustomQuery || queryLoaded"
           :class="[
             {
-              'ml-1 bg-neutral-lightest':
+              'mx-1 bg-neutral-lightest':
                 baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
                 baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder,
             },
