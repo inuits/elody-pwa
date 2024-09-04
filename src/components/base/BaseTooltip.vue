@@ -34,17 +34,10 @@ import {
   autoPlacement,
 } from "@floating-ui/vue";
 
-const { position, tooltipOffset } = withDefaults(
-  defineProps<{
-    position: Placement;
-    tooltipOffset: number;
-  }>(),
-  {
-    position: "top-end",
-    tooltipOffset: 0,
-  }
-);
-
+const { position = "top-end", tooltipOffset = 0 } = defineProps<{
+  position: Placement;
+  tooltipOffset: number;
+}>();
 const hover = ref(false);
 
 const defaultSlotRef = ref<HTMLElement | null>(null);
