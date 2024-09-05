@@ -1,6 +1,7 @@
 <template>
   <div>
     <entity-element-wrapper
+      class="pb-1"
       :label="label"
       :isCollapsed="isCollapsed"
       :base-library-mode="baseLibraryMode"
@@ -37,7 +38,7 @@
           v-if="!requiresCustomQuery || queryLoaded"
           :class="[
             {
-              'mx-1 bg-neutral-lightest':
+              'mx-1 pb-2 bg-neutral-lightest':
                 baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
                 baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder,
             },

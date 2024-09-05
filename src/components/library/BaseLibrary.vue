@@ -24,7 +24,7 @@
           baseLibraryMode === BaseLibraryModes.BasicBaseLibrary
             ? ''
             : parentEntityIdentifiers.length > 0
-            ? 'p-3'
+            ? 'px-3 pt-3'
             : 'px-6',
         ]"
       >
