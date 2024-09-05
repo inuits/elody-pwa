@@ -23,7 +23,6 @@ const useThumbnailHelper = (): {
 
       return Unicons.NoImage.name;
     } catch (e) {
-      console.log("Unable to get thumbnail, fallback to default");
       return Unicons.NoImage.name;
     }
   };
