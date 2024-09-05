@@ -73,12 +73,14 @@
 import type { FilterListItem } from "@/composables/useStateManagement";
 import {
   AdvancedFilterTypes,
+  AutocompleteSelectionOptions,
   GetFilterOptionsDocument,
   type AdvancedFilterInput,
+  type AdvancedFilterInputType,
   type DropdownOption,
   type GetFilterOptionsQuery,
   type GetFilterOptionsQueryVariables,
-  AutocompleteSelectionOptions,
+  type LookupInput,
 } from "@/generated-types/queries";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
@@ -91,15 +93,7 @@ import {
   isDateTime,
 } from "@/helpers";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
-import {
-  computed,
-  defineEmits,
-  onMounted,
-  onUpdated,
-  reactive,
-  ref,
-  watch,
-} from "vue";
+import { computed, defineEmits, onMounted, reactive, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute } from "vue-router";
@@ -135,6 +129,35 @@ const dropdownNoOptionsText = computed(() =>
 );
 const force = ref<boolean>(false);
 const showSpinner = ref<boolean>(false);
+
+const mapOptionsFilterInput = (
+  advancedFilterInputForRetrievingOptions: AdvancedFilterInputType[],
+  value?: any
+) => {
+  const optionsFilterInput: AdvancedFilterInput[] = [];
+  for (const filterInput of advancedFilterInputForRetrievingOptions) {
+    const lookup: LookupInput = {
+      from: filterInput.lookup?.from || "",
+      local_field: filterInput.lookup?.local_field || "",
+      foreign_field: filterInput.lookup?.foreign_field || "",
+      as: filterInput.lookup?.as || "",
+    };
+    optionsFilterInput.push({
+      lookup: filterInput.lookup ? lookup : undefined,
+      type: filterInput.type,
+      key: filterInput.key,
+      value: value
+        ? filterInput.value === "*"
+          ? value
+          : filterInput.value
+        : filterInput.value,
+      metadata_key_as_label: filterInput.metadata_key_as_label,
+      item_types: filterInput.item_types ?? [],
+      provide_value_options_for_key: true,
+    });
+  }
+  return optionsFilterInput;
+};
 
 const refetchFilterOptionsEnabled = ref<boolean>(false);
 const filterOptionsQueryVariables = ref<GetFilterOptionsQueryVariables>();
@@ -189,51 +212,18 @@ const getAutocompleteOptions = (value: string) => {
   clearAutocompleteOptions();
   dropdownInputLength.value = value.length;
   if (value.length < 3) return;
-
   if (
     props.filter.advancedFilter.type === AdvancedFilterTypes.Selection &&
     props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
   ) {
     autocompleteOptionsQueryVariables.value = {
-      input: {
-        lookup:
-          props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
-            .lookup,
-        type: props.filter.advancedFilter
-          .advancedFilterInputForRetrievingOptions.type,
-        parent_key:
-          props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
-            .parent_key,
-        key: props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
-          .key,
-        value,
-        metadata_key_as_label:
-          props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
-            .metadata_key_as_label,
-        item_types:
-          props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
-            .item_types ?? [],
-        provide_value_options_for_key: true,
-      },
+      input: mapOptionsFilterInput(
+        props.filter.advancedFilter.advancedFilterInputForRetrievingOptions,
+        value
+      ),
       limit: 999999,
       entityType: route.meta.entityType as string,
     };
-    if (
-      props.filter.advancedFilter.advancedFilterInputForRetrievingOptions.lookup
-    )
-      autocompleteOptionsQueryVariables.value.input.lookup = {
-        from: props.filter.advancedFilter
-          .advancedFilterInputForRetrievingOptions.lookup.from,
-        local_field:
-          props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
-            .lookup.local_field,
-        foreign_field:
-          props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
-            .lookup.foreign_field,
-        as: props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
-          .lookup.as,
-      };
-
     refetchAutocompleteOptionsEnabled.value = true;
     refetchAutocompleteOptions();
   }
@@ -288,43 +278,12 @@ onMounted(() => {
   ) {
     showSpinner.value = true;
     filterOptionsQueryVariables.value = {
-      input: {
-        type: props.filter.advancedFilter
-          .advancedFilterInputForRetrievingOptions.type,
-        parent_key:
-          props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
-            .parent_key,
-        key: props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
-          .key,
-        value:
-          props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
-            .value,
-        metadata_key_as_label:
-          props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
-            .metadata_key_as_label,
-        item_types:
-          props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
-            .item_types ?? [],
-        provide_value_options_for_key: true,
-      },
+      input: mapOptionsFilterInput(
+        props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
+      ),
       limit: 11,
       entityType: route.meta.entityType as string,
     };
-    if (
-      props.filter.advancedFilter.advancedFilterInputForRetrievingOptions.lookup
-    )
-      filterOptionsQueryVariables.value.input.lookup = {
-        from: props.filter.advancedFilter
-          .advancedFilterInputForRetrievingOptions.lookup.from,
-        local_field:
-          props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
-            .lookup.local_field,
-        foreign_field:
-          props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
-            .lookup.foreign_field,
-        as: props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
-          .lookup.as,
-      };
 
     refetchFilterOptionsEnabled.value = true;
     refetchFilterOptions();
