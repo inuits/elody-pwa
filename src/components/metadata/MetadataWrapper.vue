@@ -50,10 +50,15 @@
                   InputFieldTypes.DropdownSingleselect) &&
               metadata.value
             "
+            v-model="metadata.value"
+            :is-read-only="true"
             :field-name="metadata.label"
             :metadata-key-to-get-options-for="
               metadata.inputField.advancedFilterInputForSearchingOptions
-                ?.item_types[0]
+                ?.item_types?.[0]
+            "
+            :advanced-filter-input-for-retrieving-options="
+              metadata.inputField.advancedFilterInputForRetrievingOptions
             "
             :from-relation-type="metadata.inputField?.fromRelationType"
             :disabled="true"

@@ -12,6 +12,9 @@
       "
       :relation-type="field.relationType"
       :from-relation-type="field.fromRelationType"
+      :advanced-filter-input-for-retrieving-options="
+        field.advancedFilterInputForRetrievingOptions
+      "
       :advanced-filter-input-for-searching-options="
         field.advancedFilterInputForSearchingOptions
       "
