@@ -12,7 +12,8 @@
       }
     "
     @update:model-value="
-      (value: DropdownOption[] | undefined) => {
+      (value: DropdownOption[] | DropdownOption | undefined) => {
+        if (value && !Array.isArray(value)) value = [value];
         handleSelect(value);
       }
     "
@@ -40,6 +41,7 @@ const props = withDefaults(
     modelValue: string[] | string | undefined;
     metadataKeyToGetOptionsFor?: string | "no-key";
     selectType?: "multi" | "single";
+    advancedFilterInputForRetrievingOptions?: [AdvancedFilterInput];
     advancedFilterInputForSearchingOptions: AdvancedFilterInput;
     relationType: string;
     fromRelationType: string;
@@ -49,6 +51,7 @@ const props = withDefaults(
     disabled: boolean;
     canCreateOption: boolean;
     metadataKeyToCreateEntityFromOption?: string;
+    isReadOnly?: boolean;
   }>(),
   {
     selectType: "multi",
@@ -74,7 +77,8 @@ const {
   props.metadataKeyToGetOptionsFor as Entitytyping,
   "fetchAll",
   undefined,
-  props.advancedFilterInputForSearchingOptions
+  props.advancedFilterInputForSearchingOptions,
+  props.advancedFilterInputForRetrievingOptions
 );
 
 const {
@@ -88,7 +92,13 @@ const {
 );
 
 onMounted(async () => {
-  await initAutocompleteOption();
+  if (props.advancedFilterInputForRetrievingOptions && props.isReadOnly) {
+    preSelect();
+  } else {
+    if (props.advancedFilterInputForRetrievingOptions && props.modelValue)
+      preSelect();
+    await initAutocompleteOption();
+  }
 });
 
 const initAutocompleteOption = async () => {
@@ -127,7 +137,10 @@ const populateSelectedOptions = (options: DropdownOption[]) => {
   selectedDropdownOptions.value = options;
 };
 
-const handleSelect = (options: DropdownOption[] | undefined) => {
+const handleSelect = (
+  options: DropdownOption[] | undefined,
+  isPreSelect = false
+) => {
   if (options === undefined) return;
   const bulkProcessableItems: InBulkProcessableItem[] =
     mapDropdownOptionsToBulkProcessableItem([...options]);
@@ -136,7 +149,7 @@ const handleSelect = (options: DropdownOption[] | undefined) => {
     addRelations(bulkProcessableItems, props.relationType, props.formId);
   }
 
-  if (props.mode === "edit") {
+  if (props.mode === "edit" && !isPreSelect) {
     replaceRelationsFromSameType(
       bulkProcessableItems,
       props.relationType as string,
@@ -168,5 +181,15 @@ const handleCreatingFromTag = async (option: any) => {
 
   handleSelect([...selectedDropdownOptions.value, normalizedOption]);
   isCreatingEntity.value = false;
+};
+
+const preSelect = () => {
+  let selection: DropdownOption[];
+  if (Array.isArray(props.modelValue))
+    selection = props.modelValue.map((value) => {
+      return { label: value, value };
+    });
+  else selection = [{ label: props.modelValue || "", value: props.modelValue }];
+  handleSelect(selection, true);
 };
 </script>

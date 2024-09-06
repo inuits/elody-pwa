@@ -3,7 +3,7 @@
     data-cy="multiselect"
     v-if="inputValue"
     v-model="inputValue"
-    :mode="selectType === 'multi' ? 'tags' : 'single'"
+    mode="tags"
     :options="options"
     :searchable="searchable"
     :show-options="searchable"

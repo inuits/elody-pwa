@@ -5,6 +5,8 @@ import {
   Entitytyping,
   SearchInputType,
   type AdvancedFilterInput,
+  AdvancedFilterTypes,
+  type AdvancedFilterInputType,
 } from "@/generated-types/queries";
 import { computed, inject } from "vue";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
@@ -16,7 +18,8 @@ export const useGetDropdownOptions = (
   entityType: Entitytyping,
   parent: "fetchAll" | string,
   relationType: string = "",
-  searchFilterInput?: AdvancedFilterInput
+  searchFilterInput?: AdvancedFilterInput,
+  advancedFilterInputForRetrievingOptions?: [AdvancedFilterInput]
 ) => {
   const apolloClient = inject(DefaultApolloClient);
   const {
@@ -45,27 +48,45 @@ export const useGetDropdownOptions = (
   };
 
   const initialize = async () => {
-    const filters =
-      parent === "fetchAll" || !relationType
-        ? [baseTypeFilter]
-        : [getRelationFilter(parent, relationType)];
+    let filters;
+    let entityTypeToSet = entityType;
+    if (advancedFilterInputForRetrievingOptions) {
+      filters = mapOptionsFilterInput(advancedFilterInputForRetrievingOptions);
+      entityTypeToSet =
+        filters.find(
+          (filterInput) => filterInput.type === AdvancedFilterTypes.Type
+        )?.value || entityType;
+    } else {
+      filters =
+        parent === "fetchAll" || !relationType
+          ? [baseTypeFilter]
+          : [getRelationFilter(parent, relationType)];
+    }
     setIsSearchLibrary(false);
     setAdvancedFilters(filters as AdvancedFilterInput[]);
     setsearchInputType(SearchInputType.AdvancedInputType);
-    setEntityType(entityType);
+    setEntityType(entityTypeToSet as Entitytyping);
 
     await getEntities(undefined);
   };
 
   const getAutocompleteOptions = (searchValue: string) => {
-    const isEmptyAdvancedSearchFilter =
-      !searchFilterInput || Object.values(searchFilterInput).includes(null);
-    if (isEmptyAdvancedSearchFilter) return;
+    let advancedFilters;
+    if (advancedFilterInputForRetrievingOptions) {
+      advancedFilters = mapOptionsFilterInput(
+        advancedFilterInputForRetrievingOptions,
+        searchValue
+      );
+    } else {
+      const isEmptyAdvancedSearchFilter =
+        !searchFilterInput || Object.values(searchFilterInput).includes(null);
+      if (isEmptyAdvancedSearchFilter) return;
 
-    const advancedFilters =
-      searchValue === ""
-        ? [baseTypeFilter]
-        : [baseTypeFilter, getSearchFilter(searchValue, searchFilterInput)];
+      advancedFilters =
+        searchValue === ""
+          ? [baseTypeFilter]
+          : [baseTypeFilter, getSearchFilter(searchValue, searchFilterInput)];
+    }
 
     setAdvancedFilters(advancedFilters as AdvancedFilterInput[]);
     getEntities(undefined);
@@ -89,6 +110,25 @@ export const useGetDropdownOptions = (
         };
       }) || []
   );
+
+  const mapOptionsFilterInput = (
+    advancedFilterInputForRetrievingOptions: AdvancedFilterInputType[],
+    value?: any
+  ) => {
+    return advancedFilterInputForRetrievingOptions.map((filterInput) => {
+      return {
+        type: filterInput.type,
+        key: filterInput.key,
+        value: value
+          ? filterInput.value === "*"
+            ? value
+            : filterInput.value
+          : filterInput.value,
+        match_exact: filterInput.match_exact,
+        item_types: filterInput.item_types || [],
+      };
+    });
+  };
 
   return {
     initialize,
