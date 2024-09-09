@@ -137,7 +137,7 @@ const props = withDefaults(
 watch(
   () => props.metadata,
   (newvalue, oldvalue) => {
-    setNewValue(newvalue.value);
+    if (!Array.isArray(newvalue.value)) setNewValue(newvalue.value);
   }
 );
 
