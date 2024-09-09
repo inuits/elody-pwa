@@ -161,26 +161,30 @@ const handleSelect = (
 };
 
 const handleCreatingFromTag = async (option: any) => {
-  if (!props.metadataKeyToCreateEntityFromOption || !props.canCreateOption)
-    return;
-  isCreatingEntity.value = true;
+  if (!props.canCreateOption) return;
 
-  const newEntity = await createEntity({
-    entityType: props.metadataKeyToGetOptionsFor as Entitytyping,
-    metadata: [
-      {
-        key: props.metadataKeyToCreateEntityFromOption,
-        value: option.label,
-      },
-    ],
-  });
-  const normalizedOption = {
-    value: newEntity.uuid,
-    label: option.label,
-  };
+  if (props.metadataKeyToCreateEntityFromOption) {
+    isCreatingEntity.value = true;
 
-  handleSelect([...selectedDropdownOptions.value, normalizedOption]);
-  isCreatingEntity.value = false;
+    const newEntity = await createEntity({
+      entityType: props.metadataKeyToGetOptionsFor as Entitytyping,
+      metadata: [
+        {
+          key: props.metadataKeyToCreateEntityFromOption,
+          value: option.label,
+        },
+      ],
+    });
+    const normalizedOption = {
+      value: newEntity.uuid,
+      label: option.label,
+    };
+
+    handleSelect([...selectedDropdownOptions.value, normalizedOption]);
+    isCreatingEntity.value = false;
+  } else {
+    handleSelect([...selectedDropdownOptions.value, option]);
+  }
 };
 
 const preSelect = () => {
