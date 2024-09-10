@@ -440,3 +440,9 @@ export const extractTime = (dateTimeStr: string): string => {
   const time = dt.toTimeString().split(" ")[0];
   return time === "Invalid" ? undefined : time;
 };
+
+export const getUserName = (auth: any): string => {
+  if (!auth.user) return "unknown";
+  const user = auth.user;
+  return user.name || user.given_name || user.email || user.family_name ;
+}
