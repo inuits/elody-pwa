@@ -142,10 +142,10 @@
             <ViewModesList
               v-if="
                 displayList ||
-                (entitiesLoading && route?.name !== 'SingleEntity')
+                (isLoading(Loader.BaseLibrary) && route?.name !== 'SingleEntity')
               "
               :entities="entities as Entity[]"
-              :entities-loading="entitiesLoading"
+              :entities-loading="isLoading(Loader.BaseLibrary)"
               :bulk-operations-context="bulkOperationsContext"
               :list-item-route-name="listItemRouteName"
               :disable-previews="disableNewEntityPreviews"
@@ -161,7 +161,7 @@
             <ViewModesGrid
               v-if="displayGrid"
               :entities="entities as Entity[]"
-              :entities-loading="entitiesLoading"
+              :entities-loading="isLoading(Loader.BaseLibrary)"
               :bulk-operations-context="bulkOperationsContext"
               :list-item-route-name="listItemRouteName"
               :disable-previews="disableNewEntityPreviews"
@@ -174,13 +174,13 @@
             <ViewModesMedia
               v-if="displayPreview"
               :entities="entities as Entity[]"
-              :entities-loading="entitiesLoading"
+              :entities-loading="isLoading(Loader.BaseLibrary)"
             />
           </div>
         </div>
 
         <div
-          v-if="entities?.length === 0 && !entitiesLoading"
+          v-if="entities?.length === 0 && isLoaded(Loader.BaseLibrary)"
           class="text-center my-2"
         >
           <div>{{ t("search.noresult") }}</div>
@@ -231,6 +231,7 @@ import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
+import { useLoadingState, Loader } from "@/composables/useLoadingState";
 import { useRoute, useRouter } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { watch, ref, onMounted, inject, computed } from "vue";
@@ -313,10 +314,10 @@ const enableSelection = computed<boolean>(() => {
   );
 });
 
+const { isLoading, isLoaded } = useLoadingState();
 const {
   enqueuePromise,
   entities,
-  entitiesLoading,
   formatTeaserMetadata,
   getCustomBulkOperations,
   getEntities,
