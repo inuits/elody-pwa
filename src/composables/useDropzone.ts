@@ -1,5 +1,5 @@
 import Dropzone, { type DropzoneFile } from "dropzone";
-import { ref } from "vue";
+import { type Ref, ref } from "vue";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 
 type DropzoneSettings = {
@@ -15,24 +15,18 @@ type DropzoneSettings = {
 };
 export class useDropzone {
   dropzone = ref<Dropzone>;
-  isUploading = ref<boolean>;
-  finishedUploading = ref<boolean>;
-  dropzoneSettings = ref<DropzoneSettings>;
-
-  constructor() {
-    this.isUploading = ref(false);
-    this.finishedUploading = ref(false);
-    this.dropzoneSettings = ref({
-      url: "/upload",
-      autoProcessQueue: false,
-      acceptedFiles: ".csv, .jpg, .jpeg, .mp3, .srt, .png, .tiff, .mp4",
-      uploadMultiple: false,
-      parallelUploads: 99,
-      maxFiles: 99,
-      maxFileSize: 50,
-      createImageThumbnails: true,
-    });
-  }
+  isUploading: Ref<boolean> = ref(false);
+  finishedUploading: Ref<boolean> = ref(false);
+  dropzoneSettings: Ref<DropzoneSettings> = ref({
+    url: "/upload",
+    autoProcessQueue: false,
+    acceptedFiles: ".csv, .jpg, .jpeg, .mp3, .srt, .png, .tiff, .mp4",
+    uploadMultiple: false,
+    parallelUploads: 99,
+    maxFiles: 99,
+    maxFileSize: 50,
+    createImageThumbnails: true,
+  });
 
   initDropzone = (
     dropzoneView: HTMLDivElement,
