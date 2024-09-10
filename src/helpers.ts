@@ -9,6 +9,7 @@ import {
   type BaseEntity,
   type MediaFileEntity,
   Entitytyping,
+  InputFieldTypes
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -214,10 +215,12 @@ const { mediafileSelectionState } = useEntityMediafileSelector();
 export const getValueForPanelMetadata = (
   panelType: PanelType,
   metadataItemKey: string,
-  entityId: string
+  entityId: string,
+  typeOfInputField?: string
 ): string => {
   const form = useFormHelper().getForm(entityId);
   if (panelType === PanelType.Metadata && form) {
+    if (typeOfInputField === InputFieldTypes.Checkbox) return Boolean(form.values.intialValues[metadataItemKey]);
     return form.values.intialValues[metadataItemKey];
   } else if (mediafileSelectionState.selectedMediafile) {
     return (mediafileSelectionState.selectedMediafile.intialValues as any)?.[
@@ -256,7 +259,7 @@ export const getMetadataFields = (
         linkText: (value as PanelMetaData).linkText,
         value:
           (value as PanelInfo).value ||
-          getValueForPanelMetadata(panelType, key, formId),
+          getValueForPanelMetadata(panelType, key, formId, value.inputField?.type),
         inputField: (value as PanelMetaData).inputField,
         showOnlyInEditMode: (value as PanelMetaData).showOnlyInEditMode,
       };
