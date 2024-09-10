@@ -146,6 +146,7 @@ const props = withDefaults(
     confirmSelectionButton?: boolean;
     entityType: Entitytyping;
     customBulkOperations?: String | undefined;
+    refetchEntities: Function;
   }>(),
   {
     totalItemsCount: 0,
@@ -347,6 +348,7 @@ watch(selectedBulkOperation, () => {
         parentId: route.params.id,
         relationType: modal.formRelationType,
         collection: route.meta.type,
+        callbackFunction: props.refetchEntities,
       };
       openModal(
         modal.typeModal,
