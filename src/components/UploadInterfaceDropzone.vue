@@ -20,11 +20,7 @@
 import Dropzone from "@/components/base/dropzone/Dropzone.vue";
 import { useDropzone } from "@/composables/useDropzone";
 import useUpload from "@/composables/useUpload";
-import {
-  TypeModals,
-  UploadFieldType,
-  UploadFlow,
-} from "@/generated-types/queries";
+import type { UploadFieldType, UploadFlow } from "@/generated-types/queries";
 import { watch } from "vue";
 
 const { initializeUpload } = useUpload();
