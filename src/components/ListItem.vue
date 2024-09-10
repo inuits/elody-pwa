@@ -1,6 +1,7 @@
 <template>
   <li
     data-cy="list-item"
+    class="relative"
     :class="[
       'flex items-center gap-6 px-8 py-4 bg-neutral-white border border-neutral-light rounded cursor-pointer mb-2',
       {
@@ -10,7 +11,7 @@
       { '!border-status-new': isPreview },
       { '!border-status-deleted': isMarkedAsToBeDeleted },
       { 'grayscale brightness-95 !cursor-default': isDisabled },
-      { 'animate-pulse': loading },
+      { 'animate-pulse h-24': loading },
     ]"
   >
     <div
@@ -79,7 +80,7 @@
       class="h-10 w-10 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
     />
 
-    <div v-if="!loading" class="flex items-center w-full">
+    <div class="flex items-center w-full relative">
       <div
         v-for="metadataItem in teaserMetadata.filter(
           (metadata) => !metadata.showOnlyInEditMode
@@ -96,7 +97,7 @@
       </div>
     </div>
 
-    <div class="w-full" v-else>
+    <div class="w-[calc(100%-96px)] absolute bg-neutral-white h-full flex flex-col justify-center" v-if="loading">
       <div class="bg-neutral-100 h-4 w-1/4 opacity-40 mb-2"></div>
       <div class="bg-neutral-100 h-4 w-5/6 opacity-40"></div>
     </div>

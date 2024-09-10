@@ -10,10 +10,17 @@ import {
   type IntialValues,
   type Metadata,
 } from "@/generated-types/queries";
+import {
+  Loader,
+  LoadingElement,
+  useLoadingState,
+} from "@/composables/useLoadingState";
 import useEditMode from "@/composables/useEdit";
 import { createPlaceholderEntities } from "@/helpers";
 import { ref, watch } from "vue";
 import { useStateManagement } from "@/composables/useStateManagement";
+
+const { startLoader, finishLoadingElement } = useLoadingState();
 
 export const useBaseLibrary = (
   apolloClient: ApolloClient<any>,
@@ -151,6 +158,7 @@ export const useBaseLibrary = (
     route: RouteLocationNormalizedLoaded | undefined
   ): Promise<void> => {
     if (entitiesLoading.value) return;
+    startLoader(Loader.BaseLibrary);
     entitiesLoading.value = true;
 
     await Promise.all(promiseQueue.value.map((promise) => promise(entityType)));
@@ -188,10 +196,11 @@ export const useBaseLibrary = (
             totalEntityCount: fetchedEntities.count,
           });
         entitiesLoading.value = false;
+        finishLoadingElement(Loader.BaseLibrary, LoadingElement.Items);
       })
       .catch(() => {
         entities.value = [];
-        entitiesLoading.value = false;
+        finishLoadingElement(Loader.BaseLibrary, LoadingElement.Items);
       });
   };
 

@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="elementMetadata"
     data-cy="entity-element-metadata"
     v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
     class="text-sm break-words"
@@ -42,17 +43,18 @@
 </template>
 
 <script lang="ts" setup>
-import { BaseLibraryModes, Unit } from "@/generated-types/queries";
 import {
   convertUnitToReadbleFormat,
   processTextWithLinks,
   stringIsHtml,
   stringIsUrl,
 } from "@/helpers";
-import { computed } from "vue";
-import { useI18n } from "vue-i18n";
-import { Unicons } from "@/types";
 import CustomIcon from "@/components/CustomIcon.vue";
+import { BaseLibraryModes, Unit } from "@/generated-types/queries";
+import { computed, onMounted, ref } from "vue";
+import { Unicons } from "@/types";
+import { useI18n } from "vue-i18n";
+import { useLoadingState, Loader, LoadingElement } from "@/composables/useLoadingState";
 
 const props = withDefaults(
   defineProps<{
@@ -62,16 +64,30 @@ const props = withDefaults(
     linkText?: string;
     linkIcon?: string;
     baseLibraryMode?: BaseLibraryModes;
+    lineClamp?: boolean;
   }>(),
   {
     linkText: "",
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    lineClamp: false
   }
 );
 
 const { t } = useI18n();
+const { finishLoadingElement } = useLoadingState();
+const elementMetadata = ref<HTMLDivElement>();
 
 const readableValue = computed(() => {
   return convertUnitToReadbleFormat(props.unit as Unit, props.value ?? "");
+});
+
+onMounted(() => {
+  if (props.lineClamp)
+    setTimeout(() => {
+      const valueElement: HTMLParagraphElement | undefined | null = elementMetadata.value?.querySelector("[data-cy='metadata-value']");
+      if (valueElement && valueElement?.offsetHeight > 20)
+        valueElement.classList.add("line-clamp-1");
+      finishLoadingElement(Loader.BaseLibrary, LoadingElement.UI);
+    }, 0);
 });
 </script>
