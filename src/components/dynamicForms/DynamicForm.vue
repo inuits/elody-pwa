@@ -380,6 +380,7 @@ const uploadActionFunction = async () => {
 };
 
 const submitActionFunction = async (field: FormAction) => {
+  console.log("Going to create entity");
   await form.value.validate();
   if (formContainsErrors.value) return;
   formClosing.value = true;
@@ -395,9 +396,8 @@ const submitActionFunction = async (field: FormAction) => {
   }
   if (submitErrors.value) return;
   showErrors.value = false;
-  await getTenants();
   closeAndDeleteForm();
-  goToEntityPage(entity, "SingleEntity", props.router);
+  if (props.savedContext?.callbackFunction) props.savedContext.callbackFunction();
 };
 
 const submitWithExtraMetadata = async (field: FormAction) => {

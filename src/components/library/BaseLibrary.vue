@@ -111,6 +111,7 @@
               :confirm-selection-button="confirmSelectionButton"
               :entity-type="entityType as Entitytyping"
               :custom-bulk-operations="customBulkOperations"
+              :refetch-entities="refetchEntities"
               @custom-bulk-operations-promise="
                 (promise) => (customBulkOperationsPromise = promise)
               "
