@@ -530,7 +530,6 @@ const useUpload = () => {
     amountUploaded.value = 0;
     resetUploadDropzone();
     resetUploadProgress();
-    resetDynamicForm();
     if (reinitializeDynamicFormFunc.value) reinitializeDynamicFormFunc.value();
   };
 
