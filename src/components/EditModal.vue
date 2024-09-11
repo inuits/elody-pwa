@@ -12,7 +12,7 @@
           await getTenants();
         }
       "
-      @cancel="disableEditMode()"
+      @cancel="openDiscardModal()"
       @close="openDiscardModal()"
       @delete="openDeleteModal()"
     />
