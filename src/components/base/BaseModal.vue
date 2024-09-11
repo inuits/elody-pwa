@@ -5,13 +5,15 @@
     :class="[
       {
         'grid grid-rows-[max-content_1fr]': getModalInfo(props.modalType).open,
+        'rounded-xl':
+          currentModalStyle === ModalStyle.Center ||
+          currentModalStyle === ModalStyle.CenterWide,
       },
       modalStyle,
     ]"
   >
-    <div class="flex justify-end p-2">
+    <div v-if="!cancelButtonAvailabe" class="flex justify-end p-2">
       <unicon
-        v-show="!cancelButtonAvailabe"
         :name="Unicons.Close.name"
         :height="iconHeight"
         class="cursor-pointer"
@@ -24,7 +26,7 @@
 
 <script lang="ts" setup>
 import { ref, computed, watch } from "vue";
-import type { TypeModals } from "@/generated-types/queries";
+import { type TypeModals, ModalStyle } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
 
