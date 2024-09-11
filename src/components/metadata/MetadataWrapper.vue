@@ -10,7 +10,12 @@
       <p data-cy="metadata-label">
         {{ metadata.label ? t(metadata.label) : t("metadata.no-label") }}
       </p>
-      <p v-if="props.metadata?.inputField && !isFieldRequired && isEdit" class="pl-1">(optional)</p>
+      <p
+        v-if="props.metadata?.inputField && !isFieldRequired && isEdit"
+        class="pl-1"
+      >
+        (optional)
+      </p>
     </div>
     <entity-element-metadata-edit
       v-if="isEdit && metadata.inputField"

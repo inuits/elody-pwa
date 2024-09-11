@@ -397,7 +397,8 @@ const submitActionFunction = async (field: FormAction) => {
   if (submitErrors.value) return;
   showErrors.value = false;
   closeAndDeleteForm();
-  if (props.savedContext?.callbackFunction) props.savedContext.callbackFunction();
+  if (props.savedContext?.callbackFunction)
+    props.savedContext.callbackFunction();
 };
 
 const submitWithExtraMetadata = async (field: FormAction) => {

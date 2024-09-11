@@ -62,7 +62,9 @@
           </span>
         </transition>
       </div>
-      <div class="flex flex-row items-center hover:text-accent-accent cursor-pointer whitespace-nowrap">
+      <div
+        class="flex flex-row items-center hover:text-accent-accent cursor-pointer whitespace-nowrap"
+      >
         <base-tooltip
           v-if="!isExpanded"
           position="top-right"

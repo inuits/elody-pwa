@@ -309,7 +309,7 @@ const useFormHelper = () => {
       .filter((key) => key !== "__typename")
       .forEach((key) => {
         if (!editableFields.value[entityId]?.includes(key)) return;
-        metadata.push({ key, value: (intialValues as any)[key]});
+        metadata.push({ key, value: (intialValues as any)[key] });
       });
     return metadata;
   };
