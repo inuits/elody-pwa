@@ -327,7 +327,7 @@ const handleAdvancedFilters = () => {
       Object.values(advancedFilters.value).forEach((advancedFilter) => {
         if (typeof advancedFilter !== "string") {
           let hiddenFilter: AdvancedFilterInput | undefined;
-          if (advancedFilter.hidden) {
+          if (advancedFilter.hidden || advancedFilter.defaultValue) {
             hiddenFilter = {
               type: advancedFilter.type,
               key: advancedFilter.key,
@@ -335,7 +335,6 @@ const handleAdvancedFilters = () => {
               item_types: advancedFilter.itemTypes,
               parent_key: advancedFilter.parentKey,
               match_exact: true,
-              edge_collection: advancedFilter.edgeCollection,
             };
             if (advancedFilter.lookup)
               hiddenFilter.lookup = {
@@ -379,7 +378,7 @@ const handleAdvancedFilters = () => {
           }
 
           filters.value.push({
-            isActive: advancedFilter.hidden,
+            isActive: advancedFilter.hidden || advancedFilter.defaultValue,
             isDisplayed: advancedFilter.isDisplayedByDefault ?? false,
             advancedFilter,
             inputFromState: hiddenFilter,
