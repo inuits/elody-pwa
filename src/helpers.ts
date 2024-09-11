@@ -9,7 +9,7 @@ import {
   type BaseEntity,
   type MediaFileEntity,
   Entitytyping,
-  InputFieldTypes
+  InputFieldTypes,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -220,7 +220,8 @@ export const getValueForPanelMetadata = (
 ): string => {
   const form = useFormHelper().getForm(entityId);
   if (panelType === PanelType.Metadata && form) {
-    if (typeOfInputField === InputFieldTypes.Checkbox) return Boolean(form.values.intialValues[metadataItemKey]);
+    if (typeOfInputField === InputFieldTypes.Checkbox)
+      return Boolean(form.values.intialValues[metadataItemKey]);
     return form.values.intialValues[metadataItemKey];
   } else if (mediafileSelectionState.selectedMediafile) {
     return (mediafileSelectionState.selectedMediafile.intialValues as any)?.[
@@ -259,7 +260,12 @@ export const getMetadataFields = (
         linkText: (value as PanelMetaData).linkText,
         value:
           (value as PanelInfo).value ||
-          getValueForPanelMetadata(panelType, key, formId, value.inputField?.type),
+          getValueForPanelMetadata(
+            panelType,
+            key,
+            formId,
+            value.inputField?.type
+          ),
         inputField: (value as PanelMetaData).inputField,
         showOnlyInEditMode: (value as PanelMetaData).showOnlyInEditMode,
       };
@@ -444,5 +450,5 @@ export const extractTime = (dateTimeStr: string): string => {
 export const getUserName = (auth: any): string => {
   if (!auth.user) return "unknown";
   const user = auth.user;
-  return user.name || user.given_name || user.email || user.family_name ;
-}
+  return user.name || user.given_name || user.email || user.family_name;
+};

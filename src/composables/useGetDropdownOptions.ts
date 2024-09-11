@@ -50,7 +50,10 @@ export const useGetDropdownOptions = (
   const initialize = async () => {
     let filters;
     let entityTypeToSet = entityType;
-    if (advancedFilterInputForRetrievingOptions && advancedFilterInputForRetrievingOptions.length > 0) {
+    if (
+      advancedFilterInputForRetrievingOptions &&
+      advancedFilterInputForRetrievingOptions.length > 0
+    ) {
       filters = mapOptionsFilterInput(advancedFilterInputForRetrievingOptions);
       entityTypeToSet =
         filters.find(
@@ -72,7 +75,10 @@ export const useGetDropdownOptions = (
 
   const getAutocompleteOptions = (searchValue: string) => {
     let advancedFilters;
-    if (advancedFilterInputForRetrievingOptions && advancedFilterInputForRetrievingOptions.length > 0) {
+    if (
+      advancedFilterInputForRetrievingOptions &&
+      advancedFilterInputForRetrievingOptions.length > 0
+    ) {
       advancedFilters = mapOptionsFilterInput(
         advancedFilterInputForRetrievingOptions,
         searchValue
