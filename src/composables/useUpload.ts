@@ -429,6 +429,11 @@ const useUpload = () => {
     });
 
     if (!response.ok) {
+      __updateFileThumbnails(
+        file,
+        ProgressStepType.Upload,
+        ProgressStepStatus.Failed
+      );
       return Promise.reject(response);
     }
 
