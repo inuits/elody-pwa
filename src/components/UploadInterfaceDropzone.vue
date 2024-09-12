@@ -41,7 +41,7 @@ const props = withDefaults(
     entityTypesForUpload?: string | undefined;
   }>(),
   {
-    dropzoneSize: "big",
+    dropzoneSize: "normal",
     isLinkedUpload: false,
     dryRun: false,
     entityTypesForUpload: undefined,
@@ -51,7 +51,7 @@ const props = withDefaults(
 const getDropzoneSize = (size: "small" | "normal" | "big") => {
   const sizeObject = {
     small: "h-[15vh]",
-    normal: "h-[55vh]",
+    normal: "h-[50vh]",
     big: "h-[85vh]",
   };
   return sizeObject[size];
