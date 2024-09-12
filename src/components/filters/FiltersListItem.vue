@@ -150,8 +150,14 @@ const loadMatcher = async () => {
   else if (matcher === "MetadataOnRelationContainsMatcher")
     matcher = "ContainsMatcher";
 
-  const module = await import(`@/components/filters/matchers/${matcher}.vue`);
-  matcherComponent.value = markRaw(module.default);
+  if (!matcher) return;
+
+  try {
+    const module = await import(`@/components/filters/matchers/${matcher}.vue`);
+    matcherComponent.value = markRaw(module.default);
+  } catch (e) {
+    console.info(`Matcher with name '${matcher}' could not be loaded `);
+  }
 };
 
 const icon = computed<string>(() =>
