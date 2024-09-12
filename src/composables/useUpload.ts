@@ -23,7 +23,6 @@ type UploadSettings = {
 
 const router = useRouter();
 const { logFormattedErrors } = useHttpErrors();
-const { resetDynamicForm } = useDynamicForm();
 const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
   "no-upload"
 );
@@ -232,6 +231,19 @@ const useUpload = () => {
         dryRunStatus,
         dryRunErrors.value || []
       );
+      if (
+        dryRunStatus === ProgressStepStatus.Complete &&
+        mediafiles.value.length
+      ) {
+        mediafiles.value.forEach((mediafile: DropzoneFile) =>
+          __updateFileThumbnails(
+            mediafile,
+            ProgressStepType.Validate,
+            ProgressStepStatus.Complete
+          )
+        );
+        verifyAllNeededFilesArePresent();
+      }
     } catch {
       dryRunErrors.value.push("upload-fields.errors.dry-run-failed");
       __updateGlobalUploadProgress(
@@ -480,8 +492,8 @@ const useUpload = () => {
     files.value = files.value.filter(
       (file: DropzoneFile) => file !== fileToRemove
     );
-    if (!files.value.length) {
-      resetUpload();
+    if (!files.value.length || isValidationFile) {
+      resetUpload(isValidationFile);
     }
     if (!mediafiles.value.length)
       __updateGlobalUploadProgress(
@@ -495,7 +507,6 @@ const useUpload = () => {
     isValidationFile: boolean
   ) => {
     files.value.push(fileToAdd);
-
     if (!isValidationFile) {
       __updateFileThumbnails(
         fileToAdd,
@@ -519,18 +530,23 @@ const useUpload = () => {
     );
   };
 
-  const resetUpload = () => {
-    standaloneFileType.value = undefined;
-    uploadStatus.value = "no-upload";
+  const resetUpload = (isDryRunReset: boolean = false) => {
+    if (!isDryRunReset) {
+      standaloneFileType.value = undefined;
+      uploadStatus.value = "no-upload";
+      files.value = [];
+      failedUploads.value = [];
+      amountUploaded.value = 0;
+      resetUploadDropzone();
+      if (reinitializeDynamicFormFunc.value)
+        reinitializeDynamicFormFunc.value();
+    }
     dryRunErrors.value = [];
+    dryRunComplete.value = false;
     missingFileNames.value = [];
-    files.value = [];
     requiredMediafiles.value = undefined;
-    failedUploads.value = [];
-    amountUploaded.value = 0;
-    resetUploadDropzone();
     resetUploadProgress();
-    if (reinitializeDynamicFormFunc.value) reinitializeDynamicFormFunc.value();
+    __resetFileThumbnails();
   };
 
   const verifyAllNeededFilesArePresent = (): boolean => {
@@ -541,8 +557,9 @@ const useUpload = () => {
         uploadFlow.value === UploadFlow.MediafilesOnly ||
         (uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv &&
           !containsCsv.value)
-      )
+      ) {
         return true;
+      }
 
       if (!requiredMediafiles.value) {
         resetUploadProgress();
@@ -626,6 +643,23 @@ const useUpload = () => {
     Array.from(stepTypeContainer.children).forEach((child: Element) => {
       if (!child.classList.contains("hidden")) child.classList.add("hidden");
     });
+  };
+
+  const __resetFileThumbnails = () => {
+    mediafiles.value.forEach((mediafile: DropzoneFile) => {
+      __setAllProgressStepsToStatus(mediafile, ProgressStepStatus.Empty);
+    });
+  };
+
+  const __setAllProgressStepsToStatus = (
+    file: DropzoneFile,
+    progressStepStatus: ProgressStepStatus
+  ) => {
+    Object.values(ProgressStepType).forEach(
+      (progressStepType: ProgressStepType) => {
+        __updateFileThumbnails(file, progressStepType, progressStepStatus);
+      }
+    );
   };
 
   const __updateFileThumbnails = (
