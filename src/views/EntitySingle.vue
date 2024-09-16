@@ -123,7 +123,7 @@ watch(
   () => result.value,
   () => {
     entity.value = result.value?.Entity as BaseEntity;
-    if (!entity.value || !entity.value.intialValues) return;
+    if (!entity.value || !entity.value.intialValues) router.push("/notFound");
     useEntitySingle().setEntityUuid(entity.value.uuid || entity.value.id);
     entityForBreadcrumb.value = entity.value;
     determineBreadcrumbs();
