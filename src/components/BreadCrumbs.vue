@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="breadCrumbRoutesExist">
     <div class="flex h-10 z-[70] relative">
       <div
         :class="[
@@ -8,57 +8,32 @@
           { 'rounded-xl': !showHistory },
         ]"
       >
-        <!--<div
-          class="flex items-center px-2 cursor-pointer"
-          @click="navigateToEntity(visitedRoutes[0])"
-        >
-          <unicon
-            v-if="Unicons[selectedMenuItem?.icon as unknown as DamsIcons]"
-            height="24"
-            :name="Unicons[selectedMenuItem?.icon as unknown as DamsIcons].name"
-          ></unicon>
-          <CustomIcon
-            v-else
-            :icon="(selectedMenuItem?.icon as string)"
-            :size="24"
-            color="text-body"
-          />
-        </div>-->
         <div
-          v-if="visitedRoutes.length > 3"
+          v-if="breadcrumbRoutes.length > 1"
           @click="toggleList()"
           class="flex cursor-pointer"
         >
           <unicon height="24" :name="Unicons.EllipsisH.name"></unicon>
-          <p class="ml-1">{{ visitedRoutes.length - 2 }}</p>
+          <p class="ml-1">{{ breadcrumbRoutes.length - 1 }}</p>
         </div>
         <unicon
-          v-if="visitedRoutes.length > 3"
+          v-if="breadcrumbRoutes.length > 1"
           height="24"
           :name="Unicons.AngleRight.name"
         ></unicon>
-        <!--<unicon
-          v-if="visitedRoutes.length > 2"
-          height="24"
-          :name="Unicons.AngleRight.name"
-          ></unicon>-->
         <p
-          v-if="previousRoute?.routeName && previousRoute !== visitedRoutes[0]"
+          v-if="previousRoute?.title"
           :class="[
-            'px-2 ',
-            { 'cursor-pointer': visitedRoutes.length > 2 },
+            'px-2 cursor-pointer',
             { 'max-w-[40vw] truncate': truncatePreviousRouteName },
           ]"
           @mouseenter="truncatePreviousRouteName = false"
           @mouseleave="truncatePreviousRouteName = true"
           @click="navigateToEntity(previousRoute)"
         >
-          {{ t(previousRoute?.routeName) }}
+          {{ t(previousRoute?.title) }}
         </p>
       </div>
-      <!--<div class="flex h-full justify-center items-center px-2">
-        <unicon height="24" :name="Unicons.AngleRight.name" />
-      </div>-->
       <div
         v-if="previousRoute"
         class="flex h-full justify-center items-center px-2"
@@ -81,9 +56,9 @@
       <ul>
         <li
           v-show="showHistory"
-          v-for="(route, index) in [...visitedRoutes].slice(0, -2).reverse()"
-          :key="route.id"
-          @click="navigateToEntity(route)"
+          v-for="breadcrumbRoute in [...breadcrumbRoutes].slice(0, -1).reverse()"
+          :key="breadcrumbRoute.title || breadcrumbRoute.overviewPage"
+          @click="navigateToEntity(breadcrumbRoute)"
         >
           <div class="flex flex-col items-end w-full">
             <div class="px-4">
@@ -96,24 +71,24 @@
             <div
               :class="[
                 'cursor-pointer hover:bg-neutral-lightest w-full flex px-4',
-                { 'justify-between': route.icon },
-                { 'justify-end': !route.icon },
+                { 'justify-between': breadcrumbRoute.icon },
+                { 'justify-end': !breadcrumbRoute.icon },
               ]"
             >
-              <div class="mr-2" v-if="route.icon">
+              <div class="mr-2" v-if="breadcrumbRoute.icon">
                 <unicon
-                  v-if="Unicons[route.icon]"
+                  v-if="Unicons[breadcrumbRoute.icon]"
                   height="24"
-                  :name="Unicons[route.icon].name"
+                  :name="Unicons[breadcrumbRoute.icon].name"
                 ></unicon>
                 <CustomIcon
                   v-else
-                  :icon="route.icon"
+                  :icon="breadcrumbRoute.icon"
                   :size="24"
                   color="text-body"
                 />
               </div>
-              <p>{{ t(route.routeName) }}</p>
+              <p>{{ breadcrumbRoute.title }}</p>
             </div>
           </div>
         </li>
@@ -128,24 +103,29 @@
 </template>
 
 <script lang="ts" setup>
-import type { DamsIcons } from "@/generated-types/queries";
-import type { VisitedRoute } from "@/composables/useBreadcrumbs";
 import CustomIcon from "./CustomIcon.vue";
-import { ref, inject, computed } from "vue";
+import { ref, computed, inject } from "vue";
 import { Unicons } from "@/types";
-import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useI18n } from "vue-i18n";
-import { useMenuHelper } from "@/composables/useMenuHelper";
 import { useRouter } from "vue-router";
+import {
+  useBreadcrumbs,
+  breadcrumbRoutes,
+  rootRoute
+} from "@/composables/useBreadcrumbs";
 
-const config: any = inject("config");
 const { t } = useI18n();
-const { currentRouteTitle, visitedRoutes, previousRoute, resetVisitedRoutes } =
-  useBreadcrumbs(config, t);
-const { selectedMenuItem } = useMenuHelper();
+const config: any = inject("config");
+
 const showHistory = ref<boolean>(false);
 const truncatePreviousRouteName = ref<boolean>(true);
+const breadCrumbRoutesExist = computed(() => breadcrumbRoutes.value.length > 0 || getCurrentRouteTitle.value);
 const router = useRouter();
+
+const {
+  clearBreadcrumbPathAndAddOverviewPage,
+  previousRoute
+} = useBreadcrumbs(config);
 
 router.beforeEach(() => {
   showHistory.value = false;
@@ -153,33 +133,33 @@ router.beforeEach(() => {
 
 const getCurrentRouteTitle = computed<string>(() => {
   try {
-    return t(currentRouteTitle.value);
+    return rootRoute.value.rootTitle;
   } catch {
-    return currentRouteTitle.value;
+    return undefined;
   }
 });
 
 const toggleList = () => {
-  if (!visitedRoutes.value.length) {
+  if (!breadcrumbRoutes.value.length) {
     return;
   }
   showHistory.value = !showHistory.value;
 };
 
-const navigateToEntity = (historyRoute: VisitedRoute) => {
-  if (!historyRoute) return;
-  if (historyRoute.path) {
-    resetVisitedRoutes();
-    router.push(historyRoute.path);
-    return;
+const navigateToEntity = (route: any) => {
+  if (route.id) {
+    router.replace({
+      params: {
+        id: route.id,
+        type: route.type,
+      },
+    });
   }
-  if (!historyRoute.id) {
-    router.push({ name: "Home" });
-    return;
+  else if (route.overviewPage) {
+    router.push({ name: route.overviewPage });
+    clearBreadcrumbPathAndAddOverviewPage(route.overviewPage);
   }
-  router.push({
-    params: { id: historyRoute.id },
-  });
+  else router.push({ name: "Home" });
 };
 </script>
 

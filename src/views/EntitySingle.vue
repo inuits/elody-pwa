@@ -37,21 +37,23 @@ import {
   type GetEntityByIdQuery,
   type BaseEntity,
   type MediaFileEntity,
+  Entity,
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
 import EntityForm from "@/components/EntityForm.vue";
-import useEditMode from "@/composables/useEdit";
 import { asString } from "@/helpers";
 import { reactive, ref, watch, inject } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
-import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
+import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { usePermissions } from "@/composables/usePermissions";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import useEntitySingle from "@/composables/useEntitySingle";
+import { EntityTypeWithId, useBreadcrumbs } from "@/composables/useBreadcrumbs";
+import { apolloClient } from "@/main";
 
 const config: any = inject("config");
 const router = useRouter();
@@ -59,16 +61,21 @@ const route = useRoute();
 const auth = useAuth();
 const { locale, t } = useI18n();
 const { fetchUpdateAndDeletePermission } = usePermissions();
-
 const {
-  showEditToggle,
-  disableEditMode,
+  clearBreadcrumbPath,
+  getRouteBreadcrumbsOfEntity,
+  addTitleToBreadcrumb,
+  addParentToBreadcrumb,
+  setRootRoute,
+} = useBreadcrumbs(config);
+const {
   isEdit,
-  setRefetchFn,
   hideEditToggle,
+  disableEditMode,
+  showEditToggle,
+  setRefetchFn,
 } = useEditMode();
-const { setCurrentRouteTitle, addVisitedRoute, currentRouteTitle } =
-  useBreadcrumbs(config, t);
+
 const { mediafileSelectionState } = useEntityMediafileSelector();
 const id = asString(route.params["id"]);
 const identifiers = ref<string[]>([]);
@@ -97,6 +104,7 @@ const columnList = ref<ColumnList | "no-values">("no-values");
 const permissionToEdit = ref<boolean>();
 const permissionToDelete = ref<boolean>();
 const entity = ref<BaseEntity>();
+const entityForBreadcrumb = ref<BaseEntity>();
 
 router.beforeEach(() => {
   if (isEdit) disableEditMode();
@@ -104,6 +112,7 @@ router.beforeEach(() => {
 
 onBeforeRouteUpdate(async (to: any) => {
   queryVariables.id = to.params.id;
+  queryVariables.type = to.params.type;
   intialValues.value = "no-values";
   relationValues.value = "no-values";
   columnList.value = "no-values";
@@ -116,6 +125,8 @@ watch(
     entity.value = result.value?.Entity as BaseEntity;
     if (!entity.value || !entity.value.intialValues) return;
     useEntitySingle().setEntityUuid(entity.value.uuid || entity.value.id);
+    entityForBreadcrumb.value = entity.value;
+    determineBreadcrumbs();
 
     identifiers.value = [entity.value.uuid, entity.value.id];
     intialValues.value = entity.value.intialValues;
@@ -154,20 +165,41 @@ watch(
         } else hideEditToggle();
       }
     );
-
-    setCurrentRouteTitle(
-      entity.value.intialValues?.title ||
-        entity.value.intialValues?.name ||
-        entity.value.id
-    );
-    addVisitedRoute({
-      id: entity.value.id,
-      routeName: currentRouteTitle.value,
-    });
     setRefetchFn(refetch);
     loading.value = false;
   }
 );
+
+const determineBreadcrumbs = async () => {
+  clearBreadcrumbPath();
+  setRootRoute(entityForBreadcrumb.value.id, getTitleOrNameFromEntity(entityForBreadcrumb.value));
+  let entityByIdQueryVariables: EntityTypeWithId = {};
+  do {
+    const routeBreadcrumbs = getRouteBreadcrumbsOfEntity(entityForBreadcrumb.value.type);
+    if (!routeBreadcrumbs) break;
+    entityByIdQueryVariables = addParentToBreadcrumb(routeBreadcrumbs, entityForBreadcrumb.value.relationValues);
+    if (!entityByIdQueryVariables.id) break;
+    await apolloClient
+      .query<GetEntityByIdQuery>({
+        query: GetEntityByIdDocument,
+        variables: reactive<GetEntityByIdQueryVariables>({
+          id: entityByIdQueryVariables.id,
+          type: entityByIdQueryVariables.entityType,
+        }),
+        fetchPolicy: "no-cache",
+        notifyOnNetworkStatusChange: true,
+      })
+      .then((result) => {
+        entityForBreadcrumb.value = result.data?.Entity as BaseEntity
+        if (entityForBreadcrumb.value)
+          addTitleToBreadcrumb(getTitleOrNameFromEntity(entityForBreadcrumb.value));
+      });
+  } while (entityByIdQueryVariables.id && entityForBreadcrumb.value)
+}
+
+const getTitleOrNameFromEntity = (entity: Entity): string => {
+  return entity.intialValues.title || entity.intialValues.name || entity.intialValues.filename;
+}
 
 watch(
   () => locale.value,

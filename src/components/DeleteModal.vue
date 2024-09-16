@@ -91,7 +91,6 @@ import {
   InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
-import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useEditMode } from "@/composables/useEdit";
 import { useRouter } from "vue-router";
 import {
@@ -104,7 +103,6 @@ import { apolloClient } from "@/main";
 
 const { t } = useI18n();
 const config: any = inject("config");
-const { findLastOverviewPage } = useBreadcrumbs(config, t);
 const { closeModal, getModalInfo } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const { createNotificationOverwrite } = useNotification();
@@ -150,10 +148,8 @@ const deleteSelectedItems = async () => {
 const cleanupAfterDeletion = async () => {
   await getTenants();
   closeModal(TypeModals.Delete);
-  disableEditMode();
-  const lastOverviewPage = findLastOverviewPage();
-  if (lastOverviewPage !== undefined) router.push(lastOverviewPage.path);
-  else router.push({ name: pageInfo.value.parentRouteName });
+  disableEditMode()
+  router.push({ name: pageInfo.value.parentRouteName });
   createNotificationOverwrite(
     NotificationType.default,
     t("notifications.success.entityDeleted.title"),
