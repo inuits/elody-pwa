@@ -47,14 +47,14 @@ const useGraphqlErrors = (_errorResponse: ErrorResponse) => {
 
         await auth.logout();
         setTennantInSession("");
-        await auth.redirectToLogin();
+        router.push("/unauthorized");
         break;
       case 403:
         createErrorNotification(
           t("notifications.graphql-errors.forbidden.title"),
           t("notifications.graphql-errors.forbidden.description")
         );
-        router.push("/");
+        router.push("/accessDenied");
         break;
       case 409:
         let errorMessage: string =
