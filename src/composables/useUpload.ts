@@ -120,6 +120,7 @@ const useUpload = () => {
     config: any,
     t: Function
   ) => {
+    console.log(isLinkedUpload);
     const generator = uploadGenerator(
       config,
       isLinkedUpload ? useEntitySingle().getEntityUuid() : ""

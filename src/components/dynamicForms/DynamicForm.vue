@@ -180,6 +180,7 @@ import {
   TypeModals,
   type UploadContainer,
   type UploadField,
+  UploadFlow,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -214,14 +215,12 @@ import useEntityPickerModal from "@/composables/useEntityPickerModal";
 const props = withDefaults(
   defineProps<{
     dynamicFormQuery: string;
-    hasLinkedUpload?: boolean;
     savedContext?: any | undefined;
     router: Router;
     modalFormFields?: object;
     tabName?: string;
   }>(),
   {
-    hasLinkedUpload: false,
     modalFormFields: undefined,
   }
 );
@@ -344,6 +343,13 @@ const isLoading = computed(() => {
   return !formFields.value && !dynamicForm.value;
 });
 const { t } = useI18n();
+const isLinkedUpload = computed<boolean>(() => {
+  const uploadContainer: UploadContainer | undefined = formFields.value?.find(
+    (formField: any) => formField.__typename === "UploadContainer"
+  ) as UploadContainer | undefined;
+  if (!uploadContainer) return false;
+  return uploadContainer.uploadFlow === UploadFlow.MediafilesOnly;
+});
 
 const createEntityFromFormInput = (entityType: Entitytyping): EntityInput => {
   let entity: EntityInput = { type: entityType };
@@ -368,7 +374,7 @@ const getQuery = async (queryName: string) => {
 
 const uploadActionFunction = async () => {
   if (!enableUploadButton.value) return;
-  upload(props.hasLinkedUpload, config, t);
+  upload(isLinkedUpload.value, config, t);
   if (standaloneFileType.value)
     goToEntityTypeRoute(
       standaloneFileType.value,
