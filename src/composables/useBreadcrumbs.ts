@@ -1,7 +1,6 @@
-import { computed, ref, watch, inject } from "vue";
+import { DamsIcons, Entitytyping } from "@/generated-types/queries";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import { useMenuHelper } from "@/composables/useMenuHelper";
-import type { DamsIcons } from "@/generated-types/queries";
 
 export type VisitedRoute = {
   id: string;
@@ -9,118 +8,101 @@ export type VisitedRoute = {
   icon?: DamsIcons;
   path?: string;
 };
+export type RootRoute = {
+  rootId: string;
+  rootTitle: string;
+}
+export type EntityTypeWithId = {
+  id: string;
+  entityType: Entitytyping;
+}
+export type BreadcrumbRoute = {
+  id: string;
+  title: string;
+  overviewPage: string;
+  type: string;
+}
 
-const currentRouteTitle = ref<string>("");
-const visitedRoutes = ref<VisitedRoute[]>([]);
+const breadcrumbRoutes = ref<BreadcrumbRoute[]>([]);
+const rootRoute = ref<RootRoute>({});
 
-export const useBreadcrumbs = (config: any, t: any) => {
-  const { selectedMenuItem, selectedMenuItemPath, getMenuDestinations } =
-    useMenuHelper();
-  const previousRoute = computed<VisitedRoute | undefined>(() =>
-    visitedRoutes.value.length == 2
-      ? visitedRoutes.value[0]
-      : visitedRoutes.value[visitedRoutes.value.length - 2]
-  );
-  const visitedIds = computed(() =>
-    visitedRoutes.value.map((route: VisitedRoute) => route.id)
-  );
+const useBreadcrumbs = (config: any) => {
+  const homeRoutes = config.routerConfig[0].children;
+  const previousRoute = computed<VisitedRoute | undefined>(() => breadcrumbRoutes.value[breadcrumbRoutes.value.length - 1]);
 
-  const setCurrentRouteTitle = (title: string): void => {
-    currentRouteTitle.value = title;
-    document.title = `${config.customization.applicationTitle} | ${t(title)}`;
-  };
+  const getRouteBreadcrumbsOfEntity = (entitytype: Entitytyping): any => {
+    const entityRoute = homeRoutes.filter((item: any) => item.meta.entityType?.toLowerCase() === entitytype.toLowerCase())[0];
+    if (!entityRoute) return;
+    return entityRoute.meta.breadcrumbs;
+  }
 
-  const addVisitedRoute = (route: VisitedRoute): void => {
-    const visited: boolean = visitedIds.value.includes(route.id);
-    if (visited) {
-      removeVisitedRoutesUntilReachedCurrentRoute(route);
-      return;
+  const addParentToBreadcrumb = (routeBreadcrumbs: any, relationValues: any): EntityTypeWithId => {
+    let idOfParent: string;
+    const returnObject: EntityTypeWithId = {};
+    for (const index in routeBreadcrumbs) {
+      if (!relationValues || relationValues[routeBreadcrumbs[index].relation] === undefined) continue;
+      idOfParent = relationValues[routeBreadcrumbs[index].relation][0].key;
+      if (idOfParent === getRootRouteId()) break;
+      if (breadcrumbRoutes.value.filter(item => item.id === idOfParent).length > 0) break;
+      returnObject.id = idOfParent;
+      returnObject.entityType = routeBreadcrumbs[index].entityType;
+      breadcrumbRoutes.value.unshift({ id: idOfParent, type: routeBreadcrumbs[index].entityType });
+      break;
     }
-    visitedRoutes.value.push(route);
-  };
+    if (!returnObject.id) addOverviewPageToBreadcrumb(routeBreadcrumbs);
+    return returnObject;
+  }
 
-  const removeVisitedRoutesUntilReachedCurrentRoute = (
-    route: VisitedRoute
-  ): void => {
-    let counter = visitedRoutes.value.length - 1;
-    do {
-      if (route.id === visitedRoutes.value[counter].id) break;
-      visitedRoutes.value.pop();
-      counter--;
-    } while (counter >= 0);
-  };
+  const addOverviewPageToBreadcrumb = (routeBreadcrumbs: any) => {
+    const routeBreadcrumbsWithOverviewPage = routeBreadcrumbs[routeBreadcrumbs.length - 1];
+    breadcrumbRoutes.value.unshift({ title: routeBreadcrumbsWithOverviewPage.overviewPage, overviewPage: routeBreadcrumbsWithOverviewPage.overviewPage });
+  }
 
-  const resetVisitedRoutes = (): void => {
-    visitedRoutes.value = [];
-  };
+  const addTitleToBreadcrumb = (title: string) => {
+    breadcrumbRoutes.value[0].title = title;
+  }
 
-  watch(
-    () => visitedRoutes.value.length,
-    () => {
-      const parentView: VisitedRoute = {
-        id: "",
-        routeName: selectedMenuItem.value?.label as string,
-        icon: selectedMenuItem.value?.icon as unknown as DamsIcons,
-      };
-      if (
-        visitedRoutes.value.length === 1 &&
-        !visitedRoutes.value.includes(parentView)
-      ) {
-        if (selectedMenuItemPath.value)
-          parentView.path = selectedMenuItemPath.value;
-        visitedRoutes.value.unshift(parentView);
-      }
-    }
-  );
+  const getFullBreadcrumbPath = (): BreadcrumbRoute[] => {
+    return breadcrumbRoutes.value;
+  }
+
+  const clearBreadcrumbPath = (): void => {
+    breadcrumbRoutes.value = [];
+  }
+
+  const clearBreadcrumbPathAndAddOverviewPage = (title: string): void => {
+    setRootRoute(undefined, title);
+    clearBreadcrumbPath();
+  }
+
+  const setRootRoute = (id: string, title: string): void => {
+    rootRoute.value.rootId = id;
+    rootRoute.value.rootTitle = title;
+  }
+
+  const getRootRouteId = (): string => {
+    return rootRoute.value.rootId;
+  }
 
   useRouter().afterEach((to) => {
-    setCurrentRouteTitle(to.meta.title as string);
-    if (to.meta.entityType === "manifest")
-      setCurrentRouteTitle("navigation.entities");
-    if (to.name === "Home") resetVisitedRoutes();
+    if (to.meta.title !== "Single Asset" && to.meta.title !== "Single Entity")
+      clearBreadcrumbPathAndAddOverviewPage(to.meta.breadcrumbs[to.meta.breadcrumbs.length - 1].overviewPage as string);
   });
-
-  useRouter().beforeEach((to, from) => {
-    let route: VisitedRoute = {
-      id: "",
-      routeName: from.meta.title,
-      path: from.path,
-    };
-    if (visitedRoutes.value.length === 0) {
-      addVisitedRoute(route);
-      return;
-    }
-    const valueToMatch = to.path.slice(1);
-    const destinations = getMenuDestinations().map(
-      (destinationObject: any) => destinationObject.destination
-    );
-    route = {
-      id: "",
-      routeName: to.meta.title,
-      path: to.path,
-    };
-    if (destinations.includes(valueToMatch)) {
-      resetVisitedRoutes();
-      addVisitedRoute(route);
-    }
-  });
-
-  const findLastOverviewPage = (): VisitedRoute => {
-    let lastVisitedRoute = undefined;
-    visitedRoutes.value.reverse().forEach((visitedRoute) => {
-      if (visitedRoute.id === "" && lastVisitedRoute === undefined)
-        lastVisitedRoute = visitedRoute;
-    });
-    return lastVisitedRoute;
-  };
 
   return {
-    currentRouteTitle,
-    setCurrentRouteTitle,
-    resetVisitedRoutes,
-    addVisitedRoute,
-    visitedRoutes,
+    addParentToBreadcrumb,
+    addTitleToBreadcrumb,
+    clearBreadcrumbPath,
+    clearBreadcrumbPathAndAddOverviewPage,
+    getFullBreadcrumbPath,
+    getRouteBreadcrumbsOfEntity,
+    setRootRoute,
     previousRoute,
-    findLastOverviewPage,
-  };
-};
+  }
+}
+
+export {
+  useBreadcrumbs,
+  breadcrumbRoutes,
+  rootRoute,
+}

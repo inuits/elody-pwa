@@ -41,7 +41,6 @@ import {
   useBaseModal,
 } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
-import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useEditMode } from "@/composables/useEdit";
 import { useMutation } from "@vue/apollo-composable";
 import { usePageInfo } from "@/composables/usePageInfo";
@@ -69,7 +68,6 @@ const { initializeConfirmModal } = useConfirmModal();
 const { closeModal, openModal, deleteQueryOptions } = useBaseModal();
 const { discardEditForForm } = useFormHelper();
 const config: any = inject("config");
-const { findLastOverviewPage } = useBreadcrumbs(config, t);
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const { createNotificationOverwrite } = useNotification();
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
@@ -92,9 +90,7 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
   await getTenants();
   closeModal(TypeModals.Confirm);
   disableEditMode();
-  const lastOverviewPage = findLastOverviewPage();
-  if (lastOverviewPage !== undefined) router.push(lastOverviewPage.path);
-  else router.push({ name: pageInfo.value.parentRouteName });
+  router.push({ name: pageInfo.value.parentRouteName });
   createNotificationOverwrite(
     NotificationType.default,
     t("notifications.success.entityDeleted.title"),
