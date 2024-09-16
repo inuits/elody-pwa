@@ -182,7 +182,7 @@ const { mutate } = useMutation<GenerateTranscodeMutation>(
 const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
   GetBulkOperationsDocument,
   { entityType: entityType.value },
-  () => ({ enabled: refetchEnabled.value })
+  () => ({ enabled: entityType.value ? refetchEnabled.value : false })
 );
 const bulkOperations = ref<DropdownOption[]>([]);
 const selectedBulkOperation = ref<DropdownOption>();
