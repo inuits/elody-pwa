@@ -27,6 +27,7 @@ const auth = useAuth();
 const { t } = useI18n();
 
 const logIn = () => {
+  auth.changeRedirectRoute(window.location.origin);
   auth.redirectToLogin();
 };
 </script>
