@@ -6,7 +6,7 @@
         field.type === InputFieldTypes.DropdownSingleselect
       "
       v-model="metadataValue"
-      :metadata-key-to-get-options-for="field.advancedFilterInputForSearchingOptions.item_types[0] || fieldKey"
+      :metadata-key-to-get-options-for="field.advancedFilterInputForSearchingOptions?.item_types ? field.advancedFilterInputForSearchingOptions?.item_types[0] : fieldKey"
       :select-type="
         field.type === InputFieldTypes.DropdownSingleselect ? 'single' : 'multi'
       "

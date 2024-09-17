@@ -41,7 +41,7 @@ import type {
   InputField as InputFieldType,
 } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { type PropType, computed } from "vue";
+import { type PropType, computed, onMounted } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useField } from "vee-validate";
 import { useEditMode } from "@/composables/useEdit";
@@ -77,6 +77,10 @@ const coordinateEditIsDisabled = computed(() => {
 });
 const { t } = useI18n();
 
+onMounted(() => {
+  setFormValues(computedLatitude.value, computedLongitude.value);
+})
+
 const setFormValues = (latitude: string, longitude: string) => {
   if (form) {
     form.setFieldValue(`intialValues.${props.fieldKey}`, {
@@ -88,7 +92,7 @@ const setFormValues = (latitude: string, longitude: string) => {
 
 const computedLongitude = computed<any>({
   get() {
-    return props.value.longitude;
+    return props.value?.longitude;
   },
   set(value) {
     if (form) setFormValues(computedLatitude.value, value);
@@ -97,7 +101,7 @@ const computedLongitude = computed<any>({
 
 const computedLatitude = computed<any>({
   get() {
-    return props.value.latitude;
+    return props.value?.latitude;
   },
   set(value) {
     if (form) setFormValues(value, computedLongitude.value);
