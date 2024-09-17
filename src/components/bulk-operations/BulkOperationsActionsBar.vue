@@ -390,6 +390,7 @@ watch(
 watch(
   () => hasBulkOperationsWithItemsSelection.value,
   (hasBulkOperations: boolean) => {
+    if (props.confirmSelectionButton) return;
     emit("setBulkOperationsAvailable", hasBulkOperations);
   },
   { immediate: true }
