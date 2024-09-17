@@ -1,5 +1,4 @@
 import type { RouteRecordRaw } from "vue-router";
-import History from "./History.vue";
 import Home from "@/views/Home.vue";
 import HomeWrapper from "@/views/HomeWrapper.vue";
 import ManifestViewer from "@/components/ManifestViewer.vue";
@@ -19,7 +18,6 @@ const routeComponentConfig: RouteComponentConfig[] = [
   { routeName: "Home", routeComponent: Home },
   { routeName: "HomeWrapper", routeComponent: HomeWrapper },
   { routeName: "SingleEntity", routeComponent: SingleEntity },
-  { routeName: "History", routeComponent: History },
   { routeName: "Manifest", routeComponent: ManifestViewer },
   { routeName: "Unauthorized", routeComponent: Unauthorized },
   { routeName: "AccessDenied", routeComponent: AccessDenied },
