@@ -85,8 +85,11 @@ const useBreadcrumbs = (config: any) => {
   }
 
   useRouter().afterEach((to) => {
-    if (to.meta.title !== "Single Asset" && to.meta.title !== "Single Entity")
-      clearBreadcrumbPathAndAddOverviewPage(to.meta.breadcrumbs[to.meta.breadcrumbs.length - 1].overviewPage as string);
+    try {
+      if (to.meta.title !== "Single Asset" && to.meta.title !== "Single Entity")
+        clearBreadcrumbPathAndAddOverviewPage(to.meta.breadcrumbs[to.meta.breadcrumbs.length - 1].overviewPage as string);
+    } catch (e) {
+    }
   });
 
   return {
