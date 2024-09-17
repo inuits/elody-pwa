@@ -142,7 +142,7 @@
           @click="performActionButtonClickEvent(field)"
         />
         <p
-          v-if="submitErrors && field.__typename === 'FormAction'"
+          v-if="submitErrors && index === getFieldArray.length - 1"
           class="text-red-default"
         >
           {{ submitErrors }}
@@ -395,17 +395,16 @@ const submitActionFunction = async (field: FormAction) => {
   try {
     entity = (await performSubmitAction(document, entityInput)).data
       .CreateEntity;
+    showErrors.value = false;
+    await getTenants();
+    closeAndDeleteForm();
+    if (props.savedContext?.callbackFunction)
+      props.savedContext.callbackFunction();
+    else goToEntityPage(entity, "SingleEntity", props.router);
   } catch (e) {
     isPerformingAction.value = false;
     submitErrors.value = e.message;
   }
-  if (submitErrors.value) return;
-  showErrors.value = false;
-  await getTenants();
-  closeAndDeleteForm();
-  if (props.savedContext?.callbackFunction)
-    props.savedContext.callbackFunction();
-  else goToEntityPage(entity, "SingleEntity", props.router);
 };
 
 const submitWithExtraMetadata = async (field: FormAction) => {
@@ -428,21 +427,25 @@ const submitWithExtraMetadata = async (field: FormAction) => {
 };
 
 const downloadActionFunction = async (field: FormAction) => {
-  await form.value.validate();
-  if (formContainsErrors.value) return;
-  formClosing.value = true;
-  const document = await getQuery(field.actionQuery as string);
-  const entityInput = createEntityFromFormInput(field.creationType);
-  const entity = (
-    await performDownloadAction(
-      document,
-      props.savedContext,
-      entityInput,
-      form.value.values
-    )
-  ).data.DownloadItemsInZip;
-  closeAndDeleteForm();
-  goToEntityPage(entity, "SingleEntity", props.router);
+  try {
+    await form.value.validate();
+    if (formContainsErrors.value) return;
+    formClosing.value = true;
+    const document = await getQuery(field.actionQuery as string);
+    const entityInput = createEntityFromFormInput(field.creationType);
+    const entity = (
+      await performDownloadAction(
+        document,
+        props.savedContext,
+        entityInput,
+        form.value.values
+      )
+    ).data.DownloadItemsInZip;
+    closeAndDeleteForm();
+    goToEntityPage(entity, "SingleEntity", props.router);
+  } catch (e) {
+    submitErrors.value = e.message;
+  }
 };
 
 const updateMetdataActionFunction = async () => {
@@ -469,6 +472,7 @@ const callEndpointInGraphql = async (field: FormAction) => {
     const error = new Error(result.statusText);
     __handleHttpError(error);
     closeAndDeleteForm();
+    submitErrors.value = error.message;
     throw error;
   }
   const data = await result.text();
@@ -481,57 +485,62 @@ const reorderEntitiesWithCsvUpload = async () => {
   if (formContainsErrors.value) return;
   try {
     await uploadCsvForReordering(props.savedContext.parentId);
+    closeAndDeleteForm();
+    createNotificationOverwrite(
+      NotificationType.success,
+      t("notifications.success.csvReordering.title"),
+      t("notifications.success.csvReordering.description")
+    );
   } catch (error) {
     __handleHttpError(error);
+    submitErrors.value = error.message;
   }
-  createNotificationOverwrite(
-    NotificationType.success,
-    t("notifications.success.csvReordering.title"),
-    t("notifications.success.csvReordering.description")
-  );
-  closeAndDeleteForm();
 };
 
 const startOcrActionFunction = async (field: FormAction) => {
-  await form.value.validate();
-  if (formContainsErrors.value) return;
-  formClosing.value = true;
-  const id = props.savedContext.parentId;
-  addEditableMetadataKeys(Object.keys(form.value.values.intialValues), id);
-  const metadata = parseIntialValuesForFormSubmit(
-    form.value.values.intialValues,
-    id
-  );
-  const relations = parseRelationValuesForFormSubmit(
-    form.value.values.relationValues
-  );
-  await mutate({
-    id: id,
-    formInput: {
-      metadata: metadata,
-      relations: relations,
-    },
-    collection: props.savedContext.collection,
-  }).then(() => {
-    createNotificationOverwrite(
-      NotificationType.default,
-      t("notifications.success.entityUpdated.title"),
-      t("notifications.success.entityUpdated.description")
+  try {
+    await form.value.validate();
+    if (formContainsErrors.value) return;
+    formClosing.value = true;
+    const id = props.savedContext.parentId;
+    addEditableMetadataKeys(Object.keys(form.value.values.intialValues), id);
+    const metadata = parseIntialValuesForFormSubmit(
+      form.value.values.intialValues,
+      id
     );
-  });
-  if (form.value.values.intialValues.ocr_type === OcrType.ManualUpload) return;
-
-  const document = await getQuery(field.actionQuery as string);
-  await performOcrAction(document, props.savedContext, form.value.values).then(
-    () => {
+    const relations = parseRelationValuesForFormSubmit(
+      form.value.values.relationValues
+    );
+    await mutate({
+      id: id,
+      formInput: {
+        metadata: metadata,
+        relations: relations,
+      },
+      collection: props.savedContext.collection,
+    }).then(() => {
       createNotificationOverwrite(
         NotificationType.default,
-        t("notifications.default.generate-ocr.title"),
-        t("notifications.default.generate-ocr.description")
+        t("notifications.success.entityUpdated.title"),
+        t("notifications.success.entityUpdated.description")
       );
-    }
-  );
-  closeAndDeleteForm();
+    });
+    if (form.value.values.intialValues.ocr_type === OcrType.ManualUpload) return;
+
+    const document = await getQuery(field.actionQuery as string);
+    await performOcrAction(document, props.savedContext, form.value.values).then(
+      () => {
+        createNotificationOverwrite(
+          NotificationType.default,
+          t("notifications.default.generate-ocr.title"),
+          t("notifications.default.generate-ocr.description")
+        );
+      }
+    );
+    closeAndDeleteForm();
+  } catch (e) {
+    submitErrors.value = e.message;
+  }
 };
 
 const performActionButtonClickEvent = (field: FormAction): void => {

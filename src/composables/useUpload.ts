@@ -169,9 +169,7 @@ const useUpload = () => {
       method: "POST",
       body: __getCsvBlob(),
     });
-    if (!response.ok) {
-      return Promise.reject(response);
-    }
+    if (!response.ok) throw new Error(`Error while adjusting the order of entities: ${response.status}: ${response.statusText}`);
   };
 
   const __uploadExceptionHandler = (
