@@ -24,9 +24,9 @@
 
     <div
       v-if="auth.isAuthenticated.value === true"
-      class="flex flex-col items-center whitespace-nowrap"
+      class="flex flex-col whitespace-nowrap"
     >
-      <div class="mb-3 flex flex-row items-center whitespace-nowrap">
+      <div class="mb-3 flex flex-row whitespace-nowrap">
         <base-tooltip
           v-if="!isExpanded"
           class="hover:text-accent-accent cursor-pointer"
@@ -63,7 +63,7 @@
         </transition>
       </div>
       <div
-        class="flex flex-row items-center hover:text-accent-accent cursor-pointer whitespace-nowrap"
+        class="flex flex-row hover:text-accent-accent cursor-pointer whitespace-nowrap"
       >
         <base-tooltip
           v-if="!isExpanded"
