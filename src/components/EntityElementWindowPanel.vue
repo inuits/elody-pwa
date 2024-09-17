@@ -43,13 +43,22 @@
                 (metadata.__typename !== 'EntityListElement' ||
                   metadata.baseLibraryMode ===
                     BaseLibraryModes.BasicBaseLibrary) &&
-                !parentIsListItem
+                !parentIsListItem &&
+                metadata.unit !== Unit.CoordinatesDefault
               "
               :form-id="formId"
               :is-edit="isEdit"
               v-model:metadata="metadata as MetadataField"
               :show-errors="showErrors"
               :base-library-mode="metadata.baseLibraryMode"
+            />
+            <entity-element-coordinate-edit
+              v-if="metadata.inputField && metadata.unit === Unit.CoordinatesDefault"
+              :fieldKey="metadata.key"
+              :label="metadata.label"
+              v-model:value="metadata.value"
+              :input-field="metadata.inputField"
+              :entity-uuid="formId"
             />
             <entity-element-list
               v-if="metadata.__typename === 'EntityListElement'"
@@ -84,6 +93,7 @@ import {
   Entity,
   MetadataField,
   BaseLibraryModes,
+  Unit
 } from "@/generated-types/queries";
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
 import EntityElementList from "@/components/entityElements/EntityElementList.vue";
@@ -94,6 +104,7 @@ import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { useEditMode } from "@/composables/useEdit";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
+import EntityElementCoordinateEdit from "@/components/EntityElementCoordinateEdit.vue";
 
 const props = withDefaults(
   defineProps<{
