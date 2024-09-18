@@ -81,9 +81,10 @@ import {
 } from "@/composables/useBulkOperations";
 import {
   DamsIcons,
-  type DropdownOption,
+  type DropdownOption, Entitytyping,
   GetBulkOperationCsvExportKeysDocument,
   type GetBulkOperationCsvExportKeysQuery,
+  RouteNames,
   TypeModals,
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
@@ -97,10 +98,21 @@ import {
   NotificationType,
   useNotification,
 } from "@/components/base/BaseNotification.vue";
-import { inject, ref, watch } from "vue";
+import { inject, ref, watch, computed } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
+
+type MapRouteNameAgainstEntitytype = {
+  [key: RouteNames]: Entitytyping;
+};
+
+const entityTypeMapping: MapRouteNameAgainstEntitytype = {
+  [RouteNames.Assets]: Entitytyping.Asset,
+  [RouteNames.Home]: Entitytyping.Asset,
+  [RouteNames.Mediafiles]: Entitytyping.Mediafile,
+  default: Entitytyping.Asset,
+}
 
 const props = defineProps<{
   context: Context;
@@ -129,7 +141,7 @@ const loadItems = () =>
 const refetchEnabled = ref<boolean>(false);
 const { refetch, onResult } = useQuery<GetBulkOperationCsvExportKeysQuery>(
   GetBulkOperationCsvExportKeysDocument,
-  undefined,
+  { entityType: entityTypeMapping[props.context] },
   () => ({ enabled: refetchEnabled.value })
 );
 const csvExportOptions = ref<{ isSelected: boolean; key: DropdownOption }[]>(
@@ -187,27 +199,26 @@ const exportCsv = async () => {
 };
 
 onResult((result) => {
-  if (result.data)
+  if (result.data) {
+    csvExportOptions.value = [];
     for (let key of result.data.BulkOperationCsvExportKeys.options)
       csvExportOptions.value.push({ isSelected: false, key });
+  }
 });
 
 watch(
   () => modal?.open,
   (isBulkOperationsModalOpen: boolean | undefined) => {
     if (isBulkOperationsModalOpen) {
-      if (csvExportOptions.value.length <= 0) {
-        refetchEnabled.value = true;
-        refetch();
-      }
+      refetchEnabled.value = true;
+      refetch({entityType: entityTypeMapping[props.context]});
       loadItems();
-      console.log(items.value);
-      return;
     }
-
-    dequeueAllItemsForBulkProcessing(
-      BulkOperationsContextEnum.BulkOperationsCsvExport
-    );
+    else {
+      dequeueAllItemsForBulkProcessing(
+        BulkOperationsContextEnum.BulkOperationsCsvExport
+      );
+    }
   }
 );
 </script>
