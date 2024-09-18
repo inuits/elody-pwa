@@ -121,6 +121,7 @@ import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import { getUserName } from "../helpers";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
+import { useStateManagement } from '@/composables/useStateManagement';
 
 defineProps({
   isExpanded: Boolean,
@@ -141,6 +142,7 @@ const { setTennantInSession } = useTenant();
 
 const performLogout = async () => {
   await auth.logout();
+  useStateManagement().clearStorage();
   setTennantInSession("");
   if (route.meta.requiresAuth === true) await auth.redirectToLogin();
   await initApp(auth, config);
