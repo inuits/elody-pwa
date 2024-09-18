@@ -6,13 +6,9 @@ import {
   Collection,
   SearchInputType,
   MutateEntityValuesDocument,
-  AdvancedFilterTypes,
-  GetEntitiesDocument,
-  type GetEntitiesQueryVariables,
   type AdvancedFilterInput,
   type GetEntityByIdQueryVariables,
   type SavedSearch,
-  type User,
   type DeleteDataMutation,
   type MutateEntityValuesMutation,
   type MutateEntityValuesMutationVariables,
@@ -92,47 +88,6 @@ export const useSaveSearchHepler = () => {
       .then((result: any) => {
         const entity = result.data?.Entity as SavedSearch;
         return entity;
-      });
-  };
-
-  const getUserByEmail = async (email: string): Promise<User | undefined> => {
-    if (!email) return undefined;
-    const advancedFilters = [
-      {
-        type: AdvancedFilterTypes.Text,
-        key: ["elody:1|metadata.email.value"],
-        value: email,
-        match_exact: false,
-        item_types: [Entitytyping.User],
-      },
-    ];
-
-    const queryVariables: GetEntitiesQueryVariables = {
-      type: Entitytyping.User,
-      limit: 20,
-      skip: 1,
-      searchValue: {
-        value: "",
-        isAsc: false,
-        key: "title",
-        order_by: "",
-      },
-      advancedSearchValue: [],
-      advancedFilterInputs: advancedFilters,
-      searchInputType: SearchInputType.AdvancedInputType,
-      preferredLanguage: locale.value,
-    };
-
-    return await apolloClient
-      .query({
-        query: GetEntitiesDocument,
-        variables: queryVariables,
-        fetchPolicy: "no-cache",
-        notifyOnNetworkStatusChange: true,
-      })
-      .then((result: any) => {
-        const entity = result.data?.Entities?.results as User[];
-        return entity?.[0] || undefined;
       });
   };
 
@@ -270,6 +225,5 @@ export const useSaveSearchHepler = () => {
     addNewSavedFilterToLastUsedFiltersForRoute,
     addLastUsedFilterToStateForRoute,
     removeFilterFromStateForRoute,
-    getUserByEmail,
   };
 };

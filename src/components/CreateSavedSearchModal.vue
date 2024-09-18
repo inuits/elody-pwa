@@ -34,7 +34,6 @@ const {
   setActiveFilter,
   fetchSavedSearchById,
   normalizeSavedSearchFromEntity,
-  getUserByEmail,
 } = useSaveSearchHepler();
 const auth = useAuth();
 const { addRelations } = useFormHelper();
