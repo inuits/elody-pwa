@@ -15,6 +15,7 @@ import {
   DeleteQueryOptions,
   Collection,
   ModalStyle,
+  RouteNames
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -79,7 +80,7 @@ const {
 const { createNotification } = useNotification();
 const { closeModal, openModal, updateDeleteQueryOptions } = useBaseModal();
 const { t } = useI18n();
-const childRoutes = config.routerConfig[0].children.map(
+const childRoutes = config.routerConfig.filter((item) => item.path === "/" && item.name === RouteNames.Home)[0].children.map(
   (route: any) => route.meta
 );
 
