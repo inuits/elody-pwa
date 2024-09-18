@@ -8,7 +8,10 @@ import * as Sentry from "@sentry/vue";
 import App from "./App.vue";
 import Unicon from "vue-unicons";
 import useGraphqlErrors from "./composables/useGraphqlErrors";
-import { addComponentToRoutes } from "./views/router";
+import {
+  addComponentToRoutes,
+  handleRequiredAuthenticationForRoutes,
+} from "./views/router";
 import { BrowserTracing } from "@sentry/tracing";
 import { createApp } from "vue";
 import { createHead } from "@vueuse/head";
@@ -52,6 +55,7 @@ const start = async () => {
   router.afterEach(() => {
     auth.changeRedirectRoute(window.location.origin + window.location.pathname);
   });
+  handleRequiredAuthenticationForRoutes(router);
 
   const authCode = new URLSearchParams(window.location.search).get("code");
   auth.authCode = authCode;
