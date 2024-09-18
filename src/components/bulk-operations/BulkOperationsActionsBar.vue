@@ -66,7 +66,27 @@
             }
           "
         >
-          {{ $t("bulk-operations.select-all") }}
+          <div class="flex flex-row items-center">
+            {{ $t("bulk-operations.select-all") }}
+            <base-tooltip
+              v-if="totalItemsCount > bulkSelectAllSizeLimit"
+              position="center"
+            >
+              <template #activator="{ on }">
+                <div v-on="on">
+                  <unicon
+                    :name="Unicons.QuestionCircle.name"
+                    height="20"
+                  />
+                </div>
+              </template>
+              <template #default>
+                <span class="w-max hover:text-accent-accent">
+                  {{ t("bulk-operations.bulk-select-all-size-limit-reached", [bulkSelectAllSizeLimit]) }}
+                </span>
+              </template>
+            </base-tooltip>
+          </div>
         </span>
       </div>
     </div>
@@ -136,6 +156,8 @@ import {
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
+import { Unicons } from "@/types";
+import BaseTooltip from "@/components/base/BaseTooltip.vue";
 
 const props = withDefaults(
   defineProps<{
