@@ -78,7 +78,8 @@ import {
   type DeleteDataMutation,
   DeleteQueryOptions,
   Entitytyping,
-  TypeModals,
+  RouteNames,
+  TypeModals
 } from "@/generated-types/queries";
 import BaseModal from "@/components/base/BaseModal.vue";
 import {
@@ -124,7 +125,8 @@ const deleteSelectedItems = async () => {
   const selectedItems: InBulkProcessableItem[] = getEnqueuedItems(getContext());
   dequeueAllItemsForBulkProcessing(getContext());
   if (selectedItems.length <= 0) return;
-  const childRoutes = config.routerConfig[0].children.map(
+  const homeRoutes = config.routerConfig.filter((item) => item.path === "/" && item.name === RouteNames.Home)[0].children;
+  const childRoutes = homeRoutes.map(
     (route: any) => route.meta
   );
   for (const selectedItem of selectedItems) {
