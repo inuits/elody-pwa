@@ -93,6 +93,10 @@ export const useStateManagement = () => {
     return undefined;
   };
 
+  const clearStorage = () => {
+    window.sessionStorage.clear();
+  };
+
   return {
     getGlobalState,
     getStateForRoute,
@@ -100,5 +104,6 @@ export const useStateManagement = () => {
     setStateForRoute,
     updateGlobalState,
     updateStateForRoute,
+    clearStorage,
   };
 };
