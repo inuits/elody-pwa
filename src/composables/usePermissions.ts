@@ -1,15 +1,10 @@
 import {
-  GetPermissionMappingPerEntityTypeDocument,
-  GetPermissionMappingCreateDocument,
+  GetPermissionMappingDocument,
   GetPermissionMappingEntityDetailDocument,
-  type GetPermissionMappingPerEntityTypeQuery,
-  type GetPermissionMappingPerEntityTypeQueryVariables,
-  type GetPermissionMappingCreateQuery,
   type GetPermissionMappingEntityDetailQuery,
   type GetPermissionMappingEntityDetailQueryVariables,
   Permission,
   Entitytyping,
-  type GetPermissionMappingCreateQueryVariables,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
 import { reactive, ref } from "vue";
@@ -25,53 +20,33 @@ const permissionsMappings = ref<Map<string, Map<Permission, boolean>>>(
 );
 
 const setPermissionsMappings = async () => {
-  if (ignorePermissions.value) return;
-  const promises: Promise<void>[] = [];
+  return await apolloClient
+    .query({
+      query: GetPermissionMappingDocument,
+      variables: {
+        entities: Object.values(Entitytyping),
+      },
+      fetchPolicy: "no-cache",
+      notifyOnNetworkStatusChange: true,
+    })
+    .then((result) => {
+      permissionsMappings.value = normalizePermissions(
+        result.data.PermissionMapping
+      );
+    });
+};
 
-  for (const entity of Object.values(Entitytyping)) {
-    const permissions = new Map<Permission, boolean>();
-    permissions.set(Permission.Canread, false);
-    permissions.set(Permission.Cancreate, false);
-    permissionsMappings.value.set(entity, permissions);
-
-    const mappingPerEntityTypePromise = apolloClient
-      .query<GetPermissionMappingPerEntityTypeQuery>({
-        query: GetPermissionMappingPerEntityTypeDocument,
-        variables: reactive<GetPermissionMappingPerEntityTypeQueryVariables>({
-          type: entity,
-        }),
-        fetchPolicy: "no-cache",
-        notifyOnNetworkStatusChange: true,
-      })
-      .then((result) => {
-        permissionsMappings.value
-          .get(entity)
-          ?.set(
-            Permission.Canread,
-            result.data?.PermissionMappingPerEntityType
-          );
-      });
-
-    const mappingCreatePromise = apolloClient
-      .query<GetPermissionMappingCreateQuery>({
-        query: GetPermissionMappingCreateDocument,
-        variables: reactive<GetPermissionMappingCreateQueryVariables>({
-          entityType: entity,
-        }),
-        fetchPolicy: "no-cache",
-        notifyOnNetworkStatusChange: true,
-      })
-      .then((result) => {
-        permissionsMappings.value
-          .get(entity)
-          ?.set(Permission.Cancreate, result.data?.PermissionMappingCreate);
-      });
-
-    promises.push(mappingPerEntityTypePromise);
-    promises.push(mappingCreatePromise);
+const normalizePermissions = (response: {
+  [key: string]: { [key: string]: boolean };
+}): Map<string, Map<Permission, boolean>> => {
+  const normalizedData: { [key: string]: Map<Permission, boolean> } = {};
+  for (const property in response) {
+    normalizedData[property] = new Map(
+      Object.entries(response[property])
+    ) as Map<Permission, boolean>;
   }
 
-  await Promise.all(promises);
+  return new Map(Object.entries(normalizedData));
 };
 
 const usePermissions = () => {
