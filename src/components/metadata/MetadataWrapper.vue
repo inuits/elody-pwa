@@ -139,17 +139,17 @@ const props = withDefaults(
     showErrors: false,
   }
 );
-watch(
-  () => props.metadata,
-  (newvalue, oldvalue) => {
-    if (!Array.isArray(newvalue.value)) setNewValue(newvalue.value);
-  }
-);
+
+// Todo: Enabling this will break the validation
+// Todo: Check if turning this off has other implications
+// watch(
+//   () => props.metadata,
+//   (newvalue, oldvalue) => {
+//     if (!Array.isArray(newvalue.value)) setNewValue(newvalue.value);
+//   }
+// );
 
 const setNewValue = (newValue: string | BaseRelationValuesInput[]) => {
-  // Todo: Fix this, it breaks the intialvalues
-  // if (veeValidateField.value.includes(ValidationFields.RelationValues) && !Array.isArray(newValue))
-  //   return;
   value.value = newValue;
   const form = getForm(props.formId);
   if (form) {
