@@ -44,6 +44,7 @@ const useHttpErrors = () => {
         const { setTennantInSession } = useTenant();
 
         await auth.logout();
+        useStateManagement().clearStorage();
         setTennantInSession("");
         router.push("/unauthorized");
         break;
