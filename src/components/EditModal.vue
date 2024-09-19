@@ -28,7 +28,8 @@ import {
   type DeleteDataMutation,
   Entitytyping,
   ModalStyle,
-  TypeModals,
+  RouteNames,
+  TypeModals
 } from "@/generated-types/queries";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
 import useTenant from "@/composables/useTenant";
@@ -75,7 +76,8 @@ const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const deleteEntity = async (deleteMediafiles: boolean = false) => {
   const id = asString(route.params["id"]);
   const type = asString(route.params["type"]);
-  const childRoutes = config.routerConfig[0].children.map(
+  const homeRoutes = config.routerConfig.filter((item) => item.path === "/" && item.name === RouteNames.Home)[0].children;
+  const childRoutes = homeRoutes.map(
     (route: any) => route.meta
   );
   let collection;
