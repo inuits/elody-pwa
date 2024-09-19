@@ -104,7 +104,8 @@
           v-if="
             field.__typename === 'FormAction' &&
             (field as FormAction).actionType == ActionType.Upload ||
-            (field as FormAction).actionType == ActionType.UploadCsvForReordening
+            (field as FormAction).actionType == ActionType.UploadCsvForReordening ||
+            (field as FormAction).actionType == ActionType.UpdateMetadata
           "
           :label="t((field as FormAction).label)"
           :icon="(field as FormAction).icon"
@@ -119,7 +120,8 @@
           v-if="
             field.__typename === 'FormAction' &&
             field.actionType !== ActionType.Upload &&
-            field.actionType !== ActionType.UploadCsvForReordening
+            field.actionType !== ActionType.UploadCsvForReordening &&
+            field.actionType !== ActionType.UpdateMetadata
           "
           :class="[
             { 'mt-5 mb-10': !isButtonDisabled },
@@ -253,6 +255,7 @@ const {
   getDynamicFormTabs,
   performSubmitAction,
   performDownloadAction,
+  performUpdateMetadataAction,
   performOcrAction,
   resetDynamicForm,
   isPerformingAction,
@@ -265,6 +268,7 @@ const {
   reinitializeDynamicFormFunc,
   uploadCsvForReordering,
   __handleHttpError,
+  __getCsvString,
 } = useUpload();
 const {
   getAcceptedTypes,
@@ -448,11 +452,17 @@ const downloadActionFunction = async (field: FormAction) => {
   }
 };
 
-const updateMetdataActionFunction = async () => {
+const updateMetdataActionFunction = async (field: FormAction) => {
   await form.value.validate();
   if (formContainsErrors.value) return;
   formClosing.value = true;
-  //TODO: put code here that calls graphql function to the bulk edit endpoint in the collection-api
+
+  const document = await getQuery(field.actionQuery as string);
+  let csv: string;
+  await __getCsvString().then((csvResult) => {
+    csv = csvResult;
+  });
+  await performUpdateMetadataAction(document, csv);
 };
 
 const callEndpointInGraphql = async (field: FormAction) => {
@@ -547,7 +557,7 @@ const performActionButtonClickEvent = (field: FormAction): void => {
   useBaseModal().changeCloseConfirmation(TypeModals.DynamicForm, false);
   const actionFunctions: { [key: string]: Function } = {
     submit: () => submitActionFunction(field),
-    update: () => updateMetdataActionFunction(field),
+    updateMetadata: () => updateMetdataActionFunction(field),
     upload: () => uploadActionFunction(field),
     download: () => downloadActionFunction(field),
     ocr: () => startOcrActionFunction(field),

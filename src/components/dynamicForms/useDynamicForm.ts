@@ -69,6 +69,16 @@ const useDynamicForm = () => {
     });
   };
 
+  const performUpdateMetadataAction = async (
+    queryDocument: any,
+    csv: any
+  ): Promise<any> => {
+    return await apolloClient.mutate({
+      mutation: queryDocument,
+      variables: { csv: csv },
+    });
+  };
+
   const performOcrAction = async (
     queryDocument: any,
     savedContext: any,
@@ -101,6 +111,7 @@ const useDynamicForm = () => {
     dynamicForm,
     performSubmitAction,
     performDownloadAction,
+    performUpdateMetadataAction,
     performOcrAction,
     dynamicFormUploadFields,
     resetDynamicForm,
