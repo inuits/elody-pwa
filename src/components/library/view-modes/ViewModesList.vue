@@ -157,7 +157,6 @@ const getLinkSettings = (entity: Entity, listItemRouteName: string = "") => {
       props.parentEntityIdentifiers.length > 0 &&
       entity.type.toLowerCase() === Entitytyping.Mediafile
     ) {
-      updateSelectedEntityMediafile(entity);
       return { tag: "div", path: undefined };
     }
     return { tag: "div", path: undefined };

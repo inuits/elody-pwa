@@ -15,7 +15,7 @@
       class="w-full"
     >
       <IIIFViewer
-        v-if="getValueOfMediafile('mimetype')?.includes('image')"
+        v-if="viewerType === ElodyViewers.Iiif"
         :imageFilename="
           getValueOfMediafile('transcode_filename') ||
           getValueOfMediafile('filename') ||
@@ -24,19 +24,19 @@
         :downloadLocation="getValueOfMediafile('original_file_location')"
       />
       <VideoPlayer
-        v-if="getValueOfMediafile('mimetype')?.includes('video')"
+        v-if="viewerType === ElodyViewers.Video"
         :source="mediafileSelectionState.selectedMediafile"
       />
       <AudioPlayer
-        v-if="getValueOfMediafile('mimetype')?.includes('audio')"
+        v-if="viewerType === ElodyViewers.Audio"
         :source="mediafileSelectionState.selectedMediafile"
       />
       <PDFViewer
-        v-if="getValueOfMediafile('mimetype')?.includes('pdf')"
+        v-if="viewerType === ElodyViewers.Pdf"
         :source="mediafileSelectionState.selectedMediafile"
       />
       <TextViewer
-        v-if="getValueOfMediafile('mimetype')?.includes('text/plain')"
+        v-if="viewerType === ElodyViewers.Text"
         :source="mediafileSelectionState.selectedMediafile"
       />
     </div>
@@ -44,14 +44,14 @@
 </template>
 
 <script lang="ts" setup>
-import type { MediaFileEntity } from "@/generated-types/queries";
+import { ElodyViewers, type MediaFileEntity } from "@/generated-types/queries";
 import AudioPlayer from "@/components/base/AudioPlayer.vue";
 import EntityImageSelection from "@/components/EntityImageSelection.vue";
 import IIIFViewer from "@/components/IIIFViewer.vue";
 import PDFViewer from "@/components/base/PDFViewer.vue";
 import TextViewer from "@/components/base/TextViewer.vue";
 import VideoPlayer from "@/components/base/VideoPlayer.vue";
-import { toRefs, watch } from "vue";
+import { computed, toRefs, watch } from "vue";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 
 const props = defineProps<{
@@ -62,6 +62,30 @@ const props = defineProps<{
 const { mediafiles } = toRefs(props);
 const { mediafileSelectionState, getValueOfMediafile } =
   useEntityMediafileSelector();
+
+const viewerMap: Record<string, ElodyViewers> = {
+  pdf: ElodyViewers.Pdf,
+  image: ElodyViewers.Iiif,
+  audio: ElodyViewers.Audio,
+  video: ElodyViewers.Video,
+  text: ElodyViewers.Text,
+};
+
+const viewerType = computed<ElodyViewers | undefined>(() => {
+  try {
+    const mimetype: string = getValueOfMediafile(
+      "mimetype",
+      mediafileSelectionState.selectedMediafile
+    );
+    for (const type in viewerMap) {
+      if (mimetype.includes(type)) {
+        return viewerMap[type];
+      }
+    }
+  } catch {
+    return undefined;
+  }
+});
 
 watch([() => props.loading, mediafiles], () => {
   if (props.loading) return;
