@@ -142,7 +142,7 @@ const refetchEnabled = ref<boolean>(false);
 const { refetch, onResult } = useQuery<GetBulkOperationCsvExportKeysQuery>(
   GetBulkOperationCsvExportKeysDocument,
   { entityType: entityTypeMapping[props.context] },
-  () => ({ enabled: refetchEnabled.value })
+  () => ({ enabled: props.context && refetchEnabled.value })
 );
 const csvExportOptions = ref<{ isSelected: boolean; key: DropdownOption }[]>(
   []
@@ -196,6 +196,7 @@ const exportCsv = async () => {
         15
       )
     );
+  closeModal(TypeModals.BulkOperations);
 };
 
 onResult((result) => {
@@ -205,6 +206,16 @@ onResult((result) => {
       csvExportOptions.value.push({ isSelected: false, key });
   }
 });
+
+watch(
+  () => props.context,
+  () => {
+    if (!props.context) return;
+    refetchEnabled.value = true;
+    refetch(entityTypeMapping[props.context])
+  },
+  { immediate: true }
+)
 
 watch(
   () => modal?.open,
