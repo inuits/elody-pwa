@@ -44,7 +44,7 @@
         v-model:skip="selectedSkip"
         :limit="selectedPaginationLimitOption?.value ?? NaN"
         :total-items="
-          totalItems || getStateForRoute(props.route)?.totalEntityCount || 1
+          totalItems || getStateForRoute(route)?.totalEntityCount || 1
         "
         @update:skip="setSkip"
       />
@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { RouteLocationNormalizedLoaded } from "vue-router";
+import { type RouteLocationNormalizedLoaded, useRoute } from "vue-router";
 import {
   DamsIcons,
   Entitytyping,
@@ -72,7 +72,6 @@ import { useI18n } from "vue-i18n";
 import { useStateManagement } from "@/composables/useStateManagement";
 
 const props = defineProps<{
-  route: RouteLocationNormalizedLoaded;
   setLimit: Function;
   setSkip: Function;
   setSortKey: Function;
@@ -102,6 +101,7 @@ const sortOptionsPromiseIsResolved = ref<boolean>(false);
 const { totalItems } = toRefs(props);
 const { getStateForRoute } = useStateManagement();
 const { t } = useI18n();
+const route = useRoute();
 
 const paginationLimitOptionsPromise = async () => {
   return apolloClient
@@ -112,7 +112,7 @@ const paginationLimitOptionsPromise = async () => {
       paginationLimitOptions.value =
         result.data?.PaginationLimitOptions.options || [];
 
-      const state = getStateForRoute(props.route);
+      const state = getStateForRoute(route);
       const limit =
         state?.queryVariables?.limit ||
         paginationLimitOptions.value?.[0].value ||
@@ -142,7 +142,7 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
         result.data?.EntityTypeSortOptions.sortOptions;
       sortOptions.value = sortingOptionsResult?.options || [];
 
-      const state = getStateForRoute(props.route);
+      const state = getStateForRoute(route);
       const sortKey =
         /*state?.queryVariables?.searchValue.order_by ||*/
         sortOptions.value?.[0]?.value;
