@@ -147,8 +147,9 @@ watch(
 );
 
 const setNewValue = (newValue: string | BaseRelationValuesInput[]) => {
-  if (veeValidateField.value.includes(ValidationFields.RelationValues) && !Array.isArray(newValue))
-    return;
+  // Todo: Fix this, it breaks the intialvalues
+  // if (veeValidateField.value.includes(ValidationFields.RelationValues) && !Array.isArray(newValue))
+  //   return;
   value.value = newValue;
   const form = getForm(props.formId);
   if (form) {
