@@ -85,7 +85,7 @@ const useUpload = () => {
   };
 
   const __checkUploadValidityUpdateMetadata = (): boolean => {
-    return true;
+    return containsCsv.value;
   };
 
   const __checkUploadValidityMediafilesOnly = (): boolean => {
@@ -344,6 +344,25 @@ const useUpload = () => {
     }
     return JSON.parse(await response.text());
   };
+
+  const __getCsvString = async (): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const fileText = ref<string | null>(null);
+      const reader = new FileReader();
+      const csvFile = files.value.find(
+        (file: DropzoneFile) => file.type === "text/csv"
+      );
+      reader.onload = async (e) => {
+        fileText.value = e.target?.result as string;
+        resolve(fileText.value);
+      };
+      reader.onerror = (event) => {
+        reject(event.target?.error);
+      };
+      reader.readAsText(csvFile);
+    })
+
+  }
 
   const __getCsvBlob = () => {
     try {
@@ -749,6 +768,7 @@ const useUpload = () => {
     failedUploads,
     standaloneFileType,
     reinitializeDynamicFormFunc,
+    __getCsvString,
   };
 };
 
