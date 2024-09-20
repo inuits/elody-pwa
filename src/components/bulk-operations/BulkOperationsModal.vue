@@ -84,6 +84,7 @@ import {
   type DropdownOption, Entitytyping,
   GetBulkOperationCsvExportKeysDocument,
   type GetBulkOperationCsvExportKeysQuery,
+  type GetBulkOperationCsvExportKeysQueryVariables,
   RouteNames,
   TypeModals,
 } from "@/generated-types/queries";
@@ -111,6 +112,7 @@ const entityTypeMapping: MapRouteNameAgainstEntitytype = {
   [RouteNames.Assets]: Entitytyping.Asset,
   [RouteNames.Home]: Entitytyping.Asset,
   [RouteNames.Mediafiles]: Entitytyping.Mediafile,
+  [RouteNames.SingleEntity]: Entitytyping.Mediafile,
   default: Entitytyping.Asset,
 }
 
@@ -125,6 +127,7 @@ const {
   dequeueAllItemsForBulkProcessing,
   triggerBulkSelectionEvent,
 } = useBulkOperations();
+
 const config = inject("config") as any;
 const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
@@ -134,6 +137,10 @@ const modal = getModal(TypeModals.BulkOperations);
 const skip = ref<number>(1);
 const limit = ref<number>(config.bulkSelectAllSizeLimit);
 
+const entityType = computed(() => entityTypeMapping[props.context]);
+const queryVariables: GetBulkOperationCsvExportKeysQueryVariables = {
+  entityType: entityType.value
+};
 const items = ref<InBulkProcessableItem[]>([]);
 const loadItems = () =>
   (items.value = getEnqueuedItems(props.context, skip.value, limit.value));
@@ -141,8 +148,8 @@ const loadItems = () =>
 const refetchEnabled = ref<boolean>(false);
 const { refetch, onResult } = useQuery<GetBulkOperationCsvExportKeysQuery>(
   GetBulkOperationCsvExportKeysDocument,
-  { entityType: entityTypeMapping[props.context] },
-  () => ({ enabled: props.context && refetchEnabled.value })
+  queryVariables,
+  () => ({ enabled: entityType.value && refetchEnabled.value })
 );
 const csvExportOptions = ref<{ isSelected: boolean; key: DropdownOption }[]>(
   []
@@ -166,7 +173,7 @@ const exportCsv = async () => {
       fieldQueryParameter += `&field[]=${option.key.value}`;
   });
 
-  const exportURL = `/api/export/csv?ids=${getEnqueuedItems(props.context)
+  const exportURL = `/api/export/csv?type=${entityType.value}ids=${getEnqueuedItems(props.context)
     .map((item) => item.id)
     .join(",")}${fieldQueryParameter}`;
 
@@ -207,12 +214,18 @@ onResult((result) => {
   }
 });
 
+const doRefetch = () => {
+  refetchEnabled.value = true;
+  queryVariables.entityType = entityType.value;
+  refetch(queryVariables);
+  loadItems();
+}
+
 watch(
   () => props.context,
   () => {
-    if (!props.context) return;
-    refetchEnabled.value = true;
-    refetch(entityTypeMapping[props.context])
+    if (!props.context || !modal?.open) return;
+    doRefetch();
   },
   { immediate: true }
 )
@@ -221,9 +234,8 @@ watch(
   () => modal?.open,
   (isBulkOperationsModalOpen: boolean | undefined) => {
     if (isBulkOperationsModalOpen) {
-      refetchEnabled.value = true;
-      refetch({entityType: entityTypeMapping[props.context]});
-      loadItems();
+      if (entityType.value)
+      doRefetch();
     }
     else {
       dequeueAllItemsForBulkProcessing(
