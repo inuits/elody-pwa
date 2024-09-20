@@ -44,6 +44,10 @@ import {
 import { bulkSelectAllSizeLimit } from "@/main";
 import { computed, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
+import { TypeModals } from "@/generated-types/queries";
+import { useBaseModal } from "@/composables/useBaseModal";
+
+const { getModalInfo } = useBaseModal();
 
 const props = withDefaults(
   defineProps<{
@@ -154,4 +158,11 @@ watch(route, () => {
   if (props.ignoreBulkOperations) return;
   inputValue.value = isEnqueued(route.name as Context, props.item.id);
 });
+watch(
+  () => getModalInfo(TypeModals.BulkOperations).open,
+  (isBulkOperationsModalOpen: boolean | undefined) => {
+    if (isBulkOperationsModalOpen)
+      inputValue.value = isEnqueued(props.bulkOperationsContext, props.item.id);
+  }
+)
 </script>
