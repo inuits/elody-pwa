@@ -31,6 +31,7 @@
       @click.stop="handleItemSelection"
     >
       {{ label }}
+      <unicon v-if="required" :name="Unicons.ExclamationTriangle.name" height="20" />
     </span>
   </div>
 </template>
@@ -46,6 +47,7 @@ import { computed, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { TypeModals } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { Unicons } from "@/types";
 
 const { getModalInfo } = useBaseModal();
 
@@ -58,11 +60,13 @@ const props = withDefaults(
     inputStyle: InputStyle;
     disabled?: boolean;
     ignoreBulkOperations?: boolean;
+    required?: boolean;
   }>(),
   {
     label: "",
     disabled: false,
     ignoreBulkOperations: false,
+    required: false,
   }
 );
 
@@ -72,10 +76,10 @@ const emit = defineEmits<{
 
 const inputValue = computed<boolean>({
   get() {
-    return props.modelValue;
+    return props.required ? props.required : props.modelValue;
   },
   set(value) {
-    emit("update:modelValue", value);
+    emit("update:modelValue", props.required ? props.required : value);
   },
 });
 
