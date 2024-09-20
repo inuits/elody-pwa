@@ -188,7 +188,7 @@ const exportCsv = async () => {
 
       const link = document.createElement("a");
       link.href = url;
-      link.download = "entities.csv";
+      link.download = `${entityType.value}.csv`;
       link.click();
 
       URL.revokeObjectURL(url);
