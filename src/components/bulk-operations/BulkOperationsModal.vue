@@ -45,6 +45,7 @@
               v-model="csvExportOption.isSelected"
               :label="t(csvExportOption.key.label)"
               :item="{ id: csvExportOption.key.value }"
+              :required="csvExportOption.key.required"
               :bulk-operations-context="
                 BulkOperationsContextEnum.BulkOperationsCsvExport
               "
