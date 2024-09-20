@@ -209,7 +209,7 @@ onResult((result) => {
   if (result.data) {
     csvExportOptions.value = [];
     for (let key of result.data.BulkOperationCsvExportKeys.options)
-      csvExportOptions.value.push({ isSelected: false, key });
+      csvExportOptions.value.push({ isSelected: key.required, key });
   }
 });
 
