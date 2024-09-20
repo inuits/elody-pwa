@@ -71,11 +71,12 @@ const useDynamicForm = () => {
 
   const performUpdateMetadataAction = async (
     queryDocument: any,
+    entityType: string,
     csv: any
   ): Promise<any> => {
     return await apolloClient.mutate({
       mutation: queryDocument,
-      variables: { csv: csv },
+      variables: { entityType: entityType, csv: csv },
     });
   };
 
