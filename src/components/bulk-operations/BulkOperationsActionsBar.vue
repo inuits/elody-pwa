@@ -317,7 +317,7 @@ const generateTranscodeFromMediafiles = (
 
 watch(selectedBulkOperation, () => {
   if (selectedBulkOperation.value?.value === BulkOperationTypes.ExportCsv)
-    openModal(TypeModals.BulkOperations, ModalStyle.CenterWide);
+    openModal(TypeModals.BulkOperations, ModalStyle.CenterWide, undefined, undefined, undefined, undefined, props.context);
   if (selectedBulkOperation.value?.value === BulkOperationTypes.Edit)
     openModal(TypeModals.BulkOperationsEdit, ModalStyle.Right);
   if (

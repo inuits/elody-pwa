@@ -105,20 +105,16 @@ import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 
 type MapRouteNameAgainstEntitytype = {
-  [key: RouteNames]: Entitytyping;
+  [key: RouteNames | BulkOperationsContextEnum]: Entitytyping;
 };
 
 const entityTypeMapping: MapRouteNameAgainstEntitytype = {
   [RouteNames.Assets]: Entitytyping.Asset,
   [RouteNames.Home]: Entitytyping.Asset,
   [RouteNames.Mediafiles]: Entitytyping.Mediafile,
-  [RouteNames.SingleEntity]: Entitytyping.Mediafile,
+  [BulkOperationsContextEnum.EntityElementMedia]: Entitytyping.Mediafile,
   default: Entitytyping.Asset,
 }
-
-const props = defineProps<{
-  context: Context;
-}>();
 
 const {
   getEnqueuedItems,
@@ -137,13 +133,15 @@ const modal = getModal(TypeModals.BulkOperations);
 const skip = ref<number>(1);
 const limit = ref<number>(config.bulkSelectAllSizeLimit);
 
-const entityType = computed(() => entityTypeMapping[props.context]);
+const entityType = computed(() => entityTypeMapping[context.value]);
+const context: Context = computed(() => getModal(TypeModals.BulkOperations).context);
+
 const queryVariables: GetBulkOperationCsvExportKeysQueryVariables = {
   entityType: entityType.value
 };
 const items = ref<InBulkProcessableItem[]>([]);
 const loadItems = () =>
-  (items.value = getEnqueuedItems(props.context, skip.value, limit.value));
+  (items.value = getEnqueuedItems(context.value, skip.value, limit.value));
 
 const refetchEnabled = ref<boolean>(false);
 const { refetch, onResult } = useQuery<GetBulkOperationCsvExportKeysQuery>(
@@ -173,7 +171,7 @@ const exportCsv = async () => {
       fieldQueryParameter += `&field[]=${option.key.value}`;
   });
 
-  const exportURL = `/api/export/csv?type=${entityType.value}ids=${getEnqueuedItems(props.context)
+  const exportURL = `/api/export/csv?type=${entityType.value}ids=${getEnqueuedItems(context.value)
     .map((item) => item.id)
     .join(",")}${fieldQueryParameter}`;
 
@@ -222,9 +220,9 @@ const doRefetch = () => {
 }
 
 watch(
-  () => props.context,
+  () => context.value,
   () => {
-    if (!props.context || !modal?.open) return;
+    if (!context.value || !modal?.open) return;
     doRefetch();
   },
   { immediate: true }
