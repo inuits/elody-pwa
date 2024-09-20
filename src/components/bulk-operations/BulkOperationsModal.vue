@@ -171,7 +171,7 @@ const exportCsv = async () => {
       fieldQueryParameter += `&field[]=${option.key.value}`;
   });
 
-  const exportURL = `/api/export/csv?type=${entityType.value}ids=${getEnqueuedItems(context.value)
+  const exportURL = `/api/export/csv?type=${entityType.value}&ids=${getEnqueuedItems(context.value)
     .map((item) => item.id)
     .join(",")}${fieldQueryParameter}`;
 
