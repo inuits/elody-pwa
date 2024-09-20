@@ -20,7 +20,6 @@
       <CreateSavedSearchModal />
       <BulkoperationsModal
         v-if="route.name !== undefined"
-        :context="route.name as Context"
       />
       <search-modal />
       <!--      <BulkOperationsEditModal-->
