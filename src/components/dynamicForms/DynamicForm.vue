@@ -462,7 +462,7 @@ const updateMetdataActionFunction = async (field: FormAction) => {
   await __getCsvString().then((csvResult) => {
     csv = csvResult;
   });
-  await performUpdateMetadataAction(document, csv);
+  await performUpdateMetadataAction(document, form.value.values.intialValues.type, csv);
 };
 
 const callEndpointInGraphql = async (field: FormAction) => {
