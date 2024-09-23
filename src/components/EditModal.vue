@@ -35,7 +35,7 @@ import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperations
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import { useI18n } from "vue-i18n";
-import { asString } from "@/helpers";
+import { asString, getChildrenOfHomeRoutes } from "@/helpers";
 import { inject } from "vue";
 import {
   GenericContextForModals,
@@ -76,8 +76,7 @@ const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const deleteEntity = async (deleteMediafiles: boolean = false) => {
   const id = asString(route.params["id"]);
   const type = asString(route.params["type"]);
-  const homeRoutes = config.routerConfig.filter((item) => item.path === "/" && item.name === RouteNames.Home)[0].children;
-  const childRoutes = homeRoutes.map(
+  const childRoutes = getChildrenOfHomeRoutes(config).map(
     (route: any) => route.meta
   );
   let collection;

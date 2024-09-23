@@ -101,6 +101,7 @@ import {
 import { usePageInfo } from "@/composables/usePageInfo";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
+import { getChildrenOfHomeRoutes } from "@/helpers";
 
 const { t } = useI18n();
 const config: any = inject("config");
@@ -125,8 +126,7 @@ const deleteSelectedItems = async () => {
   const selectedItems: InBulkProcessableItem[] = getEnqueuedItems(getContext());
   dequeueAllItemsForBulkProcessing(getContext());
   if (selectedItems.length <= 0) return;
-  const homeRoutes = config.routerConfig.filter((item) => item.path === "/" && item.name === RouteNames.Home)[0].children;
-  const childRoutes = homeRoutes.map(
+  const childRoutes = getChildrenOfHomeRoutes(config).map(
     (route: any) => route.meta
   );
   for (const selectedItem of selectedItems) {

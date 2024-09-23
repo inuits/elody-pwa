@@ -1,6 +1,7 @@
 import { DamsIcons, Entitytyping, RouteNames } from "@/generated-types/queries";
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import { getChildrenOfHomeRoutes } from "@/helpers";
 
 export type VisitedRoute = {
   id: string;
@@ -27,7 +28,7 @@ const breadcrumbRoutes = ref<BreadcrumbRoute[]>([]);
 const rootRoute = ref<RootRoute>({});
 
 const useBreadcrumbs = (config: any) => {
-  const homeRoutes = config.routerConfig.filter((item) => item.path === "/" && item.name === RouteNames.Home)[0].children;
+  const homeRoutes = getChildrenOfHomeRoutes(config);
   const previousRoute = computed<VisitedRoute | undefined>(() => breadcrumbRoutes.value[breadcrumbRoutes.value.length - 1]);
 
   const getRouteBreadcrumbsOfEntity = (entitytype: Entitytyping): any => {

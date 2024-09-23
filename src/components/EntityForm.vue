@@ -42,6 +42,7 @@ import { useI18n } from "vue-i18n";
 import { useMutation } from "@vue/apollo-composable";
 import { onBeforeRouteLeave } from "vue-router";
 import { useSubmitForm } from "vee-validate";
+import { getChildrenOfHomeRoutes } from "@/helpers";
 
 const props = defineProps<{
   intialValues: IntialValues;
@@ -80,7 +81,7 @@ const {
 const { createNotification } = useNotification();
 const { closeModal, openModal, updateDeleteQueryOptions } = useBaseModal();
 const { t } = useI18n();
-const childRoutes = config.routerConfig.filter((item) => item.path === "/" && item.name === RouteNames.Home)[0].children.map(
+const childRoutes = getChildrenOfHomeRoutes(config).map(
   (route: any) => route.meta
 );
 

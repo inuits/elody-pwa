@@ -10,6 +10,7 @@ import {
   type MediaFileEntity,
   Entitytyping,
   InputFieldTypes,
+  RouteNames
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -452,3 +453,7 @@ export const getUserName = (auth: any): string => {
   const user = auth.user;
   return user.name || user.given_name || user.email || user.family_name;
 };
+
+export const getChildrenOfHomeRoutes = (config: any): [] => {
+  return config.routerConfig.filter((item) => item.name === RouteNames.Home)[0].children;
+}
