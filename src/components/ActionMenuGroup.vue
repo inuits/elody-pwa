@@ -100,8 +100,8 @@ const filterSecondaryDropdownOptions = computed<DropdownOption[]>(() => {
       const entitiesSelectionType =
         dropdownOption.actionContext.entitiesSelectionType;
       const viewMode = isEdit.value
-        ? activeViewMode === ActionContextViewModeTypes.EditMode
-        : activeViewMode === ActionContextViewModeTypes.ReadMode;
+        ? activeViewMode.includes(ActionContextViewModeTypes.EditMode)
+        : activeViewMode.includes(ActionContextViewModeTypes.ReadMode);
       const numberOfEntities = props.itemsSelected
         ? entitiesSelectionType ===
           ActionContextEntitiesSelectionType.SomeSelected
