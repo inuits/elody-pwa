@@ -123,6 +123,7 @@
               @apply-custom-bulk-operations="
                 async () => await applyCustomBulkOperations()
               "
+              @initialize-entity-picker-component="() => initializeEntityPickerComponent()"
               @refetch="async () => await refetchEntities()"
             />
           </div>
@@ -235,6 +236,7 @@ import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { watch, ref, onMounted, inject, computed } from "vue";
+import useEntityPickerModal from "@/composables/useEntityPickerModal";
 
 export type BaseLibraryProps = {
   bulkOperationsContext: Context;
@@ -266,6 +268,8 @@ export type BaseLibraryProps = {
   customBulkOperations?: String | undefined;
   enableSaveSearchFilters?: boolean;
   shouldUseStateForRoute?: boolean;
+  customQueryEntityPickerList?: string;
+  customQueryEntityPickerListFilters?: string;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -349,6 +353,13 @@ const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
 const { closeModal } = useBaseModal();
 const { replaceRelationsFromSameType, getForm } = useFormHelper();
 const { uploadStatus } = useUpload();
+const {
+  setAcceptedTypes,
+  setEntityUuid,
+  setRelationType,
+  setCustomGetEntitiesQuery,
+  setCustomGetEntitiesFiltersQuery,
+} = useEntityPickerModal();
 
 const displayList = ref<boolean>(false);
 const displayGrid = ref<boolean>(false);
@@ -480,6 +491,14 @@ const applyCustomBulkOperations = async () => {
   enqueuePromise(customBulkOperationsPromise);
   await getCustomBulkOperations();
 };
+
+const initializeEntityPickerComponent = () => {
+  setAcceptedTypes([props.entityType] as Entitytyping[]);
+  setEntityUuid(props.parentEntityIdentifiers[0]);
+  setRelationType(props.relationType);
+  setCustomGetEntitiesQuery(props.customQueryEntityPickerList);
+  setCustomGetEntitiesFiltersQuery(props.customQueryEntityPickerListFilters);
+}
 
 onMounted(async () => {
   await initializeBaseLibrary();

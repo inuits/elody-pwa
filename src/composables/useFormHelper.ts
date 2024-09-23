@@ -380,6 +380,24 @@ const useFormHelper = () => {
     return relations;
   };
 
+  const parseFormValuesToFormInput = (uuid: string , values: EntityValues) => {
+    let metadata: MetadataValuesInput[] = [];
+    let relations: BaseRelationValuesInput[] = [];
+
+    if (values.intialValues)
+      metadata = parseIntialValuesForFormSubmit(values.intialValues, uuid);
+    if (values.relationValues)
+      relations = parseRelationValuesForFormSubmit(values.relationValues);
+    if (values.relationMetadata && relations)
+      relations = parseRelationMetadataForFormSubmit(
+        values.relationMetadata,
+        relations,
+        uuid
+      );
+
+    return { metadata, relations };
+  };
+
   return {
     createForm,
     addForm,
@@ -401,6 +419,7 @@ const useFormHelper = () => {
     findRelation,
     getTeaserMetadataInState,
     deleteTeaserMetadataItemInState,
+    parseFormValuesToFormInput,
     parseIntialValuesForFormSubmit,
     parseRelationValuesForFormSubmit,
     parseRelationMetadataForFormSubmit,
