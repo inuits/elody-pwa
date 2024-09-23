@@ -192,6 +192,7 @@ const emit = defineEmits<{
     bulkOperationsPromise: () => Promise<void>
   ): void;
   (event: "applyCustomBulkOperations"): void;
+  (event: "initializeEntityPickerComponent"): void;
 }>();
 
 const route = useRoute();
@@ -379,6 +380,18 @@ watch(selectedBulkOperation, () => {
         undefined,
         modal.askForCloseConfirmation,
         savedContext
+      );
+    }
+
+    if (selectedBulkOperation.value?.value === BulkOperationTypes.AddRelation) {
+      emit("initializeEntityPickerComponent");
+      let modal = selectedBulkOperation.value?.bulkOperationModal;
+      openModal(
+        modal.typeModal,
+        ModalStyle.RightWide,
+        modal.formQuery,
+        undefined,
+        modal.askForCloseConfirmation,
       );
     }
   }

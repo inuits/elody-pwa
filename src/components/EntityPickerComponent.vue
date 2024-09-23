@@ -40,11 +40,11 @@
 
 <script lang="ts" setup>
 import {
-  type BaseRelationValuesInput,
+  type BaseRelationValuesInput, Collection, type Entity,
   EntityPickerMode,
-  Entitytyping,
+  Entitytyping, MutateEntityValuesDocument, type MutateEntityValuesMutation, type MutateEntityValuesMutationVariables,
   SearchInputType,
-  TypeModals,
+  TypeModals
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -52,25 +52,22 @@ import {
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject, unref } from "vue";
+import { useSubmitForm } from "vee-validate";
+import { useMutation } from "@vue/apollo-composable";
+import { useI18n } from "vue-i18n";
 import { useCustomQuery } from "@/composables/useCustomQuery";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { useFormHelper } from "@/composables/useFormHelper";
+import { type EntityValues, useFormHelper } from "@/composables/useFormHelper";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import useEditMode from "@/composables/useEdit";
-import { useForm } from "vee-validate";
-
-const { loadDocument, getDocument } = useCustomQuery();
-const { closeModal } = useBaseModal();
-const { addRelations } = useFormHelper();
-const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
-const { getEntityUuid, getRelationType } = useEntityPickerModal();
-const { save } = useEditMode();
-const { getForm } = useFormHelper();
+import { useNotification, NotificationType } from "@/components/base/BaseNotification.vue";
+import { getChildrenOfHomeRoutes } from "@/helpers";
 
 const emit = defineEmits<{
   (event: "entitiesUpdated", numberOfEntities: number): void;
 }>();
+const config: any = inject("config");
 
 const props = withDefaults(
   defineProps<{
@@ -90,6 +87,28 @@ const props = withDefaults(
   }
 );
 
+const { t } = useI18n();
+const { loadDocument, getDocument } = useCustomQuery();
+const { closeModal } = useBaseModal();
+const { addRelations } = useFormHelper();
+const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
+const { getEntityUuid, getRelationType } = useEntityPickerModal();
+const { save, addSaveCallback, clearSaveCallbacks } = useEditMode();
+const { getForm } = useFormHelper();
+const { parseFormValuesToFormInput } = useFormHelper();
+const { createNotification } = useNotification();
+
+const childRoutes = getChildrenOfHomeRoutes(config).map(
+  (route: any) => route.meta
+);
+
+const { mutate } = useMutation<
+  MutateEntityValuesMutation,
+  MutateEntityValuesMutationVariables
+>(MutateEntityValuesDocument);
+
+const form = getForm(getEntityUuid());
+const { setValues } = form;
 const ignoreCustomQuery = ref<boolean>(false);
 const newQuery = ref<object | undefined>(undefined);
 const queryLoaded = ref<boolean>(false);
@@ -105,6 +124,7 @@ const confirmSelection = (selectedItems: InBulkProcessableItem[]) => {
 
   addRelations(selectedItems, getRelationType(), getEntityUuid(), true);
   dequeueAllItemsForBulkProcessing(getContext());
+  addSaveHandler();
   save();
   closeModal(TypeModals.DynamicForm);
 };
@@ -128,7 +148,6 @@ const getContext = () => {
 };
 
 const getAlreadySelectedEntityIds = (): string[] => {
-  const form = getForm(getEntityUuid());
   if (!form) return [];
   const relationValues = form?.values.relationValues;
   const normalizedRelationIds = Object.keys(relationValues)
@@ -145,6 +164,42 @@ const getAlreadySelectedEntityIds = (): string[] => {
     .map((relation: BaseRelationValuesInput) => relation.key);
 
   return filteredRelationIds;
+};
+
+const submit = useSubmitForm<EntityValues>(async () => {
+  const collection =
+    childRoutes.find(
+      (route: any) =>
+        route.entityType?.toLowerCase() === props.acceptedTypes[0].toLowerCase()
+    )?.type || Collection.Entities;
+
+  if (!collection) throw Error("Could not determine collection for submit");
+
+  const result = await mutate({
+    id: props.entityUuid,
+    formInput: parseFormValuesToFormInput(props.entityUuid, unref(form.values)),
+    collection,
+  });
+
+  if (!result?.data?.mutateEntityValues) return;
+  const mutatedEntity: Entity = result.data.mutateEntityValues as Entity;
+  setValues({
+    intialValues: mutatedEntity.intialValues,
+    relationValues: mutatedEntity.relationValues,
+  });
+  createNotification({
+    displayTime: 10,
+    type: NotificationType.default,
+    title: t("notifications.success.entityUpdated.title"),
+    description: t("notifications.success.entityUpdated.description"),
+    shown: true,
+  });
+  form.resetForm({ values: form.values });
+});
+
+const addSaveHandler = () => {
+  clearSaveCallbacks();
+  addSaveCallback(submit, "first");
 };
 
 onMounted(async () => {

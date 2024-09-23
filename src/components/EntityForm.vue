@@ -74,9 +74,7 @@ const {
 } = useEditMode();
 const {
   createForm,
-  parseIntialValuesForFormSubmit,
-  parseRelationValuesForFormSubmit,
-  parseRelationMetadataForFormSubmit,
+  parseFormValuesToFormInput,
 } = useFormHelper();
 const { createNotification } = useNotification();
 const { closeModal, openModal, updateDeleteQueryOptions } = useBaseModal();
@@ -101,24 +99,6 @@ const formContainsErrors = computed((): boolean => !form?.meta.value.valid);
 
 const { setValues } = form;
 
-const parseFormValuesToFormInput = (values: EntityValues) => {
-  let metadata: MetadataValuesInput[] = [];
-  let relations: BaseRelationValuesInput[] = [];
-
-  if (values.intialValues)
-    metadata = parseIntialValuesForFormSubmit(values.intialValues, props.uuid);
-  if (values.relationValues)
-    relations = parseRelationValuesForFormSubmit(values.relationValues);
-  if (values.relationMetadata && relations)
-    relations = parseRelationMetadataForFormSubmit(
-      values.relationMetadata,
-      relations,
-      props.uuid
-    );
-
-  return { metadata, relations };
-};
-
 const submit = useSubmitForm<EntityValues>(async () => {
   const collection =
     childRoutes.find(
@@ -130,7 +110,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
 
   const result = await mutate({
     id: props.uuid,
-    formInput: parseFormValuesToFormInput(unref(form.values)),
+    formInput: parseFormValuesToFormInput(props.uuid, unref(form.values)),
     collection,
   });
 
