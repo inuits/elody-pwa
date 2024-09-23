@@ -72,6 +72,7 @@ const config: any = inject("config");
 const props = withDefaults(
   defineProps<{
     entityUuid: string;
+    parentEntityType: string;
     acceptedTypes: string[];
     customQuery: string;
     customFiltersQuery: string;
@@ -170,7 +171,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
   const collection =
     childRoutes.find(
       (route: any) =>
-        route.entityType?.toLowerCase() === props.acceptedTypes[0].toLowerCase()
+        route.entityType?.toLowerCase() === props.parentEntityType.toLowerCase()
     )?.type || Collection.Entities;
 
   if (!collection) throw Error("Could not determine collection for submit");

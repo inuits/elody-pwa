@@ -359,6 +359,7 @@ const {
   setRelationType,
   setCustomGetEntitiesQuery,
   setCustomGetEntitiesFiltersQuery,
+  setParentEntityType,
 } = useEntityPickerModal();
 
 const displayList = ref<boolean>(false);
@@ -495,6 +496,7 @@ const applyCustomBulkOperations = async () => {
 const initializeEntityPickerComponent = () => {
   setAcceptedTypes([props.entityType] as Entitytyping[]);
   setEntityUuid(props.parentEntityIdentifiers[0]);
+  setParentEntityType(route.meta.entityType);
   setRelationType(props.relationType);
   setCustomGetEntitiesQuery(props.customQueryEntityPickerList);
   setCustomGetEntitiesFiltersQuery(props.customQueryEntityPickerListFilters);
