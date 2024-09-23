@@ -6,7 +6,7 @@
       'navbar fixed left-0 top-0 w-24 h-screen align-center pt-10 bg-neutral-white px-5 pb-16 z-40',
       { 'w-80': isExpanded },
     ]"
-    @click="changeExpandedStateOfMenu(true)"
+    @click.self="changeExpandedStateOfMenu(true)"
   >
     <div>
       <router-link
@@ -19,7 +19,7 @@
       <div
         v-for="menuItem in menuItems"
         :key="menuItem.label"
-        @click="changeHoveredItem(menuItem)"
+        @click.capture="changeHoveredItem(menuItem) & changeExpandedStateOfMenu(true)"
       >
         <Menuitem
           :icon="menuItem.icon"
@@ -41,16 +41,18 @@
 </template>
 
 <script lang="ts" setup>
-import type { MenuItem } from "@/generated-types/queries";
+import { MenuItem } from "@/generated-types/queries";
 import LogInLogout from "@/components/LogInLogout.vue";
 import Menuitem from "@/components/menu/MenuItem.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { ref, onMounted, onUnmounted } from "vue";
 import { RouterLink } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useRouter } from "vue-router";
 
 const navigation = ref<any>(null);
 const hoveredItem = ref<MenuItem | undefined>(undefined);
+const router = useRouter();
 const {
   getMenuEntities,
   menuItems,
@@ -93,6 +95,10 @@ const closeExpanded = (event: any) => {
     changeHoveredItem(undefined);
   }
 };
+
+router.afterEach((to) => {
+  changeExpandedStateOfMenu(false)
+});
 </script>
 
 <style>
