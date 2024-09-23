@@ -19,6 +19,7 @@
             () => {
               setAcceptedTypes(types as Entitytyping[]);
               setEntityUuid(entityUuid);
+              setParentEntityType(route.meta.entityType);
               setRelationType(relationType);
               setCustomGetEntitiesQuery(customQueryEntityPickerList);
               setCustomGetEntitiesFiltersQuery(customQueryEntityPickerListFilters);
@@ -142,6 +143,7 @@ import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { watch, ref, onBeforeMount, computed } from "vue";
+import { useRoute } from "vue-router";
 import { useImport } from "@/composables/useImport";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
@@ -153,6 +155,7 @@ const { toggleElementCollapse } = useEntityElementCollapseHelper();
 const {
   setAcceptedTypes,
   setEntityUuid,
+  setParentEntityType,
   setRelationType,
   setCustomGetEntitiesQuery,
   setCustomGetEntitiesFiltersQuery,
@@ -169,6 +172,7 @@ const {
   setSearchInputType,
   setEntityType,
 } = useQueryVariablesFactory();
+const route = useRoute();
 
 const props = withDefaults(
   defineProps<{
