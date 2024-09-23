@@ -22,6 +22,7 @@
           v-if="field.inputField?.type === BaseFieldType.BaseEntityPickerField"
           :enable-bulk-operations="true"
           :entity-uuid="getEntityUuid()"
+          :parent-entity-type="getParentEntityType()"
           :custom-filters-query="getCustomGetEntitiesFiltersQuery()"
           :accepted-types="getAcceptedTypes()"
           :custom-query="getCustomGetEntitiesQuery()"
@@ -272,6 +273,7 @@ const {
 } = useUpload();
 const {
   getAcceptedTypes,
+  getParentEntityType,
   getEntityUuid,
   getCustomGetEntitiesFiltersQuery,
   getCustomGetEntitiesQuery,

@@ -3,6 +3,7 @@ import { ref } from "vue";
 
 const acceptedTypes = ref<Entitytyping[]>([]);
 const entityUuid = ref<string>("");
+const parentEntityType = ref<Entitytyping[]>([]);
 const relationType = ref<String | "no-type-set">("no-type-set");
 const customGetEntitiesQuery = ref<string>("");
 const customGetEntitiesFiltersQuery = ref<string>("");
@@ -14,6 +15,10 @@ const useEntityPickerModal = () => {
 
   const setEntityUuid = (id: string) => {
     entityUuid.value = id;
+  };
+
+  const setParentEntityType = (parentEntityTypes: Entitytyping[]) => {
+    parentEntityType.value = parentEntityTypes;
   };
 
   const setRelationType = (type: string) => {
@@ -30,6 +35,7 @@ const useEntityPickerModal = () => {
 
   const getAcceptedTypes = () => acceptedTypes.value;
   const getEntityUuid = () => entityUuid.value;
+  const getParentEntityType = () => parentEntityType.value;
   const getRelationType = () => relationType.value;
   const getCustomGetEntitiesQuery = () => customGetEntitiesQuery.value;
   const getCustomGetEntitiesFiltersQuery = () =>
@@ -38,9 +44,11 @@ const useEntityPickerModal = () => {
   return {
     getAcceptedTypes,
     getEntityUuid,
+    getParentEntityType,
     getRelationType,
     setAcceptedTypes,
     setEntityUuid,
+    setParentEntityType,
     setRelationType,
     getCustomGetEntitiesQuery,
     getCustomGetEntitiesFiltersQuery,
