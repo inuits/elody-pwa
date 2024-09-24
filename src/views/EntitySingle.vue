@@ -199,7 +199,7 @@ const determineBreadcrumbs = async () => {
 }
 
 const getTitleOrNameFromEntity = (entity: Entity): string => {
-  return entity.intialValues.title || entity.intialValues.name || entity.intialValues.filename;
+  return entity.intialValues.title || entity.intialValues.name || entity.intialValues.filename || entity.intialValues.id;
 }
 
 watch(
