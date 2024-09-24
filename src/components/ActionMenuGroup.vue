@@ -25,7 +25,7 @@
       <BaseContextMenuItem
         v-for="(option, idx) in filterSecondaryDropdownOptions"
         :key="idx"
-        :label="t(option?.label)"
+        :label="t(option?.label, [entityType])"
         :tooltip-label="option?.actionContext?.labelForTooltip"
         :disable="!option.active"
         @clicked="handleEmit(option)"
@@ -43,6 +43,7 @@ import {
   ContextMenuDirection,
   ActionContextViewModeTypes,
   ActionContextEntitiesSelectionType,
+  Entitytyping
 } from "@/generated-types/queries";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";
@@ -61,6 +62,7 @@ const props = withDefaults(
     options: DropdownOption[];
     isMainActionDisabled: boolean;
     itemsSelected?: boolean;
+    entityType: Entitytyping;
   }>(),
   {
     isMainActionDisabled: false,

@@ -110,6 +110,7 @@
           v-model="selectedBulkOperation"
           :options="bulkOperations"
           :items-selected="itemsSelected"
+          :entity-type="entityType"
         />
       </div>
     </div>
