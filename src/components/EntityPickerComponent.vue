@@ -122,11 +122,10 @@ const emitUpdatedEntities = (numberOfEntities: number) => {
 
 const confirmSelection = (selectedItems: InBulkProcessableItem[]) => {
   if (props.entityPickerMode === EntityPickerMode.Emit) return;
-
   addRelations(selectedItems, getRelationType(), getEntityUuid(), true);
   dequeueAllItemsForBulkProcessing(getContext());
   addSaveHandler();
-  save();
+  save(true);
   closeModal(TypeModals.DynamicForm);
 };
 
@@ -173,7 +172,6 @@ const submit = useSubmitForm<EntityValues>(async () => {
       (route: any) =>
         route.entityType?.toLowerCase() === props.parentEntityType.toLowerCase()
     )?.type || Collection.Entities;
-
   if (!collection) throw Error("Could not determine collection for submit");
 
   const result = await mutate({
