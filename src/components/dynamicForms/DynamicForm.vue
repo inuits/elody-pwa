@@ -458,13 +458,23 @@ const updateMetdataActionFunction = async (field: FormAction) => {
   await form.value.validate();
   if (formContainsErrors.value) return;
   formClosing.value = true;
-
-  const document = await getQuery(field.actionQuery as string);
-  let csv: string;
-  await __getCsvString().then((csvResult) => {
-    csv = csvResult;
-  });
-  await performUpdateMetadataAction(document, form.value.values.intialValues.type, csv);
+  try {
+    const document = await getQuery(field.actionQuery as string);
+    let csv: string;
+    await __getCsvString().then((csvResult) => {
+      csv = csvResult;
+    });
+    await performUpdateMetadataAction(document, form.value.values.intialValues.type, csv);
+    closeAndDeleteForm();
+    createNotificationOverwrite(
+      NotificationType.success,
+      t("notifications.success.updataMetdataCsv.title"),
+      t("notifications.success.updataMetdataCsv.description")
+    );
+  } catch (error) {
+    __handleHttpError(error);
+    submitErrors.value = error.message;
+  }
 };
 
 const callEndpointInGraphql = async (field: FormAction) => {
