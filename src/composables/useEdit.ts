@@ -47,8 +47,8 @@ export const useEditMode = () => {
   const hideEditToggle = () => (isEditToggleVisible.value = "no-edit");
   const clearSaveCallbacks = () => (saveCallbacks.value = []);
 
-  const save = async () => {
-    if (isDisabled.value) return;
+  const save = async (force: boolean = false) => {
+    if (!force && isDisabled.value) return;
     isSaved.value = false;
     linkMediaFilesToEntity(addSaveCallback);
 
