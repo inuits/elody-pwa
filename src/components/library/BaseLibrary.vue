@@ -228,7 +228,7 @@ import ViewModesGrid from "@/components/library/view-modes/ViewModesGrid.vue";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
-import { getEntityTitle } from "@/helpers";
+import { formatTeaserMetadata, getEntityTitle } from "@/helpers";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -322,7 +322,6 @@ const {
   enqueuePromise,
   entities,
   entitiesLoading,
-  formatTeaserMetadata,
   getCustomBulkOperations,
   getEntities,
   manipulationQuery,

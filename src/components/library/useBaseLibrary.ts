@@ -208,25 +208,10 @@ export const useBaseLibrary = (
     }
   );
 
-  const formatTeaserMetadata = (
-    teaserMetadata: Record<string, Metadata>,
-    intialValues: Record<string, IntialValues>
-  ): object => {
-    const formatted = [];
-    for (const key in teaserMetadata) {
-      if (key !== "__typename" && intialValues && teaserMetadata[key].label) {
-        teaserMetadata[key].value = intialValues[key];
-        formatted.push(teaserMetadata[key]);
-      }
-    }
-    return formatted;
-  };
-
   return {
     enqueuePromise,
     entities,
     entitiesLoading,
-    formatTeaserMetadata,
     getCustomBulkOperations,
     getEntities,
     manipulationQuery,

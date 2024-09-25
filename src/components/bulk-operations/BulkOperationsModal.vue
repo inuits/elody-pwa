@@ -78,16 +78,21 @@ import {
   BulkOperationsContextEnum,
   type Context,
   type InBulkProcessableItem,
-  useBulkOperations,
+  useBulkOperations
 } from "@/composables/useBulkOperations";
 import {
+  BulkOperationTypes,
   DamsIcons,
-  type DropdownOption, Entitytyping,
+  type DropdownOption,
+  Entitytyping,
+  FetchMediafilesOfAssetsDocument,
+  FetchMediafilesOfAssetsQuery,
   GetBulkOperationCsvExportKeysDocument,
   type GetBulkOperationCsvExportKeysQuery,
   type GetBulkOperationCsvExportKeysQueryVariables,
+  GetMediafilesFilterQueryVariables,
   RouteNames,
-  TypeModals,
+  TypeModals
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
@@ -96,14 +101,12 @@ import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperations
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import ListItem from "@/components/ListItem.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
-import { inject, ref, watch, computed } from "vue";
+import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
+import { computed, inject, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
+import { formatTeaserMetadata } from "@/helpers";
 
 type MapRouteNameAgainstEntitytype = {
   [key: RouteNames | BulkOperationsContextEnum]: Entitytyping;
@@ -129,30 +132,42 @@ const config = inject("config") as any;
 const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
 const { getThumbnail } = useThumbnailHelper();
-const { getModal, closeModal } = useBaseModal();
+const { getModal, closeModal, getModalInfo } = useBaseModal();
+
 const modal = getModal(TypeModals.BulkOperations);
 const skip = ref<number>(1);
 const limit = ref<number>(config.bulkSelectAllSizeLimit);
 
-const entityType = computed(() => entityTypeMapping[context.value]);
+const isFetchMediafilesOfAssetFlow = ref<boolean>(false);
+const entityType = computed(() => isFetchMediafilesOfAssetFlow.value ? Entitytyping.Mediafile : entityTypeMapping[context.value]);
 const context: Context = computed(() => getModal(TypeModals.BulkOperations).context);
 
-const queryVariables: GetBulkOperationCsvExportKeysQueryVariables = {
-  entityType: entityType.value
-};
 const items = ref<InBulkProcessableItem[]>([]);
 const loadItems = () =>
   (items.value = getEnqueuedItems(context.value, skip.value, limit.value));
 
 const refetchEnabled = ref<boolean>(false);
+const queryVariablesForExportKeys: GetBulkOperationCsvExportKeysQueryVariables = {
+  entityType: entityType.value
+};
 const { refetch, onResult } = useQuery<GetBulkOperationCsvExportKeysQuery>(
   GetBulkOperationCsvExportKeysDocument,
-  queryVariables,
+  queryVariablesForExportKeys,
   () => ({ enabled: entityType.value && refetchEnabled.value })
 );
 const csvExportOptions = ref<{ isSelected: boolean; key: DropdownOption }[]>(
   []
 );
+
+const queryVariablesForMediafiles: GetMediafilesFilterQueryVariables = {
+  assetIds: [],
+};
+const { refetch: refetchMediafiles, onResult: mediafilesResult } = useQuery<FetchMediafilesOfAssetsQuery>(
+  FetchMediafilesOfAssetsDocument,
+  queryVariablesForMediafiles,
+  () => ({ enabled: isFetchMediafilesOfAssetFlow.value })
+);
+
 
 const bulkSelect = () => {
   for (let csvExportOption of csvExportOptions.value)
@@ -213,34 +228,58 @@ onResult((result) => {
   }
 });
 
-const doRefetch = () => {
+mediafilesResult((result) => {
+  if (!result.data) return;
+  const mediafiles = result.data.FetchMediafilesOfAssets;
+  mediafiles.forEach((mediafile) => {
+    enqueueItemForBulkProcessing(RouteNames.Mediafiles, {
+      id: mediafile.id,
+      teaserMetadata: formatTeaserMetadata(
+        mediafile.teaserMetadata,
+        mediafile.intialValues
+      ),
+      type: Entitytyping.Mediafile,
+    });
+  });
+  executeNormalFlow();
+});
+
+const firstFetchMediafilesOfEntities = () => {
+  const assets = getEnqueuedItems(RouteNames.Assets, skip.value, limit.value)
+  queryVariablesForMediafiles.assetIds = assets.map((asset) => asset.id);
+  refetchMediafiles(queryVariablesForMediafiles);
+}
+
+const executeNormalFlow = () => {
   refetchEnabled.value = true;
-  queryVariables.entityType = entityType.value;
-  refetch(queryVariables);
+  queryVariablesForExportKeys.entityType = entityType.value;
+  refetch(queryVariablesForExportKeys);
   loadItems();
+}
+
+const determineFlow = () => {
+  if (!context.value || !modal?.open) return;
+  const savedContext = getModalInfo(TypeModals.BulkOperations).savedContext;
+  isFetchMediafilesOfAssetFlow.value = savedContext && savedContext.type === BulkOperationTypes.ExportCsvOfMediafilesFromAsset;
+  if (isFetchMediafilesOfAssetFlow.value) firstFetchMediafilesOfEntities();
+  else executeNormalFlow();
 }
 
 watch(
   () => context.value,
-  () => {
-    if (!context.value || !modal?.open) return;
-    doRefetch();
-  },
+  () => determineFlow(),
   { immediate: true }
 )
 
 watch(
   () => modal?.open,
   (isBulkOperationsModalOpen: boolean | undefined) => {
-    if (isBulkOperationsModalOpen) {
-      if (entityType.value)
-      doRefetch();
-    }
-    else {
+    if (isBulkOperationsModalOpen)
+      determineFlow();
+    else
       dequeueAllItemsForBulkProcessing(
         BulkOperationsContextEnum.BulkOperationsCsvExport
       );
-    }
   }
 );
 </script>
