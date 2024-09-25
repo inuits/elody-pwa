@@ -80,7 +80,6 @@
 </template>
 
 <script lang="ts" setup>
-import type { ApolloClient } from "@apollo/client/core";
 import type { Context } from "@/composables/useBulkOperations";
 import {
   EditStatus,
@@ -97,12 +96,11 @@ import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import {
+  formatTeaserMetadata,
   getEntityPageRoute,
-  updateEntityMediafileOnlyForMediafiles,
+  updateEntityMediafileOnlyForMediafiles
 } from "@/helpers";
-import { computed, inject } from "vue";
-import { DefaultApolloClient } from "@vue/apollo-composable";
-import { useBaseLibrary } from "@/components/library/useBaseLibrary";
+import { computed } from "vue";
 import { OrderItem } from "@/composables/useOrderListItems";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -137,12 +135,6 @@ const props = withDefaults(
   }
 );
 
-const apolloClient = inject(DefaultApolloClient);
-const { formatTeaserMetadata } = useBaseLibrary(
-  apolloClient as ApolloClient<any>,
-  props.parentEntityIdentifiers.length > 0
-);
-const { updateSelectedEntityMediafile } = useEntityMediafileSelector();
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { queryVariables } = useLibraryBar();
 const { getThumbnail } = useThumbnailHelper();

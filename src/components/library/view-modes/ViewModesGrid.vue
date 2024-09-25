@@ -81,7 +81,6 @@
 </template>
 
 <script lang="ts" setup>
-import type { ApolloClient } from "@apollo/client/core";
 import type { Context } from "@/composables/useBulkOperations";
 import { EditStatus, type Metadata } from "@/generated-types/queries";
 import type {
@@ -97,10 +96,9 @@ import {
   setCssVariable,
   getEntityPageRoute,
   updateEntityMediafileOnlyForMediafiles,
+  formatTeaserMetadata
 } from "@/helpers";
-import { computed, inject, onMounted, onUnmounted } from "vue";
-import { DefaultApolloClient } from "@vue/apollo-composable";
-import { useBaseLibrary } from "@/components/library/useBaseLibrary";
+import { computed, onMounted, onUnmounted } from "vue";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
 
@@ -126,11 +124,6 @@ const props = withDefaults(
   }
 );
 
-const apolloClient = inject(DefaultApolloClient);
-const { formatTeaserMetadata } = useBaseLibrary(
-  apolloClient as ApolloClient<any>,
-  props.parentEntityIdentifiers.length > 0
-);
 const { mediafileSelectionState, updateSelectedEntityMediafile } =
   useEntityMediafileSelector();
 const { getMediaFilenameFromEntity } = useListItemHelper();

@@ -7,10 +7,11 @@ import {
   type EntityListElement,
   type Entity,
   type BaseEntity,
-  type MediaFileEntity,
+  type IntialValues,
+  type Metadata,
   Entitytyping,
   InputFieldTypes,
-  RouteNames
+  RouteNames,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -276,6 +277,23 @@ export const getMetadataFields = (
   });
 
   return fields;
+};
+
+export const formatTeaserMetadata = (
+  teaserMetadata: Record<string, Metadata>,
+  intialValues: Record<string, IntialValues>
+): object => {
+  const formatted = [];
+  for (const key in teaserMetadata) {
+    if (key !== "__typename" && intialValues && teaserMetadata[key].label) {
+      const newTeaserMetadata = {
+        ...teaserMetadata[key],
+        value: intialValues[key]
+      }
+      formatted.push(newTeaserMetadata);
+    }
+  }
+  return formatted;
 };
 
 type ConversionFunction = (value: string, detail: string) => string;
