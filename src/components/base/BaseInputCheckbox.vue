@@ -128,8 +128,8 @@ const handleItemSelection = () => {
     return;
 
   if (!inputValue.value)
-    enqueueItemForBulkProcessing(props.bulkOperationsContext, props.item);
-  else dequeueItemForBulkProcessing(props.bulkOperationsContext, props.item.id);
+    enqueueItemForBulkProcessing(props.bulkOperationsContext, { ...props.item, required: props.required });
+  else if (!props.required) dequeueItemForBulkProcessing(props.bulkOperationsContext, props.item.id);
 
   inputValue.value = !inputValue.value;
 };
@@ -146,6 +146,7 @@ const isDisabledByContextLimit = computed<boolean>(() => {
 });
 
 onMounted(() => {
+  if (props.required) enqueueItemForBulkProcessing(props.bulkOperationsContext, { ...props.item, required: props.required });
   if (props.ignoreBulkOperations) {
     inputValue.value = props.modelValue;
     return;
