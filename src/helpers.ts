@@ -475,3 +475,30 @@ export const getUserName = (auth: any): string => {
 export const getChildrenOfHomeRoutes = (config: any): [] => {
   return config.routerConfig.filter((item) => item.name === RouteNames.Home)[0].children;
 }
+
+// period string is in format of: "1 week", "2 month", "5 year"
+export function calculateFutureDate(period: string): Date {
+  const now = new Date();
+  const [amount, unit] = period.split(' ');
+
+  switch (unit) {
+    case 'day':
+    case 'days':
+      now.setDate(now.getDate() + parseInt(amount));
+      break;
+    case 'week':
+    case 'weeks':
+      now.setDate(now.getDate() + parseInt(amount) * 7);
+      break;
+    case 'month':
+    case 'months':
+      now.setMonth(now.getMonth() + parseInt(amount));
+      break;
+    default:
+      throw new Error(`Invalid period: ${period}`);
+  }
+
+  console.log("now");
+  console.log(now);
+  return now;
+}

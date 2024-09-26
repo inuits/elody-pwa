@@ -194,7 +194,7 @@ import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
 import { useI18n } from "vue-i18n";
 import useUpload from "@/composables/useUpload";
-import { goToEntityPage, goToEntityTypeRoute } from "@/helpers";
+import { calculateFutureDate, goToEntityPage, goToEntityTypeRoute } from "@/helpers";
 import type { Router } from "vue-router";
 import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUploadButton.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
@@ -363,6 +363,9 @@ const createEntityFromFormInput = (entityType: Entitytyping): EntityInput => {
       if (typeof form.value?.values.intialValues[key] === "boolean") {
         let bool = form.value?.values.intialValues[key] ? "true" : "false";
         return { key, value: bool };
+      }
+      if (key === "ttl") {
+        return { key, value: calculateFutureDate(form.value?.values.intialValues[key]) };
       }
       return { key, value: form.value?.values.intialValues[key] };
     })
