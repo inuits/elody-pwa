@@ -85,12 +85,12 @@ import {
   DamsIcons,
   type DropdownOption,
   Entitytyping,
-  FetchMediafilesOfAssetsDocument,
-  FetchMediafilesOfAssetsQuery,
+  FetchMediafilesOfEntityDocument,
+  FetchMediafilesOfEntityQuery,
+  FetchMediafilesOfEntityQueryVariables,
   GetBulkOperationCsvExportKeysDocument,
   type GetBulkOperationCsvExportKeysQuery,
   type GetBulkOperationCsvExportKeysQueryVariables,
-  GetMediafilesFilterQueryVariables,
   RouteNames,
   TypeModals,
 } from "@/generated-types/queries";
@@ -169,12 +169,12 @@ const csvExportOptions = ref<{ isSelected: boolean; key: DropdownOption }[]>(
   []
 );
 
-const queryVariablesForMediafiles: GetMediafilesFilterQueryVariables = {
-  assetIds: [],
+const queryVariablesForMediafiles: FetchMediafilesOfEntityQueryVariables = {
+  entityIds: [],
 };
 const { refetch: refetchMediafiles, onResult: mediafilesResult } =
-  useQuery<FetchMediafilesOfAssetsQuery>(
-    FetchMediafilesOfAssetsDocument,
+  useQuery<FetchMediafilesOfEntityQuery>(
+    FetchMediafilesOfEntityDocument,
     queryVariablesForMediafiles,
     () => ({ enabled: isFetchMediafilesOfAssetFlow.value })
   );
@@ -242,7 +242,7 @@ onResult((result) => {
 
 mediafilesResult((result) => {
   if (!result.data) return;
-  const mediafiles = result.data.FetchMediafilesOfAssets;
+  const mediafiles = result.data.FetchMediafilesOfEntity;
   mediafiles.forEach((mediafile) => {
     enqueueItemForBulkProcessing(RouteNames.Mediafiles, {
       id: mediafile.id,
@@ -258,7 +258,7 @@ mediafilesResult((result) => {
 
 const firstFetchMediafilesOfEntities = () => {
   const assets = getEnqueuedItems(RouteNames.Assets, skip.value, limit.value);
-  queryVariablesForMediafiles.assetIds = assets.map((asset) => asset.id);
+  queryVariablesForMediafiles.entityIds = assets.map((asset) => asset.id);
   refetchMediafiles(queryVariablesForMediafiles);
 };
 
