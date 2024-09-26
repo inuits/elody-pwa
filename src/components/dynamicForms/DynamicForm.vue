@@ -184,6 +184,7 @@ import {
   type UploadContainer,
   type UploadField,
   UploadFlow,
+  RouteNames,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -200,10 +201,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import ImportComponent from "@/components/ImportComponent.vue";
 import useTenant from "@/composables/useTenant";
@@ -447,8 +445,13 @@ const downloadActionFunction = async (field: FormAction) => {
         form.value.values
       )
     ).data.DownloadItemsInZip;
+    createNotificationOverwrite(
+      NotificationType.default,
+      t("notifications.success.downloadEntityCreated.title"),
+      t("notifications.success.downloadEntityCreated.description")
+    );
+    await props.router.replace({ name: RouteNames.Downloads });
     closeAndDeleteForm();
-    goToEntityPage(entity, "SingleEntity", props.router);
   } catch (e) {
     submitErrors.value = e.message;
   }
