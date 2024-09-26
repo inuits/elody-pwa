@@ -268,6 +268,7 @@ const {
   uploadCsvForReordering,
   __handleHttpError,
   __getCsvString,
+  resetUpload,
 } = useUpload();
 const {
   getAcceptedTypes,
@@ -475,6 +476,7 @@ const updateMetdataActionFunction = async (field: FormAction) => {
       t("notifications.success.updataMetdataCsv.description")
     );
   } catch (error) {
+    resetUpload();
     __handleHttpError(error);
     submitErrors.value = error.message;
   }
