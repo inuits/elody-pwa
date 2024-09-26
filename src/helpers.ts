@@ -12,6 +12,7 @@ import {
   Entitytyping,
   InputFieldTypes,
   RouteNames,
+  GetCustomFormattersSettingsDocument,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -22,6 +23,7 @@ import {
   useRoute,
 } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
+import { apolloClient } from "@/main";
 
 export const goToEntityPage = (
   entity: Entity,
@@ -413,6 +415,18 @@ export const getApplicationDetails = async () => {
   return { config, translations };
 };
 
+export const getFormattersSettings = async () => {
+  return await apolloClient
+    .query({
+      query: GetCustomFormattersSettingsDocument,
+      fetchPolicy: "no-cache",
+      notifyOnNetworkStatusChange: true,
+    })
+    .then((result) => {
+      return result.data.CustomFormattersSettings;
+    });
+};
+
 export const getObjectsBasedOnTypename = (
   parent: any,
   typename: string
@@ -473,5 +487,6 @@ export const getUserName = (auth: any): string => {
 };
 
 export const getChildrenOfHomeRoutes = (config: any): [] => {
-  return config.routerConfig.filter((item) => item.name === RouteNames.Home)[0].children;
-}
+  return config.routerConfig.filter((item) => item.name === RouteNames.Home)[0]
+    .children;
+};
