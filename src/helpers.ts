@@ -480,7 +480,6 @@ export const getChildrenOfHomeRoutes = (config: any): [] => {
 export function calculateFutureDate(period: string): Date {
   const now = new Date();
   const [amount, unit] = period.split(' ');
-
   switch (unit) {
     case 'day':
     case 'days':
@@ -497,8 +496,5 @@ export function calculateFutureDate(period: string): Date {
     default:
       throw new Error(`Invalid period: ${period}`);
   }
-
-  console.log("now");
-  console.log(now);
   return now;
 }
