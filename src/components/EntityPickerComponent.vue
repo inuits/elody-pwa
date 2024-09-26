@@ -109,7 +109,6 @@ const { mutate } = useMutation<
 >(MutateEntityValuesDocument);
 
 const form = getForm(getEntityUuid());
-const { setValues } = form;
 const ignoreCustomQuery = ref<boolean>(false);
 const newQuery = ref<object | undefined>(undefined);
 const queryLoaded = ref<boolean>(false);
@@ -167,6 +166,7 @@ const getAlreadySelectedEntityIds = (): string[] => {
 };
 
 const submit = useSubmitForm<EntityValues>(async () => {
+  const { setValues } = form;
   const collection =
     childRoutes.find(
       (route: any) =>
