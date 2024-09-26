@@ -496,5 +496,5 @@ export function calculateFutureDate(period: string): Date {
     default:
       throw new Error(`Invalid period: ${period}`);
   }
-  return now;
+  return now.getTime();
 }
