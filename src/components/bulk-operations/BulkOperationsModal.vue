@@ -78,7 +78,7 @@ import {
   BulkOperationsContextEnum,
   type Context,
   type InBulkProcessableItem,
-  useBulkOperations
+  useBulkOperations,
 } from "@/composables/useBulkOperations";
 import {
   BulkOperationTypes,
@@ -92,7 +92,7 @@ import {
   type GetBulkOperationCsvExportKeysQueryVariables,
   GetMediafilesFilterQueryVariables,
   RouteNames,
-  TypeModals
+  TypeModals,
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
@@ -101,7 +101,10 @@ import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperations
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import ListItem from "@/components/ListItem.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
-import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
+import {
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
 import { computed, inject, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
@@ -118,7 +121,7 @@ const entityTypeMapping: MapRouteNameAgainstEntitytype = {
   [RouteNames.Mediafiles]: Entitytyping.Mediafile,
   [BulkOperationsContextEnum.EntityElementMedia]: Entitytyping.Mediafile,
   default: Entitytyping.Asset,
-}
+};
 
 const {
   getEnqueuedItems,
@@ -139,21 +142,28 @@ const skip = ref<number>(1);
 const limit = ref<number>(config.bulkSelectAllSizeLimit);
 
 const isFetchMediafilesOfAssetFlow = ref<boolean>(false);
-const entityType = computed(() => isFetchMediafilesOfAssetFlow.value ? Entitytyping.Mediafile : entityTypeMapping[context.value]);
-const context: Context = computed(() => getModal(TypeModals.BulkOperations).context);
+const entityType = computed(() =>
+  isFetchMediafilesOfAssetFlow.value
+    ? Entitytyping.Mediafile
+    : entityTypeMapping[context.value]
+);
+const context: Context = computed(
+  () => getModal(TypeModals.BulkOperations).context
+);
 
 const items = ref<InBulkProcessableItem[]>([]);
 const loadItems = () =>
   (items.value = getEnqueuedItems(context.value, skip.value, limit.value));
 
 const refetchEnabled = ref<boolean>(false);
-const queryVariablesForExportKeys: GetBulkOperationCsvExportKeysQueryVariables = {
-  entityType: entityType.value
-};
+const queryVariablesForExportKeys: GetBulkOperationCsvExportKeysQueryVariables =
+  {
+    entityType: entityType.value,
+  };
 const { refetch, onResult } = useQuery<GetBulkOperationCsvExportKeysQuery>(
   GetBulkOperationCsvExportKeysDocument,
   queryVariablesForExportKeys,
-  () => ({ enabled: entityType.value && refetchEnabled.value })
+  () => ({ enabled: ref<boolean>(!!entityType.value && refetchEnabled.value) })
 );
 const csvExportOptions = ref<{ isSelected: boolean; key: DropdownOption }[]>(
   []
@@ -162,12 +172,12 @@ const csvExportOptions = ref<{ isSelected: boolean; key: DropdownOption }[]>(
 const queryVariablesForMediafiles: GetMediafilesFilterQueryVariables = {
   assetIds: [],
 };
-const { refetch: refetchMediafiles, onResult: mediafilesResult } = useQuery<FetchMediafilesOfAssetsQuery>(
-  FetchMediafilesOfAssetsDocument,
-  queryVariablesForMediafiles,
-  () => ({ enabled: isFetchMediafilesOfAssetFlow.value })
-);
-
+const { refetch: refetchMediafiles, onResult: mediafilesResult } =
+  useQuery<FetchMediafilesOfAssetsQuery>(
+    FetchMediafilesOfAssetsDocument,
+    queryVariablesForMediafiles,
+    () => ({ enabled: isFetchMediafilesOfAssetFlow.value })
+  );
 
 const bulkSelect = () => {
   for (let csvExportOption of csvExportOptions.value)
@@ -187,7 +197,9 @@ const exportCsv = async () => {
       fieldQueryParameter += `&field[]=${option.key.value}`;
   });
 
-  const exportURL = `/api/export/csv?type=${entityType.value}&ids=${getEnqueuedItems(context.value)
+  const exportURL = `/api/export/csv?type=${
+    entityType.value
+  }&ids=${getEnqueuedItems(context.value)
     .map((item) => item.id)
     .join(",")}${fieldQueryParameter}`;
 
@@ -245,37 +257,38 @@ mediafilesResult((result) => {
 });
 
 const firstFetchMediafilesOfEntities = () => {
-  const assets = getEnqueuedItems(RouteNames.Assets, skip.value, limit.value)
+  const assets = getEnqueuedItems(RouteNames.Assets, skip.value, limit.value);
   queryVariablesForMediafiles.assetIds = assets.map((asset) => asset.id);
   refetchMediafiles(queryVariablesForMediafiles);
-}
+};
 
 const executeNormalFlow = () => {
   refetchEnabled.value = true;
   queryVariablesForExportKeys.entityType = entityType.value;
   refetch(queryVariablesForExportKeys);
   loadItems();
-}
+};
 
 const determineFlow = () => {
   if (!context.value || !modal?.open) return;
   const savedContext = getModalInfo(TypeModals.BulkOperations).savedContext;
-  isFetchMediafilesOfAssetFlow.value = savedContext && savedContext.type === BulkOperationTypes.ExportCsvOfMediafilesFromAsset;
+  isFetchMediafilesOfAssetFlow.value =
+    savedContext &&
+    savedContext.type === BulkOperationTypes.ExportCsvOfMediafilesFromAsset;
   if (isFetchMediafilesOfAssetFlow.value) firstFetchMediafilesOfEntities();
   else executeNormalFlow();
-}
+};
 
 watch(
   () => context.value,
   () => determineFlow(),
   { immediate: true }
-)
+);
 
 watch(
   () => modal?.open,
   (isBulkOperationsModalOpen: boolean | undefined) => {
-    if (isBulkOperationsModalOpen)
-      determineFlow();
+    if (isBulkOperationsModalOpen) determineFlow();
     else
       dequeueAllItemsForBulkProcessing(
         BulkOperationsContextEnum.BulkOperationsCsvExport
