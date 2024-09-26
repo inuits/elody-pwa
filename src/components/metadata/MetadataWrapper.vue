@@ -47,7 +47,10 @@
     >
       <template #activator="{ on }">
         <div v-on="on">
-          <Formatter v-if="metadata.value.formatter" v-bind="metadata.value" />
+          <MetadataFormatter
+            v-if="metadata.value.formatter"
+            v-bind="metadata.value"
+          />
           <ViewModesAutocomplete
             v-else-if="
               (metadata.inputField?.type ===
@@ -101,7 +104,7 @@
 <script lang="ts" setup>
 import EntityElementMetadataEdit from "@/components/metadata/EntityElementMetadataEdit.vue";
 import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.vue";
-import Formatter from "@/components/metadata/Formatter.vue";
+import MetadataFormatter from "@/components/metadata/MetadataFormatter.vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import {
   BaseLibraryModes,
@@ -169,7 +172,7 @@ defineExpose({
 });
 
 const metadadaValueToDisplayOnTooltip = computed(
-  () => props.metadata?.value?.value || value.value
+  () => props.metadata?.value?.label || value.value
 );
 
 const isMetadataOnRelation = computed(
