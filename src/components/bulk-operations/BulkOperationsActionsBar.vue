@@ -203,10 +203,11 @@ const entityType = computed(() => props.entityType || route.meta.entityType);
 const { mutate } = useMutation<GenerateTranscodeMutation>(
   GenerateTranscodeDocument
 );
+const fetchEnabled = ref<boolean>(entityType.value ? refetchEnabled.value : false)
 const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
   GetBulkOperationsDocument,
   { entityType: entityType.value },
-  () => ({ enabled: entityType.value ? refetchEnabled.value : false })
+  () => ({ enabled: fetchEnabled })
 );
 const bulkOperations = ref<DropdownOption[]>([]);
 const selectedBulkOperation = ref<DropdownOption>();
