@@ -1,7 +1,13 @@
-import type { MediaFileEntity } from "@/generated-types/queries";
+import {
+  KeyValueSource,
+  type MediaFileEntity,
+} from "@/generated-types/queries";
 import { reactive } from "vue";
 
-type MediaFileKeys =
+type MediaFileRootKeys = "id" | "uuid";
+
+type MediaFileMetadataKeys =
+  | "id"
   | "filename"
   | "original_file_location"
   | "transcode_filename"
@@ -22,11 +28,18 @@ const mediafileSelectionState = reactive<MediafileSelectionState>({
 
 export const useEntityMediafileSelector = () => {
   const getValueOfMediafile = (
-    key: MediaFileKeys,
+    key: MediaFileRootKeys | MediaFileMetadataKeys,
     mediafile:
       | MediaFileEntity
-      | undefined = mediafileSelectionState.selectedMediafile
-  ) => (mediafile?.intialValues as any)?.[key];
+      | undefined = mediafileSelectionState.selectedMediafile,
+    source: KeyValueSource = KeyValueSource.Metadata
+  ) => {
+    if (source === KeyValueSource.Metadata)
+      return (mediafile?.intialValues as any)?.[key as MediaFileMetadataKeys];
+    if (source === KeyValueSource.Root)
+      return mediafile?.[key as MediaFileRootKeys];
+    else return undefined;
+  };
 
   const setEntityMediafiles = (mediafiles: MediaFileEntity[]) => {
     mediafileSelectionState.mediafiles = mediafiles;
