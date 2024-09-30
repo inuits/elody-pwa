@@ -289,10 +289,12 @@ watch(
   () => modal?.open,
   (isBulkOperationsModalOpen: boolean | undefined) => {
     if (isBulkOperationsModalOpen) determineFlow();
-    else
+    else {
       dequeueAllItemsForBulkProcessing(
         BulkOperationsContextEnum.BulkOperationsCsvExport
       );
+      dequeueAllItemsForBulkProcessing(RouteNames.Mediafiles);
+    }
   }
 );
 </script>
