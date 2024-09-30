@@ -5,7 +5,12 @@
     modal-color="bg-neutral-lightest"
     @hide-modal="closeModal(TypeModals.Delete)"
   >
-    <div class="flex flex-col w-full h-full overflow-hidden">
+    <div
+      class="flex flex-col w-full h-full overflow-hidden"
+      :class="[
+        { 'pt-5': numberOfBlockingQueryEntities <= 0 }
+      ]"
+    >
       <div class="w-full">
         <h1 class="title flex justify-center">
           {{ t("navigation.delete-entity-window") }}
@@ -44,22 +49,24 @@
           (!numberOfBlockingQueryEntities || numberOfBlockingQueryEntities <= 0)
         "
       >
-        <div class="title pl-4">
-          {{ t("actions.labels.delete-relation-entities") }}
-        </div>
-        <entity-picker-component
-          :entity-uuid="savedContext.parentId"
-          :accepted-types="deleteQueryOptions.customQueryEntityTypes"
-          :custom-query="deleteQueryOptions.customQueryDeleteRelations"
-          :custom-filters-query="
+        <div v-if="deleteQueryOptions.customQueryDeleteRelations" >
+          <div class="title pl-4">
+            {{ t("actions.labels.delete-relation-entities") }}
+          </div>
+          <entity-picker-component
+            :entity-uuid="savedContext.parentId"
+            :accepted-types="deleteQueryOptions.customQueryEntityTypes"
+            :custom-query="deleteQueryOptions.customQueryDeleteRelations"
+            :custom-filters-query="
             deleteQueryOptions.customQueryDeleteRelationsFilters
           "
-          :show-button="false"
-          :enable-bulk-operations="false"
-          :enable-advanced-filters="false"
-          base-library-height="h-fit"
-        />
-        <ConfirmModalView class="mb-10 h-max"></ConfirmModalView>
+            :show-button="false"
+            :enable-bulk-operations="false"
+            :enable-advanced-filters="false"
+            base-library-height="h-fit"
+          />
+        </div>
+        <ConfirmModalView class="h-max"></ConfirmModalView>
       </div>
     </div>
   </BaseModal>
