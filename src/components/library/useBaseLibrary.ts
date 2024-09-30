@@ -4,6 +4,7 @@ import {
   Entitytyping,
   GetEntitiesDocument,
   SearchInputType,
+  GetEntitiesTotalCountDocument,
   type AdvancedFilterInput,
   type Entity,
   type GetEntitiesQueryVariables,
@@ -86,7 +87,7 @@ export const useBaseLibrary = (
     if (stateSaved) queryVariables.skip = 1;
 
     if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
-    if (forceFetch && _route !== undefined) await getEntities(_route);
+    if (forceFetch && _route !== undefined) await Promise.allSettled([getEntities(_route), getEntitiesTotalCount(_route)]);
   };
 
   const setSkip = async (
@@ -95,7 +96,7 @@ export const useBaseLibrary = (
   ): Promise<void> => {
     queryVariables.skip = skip;
     if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
-    if (forceFetch && _route !== undefined) await getEntities(_route);
+    if (forceFetch && _route !== undefined) await Promise.allSettled([getEntities(_route), getEntitiesTotalCount(_route)]);
   };
 
   const setLimit = async (
@@ -104,7 +105,7 @@ export const useBaseLibrary = (
   ): Promise<void> => {
     queryVariables.limit = limit;
     if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
-    if (forceFetch && _route !== undefined) await getEntities(_route);
+    if (forceFetch && _route !== undefined) await Promise.allSettled([getEntities(_route), getEntitiesTotalCount(_route)]);
   };
 
   const setSortKey = async (
@@ -113,7 +114,7 @@ export const useBaseLibrary = (
   ): Promise<void> => {
     queryVariables.searchValue.order_by = sortKey;
     if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
-    if (forceFetch && _route !== undefined) await getEntities(_route);
+    if (forceFetch && _route !== undefined) await Promise.allSettled([getEntities(_route), getEntitiesTotalCount(_route)]);
   };
 
   const setSortOrder = async (
@@ -122,7 +123,7 @@ export const useBaseLibrary = (
   ): Promise<void> => {
     queryVariables.searchValue.isAsc = sortOrder === "asc";
     if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
-    if (forceFetch && _route !== undefined) await getEntities(_route);
+    if (forceFetch && _route !== undefined) await Promise.allSettled([getEntities(_route), getEntitiesTotalCount(_route)]);
   };
 
   const enqueuePromise = (
@@ -181,17 +182,55 @@ export const useBaseLibrary = (
       .then((result) => {
         const fetchedEntities = result.data.Entities;
         entities.value = fetchedEntities?.results as Entity[];
-        totalEntityCount.value = fetchedEntities?.count || 0;
         if (shouldUseStateForRoute)
           updateStateForRoute(_route, {
             entityCountOnPage: fetchedEntities.results.length,
-            totalEntityCount: fetchedEntities.count,
           });
         entitiesLoading.value = false;
       })
       .catch(() => {
         entities.value = [];
         entitiesLoading.value = false;
+      });
+  };
+
+  const getEntitiesTotalCount = async (
+    route: RouteLocationNormalizedLoaded | undefined
+  ): Promise<void> => {
+    totalEntityCount.value = 0;
+    await Promise.all(promiseQueue.value.map((promise) => promise(entityType)));
+    while (promiseQueue.value.length > 0) promiseQueue.value.shift();
+
+    _route = route;
+    let variables =
+      shouldUseStateForRoute && getStateForRoute(_route)?.queryVariables;
+    if (variables) queryVariables = variables;
+    else if (!variables && shouldUseStateForRoute)
+      updateStateForRoute(_route, { queryVariables });
+    if (
+      !variables ||
+      _route?.name === "SingleEntity" ||
+      !shouldUseStateForRoute
+    )
+      variables = queryVariables;
+
+    await apolloClient
+      .query({
+        query: GetEntitiesTotalCountDocument,
+        variables,
+        fetchPolicy: "no-cache",
+        notifyOnNetworkStatusChange: true,
+      })
+      .then((result) => {
+        const fetchedEntities = result.data.Entities;
+        totalEntityCount.value = fetchedEntities?.count || 0;
+        if (shouldUseStateForRoute)
+          updateStateForRoute(_route, {
+            totalEntityCount: fetchedEntities.count,
+          });
+      })
+      .catch(() => {
+        totalEntityCount.value = 0;
       });
   };
 
@@ -214,6 +253,7 @@ export const useBaseLibrary = (
     entitiesLoading,
     getCustomBulkOperations,
     getEntities,
+    getEntitiesTotalCount,
     manipulationQuery,
     setAdvancedFilters,
     setEntityType,
