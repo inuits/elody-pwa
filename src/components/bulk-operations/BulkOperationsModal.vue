@@ -241,7 +241,7 @@ onResult((result) => {
 });
 
 mediafilesResult((result) => {
-  if (!result.data) return;
+  if (!result.data || !isFetchMediafilesOfAssetFlow.value) return;
   const mediafiles = result.data.FetchMediafilesOfEntity;
   mediafiles.forEach((mediafile) => {
     enqueueItemForBulkProcessing(RouteNames.Mediafiles, {
