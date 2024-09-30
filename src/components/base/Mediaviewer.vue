@@ -21,7 +21,7 @@
           getValueOfMediafile('filename') ||
           ''
         "
-        :downloadLocation="getValueOfMediafile('original_file_location')"
+        :mediafileId="getValueOfMediafile('id', undefined, KeyValueSource.Root)"
       />
       <VideoPlayer
         v-if="viewerType === ElodyViewers.Video"
@@ -44,7 +44,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ElodyViewers, type MediaFileEntity } from "@/generated-types/queries";
+import {
+  ElodyViewers,
+  KeyValueSource,
+  type MediaFileEntity,
+} from "@/generated-types/queries";
 import AudioPlayer from "@/components/base/AudioPlayer.vue";
 import EntityImageSelection from "@/components/EntityImageSelection.vue";
 import IIIFViewer from "@/components/IIIFViewer.vue";

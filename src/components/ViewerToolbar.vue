@@ -23,7 +23,7 @@
           class="text-neutral-700 cursor-pointer"
         />
       </a>
-      <a v-if="downloadLocation" @click="downloadImage">
+      <a v-if="mediafileId" @click="downloadImage">
         <unicon
           :name="Unicons.Download.name"
           height="20"
@@ -78,7 +78,7 @@ export default defineComponent({
       type: Object as PropType<HTMLDivElement | string | null>,
       default: null,
     },
-    downloadLocation: {
+    mediafileId: {
       type: String,
       default: "",
     },
@@ -99,10 +99,15 @@ export default defineComponent({
       emit("update:home", homeRef.value);
     });
 
-    const downloadImage = () => {
-      if (_props.downloadLocation) {
-        window.open(_props.downloadLocation, "_blank");
-      }
+    const downloadImage = async () => {
+      if (!_props.mediafileId)
+        throw Error(
+          `Could not download madiafile with id "${_props.mediafileId}"`
+        );
+      const response = await fetch(
+        `/api/mediafiles/${_props.mediafileId}/download`
+      );
+      window.open(await response.text(), "_blank");
     };
 
     return {

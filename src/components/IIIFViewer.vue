@@ -6,7 +6,7 @@
       v-model:zoomOut="zoomOutDiv"
       v-model:fullPage="fullPageButtonDiv"
       v-model:home="homeDiv"
-      :downloadLocation="downloadLocation"
+      :mediafileId="mediafileId"
     />
     <div
       v-show="loading"
@@ -31,7 +31,7 @@ export default defineComponent({
   props: {
     imageFilename: { type: String, default: "" },
     isPublic: { type: Boolean, default: true },
-    downloadLocation: { type: String },
+    mediafileId: { type: String },
   },
   setup: (props) => {
     const OpenSeadragonDiv = ref<HTMLDivElement | undefined>(undefined);
