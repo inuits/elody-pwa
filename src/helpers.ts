@@ -288,8 +288,8 @@ export const formatTeaserMetadata = (
     if (key !== "__typename" && intialValues && teaserMetadata[key].label) {
       const newTeaserMetadata = {
         ...teaserMetadata[key],
-        value: intialValues[key]
-      }
+        value: intialValues[key],
+      };
       formatted.push(newTeaserMetadata);
     }
   }
@@ -472,29 +472,34 @@ export const getUserName = (auth: any): string => {
   return user.name || user.given_name || user.email || user.family_name;
 };
 
+export const getHomeRoute = (config: any) => {
+  return config.routerConfig.filter((item) => item.name === RouteNames.Home)[0];
+};
+
 export const getChildrenOfHomeRoutes = (config: any): [] => {
-  return config.routerConfig.filter((item) => item.name === RouteNames.Home)[0].children;
-}
+  return config.routerConfig.filter((item) => item.name === RouteNames.Home)[0]
+    .children;
+};
 
 // period string is in format of: "1 week", "2 month", "5 year"
 export function calculateFutureDate(period: string): Date {
   const now = new Date();
-  const [amount, unit] = period.split(' ');
+  const [amount, unit] = period.split(" ");
   switch (unit) {
-    case 'day':
-    case 'days':
+    case "day":
+    case "days":
       now.setDate(now.getDate() + parseInt(amount));
       break;
-    case 'week':
-    case 'weeks':
+    case "week":
+    case "weeks":
       now.setDate(now.getDate() + parseInt(amount) * 7);
       break;
-    case 'month':
-    case 'months':
+    case "month":
+    case "months":
       now.setMonth(now.getMonth() + parseInt(amount));
       break;
     default:
       throw new Error(`Invalid period: ${period}`);
   }
-  return now.getTime()/1000;
+  return now.getTime() / 1000;
 }
