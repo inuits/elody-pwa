@@ -109,18 +109,30 @@ import { computed, inject, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
-import { formatTeaserMetadata } from "@/helpers";
+import {
+  formatTeaserMetadata,
+  getChildrenOfHomeRoutes,
+  getHomeRoute,
+} from "@/helpers";
 
-type MapRouteNameAgainstEntitytype = {
-  [key: RouteNames | BulkOperationsContextEnum]: Entitytyping;
+const entityTypeMappingByContext: {
+  [key: string]: Entitytyping;
+} = {
+  [BulkOperationsContextEnum.EntityElementMedia]: Entitytyping.Mediafile,
 };
 
-const entityTypeMapping: MapRouteNameAgainstEntitytype = {
-  [RouteNames.Assets]: Entitytyping.Asset,
-  [RouteNames.Home]: Entitytyping.Asset,
-  [RouteNames.Mediafiles]: Entitytyping.Mediafile,
-  [BulkOperationsContextEnum.EntityElementMedia]: Entitytyping.Mediafile,
-  default: Entitytyping.Asset,
+const getEntityTypeByContext = (
+  context: BulkOperationsContextEnum | string
+): string | undefined => {
+  const entityTypeByContext =
+    entityTypeMappingByContext[context as BulkOperationsContextEnum];
+  if (entityTypeByContext) return entityTypeByContext;
+
+  const route = [getHomeRoute(config), ...getChildrenOfHomeRoutes(config)].find(
+    (route: { name: string }) => route.name === context
+  );
+
+  return route?.meta?.entityType;
 };
 
 const {
@@ -145,8 +157,9 @@ const isFetchMediafilesOfAssetFlow = ref<boolean>(false);
 const entityType = computed(() =>
   isFetchMediafilesOfAssetFlow.value
     ? Entitytyping.Mediafile
-    : entityTypeMapping[context.value]
+    : getEntityTypeByContext(context.value)
 );
+
 const context: Context = computed(
   () => getModal(TypeModals.BulkOperations).context
 );
