@@ -109,7 +109,11 @@ import { computed, inject, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
-import { formatTeaserMetadata, getChildrenOfHomeRoutes } from "@/helpers";
+import {
+  formatTeaserMetadata,
+  getChildrenOfHomeRoutes,
+  getHomeRoute,
+} from "@/helpers";
 
 const entityTypeMappingByContext: {
   [key: string]: Entitytyping;
@@ -124,7 +128,7 @@ const getEntityTypeByContext = (
     entityTypeMappingByContext[context as BulkOperationsContextEnum];
   if (entityTypeByContext) return entityTypeByContext;
 
-  const route = getChildrenOfHomeRoutes(config).find(
+  const route = [getHomeRoute(config), ...getChildrenOfHomeRoutes(config)].find(
     (route: { name: string }) => route.name === context
   );
 
