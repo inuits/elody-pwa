@@ -42,7 +42,7 @@ const props = defineProps<{
   entityId: String;
   entityType: Entitytyping;
   parentEntityId?: String;
-  relation: object;
+  relation?: object;
 }>();
 
 const handleEmit = () => {

@@ -7,8 +7,6 @@ import {
   type AdvancedFilterInput,
   type Entity,
   type GetEntitiesQueryVariables,
-  type IntialValues,
-  type Metadata,
 } from "@/generated-types/queries";
 import useEditMode from "@/composables/useEdit";
 import { createPlaceholderEntities } from "@/helpers";
