@@ -5,6 +5,7 @@
     <div class="flex w-full items-center">
       <BreadCrumbs />
       <EditToggle v-if="auth.isAuthenticated.value === true" />
+      <!--      <EntityDetailHeaderContextMenu v-if="isSingle" />-->
     </div>
     <div class="flex w-full justify-end px-2">
       <LanguageSelect />
@@ -25,6 +26,9 @@ import SearchBar from "@/components/SearchBar.vue";
 import TenantSwitcher from "@/components/menu/TenantSwitcher.vue";
 import { inject } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
+import useRouteHelpers from "@/composables/useRouteHelpers";
+import EntityDetailHeaderContextMenu from "@/components/EntityDetailHeaderContextMenu.vue";
+const { isSingle } = useRouteHelpers();
 
 const auth = useAuth();
 const config: any = inject("config");
