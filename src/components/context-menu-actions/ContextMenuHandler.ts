@@ -9,15 +9,12 @@ export type ContextMenu = {
 };
 
 export class ContextMenuHandler {
-  private contextMenu = ref<ContextMenu>();
-  constructor() {
-    this.contextMenu.value = {
-      isVisible: false,
-      position: { x: 0, y: 0 },
-    };
-  }
+  private contextMenu = ref<ContextMenu>({
+    isVisible: false,
+    position: { x: 0, y: 0 },
+  });
 
-  public getContextMenu = (): ContextMenu => {
+  public getContextMenu = (): ContextMenu | undefined => {
     return this.contextMenu.value;
   };
   public openContextMenu = (position: { x: number; y: number }): void => {
