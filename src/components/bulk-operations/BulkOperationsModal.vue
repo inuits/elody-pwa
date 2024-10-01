@@ -266,7 +266,7 @@ mediafilesResult((result) => {
 });
 
 const firstFetchMediafilesOfEntities = () => {
-  const assets = getEnqueuedItems(RouteNames.Medias, skip.value, limit.value);
+  const assets = getEnqueuedItems(RouteNames.Assets, skip.value, limit.value);
   queryVariablesForMediafiles.entityIds = assets.map((asset) => asset.id);
   refetchMediafiles(queryVariablesForMediafiles);
 };
