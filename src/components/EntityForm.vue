@@ -15,7 +15,7 @@ import {
   DeleteQueryOptions,
   Collection,
   ModalStyle,
-  RouteNames
+  RouteNames,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -72,10 +72,7 @@ const {
   resetButtonClicked,
   buttonClicked,
 } = useEditMode();
-const {
-  createForm,
-  parseFormValuesToFormInput,
-} = useFormHelper();
+const { createForm, parseFormValuesToFormInput } = useFormHelper();
 const { createNotification } = useNotification();
 const { closeModal, openModal, updateDeleteQueryOptions } = useBaseModal();
 const { t } = useI18n();

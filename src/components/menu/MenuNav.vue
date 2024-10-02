@@ -19,7 +19,9 @@
       <div
         v-for="menuItem in menuItems"
         :key="menuItem.label"
-        @click.capture="changeHoveredItem(menuItem) & changeExpandedStateOfMenu(true)"
+        @click.capture="
+          changeHoveredItem(menuItem) & changeExpandedStateOfMenu(true)
+        "
       >
         <Menuitem
           :icon="menuItem.icon"
@@ -97,7 +99,7 @@ const closeExpanded = (event: any) => {
 };
 
 router.afterEach((to) => {
-  changeExpandedStateOfMenu(false)
+  changeExpandedStateOfMenu(false);
 });
 </script>
 

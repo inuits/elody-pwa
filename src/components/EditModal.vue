@@ -29,7 +29,7 @@ import {
   Entitytyping,
   ModalStyle,
   RouteNames,
-  TypeModals
+  TypeModals,
 } from "@/generated-types/queries";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
 import useTenant from "@/composables/useTenant";

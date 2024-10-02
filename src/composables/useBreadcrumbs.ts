@@ -6,7 +6,7 @@ import {
   Entitytyping,
   GetEntitiesDocument,
   type GetEntitiesQueryVariables,
-  SearchInputType
+  SearchInputType,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
 import { computed, ref } from "vue";
@@ -22,28 +22,36 @@ export type VisitedRoute = {
 export type RootRoute = {
   rootId: string;
   rootTitle: string;
-}
+};
 export type BreadcrumbRoute = {
   id: string;
   title: string;
   overviewPage: string;
   type: string;
-}
+};
 
 const rootRoute = ref<RootRoute>({});
 const breadcrumbRoutes = ref<BreadcrumbRoute[]>([]);
 
 const useBreadcrumbs = (config: any) => {
   const homeRoutes = getChildrenOfHomeRoutes(config);
-  const previousRoute = computed<VisitedRoute | undefined>(() => breadcrumbRoutes.value[breadcrumbRoutes.value.length - 1]);
+  const previousRoute = computed<VisitedRoute | undefined>(
+    () => breadcrumbRoutes.value[breadcrumbRoutes.value.length - 1]
+  );
 
   const getRouteBreadcrumbsOfEntity = (entitytype: Entitytyping): any => {
-    const entityRoute = homeRoutes.filter((item: any) => item.meta.entityType?.toLowerCase() === entitytype.toLowerCase())[0];
+    const entityRoute = homeRoutes.filter(
+      (item: any) =>
+        item.meta.entityType?.toLowerCase() === entitytype.toLowerCase()
+    )[0];
     if (!entityRoute) return;
     return entityRoute.meta.breadcrumbs;
-  }
+  };
 
-  const iterateOverBreadcrumbs = async (parentId: string[], routeBreadcrumbs: any) => {
+  const iterateOverBreadcrumbs = async (
+    parentId: string[],
+    routeBreadcrumbs: any
+  ) => {
     let entities: Entity[] = [];
     for (const index in routeBreadcrumbs) {
       if (routeBreadcrumbs[index].overviewPage) {
@@ -52,10 +60,16 @@ const useBreadcrumbs = (config: any) => {
       }
       const entityType = routeBreadcrumbs[index].entityType;
       const relation = routeBreadcrumbs[index].relation;
-      entities = await fetchRelationsBasedOnEntityType(createFilters(parentId, entityType, relation));
+      entities = await fetchRelationsBasedOnEntityType(
+        createFilters(parentId, entityType, relation)
+      );
       if (entities.length > 0) {
         const idOfParent = entities[0].id;
-        if (idOfParent === getRootRouteId() || breadcrumbRoutes.value.filter(item => item.id === idOfParent).length > 0) {
+        if (
+          idOfParent === getRootRouteId() ||
+          breadcrumbRoutes.value.filter((item) => item.id === idOfParent)
+            .length > 0
+        ) {
           addOverviewPageToBreadcrumb(routeBreadcrumbs);
           entities = undefined;
           break;
@@ -65,40 +79,48 @@ const useBreadcrumbs = (config: any) => {
       }
     }
     return entities ? entities[0] : undefined;
-  }
+  };
 
   const addOverviewPageToBreadcrumb = (routeBreadcrumbs: any) => {
-    const routeBreadcrumbsWithOverviewPage = routeBreadcrumbs[routeBreadcrumbs.length - 1];
-    breadcrumbRoutes.value.unshift({ title: routeBreadcrumbsWithOverviewPage.overviewPage, overviewPage: routeBreadcrumbsWithOverviewPage.overviewPage });
-  }
+    const routeBreadcrumbsWithOverviewPage =
+      routeBreadcrumbs[routeBreadcrumbs.length - 1];
+    breadcrumbRoutes.value.unshift({
+      title: routeBreadcrumbsWithOverviewPage.overviewPage,
+      overviewPage: routeBreadcrumbsWithOverviewPage.overviewPage,
+    });
+  };
 
   const addTitleToBreadcrumb = (title: string) => {
     breadcrumbRoutes.value[0].title = title;
-  }
+  };
 
   const getFullBreadcrumbPath = (): BreadcrumbRoute[] => {
     return breadcrumbRoutes.value;
-  }
+  };
 
   const clearBreadcrumbPath = (): void => {
     breadcrumbRoutes.value = [];
-  }
+  };
 
   const clearBreadcrumbPathAndAddOverviewPage = (title: string): void => {
     setRootRoute(undefined, title);
     clearBreadcrumbPath();
-  }
+  };
 
   const setRootRoute = (id: string, title: string): void => {
     rootRoute.value.rootId = id;
     rootRoute.value.rootTitle = title;
-  }
+  };
 
   const getRootRouteId = (): string => {
     return rootRoute.value.rootId;
-  }
+  };
 
-  const createFilters = (parentId: string[], entityType: Entitytyping, relation: string) => {
+  const createFilters = (
+    parentId: string[],
+    entityType: Entitytyping,
+    relation: string
+  ) => {
     const advancedFilters: AdvancedFilterInput[] = [
       {
         match_exact: true,
@@ -110,7 +132,7 @@ const useBreadcrumbs = (config: any) => {
         type: AdvancedFilterTypes.Selection,
         key: [`elody:1|relations.${relation}.key`],
         value: parentId,
-      }
+      },
     ];
     const queryVariables: GetEntitiesQueryVariables = {
       type: entityType,
@@ -126,10 +148,12 @@ const useBreadcrumbs = (config: any) => {
       advancedSearchValue: [],
       advancedFilterInputs: advancedFilters,
     };
-    return queryVariables
-  }
+    return queryVariables;
+  };
 
-  const fetchRelationsBasedOnEntityType = async (queryVariables: GetEntitiesQueryVariables) => {
+  const fetchRelationsBasedOnEntityType = async (
+    queryVariables: GetEntitiesQueryVariables
+  ) => {
     let entities: Entity[] = [];
     await apolloClient
       .query({
@@ -146,14 +170,16 @@ const useBreadcrumbs = (config: any) => {
         entities = [];
       });
     return entities;
-  }
+  };
 
   useRouter().afterEach((to) => {
     try {
       if (to.meta.title !== "Single Asset" && to.meta.title !== "Single Entity")
-        clearBreadcrumbPathAndAddOverviewPage(to.meta.breadcrumbs[to.meta.breadcrumbs.length - 1].overviewPage as string);
-    } catch (e) {
-    }
+        clearBreadcrumbPathAndAddOverviewPage(
+          to.meta.breadcrumbs[to.meta.breadcrumbs.length - 1]
+            .overviewPage as string
+        );
+    } catch (e) {}
   });
 
   return {
@@ -165,11 +191,7 @@ const useBreadcrumbs = (config: any) => {
     setRootRoute,
     previousRoute,
     iterateOverBreadcrumbs,
-  }
-}
+  };
+};
 
-export {
-  useBreadcrumbs,
-  breadcrumbRoutes,
-  rootRoute,
-}
+export { useBreadcrumbs, breadcrumbRoutes, rootRoute };

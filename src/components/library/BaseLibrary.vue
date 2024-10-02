@@ -123,7 +123,9 @@
               @apply-custom-bulk-operations="
                 async () => await applyCustomBulkOperations()
               "
-              @initialize-entity-picker-component="() => initializeEntityPickerComponent()"
+              @initialize-entity-picker-component="
+                () => initializeEntityPickerComponent()
+              "
               @refetch="async () => await refetchEntities()"
             />
           </div>
@@ -499,7 +501,7 @@ const initializeEntityPickerComponent = () => {
   setRelationType(props.relationType);
   setCustomGetEntitiesQuery(props.customQueryEntityPickerList);
   setCustomGetEntitiesFiltersQuery(props.customQueryEntityPickerListFilters);
-}
+};
 
 onMounted(async () => {
   await initializeBaseLibrary();

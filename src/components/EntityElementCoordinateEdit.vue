@@ -79,7 +79,7 @@ const { t } = useI18n();
 
 onMounted(() => {
   setFormValues(computedLatitude.value, computedLongitude.value);
-})
+});
 
 const setFormValues = (latitude: string, longitude: string) => {
   if (form) {

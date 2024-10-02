@@ -81,7 +81,9 @@
             :allowed-actions-on-relations="allowedActionsOnRelations"
             :custom-bulk-operations="customBulkOperations"
             :custom-query-entity-picker-list="customQueryEntityPickerList"
-            :custom-query-entity-picker-list-filters="customQueryEntityPickerListFilters"
+            :custom-query-entity-picker-list-filters="
+              customQueryEntityPickerListFilters
+            "
           />
           <BaseLibrary
             class="flex-1"
@@ -107,7 +109,9 @@
             :allowed-actions-on-relations="allowedActionsOnRelations"
             :custom-bulk-operations="customBulkOperations"
             :custom-query-entity-picker-list="customQueryEntityPickerList"
-            :custom-query-entity-picker-list-filters="customQueryEntityPickerListFilters"
+            :custom-query-entity-picker-list-filters="
+              customQueryEntityPickerListFilters
+            "
           />
         </div>
       </template>

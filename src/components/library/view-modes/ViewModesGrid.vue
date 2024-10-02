@@ -96,7 +96,7 @@ import {
   setCssVariable,
   getEntityPageRoute,
   updateEntityMediafileOnlyForMediafiles,
-  formatTeaserMetadata
+  formatTeaserMetadata,
 } from "@/helpers";
 import { computed, onMounted, onUnmounted } from "vue";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";

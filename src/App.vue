@@ -18,9 +18,7 @@
       <search-saved-searches-modal />
       <SavedSearchesPickerModal />
       <CreateSavedSearchModal />
-      <BulkoperationsModal
-        v-if="route.name !== undefined"
-      />
+      <BulkoperationsModal v-if="route.name !== undefined" />
       <search-modal />
       <!--      <BulkOperationsEditModal-->
       <!--        v-if="route.name !== undefined"-->
