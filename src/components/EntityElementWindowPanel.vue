@@ -53,7 +53,9 @@
               :base-library-mode="metadata.baseLibraryMode"
             />
             <entity-element-coordinate-edit
-              v-if="metadata.inputField && metadata.unit === Unit.CoordinatesDefault"
+              v-if="
+                metadata.inputField && metadata.unit === Unit.CoordinatesDefault
+              "
               :fieldKey="metadata.key"
               :label="metadata.label"
               v-model:value="metadata.value"
@@ -93,7 +95,7 @@ import {
   Entity,
   MetadataField,
   BaseLibraryModes,
-  Unit
+  Unit,
 } from "@/generated-types/queries";
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
 import EntityElementList from "@/components/entityElements/EntityElementList.vue";

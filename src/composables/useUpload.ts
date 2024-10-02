@@ -169,7 +169,10 @@ const useUpload = () => {
       method: "POST",
       body: __getCsvBlob(),
     });
-    if (!response.ok) throw new Error(`Error while adjusting the order of entities: ${response.status}: ${response.statusText}`);
+    if (!response.ok)
+      throw new Error(
+        `Error while adjusting the order of entities: ${response.status}: ${response.statusText}`
+      );
   };
 
   const __uploadExceptionHandler = (
@@ -360,9 +363,8 @@ const useUpload = () => {
         reject(event.target?.error);
       };
       reader.readAsText(csvFile);
-    })
-
-  }
+    });
+  };
 
   const __getCsvBlob = () => {
     try {

@@ -7,9 +7,7 @@
   >
     <div
       class="flex flex-col w-full h-full overflow-hidden"
-      :class="[
-        { 'pt-5': numberOfBlockingQueryEntities <= 0 }
-      ]"
+      :class="[{ 'pt-5': numberOfBlockingQueryEntities <= 0 }]"
     >
       <div class="w-full">
         <h1 class="title flex justify-center">
@@ -49,7 +47,7 @@
           (!numberOfBlockingQueryEntities || numberOfBlockingQueryEntities <= 0)
         "
       >
-        <div v-if="deleteQueryOptions.customQueryDeleteRelations" >
+        <div v-if="deleteQueryOptions.customQueryDeleteRelations">
           <div class="title pl-4">
             {{ t("actions.labels.delete-relation-entities") }}
           </div>
@@ -58,8 +56,8 @@
             :accepted-types="deleteQueryOptions.customQueryEntityTypes"
             :custom-query="deleteQueryOptions.customQueryDeleteRelations"
             :custom-filters-query="
-            deleteQueryOptions.customQueryDeleteRelationsFilters
-          "
+              deleteQueryOptions.customQueryDeleteRelationsFilters
+            "
             :show-button="false"
             :enable-bulk-operations="false"
             :enable-advanced-filters="false"
@@ -86,7 +84,7 @@ import {
   DeleteQueryOptions,
   Entitytyping,
   RouteNames,
-  TypeModals
+  TypeModals,
 } from "@/generated-types/queries";
 import BaseModal from "@/components/base/BaseModal.vue";
 import {
@@ -157,7 +155,7 @@ const deleteSelectedItems = async () => {
 const cleanupAfterDeletion = async () => {
   await getTenants();
   closeModal(TypeModals.Delete);
-  disableEditMode()
+  disableEditMode();
   router.push({ name: pageInfo.value.parentRouteName });
   createNotificationOverwrite(
     NotificationType.default,

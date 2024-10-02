@@ -194,14 +194,21 @@ import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
 import { useI18n } from "vue-i18n";
 import useUpload from "@/composables/useUpload";
-import { calculateFutureDate, goToEntityPage, goToEntityTypeRoute } from "@/helpers";
+import {
+  calculateFutureDate,
+  goToEntityPage,
+  goToEntityTypeRoute,
+} from "@/helpers";
 import type { Router } from "vue-router";
 import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUploadButton.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
+import {
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import ImportComponent from "@/components/ImportComponent.vue";
 import useTenant from "@/composables/useTenant";
@@ -365,7 +372,10 @@ const createEntityFromFormInput = (entityType: Entitytyping): EntityInput => {
         return { key, value: bool };
       }
       if (key === "ttl") {
-        return { key, value: calculateFutureDate(form.value?.values.intialValues[key]) };
+        return {
+          key,
+          value: calculateFutureDate(form.value?.values.intialValues[key]),
+        };
       }
       return { key, value: form.value?.values.intialValues[key] };
     })
@@ -471,7 +481,11 @@ const updateMetdataActionFunction = async (field: FormAction) => {
     await __getCsvString().then((csvResult) => {
       csv = csvResult;
     });
-    await performUpdateMetadataAction(document, form.value.values.intialValues.type, csv);
+    await performUpdateMetadataAction(
+      document,
+      form.value.values.intialValues.type,
+      csv
+    );
     closeAndDeleteForm();
     createNotificationOverwrite(
       NotificationType.success,
@@ -555,18 +569,21 @@ const startOcrActionFunction = async (field: FormAction) => {
         t("notifications.success.entityUpdated.description")
       );
     });
-    if (form.value.values.intialValues.ocr_type === OcrType.ManualUpload) return;
+    if (form.value.values.intialValues.ocr_type === OcrType.ManualUpload)
+      return;
 
     const document = await getQuery(field.actionQuery as string);
-    await performOcrAction(document, props.savedContext, form.value.values).then(
-      () => {
-        createNotificationOverwrite(
-          NotificationType.default,
-          t("notifications.default.generate-ocr.title"),
-          t("notifications.default.generate-ocr.description")
-        );
-      }
-    );
+    await performOcrAction(
+      document,
+      props.savedContext,
+      form.value.values
+    ).then(() => {
+      createNotificationOverwrite(
+        NotificationType.default,
+        t("notifications.default.generate-ocr.title"),
+        t("notifications.default.generate-ocr.description")
+      );
+    });
     closeAndDeleteForm();
   } catch (e) {
     submitErrors.value = e.message;

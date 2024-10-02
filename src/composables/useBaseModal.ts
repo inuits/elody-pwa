@@ -4,7 +4,7 @@ import {
   Collection,
   type DeleteQueryOptions,
   ModalStyle,
-  TypeModals
+  TypeModals,
 } from "@/generated-types/queries";
 import { type Context } from "@/composables/useBulkOperations";
 
@@ -15,7 +15,7 @@ export type ModalInfo = {
   deleteQueryOptions?: DeleteQueryOptions;
   closeConfirmation: boolean;
   savedContext?: any;
-  context?: Context
+  context?: Context;
 };
 
 export type GenericContextForModals = {
@@ -56,7 +56,7 @@ export const useBaseModal = () => {
     deleteQueryOptions: DeleteQueryOptions | undefined = undefined,
     askForCloseConfirmation: boolean | undefined = undefined,
     savedContext: any | undefined = undefined,
-    context: Context | undefined = undefined,
+    context: Context | undefined = undefined
   ): void => {
     if (modalType !== TypeModals.Confirm)
       closeModalsWithStyle(currentModalStyle.value);
@@ -70,8 +70,7 @@ export const useBaseModal = () => {
     updateModal(modalType, updatedModal);
     if (askForCloseConfirmation)
       getModalInfo(modalType).closeConfirmation = askForCloseConfirmation;
-    if (context)
-      getModalInfo(modalType).context = context;
+    if (context) getModalInfo(modalType).context = context;
   };
 
   const isCenterModalOpened = computed(() => {

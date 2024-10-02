@@ -22,10 +22,8 @@ import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 
 const route = useRoute();
 const config = inject("config");
-const {
-  getRouteBreadcrumbsOfEntity,
-  clearBreadcrumbPathAndAddOverviewPage,
-} = useBreadcrumbs(config);
+const { getRouteBreadcrumbsOfEntity, clearBreadcrumbPathAndAddOverviewPage } =
+  useBreadcrumbs(config);
 
 const entityType = computed<string | "not-set">(() =>
   route.meta.entityType ? (route.meta.entityType as string) : "not-set"
@@ -34,6 +32,8 @@ const entityType = computed<string | "not-set">(() =>
 onMounted(() => {
   const routeBreadcrumbs = getRouteBreadcrumbsOfEntity(entityType.value);
   if (routeBreadcrumbs)
-    clearBreadcrumbPathAndAddOverviewPage(routeBreadcrumbs[routeBreadcrumbs.length - 1].overviewPage as string);
-})
+    clearBreadcrumbPathAndAddOverviewPage(
+      routeBreadcrumbs[routeBreadcrumbs.length - 1].overviewPage as string
+    );
+});
 </script>

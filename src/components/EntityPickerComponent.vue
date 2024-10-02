@@ -40,11 +40,16 @@
 
 <script lang="ts" setup>
 import {
-  type BaseRelationValuesInput, Collection, type Entity,
+  type BaseRelationValuesInput,
+  Collection,
+  type Entity,
   EntityPickerMode,
-  Entitytyping, MutateEntityValuesDocument, type MutateEntityValuesMutation, type MutateEntityValuesMutationVariables,
+  Entitytyping,
+  MutateEntityValuesDocument,
+  type MutateEntityValuesMutation,
+  type MutateEntityValuesMutationVariables,
   SearchInputType,
-  TypeModals
+  TypeModals,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -61,7 +66,10 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { type EntityValues, useFormHelper } from "@/composables/useFormHelper";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import useEditMode from "@/composables/useEdit";
-import { useNotification, NotificationType } from "@/components/base/BaseNotification.vue";
+import {
+  useNotification,
+  NotificationType,
+} from "@/components/base/BaseNotification.vue";
 import { getChildrenOfHomeRoutes } from "@/helpers";
 
 const emit = defineEmits<{

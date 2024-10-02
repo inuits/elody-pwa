@@ -50,45 +50,45 @@
           {{ $t("bulk-operations.select-page") }}
         </span>
       </div>
-<!--      <div v-if="hasBulkOperationsWithItemsSelection">-->
-<!--        <span-->
-<!--          :class="[-->
-<!--            totalItemsCount <= bulkSelectAllSizeLimit-->
-<!--              ? 'select-actions'-->
-<!--              : 'disabled-select-actions',-->
-<!--            useExtendedBulkOperations && itemsSelected-->
-<!--              ? `text-accent-accent`-->
-<!--              : `text-text-body`,-->
-<!--          ]"-->
-<!--          @click="-->
-<!--            () => {-->
-<!--              if (totalItemsCount <= bulkSelectAllSizeLimit) emit('selectAll');-->
-<!--            }-->
-<!--          "-->
-<!--        >-->
-<!--          <div class="flex flex-row items-center">-->
-<!--            {{ $t("bulk-operations.select-all") }}-->
-<!--            <base-tooltip-->
-<!--              v-if="totalItemsCount > bulkSelectAllSizeLimit"-->
-<!--              position="center"-->
-<!--            >-->
-<!--              <template #activator="{ on }">-->
-<!--                <div v-on="on">-->
-<!--                  <unicon-->
-<!--                    :name="Unicons.QuestionCircle.name"-->
-<!--                    height="20"-->
-<!--                  />-->
-<!--                </div>-->
-<!--              </template>-->
-<!--              <template #default>-->
-<!--                <span class="w-max hover:text-accent-accent">-->
-<!--                  {{ t("bulk-operations.bulk-select-all-size-limit-reached", [bulkSelectAllSizeLimit]) }}-->
-<!--                </span>-->
-<!--              </template>-->
-<!--            </base-tooltip>-->
-<!--          </div>-->
-<!--        </span>-->
-<!--      </div>-->
+      <!--      <div v-if="hasBulkOperationsWithItemsSelection">-->
+      <!--        <span-->
+      <!--          :class="[-->
+      <!--            totalItemsCount <= bulkSelectAllSizeLimit-->
+      <!--              ? 'select-actions'-->
+      <!--              : 'disabled-select-actions',-->
+      <!--            useExtendedBulkOperations && itemsSelected-->
+      <!--              ? `text-accent-accent`-->
+      <!--              : `text-text-body`,-->
+      <!--          ]"-->
+      <!--          @click="-->
+      <!--            () => {-->
+      <!--              if (totalItemsCount <= bulkSelectAllSizeLimit) emit('selectAll');-->
+      <!--            }-->
+      <!--          "-->
+      <!--        >-->
+      <!--          <div class="flex flex-row items-center">-->
+      <!--            {{ $t("bulk-operations.select-all") }}-->
+      <!--            <base-tooltip-->
+      <!--              v-if="totalItemsCount > bulkSelectAllSizeLimit"-->
+      <!--              position="center"-->
+      <!--            >-->
+      <!--              <template #activator="{ on }">-->
+      <!--                <div v-on="on">-->
+      <!--                  <unicon-->
+      <!--                    :name="Unicons.QuestionCircle.name"-->
+      <!--                    height="20"-->
+      <!--                  />-->
+      <!--                </div>-->
+      <!--              </template>-->
+      <!--              <template #default>-->
+      <!--                <span class="w-max hover:text-accent-accent">-->
+      <!--                  {{ t("bulk-operations.bulk-select-all-size-limit-reached", [bulkSelectAllSizeLimit]) }}-->
+      <!--                </span>-->
+      <!--              </template>-->
+      <!--            </base-tooltip>-->
+      <!--          </div>-->
+      <!--        </span>-->
+      <!--      </div>-->
     </div>
 
     <div
@@ -319,12 +319,31 @@ const generateTranscodeFromMediafiles = (
 
 watch(selectedBulkOperation, () => {
   if (selectedBulkOperation.value?.value === BulkOperationTypes.ExportCsv)
-    openModal(TypeModals.BulkOperations, ModalStyle.CenterWide, undefined, undefined, undefined, undefined, props.context);
-  if (selectedBulkOperation.value?.value === BulkOperationTypes.ExportCsvOfMediafilesFromAsset) {
+    openModal(
+      TypeModals.BulkOperations,
+      ModalStyle.CenterWide,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      props.context
+    );
+  if (
+    selectedBulkOperation.value?.value ===
+    BulkOperationTypes.ExportCsvOfMediafilesFromAsset
+  ) {
     const savedContext: DownloadMediafilesContextForBulkOperationsForm = {
       type: selectedBulkOperation.value?.value,
     };
-    openModal(TypeModals.BulkOperations, ModalStyle.CenterWide, undefined, undefined, undefined, savedContext, RouteNames.Mediafiles);
+    openModal(
+      TypeModals.BulkOperations,
+      ModalStyle.CenterWide,
+      undefined,
+      undefined,
+      undefined,
+      savedContext,
+      RouteNames.Mediafiles
+    );
   }
   if (selectedBulkOperation.value?.value === BulkOperationTypes.Edit)
     openModal(TypeModals.BulkOperationsEdit, ModalStyle.Right);
@@ -398,14 +417,16 @@ watch(selectedBulkOperation, () => {
         ModalStyle.RightWide,
         modal.formQuery,
         undefined,
-        modal.askForCloseConfirmation,
+        modal.askForCloseConfirmation
       );
     }
   }
 });
 
 watch(
-  () => getModalInfo(TypeModals.DynamicForm).open || getModalInfo(TypeModals.BulkOperations).open,
+  () =>
+    getModalInfo(TypeModals.DynamicForm).open ||
+    getModalInfo(TypeModals.BulkOperations).open,
   (isBulkOperationModalOpen: boolean | undefined) => {
     if (!isBulkOperationModalOpen) selectedBulkOperation.value = undefined;
   }

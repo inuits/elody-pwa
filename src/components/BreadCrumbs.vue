@@ -56,7 +56,9 @@
       <ul>
         <li
           v-show="showHistory"
-          v-for="breadcrumbRoute in [...breadcrumbRoutes].slice(0, -1).reverse()"
+          v-for="breadcrumbRoute in [...breadcrumbRoutes]
+            .slice(0, -1)
+            .reverse()"
           :key="breadcrumbRoute.title || breadcrumbRoute.overviewPage"
           @click="navigateToEntity(breadcrumbRoute)"
         >
@@ -111,7 +113,7 @@ import { useRouter } from "vue-router";
 import {
   useBreadcrumbs,
   breadcrumbRoutes,
-  rootRoute
+  rootRoute,
 } from "@/composables/useBreadcrumbs";
 
 const { t } = useI18n();
@@ -119,13 +121,13 @@ const config: any = inject("config");
 
 const showHistory = ref<boolean>(false);
 const truncatePreviousRouteName = ref<boolean>(true);
-const breadCrumbRoutesExist = computed(() => breadcrumbRoutes.value.length > 0 || getCurrentRouteTitle.value);
+const breadCrumbRoutesExist = computed(
+  () => breadcrumbRoutes.value.length > 0 || getCurrentRouteTitle.value
+);
 const router = useRouter();
 
-const {
-  clearBreadcrumbPathAndAddOverviewPage,
-  previousRoute
-} = useBreadcrumbs(config);
+const { clearBreadcrumbPathAndAddOverviewPage, previousRoute } =
+  useBreadcrumbs(config);
 
 router.beforeEach(() => {
   showHistory.value = false;
@@ -154,12 +156,10 @@ const navigateToEntity = (route: any) => {
         type: route.type,
       },
     });
-  }
-  else if (route.overviewPage) {
+  } else if (route.overviewPage) {
     router.push({ name: route.overviewPage });
     clearBreadcrumbPathAndAddOverviewPage(route.overviewPage);
-  }
-  else router.push({ name: "Home" });
+  } else router.push({ name: "Home" });
 };
 </script>
 

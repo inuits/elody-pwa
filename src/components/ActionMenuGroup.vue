@@ -43,7 +43,7 @@ import {
   ContextMenuDirection,
   ActionContextViewModeTypes,
   ActionContextEntitiesSelectionType,
-  Entitytyping
+  Entitytyping,
 } from "@/generated-types/queries";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";

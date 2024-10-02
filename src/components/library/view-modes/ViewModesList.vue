@@ -98,7 +98,7 @@ import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import {
   formatTeaserMetadata,
   getEntityPageRoute,
-  updateEntityMediafileOnlyForMediafiles
+  updateEntityMediafileOnlyForMediafiles,
 } from "@/helpers";
 import { computed } from "vue";
 import { OrderItem } from "@/composables/useOrderListItems";

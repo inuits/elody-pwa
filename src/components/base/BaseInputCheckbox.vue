@@ -31,7 +31,11 @@
       @click.stop="handleItemSelection"
     >
       {{ label }}
-      <unicon v-if="required" :name="Unicons.ExclamationTriangle.name" height="20" />
+      <unicon
+        v-if="required"
+        :name="Unicons.ExclamationTriangle.name"
+        height="20"
+      />
     </span>
   </div>
 </template>
@@ -128,8 +132,12 @@ const handleItemSelection = () => {
     return;
 
   if (!inputValue.value)
-    enqueueItemForBulkProcessing(props.bulkOperationsContext, { ...props.item, required: props.required });
-  else if (!props.required) dequeueItemForBulkProcessing(props.bulkOperationsContext, props.item.id);
+    enqueueItemForBulkProcessing(props.bulkOperationsContext, {
+      ...props.item,
+      required: props.required,
+    });
+  else if (!props.required)
+    dequeueItemForBulkProcessing(props.bulkOperationsContext, props.item.id);
 
   inputValue.value = !inputValue.value;
 };
@@ -146,7 +154,11 @@ const isDisabledByContextLimit = computed<boolean>(() => {
 });
 
 onMounted(() => {
-  if (props.required) enqueueItemForBulkProcessing(props.bulkOperationsContext, { ...props.item, required: props.required });
+  if (props.required)
+    enqueueItemForBulkProcessing(props.bulkOperationsContext, {
+      ...props.item,
+      required: props.required,
+    });
   if (props.ignoreBulkOperations) {
     inputValue.value = props.modelValue;
     return;
@@ -169,5 +181,5 @@ watch(
     if (isBulkOperationsModalOpen)
       inputValue.value = isEnqueued(props.bulkOperationsContext, props.item.id);
   }
-)
+);
 </script>

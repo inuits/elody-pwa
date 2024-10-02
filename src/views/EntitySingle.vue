@@ -65,7 +65,7 @@ const {
   getRouteBreadcrumbsOfEntity,
   addTitleToBreadcrumb,
   setRootRoute,
-  iterateOverBreadcrumbs
+  iterateOverBreadcrumbs,
 } = useBreadcrumbs(config);
 const {
   isEdit,
@@ -172,19 +172,32 @@ watch(
 
 const determineBreadcrumbs = async () => {
   clearBreadcrumbPath();
-  setRootRoute(entityForBreadcrumb.value.id, getTitleOrNameFromEntity(entityForBreadcrumb.value));
+  setRootRoute(
+    entityForBreadcrumb.value.id,
+    getTitleOrNameFromEntity(entityForBreadcrumb.value)
+  );
   do {
-    const routeBreadcrumbs = getRouteBreadcrumbsOfEntity(entityForBreadcrumb.value.type);
+    const routeBreadcrumbs = getRouteBreadcrumbsOfEntity(
+      entityForBreadcrumb.value.type
+    );
     if (!routeBreadcrumbs) break;
-    entityForBreadcrumb.value = await iterateOverBreadcrumbs([entityForBreadcrumb.value.id], routeBreadcrumbs);
+    entityForBreadcrumb.value = await iterateOverBreadcrumbs(
+      [entityForBreadcrumb.value.id],
+      routeBreadcrumbs
+    );
     if (entityForBreadcrumb.value)
       addTitleToBreadcrumb(getTitleOrNameFromEntity(entityForBreadcrumb.value));
-  } while (entityForBreadcrumb.value)
-}
+  } while (entityForBreadcrumb.value);
+};
 
 const getTitleOrNameFromEntity = (entity: Entity): string => {
-  return entity.intialValues.title || entity.intialValues.name || entity.intialValues.filename || entity.intialValues.id;
-}
+  return (
+    entity.intialValues.title ||
+    entity.intialValues.name ||
+    entity.intialValues.filename ||
+    entity.intialValues.id
+  );
+};
 
 watch(
   () => locale.value,

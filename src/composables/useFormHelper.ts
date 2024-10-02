@@ -380,7 +380,7 @@ const useFormHelper = () => {
     return relations;
   };
 
-  const parseFormValuesToFormInput = (uuid: string , values: EntityValues) => {
+  const parseFormValuesToFormInput = (uuid: string, values: EntityValues) => {
     let metadata: MetadataValuesInput[] = [];
     let relations: BaseRelationValuesInput[] = [];
 
