@@ -52,8 +52,7 @@ import { usePermissions } from "@/composables/usePermissions";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { EntityTypeWithId, useBreadcrumbs } from "@/composables/useBreadcrumbs";
-import { apolloClient } from "@/main";
+import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 
 const config: any = inject("config");
 const router = useRouter();
@@ -65,8 +64,8 @@ const {
   clearBreadcrumbPath,
   getRouteBreadcrumbsOfEntity,
   addTitleToBreadcrumb,
-  addParentToBreadcrumb,
   setRootRoute,
+  iterateOverBreadcrumbs
 } = useBreadcrumbs(config);
 const {
   isEdit,
@@ -174,28 +173,13 @@ watch(
 const determineBreadcrumbs = async () => {
   clearBreadcrumbPath();
   setRootRoute(entityForBreadcrumb.value.id, getTitleOrNameFromEntity(entityForBreadcrumb.value));
-  let entityByIdQueryVariables: EntityTypeWithId = {};
   do {
     const routeBreadcrumbs = getRouteBreadcrumbsOfEntity(entityForBreadcrumb.value.type);
     if (!routeBreadcrumbs) break;
-    entityByIdQueryVariables = addParentToBreadcrumb(routeBreadcrumbs, entityForBreadcrumb.value.relationValues);
-    if (!entityByIdQueryVariables.id) break;
-    await apolloClient
-      .query<GetEntityByIdQuery>({
-        query: GetEntityByIdDocument,
-        variables: reactive<GetEntityByIdQueryVariables>({
-          id: entityByIdQueryVariables.id,
-          type: entityByIdQueryVariables.entityType,
-        }),
-        fetchPolicy: "no-cache",
-        notifyOnNetworkStatusChange: true,
-      })
-      .then((result) => {
-        entityForBreadcrumb.value = result.data?.Entity as BaseEntity
-        if (entityForBreadcrumb.value)
-          addTitleToBreadcrumb(getTitleOrNameFromEntity(entityForBreadcrumb.value));
-      });
-  } while (entityByIdQueryVariables.id && entityForBreadcrumb.value)
+    entityForBreadcrumb.value = await iterateOverBreadcrumbs([entityForBreadcrumb.value.id], routeBreadcrumbs);
+    if (entityForBreadcrumb.value)
+      addTitleToBreadcrumb(getTitleOrNameFromEntity(entityForBreadcrumb.value));
+  } while (entityForBreadcrumb.value)
 }
 
 const getTitleOrNameFromEntity = (entity: Entity): string => {

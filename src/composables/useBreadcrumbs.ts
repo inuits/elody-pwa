@@ -1,5 +1,15 @@
-import { DamsIcons, Entitytyping, RouteNames } from "@/generated-types/queries";
-import { ref, computed } from "vue";
+import {
+  type AdvancedFilterInput,
+  AdvancedFilterTypes,
+  DamsIcons,
+  type Entity,
+  Entitytyping,
+  GetEntitiesDocument,
+  type GetEntitiesQueryVariables,
+  SearchInputType
+} from "@/generated-types/queries";
+import { apolloClient } from "@/main";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { getChildrenOfHomeRoutes } from "@/helpers";
 
@@ -13,10 +23,6 @@ export type RootRoute = {
   rootId: string;
   rootTitle: string;
 }
-export type EntityTypeWithId = {
-  id: string;
-  entityType: Entitytyping;
-}
 export type BreadcrumbRoute = {
   id: string;
   title: string;
@@ -24,8 +30,8 @@ export type BreadcrumbRoute = {
   type: string;
 }
 
-const breadcrumbRoutes = ref<BreadcrumbRoute[]>([]);
 const rootRoute = ref<RootRoute>({});
+const breadcrumbRoutes = ref<BreadcrumbRoute[]>([]);
 
 const useBreadcrumbs = (config: any) => {
   const homeRoutes = getChildrenOfHomeRoutes(config);
@@ -37,21 +43,28 @@ const useBreadcrumbs = (config: any) => {
     return entityRoute.meta.breadcrumbs;
   }
 
-  const addParentToBreadcrumb = (routeBreadcrumbs: any, relationValues: any): EntityTypeWithId => {
-    let idOfParent: string;
-    const returnObject: EntityTypeWithId = {};
+  const iterateOverBreadcrumbs = async (parentId: string[], routeBreadcrumbs: any) => {
+    let entities: Entity[] = [];
     for (const index in routeBreadcrumbs) {
-      if (!relationValues || relationValues[routeBreadcrumbs[index].relation] === undefined) continue;
-      idOfParent = relationValues[routeBreadcrumbs[index].relation][0].key;
-      if (idOfParent === getRootRouteId()) break;
-      if (breadcrumbRoutes.value.filter(item => item.id === idOfParent).length > 0) break;
-      returnObject.id = idOfParent;
-      returnObject.entityType = routeBreadcrumbs[index].entityType;
-      breadcrumbRoutes.value.unshift({ id: idOfParent, type: routeBreadcrumbs[index].entityType });
-      break;
+      if (routeBreadcrumbs[index].overviewPage) {
+        addOverviewPageToBreadcrumb(routeBreadcrumbs);
+        break;
+      }
+      const entityType = routeBreadcrumbs[index].entityType;
+      const relation = routeBreadcrumbs[index].relation;
+      entities = await fetchRelationsBasedOnEntityType(createFilters(parentId, entityType, relation));
+      if (entities.length > 0) {
+        const idOfParent = entities[0].id;
+        if (idOfParent === getRootRouteId() || breadcrumbRoutes.value.filter(item => item.id === idOfParent).length > 0) {
+          addOverviewPageToBreadcrumb(routeBreadcrumbs);
+          entities = undefined;
+          break;
+        }
+        breadcrumbRoutes.value.unshift({ id: idOfParent, type: entityType });
+        break;
+      }
     }
-    if (!returnObject.id) addOverviewPageToBreadcrumb(routeBreadcrumbs);
-    return returnObject;
+    return entities ? entities[0] : undefined;
   }
 
   const addOverviewPageToBreadcrumb = (routeBreadcrumbs: any) => {
@@ -85,6 +98,56 @@ const useBreadcrumbs = (config: any) => {
     return rootRoute.value.rootId;
   }
 
+  const createFilters = (parentId: string[], entityType: Entitytyping, relation: string) => {
+    const advancedFilters: AdvancedFilterInput[] = [
+      {
+        match_exact: true,
+        type: AdvancedFilterTypes.Type,
+        value: entityType,
+      },
+      {
+        match_exact: true,
+        type: AdvancedFilterTypes.Selection,
+        key: [`elody:1|relations.${relation}.key`],
+        value: parentId,
+      }
+    ];
+    const queryVariables: GetEntitiesQueryVariables = {
+      type: entityType,
+      limit: 20,
+      skip: 1,
+      searchValue: {
+        value: "",
+        isAsc: false,
+        key: "title",
+        order_by: "date_updated",
+      },
+      searchInputType: SearchInputType.AdvancedInputType,
+      advancedSearchValue: [],
+      advancedFilterInputs: advancedFilters,
+    };
+    return queryVariables
+  }
+
+  const fetchRelationsBasedOnEntityType = async (queryVariables: GetEntitiesQueryVariables) => {
+    let entities: Entity[] = [];
+    await apolloClient
+      .query({
+        query: GetEntitiesDocument,
+        variables: queryVariables,
+        fetchPolicy: "no-cache",
+        notifyOnNetworkStatusChange: true,
+      })
+      .then((result) => {
+        const fetchedEntities = result.data.Entities;
+        entities = fetchedEntities?.results as Entity[];
+      })
+      .catch(() => {
+        entities = [];
+      });
+    return entities;
+  }
+
   useRouter().afterEach((to) => {
     try {
       if (to.meta.title !== "Single Asset" && to.meta.title !== "Single Entity")
@@ -94,7 +157,6 @@ const useBreadcrumbs = (config: any) => {
   });
 
   return {
-    addParentToBreadcrumb,
     addTitleToBreadcrumb,
     clearBreadcrumbPath,
     clearBreadcrumbPathAndAddOverviewPage,
@@ -102,6 +164,7 @@ const useBreadcrumbs = (config: any) => {
     getRouteBreadcrumbsOfEntity,
     setRootRoute,
     previousRoute,
+    iterateOverBreadcrumbs,
   }
 }
 
