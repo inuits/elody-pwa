@@ -17,6 +17,7 @@
           v-if="
             field.inputField?.type === BaseFieldType.BaseFileSystemImportField
           "
+          :close-and-delete-form="closeAndDeleteForm"
         />
         <EntityPickerComponent
           v-if="field.inputField?.type === BaseFieldType.BaseEntityPickerField"
