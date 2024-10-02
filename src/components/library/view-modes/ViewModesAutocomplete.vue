@@ -52,6 +52,7 @@ const props = withDefaults(
     canCreateOption: boolean;
     metadataKeyToCreateEntityFromOption?: string;
     isReadOnly?: boolean;
+    isMetadataField?: boolean;
   }>(),
   {
     selectType: "multi",
@@ -60,6 +61,7 @@ const props = withDefaults(
     autoSelectable: false,
     disabled: false,
     canCreateOption: false,
+    isMetadataField: false,
   }
 );
 
@@ -93,7 +95,8 @@ const {
 
 onMounted(async () => {
   if (props.advancedFilterInputForRetrievingOptions && props.isReadOnly) {
-    preSelect();
+    if (props.isMetadataField) preSelect();
+    else await initAutocompleteOption();
   } else {
     if (props.advancedFilterInputForRetrievingOptions && props.modelValue)
       preSelect();
