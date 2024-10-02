@@ -6,7 +6,7 @@
     class="flex justify-between items-center w-full"
   >
     <div class="flex justify-start gap-x-3">
-      <div v-if="paginationLimitOptions">
+      <div v-if="paginationLimitOptions.length > 0">
         <BaseDropdownNew
           v-model="selectedPaginationLimitOption"
           :options="paginationLimitOptions"
@@ -17,7 +17,7 @@
           dropdown-style="default"
         />
       </div>
-      <div v-if="sortOptions" class="w-auto">
+      <div v-if="sortOptions.length > 0" class="w-auto">
         <BaseDropdownNew
           data-cy="sort-options"
           v-model="selectedSortOption"
@@ -29,7 +29,7 @@
           dropdown-style="default"
         />
       </div>
-      <div v-if="sortOptions" class="flex items-center">
+      <div v-if="sortOptions.length > 0" class="flex items-center">
         <BaseToggle
           data-cy="sort-toggle"
           v-model="isAsc"
@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import { type RouteLocationNormalizedLoaded, useRoute } from "vue-router";
+import { useRoute } from "vue-router";
 import {
   DamsIcons,
   Entitytyping,
