@@ -26,6 +26,7 @@
         <p
           data-cy="metadata-value"
           v-html="processTextWithLinks(t(linkText) || readableValue)"
+          @click.stop
         ></p>
       </div>
 
