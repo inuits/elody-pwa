@@ -70,7 +70,7 @@
           />
           <entity-element-metadata
             v-else
-            :class="linkedEntityId ? 'line-clamp-1' : ''"
+            :class="linkedEntityId ? 'break-all line-clamp-1' : ''"
             :label="metadata.label as string"
             v-model:value="value"
             :link-text="metadata.linkText"
