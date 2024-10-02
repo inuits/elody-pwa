@@ -8,7 +8,7 @@
       class="flex items-center justify-between cursor-pointer"
     >
       <h2>{{ t(panel.label) }}</h2>
-      <div class="w-full flex justify-end">
+      <div class="flex justify-end">
         <unicon :name="!isCollapsed ? Unicons.Minus.name : Unicons.Plus.name" />
       </div>
     </div>
