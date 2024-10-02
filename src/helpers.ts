@@ -60,7 +60,11 @@ export const goToEntityTypeRoute = (
     );
 
     if (route) {
-      router.push(`/${route.destination}`);
+      if (router.currentRoute.value.path === `/${route.destination}`) {
+        window.location.href = `/${route.destination}`;
+      } else {
+        router.push(`/${route.destination}`);
+      }
       if (sorting) {
         const routes = router.getRoutes();
         const routeLocation = routes.find(

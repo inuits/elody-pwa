@@ -29,25 +29,35 @@
   </div>
 </template>
 
-<script setup>
-import { provide, ref, computed } from "vue";
-import { useMutation, useQuery } from "@vue/apollo-composable";
+<script setup lang="ts">
 import {
+  Entitytyping,
   GetDirectoriesDocument,
   PostStartImportDocument,
 } from "@/generated-types/queries";
-import FolderTreeLine from "@/components/FolderTreeLine.vue";
 import {
   useNotification,
   NotificationType,
 } from "../components/base/BaseNotification.vue";
-import { useI18n } from "vue-i18n";
+import FolderTreeLine from "@/components/FolderTreeLine.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import useMenuHelper from "@/composables/useMenuHelper";
+import { goToEntityTypeRoute } from "@/helpers";
+import { provide, ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
+import { useMutation, useQuery } from "@vue/apollo-composable";
+import { useRouter } from "vue-router";
+
+const props = defineProps<{
+  closeAndDeleteForm: Function;
+}>();
 
 const { t } = useI18n();
 const directories = ref([]);
 const selectedDirectory = ref(null);
 const { createNotificationOverwrite } = useNotification();
+const { getMenuDestinations } = useMenuHelper();
+const router = useRouter();
 
 const { onResult, loading } = useQuery(GetDirectoriesDocument, {});
 
@@ -90,10 +100,17 @@ const doImport = (folder) => {
         }
       } else {
         createNotificationOverwrite(
-          NotificationType.success,
-          "Success",
-          t(`import.import-success`)
+          NotificationType.default,
+          "Import",
+          t(`import.start-import`)
         );
+        goToEntityTypeRoute(
+          Entitytyping.Job,
+          undefined,
+          getMenuDestinations(),
+          router
+        );
+        props.closeAndDeleteForm();
       }
     })
     .catch((error) => {
