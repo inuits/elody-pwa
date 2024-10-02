@@ -65,6 +65,7 @@
             :advanced-filter-input-for-retrieving-options="
               metadata.inputField.advancedFilterInputForRetrievingOptions
             "
+            :is-metadata-field="metadata.inputField?.isMetadataField"
             :from-relation-type="metadata.inputField?.fromRelationType"
             :disabled="true"
           />
