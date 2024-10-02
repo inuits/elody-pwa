@@ -85,7 +85,13 @@
           (metadata) => !metadata.showOnlyInEditMode
         )"
         :key="metadataItem ? metadataItem.key : 'no-key'"
-        class="flex justify-start flex-col mx-2 break-words w-1/4"
+        class="flex justify-start flex-col mx-2 break-words"
+        :class="{
+          'w-1/4': teaserMetadata.length >= 4,
+          'w-1/2': teaserMetadata.length == 3,
+          'w-1/3': teaserMetadata.length == 2,
+          'w-full': teaserMetadata.length == 1,
+        }"
       >
         <metadata-wrapper
           :form-id="formId || 'listview'"
