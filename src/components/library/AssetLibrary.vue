@@ -33,6 +33,7 @@ const entityType = computed<string | "not-set">(() =>
 
 onMounted(() => {
   const routeBreadcrumbs = getRouteBreadcrumbsOfEntity(entityType.value);
-  clearBreadcrumbPathAndAddOverviewPage(routeBreadcrumbs[routeBreadcrumbs.length - 1].overviewPage as string);
+  if (routeBreadcrumbs)
+    clearBreadcrumbPathAndAddOverviewPage(routeBreadcrumbs[routeBreadcrumbs.length - 1].overviewPage as string);
 })
 </script>
