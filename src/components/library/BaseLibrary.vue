@@ -17,7 +17,11 @@
         "
       />
     </div>
-    <div v-else class="lg:flex bg-neutral-lightest">
+    <div
+      v-else
+      class="lg:flex bg-neutral-lightest"
+      :class="[{ '!bg-white': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary }]"
+    >
       <div
         class="w-full"
         :class="[
@@ -106,7 +110,7 @@
               ]"
               :context="bulkOperationsContext"
               :total-items-count="totalEntityCount"
-              :use-extended-bulk-operations="true"
+              :use-extended-bulk-operations="!isSearchLibrary"
               :show-button="showButton"
               :confirm-selection-button="confirmSelectionButton"
               :entity-type="entityType as Entitytyping"
@@ -185,9 +189,10 @@
 
         <div
           v-if="entities?.length === 0 && !entitiesLoading"
-          class="text-center my-2"
+          :class="{'text-center my-2': baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary}"
         >
-          <div>{{ t("search.noresult") }}</div>
+          <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">-</div>
+          <div v-else>{{ t("search.noresult") }}</div>
         </div>
       </div>
     </div>
@@ -315,7 +320,7 @@ const { getGlobalState, updateGlobalState } = useStateManagement();
 const hasBulkOperations = ref<boolean>(true);
 const enableSelection = computed<boolean>(() => {
   return (
-    (hasBulkOperations.value && props.enableBulkOperations) ||
+    (hasBulkOperations.value && props.enableBulkOperations && !props.isSearchLibrary) ||
     props.selectionEnabled
   );
 });

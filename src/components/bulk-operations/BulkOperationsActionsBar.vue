@@ -1,13 +1,7 @@
 <template>
   <div
     v-if="bulkOperationsPromiseIsResolved"
-    class="flex justify-between items-center rounded alignment-nested-divs"
-    :class="[
-      useExtendedBulkOperations
-        ? `px-3 !py-1 bg-neutral-white`
-        : `bg-transparent`,
-      { 'py-3': useExtendedBulkOperations },
-    ]"
+    class="flex justify-between items-center rounded alignment-nested-divs px-3 !py-1 bg-neutral-white"
   >
     <div class="flex justify-start items-center">
       <div
@@ -37,7 +31,7 @@
           {{ $t("bulk-operations.undo-selection") }}
         </span>
       </div>
-      <div v-if="hasBulkOperationsWithItemsSelection">
+      <div v-if="useExtendedBulkOperations && hasBulkOperationsWithItemsSelection">
         <span
           class="select-actions"
           :class="
