@@ -106,7 +106,7 @@ import BaseTooltip from "@/components/base/BaseTooltip.vue";
 const { checkIfRouteOrModal, setSelectedMenuItem, selectedMenuItem } =
   useMenuHelper();
 const { t } = useI18n();
-const { can, fetchCanPermission } = usePermissions();
+const { can, fetchAdvancedPermission } = usePermissions();
 
 const auth = useAuth();
 const menuSubitem = ref<Array<MenuItem>>([]);
@@ -188,7 +188,7 @@ onMounted(async () => {
   });
 
   if (props.menuitem.can) {
-    allowed = await fetchCanPermission(props.menuitem.can);
+    allowed = await fetchAdvancedPermission(props.menuitem.can);
   }
   hasPermissionForMenuItem.value = allowed;
 });

@@ -73,7 +73,7 @@ const usePermissions = () => {
     }
   };
 
-  const fetchCanPermission = (permission: string) => {
+  const fetchAdvancedPermission = (permission: string) => {
     if (permission in advancedPermissions) {
       return advancedPermissions[permission];
     }
@@ -134,7 +134,7 @@ const usePermissions = () => {
     can,
     fetchUpdateAndDeletePermission,
     numberOfEntities,
-    fetchCanPermission,
+    fetchAdvancedPermission,
   };
 };
 
