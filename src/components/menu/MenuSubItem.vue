@@ -24,7 +24,7 @@ import { useI18n } from "vue-i18n";
 import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
 import { usePermissions } from "@/composables/usePermissions";
 import { Permission, type MenuItem } from "@/generated-types/queries";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { Unicons } from "@/types";
 
 const props = defineProps({
@@ -36,7 +36,7 @@ const props = defineProps({
 });
 const { t } = useI18n();
 const route = useRoute();
-const { can } = usePermissions();
+const { can, fetchCanPermission } = usePermissions();
 const isActive = computed(
   () =>
     route.path.replace("/", "") ===
@@ -48,20 +48,43 @@ const isLink = computed(
   () => menuAction.value?.menuItemType === MenuItemType.link
 );
 const linkTag = computed(() => (isLink.value ? "router-link" : "div"));
-const isPermitted = ref<boolean>();
+const isPermitted = ref<boolean>(false);
 
-if (props.subMenuItem.requiresAuth === false) isPermitted.value = true;
-else
-  isPermitted.value = can(
-    props.subMenuItem.typeLink?.modal?.neededPermission || Permission.Canread,
-    props.subMenuItem.entityType
-  );
+onMounted(async () => {
+  await canShowMenu();
+});
+
+const checkAdvancedPermission = async () => {
+  if (!props.subMenuItem.can) return false;
+  const result = await fetchCanPermission(props.subMenuItem.can);
+  return result;
+};
 
 const handleClick = (event: Event, menuAction: any) => {
   if (!isLink.value && menuAction?.action) {
     event.stopPropagation();
     menuAction.action();
   }
+};
+
+const canShowMenu = async () => {
+  let isShow = false;
+
+  if (props.subMenuItem.requiresAuth === false) {
+    isShow = true;
+  }
+  if (props.subMenuItem.can) {
+    isShow = await checkAdvancedPermission();
+  } else {
+    isShow =
+      can(
+        props.subMenuItem.typeLink?.modal?.neededPermission ||
+          Permission.Canread,
+        props.subMenuItem.entityType
+      ) || false;
+  }
+
+  isPermitted.value = isShow;
 };
 </script>
 <style></style>
