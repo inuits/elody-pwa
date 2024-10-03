@@ -36,7 +36,7 @@ const props = defineProps({
 });
 const { t } = useI18n();
 const route = useRoute();
-const { can, fetchCanPermission } = usePermissions();
+const { can, fetchAdvancedPermission } = usePermissions();
 const isActive = computed(
   () =>
     route.path.replace("/", "") ===
@@ -51,12 +51,12 @@ const linkTag = computed(() => (isLink.value ? "router-link" : "div"));
 const isPermitted = ref<boolean>(false);
 
 onMounted(async () => {
-  await canShowMenu();
+  await checkPermissions();
 });
 
 const checkAdvancedPermission = async () => {
   if (!props.subMenuItem.can) return false;
-  const result = await fetchCanPermission(props.subMenuItem.can);
+  const result = await fetchAdvancedPermission(props.subMenuItem.can);
   return result;
 };
 
@@ -67,16 +67,16 @@ const handleClick = (event: Event, menuAction: any) => {
   }
 };
 
-const canShowMenu = async () => {
-  let isShow = false;
+const checkPermissions = async () => {
+  let canDoAction = false;
 
   if (props.subMenuItem.requiresAuth === false) {
-    isShow = true;
+    canDoAction = true;
   }
   if (props.subMenuItem.can) {
-    isShow = await checkAdvancedPermission();
+    canDoAction = await checkAdvancedPermission();
   } else {
-    isShow =
+    canDoAction =
       can(
         props.subMenuItem.typeLink?.modal?.neededPermission ||
           Permission.Canread,
@@ -84,7 +84,7 @@ const canShowMenu = async () => {
       ) || false;
   }
 
-  isPermitted.value = isShow;
+  isPermitted.value = canDoAction;
 };
 </script>
 <style></style>
