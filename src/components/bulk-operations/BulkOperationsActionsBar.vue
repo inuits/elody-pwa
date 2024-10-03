@@ -31,7 +31,9 @@
           {{ $t("bulk-operations.undo-selection") }}
         </span>
       </div>
-      <div v-if="useExtendedBulkOperations && hasBulkOperationsWithItemsSelection">
+      <div
+        v-if="useExtendedBulkOperations && hasBulkOperationsWithItemsSelection"
+      >
         <span
           class="select-actions"
           :class="

@@ -20,7 +20,9 @@
     <div
       v-else
       class="lg:flex bg-neutral-lightest"
-      :class="[{ '!bg-white': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary }]"
+      :class="[
+        { '!bg-white': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary },
+      ]"
     >
       <div
         class="w-full"
@@ -189,9 +191,14 @@
 
         <div
           v-if="entities?.length === 0 && !entitiesLoading"
-          :class="{'text-center my-2': baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary}"
+          :class="{
+            'text-center my-2':
+              baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary,
+          }"
         >
-          <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">-</div>
+          <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">
+            -
+          </div>
           <div v-else>{{ t("search.noresult") }}</div>
         </div>
       </div>
@@ -320,7 +327,9 @@ const { getGlobalState, updateGlobalState } = useStateManagement();
 const hasBulkOperations = ref<boolean>(true);
 const enableSelection = computed<boolean>(() => {
   return (
-    (hasBulkOperations.value && props.enableBulkOperations && !props.isSearchLibrary) ||
+    (hasBulkOperations.value &&
+      props.enableBulkOperations &&
+      !props.isSearchLibrary) ||
     props.selectionEnabled
   );
 });

@@ -29,7 +29,10 @@ export const usePageInfo = () => {
   const updatePageInfo = (input: string, type: infoTypes = "routerTitle") => {
     pageInfo.value[type] = input;
   };
-  const updatePreviousPageInfo = (input: string, type: infoTypes = "routerTitle") => {
+  const updatePreviousPageInfo = (
+    input: string,
+    type: infoTypes = "routerTitle"
+  ) => {
     previousPageInfo.value[type] = input;
   };
 
@@ -39,7 +42,10 @@ export const usePageInfo = () => {
     updatePageInfo(to.meta.title as string);
     updatePageInfo(to.meta.uuid as string);
 
-    updatePreviousPageInfo(from.matched[1].name?.toString() || "", "parentRouteName");
+    updatePreviousPageInfo(
+      from.matched[1].name?.toString() || "",
+      "parentRouteName"
+    );
     updatePreviousPageInfo(from.meta.type as string, "routeType");
     updatePreviousPageInfo(from.meta.title as string);
     updatePreviousPageInfo(from.meta.uuid as string);
