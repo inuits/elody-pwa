@@ -10,6 +10,12 @@ type PageInfo = {
   entityId: string;
 };
 
+const previousPageInfo = ref<PageInfo>({
+  routerTitle: "",
+  routeType: "",
+  parentRouteName: "",
+  entityId: "",
+});
 const pageInfo = ref<PageInfo>({
   routerTitle: "",
   routeType: "",
@@ -23,16 +29,25 @@ export const usePageInfo = () => {
   const updatePageInfo = (input: string, type: infoTypes = "routerTitle") => {
     pageInfo.value[type] = input;
   };
+  const updatePreviousPageInfo = (input: string, type: infoTypes = "routerTitle") => {
+    previousPageInfo.value[type] = input;
+  };
 
-  router.afterEach((to) => {
-    updatePageInfo(to.matched[0].name?.toString() || "", "parentRouteName");
+  router.afterEach((to, from) => {
+    updatePageInfo(to.matched[1].name?.toString() || "", "parentRouteName");
     updatePageInfo(to.meta.type as string, "routeType");
     updatePageInfo(to.meta.title as string);
     updatePageInfo(to.meta.uuid as string);
+
+    updatePreviousPageInfo(from.matched[1].name?.toString() || "", "parentRouteName");
+    updatePreviousPageInfo(from.meta.type as string, "routeType");
+    updatePreviousPageInfo(from.meta.title as string);
+    updatePreviousPageInfo(from.meta.uuid as string);
   });
 
   return {
     pageInfo,
+    previousPageInfo,
     updatePageInfo,
   };
 };
