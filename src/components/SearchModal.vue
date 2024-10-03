@@ -16,7 +16,7 @@
           list-item-route-name="SingleEntity"
           :enable-advanced-filters="false"
           :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
-          :enable-bulk-operations="false"
+          :enable-bulk-operations="true"
           :filters="filters"
           :is-search-library="true"
         ></base-library>

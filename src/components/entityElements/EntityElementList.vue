@@ -1,7 +1,9 @@
 <template>
   <div>
     <entity-element-wrapper
-      class="pb-1"
+      :class="[
+        { 'pb-1': baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary },
+      ]"
       :label="label"
       :isCollapsed="isCollapsed"
       :base-library-mode="baseLibraryMode"
