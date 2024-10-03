@@ -55,7 +55,7 @@ import {
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-const { pageInfo } = usePageInfo();
+const { previousPageInfo } = usePageInfo();
 const {
   isEdit,
   save,
@@ -91,7 +91,7 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
   await getTenants();
   closeModal(TypeModals.Confirm);
   disableEditMode();
-  router.push({ name: pageInfo.value.parentRouteName });
+  router.push({ name: previousPageInfo.value.parentRouteName });
   createNotificationOverwrite(
     NotificationType.default,
     t("notifications.success.entityDeleted.title"),
