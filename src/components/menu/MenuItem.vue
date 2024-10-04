@@ -2,6 +2,7 @@
   <div data-cy="menu-item">
     <component
       v-if="showMenuItem"
+      data-test="menu-item-component"
       :is="linkTag"
       :to="isLink ? menuAction.action : undefined"
       @click="!isLink && menuAction?.action ? menuAction.action() : undefined"
@@ -90,7 +91,7 @@ import {
 import CustomIcon from "../CustomIcon.vue";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
 import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
-import { computed, defineProps, onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { Permission } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useAuth } from "session-vue-3-oidc-library";
@@ -190,6 +191,7 @@ onMounted(async () => {
   if (props.menuitem.can) {
     allowed = await fetchAdvancedPermission(props.menuitem.can);
   }
+
   hasPermissionForMenuItem.value = allowed;
 });
 </script>
