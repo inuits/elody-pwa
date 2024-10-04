@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineProps, type PropType } from "vue";
+import { computed, type PropType } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
@@ -40,7 +40,7 @@ const { can, fetchAdvancedPermission } = usePermissions();
 const isActive = computed(
   () =>
     route.path.replace("/", "") ===
-    (props.subMenuItem.typeLink?.route?.destination as string)
+    (props.subMenuItem?.typeLink?.route?.destination as string)
 );
 const { checkIfRouteOrModal } = useMenuHelper();
 const menuAction = computed(() => checkIfRouteOrModal(props.subMenuItem));
