@@ -91,6 +91,7 @@ let form = createForm(props.uuid, {
   relationMetadata: {},
   relatedEntityData: {},
 });
+console.log(form.values);
 let mutatedEntity: Entity | undefined;
 const formContainsErrors = computed((): boolean => !form?.meta.value.valid);
 

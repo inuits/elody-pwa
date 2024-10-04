@@ -9,7 +9,7 @@
         :intial-values="intialValues"
         :relation-values="relationValues"
         :uuid="entity.uuid"
-        :type="String(route.params['type'])"
+        :type="entity.type"
         :delete-query-options="entity.deleteQueryOptions"
       >
         <entity-column
@@ -75,8 +75,17 @@ const {
   setRefetchFn,
 } = useEditMode();
 
+const props = withDefaults(
+  defineProps<{
+    entityId?: string | undefined;
+  }>(),
+  {
+    entityId: undefined,
+  }
+);
+
 const { mediafileSelectionState } = useEntityMediafileSelector();
-const id = asString(route.params["id"]);
+const id = props.entityId || asString(route.params["id"]);
 const identifiers = ref<string[]>([]);
 const loading = ref<boolean>(true);
 const { getEditableMetadataKeys } = useFormHelper();
