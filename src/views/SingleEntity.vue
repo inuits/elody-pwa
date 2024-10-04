@@ -1,5 +1,5 @@
 <template>
-  <entity-single></entity-single>
+  <entity-single key="root-entity"></entity-single>
 </template>
 
 <script lang="ts" setup>

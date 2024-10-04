@@ -64,6 +64,10 @@
         v-if="element.__typename === 'MarkdownViewerElement'"
         :element="element"
       />
+      <entity-element-entity-viewer
+        v-if="element.__typename === 'EntityViewerElement'"
+        :element="element"
+      />
     </div>
   </div>
 </template>
@@ -93,15 +97,7 @@ import type {
 import EntityElementMarkdownViewer from "@/components/entityElements/EntityElementMarkdownViewer.vue";
 import { getObjectsBasedOnTypename } from "@/helpers";
 import { useStateManagement } from "@/composables/useStateManagement";
-
-export type Elements =
-  | EntityListElement
-  | GraphElement
-  | ManifestViewerElement
-  | MarkdownViewerElement
-  | MediaFileElement
-  | SingleMediaFileElement
-  | WindowElement;
+import EntityElementEntityViewer from "@/components/entityElements/EntityElementEntityViewer.vue";
 
 const props = defineProps<{
   elements: EntityViewElements;
@@ -114,9 +110,9 @@ const { isEdit } = useEditMode();
 const { getStateForRoute, updateStateForRoute } = useStateManagement();
 const route = useRoute();
 
-const elements = computed<Elements[]>(() => {
-  const returnArray: Elements[] = [];
-  const graphArray: Elements[] = [];
+const elements = computed<EntityViewElements[]>(() => {
+  const returnArray: EntityViewElements[] = [];
+  const graphArray: EntityViewElements[] = [];
   Object.values(props.elements).forEach((value) => {
     if (value != null && typeof value !== "string") {
       const collapsedState = getCollapsedStateForElement(value);
