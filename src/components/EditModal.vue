@@ -51,6 +51,7 @@ import {
   NotificationType,
   useNotification,
 } from "@/components/base/BaseNotification.vue";
+import { useBulkOperations } from "@/composables/useBulkOperations";
 
 const route = useRoute();
 const router = useRouter();
@@ -66,6 +67,7 @@ const {
   isEditToggleVisible,
 } = useEditMode();
 const { initializeConfirmModal } = useConfirmModal();
+const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { closeModal, openModal, deleteQueryOptions } = useBaseModal();
 const { discardEditForForm } = useFormHelper();
 const config: any = inject("config");
@@ -87,6 +89,7 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
       (route: any) => route.entityType === type
     ).type;
   }
+  dequeueItemForBulkProcessing(previousPageInfo.value.parentRouteName, id);
   await mutate({ id, path: collection, deleteMediafiles });
   await getTenants();
   closeModal(TypeModals.Confirm);
