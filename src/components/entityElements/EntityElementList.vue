@@ -114,6 +114,7 @@
             :custom-query-entity-picker-list-filters="
               customQueryEntityPickerListFilters
             "
+            :fetch-deep-relations="fetchDeepRelations"
           />
         </div>
       </template>
@@ -133,6 +134,7 @@ import {
   BaseLibraryModes,
   RelationActions,
   ModalStyle,
+  FetchDeepRelations
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -201,6 +203,7 @@ const props = withDefaults(
     entityUuid: string;
     entityListElements?: EntityListElement[];
     allowedActionsOnRelations?: RelationActions[];
+    fetchDeepRelations?: FetchDeepRelations;
   }>(),
   {
     types: () => [],

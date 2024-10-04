@@ -7,6 +7,8 @@ import {
   type AdvancedFilterInput,
   type Entity,
   type GetEntitiesQueryVariables,
+  GetEntityByIdDocument,
+  type GetEntityByIdQueryVariables,
 } from "@/generated-types/queries";
 import useEditMode from "@/composables/useEdit";
 import { createPlaceholderEntities } from "@/helpers";
@@ -193,6 +195,31 @@ export const useBaseLibrary = (
       });
   };
 
+  const getEntityById = async (
+    entityType: Entitytyping, id: string
+  ): Promise<void> => {
+    const variables: GetEntityByIdQueryVariables = {
+      id: id,
+      type: entityType,
+    }
+    await apolloClient
+      .query({
+        query: GetEntityByIdDocument,
+        variables: variables,
+        fetchPolicy: "no-cache",
+        notifyOnNetworkStatusChange: true,
+      })
+      .then((result) => {
+        const entity = result.data.Entity;
+        entities.value.push(entity);
+        entitiesLoading.value = false;
+      })
+      .catch(() => {
+        entities.value = [];
+        entitiesLoading.value = false;
+      });
+  };
+
   watch(
     () => entitiesLoading.value,
     () => {
@@ -212,6 +239,7 @@ export const useBaseLibrary = (
     entitiesLoading,
     getCustomBulkOperations,
     getEntities,
+    getEntityById,
     manipulationQuery,
     setAdvancedFilters,
     setEntityType,

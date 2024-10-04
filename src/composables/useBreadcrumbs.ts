@@ -32,6 +32,7 @@ export type BreadcrumbRoute = {
 
 const rootRoute = ref<RootRoute>({});
 const breadcrumbRoutes = ref<BreadcrumbRoute[]>([]);
+const breadcrumbPathFinished = ref<boolean>(false);
 
 const useBreadcrumbs = (config: any) => {
   const homeRoutes = getChildrenOfHomeRoutes(config);
@@ -72,9 +73,8 @@ const useBreadcrumbs = (config: any) => {
         ) {
           addOverviewPageToBreadcrumb(routeBreadcrumbs);
           entities = undefined;
-          break;
         }
-        breadcrumbRoutes.value.unshift({ id: idOfParent, type: entityType });
+        else breadcrumbRoutes.value.unshift({ id: idOfParent, type: entityType });
         break;
       }
     }
@@ -88,6 +88,7 @@ const useBreadcrumbs = (config: any) => {
       title: routeBreadcrumbsWithOverviewPage.overviewPage,
       overviewPage: routeBreadcrumbsWithOverviewPage.overviewPage,
     });
+    breadcrumbPathFinished.value = true;
   };
 
   const addTitleToBreadcrumb = (title: string) => {
@@ -100,6 +101,7 @@ const useBreadcrumbs = (config: any) => {
 
   const clearBreadcrumbPath = (): void => {
     breadcrumbRoutes.value = [];
+    breadcrumbPathFinished.value = false;
   };
 
   const clearBreadcrumbPathAndAddOverviewPage = (title: string): void => {
@@ -194,4 +196,4 @@ const useBreadcrumbs = (config: any) => {
   };
 };
 
-export { useBreadcrumbs, breadcrumbRoutes, rootRoute };
+export { useBreadcrumbs, breadcrumbRoutes, rootRoute, breadcrumbPathFinished };
