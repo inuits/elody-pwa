@@ -51,11 +51,12 @@ const useBreadcrumbs = (config: any) => {
 
   const iterateOverBreadcrumbs = async (
     parentId: string[],
-    routeBreadcrumbs: any
+    routeBreadcrumbs: any,
+    modifyBreadcrumbRoutesArray: boolean,
   ) => {
     let entities: Entity[] = [];
     for (const index in routeBreadcrumbs) {
-      if (routeBreadcrumbs[index].overviewPage) {
+      if (routeBreadcrumbs[index].overviewPage && modifyBreadcrumbRoutesArray) {
         addOverviewPageToBreadcrumb(routeBreadcrumbs);
         break;
       }
@@ -64,7 +65,7 @@ const useBreadcrumbs = (config: any) => {
       entities = await fetchRelationsBasedOnEntityType(
         createFilters(parentId, entityType, relation)
       );
-      if (entities.length > 0) {
+      if (entities.length > 0 && modifyBreadcrumbRoutesArray) {
         const idOfParent = entities[0].id;
         if (
           idOfParent === getRootRouteId() ||

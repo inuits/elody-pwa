@@ -183,7 +183,8 @@ const determineBreadcrumbs = async () => {
     if (!routeBreadcrumbs) break;
     entityForBreadcrumb.value = await iterateOverBreadcrumbs(
       [entityForBreadcrumb.value.id],
-      routeBreadcrumbs
+      routeBreadcrumbs,
+      true
     );
     if (entityForBreadcrumb.value)
       addTitleToBreadcrumb(getTitleOrNameFromEntity(entityForBreadcrumb.value));
