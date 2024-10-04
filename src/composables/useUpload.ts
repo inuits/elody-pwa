@@ -519,7 +519,7 @@ const useUpload = () => {
       (file: DropzoneFile) => file !== fileToRemove
     );
     if (!files.value.length || isValidationFile) {
-      resetUpload(isValidationFile);
+      resetUpload(true);
     }
     if (!mediafiles.value.length)
       __updateGlobalUploadProgress(
