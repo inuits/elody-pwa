@@ -213,9 +213,11 @@ import {
   type AdvancedFilterInput,
   BaseLibraryModes,
   type BaseRelationValuesInput,
+  DeepRelationsFetchStrategy,
   type Entity,
   type EntityListElement,
-  RelationActions,
+  FetchDeepRelations,
+  RelationActions
 } from "@/generated-types/queries";
 import {
   type BaseEntity,
@@ -251,6 +253,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { watch, ref, onMounted, inject, computed } from "vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
+import { breadcrumbPathFinished, BreadcrumbRoute, breadcrumbRoutes } from "@/composables/useBreadcrumbs";
 
 export type BaseLibraryProps = {
   bulkOperationsContext: Context;
@@ -284,6 +287,7 @@ export type BaseLibraryProps = {
   shouldUseStateForRoute?: boolean;
   customQueryEntityPickerList?: string;
   customQueryEntityPickerListFilters?: string;
+  fetchDeepRelations?: FetchDeepRelations;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -340,6 +344,7 @@ const {
   entitiesLoading,
   getCustomBulkOperations,
   getEntities,
+  getEntityById,
   manipulationQuery,
   setAdvancedFilters,
   setEntityType,
@@ -406,6 +411,8 @@ const entityDropdownOptions = computed<DropdownOption[]>(() => {
     };
   });
 });
+
+const isDeepRelationWithBreadcrumbInfo = computed(() => props.fetchDeepRelations?.deepRelationsFetchStrategy === DeepRelationsFetchStrategy.UseExistingBreadcrumbsInfo);
 
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
 
@@ -489,6 +496,15 @@ const initializeBaseLibrary = async () => {
   }
 };
 
+const initializeDeepRelations = async () => {
+  if (isDeepRelationWithBreadcrumbInfo.value && breadcrumbPathFinished.value) {
+    const positionOfRelation = breadcrumbRoutes.value.length - props.fetchDeepRelations.amountOfRecursions;
+    const breadcrumbEntity = breadcrumbRoutes.value[positionOfRelation];
+    if (!breadcrumbEntity || breadcrumbEntity.type !== props.fetchDeepRelations.entityType) return;
+    await getEntityById(breadcrumbEntity.type, breadcrumbEntity.id);
+  }
+}
+
 const getDisplayPreferences = () => {
   const displayPreferences = getGlobalState("_displayPreferences");
   if (displayPreferences) {
@@ -518,7 +534,10 @@ const initializeEntityPickerComponent = () => {
 };
 
 onMounted(async () => {
-  await initializeBaseLibrary();
+  if (props.fetchDeepRelations)
+    await initializeDeepRelations();
+  else
+    await initializeBaseLibrary();
   getDisplayPreferences();
 });
 
@@ -611,6 +630,12 @@ watch(
     if (uploadStatus.value === "upload-finished") await refetchEntities();
   }
 );
+watch(
+  () => breadcrumbPathFinished.value,
+  () => {
+    if (breadcrumbPathFinished.value && isDeepRelationWithBreadcrumbInfo.value) initializeDeepRelations();
+  }
+)
 
 EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryMediafile, async () => {
   if (
