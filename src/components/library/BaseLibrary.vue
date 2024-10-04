@@ -253,7 +253,11 @@ import { useRoute, useRouter } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { watch, ref, onMounted, inject, computed } from "vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import { breadcrumbPathFinished, BreadcrumbRoute, breadcrumbRoutes } from "@/composables/useBreadcrumbs";
+import {
+  useBreadcrumbs,
+  breadcrumbPathFinished,
+  breadcrumbRoutes,
+} from "@/composables/useBreadcrumbs";
 
 export type BaseLibraryProps = {
   bulkOperationsContext: Context;
@@ -322,11 +326,13 @@ const emit = defineEmits<{
   (event: "entitiesUpdated", numberOfEntities: number): void;
 }>();
 
+const config: any = inject("config");
 const apolloClient = inject(DefaultApolloClient);
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const { getGlobalState, updateGlobalState } = useStateManagement();
+const { iterateOverBreadcrumbs } = useBreadcrumbs(config);
 
 const hasBulkOperations = ref<boolean>(true);
 const enableSelection = computed<boolean>(() => {
@@ -413,6 +419,7 @@ const entityDropdownOptions = computed<DropdownOption[]>(() => {
 });
 
 const isDeepRelationWithBreadcrumbInfo = computed(() => props.fetchDeepRelations?.deepRelationsFetchStrategy === DeepRelationsFetchStrategy.UseExistingBreadcrumbsInfo);
+const isDeepRelationUsingMethods = computed(() => props.fetchDeepRelations?.deepRelationsFetchStrategy === DeepRelationsFetchStrategy.UseMethodsAndFetch);
 
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
 
@@ -502,6 +509,18 @@ const initializeDeepRelations = async () => {
     const breadcrumbEntity = breadcrumbRoutes.value[positionOfRelation];
     if (!breadcrumbEntity || breadcrumbEntity.type !== props.fetchDeepRelations.entityType) return;
     await getEntityById(breadcrumbEntity.type, breadcrumbEntity.id);
+  }
+  else if (isDeepRelationUsingMethods.value) {
+    const routeConfig = props.fetchDeepRelations.routeConfig;
+    let parentId = props.parentEntityIdentifiers[0];
+    let entity: Entity;
+    for (const index in routeConfig) {
+      const entityResult = await iterateOverBreadcrumbs(parentId, [routeConfig[index]], false);
+      if (!entityResult) break;
+      parentId = entityResult.id;
+      entity = entityResult;
+    }
+    if (entity && props.fetchDeepRelations.entityType === entity.type ) entities.value = [entity];
   }
 }
 
