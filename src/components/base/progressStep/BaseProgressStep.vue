@@ -1,10 +1,11 @@
 <template>
   <div
     :class="[
-      `rounded-full h-6 flex justify-center items-center ${bgColor}`,
-      { 'w-6 p-1': !label },
-      { 'w-min px-4': label },
+      `rounded-full h-6 flex justify-center items-center ${bgColor} cursor-default`,
+      { 'w-6 p-1': !showLabel },
+      { 'w-min px-4': showLabel },
     ]"
+    :title="translatedLabel"
   >
     <unicon
       v-if="status === ProgressStepStatus.Empty"
@@ -31,7 +32,7 @@
       :name="Unicons.Process.name"
       height="16"
     />
-    <p v-if="label" :class="`${labelColor}`">{{ t(label) }}</p>
+    <p v-if="showLabel" :class="`${labelColor}`">{{ translatedLabel }}</p>
   </div>
 </template>
 
@@ -41,12 +42,21 @@ import { useI18n } from "vue-i18n";
 import { computed } from "vue";
 import { ProgressStepStatus } from "@/generated-types/queries";
 
-const props = defineProps<{
-  label?: string;
-  status: ProgressStepStatus;
-}>();
+const props = withDefaults(
+  defineProps<{
+    label?: string;
+    showLabel: boolean;
+    status: ProgressStepStatus;
+  }>(),
+  {
+    showLabel: true,
+  }
+);
 
 const { t } = useI18n();
+
+const translatedLabel = computed(() => (props.label ? t(props.label) : ""));
+
 const labelColor = computed(() => {
   if (props.status === ProgressStepStatus.Loading) return "text-neutral-white";
   if (props.status === ProgressStepStatus.Complete) return "text-green-default";
