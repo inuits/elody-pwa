@@ -55,7 +55,8 @@ onMounted(async () => {
 });
 
 const checkAdvancedPermission = async () => {
-  if (!props.subMenuItem.can) return false;
+  if (!props.subMenuItem.can || props.subMenuItem.can.length === 0)
+    return false;
   const result = await fetchAdvancedPermission(props.subMenuItem.can);
   return result;
 };

@@ -74,7 +74,7 @@ describe("MenuSubItem", () => {
     typeLink: {
       route: { destination: "realDevice" },
     },
-    can: "read-real-device",
+    can: ["read-real-device"],
   };
 
   it("renders the component if permission is granted", async () => {

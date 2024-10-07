@@ -89,7 +89,7 @@ describe("MenuItem", () => {
         destination: "some-path",
       },
     },
-    can: "test-permission",
+    can: ["test-permission"],
     subMenu: null,
     isLoggedIn: true,
   };
