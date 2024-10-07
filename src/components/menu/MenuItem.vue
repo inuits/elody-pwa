@@ -188,7 +188,7 @@ onMounted(async () => {
       allowed = allowed || can(Permission.Canread, item.entityType);
   });
 
-  if (props.menuitem.can) {
+  if (props.menuitem.can && props.menuitem.can?.length > 0) {
     allowed = await fetchAdvancedPermission(props.menuitem.can);
   }
 
