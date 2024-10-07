@@ -18,13 +18,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineProps, type PropType } from "vue";
+import { computed, type PropType } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
 import { usePermissions } from "@/composables/usePermissions";
 import { Permission, type MenuItem } from "@/generated-types/queries";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { Unicons } from "@/types";
 
 const props = defineProps({
@@ -36,11 +36,11 @@ const props = defineProps({
 });
 const { t } = useI18n();
 const route = useRoute();
-const { can } = usePermissions();
+const { can, fetchAdvancedPermission } = usePermissions();
 const isActive = computed(
   () =>
     route.path.replace("/", "") ===
-    (props.subMenuItem.typeLink?.route?.destination as string)
+    (props.subMenuItem?.typeLink?.route?.destination as string)
 );
 const { checkIfRouteOrModal } = useMenuHelper();
 const menuAction = computed(() => checkIfRouteOrModal(props.subMenuItem));
@@ -48,20 +48,44 @@ const isLink = computed(
   () => menuAction.value?.menuItemType === MenuItemType.link
 );
 const linkTag = computed(() => (isLink.value ? "router-link" : "div"));
-const isPermitted = ref<boolean>();
+const isPermitted = ref<boolean>(false);
 
-if (props.subMenuItem.requiresAuth === false) isPermitted.value = true;
-else
-  isPermitted.value = can(
-    props.subMenuItem.typeLink?.modal?.neededPermission || Permission.Canread,
-    props.subMenuItem.entityType
-  );
+onMounted(async () => {
+  await checkPermissions();
+});
+
+const checkAdvancedPermission = async () => {
+  if (!props.subMenuItem.can || props.subMenuItem.can.length === 0)
+    return false;
+  const result = await fetchAdvancedPermission(props.subMenuItem.can);
+  return result;
+};
 
 const handleClick = (event: Event, menuAction: any) => {
   if (!isLink.value && menuAction?.action) {
     event.stopPropagation();
     menuAction.action();
   }
+};
+
+const checkPermissions = async () => {
+  let canDoAction = false;
+
+  if (props.subMenuItem.requiresAuth === false) {
+    canDoAction = true;
+  }
+  if (props.subMenuItem.can) {
+    canDoAction = await checkAdvancedPermission();
+  } else {
+    canDoAction =
+      can(
+        props.subMenuItem.typeLink?.modal?.neededPermission ||
+          Permission.Canread,
+        props.subMenuItem.entityType
+      ) || false;
+  }
+
+  isPermitted.value = canDoAction;
 };
 </script>
 <style></style>
