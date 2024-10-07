@@ -41,7 +41,7 @@ import {
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
 import EntityForm from "@/components/EntityForm.vue";
-import { asString } from "@/helpers";
+import { asString, getTitleOrNameFromEntity } from "@/helpers";
 import { reactive, ref, watch, inject } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -63,7 +63,6 @@ const { fetchUpdateAndDeletePermission } = usePermissions();
 const {
   clearBreadcrumbPath,
   getRouteBreadcrumbsOfEntity,
-  addTitleToBreadcrumb,
   setRootRoute,
   iterateOverBreadcrumbs,
 } = useBreadcrumbs(config);
@@ -186,18 +185,7 @@ const determineBreadcrumbs = async () => {
       routeBreadcrumbs,
       true
     );
-    if (entityForBreadcrumb.value)
-      addTitleToBreadcrumb(getTitleOrNameFromEntity(entityForBreadcrumb.value));
   } while (entityForBreadcrumb.value);
-};
-
-const getTitleOrNameFromEntity = (entity: Entity): string => {
-  return (
-    entity.intialValues.title ||
-    entity.intialValues.name ||
-    entity.intialValues.filename ||
-    entity.intialValues.id
-  );
 };
 
 watch(
