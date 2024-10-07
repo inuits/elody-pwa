@@ -15,7 +15,7 @@ const setIgnorePermissions = (value: boolean) => {
   ignorePermissions.value = value;
 };
 const permittedEntitiesToCreate = ref<Entitytyping[]>([]);
-const advancedPermissions: { [key: string]: boolean } = {};
+let advancedPermissions: { [key: string]: boolean } = {};
 
 const permissionsMappings = ref<Map<string, Map<Permission, boolean>>>(
   new Map<string, Map<Permission, boolean>>()
@@ -36,6 +36,10 @@ const setPermissionsMappings = async () => {
         result.data.PermissionMapping
       );
     });
+};
+
+const resetAdvancedPermissions = () => {
+  advancedPermissions = {};
 };
 
 const normalizePermissions = (response: {
@@ -145,4 +149,5 @@ export {
   setIgnorePermissions,
   setPermissionsMappings,
   usePermissions,
+  resetAdvancedPermissions,
 };
