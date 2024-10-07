@@ -1,6 +1,7 @@
 import {
   GetPermissionMappingDocument,
   GetPermissionMappingEntityDetailDocument,
+  GetAdvancedPermissionDocument,
   type GetPermissionMappingEntityDetailQuery,
   type GetPermissionMappingEntityDetailQueryVariables,
   Permission,
@@ -14,6 +15,7 @@ const setIgnorePermissions = (value: boolean) => {
   ignorePermissions.value = value;
 };
 const permittedEntitiesToCreate = ref<Entitytyping[]>([]);
+const advancedPermissions: { [key: string]: boolean } = {};
 
 const permissionsMappings = ref<Map<string, Map<Permission, boolean>>>(
   new Map<string, Map<Permission, boolean>>()
@@ -71,6 +73,32 @@ const usePermissions = () => {
     }
   };
 
+  const fetchAdvancedPermission = (permissions: string[]) => {
+    const permission = permissions[0];
+    if (permission in advancedPermissions) {
+      return advancedPermissions[permission];
+    }
+
+    try {
+      return apolloClient
+        .query({
+          query: GetAdvancedPermissionDocument,
+          variables: { permission },
+          fetchPolicy: "no-cache",
+          notifyOnNetworkStatusChange: true,
+        })
+        .then((result) => {
+          const isPermitted = result.data.AdvancedPermission;
+          advancedPermissions[permission] = isPermitted;
+          return isPermitted;
+        });
+    } catch (e) {
+      console.log(
+        `Error in usePermissions fetch advanced permissions function: ${e}`
+      );
+    }
+  };
+
   const fetchUpdateAndDeletePermission = (id: string, entityType: string) => {
     const permissions = new Map<Permission, boolean>();
     try {
@@ -107,6 +135,7 @@ const usePermissions = () => {
     can,
     fetchUpdateAndDeletePermission,
     numberOfEntities,
+    fetchAdvancedPermission,
   };
 };
 

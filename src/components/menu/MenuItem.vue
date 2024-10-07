@@ -1,10 +1,8 @@
 <template>
   <div data-cy="menu-item">
     <component
-      v-show="
-        (menuitem?.isLoggedIn ? auth.isAuthenticated.value : true) &&
-        hasPermissionForMenuItem
-      "
+      v-if="showMenuItem"
+      data-test="menu-item-component"
       :is="linkTag"
       :to="isLink ? menuAction.action : undefined"
       @click="!isLink && menuAction?.action ? menuAction.action() : undefined"
@@ -71,7 +69,7 @@
         </div>
       </div>
     </component>
-    <transition-group v-if="isExpanded">
+    <transition-group v-if="isExpanded && showMenuItem">
       <div v-for="submenuItem in menuSubitem" :key="submenuItem.label">
         <MenuSubItem
           @click="setSelectedMenuItem(menuitem)"
@@ -93,7 +91,7 @@ import {
 import CustomIcon from "../CustomIcon.vue";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
 import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
-import { computed, defineProps, onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { Permission } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useAuth } from "session-vue-3-oidc-library";
@@ -109,7 +107,7 @@ import BaseTooltip from "@/components/base/BaseTooltip.vue";
 const { checkIfRouteOrModal, setSelectedMenuItem, selectedMenuItem } =
   useMenuHelper();
 const { t } = useI18n();
-const { can } = usePermissions();
+const { can, fetchAdvancedPermission } = usePermissions();
 
 const auth = useAuth();
 const menuSubitem = ref<Array<MenuItem>>([]);
@@ -129,6 +127,12 @@ const props = defineProps<{
 }>();
 
 const isActive = computed(() => props.menuitem === selectedMenuItem.value);
+const showMenuItem = computed(() => {
+  return (
+    (props.menuitem?.isLoggedIn ? auth.isAuthenticated.value : true) &&
+    hasPermissionForMenuItem.value
+  );
+});
 const iconColor = computed(() =>
   isActive.value ? "accent-normal" : "text-body"
 );
@@ -153,7 +157,7 @@ const handleSubMenu = () => {
 };
 handleSubMenu();
 
-onMounted(() => {
+onMounted(async () => {
   let allowed = false;
   const neededPermission = props.menuitem.typeLink.modal
     ?.neededPermission as Permission;
@@ -183,6 +187,11 @@ onMounted(() => {
     } else if (item.entityType)
       allowed = allowed || can(Permission.Canread, item.entityType);
   });
+
+  if (props.menuitem.can && props.menuitem.can?.length > 0) {
+    allowed = await fetchAdvancedPermission(props.menuitem.can);
+  }
+
   hasPermissionForMenuItem.value = allowed;
 });
 </script>
