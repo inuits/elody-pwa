@@ -73,7 +73,8 @@ const usePermissions = () => {
     }
   };
 
-  const fetchAdvancedPermission = (permission: string) => {
+  const fetchAdvancedPermission = (permissions: string[]) => {
+    const permission = permissions[0];
     if (permission in advancedPermissions) {
       return advancedPermissions[permission];
     }
