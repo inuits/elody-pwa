@@ -11,7 +11,7 @@ import {
 import { apolloClient } from "@/main";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import { getChildrenOfHomeRoutes } from "@/helpers";
+import { getChildrenOfHomeRoutes, getTitleOrNameFromEntity } from "@/helpers";
 
 export type VisitedRoute = {
   id: string;
@@ -75,7 +75,11 @@ const useBreadcrumbs = (config: any) => {
           addOverviewPageToBreadcrumb(routeBreadcrumbs);
           entities = undefined;
         }
-        else breadcrumbRoutes.value.unshift({ id: idOfParent, type: entityType });
+        else breadcrumbRoutes.value.unshift({
+          id: idOfParent,
+          type: entityType,
+          title: getTitleOrNameFromEntity(entities[0]),
+        });
         break;
       }
     }
@@ -175,7 +179,7 @@ const useBreadcrumbs = (config: any) => {
     return entities;
   };
 
-  useRouter().afterEach((to) => {
+  useRouter()?.afterEach((to) => {
     try {
       if (to.meta.title !== "Single Asset" && to.meta.title !== "Single Entity")
         clearBreadcrumbPathAndAddOverviewPage(
@@ -194,6 +198,8 @@ const useBreadcrumbs = (config: any) => {
     setRootRoute,
     previousRoute,
     iterateOverBreadcrumbs,
+    createFilters,
+    addOverviewPageToBreadcrumb,
   };
 };
 

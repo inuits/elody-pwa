@@ -481,7 +481,7 @@ export const getHomeRoute = (config: any) => {
 };
 
 export const getChildrenOfHomeRoutes = (config: any): [] => {
-  return config.routerConfig.filter((item) => item.name === RouteNames.Home)[0]
+  return config?.routerConfig.filter((item) => item.name === RouteNames.Home)[0]
     .children;
 };
 
@@ -507,3 +507,12 @@ export function calculateFutureDate(period: string): Date {
   }
   return now.getTime() / 1000;
 }
+
+export const getTitleOrNameFromEntity = (entity: Entity): string => {
+  return (
+    entity.intialValues.title ||
+    entity.intialValues.name ||
+    entity.intialValues.filename ||
+    entity.intialValues.id
+  );
+};
