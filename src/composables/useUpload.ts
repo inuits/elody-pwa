@@ -274,10 +274,21 @@ const useUpload = () => {
     let dryRunResult;
     try {
       dryRunResult = await __batchEntities(__getCsvBlob(), true);
-    } catch (error) {
-      __handleHttpError(error);
+      handleDryRunResult(dryRunResult, file);
+    } catch (error: any) {
+      const errorMessage: string = error.message || error.statusText;
+      dryRunErrors.value.push(errorMessage);
+      __updateGlobalUploadProgress(
+        ProgressStepType.Validate,
+        ProgressStepStatus.Failed
+      );
+      __updateFileThumbnails(
+        file,
+        ProgressStepType.Validate,
+        ProgressStepStatus.Failed,
+        [errorMessage]
+      );
     }
-    handleDryRunResult(dryRunResult, file);
   };
 
   const __batchEntities = async (
@@ -489,8 +500,13 @@ const useUpload = () => {
           ProgressStepStatus.Complete
         );
         yield __uploadFile(file, url, config);
-      } catch (error) {
-        __handleHttpError(error);
+      } catch (error: any) {
+        __updateFileThumbnails(
+          file,
+          ProgressStepType.Prepare,
+          ProgressStepStatus.Failed,
+          [error.message || error.statusText]
+        );
       }
     }
     _prefetchedUploadUrls = "not-prefetched-yet";
@@ -735,10 +751,6 @@ const useUpload = () => {
     errorContainer.classList.remove("hidden");
   };
 
-  const __handleHttpError = (error: any) => {
-    logFormattedErrors(router, error);
-  };
-
   return {
     resetUpload,
     addFileToUpload,
@@ -764,7 +776,6 @@ const useUpload = () => {
     __updateFileThumbnails,
     initializeUpload,
     uploadCsvForReordering,
-    __handleHttpError,
     uploadFlow,
     missingFileNames,
     failedUploads,
