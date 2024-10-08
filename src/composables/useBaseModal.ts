@@ -14,16 +14,7 @@ export type ModalInfo = {
   formQuery?: string;
   deleteQueryOptions?: DeleteQueryOptions;
   closeConfirmation: boolean;
-  savedContext?: any;
   context?: Context;
-};
-
-export type GenericContextForModals = {
-  type: BulkOperationTypes;
-  parentId: string;
-  relationType: string;
-  collection: Collection;
-  callbackFunction?: Function;
 };
 
 const initialModalInfo: ModalInfo = {
@@ -55,7 +46,6 @@ export const useBaseModal = () => {
     formQuery: string | undefined = undefined,
     deleteQueryOptions: DeleteQueryOptions | undefined = undefined,
     askForCloseConfirmation: boolean | undefined = undefined,
-    savedContext: any | undefined = undefined,
     context: Context | undefined = undefined
   ): void => {
     if (modalType !== TypeModals.Confirm)
@@ -64,7 +54,6 @@ export const useBaseModal = () => {
     const updatedModal = { open: true };
     Object.assign(updatedModal, {
       formQuery,
-      savedContext,
       deleteQueryOptions,
     });
     updateModal(modalType, updatedModal);
