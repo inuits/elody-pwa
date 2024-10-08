@@ -320,13 +320,24 @@ const generateTranscodeFromMediafiles = (
 };
 
 watch(selectedBulkOperation, () => {
+  const modal = selectedBulkOperation.value?.bulkOperationModal;
+  openModal(
+    modal.typeModal,
+    ModalStyle.CenterWide,
+    modal.formQuery,
+    undefined,
+    modal.askForCloseConfirmation,
+    props.context,
+  );
+
+
   if (selectedBulkOperation.value?.value === BulkOperationTypes.ExportCsv)
     openModal(
       TypeModals.BulkOperations,
       ModalStyle.CenterWide,
       undefined,
       undefined,
-      undefined,
+      modal.askForCloseConfirmation,
       undefined,
       props.context
     );

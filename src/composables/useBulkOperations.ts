@@ -20,18 +20,6 @@ export type InBulkProcessableItem = {
   value?: string;
   type?: string;
 };
-export type GenericContextForBulkOperationsForm = {
-  parentId: string;
-  relationType: string;
-  collection: Collection;
-};
-export type DownloadMediafilesContextForBulkOperationsForm = {
-  type: BulkOperationTypes;
-  mediafiles: [];
-  entities: [];
-  includeAssetCsv: boolean;
-  relationType: string;
-};
 
 const items = ref<{ [key: string]: InBulkProcessableItem[] }>({});
 for (const key of [
