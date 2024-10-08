@@ -7,6 +7,7 @@ import {
   Permission,
   Entitytyping,
   type DropdownOption,
+  type ContextMenuActions,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
 import { reactive, ref } from "vue";
@@ -114,6 +115,21 @@ const usePermissions = () => {
     const promises = listOfPermissions.map((item: string[]) => {
       return fetchAdvancedPermission(item);
     });
+
+    await Promise.all(promises);
+  };
+
+  const fetchPermissionsOfContextMenu = async (actions: ContextMenuActions) => {
+    // const promises: Promise<any>[] = [];
+    const actionValues = Object.values(actions);
+
+    const promises = actionValues
+      .filter((item) => {
+        return item && item.can && item.can.length > 0;
+      })
+      .map((item: any) => {
+        return fetchAdvancedPermission(item.can[0]);
+      });
 
     await Promise.all(promises);
   };
