@@ -39,6 +39,7 @@ const mocks = vi.hoisted(() => {
   return {
     advancedPermissions: {
       can_do_whatever_you_want: true,
+      no_way: false,
     },
   };
 });
@@ -143,5 +144,31 @@ describe("ActionMenuGroup", () => {
     await flushPromises();
 
     expect(wrapper.vm.availableOptions.length).toBe(1);
+  });
+
+  it("contains the option to render if options were provided with delay", async () => {
+    const wrapper = mount(ActionMenuGroup, {
+      props: {
+        options: [],
+        isMainActionDisabled: false,
+        entityType: "Entitytyping" as Entitytyping,
+      },
+    });
+
+    await flushPromises();
+
+    expect(wrapper.vm.availableOptions.length).toBe(0);
+
+    mocks.advancedPermissions["no_way"] = true;
+    await wrapper.setProps({
+      options: [
+        { ...bulkOption, can: ["no_way"] },
+        { ...bulkOption, can: undefined },
+        { ...bulkOption, can: ["different_no_way"] },
+      ],
+    });
+    await flushPromises();
+
+    expect(wrapper.vm.availableOptions.length).toBe(2);
   });
 });
