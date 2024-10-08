@@ -99,7 +99,6 @@
           <div
             v-if="
               enableBulkOperations &&
-              !displayPreview &&
               baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
             "
             class="my-3"

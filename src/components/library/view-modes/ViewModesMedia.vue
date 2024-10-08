@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[62vh] mt-5">
+  <div class="h-[62vh]">
     <media-viewer :mediafiles="entities" :loading="entitiesLoading" />
   </div>
 </template>
