@@ -89,12 +89,13 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
       (route: any) => route.entityType === type
     ).type;
   }
-  dequeueItemForBulkProcessing(previousPageInfo.value.parentRouteName, id);
+  const context = previousPageInfo.value.parentRouteName;
+  if (context) dequeueItemForBulkProcessing(context, id);
   await mutate({ id, path: collection, deleteMediafiles });
   await getTenants();
   closeModal(TypeModals.Confirm);
   disableEditMode();
-  router.push({ name: previousPageInfo.value.parentRouteName });
+  router.push({ name: context ? context : "Home" });
   createNotificationOverwrite(
     NotificationType.default,
     t("notifications.success.entityDeleted.title"),
