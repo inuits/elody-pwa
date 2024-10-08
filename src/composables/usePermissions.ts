@@ -150,4 +150,5 @@ export {
   setPermissionsMappings,
   usePermissions,
   resetAdvancedPermissions,
+  advancedPermissions,
 };
