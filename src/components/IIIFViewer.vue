@@ -8,12 +8,6 @@
       v-model:home="homeDiv"
       :mediafileId="mediafileId"
     />
-    <div
-      v-show="loading"
-      class="absolute flex h-full items-center justify-center text-center w-full z-40"
-    >
-      {{ $t("loading") }}
-    </div>
     <div ref="OpenSeadragonDiv" class="w-full h-full z-0" />
   </div>
 </template>
@@ -50,6 +44,7 @@ export default defineComponent({
         const dragonOption: OpenSeadragon.Options = {
           element: OpenSeadragonDiv.value,
           prefixUrl: "/static/openseadragon/images/",
+          drawer: "canvas",
           // @ts-ignore
           toolbar: document.getElementById("OpenSeadragon-toolbar"),
           tileSources: `/api/iiif/3/${props.imageFilename}/info.json`,
@@ -83,10 +78,6 @@ export default defineComponent({
             }
           }
         );
-
-        viewer.addHandler("tile-drawn", () => {
-          loading.value = false;
-        });
       }
     });
 
