@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, onMounted } from "vue";
+import { computed, ref, onMounted, watch } from "vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import {
   DropdownOption,
@@ -124,11 +124,6 @@ const handleEmit = (action: DropdownOption) => {
   emit("update:modelValue", action);
 };
 
-onMounted(async () => {
-  await fetchPermissionsForDropdownOptions(props.options);
-  getAvailableOptions();
-});
-
 const getAvailableOptions = () => {
   const permittedOptions = props.options.filter((item: DropdownOption) => {
     return (
@@ -145,4 +140,13 @@ const getAvailableOptions = () => {
     );
   });
 };
+
+watch(
+  () => props.options,
+  async () => {
+    await fetchPermissionsForDropdownOptions(props.options);
+    getAvailableOptions();
+  },
+  { deep: true, immediate: true }
+);
 </script>
