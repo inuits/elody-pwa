@@ -6,7 +6,7 @@ import {
   type GetPermissionMappingEntityDetailQueryVariables,
   Permission,
   Entitytyping,
-  DropdownOption,
+  type DropdownOption,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
 import { reactive, ref } from "vue";
@@ -21,8 +21,6 @@ let advancedPermissions: { [key: string]: boolean } = {};
 const permissionsMappings = ref<Map<string, Map<Permission, boolean>>>(
   new Map<string, Map<Permission, boolean>>()
 );
-
-type IterableOption = { can: string[] | undefined };
 
 const setPermissionsMappings = async () => {
   return await apolloClient
