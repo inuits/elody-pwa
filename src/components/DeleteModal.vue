@@ -61,6 +61,7 @@
             :show-button="false"
             :enable-bulk-operations="false"
             :enable-advanced-filters="false"
+            :enable-non-selectable-entities="false"
             base-library-height="h-fit"
           />
         </div>

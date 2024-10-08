@@ -24,7 +24,7 @@
       :parent-entity-identifiers="
         entityPickerMode === EntityPickerMode.Emit ? [entityUuid] : undefined
       "
-      :ids-of-non-selectable-entities="getAlreadySelectedEntityIds()"
+      :ids-of-non-selectable-entities="enableNonSelectableEntities ? getAlreadySelectedEntityIds() : []"
       list-item-route-name="SingleEntity"
       @entities-updated="
         (numberOfEntities) => emitUpdatedEntities(numberOfEntities)
@@ -89,10 +89,12 @@ const props = withDefaults(
     enableAdvancedFilters: boolean;
     entityPickerMode: EntityPickerMode;
     baseLibraryHeight?: string;
+    enableNonSelectableEntities?: boolean;
   }>(),
   {
     entityPickerMode: EntityPickerMode.Emit,
     baseLibraryHeight: "h-[95vh]",
+    enableNonSelectableEntities: true,
   }
 );
 
