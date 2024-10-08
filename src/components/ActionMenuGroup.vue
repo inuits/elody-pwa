@@ -11,7 +11,7 @@
       @click="handleEmit(primaryOption)"
     />
     <BaseButtonNew
-      v-if="filterSecondaryDropdownOptions.length > 0"
+      v-if="hasSecondaryOptions"
       button-size="small"
       :icon="DamsIcons.EllipsisV"
       class="!w-max !p-2"
@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import {
   DropdownOption,
@@ -51,10 +51,16 @@ import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import useEditMode from "@/composables/useEdit";
 import { useAuth } from "session-vue-3-oidc-library";
+import {
+  usePermissions,
+  advancedPermissions,
+} from "@/composables/usePermissions";
 
 const { isEdit } = useEditMode();
 
 const emit = defineEmits(["update:modelValue"]);
+const { fetchAdvancedPermission, fetchPermissionsForDropdownOptions } =
+  usePermissions();
 
 const props = withDefaults(
   defineProps<{
@@ -75,23 +81,18 @@ const { t } = useI18n();
 
 const auth = useAuth();
 
-const availableOptions = computed(() => {
-  return props.options.filter((item: DropdownOption) => {
-    return (
-      !item?.requiresAuth ||
-      (item?.requiresAuth && auth.isAuthenticated.value === true)
-    );
-  });
-});
+const availableOptions = ref<DropdownOption[]>([]);
 
 const primaryOption = computed(() => {
   return availableOptions.value.find((item: DropdownOption) => item.primary);
 });
 
 const secondaryOptions = computed(() => {
-  return availableOptions.value
-    .filter((item: DropdownOption) => !item?.primary)
-    .map((item: DropdownOption) => ({ ...item, active: true }));
+  return (
+    availableOptions.value
+      .filter((item: DropdownOption) => !item?.primary)
+      .map((item: DropdownOption) => ({ ...item, active: true })) || []
+  );
 });
 
 const filterSecondaryDropdownOptions = computed<DropdownOption[]>(() => {
@@ -115,7 +116,33 @@ const filterSecondaryDropdownOptions = computed<DropdownOption[]>(() => {
   });
 });
 
+const hasSecondaryOptions = computed(() => {
+  return filterSecondaryDropdownOptions.value.length > 0;
+});
+
 const handleEmit = (action: DropdownOption) => {
   emit("update:modelValue", action);
+};
+
+onMounted(async () => {
+  await fetchPermissionsForDropdownOptions(props.options);
+  getAvailableOptions();
+});
+
+const getAvailableOptions = () => {
+  const permittedOptions = props.options.filter((item: DropdownOption) => {
+    return (
+      !item.can ||
+      (item.can && item.can.length > 0 && advancedPermissions[item.can[0]])
+    );
+  });
+
+  availableOptions.value = permittedOptions.filter((item: DropdownOption) => {
+    return (
+      !item?.requiresAuth ||
+      (item?.requiresAuth && auth.isAuthenticated.value === true) ||
+      (item.can && item.can.length > 0 && advancedPermissions[item.can[0]])
+    );
+  });
 };
 </script>
