@@ -59,7 +59,8 @@ import {
 const { isEdit } = useEditMode();
 
 const emit = defineEmits(["update:modelValue"]);
-const { fetchAdvancedPermission } = usePermissions();
+const { fetchAdvancedPermission, fetchPermissionsForDropdownOptions } =
+  usePermissions();
 
 const props = withDefaults(
   defineProps<{
@@ -124,24 +125,9 @@ const handleEmit = (action: DropdownOption) => {
 };
 
 onMounted(async () => {
-  await checkPermissions();
+  await fetchPermissionsForDropdownOptions(props.options);
   getAvailableOptions();
 });
-
-const checkPermissions = async () => {
-  let dropdownOptionsWithPermissions = props.options.filter(
-    (option: DropdownOption) => option.can && option.can.length > 0
-  );
-  let permissionsToCheck: string[][] = dropdownOptionsWithPermissions.map(
-    (option: DropdownOption) => option.can as string[]
-  );
-
-  const promises = permissionsToCheck.map((item: string[]) => {
-    return fetchAdvancedPermission(item);
-  });
-
-  await Promise.all(promises);
-};
 
 const getAvailableOptions = () => {
   const permittedOptions = props.options.filter((item: DropdownOption) => {

@@ -37,8 +37,6 @@ vi.mock("session-vue-3-oidc-library", () => ({
 
 const mocks = vi.hoisted(() => {
   return {
-    fetchAdvancedPermissions: vi.fn(),
-    can: vi.fn(),
     advancedPermissions: {
       can_do_whatever_you_want: true,
     },
@@ -47,8 +45,9 @@ const mocks = vi.hoisted(() => {
 
 vi.mock("@/composables/usePermissions", () => ({
   usePermissions: () => ({
-    can: mocks.fetchAdvancedPermissions,
-    fetchAdvancedPermission: mocks.fetchAdvancedPermissions,
+    can: vi.fn(),
+    fetchAdvancedPermission: vi.fn(),
+    fetchPermissionsForDropdownOptions: vi.fn(),
   }),
   ignorePermissions: { value: false },
   advancedPermissions: mocks.advancedPermissions,
