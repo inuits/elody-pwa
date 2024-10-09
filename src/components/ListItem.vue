@@ -128,23 +128,14 @@
         />
       </slot>
     </div>
-
-    <div v-if="availableContextMenuActions">
-      <unicon
-        :name="Unicons.EllipsisVThinline.name"
-        @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event?.clientX, y: event?.clientY})"
-      />
-      <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
-        <context-menu-action
-          :context-menu-actions="availableContextMenuActions"
-          :parent-entity-id="formId"
-          :entity-id="itemId"
-          :entity-type="itemType"
-          :relation="relation"
-          @toggle-loading="toggleLoading"
-        />
-      </base-context-menu>
-    </div>
+    <BaseContextMenuActions
+      :context-menu-actions="contextMenuActions"
+      :parent-entity-id="formId"
+      :entity-id="itemId"
+      :entity-type="itemType"
+      :relation="relation"
+      @toggle-loading="toggleLoading"
+    />
   </li>
   <template v-if="entityListElements">
     <div
@@ -179,25 +170,19 @@ import {
   type WindowElementPanel,
 } from "@/generated-types/queries";
 import { stringIsUrl } from "@/helpers";
-import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
-import ContextMenuAction from "@/components/context-menu-actions/ContextMenuAction.vue";
 import EntityElementWindowPanel from "@/components/EntityElementWindowPanel.vue";
 import ImageViewer from "@/components/base/ImageViewer.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import useEditMode from "@/composables/useEdit";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, ref, watch, onUpdated } from "vue";
-import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import { Unicons } from "@/types";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useFieldArray } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
-import {
-  usePermissions,
-  advancedPermissions,
-} from "@/composables/usePermissions";
+import BaseContextMenuActions from "./BaseContextMenuActions.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -263,9 +248,7 @@ const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
 
-const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const formId = computed(() => getEntityUuid());
-const { fetchPermissionsOfContextMenu } = usePermissions();
 
 const orderMetadataChild = ref(null);
 onUpdated(() => {
@@ -291,10 +274,6 @@ const canShowCopyRight = () => {
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 const onlyEditableTeaserMetadata = computed(() =>
   props.teaserMetadata.filter((metadata) => metadata.showOnlyInEditMode)
-);
-
-const availableContextMenuActions = ref<ContextMenuActions | undefined>(
-  undefined
 );
 
 watch(
@@ -338,35 +317,4 @@ const createWindowPanelsFromEntityListElements = (
   };
   return panel;
 };
-
-const getAvailableContextMenuActions = () => {
-  const { __typename, ...menuActions } = { ...props.contextMenuActions };
-  const availableOptions: Partial<ContextMenuActions> = { ...menuActions };
-
-  for (const key in availableOptions) {
-    const action = availableOptions[key as keyof typeof menuActions];
-    const permission = action?.can;
-
-    if (
-      permission &&
-      permission.length > 0 &&
-      !advancedPermissions[permission[0] as string]
-    ) {
-      delete availableOptions[key as keyof typeof menuActions];
-    }
-  }
-
-  availableContextMenuActions.value = availableOptions;
-};
-
-watch(
-  () => props.contextMenuActions,
-  async () => {
-    if (props.contextMenuActions) {
-      await fetchPermissionsOfContextMenu(props.contextMenuActions);
-      getAvailableContextMenuActions();
-    }
-  },
-  { immediate: true, deep: true }
-);
 </script>
