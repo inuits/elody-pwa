@@ -62,6 +62,9 @@ onMounted(() => {
     removeFileToUpload(file, props.isValidationFile);
     dropzone.setupEventListeners();
   });
+  dropzone.on("maxfilesexceeded", (file: DropzoneFile) => {
+    dropzone.removeFile(file);
+  });
   dropzone.on("maxfilesreached", () => {
     dropzone.removeEventListeners();
   });
