@@ -128,36 +128,29 @@
         />
       </slot>
     </div>
-
-    <div v-if="contextMenuActions">
-      <unicon
-        :name="Unicons.EllipsisVThinline.name"
-        @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event?.clientX, y: event?.clientY})"
-      />
-      <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
-        <context-menu-action
-          :context-menu-actions="contextMenuActions"
-          :parent-entity-id="formId"
-          :entity-id="itemId"
-          :entity-type="itemType"
-          :relation="relation"
-          @toggle-loading="toggleLoading"
-        />
-      </base-context-menu>
-    </div>
-  </li>
-  <div
-    v-if="entityListElements"
-    v-for="entityListElement in entityListElements"
-  >
-    <entity-element-window-panel
-      :form-id="itemId"
-      :identifiers="[itemId]"
-      :is-edit="false"
-      :parent-is-list-item="true"
-      :panel="createWindowPanelsFromEntityListElements(entityListElement)"
+    <BaseContextMenuActions
+      :context-menu-actions="contextMenuActions"
+      :parent-entity-id="formId"
+      :entity-id="itemId"
+      :entity-type="itemType"
+      :relation="relation"
+      @toggle-loading="toggleLoading"
     />
-  </div>
+  </li>
+  <template v-if="entityListElements">
+    <div
+      v-for="(entityListElement, idx) in entityListElements"
+      :key="'window_panel_' + idx"
+    >
+      <entity-element-window-panel
+        :form-id="itemId"
+        :identifiers="[itemId]"
+        :is-edit="false"
+        :parent-is-list-item="true"
+        :panel="createWindowPanelsFromEntityListElements(entityListElement)"
+      />
+    </div>
+  </template>
 </template>
 
 <script lang="ts" setup>
@@ -170,7 +163,6 @@ import {
   PanelType,
   type BaseRelationValuesInput,
   type ContextMenuActions,
-  type Entity,
   type EntityListElement,
   type IntialValues,
   type Metadata,
@@ -178,21 +170,19 @@ import {
   type WindowElementPanel,
 } from "@/generated-types/queries";
 import { stringIsUrl } from "@/helpers";
-import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
-import ContextMenuAction from "@/components/context-menu-actions/ContextMenuAction.vue";
 import EntityElementWindowPanel from "@/components/EntityElementWindowPanel.vue";
 import ImageViewer from "@/components/base/ImageViewer.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import useEditMode from "@/composables/useEdit";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, ref, watch, onUpdated } from "vue";
-import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import { Unicons } from "@/types";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useFieldArray } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
+import BaseContextMenuActions from "./BaseContextMenuActions.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -258,7 +248,6 @@ const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
 
-const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const formId = computed(() => getEntityUuid());
 
 const orderMetadataChild = ref(null);
