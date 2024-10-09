@@ -20,11 +20,11 @@ import EventBus from "@/EventBus";
 const emit = defineEmits(["toggleLoading"]);
 
 const props = defineProps<{
-  label: String;
-  icon: String;
+  label: string;
+  icon: string;
   action: ContextMenuGeneralActionEnum;
-  entityId: String;
-  parentEntityId: String;
+  entityId: string;
+  parentEntityId: string;
 }>();
 const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();

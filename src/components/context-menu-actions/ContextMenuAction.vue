@@ -39,9 +39,9 @@ const emit = defineEmits(["toggleLoading"]);
 
 const props = defineProps<{
   contextMenuActions: ContextMenuActions;
-  entityId: String;
+  entityId: string;
   entityType: Entitytyping;
-  parentEntityId?: String;
+  parentEntityId?: string;
   relation?: object;
 }>();
 
