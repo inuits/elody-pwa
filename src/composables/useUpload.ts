@@ -531,6 +531,9 @@ const useUpload = () => {
     fileToRemove: DropzoneFile,
     isValidationFile: boolean = false
   ) => {
+    failedUploads.value = failedUploads.value.filter(
+      (fileName: String) => fileName !== fileToRemove.name
+    );
     files.value = files.value.filter(
       (file: DropzoneFile) => file !== fileToRemove
     );
@@ -734,7 +737,8 @@ const useUpload = () => {
     errors: string[]
   ): void => {
     const filePreview: HTMLElement = file.previewTemplate;
-    failedUploads.value.push(file.name);
+    if (!failedUploads.value.includes(file.name))
+      failedUploads.value.push(file.name);
 
     filePreview.classList.add("border-2", "border-red-default");
     const errorContainer: Element | null = filePreview
