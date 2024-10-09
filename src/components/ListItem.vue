@@ -129,14 +129,14 @@
       </slot>
     </div>
 
-    <div v-if="contextMenuActions">
+    <div v-if="availableContextMenuActions">
       <unicon
         :name="Unicons.EllipsisVThinline.name"
         @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event?.clientX, y: event?.clientY})"
       />
       <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
         <context-menu-action
-          :context-menu-actions="contextMenuActions"
+          :context-menu-actions="availableContextMenuActions"
           :parent-entity-id="formId"
           :entity-id="itemId"
           :entity-type="itemType"
@@ -146,18 +146,20 @@
       </base-context-menu>
     </div>
   </li>
-  <div
-    v-if="entityListElements"
-    v-for="entityListElement in entityListElements"
-  >
-    <entity-element-window-panel
-      :form-id="itemId"
-      :identifiers="[itemId]"
-      :is-edit="false"
-      :parent-is-list-item="true"
-      :panel="createWindowPanelsFromEntityListElements(entityListElement)"
-    />
-  </div>
+  <template v-if="entityListElements">
+    <div
+      v-for="(entityListElement, idx) in entityListElements"
+      :key="'window_panel_' + idx"
+    >
+      <entity-element-window-panel
+        :form-id="itemId"
+        :identifiers="[itemId]"
+        :is-edit="false"
+        :parent-is-list-item="true"
+        :panel="createWindowPanelsFromEntityListElements(entityListElement)"
+      />
+    </div>
+  </template>
 </template>
 
 <script lang="ts" setup>
@@ -170,7 +172,6 @@ import {
   PanelType,
   type BaseRelationValuesInput,
   type ContextMenuActions,
-  type Entity,
   type EntityListElement,
   type IntialValues,
   type Metadata,
@@ -193,6 +194,10 @@ import { Unicons } from "@/types";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useFieldArray } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
+import {
+  usePermissions,
+  advancedPermissions,
+} from "@/composables/usePermissions";
 
 const props = withDefaults(
   defineProps<{
@@ -260,6 +265,7 @@ const imageSrcError = ref<boolean>(false);
 
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const formId = computed(() => getEntityUuid());
+const { fetchPermissionsOfContextMenu } = usePermissions();
 
 const orderMetadataChild = ref(null);
 onUpdated(() => {
@@ -285,6 +291,10 @@ const canShowCopyRight = () => {
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 const onlyEditableTeaserMetadata = computed(() =>
   props.teaserMetadata.filter((metadata) => metadata.showOnlyInEditMode)
+);
+
+const availableContextMenuActions = ref<ContextMenuActions | undefined>(
+  undefined
 );
 
 watch(
@@ -328,4 +338,35 @@ const createWindowPanelsFromEntityListElements = (
   };
   return panel;
 };
+
+const getAvailableContextMenuActions = () => {
+  const { __typename, ...menuActions } = { ...props.contextMenuActions };
+  const availableOptions: Partial<ContextMenuActions> = { ...menuActions };
+
+  for (const key in availableOptions) {
+    const action = availableOptions[key as keyof typeof menuActions];
+    const permission = action?.can;
+
+    if (
+      permission &&
+      permission.length > 0 &&
+      !advancedPermissions[permission[0] as string]
+    ) {
+      delete availableOptions[key as keyof typeof menuActions];
+    }
+  }
+
+  availableContextMenuActions.value = availableOptions;
+};
+
+watch(
+  () => props.contextMenuActions,
+  async () => {
+    if (props.contextMenuActions) {
+      await fetchPermissionsOfContextMenu(props.contextMenuActions);
+      getAvailableContextMenuActions();
+    }
+  },
+  { immediate: true, deep: true }
+);
 </script>

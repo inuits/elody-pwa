@@ -8,6 +8,9 @@ import {
   Entitytyping,
   type DropdownOption,
   type ContextMenuActions,
+  type ContextMenuElodyAction,
+  type ContextMenuGeneralAction,
+  type ContextMenuLinkAction,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
 import { reactive, ref } from "vue";
@@ -22,6 +25,11 @@ let advancedPermissions: { [key: string]: boolean } = {};
 const permissionsMappings = ref<Map<string, Map<Permission, boolean>>>(
   new Map<string, Map<Permission, boolean>>()
 );
+
+type ContextMenuActionType =
+  | ContextMenuElodyAction
+  | ContextMenuGeneralAction
+  | ContextMenuLinkAction;
 
 const setPermissionsMappings = async () => {
   return await apolloClient
@@ -120,15 +128,14 @@ const usePermissions = () => {
   };
 
   const fetchPermissionsOfContextMenu = async (actions: ContextMenuActions) => {
-    // const promises: Promise<any>[] = [];
-    const actionValues = Object.values(actions);
+    const actionValues = Object.values(actions) as ContextMenuActionType[];
 
     const promises = actionValues
-      .filter((item) => {
-        return item && item.can && item.can.length > 0;
+      .filter((item: ContextMenuActionType) => {
+        return item.can && item.can.length > 0;
       })
-      .map((item: any) => {
-        return fetchAdvancedPermission(item.can[0]);
+      .map((item) => {
+        return fetchAdvancedPermission(item.can as string[]);
       });
 
     await Promise.all(promises);
@@ -172,6 +179,7 @@ const usePermissions = () => {
     numberOfEntities,
     fetchAdvancedPermission,
     fetchPermissionsForDropdownOptions,
+    fetchPermissionsOfContextMenu,
   };
 };
 
