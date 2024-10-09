@@ -44,7 +44,6 @@ export default defineComponent({
         const dragonOption: OpenSeadragon.Options = {
           element: OpenSeadragonDiv.value,
           prefixUrl: "/static/openseadragon/images/",
-          drawer: "canvas",
           // @ts-ignore
           toolbar: document.getElementById("OpenSeadragon-toolbar"),
           tileSources: `/api/iiif/3/${props.imageFilename}/info.json`,
