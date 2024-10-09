@@ -35,7 +35,7 @@
             icon="Redo"
             :label="t('actions.labels.reset-upload')"
             button-style="accentAccent"
-            @click="resetUpload"
+            @click="resetUpload()"
           />
         </div>
       </div>
