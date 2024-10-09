@@ -22,7 +22,6 @@ type UploadSettings = {
 };
 
 const router = useRouter();
-const { resetDynamicForm } = useDynamicForm();
 const { logFormattedErrors } = useHttpErrors();
 const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
   "no-upload"
@@ -120,7 +119,6 @@ const useUpload = () => {
     config: any,
     t: Function
   ) => {
-    console.log(isLinkedUpload);
     const generator = uploadGenerator(
       config,
       isLinkedUpload ? useEntitySingle().getEntityUuid() : ""
@@ -583,7 +581,6 @@ const useUpload = () => {
       failedUploads.value = [];
       amountUploaded.value = 0;
       resetUploadDropzone();
-      resetDynamicForm();
       if (reinitializeDynamicFormFunc.value)
         reinitializeDynamicFormFunc.value();
     }
