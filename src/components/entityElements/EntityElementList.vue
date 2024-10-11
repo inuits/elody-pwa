@@ -134,7 +134,7 @@ import {
   BaseLibraryModes,
   RelationActions,
   ModalStyle,
-  FetchDeepRelations
+  FetchDeepRelations,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,

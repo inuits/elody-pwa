@@ -52,7 +52,7 @@ const useBreadcrumbs = (config: any) => {
   const iterateOverBreadcrumbs = async (
     parentId: string[],
     routeBreadcrumbs: any,
-    modifyBreadcrumbRoutesArray: boolean,
+    modifyBreadcrumbRoutesArray: boolean
   ) => {
     let entities: Entity[] = [];
     for (const index in routeBreadcrumbs) {
@@ -74,12 +74,12 @@ const useBreadcrumbs = (config: any) => {
         ) {
           addOverviewPageToBreadcrumb(routeBreadcrumbs);
           entities = undefined;
-        }
-        else breadcrumbRoutes.value.unshift({
-          id: idOfParent,
-          type: entityType,
-          title: getTitleOrNameFromEntity(entities[0]),
-        });
+        } else
+          breadcrumbRoutes.value.unshift({
+            id: idOfParent,
+            type: entityType,
+            title: getTitleOrNameFromEntity(entities[0]),
+          });
         break;
       }
     }

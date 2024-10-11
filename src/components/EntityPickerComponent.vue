@@ -24,7 +24,9 @@
       :parent-entity-identifiers="
         entityPickerMode === EntityPickerMode.Emit ? [entityUuid] : undefined
       "
-      :ids-of-non-selectable-entities="enableNonSelectableEntities ? getAlreadySelectedEntityIds() : []"
+      :ids-of-non-selectable-entities="
+        enableNonSelectableEntities ? getAlreadySelectedEntityIds() : []
+      "
       list-item-route-name="SingleEntity"
       @entities-updated="
         (numberOfEntities) => emitUpdatedEntities(numberOfEntities)
