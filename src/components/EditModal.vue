@@ -52,6 +52,7 @@ import {
   useNotification,
 } from "@/components/base/BaseNotification.vue";
 import { useBulkOperations } from "@/composables/useBulkOperations";
+import { useModalActions } from "@/composables/useModalActions";
 
 const route = useRoute();
 const router = useRouter();
@@ -66,6 +67,11 @@ const {
   clickButton,
   isEditToggleVisible,
 } = useEditMode();
+const {
+  initializeAction,
+  initializeGeneralProperties,
+  initializePropertiesForDownload
+} = useModalActions();
 const { initializeConfirmModal } = useConfirmModal();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { closeModal, openModal, deleteQueryOptions } = useBaseModal();
@@ -105,18 +111,17 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
 
 const openDeleteModal = () => {
   if (deleteQueryOptions.value) {
-    const savedContext: GenericContextForModals = {
-      parentId: route.params.id,
-      collection: route.meta.type,
-      callbackFunction: deleteEntity,
-    };
+    initializeGeneralProperties(
+      route.params.id,
+      undefined,
+      route.meta.type,
+      deleteEntity
+    );
     openModal(
       TypeModals.Delete,
       ModalStyle.Center,
       undefined,
       deleteQueryOptions,
-      undefined,
-      savedContext
     );
   } else {
     initializeConfirmModal({

@@ -37,14 +37,15 @@ export const usePageInfo = () => {
   };
 
   router.afterEach((to, from) => {
-    const parentRoute = to.matched.length > 1 ? to.matched[1] : to.matched[0];
-    updatePageInfo(parentRoute.name?.toString() || "", "parentRouteName");
+    const parentRouteTo = to.matched.length > 1 ? to.matched[1] : to.matched[0];
+    updatePageInfo(parentRouteTo.name?.toString() || "", "parentRouteName");
     updatePageInfo(to.meta.type as string, "routeType");
     updatePageInfo(to.meta.title as string);
     updatePageInfo(to.meta.uuid as string);
 
+    const parentRouteFrom = from.matched.length > 1 ? from.matched[1] : from.matched[0];
     updatePreviousPageInfo(
-      from.matched[1].name?.toString() || "",
+      parentRouteFrom.name?.toString() || "",
       "parentRouteName"
     );
     updatePreviousPageInfo(from.meta.type as string, "routeType");

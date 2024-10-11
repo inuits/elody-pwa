@@ -52,17 +52,12 @@ const useDynamicForm = () => {
 
   const performDownloadAction = async (
     queryDocument: any,
-    savedContext: any,
+    variables: any,
     downloadEntity: any,
     form: any
   ): Promise<any> => {
-    const variables = {
-      entities: savedContext.entities,
-      mediafiles: savedContext.mediafiles,
-      basicCsv: !!form.intialValues.basic_csv,
-      includeAssetCsv: savedContext.includeAssetCsv,
-      downloadEntity: downloadEntity,
-    };
+    variables["basicCsv"] = !!form.intialValues.basic_csv;
+    variables["downloadEntity"] = downloadEntity;
     return await apolloClient.query({
       query: queryDocument,
       variables,
@@ -82,13 +77,13 @@ const useDynamicForm = () => {
 
   const performOcrAction = async (
     queryDocument: any,
-    savedContext: any,
+    id: any,
     form: any
   ): Promise<any> => {
     const operation = [form.intialValues.ocr_type];
     if (operation[0] === OcrType.Pdf) operation.unshift(OcrType.Alto);
     const variables = {
-      assetId: savedContext.parentId,
+      assetId: id,
       operation: operation,
       language: form.intialValues.ocr_language,
     };
