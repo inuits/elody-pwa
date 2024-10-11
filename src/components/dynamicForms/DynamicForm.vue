@@ -8,6 +8,9 @@
       <h1 v-if="dynamicForm.GetDynamicForm.label" class="title pb-4">
         {{ t(dynamicForm.GetDynamicForm.label) }}
       </h1>
+      <p v-if="dynamicForm.GetDynamicForm.infoLabel" class="text-sm text-text-body pb-4">
+        {{ t(dynamicForm.GetDynamicForm.infoLabel) }}
+      </p>
       <div
         v-for="(field, index) in getFieldArray"
         :key="`${dynamicFormQuery}_field_${index}`"
