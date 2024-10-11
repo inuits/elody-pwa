@@ -20,7 +20,6 @@
               :dynamic-form-query="
                 getModalInfo(TypeModals.DynamicForm).formQuery
               "
-              :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
               :router="useRouter()"
               :modal-form-fields="formTab.formFields"
               :tab-name="tabsTitles[tabIndex]"
@@ -33,7 +32,6 @@
           v-if="getModalInfo(TypeModals.DynamicForm).open && !shouldRenderTabs"
           :key="getModalInfo(TypeModals.DynamicForm).formQuery"
           :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
-          :saved-context="getModalInfo(TypeModals.DynamicForm).savedContext"
           :router="useRouter()"
           :tab-name="''"
         />

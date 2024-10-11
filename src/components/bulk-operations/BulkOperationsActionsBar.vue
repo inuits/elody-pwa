@@ -141,8 +141,9 @@ import {
   InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
+import { useModalActions } from "@/composables/useModalActions";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import { apolloClient, bulkSelectAllSizeLimit } from "@/main";
+import { apolloClient } from "@/main";
 import { computed, onMounted, ref, watch } from "vue";
 import {
   GenericContextForModals,
@@ -157,8 +158,6 @@ import {
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
-import { Unicons } from "@/types";
-import BaseTooltip from "@/components/base/BaseTooltip.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -221,6 +220,10 @@ const {
   dequeueAllItemsForBulkProcessing,
   enqueueItemForBulkProcessing,
 } = useBulkOperations();
+const {
+  initializeGeneralProperties,
+  initializePropertiesForDownload
+} = useModalActions();
 const { openModal, getModalInfo } = useBaseModal();
 const { createNotificationOverwrite } = useNotification();
 const { t } = useI18n();
@@ -320,7 +323,21 @@ const generateTranscodeFromMediafiles = (
 };
 
 watch(selectedBulkOperation, () => {
+  if (!selectedBulkOperation.value) return;
   const modal = selectedBulkOperation.value?.bulkOperationModal;
+  const bulkOperationType = selectedBulkOperation.value?.value;
+  initializeGeneralProperties(
+    route.params.id,
+    modal.formRelationType,
+    route.meta.type,
+    props.refetchEntities
+  );
+
+  if (bulkOperationType=== BulkOperationTypes.DownloadMediafiles)
+    initializePropertiesForDownload(getEnqueuedItems(props.context), props.context);
+  if (bulkOperationType === BulkOperationTypes.AddRelation)
+    emit("initializeEntityPickerComponent");
+
   openModal(
     modal.typeModal,
     ModalStyle.CenterWide,
@@ -331,109 +348,104 @@ watch(selectedBulkOperation, () => {
   );
 
 
-  if (selectedBulkOperation.value?.value === BulkOperationTypes.ExportCsv)
-    openModal(
-      TypeModals.BulkOperations,
-      ModalStyle.CenterWide,
-      undefined,
-      undefined,
-      modal.askForCloseConfirmation,
-      undefined,
-      props.context
-    );
-  if (
-    selectedBulkOperation.value?.value ===
-    BulkOperationTypes.ExportCsvOfMediafilesFromAsset
-  ) {
-    const savedContext: DownloadMediafilesContextForBulkOperationsForm = {
-      type: selectedBulkOperation.value?.value,
-    };
-    openModal(
-      TypeModals.BulkOperations,
-      ModalStyle.CenterWide,
-      undefined,
-      undefined,
-      undefined,
-      savedContext,
-      RouteNames.Mediafiles
-    );
-  }
-  if (selectedBulkOperation.value?.value === BulkOperationTypes.Edit)
-    openModal(TypeModals.BulkOperationsEdit, ModalStyle.Right);
-  if (
-    selectedBulkOperation.value?.value ===
-    BulkOperationTypes.AddToManifestViewerCollection
-  ) {
-    enqueueItemsForManifestCollection();
-    dequeueAllItemsForBulkProcessing(props.context);
-  }
-  if (selectedBulkOperation.value?.bulkOperationModal) {
-    if (
-      selectedBulkOperation.value?.value ===
-      BulkOperationTypes.DownloadMediafiles
-    ) {
-      let modal = selectedBulkOperation.value?.bulkOperationModal;
-      const enqueuedItems = getEnqueuedItems(props.context);
-      const savedContext: DownloadMediafilesContextForBulkOperationsForm = {
-        type: selectedBulkOperation.value?.value,
-        mediafiles: [],
-        entities: [],
-        includeAssetCsv: props.context !== RouteNames.Mediafile,
-        relationType: modal.formRelationType,
-      };
-      if (
-        props.context === RouteNames.Mediafile ||
-        props.context === RouteNames.Mediafiles ||
-        props.context === BulkOperationsContextEnum.EntityElementMedia
-      )
-        savedContext.mediafiles = enqueuedItems.map((item) => item.id);
-      else savedContext.entities = enqueuedItems.map((item) => item.id);
-      openModal(
-        modal.typeModal,
-        ModalStyle.Center,
-        modal.formQuery,
-        undefined,
-        modal.askForCloseConfirmation,
-        savedContext
-      );
-    }
 
-    if (
-      selectedBulkOperation.value?.value ===
-        BulkOperationTypes.ReorderEntities ||
-      selectedBulkOperation.value?.value === BulkOperationTypes.StartOcr ||
-      selectedBulkOperation.value?.value === BulkOperationTypes.CreateEntity
-    ) {
-      let modal = selectedBulkOperation.value?.bulkOperationModal;
-      const savedContext: GenericContextForModals = {
-        type: selectedBulkOperation.value?.value,
-        parentId: route.params.id,
-        relationType: modal.formRelationType,
-        collection: route.meta.type,
-        callbackFunction: props.refetchEntities,
-      };
-      openModal(
-        modal.typeModal,
-        ModalStyle.Center,
-        modal.formQuery,
-        undefined,
-        modal.askForCloseConfirmation,
-        savedContext
-      );
-    }
 
-    if (selectedBulkOperation.value?.value === BulkOperationTypes.AddRelation) {
-      emit("initializeEntityPickerComponent");
-      let modal = selectedBulkOperation.value?.bulkOperationModal;
-      openModal(
-        modal.typeModal,
-        ModalStyle.RightWide,
-        modal.formQuery,
-        undefined,
-        modal.askForCloseConfirmation
-      );
-    }
-  }
+  // if (selectedBulkOperation.value?.value === BulkOperationTypes.ExportCsv)
+  //   openModal(
+  //     TypeModals.BulkOperations,
+  //     ModalStyle.CenterWide,
+  //     undefined,
+  //     undefined,
+  //     modal.askForCloseConfirmation,
+  //     undefined,
+  //     props.context
+  //   );
+  // if (
+  //   selectedBulkOperation.value?.value ===
+  //   BulkOperationTypes.ExportCsvOfMediafilesFromAsset
+  // ) {
+  //   const savedContext: DownloadMediafilesContextForBulkOperationsForm = {
+  //     type: selectedBulkOperation.value?.value,
+  //   };
+  //   openModal(
+  //     TypeModals.BulkOperations,
+  //     ModalStyle.CenterWide,
+  //     undefined,
+  //     undefined,
+  //     undefined,
+  //     savedContext,
+  //     RouteNames.Mediafiles
+  //   );
+  // }
+  // if (selectedBulkOperation.value?.value === BulkOperationTypes.Edit)
+  //   openModal(TypeModals.BulkOperationsEdit, ModalStyle.Right);
+  // if (selectedBulkOperation.value?.bulkOperationModal) {
+  //   if (
+  //     selectedBulkOperation.value?.value ===
+  //     BulkOperationTypes.DownloadMediafiles
+  //   ) {
+  //     let modal = selectedBulkOperation.value?.bulkOperationModal;
+  //     const enqueuedItems = getEnqueuedItems(props.context);
+  //     const savedContext: DownloadMediafilesContextForBulkOperationsForm = {
+  //       type: selectedBulkOperation.value?.value,
+  //       mediafiles: [],
+  //       entities: [],
+  //       includeAssetCsv: props.context !== RouteNames.Mediafile,
+  //       relationType: modal.formRelationType,
+  //     };
+  //     if (
+  //       props.context === RouteNames.Mediafile ||
+  //       props.context === RouteNames.Mediafiles ||
+  //       props.context === BulkOperationsContextEnum.EntityElementMedia
+  //     )
+  //       savedContext.mediafiles = enqueuedItems.map((item) => item.id);
+  //     else savedContext.entities = enqueuedItems.map((item) => item.id);
+  //     openModal(
+  //       modal.typeModal,
+  //       ModalStyle.Center,
+  //       modal.formQuery,
+  //       undefined,
+  //       modal.askForCloseConfirmation,
+  //       savedContext
+  //     );
+  //   }
+  //
+  //   if (
+  //     selectedBulkOperation.value?.value ===
+  //       BulkOperationTypes.ReorderEntities ||
+  //     selectedBulkOperation.value?.value === BulkOperationTypes.StartOcr ||
+  //     selectedBulkOperation.value?.value === BulkOperationTypes.CreateEntity
+  //   ) {
+  //     let modal = selectedBulkOperation.value?.bulkOperationModal;
+  //     const savedContext: GenericContextForModals = {
+  //       type: selectedBulkOperation.value?.value,
+  //       parentId: route.params.id,
+  //       relationType: modal.formRelationType,
+  //       collection: route.meta.type,
+  //       callbackFunction: props.refetchEntities,
+  //     };
+  //     openModal(
+  //       modal.typeModal,
+  //       ModalStyle.Center,
+  //       modal.formQuery,
+  //       undefined,
+  //       modal.askForCloseConfirmation,
+  //       savedContext
+  //     );
+  //   }
+  //
+  //   if (selectedBulkOperation.value?.value === BulkOperationTypes.AddRelation) {
+  //     emit("initializeEntityPickerComponent");
+  //     let modal = selectedBulkOperation.value?.bulkOperationModal;
+  //     openModal(
+  //       modal.typeModal,
+  //       ModalStyle.RightWide,
+  //       modal.formQuery,
+  //       undefined,
+  //       modal.askForCloseConfirmation
+  //     );
+  //   }
+  // }
 });
 
 watch(
