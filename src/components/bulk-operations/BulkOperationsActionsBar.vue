@@ -32,7 +32,7 @@
         </span>
       </div>
       <div
-        v-if="useExtendedBulkOperations && hasBulkOperationsWithItemsSelection"
+        v-if="useExtendedBulkOperations && hasBulkOperationsWithItemsSelection && enableSelection"
       >
         <span
           class="select-actions"
@@ -166,12 +166,14 @@ const props = withDefaults(
     entityType: Entitytyping;
     customBulkOperations?: String | undefined;
     refetchEntities: Function;
+    enableSelection?: boolean;
   }>(),
   {
     totalItemsCount: 0,
     showButton: true,
     confirmSelectionButton: false,
     customBulkOperations: undefined,
+    enableSelection: true,
   }
 );
 

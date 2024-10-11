@@ -6,7 +6,7 @@
         ? SearchInputType.AdvancedInputMediaFilesType
         : SearchInputType.AdvancedInputType
     "
-    :enable-bulk-operations="config.features.hasBulkSelect"
+    :enable-bulk-operations="config.features.hasBulkOperations"
     :list-item-route-name="RouteNames.SingleEntity"
     :filter-type="entityType"
   />

@@ -117,6 +117,7 @@
               :entity-type="entityType as Entitytyping"
               :custom-bulk-operations="customBulkOperations"
               :refetch-entities="refetchEntities"
+              :enable-selection="enableSelection"
               @custom-bulk-operations-promise="
                 (promise) => (customBulkOperationsPromise = promise)
               "
@@ -336,7 +337,8 @@ const { iterateOverBreadcrumbs } = useBreadcrumbs(config);
 const hasBulkOperations = ref<boolean>(true);
 const enableSelection = computed<boolean>(() => {
   return (
-    (hasBulkOperations.value &&
+    (config.features.hasBulkSelect &&
+      hasBulkOperations.value &&
       props.enableBulkOperations &&
       !props.isSearchLibrary) ||
     props.selectionEnabled
