@@ -47,13 +47,18 @@
     >
       <template #activator="{ on }">
         <div v-on="on">
+          <MetadataFormatter
+            v-if="metadata.value.formatter"
+            v-bind="metadata.value"
+          />
           <ViewModesAutocomplete
-            v-if="
+            v-else-if="
               (metadata.inputField?.type ===
                 InputFieldTypes.DropdownMultiselect ||
                 metadata.inputField?.type ===
                   InputFieldTypes.DropdownSingleselect) &&
-              metadata.value
+              metadata.value &&
+              !metadata.value?.formatter
             "
             v-model="metadata.value"
             :is-read-only="true"
@@ -85,7 +90,7 @@
         <entity-element-metadata
           class="text-text-placeholder"
           :label="metadata.label as string"
-          v-model:value="value"
+          v-model:value="metadadaValueToDisplayOnTooltip"
           :link-text="metadata.linkText"
           :link-icon="metadata.linkIcon"
           :unit="metadata.unit"
@@ -99,6 +104,7 @@
 <script lang="ts" setup>
 import EntityElementMetadataEdit from "@/components/metadata/EntityElementMetadataEdit.vue";
 import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.vue";
+import MetadataFormatter from "@/components/metadata/MetadataFormatter.vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import {
   BaseLibraryModes,
@@ -164,6 +170,10 @@ const registerEnterKeyPressed = async (value: string) => {
 defineExpose({
   setNewValue,
 });
+
+const metadadaValueToDisplayOnTooltip = computed(
+  () => props.metadata?.value?.label || value.value
+);
 
 const isMetadataOnRelation = computed(
   () => props.metadata.__typename === "PanelRelationMetaData"
