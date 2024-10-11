@@ -32,7 +32,11 @@
         </span>
       </div>
       <div
-        v-if="useExtendedBulkOperations && hasBulkOperationsWithItemsSelection && enableSelection"
+        v-if="
+          useExtendedBulkOperations &&
+          hasBulkOperationsWithItemsSelection &&
+          enableSelection
+        "
       >
         <span
           class="select-actions"

@@ -196,12 +196,13 @@ export const useBaseLibrary = (
   };
 
   const getEntityById = async (
-    entityType: Entitytyping, id: string
+    entityType: Entitytyping,
+    id: string
   ): Promise<void> => {
     const variables: GetEntityByIdQueryVariables = {
       id: id,
       type: entityType,
-    }
+    };
     await apolloClient
       .query({
         query: GetEntityByIdDocument,

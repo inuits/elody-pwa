@@ -217,7 +217,7 @@ import {
   type Entity,
   type EntityListElement,
   FetchDeepRelations,
-  RelationActions
+  RelationActions,
 } from "@/generated-types/queries";
 import {
   type BaseEntity,
@@ -419,8 +419,16 @@ const entityDropdownOptions = computed<DropdownOption[]>(() => {
   });
 });
 
-const isDeepRelationWithBreadcrumbInfo = computed(() => props.fetchDeepRelations?.deepRelationsFetchStrategy === DeepRelationsFetchStrategy.UseExistingBreadcrumbsInfo);
-const isDeepRelationUsingMethods = computed(() => props.fetchDeepRelations?.deepRelationsFetchStrategy === DeepRelationsFetchStrategy.UseMethodsAndFetch);
+const isDeepRelationWithBreadcrumbInfo = computed(
+  () =>
+    props.fetchDeepRelations?.deepRelationsFetchStrategy ===
+    DeepRelationsFetchStrategy.UseExistingBreadcrumbsInfo
+);
+const isDeepRelationUsingMethods = computed(
+  () =>
+    props.fetchDeepRelations?.deepRelationsFetchStrategy ===
+    DeepRelationsFetchStrategy.UseMethodsAndFetch
+);
 
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
 
@@ -506,24 +514,34 @@ const initializeBaseLibrary = async () => {
 
 const initializeDeepRelations = async () => {
   if (isDeepRelationWithBreadcrumbInfo.value && breadcrumbPathFinished.value) {
-    const positionOfRelation = breadcrumbRoutes.value.length - props.fetchDeepRelations.amountOfRecursions;
+    const positionOfRelation =
+      breadcrumbRoutes.value.length -
+      props.fetchDeepRelations.amountOfRecursions;
     const breadcrumbEntity = breadcrumbRoutes.value[positionOfRelation];
-    if (!breadcrumbEntity || breadcrumbEntity.type !== props.fetchDeepRelations.entityType) return;
+    if (
+      !breadcrumbEntity ||
+      breadcrumbEntity.type !== props.fetchDeepRelations.entityType
+    )
+      return;
     await getEntityById(breadcrumbEntity.type, breadcrumbEntity.id);
-  }
-  else if (isDeepRelationUsingMethods.value) {
+  } else if (isDeepRelationUsingMethods.value) {
     const routeConfig = props.fetchDeepRelations.routeConfig;
     let parentId = props.parentEntityIdentifiers[0];
     let entity: Entity;
     for (const index in routeConfig) {
-      const entityResult = await iterateOverBreadcrumbs(parentId, [routeConfig[index]], false);
+      const entityResult = await iterateOverBreadcrumbs(
+        parentId,
+        [routeConfig[index]],
+        false
+      );
       if (!entityResult) break;
       parentId = entityResult.id;
       entity = entityResult;
     }
-    if (entity && props.fetchDeepRelations.entityType === entity.type ) entities.value = [entity];
+    if (entity && props.fetchDeepRelations.entityType === entity.type)
+      entities.value = [entity];
   }
-}
+};
 
 const getDisplayPreferences = () => {
   const displayPreferences = getGlobalState("_displayPreferences");
@@ -554,10 +572,8 @@ const initializeEntityPickerComponent = () => {
 };
 
 onMounted(async () => {
-  if (props.fetchDeepRelations)
-    await initializeDeepRelations();
-  else
-    await initializeBaseLibrary();
+  if (props.fetchDeepRelations) await initializeDeepRelations();
+  else await initializeBaseLibrary();
   getDisplayPreferences();
 });
 
@@ -653,9 +669,10 @@ watch(
 watch(
   () => breadcrumbPathFinished.value,
   () => {
-    if (breadcrumbPathFinished.value && isDeepRelationWithBreadcrumbInfo.value) initializeDeepRelations();
+    if (breadcrumbPathFinished.value && isDeepRelationWithBreadcrumbInfo.value)
+      initializeDeepRelations();
   }
-)
+);
 
 EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryMediafile, async () => {
   if (
