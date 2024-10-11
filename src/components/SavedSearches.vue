@@ -79,6 +79,7 @@ import {
 } from "@/components/base/BaseNotification.vue";
 import { useI18n } from "vue-i18n";
 import type { RouteLocationNormalizedLoaded } from "vue-router";
+import { useModalActions } from "@/composables/useModalActions";
 
 const props = withDefaults(
   defineProps<{
@@ -99,6 +100,7 @@ const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
 const { openModal, closeModal } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
+const { initializePropertiesForSavedSearch } = useModalActions();
 const {
   setActiveFilter,
   getActiveFilter,
@@ -165,16 +167,19 @@ const updateLabel = async () => {
 };
 
 const createNew = () => {
-  handleOpenModal([
-    {
-      key: "applicableType",
-      value: props.entityType,
-    },
-    {
-      key: "filters",
-      value: getDeepCopy(props.activeFilters),
-    },
-  ]);
+  initializePropertiesForSavedSearch(
+    [
+      {
+        key: "applicableType",
+        value: props.entityType,
+      },
+      {
+        key: "filters",
+        value: getDeepCopy(props.activeFilters),
+      },
+    ]
+  )
+  handleOpenModal();
 };
 
 // TODO(savedSearch): should be used once selected filters will be saved in session/local storage

@@ -46,7 +46,7 @@ export const useBaseModal = () => {
     formQuery: string | undefined = undefined,
     deleteQueryOptions: DeleteQueryOptions | undefined = undefined,
     askForCloseConfirmation: boolean | undefined = undefined,
-    context: Context | undefined = undefined
+    context: Context | undefined = undefined,
   ): void => {
     if (modalType !== TypeModals.Confirm)
       closeModalsWithStyle(currentModalStyle.value);
