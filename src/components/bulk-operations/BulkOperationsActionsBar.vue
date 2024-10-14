@@ -119,9 +119,9 @@
 
 <script lang="ts" setup>
 import {
+  ActionContextEntitiesSelectionType,
   BulkOperationTypes,
   DamsIcons,
-  ActionContextEntitiesSelectionType,
   type DropdownOption,
   Entitytyping,
   GenerateTranscodeDocument,
@@ -132,29 +132,22 @@ import {
   ModalStyle,
   RouteNames,
   TranscodeType,
-  TypeModals,
+  TypeModals
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
   Context,
-  DownloadMediafilesContextForBulkOperationsForm,
   InBulkProcessableItem,
-  useBulkOperations,
+  useBulkOperations
 } from "@/composables/useBulkOperations";
 import { useModalActions } from "@/composables/useModalActions";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { apolloClient } from "@/main";
 import { computed, onMounted, ref, watch } from "vue";
-import {
-  GenericContextForModals,
-  useBaseModal,
-} from "@/composables/useBaseModal";
+import { useBaseModal } from "@/composables/useBaseModal";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import { useImport } from "@/composables/useImport";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
@@ -222,7 +215,8 @@ const {
 } = useBulkOperations();
 const {
   initializeGeneralProperties,
-  initializePropertiesForDownload
+  initializePropertiesForDownload,
+  initializePropertiesForCreateEntity
 } = useModalActions();
 const { openModal, getModalInfo } = useBaseModal();
 const { createNotificationOverwrite } = useNotification();
@@ -330,13 +324,16 @@ watch(selectedBulkOperation, () => {
     route.params.id,
     modal.formRelationType,
     route.meta.type,
-    props.refetchEntities
+    props.refetchEntities,
+    bulkOperationType,
   );
 
-  if (bulkOperationType=== BulkOperationTypes.DownloadMediafiles)
+  if (bulkOperationType === BulkOperationTypes.DownloadMediafiles)
     initializePropertiesForDownload(getEnqueuedItems(props.context), props.context);
   if (bulkOperationType === BulkOperationTypes.AddRelation)
     emit("initializeEntityPickerComponent");
+  if (bulkOperationType === BulkOperationTypes.CreateEntity)
+    initializePropertiesForCreateEntity();
 
   openModal(
     modal.typeModal,
@@ -344,7 +341,7 @@ watch(selectedBulkOperation, () => {
     modal.formQuery,
     undefined,
     modal.askForCloseConfirmation,
-    props.context,
+    bulkOperationType === BulkOperationTypes.ExportCsvOfMediafilesFromAsset ? RouteNames.Mediafiles : props.context,
   );
 
 

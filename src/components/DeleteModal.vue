@@ -23,7 +23,7 @@
           {{ t("actions.labels.blocking-relations") }}
         </div>
         <entity-picker-component
-          :entity-uuid="savedContext.parentId"
+          :entity-uuid="parentId"
           :accepted-types="deleteQueryOptions.customQueryBlockingEntityTypes"
           :custom-query="deleteQueryOptions.customQueryBlockingRelations"
           :custom-filters-query="
@@ -52,7 +52,7 @@
             {{ t("actions.labels.delete-relation-entities") }}
           </div>
           <entity-picker-component
-            :entity-uuid="savedContext.parentId"
+            :entity-uuid="parentId"
             :accepted-types="deleteQueryOptions.customQueryEntityTypes"
             :custom-query="deleteQueryOptions.customQueryDeleteRelations"
             :custom-filters-query="
@@ -77,19 +77,17 @@ import { useMutation } from "@vue/apollo-composable";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
 import ConfirmModalView from "@/components/ConfirmModalView.vue";
 import { useI18n } from "vue-i18n";
-import { ref, watch, inject } from "vue";
+import { ref, watch, inject, computed } from "vue";
 import {
   Collection,
   DeleteDataDocument,
   type DeleteDataMutation,
   DeleteQueryOptions,
   Entitytyping,
-  RouteNames,
   TypeModals,
 } from "@/generated-types/queries";
 import BaseModal from "@/components/base/BaseModal.vue";
 import {
-  GenericContextForModals,
   useBaseModal,
 } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
@@ -108,6 +106,7 @@ import { usePageInfo } from "@/composables/usePageInfo";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import { getChildrenOfHomeRoutes } from "@/helpers";
+import { useModalActions } from "@/composables/useModalActions";
 
 const { t } = useI18n();
 const config: any = inject("config");
@@ -116,6 +115,10 @@ const { initializeConfirmModal } = useConfirmModal();
 const { createNotificationOverwrite } = useNotification();
 const { getEnqueuedItems, dequeueAllItemsForBulkProcessing } =
   useBulkOperations();
+const {
+  getParentId,
+  getCallbackFunction,
+} = useModalActions();
 
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
@@ -125,8 +128,8 @@ const { pageInfo } = usePageInfo();
 
 const modalOpenend = ref<boolean>(false);
 const deleteQueryOptions = ref<DeleteQueryOptions | undefined>(undefined);
-const savedContext = ref<GenericContextForModals | undefined>(undefined);
 const numberOfBlockingQueryEntities = ref<number | undefined>(undefined);
+const parentId = computed(() => getParentId());
 
 const deleteSelectedItems = async () => {
   const selectedItems: InBulkProcessableItem[] = getEnqueuedItems(getContext());
@@ -167,7 +170,7 @@ const cleanupAfterDeletion = async () => {
 
 const deleteButtonClicked = async () => {
   await deleteSelectedItems();
-  savedContext.value?.callbackFunction();
+  getCallbackFunction()();
   await cleanupAfterDeletion();
 };
 
@@ -195,7 +198,6 @@ watch(
     deleteQueryOptions.value = getModalInfo(
       TypeModals.Delete
     ).deleteQueryOptions;
-    savedContext.value = getModalInfo(TypeModals.Delete).savedContext;
     initializeConfirmModal({
       confirmButton: { buttonCallback: deleteButtonClicked },
       declineButton: {
