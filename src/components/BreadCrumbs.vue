@@ -135,7 +135,7 @@ router.beforeEach(() => {
 
 const getCurrentRouteTitle = computed<string>(() => {
   try {
-    return rootRoute.value.rootTitle;
+    return t(rootRoute.value.rootTitle);
   } catch {
     return undefined;
   }
