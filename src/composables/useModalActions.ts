@@ -39,8 +39,6 @@ export const useModalActions = () => {
       return relations
     }
 
-    if (callbackFunction.value)
-      callbackFunction.value();
     return callbackFunction.value;
   };
 
