@@ -165,8 +165,6 @@ import {
   ActionType,
   BaseFieldType,
   type BaseRelationValuesInput,
-  BulkOperationTypes,
-  EditStatus,
   EndpointResponseActions,
   type EntityInput,
   EntityPickerMode,
@@ -419,10 +417,9 @@ const submitActionFunction = async (field: FormAction) => {
       .CreateEntity;
     showErrors.value = false;
     await getTenants();
-    if (config.features.has) {
-      const callbackFunctionExecuted = startExecuteActionFn(field.actionType);
-      if (!callbackFunctionExecuted) goToEntityPage(entity, "SingleEntity", props.router);
-    }
+    const callbackFunction: Function = startExecuteActionFn(field.actionType);
+    if (config.features.hasBulkSelect && callbackFunction)
+      callbackFunction();
     else {
       setTimeout(() => goToEntityPage(entity, "SingleEntity", props.router), 1);
     }
