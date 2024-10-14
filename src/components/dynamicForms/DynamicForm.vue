@@ -407,16 +407,19 @@ const submitActionFunction = async (field: FormAction) => {
   formClosing.value = true;
   const document = await getQuery(field.actionQuery as string);
   const entityInput = createEntityFromFormInput(field.creationType);
-  let entity;
+  let entity: any;
   try {
     entity = (await performSubmitAction(document, entityInput)).data
       .CreateEntity;
     showErrors.value = false;
     await getTenants();
-    closeAndDeleteForm();
-    if (props.savedContext?.callbackFunction)
+    if (props.savedContext?.callbackFunction && config.features.has) {
       props.savedContext.callbackFunction();
-    else goToEntityPage(entity, "SingleEntity", props.router);
+    }
+    else {
+      setTimeout(() => goToEntityPage(entity, "SingleEntity", props.router), 1);
+    }
+    closeAndDeleteForm();
   } catch (e) {
     isPerformingAction.value = false;
     submitErrors.value = e.message;
