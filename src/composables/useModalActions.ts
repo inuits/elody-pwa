@@ -1,6 +1,7 @@
 import {
   ActionType,
   type BaseRelationValuesInput,
+  BulkOperationTypes,
   Collection,
   EditStatus,
   RouteNames
@@ -18,6 +19,7 @@ const parentId = ref<string | undefined>(undefined);
 const relationType = ref<string | undefined>(undefined);
 const collection = ref<Collection | undefined>(undefined);
 const callbackFunction = ref<Function | undefined>(undefined);
+const bulkOperationType = ref<BulkOperationTypes | undefined>(undefined);
 
 const downloadMediafilesInformation = ref<DownloadMediafilesInformation | undefined>(undefined);
 const savedSearchInformation = ref<any | undefined>(undefined);
@@ -25,7 +27,18 @@ const savedSearchInformation = ref<any | undefined>(undefined);
 
 export const useModalActions = () => {
 
-  const submitActionFunction = (): boolean => {
+  const submitActionFunction = (): BaseRelationValuesInput[] | boolean => {
+    const relations: BaseRelationValuesInput[] = [];
+    if (parentId.value !== undefined) {
+      relations.push({
+        key: parentId.value,
+        type: relationType.value,
+        editStatus: EditStatus.New,
+      });
+      parentId.value = undefined;
+      return relations
+    }
+
     if (callbackFunction.value)
       callbackFunction.value();
     return callbackFunction.value;
@@ -110,13 +123,14 @@ export const useModalActions = () => {
     relation: string,
     col: Collection,
     callbackFn: Function,
+    bulkoperationType: BulkOperationTypes,
   ): void => {
     parentId.value = parent;
     relationType.value = relation;
     collection.value = col;
     callbackFunction.value = callbackFn;
+    bulkOperationType.value = bulkoperationType;
   };
-
   const initializePropertiesForDownload = (
     enqueuedItems,
     context: any,
@@ -131,16 +145,33 @@ export const useModalActions = () => {
       includeAssetCsv: context !== RouteNames.Mediafile,
     }
   };
-
+  const initializePropertiesForCreateEntity = (): void => {
+    if (!parentId.value)
+      callbackFunction.value = undefined;
+  };
   const initializePropertiesForSavedSearch = (savedSearchInfo: any): void => {
     savedSearchInformation.value = savedSearchInfo;
   };
+
+  const getParentId = () => {
+    return parentId.value
+  }
+  const getBulkOperationType = () => {
+    return bulkOperationType.value
+  }
+  const getCallbackFunction = () => {
+    return callbackFunction.value
+  }
 
   return {
     startExecuteActionFn,
     initializeGeneralProperties,
     initializePropertiesForDownload,
-    initializePropertiesForSavedSearch
+    initializePropertiesForCreateEntity,
+    initializePropertiesForSavedSearch,
+    getParentId,
+    getBulkOperationType,
+    getCallbackFunction,
   }
 
 }

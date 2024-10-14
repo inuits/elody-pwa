@@ -115,7 +115,8 @@ const openDeleteModal = () => {
       route.params.id,
       undefined,
       route.meta.type,
-      deleteEntity
+      deleteEntity,
+      undefined
     );
     openModal(
       TypeModals.Delete,
