@@ -48,7 +48,7 @@
       <template #activator="{ on }">
         <div v-on="on">
           <MetadataFormatter
-            v-if="metadata.value.formatter"
+            v-if="metadata.value?.formatter"
             v-bind="metadata.value"
           />
           <ViewModesAutocomplete
