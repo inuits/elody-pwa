@@ -590,13 +590,13 @@ const performActionButtonClickEvent = (field: FormAction): void => {
   useBaseModal().changeCloseConfirmation(TypeModals.DynamicForm, false);
 
   const actionFunctions: { [key: string]: Function } = {
-    submit: () => submitActionFunction(field), //OK
+    submit: () => submitActionFunction(field),
     updateMetadata: () => updateMetdataActionFunction(field),
     upload: () => uploadActionFunction(field),
-    download: () => downloadActionFunction(field), //OK
-    ocr: () => startOcrActionFunction(field), //OK
-    endpoint: () => callEndpointInGraphql(field), //OK
-    uploadCsvForReordening: () => reorderEntitiesWithCsvUpload(field), //OK
+    download: () => downloadActionFunction(field),
+    ocr: () => startOcrActionFunction(field),
+    endpoint: () => callEndpointInGraphql(field),
+    uploadCsvForReordening: () => reorderEntitiesWithCsvUpload(field),
     submitWithExtraMetadata: () => submitWithExtraMetadata(field),
   };
   if (!field.actionType) return;
