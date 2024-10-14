@@ -320,6 +320,7 @@ watch(selectedBulkOperation, () => {
   if (!selectedBulkOperation.value) return;
   const modal = selectedBulkOperation.value?.bulkOperationModal;
   const bulkOperationType = selectedBulkOperation.value?.value;
+
   initializeGeneralProperties(
     route.params.id,
     modal.formRelationType,
@@ -327,7 +328,6 @@ watch(selectedBulkOperation, () => {
     props.refetchEntities,
     bulkOperationType,
   );
-
   if (bulkOperationType === BulkOperationTypes.DownloadMediafiles)
     initializePropertiesForDownload(getEnqueuedItems(props.context), props.context);
   if (bulkOperationType === BulkOperationTypes.AddRelation)
@@ -343,106 +343,6 @@ watch(selectedBulkOperation, () => {
     modal.askForCloseConfirmation,
     bulkOperationType === BulkOperationTypes.ExportCsvOfMediafilesFromAsset ? RouteNames.Mediafiles : props.context,
   );
-
-
-
-
-  // if (selectedBulkOperation.value?.value === BulkOperationTypes.ExportCsv)
-  //   openModal(
-  //     TypeModals.BulkOperations,
-  //     ModalStyle.CenterWide,
-  //     undefined,
-  //     undefined,
-  //     modal.askForCloseConfirmation,
-  //     undefined,
-  //     props.context
-  //   );
-  // if (
-  //   selectedBulkOperation.value?.value ===
-  //   BulkOperationTypes.ExportCsvOfMediafilesFromAsset
-  // ) {
-  //   const savedContext: DownloadMediafilesContextForBulkOperationsForm = {
-  //     type: selectedBulkOperation.value?.value,
-  //   };
-  //   openModal(
-  //     TypeModals.BulkOperations,
-  //     ModalStyle.CenterWide,
-  //     undefined,
-  //     undefined,
-  //     undefined,
-  //     savedContext,
-  //     RouteNames.Mediafiles
-  //   );
-  // }
-  // if (selectedBulkOperation.value?.value === BulkOperationTypes.Edit)
-  //   openModal(TypeModals.BulkOperationsEdit, ModalStyle.Right);
-  // if (selectedBulkOperation.value?.bulkOperationModal) {
-  //   if (
-  //     selectedBulkOperation.value?.value ===
-  //     BulkOperationTypes.DownloadMediafiles
-  //   ) {
-  //     let modal = selectedBulkOperation.value?.bulkOperationModal;
-  //     const enqueuedItems = getEnqueuedItems(props.context);
-  //     const savedContext: DownloadMediafilesContextForBulkOperationsForm = {
-  //       type: selectedBulkOperation.value?.value,
-  //       mediafiles: [],
-  //       entities: [],
-  //       includeAssetCsv: props.context !== RouteNames.Mediafile,
-  //       relationType: modal.formRelationType,
-  //     };
-  //     if (
-  //       props.context === RouteNames.Mediafile ||
-  //       props.context === RouteNames.Mediafiles ||
-  //       props.context === BulkOperationsContextEnum.EntityElementMedia
-  //     )
-  //       savedContext.mediafiles = enqueuedItems.map((item) => item.id);
-  //     else savedContext.entities = enqueuedItems.map((item) => item.id);
-  //     openModal(
-  //       modal.typeModal,
-  //       ModalStyle.Center,
-  //       modal.formQuery,
-  //       undefined,
-  //       modal.askForCloseConfirmation,
-  //       savedContext
-  //     );
-  //   }
-  //
-  //   if (
-  //     selectedBulkOperation.value?.value ===
-  //       BulkOperationTypes.ReorderEntities ||
-  //     selectedBulkOperation.value?.value === BulkOperationTypes.StartOcr ||
-  //     selectedBulkOperation.value?.value === BulkOperationTypes.CreateEntity
-  //   ) {
-  //     let modal = selectedBulkOperation.value?.bulkOperationModal;
-  //     const savedContext: GenericContextForModals = {
-  //       type: selectedBulkOperation.value?.value,
-  //       parentId: route.params.id,
-  //       relationType: modal.formRelationType,
-  //       collection: route.meta.type,
-  //       callbackFunction: props.refetchEntities,
-  //     };
-  //     openModal(
-  //       modal.typeModal,
-  //       ModalStyle.Center,
-  //       modal.formQuery,
-  //       undefined,
-  //       modal.askForCloseConfirmation,
-  //       savedContext
-  //     );
-  //   }
-  //
-  //   if (selectedBulkOperation.value?.value === BulkOperationTypes.AddRelation) {
-  //     emit("initializeEntityPickerComponent");
-  //     let modal = selectedBulkOperation.value?.bulkOperationModal;
-  //     openModal(
-  //       modal.typeModal,
-  //       ModalStyle.RightWide,
-  //       modal.formQuery,
-  //       undefined,
-  //       modal.askForCloseConfirmation
-  //     );
-  //   }
-  // }
 });
 
 watch(
