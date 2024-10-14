@@ -34,12 +34,7 @@ export const useBaseLibrary = (
     type: entityType,
     limit: 20,
     skip: 1,
-    searchValue: {
-      value: "",
-      isAsc: false,
-      key: "title",
-      order_by: "",
-    },
+    searchValue: {},
     advancedSearchValue: [],
     advancedFilterInputs: [],
     searchInputType: undefined,
@@ -111,7 +106,7 @@ export const useBaseLibrary = (
     sortKey: string,
     forceFetch: boolean = false
   ): Promise<void> => {
-    queryVariables.searchValue.order_by = sortKey;
+    // queryVariables.searchValue.order_by = sortKey;
     if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
@@ -120,7 +115,7 @@ export const useBaseLibrary = (
     sortOrder: "asc" | "desc",
     forceFetch: boolean = false
   ): Promise<void> => {
-    queryVariables.searchValue.isAsc = sortOrder === "asc";
+    // queryVariables.searchValue.isAsc = sortOrder === "asc";
     if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
@@ -179,7 +174,160 @@ export const useBaseLibrary = (
         notifyOnNetworkStatusChange: true,
       })
       .then((result) => {
-        const fetchedEntities = result.data.Entities;
+        let fetchedEntities = result.data.Entities;
+        if (variables.type === "wears") {
+          fetchedEntities = {
+            count: 1,
+            results: [
+              {
+                _id: "d52bf670-cf0d-45d9-85a2-37ccf18cfed6",
+                id: "d52bf670-cf0d-45d9-85a2-37ccf18cfed6",
+                uuid: "entities/d52bf670-cf0d-45d9-85a2-37ccf18cfed6",
+                type: "wears",
+                intialValues: {
+                  // @ts-ignore
+                  about: [
+                    {
+                      "@type": "Entiteit",
+                      "Entiteit.type": [
+                        {
+                          "@id": "https://stad.gent/id/concept/570024450",
+                          "skos:prefLabel": {
+                            "@value": "metaal",
+                            "@language": "nl",
+                          },
+                        },
+                        {
+                          "@id": "cest:Naam_geassocieerd_concept",
+                          label: "associatie.onderwerp",
+                        },
+                      ],
+                    },
+                    {
+                      "@type": "Entiteit",
+                      "Entiteit.type": [
+                        {
+                          "@id": "http://vocab.getty.edu/aat/300056007",
+                          "skos:prefLabel": {
+                            "@value": "energie",
+                            "@language": "nl",
+                          },
+                        },
+                        {
+                          "@id": "cest:Naam_geassocieerd_concept",
+                          label: "associatie.onderwerp",
+                        },
+                      ],
+                    },
+                    {
+                      "@type": "Entiteit",
+                      "Entiteit.type": [
+                        {
+                          "@id": "http://vocab.getty.edu/aat/300011784",
+                          "skos:prefLabel": {
+                            "@value": "stoom",
+                            "@language": "nl",
+                          },
+                        },
+                        {
+                          "@id": "cest:Naam_geassocieerd_concept",
+                          label: "associatie.onderwerp",
+                        },
+                      ],
+                    },
+                    {
+                      "@type": "Entiteit",
+                      "Entiteit.type": [
+                        {
+                          "@id": "http://vocab.getty.edu/tgn/7007887",
+                          "skos:prefLabel": {
+                            "@value": "Gent",
+                            "@language": "nl",
+                          },
+                        },
+                        {
+                          "@id": "cest:Naam_geassocieerd_concept",
+                          label: "associatie.onderwerp",
+                        },
+                      ],
+                    },
+                    {
+                      "@type": "Entiteit",
+                      "Entiteit.type": [
+                        {
+                          "@id": "http://vocab.getty.edu/tgn/1026817",
+                          "skos:prefLabel": {
+                            "@value": "Wondelgem",
+                            "@language": "nl",
+                          },
+                        },
+                        {
+                          "@id": "cest:Naam_geassocieerd_concept",
+                          label: "associatie.onderwerp",
+                        },
+                      ],
+                    },
+                  ],
+                  reference: [
+                    {
+                      "@type": "Persoon",
+                      "Entiteit.type": [
+                        {
+                          "@id": "https://stad.gent/id/agent/570019416",
+                          label: "Mahy Frères nv",
+                        },
+                        {
+                          "@id":
+                            "cest:Naam_geassocieerde_persoon_of_instelling",
+                          label: "associatie.persoon",
+                        },
+                      ],
+                    },
+                    {
+                      "@type": "Entiteit",
+                      "Entiteit.type": [
+                        {
+                          "@id": "https://stad.gent/id/concept/570012612",
+                          "skos:prefLabel": {
+                            "@value": "2de kwart 20ste eeuw",
+                            "@language": "nl",
+                          },
+                        },
+                        {
+                          "@id": "cest:Periode",
+                          label: "associatie.periode",
+                        },
+                      ],
+                    },
+                  ],
+                  __typename: "IntialValues",
+                },
+                allowedViewModes: {
+                  viewModes: [
+                    // @ts-ignore
+                    "ViewModesList",
+                  ],
+                  __typename: "AllowedViewModes",
+                },
+                teaserMetadata: {
+                  // @ts-ignore
+                  about: {
+                    label: "metadata.labels.about",
+                    key: "about",
+                    __typename: "PanelMetaData",
+                  },
+                  reference: {
+                    label: "metadata.labels.reference",
+                    key: "reference",
+                    __typename: "PanelMetaData",
+                  },
+                  __typename: "teaserMetadata",
+                },
+                __typename: "Wears",
+              },
+            ],
+          };
+        }
         entities.value = fetchedEntities?.results as Entity[];
         totalEntityCount.value = fetchedEntities?.count || 0;
         if (shouldUseStateForRoute)
