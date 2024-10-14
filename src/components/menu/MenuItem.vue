@@ -174,7 +174,7 @@ onMounted(async () => {
   } else if (props.menuitem.entityType)
     allowed = allowed || can(Permission.Canread, props.menuitem.entityType);
 
-  menuSubitem.value.forEach((item) => {
+  for (const item of menuSubitem.value) {
     if (item.requiresAuth === false) allowed = true;
     else if (item.typeLink?.modal?.neededPermission === Permission.Cancreate) {
       permittedEntitiesToCreate.value = [];
@@ -186,7 +186,11 @@ onMounted(async () => {
       });
     } else if (item.entityType)
       allowed = allowed || can(Permission.Canread, item.entityType);
-  });
+
+    if (item.can && item.can?.length > 0) {
+      allowed = await fetchAdvancedPermission(item.can);
+    }
+  }
 
   if (props.menuitem.can && props.menuitem.can?.length > 0) {
     allowed = await fetchAdvancedPermission(props.menuitem.can);
