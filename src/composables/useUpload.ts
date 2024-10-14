@@ -32,13 +32,13 @@ const dryRunComplete = ref<boolean>(false);
 const dryRunErrors = ref<string[]>([]);
 const files = ref<DropzoneFile[]>([]);
 const mediafiles = computed((): DropzoneFile[] =>
-  files.value.filter((file: DropzoneFile) => file.type !== "text/csv")
+  files.value.filter((file: DropzoneFile) => file.type !== "text/csv" && file.type !== "application/vnd.ms-excel")
 );
 const uploadProgressPercentage = ref<number>(0);
 const uploadType = ref<UploadFieldType>(UploadFieldType.Batch);
 const requiredMediafiles = ref<string[] | undefined>(undefined);
 const containsCsv = computed(
-  () => !!files.value.find((file: DropzoneFile) => file.type === "text/csv")
+  () => !!files.value.find((file: DropzoneFile) => file.type === "text/csv" || file.type === "application/vnd.ms-excel")
 );
 const uploadFlow = ref<UploadFlow>(UploadFlow.MediafilesOnly);
 const uploadValidationFn = ref<Function>(() => {
@@ -357,13 +357,17 @@ const useUpload = () => {
     return JSON.parse(await response.text());
   };
 
+  const __getCsvFile = (): DropzoneFile => {
+    return files.value.find(
+      (file: DropzoneFile) => file.type === "text/csv" || file.type === "application/vnd.ms-excel"
+    );
+  }
+
   const __getCsvString = async (): Promise<string> => {
     return new Promise((resolve, reject) => {
       const fileText = ref<string | null>(null);
       const reader = new FileReader();
-      const csvFile = files.value.find(
-        (file: DropzoneFile) => file.type === "text/csv"
-      );
+      const csvFile = __getCsvFile();
       reader.onload = async (e) => {
         fileText.value = e.target?.result as string;
         resolve(fileText.value);
@@ -377,9 +381,7 @@ const useUpload = () => {
 
   const __getCsvBlob = () => {
     try {
-      const csvFile = files.value.find(
-        (file: DropzoneFile) => file.type === "text/csv"
-      );
+      const csvFile = __getCsvFile();
       return new Blob([csvFile], { type: csvFile.type });
     } catch (e: any) {
       throw Error(e);
