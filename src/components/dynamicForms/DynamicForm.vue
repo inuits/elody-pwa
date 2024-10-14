@@ -108,7 +108,7 @@
           "
           :label="t((field as FormAction).label)"
           :icon="(field as FormAction).icon"
-          :disabled="!enableUploadButton"
+          :disabled="!enableUploadButton || isButtonDisabled"
           :progressIndicatorType="(field as FormAction).actionProgressIndicator?.type"
           @click-upload-button="
             performActionButtonClickEvent(field as FormAction)
@@ -392,8 +392,8 @@ const getQuery = async (queryName: string) => {
 
 const validateForm = async () => {
   await form.value.validate();
-  if (formContainsErrors.value) return;
   formClosing.value = true;
+  return formContainsErrors.value;
 }
 
 const uploadActionFunction = async () => {
@@ -410,9 +410,9 @@ const uploadActionFunction = async () => {
 };
 
 const submitActionFunction = async (field: FormAction) => {
-  await validateForm();
+  if (await validateForm()) return;
   const document = await getQuery(field.actionQuery as string);
-  const entityInput = createEntityFromFormInput(field.creationType);
+  const entityInput = createEntityFromFormInput(field.creationType, startExecuteActionFn(field.actionType));
   let entity: any;
   try {
     entity = (await performSubmitAction(document, entityInput)).data
@@ -434,7 +434,7 @@ const submitActionFunction = async (field: FormAction) => {
 };
 
 const submitWithExtraMetadata = async (field: FormAction) => {
-  await validateForm();
+  if (await validateForm()) return;
   const document = await getQuery(field.actionQuery as string);
   const entityInput = createEntityFromFormInput(field.creationType);
   entityInput.metadata?.push(...startExecuteActionFn(field.actionType));
@@ -451,7 +451,7 @@ const submitWithExtraMetadata = async (field: FormAction) => {
 };
 
 const downloadActionFunction = async (field: FormAction) => {
-  await validateForm();
+  if (await validateForm()) return;
   try {
     const variables = startExecuteActionFn(field.actionType)
     const document = await getQuery(field.actionQuery as string);
@@ -477,7 +477,7 @@ const downloadActionFunction = async (field: FormAction) => {
 };
 
 const updateMetdataActionFunction = async (field: FormAction) => {
-  await validateForm();
+  if (await validateForm()) return;
   try {
     const document = await getQuery(field.actionQuery as string);
     let csv: string;
@@ -546,7 +546,7 @@ const reorderEntitiesWithCsvUpload = async (field: FormAction) => {
 
 const startOcrActionFunction = async (field: FormAction) => {
   try {
-    await validateForm();
+    if (await validateForm()) return;
     const { id, collection } = startExecuteActionFn(field.actionType);
     addEditableMetadataKeys(Object.keys(form.value.values.intialValues), id);
     const metadata = parseIntialValuesForFormSubmit(
@@ -632,13 +632,11 @@ const getUploadProgressSteps = (
 const resetVeeValidateForDynamicForm = (
   newQueryName: string,
   oldQueryName: string | undefined,
-  relations: BaseRelationValuesInput[]
 ) => {
   resetForm();
   if (oldQueryName) deleteForm(oldQueryName);
   form.value = createForm(newQueryName, {
     intialValues: {},
-    relationValues: { relations },
   } as {
     [key: string]: object;
   });
@@ -648,21 +646,7 @@ const initializeForm = async (
   newQueryName: string,
   oldQueryName: string | undefined
 ) => {
-  const relations: BaseRelationValuesInput[] = [];
-  if (props.savedContext) {
-    if (
-      props.savedContext.type === BulkOperationTypes.CreateEntity &&
-      props.savedContext.parentId !== undefined
-    ) {
-      relations.push({
-        key: props.savedContext.parentId,
-        type: props.savedContext.relationType,
-        editStatus: EditStatus.New,
-      });
-    }
-  }
-
-  resetVeeValidateForDynamicForm(newQueryName, oldQueryName, relations);
+  resetVeeValidateForDynamicForm(newQueryName, oldQueryName);
   if (!props.dynamicFormQuery) return;
   const document = await getQuery(props.dynamicFormQuery);
   getDynamicForm(document, props.tabName);

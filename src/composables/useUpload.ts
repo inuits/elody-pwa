@@ -754,6 +754,10 @@ const useUpload = () => {
     errorContainer.classList.remove("hidden");
   };
 
+  const __handleHttpError = (error: any) => {
+    logFormattedErrors(router, error);
+  };
+
   return {
     resetUpload,
     addFileToUpload,
@@ -785,6 +789,7 @@ const useUpload = () => {
     standaloneFileType,
     reinitializeDynamicFormFunc,
     __getCsvString,
+    __handleHttpError,
   };
 };
 

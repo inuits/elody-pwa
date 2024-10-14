@@ -9,7 +9,6 @@
       <dynamic-form
         v-if="getModalInfo(TypeModals.SaveSearch).open"
         :dynamic-form-query="getModalInfo(TypeModals.SaveSearch).formQuery"
-        :saved-context="getModalInfo(TypeModals.SaveSearch).savedContext"
         :tab-name="''"
         @entityCreated="saveFilter"
       />

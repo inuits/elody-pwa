@@ -114,6 +114,7 @@ import {
   getChildrenOfHomeRoutes,
   getHomeRoute,
 } from "@/helpers";
+import { useModalActions } from "@/composables/useModalActions";
 
 const entityTypeMappingByContext: {
   [key: string]: Entitytyping;
@@ -142,6 +143,10 @@ const {
   dequeueAllItemsForBulkProcessing,
   triggerBulkSelectionEvent,
 } = useBulkOperations();
+
+const {
+  getBulkOperationType,
+} = useModalActions();
 
 const config = inject("config") as any;
 const { t } = useI18n();
@@ -284,10 +289,10 @@ const executeNormalFlow = () => {
 
 const determineFlow = () => {
   if (!context.value || !modal?.open) return;
-  const savedContext = getModalInfo(TypeModals.BulkOperations).savedContext;
+  const bulkOperationType = getBulkOperationType();
   isFetchMediafilesOfAssetFlow.value =
-    savedContext &&
-    savedContext.type === BulkOperationTypes.ExportCsvOfMediafilesFromAsset;
+    bulkOperationType &&
+    bulkOperationType === BulkOperationTypes.ExportCsvOfMediafilesFromAsset;
   if (isFetchMediafilesOfAssetFlow.value) firstFetchMediafilesOfEntities();
   else executeNormalFlow();
 };
