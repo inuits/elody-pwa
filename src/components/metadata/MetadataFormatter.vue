@@ -11,7 +11,7 @@
     :label="readableLabel"
   />
   <MetadataRegexpFormatter
-    v-if="formatterType === CustomFormatterTypes.Regexp"
+    v-if="formatterType === CustomFormatterTypes.RegexpMatch"
     :formatter="formatter"
     :label="readableLabel"
   />
@@ -41,6 +41,11 @@ const formatterType = computed(() => {
 });
 
 const readableLabel = computed(() => {
-  return Array.isArray(props.label) ? props.label.join(", ") : props.label;
+  const isLabelArray = Array.isArray(props.label);
+
+  if (isLabelArray) {
+    return props.label.length > 0 ? props.label.join(", ") : "-";
+  }
+  return props.label ? props.label : "-";
 });
 </script>
