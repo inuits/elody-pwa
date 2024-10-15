@@ -36,6 +36,7 @@
         :allowed-actions-on-relations="element.allowedActionsOnRelations"
         :fetch-deep-relations="element.fetchDeepRelations"
         :entity-type="entityType"
+        :can="element.can"
       />
       <entity-element-media
         v-if="element.__typename === 'MediaFileElement'"
