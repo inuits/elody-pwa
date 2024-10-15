@@ -279,9 +279,7 @@ const {
   getCustomGetEntitiesFiltersQuery,
   getCustomGetEntitiesQuery,
 } = useEntityPickerModal();
-const {
-  startExecuteActionFn,
-} = useModalActions();
+const { extractActionArguments } = useModalActions();
 
 const { mutate } = useMutation<
   MutateEntityValuesMutation,
@@ -388,10 +386,11 @@ const getQuery = async (queryName: string) => {
   return await loadDocument(queryName);
 };
 
-const validateForm = async () => {
+const isFormValid = async () => {
   await form.value.validate();
-  formClosing.value = true;
-  return formContainsErrors.value;
+  if (!formContainsErrors.value)
+    formClosing.value = true;
+  return !formContainsErrors.value;
 }
 
 const uploadActionFunction = async () => {
@@ -408,16 +407,16 @@ const uploadActionFunction = async () => {
 };
 
 const submitActionFunction = async (field: FormAction) => {
-  if (await validateForm()) return;
+  if (await !isFormValid()) return;
   const document = await getQuery(field.actionQuery as string);
-  const entityInput = createEntityFromFormInput(field.creationType, startExecuteActionFn(field.actionType));
+  const entityInput = createEntityFromFormInput(field.creationType, extractActionArguments(field.actionType));
   let entity: any;
   try {
     entity = (await performSubmitAction(document, entityInput)).data
       .CreateEntity;
     showErrors.value = false;
     await getTenants();
-    const callbackFunction: Function = startExecuteActionFn(field.actionType);
+    const callbackFunction: Function = extractActionArguments(field.actionType);
     if (config.features.hasBulkSelect && callbackFunction)
       callbackFunction();
     else {
@@ -430,11 +429,11 @@ const submitActionFunction = async (field: FormAction) => {
   }
 };
 
-const submitWithExtraMetadata = async (field: FormAction) => {
-  if (await validateForm()) return;
+const submitWithExtraMetadataActionFunction = async (field: FormAction) => {
+  if (await !isFormValid()) return;
   const document = await getQuery(field.actionQuery as string);
   const entityInput = createEntityFromFormInput(field.creationType);
-  entityInput.metadata?.push(...startExecuteActionFn(field.actionType));
+  entityInput.metadata?.push(...extractActionArguments(field.actionType));
   const entity = (await performSubmitAction(document, entityInput)).data
     .CreateEntity;
   emit("entityCreated", { ...entity, metadata: entityInput.metadata });
@@ -448,9 +447,9 @@ const submitWithExtraMetadata = async (field: FormAction) => {
 };
 
 const downloadActionFunction = async (field: FormAction) => {
-  if (await validateForm()) return;
+  if (await !isFormValid()) return;
   try {
-    const variables = startExecuteActionFn(field.actionType)
+    const variables = extractActionArguments(field.actionType)
     const document = await getQuery(field.actionQuery as string);
     const entityInput = createEntityFromFormInput(field.creationType, variables.relations);
     const entity = (
@@ -474,7 +473,7 @@ const downloadActionFunction = async (field: FormAction) => {
 };
 
 const updateMetdataActionFunction = async (field: FormAction) => {
-  if (await validateForm()) return;
+  if (await !isFormValid()) return;
   try {
     const document = await getQuery(field.actionQuery as string);
     let csv: string;
@@ -499,12 +498,12 @@ const updateMetdataActionFunction = async (field: FormAction) => {
   }
 };
 
-const callEndpointInGraphql = async (field: FormAction) => {
+const callEndpointActionFunction = async (field: FormAction) => {
   if (!field.endpointInformation) return;
   const endpoint = field.endpointInformation;
   const body = {};
   endpoint.variables.forEach((variable) => {
-    body[variable] = startExecuteActionFn(field.actionType)[variable];
+    body[variable] = extractActionArguments(field.actionType)[variable];
   });
 
   const result = await fetch(`${endpoint.endpointName}`, {
@@ -524,11 +523,11 @@ const callEndpointInGraphql = async (field: FormAction) => {
     downloadDataFromResponse(data);
 };
 
-const reorderEntitiesWithCsvUpload = async (field: FormAction) => {
+const reorderEntitiesActionFunction = async (field: FormAction) => {
   await form.value.validate();
   if (formContainsErrors.value) return;
   try {
-    await uploadCsvForReordering(startExecuteActionFn(field.actionType));
+    await uploadCsvForReordering(extractActionArguments(field.actionType));
     closeAndDeleteForm();
     createNotificationOverwrite(
       NotificationType.success,
@@ -543,8 +542,8 @@ const reorderEntitiesWithCsvUpload = async (field: FormAction) => {
 
 const startOcrActionFunction = async (field: FormAction) => {
   try {
-    if (await validateForm()) return;
-    const { id, collection } = startExecuteActionFn(field.actionType);
+    if (await !isFormValid()) return;
+    const { id, collection } = extractActionArguments(field.actionType);
     addEditableMetadataKeys(Object.keys(form.value.values.intialValues), id);
     const metadata = parseIntialValuesForFormSubmit(
       form.value.values.intialValues,
@@ -597,9 +596,9 @@ const performActionButtonClickEvent = (field: FormAction): void => {
     upload: () => uploadActionFunction(field),
     download: () => downloadActionFunction(field),
     ocr: () => startOcrActionFunction(field),
-    endpoint: () => callEndpointInGraphql(field),
-    uploadCsvForReordening: () => reorderEntitiesWithCsvUpload(field),
-    submitWithExtraMetadata: () => submitWithExtraMetadata(field),
+    endpoint: () => callEndpointActionFunction(field),
+    uploadCsvForReordening: () => reorderEntitiesActionFunction(field),
+    submitWithExtraMetadata: () => submitWithExtraMetadataActionFunction(field),
   };
   if (!field.actionType) return;
   showErrors.value = true;
