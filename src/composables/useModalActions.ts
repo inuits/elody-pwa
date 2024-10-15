@@ -27,7 +27,7 @@ const savedSearchInformation = ref<any | undefined>(undefined);
 
 export const useModalActions = () => {
 
-  const submitActionFunction = (): BaseRelationValuesInput[] | boolean => {
+  const getArgumentsForSubmit = (): BaseRelationValuesInput[] | boolean => {
     const relations: BaseRelationValuesInput[] = [];
     if (parentId.value !== undefined) {
       relations.push({
@@ -42,7 +42,7 @@ export const useModalActions = () => {
     return callbackFunction.value;
   };
 
-  const downloadActionFunction = (): any =>  {
+  const getArgumentsForDownload = (): any =>  {
     const relations: BaseRelationValuesInput[] = [];
     downloadMediafilesInformation.value.mediafiles.forEach((mediafile) => {
       relations.push({
@@ -66,54 +66,54 @@ export const useModalActions = () => {
     }
   }
 
-  const startOcrActionFunction = (): any =>  {
+  const getArgumentsForStartOcr = (): any =>  {
     return {
       id: parentId.value,
       collection: collection.value,
     };
   }
 
-  const callEndpointInGraphql = (): any =>  {
+  const getArgumentsForEndpointInGraphql = (): any =>  {
     return {
       parentId: parentId.value,
     }
   }
 
-  const reorderEntitiesWithCsvUpload = (): any =>  {
+  const getArgumentsForReorderEntities = (): any =>  {
     return parentId.value;
   }
 
-  const submitWithExtraMetadata = (): any =>  {
+  const getArgumentsForSubmitExtraMetadata = (): any =>  {
     return savedSearchInformation.value;
   }
 
 
-  const startExecuteActionFn = (actionType: ActionType): any => {
+  const extractActionArguments = (actionType: ActionType): any => {
     const actionObject: {
       [key: ActionType]: {
         startExecuteActionFn: Function
       };
     } = {
       [ActionType.Submit]: {
-        startExecuteActionFn: () => submitActionFunction(),
+        extractActionArguments: () => getArgumentsForSubmit(),
       },
       [ActionType.Download]: {
-        startExecuteActionFn: () => downloadActionFunction(),
+        extractActionArguments: () => getArgumentsForDownload(),
       },
       [ActionType.Ocr]: {
-        startExecuteActionFn: () => startOcrActionFunction(),
+        extractActionArguments: () => getArgumentsForStartOcr(),
       },
       [ActionType.Endpoint]: {
-        startExecuteActionFn: () => callEndpointInGraphql(),
+        extractActionArguments: () => getArgumentsForEndpointInGraphql(),
       },
       [ActionType.UploadCsvForReordening]: {
-        startExecuteActionFn: () => reorderEntitiesWithCsvUpload(),
+        extractActionArguments: () => getArgumentsForReorderEntities(),
       },
       [ActionType.SubmitWithExtraMetadata]: {
-        startExecuteActionFn: () => submitWithExtraMetadata(),
+        extractActionArguments: () => getArgumentsForSubmitExtraMetadata(),
       }
     };
-    return actionObject[actionType].startExecuteActionFn();
+    return actionObject[actionType].extractActionArguments();
   };
 
   const initializeGeneralProperties = (
@@ -162,7 +162,7 @@ export const useModalActions = () => {
   }
 
   return {
-    startExecuteActionFn,
+    extractActionArguments,
     initializeGeneralProperties,
     initializePropertiesForDownload,
     initializePropertiesForCreateEntity,
