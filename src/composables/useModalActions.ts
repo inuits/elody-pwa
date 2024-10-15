@@ -27,7 +27,7 @@ const savedSearchInformation = ref<any | undefined>(undefined);
 
 export const useModalActions = () => {
 
-  const getArgumentsForSubmit = (): BaseRelationValuesInput[] | boolean => {
+  const getArgumentsForSubmit = (): BaseRelationValuesInput[] | Function => {
     const relations: BaseRelationValuesInput[] = [];
     if (parentId.value !== undefined) {
       relations.push({
@@ -42,7 +42,7 @@ export const useModalActions = () => {
     return callbackFunction.value;
   };
 
-  const getArgumentsForDownload = (): any =>  {
+  const getArgumentsForDownload = (): { relations: BaseRelationValuesInput[], entities: [], mediafiles: [], includeAssetCsv: boolean } =>  {
     const relations: BaseRelationValuesInput[] = [];
     downloadMediafilesInformation.value.mediafiles.forEach((mediafile) => {
       relations.push({
@@ -66,24 +66,24 @@ export const useModalActions = () => {
     }
   }
 
-  const getArgumentsForStartOcr = (): any =>  {
+  const getArgumentsForStartOcr = (): { id: string, collection: Collection } =>  {
     return {
       id: parentId.value,
       collection: collection.value,
     };
   }
 
-  const getArgumentsForEndpointInGraphql = (): any =>  {
+  const getArgumentsForEndpointInGraphql = (): { parentId: string } =>  {
     return {
       parentId: parentId.value,
     }
   }
 
-  const getArgumentsForReorderEntities = (): any =>  {
+  const getArgumentsForReorderEntities = (): { parentId: string } =>  {
     return parentId.value;
   }
 
-  const getArgumentsForSubmitExtraMetadata = (): any =>  {
+  const getArgumentsForSubmitExtraMetadata = (): { parentId: string } =>  {
     return savedSearchInformation.value;
   }
 
@@ -91,7 +91,7 @@ export const useModalActions = () => {
   const extractActionArguments = (actionType: ActionType): any => {
     const actionObject: {
       [key: ActionType]: {
-        startExecuteActionFn: Function
+        extractActionArguments: Function
       };
     } = {
       [ActionType.Submit]: {
