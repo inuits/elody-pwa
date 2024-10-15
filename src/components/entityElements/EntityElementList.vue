@@ -293,7 +293,6 @@ const checkElementListPermission = async () => {
 const checkAddRealtionsBtnPermission = async () => {
   if (!props.canAddRelations) {
     showAddRelationBtn.value = true;
-    console.log("here: ", showAddRelationBtn.value);
     return true;
   }
 
