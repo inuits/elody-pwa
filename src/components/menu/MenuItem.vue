@@ -190,6 +190,8 @@ onMounted(async () => {
     if (item.can && item.can?.length > 0) {
       allowed = await fetchAdvancedPermission(item.can);
     }
+
+    if (allowed) break;
   }
 
   if (props.menuitem.can && props.menuitem.can?.length > 0) {
