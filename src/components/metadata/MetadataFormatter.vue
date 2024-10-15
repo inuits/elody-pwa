@@ -10,13 +10,18 @@
     :formatter="formatter"
     :label="readableLabel"
   />
+  <MetadataRegexpFormatter
+    v-if="formatterType === CustomFormatterTypes.RegexpMatch"
+    :formatter="formatter"
+    :label="readableLabel"
+  />
 </template>
 
 <script lang="ts" setup>
 import { CustomFormatterTypes } from "@/generated-types/queries";
 import MetadataFormatterLink from "./MetadataFormatterLink.vue";
 import MetadataFormatterPill from "./MetadataFormatterPill.vue";
-
+import MetadataRegexpFormatter from "./MetadataRegexpFormatter.vue";
 import { computed } from "vue";
 
 const props = withDefaults(
@@ -36,6 +41,11 @@ const formatterType = computed(() => {
 });
 
 const readableLabel = computed(() => {
-  return Array.isArray(props.label) ? props.label.join(", ") : props.label;
+  const isLabelArray = Array.isArray(props.label);
+
+  if (isLabelArray) {
+    return props.label.length > 0 ? props.label.join(", ") : "-";
+  }
+  return props.label ? props.label : "-";
 });
 </script>
