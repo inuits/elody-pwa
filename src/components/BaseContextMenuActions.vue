@@ -7,7 +7,7 @@
     <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
       <context-menu-action
         :context-menu-actions="availableContextMenuActions"
-        :parent-entity-id="formId"
+        :parent-entity-id="parentEntityId"
         :entity-id="entityId"
         :entity-type="entityType"
         :relation="relation"
@@ -35,7 +35,6 @@ import {
 const props = withDefaults(
   defineProps<{
     contextMenuActions?: ContextMenuActions;
-    formId: string;
     entityId: string;
     entityType: Entitytyping;
     parentEntityId?: string;
