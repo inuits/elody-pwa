@@ -1,6 +1,7 @@
 <template>
   <div>
     <entity-element-wrapper
+      data-test="entity-element-wrapper"
       v-if="showElementList"
       :class="[
         { 'pb-1': baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary },
@@ -152,7 +153,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
-import { watch, ref, onBeforeMount, computed, onMounted } from "vue";
+import { watch, ref, onBeforeMount, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useImport } from "@/composables/useImport";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
