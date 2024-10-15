@@ -177,7 +177,7 @@ const determineBreadcrumbs = async () => {
   );
   do {
     const routeBreadcrumbs = getRouteBreadcrumbsOfEntity(
-      entityForBreadcrumb.value.type
+      entityForBreadcrumb.value?.__typename
     );
     if (!routeBreadcrumbs) break;
     entityForBreadcrumb.value = await iterateOverBreadcrumbs(
