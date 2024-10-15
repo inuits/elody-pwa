@@ -318,6 +318,7 @@ const useFormHelper = () => {
     [key: string]: any;
   }): BaseRelationValuesInput[] => {
     const relations: any[] = [];
+    if (!relationValues) return [];
     Object.keys(relationValues).forEach((relationType: string) => {
       const typedRelations: BaseRelationValuesInput[] =
         relationValues[relationType];
