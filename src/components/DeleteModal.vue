@@ -172,7 +172,7 @@ const deleteButtonClicked = async () => {
 };
 
 const getContext = () => {
-  if (deleteQueryOptions.value.customQueryEntityTypes.length > 0) {
+  if (deleteQueryOptions.value.customQueryEntityTypes?.length > 0) {
     if (
       deleteQueryOptions.value.customQueryEntityTypes[0] !==
       Entitytyping.Mediafile
