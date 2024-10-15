@@ -35,6 +35,8 @@
         :base-library-mode="element.baseLibraryMode"
         :allowed-actions-on-relations="element.allowedActionsOnRelations"
         :fetch-deep-relations="element.fetchDeepRelations"
+        :can="element.can"
+        :can-add-relations="element.canAddRelations"
       />
       <entity-element-media
         v-if="element.__typename === 'MediaFileElement'"
