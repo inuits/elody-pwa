@@ -9,6 +9,7 @@
         :elements="column.elements"
         :identifiers="identifiers"
         :uuid="uuid"
+        :entity-type="entityType"
       >
       </entity-element>
     </div>
@@ -16,7 +17,7 @@
 </template>
 <script lang="ts" setup>
 import { computed, watch } from "vue";
-import type { ColumnList, Column } from "@/generated-types/queries";
+import type { ColumnList, Column, Entitytyping } from "@/generated-types/queries";
 import EntityElement from "./entityElements/EntityElement.vue";
 import { convertSizeToTailwind } from "@/helpers";
 import { useColumnResizeHelper } from "../composables/useResizeHelper";
@@ -26,6 +27,7 @@ const props = defineProps<{
   columnList: ColumnList;
   identifiers: string[];
   uuid: string;
+  entityType: Entitytyping;
 }>();
 
 const { setInitialColumns, currentColumnConfig } = useColumnResizeHelper();
