@@ -407,7 +407,7 @@ const uploadActionFunction = async () => {
 };
 
 const submitActionFunction = async (field: FormAction) => {
-  if (await !isFormValid()) return;
+  if (!await isFormValid()) return;
   const document = await getQuery(field.actionQuery as string);
   const entityInput = createEntityFromFormInput(field.creationType, extractActionArguments(field.actionType));
   let entity: any;
@@ -430,7 +430,7 @@ const submitActionFunction = async (field: FormAction) => {
 };
 
 const submitWithExtraMetadataActionFunction = async (field: FormAction) => {
-  if (await !isFormValid()) return;
+  if (!await isFormValid()) return;
   const document = await getQuery(field.actionQuery as string);
   const entityInput = createEntityFromFormInput(field.creationType);
   entityInput.metadata?.push(...extractActionArguments(field.actionType));
@@ -447,7 +447,7 @@ const submitWithExtraMetadataActionFunction = async (field: FormAction) => {
 };
 
 const downloadActionFunction = async (field: FormAction) => {
-  if (await !isFormValid()) return;
+  if (!await isFormValid()) return;
   try {
     const variables = extractActionArguments(field.actionType)
     const document = await getQuery(field.actionQuery as string);
@@ -473,7 +473,7 @@ const downloadActionFunction = async (field: FormAction) => {
 };
 
 const updateMetdataActionFunction = async (field: FormAction) => {
-  if (await !isFormValid()) return;
+  if (!await isFormValid()) return;
   try {
     const document = await getQuery(field.actionQuery as string);
     let csv: string;
@@ -542,7 +542,7 @@ const reorderEntitiesActionFunction = async (field: FormAction) => {
 
 const startOcrActionFunction = async (field: FormAction) => {
   try {
-    if (await !isFormValid()) return;
+    if (!await isFormValid()) return;
     const { id, collection } = extractActionArguments(field.actionType);
     addEditableMetadataKeys(Object.keys(form.value.values.intialValues), id);
     const metadata = parseIntialValuesForFormSubmit(
