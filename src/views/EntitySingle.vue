@@ -17,6 +17,7 @@
           :columnList="columnList"
           :identifiers="identifiers"
           :uuid="entity.uuid"
+          :entity-type="entity.__typename"
         ></entity-column>
       </entity-form>
     </div>

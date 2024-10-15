@@ -35,6 +35,7 @@
         :base-library-mode="element.baseLibraryMode"
         :allowed-actions-on-relations="element.allowedActionsOnRelations"
         :fetch-deep-relations="element.fetchDeepRelations"
+        :entity-type="entityType"
       />
       <entity-element-media
         v-if="element.__typename === 'MediaFileElement'"
@@ -83,6 +84,7 @@ import { useRoute } from "vue-router";
 import type {
   Entity,
   EntityListElement,
+  Entitytyping,
   EntityViewElements,
   GraphElement,
   ManifestViewerElement,
@@ -108,6 +110,7 @@ const props = defineProps<{
   elements: EntityViewElements;
   identifiers: string[];
   uuid: string;
+  entityType: Entitytyping;
 }>();
 
 const formId = computed(() => props.uuid);

@@ -72,6 +72,7 @@
                 ? undefined
                 : identifiers
             "
+            :parent-entity-type="entityType"
             :filter-type="Entitytyping.Mediafile"
             list-item-route-name="SingleEntity"
             :entity-type="Entitytyping.Mediafile"
@@ -101,6 +102,7 @@
             :enable-navigation="false"
             :entity-type="types[0]"
             :parent-entity-identifiers="identifiers"
+            :parent-entity-type="entityType"
             :filter-type="types[0]"
             list-item-route-name="SingleEntity"
             :relation-type="relationType"
@@ -204,6 +206,7 @@ const props = withDefaults(
     entityListElements?: EntityListElement[];
     allowedActionsOnRelations?: RelationActions[];
     fetchDeepRelations?: FetchDeepRelations;
+    entityType: Entitytyping;
   }>(),
   {
     types: () => [],

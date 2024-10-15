@@ -292,6 +292,7 @@ export type BaseLibraryProps = {
   customQueryEntityPickerList?: string;
   customQueryEntityPickerListFilters?: string;
   fetchDeepRelations?: FetchDeepRelations;
+  parentEntityType?: Entitytyping;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -565,7 +566,7 @@ const applyCustomBulkOperations = async () => {
 const initializeEntityPickerComponent = () => {
   setAcceptedTypes([props.entityType] as Entitytyping[]);
   setEntityUuid(props.parentEntityIdentifiers[0]);
-  setParentEntityType(route.meta.entityType);
+  setParentEntityType(props.parentEntityType || route.meta.entityType);
   setRelationType(props.relationType);
   setCustomGetEntitiesQuery(props.customQueryEntityPickerList);
   setCustomGetEntitiesFiltersQuery(props.customQueryEntityPickerListFilters);
