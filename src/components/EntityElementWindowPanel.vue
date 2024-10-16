@@ -80,7 +80,6 @@
                 getObjectsBasedOnTypename(metadata, 'EntityListElement')
               "
               :can="metadata.can"
-              :can-add-relations="metadata.canAddRelations"
               class="pt-2"
             />
           </div>
