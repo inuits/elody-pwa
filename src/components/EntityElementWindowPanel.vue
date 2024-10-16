@@ -79,6 +79,7 @@
               :entity-list-elements="
                 getObjectsBasedOnTypename(metadata, 'EntityListElement')
               "
+              :can="metadata.can"
               class="pt-2"
             />
           </div>
