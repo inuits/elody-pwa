@@ -10,35 +10,6 @@
       :isCollapsed="isCollapsed"
       :base-library-mode="baseLibraryMode"
     >
-      <template v-slot:actions>
-        <div
-          data-cy="entity-element-list-add-button"
-          v-if="
-            isEdit &&
-            relationType &&
-            allowedActionsOnRelations.includes(RelationActions.AddRelation) &&
-            showAddRelationBtn
-          "
-          class="flex items-center px-2 text-text-subtitle cursor-pointer"
-          @click.stop="
-            () => {
-              setAcceptedTypes(types as Entitytyping[]);
-              setEntityUuid(entityUuid);
-              setParentEntityType(route.meta.entityType);
-              setRelationType(relationType);
-              setCustomGetEntitiesQuery(customQueryEntityPickerList);
-              setCustomGetEntitiesFiltersQuery(customQueryEntityPickerListFilters);
-              openModal(TypeModals.DynamicForm, ModalStyle.RightWide,'GetEntityPickerForm');
-              toggleElementCollapse(label, false);
-            }
-          "
-        >
-          <unicon height="16" :name="Unicons.PlusCircle.name" />
-          <p class="underline">
-            {{ t("library.add") }}
-          </p>
-        </div>
-      </template>
       <template v-slot:content>
         <div
           v-if="!requiresCustomQuery || queryLoaded"
@@ -128,7 +99,6 @@
 <script lang="ts" setup>
 import {
   SearchInputType,
-  TypeModals,
   EntityListViewMode,
   type Entity,
   Entitytyping,
@@ -136,7 +106,6 @@ import {
   type EntityListElement,
   BaseLibraryModes,
   RelationActions,
-  ModalStyle,
   FetchDeepRelations,
 } from "@/generated-types/queries";
 import {
@@ -146,15 +115,9 @@ import {
 } from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
-import useEditMode from "@/composables/useEdit";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import { Unicons } from "@/types";
-import { useBaseModal } from "@/composables/useBaseModal";
-import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { useI18n } from "vue-i18n";
 import { watch, ref, onBeforeMount, computed } from "vue";
-import { useRoute } from "vue-router";
 import { useImport } from "@/composables/useImport";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
@@ -163,19 +126,8 @@ import { usePermissions } from "@/composables/usePermissions";
 
 const { addRelations } = useFormHelper();
 const { createCustomContext } = useBulkOperations();
-const { toggleElementCollapse } = useEntityElementCollapseHelper();
-const {
-  setAcceptedTypes,
-  setEntityUuid,
-  setParentEntityType,
-  setRelationType,
-  setCustomGetEntitiesQuery,
-  setCustomGetEntitiesFiltersQuery,
-} = useEntityPickerModal();
-const { openModal } = useBaseModal();
+const { setRelationType } = useEntityPickerModal();
 const { loadDocument } = useImport();
-const { isEdit } = useEditMode();
-const { t } = useI18n();
 const { mediafileSelectionState } = useEntityMediafileSelector();
 const { uploadStatus } = useUpload();
 const {
@@ -184,7 +136,6 @@ const {
   setSearchInputType,
   setEntityType,
 } = useQueryVariablesFactory();
-const route = useRoute();
 const { fetchAdvancedPermission } = usePermissions();
 
 const props = withDefaults(
@@ -235,14 +186,10 @@ const requiresCustomQuery = computed(() => props.customQuery != undefined);
 const queryLoaded = ref<boolean>(false);
 const newQuery = ref<object>(undefined);
 const showElementList = ref<boolean>(false);
-const showAddRelationBtn = ref<boolean>(false);
 
 onBeforeMount(async () => {
   if (requiresCustomQuery.value) await useCustomQuery();
-  await Promise.all([
-    checkElementListPermission(),
-    checkAddRealtionsBtnPermission(),
-  ]);
+  await checkElementListPermission();
 });
 
 watch(
@@ -289,18 +236,5 @@ const checkElementListPermission = async () => {
 
   const isPermitted: boolean = await fetchAdvancedPermission(props.can);
   showElementList.value = isPermitted;
-};
-
-const checkAddRealtionsBtnPermission = async () => {
-  if (!props.canAddRelations) {
-    showAddRelationBtn.value = true;
-    return true;
-  }
-
-  const isPermitted: boolean = await fetchAdvancedPermission(
-    props.canAddRelations
-  );
-  showAddRelationBtn.value = isPermitted;
-  return isPermitted;
 };
 </script>
