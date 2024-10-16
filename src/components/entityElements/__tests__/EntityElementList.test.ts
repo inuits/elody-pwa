@@ -29,12 +29,7 @@ vi.mock("@/composables/useFormHelper", () => ({
 
 vi.mock("@/composables/useEntityPickerModal", () => ({
   default: () => ({
-    setAcceptedTypes: vi.fn(),
-    setEntityUuid: vi.fn(),
-    setParentEntityType: vi.fn(),
     setRelationType: vi.fn(),
-    setCustomGetEntitiesQuery: vi.fn(),
-    setCustomGetEntitiesFiltersQuery: vi.fn(),
   }),
 }));
 
@@ -110,7 +105,6 @@ const mocks = vi.hoisted(() => {
     fetchAdvancedPermissions: vi.fn(),
     advancedPermissions: {
       canReadElementList: false,
-      canAddRelations: false,
     },
   };
 });
@@ -145,7 +139,7 @@ describe("EntityElementList", () => {
     vi.resetAllMocks();
   });
 
-  it("renders the entity element list and the 'Add' button when advanced permissions are not provided", async () => {
+  it("renders the entity element list when advanced permissions are not provided", async () => {
     const wrapper = mount(EntityElementList, {
       props: getBasicProps(),
       global: {
@@ -162,15 +156,9 @@ describe("EntityElementList", () => {
     );
     expect(wrapper.vm.showElementList).toBe(true);
     expect(entityElementList.exists()).toBe(true);
-
-    const entityElementListAddBtn = await wrapper.find(
-      '[data-cy="entity-element-list-add-button"]'
-    );
-    expect(wrapper.vm.showAddRelationBtn).toBe(true);
-    expect(entityElementListAddBtn.exists()).toBe(true);
   });
 
-  it("does not render the 'Add' button when the user lacks the required permissions", async () => {
+  it("does not render the entity element list when the user lacks the required permissions", async () => {
     mocks.advancedPermissions["canAddRelations"] = false;
     mocks.fetchAdvancedPermissions.mockReturnValue(false);
 
@@ -193,54 +181,16 @@ describe("EntityElementList", () => {
     );
     expect(wrapper.vm.showElementList).toBe(true);
     expect(entityElementList.exists()).toBe(true);
-
-    const entityElementListAddBtn = await wrapper.find(
-      '[data-cy="entity-element-list-add-button"]'
-    );
-    expect(wrapper.vm.showAddRelationBtn).toBe(false);
-    expect(entityElementListAddBtn.exists()).toBe(false);
   });
 
-  it("does not render the component when the user lacks advanced permissions", async () => {
-    mocks.advancedPermissions["canReadElementList"] = false;
-    mocks.fetchAdvancedPermissions.mockReturnValue(false);
-
-    const wrapper = mount(EntityElementList, {
-      props: {
-        ...getBasicProps(),
-        can: ["canReadElementList"],
-      },
-      global: {
-        stubs: {
-          BaseLibrary: true,
-        },
-      },
-    });
-
-    await flushPromises();
-
-    const entityElementList = await wrapper.find(
-      '[data-test="entity-element-wrapper"]'
-    );
-    expect(wrapper.vm.showElementList).toBe(false);
-    expect(entityElementList.exists()).toBe(false);
-
-    const entityElementListAddBtn = await wrapper.find(
-      '[data-cy="entity-element-list-add-button"]'
-    );
-    expect(entityElementListAddBtn.exists()).toBe(false);
-  });
-
-  it("renders the component and the 'Add' button when valid permissions are granted", async () => {
+  it("renders the entity element list when valid permissions are granted", async () => {
     mocks.advancedPermissions["canReadElementList"] = true;
-    mocks.advancedPermissions["canAddRelations"] = true;
     mocks.fetchAdvancedPermissions.mockReturnValue(true);
 
     const wrapper = mount(EntityElementList, {
       props: {
         ...getBasicProps(),
         can: ["canReadElementList"],
-        canAddRelations: ["canAddRelations"],
       },
       global: {
         stubs: {
@@ -256,11 +206,5 @@ describe("EntityElementList", () => {
     );
     expect(wrapper.vm.showElementList).toBe(true);
     expect(entityElementList.exists()).toBe(true);
-
-    const entityElementListAddBtn = await wrapper.find(
-      '[data-cy="entity-element-list-add-button"]'
-    );
-    expect(wrapper.vm.showAddRelationBtn).toBe(true);
-    expect(await entityElementListAddBtn.exists()).toBe(true);
   });
 });
