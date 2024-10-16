@@ -142,6 +142,15 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
         result.data?.EntityTypeSortOptions.sortOptions;
       sortOptions.value = sortingOptionsResult?.options || [];
 
+      sortOptions.value = sortOptions.value.filter((option) => {
+        const availabilityArray = option.availableInPages;
+        if (!availabilityArray) return true;
+        return availabilityArray.reduce((accumulator, currentValue) => {
+          if (route.fullPath.includes(currentValue.entityType) && currentValue.routeName === route.name) return true;
+          return accumulator;
+        }, false);
+      });
+
       const state = getStateForRoute(route);
       const sortKey =
         /*state?.queryVariables?.searchValue.order_by ||*/
