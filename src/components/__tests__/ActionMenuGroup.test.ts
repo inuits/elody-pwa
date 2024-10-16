@@ -11,12 +11,6 @@ import {
 } from "@/generated-types/queries";
 import { flushPromises } from "@vue/test-utils";
 
-vi.mock("vue-i18n", () => ({
-  useI18n: () => ({
-    t: (key: string) => key,
-  }),
-}));
-
 vi.mock("@vue/apollo-composable", () => ({
   useMutation: () => ({
     mutate: vi.fn(),

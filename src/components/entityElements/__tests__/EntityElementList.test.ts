@@ -9,12 +9,6 @@ import {
 } from "@/generated-types/queries";
 import { flushPromises } from "@vue/test-utils";
 
-vi.mock("vue-i18n", () => ({
-  useI18n: () => ({
-    t: (key: string) => key,
-  }),
-}));
-
 vi.mock("@/composables/useImport", () => ({
   useImport: () => ({
     loadDocument: vi.fn(),
@@ -34,20 +28,6 @@ vi.mock("@/composables/useEntityMediafileSelector", () => ({
     }),
   }),
 }));
-
-vi.mock("@/main", () => {
-  const actualModule = vi.importActual("@/main");
-
-  return {
-    ...actualModule,
-    apolloClient: {
-      ...actualModule.apolloClient,
-      query: vi.fn().mockResolvedValue({
-        data: {},
-      }),
-    },
-  };
-});
 
 const mocks = vi.hoisted(() => {
   return {
