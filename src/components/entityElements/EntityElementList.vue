@@ -113,12 +113,9 @@ import {
 import {
   BulkOperationsContextEnum,
   useBulkOperations,
-  type InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
-import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import { useFormHelper } from "@/composables/useFormHelper";
 import { watch, ref, onBeforeMount, computed } from "vue";
 import { useImport } from "@/composables/useImport";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -126,9 +123,7 @@ import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory
 import useUpload from "@/composables/useUpload";
 import { usePermissions } from "@/composables/usePermissions";
 
-const { addRelations } = useFormHelper();
 const { createCustomContext } = useBulkOperations();
-const { setRelationType } = useEntityPickerModal();
 const { loadDocument } = useImport();
 const { mediafileSelectionState } = useEntityMediafileSelector();
 const { uploadStatus } = useUpload();
@@ -162,12 +157,8 @@ const props = withDefaults(
     entityListElements?: EntityListElement[];
     allowedActionsOnRelations?: RelationActions[];
     fetchDeepRelations?: FetchDeepRelations;
-<<<<<<< HEAD
     entityType: Entitytyping;
-=======
     can?: string[];
-    canAddRelations?: string[];
->>>>>>> 8e29b053 (add permission checking functionality for entity element list)
   }>(),
   {
     types: () => [],
@@ -176,15 +167,6 @@ const props = withDefaults(
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     entityListElements: undefined,
     allowedActionsOnRelations: () => [],
-  }
-);
-
-watch(
-  () => props.entityList,
-  () => {
-    if (props.entityList.length > 0) {
-      updateRelationForm(props.entityList);
-    }
   }
 );
 
@@ -221,17 +203,6 @@ const useCustomQuery = async () => {
     filtersDocument: filtersDocument,
   };
   queryLoaded.value = true;
-};
-
-const updateRelationForm = (newTags: String[]) => {
-  if (typeof newTags == "string") {
-    return;
-  }
-  const InBulkProcessableItems: InBulkProcessableItem = newTags.map((str) => ({
-    id: str,
-  }));
-  setRelationType(props.relationType);
-  addRelations(InBulkProcessableItems, props.relationType, props.entityUuid);
 };
 
 const checkElementListPermission = async () => {

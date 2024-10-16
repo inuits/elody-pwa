@@ -21,36 +21,6 @@ vi.mock("@/composables/useImport", () => ({
   }),
 }));
 
-vi.mock("@/composables/useFormHelper", () => ({
-  useFormHelper: () => ({
-    addRelations: vi.fn(),
-  }),
-}));
-
-vi.mock("@/composables/useEntityPickerModal", () => ({
-  default: () => ({
-    setRelationType: vi.fn(),
-  }),
-}));
-
-vi.mock("@/composables/useEntityElementCollapseHelper", () => ({
-  useEntityElementCollapseHelper: () => ({
-    toggleElementCollapse: vi.fn(),
-  }),
-}));
-
-vi.mock("@/composables/useBaseModal", () => ({
-  useBaseModal: () => ({
-    openModal: vi.fn(),
-  }),
-}));
-
-vi.mock("@/composables/useEdit", () => ({
-  default: () => ({
-    isEdit: true,
-  }),
-}));
-
 vi.mock("@/composables/useUpload", () => ({
   default: () => ({
     uploadStatus: ref("idle"),
@@ -63,27 +33,6 @@ vi.mock("@/composables/useEntityMediafileSelector", () => ({
       selectedMediafile: undefined,
     }),
   }),
-}));
-
-vi.mock("vue-router", () => ({
-  useRouter: () => ({
-    meta: {
-      entityType: "some-entity-type",
-    },
-  }),
-  useRoute: () => ({
-    meta: {
-      entityType: "some-entity-type",
-    },
-  }),
-}));
-
-vi.mock("@/types", () => ({
-  Unicons: {
-    PlusCircle: { name: "plus-circle" },
-    AngleDown: { name: "plus-circle" },
-    AngleUp: { name: "plus-circle" },
-  },
 }));
 
 vi.mock("@/main", () => {
@@ -123,7 +72,7 @@ const getBasicProps = () => ({
   isCollapsed: false,
   entityList: [],
   identifiers: ["2142414-24124124124", "2142414-24124124124"],
-  relationType: "zonesServed",
+  relationType: "zones",
   entityUuid: "2142414-24124124124",
   types: ["Area", "BakeryArea"],
   customBulkOperations: "GetDevicesZonesServedBulkOperations",
