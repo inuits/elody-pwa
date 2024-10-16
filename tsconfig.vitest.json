@@ -4,6 +4,6 @@
   "compilerOptions": {
     "composite": true,
     "lib": [],
-    "types": ["vitest", "node", "jsdom"]
-  },
+    "types": ["node", "jsdom"]
+  }
 }
