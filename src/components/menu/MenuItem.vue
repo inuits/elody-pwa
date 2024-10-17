@@ -1,7 +1,7 @@
 <template>
   <div data-cy="menu-item">
     <component
-      v-if="showMenuItem"
+      v-show="showMenuItem"
       data-test="menu-item-component"
       :is="linkTag"
       :to="isLink ? menuAction.action : undefined"
@@ -50,7 +50,7 @@
         :color="iconColor"
       />
       <div
-        v-if="isExpanded"
+        v-show="isExpanded"
         class="w-full grid grid-cols-[1fr_auto] items-center"
       >
         <span class="w-100 px-4 font-bold">
@@ -58,7 +58,7 @@
         </span>
         <div
           class="w-full flex justify-end align-center"
-          v-if="menuitem.subMenu"
+          v-show="menuitem.subMenu"
         >
           <unicon
             v-if="isBeingHovered"
@@ -69,7 +69,7 @@
         </div>
       </div>
     </component>
-    <transition-group v-if="isExpanded && showMenuItem">
+    <transition-group v-show="isExpanded && showMenuItem">
       <div v-for="submenuItem in menuSubitem" :key="submenuItem.label">
         <MenuSubItem
           @click="setSelectedMenuItem(menuitem)"
