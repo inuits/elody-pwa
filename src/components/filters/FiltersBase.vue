@@ -276,6 +276,7 @@ const filterMatcherMappingPromise = async () => {
   return apolloClient
     .query<GetFilterMatcherMappingQuery>({
       query: GetFilterMatcherMappingDocument,
+      fetchPolicy: "no-cache",
     })
     .then((result) => {
       filterMatcherMapping.value = result.data.FilterMatcherMapping;
