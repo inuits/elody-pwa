@@ -146,7 +146,11 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
         const availabilityArray = option.availableInPages;
         if (!availabilityArray) return true;
         return availabilityArray.reduce((accumulator, currentValue) => {
-          if (route.fullPath.includes(currentValue.entityType) && currentValue.routeName === route.name) return true;
+          if (
+            route.fullPath.includes(currentValue.entityType) &&
+            currentValue.routeName === route.name
+          )
+            return true;
           return accumulator;
         }, false);
       });

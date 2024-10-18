@@ -144,9 +144,7 @@ const {
   triggerBulkSelectionEvent,
 } = useBulkOperations();
 
-const {
-  getBulkOperationType,
-} = useModalActions();
+const { getBulkOperationType } = useModalActions();
 
 const config = inject("config") as any;
 const { t } = useI18n();

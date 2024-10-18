@@ -4,7 +4,7 @@ import {
   BulkOperationTypes,
   Collection,
   EditStatus,
-  RouteNames
+  RouteNames,
 } from "@/generated-types/queries";
 import { ref } from "vue";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
@@ -21,12 +21,12 @@ const collection = ref<Collection | undefined>(undefined);
 const callbackFunction = ref<Function | undefined>(undefined);
 const bulkOperationType = ref<BulkOperationTypes | undefined>(undefined);
 
-const downloadMediafilesInformation = ref<DownloadMediafilesInformation | undefined>(undefined);
+const downloadMediafilesInformation = ref<
+  DownloadMediafilesInformation | undefined
+>(undefined);
 const savedSearchInformation = ref<any | undefined>(undefined);
 
-
 export const useModalActions = () => {
-
   const getArgumentsForSubmit = (): BaseRelationValuesInput[] | Function => {
     const relations: BaseRelationValuesInput[] = [];
     if (parentId.value !== undefined) {
@@ -36,13 +36,18 @@ export const useModalActions = () => {
         editStatus: EditStatus.New,
       });
       parentId.value = undefined;
-      return relations
+      return relations;
     }
 
     return callbackFunction.value;
   };
 
-  const getArgumentsForDownload = (): { relations: BaseRelationValuesInput[], entities: [], mediafiles: [], includeAssetCsv: boolean } =>  {
+  const getArgumentsForDownload = (): {
+    relations: BaseRelationValuesInput[];
+    entities: [];
+    mediafiles: [];
+    includeAssetCsv: boolean;
+  } => {
     const relations: BaseRelationValuesInput[] = [];
     downloadMediafilesInformation.value.mediafiles.forEach((mediafile) => {
       relations.push({
@@ -63,35 +68,37 @@ export const useModalActions = () => {
       entities: downloadMediafilesInformation.value.entities,
       mediafiles: downloadMediafilesInformation.value.mediafiles,
       includeAssetCsv: downloadMediafilesInformation.value.includeAssetCsv,
-    }
-  }
+    };
+  };
 
-  const getArgumentsForStartOcr = (): { id: string, collection: Collection } =>  {
+  const getArgumentsForStartOcr = (): {
+    id: string;
+    collection: Collection;
+  } => {
     return {
       id: parentId.value,
       collection: collection.value,
     };
-  }
+  };
 
-  const getArgumentsForEndpointInGraphql = (): { parentId: string } =>  {
+  const getArgumentsForEndpointInGraphql = (): { parentId: string } => {
     return {
       parentId: parentId.value,
-    }
-  }
+    };
+  };
 
-  const getArgumentsForReorderEntities = (): { parentId: string } =>  {
+  const getArgumentsForReorderEntities = (): { parentId: string } => {
     return parentId.value;
-  }
+  };
 
-  const getArgumentsForSubmitExtraMetadata = (): { parentId: string } =>  {
+  const getArgumentsForSubmitExtraMetadata = (): { parentId: string } => {
     return savedSearchInformation.value;
-  }
-
+  };
 
   const extractActionArguments = (actionType: ActionType): any => {
     const actionObject: {
       [key: ActionType]: {
-        extractActionArguments: Function
+        extractActionArguments: Function;
       };
     } = {
       [ActionType.Submit]: {
@@ -111,7 +118,7 @@ export const useModalActions = () => {
       },
       [ActionType.SubmitWithExtraMetadata]: {
         extractActionArguments: () => getArgumentsForSubmitExtraMetadata(),
-      }
+      },
     };
     return actionObject[actionType].extractActionArguments();
   };
@@ -121,7 +128,7 @@ export const useModalActions = () => {
     relation: string,
     col: Collection,
     callbackFn: Function,
-    bulkoperationType: BulkOperationTypes,
+    bulkoperationType: BulkOperationTypes
   ): void => {
     parentId.value = parent;
     relationType.value = relation;
@@ -131,7 +138,7 @@ export const useModalActions = () => {
   };
   const initializePropertiesForDownload = (
     enqueuedItems,
-    context: any,
+    context: any
   ): void => {
     const isMediafileArray =
       context === RouteNames.Mediafile ||
@@ -141,25 +148,24 @@ export const useModalActions = () => {
       mediafiles: isMediafileArray ? enqueuedItems.map((item) => item.id) : [],
       entities: !isMediafileArray ? enqueuedItems.map((item) => item.id) : [],
       includeAssetCsv: context !== RouteNames.Mediafile,
-    }
+    };
   };
   const initializePropertiesForCreateEntity = (): void => {
-    if (!parentId.value)
-      callbackFunction.value = undefined;
+    if (!parentId.value) callbackFunction.value = undefined;
   };
   const initializePropertiesForSavedSearch = (savedSearchInfo: any): void => {
     savedSearchInformation.value = savedSearchInfo;
   };
 
   const getParentId = () => {
-    return parentId.value
-  }
+    return parentId.value;
+  };
   const getBulkOperationType = () => {
-    return bulkOperationType.value
-  }
+    return bulkOperationType.value;
+  };
   const getCallbackFunction = () => {
-    return callbackFunction.value
-  }
+    return callbackFunction.value;
+  };
 
   return {
     extractActionArguments,
@@ -170,6 +176,5 @@ export const useModalActions = () => {
     getParentId,
     getBulkOperationType,
     getCallbackFunction,
-  }
-
-}
+  };
+};

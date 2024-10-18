@@ -132,13 +132,13 @@ import {
   ModalStyle,
   RouteNames,
   TranscodeType,
-  TypeModals
+  TypeModals,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
   Context,
   InBulkProcessableItem,
-  useBulkOperations
+  useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { useModalActions } from "@/composables/useModalActions";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
@@ -147,7 +147,10 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import { useImport } from "@/composables/useImport";
-import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
+import {
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
@@ -216,7 +219,7 @@ const {
 const {
   initializeGeneralProperties,
   initializePropertiesForDownload,
-  initializePropertiesForCreateEntity
+  initializePropertiesForCreateEntity,
 } = useModalActions();
 const { openModal, getModalInfo } = useBaseModal();
 const { createNotificationOverwrite } = useNotification();
@@ -326,10 +329,13 @@ watch(selectedBulkOperation, () => {
     modal.formRelationType,
     route.meta.type,
     props.refetchEntities,
-    bulkOperationType,
+    bulkOperationType
   );
   if (bulkOperationType === BulkOperationTypes.DownloadMediafiles)
-    initializePropertiesForDownload(getEnqueuedItems(props.context), props.context);
+    initializePropertiesForDownload(
+      getEnqueuedItems(props.context),
+      props.context
+    );
   if (bulkOperationType === BulkOperationTypes.AddRelation)
     emit("initializeEntityPickerComponent");
   if (bulkOperationType === BulkOperationTypes.CreateEntity)
@@ -341,7 +347,9 @@ watch(selectedBulkOperation, () => {
     modal.formQuery,
     undefined,
     modal.askForCloseConfirmation,
-    bulkOperationType === BulkOperationTypes.ExportCsvOfMediafilesFromAsset ? RouteNames.Mediafiles : props.context,
+    bulkOperationType === BulkOperationTypes.ExportCsvOfMediafilesFromAsset
+      ? RouteNames.Mediafiles
+      : props.context
   );
 });
 

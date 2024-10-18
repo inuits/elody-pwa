@@ -32,13 +32,20 @@ const dryRunComplete = ref<boolean>(false);
 const dryRunErrors = ref<string[]>([]);
 const files = ref<DropzoneFile[]>([]);
 const mediafiles = computed((): DropzoneFile[] =>
-  files.value.filter((file: DropzoneFile) => file.type !== "text/csv" && file.type !== "application/vnd.ms-excel")
+  files.value.filter(
+    (file: DropzoneFile) =>
+      file.type !== "text/csv" && file.type !== "application/vnd.ms-excel"
+  )
 );
 const uploadProgressPercentage = ref<number>(0);
 const uploadType = ref<UploadFieldType>(UploadFieldType.Batch);
 const requiredMediafiles = ref<string[] | undefined>(undefined);
 const containsCsv = computed(
-  () => !!files.value.find((file: DropzoneFile) => file.type === "text/csv" || file.type === "application/vnd.ms-excel")
+  () =>
+    !!files.value.find(
+      (file: DropzoneFile) =>
+        file.type === "text/csv" || file.type === "application/vnd.ms-excel"
+    )
 );
 const uploadFlow = ref<UploadFlow>(UploadFlow.MediafilesOnly);
 const uploadValidationFn = ref<Function>(() => {
@@ -359,9 +366,10 @@ const useUpload = () => {
 
   const __getCsvFile = (): DropzoneFile => {
     return files.value.find(
-      (file: DropzoneFile) => file.type === "text/csv" || file.type === "application/vnd.ms-excel"
+      (file: DropzoneFile) =>
+        file.type === "text/csv" || file.type === "application/vnd.ms-excel"
     );
-  }
+  };
 
   const __getCsvString = async (): Promise<string> => {
     return new Promise((resolve, reject) => {

@@ -359,7 +359,10 @@ const isLinkedUpload = computed<boolean>(() => {
   return uploadContainer.uploadFlow === UploadFlow.MediafilesOnly;
 });
 
-const createEntityFromFormInput = (entityType: Entitytyping, relations: BaseRelationValuesInput[] = undefined): EntityInput => {
+const createEntityFromFormInput = (
+  entityType: Entitytyping,
+  relations: BaseRelationValuesInput[] = undefined
+): EntityInput => {
   let entity: EntityInput = { type: entityType };
   entity.metadata = Object.keys(form.value?.values.intialValues)
     .map((key) => {
@@ -376,9 +379,9 @@ const createEntityFromFormInput = (entityType: Entitytyping, relations: BaseRela
       return { key, value: form.value?.values.intialValues[key] };
     })
     .filter((metadataItem: MetadataInput) => metadataItem.value);
-  entity.relations = relations ?
-    relations :
-    parseRelationValuesForFormSubmit(form.value?.values.relationValues);
+  entity.relations = relations
+    ? relations
+    : parseRelationValuesForFormSubmit(form.value?.values.relationValues);
   return entity;
 };
 
@@ -388,10 +391,9 @@ const getQuery = async (queryName: string) => {
 
 const isFormValid = async () => {
   await form.value.validate();
-  if (!formContainsErrors.value)
-    formClosing.value = true;
+  if (!formContainsErrors.value) formClosing.value = true;
   return !formContainsErrors.value;
-}
+};
 
 const uploadActionFunction = async () => {
   if (!enableUploadButton.value) return;
@@ -407,9 +409,12 @@ const uploadActionFunction = async () => {
 };
 
 const submitActionFunction = async (field: FormAction) => {
-  if (!await isFormValid()) return;
+  if (!(await isFormValid())) return;
   const document = await getQuery(field.actionQuery as string);
-  const entityInput = createEntityFromFormInput(field.creationType, extractActionArguments(field.actionType));
+  const entityInput = createEntityFromFormInput(
+    field.creationType,
+    extractActionArguments(field.actionType)
+  );
   let entity: any;
   try {
     entity = (await performSubmitAction(document, entityInput)).data
@@ -417,8 +422,7 @@ const submitActionFunction = async (field: FormAction) => {
     showErrors.value = false;
     await getTenants();
     const callbackFunction: Function = extractActionArguments(field.actionType);
-    if (config.features.hasBulkSelect && callbackFunction)
-      callbackFunction();
+    if (config.features.hasBulkSelect && callbackFunction) callbackFunction();
     else {
       setTimeout(() => goToEntityPage(entity, "SingleEntity", props.router), 1);
     }
@@ -430,7 +434,7 @@ const submitActionFunction = async (field: FormAction) => {
 };
 
 const submitWithExtraMetadataActionFunction = async (field: FormAction) => {
-  if (!await isFormValid()) return;
+  if (!(await isFormValid())) return;
   const document = await getQuery(field.actionQuery as string);
   const entityInput = createEntityFromFormInput(field.creationType);
   entityInput.metadata?.push(...extractActionArguments(field.actionType));
@@ -447,11 +451,14 @@ const submitWithExtraMetadataActionFunction = async (field: FormAction) => {
 };
 
 const downloadActionFunction = async (field: FormAction) => {
-  if (!await isFormValid()) return;
+  if (!(await isFormValid())) return;
   try {
-    const variables = extractActionArguments(field.actionType)
+    const variables = extractActionArguments(field.actionType);
     const document = await getQuery(field.actionQuery as string);
-    const entityInput = createEntityFromFormInput(field.creationType, variables.relations);
+    const entityInput = createEntityFromFormInput(
+      field.creationType,
+      variables.relations
+    );
     const entity = (
       await performDownloadAction(
         document,
@@ -473,7 +480,7 @@ const downloadActionFunction = async (field: FormAction) => {
 };
 
 const updateMetdataActionFunction = async (field: FormAction) => {
-  if (!await isFormValid()) return;
+  if (!(await isFormValid())) return;
   try {
     const document = await getQuery(field.actionQuery as string);
     let csv: string;
@@ -542,7 +549,7 @@ const reorderEntitiesActionFunction = async (field: FormAction) => {
 
 const startOcrActionFunction = async (field: FormAction) => {
   try {
-    if (!await isFormValid()) return;
+    if (!(await isFormValid())) return;
     const { id, collection } = extractActionArguments(field.actionType);
     addEditableMetadataKeys(Object.keys(form.value.values.intialValues), id);
     const metadata = parseIntialValuesForFormSubmit(
@@ -570,11 +577,7 @@ const startOcrActionFunction = async (field: FormAction) => {
       return;
 
     const document = await getQuery(field.actionQuery as string);
-    await performOcrAction(
-      document,
-      id,
-      form.value.values
-    ).then(() => {
+    await performOcrAction(document, id, form.value.values).then(() => {
       createNotificationOverwrite(
         NotificationType.default,
         t("notifications.default.generate-ocr.title"),
@@ -627,7 +630,7 @@ const getUploadProgressSteps = (
 
 const resetVeeValidateForDynamicForm = (
   newQueryName: string,
-  oldQueryName: string | undefined,
+  oldQueryName: string | undefined
 ) => {
   resetForm();
   if (oldQueryName) deleteForm(oldQueryName);

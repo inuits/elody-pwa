@@ -70,7 +70,7 @@ const {
 const {
   initializeAction,
   initializeGeneralProperties,
-  initializePropertiesForDownload
+  initializePropertiesForDownload,
 } = useModalActions();
 const { initializeConfirmModal } = useConfirmModal();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
@@ -122,7 +122,7 @@ const openDeleteModal = () => {
       TypeModals.Delete,
       ModalStyle.Center,
       undefined,
-      deleteQueryOptions,
+      deleteQueryOptions
     );
   } else {
     initializeConfirmModal({
