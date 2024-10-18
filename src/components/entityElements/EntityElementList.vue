@@ -3,6 +3,7 @@
     <entity-element-wrapper
       data-test="entity-element-wrapper"
       v-if="showElementList"
+      class="mb-5"
       :class="[
         { 'pb-1': baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary },
       ]"
