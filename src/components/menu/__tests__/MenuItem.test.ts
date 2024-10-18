@@ -5,12 +5,6 @@ import { Entitytyping, MenuItem, DamsIcons } from "@/generated-types/queries";
 import { flushPromises } from "@vue/test-utils";
 import { ref } from "vue";
 
-vi.mock("vue-i18n", () => ({
-  useI18n: () => ({
-    t: (key: string) => key,
-  }),
-}));
-
 vi.mock("vue-router", () => ({
   useRoute: () => ({
     path: "/",

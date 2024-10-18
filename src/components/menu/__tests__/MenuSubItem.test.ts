@@ -4,12 +4,6 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { Entitytyping, MenuItem } from "@/generated-types/queries";
 import { flushPromises } from "@vue/test-utils";
 
-vi.mock("vue-i18n", () => ({
-  useI18n: () => ({
-    t: (key: string) => key,
-  }),
-}));
-
 vi.mock("vue-router", () => ({
   useRoute: () => ({
     path: "/",
