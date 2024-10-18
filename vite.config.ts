@@ -1,5 +1,6 @@
 import { fileURLToPath, URL } from "node:url";
-import { defineConfig } from "vite";
+import { defineConfig, mergeConfig } from "vite";
+import { defineConfig as defineVitestConfig } from "vitest/config";
 import vue from "@vitejs/plugin-vue";
 
 const parsePort = (port: string) => {
@@ -12,7 +13,7 @@ const cacheDir =
     : "../node_modules/.vite";
 
 // https://vitejs.dev/config/
-export default defineConfig({
+const viteConfig = defineConfig({
   plugins: [vue()],
   define: {
     __VUE_I18N_FULL_INSTALL__: true,
@@ -42,13 +43,16 @@ export default defineConfig({
       external: ["pdfjs-dist/types/src/display/api"],
     },
   },
-  // test: {
-  //   globals: true,
-  //   coverage: {
-  //     reporter: ["text", "html"],
-  //   },
-  // },
   optimizeDeps: {
     exclude: ["session-vue-3-oidc-library"],
   },
 });
+
+const vitestConfig = defineVitestConfig({
+  test: {
+    setupFiles: "./vitestSetup.ts",
+    environment: "jsdom",
+  },
+});
+
+export default mergeConfig(viteConfig, vitestConfig);
