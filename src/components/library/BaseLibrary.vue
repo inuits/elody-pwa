@@ -74,7 +74,7 @@
               class="mr-2"
               :class="['flex', { 'ml-4': enableAdvancedFilters }]"
             >
-              <BaseToggleGroup v-if="toggles.length > 1" :toggles="toggles" />
+              <BaseToggleGroup v-if="toggles.length >= 1" :toggles="toggles" />
             </div>
             <LibraryBar
               v-if="
@@ -179,6 +179,11 @@
               :entities="entities as Entity[]"
               :entities-loading="entitiesLoading"
             />
+            <ViewModesMap
+              v-if="displayMap"
+              :entities="entities as Entity[]"
+              :entities-loading="entitiesLoading"
+            />
           </div>
         </div>
 
@@ -235,6 +240,7 @@ import LibraryBar from "@/components/library/LibraryBar.vue";
 import useUpload from "@/composables/useUpload";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
+import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { formatTeaserMetadata, getEntityTitle } from "@/helpers";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
@@ -386,6 +392,7 @@ const {
 const displayList = ref<boolean>(false);
 const displayGrid = ref<boolean>(false);
 const displayPreview = ref<boolean>(props.enablePreview);
+const displayMap = ref<boolean>(false);
 
 const expandFilters = ref<boolean>(false);
 let toggles: ViewModes.type[] = [];
@@ -540,9 +547,10 @@ const initializeDeepRelations = async () => {
 const getDisplayPreferences = () => {
   const displayPreferences = getGlobalState("_displayPreferences");
   if (displayPreferences) {
-    if (!displayPreview.value && displayPreferences.grid)
+    if (displayPreferences.map) displayMap.value = true;
+    if (!displayPreview.value && displayPreferences.grid && !displayPreferences.map)
       displayGrid.value = displayPreferences.grid;
-    if (displayGrid.value === false && !displayPreview.value)
+    if (displayGrid.value === false && !displayPreview.value && !displayPreferences.map)
       displayList.value = true;
     expandFilters.value = !props.enableAdvancedFilters
       ? false
@@ -640,6 +648,12 @@ watch(
         iconOn: DamsIcons.Image,
         iconOff: DamsIcons.Image,
       });
+    if (viewModes.includes(ViewModesMap.__name))
+      toggles.push({
+        isOn: displayMap,
+        iconOn: DamsIcons.Map,
+        iconOff: DamsIcons.Map,
+      });
     getDisplayPreferences();
   }
 );
@@ -651,6 +665,7 @@ watch([displayGrid, expandFilters], () => {
   displayList.value = !displayGrid.value;
   updateGlobalState("_displayPreferences", {
     grid: displayPreview.value ? false : displayGrid.value,
+    map: displayMap.value,
     expandFilters: _expandFilters,
   });
 });
