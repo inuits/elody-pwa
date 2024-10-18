@@ -87,9 +87,7 @@ import {
   TypeModals,
 } from "@/generated-types/queries";
 import BaseModal from "@/components/base/BaseModal.vue";
-import {
-  useBaseModal,
-} from "@/composables/useBaseModal";
+import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import {
   BulkOperationsContextEnum,
@@ -115,10 +113,7 @@ const { initializeConfirmModal } = useConfirmModal();
 const { createNotificationOverwrite } = useNotification();
 const { getEnqueuedItems, dequeueAllItemsForBulkProcessing } =
   useBulkOperations();
-const {
-  getParentId,
-  getCallbackFunction,
-} = useModalActions();
+const { getParentId, getCallbackFunction } = useModalActions();
 
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);

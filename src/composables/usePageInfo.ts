@@ -43,7 +43,8 @@ export const usePageInfo = () => {
     updatePageInfo(to.meta.title as string);
     updatePageInfo(to.meta.uuid as string);
 
-    const parentRouteFrom = from.matched.length > 1 ? from.matched[1] : from.matched[0];
+    const parentRouteFrom =
+      from.matched.length > 1 ? from.matched[1] : from.matched[0];
     updatePreviousPageInfo(
       parentRouteFrom.name?.toString() || "",
       "parentRouteName"

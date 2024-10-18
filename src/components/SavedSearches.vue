@@ -167,18 +167,16 @@ const updateLabel = async () => {
 };
 
 const createNew = () => {
-  initializePropertiesForSavedSearch(
-    [
-      {
-        key: "applicableType",
-        value: props.entityType,
-      },
-      {
-        key: "filters",
-        value: getDeepCopy(props.activeFilters),
-      },
-    ]
-  )
+  initializePropertiesForSavedSearch([
+    {
+      key: "applicableType",
+      value: props.entityType,
+    },
+    {
+      key: "filters",
+      value: getDeepCopy(props.activeFilters),
+    },
+  ]);
   handleOpenModal();
 };
 

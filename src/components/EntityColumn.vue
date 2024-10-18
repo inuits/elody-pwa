@@ -17,7 +17,11 @@
 </template>
 <script lang="ts" setup>
 import { computed, watch } from "vue";
-import type { ColumnList, Column, Entitytyping } from "@/generated-types/queries";
+import type {
+  ColumnList,
+  Column,
+  Entitytyping,
+} from "@/generated-types/queries";
 import EntityElement from "./entityElements/EntityElement.vue";
 import { convertSizeToTailwind } from "@/helpers";
 import { useColumnResizeHelper } from "../composables/useResizeHelper";
