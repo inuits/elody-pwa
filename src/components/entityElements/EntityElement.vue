@@ -4,7 +4,7 @@
       v-for="(element, index) in elements"
       :key="index"
       :class="[
-        { 'mb-5': index + 1 != elements.length },
+        { 'mb-5': index + 1 != elements.length && element.__typename !== 'EntityListElement' },
         {
           'flex-1': !element.isCollapsed,
         },
