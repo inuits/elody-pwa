@@ -37,7 +37,7 @@ const props = withDefaults(
     contextMenuActions?: ContextMenuActions;
     entityId: string;
     entityType: Entitytyping;
-    parentEntityId?: string;
+    parentEntityId: string;
     relation?: object;
   }>(),
   {
@@ -51,7 +51,7 @@ const handleEmit = () => {
   emit("toggleLoading");
 };
 
-const { fetchPermissionsOfContextMenu } = usePermissions();
+const { fetchPermissionsOfContextMenu, setExtraVariables } = usePermissions();
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const availableContextMenuActions = ref<ContextMenuActions | undefined>(
   undefined
@@ -86,6 +86,10 @@ watch(
   () => props.contextMenuActions,
   async () => {
     if (props.contextMenuActions) {
+      setExtraVariables({
+        parentEntityId: props.parentEntityId,
+        childEntityId: props.entityId,
+      });
       await fetchPermissionsOfContextMenu(props.contextMenuActions);
       getAvailableContextMenuActions();
     }
