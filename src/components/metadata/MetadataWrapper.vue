@@ -225,6 +225,12 @@ const getValidationRules = (metadata: PanelMetaData): string => {
   if (metadata?.inputField?.validation?.value === ValidationRules.CustomValue)
     rules = metadata?.inputField?.validation?.customValue;
   else rules = metadata?.inputField?.validation?.value?.join("|") as string;
+  if (
+    (isRequiredRelationField.value || isOneOfRequiredRelationField.value) &&
+    !props.isEdit
+  ) {
+    return "required";
+  }
   if (isRequiredRelationField.value) {
     const relationType =
       metadata?.inputField?.validation?.has_required_relation?.relationType;
@@ -260,10 +266,17 @@ const veeValidateField = computed(() => {
     return `${ValidationFields.RelationMetadata}.${fieldKeyWithId.value}`;
   else if (
     (isRequiredRelationField.value || isOneOfRequiredRelationField.value) &&
-    props.isEdit
-  )
+    !props.isEdit
+  ) {
+    return `${ValidationFields.IntialValues}.${getKeyBasedOnInputField(
+      props.metadata
+    )}`;
+  } else if (
+    isRequiredRelationField.value ||
+    isOneOfRequiredRelationField.value
+  ) {
     return `${ValidationFields.RelationValues}.${props.metadata.inputField.relationType}`;
-  else if (props.metadata.inputField)
+  } else if (props.metadata.inputField)
     return `${ValidationFields.IntialValues}.${getKeyBasedOnInputField(
       props.metadata
     )}`;
