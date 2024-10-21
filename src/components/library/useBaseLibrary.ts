@@ -9,6 +9,7 @@ import {
   type GetEntitiesQueryVariables,
   GetEntityByIdDocument,
   type GetEntityByIdQueryVariables,
+  BaseLibraryModes,
 } from "@/generated-types/queries";
 import useEditMode from "@/composables/useEdit";
 import { createPlaceholderEntities } from "@/helpers";
@@ -17,7 +18,8 @@ import { useStateManagement } from "@/composables/useStateManagement";
 
 export const useBaseLibrary = (
   apolloClient: ApolloClient<any>,
-  shouldUseStateForRoute: boolean = true
+  shouldUseStateForRoute: boolean = true,
+  baseLibraryMode: BaseLibraryModes = BaseLibraryModes.NormalBaseLibrary
 ) => {
   let entityType: Entitytyping = Entitytyping.BaseEntity;
   let _route: RouteLocationNormalizedLoaded | undefined;
@@ -226,6 +228,8 @@ export const useBaseLibrary = (
     () => {
       if (entitiesLoading.value && _route?.name !== "SingleEntity") {
         let placeholderAmount = 20;
+        if (baseLibraryMode === BaseLibraryModes.BasicBaseLibrary)
+          placeholderAmount = 1;
         const entityCountOnPage = getStateForRoute(_route)?.entityCountOnPage;
         if (entityCountOnPage !== undefined)
           placeholderAmount = entityCountOnPage;

@@ -152,7 +152,7 @@
             <ViewModesList
               v-if="
                 displayList ||
-                (entitiesLoading && route?.name !== 'SingleEntity')
+                (entitiesLoading && (route?.name !== 'SingleEntity' || props.baseLibraryMode === BaseLibraryModes.BasicBaseLibrary))
               "
               :entities="entities as Entity[]"
               :entities-loading="entitiesLoading"
@@ -367,7 +367,8 @@ const {
   totalEntityCount,
 } = useBaseLibrary(
   apolloClient as ApolloClient<any>,
-  props.shouldUseStateForRoute
+  props.shouldUseStateForRoute,
+  props.baseLibraryMode
 );
 
 let filterMatcherMappingPromise: (entityType: Entitytyping) => Promise<void>;
