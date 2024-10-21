@@ -67,6 +67,8 @@ const normalizePermissions = (response: {
 
 const usePermissions = () => {
   const numberOfEntities = Object.keys(Entitytyping).length;
+  let parentEntityId: string | undefined = undefined;
+  let childEntityId: string | undefined = undefined;
 
   const can = (permission: Permission, entity: Entitytyping | undefined) => {
     if (ignorePermissions.value) return true;
@@ -93,11 +95,17 @@ const usePermissions = () => {
       return advancedPermissions[permission];
     }
 
+    const variables: { [key: string]: string } = {
+      permission,
+      ...(parentEntityId && { parentEntityId }),
+      ...(childEntityId && { childEntityId }),
+    };
+
     try {
       return apolloClient
         .query({
           query: GetAdvancedPermissionDocument,
-          variables: { permission },
+          variables,
           fetchPolicy: "no-cache",
           notifyOnNetworkStatusChange: true,
         })
@@ -111,6 +119,14 @@ const usePermissions = () => {
         `Error in usePermissions fetch advanced permissions function: ${e}`
       );
     }
+  };
+
+  const setExtraVariables = (variables?: {
+    parentEntityId?: string;
+    childEntityId: string;
+  }) => {
+    parentEntityId = variables?.parentEntityId;
+    childEntityId = variables?.childEntityId;
   };
 
   const fetchPermissionsForDropdownOptions = async (
@@ -180,6 +196,7 @@ const usePermissions = () => {
     fetchAdvancedPermission,
     fetchPermissionsForDropdownOptions,
     fetchPermissionsOfContextMenu,
+    setExtraVariables,
   };
 };
 
