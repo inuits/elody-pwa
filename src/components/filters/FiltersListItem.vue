@@ -56,8 +56,17 @@
         />
       </div>
       <div class="flex-grow">
+        <RangeMatcher
+          v-if="selectedMatcher && selectedMatcher.value === 'ContainsMatcher'"
+          :initialFrom="5"
+          :initialTill="21"
+          :min="0"
+          :max="24"
+          :step="1"
+        />
+
         <component
-          v-if="selectedMatcher"
+          v-if="selectedMatcher && selectedMatcher.value !== 'ContainsMatcher'"
           :is="matcherComponent"
           :filter="filter"
           :related-active-filter="relatedActiveFilter"
@@ -103,6 +112,7 @@ import { computed, markRaw, onMounted, ref, toRefs, watch } from "vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import isEqual from "lodash.isequal";
+import RangeMatcher from "./matchers/RangeMatcher.vue";
 
 enum Matchers {
   EXACT_MATCHER = "ExactMatcher",
