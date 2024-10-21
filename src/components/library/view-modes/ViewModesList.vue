@@ -64,7 +64,7 @@
       :is-disabled="isEntityDisabled(entity)"
       :relation="
         findRelation(
-          entity.uuid,
+          entity.id,
           relationType,
           props.parentEntityIdentifiers[0]
         )
