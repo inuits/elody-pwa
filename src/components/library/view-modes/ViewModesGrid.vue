@@ -16,18 +16,15 @@
         :key="item.key + '_preview'"
         :item-id="item.key"
         :bulk-operations-context="bulkOperationsContext"
-        :teaser-metadata="item.teaserMetadata"
+        :teaser-metadata="getTeaserMetadataInState(item.key) as Metadata[]"
         :thumb-icon="entitiesLoading ? undefined : getThumbnail(item)"
         :small="listItemRouteName === 'SingleMediafile'"
         :is-preview="true"
         :is-markable-as-to-be-deleted="parentEntityIdentifiers.length > 0"
         :relation="
-          relations?.find(
-            (relation) =>
-              relation.key === item.key && relation.type === relationType
-          )
+          findRelation(item.key, relationType, props.parentEntityIdentifiers[0])
         "
-        :relations="relations"
+        :relation-type="relationType"
         :has-selection="enableSelection"
       />
     </div>
@@ -128,7 +125,7 @@ const { mediafileSelectionState, updateSelectedEntityMediafile } =
   useEntityMediafileSelector();
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { getThumbnail } = useThumbnailHelper();
-const { getForm } = useFormHelper();
+const { getForm, getTeaserMetadataInState, findRelation } = useFormHelper();
 
 const entityId = computed(() => getEntityIdFromRoute() as string);
 const relations = computed<BaseRelationValuesInput[]>(
