@@ -55,7 +55,9 @@ export const useBulkOperations = () => {
   };
 
   const dequeueAllItemsForBulkProcessing = (context: Context) => {
-    items.value[context] = items.value[context]?.filter((item) => item.required);
+    items.value[context] = items.value[context]?.filter(
+      (item) => item.required
+    );
     triggerBulkSelectionEvent(context);
   };
 
