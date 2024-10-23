@@ -59,7 +59,8 @@ import {
 const { isEdit } = useEditMode();
 
 const emit = defineEmits(["update:modelValue"]);
-const { fetchPermissionsForDropdownOptions, setExtraVariables } = usePermissions();
+const { fetchPermissionsForDropdownOptions, setExtraVariables } =
+  usePermissions();
 
 const props = withDefaults(
   defineProps<{

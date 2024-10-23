@@ -153,7 +153,10 @@
             <ViewModesList
               v-if="
                 displayList ||
-                (entitiesLoading && (route?.name !== 'SingleEntity' || props.baseLibraryMode === BaseLibraryModes.BasicBaseLibrary))
+                (entitiesLoading &&
+                  (route?.name !== 'SingleEntity' ||
+                    props.baseLibraryMode ===
+                      BaseLibraryModes.BasicBaseLibrary))
               "
               :entities="entities as Entity[]"
               :entities-loading="entitiesLoading"

@@ -63,11 +63,7 @@
       "
       :is-disabled="isEntityDisabled(entity)"
       :relation="
-        findRelation(
-          entity.id,
-          relationType,
-          props.parentEntityIdentifiers[0]
-        )
+        findRelation(entity.id, relationType, props.parentEntityIdentifiers[0])
       "
       :relation-type="relationType"
       :has-selection="enableSelection"
