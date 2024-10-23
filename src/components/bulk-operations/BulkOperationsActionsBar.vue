@@ -111,6 +111,7 @@
           :options="bulkOperations"
           :items-selected="itemsSelected"
           :entity-type="entityType"
+          :parent-entity-id="parentEntityId"
         />
       </div>
     </div>
@@ -166,6 +167,7 @@ const props = withDefaults(
     customBulkOperations?: String | undefined;
     refetchEntities: Function;
     enableSelection?: boolean;
+    parentEntityId?: string | undefined;
   }>(),
   {
     totalItemsCount: 0,
@@ -173,6 +175,7 @@ const props = withDefaults(
     confirmSelectionButton: false,
     customBulkOperations: undefined,
     enableSelection: true,
+    parentEntityId: undefined,
   }
 );
 

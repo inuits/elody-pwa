@@ -118,6 +118,7 @@
               :custom-bulk-operations="customBulkOperations"
               :refetch-entities="refetchEntities"
               :enable-selection="enableSelection"
+              :parent-entity-id="props.parentEntityIdentifiers[0]"
               @custom-bulk-operations-promise="
                 (promise) => (customBulkOperationsPromise = promise)
               "

@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, onMounted, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import {
   DropdownOption,
@@ -59,8 +59,7 @@ import {
 const { isEdit } = useEditMode();
 
 const emit = defineEmits(["update:modelValue"]);
-const { fetchAdvancedPermission, fetchPermissionsForDropdownOptions } =
-  usePermissions();
+const { fetchPermissionsForDropdownOptions, setExtraVariables } = usePermissions();
 
 const props = withDefaults(
   defineProps<{
@@ -69,6 +68,7 @@ const props = withDefaults(
     isMainActionDisabled: boolean;
     itemsSelected?: boolean;
     entityType: Entitytyping;
+    parentEntityId?: string | undefined;
   }>(),
   {
     isMainActionDisabled: false,
@@ -144,6 +144,10 @@ const getAvailableOptions = () => {
 watch(
   () => props.options,
   async () => {
+    setExtraVariables({
+      parentEntityId: props.parentEntityId,
+      childEntityId: "",
+    });
     await fetchPermissionsForDropdownOptions(props.options);
     getAvailableOptions();
   },

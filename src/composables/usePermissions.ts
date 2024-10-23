@@ -89,9 +89,9 @@ const usePermissions = () => {
     }
   };
 
-  const fetchAdvancedPermission = (permissions: string[]) => {
+  const fetchAdvancedPermission = (permissions: string[], forceFetch: boolean = false) => {
     const permission = permissions[0];
-    if (permission in advancedPermissions) {
+    if (!forceFetch && permission in advancedPermissions) {
       return advancedPermissions[permission];
     }
 
@@ -151,7 +151,7 @@ const usePermissions = () => {
         return item.can && item.can.length > 0;
       })
       .map((item) => {
-        return fetchAdvancedPermission(item.can as string[]);
+        return fetchAdvancedPermission(item.can as string[], true);
       });
 
     await Promise.all(promises);
