@@ -24,7 +24,7 @@ import {
 } from "@/generated-types/queries";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import ContextMenuAction from "@/components/context-menu-actions/ContextMenuAction.vue";
-import { ref, watch, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import { Unicons } from "@/types";
 import {
@@ -82,18 +82,14 @@ const getAvailableContextMenuActions = () => {
   availableContextMenuActions.value = availableOptions;
 };
 
-watch(
-  () => props.contextMenuActions,
-  async () => {
-    if (props.contextMenuActions) {
-      setExtraVariables({
-        parentEntityId: props.parentEntityId,
-        childEntityId: props.entityId,
-      });
-      await fetchPermissionsOfContextMenu(props.contextMenuActions);
-      getAvailableContextMenuActions();
-    }
-  },
-  { immediate: true, deep: true }
-);
+onMounted(async () => {
+  if (props.contextMenuActions) {
+    setExtraVariables({
+      parentEntityId: props.parentEntityId,
+      childEntityId: props.entityId,
+    });
+    await fetchPermissionsOfContextMenu(props.contextMenuActions);
+    getAvailableContextMenuActions();
+  }
+});
 </script>
