@@ -7,29 +7,24 @@
   </div>
 </template>
 
-<script lang="ts">
-import { ref, watch, onBeforeMount, defineComponent, inject } from "vue";
-export default defineComponent({
-  name: "BaseTab",
-  setup() {
-    const index = ref(0);
-    const isActive = ref(false);
+<script lang="ts" setup>
+import { ref, watch, onBeforeMount, inject } from "vue";
 
-    const tabs: any = inject("TabsProvider");
+const index = ref(0);
+const isActive = ref(false);
 
-    watch(
-      () => tabs.selectedIndex,
-      () => {
-        isActive.value = index.value === tabs.selectedIndex;
-      }
-    );
+const tabs: any = inject("TabsProvider");
 
-    onBeforeMount(() => {
-      index.value = tabs.count;
-      tabs.count++;
-      isActive.value = index.value === tabs.selectedIndex;
-    });
-    return { index, isActive };
-  },
+watch(
+  () => tabs.selectedIndex,
+  () => {
+    isActive.value = index.value === tabs.selectedIndex;
+  }
+);
+
+onBeforeMount(() => {
+  index.value = tabs.count;
+  tabs.count++;
+  isActive.value = index.value === tabs.selectedIndex;
 });
 </script>

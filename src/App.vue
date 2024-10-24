@@ -15,7 +15,6 @@
       </div>
       <DynamicFormModal></DynamicFormModal>
       <DeleteModal></DeleteModal>
-      <search-saved-searches-modal />
       <SavedSearchesPickerModal />
       <CreateSavedSearchModal />
       <BulkoperationsModal v-if="route.name !== undefined" />

@@ -2,7 +2,11 @@
   <li
     data-cy="list-item"
     :class="[
-      'flex items-center gap-6 px-8 py-4 bg-neutral-white border border-neutral-light rounded cursor-pointer mb-2',
+      'bg-neutral-white border border-neutral-light rounded cursor-pointer list-none',
+      {
+        'flex items-center gap-6 px-8 py-4 mb-2': viewMode === 'list',
+      },
+      { 'gap-6 px-8 py-4 mb-2': viewMode === 'grid' },
       {
         'border-dashed border-2 !border-accent-normal':
           isPreview || isMarkedAsToBeDeleted,
@@ -14,16 +18,39 @@
     ]"
   >
     <div
-      class="flex items-center rounded-2xl p-2 bg-neutral-light"
+      v-if="viewMode === 'grid'"
+      class="flex justify-between items-center pb-2"
+    >
+      <BaseInputCheckbox
+        v-if="
+          baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
+          !isPreview &&
+          hasSelection &&
+          viewMode === 'grid'
+        "
+        :class="[{ invisible: isDisabled }, 'text-center']"
+        v-model="isChecked"
+        :item="{ id: itemId, teaserMetadata, type: itemType }"
+        :bulk-operations-context="bulkOperationsContext"
+        input-style="accentNormal"
+      />
+      <BaseContextMenuActions
+        :context-menu-actions="contextMenuActions"
+        :parent-entity-id="formId"
+        :entity-id="itemId"
+        :entity-type="itemType"
+        :relation="relation"
+        @toggle-loading="toggleLoading"
+      />
+    </div>
+    <div
+      :class="[
+        'flex items-center rounded-2xl p-2 bg-neutral-light',
+        { 'mb-4': viewMode === 'grid' },
+      ]"
       v-show="isEdit"
       v-if="onlyEditableTeaserMetadata.length > 0"
     >
-      <!--      <div class="pl-2">-->
-      <!--        <unicon-->
-      <!--          :name="Unicons.Bars.name"-->
-      <!--          class="h-5 w-5 text-neutral-700 rounded-sm outline-none shadow-sm self-center"-->
-      <!--        />-->
-      <!--      </div>-->
       <div v-if="!loading" class="w-16 pr-2">
         <div
           v-for="metadataItem in onlyEditableTeaserMetadata"
@@ -47,7 +74,8 @@
         v-if="
           baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
           !isPreview &&
-          hasSelection
+          hasSelection &&
+          viewMode === 'list'
         "
         :class="[{ invisible: isDisabled }, 'text-center']"
         v-model="isChecked"
@@ -58,13 +86,24 @@
     </div>
     <div
       v-if="canShowCopyRight() && media && !imageSrcError"
-      class="flex items-center"
+      :class="[
+        'flex items-center',
+        { 'justify-center mb-4': viewMode === 'grid' },
+      ]"
     >
       <ImageViewer
         v-if="canShowCopyRight() && media && !imageSrcError"
-        class="h-10 w-10 object-cover self-center outline-none"
+        :class="[
+          { 'h-10 w-10': viewMode === 'list' },
+          { 'h-48 w-48': viewMode === 'grid' },
+          'object-cover self-center outline-none',
+        ]"
         :url="
-          mediaIsLink ? media : `/api/iiif/3/${media}/square/100,/0/default.jpg`
+          mediaIsLink
+            ? media
+            : `/api/iiif/3/${media}/square/${
+                viewMode === 'list' ? 100 : 500
+              },/0/default.jpg`
         "
         @error="setNoImage()"
       />
@@ -76,22 +115,27 @@
         (!media && isMediaType)
       "
       :name="thumbIcon"
-      class="h-10 w-10 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
+      :class="[
+        { 'h-10 w-10': viewMode === 'list' },
+        { 'h-48 w-48': viewMode === 'grid' },
+        'text-neutral-700 rounded-sm outline-none shadow-sm self-center',
+      ]"
     />
 
-    <div v-if="!loading" class="flex items-center w-full">
+    <div
+      v-if="!loading"
+      :class="[
+        'w-full',
+        { 'flex items-center': viewMode === 'list' },
+        { '': viewMode === 'grid' },
+      ]"
+    >
       <div
         v-for="metadataItem in teaserMetadata.filter(
           (metadata) => !metadata.showOnlyInEditMode
         )"
         :key="metadataItem ? metadataItem.key : 'no-key'"
-        class="flex justify-start flex-col mx-2 break-words"
-        :class="{
-          'w-1/4': teaserMetadata.length >= 4,
-          'w-1/2': teaserMetadata.length == 3,
-          'w-1/3': teaserMetadata.length == 2,
-          'w-full': teaserMetadata.length == 1,
-        }"
+        :class="teaserMetadataStyle"
       >
         <metadata-wrapper
           :form-id="formId || 'listview'"
@@ -107,7 +151,11 @@
       <div class="bg-neutral-100 h-4 w-5/6 opacity-40"></div>
     </div>
 
-    <div v-if="isEdit && isMarkableAsToBeDeleted" @click.stop>
+    <div
+      v-if="isEdit && isMarkableAsToBeDeleted"
+      :class="[{ 'flex justify-end': viewMode === 'grid' }]"
+      @click.stop
+    >
       <BaseToggle
         v-model="isMarkedAsToBeDeleted"
         :icon-on="DamsIcons.CrossCircle"
@@ -117,7 +165,7 @@
     </div>
 
     <div
-      v-if="!isPreview && isEnableNavigation"
+      v-if="!isPreview && isEnableNavigation && viewMode !== 'grid'"
       class="flex flex-row"
       @click="() => emit('navigateTo')"
     >
@@ -128,14 +176,16 @@
         />
       </slot>
     </div>
-    <BaseContextMenuActions
-      :context-menu-actions="contextMenuActions"
-      :parent-entity-id="formId"
-      :entity-id="itemId"
-      :entity-type="itemType"
-      :relation="relation"
-      @toggle-loading="toggleLoading"
-    />
+    <div v-if="viewMode === 'list'">
+      <BaseContextMenuActions
+        :context-menu-actions="contextMenuActions"
+        :parent-entity-id="formId"
+        :entity-id="itemId"
+        :entity-type="itemType"
+        :relation="relation"
+        @toggle-loading="toggleLoading"
+      />
+    </div>
   </li>
   <template v-if="entityListElements">
     <div
@@ -169,7 +219,7 @@ import {
   type MetadataField,
   type WindowElementPanel,
 } from "@/generated-types/queries";
-import { stringIsUrl } from "@/helpers";
+import { setCssVariable, stringIsUrl } from "@/helpers";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
 import EntityElementWindowPanel from "@/components/EntityElementWindowPanel.vue";
@@ -177,7 +227,7 @@ import ImageViewer from "@/components/base/ImageViewer.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import useEditMode from "@/composables/useEdit";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { computed, ref, watch, onUpdated } from "vue";
+import { computed, ref, watch, onUpdated, onMounted, onUnmounted } from "vue";
 import { Unicons } from "@/types";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useFieldArray } from "vee-validate";
@@ -208,6 +258,7 @@ const props = withDefaults(
     isMediaType?: boolean;
     isEnableNavigation?: boolean;
     entityListElements?: EntityListElement[];
+    viewMode?: "list" | "grid";
   }>(),
   {
     contextMenuActions: undefined,
@@ -229,6 +280,7 @@ const props = withDefaults(
     isMediaType: false,
     isEnableNavigation: false,
     entityListElements: undefined,
+    viewMode: "list",
   }
 );
 
@@ -247,8 +299,27 @@ const loading = ref<boolean>(props.loading);
 const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
-
 const formId = computed(() => getEntityUuid());
+const teaserMetadataStyle = computed<string>(() => {
+  if (props.viewMode === "grid") return "w-full";
+  const amountOfTeaserMetadataItems: string | number =
+    props.teaserMetadata.length >= 4 ? "default" : props.teaserMetadata.length;
+
+  const baseListViewModeStyles: string =
+    "flex justify-start flex-col mx-2 break-words";
+
+  const listStylesBasedOnAmount = {
+    1: "w-full",
+    2: "w-1/3",
+    3: "w-1/2",
+    default: "w-1/4",
+  };
+
+  return baseListViewModeStyles.concat(
+    " ",
+    listStylesBasedOnAmount[amountOfTeaserMetadataItems]
+  );
+});
 
 const orderMetadataChild = ref(null);
 onUpdated(() => {
