@@ -26,10 +26,7 @@
         />
       </span>
     </div>
-    <div class="h-full" v-if="!useVshowInsteadOfVif && !isCollapsed">
-      <slot name="content"></slot>
-    </div>
-    <div class="h-full" v-if="useVshowInsteadOfVif" v-show="!isCollapsed">
+    <div class="h-full" v-show="!isCollapsed">
       <slot name="content"></slot>
     </div>
   </div>

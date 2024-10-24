@@ -153,6 +153,7 @@
             <ViewModesList
               v-if="
                 displayList ||
+                displayGrid ||
                 (entitiesLoading &&
                   (route?.name !== 'SingleEntity' ||
                     props.baseLibraryMode ===
@@ -171,19 +172,7 @@
               :base-library-mode="baseLibraryMode"
               :entity-list-elements="entityListElements"
               :allowed-actions-on-relations="allowedActionsOnRelations"
-            />
-            <ViewModesGrid
-              v-if="displayGrid"
-              :entities="entities as Entity[]"
-              :entities-loading="entitiesLoading"
-              :bulk-operations-context="bulkOperationsContext"
-              :list-item-route-name="listItemRouteName"
-              :disable-previews="disableNewEntityPreviews"
-              :enable-navigation="enableNavigation"
-              :parent-entity-identifiers="parentEntityIdentifiers"
-              :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
-              :relation-type="relationType"
-              :enable-selection="enableSelection"
+              :mode="displayGrid ? 'grid' : 'list'"
             />
             <ViewModesMedia
               v-if="displayPreview"
@@ -244,7 +233,6 @@ import EventBus from "@/EventBus";
 import FiltersBase from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import useUpload from "@/composables/useUpload";
-import ViewModesGrid from "@/components/library/view-modes/ViewModesGrid.vue";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
