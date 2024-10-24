@@ -26,11 +26,6 @@ import { Unicons } from "./types";
 import { useFormHelper } from "@/composables/useFormHelper";
 
 import OpenLayersMap from "vue3-openlayers";
-import {
-  Map,
-  Layers,
-  Sources,
-} from "vue3-openlayers";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
@@ -102,7 +97,6 @@ const start = async () => {
     .use(router)
     .use(auth)
     .use(OpenLayersMap)
-    .use(Layers)
     .use(head)
     .provide("config", config)
     .provide(DefaultApolloClient, apolloClient);
