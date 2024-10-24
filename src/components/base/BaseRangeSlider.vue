@@ -42,7 +42,7 @@
           <div v-if="unit">{{ unit }}</div>
         </div>
         <div v-if="hasFromInputError" class="text-red-default">
-          "From" cannot be greater than "to"
+          {{ $t("filters.rangeFilterFromInputError") }}
         </div>
       </div>
       <div class="flex flex-col">
@@ -61,7 +61,7 @@
           <div v-if="unit">{{ unit }}</div>
         </div>
         <div v-if="hasToInputError" class="text-red-default text-right">
-          "To" cannot be less than "from"
+          {{ $t("filters.rangeFilterToInputError") }}
         </div>
       </div>
     </div>
