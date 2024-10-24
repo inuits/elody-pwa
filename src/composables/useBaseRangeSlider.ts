@@ -47,6 +47,7 @@ export const useBaseRangeSlider = ({
     if (!Array.isArray(values)) return;
     from.value = values[0];
     to.value = values[1];
+    sliderValue.value = values;
 
     resetErrors();
   };
