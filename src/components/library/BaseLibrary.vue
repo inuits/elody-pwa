@@ -628,7 +628,7 @@ watch(
         iconOn: DamsIcons.ListUl,
         iconOff: DamsIcons.ListUl,
       });
-    if (viewModes.includes(ViewModesGrid.__name))
+    if (viewModes.includes("ViewModesGrid"))
       toggles.push({
         isOn: displayGrid,
         iconOn: DamsIcons.Apps,
