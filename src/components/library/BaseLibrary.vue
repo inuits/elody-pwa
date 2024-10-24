@@ -559,10 +559,9 @@ const initializeDeepRelations = async () => {
 const getDisplayPreferences = () => {
   const displayPreferences = getGlobalState("_displayPreferences");
   if (displayPreferences) {
-    if (displayPreferences.map) displayMap.value = true;
-    if (!displayPreview.value && displayPreferences.grid && !displayPreferences.map)
+    if (!displayPreview.value && displayPreferences.grid)
       displayGrid.value = displayPreferences.grid;
-    if (displayGrid.value === false && !displayPreview.value && !displayPreferences.map)
+    if (displayGrid.value === false && !displayPreview.value)
       displayList.value = true;
     expandFilters.value = !props.enableAdvancedFilters
       ? false
@@ -666,6 +665,7 @@ watch(
         iconOn: DamsIcons.Map,
         iconOff: DamsIcons.Map,
       });
+    else displayMap.value = false;
     getDisplayPreferences();
   }
 );
@@ -677,7 +677,6 @@ watch([displayGrid, expandFilters], () => {
   displayList.value = !displayGrid.value;
   updateGlobalState("_displayPreferences", {
     grid: displayPreview.value ? false : displayGrid.value,
-    map: displayMap.value,
     expandFilters: _expandFilters,
   });
 });
