@@ -108,7 +108,6 @@ const emitNewAdvancedFilterInput = () => {
       foreign_field: props.filter.advancedFilter.lookup.foreign_field,
       as: props.filter.advancedFilter.lookup.as,
     };
-  console.log(newAdvancedFilterInput);
   emit("newAdvancedFilterInput", newAdvancedFilterInput, force.value);
   force.value = false;
 };
