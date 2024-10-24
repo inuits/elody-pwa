@@ -132,6 +132,9 @@
           "
         />
       </div>
+      <div class="bg-gray-200 p-6">
+        <BaseRangeSlider :from="10" :to="24" :min="0" :max="40" />
+      </div>
     </div>
     <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
       <saved-searches
@@ -184,6 +187,7 @@ import {
   BulkOperationsContextEnum,
 } from "@/composables/useBulkOperations";
 import { useFiltersBase } from "@/composables/useFiltersBase";
+import BaseRangeSlider from "../base/BaseRangeSlider.vue";
 
 const props = withDefaults(
   defineProps<{
