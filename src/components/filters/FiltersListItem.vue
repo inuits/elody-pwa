@@ -40,7 +40,7 @@
   <div
     data-cy="filters-list-item-panel"
     v-show="isOpen"
-    class="flex flex-row gap-4 p-6 bg-neutral-light"
+    class="flex flex-col gap-4 p-6 bg-neutral-light"
   >
     <div class="flex w-full justify-start gap-4">
       <div>
@@ -55,25 +55,7 @@
           dropdown-style="default"
         />
       </div>
-      <div class="flex-grow">
-        <RangeMatcher
-          v-if="selectedMatcher && selectedMatcher.value === 'ContainsMatcher'"
-          :initialFrom="5"
-          :initialTill="21"
-          :min="0"
-          :max="24"
-          :step="1"
-        />
-
-        <component
-          v-if="selectedMatcher && selectedMatcher.value !== 'ContainsMatcher'"
-          :is="matcherComponent"
-          :filter="filter"
-          :related-active-filter="relatedActiveFilter"
-          @new-advanced-filter-input="(input: AdvancedFilterInput) => advancedFilterInput = input"
-          @filter-options="(options: string[]) => (filterOptions = options)"
-        />
-      </div>
+      <div class="flex-grow"></div>
       <BaseButtonNew
         class="!w-9 h-9"
         label=""
@@ -90,6 +72,14 @@
         "
       />
     </div>
+    <component
+      v-if="selectedMatcher"
+      :is="matcherComponent"
+      :filter="filter"
+      :related-active-filter="relatedActiveFilter"
+      @new-advanced-filter-input="(input: AdvancedFilterInput) => advancedFilterInput = input"
+      @filter-options="(options: string[]) => (filterOptions = options)"
+    />
   </div>
 </template>
 
@@ -112,7 +102,6 @@ import { computed, markRaw, onMounted, ref, toRefs, watch } from "vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import isEqual from "lodash.isequal";
-import RangeMatcher from "./matchers/RangeMatcher.vue";
 
 enum Matchers {
   EXACT_MATCHER = "ExactMatcher",

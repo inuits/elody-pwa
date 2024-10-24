@@ -1,64 +1,66 @@
 <template>
-  <div>
-    <span class="text-sm text-text-body">minimum</span>
-    <div
-      v-if="
-        Array.isArray(determineInputType) && determineInputType?.length === 2
-      "
-    >
-      <BaseInputTextNumberDatetime
-        class="mb-2"
-        v-model="min"
-        input-style="default"
-        :type="determineInputType[0]"
-        :placeholder="determinePlaceholder"
-      />
-      <BaseInputTextNumberDatetime
-        v-if="filter.advancedFilter.showTimeForDateFilter"
-        v-model="minTime"
-        input-style="default"
-        :type="determineInputType[1]"
-        :placeholder="determinePlaceholder"
-      />
+  <div class="flex flex-row justify-between gap-4">
+    <div class="w-1/2">
+      <span class="text-sm text-text-body">minimum</span>
+      <div
+        v-if="
+          Array.isArray(determineInputType) && determineInputType?.length === 2
+        "
+      >
+        <BaseInputTextNumberDatetime
+          class="mb-2"
+          v-model="min"
+          input-style="default"
+          :type="determineInputType[0]"
+          :placeholder="determinePlaceholder"
+        />
+        <BaseInputTextNumberDatetime
+          v-if="filter.advancedFilter.showTimeForDateFilter"
+          v-model="minTime"
+          input-style="default"
+          :type="determineInputType[1]"
+          :placeholder="determinePlaceholder"
+        />
+      </div>
+      <div v-else>
+        <BaseInputTextNumberDatetime
+          v-model="min"
+          input-style="default"
+          :type="determineInputType"
+          :placeholder="determinePlaceholder"
+        />
+      </div>
     </div>
-    <div v-else>
-      <BaseInputTextNumberDatetime
-        v-model="min"
-        input-style="default"
-        :type="determineInputType"
-        :placeholder="determinePlaceholder"
-      />
-    </div>
-  </div>
-  <div>
-    <span class="text-sm text-text-body">maximum</span>
-    <div
-      v-if="
-        Array.isArray(determineInputType) && determineInputType?.length === 2
-      "
-    >
-      <BaseInputTextNumberDatetime
-        class="mb-2"
-        v-model="max"
-        input-style="default"
-        :type="determineInputType[0]"
-        :placeholder="determinePlaceholder"
-      />
-      <BaseInputTextNumberDatetime
-        v-if="filter.advancedFilter.showTimeForDateFilter"
-        v-model="maxTime"
-        input-style="default"
-        :type="determineInputType[1]"
-        :placeholder="determinePlaceholder"
-      />
-    </div>
-    <div v-else>
-      <BaseInputTextNumberDatetime
-        v-model="max"
-        input-style="default"
-        :type="determineInputType"
-        :placeholder="determinePlaceholder"
-      />
+    <div class="w-1/2">
+      <span class="text-sm text-text-body">maximum</span>
+      <div
+        v-if="
+          Array.isArray(determineInputType) && determineInputType?.length === 2
+        "
+      >
+        <BaseInputTextNumberDatetime
+          class="mb-2"
+          v-model="max"
+          input-style="default"
+          :type="determineInputType[0]"
+          :placeholder="determinePlaceholder"
+        />
+        <BaseInputTextNumberDatetime
+          v-if="filter.advancedFilter.showTimeForDateFilter"
+          v-model="maxTime"
+          input-style="default"
+          :type="determineInputType[1]"
+          :placeholder="determinePlaceholder"
+        />
+      </div>
+      <div v-else>
+        <BaseInputTextNumberDatetime
+          v-model="max"
+          input-style="default"
+          :type="determineInputType"
+          :placeholder="determinePlaceholder"
+        />
+      </div>
     </div>
   </div>
 </template>
