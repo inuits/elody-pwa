@@ -33,6 +33,7 @@
     "@vue-leaflet/vue-leaflet": "^0.10.1",
     "@vue/apollo-composable": "^4.0.0-alpha.14",
     "@vueform/multiselect": "^2.6.3",
+    "@vueform/slider": "^2.1.10",
     "@vueuse/head": "^0.6.0",
     "apollo-upload-client": "^17.0.0",
     "c8": "^7.12.0",
