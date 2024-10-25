@@ -40,7 +40,7 @@
   <div
     data-cy="filters-list-item-panel"
     v-show="isOpen"
-    class="flex flex-row gap-4 p-6 bg-neutral-light"
+    class="flex flex-col gap-4 p-6 bg-neutral-light"
   >
     <div class="flex w-full justify-start gap-4">
       <div>
@@ -55,16 +55,7 @@
           dropdown-style="default"
         />
       </div>
-      <div class="flex-grow">
-        <component
-          v-if="selectedMatcher"
-          :is="matcherComponent"
-          :filter="filter"
-          :related-active-filter="relatedActiveFilter"
-          @new-advanced-filter-input="(input: AdvancedFilterInput) => advancedFilterInput = input"
-          @filter-options="(options: string[]) => (filterOptions = options)"
-        />
-      </div>
+      <div class="flex-grow"></div>
       <BaseButtonNew
         class="!w-9 h-9"
         label=""
@@ -81,6 +72,14 @@
         "
       />
     </div>
+    <component
+      v-if="selectedMatcher"
+      :is="matcherComponent"
+      :filter="filter"
+      :related-active-filter="relatedActiveFilter"
+      @new-advanced-filter-input="(input: AdvancedFilterInput) => advancedFilterInput = input"
+      @filter-options="(options: string[]) => (filterOptions = options)"
+    />
   </div>
 </template>
 

@@ -10,6 +10,8 @@
     v-model="inputValue"
     :type="type"
     :step="step"
+    :min="min"
+    :max="max"
     :disabled="disabled"
     :placeholder="placeholder"
     @change.stop
@@ -90,6 +92,8 @@ const props = withDefaults(
     inputStyle: InputStyle;
     type?: string;
     step?: number;
+    min?: number;
+    max?: number;
     disabled?: boolean;
     isValidPredicate?: Function;
     placeholder?: string;
