@@ -46,6 +46,7 @@
       title="heatmap"
       :blur="blur"
       :radius="radius"
+      :weight="heatmapWeight"
       :zIndex="1"
     >
       <ol-source-vector
@@ -97,25 +98,20 @@ contextMenuItems.value = [
 ];
 
 const features = computed(() => entities.value?.map((entity) => {
-  const [longitude, latitude] = entity.intialValues.location.split(",")
+  if (!entity.intialValues) return new Feature();
+
+  const [longitude, latitude] = entity.intialValues.location?.split(",");
   const feature = new Feature({
-    geometry: new Point(geoToMercator(longitude, latitude))
+    geometry: new Point(geoToMercator(longitude, latitude)),
+    weight: entity.intialValues.damageSeverity
   });
-  const style = new Style({
-    image: new Circle({
-      radius: entity.intialValues.damageSeverity,
-      fill: new Fill({
-        color: 'rgba(255, 0, 0, 0.5)'
-      }),
-      stroke: new Stroke({
-        color: 'rgba(0, 0, 0, 1)',
-        width: 1
-      })
-    })
-  });
-  feature.setStyle(style);
   return feature;
 }));
+
+const heatmapWeight = function (feature) {
+  const weight = feature.get("weight");
+  return weight / 100;
+};
 
 function geoToMercator(lat, lon) {
   var r_major = 6378137.000;
