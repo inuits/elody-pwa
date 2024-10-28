@@ -49,7 +49,7 @@ export const useBulkOperations = () => {
   };
 
   const dequeueItemForBulkProcessing = (context: Context, itemId: string) => {
-    items.value[context] = items.value[context].filter(
+    items.value[context] = items.value[context]?.filter(
       (item) => item.id != itemId
     );
   };
