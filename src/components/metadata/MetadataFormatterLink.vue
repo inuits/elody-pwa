@@ -1,11 +1,11 @@
 <template>
-  <a class="text-sm break-words underline" target="_blank" :href="link">{{
+  <a class="text-sm break-words underline" :href="link">{{
     label
   }}</a>
 </template>
 
 <script lang="ts" setup>
-const props = defineProps<{
+defineProps<{
   label: string;
   link: string;
 }>();
