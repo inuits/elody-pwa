@@ -23,13 +23,22 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import { useAuth } from "session-vue-3-oidc-library";
+import { onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { RouteNames } from "@/generated-types/queries";
+
 const auth = useAuth();
 const { t } = useI18n();
+const router = useRouter();
 
 const logIn = () => {
   auth.changeRedirectRoute(window.location.origin);
   auth.redirectToLogin();
 };
+
+onMounted(() => {
+  if (auth.isAuthenticated.value) router.push({ name: RouteNames.Home });
+})
 </script>
 
 <style scoped></style>
