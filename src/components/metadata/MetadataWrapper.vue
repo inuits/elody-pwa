@@ -262,6 +262,10 @@ const label = computed(() =>
 );
 
 const veeValidateField = computed(() => {
+  if (!props.metadata?.inputField) {
+    const key = fieldKeyWithId.value || props.metadata.key;
+    return `${ValidationFields.IntialValues}.${key}`;
+  }
   if (isMetadataOnRelation.value)
     return `${ValidationFields.RelationMetadata}.${fieldKeyWithId.value}`;
   else if (
