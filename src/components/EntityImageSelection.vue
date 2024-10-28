@@ -7,7 +7,7 @@
     <div
       class="flex flex-col w-full h-full items-center bg-neutral-0 border-neutral-30 border-solid border-2 rounded-t-md"
     >
-      <div class="w-full h-full px-2">
+      <div class="w-full h-full px-2 max-h-[62vh] flex flex-col">
         <div class="flex items-center justify-between w-full my-1">
           <h3 class="subtitle text-text-body">Media</h3>
           <div
@@ -25,7 +25,7 @@
         <transition>
           <div
             v-if="!isCollapsed"
-            class="flex flex-col w-full max-h-[59vh] items-center mt-2 overflow-y-auto"
+            class="flex flex-col w-full items-center my-2 overflow-y-auto"
           >
             <div
               v-for="mediafile in mediafileSelectionState.mediafiles"
