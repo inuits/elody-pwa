@@ -61,6 +61,7 @@ import {
   TypeModals,
   Entitytyping,
   ModalStyle,
+  type SavedSearch,
 } from "@/generated-types/queries";
 import {
   useSaveSearchHepler,
@@ -111,6 +112,8 @@ const {
   getLastUsedFiltersForRoute,
   getLastUsedFilterForRoute,
   removeFilterFromStateForRoute,
+  addNewSavedFilterToLastUsedFiltersForRoute,
+  normalizeSavedSearchFromEntity,
 } = useSaveSearchHepler();
 const { setEntityType } = useQueryVariablesFactory();
 
@@ -152,7 +155,14 @@ const handleOpenModal = (context: any = undefined) => {
 const saveChanges = async () => {
   if (!selectedFilter.value) return;
   const savedFilter = await fetchSavedSearchById(selectedFilter.value.id);
-  await saveExistedSearch(savedFilter, props.activeFilters);
+  const updatedSearch = await saveExistedSearch(
+    savedFilter,
+    props.activeFilters
+  );
+  addNewSavedFilterToLastUsedFiltersForRoute(
+    props.route,
+    normalizeSavedSearchFromEntity(updatedSearch as SavedSearch)
+  );
   createNotificationOverwrite(
     NotificationType.default,
     t("notifications.success.entityUpdated.title"),
