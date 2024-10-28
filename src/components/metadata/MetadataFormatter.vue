@@ -1,20 +1,23 @@
 <template>
   <MetadataFormatterLink
-    v-if="formatterType === CustomFormatterTypes.Link"
+    v-if="formatterType === CustomFormatterTypes.Link && label"
     :formatter="formatter"
     :label="readableLabel"
     :link="link"
   />
   <MetadataFormatterPill
-    v-if="formatterType === CustomFormatterTypes.Pill"
+    v-if="formatterType === CustomFormatterTypes.Pill && label"
     :formatter="formatter"
     :label="readableLabel"
   />
   <MetadataRegexpFormatter
-    v-if="formatterType === CustomFormatterTypes.RegexpMatch"
+    v-if="formatterType === CustomFormatterTypes.RegexpMatch && label"
     :formatter="formatter"
     :label="readableLabel"
   />
+  <label v-if="!label">
+    {{ readableLabel }}
+  </label>
 </template>
 
 <script lang="ts" setup>
