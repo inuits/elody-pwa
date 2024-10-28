@@ -273,7 +273,7 @@ const customBulkOperationsPromise = async () => {
 };
 
 onMounted(() => {
-  if (entityType.value && !props.confirmSelectionButton) refetchEnabled.value = true;
+  if (entityType.value && !props.customBulkOperations) refetchEnabled.value = true;
   refetch();
 });
 
