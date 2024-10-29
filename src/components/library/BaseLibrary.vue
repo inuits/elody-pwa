@@ -144,7 +144,6 @@
           <div
             data-cy="base-library-grid-container"
             id="gridContainer"
-            class="h-screen"
             :class="[
               { 'w-[67%]': expandFilters && toggles.length <= 1 },
               { 'w-[69.75%]': expandFilters && toggles.length > 1 },
