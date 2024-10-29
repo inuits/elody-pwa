@@ -1,36 +1,9 @@
 <template>
-  <form>
-    <fieldset>
-      <label for="blur">Blur</label>
-      <input
-        type="range"
-        id="blur"
-        min="0"
-        max="100"
-        step="1"
-        v-model.number="blur"
-      />
-      <span class="description">{{ blur }}</span>
-    </fieldset>
-    <fieldset>
-      <label for="radius">Radius</label>
-      <input
-        type="range"
-        id="radius"
-        min="0"
-        max="100"
-        step="1"
-        v-model.number="radius"
-      />
-      <span class="description">{{ radius }}</span>
-    </fieldset>
-  </form>
-
   <ol-map
     ref="map"
     :loadTilesWhileAnimating="true"
     :loadTilesWhileInteracting="true"
-    style="height: 75%"
+    style="height: 65vh"
   >
     <ol-view
       ref="view"
@@ -84,13 +57,9 @@ const props = defineProps<{
 const view = ref<View | null>(null);
 const contextMenuItems = ref<Item[]>([]);
 
-const {
-  entities,
-  center,
-  zoom,
-  blur,
-  radius
-} = toRefs(props);
+const { entities } = toRefs(props);
+const zoom = ref(props.zoom)
+const center = ref(props.center)
 
 const features = computed(() => entities.value?.map((entity) => {
   const mapData = entity.mapComponent;
