@@ -47,7 +47,6 @@ import { geoToMercator } from "@/helpers";
 
 const props = defineProps<{
   entities: Entity[];
-  entitiesLoading: boolean;
   center: String;
   zoom: number;
   blur: number;
