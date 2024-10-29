@@ -184,6 +184,10 @@
               v-if="displayMap"
               :entities="entities as Entity[]"
               :entities-loading="entitiesLoading"
+              :center="entities[0]?.mapComponent?.center"
+              :zoom="entities[0]?.mapComponent?.zoom"
+              :blur="entities[0]?.mapComponent?.blur"
+              :radius="entities[0]?.mapComponent?.radius"
             />
           </div>
         </div>
