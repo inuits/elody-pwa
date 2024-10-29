@@ -70,21 +70,36 @@ import { ref, computed, toRefs } from "vue";
 import { type View, type Item } from "vue3-openlayers";
 import { Feature } from 'ol';
 import { Point } from 'ol/geom';
-import { Style, Circle, Fill, Stroke } from 'ol/style';
+import { geoToMercator } from "@/helpers";
 
 const props = defineProps<{
   entities: Entity[];
   entitiesLoading: boolean;
+  center: String;
+  zoom: number;
+  blur: number;
+  radius: number;
 }>();
 
-const { entities } = toRefs(props);
-
-const zoom = ref(13);
-const center = ref([414540.728945848, 6630846.409094376]);
-const contextMenuItems = ref<Item[]>([]);
 const view = ref<View | null>(null);
-const blur = ref(20);
-const radius = ref(20);
+const contextMenuItems = ref<Item[]>([]);
+
+const {
+  entities,
+  center,
+  zoom,
+  blur,
+  radius
+} = toRefs(props);
+
+const features = computed(() => entities.value?.map((entity) => {
+  const mapData = entity.mapComponent;
+  if (!mapData) return new Feature();
+  return new Feature({
+    geometry: new Point(geoToMercator(mapData.coordinateX.value, mapData.coordinateY.value)),
+    weight: mapData.weight.value
+  });
+}));
 
 contextMenuItems.value = [
   {
@@ -97,30 +112,10 @@ contextMenuItems.value = [
   "-",
 ];
 
-const features = computed(() => entities.value?.map((entity) => {
-  if (!entity.intialValues) return new Feature();
-
-  const [longitude, latitude] = entity.intialValues.location?.split(",");
-  const feature = new Feature({
-    geometry: new Point(geoToMercator(longitude, latitude)),
-    weight: entity.intialValues.damageSeverity
-  });
-  return feature;
-}));
-
 const heatmapWeight = function (feature) {
   const weight = feature.get("weight");
   return weight / 100;
 };
-
-function geoToMercator(lat, lon) {
-  var r_major = 6378137.000;
-  var x = r_major * (lon * Math.PI / 180);
-  var scale = x / lon;
-  var y = 180.0 / Math.PI * Math.log(Math.tan(Math.PI / 4.0 + lat * (Math.PI / 180.0) / 2.0)) * scale;
-  return [x, y];
-}
-
 </script>
 
 <style scoped>
