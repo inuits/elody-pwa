@@ -530,3 +530,11 @@ export const getTitleOrNameFromEntity = (entity: Entity): string => {
     entity.intialValues.id
   );
 };
+
+export const geoToMercator = (lat, lon): [number, number] => {
+  var r_major = 6378137.000;
+  var x = r_major * (lon * Math.PI / 180);
+  var scale = x / lon;
+  var y = 180.0 / Math.PI * Math.log(Math.tan(Math.PI / 4.0 + lat * (Math.PI / 180.0) / 2.0)) * scale;
+  return [x, y];
+}
