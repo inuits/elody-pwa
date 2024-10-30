@@ -136,6 +136,7 @@
         )"
         :key="metadataItem ? metadataItem.key : 'no-key'"
         :class="teaserMetadataStyle"
+        :style="metadataItem.width ? { width: metadataItem.width } : ''"
       >
         <metadata-wrapper
           :form-id="formId || 'listview'"
@@ -219,7 +220,7 @@ import {
   type MetadataField,
   type WindowElementPanel,
 } from "@/generated-types/queries";
-import { setCssVariable, stringIsUrl } from "@/helpers";
+import { stringIsUrl } from "@/helpers";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
 import EntityElementWindowPanel from "@/components/EntityElementWindowPanel.vue";
@@ -227,7 +228,7 @@ import ImageViewer from "@/components/base/ImageViewer.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import useEditMode from "@/composables/useEdit";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { computed, ref, watch, onUpdated, onMounted, onUnmounted } from "vue";
+import { computed, ref, watch, onUpdated } from "vue";
 import { Unicons } from "@/types";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useFieldArray } from "vee-validate";
