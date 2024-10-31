@@ -7,8 +7,8 @@
   >
     <ol-view
       ref="view"
-      :zoom="getBasicMapProperties(entities).zoom"
-      :center="getBasicMapProperties(entities).center"
+      :zoom="getBasicMapProperties(config).zoom"
+      :center="getBasicMapProperties(config).center"
     />
 
     <ol-tile-layer>
@@ -17,8 +17,8 @@
 
     <ol-heatmap-layer
       title="heatmap"
-      :blur="getBasicMapProperties(entities).blur"
-      :radius="getBasicMapProperties(entities).radius"
+      :blur="getBasicMapProperties(config).blur"
+      :radius="getBasicMapProperties(config).radius"
       :weight="heatmapWeight"
       :zIndex="1"
     >
@@ -44,9 +44,10 @@ import { type View, type Item } from "vue3-openlayers";
 import { Feature } from 'ol';
 import { Point } from 'ol/geom';
 import { useMaps } from "@/composables/useMaps";
-import type { Entity } from "@/generated-types/queries";
+import { ConfigItem, Entity } from "@/generated-types/queries";
 
 const props = defineProps<{
+  config: ConfigItem[]
   entities: Entity[];
 }>();
 

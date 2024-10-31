@@ -1,23 +1,12 @@
-import type {
-  Entity,
-  MapComponent
-} from "@/generated-types/queries";
-
+import { type ConfigItem } from "@/generated-types/queries";
 
 export const useMaps = () => {
-  const getMapType = (entities: Entity[]) => {
-    if (!entities || !entities[0].mapComponent) return;
-    return entities[0].mapComponent.mapType;
-  }
-
-  const getBasicMapProperties = (entities: Entity[]) => {
-    const mapComponent: MapComponent = entities[0]?.mapComponent;
-    return {
-      zoom: mapComponent.zoom,
-      center: mapComponent.center,
-      blur: mapComponent.blur,
-      radius: mapComponent.radius
-    };
+  const getBasicMapProperties = (config: ConfigItem[]) => {
+    if (!config) return [];
+    return config.reduce((resultObject: any, configItem: ConfigItem) => {
+      resultObject[configItem.key] = configItem.value;
+      return resultObject;
+    }, {}) || [];
   }
 
   // This function will map coordinates following the normal longitude latitude projection (-180, 180) to the Mercator projection
@@ -30,7 +19,6 @@ export const useMaps = () => {
   }
 
   return {
-    getMapType,
     getBasicMapProperties,
     geoToMercator
   };
