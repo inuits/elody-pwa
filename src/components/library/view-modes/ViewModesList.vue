@@ -99,6 +99,7 @@ import {
   EntityListElement,
   BaseLibraryModes,
   RelationActions,
+  ConfigItem
 } from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
@@ -111,7 +112,6 @@ import {
 } from "@/helpers";
 import { computed, onMounted, onUnmounted } from "vue";
 import { OrderItem } from "@/composables/useOrderListItems";
-import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
 import EventBus from "@/EventBus";
 import { useLibraryBar } from "@/composables/useLibraryBar";
@@ -132,6 +132,7 @@ const props = withDefaults(
     entityListElements?: EntityListElement[];
     allowedActionsOnRelations?: RelationActions[];
     mode: "list" | "grid";
+    config: ConfigItem[];
   }>(),
   {
     disablePreviews: false,

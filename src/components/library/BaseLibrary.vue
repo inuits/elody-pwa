@@ -169,15 +169,18 @@
               :entity-list-elements="entityListElements"
               :allowed-actions-on-relations="allowedActionsOnRelations"
               :mode="displayGrid ? 'grid' : 'list'"
+              :config="configPerViewMode[displayList ? ViewModes.ViewModesList : displayGrid ?? ViewModes.ViewModesGrid]"
             />
             <ViewModesMedia
               v-if="displayPreview"
               :entities="entities as Entity[]"
               :entities-loading="entitiesLoading"
+              :config="configPerViewMode[ViewModes.ViewModesMedia]"
             />
             <ViewModesMap
               v-if="displayMap"
               :entities="entities as Entity[]"
+              :config="configPerViewMode[ViewModes.ViewModesMap]"
             />
           </div>
         </div>
@@ -201,7 +204,6 @@
 
 <script lang="ts" setup>
 import type { ApolloClient } from "@apollo/client/core";
-import type { ViewModes } from "@/generated-types/type-defs";
 import {
   type AdvancedFilterInput,
   BaseLibraryModes,
@@ -211,8 +213,8 @@ import {
   type EntityListElement,
   FetchDeepRelations,
   RelationActions,
-} from "@/generated-types/queries";
-import {
+  ViewModesWithConfig,
+  ViewModes,
   type BaseEntity,
   ContextMenuGeneralActionEnum,
   DamsIcons,
@@ -567,6 +569,13 @@ const initializeEntityPickerComponent = () => {
   setCustomGetEntitiesFiltersQuery(props.customQueryEntityPickerListFilters);
 };
 
+const configPerViewMode = computed(() => {
+  return entities.value[0].allowedViewModes?.viewModes?.reduce((resultObject: any, viewModeWithConfig: ViewModesWithConfig) => {
+    resultObject[viewModeWithConfig.viewMode] = viewModeWithConfig.config;
+    return resultObject;
+  }, {}) || [];
+});
+
 onMounted(async () => {
   if (props.fetchDeepRelations) await initializeDeepRelations();
   else await initializeBaseLibrary();
@@ -623,7 +632,7 @@ watch(
       !entities.value[0]?.allowedViewModes
     )
       return;
-    const viewModes: any[] = entities.value[0].allowedViewModes.viewModes;
+    const viewModes: any[] = entities.value[0].allowedViewModes.viewModes.map((viewModeWithConfig: ViewModesWithConfig) => viewModeWithConfig.viewMode);
     if (viewModes.includes(ViewModesList.__name))
       toggles.unshift({
         isOn: displayList,
