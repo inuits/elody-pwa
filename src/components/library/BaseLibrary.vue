@@ -178,10 +178,6 @@
             <ViewModesMap
               v-if="displayMap"
               :entities="entities as Entity[]"
-              :center="entities[0]?.mapComponent?.center"
-              :zoom="entities[0]?.mapComponent?.zoom"
-              :blur="entities[0]?.mapComponent?.blur"
-              :radius="entities[0]?.mapComponent?.radius"
             />
           </div>
         </div>
