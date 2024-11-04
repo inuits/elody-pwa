@@ -28,13 +28,14 @@ import type {
   Entitytyping,
   AdvancedFilterInput,
 } from "@/generated-types/queries";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import { getEntityIdFromRoute } from "@/helpers";
 import { useManageEntities } from "@/composables/useManageEntities";
+import isEqual from "lodash.isequal";
 
 const props = withDefaults(
   defineProps<{
@@ -45,6 +46,7 @@ const props = withDefaults(
     advancedFilterInputForSearchingOptions: AdvancedFilterInput;
     relationType: string;
     fromRelationType: string;
+    dependsOn: string;
     mode: "edit" | "create";
     formId: string;
     autoSelectable: boolean;
@@ -75,12 +77,14 @@ const {
   entityDropdownOptions,
   entitiesLoading,
   getAutocompleteOptions,
+  getFormWithRelationFieldCheck,
 } = useGetDropdownOptions(
   props.metadataKeyToGetOptionsFor as Entitytyping,
   "fetchAll",
   undefined,
   props.advancedFilterInputForSearchingOptions,
-  props.advancedFilterInputForRetrievingOptions
+  props.advancedFilterInputForRetrievingOptions,
+  props.formId
 );
 
 const {
@@ -199,4 +203,34 @@ const preSelect = () => {
   else selection = [{ label: props.modelValue || "", value: props.modelValue }];
   handleSelect(selection, true);
 };
+
+const dependentRelationValues = computed(() => {
+  if (!props.dependsOn || props.disabled) return null;
+
+  const form = getFormWithRelationFieldCheck(props.formId, props.dependsOn);
+  return form ? form.values.relationValues[props.dependsOn] : null;
+});
+
+watch(
+  () => dependentRelationValues.value,
+  (newValue: any, oldValue: any) => {
+    if (!Array.isArray(newValue) || !Array.isArray(oldValue)) return;
+
+    if (!Array.isArray(newValue) || !Array.isArray(oldValue)) return;
+
+    const hasNoUpdates = isEqual(
+      newValue
+        .flatMap((item: { editStatus?: string }) => item.editStatus)
+        .filter(Boolean),
+      oldValue
+        .flatMap((item: { editStatus?: string }) => item.editStatus)
+        .filter(Boolean)
+    );
+    if (hasNoUpdates) return;
+
+    handleSelect([]);
+    getAutocompleteOptions("");
+  },
+  { deep: true }
+);
 </script>
