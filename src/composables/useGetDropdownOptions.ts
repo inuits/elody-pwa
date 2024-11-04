@@ -189,7 +189,7 @@ export const useGetDropdownOptions = (
   };
 
   const findNewRelationValue = (
-    relations: { editStatus: string; key: string }[]
+    relations: { editStatus?: string; key: string }[]
   ) => {
     return (
       relations.find((item) => item.editStatus === EditStatus.New)?.key || null
@@ -202,5 +202,8 @@ export const useGetDropdownOptions = (
     entitiesLoading,
     entityDropdownOptions,
     getFormWithRelationFieldCheck,
+    getVariableValueForFilter,
+    hasNewRelations,
+    findNewRelationValue,
   };
 };
