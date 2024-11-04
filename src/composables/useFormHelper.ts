@@ -95,6 +95,10 @@ const useFormHelper = () => {
       ValidationRules.HasOneOfRequiredRelations,
       getHasOneOfSpecificRelationsRule
     );
+    defineRule(
+      ValidationRules.HasOneOfRequiredMetadata,
+      getHasOneOfSpecificMetadataRule
+    );
   };
 
   const getHasSpecificRelationRule = (
@@ -139,6 +143,20 @@ const useFormHelper = () => {
       });
     }
     return isValid;
+  };
+
+  const getHasOneOfSpecificMetadataRule = (
+    value: BaseRelationValuesInput[],
+    parameters: string[],
+    ctx: any
+  ) => {
+    const intialValues = ctx.form.intialValues;
+    const [amount = 1, ...includedMetadataFields] = parameters[0].split(":");
+    let filledInMetadataFields = 0;
+    includedMetadataFields.forEach(async (metadataField: string) => {
+      filledInMetadataFields += intialValues[metadataField]?.length ? 1 : 0;
+    });
+    return filledInMetadataFields >= Number(amount);
   };
 
   const __isNotEmpty = (str: any) => str.trim() !== "";

@@ -11,10 +11,16 @@
         {{ metadata.label ? t(metadata.label) : t("metadata.no-label") }}
       </p>
       <p
-        v-if="props.metadata?.inputField && !isFieldRequired && isEdit"
+        v-if="props.metadata?.inputField && isEdit && (isOneOfRequiredMetadataField || isOneOfRequiredRelationField)"
         class="pl-1"
       >
-        (optional)
+        ( {{ t('metadata.labels.one-of-required') }} )
+      </p>
+      <p
+        v-else-if="props.metadata?.inputField && !isFieldRequired && isEdit"
+        class="pl-1"
+      >
+        ( {{ t('metadata.labels.optional') }} )
       </p>
     </div>
     <entity-element-metadata-edit
@@ -198,6 +204,11 @@ const isOneOfRequiredRelationField = computed(() => {
     ValidationRules.HasOneOfRequiredRelations
   );
 });
+const isOneOfRequiredMetadataField = computed(() => {
+  return !!props.metadata?.inputField?.validation?.value?.includes(
+    ValidationRules.HasOneOfRequiredMetadata
+  );
+});
 
 const isFieldRequired = computed(() => {
   if (
@@ -245,6 +256,15 @@ const getValidationRules = (metadata: PanelMetaData): string => {
       );
     const amount =
       metadata?.inputField?.validation?.has_one_of_required_relations?.amount;
+    return `${rules}:${amount}:${relationTypes}`;
+  }
+  if (isOneOfRequiredMetadataField.value) {
+    const relationTypes =
+      metadata?.inputField?.validation?.has_one_of_required_metadata?.includedMetadataFields.join(
+        ":"
+      );
+    const amount =
+      metadata?.inputField?.validation?.has_one_of_required_metadata?.amount;
     return `${rules}:${amount}:${relationTypes}`;
   }
   if (isFieldRequired.value)
