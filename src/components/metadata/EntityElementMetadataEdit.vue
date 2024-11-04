@@ -30,6 +30,7 @@
       :metadataKeyToCreateEntityFromOption="
         field.metadataKeyToCreateEntityFromOption
       "
+      :depends-on="field.dependsOn"
     />
     <BaseDropdownNew
       v-else-if="field.type === InputFieldTypes.Dropdown"
