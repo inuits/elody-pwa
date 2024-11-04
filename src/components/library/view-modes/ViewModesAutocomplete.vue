@@ -69,7 +69,7 @@ const props = withDefaults(
 
 const isCreatingEntity = ref<boolean>(false);
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
-const { replaceRelationsFromSameType, addRelations, getForm } = useFormHelper();
+const { replaceRelationsFromSameType, addRelations } = useFormHelper();
 const entityId = getEntityIdFromRoute();
 const { createEntity } = useManageEntities();
 const {
