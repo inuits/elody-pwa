@@ -61,7 +61,14 @@
 </template>
 
 <script lang="ts" setup>
-import type { Conditional, DropdownOption } from "@/generated-types/queries";
+import {
+  Conditional,
+  DropdownOption,
+  EditStatus,
+  Entitytyping,
+  HiddenField
+} from "@/generated-types/queries";
+import { useAuth } from "session-vue-3-oidc-library";
 import {
   InputFieldTypes,
   type BaseRelationValuesInput,
@@ -78,11 +85,13 @@ import { useI18n } from "vue-i18n";
 
 const emit = defineEmits(["update:value", "registerEnterPressed:value"]);
 const { t } = useI18n();
+const auth = useAuth();
 
 const props = defineProps<{
   fieldKey: string;
   label: string;
   value: string;
+  hiddenField?: HiddenField;
   field: InputFieldType;
   formId: string;
   unit?: string;
@@ -96,6 +105,8 @@ const props = defineProps<{
 const { addEditableMetadataKeys } = useFormHelper();
 const metadataValue = ref<string | DropdownOption>(props.value);
 const { conditionalFieldIsAvailable } = useConditionalValidation();
+
+const isFieldHidden = computed(() => props.hiddenField?.hidden);
 const fieldEditIsDisabled = computed(() => {
   if (
     props.field.type === InputFieldTypes.Dropdown &&
@@ -130,6 +141,25 @@ const getValueFromMetadata = (): string | BaseRelationValuesInput[] => {
   return metadataValue.value.value;
 };
 
+const getIdForHiddenFieldFilter = (): any => {
+  if (props.field.advancedFilterInputForSearchingOptions.item_types[0] === Entitytyping.User && props.hiddenField.searchValueForFilter === "email") {
+    return auth.user.email;
+  }
+}
+
+const populateHiddenField = (): BaseRelationValuesInput[] | undefined => {
+  if (props.field.type === InputFieldTypes.DropdownMultiselect) {
+    const relation: BaseRelationValuesInput[] = [];
+    relation.push({
+      editStatus: EditStatus.New,
+      key: getIdForHiddenFieldFilter(),
+      type: props.field.relationType,
+      value: getIdForHiddenFieldFilter()
+    });
+    return relation;
+  }
+}
+
 const keyUpEnterEvent = () => {
   const newValue = getValueFromMetadata();
   emit("registerEnterPressed:value", newValue);
@@ -141,5 +171,13 @@ watch(
     const newValue = getValueFromMetadata();
     emit("update:value", newValue);
   }
+);
+watch(
+  () => isFieldHidden.value,
+  () => {
+    if (!isFieldHidden.value) return;
+    const newValue = populateHiddenField();
+    emit("update:value", newValue);
+  }, { immediate: true }
 );
 </script>

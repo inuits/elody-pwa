@@ -29,6 +29,7 @@
       :label="metadata.label as string"
       v-model:value="value"
       :field="metadata.inputField"
+      :hidden-field="metadata.hiddenField"
       :formId="formId"
       :formFlow="formFlow"
       :unit="metadata.unit"
@@ -314,6 +315,7 @@ const { errorMessage, value, meta } = useField<
 >(veeValidateField, rules, { label: label });
 
 onMounted(() => {
+  if (props.metadata.hiddenField?.hidden) return;
   setNewValue(props.metadata.value);
   if (isMetadataOnRelation.value && props.metadata.key === "order") {
     const orderItem: OrderItem = {

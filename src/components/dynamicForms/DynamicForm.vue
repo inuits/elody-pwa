@@ -42,6 +42,7 @@
             field.__typename === 'PanelMetaData' &&
             !nonStandardFieldTypes.includes(field.inputField.type)
           "
+          v-show="!field.hiddenField?.hidden"
           :form-id="dynamicFormQuery"
           :metadata="field as PanelMetaData"
           :is-edit="true"
