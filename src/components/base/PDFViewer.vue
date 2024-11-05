@@ -176,7 +176,6 @@ export default defineComponent({
     });
 
     return {
-      url,
       loading,
       ctx,
       Unicons,
