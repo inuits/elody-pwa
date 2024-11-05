@@ -152,9 +152,9 @@ export default defineComponent({
     const initialRender = async () => {
       url.value =
         source.value &&
-        getMediafilePath(source.value.intialValues.originalFileLocation)
+        getMediafilePath(source.value.intialValues.original_file_location)
           ? "/api/mediafile/" +
-            getMediafilePath(source.value.intialValues.originalFileLocation)
+            getMediafilePath(source.value.intialValues.original_file_location)
           : "no-src";
       const response = await getMediafile(url.value);
       const pdf = await response.blob();
@@ -176,6 +176,7 @@ export default defineComponent({
     });
 
     return {
+      url,
       loading,
       ctx,
       Unicons,
