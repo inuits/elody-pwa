@@ -279,7 +279,7 @@ const {
   getCustomGetEntitiesFiltersQuery,
   getCustomGetEntitiesQuery,
 } = useEntityPickerModal();
-const { extractActionArguments } = useModalActions();
+const { extractActionArguments, getCallbackFunction } = useModalActions();
 
 const { mutate } = useMutation<
   MutateEntityValuesMutation,
@@ -535,6 +535,9 @@ const reorderEntitiesActionFunction = async (field: FormAction) => {
   if (formContainsErrors.value) return;
   try {
     await uploadCsvForReordering(extractActionArguments(field.actionType));
+    const callback = getCallbackFunction();
+    console.log("callback ", callback);
+    if (callback) await callback();
     closeAndDeleteForm();
     createNotificationOverwrite(
       NotificationType.success,
