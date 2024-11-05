@@ -160,11 +160,17 @@ export const useModalActions = () => {
   const getParentId = () => {
     return parentId.value;
   };
+
   const getBulkOperationType = () => {
     return bulkOperationType.value;
   };
+
   const getCallbackFunction = () => {
     return callbackFunction.value;
+  };
+
+  const setCallbackFunction = (callback: Function) => {
+    callbackFunction.value = callback;
   };
 
   return {
@@ -176,5 +182,6 @@ export const useModalActions = () => {
     getParentId,
     getBulkOperationType,
     getCallbackFunction,
+    setCallbackFunction,
   };
 };
