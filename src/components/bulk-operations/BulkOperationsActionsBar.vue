@@ -125,18 +125,13 @@ import {
   DamsIcons,
   type DropdownOption,
   Entitytyping,
-  GenerateTranscodeDocument,
-  GenerateTranscodeMutation,
   GetBulkOperationsDocument,
   type GetBulkOperationsQuery,
-  MetadataAndRelation,
   ModalStyle,
   RouteNames,
-  TranscodeType,
   TypeModals,
 } from "@/generated-types/queries";
 import {
-  BulkOperationsContextEnum,
   Context,
   InBulkProcessableItem,
   useBulkOperations,
@@ -146,14 +141,9 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { apolloClient } from "@/main";
 import { computed, onMounted, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { useMutation, useQuery } from "@vue/apollo-composable";
+import { useQuery } from "@vue/apollo-composable";
 import { useImport } from "@/composables/useImport";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
-import { useI18n } from "vue-i18n";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
 
 const props = withDefaults(
@@ -200,9 +190,6 @@ const route = useRoute();
 const { loadDocument } = useImport();
 const refetchEnabled = ref<boolean>(false);
 const entityType = computed(() => props.entityType || route.meta.entityType);
-const { mutate } = useMutation<GenerateTranscodeMutation>(
-  GenerateTranscodeDocument
-);
 const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
   GetBulkOperationsDocument,
   { entityType: entityType.value },
@@ -217,17 +204,14 @@ const {
   getEnqueuedItemCount,
   getEnqueuedItems,
   dequeueAllItemsForBulkProcessing,
-  enqueueItemForBulkProcessing,
 } = useBulkOperations();
 const {
   initializeGeneralProperties,
   initializePropertiesForDownload,
   initializePropertiesForCreateEntity,
+  setCallbackFunction,
 } = useModalActions();
 const { openModal, getModalInfo } = useBaseModal();
-const { createNotificationOverwrite } = useNotification();
-const { t } = useI18n();
-const router = useRouter();
 
 onResult((result) => {
   try {
@@ -273,54 +257,10 @@ const customBulkOperationsPromise = async () => {
 };
 
 onMounted(() => {
-  if (entityType.value && !props.customBulkOperations) refetchEnabled.value = true;
+  if (entityType.value && !props.customBulkOperations)
+    refetchEnabled.value = true;
   refetch();
 });
-
-const enqueueItemsForManifestCollection = () => {
-  try {
-    const manifests = getEnqueuedItems(props.context).map(
-      (item: InBulkProcessableItem) =>
-        item.teaserMetadata?.find(
-          (metadataItem: MetadataAndRelation) =>
-            metadataItem.key === "manifest_url"
-        )?.value
-    );
-    const newItems: InBulkProcessableItem[] = manifests.map(
-      (manifest: string) => {
-        return { id: manifest };
-      }
-    );
-    newItems.forEach((item: InBulkProcessableItem) =>
-      enqueueItemForBulkProcessing(
-        BulkOperationsContextEnum.ManifestCollection,
-        item
-      )
-    );
-    router.push({ name: RouteNames.ManifestViewer });
-  } catch {
-    createNotificationOverwrite(
-      NotificationType.error,
-      t("notifications.errors.manifest-collection-error.title"),
-      t("notifications.errors.manifest-collection-error.description")
-    );
-  }
-};
-
-const generateTranscodeFromMediafiles = (
-  type: TranscodeType,
-  entityIds: string[]
-) => {
-  mutate({ mediafileIds: entityIds, transcodeType: type }).then(() => {
-    createNotificationOverwrite(
-      NotificationType.default,
-      t("notifications.default.generate-transcode.title"),
-      t("notifications.default.generate-transcode.description")
-    );
-    dequeueAllItemsForBulkProcessing(props.context);
-    emit("refetch");
-  });
-};
 
 watch(selectedBulkOperation, () => {
   if (!selectedBulkOperation.value) return;
@@ -343,6 +283,10 @@ watch(selectedBulkOperation, () => {
     emit("initializeEntityPickerComponent");
   if (bulkOperationType === BulkOperationTypes.CreateEntity)
     initializePropertiesForCreateEntity();
+
+  if (bulkOperationType === BulkOperationTypes.ReorderEntities) {
+    setCallbackFunction(props.refetchEntities);
+  }
 
   openModal(
     modal.typeModal,

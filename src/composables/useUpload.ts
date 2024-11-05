@@ -178,6 +178,8 @@ const useUpload = () => {
       throw new Error(
         `Error while adjusting the order of entities: ${response.status}: ${response.statusText}`
       );
+
+    files.value = [];
   };
 
   const __uploadExceptionHandler = (
