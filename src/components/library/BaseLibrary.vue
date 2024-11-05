@@ -570,6 +570,7 @@ const initializeEntityPickerComponent = () => {
 };
 
 const configPerViewMode = computed(() => {
+  if (entities.value.length <= 0) return [];
   return entities.value[0].allowedViewModes?.viewModes?.reduce((resultObject: any, viewModeWithConfig: ViewModesWithConfig) => {
     resultObject[viewModeWithConfig.viewMode] = viewModeWithConfig.config;
     return resultObject;
