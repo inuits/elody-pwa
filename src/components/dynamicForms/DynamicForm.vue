@@ -4,12 +4,12 @@
     class="p-4 pt-0 h-full w-full overflow-y-auto"
     :key="dynamicFormQuery"
   >
-    <div v-if="!isLoading" class="w-full [&>*>button:last-child]:mb-0">
-      <h1 v-if="dynamicForm.GetDynamicForm.label" class="title pb-4">
+    <div v-show="!isLoading" class="w-full [&>*>button:last-child]:mb-0">
+      <h1 v-if="dynamicForm?.GetDynamicForm?.label" class="title pb-4">
         {{ t(dynamicForm.GetDynamicForm.label) }}
       </h1>
       <p
-        v-if="dynamicForm.GetDynamicForm.infoLabel"
+        v-if="dynamicForm?.GetDynamicForm?.infoLabel"
         class="text-sm text-text-body pb-4"
       >
         {{ t(dynamicForm.GetDynamicForm.infoLabel) }}
@@ -150,7 +150,10 @@
         </p>
       </div>
     </div>
-    <div v-else class="min-h-[20rem] w-full flex justify-center items-center">
+    <div
+      v-show="isLoading"
+      class="min-h-[20rem] w-full flex justify-center items-center"
+    >
       <spinner-loader theme="accent" />
     </div>
   </div>
@@ -380,7 +383,10 @@ const createEntityFromFormInput = (
     })
     .filter((metadataItem: MetadataInput) => metadataItem.value);
   entity.relations = relations
-    ? [...relations, ...parseRelationValuesForFormSubmit(form.value?.values?.relationValues)]
+    ? [
+        ...relations,
+        ...parseRelationValuesForFormSubmit(form.value?.values?.relationValues),
+      ]
     : parseRelationValuesForFormSubmit(form.value?.values.relationValues);
   return entity;
 };
@@ -536,7 +542,6 @@ const reorderEntitiesActionFunction = async (field: FormAction) => {
   try {
     await uploadCsvForReordering(extractActionArguments(field.actionType));
     const callback = getCallbackFunction();
-    console.log("callback ", callback);
     if (callback) await callback();
     closeAndDeleteForm();
     createNotificationOverwrite(
