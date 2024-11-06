@@ -120,8 +120,6 @@ const fieldEditIsDisabled = computed(() => {
   if (!props.field.validation || !props.field.validation.available_if)
     return false;
 
-  console.log("Injected context metadata edit:");
-  console.log(mediafileViewerContext);
   return !conditionalFieldIsAvailable(
     props.field?.validation?.available_if as Conditional,
     props.formId,
