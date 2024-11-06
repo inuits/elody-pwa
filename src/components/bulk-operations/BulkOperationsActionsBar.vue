@@ -193,7 +193,7 @@ const entityType = computed(() => props.entityType || route.meta.entityType);
 const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
   GetBulkOperationsDocument,
   { entityType: entityType.value },
-  () => ({ enabled: entityType.value ? refetchEnabled.value : false })
+  () => ({ enabled: entityType.value ? refetchEnabled.value : ref(false) })
 );
 const bulkOperations = ref<DropdownOption[]>([]);
 const selectedBulkOperation = ref<DropdownOption>();
