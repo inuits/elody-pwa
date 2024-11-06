@@ -312,6 +312,7 @@ watch(
 watch(
   () => entityType.value,
   (type: Entitytyping) => {
+    if (!type) return;
     refetch({ entityType: type });
   }
 );
