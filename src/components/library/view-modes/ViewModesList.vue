@@ -110,7 +110,7 @@ import {
   setCssVariable,
   updateEntityMediafileOnlyForMediafiles,
 } from "@/helpers";
-import { computed, onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, inject } from "vue";
 import { OrderItem } from "@/composables/useOrderListItems";
 import { useFormHelper } from "@/composables/useFormHelper";
 import EventBus from "@/EventBus";
@@ -146,7 +146,7 @@ const props = withDefaults(
     mode: "list",
   }
 );
-
+const mediafileViewerContext: any = inject("mediafileViewerContext");
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { queryVariables } = useLibraryBar();
 const { getThumbnail } = useThumbnailHelper();
@@ -180,7 +180,7 @@ const isEntityDisabled = (entity: Entity) => {
 
 const entityWrapperHandler = (entity: Entity) => {
   if (isEntityDisabled(entity) || !props.enableNavigation) return;
-  updateEntityMediafileOnlyForMediafiles(entity);
+  updateEntityMediafileOnlyForMediafiles(mediafileViewerContext, entity);
 };
 
 EventBus.on("orderList_changed", (orderItems: OrderItem[]) => {

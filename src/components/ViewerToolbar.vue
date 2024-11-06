@@ -32,14 +32,14 @@
       </a>
     </div>
     <div>
-      <a @click="selectPreviousMediafile()">
+      <a @click="selectPreviousMediafile(mediafileViewerContext)">
         <unicon
           :name="Unicons.ArrowCircleLeft.name"
           height="20"
           class="text-neutral-700 cursor-pointer"
         />
       </a>
-      <a @click="selectNextMediafile()">
+      <a @click="selectNextMediafile(mediafileViewerContext)">
         <unicon
           :name="Unicons.ArrowCircleRight.name"
           height="20"
@@ -55,9 +55,11 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref } from "vue";
-import type { PropType } from "vue";
+import { type PropType, inject } from "vue";
 import { Unicons } from "../types";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
+
+
 export default defineComponent({
   name: "ViewerToolbar",
   components: {},
@@ -91,6 +93,7 @@ export default defineComponent({
     const homeRef = ref<HTMLDivElement | undefined>(undefined);
     const { selectNextMediafile, selectPreviousMediafile } =
       useEntityMediafileSelector();
+    const mediafileViewerContext: any = inject("mediafileViewerContext");
 
     onMounted(() => {
       emit("update:zoomIn", zoomInRef.value);
@@ -116,6 +119,7 @@ export default defineComponent({
       zoomOutRef,
       fullPageRef,
       homeRef,
+      mediafileViewerContext,
       downloadImage,
       selectNextMediafile,
       selectPreviousMediafile,

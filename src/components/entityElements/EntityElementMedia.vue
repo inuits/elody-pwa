@@ -89,7 +89,7 @@ import useEditMode from "@/composables/useEdit";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { getValueForPanelMetadata } from "@/helpers";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -108,6 +108,8 @@ const { setAcceptedTypes, setRelationType } = useEntityPickerModal();
 const { openModal } = useBaseModal();
 const { isEdit } = useEditMode();
 
+const mediafileViewerContext: any = inject("mediafileViewerContext");
+
 const componentMetadata = computed(() => {
   const returnArray: MetadataAndRelation[] = [];
 
@@ -120,7 +122,8 @@ const componentMetadata = computed(() => {
         value: getValueForPanelMetadata(
           PanelType.Metadata,
           metadataItemKey,
-          props.entityUuid
+          props.entityUuid,
+          mediafileViewerContext
         ),
         inputField: (value as PanelMetaData).inputField,
         unit: (value as PanelMetaData).unit,
