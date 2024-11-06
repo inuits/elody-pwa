@@ -72,8 +72,6 @@ const { conditionalFieldIsAvailable } = useConditionalValidation();
 const coordinateEditIsDisabled = computed(() => {
   if (!isEdit.value) return true;
   if (!props.inputField?.validation?.available_if) return false;
-  console.log("Injected context coordinate:");
-  console.log(mediafileViewerContext);
   return !conditionalFieldIsAvailable(
     props.inputField.validation.available_if as Conditional,
     props.entityUuid,
