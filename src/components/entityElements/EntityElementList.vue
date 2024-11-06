@@ -32,9 +32,9 @@
               SearchInputType.AdvancedInputMediaFilesType
             "
             :predefined-entities="
-              entityUuid === mediafileSelectionState.selectedMediafile?.id ||
-              entityUuid === mediafileSelectionState.selectedMediafile?.uuid
-                ? [mediafileSelectionState.selectedMediafile]
+              entityUuid === mediafileSelectionState[customQueryFilters].selectedMediafile?.id ||
+              entityUuid === mediafileSelectionState[customQueryFilters].selectedMediafile?.uuid
+                ? [mediafileSelectionState[customQueryFilters].selectedMediafile]
                 : undefined
             "
             :enable-preview="true"
@@ -42,8 +42,8 @@
             :enable-bulk-operations="true"
             :enable-navigation="false"
             :parent-entity-identifiers="
-              entityUuid === mediafileSelectionState.selectedMediafile?.id ||
-              entityUuid === mediafileSelectionState.selectedMediafile?.uuid
+              entityUuid === mediafileSelectionState[customQueryFilters].selectedMediafile?.id ||
+              entityUuid === mediafileSelectionState[customQueryFilters].selectedMediafile?.uuid
                 ? undefined
                 : identifiers
             "
@@ -117,7 +117,7 @@ import {
 } from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
-import { watch, ref, onBeforeMount, computed } from "vue";
+import { watch, ref, onBeforeMount, computed, provide } from "vue";
 import { useImport } from "@/composables/useImport";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
@@ -170,6 +170,8 @@ const props = withDefaults(
     allowedActionsOnRelations: () => [],
   }
 );
+
+provide("mediafileViewerContext", props.customQueryFilters);
 
 const requiresCustomQuery = computed(() => props.customQuery != undefined);
 const queryLoaded = ref<boolean>(false);

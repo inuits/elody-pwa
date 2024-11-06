@@ -38,12 +38,15 @@ import {
   type GetEntityByIdQuery,
   type BaseEntity,
   type MediaFileEntity,
-  Entity,
+  Column,
+  MediaFileElementTypes,
+  EntityListElement,
+  SingleMediaFileElement,
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
 import EntityForm from "@/components/EntityForm.vue";
 import { asString, getTitleOrNameFromEntity } from "@/helpers";
-import { reactive, ref, watch, inject } from "vue";
+import { reactive, ref, watch, inject, provide } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useEditMode } from "@/composables/useEdit";
@@ -75,7 +78,9 @@ const {
   setRefetchFn,
 } = useEditMode();
 
-const { mediafileSelectionState } = useEntityMediafileSelector();
+const { mediafileSelectionState, addMediafileSelectionStateContext } = useEntityMediafileSelector();
+const mediafileViewerContexts = ref<string[]>([]);
+
 const id = asString(route.params["id"]);
 const identifiers = ref<string[]>([]);
 const loading = ref<boolean>(true);
@@ -109,6 +114,24 @@ const permissionToDelete = ref<boolean>();
 const entity = ref<BaseEntity>();
 const entityForBreadcrumb = ref<BaseEntity>();
 
+const addContextToState = (context: String): void => {
+  mediafileViewerContexts.value.push(context);
+  addMediafileSelectionStateContext(context)
+}
+
+const determineContextsForMediafileViewer = () => {
+  if (columnList.value === "no-values") return;
+  const columns: Column[] = Object.values(columnList.value).map((value) => {
+    if (typeof value !== "string") return value;
+  });
+  Object.values(columns[0].elements).forEach((element: EntityListElement | SingleMediaFileElement) => {
+    if (element?.__typename === "SingleMediaFileElement" )
+      addContextToState("SingleMediaFileElement");
+    if (element?.__typename === "EntityListElement" && element?.type === MediaFileElementTypes.Media)
+      addContextToState(element.customQueryFilters);
+  });
+}
+
 router.beforeEach(() => {
   if (isEdit) disableEditMode();
 });
@@ -136,14 +159,15 @@ watch(
     intialValues.value = entity.value.intialValues;
     relationValues.value = entity.value.relationValues;
     columnList.value = entity.value.entityView;
+    determineContextsForMediafileViewer();
 
     if (typeof columnList.value !== "string") {
       getEditableMetadataKeys(columnList.value, entity.value.uuid);
     }
 
     if (entity.value.type.toLowerCase() === "mediafile") {
-      mediafileSelectionState.mediafiles = [entity.value as MediaFileEntity];
-      mediafileSelectionState.selectedMediafile =
+      mediafileSelectionState.value[mediafileViewerContexts.value[0]].mediafiles = [entity.value as MediaFileEntity];
+      mediafileSelectionState.value[mediafileViewerContexts.value[0]].selectedMediafile =
         entity.value as MediaFileEntity;
     }
 

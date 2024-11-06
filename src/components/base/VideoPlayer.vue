@@ -9,8 +9,8 @@
       <source
         :src="videoUrl"
         :type="
-          source && getValueOfMediafile('mimetype')
-            ? getValueOfMediafile('mimetype')
+          source && getValueOfMediafile(mediafileViewerContext, 'mimetype')
+            ? getValueOfMediafile(mediafileViewerContext, 'mimetype')
             : 'no-type'
         "
       />
@@ -19,7 +19,7 @@
 </template>
 <script lang="ts" setup>
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, inject } from "vue";
 import { useGetMediafile } from "@/composables/useGetMediafile";
 
 const props = defineProps<{
@@ -28,6 +28,8 @@ const props = defineProps<{
 
 const { getValueOfMediafile } = useEntityMediafileSelector();
 const { getMediafile, getMediafilePath } = useGetMediafile();
+
+const mediafileViewerContext: any = inject("mediafileViewerContext");
 
 const videoUrl = ref("");
 

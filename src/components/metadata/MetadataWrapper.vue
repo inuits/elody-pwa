@@ -122,7 +122,7 @@ import {
   type BaseRelationValuesInput,
   type PanelRelationMetaData,
 } from "@/generated-types/queries";
-import { computed, onMounted, onBeforeUnmount, watch } from "vue";
+import { computed, onMounted, onBeforeUnmount, watch, inject } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   useOrderListItems,
@@ -136,6 +136,8 @@ import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAuto
 const { t } = useI18n();
 const { addOrderItem, removeOrderItem, updateOrderItem } = useOrderListItems();
 const { getForm, getKeyBasedOnInputField } = useFormHelper();
+
+const mediafileViewerContext: any = inject("mediafileViewerContext");
 
 const props = withDefaults(
   defineProps<{
@@ -224,11 +226,15 @@ const isFieldRequired = computed(() => {
     )
   )
     return true;
-  if (props.metadata?.inputField?.validation?.required_if)
+  if (props.metadata?.inputField?.validation?.required_if) {
+    console.log("Injected context wrapper:");
+    console.log(mediafileViewerContext);
     return conditionalFieldIsRequired(
       props.metadata?.inputField?.validation?.required_if,
-      props.formId
+      props.formId,
+      mediafileViewerContext
     );
+  }
   return false;
 });
 

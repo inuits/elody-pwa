@@ -17,6 +17,9 @@
 import type { SingleMediaFileElement } from "@/generated-types/queries";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import MediaViewer from "@/components/base/Mediaviewer.vue";
+import { provide } from "vue";
+
+provide("mediafileViewerContext", "SingleMediaFileElement");
 
 defineProps<{
   element: SingleMediaFileElement;

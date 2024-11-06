@@ -2,7 +2,7 @@ import {
   KeyValueSource,
   type MediaFileEntity,
 } from "@/generated-types/queries";
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 
 type MediaFileRootKeys = "id" | "uuid";
 
@@ -21,17 +21,24 @@ type MediafileSelectionState = {
   selectedMediafile: MediaFileEntity | undefined;
 };
 
-const mediafileSelectionState = reactive<MediafileSelectionState>({
-  mediafiles: [],
-  selectedMediafile: undefined,
-});
+const mediafileSelectionState = ref<{ [key: string]: reactive<MediafileSelectionState> }>({})
 
 export const useEntityMediafileSelector = () => {
+  const addMediafileSelectionStateContext = (
+    context: String
+  ): void => {
+    mediafileSelectionState.value[context] = reactive<MediafileSelectionState>({
+      mediafiles: [],
+      selectedMediafile: undefined,
+    });
+  }
+
   const getValueOfMediafile = (
+    context: String,
     key: MediaFileRootKeys | MediaFileMetadataKeys,
     mediafile:
       | MediaFileEntity
-      | undefined = mediafileSelectionState.selectedMediafile,
+      | undefined = mediafileSelectionState.value[context].selectedMediafile,
     source: KeyValueSource = KeyValueSource.Metadata
   ) => {
     if (source === KeyValueSource.Metadata)
@@ -41,60 +48,70 @@ export const useEntityMediafileSelector = () => {
     else return undefined;
   };
 
-  const setEntityMediafiles = (mediafiles: MediaFileEntity[]) => {
-    mediafileSelectionState.mediafiles = mediafiles;
+  const setEntityMediafiles = (
+    context: String,
+    mediafiles: MediaFileEntity[]
+  ) => {
+    if (!context) return;
+    mediafileSelectionState.value[context].mediafiles = mediafiles;
   };
 
   const updateSelectedEntityMediafile = (
+    context: String,
     mediafile: MediaFileEntity | undefined
   ) => {
-    mediafileSelectionState.selectedMediafile = mediafile;
+    if (!context) return;
+    mediafileSelectionState.value[context].selectedMediafile = mediafile;
   };
 
-  const selectPreviousMediafile = () => {
-    const currentIndex = getCurrentlySelectedMediafileIndex();
+  const selectPreviousMediafile = (context: String) => {
+    const currentIndex = getCurrentlySelectedMediafileIndex(context);
     if (currentIndex === undefined) return;
 
     let previousIndex = 0;
     if (currentIndex > 0) previousIndex = currentIndex - 1;
-    else previousIndex = mediafileSelectionState.mediafiles.length - 1;
+    else previousIndex = mediafileSelectionState.value[context].mediafiles.length - 1;
 
-    setSelectedMediafileByIndex(previousIndex);
+    setSelectedMediafileByIndex(context, previousIndex);
   };
 
-  const selectNextMediafile = () => {
-    const currentIndex = getCurrentlySelectedMediafileIndex();
+  const selectNextMediafile = (context: String) => {
+    const currentIndex = getCurrentlySelectedMediafileIndex(context);
     if (currentIndex === undefined) return;
 
     let nextIndex = 0;
-    if (currentIndex < mediafileSelectionState.mediafiles.length - 1)
+    if (currentIndex < mediafileSelectionState.value[context].mediafiles.length - 1)
       nextIndex = currentIndex + 1;
     else nextIndex = 0;
 
-    setSelectedMediafileByIndex(nextIndex);
+    setSelectedMediafileByIndex(context, nextIndex);
   };
 
-  const getCurrentlySelectedMediafileIndex = (): number | undefined => {
+  const getCurrentlySelectedMediafileIndex = (context: String): number | undefined => {
     if (
-      mediafileSelectionState.mediafiles.length === 0 ||
-      !mediafileSelectionState.selectedMediafile
+      mediafileSelectionState.value[context].mediafiles.length === 0 ||
+      !mediafileSelectionState.value[context].selectedMediafile
     )
       return undefined;
 
-    const index = mediafileSelectionState.mediafiles.indexOf(
-      mediafileSelectionState.selectedMediafile
+    const index = mediafileSelectionState.value[context].mediafiles.indexOf(
+      mediafileSelectionState.value[context].selectedMediafile
     );
     return index;
   };
 
-  const setSelectedMediafileByIndex = (index: number) => {
-    if (index >= mediafileSelectionState.mediafiles.length || index < 0) return;
-    mediafileSelectionState.selectedMediafile =
-      mediafileSelectionState.mediafiles[index];
+  const setSelectedMediafileByIndex = (
+    context: String,
+    index: number
+  ) => {
+    if (index >= mediafileSelectionState.value[context].mediafiles.length || index < 0) return;
+    mediafileSelectionState.value[context].selectedMediafile =
+      mediafileSelectionState.value[context].mediafiles[index];
   };
 
   return {
     mediafileSelectionState,
+    addMediafileSelectionStateContext,
     getValueOfMediafile,
     setEntityMediafiles,
     updateSelectedEntityMediafile,
