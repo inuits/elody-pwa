@@ -383,6 +383,7 @@ const createEntityFromFormInput = (
       return { key, value: form.value?.values.intialValues[key] };
     })
     .filter((metadataItem: MetadataInput) => metadataItem.value);
+  console.log(relations);
   entity.relations = relations
     ? [
         ...relations,
