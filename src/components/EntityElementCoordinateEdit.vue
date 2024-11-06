@@ -41,7 +41,7 @@ import type {
   InputField as InputFieldType,
 } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { type PropType, computed, onMounted } from "vue";
+import { type PropType, computed, onMounted, inject } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useField } from "vee-validate";
 import { useEditMode } from "@/composables/useEdit";
@@ -61,6 +61,8 @@ const props = defineProps({
   entityUuid: { type: String, required: true },
 });
 
+const mediafileViewerContext: any = inject("mediafileViewerContext");
+
 const { isEdit } = useEditMode();
 const decimalPointStep = 0.000001;
 const { getForm } = useFormHelper();
@@ -70,9 +72,12 @@ const { conditionalFieldIsAvailable } = useConditionalValidation();
 const coordinateEditIsDisabled = computed(() => {
   if (!isEdit.value) return true;
   if (!props.inputField?.validation?.available_if) return false;
+  console.log("Injected context coordinate:");
+  console.log(mediafileViewerContext);
   return !conditionalFieldIsAvailable(
     props.inputField.validation.available_if as Conditional,
-    props.entityUuid
+    props.entityUuid,
+    mediafileViewerContext
   );
 });
 const { t } = useI18n();

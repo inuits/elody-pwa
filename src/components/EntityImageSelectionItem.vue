@@ -2,8 +2,8 @@
   <div
     class="py-2 flex flex-col justify-end flex items-center"
     :key="
-      getValueOfMediafile('filename', mediafile)
-        ? getValueOfMediafile('filename', mediafile)
+      getValueOfMediafile(mediafileViewerContext, 'filename', mediafile)
+        ? getValueOfMediafile(mediafileViewerContext, 'filename', mediafile)
         : 'no-filename'
     "
   >
@@ -12,23 +12,23 @@
         :class="[
           'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
           toBeDeleted.includes(mediafile.id) ? 'filter blur-xs grayscale' : '',
-          mediafileSelectionState.selectedMediafile &&
-          getValueOfMediafile('filename', mediafile) ===
-            getValueOfMediafile('filename')
+          mediafileSelectionState[mediafileViewerContext].selectedMediafile &&
+          getValueOfMediafile(mediafileViewerContext, 'filename', mediafile) ===
+            getValueOfMediafile(mediafileViewerContext, 'filename')
             ? 'p-6 border-2 border-accent-normal'
             : '',
         ]"
         :url="
-          getValueOfMediafile('mimetype', mediafile) &&
-          !getValueOfMediafile('mimetype', mediafile).includes('pdf') &&
-          !getValueOfMediafile('mimetype', mediafile).includes('json/manifest')
+          getValueOfMediafile(mediafileViewerContext, 'mimetype', mediafile) &&
+          !getValueOfMediafile(mediafileViewerContext, 'mimetype', mediafile).includes('pdf') &&
+          !getValueOfMediafile(mediafileViewerContext, 'mimetype', mediafile).includes('json/manifest')
             ? `/api/iiif/3/${
-                getValueOfMediafile('transcode_filename', mediafile) ||
-                getValueOfMediafile('filename', mediafile)
+                getValueOfMediafile(mediafileViewerContext, 'transcode_filename', mediafile) ||
+                getValueOfMediafile(mediafileViewerContext, 'filename', mediafile)
               }/square/100,/0/default.jpg`
-            : getValueOfMediafile('thumbnail_file_location', mediafile)
+            : getValueOfMediafile(mediafileViewerContext, 'thumbnail_file_location', mediafile)
         "
-        @click="updateSelectedEntityMediafile(mediafile)"
+        @click="updateSelectedEntityMediafile(mediafileViewerContext, mediafile)"
         @error="setNoImage()"
       />
     </div>
@@ -46,7 +46,7 @@ import type { MediaFileEntity } from "@/generated-types/queries";
 import { toBeDeleted } from "@/composables/useEdit";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useAuth } from "session-vue-3-oidc-library";
-import { ref } from "vue";
+import { ref, inject } from "vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import ImageViewer from "@/components/base/ImageViewer.vue";
 
@@ -57,6 +57,8 @@ const props = defineProps<{
 const auth = useAuth();
 const { getThumbnail } = useThumbnailHelper();
 const imageSrcError = ref<boolean>(false);
+
+const mediafileViewerContext: any = inject("mediafileViewerContext");
 
 const setNoImage = () => {
   imageSrcError.value = true;

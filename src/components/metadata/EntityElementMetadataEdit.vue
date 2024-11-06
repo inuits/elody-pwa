@@ -78,7 +78,7 @@ import BaseDropdownNew from "../base/BaseDropdownNew.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
 import { addCurrentTimeZoneToDateTimeString, isDateTime } from "@/helpers";
-import { onMounted, watch, ref, computed } from "vue";
+import { onMounted, watch, ref, computed, inject } from "vue";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
@@ -102,6 +102,9 @@ const props = defineProps<{
   fieldIsValid: boolean;
   formFlow?: string;
 }>();
+
+const mediafileViewerContext: any = inject("mediafileViewerContext");
+
 const { addEditableMetadataKeys } = useFormHelper();
 const metadataValue = ref<string | DropdownOption>(props.value);
 const { conditionalFieldIsAvailable } = useConditionalValidation();
@@ -117,9 +120,12 @@ const fieldEditIsDisabled = computed(() => {
   if (!props.field.validation || !props.field.validation.available_if)
     return false;
 
+  console.log("Injected context metadata edit:");
+  console.log(mediafileViewerContext);
   return !conditionalFieldIsAvailable(
     props.field?.validation?.available_if as Conditional,
-    props.formId
+    props.formId,
+    mediafileViewerContext
   );
 });
 

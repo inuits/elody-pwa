@@ -3,41 +3,41 @@
     <div
       class="w-1/3 max-h-3"
       v-if="
-        mediafileSelectionState.selectedMediafile &&
-        mediafileSelectionState.mediafiles.length > 0
+        mediafileSelectionState[mediafileViewerContext].selectedMediafile &&
+        mediafileSelectionState[mediafileViewerContext].mediafiles.length > 0
       "
     >
       <entity-image-selection :loading="loading" />
     </div>
 
     <div
-      v-if="!loading && mediafileSelectionState.selectedMediafile"
+      v-if="!loading && mediafileSelectionState[mediafileViewerContext].selectedMediafile"
       class="w-full"
     >
       <IIIFViewer
         v-if="viewerType === ElodyViewers.Iiif"
         :imageFilename="
-          getValueOfMediafile('transcode_filename') ||
-          getValueOfMediafile('filename') ||
+          getValueOfMediafile(mediafileViewerContext, 'transcode_filename') ||
+          getValueOfMediafile(mediafileViewerContext, 'filename') ||
           ''
         "
-        :mediafileId="getValueOfMediafile('id', undefined, KeyValueSource.Root)"
+        :mediafileId="getValueOfMediafile(mediafileViewerContext, 'id', undefined, KeyValueSource.Root)"
       />
       <VideoPlayer
         v-if="viewerType === ElodyViewers.Video"
-        :source="mediafileSelectionState.selectedMediafile"
+        :source="mediafileSelectionState[mediafileViewerContext].selectedMediafile"
       />
       <AudioPlayer
         v-if="viewerType === ElodyViewers.Audio"
-        :source="mediafileSelectionState.selectedMediafile"
+        :source="mediafileSelectionState[mediafileViewerContext].selectedMediafile"
       />
       <PDFViewer
         v-if="viewerType === ElodyViewers.Pdf"
-        :source="mediafileSelectionState.selectedMediafile"
+        :source="mediafileSelectionState[mediafileViewerContext].selectedMediafile"
       />
       <TextViewer
         v-if="viewerType === ElodyViewers.Text"
-        :source="mediafileSelectionState.selectedMediafile"
+        :source="mediafileSelectionState[mediafileViewerContext].selectedMediafile"
       />
     </div>
   </div>
@@ -55,7 +55,7 @@ import IIIFViewer from "@/components/IIIFViewer.vue";
 import PDFViewer from "@/components/base/PDFViewer.vue";
 import TextViewer from "@/components/base/TextViewer.vue";
 import VideoPlayer from "@/components/base/VideoPlayer.vue";
-import { computed, toRefs, watch } from "vue";
+import { computed, toRefs, watch, inject } from "vue";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 
 const props = defineProps<{
@@ -63,6 +63,7 @@ const props = defineProps<{
   loading?: boolean;
 }>();
 
+const mediafileViewerContext: any = inject("mediafileViewerContext");
 const { mediafiles } = toRefs(props);
 const { mediafileSelectionState, getValueOfMediafile } =
   useEntityMediafileSelector();
@@ -78,8 +79,9 @@ const viewerMap: Record<string, ElodyViewers> = {
 const viewerType = computed<ElodyViewers | undefined>(() => {
   try {
     const mimetype: string = getValueOfMediafile(
+      mediafileViewerContext,
       "mimetype",
-      mediafileSelectionState.selectedMediafile
+      mediafileSelectionState.value[mediafileViewerContext].selectedMediafile
     );
     for (const type in viewerMap) {
       if (mimetype.includes(type)) {
@@ -93,7 +95,7 @@ const viewerType = computed<ElodyViewers | undefined>(() => {
 
 watch([() => props.loading, mediafiles], () => {
   if (props.loading) return;
-  mediafileSelectionState.mediafiles = mediafiles?.value || [];
-  mediafileSelectionState.selectedMediafile = mediafiles?.value?.[0];
+  mediafileSelectionState.value[mediafileViewerContext].mediafiles = mediafiles?.value || [];
+  mediafileSelectionState.value[mediafileViewerContext].selectedMediafile = mediafiles?.value?.[0];
 });
 </script>
