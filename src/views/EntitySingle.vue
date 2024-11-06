@@ -86,7 +86,7 @@ const queryVariables = reactive<GetEntityByIdQueryVariables>({
   type: String(route.params["type"]),
   preferredLanguage: locale.value,
 });
-const { result, refetch } = useQuery<GetEntityByIdQuery>(
+const { result, refetch, onError } = useQuery<GetEntityByIdQuery>(
   GetEntityByIdDocument,
   queryVariables,
   () => ({
@@ -94,6 +94,10 @@ const { result, refetch } = useQuery<GetEntityByIdQuery>(
     fetchPolicy: "no-cache",
   })
 );
+onError((error) => {
+  if (error.message === "404: NOT FOUND")
+    router.replace({ name: "NotFound" });
+});
 
 const intialValues = ref<IntialValues | "no-values">("no-values");
 const relationValues = ref<{ [key: string]: Object } | "no-values">(
