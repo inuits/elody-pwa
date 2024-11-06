@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="!loading && mediafileSelectionState.mediafiles.length > 0"
+    v-if="!loading && mediafileSelectionState[mediafileViewerContext].mediafiles.length > 0"
     class="flex h-auto"
     :class="{ 'animate-pulse bg-neutral-20 text-neutral-20': loading }"
   >
@@ -28,7 +28,7 @@
             class="flex flex-col w-full items-center my-2 overflow-y-auto"
           >
             <div
-              v-for="mediafile in mediafileSelectionState.mediafiles"
+              v-for="mediafile in mediafileSelectionState[mediafileViewerContext].mediafiles"
               :key="mediafile.id"
               class="w-full h-full"
             >
@@ -43,7 +43,7 @@
 
 <script lang="ts" setup>
 import EntityImageSelectionItem from "@/components/EntityImageSelectionItem.vue";
-import { ref } from "vue";
+import { ref, inject } from "vue";
 import { Unicons } from "@/types";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 
@@ -52,6 +52,8 @@ defineProps<{
 }>();
 
 const { mediafileSelectionState } = useEntityMediafileSelector();
+const mediafileViewerContext: any = inject("mediafileViewerContext");
+
 const isCollapsed = ref<boolean>(false);
 
 const toggleIsCollapsed = () => {

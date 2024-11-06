@@ -30,11 +30,6 @@ export const goToEntityPage = (
   listItemRouteName: string,
   router: Router
 ) => {
-  if (entity.type.toLowerCase() === Entitytyping.Mediafile) {
-    useEntityMediafileSelector().setEntityMediafiles([]);
-    useEntityMediafileSelector().updateSelectedEntityMediafile(entity);
-  }
-
   const entityId =
     entity.intialValues?.slug ||
     entity.uuid ||
@@ -113,13 +108,14 @@ export const getEntityPageRoute = (
 };
 
 export const updateEntityMediafileOnlyForMediafiles = (
+  mediafileViewerContext: String,
   entity: Entity,
   onlyRemove: boolean = false
 ) => {
   if (entity.type.toLowerCase() === Entitytyping.Mediafile) {
-    useEntityMediafileSelector().setEntityMediafiles([]);
+    useEntityMediafileSelector().setEntityMediafiles(mediafileViewerContext, []);
     if (onlyRemove) return;
-    useEntityMediafileSelector().updateSelectedEntityMediafile(entity);
+    useEntityMediafileSelector().updateSelectedEntityMediafile(mediafileViewerContext, entity);
   }
 };
 
@@ -224,6 +220,7 @@ export const getValueForPanelMetadata = (
   panelType: PanelType,
   metadataItemKey: string,
   entityId: string,
+  mediafileViewerContext: String,
   typeOfInputField?: string
 ): string => {
   const form = useFormHelper().getForm(entityId);
@@ -231,8 +228,8 @@ export const getValueForPanelMetadata = (
     if (typeOfInputField === InputFieldTypes.Checkbox)
       return Boolean(form.values.intialValues[metadataItemKey]);
     return form.values.intialValues[metadataItemKey];
-  } else if (mediafileSelectionState.selectedMediafile) {
-    return (mediafileSelectionState.selectedMediafile.intialValues as any)?.[
+  } else if (mediafileSelectionState.value[mediafileViewerContext]?.selectedMediafile) {
+    return (mediafileSelectionState.value[mediafileViewerContext].selectedMediafile.intialValues as any)?.[
       metadataItemKey
     ];
   }
@@ -272,6 +269,7 @@ export const getMetadataFields = (
             panelType,
             key,
             formId,
+            undefined,
             value.inputField?.type
           ),
         inputField: (value as PanelMetaData).inputField,
