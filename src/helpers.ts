@@ -44,7 +44,7 @@ export const goToEntityPage = (
     name: listItemRouteName,
     params: {
       id: entityId,
-      type: entityId.includes("tracker") ? "IotDeviceTracker" : entity.type,
+      type: entity.__typename,
     },
   });
 };
@@ -107,7 +107,7 @@ export const getEntityPageRoute = (
     name: listItemRouteName,
     params: {
       id: entityId,
-      type: entityId.includes("tracker") ? "IotDeviceTracker" : entity.type,
+      type: entity.__typename,
     },
   };
 };
