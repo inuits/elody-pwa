@@ -1,9 +1,12 @@
 <template>
   <div
-    class="rounded-md bg-slate-800 py-0.25 px-1 border border-transparent text-sm"
+    class="text-sm"
+    :class="{
+      'rounded-md bg-slate-800 py-0.25 px-1 mt-1 border border-transparent': pillSettings
+    }"
     :style="{
-      background: pillSettings.background,
-      color: pillSettings.text,
+      background: pillSettings?.background,
+      color: pillSettings?.text,
     }"
   >
     {{ label }}
@@ -20,7 +23,8 @@ const props = defineProps<{
 }>();
 
 const pillSettings = computed(() => {
-  const [formatterType, pillType] = props.formatter.split("|");
+  let [formatterType, pillType] = props.formatter.split("|");
+  if (!pillType) pillType = props.label.toLowerCase();
   return formattersSettings[formatterType][pillType];
 });
 </script>
