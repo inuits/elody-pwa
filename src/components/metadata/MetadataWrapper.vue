@@ -227,8 +227,6 @@ const isFieldRequired = computed(() => {
   )
     return true;
   if (props.metadata?.inputField?.validation?.required_if) {
-    console.log("Injected context wrapper:");
-    console.log(mediafileViewerContext);
     return conditionalFieldIsRequired(
       props.metadata?.inputField?.validation?.required_if,
       props.formId,
