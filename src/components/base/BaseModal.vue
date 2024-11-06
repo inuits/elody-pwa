@@ -77,7 +77,6 @@ watch(
 const hideModal = () => {
   emit("update:modalState", "hide");
   emit("hideModal", "hide");
-  console.log("closed");
   useModalActions().resetAllProperties();
 };
 </script>
