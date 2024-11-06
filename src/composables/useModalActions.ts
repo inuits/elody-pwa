@@ -173,6 +173,16 @@ export const useModalActions = () => {
     callbackFunction.value = callback;
   };
 
+  const resetAllProperties = () => {
+    parentId.value = undefined;
+    relationType.value = undefined;
+    collection.value = undefined;
+    callbackFunction.value = undefined;
+    bulkOperationType.value = undefined;
+    downloadMediafilesInformation.value = undefined;
+    savedSearchInformation.value = undefined;
+  };
+
   return {
     extractActionArguments,
     initializeGeneralProperties,
@@ -183,5 +193,6 @@ export const useModalActions = () => {
     getBulkOperationType,
     getCallbackFunction,
     setCallbackFunction,
+    resetAllProperties,
   };
 };
