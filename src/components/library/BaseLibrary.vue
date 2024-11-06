@@ -74,7 +74,7 @@
               class="mr-2"
               :class="['flex', { 'ml-4': enableAdvancedFilters }]"
             >
-              <BaseToggleGroup v-if="toggles.length >= 1" :toggles="toggles" />
+              <BaseToggleGroup v-if="toggles.length > 1" :toggles="toggles" />
             </div>
             <LibraryBar
               v-if="
