@@ -23,8 +23,10 @@ import { OpenIdConnectClient } from "session-vue-3-oidc-library";
 import { setIgnorePermissions } from "./composables/usePermissions";
 import { Unicons } from "./types";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useErrorCodes } from "@/composables/useErrorCodes";
 
 import OpenLayersMap from "vue3-openlayers";
+import type { GraphQLError } from "graphql/error";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
@@ -72,9 +74,9 @@ const start = async () => {
 
   bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
 
-  const graphqlErrorInterceptor = onError((error: any) => {
-    const errorHandler = useGraphqlErrors(error);
-    errorHandler.logFormattedErrors(router);
+  const graphqlErrorInterceptor = onError((error: GraphQLError) => {
+    const { handleGraphqlError } = useErrorCodes();
+    handleGraphqlError(error);
   });
 
   apolloClient = new ApolloClient({
