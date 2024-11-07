@@ -21,10 +21,6 @@
         ></entity-column>
       </entity-form>
     </div>
-    <div
-      v-else
-      class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0 animate-pulse text-neutral-20 z-2"
-    />
   </div>
 </template>
 
@@ -78,7 +74,8 @@ const {
   setRefetchFn,
 } = useEditMode();
 
-const { mediafileSelectionState, addMediafileSelectionStateContext } = useEntityMediafileSelector();
+const { mediafileSelectionState, addMediafileSelectionStateContext } =
+  useEntityMediafileSelector();
 const mediafileViewerContexts = ref<string[]>([]);
 
 const id = asString(route.params["id"]);
@@ -119,21 +116,26 @@ const entityForBreadcrumb = ref<BaseEntity>();
 
 const addContextToState = (context: String): void => {
   mediafileViewerContexts.value.push(context);
-  addMediafileSelectionStateContext(context)
-}
+  addMediafileSelectionStateContext(context);
+};
 
 const determineContextsForMediafileViewer = () => {
   if (columnList.value === "no-values") return;
   const columns: Column[] = Object.values(columnList.value).map((value) => {
     if (typeof value !== "string") return value;
   });
-  Object.values(columns[0].elements).forEach((element: EntityListElement | SingleMediaFileElement) => {
-    if (element?.__typename === "SingleMediaFileElement" )
-      addContextToState("SingleMediaFileElement");
-    if (element?.__typename === "EntityListElement" && element?.type === MediaFileElementTypes.Media)
-      addContextToState(element.customQueryFilters);
-  });
-}
+  Object.values(columns[0].elements).forEach(
+    (element: EntityListElement | SingleMediaFileElement) => {
+      if (element?.__typename === "SingleMediaFileElement")
+        addContextToState("SingleMediaFileElement");
+      if (
+        element?.__typename === "EntityListElement" &&
+        element?.type === MediaFileElementTypes.Media
+      )
+        addContextToState(element.customQueryFilters);
+    }
+  );
+};
 
 router.beforeEach(() => {
   if (isEdit) disableEditMode();
@@ -169,9 +171,12 @@ watch(
     }
 
     if (entity.value.type.toLowerCase() === "mediafile") {
-      mediafileSelectionState.value[mediafileViewerContexts.value[0]].mediafiles = [entity.value as MediaFileEntity];
-      mediafileSelectionState.value[mediafileViewerContexts.value[0]].selectedMediafile =
-        entity.value as MediaFileEntity;
+      mediafileSelectionState.value[
+        mediafileViewerContexts.value[0]
+      ].mediafiles = [entity.value as MediaFileEntity];
+      mediafileSelectionState.value[
+        mediafileViewerContexts.value[0]
+      ].selectedMediafile = entity.value as MediaFileEntity;
     }
 
     const mappings = fetchUpdateAndDeletePermission(
