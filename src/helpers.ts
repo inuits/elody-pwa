@@ -102,7 +102,7 @@ export const getEntityPageRoute = (
     name: listItemRouteName,
     params: {
       id: entityId,
-      type: entity.__typename,
+      type: entity.type,
     },
   };
 };
@@ -113,9 +113,15 @@ export const updateEntityMediafileOnlyForMediafiles = (
   onlyRemove: boolean = false
 ) => {
   if (entity.type.toLowerCase() === Entitytyping.Mediafile) {
-    useEntityMediafileSelector().setEntityMediafiles(mediafileViewerContext, []);
+    useEntityMediafileSelector().setEntityMediafiles(
+      mediafileViewerContext,
+      []
+    );
     if (onlyRemove) return;
-    useEntityMediafileSelector().updateSelectedEntityMediafile(mediafileViewerContext, entity);
+    useEntityMediafileSelector().updateSelectedEntityMediafile(
+      mediafileViewerContext,
+      entity
+    );
   }
 };
 
@@ -228,10 +234,13 @@ export const getValueForPanelMetadata = (
     if (typeOfInputField === InputFieldTypes.Checkbox)
       return Boolean(form.values.intialValues[metadataItemKey]);
     return form.values.intialValues[metadataItemKey];
-  } else if (mediafileSelectionState.value[mediafileViewerContext]?.selectedMediafile) {
-    return (mediafileSelectionState.value[mediafileViewerContext].selectedMediafile.intialValues as any)?.[
-      metadataItemKey
-    ];
+  } else if (
+    mediafileSelectionState.value[mediafileViewerContext]?.selectedMediafile
+  ) {
+    return (
+      mediafileSelectionState.value[mediafileViewerContext].selectedMediafile
+        .intialValues as any
+    )?.[metadataItemKey];
   }
   return "";
 };
