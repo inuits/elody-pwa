@@ -7,7 +7,6 @@ import "./assets/base.css";
 import * as Sentry from "@sentry/vue";
 import App from "./App.vue";
 import Unicon from "vue-unicons";
-import useGraphqlErrors from "./composables/useGraphqlErrors";
 import {
   addComponentToRoutes,
   handleRequiredAuthenticationForRoutes,
