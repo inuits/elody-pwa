@@ -6,8 +6,9 @@
       :class="{ '-mr-4': filterSecondaryDropdownOptions.length > 0 }"
       button-style="accentNormal"
       button-size="small"
-      :disabled="isMainActionDisabled"
+      :disabled="isMainActionDisabled || !primaryOption.active"
       :label="t(primaryOption.label)"
+      :tooltip-label="primaryOption.actionContext?.labelForTooltip"
       @click="handleEmit(primaryOption)"
     />
     <BaseButtonNew
@@ -85,7 +86,16 @@ const auth = useAuth();
 const availableOptions = ref<DropdownOption[]>([]);
 
 const primaryOption = computed(() => {
-  return availableOptions.value.find((item: DropdownOption) => item.primary);
+  let option = availableOptions.value.find(
+    (item: DropdownOption) => item.primary
+  );
+  if (option) {
+    option = {
+      ...option,
+      active: determineActiveState(option),
+    };
+  }
+  return option;
 });
 
 const secondaryOptions = computed(() => {
@@ -98,21 +108,7 @@ const secondaryOptions = computed(() => {
 
 const filterSecondaryDropdownOptions = computed<DropdownOption[]>(() => {
   return secondaryOptions.value.map((dropdownOption) => {
-    if (!dropdownOption.actionContext) dropdownOption.active = true;
-    else {
-      const activeViewMode = dropdownOption.actionContext.activeViewMode;
-      const entitiesSelectionType =
-        dropdownOption.actionContext.entitiesSelectionType;
-      const viewMode = isEdit.value
-        ? activeViewMode.includes(ActionContextViewModeTypes.EditMode)
-        : activeViewMode.includes(ActionContextViewModeTypes.ReadMode);
-      const numberOfEntities = props.itemsSelected
-        ? entitiesSelectionType ===
-          ActionContextEntitiesSelectionType.SomeSelected
-        : entitiesSelectionType ===
-          ActionContextEntitiesSelectionType.NoneSelected;
-      dropdownOption.active = viewMode && numberOfEntities;
-    }
+    dropdownOption.active = determineActiveState(dropdownOption);
     return dropdownOption;
   });
 });
@@ -123,6 +119,23 @@ const hasSecondaryOptions = computed(() => {
 
 const handleEmit = (action: DropdownOption) => {
   emit("update:modelValue", action);
+};
+
+const determineActiveState = (item: DropdownOption) => {
+  if (!item.actionContext) return true;
+  let isActive = false;
+
+  const activeViewMode = item.actionContext.activeViewMode;
+  const entitiesSelectionType = item.actionContext.entitiesSelectionType;
+  const viewMode = isEdit.value
+    ? activeViewMode.includes(ActionContextViewModeTypes.EditMode)
+    : activeViewMode.includes(ActionContextViewModeTypes.ReadMode);
+  const numberOfEntities = props.itemsSelected
+    ? entitiesSelectionType === ActionContextEntitiesSelectionType.SomeSelected
+    : entitiesSelectionType === ActionContextEntitiesSelectionType.NoneSelected;
+  isActive = viewMode && numberOfEntities;
+
+  return isActive;
 };
 
 const getAvailableOptions = () => {
