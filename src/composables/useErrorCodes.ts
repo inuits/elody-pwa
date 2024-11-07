@@ -11,8 +11,14 @@ export const useErrorCodes = (): {
     code: string;
     message: string;
   } => {
-    const [errorCode, ...messageParts] = httpErrorMessage.split(" ");
-    return { code: errorCode, message: messageParts.join(" ") };
+    const errorCodeRegex = /\b[RW]\d{4,5}\b/g;
+    const errorCodeMatch = httpErrorMessage.match(errorCodeRegex);
+    const errorCode: string = errorCodeMatch[0];
+
+    const messageParts: string[] = httpErrorMessage.split(errorCode);
+    const message: string = messageParts[1] ? messageParts[1].trim() : "";
+
+    return { code: errorCode, message };
   };
 
   const handleErrorByCode = (code: string): void => {
@@ -30,6 +36,7 @@ export const useErrorCodes = (): {
     const { code, message } =
       extractMessageAndCodeFromErrorResponse(httpErrorMessage);
     handleErrorByCode(code);
+    console.log(message);
     return message;
   };
 
