@@ -29,6 +29,7 @@ import { ref, computed, watch } from "vue";
 import { type TypeModals, ModalStyle } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useModalActions } from "@/composables/useModalActions";
 
 const props = withDefaults(
   defineProps<{
@@ -76,6 +77,7 @@ watch(
 const hideModal = () => {
   emit("update:modalState", "hide");
   emit("hideModal", "hide");
+  useModalActions().resetAllProperties();
 };
 </script>
 
