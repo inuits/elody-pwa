@@ -21,6 +21,23 @@
       :height="iconHeight"
     />
     <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
+
+    <div v-if="disabled && tooltipLabel" class="ml-2 -mb-2 text-black">
+      <base-tooltip position="top-right" :tooltip-offset="8">
+        <template #activator="{ on }">
+          <div v-on="on">
+            <unicon :name="Unicons.QuestionCircle.name" height="20" />
+          </div>
+        </template>
+        <template #default>
+          <span class="text-sm text-text-placeholder">
+            <div>
+              {{ t(tooltipLabel) }}
+            </div>
+          </span>
+        </template>
+      </base-tooltip>
+    </div>
   </button>
 </template>
 
@@ -29,6 +46,7 @@ import { DamsIcons } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import BaseTooltip from "./BaseTooltip.vue";
 
 type PseudoStyle = {
   textColor: string;
@@ -114,6 +132,7 @@ const props = withDefaults(
     disabled?: boolean;
     iconHeight?: number;
     loading?: boolean;
+    tooltipLabel?: string;
   }>(),
   {
     icon: DamsIcons.NoIcon,
