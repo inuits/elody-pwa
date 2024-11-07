@@ -7,7 +7,6 @@ import "./assets/base.css";
 import * as Sentry from "@sentry/vue";
 import App from "./App.vue";
 import Unicon from "vue-unicons";
-import useGraphqlErrors from "./composables/useGraphqlErrors";
 import {
   addComponentToRoutes,
   handleRequiredAuthenticationForRoutes,
@@ -32,7 +31,6 @@ export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
 export let bulkSelectAllSizeLimit: number = 999999;
 export let formattersSettings: any = {};
-
 
 const applyCustomization = (rulesObject: any) => {
   if (rulesObject.applicationTitle)

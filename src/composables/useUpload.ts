@@ -12,17 +12,15 @@ import {
 } from "@/generated-types/queries";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
-import useHttpErrors from "@/composables/useHttpErrors";
-import { useRouter } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useErrorCodes } from "@/composables/useErrorCodes";
 
 type UploadSettings = {
   uploadType: UploadFieldType;
   uploadFlow: UploadFlow;
 };
 
-const router = useRouter();
-const { logFormattedErrors } = useHttpErrors();
+const { handleHttpError } = useErrorCodes();
 const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
   "no-upload"
 );
@@ -199,21 +197,6 @@ const useUpload = () => {
 
   const handleDryRunResult = (dryRunResult: any, file: DropzoneFile): void => {
     try {
-      if (dryRunResult.message) {
-        dryRunErrors.value.push(dryRunResult.message);
-        __updateGlobalUploadProgress(
-          ProgressStepType.Validate,
-          ProgressStepStatus.Failed
-        );
-        __updateFileThumbnails(
-          file,
-          ProgressStepType.Validate,
-          ProgressStepStatus.Failed,
-          [dryRunResult.message]
-        );
-        return;
-      }
-
       const errors: string[] = [];
       const errorKeys = Object.keys(dryRunResult.errors);
       errorKeys.forEach((key: string) => {
@@ -282,9 +265,9 @@ const useUpload = () => {
     try {
       dryRunResult = await __batchEntities(__getCsvBlob(), true);
       handleDryRunResult(dryRunResult, file);
-    } catch (error: any) {
-      const errorMessage: string = error.message || error.statusText;
-      dryRunErrors.value.push(errorMessage);
+    } catch (error: Promise<string>) {
+      const message = await error;
+      dryRunErrors.value.push(message);
       __updateGlobalUploadProgress(
         ProgressStepType.Validate,
         ProgressStepStatus.Failed
@@ -293,7 +276,7 @@ const useUpload = () => {
         file,
         ProgressStepType.Validate,
         ProgressStepStatus.Failed,
-        [errorMessage]
+        [message]
       );
     }
   };
@@ -311,7 +294,8 @@ const useUpload = () => {
       }
     );
     if (!response.ok) {
-      return Promise.reject(response);
+      const httpErrorMessage = handleHttpError(response);
+      return Promise.reject(httpErrorMessage);
     }
 
     if (!isDryRun) return JSON.parse(await response.text());
@@ -340,7 +324,8 @@ const useUpload = () => {
     );
 
     if (!response.ok) {
-      return Promise.reject(response);
+      const httpErrorMessage = handleHttpError(response);
+      return Promise.reject(httpErrorMessage);
     }
 
     return JSON.parse(await response.text());
@@ -361,7 +346,8 @@ const useUpload = () => {
     );
 
     if (!response.ok) {
-      return Promise.reject(response);
+      const httpErrorMessage = handleHttpError(response);
+      return Promise.reject(httpErrorMessage);
     }
     return JSON.parse(await response.text());
   };
@@ -476,7 +462,8 @@ const useUpload = () => {
         ProgressStepType.Upload,
         ProgressStepStatus.Failed
       );
-      return Promise.reject(response);
+      const httpErrorMessage = handleHttpError(response);
+      return Promise.reject(httpErrorMessage);
     }
 
     return {
@@ -510,12 +497,13 @@ const useUpload = () => {
           ProgressStepStatus.Complete
         );
         yield __uploadFile(file, url, config);
-      } catch (error: any) {
+      } catch (error: Promise<string>) {
+        const errorMessage = await error;
         __updateFileThumbnails(
           file,
           ProgressStepType.Prepare,
           ProgressStepStatus.Failed,
-          [error.message || error.statusText]
+          [errorMessage]
         );
       }
     }
@@ -764,10 +752,6 @@ const useUpload = () => {
     errorContainer.classList.remove("hidden");
   };
 
-  const __handleHttpError = (error: any) => {
-    logFormattedErrors(router, error);
-  };
-
   return {
     resetUpload,
     addFileToUpload,
@@ -799,7 +783,6 @@ const useUpload = () => {
     standaloneFileType,
     reinitializeDynamicFormFunc,
     __getCsvString,
-    __handleHttpError,
   };
 };
 

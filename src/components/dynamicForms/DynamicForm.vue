@@ -219,6 +219,7 @@ import { Unicons } from "@/types";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { useModalActions } from "@/composables/useModalActions";
+import { useErrorCodes } from "@/composables/useErrorCodes";
 
 const props = withDefaults(
   defineProps<{
@@ -272,10 +273,10 @@ const {
   standaloneFileType,
   reinitializeDynamicFormFunc,
   uploadCsvForReordering,
-  __handleHttpError,
   __getCsvString,
   resetUpload,
 } = useUpload();
+const { handleHttpError } = useErrorCodes();
 const {
   getAcceptedTypes,
   getParentEntityType,
@@ -507,7 +508,7 @@ const updateMetdataActionFunction = async (field: FormAction) => {
     );
   } catch (error) {
     resetUpload();
-    __handleHttpError(error);
+    handleHttpError(error);
     submitErrors.value = error.message;
   }
 };
@@ -527,7 +528,7 @@ const callEndpointActionFunction = async (field: FormAction) => {
   });
   if (result.status !== 200) {
     const error = new Error(result.statusText);
-    __handleHttpError(error);
+    handleHttpError(error);
     closeAndDeleteForm();
     submitErrors.value = error.message;
     throw error;
@@ -551,7 +552,7 @@ const reorderEntitiesActionFunction = async (field: FormAction) => {
       t("notifications.success.csvReordering.description")
     );
   } catch (error) {
-    __handleHttpError(error);
+    handleHttpError(error);
     submitErrors.value = error.message;
   }
 };
