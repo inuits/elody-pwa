@@ -46,7 +46,7 @@ import {
 import EntityColumn from "@/components/EntityColumn.vue";
 import EntityForm from "@/components/EntityForm.vue";
 import { asString, getTitleOrNameFromEntity } from "@/helpers";
-import { reactive, ref, watch, inject, provide } from "vue";
+import { reactive, ref, watch, inject, provide, onBeforeMount } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useEditMode } from "@/composables/useEdit";
@@ -99,9 +99,12 @@ const { result, refetch, onError } = useQuery<GetEntityByIdQuery>(
     fetchPolicy: "no-cache",
   })
 );
-onError((error) => {
-  if (error.message === "404: NOT FOUND")
-    router.replace({ name: "NotFound" });
+
+onBeforeMount(() => {
+  onError((error) => {
+    if (error.message === "404: NOT FOUND")
+      router.replace({ name: "NotFound" });
+  });
 });
 
 const intialValues = ref<IntialValues | "no-values">("no-values");
