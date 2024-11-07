@@ -21,6 +21,9 @@ const useThumbnailHelper = (): {
         return Unicons.VideoSlash.name;
       }
 
+      if (data.intialValues.mimetype.includes("pdf"))
+        return Unicons.FileAlt.name;
+
       return Unicons.NoImage.name;
     } catch (e) {
       return Unicons.NoImage.name;
