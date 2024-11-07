@@ -25,7 +25,7 @@ export default defineComponent({
     const getText = async () => {
       const response = await getMediafile(
         "/api/mediafile/" +
-          getMediafilePath(props.source.intialValues.originalFileLocation)
+          getMediafilePath(props.source.intialValues.original_file_location)
       );
       const text = await response.text();
       fileContent.value = text.split(/\r\n|\n/).join("<br/>");
