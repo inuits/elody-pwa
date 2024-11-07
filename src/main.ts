@@ -19,12 +19,11 @@ import { createRouter, createWebHistory } from "vue-router";
 import { createUploadLink } from "apollo-upload-client";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { getApplicationDetails, getFormattersSettings, i18n } from "@/helpers";
-import { type ErrorResponse, onError } from "@apollo/client/link/error";
+import { onError } from "@apollo/client/link/error";
 import { OpenIdConnectClient } from "session-vue-3-oidc-library";
 import { setIgnorePermissions } from "./composables/usePermissions";
 import { Unicons } from "./types";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { useErrorCodes } from "@/composables/useErrorCodes";
 
 import OpenLayersMap from "vue3-openlayers";
 
@@ -75,9 +74,9 @@ const start = async () => {
 
   bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
 
-  const graphqlErrorInterceptor = onError((error: ErrorResponse) => {
-    const { handleGraphqlError } = useErrorCodes();
-    handleGraphqlError(error);
+  const graphqlErrorInterceptor = onError((error: any) => {
+    const errorHandler = useGraphqlErrors(error);
+    errorHandler.logFormattedErrors(router);
   });
 
   apolloClient = new ApolloClient({
