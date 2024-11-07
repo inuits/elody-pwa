@@ -25,7 +25,7 @@ const mediafileSelectionState = ref<{ [key: string]: reactive<MediafileSelection
 
 export const useEntityMediafileSelector = () => {
   const addMediafileSelectionStateContext = (
-    context: String
+    context: string
   ): void => {
     mediafileSelectionState.value[context] = reactive<MediafileSelectionState>({
       mediafiles: [],
@@ -34,7 +34,7 @@ export const useEntityMediafileSelector = () => {
   }
 
   const getValueOfMediafile = (
-    context: String,
+    context: string,
     key: MediaFileRootKeys | MediaFileMetadataKeys,
     mediafile:
       | MediaFileEntity
@@ -49,7 +49,7 @@ export const useEntityMediafileSelector = () => {
   };
 
   const setEntityMediafiles = (
-    context: String,
+    context: string,
     mediafiles: MediaFileEntity[]
   ) => {
     if (!context) return;
@@ -57,14 +57,14 @@ export const useEntityMediafileSelector = () => {
   };
 
   const updateSelectedEntityMediafile = (
-    context: String,
+    context: string,
     mediafile: MediaFileEntity | undefined
   ) => {
     if (!context) return;
     mediafileSelectionState.value[context].selectedMediafile = mediafile;
   };
 
-  const selectPreviousMediafile = (context: String) => {
+  const selectPreviousMediafile = (context: string) => {
     const currentIndex = getCurrentlySelectedMediafileIndex(context);
     if (currentIndex === undefined) return;
 
@@ -75,7 +75,7 @@ export const useEntityMediafileSelector = () => {
     setSelectedMediafileByIndex(context, previousIndex);
   };
 
-  const selectNextMediafile = (context: String) => {
+  const selectNextMediafile = (context: string) => {
     const currentIndex = getCurrentlySelectedMediafileIndex(context);
     if (currentIndex === undefined) return;
 
@@ -87,7 +87,7 @@ export const useEntityMediafileSelector = () => {
     setSelectedMediafileByIndex(context, nextIndex);
   };
 
-  const getCurrentlySelectedMediafileIndex = (context: String): number | undefined => {
+  const getCurrentlySelectedMediafileIndex = (context: string): number | undefined => {
     if (
       mediafileSelectionState.value[context].mediafiles.length === 0 ||
       !mediafileSelectionState.value[context].selectedMediafile
@@ -101,7 +101,7 @@ export const useEntityMediafileSelector = () => {
   };
 
   const setSelectedMediafileByIndex = (
-    context: String,
+    context: string,
     index: number
   ) => {
     if (index >= mediafileSelectionState.value[context].mediafiles.length || index < 0) return;
