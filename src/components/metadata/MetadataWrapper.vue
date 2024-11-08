@@ -166,8 +166,6 @@ const props = withDefaults(
 // );
 
 const setNewValue = (newValue: string | BaseRelationValuesInput[] | string[]) => {
-  console.log("Setting new value!!")
-  console.log(newValue)
   value.value = newValue;
   const form = getForm(props.formId);
   if (form) {
@@ -337,6 +335,12 @@ onBeforeUnmount(() => {
   removeOrderItem(props.formId, fieldKeyWithId.value);
 });
 
+watch(
+  () => props.metadata.value,
+  () => {
+    setNewValue(props.metadata.value);
+  }
+);
 watch(
   () => props.isEdit,
   () => {
