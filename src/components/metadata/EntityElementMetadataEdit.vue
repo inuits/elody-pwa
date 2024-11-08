@@ -34,10 +34,11 @@
     />
     <BaseDropdownNew
       v-else-if="field.type === InputFieldTypes.Dropdown"
-      v-model:model-value="metadataValue as DropdownOption"
+      v-model:model-value="metadataValue as DropdownOption[]"
       :options="(field.options as DropdownOption[])"
       dropdown-style="defaultWithBorder"
       :disable="fieldEditIsDisabled"
+      :multiple="field.multiple"
     />
     <BaseInputTextNumberDatetime
       v-else
@@ -106,7 +107,7 @@ const props = defineProps<{
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 
 const { addEditableMetadataKeys } = useFormHelper();
-const metadataValue = ref<string | DropdownOption>(props.value);
+const metadataValue = ref<string | DropdownOption[]>(props.value);
 const { conditionalFieldIsAvailable } = useConditionalValidation();
 
 const isFieldHidden = computed(() => props.hiddenField?.hidden);
@@ -133,9 +134,18 @@ onMounted(() => {
 });
 
 const getValueFromMetadata = (): string | BaseRelationValuesInput[] => {
+  if (Array.isArray(metadataValue.value)) {
+    const returnArray = [];
+    metadataValue.value.forEach((metadataItem) => {
+      if (isDateTime(metadataItem.value)) {
+        returnArray.push(addCurrentTimeZoneToDateTimeString(metadataItem.value));
+      }
+      else returnArray.push(metadataItem.value);
+    })
+    return returnArray;
+  }
   if (
-    typeof metadataValue.value !== "object" ||
-    Array.isArray(metadataValue.value)
+    typeof metadataValue.value !== "object"
   ) {
     if (isDateTime(metadataValue.value)) {
       return addCurrentTimeZoneToDateTimeString(metadataValue.value);
