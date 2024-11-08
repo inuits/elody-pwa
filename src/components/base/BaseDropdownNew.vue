@@ -121,11 +121,11 @@ const defaultOption: DropdownOption = {
   value: "",
 };
 const allOptions = computed(() => [defaultOption, ...props.options]);
-const selectedItem = ref<DropdownOption>(props.defaultOption || defaultOption);
-const selectedItemLabel = computed(() => selectedItem.value?.label);
+const selectedItem = ref<DropdownOption[]>(props.defaultOption || defaultOption);
+const selectedItemLabel = computed(() => selectedItem.value[0]?.label);
 
 const selectDefaultItem = () => {
-  selectedItem.value = defaultOption;
+  selectedItem.value = [defaultOption];
 };
 defineExpose({
   selectDefaultItem,
@@ -179,7 +179,7 @@ watch(
   () => {
     if (props.options.length > 0)
       if (props.selectFirstOptionByDefault) {
-        selectedItem.value = props.options[0];
+        selectedItem.value = [props.options[0]];
         emit("update:modelValue", selectedItem.value);
       }
   },
