@@ -51,7 +51,7 @@ const props = withDefaults(
     formId: string;
     autoSelectable: boolean;
     disabled: boolean;
-    canCreateOption: boolean;
+    canCreateOption?: boolean;
     metadataKeyToCreateEntityFromOption?: string;
     isReadOnly?: boolean;
     isMetadataField?: boolean;

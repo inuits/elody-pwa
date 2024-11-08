@@ -37,8 +37,8 @@ const props = withDefaults(
     contextMenuActions?: ContextMenuActions;
     entityId: string;
     entityType: Entitytyping;
-    parentEntityId: string;
-    relation?: object;
+    parentEntityId?: string;
+    relation?: object | string;
   }>(),
   {
     contextMenuActions: undefined,

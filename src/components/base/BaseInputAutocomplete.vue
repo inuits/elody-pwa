@@ -44,7 +44,7 @@ const props = withDefaults(
     relation?: boolean;
     loading?: boolean;
     noOptionsText?: string;
-    canCreateOption: boolean;
+    canCreateOption?: boolean;
   }>(),
   {
     selectType: "multi",
