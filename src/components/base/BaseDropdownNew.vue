@@ -5,6 +5,7 @@
   >
     <p :class="['pr-2']" v-if="label">{{ t(label) }}</p>
     <select
+      :multiple="multiple"
       :disabled="disable"
       :class="[
         'cursor-pointer',
@@ -96,6 +97,7 @@ const props = withDefaults(
     label?: string;
     disable?: boolean;
     itemsSelected?: boolean;
+    multiple?: boolean;
   }>(),
   {
     selectFirstOptionByDefault: false,
@@ -103,11 +105,12 @@ const props = withDefaults(
     labelAlignment: "left",
     disable: false,
     itemsSelected: false,
+    multiple: false,
   }
 );
 
 const emit = defineEmits<{
-  (event: "update:modelValue", modelValue: DropdownOption): void;
+  (event: "update:modelValue", modelValue: DropdownOption[]): void;
 }>();
 
 const { t } = useI18n();
@@ -129,9 +132,20 @@ defineExpose({
 });
 
 const selectItem = (event: Event) => {
-  const newlySelectedOption = props.options.find(
-    (option: DropdownOption) => option.label === event.target?.value
-  );
+  let newlySelectedOption: DropdownOption[] = [];
+  if (props.multiple)
+    for (const item of event.target.options) {
+      if (item.selected)
+        newlySelectedOption.push(
+          props.options.find(
+            (option: DropdownOption) => option.label === item?.value
+          )
+      );
+    }
+  else
+    newlySelectedOption = [props.options.find(
+      (option: DropdownOption) => option.label === event.target?.value
+    )];
   if (
     !newlySelectedOption ||
     newlySelectedOption === selectedItem.value ||
