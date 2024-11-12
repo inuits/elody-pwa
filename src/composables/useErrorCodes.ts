@@ -30,7 +30,7 @@ export const useErrorCodes = (): {
     403: () => handleAccessDenied(),
   };
 
-  const setupUseI18n = async () => {
+  const setupScopedUseI18n = async () => {
     const { translations, config } = await getApplicationDetails();
     let language = config.customization.applicationLocale;
     const displayPreferences = useStateManagement().getGlobalState(
@@ -132,7 +132,7 @@ export const useErrorCodes = (): {
   };
 
   const handleGraphqlError = async (error: GraphQLError): Promise<string> => {
-    t = await setupUseI18n();
+    t = await setupScopedUseI18n();
     const graphqlErrorMessage =
       error.response.errors[0]?.extensions?.response?.body?.message;
 
@@ -151,7 +151,7 @@ export const useErrorCodes = (): {
   };
 
   const handleHttpError = async (httpResponse: Response): Promise<string> => {
-    t = await setupUseI18n();
+    t = await setupScopedUseI18n();
     const responseBody = await httpResponse.json();
     const httpErrorMessage: string =
       responseBody.extensions.response.body.message;
