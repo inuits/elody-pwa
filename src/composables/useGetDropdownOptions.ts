@@ -158,6 +158,7 @@ export const useGetDropdownOptions = (
     if (
       !relations ||
       !Array.isArray(relations) ||
+      (Array.isArray(relations) && relations.length === 0) ||
       hasOnlyDeletedRelations(relations)
     )
       return variable;
