@@ -59,7 +59,6 @@ import { type PropType, inject } from "vue";
 import { Unicons } from "../types";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 
-
 export default defineComponent({
   name: "ViewerToolbar",
   components: {},

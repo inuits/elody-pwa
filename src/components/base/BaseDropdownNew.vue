@@ -110,7 +110,10 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (event: "update:modelValue", modelValue: DropdownOption | DropdownOption[]): void;
+  (
+    event: "update:modelValue",
+    modelValue: DropdownOption | DropdownOption[]
+  ): void;
 }>();
 
 const { t } = useI18n();
@@ -123,8 +126,8 @@ const defaultOption: DropdownOption = {
 const allOptions = computed(() => [defaultOption, ...props.options]);
 const selectedItem = ref<DropdownOption>(props.defaultOption || defaultOption);
 const selectedItemLabel = computed(() => {
-  if (Array.isArray(selectedItem.value)) return selectedItem.value[0]?.label
-  return selectedItem.value?.label
+  if (Array.isArray(selectedItem.value)) return selectedItem.value[0]?.label;
+  return selectedItem.value?.label;
 });
 
 const selectDefaultItem = () => {
@@ -146,8 +149,7 @@ const selectItem = (event: Event) => {
           )
         );
     }
-  }
-  else
+  } else
     newlySelectedOption = props.options.find(
       (option: DropdownOption) => option.label === event.target?.value
     );

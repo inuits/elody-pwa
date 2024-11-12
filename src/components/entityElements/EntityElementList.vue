@@ -32,9 +32,16 @@
               SearchInputType.AdvancedInputMediaFilesType
             "
             :predefined-entities="
-              entityUuid === mediafileSelectionState[customQueryFilters].selectedMediafile?.id ||
-              entityUuid === mediafileSelectionState[customQueryFilters].selectedMediafile?.uuid
-                ? [mediafileSelectionState[customQueryFilters].selectedMediafile]
+              entityUuid ===
+                mediafileSelectionState[customQueryFilters].selectedMediafile
+                  ?.id ||
+              entityUuid ===
+                mediafileSelectionState[customQueryFilters].selectedMediafile
+                  ?.uuid
+                ? [
+                    mediafileSelectionState[customQueryFilters]
+                      .selectedMediafile,
+                  ]
                 : undefined
             "
             :enable-preview="true"
@@ -42,8 +49,12 @@
             :enable-bulk-operations="true"
             :enable-navigation="false"
             :parent-entity-identifiers="
-              entityUuid === mediafileSelectionState[customQueryFilters].selectedMediafile?.id ||
-              entityUuid === mediafileSelectionState[customQueryFilters].selectedMediafile?.uuid
+              entityUuid ===
+                mediafileSelectionState[customQueryFilters].selectedMediafile
+                  ?.id ||
+              entityUuid ===
+                mediafileSelectionState[customQueryFilters].selectedMediafile
+                  ?.uuid
                 ? undefined
                 : identifiers
             "

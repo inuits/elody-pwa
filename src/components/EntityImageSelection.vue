@@ -1,6 +1,9 @@
 <template>
   <div
-    v-if="!loading && mediafileSelectionState[mediafileViewerContext].mediafiles.length > 0"
+    v-if="
+      !loading &&
+      mediafileSelectionState[mediafileViewerContext].mediafiles.length > 0
+    "
     class="flex h-auto"
     :class="{ 'animate-pulse bg-neutral-20 text-neutral-20': loading }"
   >
@@ -28,7 +31,9 @@
             class="flex flex-col w-full items-center my-2 overflow-y-auto"
           >
             <div
-              v-for="mediafile in mediafileSelectionState[mediafileViewerContext].mediafiles"
+              v-for="mediafile in mediafileSelectionState[
+                mediafileViewerContext
+              ].mediafiles"
               :key="mediafile.id"
               class="w-full h-full"
             >
