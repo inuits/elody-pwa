@@ -110,12 +110,17 @@ enum Matchers {
   NONE_MATCHER = "NoneMatcher",
 }
 
-const props = defineProps<{
-  filter: FilterListItem;
-  matchers: DropdownOption[];
-  clearAllActiveFilters: boolean;
-  relatedActiveFilter: string[];
-}>();
+const props = withDefaults(
+  defineProps<{
+    filter: FilterListItem;
+    matchers: DropdownOption[];
+    clearAllActiveFilters: boolean;
+    relatedActiveFilter: string[];
+  }>(),
+  {
+    relatedActiveFilter: () => [],
+  }
+);
 
 const emit = defineEmits<{
   (

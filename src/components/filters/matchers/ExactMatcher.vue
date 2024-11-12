@@ -98,10 +98,15 @@ import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute } from "vue-router";
 
-const props = defineProps<{
-  filter: FilterListItem;
-  relatedActiveFilter: string[];
-}>();
+const props = withDefaults(
+  defineProps<{
+    filter: FilterListItem;
+    relatedActiveFilter: string[];
+  }>(),
+  {
+    relatedActiveFilter: () => [],
+  }
+);
 
 const emit = defineEmits<{
   (
@@ -181,7 +186,7 @@ onFilterOptionsResult((result) => {
     options.forEach((option) => {
       const isSelected =
         props.relatedActiveFilter &&
-        props.relatedActiveFilter?.value.includes(option.value);
+        props.relatedActiveFilter?.value?.includes(option.value);
       filterOptions.push({ isSelected: isSelected, option });
     });
     emit(
