@@ -336,12 +336,14 @@ onBeforeUnmount(() => {
   removeOrderItem(props.formId, fieldKeyWithId.value);
 });
 
-watch(
-  () => props.metadata.value,
-  () => {
-    setNewValue(props.metadata.value);
-  }
-);
+if (typeof props.metadata.value !== "object") {
+  watch(
+    () => props.metadata.value,
+    () => {
+      setNewValue(props.metadata.value);
+    }
+  );
+}
 watch(
   () => props.isEdit,
   () => {
