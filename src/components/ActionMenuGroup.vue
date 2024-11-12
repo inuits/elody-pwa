@@ -67,7 +67,7 @@ const props = withDefaults(
   defineProps<{
     modelValue?: DropdownOption;
     options: DropdownOption[];
-    isMainActionDisabled: boolean;
+    isMainActionDisabled?: boolean;
     itemsSelected?: boolean;
     entityType: Entitytyping;
     parentEntityId?: string | undefined;

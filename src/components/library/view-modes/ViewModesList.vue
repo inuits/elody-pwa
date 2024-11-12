@@ -99,7 +99,7 @@ import {
   EntityListElement,
   BaseLibraryModes,
   RelationActions,
-  ConfigItem
+  ConfigItem,
 } from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
@@ -126,13 +126,13 @@ const props = withDefaults(
     enableNavigation?: boolean;
     parentEntityIdentifiers?: string[];
     idsOfNonSelectableEntities?: string[];
-    relationType: string;
+    relationType?: string;
     enableSelection: boolean;
     baseLibraryMode?: BaseLibraryModes;
     entityListElements?: EntityListElement[];
     allowedActionsOnRelations?: RelationActions[];
     mode: "list" | "grid";
-    config: ConfigItem[];
+    config?: ConfigItem[];
   }>(),
   {
     disablePreviews: false,
@@ -142,7 +142,7 @@ const props = withDefaults(
     enableSelection: true,
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     entityListElements: undefined,
-    allowedActionsOnRelations: [],
+    allowedActionsOnRelations: () => [],
     mode: "list",
   }
 );
