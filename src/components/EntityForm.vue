@@ -105,11 +105,13 @@ const submit = useSubmitForm<EntityValues>(async () => {
 
   if (!collection) throw Error("Could not determine collection for submit");
 
-  const result = await mutate({
+  const { result, errors } = await mutate({
     id: props.uuid,
     formInput: parseFormValuesToFormInput(props.uuid, unref(form.values)),
     collection,
   });
+
+  if (errors) console.log(errors);
 
   if (!result?.data?.mutateEntityValues) return;
   mutatedEntity = result.data.mutateEntityValues as Entity;
