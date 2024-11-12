@@ -1,10 +1,7 @@
-import useHttpErrors from "@/composables/useHttpErrors";
-import { useRouter } from "vue-router";
+import { useErrorCodes } from "@/composables/useErrorCodes";
 
 export const useGetMediafile = () => {
-  const { logFormattedErrors, getStatusCodeFromError } = useHttpErrors();
-  const router = useRouter();
-  const errorCodesToReact = [401, 403];
+  const { handleHttpError } = useErrorCodes();
 
   const fetchFile = async (path: string) => {
     const response = await fetch(path);
@@ -21,12 +18,7 @@ export const useGetMediafile = () => {
       const response = await fetchFile(path);
       return response;
     } catch (error: any) {
-      const errorCode = getStatusCodeFromError(error);
-      const shouldLogError = errorCodesToReact.includes(Number(errorCode));
-      if (shouldLogError) {
-        logFormattedErrors(router, error);
-      }
-      throw error;
+      handleHttpError(error);
     }
   };
 
