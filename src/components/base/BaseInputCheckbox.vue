@@ -67,6 +67,7 @@ const props = withDefaults(
     required?: boolean;
   }>(),
   {
+    modelValue: false,
     label: "",
     disabled: false,
     ignoreBulkOperations: false,

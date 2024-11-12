@@ -14,10 +14,15 @@ import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDa
 import { defineEmits, onMounted, onUpdated, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
-const props = defineProps<{
-  filter: FilterListItem;
-  relatedActiveFilter: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    filter: FilterListItem;
+    relatedActiveFilter: string[];
+  }>(),
+  {
+    relatedActiveFilter: () => [],
+  }
+);
 
 const emit = defineEmits<{
   (
