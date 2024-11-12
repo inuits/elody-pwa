@@ -14,6 +14,7 @@ export const useErrorCodes = (): {
   handleHttpError: (httpResponse: Response) => string;
 } => {
   let t;
+  const { createNotificationOverwrite } = useNotification();
 
   const authHandlers: Record<string, Function> = {
     "1001": () => handleUnauthorized(),
@@ -79,11 +80,11 @@ export const useErrorCodes = (): {
   };
 
   const handleAccessDenied = () => {
-    useNotification().createNotificationOverwrite({
-      type: NotificationType.error,
-      title: t("notifications.graphql-errors.forbidden.title"),
-      description: t("notifications.graphql-errors.forbidden.description"),
-    });
+    createNotificationOverwrite(
+      NotificationType.error,
+      t("notifications.graphql-errors.forbidden.title"),
+      t("notifications.graphql-errors.forbidden.description")
+    );
     router.push("/accessDenied");
   };
 
@@ -93,11 +94,7 @@ export const useErrorCodes = (): {
 
   const handleWriteTypeError = (code: string, message: string): void => {
     if (!Object.keys(writeHandlers).includes(code)) {
-      useNotification().createNotificationOverwrite({
-        type: NotificationType.error,
-        title: "Error",
-        description: message,
-      });
+      createNotificationOverwrite(NotificationType.error, "Error", message);
       return;
     }
     writeHandlers[code]();
