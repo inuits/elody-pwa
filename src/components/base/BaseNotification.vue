@@ -72,6 +72,7 @@ export const useNotification = () => {
     const baseNotification = { displayTime, shown: true };
     const notificationOverwrite = { type, title, description };
     Object.assign(baseNotification, notificationOverwrite);
+    console.log(baseNotification);
     createNotification(baseNotification as Notification);
   };
 
