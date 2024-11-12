@@ -76,7 +76,7 @@ export const useGetDropdownOptions = (
     await getEntities(undefined);
   };
 
-  const getAutocompleteOptions = async (searchValue: string) => {
+  const getAutocompleteOptions = (searchValue: string) => {
     let advancedFilters;
     if (
       advancedFilterInputForRetrievingOptions &&
@@ -98,7 +98,7 @@ export const useGetDropdownOptions = (
     }
 
     setAdvancedFilters(advancedFilters as AdvancedFilterInput[]);
-    await getEntities(undefined);
+    getEntities(undefined);
   };
 
   const getSearchFilter = (
