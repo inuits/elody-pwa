@@ -76,7 +76,7 @@ export const useGetDropdownOptions = (
     await getEntities(undefined);
   };
 
-  const getAutocompleteOptions = (searchValue: string) => {
+  const getAutocompleteOptions = async (searchValue: string) => {
     let advancedFilters;
     if (
       advancedFilterInputForRetrievingOptions &&
@@ -98,7 +98,7 @@ export const useGetDropdownOptions = (
     }
 
     setAdvancedFilters(advancedFilters as AdvancedFilterInput[]);
-    getEntities(undefined);
+    await getEntities(undefined);
   };
 
   const getSearchFilter = (
@@ -158,6 +158,7 @@ export const useGetDropdownOptions = (
     if (
       !relations ||
       !Array.isArray(relations) ||
+      (Array.isArray(relations) && relations.length === 0) ||
       hasOnlyDeletedRelations(relations)
     )
       return variable;
