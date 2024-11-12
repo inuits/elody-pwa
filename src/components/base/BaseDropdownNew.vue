@@ -110,7 +110,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (event: "update:modelValue", modelValue: DropdownOption[]): void;
+  (event: "update:modelValue", modelValue: DropdownOption | DropdownOption[]): void;
 }>();
 
 const { t } = useI18n();
@@ -121,31 +121,36 @@ const defaultOption: DropdownOption = {
   value: "",
 };
 const allOptions = computed(() => [defaultOption, ...props.options]);
-const selectedItem = ref<DropdownOption[]>(props.defaultOption || defaultOption);
-const selectedItemLabel = computed(() => selectedItem.value[0]?.label);
+const selectedItem = ref<DropdownOption>(props.defaultOption || defaultOption);
+const selectedItemLabel = computed(() => {
+  if (Array.isArray(selectedItem.value)) return selectedItem.value[0]?.label
+  return selectedItem.value?.label
+});
 
 const selectDefaultItem = () => {
-  selectedItem.value = [defaultOption];
+  selectedItem.value = defaultOption;
 };
 defineExpose({
   selectDefaultItem,
 });
 
 const selectItem = (event: Event) => {
-  let newlySelectedOption: DropdownOption[] = [];
-  if (props.multiple)
+  let newlySelectedOption: DropdownOption | DropdownOption[];
+  if (props.multiple) {
+    newlySelectedOption = [];
     for (const item of event.target.options) {
       if (item.selected)
         newlySelectedOption.push(
           props.options.find(
             (option: DropdownOption) => option.label === item?.value
           )
-      );
+        );
     }
+  }
   else
-    newlySelectedOption = [props.options.find(
+    newlySelectedOption = props.options.find(
       (option: DropdownOption) => option.label === event.target?.value
-    )];
+    );
   if (
     !newlySelectedOption ||
     newlySelectedOption === selectedItem.value ||
@@ -179,7 +184,7 @@ watch(
   () => {
     if (props.options.length > 0)
       if (props.selectFirstOptionByDefault) {
-        selectedItem.value = [props.options[0]];
+        selectedItem.value = props.options[0];
         emit("update:modelValue", selectedItem.value);
       }
   },
