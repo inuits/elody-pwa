@@ -39,7 +39,7 @@ export const goToEntityPage = (
     name: listItemRouteName,
     params: {
       id: entityId,
-      type: entity.__typename,
+      type: entity.type,
     },
   });
 };
