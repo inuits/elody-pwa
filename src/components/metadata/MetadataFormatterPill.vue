@@ -2,7 +2,8 @@
   <div
     class="text-sm"
     :class="{
-      'rounded-md bg-slate-800 py-0.25 px-1 mt-1 border border-transparent': pillSettings
+      'rounded-md bg-slate-800 py-0.25 px-1 mt-1 border border-transparent':
+        pillSettings,
     }"
     :style="{
       background: pillSettings?.background,

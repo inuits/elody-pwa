@@ -20,15 +20,37 @@
         ]"
         :url="
           getValueOfMediafile(mediafileViewerContext, 'mimetype', mediafile) &&
-          !getValueOfMediafile(mediafileViewerContext, 'mimetype', mediafile).includes('pdf') &&
-          !getValueOfMediafile(mediafileViewerContext, 'mimetype', mediafile).includes('json/manifest')
+          !getValueOfMediafile(
+            mediafileViewerContext,
+            'mimetype',
+            mediafile
+          ).includes('pdf') &&
+          !getValueOfMediafile(
+            mediafileViewerContext,
+            'mimetype',
+            mediafile
+          ).includes('json/manifest')
             ? `/api/iiif/3/${
-                getValueOfMediafile(mediafileViewerContext, 'transcode_filename', mediafile) ||
-                getValueOfMediafile(mediafileViewerContext, 'filename', mediafile)
+                getValueOfMediafile(
+                  mediafileViewerContext,
+                  'transcode_filename',
+                  mediafile
+                ) ||
+                getValueOfMediafile(
+                  mediafileViewerContext,
+                  'filename',
+                  mediafile
+                )
               }/square/100,/0/default.jpg`
-            : getValueOfMediafile(mediafileViewerContext, 'thumbnail_file_location', mediafile)
+            : getValueOfMediafile(
+                mediafileViewerContext,
+                'thumbnail_file_location',
+                mediafile
+              )
         "
-        @click="updateSelectedEntityMediafile(mediafileViewerContext, mediafile)"
+        @click="
+          updateSelectedEntityMediafile(mediafileViewerContext, mediafile)
+        "
         @error="setNoImage()"
       />
     </div>

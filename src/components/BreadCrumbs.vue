@@ -27,7 +27,9 @@
             'px-2 cursor-pointer',
             { 'max-w-[40vw] truncate': truncatePreviousRouteName },
           ]"
-          @mouseenter="truncatePreviousRouteName = t(previousRoute.title).includes(' ')"
+          @mouseenter="
+            truncatePreviousRouteName = t(previousRoute.title).includes(' ')
+          "
           @mouseleave="truncatePreviousRouteName = true"
           @click="navigateToEntity(previousRoute)"
         >

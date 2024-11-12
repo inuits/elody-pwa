@@ -11,16 +11,20 @@
         {{ metadata.label ? t(metadata.label) : t("metadata.no-label") }}
       </p>
       <p
-        v-if="props.metadata?.inputField && isEdit && (isOneOfRequiredMetadataField || isOneOfRequiredRelationField)"
+        v-if="
+          props.metadata?.inputField &&
+          isEdit &&
+          (isOneOfRequiredMetadataField || isOneOfRequiredRelationField)
+        "
         class="pl-1"
       >
-        ( {{ t('metadata.labels.one-of-required') }} )
+        ( {{ t("metadata.labels.one-of-required") }} )
       </p>
       <p
         v-else-if="props.metadata?.inputField && !isFieldRequired && isEdit"
         class="pl-1"
       >
-        ( {{ t('metadata.labels.optional') }} )
+        ( {{ t("metadata.labels.optional") }} )
       </p>
     </div>
     <entity-element-metadata-edit
@@ -165,7 +169,13 @@ const props = withDefaults(
 //   }
 // );
 
-const setNewValue = (newValue: string | string[] | BaseRelationValuesInput | BaseRelationValuesInput[]) => {
+const setNewValue = (
+  newValue:
+    | string
+    | string[]
+    | BaseRelationValuesInput
+    | BaseRelationValuesInput[]
+) => {
   if (Array.isArray(newValue) && newValue.length === 1) newValue = newValue[0];
   value.value = newValue;
   const form = getForm(props.formId);

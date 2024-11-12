@@ -67,7 +67,7 @@ import {
   DropdownOption,
   EditStatus,
   Entitytyping,
-  HiddenField
+  HiddenField,
 } from "@/generated-types/queries";
 import { useAuth } from "session-vue-3-oidc-library";
 import {
@@ -107,7 +107,9 @@ const props = defineProps<{
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 
 const { addEditableMetadataKeys } = useFormHelper();
-const metadataValue = ref<string | DropdownOption | DropdownOption[]>(props.value);
+const metadataValue = ref<string | DropdownOption | DropdownOption[]>(
+  props.value
+);
 const { conditionalFieldIsAvailable } = useConditionalValidation();
 
 const isFieldHidden = computed(() => props.hiddenField?.hidden);
@@ -138,15 +140,14 @@ const getValueFromMetadata = (): string | BaseRelationValuesInput[] => {
     const returnArray = [];
     metadataValue.value.forEach((metadataItem) => {
       if (isDateTime(metadataItem.value)) {
-        returnArray.push(addCurrentTimeZoneToDateTimeString(metadataItem.value));
-      }
-      else returnArray.push(metadataItem.value);
-    })
+        returnArray.push(
+          addCurrentTimeZoneToDateTimeString(metadataItem.value)
+        );
+      } else returnArray.push(metadataItem.value);
+    });
     return returnArray;
   }
-  if (
-    typeof metadataValue.value !== "object"
-  ) {
+  if (typeof metadataValue.value !== "object") {
     if (isDateTime(metadataValue.value)) {
       return addCurrentTimeZoneToDateTimeString(metadataValue.value);
     }
@@ -156,10 +157,14 @@ const getValueFromMetadata = (): string | BaseRelationValuesInput[] => {
 };
 
 const getIdForHiddenFieldFilter = (): any => {
-  if (props.field.advancedFilterInputForSearchingOptions.item_types[0] === Entitytyping.User && props.hiddenField.searchValueForFilter === "email") {
+  if (
+    props.field.advancedFilterInputForSearchingOptions.item_types[0] ===
+      Entitytyping.User &&
+    props.hiddenField.searchValueForFilter === "email"
+  ) {
     return auth.user.email;
   }
-}
+};
 
 const populateHiddenField = (): BaseRelationValuesInput[] | undefined => {
   if (props.field.type === InputFieldTypes.DropdownMultiselect) {
@@ -168,11 +173,11 @@ const populateHiddenField = (): BaseRelationValuesInput[] | undefined => {
       editStatus: EditStatus.New,
       key: getIdForHiddenFieldFilter(),
       type: props.field.relationType,
-      value: getIdForHiddenFieldFilter()
+      value: getIdForHiddenFieldFilter(),
     });
     return relation;
   }
-}
+};
 
 const keyUpEnterEvent = () => {
   const newValue = getValueFromMetadata();
@@ -192,6 +197,7 @@ watch(
     if (!isFieldHidden.value) return;
     const newValue = populateHiddenField();
     emit("update:value", newValue);
-  }, { immediate: true }
+  },
+  { immediate: true }
 );
 </script>

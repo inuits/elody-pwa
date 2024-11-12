@@ -7,7 +7,7 @@
     >
       <button
         class="absolute top-2 right-2"
-        @click.stop="() => notification.shown = false"
+        @click.stop="() => (notification.shown = false)"
       >
         x
       </button>
