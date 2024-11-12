@@ -165,7 +165,7 @@ const props = withDefaults(
 //   }
 // );
 
-const setNewValue = (newValue: string | BaseRelationValuesInput[] | string[]) => {
+const setNewValue = (newValue: string | string[] | BaseRelationValuesInput | BaseRelationValuesInput[]) => {
   if (Array.isArray(newValue) && newValue.length === 1) newValue = newValue[0];
   value.value = newValue;
   const form = getForm(props.formId);

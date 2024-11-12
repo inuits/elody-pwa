@@ -34,7 +34,7 @@
     />
     <BaseDropdownNew
       v-else-if="field.type === InputFieldTypes.Dropdown"
-      v-model:model-value="metadataValue as DropdownOption[]"
+      v-model:model-value="metadataValue as DropdownOption | DropdownOption[]"
       :options="(field.options as DropdownOption[])"
       dropdown-style="defaultWithBorder"
       :disable="fieldEditIsDisabled"
@@ -107,7 +107,7 @@ const props = defineProps<{
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 
 const { addEditableMetadataKeys } = useFormHelper();
-const metadataValue = ref<string | DropdownOption[]>(props.value);
+const metadataValue = ref<string | DropdownOption | DropdownOption[]>(props.value);
 const { conditionalFieldIsAvailable } = useConditionalValidation();
 
 const isFieldHidden = computed(() => props.hiddenField?.hidden);
