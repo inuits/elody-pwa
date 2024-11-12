@@ -3,6 +3,10 @@
     @clicked="doAction()"
     :label="$t(label)"
     :icon="Unicons[icon].name"
+    :disable="isDisabled"
+    :tooltipLabel="
+      isDisabled ? 'tooltip.bulkOperationsActionBar.readmode' : undefined
+    "
   />
 </template>
 
@@ -15,7 +19,7 @@ import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { useFieldArray } from "vee-validate";
 import useEditMode, { type callback } from "@/composables/useEdit";
-import { inject } from "vue";
+import { inject, computed } from "vue";
 import { useShareLink } from "@/composables/useShareLink";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
@@ -34,7 +38,7 @@ const props = defineProps<{
 const { update } = useFieldArray(
   `relationValues.${props.relation?.relation?.type}`
 );
-const { save, disableEditMode, addSaveCallback, clearSaveCallbacks } =
+const { save, disableEditMode, addSaveCallback, clearSaveCallbacks, isEdit } =
   useEditMode();
 const submitForm: callback = inject("submitForm") as callback;
 const apolloClient = inject(DefaultApolloClient);
@@ -49,6 +53,10 @@ const deleteRelation = async () => {
   await save();
   disableEditMode();
 };
+
+const isDisabled = computed(() => {
+  return isEdit.value && props.action === ContextMenuElodyActionEnum.Delete;
+});
 
 const addSaveHandler = () => {
   clearSaveCallbacks();
