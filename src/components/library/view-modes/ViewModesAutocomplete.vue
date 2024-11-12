@@ -214,8 +214,7 @@ const dependentRelationValues = computed(() => {
 watch(
   () => dependentRelationValues.value,
   (newValue: any, oldValue: any) => {
-    if (!Array.isArray(newValue) || !Array.isArray(oldValue)) return;
-
+    getAutocompleteOptions("");
     if (!Array.isArray(newValue) || !Array.isArray(oldValue)) return;
 
     const hasNoUpdates = isEqual(
@@ -229,7 +228,6 @@ watch(
     if (hasNoUpdates) return;
 
     handleSelect([]);
-    getAutocompleteOptions("");
   },
   { deep: true }
 );
