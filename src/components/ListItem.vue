@@ -152,7 +152,7 @@
     </div>
 
     <div
-      v-if="isEdit && isMarkableAsToBeDeleted"
+      v-if="false"
       :class="[{ 'flex justify-end': viewMode === 'grid' }]"
       @click.stop
     >
