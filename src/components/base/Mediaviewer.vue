@@ -11,7 +11,10 @@
     </div>
 
     <div
-      v-if="!loading && mediafileSelectionState[mediafileViewerContext].selectedMediafile"
+      v-if="
+        !loading &&
+        mediafileSelectionState[mediafileViewerContext].selectedMediafile
+      "
       class="w-full"
     >
       <IIIFViewer
@@ -21,23 +24,38 @@
           getValueOfMediafile(mediafileViewerContext, 'filename') ||
           ''
         "
-        :mediafileId="getValueOfMediafile(mediafileViewerContext, 'id', undefined, KeyValueSource.Root)"
+        :mediafileId="
+          getValueOfMediafile(
+            mediafileViewerContext,
+            'id',
+            undefined,
+            KeyValueSource.Root
+          )
+        "
       />
       <VideoPlayer
         v-if="viewerType === ElodyViewers.Video"
-        :source="mediafileSelectionState[mediafileViewerContext].selectedMediafile"
+        :source="
+          mediafileSelectionState[mediafileViewerContext].selectedMediafile
+        "
       />
       <AudioPlayer
         v-if="viewerType === ElodyViewers.Audio"
-        :source="mediafileSelectionState[mediafileViewerContext].selectedMediafile"
+        :source="
+          mediafileSelectionState[mediafileViewerContext].selectedMediafile
+        "
       />
       <PDFViewer
         v-if="viewerType === ElodyViewers.Pdf"
-        :source="mediafileSelectionState[mediafileViewerContext].selectedMediafile"
+        :source="
+          mediafileSelectionState[mediafileViewerContext].selectedMediafile
+        "
       />
       <TextViewer
         v-if="viewerType === ElodyViewers.Text"
-        :source="mediafileSelectionState[mediafileViewerContext].selectedMediafile"
+        :source="
+          mediafileSelectionState[mediafileViewerContext].selectedMediafile
+        "
       />
     </div>
   </div>
@@ -95,7 +113,9 @@ const viewerType = computed<ElodyViewers | undefined>(() => {
 
 watch([() => props.loading, mediafiles], () => {
   if (props.loading) return;
-  mediafileSelectionState.value[mediafileViewerContext].mediafiles = mediafiles?.value || [];
-  mediafileSelectionState.value[mediafileViewerContext].selectedMediafile = mediafiles?.value?.[0];
+  mediafileSelectionState.value[mediafileViewerContext].mediafiles =
+    mediafiles?.value || [];
+  mediafileSelectionState.value[mediafileViewerContext].selectedMediafile =
+    mediafiles?.value?.[0];
 });
 </script>

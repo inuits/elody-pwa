@@ -38,7 +38,7 @@ const logIn = () => {
 
 onMounted(() => {
   if (auth.isAuthenticated.value) router.push({ name: RouteNames.Home });
-})
+});
 </script>
 
 <style scoped></style>

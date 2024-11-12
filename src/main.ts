@@ -33,7 +33,6 @@ export let apolloClient: ApolloClient<NormalizedCacheObject>;
 export let bulkSelectAllSizeLimit: number = 999999;
 export let formattersSettings: any = {};
 export let router: Router;
-
 const applyCustomization = (rulesObject: any) => {
   if (rulesObject.applicationTitle)
     document.title = rulesObject.applicationTitle;

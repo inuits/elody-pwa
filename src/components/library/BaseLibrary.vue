@@ -151,10 +151,7 @@
             @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
           >
             <ViewModesList
-              v-if="
-                displayList ||
-                displayGrid
-              "
+              v-if="displayList || displayGrid"
               :entities="entities as Entity[]"
               :entities-loading="entitiesLoading"
               :bulk-operations-context="bulkOperationsContext"
@@ -169,7 +166,13 @@
               :entity-list-elements="entityListElements"
               :allowed-actions-on-relations="allowedActionsOnRelations"
               :mode="displayGrid ? 'grid' : 'list'"
-              :config="configPerViewMode[displayList ? ViewModes.ViewModesList : displayGrid ?? ViewModes.ViewModesGrid]"
+              :config="
+                configPerViewMode[
+                  displayList
+                    ? ViewModes.ViewModesList
+                    : displayGrid ?? ViewModes.ViewModesGrid
+                ]
+              "
             />
             <ViewModesMedia
               v-if="displayPreview"
@@ -571,10 +574,15 @@ const initializeEntityPickerComponent = () => {
 
 const configPerViewMode = computed(() => {
   if (entities.value.length <= 0) return [];
-  return entities.value[0].allowedViewModes?.viewModes?.reduce((resultObject: any, viewModeWithConfig: ViewModesWithConfig) => {
-    resultObject[viewModeWithConfig.viewMode] = viewModeWithConfig.config;
-    return resultObject;
-  }, {}) || [];
+  return (
+    entities.value[0].allowedViewModes?.viewModes?.reduce(
+      (resultObject: any, viewModeWithConfig: ViewModesWithConfig) => {
+        resultObject[viewModeWithConfig.viewMode] = viewModeWithConfig.config;
+        return resultObject;
+      },
+      {}
+    ) || []
+  );
 });
 
 onMounted(async () => {
@@ -633,7 +641,9 @@ watch(
       !entities.value[0]?.allowedViewModes
     )
       return;
-    const viewModes: any[] = entities.value[0].allowedViewModes.viewModes.map((viewModeWithConfig: ViewModesWithConfig) => viewModeWithConfig.viewMode);
+    const viewModes: any[] = entities.value[0].allowedViewModes.viewModes.map(
+      (viewModeWithConfig: ViewModesWithConfig) => viewModeWithConfig.viewMode
+    );
     if (viewModes.includes(ViewModesList.__name))
       toggles.unshift({
         isOn: displayList,
