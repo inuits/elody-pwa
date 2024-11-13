@@ -247,6 +247,12 @@ const isFieldRequired = computed(() => {
   return false;
 });
 
+const isMaxDateToday = computed(() => {
+  props.metadata?.inputField?.validation?.value?.includes(
+    ValidationRules.MaxDateToday
+  );
+});
+
 const getValidationRules = (metadata: PanelMetaData): string => {
   let rules: string;
   if (metadata?.inputField?.validation?.value === ValidationRules.CustomValue)
@@ -287,6 +293,7 @@ const getValidationRules = (metadata: PanelMetaData): string => {
     return rules.includes(ValidationRules.Required)
       ? rules
       : `${rules}|required`;
+  if (isMaxDateToday.value) return rules;
   return rules;
 };
 

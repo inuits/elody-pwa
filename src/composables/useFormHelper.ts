@@ -99,6 +99,10 @@ const useFormHelper = () => {
       ValidationRules.HasOneOfRequiredMetadata,
       getHasOneOfSpecificMetadataRule
     );
+    defineRule(
+      ValidationRules.MaxDateToday,
+      getMaxDateTodayRule
+    );
   };
 
   const getHasSpecificRelationRule = (
@@ -146,7 +150,7 @@ const useFormHelper = () => {
   };
 
   const getHasOneOfSpecificMetadataRule = (
-    value: BaseRelationValuesInput[],
+    value: any,
     parameters: string[],
     ctx: any
   ) => {
@@ -157,6 +161,15 @@ const useFormHelper = () => {
       filledInMetadataFields += intialValues[metadataField]?.length ? 1 : 0;
     });
     return filledInMetadataFields >= Number(amount);
+  };
+
+  const getMaxDateTodayRule = (
+    value: string,
+  ) => {
+    if (!value) return true;
+    const timestamp = new Date(value).getTime();
+    const now = Date.now();
+    return timestamp <= now;
   };
 
   const __isNotEmpty = (str: any) => str.trim() !== "";
