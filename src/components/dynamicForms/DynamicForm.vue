@@ -214,7 +214,7 @@ import ImportComponent from "@/components/ImportComponent.vue";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import { useMutation } from "@vue/apollo-composable";
-import type { ApolloClient } from "@apollo/client/core";
+import { type ApolloClient, ApolloError } from "@apollo/client/core";
 import { Unicons } from "@/types";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
@@ -276,7 +276,7 @@ const {
   __getCsvString,
   resetUpload,
 } = useUpload();
-const { handleHttpError } = useErrorCodes();
+const { handleHttpError, getMessageAndCodeFromApolloError } = useErrorCodes();
 const {
   getAcceptedTypes,
   getParentEntityType,
@@ -435,9 +435,10 @@ const submitActionFunction = async (field: FormAction) => {
       setTimeout(() => goToEntityPage(entity, "SingleEntity", props.router), 1);
     }
     closeAndDeleteForm();
-  } catch (e) {
+  } catch (e: ApolloError) {
+    const errorObject = await getMessageAndCodeFromApolloError(e);
     isPerformingAction.value = false;
-    submitErrors.value = e.message;
+    submitErrors.value = errorObject.message;
   }
 };
 
