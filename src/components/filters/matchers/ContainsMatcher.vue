@@ -42,10 +42,8 @@ const setVariablesFromInput = () => {
   if (props.relatedActiveFilter) input.value = props.relatedActiveFilter?.value;
   force.value = Boolean(props.filter.inputFromState);
 };
+
 onMounted(() => {
-  setVariablesFromInput();
-});
-onUpdated(() => {
   setVariablesFromInput();
 });
 
