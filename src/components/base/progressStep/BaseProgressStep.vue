@@ -29,7 +29,7 @@
     <unicon
       v-if="status === ProgressStepStatus.Loading"
       class="animate-spin fill-neutral-white"
-      :name="Unicons.Process.name"
+      :name="Unicons.Cog.name"
       height="16"
     />
     <p v-if="showLabel" :class="`${labelColor}`">{{ translatedLabel }}</p>
