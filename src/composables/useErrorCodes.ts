@@ -38,6 +38,7 @@ export const useErrorCodes = (): {
   const statusCodeHandlers: Record<number, Function> = {
     401: (errorCodeType) => handleUnauthorized(errorCodeType),
     403: (errorCodeType) => handleAccessDenied(errorCodeType),
+    500: (errorCodeType) => undefined,
   };
 
   const setupScopedUseI18n = async () => {
