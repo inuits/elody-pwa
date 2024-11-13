@@ -204,7 +204,7 @@ export const useErrorCodes = (): {
     t = await setupScopedUseI18n();
     const responseBody = await httpResponse.json();
     const httpErrorMessage: string =
-      responseBody.extensions.response.body.message;
+      responseBody?.extensions?.response?.body?.message;
 
     const { code, message } =
       extractMessageAndCodeFromErrorResponse(httpErrorMessage);
