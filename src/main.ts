@@ -33,6 +33,7 @@ export let apolloClient: ApolloClient<NormalizedCacheObject>;
 export let bulkSelectAllSizeLimit: number = 999999;
 export let formattersSettings: any = {};
 export let router: Router;
+export let i18nInstance: any;
 const applyCustomization = (rulesObject: any) => {
   if (rulesObject.applicationTitle)
     document.title = rulesObject.applicationTitle;
@@ -72,6 +73,9 @@ const start = async () => {
     await auth.verifyServerAuth();
   }
 
+  i18nInstance = i18n(translations, config.customization.applicationLocale);
+  console.log(i18nInstance);
+
   bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
 
   const graphqlErrorInterceptor = onError((error: GraphQLError) => {
@@ -90,7 +94,7 @@ const start = async () => {
   });
 
   const app = createApp(App)
-    .use(i18n(translations, config.customization.applicationLocale))
+    .use(i18nInstance)
     .use(Unicon, {
       fill: "currentColor",
     })

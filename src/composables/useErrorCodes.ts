@@ -9,6 +9,8 @@ import useTenant from "@/composables/useTenant";
 import { auth, router } from "@/main";
 import { ErrorCodeType } from "@/generated-types/queries";
 import type { ApolloError } from "@apollo/client/core";
+import { i18nInstance } from "@/main";
+import { ref, onMounted } from "vue";
 
 export const useErrorCodes = (): {
   handleErrorByCode: (code: string) => void;
@@ -22,8 +24,12 @@ export const useErrorCodes = (): {
     error: string
   ) => Promise<{ code: string; message: string }>;
 } => {
-  let t;
+  let t: any;
   const { createNotificationOverwrite } = useNotification();
+
+  onMounted(() => {
+    t = i18nInstance.global.t;
+  });
 
   const authHandlers: Record<string, Function> = {
     "1001": (errorCodeType) => handleUnauthorized(errorCodeType),
@@ -41,18 +47,20 @@ export const useErrorCodes = (): {
     500: (errorCodeType) => undefined,
   };
 
-  const setupScopedUseI18n = async () => {
-    const { translations, config } = await getApplicationDetails();
-    let language = config.customization.applicationLocale;
-    const displayPreferences = useStateManagement().getGlobalState(
-      "_displayPreferences"
-    );
-    if (displayPreferences)
-      if (displayPreferences.lang) language = displayPreferences.lang;
+  // const setupScopedUseI18n = async () => {
+  //   const { t } = i18nInstance.global;
+  //   return t;
+  // const { translations, config } = await getApplicationDetails();
+  // let language = config.customization.applicationLocale;
+  // const displayPreferences = useStateManagement().getGlobalState(
+  //   "_displayPreferences"
+  // );
+  // if (displayPreferences)
+  //   if (displayPreferences.lang) language = displayPreferences.lang;
 
-    const { t } = i18n(translations, language).global;
-    return t;
-  };
+  // const { t } = i18n(translations, language).global;
+  // return t;
+  // };
 
   const extractMessageAndCodeFromErrorResponse = (
     errorMessage: string
@@ -128,7 +136,7 @@ export const useErrorCodes = (): {
   const handleErrorByCodeType = async (
     code: string,
     defaultMessage: string
-  ): promise<void> => {
+  ): Promise<void> => {
     const message =
       (await getTranslatedErrorMessageForCode(code)) || defaultMessage;
     const genericCodePart: string = code.substring(1);
@@ -164,7 +172,7 @@ export const useErrorCodes = (): {
   const getMessageAndCodeFromErrorString = async (
     error: string
   ): Promise<{ code: string; message: string }> => {
-    t = await setupScopedUseI18n();
+    // t = await setupScopedUseI18n();
     const errorObject = extractMessageAndCodeFromErrorResponse(error);
     errorObject.message = await getTranslatedErrorMessageForCode(
       errorObject.code
@@ -175,7 +183,7 @@ export const useErrorCodes = (): {
   const getMessageAndCodeFromApolloError = async (
     apolloError: ApolloError
   ): Promise<{ code: string; message: string }> => {
-    t = await setupScopedUseI18n();
+    // t = await setupScopedUseI18n();
     const apolloMessage: string =
       apolloError.graphQLErrors[0].extensions.response.body;
 
@@ -183,7 +191,8 @@ export const useErrorCodes = (): {
   };
 
   const handleGraphqlError = async (error: GraphQLError): Promise<string> => {
-    t = await setupScopedUseI18n();
+    console.log("i18n: ", i18nInstance);
+    // t = await setupScopedUseI18n();
     const graphqlErrorMessage =
       error.response.errors[0]?.extensions?.response?.body?.message;
 
