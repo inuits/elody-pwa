@@ -7,6 +7,7 @@ import {
 } from "@/components/base/BaseNotification.vue";
 import useTenant from "@/composables/useTenant";
 import { auth, router } from "@/main";
+import { ErrorCodeType } from "@/generated-types/queries";
 
 export const useErrorCodes = (): {
   handleErrorByCode: (code: string) => void;
@@ -17,9 +18,9 @@ export const useErrorCodes = (): {
   const { createNotificationOverwrite } = useNotification();
 
   const authHandlers: Record<string, Function> = {
-    "1001": () => handleUnauthorized(),
-    "1003": () => handleAccessDenied(),
-    "1004": () => handleAccessDenied(),
+    "1001": (errorCodeType) => handleUnauthorized(errorCodeType),
+    "1003": (errorCodeType) => handleAccessDenied(errorCodeType),
+    "1004": (errorCodeType) => handleAccessDenied(errorCodeType),
   };
 
   const readHandlers: Record<string, Function> = {};
@@ -27,8 +28,8 @@ export const useErrorCodes = (): {
   const writeHandlers: Record<string, Function> = {};
 
   const statusCodeHandlers: Record<number, Function> = {
-    401: () => handleUnauthorized(),
-    403: () => handleAccessDenied(),
+    401: (errorCodeType) => handleUnauthorized(errorCodeType),
+    403: (errorCodeType) => handleAccessDenied(errorCodeType),
   };
 
   const setupScopedUseI18n = async () => {
@@ -70,7 +71,9 @@ export const useErrorCodes = (): {
     return t(`error-codes.${code}`);
   };
 
-  const handleUnauthorized = async () => {
+  const handleUnauthorized = async (
+    errorCodeType: ErrorCodeType = ErrorCodeType.Read
+  ) => {
     const { setTennantInSession } = useTenant();
 
     await auth.logout();
@@ -79,17 +82,25 @@ export const useErrorCodes = (): {
     router.push("/unauthorized");
   };
 
-  const handleAccessDenied = () => {
-    createNotificationOverwrite(
-      NotificationType.error,
-      t("notifications.graphql-errors.forbidden.title"),
-      t("notifications.graphql-errors.forbidden.description")
-    );
+  const handleAccessDenied = (
+    errorCodeType: ErrorCodeType = ErrorCodeType.Read
+  ) => {
+    if (errorCodeType === ErrorCodeType.Write) {
+      createNotificationOverwrite(
+        NotificationType.error,
+        t("notifications.graphql-errors.forbidden.title"),
+        t("notifications.graphql-errors.forbidden.description")
+      );
+      return;
+    }
     router.push("/accessDenied");
   };
 
-  const handleAuthCodes = (genericCodePart: string) => {
-    authHandlers[genericCodePart]();
+  const handleAuthCodes = (
+    genericCodePart: string,
+    errorCodeType: ErrorCodeType
+  ) => {
+    authHandlers[genericCodePart](errorCodeType);
   };
 
   const handleWriteTypeError = (code: string, message: string): void => {
@@ -112,20 +123,34 @@ export const useErrorCodes = (): {
     const message =
       (await getTranslatedErrorMessageForCode(code)) || defaultMessage;
     const genericCodePart: string = code.substring(1);
+    const actionCodePart: string = Array.from(code)[0];
 
-    if (Object.keys(authHandlers).includes(genericCodePart)) handleAuthCodes();
-    if (code.startsWith("R")) handleReadTypeError(code, message);
-    if (code.startsWith("W")) handleWriteTypeError(code, message);
+    const actionTypeMapper: Record<string, ErrorCodeType> = {
+      R: ErrorCodeType.Read,
+      W: ErrorCodeType.Write,
+    };
+    const errorCodeType: ErrorCodeType = actionTypeMapper[actionCodePart];
+
+    if (Object.keys(authHandlers).includes(genericCodePart))
+      handleAuthCodes(genericCodePart, errorCodeType);
+    if (errorCodeType === ErrorCodeType.Read)
+      handleReadTypeError(code, message);
+    if (errorCodeType === ErrorCodeType.Write)
+      handleWriteTypeError(code, message);
   };
 
-  const fallbackOnRequestStatusCode = (statusCode: string): void => {
+  const fallbackOnRequestStatusCode = (
+    statusCode: string,
+    errorCodeType: ErrorCodeType
+  ): void => {
+    console.log(errorCodeType);
     if (!Object.keys(statusCodeHandlers).includes(statusCode)) {
       console.info(
         `An error with status code ${statusCode} could not be handled, add it to the statusCodeHandlers mapper to determine what should happen`
       );
       return;
     }
-    statusCodeHandlers[statusCode]();
+    statusCodeHandlers[statusCode](errorCodeType);
   };
 
   const handleGraphqlError = async (error: GraphQLError): Promise<string> => {
@@ -139,7 +164,7 @@ export const useErrorCodes = (): {
     if (!code) {
       const statusCode: number =
         error.response.errors[0]?.extensions?.response?.status;
-      fallbackOnRequestStatusCode(statusCode.toString());
+      fallbackOnRequestStatusCode(statusCode.toString(), ErrorCodeType.Read);
       return;
     }
 
@@ -157,7 +182,10 @@ export const useErrorCodes = (): {
       extractMessageAndCodeFromErrorResponse(httpErrorMessage);
 
     if (!code) {
-      fallbackOnRequestStatusCode(httpResponse.status.toString());
+      fallbackOnRequestStatusCode(
+        httpResponse.status.toString(),
+        ErrorCodeType.Read
+      );
       return;
     }
 
