@@ -20,7 +20,7 @@ type UploadSettings = {
   uploadFlow: UploadFlow;
 };
 
-const { handleHttpError } = useErrorCodes();
+const { handleHttpError, getMessageAndCodeFromErrorString } = useErrorCodes();
 const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
   "no-upload"
 );
@@ -195,16 +195,38 @@ const useUpload = () => {
     );
   };
 
-  const handleDryRunResult = (dryRunResult: any, file: DropzoneFile): void => {
+  const getDryRunErrors = async (dryRunResult: any): Promise<string[]> => {
+    const errors: string[] = [];
+    const errorKeys = Object.keys(dryRunResult.errors);
+    const errorPromises = errorKeys.map(async (key: string): Promise<void> => {
+      const errorList = await Promise.all(
+        dryRunResult.errors[key].map(async (errorMessage: string) => {
+          try {
+            const errorObject = await getMessageAndCodeFromErrorString(
+              errorMessage
+            );
+            return errorObject.message;
+          } catch (error) {
+            console.error(`Error processing message: ${errorMessage}`, error);
+            return null;
+          }
+        })
+      );
+      if (errorList.length) {
+        errors.push(...errorList);
+      }
+    });
+
+    await Promise.all(errorPromises);
+    return errors;
+  };
+
+  const handleDryRunResult = async (
+    dryRunResult: any,
+    file: DropzoneFile
+  ): Promise<void> => {
     try {
-      const errors: string[] = [];
-      const errorKeys = Object.keys(dryRunResult.errors);
-      errorKeys.forEach((key: string) => {
-        const errorList = dryRunResult.errors[key];
-        if (errorList.length) {
-          errors.push(...errorList);
-        }
-      });
+      const errors = await getDryRunErrors(dryRunResult);
       if (dryRunResult?.mediafiles.length) {
         requiredMediafiles.value = dryRunResult.mediafiles.map(
           (mediafile: any) => mediafile.filename
