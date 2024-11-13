@@ -41,8 +41,8 @@
             <BaseInputCheckbox
               v-for="csvExportOption in csvExportOptions"
               :key="csvExportOption.key.value"
-              :class="{ 'mb-2': csvExportOption.isSelected }"
               v-model="csvExportOption.isSelected"
+              class="my-1"
               :label="t(csvExportOption.key.label)"
               :item="{ id: csvExportOption.key.value }"
               :required="csvExportOption.key.required"
