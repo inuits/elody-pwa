@@ -25,17 +25,22 @@
     </div>
     <span
       v-if="label"
-      class="select-none cursor-pointer"
+      class="flex flex-row select-none cursor-pointer"
       :class="{ 'ml-2': inputValue }"
       @change.stop
       @click.stop="handleItemSelection"
     >
       {{ label }}
-      <unicon
-        v-if="required"
-        :name="Unicons.ExclamationTriangle.name"
-        height="20"
-      />
+      <div
+        class="pl-2"
+        :title="t(`tooltip.required`)"
+      >
+        <unicon
+          v-if="required"
+          :name="Unicons.ExclamationTriangle.name"
+          height="20"
+        />
+      </div>
     </span>
   </div>
 </template>
@@ -48,11 +53,13 @@ import {
 } from "@/composables/useBulkOperations";
 import { bulkSelectAllSizeLimit } from "@/main";
 import { computed, onMounted, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import { TypeModals } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { Unicons } from "@/types";
 
+const { t } = useI18n();
 const { getModalInfo } = useBaseModal();
 
 const props = withDefaults(
