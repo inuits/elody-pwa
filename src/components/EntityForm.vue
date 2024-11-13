@@ -111,8 +111,6 @@ const submit = useSubmitForm<EntityValues>(async () => {
     collection,
   });
 
-  if (errors) console.log(errors);
-
   if (!result?.data?.mutateEntityValues) return;
   mutatedEntity = result.data.mutateEntityValues as Entity;
   setValues({
