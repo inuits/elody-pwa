@@ -8,11 +8,19 @@ import {
 import useTenant from "@/composables/useTenant";
 import { auth, router } from "@/main";
 import { ErrorCodeType } from "@/generated-types/queries";
+import type { ApolloError } from "@apollo/client/core";
 
 export const useErrorCodes = (): {
   handleErrorByCode: (code: string) => void;
-  handleGraphqlError: (error: GraphQLError) => void;
+  handleGraphqlError: (error: GraphQLError) => string;
   handleHttpError: (httpResponse: Response) => string;
+  getMessageAndCodeFromApolloError: (apolloError: ApolloError) => Promise<{
+    code: string;
+    message: string;
+  }>;
+  getMessageAndCodeFromErrorString: (
+    error: string
+  ) => Promise<{ code: string; message: string }>;
 } => {
   let t;
   const { createNotificationOverwrite } = useNotification();
@@ -143,14 +151,34 @@ export const useErrorCodes = (): {
     statusCode: string,
     errorCodeType: ErrorCodeType
   ): void => {
-    console.log(errorCodeType);
     if (!Object.keys(statusCodeHandlers).includes(statusCode)) {
       console.info(
-        `An error with status code ${statusCode} could not be handled, add it to the statusCodeHandlers mapper to determine what should happen`
+        `An error with status code ${statusCode} could not be handled, add it to the statusCodeHandlers mapper or handle the error with the 'onError' directive on the call itself`
       );
       return;
     }
     statusCodeHandlers[statusCode](errorCodeType);
+  };
+
+  const getMessageAndCodeFromErrorString = async (
+    error: string
+  ): Promise<{ code: string; message: string }> => {
+    t = await setupScopedUseI18n();
+    const errorObject = extractMessageAndCodeFromErrorResponse(error);
+    errorObject.message = await getTranslatedErrorMessageForCode(
+      errorObject.code
+    );
+    return errorObject;
+  };
+
+  const getMessageAndCodeFromApolloError = async (
+    apolloError: ApolloError
+  ): Promise<{ code: string; message: string }> => {
+    t = await setupScopedUseI18n();
+    const apolloMessage: string =
+      apolloError.graphQLErrors[0].extensions.response.body;
+
+    return await getMessageAndCodeFromErrorString(apolloMessage);
   };
 
   const handleGraphqlError = async (error: GraphQLError): Promise<string> => {
@@ -193,5 +221,11 @@ export const useErrorCodes = (): {
     return message;
   };
 
-  return { handleErrorByCodeType, handleGraphqlError, handleHttpError };
+  return {
+    handleErrorByCodeType,
+    handleGraphqlError,
+    handleHttpError,
+    getMessageAndCodeFromApolloError,
+    getMessageAndCodeFromErrorString,
+  };
 };
