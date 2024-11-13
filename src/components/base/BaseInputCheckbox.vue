@@ -13,12 +13,15 @@
         :class="[
           { 'cursor-pointer': !disabled },
           { rounded: !inputValue },
+          { [selectedInputStyle.disabledStyle.textColor]: disabled },
+          { [selectedInputStyle.disabledStyle.bgColor]: disabled },
+          { [selectedInputStyle.disabledStyle.borderColor]: disabled },
           `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
-          `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
         ]"
         v-model="inputValue"
         type="checkbox"
-        :disabled="disabled || isDisabledByContextLimit"
+        :checked="required"
+        :disabled="disabled || isDisabledByContextLimit || required"
         @change.stop
         @click.stop="handleItemSelection"
       />
