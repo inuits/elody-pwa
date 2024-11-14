@@ -4,7 +4,7 @@
     :modal-type="TypeModals.BulkOperations"
     @hide-modal="closeModal(TypeModals.BulkOperations)"
   >
-    <div class="flex flex-wrap p-8 h-full">
+    <div class="flex flex-wrap p-8 h-[90%]">
       <div class="flex basis-full gap-8 h-full">
         <div class="h-full basis-[56%]">
           <div class="h-[40px] mb-6">
