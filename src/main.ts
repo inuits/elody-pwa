@@ -18,7 +18,12 @@ import { createHead } from "@vueuse/head";
 import { createRouter, createWebHistory } from "vue-router";
 import { createUploadLink } from "apollo-upload-client";
 import { DefaultApolloClient } from "@vue/apollo-composable";
-import { getApplicationDetails, getFormattersSettings, i18n } from "@/helpers";
+import {
+  getApplicationDetails,
+  getFormattersSettings,
+  getTypeUrlMapping,
+  i18n,
+} from "@/helpers";
 import { onError } from "@apollo/client/link/error";
 import { OpenIdConnectClient } from "session-vue-3-oidc-library";
 import { setIgnorePermissions } from "./composables/usePermissions";
@@ -31,6 +36,12 @@ export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
 export let bulkSelectAllSizeLimit: number = 999999;
 export let formattersSettings: any = {};
+export let typeUrlMapping:
+  | {
+      mapping: { [type: string]: string };
+      reverseMapping: { [type: string]: string };
+    }
+  | undefined;
 
 const applyCustomization = (rulesObject: any) => {
   if (rulesObject.applicationTitle)
@@ -115,7 +126,12 @@ const start = async () => {
     });
   }
   setIgnorePermissions(config.IGNORE_PERMISSIONS);
-  formattersSettings = await getFormattersSettings();
+  const [formattersSettingsResult, typeUrlMappingResult] = await Promise.all([
+    getFormattersSettings(),
+    getTypeUrlMapping(),
+  ]);
+  formattersSettings = formattersSettingsResult;
+  typeUrlMapping = typeUrlMappingResult;
   app.mount("#app");
 };
 start();

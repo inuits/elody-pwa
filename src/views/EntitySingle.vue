@@ -42,7 +42,7 @@ import {
 import EntityColumn from "@/components/EntityColumn.vue";
 import EntityForm from "@/components/EntityForm.vue";
 import { asString, getTitleOrNameFromEntity } from "@/helpers";
-import { reactive, ref, watch, inject, provide, onBeforeMount } from "vue";
+import { reactive, ref, watch, inject, computed, onBeforeMount } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useEditMode } from "@/composables/useEdit";
@@ -53,6 +53,7 @@ import { useQuery } from "@vue/apollo-composable";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
+import { getUrlTypeMappedValue } from "@/helpers";
 
 const config: any = inject("config");
 const router = useRouter();
@@ -83,9 +84,14 @@ const identifiers = ref<string[]>([]);
 const loading = ref<boolean>(true);
 const { getEditableMetadataKeys } = useFormHelper();
 
+const entityType = computed(() => {
+  const routeType = String(route.params["type"]);
+  return getUrlTypeMappedValue(String(route.params["type"])) || routeType;
+});
+
 const queryVariables = reactive<GetEntityByIdQueryVariables>({
   id: id,
-  type: String(route.params["type"]),
+  type: entityType.value,
   preferredLanguage: locale.value,
 });
 const { result, refetch, onError } = useQuery<GetEntityByIdQuery>(

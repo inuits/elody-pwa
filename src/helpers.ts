@@ -13,6 +13,7 @@ import {
   InputFieldTypes,
   RouteNames,
   GetCustomFormattersSettingsDocument,
+  GetCustomTypeUrlMappingDocument,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -23,7 +24,7 @@ import {
   useRoute,
 } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
-import { apolloClient } from "@/main";
+import { apolloClient, typeUrlMapping } from "@/main";
 
 export const goToEntityPage = (
   entity: Entity,
@@ -102,9 +103,18 @@ export const getEntityPageRoute = (
     name: listItemRouteName,
     params: {
       id: entityId,
-      type: entity.type,
+      type: getMappedTypeForRoute(entity),
     },
   };
+};
+
+export const getMappedTypeForRoute = (entity: Entity): string => {
+  const mappedType = typeUrlMapping?.mapping[entity.__typename];
+  return mappedType ? mappedType : entity.type;
+};
+
+export const getUrlTypeMappedValue = (type: string): string | undefined => {
+  return typeUrlMapping?.reverseMapping[type];
 };
 
 export const updateEntityMediafileOnlyForMediafiles = (
@@ -435,6 +445,18 @@ export const getFormattersSettings = async () => {
     })
     .then((result) => {
       return result.data.CustomFormattersSettings;
+    });
+};
+
+export const getTypeUrlMapping = async () => {
+  return await apolloClient
+    .query({
+      query: GetCustomTypeUrlMappingDocument,
+      fetchPolicy: "no-cache",
+      notifyOnNetworkStatusChange: true,
+    })
+    .then((result) => {
+      return result.data.CustomTypeUrlMapping;
     });
 };
 
