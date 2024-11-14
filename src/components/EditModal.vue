@@ -36,7 +36,7 @@ import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import { useI18n } from "vue-i18n";
 import { asString, getChildrenOfHomeRoutes } from "@/helpers";
-import { inject } from "vue";
+import { inject, computed } from "vue";
 import {
   GenericContextForModals,
   useBaseModal,
@@ -53,6 +53,7 @@ import {
 } from "@/components/base/BaseNotification.vue";
 import { useBulkOperations } from "@/composables/useBulkOperations";
 import { useModalActions } from "@/composables/useModalActions";
+import { getUrlTypeMappedValue } from "@/helpers";
 
 const route = useRoute();
 const router = useRouter();
@@ -67,11 +68,7 @@ const {
   clickButton,
   isEditToggleVisible,
 } = useEditMode();
-const {
-  initializeAction,
-  initializeGeneralProperties,
-  initializePropertiesForDownload,
-} = useModalActions();
+const { initializeGeneralProperties } = useModalActions();
 const { initializeConfirmModal } = useConfirmModal();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { closeModal, openModal, deleteQueryOptions } = useBaseModal();
@@ -81,9 +78,14 @@ const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const { createNotificationOverwrite } = useNotification();
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 
+const entityType = computed(() => {
+  const routeType = String(route.params["type"]);
+  return getUrlTypeMappedValue(String(route.params["type"])) || routeType;
+});
+
 const deleteEntity = async (deleteMediafiles: boolean = false) => {
   const id = asString(route.params["id"]);
-  const type = asString(route.params["type"]);
+  const type = entityType.value;
   const childRoutes = getChildrenOfHomeRoutes(config).map(
     (route: any) => route.meta
   );
