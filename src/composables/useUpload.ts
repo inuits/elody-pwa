@@ -130,8 +130,9 @@ const useUpload = () => {
     );
 
     for await (const upload of generator) {
+      console.log(upload);
       if (!upload?.response.ok) {
-        __uploadExceptionHandler(await upload?.response.text(), upload.file, t);
+        __uploadExceptionHandler(upload?.response.text(), upload.file, t);
         continue;
       }
       __updateFileThumbnails(
@@ -163,7 +164,7 @@ const useUpload = () => {
         ProgressStepStatus.Complete
       );
 
-    __uploadMediafilesWithTicketUrl(isLinkedUpload, config, t);
+    await __uploadMediafilesWithTicketUrl(isLinkedUpload, config, t);
   };
 
   const uploadCsvForReordering = async (parentId: string) => {
@@ -479,12 +480,19 @@ const useUpload = () => {
     });
 
     if (!response.ok) {
+      const httpErrorMessage = (
+        await getMessageAndCodeFromErrorString(await response.text())
+      ).message;
       __updateFileThumbnails(
         file,
         ProgressStepType.Upload,
+        ProgressStepStatus.Failed,
+        [httpErrorMessage]
+      );
+      __updateGlobalUploadProgress(
+        ProgressStepType.Upload,
         ProgressStepStatus.Failed
       );
-      const httpErrorMessage = handleHttpError(response);
       return Promise.reject(httpErrorMessage);
     }
 
@@ -511,23 +519,13 @@ const useUpload = () => {
         ProgressStepType.Prepare,
         ProgressStepStatus.Loading
       );
-      try {
-        const url = await __getUploadUrl(file, entityId);
-        __updateFileThumbnails(
-          file,
-          ProgressStepType.Prepare,
-          ProgressStepStatus.Complete
-        );
-        yield __uploadFile(file, url, config);
-      } catch (error: Promise<string>) {
-        const errorMessage = await error;
-        __updateFileThumbnails(
-          file,
-          ProgressStepType.Prepare,
-          ProgressStepStatus.Failed,
-          [errorMessage]
-        );
-      }
+      const url = await __getUploadUrl(file, entityId);
+      __updateFileThumbnails(
+        file,
+        ProgressStepType.Prepare,
+        ProgressStepStatus.Complete
+      );
+      yield __uploadFile(file, url, config);
     }
     _prefetchedUploadUrls = "not-prefetched-yet";
   }
