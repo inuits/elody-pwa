@@ -24,6 +24,7 @@
       :action="element.action"
       :entity-id="entityId"
       :relation="relation"
+      :bulk-operations-context="bulkOperationsContext"
     />
   </div>
 </template>
@@ -34,6 +35,7 @@ import GeneralAction from "@/components/context-menu-actions/GeneralAction.vue";
 import ElodyAction from "@/components/context-menu-actions/ElodyAction.vue";
 import LinkAction from "@/components/context-menu-actions/LinkAction.vue";
 import { Entitytyping } from "@/generated-types/queries";
+import type { Context } from "@/composables/useBulkOperations";
 
 const emit = defineEmits(["toggleLoading"]);
 
@@ -43,6 +45,7 @@ const props = defineProps<{
   entityType: Entitytyping;
   parentEntityId?: string;
   relation?: object;
+  bulkOperationsContext: Context;
 }>();
 
 const handleEmit = () => {
