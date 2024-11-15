@@ -53,7 +53,7 @@ import {
 } from "@/components/base/BaseNotification.vue";
 import { useBulkOperations } from "@/composables/useBulkOperations";
 import { useModalActions } from "@/composables/useModalActions";
-import { getUrlTypeMappedValue } from "@/helpers";
+import { mapUrlToEntityType } from "@/helpers";
 
 const route = useRoute();
 const router = useRouter();
@@ -79,8 +79,8 @@ const { createNotificationOverwrite } = useNotification();
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 
 const entityType = computed(() => {
-  const routeType = String(route.params["type"]);
-  return getUrlTypeMappedValue(String(route.params["type"])) || routeType;
+  const slug = String(route.params["type"]);
+  return mapUrlToEntityType(slug) || slug;
 });
 
 const deleteEntity = async (deleteMediafiles: boolean = false) => {

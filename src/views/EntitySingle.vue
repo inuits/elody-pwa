@@ -53,7 +53,7 @@ import { useQuery } from "@vue/apollo-composable";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
-import { getUrlTypeMappedValue } from "@/helpers";
+import { mapUrlToEntityType } from "@/helpers";
 
 const config: any = inject("config");
 const router = useRouter();
@@ -85,8 +85,8 @@ const loading = ref<boolean>(true);
 const { getEditableMetadataKeys } = useFormHelper();
 
 const entityType = computed(() => {
-  const routeType = String(route.params["type"]);
-  return getUrlTypeMappedValue(String(route.params["type"])) || routeType;
+  const slug = String(route.params["type"]);
+  return mapUrlToEntityType(slug) || slug;
 });
 
 const queryVariables = reactive<GetEntityByIdQueryVariables>({
