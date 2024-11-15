@@ -9,7 +9,7 @@
         :intial-values="intialValues"
         :relation-values="relationValues"
         :uuid="entity.uuid"
-        :type="String(route.params['type'])"
+        :type="entityType"
         :delete-query-options="entity.deleteQueryOptions"
       >
         <entity-column

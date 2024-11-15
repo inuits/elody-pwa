@@ -40,7 +40,7 @@ export const goToEntityPage = (
     name: listItemRouteName,
     params: {
       id: entityId,
-      type: entity.type,
+      type: getMappedSlug(entity),
     },
   });
 };
