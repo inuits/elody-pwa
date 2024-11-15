@@ -11,6 +11,7 @@
         :entity-id="entityId"
         :entity-type="entityType"
         :relation="relation"
+        :bulk-operations-context="bulkOperationsContext"
         @toggle-loading="handleEmit"
       />
     </base-context-menu>
@@ -31,6 +32,7 @@ import {
   usePermissions,
   advancedPermissions,
 } from "@/composables/usePermissions";
+import type { Context } from "@/composables/useBulkOperations";
 
 const props = withDefaults(
   defineProps<{
@@ -39,6 +41,7 @@ const props = withDefaults(
     entityType: Entitytyping;
     parentEntityId?: string;
     relation?: object | string;
+    bulkOperationsContext: Context;
   }>(),
   {
     contextMenuActions: undefined,

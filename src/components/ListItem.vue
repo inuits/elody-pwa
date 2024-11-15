@@ -40,6 +40,7 @@
         :entity-id="itemId"
         :entity-type="itemType"
         :relation="relation"
+        :bulk-operations-context="bulkOperationsContext"
         @toggle-loading="toggleLoading"
       />
     </div>
@@ -183,6 +184,7 @@
         :entity-id="itemId"
         :entity-type="itemType"
         :relation="relation"
+        :bulk-operations-context="bulkOperationsContext"
         @toggle-loading="toggleLoading"
       />
     </div>

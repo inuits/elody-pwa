@@ -23,6 +23,7 @@ import { inject, computed } from "vue";
 import { useShareLink } from "@/composables/useShareLink";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
+import { Context, useBulkOperations } from "@/composables/useBulkOperations";
 
 const props = defineProps<{
   label: String;
@@ -33,6 +34,7 @@ const props = defineProps<{
     | { idx: number; relation: object }
     | "no-relation-found"
     | undefined;
+  bulkOperationsContext: Context;
 }>();
 
 const { update } = useFieldArray(
@@ -40,11 +42,14 @@ const { update } = useFieldArray(
 );
 const { save, disableEditMode, addSaveCallback, clearSaveCallbacks, isEdit } =
   useEditMode();
+const { dequeueItemForBulkProcessing } = useBulkOperations();
+
 const submitForm: callback = inject("submitForm") as callback;
 const apolloClient = inject(DefaultApolloClient);
 const { createShareLink } = useShareLink(apolloClient as ApolloClient<any>);
 
 const deleteRelation = async () => {
+  dequeueItemForBulkProcessing(props.bulkOperationsContext, props.relation.relation.key);
   if (props.relation !== "no-relation-found")
     update(props.relation.idx, {
       ...props.relation.relation,
