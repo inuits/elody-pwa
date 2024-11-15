@@ -118,10 +118,8 @@ const inputValue = computed<string | number | boolean | undefined>({
     return props.modelValue;
   },
   set(value) {
-    if (typeof value === "string")
-      value = value?.trim();
-    if (props.isValidPredicate(value))
-      emit("update:modelValue", value);
+    if (typeof value === "string") value = value?.trim();
+    if (props.isValidPredicate(value)) emit("update:modelValue", value);
   },
 });
 

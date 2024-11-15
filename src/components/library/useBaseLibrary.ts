@@ -160,7 +160,9 @@ export const useBaseLibrary = (
 
     _route = route;
     let variables =
-      (shouldUseStateForRoute && _route?.name !== "SingleEntity") && getStateForRoute(_route)?.queryVariables;
+      shouldUseStateForRoute &&
+      _route?.name !== "SingleEntity" &&
+      getStateForRoute(_route)?.queryVariables;
     if (variables) queryVariables = variables;
     else if (!variables && shouldUseStateForRoute)
       updateStateForRoute(_route, { queryVariables });

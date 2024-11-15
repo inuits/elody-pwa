@@ -17,7 +17,9 @@ import {
   type DeleteDataMutation,
   DeleteDataDocument,
   Entitytyping,
-  Collection, TypeModals, ModalStyle
+  Collection,
+  TypeModals,
+  ModalStyle,
 } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
@@ -62,11 +64,11 @@ const { createShareLink } = useShareLink(apolloClient as ApolloClient<any>);
 const config: any = inject("config");
 
 const isDisabled = computed(() => {
-  return isEdit.value &&
-    (
-      props.action === ContextMenuElodyActionEnum.DeleteRelation ||
-      props.action === ContextMenuElodyActionEnum.DeleteEntity
-    );
+  return (
+    isEdit.value &&
+    (props.action === ContextMenuElodyActionEnum.DeleteRelation ||
+      props.action === ContextMenuElodyActionEnum.DeleteEntity)
+  );
 });
 
 const childRoutes = getChildrenOfHomeRoutes(config).map(
@@ -74,7 +76,10 @@ const childRoutes = getChildrenOfHomeRoutes(config).map(
 );
 
 const deleteRelation = async () => {
-  dequeueItemForBulkProcessing(props.bulkOperationsContext, props.relation.relation.key);
+  dequeueItemForBulkProcessing(
+    props.bulkOperationsContext,
+    props.relation.relation.key
+  );
   if (props.relation !== "no-relation-found")
     update(props.relation.idx, {
       ...props.relation.relation,
@@ -90,7 +95,10 @@ const addSaveHandler = () => {
 };
 
 const deleteEntity = async () => {
-  dequeueItemForBulkProcessing(props.bulkOperationsContext, props.relation.relation.key);
+  dequeueItemForBulkProcessing(
+    props.bulkOperationsContext,
+    props.relation.relation.key
+  );
   let collection;
   if (props.entityType.toLowerCase() === Entitytyping.Mediafile) {
     collection = Collection.Mediafiles;
@@ -101,12 +109,16 @@ const deleteEntity = async () => {
   }
 
   try {
-    await mutate({ id: props.entityId, path: collection, deleteMediafiles: false });
+    await mutate({
+      id: props.entityId,
+      path: collection,
+      deleteMediafiles: false,
+    });
     await props.refetchEntities();
   } catch (e) {
     console.log(e);
   }
-}
+};
 const openDeleteEntityConfirmation = async () => {
   initializeConfirmModal({
     confirmButton: { buttonCallback: deleteEntity },
@@ -118,7 +130,7 @@ const openDeleteEntityConfirmation = async () => {
     translationKey: "delete-entity",
     openImmediately: true,
   });
-}
+};
 
 const doAction = () => {
   if (props.action === ContextMenuElodyActionEnum.DeleteRelation) {
