@@ -99,10 +99,7 @@ const useFormHelper = () => {
       ValidationRules.HasOneOfRequiredMetadata,
       getHasOneOfSpecificMetadataRule
     );
-    defineRule(
-      ValidationRules.MaxDateToday,
-      getMaxDateTodayRule
-    );
+    defineRule(ValidationRules.MaxDateToday, getMaxDateTodayRule);
   };
 
   const getHasSpecificRelationRule = (
@@ -163,9 +160,7 @@ const useFormHelper = () => {
     return filledInMetadataFields >= Number(amount);
   };
 
-  const getMaxDateTodayRule = (
-    value: string,
-  ) => {
+  const getMaxDateTodayRule = (value: string) => {
     if (!value) return true;
     const timestamp = new Date(value).getTime();
     const now = Date.now();

@@ -323,7 +323,10 @@ const handleAdvancedFilters = () => {
   activeFilters.value = [];
 
   if (advancedFilters.value) {
-    const state = (props.shouldUseStateForRoute && props.route.name !== "SingleEntity") && getStateForRoute(props.route);
+    const state =
+      props.shouldUseStateForRoute &&
+      props.route.name !== "SingleEntity" &&
+      getStateForRoute(props.route);
     if (!state?.filterListItems || state.filterListItems.length == 0) {
       Object.values(advancedFilters.value).forEach((advancedFilter) => {
         if (typeof advancedFilter !== "string") {

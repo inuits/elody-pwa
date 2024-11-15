@@ -34,10 +34,7 @@
       @click.stop="handleItemSelection"
     >
       {{ label }}
-      <div
-        class="pl-2"
-        :title="t(`tooltip.required`)"
-      >
+      <div class="pl-2" :title="t(`tooltip.required`)">
         <unicon
           v-if="required"
           :name="Unicons.ExclamationTriangle.name"
