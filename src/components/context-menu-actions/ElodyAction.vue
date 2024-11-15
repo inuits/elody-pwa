@@ -108,7 +108,6 @@ const deleteEntity = async () => {
   }
 }
 const openDeleteEntityConfirmation = async () => {
-  console.log("Initializing confirm modal");
   initializeConfirmModal({
     confirmButton: { buttonCallback: deleteEntity },
     declineButton: {
