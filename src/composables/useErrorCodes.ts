@@ -70,13 +70,15 @@ export const useErrorCodes = (): {
 
       return { code: errorCode, message };
     } catch (e) {
-      return { code: undefined, message: undefined };
+      return { code: undefined, message: errorMessage };
     }
   };
 
   const getTranslatedErrorMessageForCode = async (
-    code: string
-  ): string | undefined => {
+    code: string | undefined,
+    defaultMessage: string
+  ): Promise<string> => {
+    if (!code) return defaultMessage;
     return t(`error-codes.${code}`);
   };
 
@@ -129,8 +131,10 @@ export const useErrorCodes = (): {
     code: string,
     defaultMessage: string
   ): promise<void> => {
-    const message =
-      (await getTranslatedErrorMessageForCode(code)) || defaultMessage;
+    const message = await getTranslatedErrorMessageForCode(
+      code,
+      defaultMessage
+    );
     const genericCodePart: string = code.substring(1);
     const actionCodePart: string = Array.from(code)[0];
 
@@ -167,7 +171,8 @@ export const useErrorCodes = (): {
     t = await setupScopedUseI18n();
     const errorObject = extractMessageAndCodeFromErrorResponse(error);
     errorObject.message = await getTranslatedErrorMessageForCode(
-      errorObject.code
+      errorObject.code,
+      errorObject.message
     );
     return errorObject;
   };
@@ -176,9 +181,9 @@ export const useErrorCodes = (): {
     apolloError: ApolloError
   ): Promise<{ code: string; message: string }> => {
     t = await setupScopedUseI18n();
-    const apolloMessage: string =
+    let apolloMessage: string =
       apolloError.graphQLErrors[0].extensions.response.body;
-
+    if (apolloMessage.message) apolloMessage = apolloMessage.message;
     return await getMessageAndCodeFromErrorString(apolloMessage);
   };
 
