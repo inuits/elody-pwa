@@ -507,10 +507,10 @@ const updateMetdataActionFunction = async (field: FormAction) => {
       t("notifications.success.updataMetdataCsv.title"),
       t("notifications.success.updataMetdataCsv.description")
     );
-  } catch (error) {
+  } catch (error: ApolloError) {
+    const errorObject = await getMessageAndCodeFromApolloError(error);
     resetUpload();
-    handleHttpError(error);
-    submitErrors.value = error.message;
+    submitErrors.value = errorObject.message;
   }
 };
 
