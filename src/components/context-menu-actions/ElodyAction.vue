@@ -86,6 +86,7 @@ const addSaveHandler = () => {
 };
 
 const deleteEntity = async () => {
+  dequeueItemForBulkProcessing(props.bulkOperationsContext, props.relation.relation.key);
   let collection;
   if (props.entityType.toLowerCase() === Entitytyping.Mediafile) {
     collection = Collection.Mediafiles;
