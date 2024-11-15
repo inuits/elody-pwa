@@ -17,7 +17,7 @@ import {
   type DeleteDataMutation,
   DeleteDataDocument,
   Entitytyping,
-  Collection
+  Collection, TypeModals, ModalStyle
 } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
@@ -29,6 +29,8 @@ import { DefaultApolloClient, useMutation } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
 import { Context, useBulkOperations } from "@/composables/useBulkOperations";
 import { getChildrenOfHomeRoutes } from "@/helpers";
+import { useConfirmModal } from "@/composables/useConfirmModal";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 const props = defineProps<{
   label: String;
@@ -50,6 +52,8 @@ const { update } = useFieldArray(
 const { save, disableEditMode, addSaveCallback, clearSaveCallbacks, isEdit } =
   useEditMode();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
+const { initializeConfirmModal } = useConfirmModal();
+const { closeModal } = useBaseModal();
 
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const submitForm: callback = inject("submitForm") as callback;
@@ -103,6 +107,19 @@ const deleteEntity = async () => {
     console.log(e);
   }
 }
+const openDeleteEntityConfirmation = async () => {
+  console.log("Initializing confirm modal");
+  initializeConfirmModal({
+    confirmButton: { buttonCallback: deleteEntity },
+    declineButton: {
+      buttonCallback: () => {
+        closeModal(TypeModals.Confirm);
+      },
+    },
+    translationKey: "delete-entity",
+    openImmediately: true,
+  });
+}
 
 const doAction = () => {
   if (props.action === ContextMenuElodyActionEnum.DeleteRelation) {
@@ -110,7 +127,7 @@ const doAction = () => {
     deleteRelation();
   }
   if (props.action === ContextMenuElodyActionEnum.DeleteEntity) {
-    deleteEntity();
+    openDeleteEntityConfirmation();
   }
   if (props.action === ContextMenuElodyActionEnum.Share) {
     createShareLink();
