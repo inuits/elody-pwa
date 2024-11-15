@@ -82,6 +82,7 @@
         :is-enable-navigation="enableNavigation"
         :entity-list-elements="entityListElements"
         :view-mode="mode"
+        :refetch-entities="refetchEntities"
       />
     </component>
   </div>
@@ -133,6 +134,7 @@ const props = withDefaults(
     allowedActionsOnRelations?: RelationActions[];
     mode: "list" | "grid";
     config?: ConfigItem[];
+    refetchEntities?: Function;
   }>(),
   {
     disablePreviews: false,
@@ -144,6 +146,7 @@ const props = withDefaults(
     entityListElements: undefined,
     allowedActionsOnRelations: () => [],
     mode: "list",
+    refetchEntities: undefined,
   }
 );
 const mediafileViewerContext: any = inject("mediafileViewerContext");

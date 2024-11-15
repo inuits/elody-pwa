@@ -22,9 +22,11 @@
       :label="element.label"
       :icon="element.icon"
       :action="element.action"
+      :entity-type="entityType"
       :entity-id="entityId"
       :relation="relation"
       :bulk-operations-context="bulkOperationsContext"
+      :refetch-entities="refetchEntities"
     />
   </div>
 </template>
@@ -46,6 +48,7 @@ const props = defineProps<{
   parentEntityId?: string;
   relation?: object;
   bulkOperationsContext: Context;
+  refetchEntities: Function;
 }>();
 
 const handleEmit = () => {

@@ -58,8 +58,8 @@ describe("BaseContextMenuActions", () => {
       icon: "AngleRight",
     },
     doElodyAction: {
-      label: "contextMenu.contextMenuElodyAction.delete",
-      action: "Delete",
+      label: "contextMenu.contextMenuElodyAction.delete-relation",
+      action: "DeleteRelation",
       can: ["can_delete"],
       icon: "Trash",
     },
@@ -112,8 +112,8 @@ describe("BaseContextMenuActions", () => {
         icon: "AngleRight",
       },
       doElodyAction: {
-        label: "contextMenu.contextMenuElodyAction.delete",
-        action: "Delete",
+        label: "contextMenu.contextMenuElodyAction.delete-relation",
+        action: "DeleteRelation",
         icon: "Trash",
       },
     } as ContextMenuActions;

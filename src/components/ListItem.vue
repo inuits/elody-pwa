@@ -185,6 +185,7 @@
         :entity-type="itemType"
         :relation="relation"
         :bulk-operations-context="bulkOperationsContext"
+        :refetch-entities="refetchEntities"
         @toggle-loading="toggleLoading"
       />
     </div>
@@ -261,6 +262,7 @@ const props = withDefaults(
     isEnableNavigation?: boolean;
     entityListElements?: EntityListElement[];
     viewMode?: "list" | "grid";
+    refetchEntities?: Function;
   }>(),
   {
     contextMenuActions: undefined,
@@ -283,6 +285,7 @@ const props = withDefaults(
     isEnableNavigation: false,
     entityListElements: undefined,
     viewMode: "list",
+    refetchEntities: undefined,
   }
 );
 
