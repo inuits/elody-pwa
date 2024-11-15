@@ -103,17 +103,17 @@ export const getEntityPageRoute = (
     name: listItemRouteName,
     params: {
       id: entityId,
-      type: getMappedTypeForRoute(entity),
+      type: getMappedSlug(entity),
     },
   };
 };
 
-export const getMappedTypeForRoute = (entity: Entity): string => {
-  const mappedType = typeUrlMapping?.mapping[entity.__typename];
-  return mappedType ? mappedType : entity.type;
+export const getMappedSlug = (entity: Entity): string => {
+  const mappedSlug = typeUrlMapping?.mapping[entity.__typename];
+  return mappedSlug ? mappedSlug : entity.type;
 };
 
-export const getUrlTypeMappedValue = (type: string): string | undefined => {
+export const mapUrlToEntityType = (type: string): string | undefined => {
   return typeUrlMapping?.reverseMapping[type];
 };
 

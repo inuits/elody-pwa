@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import {
   getEntityPageRoute,
   getMappedTypeForRoute,
-  getUrlTypeMappedValue,
+  mapUrlToEntityType,
 } from "@/helpers";
 import { Entity } from "@/generated-types/queries";
 
@@ -40,14 +40,14 @@ describe("Entity Mapping Functions", () => {
     });
   });
 
-  describe("getUrlTypeMappedValue", () => {
+  describe("mapUrlToEntityType", () => {
     it("should return the correct mapped type value for a known type", () => {
-      const result = getUrlTypeMappedValue("our-products");
+      const result = mapUrlToEntityType("our-products");
       expect(result).toBe("Product");
     });
 
     it("should return undefined for an unknown type", () => {
-      const result = getUrlTypeMappedValue("unknown-type");
+      const result = mapUrlToEntityType("unknown-type");
       expect(result).toBeUndefined();
     });
   });
