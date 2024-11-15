@@ -12,6 +12,7 @@
         :entity-type="entityType"
         :relation="relation"
         :bulk-operations-context="bulkOperationsContext"
+        :refetch-entities="refetchEntities"
         @toggle-loading="handleEmit"
       />
     </base-context-menu>
@@ -42,9 +43,11 @@ const props = withDefaults(
     parentEntityId?: string;
     relation?: object | string;
     bulkOperationsContext: Context;
+    refetchEntities?: Function;
   }>(),
   {
     contextMenuActions: undefined,
+    refetchEntities: undefined,
   }
 );
 

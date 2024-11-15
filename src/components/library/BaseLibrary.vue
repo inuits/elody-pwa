@@ -173,6 +173,7 @@
                     : displayGrid ?? ViewModes.ViewModesGrid
                 ]
               "
+              :refetch-entities="refetchEntities"
             />
             <ViewModesMedia
               v-if="displayPreview"
