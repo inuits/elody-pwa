@@ -130,7 +130,6 @@ const useUpload = () => {
     );
 
     for await (const upload of generator) {
-      console.log(upload);
       if (!upload?.response.ok) {
         __uploadExceptionHandler(upload?.response.text(), upload.file, t);
         continue;
