@@ -198,7 +198,7 @@ export const useErrorCodes = (): {
     if (!code) {
       const statusCode: number =
         error.response.errors[0]?.extensions?.response?.status;
-      fallbackOnRequestStatusCode(statusCode.toString(), ErrorCodeType.Read);
+      fallbackOnRequestStatusCode(statusCode?.toString(), ErrorCodeType.Read);
       return;
     }
 
@@ -217,7 +217,7 @@ export const useErrorCodes = (): {
 
     if (!code) {
       fallbackOnRequestStatusCode(
-        httpResponse.status.toString(),
+        httpResponse.status?.toString(),
         ErrorCodeType.Read
       );
       return;
