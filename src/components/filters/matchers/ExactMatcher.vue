@@ -102,9 +102,11 @@ const props = withDefaults(
   defineProps<{
     filter: FilterListItem;
     relatedActiveFilter: string[];
+    lastTypedValue: string;
   }>(),
   {
     relatedActiveFilter: () => [],
+    lastTypedValue: "",
   }
 );
 
@@ -115,6 +117,7 @@ const emit = defineEmits<{
     force: boolean
   ): void;
   (event: "filterOptions", filterOptions: string[]): void;
+  (event: "newInputValue", input: string | number): void;
 }>();
 
 const route = useRoute();
@@ -303,6 +306,12 @@ onMounted(() => {
       ? extractTime(props.filter.inputFromState?.value)
       : undefined;
   force.value = Boolean(props.filter.inputFromState);
+
+  if (props.filter.advancedFilter.type !== "date" && props.lastTypedValue) {
+    input.value = props.lastTypedValue;
+    force.value = true;
+    emitNewAdvancedFilterInput();
+  }
 });
 
 watch(
@@ -365,8 +374,15 @@ const emitNewAdvancedFilterInput = () => {
     };
   emit("newAdvancedFilterInput", newAdvancedFilterInput, force.value);
   force.value = false;
+  console.log("exact updated: ", input.value);
 };
 
-watch(input, () => emitNewAdvancedFilterInput());
+watch(input, () => {
+  if (typeof input.value === "string") {
+    emit("newInputValue", input.value);
+  }
+
+  emitNewAdvancedFilterInput();
+});
 watch(inputTime, () => emitNewAdvancedFilterInput());
 </script>

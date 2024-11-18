@@ -77,6 +77,8 @@
       :is="matcherComponent"
       :filter="filter"
       :related-active-filter="relatedActiveFilter"
+      :last-typed-value="lastTypedValue"
+      @new-input-value="(value: string) => lastTypedValue = value"
       @new-advanced-filter-input="(input: AdvancedFilterInput) => advancedFilterInput = input"
       @filter-options="(options: string[]) => (filterOptions = options)"
     />
@@ -147,6 +149,7 @@ const advancedFilterInput = ref<AdvancedFilterInput>({
   value: undefined,
 });
 const filterOptions = ref<string[]>([]);
+const lastTypedValue = ref<string>("");
 
 const loadMatcher = async () => {
   let matcher = selectedMatcher.value?.value;
@@ -193,7 +196,7 @@ onMounted(() => {
 });
 
 watch(selectedMatcher, async (newValue, oldValue) => {
-  if (oldValue !== undefined)
+  if (oldValue !== undefined && !lastTypedValue.value)
     emit("deactivateFilter", advancedFilterInput.value.key);
   if (selectedMatcher.value) await loadMatcher();
 
@@ -245,6 +248,7 @@ watch(clearAllActiveFilters, () => {
     if (!matchersToResetToDefault.includes(matcher))
       return reloadMatcherComponent();
 
+    lastTypedValue.value = "";
     const defaultMatcher = getDefaultMatcher();
     if (!defaultMatcher) return;
 
