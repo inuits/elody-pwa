@@ -31,6 +31,7 @@
         field.metadataKeyToCreateEntityFromOption
       "
       :depends-on="field.dependsOn"
+      :is-used-in-modal="isUsedInModal"
     />
     <ViewModesAutocompleteMetadata
       v-else-if="
@@ -115,6 +116,7 @@ const props = defineProps<{
   showErrors: boolean;
   fieldIsValid: boolean;
   formFlow?: string;
+  isUsedInModal: boolean;
 }>();
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");

@@ -61,6 +61,7 @@
           metadata.inputField?.validation?.fastValidationMessage)
       "
       :field-is-valid="fieldIsValid"
+      :is-used-in-modal="isUsedInModal"
       @update:value="setNewValue"
       @register-enter-pressed:value="registerEnterKeyPressed"
     />
@@ -181,11 +182,13 @@ const props = withDefaults(
     baseLibraryMode?: BaseLibraryModes;
     formFlow?: "edit" | "create";
     showErrors?: boolean;
+    isUsedInModal: boolean;
   }>(),
   {
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     formFlow: "edit",
     showErrors: false,
+    isUsedInModal: false,
   }
 );
 

@@ -1,12 +1,13 @@
 <template>
   <Multiselect
     data-cy="multiselect"
-    v-if="inputValue"
+    v-if="inputValue && isMounted"
     v-model="inputValue"
     mode="tags"
     :options="options"
-    :searchable="searchable"
+    :searchable="false"
     :show-options="searchable"
+    :appendTo="isUsedInModal ? '.base-modal--opened' : undefined"
     :close-on-select="true"
     :classes="classes"
     :caret="!disabled"
@@ -45,6 +46,7 @@ const props = withDefaults(
     loading?: boolean;
     noOptionsText?: string;
     canCreateOption?: boolean;
+    isUsedInModal: boolean;
   }>(),
   {
     selectType: "multi",
@@ -53,6 +55,7 @@ const props = withDefaults(
     relation: false,
     loading: false,
     canCreateOption: false,
+    isUsedInModal: false,
   }
 );
 
@@ -64,6 +67,7 @@ const emit = defineEmits<{
 
 const classes = ref();
 const searchValue = ref<string>();
+const isMounted = ref<boolean>(false);
 
 const inputValue = computed<DropdownOption[] | undefined>({
   get() {
@@ -113,7 +117,10 @@ const setClasses = () => {
   }
 };
 
-onMounted(() => setClasses());
+onMounted(() => {
+  setClasses();
+  isMounted.value = true;
+});
 
 watch(
   () => [inputValue.value, props.options],
@@ -137,5 +144,9 @@ const handleTagCreate = async (option: any) => {
   border: none;
   border-color: transparent;
   outline: none;
+}
+
+.multiselect-tags {
+  padding-left: 0;
 }
 </style>
