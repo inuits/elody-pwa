@@ -286,7 +286,7 @@ const useUpload = () => {
     let dryRunResult;
     try {
       dryRunResult = await __batchEntities(__getCsvBlob(), true);
-      handleDryRunResult(dryRunResult, file);
+      await handleDryRunResult(dryRunResult, file);
     } catch (error: Promise<string>) {
       const message = await error;
       dryRunErrors.value.push(message);
@@ -524,7 +524,16 @@ const useUpload = () => {
         ProgressStepType.Prepare,
         ProgressStepStatus.Complete
       );
-      yield __uploadFile(file, url, config);
+      try {
+        yield await __uploadFile(file, url, config);
+      } catch (error) {
+        __updateFileThumbnails(
+          file,
+          ProgressStepType.Upload,
+          ProgressStepStatus.Failed,
+          [error]
+        );
+      }
     }
     _prefetchedUploadUrls = "not-prefetched-yet";
   }
@@ -564,10 +573,10 @@ const useUpload = () => {
       );
   };
 
-  const addFileToUpload = (
+  const addFileToUpload = async (
     fileToAdd: DropzoneFile,
     isValidationFile: boolean
-  ) => {
+  ): Promise<void> => {
     files.value.push(fileToAdd);
     if (!isValidationFile) {
       __updateFileThumbnails(
@@ -577,7 +586,7 @@ const useUpload = () => {
       );
       return;
     }
-    dryRunCsv(fileToAdd);
+    await dryRunCsv(fileToAdd);
   };
 
   const setUploadProgressPercentage = (newPercentage: number): void => {
