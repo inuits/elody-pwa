@@ -118,7 +118,7 @@ export const mapUrlToEntityType = (type: string): string | undefined => {
 };
 
 export const updateEntityMediafileOnlyForMediafiles = (
-  mediafileViewerContext: String,
+  mediafileViewerContext: string,
   entity: Entity,
   onlyRemove: boolean = false
 ) => {

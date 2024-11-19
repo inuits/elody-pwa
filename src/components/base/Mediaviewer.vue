@@ -117,5 +117,5 @@ watch([() => props.loading, mediafiles], () => {
     mediafiles?.value || [];
   mediafileSelectionState.value[mediafileViewerContext].selectedMediafile =
     mediafiles?.value?.[0];
-});
+}, { immediate: true });
 </script>

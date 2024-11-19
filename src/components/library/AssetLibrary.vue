@@ -13,17 +13,23 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, onMounted } from "vue";
+import { computed, inject, onMounted, provide } from "vue";
 import type { Context } from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import { RouteNames, SearchInputType } from "@/generated-types/queries";
 import { useRoute } from "vue-router";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
+import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 
 const route = useRoute();
 const config = inject("config");
 const { getRouteBreadcrumbsOfEntity, clearBreadcrumbPathAndAddOverviewPage } =
   useBreadcrumbs(config);
+const { addMediafileSelectionStateContext } =
+  useEntityMediafileSelector();
+
+provide("mediafileViewerContext", SearchInputType.AdvancedInputMediaFilesType);
+addMediafileSelectionStateContext(SearchInputType.AdvancedInputMediaFilesType);
 
 const entityType = computed<string | "not-set">(() =>
   route.meta.entityType ? (route.meta.entityType as string) : "not-set"
