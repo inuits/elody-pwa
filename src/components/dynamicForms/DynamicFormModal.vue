@@ -52,12 +52,14 @@ import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import BaseTab from "@/components/BaseTab.vue";
 import BaseTabs from "@/components/BaseTabs.vue";
+import useUpload from "@/composables/useUpload";
 
 const formTabs = ref<Form | null>(null);
 const { closeModal, getModalInfo, changeCloseConfirmation } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const { t } = useI18n();
 const { getDynamicFormTabs } = useDynamicForm();
+const { resetUpload } = useUpload();
 
 watchEffect(() => {
   (async () => {
@@ -146,6 +148,7 @@ const formTabArray = computed(() => {
 const handleCloseModal = () => {
   closeModal(TypeModals.DynamicForm);
   clearFormTabs();
+  resetUpload();
 };
 </script>
 
