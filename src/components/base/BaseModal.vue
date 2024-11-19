@@ -4,7 +4,9 @@
     @close="hideModal"
     :class="[
       {
-        'grid grid-rows-[max-content_1fr]': getModalInfo(props.modalType).open,
+        'grid grid-rows-[max-content_1fr] base-modal--opened': getModalInfo(
+          props.modalType
+        ).open,
         'rounded-xl':
           currentModalStyle === ModalStyle.Center ||
           currentModalStyle === ModalStyle.CenterWide,
@@ -36,7 +38,7 @@ const props = withDefaults(
     modalType: TypeModals;
     modalHeightStyle?: string;
     iconHeight?: number;
-    modalColor?: String;
+    modalColor?: string;
     cancelButtonAvailabe?: boolean;
   }>(),
   {

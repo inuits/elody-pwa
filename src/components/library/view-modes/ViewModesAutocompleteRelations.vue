@@ -6,6 +6,7 @@
     :model-value="selectedDropdownOptions"
     :disabled="disabled"
     :loading="entitiesLoading || relatedEntitiesLoading || isCreatingEntity"
+    :is-used-in-modal="isUsedInModal"
     @search-change="
       (value: string) => {
         getAutocompleteOptions(value);
@@ -55,6 +56,7 @@ const props = withDefaults(
     metadataKeyToCreateEntityFromOption?: string;
     isReadOnly?: boolean;
     isMetadataField?: boolean;
+    isUsedInModal: boolean;
   }>(),
   {
     selectType: "multi",
@@ -64,6 +66,7 @@ const props = withDefaults(
     disabled: false,
     canCreateOption: false,
     isMetadataField: false,
+    isUsedInModal: false,
   }
 );
 
