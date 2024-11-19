@@ -151,7 +151,14 @@
             @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
           >
             <ViewModesList
-              v-if="displayList || displayGrid"
+              v-if="
+                displayList ||
+                displayGrid ||
+                (entitiesLoading &&
+                  (route?.name !== 'SingleEntity' ||
+                    props.baseLibraryMode ===
+                      BaseLibraryModes.BasicBaseLibrary))
+              "
               :entities="entities as Entity[]"
               :entities-loading="entitiesLoading"
               :bulk-operations-context="bulkOperationsContext"
