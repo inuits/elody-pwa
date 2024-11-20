@@ -38,7 +38,7 @@
         :context-menu-actions="contextMenuActions"
         :parent-entity-id="formId"
         :entity-id="itemId"
-        :entity-type="itemType"
+        :entity-type="entityTypename"
         :relation="relation"
         :bulk-operations-context="bulkOperationsContext"
         @toggle-loading="toggleLoading"
@@ -182,7 +182,7 @@
         :context-menu-actions="contextMenuActions"
         :parent-entity-id="formId"
         :entity-id="itemId"
-        :entity-type="itemType"
+        :entity-type="entityTypename"
         :relation="relation"
         :bulk-operations-context="bulkOperationsContext"
         :refetch-entities="refetchEntities"
@@ -243,6 +243,7 @@ const props = withDefaults(
     contextMenuActions?: ContextMenuActions;
     itemId?: string;
     itemType?: Entitytyping;
+    entityTypename?: Entitytyping;
     loading?: boolean;
     teaserMetadata?: Metadata[];
     intialValues?: IntialValues | undefined;
@@ -268,6 +269,7 @@ const props = withDefaults(
     contextMenuActions: undefined,
     itemId: "",
     itemType: undefined,
+    entityTypename: undefined,
     loading: false,
     teaserMetadata: () => [],
     intialValues: undefined,

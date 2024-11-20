@@ -50,6 +50,7 @@
             ? entity.teaserMetadata?.contextMenuActions
             : undefined
         "
+        :entityTypename="entity.__typename"
         :teaser-metadata="
         formatTeaserMetadata(
           entity.teaserMetadata,
