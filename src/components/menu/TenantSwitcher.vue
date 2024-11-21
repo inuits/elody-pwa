@@ -39,8 +39,10 @@ const {
   selectTenant,
   selectedTenant,
   getLabelById,
+  getIdFromLabel,
   getIdFromCode,
   isAllTenantsLoaded,
+  
 } = useTenant(apolloClient as ApolloClient<any>, config);
 
 const tenant = ref<string | undefined>();
@@ -67,8 +69,8 @@ watch(
   }
 );
 
-const handleTenantFromUrl = (tenant: string): string => {
-  return getIdFromCode(tenant) || tenant;
+const normalizeTenantMetadataToId = (tenant: string): string => {
+  return getIdFromCode(tenant) || getIdFromLabel(tenant) || tenant;
 };
 
 watch(
@@ -77,7 +79,7 @@ watch(
     if (!loaded) return;
     const tenantParam = route.params?.tenant as string;
     tenant.value =
-      (tenantParam && handleTenantFromUrl(tenantParam)) || selectedTenant.value;
+      (tenantParam && normalizeTenantMetadataToId(tenantParam)) || selectedTenant.value;
     router.replace({
       name: route.name as string,
       params: { ...route.params, tenant: tenant.value },
