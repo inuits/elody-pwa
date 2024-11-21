@@ -137,7 +137,7 @@ const iconColor = computed(() =>
   isActive.value ? "accent-normal" : "text-body"
 );
 const isActiveParentOrSubmenu = computed(() => {
-  const routePath = route.path.replace("/", "");
+  const routePath = route.path.substring(route.path.lastIndexOf("/") + 1);
   const isMenuActive =
     routePath === (props.menuitem.typeLink?.route?.destination as string);
   const isSubmenuActive = menuSubitem.value.some((subMenuItem: MenuItem) => {

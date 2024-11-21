@@ -23,6 +23,7 @@ import { DamsIcons } from "@/generated-types/queries";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { inject, computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRoute, useRouter } from "vue-router";
 
 const apolloClient = inject(DefaultApolloClient);
 const config = inject<{
@@ -30,11 +31,19 @@ const config = inject<{
 }>("config");
 
 const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
 const { isEdit } = useEditMode();
-const { tenantsAsDropdownOptions, selectTenant, selectedTenant, getLabelById } =
-  useTenant(apolloClient as ApolloClient<any>, config);
+const {
+  tenantsAsDropdownOptions,
+  selectTenant,
+  selectedTenant,
+  getLabelById,
+  getIdFromCode,
+  isAllTenantsLoaded,
+} = useTenant(apolloClient as ApolloClient<any>, config);
 
-const tenant = ref<string | undefined>(selectedTenant.value);
+const tenant = ref<string | undefined>();
 
 const computedValue = computed<DropdownOption>({
   get() {
@@ -56,6 +65,26 @@ watch(
   async () => {
     if (tenant.value) await selectTenant(tenant.value);
   }
+);
+
+const handleTenantFromUrl = (tenant: string): string => {
+  return getIdFromCode(tenant) || tenant;
+};
+
+watch(
+  () => isAllTenantsLoaded.value,
+  (loaded: boolean) => {
+    if (!loaded) return;
+    const tenantParam = route.params?.tenant as string;
+    tenant.value =
+      (tenantParam && handleTenantFromUrl(tenantParam)) || selectedTenant.value;
+    router.replace({
+      name: route.name as string,
+      params: { ...route.params, tenant: tenant.value },
+      query: route.query,
+    });
+  },
+  { immediate: true }
 );
 </script>
 

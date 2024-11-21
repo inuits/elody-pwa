@@ -7,10 +7,7 @@ import "./assets/base.css";
 import * as Sentry from "@sentry/vue";
 import App from "./App.vue";
 import Unicon from "vue-unicons";
-import {
-  addComponentToRoutes,
-  handleRequiredAuthenticationForRoutes,
-} from "./views/router";
+import { addComponentToRoutes } from "./views/router";
 import { BrowserTracing } from "@sentry/tracing";
 import { createApp } from "vue";
 import { createHead } from "@vueuse/head";
@@ -29,6 +26,7 @@ import { setIgnorePermissions } from "./composables/usePermissions";
 import { Unicons } from "./types";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useErrorCodes } from "@/composables/useErrorCodes";
+import { addRouterNavigationGuards } from "./routerNavigationGuards";
 
 import OpenLayersMap from "vue3-openlayers";
 import type { GraphQLError } from "graphql/error";
@@ -68,10 +66,7 @@ const start = async () => {
   });
 
   auth.changeRedirectRoute(window.location.origin + window.location.pathname);
-  router.afterEach(() => {
-    auth.changeRedirectRoute(window.location.origin + window.location.pathname);
-  });
-  handleRequiredAuthenticationForRoutes(router);
+  addRouterNavigationGuards(router);
 
   const authCode = new URLSearchParams(window.location.search).get("code");
   auth.authCode = authCode;
