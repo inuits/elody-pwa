@@ -14,10 +14,11 @@ import { useRouter } from "vue-router";
 
 const TENANTS_ENDPOINT = "/api/tenants";
 
-type tenant = { id: string; label: string };
+type tenant = { id: string; label: string; code: string };
 const tenants = ref<tenant[] | "no-tenants">("no-tenants");
 const selectedTenant = ref<string | undefined>(undefined);
 const selectedTenantName = ref<string | undefined>(undefined);
+const isAllTenantsLoaded = ref<boolean>(false);
 
 const useTenant = (
   apolloClient: ApolloClient<any>,
@@ -82,6 +83,7 @@ const useTenant = (
                 if (entity && entity.__typename === "Tenant") {
                   const id = entity.uuid as string;
                   const label = entity.intialValues.label as string;
+                  const code = entity.intialValues.code as string;
                   if (tenants.value === "no-tenants") {
                     tenants.value = [];
                   }
@@ -93,9 +95,11 @@ const useTenant = (
                     tenants.value.push({
                       id,
                       label,
+                      code,
                     });
                 }
               });
+            isAllTenantsLoaded.value = true;
           });
       } catch {
         await apolloClient.cache.reset();
@@ -171,8 +175,18 @@ const useTenant = (
     }
   };
 
+  const getIdFromCode = (codeToFind: string) => {
+    if (tenants.value !== "no-tenants") {
+      const tenantResult = tenants.value.find(
+        ({ code }) => code === codeToFind
+      );
+      return tenantResult && tenantResult.id;
+    }
+  };
+
   return {
     getLabelById,
+    getIdFromCode,
     getTenants,
     initTenants,
     selectedTenant,
@@ -182,6 +196,7 @@ const useTenant = (
     tenants,
     tenantsAsDropdownOptions,
     tenantsLoaded,
+    isAllTenantsLoaded,
   };
 };
 
