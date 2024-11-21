@@ -55,7 +55,7 @@
         {{ t(field.validation.fastValidationMessage) }}
       </p>
       <p v-else>
-        {{ error }}
+        {{ t(error) }}
       </p>
     </div>
   </div>

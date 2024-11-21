@@ -77,6 +77,19 @@ export const goToEntityTypeRoute = (
   }
 };
 
+export const setupScopedUseI18n = async () => {
+  const { translations, config } = await getApplicationDetails();
+  let language = config.customization.applicationLocale;
+  const displayPreferences = useStateManagement().getGlobalState(
+    "_displayPreferences"
+  );
+  if (displayPreferences)
+    if (displayPreferences.lang) language = displayPreferences.lang;
+
+  const { t } = i18n(translations, language).global;
+  return t;
+};
+
 export const setSortConfigurationForRoute = (
   route: RouteLocationNormalizedLoaded,
   sorting: { key: string; asc: boolean }

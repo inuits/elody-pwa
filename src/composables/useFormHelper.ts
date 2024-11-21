@@ -6,12 +6,13 @@ import {
   type MetadataValuesInput,
   type PanelMetaData,
 } from "@/generated-types/queries";
-import { findPanelMetadata } from "@/helpers";
+import { findPanelMetadata, setupScopedUseI18n } from "@/helpers";
 import { defineRule, type FormContext, useForm } from "vee-validate";
 import { ref } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { all } from "@vee-validate/rules";
+import { DateTime } from "luxon";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
@@ -100,6 +101,7 @@ const useFormHelper = () => {
       getHasOneOfSpecificMetadataRule
     );
     defineRule(ValidationRules.MaxDateToday, getMaxDateTodayRule);
+    defineRule(ValidationRules.ExistingDate, mustBeExistingDateRule);
   };
 
   const getHasSpecificRelationRule = (
@@ -160,11 +162,19 @@ const useFormHelper = () => {
     return filledInMetadataFields >= Number(amount);
   };
 
-  const getMaxDateTodayRule = (value: string) => {
+  const getMaxDateTodayRule = (value: string): string | boolean => {
     if (!value) return true;
     const timestamp = new Date(value).getTime();
     const now = Date.now();
+    if (!timestamp <= now)
+      return "notifications.errors.future-date-error.title";
     return timestamp <= now;
+  };
+
+  const mustBeExistingDateRule = (value: string): boolean | string => {
+    const isValid = DateTime.fromJSDate(new Date(value)).isValid;
+    if (!isValid) return "notifications.errors.construct-date-error.title";
+    return isValid;
   };
 
   const __isNotEmpty = (str: any) => str.trim() !== "";

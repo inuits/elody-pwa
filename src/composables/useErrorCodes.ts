@@ -1,5 +1,5 @@
 import type { GraphQLError } from "graphql/error";
-import { getApplicationDetails, i18n } from "@/helpers";
+import { setupScopedUseI18n } from "@/helpers";
 import { useStateManagement } from "@/composables/useStateManagement";
 import {
   NotificationType,
@@ -39,19 +39,6 @@ export const useErrorCodes = (): {
     401: (errorCodeType) => handleUnauthorized(errorCodeType),
     403: (errorCodeType) => handleAccessDenied(errorCodeType),
     500: (errorCodeType) => undefined,
-  };
-
-  const setupScopedUseI18n = async () => {
-    const { translations, config } = await getApplicationDetails();
-    let language = config.customization.applicationLocale;
-    const displayPreferences = useStateManagement().getGlobalState(
-      "_displayPreferences"
-    );
-    if (displayPreferences)
-      if (displayPreferences.lang) language = displayPreferences.lang;
-
-    const { t } = i18n(translations, language).global;
-    return t;
   };
 
   const extractMessageAndCodeFromErrorResponse = (
