@@ -1,4 +1,4 @@
-import type { Router, RouteRecordRaw } from "vue-router";
+import type { RouteRecordRaw } from "vue-router";
 import Home from "@/views/Home.vue";
 import HomeWrapper from "@/views/HomeWrapper.vue";
 import ManifestViewer from "@/components/ManifestViewer.vue";
@@ -6,7 +6,6 @@ import SingleEntity from "@/views/SingleEntity.vue";
 import NotFound from "@/views/errorViews/NotFound.vue";
 import AccessDenied from "@/views/errorViews/AccessDenied.vue";
 import Unauthorized from "@/views/errorViews/Unauthorized.vue";
-import { auth } from "@/main";
 
 export type urlParams = "id";
 
@@ -55,14 +54,4 @@ export const addComponentToRoutes = (
     router.push(route);
   });
   return router;
-};
-
-export const handleRequiredAuthenticationForRoutes = (router: Router) => {
-  router.afterEach(() => {
-    if (
-      router.currentRoute.value.meta.requiresAuth &&
-      !auth.isAuthenticated.value
-    )
-      router.push("/unauthorized");
-  });
 };

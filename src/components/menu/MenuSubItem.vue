@@ -39,7 +39,7 @@ const route = useRoute();
 const { can, fetchAdvancedPermission } = usePermissions();
 const isActive = computed(
   () =>
-    route.path.replace("/", "") ===
+    route.path.substring(route.path.lastIndexOf("/") + 1) ===
     (props.subMenuItem?.typeLink?.route?.destination as string)
 );
 const { checkIfRouteOrModal } = useMenuHelper();
