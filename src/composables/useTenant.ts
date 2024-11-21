@@ -175,6 +175,13 @@ const useTenant = (
     }
   };
 
+  const getCodeById = (idToFind: string) => {
+    if (tenants.value !== "no-tenants") {
+      const tenantResult = tenants.value.find(({ id }) => id === idToFind);
+      return tenantResult && tenantResult.code;
+    }
+  };
+
   const getIdFromCode = (codeToFind: string) => {
     if (tenants.value !== "no-tenants") {
       const tenantResult = tenants.value.find(
@@ -186,6 +193,7 @@ const useTenant = (
 
   return {
     getLabelById,
+    getCodeById,
     getIdFromCode,
     getTenants,
     initTenants,

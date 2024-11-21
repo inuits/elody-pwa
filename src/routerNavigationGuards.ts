@@ -18,13 +18,13 @@ const handleTenantInUrl = (
   to: RouteLocationNormalized,
   next: NavigationGuardNext
 ) => {
-  const { selectedTenant } = useTenant();
+  const { selectedTenant, getCodeById } = useTenant();
 
   if (!to.params.tenant && selectedTenant.value) {
     next({
-      name: to.name as string, // Use the route name to preserve named routing
-      params: { ...to.params, tenant: selectedTenant.value }, // Add the tenant param
-      query: to.query, // Preserve existing query parameters
+      name: to.name as string,
+      params: { ...to.params, tenant: getCodeById(selectedTenant.value) },
+      query: to.query,
     });
   } else {
     next();
