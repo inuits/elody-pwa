@@ -94,6 +94,7 @@
     >
       <ImageViewer
         v-if="canShowCopyRight() && media && !imageSrcError"
+        :key="`${itemId}-image-${imageSize}`"
         :class="[
           { 'h-10 w-10': viewMode === 'list' },
           { 'h-48 w-48': viewMode === 'grid' },
@@ -102,9 +103,7 @@
         :url="
           mediaIsLink
             ? media
-            : `/api/iiif/3/${media}/square/${
-                viewMode === 'list' ? 100 : 500
-              },/0/default.jpg`
+            : `/api/iiif/3/${media}/square/${imageSize},/0/default.jpg`
         "
         @error="setNoImage()"
       />
@@ -133,7 +132,7 @@
     >
       <div
         v-for="metadataItem in teaserMetadata.filter(
-          (metadata) => !metadata.showOnlyInEditMode
+          (metadata) => !metadata.showOnlyInEditMode,
         )"
         :key="metadataItem ? metadataItem.key : 'no-key'"
         :class="teaserMetadataStyle"
@@ -288,7 +287,7 @@ const props = withDefaults(
     entityListElements: undefined,
     viewMode: "list",
     refetchEntities: undefined,
-  }
+  },
 );
 
 const emit = defineEmits<{
@@ -298,7 +297,7 @@ const emit = defineEmits<{
 const { isEdit } = useEditMode();
 const { deleteTeaserMetadataItemInState } = useFormHelper();
 const { update, remove } = useFieldArray(
-  `relationValues.${props.relationType}`
+  `relationValues.${props.relationType}`,
 );
 const { getEntityUuid } = useEntitySingle();
 const auth = useAuth();
@@ -307,6 +306,7 @@ const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
 const formId = computed(() => getEntityUuid());
+const imageSize = computed(() => (props.viewMode === "grid" ? 500 : 100));
 const teaserMetadataStyle = computed<string>(() => {
   if (props.viewMode === "grid") return "w-full";
   const amountOfTeaserMetadataItems: string | number =
@@ -324,7 +324,7 @@ const teaserMetadataStyle = computed<string>(() => {
 
   return baseListViewModeStyles.concat(
     " ",
-    listStylesBasedOnAmount[amountOfTeaserMetadataItems]
+    listStylesBasedOnAmount[amountOfTeaserMetadataItems],
   );
 });
 
@@ -351,7 +351,7 @@ const canShowCopyRight = () => {
 
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 const onlyEditableTeaserMetadata = computed(() =>
-  props.teaserMetadata.filter((metadata) => metadata.showOnlyInEditMode)
+  props.teaserMetadata.filter((metadata) => metadata.showOnlyInEditMode),
 );
 
 watch(
@@ -371,12 +371,12 @@ watch(
           editStatus: EditStatus.Unchanged,
         });
       }
-  }
+  },
 );
 
 watch(
   () => isEdit.value,
-  () => (!isEdit.value ? (isMarkedAsToBeDeleted.value = false) : "")
+  () => (!isEdit.value ? (isMarkedAsToBeDeleted.value = false) : ""),
 );
 const removePreviewItem = (idx: number) => {
   deleteTeaserMetadataItemInState(props.itemId);
@@ -384,7 +384,7 @@ const removePreviewItem = (idx: number) => {
 };
 
 const createWindowPanelsFromEntityListElements = (
-  entityListElement: EntityListElement
+  entityListElement: EntityListElement,
 ) => {
   const panel: WindowElementPanel = {
     label: entityListElement.label,
