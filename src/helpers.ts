@@ -569,6 +569,6 @@ export const getTitleOrNameFromEntity = (entity: Entity): string => {
     entity.intialValues.title ||
     entity.intialValues.name ||
     entity.intialValues.filename ||
-    entity.intialValues.id
+    entity.id
   );
 };
