@@ -191,10 +191,20 @@ const useTenant = (
     }
   };
 
+  const getIdFromLabel = (labelToFind: string) => {
+    if (tenants.value !== "no-tenants") {
+      const tenantResult = tenants.value.find(
+        ({ label }) => label === labelToFind
+      );
+      return tenantResult && tenantResult.id;
+    }
+  };
+
   return {
     getLabelById,
     getCodeById,
     getIdFromCode,
+    getIdFromLabel,
     getTenants,
     initTenants,
     selectedTenant,
