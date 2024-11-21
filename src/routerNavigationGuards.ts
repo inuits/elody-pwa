@@ -18,10 +18,10 @@ const handleTenantInUrl = (
   to: RouteLocationNormalized,
   next: NavigationGuardNext
 ) => {
-  const { selectedTenant, getCodeById, getLabelById } = useTenant();
+  const { selectedTenant, getCodeById } = useTenant();
 
   if (!to.params.tenant && selectedTenant.value) {
-    const tenant = getCodeById(selectedTenant.value) || getLabelById(selectedTenant.value) || selectedTenant.value
+    const tenant = getCodeById(selectedTenant.value) || selectedTenant.value
     next({
       name: to.name as string,
       params: { ...to.params, tenant },
