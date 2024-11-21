@@ -39,7 +39,6 @@ const {
   selectTenant,
   selectedTenant,
   getLabelById,
-  getIdFromLabel,
   getIdFromCode,
   isAllTenantsLoaded,
   
@@ -70,7 +69,7 @@ watch(
 );
 
 const normalizeTenantMetadataToId = (tenant: string): string => {
-  return getIdFromCode(tenant) || getIdFromLabel(tenant) || tenant;
+  return getIdFromCode(tenant) || tenant;
 };
 
 watch(
