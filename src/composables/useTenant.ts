@@ -10,7 +10,7 @@ import {
   setPermissionsMappings,
   resetAdvancedPermissions,
 } from "@/composables/usePermissions";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const TENANTS_ENDPOINT = "/api/tenants";
 
@@ -34,11 +34,16 @@ const useTenant = (
   const hideSuperTenant: boolean =
     (config && config.features.hideSuperTenant) || false;
   const router = useRouter();
+  const route = useRoute();
 
   const initTenants = async () => {
     if (hasTenantSelect) {
       await apolloClient.cache.reset();
       await getTenants();
+      if (route.params?.tenant) {
+        const tenantInUrl = getIdFromCode(route.params?.tenant as string) || "";
+        if (tenantInUrl) await setTennantInSession(tenantInUrl);
+      }
       const tenantFromSession = await getTennantFromSession();
       if (
         tenants.value !== "no-tenants" &&
