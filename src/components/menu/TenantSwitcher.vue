@@ -35,13 +35,13 @@ const route = useRoute();
 const router = useRouter();
 const { isEdit } = useEditMode();
 const {
-  tenantsAsDropdownOptions,
-  selectTenant,
-  selectedTenant,
-  getLabelById,
+  getCodeById,
   getIdFromCode,
+  getLabelById,
   isAllTenantsLoaded,
-  
+  selectedTenant,
+  selectTenant,
+  tenantsAsDropdownOptions
 } = useTenant(apolloClient as ApolloClient<any>, config);
 
 const tenant = ref<string | undefined>();
@@ -73,6 +73,10 @@ const normalizeTenantMetadataToId = (tenant: string): string => {
   return getIdFromCode(tenant) || tenant;
 };
 
+const normalizeTenantIdToMetadata = (tenant: string): string => {
+  return getCodeById(tenant) || tenant;
+};
+
 watch(
   () => isAllTenantsLoaded.value,
   (loaded: boolean) => {
@@ -82,7 +86,7 @@ watch(
       (tenantParam && normalizeTenantMetadataToId(tenantParam)) || selectedTenant.value;
     router.replace({
       name: route.name as string,
-      params: { ...route.params, tenant: tenant.value },
+      params: { ...route.params, tenant: tenantParam || normalizeTenantIdToMetadata(selectedTenant.value || "") },
       query: route.query,
     });
   },
