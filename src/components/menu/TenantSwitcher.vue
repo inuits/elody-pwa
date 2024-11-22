@@ -65,7 +65,7 @@ watch(
   () => tenant.value,
   async (newTenant?: string, oldTenant?: string) => {
     if (!oldTenant && newTenant) return;
-    if (tenant.value) await selectTenant(tenant.value);
+    if (newTenant) await selectTenant(newTenant);
   }
 );
 
