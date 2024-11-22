@@ -14,7 +14,7 @@ const handleRequiredAuthentication = (router: Router) => {
     router.push("/unauthorized");
 };
 
-const handleTenantInUrl = (
+const handleTenantParameterInUrl = (
   to: RouteLocationNormalized,
   next: NavigationGuardNext
 ) => {
@@ -39,6 +39,6 @@ export const addRouterNavigationGuards = (router: Router) => {
   });
 
   router.beforeEach((to, from, next) => {
-    handleTenantInUrl(to, next);
+    handleTenantParameterInUrl(to, next);
   });
 };
