@@ -238,6 +238,11 @@ const isOneOfRequiredMetadataField = computed(() => {
     ValidationRules.HasOneOfRequiredMetadata
   );
 });
+const isRegexField = computed(() => {
+  return !!props.metadata?.inputField?.validation?.value?.includes(
+    ValidationRules.Regex
+  );
+});
 
 const isFieldRequired = computed(() => {
   if (
@@ -249,6 +254,9 @@ const isFieldRequired = computed(() => {
     ) ||
     props.metadata?.inputField?.validation?.value?.includes(
       ValidationRules.HasOneOfRequiredRelations
+    ) || 
+    props.metadata?.inputField?.validation?.value?.includes(
+      ValidationRules.Regex
     )
   )
     return true;
@@ -273,6 +281,11 @@ const getValidationRules = (metadata: PanelMetaData): string => {
   if (metadata?.inputField?.validation?.value === ValidationRules.CustomValue)
     rules = metadata?.inputField?.validation?.customValue;
   else rules = metadata?.inputField?.validation?.value?.join("|") as string;
+  if (isRegexField.value) {
+    const rule = ValidationRules.Regex;
+    const regex = metadata?.inputField?.validation?.regex;
+    return `required|${rule}:${regex}`;
+  }
   if (
     (isRequiredRelationField.value || isOneOfRequiredRelationField.value) &&
     !props.isEdit
@@ -321,6 +334,10 @@ const label = computed(() =>
 
 const veeValidateField = computed(() => {
   if (!props.metadata?.inputField && !props.linkedEntityId) {
+    const key = fieldKeyWithId.value || props.metadata.key;
+    return `${ValidationFields.IntialValues}.${key}`;
+  }
+  if (isRegexField.value) {
     const key = fieldKeyWithId.value || props.metadata.key;
     return `${ValidationFields.IntialValues}.${key}`;
   }
