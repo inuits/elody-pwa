@@ -80,6 +80,7 @@
                 getObjectsBasedOnTypename(metadata, 'EntityListElement')
               "
               :can="metadata.can"
+              :fetch-deep-relations="metadata.fetchDeepRelations"
               class="pt-2"
             />
           </div>
