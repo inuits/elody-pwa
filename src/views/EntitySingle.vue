@@ -149,7 +149,7 @@ router.beforeEach(() => {
 
 onBeforeRouteUpdate(async (to: any) => {
   queryVariables.id = to.params.id;
-  queryVariables.type = to.params.type;
+  queryVariables.type = entityType.value;
   intialValues.value = "no-values";
   relationValues.value = "no-values";
   columnList.value = "no-values";

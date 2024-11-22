@@ -63,7 +63,8 @@ const computedValue = computed<DropdownOption>({
 
 watch(
   () => tenant.value,
-  async () => {
+  async (newTenant?: string, oldTenant?: string) => {
+    if (!oldTenant && newTenant) return;
     if (tenant.value) await selectTenant(tenant.value);
   }
 );
