@@ -19,7 +19,7 @@ export const useErrorCodes = (): {
     message: string;
   }>;
   getMessageAndCodeFromErrorString: (
-    error: string
+    error: string,
   ) => Promise<{ code: string; message: string }>;
 } => {
   let t;
@@ -31,18 +31,21 @@ export const useErrorCodes = (): {
     "1004": (errorCodeType) => handleAccessDenied(errorCodeType),
   };
 
-  const readHandlers: Record<string, Function> = {};
+  const readHandlers: Record<string, Function> = {
+    R0004: () => handleNotFound(),
+  };
 
   const writeHandlers: Record<string, Function> = {};
 
   const statusCodeHandlers: Record<number, Function> = {
     401: (errorCodeType) => handleUnauthorized(errorCodeType),
     403: (errorCodeType) => handleAccessDenied(errorCodeType),
+    404: (errorCodeType) => handleNotFound(errorCodeType),
     500: (errorCodeType) => undefined,
   };
 
   const extractMessageAndCodeFromErrorResponse = (
-    errorMessage: string
+    errorMessage: string,
   ): {
     code: string | undefined;
     message: string | undefined;
@@ -63,14 +66,14 @@ export const useErrorCodes = (): {
 
   const getTranslatedErrorMessageForCode = async (
     code: string | undefined,
-    defaultMessage: string
+    defaultMessage: string,
   ): Promise<string> => {
     if (!code) return defaultMessage;
     return t(`error-codes.${code}`);
   };
 
   const handleUnauthorized = async (
-    errorCodeType: ErrorCodeType = ErrorCodeType.Read
+    errorCodeType: ErrorCodeType = ErrorCodeType.Read,
   ) => {
     const { setTennantInSession } = useTenant();
 
@@ -81,22 +84,28 @@ export const useErrorCodes = (): {
   };
 
   const handleAccessDenied = (
-    errorCodeType: ErrorCodeType = ErrorCodeType.Read
+    errorCodeType: ErrorCodeType = ErrorCodeType.Read,
   ) => {
     if (errorCodeType === ErrorCodeType.Write) {
       createNotificationOverwrite(
         NotificationType.error,
         t("notifications.graphql-errors.forbidden.title"),
-        t("notifications.graphql-errors.forbidden.description")
+        t("notifications.graphql-errors.forbidden.description"),
       );
       return;
     }
     router.push("/accessDenied");
   };
 
+  const handleNotFound = (
+    errorCodeType: ErrorCodeType = ErrorCodeType.Read,
+  ) => {
+    router.push("/not-found");
+  };
+
   const handleAuthCodes = (
     genericCodePart: string,
-    errorCodeType: ErrorCodeType
+    errorCodeType: ErrorCodeType,
   ) => {
     authHandlers[genericCodePart](errorCodeType);
   };
@@ -116,11 +125,11 @@ export const useErrorCodes = (): {
 
   const handleErrorByCodeType = async (
     code: string,
-    defaultMessage: string
+    defaultMessage: string,
   ): promise<void> => {
     const message = await getTranslatedErrorMessageForCode(
       code,
-      defaultMessage
+      defaultMessage,
     );
     const genericCodePart: string = code.substring(1);
     const actionCodePart: string = Array.from(code)[0];
@@ -141,11 +150,11 @@ export const useErrorCodes = (): {
 
   const fallbackOnRequestStatusCode = (
     statusCode: string,
-    errorCodeType: ErrorCodeType
+    errorCodeType: ErrorCodeType,
   ): void => {
     if (!Object.keys(statusCodeHandlers).includes(statusCode)) {
       console.info(
-        `An error with status code ${statusCode} could not be handled, add it to the statusCodeHandlers mapper or handle the error with the 'onError' directive on the call itself`
+        `An error with status code ${statusCode} could not be handled, add it to the statusCodeHandlers mapper or handle the error with the 'onError' directive on the call itself`,
       );
       return;
     }
@@ -153,19 +162,19 @@ export const useErrorCodes = (): {
   };
 
   const getMessageAndCodeFromErrorString = async (
-    error: string
+    error: string,
   ): Promise<{ code: string; message: string }> => {
     t = await setupScopedUseI18n();
     const errorObject = extractMessageAndCodeFromErrorResponse(error);
     errorObject.message = await getTranslatedErrorMessageForCode(
       errorObject.code,
-      errorObject.message
+      errorObject.message,
     );
     return errorObject;
   };
 
   const getMessageAndCodeFromApolloError = async (
-    apolloError: ApolloError
+    apolloError: ApolloError,
   ): Promise<{ code: string; message: string }> => {
     t = await setupScopedUseI18n();
     let apolloMessage: string =
@@ -205,7 +214,7 @@ export const useErrorCodes = (): {
     if (!code) {
       fallbackOnRequestStatusCode(
         httpResponse.status?.toString(),
-        ErrorCodeType.Read
+        ErrorCodeType.Read,
       );
       return;
     }
