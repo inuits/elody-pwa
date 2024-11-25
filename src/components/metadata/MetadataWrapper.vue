@@ -268,7 +268,7 @@ const getValidationRules = (metadata: PanelMetaData): string => {
   else rules = metadata?.inputField?.validation?.value?.join("|") as string;
   if (isRegexField.value) {
     const rule = ValidationRules.Regex;
-    const regex = metadata?.inputField?.validation?.regex;
+    let regex = metadata?.inputField?.validation?.regex?.replace(/^\/|\/$/g, '');
     return `required|${rule}:${regex}`;
   }
   if (
