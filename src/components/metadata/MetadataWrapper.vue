@@ -21,11 +21,25 @@
         ( {{ t("metadata.labels.one-of-required") }} )
       </p>
       <p
-        v-else-if="props.metadata?.inputField && !isFieldRequired && isEdit"
+        v-else-if="metadata?.inputField && !isFieldRequired && isEdit"
         class="pl-1"
       >
         ( {{ t("metadata.labels.optional") }} )
       </p>
+      <base-tooltip v-if="metadata?.tooltip" position="top-right" :tooltip-offset="8">
+          <template #activator="{ on }">
+            <div v-on="on" class="pl-1">
+              <unicon :name="Unicons.QuestionCircle.name" height="20" />
+            </div>
+          </template>
+          <template #default>
+            <span class="text-sm text-text-placeholder">
+              <div>
+                {{ t(`${metadata.tooltip}`) }}
+              </div>
+            </span>
+          </template>
+        </base-tooltip>
     </div>
     <entity-element-metadata-edit
       v-if="isEdit && metadata.inputField"
@@ -136,6 +150,7 @@ import { useField } from "vee-validate";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useFormHelper } from "@/composables/useFormHelper";
 import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
+import { Unicons } from "@/types";
 
 const { t } = useI18n();
 const { addOrderItem, removeOrderItem, updateOrderItem } = useOrderListItems();
