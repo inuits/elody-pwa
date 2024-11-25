@@ -3,10 +3,9 @@
     v-if="
       paginationLimitOptionsPromiseIsResolved && sortOptionsPromiseIsResolved
     "
-    class="flex justify-between items-center w-full"
   >
-    <div class="flex justify-start gap-x-3">
-      <div v-if="paginationLimitOptions.length > 0">
+    <div class="library-bar-container">
+      <div v-if="paginationLimitOptions.length > 0" class="library-bar-item">
         <BaseDropdownNew
           v-model="selectedPaginationLimitOption"
           :options="paginationLimitOptions"
@@ -17,7 +16,10 @@
           dropdown-style="default"
         />
       </div>
-      <div v-if="sortOptions.length > 0" class="w-auto">
+      <div
+        v-if="sortOptions.length > 0"
+        class="library-bar-item flex gap-x-2 items-center"
+      >
         <BaseDropdownNew
           data-cy="sort-options"
           v-model="selectedSortOption"
@@ -28,8 +30,6 @@
           label-alignment="left"
           dropdown-style="default"
         />
-      </div>
-      <div v-if="sortOptions.length > 0" class="flex items-center">
         <BaseToggle
           data-cy="sort-toggle"
           v-model="isAsc"
@@ -38,16 +38,16 @@
           :icon-height="24"
         />
       </div>
-    </div>
-    <div class="flex justify-end">
-      <BasePaginationNew
-        v-model:skip="selectedSkip"
-        :limit="selectedPaginationLimitOption?.value ?? NaN"
-        :total-items="
-          totalItems || getStateForRoute(route)?.totalEntityCount || 1
-        "
-        @update:skip="setSkip"
-      />
+      <div class="library-bar-item">
+        <BasePaginationNew
+          v-model:skip="selectedSkip"
+          :limit="selectedPaginationLimitOption?.value ?? NaN"
+          :total-items="
+            totalItems || getStateForRoute(route)?.totalEntityCount || 1
+          "
+          @update:skip="setSkip"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -196,3 +196,29 @@ watch(
   async () => await props.setSortOrder(isAsc.value ? "asc" : "desc", true)
 );
 </script>
+
+<style scoped>
+.library-bar-container {
+  display: flex;
+  width: 100%;
+}
+
+@container base-library (max-width: 850px) {
+  .library-bar-container {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .library-bar-item {
+    width: 100%;
+    padding: 0.5rem;
+    display: flex;
+    background-color: theme("colors.neutral.lightest");
+  }
+
+  .library-bar-item:nth-child(odd) {
+    background-color: theme("colors.neutral.light");
+  }
+}
+</style>

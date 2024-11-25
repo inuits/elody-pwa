@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="[{ 'base-library-container': !enableAdvancedFilters }]">
     <div v-if="selectInputFieldType">
       <base-input-autocomplete
         autocomplete-style="defaultWithBorder"
@@ -43,7 +43,7 @@
             { 'sticky z-1': hasStickyBars },
           ]"
         >
-          <div class="flex flex-row items-center gap-y-4">
+          <div class="fine-tune-container">
             <FiltersBase
               v-show="enableAdvancedFilters"
               class="lg:w-[46%]"
@@ -101,7 +101,7 @@
               enableBulkOperations &&
               baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
             "
-            class="my-3"
+            class="mr-3 py-3"
             :class="{ 'flex justify-end': expandFilters }"
           >
             <BulkOperationsActionsBar
@@ -720,3 +720,23 @@ EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryThumbnail, async () => {
     await getEntities(route);
 });
 </script>
+
+<style scoped>
+.base-library-container {
+  container-type: inline-size;
+  container-name: base-library;
+}
+
+.fine-tune-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  row-gap: 1rem;
+}
+
+@container base-library (max-width: 850px) {
+  .fine-tune-container {
+    display: grid;
+  }
+}
+</style>
