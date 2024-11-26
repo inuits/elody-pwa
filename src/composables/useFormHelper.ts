@@ -27,7 +27,7 @@ export type EntityValues = {
 
 const useFormHelper = () => {
   const createEntityValues = (
-    intialValueFields: PanelMetaData[]
+    intialValueFields: PanelMetaData[],
   ): EntityValues => {
     const intialValues: any = {};
     Object.values(intialValueFields).forEach((field: PanelMetaData) => {
@@ -44,7 +44,7 @@ const useFormHelper = () => {
 
   const createForm = (
     key: string,
-    formValues: EntityValues
+    formValues: EntityValues,
   ): FormContext<any> => {
     const form = useForm<EntityValues>({
       initialValues: formValues,
@@ -94,11 +94,11 @@ const useFormHelper = () => {
     defineRule(ValidationRules.HasRequiredRelation, getHasSpecificRelationRule);
     defineRule(
       ValidationRules.HasOneOfRequiredRelations,
-      getHasOneOfSpecificRelationsRule
+      getHasOneOfSpecificRelationsRule,
     );
     defineRule(
       ValidationRules.HasOneOfRequiredMetadata,
-      getHasOneOfSpecificMetadataRule
+      getHasOneOfSpecificMetadataRule,
     );
     defineRule(ValidationRules.MaxDateToday, getMaxDateTodayRule);
     defineRule(ValidationRules.ExistingDate, mustBeExistingDateRule);
@@ -106,19 +106,19 @@ const useFormHelper = () => {
 
   const getHasSpecificRelationRule = (
     value: BaseRelationValuesInput[],
-    parameters: string[]
+    parameters: string[],
   ): boolean => {
     if (!Array.isArray(value)) {
       return false;
     }
     const relations = value.filter(
       (relation: BaseRelationValuesInput) =>
-        relation.editStatus !== EditStatus.Deleted
+        relation.editStatus !== EditStatus.Deleted,
     );
     const [amount = 1, relationType] = parameters[0].split(":");
     const specificRelationsLength =
       relations.filter(
-        (relation: BaseRelationValuesInput) => relation.type === relationType
+        (relation: BaseRelationValuesInput) => relation.type === relationType,
       )?.length || 0;
 
     return specificRelationsLength >= Number(amount);
@@ -127,7 +127,7 @@ const useFormHelper = () => {
   const getHasOneOfSpecificRelationsRule = (
     value: BaseRelationValuesInput[],
     parameters: string[],
-    ctx: any
+    ctx: any,
   ) => {
     if (!Array.isArray(value)) {
       return false;
@@ -151,7 +151,7 @@ const useFormHelper = () => {
   const getHasOneOfSpecificMetadataRule = (
     value: any,
     parameters: string[],
-    ctx: any
+    ctx: any,
   ) => {
     const intialValues = ctx.form.intialValues;
     const [amount = 1, ...includedMetadataFields] = parameters[0].split(":");
@@ -172,6 +172,7 @@ const useFormHelper = () => {
   };
 
   const mustBeExistingDateRule = (value: string): boolean | string => {
+    if (!value) return true;
     const isValid = DateTime.fromJSDate(new Date(value)).isValid;
     if (!isValid) return "notifications.errors.construct-date-error.title";
     return isValid;
@@ -194,7 +195,7 @@ const useFormHelper = () => {
 
   const getEditableMetadataKeys = (
     columnList: Record<string, any>,
-    formId: string
+    formId: string,
   ): string[] => {
     const keyArray: string[] = [];
     const panelMetadataItems = findPanelMetadata(columnList);
@@ -238,7 +239,7 @@ const useFormHelper = () => {
     selectedItems: InBulkProcessableItem[],
     relationType: string,
     formId: string | undefined = undefined,
-    keepExisted: boolean = false
+    keepExisted: boolean = false,
   ) => {
     const form: FormContext<any> | undefined = formId
       ? getForm(formId)
@@ -250,7 +251,7 @@ const useFormHelper = () => {
       const currentRelations =
         form.values.relationValues[relationType]?.filter(
           (relation: BaseRelationValuesInput) =>
-            !relation.editStatus || relation.editStatus !== EditStatus.New
+            !relation.editStatus || relation.editStatus !== EditStatus.New,
         ) || [];
       relationsToSet.push(...currentRelations);
     }
@@ -270,24 +271,25 @@ const useFormHelper = () => {
   const replaceRelationsFromSameType = (
     selectedItems: InBulkProcessableItem[],
     relationType: string,
-    formId: string | undefined = undefined
+    formId: string | undefined = undefined,
   ) => {
     const form: FormContext<any> | undefined = formId
       ? getForm(formId)
       : getFormByRouteId().form;
     if (!form) return;
     const relationIds: string[] = selectedItems.map(
-      (item: InBulkProcessableItem) => item.id
+      (item: InBulkProcessableItem) => item.id,
     );
     // TODO: Find something better to unref this
     const relationValues = JSON.parse(
-      JSON.stringify(form.values.relationValues)
+      JSON.stringify(form.values.relationValues),
     );
 
     const relationsToDelete: BaseRelationValuesInput[] = relationValues[
       relationType
     ]?.filter(
-      (relation: BaseRelationValuesInput) => !relationIds.includes(relation.key)
+      (relation: BaseRelationValuesInput) =>
+        !relationIds.includes(relation.key),
     );
 
     const relationsToSet: BaseRelationValuesInput[] = [];
@@ -316,7 +318,7 @@ const useFormHelper = () => {
   const findRelation = (
     key: string,
     type: string,
-    parentEntityId: string
+    parentEntityId: string,
   ):
     | { idx: number; relation: BaseRelationValuesInput }
     | "no-relation-found" => {
@@ -330,7 +332,7 @@ const useFormHelper = () => {
           idx = index;
           return true;
         }
-      }
+      },
     );
 
     return idx === "no-idx" ? "no-relation-found" : { relation, idx };
@@ -338,7 +340,7 @@ const useFormHelper = () => {
 
   const parseIntialValuesForFormSubmit = (
     intialValues: IntialValues,
-    entityId: string
+    entityId: string,
   ): MetadataValuesInput[] => {
     const metadata: any[] = [];
     Object.keys(intialValues)
@@ -385,10 +387,10 @@ const useFormHelper = () => {
   const parseRelationMetadataForFormSubmit = (
     relationMetadata: IntialValues,
     relations: BaseRelationValuesInput[],
-    entityId: string
+    entityId: string,
   ): BaseRelationValuesInput[] => {
     const editableRelationMetadataItems = Object.entries(
-      relationMetadata
+      relationMetadata,
     ).filter((entry) => !editableFields.value[entityId].includes(entry.key));
 
     editableRelationMetadataItems.forEach((entry) => {
@@ -401,7 +403,7 @@ const useFormHelper = () => {
         if (relation.key === id) {
           if (!relation.metadata) relation.metadata = [];
           const existingField = relation.metadata.find(
-            (metadataItem: any) => metadataItem.key === fieldKey
+            (metadataItem: any) => metadataItem.key === fieldKey,
           );
           if (existingField) {
             existingField.value = fieldValue;
@@ -429,7 +431,7 @@ const useFormHelper = () => {
       relations = parseRelationMetadataForFormSubmit(
         values.relationMetadata,
         relations,
-        uuid
+        uuid,
       );
 
     return { metadata, relations };
