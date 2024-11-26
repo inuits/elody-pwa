@@ -6,7 +6,7 @@ import {
   type MetadataValuesInput,
   type PanelMetaData,
 } from "@/generated-types/queries";
-import { findPanelMetadata, setupScopedUseI18n } from "@/helpers";
+import { findPanelMetadata } from "@/helpers";
 import { defineRule, type FormContext, useForm } from "vee-validate";
 import { ref } from "vue";
 import { useRoute } from "vue-router";
