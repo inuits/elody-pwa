@@ -58,6 +58,8 @@ export const useGetDropdownOptions = (
       advancedFilterInputForRetrievingOptions.length > 0
     ) {
       filters = mapOptionsFilterInput(advancedFilterInputForRetrievingOptions);
+      filters = parent !== "fetchAll" && relationType ? 
+        [...filters, getRelationFilter(parent, relationType)] : filters
       entityTypeToSet =
         filters.find(
           (filterInput) => filterInput.type === AdvancedFilterTypes.Type
@@ -89,6 +91,7 @@ export const useGetDropdownOptions = (
     } else {
       const isEmptyAdvancedSearchFilter =
         !searchFilterInput || Object.values(searchFilterInput).includes(null);
+      console.log('isEmptyAdvanceSearch: ', isEmptyAdvancedSearchFilter, Object.values(searchFilterInput).includes(null))
       if (isEmptyAdvancedSearchFilter) return;
 
       advancedFilters =
