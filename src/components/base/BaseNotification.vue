@@ -2,7 +2,7 @@
   <transition>
     <div
       data-cy="base-notification"
-      v-if="notification.shown && notification.title"
+      v-if="notification.shown && notification.title && !someModalIsOpened"
       class="absolute m-4 p-4 w-2/12 bg-neutral-20 top-0 right-0 rounded-md z-[100]"
     >
       <button
@@ -34,6 +34,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 export enum NotificationType {
   default = "default",
@@ -67,7 +68,7 @@ export const useNotification = () => {
     type: NotificationType,
     title: string,
     description: string,
-    displayTime: number = 10
+    displayTime: number = 10,
   ) => {
     const baseNotification = { displayTime, shown: true };
     const notificationOverwrite = { type, title, description };
@@ -82,6 +83,7 @@ export default defineComponent({
   name: "BaseNotification",
   setup() {
     const { notification } = useNotification();
+    const { someModalIsOpened } = useBaseModal();
     const typeColors = {
       default: { border: "border-neutral-700", text: "text-neutral-700" },
       warning: {
@@ -100,14 +102,20 @@ export default defineComponent({
       () => notification.value.shown,
       (shown) => {
         if (shown) {
+          if (someModalIsOpened)
+            // Remove this if no notifications pop-up when a modal is open
+            console.info(
+              `A modal is open at this time show the '${notification.value.title}' error inside of the modal instead of using notifications`,
+            );
+
           setTimeout(() => {
             notification.value.shown = false;
           }, secondsToMilliseconds(notification.value.displayTime));
         }
-      }
+      },
     );
 
-    return { NotificationType, typeColors, notification };
+    return { NotificationType, typeColors, notification, someModalIsOpened };
   },
 });
 </script>
