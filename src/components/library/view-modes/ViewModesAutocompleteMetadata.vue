@@ -61,9 +61,9 @@ const inputValue = computed<DropdownOption[] | undefined>({
 });
 
 const mapModalValueToDropdownOptions = (values: any[]): DropdownOption[] => {
-  if(!values) return [];
+  if (!values) return [];
 
-  if (Array.isArray(values))
+  if (Array.isArray(values)) {
     return values.map((item) => {
       if (item.__typename === "DropdownOption") return item;
       return {
@@ -73,6 +73,7 @@ const mapModalValueToDropdownOptions = (values: any[]): DropdownOption[] => {
         __typename: "DropdownOption"
       };
     });
+  }
 
   return [{
     icon: DamsIcons.NoIcon,
