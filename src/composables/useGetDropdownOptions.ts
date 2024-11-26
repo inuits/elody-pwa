@@ -91,7 +91,6 @@ export const useGetDropdownOptions = (
     } else {
       const isEmptyAdvancedSearchFilter =
         !searchFilterInput || Object.values(searchFilterInput).includes(null);
-      console.log('isEmptyAdvanceSearch: ', isEmptyAdvancedSearchFilter, Object.values(searchFilterInput).includes(null))
       if (isEmptyAdvancedSearchFilter) return;
 
       advancedFilters =
