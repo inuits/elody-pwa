@@ -25,7 +25,7 @@ const initialModalInfo: ModalInfo = {
 const getInitialModals = (): { [key: string]: ModalInfo } => {
   const initialModals: { [key: string]: ModalInfo } = {};
   Object.keys(TypeModals).forEach(
-    (modalType) => (initialModals[modalType] = { ...initialModalInfo }),
+    (modalType) => (initialModals[modalType] = { ...initialModalInfo })
   );
   return initialModals;
 };
@@ -46,7 +46,7 @@ export const useBaseModal = () => {
     formQuery: string | undefined = undefined,
     deleteQueryOptions: DeleteQueryOptions | undefined = undefined,
     askForCloseConfirmation: boolean | undefined = undefined,
-    context: Context | undefined = undefined,
+    context: Context | undefined = undefined
   ): void => {
     if (modalType !== TypeModals.Confirm)
       closeModalsWithStyle(currentModalStyle.value);
@@ -74,7 +74,7 @@ export const useBaseModal = () => {
 
   const closeModalsWithStyle = (style: ModalStyle): void => {
     const modalsWithStyle: ModalInfo[] = Object.values(modals).filter(
-      (modal: ModalInfo) => currentModalStyle.value === style,
+      (modal: ModalInfo) => currentModalStyle.value === style
     );
     if (!modalsWithStyle) return;
     modalsWithStyle.forEach((modal: ModalInfo) => (modal.open = false));
@@ -86,7 +86,7 @@ export const useBaseModal = () => {
 
   const updateModal = (
     modalType: TypeModals,
-    modalInput: { [key: string]: any },
+    modalInput: { [key: string]: any }
   ): void => {
     Object.assign(modals[modalType], modalInput);
   };
@@ -111,12 +111,6 @@ export const useBaseModal = () => {
     deleteQueryOptions.value = value;
   };
 
-  const someModalIsOpened = computed((): boolean => {
-    return modals.value.some((modal: ModalInfo) => {
-      return modal.open;
-    });
-  });
-
   return {
     getModal,
     modals,
@@ -130,6 +124,5 @@ export const useBaseModal = () => {
     changeCloseConfirmation,
     modalToCloseAfterConfirm,
     currentModalStyle,
-    someModalIsOpened,
   };
 };
