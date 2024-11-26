@@ -1,9 +1,9 @@
 <template>
   <div>
-    <ViewModesAutocomplete
+    <ViewModesAutocompleteRelations
       v-if="
-        field.type === InputFieldTypes.DropdownMultiselect ||
-        field.type === InputFieldTypes.DropdownSingleselect
+        field.type === InputFieldTypes.DropdownMultiselectRelations ||
+        field.type === InputFieldTypes.DropdownSingleselectRelations
       "
       v-model="metadataValue"
       :metadata-key-to-get-options-for="
@@ -12,7 +12,7 @@
           : fieldKey
       "
       :select-type="
-        field.type === InputFieldTypes.DropdownSingleselect ? 'single' : 'multi'
+        field.type === InputFieldTypes.DropdownSingleselectRelations ? 'single' : 'multi'
       "
       :relation-type="field.relationType"
       :from-relation-type="field.fromRelationType"
@@ -31,6 +31,18 @@
         field.metadataKeyToCreateEntityFromOption
       "
       :depends-on="field.dependsOn"
+    />
+    <ViewModesAutocompleteMetadata
+      v-else-if="
+        field?.type === InputFieldTypes.DropdownMultiselectMetadata ||
+        field?.type === InputFieldTypes.DropdownSingleselectMetadata
+      "
+      v-model:model-value="metadataValue"
+      :metadata-dropdown-options="field.options"
+      :formId="formId"
+      :select-type="field.type === InputFieldTypes.DropdownSingleselectMetadata ? 'single' : 'multi'"
+      :disabled="field.disabled"
+      mode="edit"
     />
     <BaseDropdownNew
       v-else-if="field.type === InputFieldTypes.Dropdown"
@@ -77,12 +89,13 @@ import {
 } from "@/generated-types/queries";
 import BaseDropdownNew from "../base/BaseDropdownNew.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
+import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import { addCurrentTimeZoneToDateTimeString, isDateTime } from "@/helpers";
 import { onMounted, watch, ref, computed, inject } from "vue";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
+import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 
 const emit = defineEmits(["update:value", "registerEnterPressed:value"]);
 const { t } = useI18n();
@@ -167,7 +180,7 @@ const getIdForHiddenFieldFilter = (): any => {
 };
 
 const populateHiddenField = (): BaseRelationValuesInput[] | undefined => {
-  if (props.field.type === InputFieldTypes.DropdownMultiselect) {
+  if (props.field.type === InputFieldTypes.DropdownMultiselectRelations) {
     const relation: BaseRelationValuesInput[] = [];
     relation.push({
       editStatus: EditStatus.New,
