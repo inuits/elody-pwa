@@ -6,12 +6,12 @@
     @keydown.enter="applyFilters(true)"
   >
     <div
-      class="flex justify-between items-center px-4 h-12 border-t border-x select-none cursor-pointer"
-      :class="
-        expandFilters
-          ? 'border-neutral-light rounded-t'
-          : 'border-neutral-white rounded-xl'
-      "
+      class=""
+      :class="[
+        'flex justify-between items-center px-4 h-12 border-t border-x select-none cursor-pointer',
+        { 'border-neutral-light rounded-t': expandFilters },
+        { 'border-neutral-white rounded-xl': !expandFilters },
+      ]"
       @click="() => emit('expandFilters', expandFilters)"
     >
       <span class="text-text-body text-xl font-bold">
@@ -40,12 +40,12 @@
     </div>
 
     <div
-      class="absolute w-full rounded-b bg-neutral-white"
-      :class="
-        expandFilters
-          ? 'scrollable border-x border-b-2 border-neutral-light'
-          : ''
-      "
+      :class="[
+        'absolute w-full rounded-b bg-neutral-white',
+        {
+          'scrollable border-x border-b-2 border-neutral-light': expandFilters,
+        },
+      ]"
     >
       <div v-if="expandFilters" class="p-4 sticky top-0 bg-white z-10">
         <div class="flex justify-between gap-4 pb-4">
@@ -72,7 +72,13 @@
             "
             :icon="DamsIcons.EllipsisV"
             class="!w-1/5"
-            @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event.clientX, y: event.clientY})"
+            @click.stop="
+              (event: MouseEvent) =>
+                contextMenuHandler.openContextMenu({
+                  x: event.clientX,
+                  y: event.clientY,
+                })
+            "
           />
         </div>
         <div>
@@ -95,37 +101,48 @@
             activeFilters.filter(
               (activeFilter) =>
                 JSON.stringify(activeFilter.key) ===
-                JSON.stringify(filter.advancedFilter.key)
+                JSON.stringify(filter.advancedFilter.key),
             )[0]
           "
           :matchers="
             matchers.filter((option) =>
               filterMatcherMapping[filter.advancedFilter.type].includes(
-                option.value
-              )
+                option.value,
+              ),
             )
           "
           :clear-all-active-filters="clearAllActiveFilters"
-          @activate-filter="(filterInput: AdvancedFilterInput, matcher: DropdownOption | undefined) => {
-            filter.isActive = true;
-            filter.inputFromState = filterInput;
-            filter.selectedMatcher = matcher;
-            activeFilters = activeFilters.filter(activeFilter => activeFilter.key !== filterInput.key);
-            let index = activeFilters.findIndex((activeFilter) => JSON.stringify(activeFilter.key) === JSON.stringify(filterInput.key))
-            if(index !== -1) activeFilters.splice(index, 1, filterInput)
-            else activeFilters.push(filterInput);
-          }"
+          @activate-filter="
+            (
+              filterInput: AdvancedFilterInput,
+              matcher: DropdownOption | undefined,
+            ) => {
+              filter.isActive = true;
+              filter.inputFromState = filterInput;
+              filter.selectedMatcher = matcher;
+              activeFilters = activeFilters.filter(
+                (activeFilter) => activeFilter.key !== filterInput.key,
+              );
+              let index = activeFilters.findIndex(
+                (activeFilter) =>
+                  JSON.stringify(activeFilter.key) ===
+                  JSON.stringify(filterInput.key),
+              );
+              if (index !== -1) activeFilters.splice(index, 1, filterInput);
+              else activeFilters.push(filterInput);
+            }
+          "
           @deactivate-filter="
             (key, forceApply = false) => {
               const filter = filters.filter(
-                (filter) => filter.advancedFilter.key === key
+                (filter) => filter.advancedFilter.key === key,
               )[0];
               if (filter.advancedFilter.hidden) return;
               filter.isActive = false;
               filter.inputFromState = undefined;
               filter.selectedMatcher = undefined;
               activeFilters = activeFilters.filter(
-                (filter) => JSON.stringify(filter.key) !== JSON.stringify(key)
+                (filter) => JSON.stringify(filter.key) !== JSON.stringify(key),
               );
               if (forceApply) applyFilters(true);
             }
@@ -200,23 +217,23 @@ const props = withDefaults(
     parentEntityIdentifiers: () => [],
     enableSaveSearchFilters: true,
     shouldUseStateForRoute: true,
-  }
+  },
 );
 
 const emit = defineEmits<{
   (
     event: "filterMatcherMappingPromise",
-    filterMatcherMappingPromise: (entityType: Entitytyping) => Promise<void>
+    filterMatcherMappingPromise: (entityType: Entitytyping) => Promise<void>,
   ): void;
   (
     event: "advancedFiltersPromise",
-    advancedFiltersPromise: (entityType: Entitytyping) => Promise<void>
+    advancedFiltersPromise: (entityType: Entitytyping) => Promise<void>,
   ): void;
   (
     event: "applyFilters",
     advancedFilterInputs: AdvancedFilterInput[],
     stateSaved: boolean,
-    force: boolean
+    force: boolean,
   ): void;
   (event: "expandFilters", expandFilters: boolean): void;
 }>();
@@ -266,7 +283,7 @@ const addFilterOptions = computed(() =>
         label: t(filter.advancedFilter.label || ""),
         value: t(filter.advancedFilter.label || ""),
       };
-    })
+    }),
 );
 const selectedSavedFilter = computed(() => {
   return getActiveFilter();
@@ -414,7 +431,7 @@ const applyFilters = (saveState = false, force = true) => {
 };
 
 const getAngleIcon = computed<DamsIcons>(() =>
-  props.expandFilters ? DamsIcons.AngleUp : DamsIcons.AngleDown
+  props.expandFilters ? DamsIcons.AngleUp : DamsIcons.AngleDown,
 );
 
 const toggleDisplayedFilters = () => {
@@ -438,7 +455,7 @@ if (props.parentEntityIdentifiers.length > 0)
     () => isSaved.value,
     () => {
       if (isSaved.value) applyFilters();
-    }
+    },
   );
 watch(displayedFilterOptions, () => toggleDisplayedFilters());
 watch(clearAllActiveFilters, () => {
@@ -461,7 +478,7 @@ watch(selectedSavedFilter, () => {
 
   addNewSavedFilterToLastUsedFiltersForRoute(
     props.route,
-    selectedSavedFilter.value
+    selectedSavedFilter.value,
   );
   addLastUsedFilterToStateForRoute(props.route, selectedSavedFilter.value);
   lastActiveFilter.value = selectedSavedFilter.value;
@@ -474,7 +491,7 @@ watch(
     setActiveSavedFilter(null);
     lastActiveFilter.value = getLastUsedFilterForRoute(props.route);
     dequeueAllItemsForBulkProcessing(BulkOperationsContextEnum.FilterOptions);
-  }
+  },
 );
 
 const clearAllFilters = async ({
