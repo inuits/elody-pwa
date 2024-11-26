@@ -3,7 +3,7 @@
     v-if="mode === 'edit' || (modelValue && modelValue.length > 0)"
     v-model="inputValue"
     :autocomplete-style="!disabled ? 'defaultWithBorder' : 'readOnly'"
-    :options="!disabled ? metadataDropdownOptions : selectedDropdownOptions"
+    :options="!disabled ? dropdownOptions : selectedDropdownOptions"
     :select-type="selectType"
     :disabled="disabled"
     :can-create-option="canCreateOption"
@@ -23,7 +23,7 @@ import {
   DamsIcons,
   DropdownOption,
 } from "@/generated-types/queries";
-import { toRefs, computed } from "vue";
+import { ref, computed } from "vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 
 const emit = defineEmits<{
@@ -50,17 +50,17 @@ const props = withDefaults(
   }
 );
 
-const { metadataDropdownOptions } = toRefs(props);
+const dropdownOptions = ref<DropdownOption[]>(props.metadataDropdownOptions);
 const inputValue = computed<DropdownOption[] | undefined>({
   get() {
-    return mapModalValueToDropdownOptions(props.modelValue);
+    return mapModelValueToDropdownOptions(props.modelValue);
   },
   set(value) {
     emit("update:modelValue", Array.isArray(value) ? value : [value]);
   },
 });
 
-const mapModalValueToDropdownOptions = (values: any[]): DropdownOption[] => {
+const mapModelValueToDropdownOptions = (values: any[]): DropdownOption[] => {
   if (!values) return [];
 
   if (Array.isArray(values)) {
@@ -84,7 +84,7 @@ const mapModalValueToDropdownOptions = (values: any[]): DropdownOption[] => {
 }
 
 const filterAutocompleteOptions = (value: string): void => {
-  metadataDropdownOptions.value = props.metadataDropdownOptions.filter((option: DropdownOption) => option.value.includes(value));
+  dropdownOptions.value = props.metadataDropdownOptions.filter((option: DropdownOption) => option.value.includes(value));
 }
 
 </script>
