@@ -39,7 +39,7 @@
               </div>
             </span>
           </template>
-        </base-tooltip>
+      </base-tooltip>
     </div>
     <entity-element-metadata-edit
       v-if="isEdit && metadata.inputField"
@@ -76,18 +76,19 @@
             v-if="metadata.value?.formatter"
             v-bind="metadata.value"
           />
-          <ViewModesAutocomplete
+          <ViewModesAutocompleteRelations
             v-else-if="
               (metadata.inputField?.type ===
-                InputFieldTypes.DropdownMultiselect ||
+                InputFieldTypes.DropdownMultiselectRelations ||
                 metadata.inputField?.type ===
-                  InputFieldTypes.DropdownSingleselect) &&
+                  InputFieldTypes.DropdownSingleselectRelations) &&
               metadata.value &&
               !metadata.value?.formatter
             "
             v-model="metadata.value"
             :is-read-only="true"
             :field-name="metadata.label"
+            :formId="formId"
             :metadata-key-to-get-options-for="
               metadata.inputField.advancedFilterInputForSearchingOptions
                 ?.item_types?.[0]
@@ -98,6 +99,18 @@
             :is-metadata-field="metadata.inputField?.isMetadataField"
             :from-relation-type="metadata.inputField?.fromRelationType"
             :disabled="true"
+          />
+          <ViewModesAutocompleteMetadata
+            v-else-if="
+              metadata.inputField?.type === InputFieldTypes.DropdownMultiselectMetadata ||
+              metadata.inputField?.type === InputFieldTypes.DropdownSingleselectMetadata
+            "
+            v-model:model-value="metadata.value"
+            :metadata-dropdown-options="metadata.inputField.options"
+            :formId="formId"
+            :select-type="metadata.inputField.type === InputFieldTypes.DropdownSingleselectMetadata ? 'single' : 'multi'"
+            :disabled="true"
+            mode="view"
           />
           <entity-element-metadata
             v-else
@@ -149,7 +162,8 @@ import {
 import { useField } from "vee-validate";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useFormHelper } from "@/composables/useFormHelper";
-import ViewModesAutocomplete from "@/components/library/view-modes/ViewModesAutocomplete.vue";
+import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
+import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import { Unicons } from "@/types";
 
 const { t } = useI18n();
