@@ -75,8 +75,11 @@ const {
   setRefetchFn,
 } = useEditMode();
 
-const { mediafileSelectionState, addMediafileSelectionStateContext } =
-  useEntityMediafileSelector();
+const {
+  mediafileSelectionState,
+  addMediafileSelectionStateContext,
+  setEntityMediafiles,
+} = useEntityMediafileSelector();
 const mediafileViewerContexts = ref<string[]>([]);
 
 const id = asString(route.params["id"]);
@@ -100,7 +103,7 @@ const { result, refetch, onError } = useQuery<GetEntityByIdQuery>(
   () => ({
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "no-cache",
-  })
+  }),
 );
 
 onBeforeMount(() => {
@@ -112,7 +115,7 @@ onBeforeMount(() => {
 
 const intialValues = ref<IntialValues | "no-values">("no-values");
 const relationValues = ref<{ [key: string]: Object } | "no-values">(
-  "no-values"
+  "no-values",
 );
 const columnList = ref<ColumnList | "no-values">("no-values");
 const permissionToEdit = ref<boolean>();
@@ -132,14 +135,16 @@ const determineContextsForMediafileViewer = () => {
   });
   Object.values(columns[0].elements).forEach(
     (element: EntityListElement | SingleMediaFileElement) => {
-      if (element?.__typename === "SingleMediaFileElement")
+      if (element?.__typename === "SingleMediaFileElement") {
         addContextToState("SingleMediaFileElement");
+        setEntityMediafiles("SingleMediaFileElement", [entity.value]);
+      }
       if (
         element?.__typename === "EntityListElement" &&
         element?.type === MediaFileElementTypes.Media
       )
         addContextToState(element.customQueryFilters);
-    }
+    },
   );
 };
 
@@ -187,7 +192,7 @@ watch(
 
     const mappings = fetchUpdateAndDeletePermission(
       entity.value.id,
-      entity.value.type
+      entity.value.type,
     );
     if (mappings) {
       mappings.then((result) => {
@@ -205,28 +210,28 @@ watch(
             showEditToggle("edit");
           else hideEditToggle();
         } else hideEditToggle();
-      }
+      },
     );
     setRefetchFn(refetch);
     loading.value = false;
-  }
+  },
 );
 
 const determineBreadcrumbs = async () => {
   clearBreadcrumbPath();
   setRootRoute(
     entityForBreadcrumb.value.id,
-    getTitleOrNameFromEntity(entityForBreadcrumb.value)
+    getTitleOrNameFromEntity(entityForBreadcrumb.value),
   );
   do {
     const routeBreadcrumbs = getRouteBreadcrumbsOfEntity(
-      entityForBreadcrumb.value?.__typename
+      entityForBreadcrumb.value?.__typename,
     );
     if (!routeBreadcrumbs) break;
     entityForBreadcrumb.value = await iterateOverBreadcrumbs(
       [entityForBreadcrumb.value.id],
       routeBreadcrumbs,
-      true
+      true,
     );
   } while (entityForBreadcrumb.value);
 };
@@ -236,6 +241,6 @@ watch(
   (newLocale: string) => {
     queryVariables.preferredLanguage = newLocale;
     refetch(queryVariables);
-  }
+  },
 );
 </script>

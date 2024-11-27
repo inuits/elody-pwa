@@ -29,7 +29,7 @@
             mediafileViewerContext,
             'id',
             undefined,
-            KeyValueSource.Root
+            KeyValueSource.Root,
           )
         "
       />
@@ -99,7 +99,7 @@ const viewerType = computed<ElodyViewers | undefined>(() => {
     const mimetype: string = getValueOfMediafile(
       mediafileViewerContext,
       "mimetype",
-      mediafileSelectionState.value[mediafileViewerContext].selectedMediafile
+      mediafileSelectionState.value[mediafileViewerContext].selectedMediafile,
     );
     for (const type in viewerMap) {
       if (mimetype.includes(type)) {
@@ -111,11 +111,15 @@ const viewerType = computed<ElodyViewers | undefined>(() => {
   }
 });
 
-watch([() => props.loading, mediafiles], () => {
-  if (props.loading) return;
-  mediafileSelectionState.value[mediafileViewerContext].mediafiles =
-    mediafiles?.value || [];
-  mediafileSelectionState.value[mediafileViewerContext].selectedMediafile =
-    mediafiles?.value?.[0];
-}, { immediate: true });
+watch(
+  [() => props.loading, mediafiles],
+  () => {
+    if (props.loading || !mediafiles.value) return;
+    mediafileSelectionState.value[mediafileViewerContext].mediafiles =
+      mediafiles?.value;
+    mediafileSelectionState.value[mediafileViewerContext].selectedMediafile =
+      mediafiles?.value?.[0];
+  },
+  { immediate: true },
+);
 </script>
