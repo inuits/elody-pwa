@@ -50,7 +50,7 @@
             ? entity.teaserMetadata?.contextMenuActions
             : undefined
         "
-        :entityTypename="entity.__typename"
+        :entityTypename="getMappedSlug(entity)"
         :teaser-metadata="
         formatTeaserMetadata(
           entity.teaserMetadata,
@@ -108,9 +108,9 @@ import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import {
   formatTeaserMetadata,
-  getEntityPageRoute,
+  getEntityPageRoute, getMappedSlug,
   setCssVariable,
-  updateEntityMediafileOnlyForMediafiles,
+  updateEntityMediafileOnlyForMediafiles
 } from "@/helpers";
 import { computed, onMounted, onUnmounted, inject } from "vue";
 import { OrderItem } from "@/composables/useOrderListItems";
