@@ -268,7 +268,7 @@ const isFieldRequired = computed(() => {
     ) ||
     props.metadata?.inputField?.validation?.value?.includes(
       ValidationRules.HasOneOfRequiredRelations
-    ) || 
+    ) ||
     props.metadata?.inputField?.validation?.value?.includes(
       ValidationRules.Regex
     )
@@ -298,7 +298,10 @@ const getValidationRules = (metadata: PanelMetaData): string => {
   if (isRegexField.value) {
     const rule = ValidationRules.Regex;
     let regex = metadata?.inputField?.validation?.regex?.replace(/^\/|\/$/g, '');
-    return `required|${rule}:${regex}`;
+    if (new RegExp(String(regex)).test(""))
+      return `${rule}:${regex}`;
+    else
+      return `required|${rule}:${regex}`;
   }
   if (
     (isRequiredRelationField.value || isOneOfRequiredRelationField.value) &&
