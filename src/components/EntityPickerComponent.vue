@@ -82,7 +82,7 @@ const config: any = inject("config");
 const props = withDefaults(
   defineProps<{
     entityUuid: string;
-    parentEntityType: string;
+    parentEntityType?: string;
     acceptedTypes: string[];
     customQuery: string;
     customFiltersQuery: string;
@@ -97,7 +97,7 @@ const props = withDefaults(
     entityPickerMode: EntityPickerMode.Emit,
     baseLibraryHeight: "h-[95vh]",
     enableNonSelectableEntities: true,
-  }
+  },
 );
 
 const { t } = useI18n();
@@ -112,7 +112,7 @@ const { parseFormValuesToFormInput } = useFormHelper();
 const { createNotification } = useNotification();
 
 const childRoutes = getChildrenOfHomeRoutes(config).map(
-  (route: any) => route.meta
+  (route: any) => route.meta,
 );
 
 const { mutate } = useMutation<
@@ -165,8 +165,8 @@ const getAlreadySelectedEntityIds = (): string[] => {
     .filter((relationKey: string) => Array.isArray(relationValues[relationKey]))
     .map((relationKey: string) =>
       relationValues[relationKey].map(
-        (relation: BaseRelationValuesInput) => relation
-      )
+        (relation: BaseRelationValuesInput) => relation,
+      ),
     )
     .flat();
 
@@ -182,10 +182,10 @@ const submit = useSubmitForm<EntityValues>(async () => {
   const collection =
     childRoutes.find(
       (route: any) =>
-        route.entityType?.toLowerCase() === props.parentEntityType.toLowerCase()
+        route.entityType?.toLowerCase() ===
+        props.parentEntityType.toLowerCase(),
     )?.type || Collection.Entities;
   if (!collection) throw Error("Could not determine collection for submit");
-
   const result = await mutate({
     id: props.entityUuid,
     formInput: parseFormValuesToFormInput(props.entityUuid, unref(form.values)),
