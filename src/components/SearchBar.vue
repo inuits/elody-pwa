@@ -38,7 +38,7 @@ withDefaults(
   }>(),
   {
     inputEnabled: false,
-  }
+  },
 );
 
 const emit = defineEmits<{
@@ -55,7 +55,7 @@ const entityTypeFilters = computed(() =>
       type: AdvancedFilterTypes.Type,
       value: type,
     };
-  })
+  }),
 );
 onBeforeMount(() => applyFilterToLibrary());
 const applyFilterToLibrary = () => {
@@ -67,11 +67,9 @@ const applyFilterToLibrary = () => {
   const metadataKeys = config.features.simpleSearch.simpleSearchMetadataKey;
   for (let index in metadataKeys) {
     filters.push({
-      key: metadataKeys[index],
+      key: [`elody:1|metadata.${metadataKeys[index]}.value`],
       value: inputValue.value,
       type: AdvancedFilterTypes.Text,
-      match_exact: false,
-      parent_key: "metadata",
       operator: "or",
     });
     if (item_types)
@@ -91,6 +89,6 @@ watch(
       inputValue.value = "";
       applyFilterToLibrary();
     }
-  }
+  },
 );
 </script>
