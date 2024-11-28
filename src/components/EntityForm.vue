@@ -50,6 +50,7 @@ const props = defineProps<{
   uuid: string;
   type: string;
   deleteQueryOptions?: DeleteQueryOptions;
+  locale: string;
 }>();
 
 const config: any = inject("config");
@@ -107,7 +108,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
 
   const result = await mutate({
     id: props.uuid,
-    formInput: parseFormValuesToFormInput(props.uuid, unref(form.values)),
+    formInput: parseFormValuesToFormInput(props.uuid, unref(form.values), props.locale),
     collection,
   });
 
