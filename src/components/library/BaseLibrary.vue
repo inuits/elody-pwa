@@ -40,7 +40,7 @@
               'top-0 mb-2 pt-4 bg-neutral-lightest':
                 baseLibraryMode === BaseLibraryModes.NormalBaseLibrary,
             },
-            { 'sticky z-10': hasStickyBars },
+            { 'sticky z-1': hasStickyBars },
           ]"
         >
           <div class="flex flex-row items-center gap-y-4">
