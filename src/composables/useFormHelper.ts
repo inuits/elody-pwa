@@ -342,13 +342,15 @@ const useFormHelper = () => {
   const parseIntialValuesForFormSubmit = (
     intialValues: IntialValues,
     entityId: string,
+    locale?: string
   ): MetadataValuesInput[] => {
     const metadata: any[] = [];
     Object.keys(intialValues)
       .filter((key) => key !== "__typename")
       .forEach((key) => {
         if (!editableFields.value[entityId]?.includes(key)) return;
-        metadata.push({ key, value: (intialValues as any)[key] });
+        // metadata.push({ key, value: (intialValues as any)[key] });
+        metadata.push({ key, value: (intialValues as any)[key], lang: locale || "" });
       });
     return metadata;
   };
@@ -420,12 +422,12 @@ const useFormHelper = () => {
     return relations;
   };
 
-  const parseFormValuesToFormInput = (uuid: string, values: EntityValues) => {
+  const parseFormValuesToFormInput = (uuid: string, values: EntityValues, locale?: string) => {
     let metadata: MetadataValuesInput[] = [];
     let relations: BaseRelationValuesInput[] = [];
 
     if (values.intialValues)
-      metadata = parseIntialValuesForFormSubmit(values.intialValues, uuid);
+      metadata = parseIntialValuesForFormSubmit(values.intialValues, uuid, locale);
     if (values.relationValues)
       relations = parseRelationValuesForFormSubmit(values.relationValues);
     if (values.relationMetadata && relations)

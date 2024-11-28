@@ -15,6 +15,7 @@ import useEditMode from "@/composables/useEdit";
 import { createPlaceholderEntities } from "@/helpers";
 import { ref, watch } from "vue";
 import { useStateManagement } from "@/composables/useStateManagement";
+import { useI18n } from "vue-i18n";
 
 export const useBaseLibrary = (
   apolloClient: ApolloClient<any>,
@@ -32,6 +33,7 @@ export const useBaseLibrary = (
   const totalEntityCount = ref<number>(0);
   const { getStateForRoute, updateStateForRoute } = useStateManagement();
   const { isSaved } = useEditMode();
+  const { locale } = useI18n();
   let queryVariables: GetEntitiesQueryVariables = {
     type: entityType,
     limit: 20,
@@ -46,6 +48,7 @@ export const useBaseLibrary = (
     advancedFilterInputs: [],
     searchInputType: undefined,
     userUuid: "", // refactor needed
+    preferredLanguage: locale.value,
   };
 
   const setManipulationOfQuery = (

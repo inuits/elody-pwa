@@ -67,7 +67,7 @@ const applyFilterToLibrary = () => {
   const metadataKeys = config.features.simpleSearch.simpleSearchMetadataKey;
   for (let index in metadataKeys) {
     filters.push({
-      key: metadataKeys[index],
+      key: [`elody:1|metadata.${metadataKeys[index]}.value`],
       value: inputValue.value,
       type: AdvancedFilterTypes.Text,
       match_exact: false,
