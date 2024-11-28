@@ -40,7 +40,7 @@
               'top-0 mb-2 pt-4 bg-neutral-lightest':
                 baseLibraryMode === BaseLibraryModes.NormalBaseLibrary,
             },
-            { 'sticky z-1': hasStickyBars },
+            { 'sticky z-10': hasStickyBars },
           ]"
         >
           <div class="flex flex-row items-center gap-y-4">
@@ -250,7 +250,7 @@ import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
 import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
-import { formatTeaserMetadata, getEntityTitle } from "@/helpers";
+import { createPlaceholderEntities, formatTeaserMetadata, getEntityTitle } from "@/helpers";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -352,10 +352,13 @@ const enableSelection = computed<boolean>(() => {
   );
 });
 
+const entities = ref<any>(createPlaceholderEntities(30));
+const entitiesLoading = ref<boolean>(true);
+
 const {
   enqueuePromise,
-  entities,
-  entitiesLoading,
+  // entities,
+  // entitiesLoading,
   getCustomBulkOperations,
   getEntities,
   getEntityById,
