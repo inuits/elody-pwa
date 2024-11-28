@@ -2,7 +2,7 @@
   <li
     data-cy="list-item"
     :class="[
-      'bg-neutral-white border border-neutral-light rounded cursor-pointer list-none',
+      'bg-neutral-white border border-neutral-light rounded cursor-pointer list-none z-[-1]',
       {
         'flex items-center gap-6 px-8 py-4 mb-2': viewMode === 'list',
       },
