@@ -12,7 +12,7 @@ import { ref } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { all } from "@vee-validate/rules";
-import { parse, isValid } from 'date-fns';
+import { DateTime } from "luxon";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
@@ -174,9 +174,9 @@ const useFormHelper = () => {
   const mustBeExistingDateRule = (value: string): boolean | string => {
     if (!value) return true;
     
-    const isValidDate = isValid(parse(value, 'yyyy-MM-dd', new Date()));
-    if (!isValidDate) return "notifications.errors.construct-date-error.title";
-    return isValidDate;
+    const isValid = DateTime.fromJSDate(new Date(value)).isValid;
+    if (!isValid) return "notifications.errors.construct-date-error.title";
+    return isValid;
   };
 
   const __isNotEmpty = (str: any) => str.trim() !== "";
