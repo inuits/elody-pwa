@@ -67,6 +67,7 @@
         @click="
           () => {
             emit('deactivateFilter', advancedFilterInput.key, true);
+            clearLastTypedValue();
             reloadMatcherComponent();
           }
         "
@@ -188,6 +189,10 @@ const getDefaultMatcher = () => {
   );
 };
 
+const clearLastTypedValue = () => {
+  lastTypedValue.value = "";
+};
+
 onMounted(() => {
   const defaultMatcher = props.filter.selectedMatcher || getDefaultMatcher();
 
@@ -231,7 +236,7 @@ watch(advancedFilterInput, (newValue, oldValue) => {
       emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
     else emit("deactivateFilter", advancedFilterInput.value.key);
   } else {
-    if (newValue?.value === oldValue?.value) return;
+    if (isEqual(newValue, oldValue)) return;
     if (advancedFilterInput.value.value !== undefined)
       emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
     else emit("deactivateFilter", advancedFilterInput.value.key);
@@ -240,6 +245,7 @@ watch(advancedFilterInput, (newValue, oldValue) => {
 watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
     isOpen.value = false;
+    clearLastTypedValue();
     const matchersToResetToDefault = [
       Matchers.ANY_MATCHER,
       Matchers.NONE_MATCHER,
@@ -248,7 +254,6 @@ watch(clearAllActiveFilters, () => {
     if (!matchersToResetToDefault.includes(matcher))
       return reloadMatcherComponent();
 
-    lastTypedValue.value = "";
     const defaultMatcher = getDefaultMatcher();
     if (!defaultMatcher) return;
 
