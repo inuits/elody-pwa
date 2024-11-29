@@ -38,10 +38,11 @@ import {
   MediaFileElementTypes,
   EntityListElement,
   SingleMediaFileElement,
+  Entity
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
 import EntityForm from "@/components/EntityForm.vue";
-import { asString, getTitleOrNameFromEntity } from "@/helpers";
+import { asString, getTitleOrNameFromEntity, getMappedSlug, mapUrlToEntityType } from "@/helpers";
 import { reactive, ref, watch, inject, computed, onBeforeMount } from "vue";
 import { useAuth } from "session-vue-3-oidc-library";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -53,7 +54,6 @@ import { useQuery } from "@vue/apollo-composable";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
-import { mapUrlToEntityType } from "@/helpers";
 
 const config: any = inject("config");
 const router = useRouter();
@@ -121,7 +121,7 @@ const columnList = ref<ColumnList | "no-values">("no-values");
 const permissionToEdit = ref<boolean>();
 const permissionToDelete = ref<boolean>();
 const entity = ref<BaseEntity>();
-const entityForBreadcrumb = ref<BaseEntity>();
+const entityForBreadcrumb = ref<Entity>();
 
 const addContextToState = (context: String): void => {
   mediafileViewerContexts.value.push(context);
@@ -225,7 +225,7 @@ const determineBreadcrumbs = async () => {
   );
   do {
     const routeBreadcrumbs = getRouteBreadcrumbsOfEntity(
-      entityForBreadcrumb.value?.__typename,
+      getMappedSlug(entityForBreadcrumb.value)
     );
     if (!routeBreadcrumbs) break;
     entityForBreadcrumb.value = await iterateOverBreadcrumbs(
