@@ -389,7 +389,7 @@ const useFormHelper = () => {
       .filter((key) => key !== "__typename")
       .forEach((key) => {
         if (!editableFields.value[entityId]?.includes(key)) return;
-        // metadata.push({ key, value: (intialValues as any)[key] });
+        //TODO: I think we should do it only if client has feature flag
         metadata.push({
           key,
           value: (intialValues as any)[key],
