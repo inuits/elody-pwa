@@ -127,7 +127,6 @@ const queryLoaded = ref<boolean>(false);
 
 const emitUpdatedEntities = (numberOfEntities: number) => {
   if (props.entityPickerMode === EntityPickerMode.Save) return;
-
   emit("entitiesUpdated", numberOfEntities);
 };
 
