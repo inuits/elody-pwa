@@ -40,7 +40,7 @@ const useBreadcrumbs = (config: any) => {
     () => breadcrumbRoutes.value[breadcrumbRoutes.value.length - 1]
   );
 
-  const getRouteBreadcrumbsOfEntity = (entitytype: Entitytyping): any => {
+  const getRouteBreadcrumbsOfEntity = (entitytype: Entitytyping | string): any => {
     const entityRoute = homeRoutes.filter(
       (item: any) =>
         item.meta.entityType?.toLowerCase() === entitytype.toLowerCase()
