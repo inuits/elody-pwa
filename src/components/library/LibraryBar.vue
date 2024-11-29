@@ -157,17 +157,15 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
 
       const state = getStateForRoute(route);
       const sortKey =
-        /*state?.queryVariables?.searchValue.order_by ||*/
+        state?.queryVariables?.searchValue.order_by ||
         sortOptions.value?.[0]?.value;
       selectedSortOption.value = sortOptions.value.find(
         (option) => option.value === sortKey
       );
-      let sortOrder = sortingOptionsResult?.isAsc?.toLowerCase();
-      if (!sortOrder) {
-        sortOrder = state?.queryVariables?.searchValue.isAsc ? "asc" : "desc";
-      }
+      const sortOrder =
+        state?.queryVariables?.searchValue.isAsc ? "asc" : "desc" ||
+        sortingOptionsResult?.isAsc?.toLowerCase();
       isAsc.value = sortOrder === "asc";
-
       props.setSortKey(sortKey);
       props.setSortOrder(sortOrder);
       sortOptionsPromiseIsResolved.value = true;
