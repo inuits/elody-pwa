@@ -47,7 +47,10 @@
           (!numberOfBlockingQueryEntities || numberOfBlockingQueryEntities <= 0)
         "
       >
-        <div v-if="deleteQueryOptions.customQueryDeleteRelations">
+        <div
+          v-if="deleteQueryOptions.customQueryDeleteRelations"
+          v-show="numberOfRelatedEntities > 0"
+        >
           <div class="title pl-4">
             {{ t("actions.labels.delete-relation-entities") }}
           </div>
@@ -62,6 +65,10 @@
             :enable-bulk-operations="false"
             :enable-advanced-filters="false"
             :enable-non-selectable-entities="false"
+            @entities-updated="
+            (numberOfEntities) =>
+              (numberOfRelatedEntities = numberOfEntities)
+          "
             base-library-height="h-fit"
           />
         </div>
@@ -124,6 +131,7 @@ const { pageInfo } = usePageInfo();
 const modalOpenend = ref<boolean>(false);
 const deleteQueryOptions = ref<DeleteQueryOptions | undefined>(undefined);
 const numberOfBlockingQueryEntities = ref<number | undefined>(undefined);
+const numberOfRelatedEntities = ref<number | undefined>(undefined);
 const parentId = computed(() => getParentId());
 
 const deleteSelectedItems = async () => {
@@ -190,6 +198,7 @@ watch(
     modalOpenend.value = isDeleteModalOpen;
     if (!modalOpenend.value) return;
     numberOfBlockingQueryEntities.value = undefined;
+    numberOfRelatedEntities.value = undefined;
     deleteQueryOptions.value = getModalInfo(
       TypeModals.Delete
     ).deleteQueryOptions;
