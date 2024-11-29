@@ -152,6 +152,12 @@ export const useBaseLibrary = (
     );
   };
 
+  const setLocale = async (locale: string) => {
+    queryVariables.preferredLanguage = locale;
+    if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
+    return true;
+  }
+
   const getEntities = async (
     route: RouteLocationNormalizedLoaded | undefined
   ): Promise<void> => {
@@ -261,6 +267,7 @@ export const useBaseLibrary = (
     setSkip,
     setSortKey,
     setSortOrder,
+    setLocale,
     totalEntityCount,
   };
 };
