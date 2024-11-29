@@ -374,7 +374,6 @@ const emitNewAdvancedFilterInput = () => {
     };
   emit("newAdvancedFilterInput", newAdvancedFilterInput, force.value);
   force.value = false;
-  console.log("exact updated: ", input.value);
 };
 
 watch(input, () => {

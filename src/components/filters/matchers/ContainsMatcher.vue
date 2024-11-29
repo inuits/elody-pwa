@@ -73,7 +73,6 @@ const emitNewAdvancedFilterInput = () => {
       as: props.filter.advancedFilter.lookup.as,
     };
   emit("newAdvancedFilterInput", newAdvancedFilterInput, force.value);
-  console.log("updated: ", input.value);
   force.value = false;
 };
 
