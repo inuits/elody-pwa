@@ -337,7 +337,7 @@ const config: any = inject("config");
 const apolloClient = inject(DefaultApolloClient);
 const route = useRoute();
 const router = useRouter();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { getGlobalState, updateGlobalState } = useStateManagement();
 const { iterateOverBreadcrumbs } = useBreadcrumbs(config);
 
@@ -370,6 +370,7 @@ const {
   setSkip,
   setSortKey,
   setSortOrder,
+  setLocale,
   totalEntityCount,
 } = useBaseLibrary(
   apolloClient as ApolloClient<any>,
@@ -702,6 +703,15 @@ watch(
   () => {
     if (breadcrumbPathFinished.value && isDeepRelationWithBreadcrumbInfo.value)
       initializeDeepRelations();
+  }
+);
+
+watch(
+  () => locale.value,
+  (newValue: string) => {
+    //TODO: I think we should do it only if client has feature flag
+    setLocale(newValue);
+    refetchEntities();
   }
 );
 

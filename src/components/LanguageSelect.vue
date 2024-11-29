@@ -2,7 +2,8 @@
   <div data-cy="language-select" :key="locale" class="float-right">
     <BaseDropdownNew
       v-if="languageOptions"
-      v-model:model-value="selectedLanguageOption"
+      :model-value="selectedLanguageOption"
+      @update:model-value="setLanguage"
       :options="languageOptions"
       label-position="inline"
       dropdown-style="default"
@@ -16,9 +17,11 @@ import { useI18n } from "vue-i18n";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import { DamsIcons, type DropdownOption } from "@/generated-types/queries";
 import { useStateManagement } from "@/composables/useStateManagement";
+import useEditMode from "@/composables/useEdit";
 
 const { availableLocales, locale, t } = useI18n();
 const { updateGlobalState, getGlobalState } = useStateManagement();
+const { isEdit } = useEditMode();
 const selectedLanguageOption = ref<DropdownOption | undefined>();
 
 const createOptionsFromAvailableLanguages = (
@@ -45,6 +48,14 @@ const setSelectedLanguageOption = (): void => {
     (language) => language.value === locale.value
   );
 };
+
+const setLanguage = (option: DropdownOption | DropdownOption[]) => {
+  if (isEdit.value) { 
+    selectedLanguageOption.value = {...selectedLanguageOption.value} as DropdownOption;
+    return;
+  };
+  selectedLanguageOption.value = option as DropdownOption;
+}
 
 onMounted(() => {
   setSelectedLanguageOption();
