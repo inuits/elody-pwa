@@ -82,7 +82,7 @@ const {
 } = useEntityMediafileSelector();
 const mediafileViewerContexts = ref<string[]>([]);
 
-const id = asString(route.params["id"]);
+const id = ref<string[]>(asString(route.params["id"]));
 const identifiers = ref<string[]>([]);
 const loading = ref<boolean>(true);
 const { getEditableMetadataKeys } = useFormHelper();
@@ -97,6 +97,11 @@ const queryVariables = reactive<GetEntityByIdQueryVariables>({
   type: entityType.value,
   preferredLanguage: locale.value,
 });
+
+watch(entityType, (value) => {
+  queryVariables.type = value;
+});
+
 const { result, refetch, onError } = useQuery<GetEntityByIdQuery>(
   GetEntityByIdDocument,
   queryVariables,
