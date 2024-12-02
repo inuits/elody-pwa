@@ -213,7 +213,8 @@ export const useErrorCodes = (): {
 
     if (!code) {
       fallbackOnRequestStatusCode(
-        httpResponse.status?.toString(),
+        httpResponse.status?.toString() ||
+          responseBody?.extensions?.statusCode?.toString(),
         ErrorCodeType.Read,
       );
       return;

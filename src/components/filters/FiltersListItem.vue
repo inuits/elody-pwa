@@ -27,7 +27,7 @@
             <div>
               {{
                 t(
-                  `tooltip.advancedFilterTypes.${props.filter.advancedFilter.type}`
+                  `tooltip.advancedFilterTypes.${props.filter.advancedFilter.type}`,
                 )
               }}
             </div>
@@ -77,7 +77,9 @@
       :is="matcherComponent"
       :filter="filter"
       :related-active-filter="relatedActiveFilter"
-      @new-advanced-filter-input="(input: AdvancedFilterInput) => advancedFilterInput = input"
+      @new-advanced-filter-input="
+        (input: AdvancedFilterInput) => (advancedFilterInput = input)
+      "
       @filter-options="(options: string[]) => (filterOptions = options)"
     />
   </div>
@@ -119,19 +121,19 @@ const props = withDefaults(
   }>(),
   {
     relatedActiveFilter: () => [],
-  }
+  },
 );
 
 const emit = defineEmits<{
   (
     event: "activateFilter",
     advancedFilterInput: AdvancedFilterInput,
-    selectedMatcher: DropdownOption | undefined
+    selectedMatcher: DropdownOption | undefined,
   ): void;
   (
     event: "deactivateFilter",
     advancedFilterKey: string | InputMaybe<string> | undefined,
-    forceApply: Boolean | undefined
+    forceApply: Boolean | undefined,
   ): void;
 }>();
 
@@ -165,7 +167,7 @@ const loadMatcher = async () => {
 };
 
 const icon = computed<string>(() =>
-  isOpen.value ? Unicons.Minus.name : Unicons.Plus.name
+  isOpen.value ? Unicons.Minus.name : Unicons.Plus.name,
 );
 
 const defaultMatcherMap: Partial<Record<AdvancedFilterTypes, string>> = {
@@ -181,7 +183,7 @@ const reloadMatcherComponent = () => {
 const getDefaultMatcher = () => {
   return matchers.value.find(
     (matcher) =>
-      matcher.value === defaultMatcherMap[advancedFilterInput.value.type]
+      matcher.value === defaultMatcherMap[advancedFilterInput.value.type],
   );
 };
 
@@ -200,8 +202,8 @@ watch(selectedMatcher, async (newValue, oldValue) => {
   filterOptions.value.forEach((option) =>
     dequeueItemForBulkProcessing(
       BulkOperationsContextEnum.FilterOptions,
-      option
-    )
+      option,
+    ),
   );
 });
 
