@@ -7,7 +7,7 @@
       button-style="accentNormal"
       button-size="small"
       :disabled="isMainActionDisabled || !primaryOption.active"
-      :label="t(primaryOption.label)"
+      :label="t(primaryOption.label, [entityType])"
       :tooltip-label="primaryOption.actionContext?.labelForTooltip"
       @click="handleEmit(primaryOption)"
     />
