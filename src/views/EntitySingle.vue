@@ -44,7 +44,7 @@ import EntityColumn from "@/components/EntityColumn.vue";
 import EntityForm from "@/components/EntityForm.vue";
 import { asString, getTitleOrNameFromEntity, getMappedSlug, mapUrlToEntityType } from "@/helpers";
 import { reactive, ref, watch, inject, computed, onBeforeMount } from "vue";
-import { useAuth } from "session-vue-3-oidc-library";
+import { auth } from "@/main";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -58,7 +58,7 @@ import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 const config: any = inject("config");
 const router = useRouter();
 const route = useRoute();
-const auth = useAuth();
+const auth: any = {};
 const { locale, t } = useI18n();
 const { fetchUpdateAndDeletePermission } = usePermissions();
 const {

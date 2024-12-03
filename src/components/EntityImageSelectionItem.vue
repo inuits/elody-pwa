@@ -67,7 +67,7 @@
 import type { MediaFileEntity } from "@/generated-types/queries";
 import { toBeDeleted } from "@/composables/useEdit";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
-import { useAuth } from "session-vue-3-oidc-library";
+import { auth } from "@/main";
 import { ref, inject } from "vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import ImageViewer from "@/components/base/ImageViewer.vue";
@@ -76,7 +76,7 @@ const props = defineProps<{
   mediafile: MediaFileEntity;
 }>();
 
-const auth = useAuth();
+const auth: any = {};
 const { getThumbnail } = useThumbnailHelper();
 const imageSrcError = ref<boolean>(false);
 

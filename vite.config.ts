@@ -1,6 +1,7 @@
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig, mergeConfig } from "vite";
 import { defineConfig as defineVitestConfig } from "vitest/config";
+import compress from "vite-plugin-compress";
 import vue from "@vitejs/plugin-vue";
 
 const parsePort = (port: string) => {
@@ -39,8 +40,21 @@ const viteConfig = defineConfig({
   },
   cacheDir,
   build: {
+    chunkSizeWarningLimit: 1000, // You can increase the limit if necessary, but try to keep it under 500 KB for faster loading.
+    minify: "terser",
     rollupOptions: {
       external: ["pdfjs-dist/types/src/display/api"],
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            return id
+              .toString()
+              .split("node_modules/")[1]
+              .split("/")[0]
+              .toString(); // Split out node_modules into separate chunks
+          }
+        },
+      },
     },
   },
   optimizeDeps: {

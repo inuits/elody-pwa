@@ -94,7 +94,7 @@ import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
 import { computed, onMounted, ref } from "vue";
 import { Permission } from "@/generated-types/queries";
 import { Unicons } from "@/types";
-import { useAuth } from "session-vue-3-oidc-library";
+import { auth } from "@/main";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import {
@@ -109,7 +109,7 @@ const { checkIfRouteOrModal, setSelectedMenuItem, selectedMenuItem } =
 const { t } = useI18n();
 const { can, fetchAdvancedPermission } = usePermissions();
 
-const auth = useAuth();
+const auth: any = {};
 const menuSubitem = ref<Array<MenuItem>>([]);
 const menuAction = computed(() => checkIfRouteOrModal(props.menuitem));
 const isLink = computed(

@@ -25,7 +25,7 @@ import { useI18n } from "vue-i18n";
 import { useSaveSearchHepler } from "@/composables/useSaveSearchHepler";
 import DynamicForm from "./dynamicForms/DynamicForm.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { useAuth } from "session-vue-3-oidc-library";
+import { auth } from "@/main";
 
 const { closeModal, getModalInfo } = useBaseModal();
 const { t } = useI18n();
@@ -34,7 +34,7 @@ const {
   fetchSavedSearchById,
   normalizeSavedSearchFromEntity,
 } = useSaveSearchHepler();
-const auth = useAuth();
+const auth: any = {};
 const { addRelations } = useFormHelper();
 
 const saveFilter = async (entity: any) => {
