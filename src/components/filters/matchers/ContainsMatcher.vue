@@ -11,16 +11,18 @@
 import type { AdvancedFilterInput } from "@/generated-types/queries";
 import type { FilterListItem } from "@/composables/useStateManagement";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { defineEmits, onMounted, onUpdated, ref, watch } from "vue";
+import { defineEmits, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
   defineProps<{
     filter: FilterListItem;
     relatedActiveFilter: string[];
+    lastTypedValue: string | number;
   }>(),
   {
     relatedActiveFilter: () => [],
+    lastTypedValue: "",
   }
 );
 
@@ -30,6 +32,7 @@ const emit = defineEmits<{
     advancedFilterInput: AdvancedFilterInput,
     force: boolean
   ): void;
+  (event: "newInputValue", inputValue: string | number): void;
 }>();
 
 const { t } = useI18n();
@@ -45,9 +48,15 @@ const setVariablesFromInput = () => {
 
 onMounted(() => {
   setVariablesFromInput();
+
+  if (props.lastTypedValue) {
+    input.value = props.lastTypedValue;
+    force.value = true;
+    emitNewAdvancedFilterInput();
+  }
 });
 
-watch(input, () => {
+const emitNewAdvancedFilterInput = () => {
   const newAdvancedFilterInput: AdvancedFilterInput = {
     type: props.filter.advancedFilter.type,
     parent_key: props.filter.advancedFilter.parentKey,
@@ -65,6 +74,14 @@ watch(input, () => {
     };
   emit("newAdvancedFilterInput", newAdvancedFilterInput, force.value);
   force.value = false;
+};
+
+watch(input, () => {
+  emitNewAdvancedFilterInput();
+
+  if (typeof input.value !== "undefined") {
+    emit("newInputValue", input.value);
+  }
 });
 </script>
 
