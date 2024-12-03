@@ -51,7 +51,7 @@ import { useI18n } from "vue-i18n";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import useEditMode from "@/composables/useEdit";
-import { useAuth } from "session-vue-3-oidc-library";
+import { auth } from "@/main";
 import {
   usePermissions,
   advancedPermissions,
@@ -81,7 +81,7 @@ const props = withDefaults(
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const { t } = useI18n();
 
-const auth = useAuth();
+const auth: any = {};
 
 const availableOptions = ref<DropdownOption[]>([]);
 

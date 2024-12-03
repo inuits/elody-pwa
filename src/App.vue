@@ -48,12 +48,12 @@ import TheNavigation from "@/components/menu/MenuNav.vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
 import { inject, onMounted } from "vue";
 import { useApp } from "@/composables/useApp";
-import { useAuth } from "session-vue-3-oidc-library";
+// import { auth } from "@/main";
 import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
 import CreateSavedSearchModal from "./components/CreateSavedSearchModal.vue";
 
-const auth = useAuth();
+const auth: any = {};
 const config = inject<{
   features: { hasTenantSelect: boolean };
   allowAnonymousUsers: boolean;

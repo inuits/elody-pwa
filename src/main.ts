@@ -21,7 +21,7 @@ import {
   i18n,
 } from "@/helpers";
 import { onError } from "@apollo/client/link/error";
-import { OpenIdConnectClient } from "session-vue-3-oidc-library";
+// import { OpenIdConnectClient } from "session-vue-3-oidc-library";
 import { setIgnorePermissions } from "./composables/usePermissions";
 import { Unicons } from "./types";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -31,7 +31,7 @@ import { addRouterNavigationGuards } from "./routerNavigationGuards";
 import OpenLayersMap from "vue3-openlayers";
 import type { GraphQLError } from "graphql/error";
 
-export let auth: typeof OpenIdConnectClient | null;
+export let auth: any;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
 export let bulkSelectAllSizeLimit: number = 999999;
 export let formattersSettings: any = {};
@@ -57,7 +57,7 @@ const start = async () => {
   defineValidationRules();
 
   if (config.customization) applyCustomization(config.customization);
-  auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
+  // auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
 
   const head = createHead();
   router = createRouter({

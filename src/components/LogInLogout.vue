@@ -114,7 +114,7 @@ import { inject } from "vue";
 import { TypeModals } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useApp } from "@/composables/useApp";
-import { useAuth } from "session-vue-3-oidc-library";
+import { auth } from "@/main";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useI18n } from "vue-i18n";
@@ -127,7 +127,7 @@ defineProps({
   isExpanded: Boolean,
 });
 
-const auth = useAuth();
+const auth: any = {};
 const config = inject<{
   features: { hasTenantSelect: boolean };
   allowAnonymousUsers: boolean;

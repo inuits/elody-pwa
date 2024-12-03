@@ -195,7 +195,7 @@ import {
   useSaveSearchHepler,
 } from "@/composables/useSaveSearchHepler";
 import { useRoute } from "vue-router";
-import { useAuth } from "session-vue-3-oidc-library";
+import { auth } from "@/main";
 import {
   useBulkOperations,
   BulkOperationsContextEnum,
@@ -248,7 +248,7 @@ const filterMatcherMapping = ref<FilterMatcherMap>({
   type: [],
   metadata_on_relation: [],
 });
-const auth = useAuth();
+const auth: any = {};
 const advancedFilters = ref<Maybe<AdvancedFilters>>();
 const clearAllActiveFilters = ref<boolean>(false);
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
