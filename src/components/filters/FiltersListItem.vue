@@ -67,6 +67,7 @@
         @click="
           () => {
             emit('deactivateFilter', advancedFilterInput.key, true);
+            clearLastTypedValue();
             reloadMatcherComponent();
           }
         "
@@ -80,6 +81,8 @@
       @new-advanced-filter-input="
         (input: AdvancedFilterInput) => (advancedFilterInput = input)
       "
+      :last-typed-value="lastTypedValue"
+      @new-input-value="(value: string) => (lastTypedValue = value)"
       @filter-options="(options: string[]) => (filterOptions = options)"
     />
   </div>
@@ -149,6 +152,7 @@ const advancedFilterInput = ref<AdvancedFilterInput>({
   value: undefined,
 });
 const filterOptions = ref<string[]>([]);
+const lastTypedValue = ref<string>("");
 
 const loadMatcher = async () => {
   let matcher = selectedMatcher.value?.value;
@@ -187,6 +191,10 @@ const getDefaultMatcher = () => {
   );
 };
 
+const clearLastTypedValue = () => {
+  lastTypedValue.value = "";
+};
+
 onMounted(() => {
   const defaultMatcher = props.filter.selectedMatcher || getDefaultMatcher();
 
@@ -195,7 +203,7 @@ onMounted(() => {
 });
 
 watch(selectedMatcher, async (newValue, oldValue) => {
-  if (oldValue !== undefined)
+  if (oldValue !== undefined && !lastTypedValue.value)
     emit("deactivateFilter", advancedFilterInput.value.key);
   if (selectedMatcher.value) await loadMatcher();
 
@@ -230,7 +238,7 @@ watch(advancedFilterInput, (newValue, oldValue) => {
       emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
     else emit("deactivateFilter", advancedFilterInput.value.key);
   } else {
-    if (newValue?.value === oldValue?.value) return;
+    if (isEqual(newValue, oldValue)) return;
     if (advancedFilterInput.value.value !== undefined)
       emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
     else emit("deactivateFilter", advancedFilterInput.value.key);
@@ -239,6 +247,7 @@ watch(advancedFilterInput, (newValue, oldValue) => {
 watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
     isOpen.value = false;
+    clearLastTypedValue();
     const matchersToResetToDefault = [
       Matchers.ANY_MATCHER,
       Matchers.NONE_MATCHER,
