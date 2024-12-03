@@ -1,7 +1,7 @@
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig, mergeConfig } from "vite";
 import { defineConfig as defineVitestConfig } from "vitest/config";
-import compress from "vite-plugin-compress";
+import viteCompression from "vite-plugin-compression";
 import vue from "@vitejs/plugin-vue";
 
 const parsePort = (port: string) => {
@@ -15,7 +15,7 @@ const cacheDir =
 
 // https://vitejs.dev/config/
 const viteConfig = defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), viteCompression()],
   define: {
     __VUE_I18N_FULL_INSTALL__: true,
     __VUE_I18N_LEGACY_API__: false,
@@ -40,25 +40,39 @@ const viteConfig = defineConfig({
   },
   cacheDir,
   build: {
-    chunkSizeWarningLimit: 1000, // You can increase the limit if necessary, but try to keep it under 500 KB for faster loading.
-    minify: "terser",
+    sourcemap: false,
+    minify: "esbuild",
     rollupOptions: {
       external: ["pdfjs-dist/types/src/display/api"],
       output: {
-        manualChunks(id) {
-          if (id.includes("node_modules")) {
-            return id
-              .toString()
-              .split("node_modules/")[1]
-              .split("/")[0]
-              .toString(); // Split out node_modules into separate chunks
-          }
+        manualChunks: {
+          vue: ["vue", "vue-router"],
+          apollo: ["@apollo/client", "@vue/apollo-composable"],
+          leaflet: ["leaflet", "@vue-leaflet/vue-leaflet"],
+          sentry: [
+            "@sentry/browser",
+            "@sentry/integrations",
+            "@sentry/tracing",
+            "@sentry/vue",
+          ],
+          openseadragon: ["openseadragon"],
+          pdfjs: ["pdfjs-dist"],
+          ol: ["ol"],
+          chart: [
+            "chart.js",
+            "chartjs-adapter-date-fns",
+            "chartjs-plugin-datasource-prometheus",
+          ],
+          openlayers: ["vue3-openlayers"],
+          dropzone: ["dropzone"],
+          unicons: ["vue-unicons"],
         },
       },
     },
   },
   optimizeDeps: {
-    exclude: ["session-vue-3-oidc-library"],
+    exclude: ["session-vue-3-oidc-library", "date-fns"],
+    include: ["vue", "@vue/runtime-core"],
   },
 });
 

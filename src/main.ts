@@ -28,7 +28,6 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useErrorCodes } from "@/composables/useErrorCodes";
 import { addRouterNavigationGuards } from "./routerNavigationGuards";
 
-import OpenLayersMap from "vue3-openlayers";
 import type { GraphQLError } from "graphql/error";
 
 export let auth: any;
@@ -91,7 +90,7 @@ const start = async () => {
       createUploadLink({
         uri: config.graphQlLink || "/api/graphql",
         headers: { "Apollo-Require-Preflight": "true" },
-      })
+      }),
     ),
     cache: new InMemoryCache(),
   });
@@ -103,7 +102,6 @@ const start = async () => {
     })
     .use(router)
     .use(auth)
-    .use(OpenLayersMap)
     .use(head)
     .provide("config", config)
     .provide(DefaultApolloClient, apolloClient);
