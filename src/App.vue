@@ -48,11 +48,10 @@ import TheNavigation from "@/components/menu/MenuNav.vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
 import { inject, onMounted } from "vue";
 import { useApp } from "@/composables/useApp";
-// import { auth } from "@/main";
+import { auth } from "@/main";
 import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
 import CreateSavedSearchModal from "./components/CreateSavedSearchModal.vue";
-
 
 const config = inject<{
   features: { hasTenantSelect: boolean };
@@ -82,7 +81,9 @@ useHead({
   writing-mode: vertical-lr;
   font-size: 20px;
   font-weight: bold;
-  transition: writing-mode 300ms ease-in-out, transform 300ms ease-in-out;
+  transition:
+    writing-mode 300ms ease-in-out,
+    transform 300ms ease-in-out;
 }
 
 .move-by-nav {

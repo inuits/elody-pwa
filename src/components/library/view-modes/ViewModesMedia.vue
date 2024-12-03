@@ -6,7 +6,7 @@
 
 <script lang="ts" setup>
 import type { Entity } from "@/generated-types/queries";
-import MediaViewer from "@/components/base/Mediaviewer.vue";
+import MediaViewer from "@/components/base/MediaViewer.vue";
 
 defineProps<{
   entities: Entity[];
