@@ -300,7 +300,7 @@ const { update, remove } = useFieldArray(
   `relationValues.${props.relationType}`,
 );
 const { getEntityUuid } = useEntitySingle();
-const auth: any = {};
+
 const loading = ref<boolean>(props.loading);
 const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);

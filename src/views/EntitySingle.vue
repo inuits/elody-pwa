@@ -38,11 +38,16 @@ import {
   MediaFileElementTypes,
   EntityListElement,
   SingleMediaFileElement,
-  Entity
+  Entity,
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
 import EntityForm from "@/components/EntityForm.vue";
-import { asString, getTitleOrNameFromEntity, getMappedSlug, mapUrlToEntityType } from "@/helpers";
+import {
+  asString,
+  getTitleOrNameFromEntity,
+  getMappedSlug,
+  mapUrlToEntityType,
+} from "@/helpers";
 import { reactive, ref, watch, inject, computed, onBeforeMount } from "vue";
 import { auth } from "@/main";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -58,7 +63,7 @@ import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 const config: any = inject("config");
 const router = useRouter();
 const route = useRoute();
-const auth: any = {};
+
 const { locale, t } = useI18n();
 const { fetchUpdateAndDeletePermission } = usePermissions();
 const {
@@ -230,7 +235,7 @@ const determineBreadcrumbs = async () => {
   );
   do {
     const routeBreadcrumbs = getRouteBreadcrumbsOfEntity(
-      getMappedSlug(entityForBreadcrumb.value)
+      getMappedSlug(entityForBreadcrumb.value),
     );
     if (!routeBreadcrumbs) break;
     entityForBreadcrumb.value = await iterateOverBreadcrumbs(

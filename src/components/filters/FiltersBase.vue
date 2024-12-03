@@ -248,7 +248,6 @@ const filterMatcherMapping = ref<FilterMatcherMap>({
   type: [],
   metadata_on_relation: [],
 });
-const auth: any = {};
 const advancedFilters = ref<Maybe<AdvancedFilters>>();
 const clearAllActiveFilters = ref<boolean>(false);
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
