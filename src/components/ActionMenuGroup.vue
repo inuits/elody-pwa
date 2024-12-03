@@ -39,12 +39,13 @@
 import { computed, ref, watch } from "vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import {
-  DropdownOption,
-  DamsIcons,
-  ContextMenuDirection,
-  ActionContextViewModeTypes,
   ActionContextEntitiesSelectionType,
+  ActionContextViewModeTypes,
+  ContextMenuDirection,
+  DamsIcons,
+  DropdownOption,
   Entitytyping,
+  PanelType
 } from "@/generated-types/queries";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";
@@ -52,10 +53,8 @@ import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import useEditMode from "@/composables/useEdit";
 import { useAuth } from "session-vue-3-oidc-library";
-import {
-  usePermissions,
-  advancedPermissions,
-} from "@/composables/usePermissions";
+import { advancedPermissions, usePermissions } from "@/composables/usePermissions";
+import { getValueForPanelMetadata } from "@/helpers";
 
 const { isEdit } = useEditMode();
 
@@ -123,8 +122,17 @@ const handleEmit = (action: DropdownOption) => {
 
 const determineActiveState = (item: DropdownOption) => {
   if (!item.actionContext) return true;
-  let isActive = false;
 
+  let metadataConditionAccepts = true;
+  if (item.actionContext.matchMetadataValue) {
+    item.actionContext.matchMetadataValue.forEach((condition) => {
+      const result = getValueForPanelMetadata(PanelType.Metadata, condition.matchKey, props.parentEntityId, undefined);
+      if (result !== undefined && result.toString() != condition.matchValue)
+        metadataConditionAccepts = false;
+    });
+  }
+
+  let isActive = false;
   const activeViewMode = item.actionContext.activeViewMode;
   const entitiesSelectionType = item.actionContext.entitiesSelectionType;
   const viewMode = isEdit.value
@@ -135,7 +143,7 @@ const determineActiveState = (item: DropdownOption) => {
     : entitiesSelectionType === ActionContextEntitiesSelectionType.NoneSelected;
   isActive = viewMode && numberOfEntities;
 
-  return isActive;
+  return isActive && metadataConditionAccepts;
 };
 
 const getAvailableOptions = () => {
