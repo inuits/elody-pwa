@@ -60,8 +60,7 @@
     "vue-markdown-render": "^2.2.1",
     "vue-router": "4.4.5",
     "vue-unicons": "^3.3.1",
-    "vue3-openlayers": "^11.2.1",
-    "vuedraggable": "^4.1.0"
+    "vue3-openlayers": "^11.2.1"
   },
   "devDependencies": {
     "@graphql-codegen/add": "^4.0.1",
