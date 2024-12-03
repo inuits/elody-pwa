@@ -127,7 +127,6 @@ defineProps({
   isExpanded: Boolean,
 });
 
-const auth: any = {};
 const config = inject<{
   features: { hasTenantSelect: boolean };
   allowAnonymousUsers: boolean;

@@ -109,7 +109,6 @@ const { checkIfRouteOrModal, setSelectedMenuItem, selectedMenuItem } =
 const { t } = useI18n();
 const { can, fetchAdvancedPermission } = usePermissions();
 
-const auth: any = {};
 const menuSubitem = ref<Array<MenuItem>>([]);
 const menuAction = computed(() => checkIfRouteOrModal(props.menuitem));
 const isLink = computed(

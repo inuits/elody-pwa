@@ -81,8 +81,6 @@ const props = withDefaults(
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const { t } = useI18n();
 
-const auth: any = {};
-
 const availableOptions = ref<DropdownOption[]>([]);
 
 const primaryOption = computed(() => {

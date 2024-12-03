@@ -76,7 +76,6 @@ const props = defineProps<{
   mediafile: MediaFileEntity;
 }>();
 
-const auth: any = {};
 const { getThumbnail } = useThumbnailHelper();
 const imageSrcError = ref<boolean>(false);
 
