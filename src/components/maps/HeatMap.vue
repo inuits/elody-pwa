@@ -1,40 +1,47 @@
 <template>
-  <ol-map
+  <Map.OlMap
     ref="map"
     :loadTilesWhileAnimating="true"
     :loadTilesWhileInteracting="true"
     style="height: 65vh"
   >
-    <ol-view
+    <Map.OlView
       ref="view"
       :zoom="getBasicMapProperties(config).zoom"
       :center="getBasicMapProperties(config).center"
     />
 
-    <ol-tile-layer>
-      <ol-source-osm />
-    </ol-tile-layer>
+    <Layers.OlTileLayer>
+      <Sources.OlSourceOsm />
+    </Layers.OlTileLayer>
 
-    <ol-heatmap-layer
+    <Layers.OlHeatmapLayer
       title="heatmap"
       :blur="getBasicMapProperties(config).blur"
       :radius="getBasicMapProperties(config).radius"
       :weight="heatmapWeight"
       :zIndex="1"
     >
-      <ol-source-vector :features="heatmapPoints" />
-    </ol-heatmap-layer>
+      <Sources.OlSourceVector :features="heatmapPoints" />
+    </Layers.OlHeatmapLayer>
 
-    <ol-context-menu-control :items="contextMenuItems" />
+    <MapControls.OlContextMenuControl :items="contextMenuItems" />
 
-    <ol-fullscreen-control />
-  </ol-map>
+    <MapControls.OlFullscreenControl />
+  </Map.OlMap>
 </template>
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import { ref, computed, toRefs } from "vue";
-import { type View, type Item } from "vue3-openlayers";
+import {
+  type View,
+  type Item,
+  Map,
+  Layers,
+  Sources,
+  MapControls,
+} from "vue3-openlayers";
 import { Feature } from "ol";
 import { Point } from "ol/geom";
 import { useMaps } from "@/composables/useMaps";
@@ -68,11 +75,11 @@ const heatmapPoints = computed(() =>
     if (!mapData) return new Feature();
     return new Feature({
       geometry: new Point(
-        geoToMercator(mapData.coordinateX.value, mapData.coordinateY.value)
+        geoToMercator(mapData.coordinateX.value, mapData.coordinateY.value),
       ),
       weight: mapData.weight.value,
     });
-  })
+  }),
 );
 
 const heatmapWeight = function (feature: Feature) {

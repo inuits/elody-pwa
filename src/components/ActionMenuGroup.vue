@@ -16,7 +16,13 @@
       button-size="small"
       :icon="DamsIcons.EllipsisV"
       class="!w-max !p-2"
-      @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event.clientX, y: event.clientY})"
+      @click.stop="
+        (event: MouseEvent) =>
+          contextMenuHandler.openContextMenu({
+            x: event.clientX,
+            y: event.clientY,
+          })
+      "
     />
 
     <BaseContextMenu
@@ -45,16 +51,18 @@ import {
   DamsIcons,
   DropdownOption,
   Entitytyping,
-  PanelType
+  PanelType,
 } from "@/generated-types/queries";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import useEditMode from "@/composables/useEdit";
-import { useAuth } from "session-vue-3-oidc-library";
-import { advancedPermissions, usePermissions } from "@/composables/usePermissions";
-import { getValueForPanelMetadata } from "@/helpers";
+import { auth } from "@/main";
+import {
+  usePermissions,
+  advancedPermissions,
+} from "@/composables/usePermissions";
 
 const { isEdit } = useEditMode();
 
@@ -75,18 +83,16 @@ const props = withDefaults(
     isMainActionDisabled: false,
     itemsSelected: false,
     options: () => [],
-  }
+  },
 );
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const { t } = useI18n();
-
-const auth = useAuth();
 
 const availableOptions = ref<DropdownOption[]>([]);
 
 const primaryOption = computed(() => {
   let option = availableOptions.value.find(
-    (item: DropdownOption) => item.primary
+    (item: DropdownOption) => item.primary,
   );
   if (option) {
     option = {
@@ -126,7 +132,12 @@ const determineActiveState = (item: DropdownOption) => {
   let metadataConditionAccepts = true;
   if (item.actionContext.matchMetadataValue) {
     item.actionContext.matchMetadataValue.forEach((condition) => {
-      const result = getValueForPanelMetadata(PanelType.Metadata, condition.matchKey, props.parentEntityId, undefined);
+      const result = getValueForPanelMetadata(
+        PanelType.Metadata,
+        condition.matchKey,
+        props.parentEntityId,
+        undefined,
+      );
       if (result !== undefined && result.toString() != condition.matchValue)
         metadataConditionAccepts = false;
     });
@@ -173,6 +184,6 @@ watch(
     await fetchPermissionsForDropdownOptions(props.options);
     getAvailableOptions();
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 );
 </script>

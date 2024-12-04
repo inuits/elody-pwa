@@ -1,6 +1,7 @@
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig, mergeConfig } from "vite";
 import { defineConfig as defineVitestConfig } from "vitest/config";
+import viteCompression from "vite-plugin-compression";
 import vue from "@vitejs/plugin-vue";
 
 const parsePort = (port: string) => {
@@ -14,7 +15,7 @@ const cacheDir =
 
 // https://vitejs.dev/config/
 const viteConfig = defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), viteCompression()],
   define: {
     __VUE_I18N_FULL_INSTALL__: true,
     __VUE_I18N_LEGACY_API__: false,
@@ -39,12 +40,39 @@ const viteConfig = defineConfig({
   },
   cacheDir,
   build: {
+    sourcemap: false,
+    minify: "esbuild",
     rollupOptions: {
       external: ["pdfjs-dist/types/src/display/api"],
+      output: {
+        manualChunks: {
+          vue: ["vue", "vue-router"],
+          apollo: ["@apollo/client", "@vue/apollo-composable"],
+          leaflet: ["leaflet", "@vue-leaflet/vue-leaflet"],
+          sentry: [
+            "@sentry/browser",
+            "@sentry/integrations",
+            "@sentry/tracing",
+            "@sentry/vue",
+          ],
+          openseadragon: ["openseadragon"],
+          pdfjs: ["pdfjs-dist"],
+          ol: ["ol"],
+          chart: [
+            "chart.js",
+            "chartjs-adapter-date-fns",
+            "chartjs-plugin-datasource-prometheus",
+          ],
+          openlayers: ["vue3-openlayers"],
+          dropzone: ["dropzone"],
+          unicons: ["vue-unicons"],
+        },
+      },
     },
   },
   optimizeDeps: {
-    exclude: ["session-vue-3-oidc-library"],
+    exclude: ["session-vue-3-oidc-library", "date-fns"],
+    include: ["vue", "@vue/runtime-core"],
   },
 });
 

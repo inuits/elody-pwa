@@ -81,7 +81,7 @@ import {
   Entitytyping,
   HiddenField,
 } from "@/generated-types/queries";
-import { useAuth } from "session-vue-3-oidc-library";
+import { auth } from "@/main";
 import {
   InputFieldTypes,
   type BaseRelationValuesInput,
@@ -99,7 +99,6 @@ import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewM
 
 const emit = defineEmits(["update:value", "registerEnterPressed:value"]);
 const { t } = useI18n();
-const auth = useAuth();
 
 const props = defineProps<{
   fieldKey: string;
