@@ -574,3 +574,13 @@ export const getTitleOrNameFromEntity = (entity: Entity): string => {
     entity.id
   );
 };
+
+export const getRouteMetadataInfoFromEntity = (config: any, entitytype: Entitytyping | string): any => {
+  const homeRoutes = getChildrenOfHomeRoutes(config);
+  const entityRoute = homeRoutes.filter(
+    (item: any) =>
+      item.meta.entityType?.toLowerCase() === entitytype.toLowerCase()
+  )[0];
+  if (!entityRoute) return;
+  return entityRoute.meta;
+};
