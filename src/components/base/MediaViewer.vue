@@ -70,11 +70,14 @@ import {
 import AudioPlayer from "@/components/base/AudioPlayer.vue";
 import EntityImageSelection from "@/components/EntityImageSelection.vue";
 import IIIFViewer from "@/components/IIIFViewer.vue";
-import PDFViewer from "@/components/base/PDFViewer.vue";
 import TextViewer from "@/components/base/TextViewer.vue";
 import VideoPlayer from "@/components/base/VideoPlayer.vue";
-import { computed, toRefs, watch, inject } from "vue";
+import { computed, toRefs, watch, inject, defineAsyncComponent } from "vue";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
+
+const PDFViewer = defineAsyncComponent(
+  () => import("@/components/base/PDFViewer.vue"),
+);
 
 const props = defineProps<{
   mediafiles?: MediaFileEntity[];
@@ -109,6 +112,8 @@ const viewerType = computed<ElodyViewers | undefined>(() => {
   } catch {
     return undefined;
   }
+
+  return undefined;
 });
 
 watch(

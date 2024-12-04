@@ -231,7 +231,7 @@ import useEditMode from "@/composables/useEdit";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, ref, watch, onUpdated, onMounted, onUnmounted } from "vue";
 import { Unicons } from "@/types";
-import { useAuth } from "session-vue-3-oidc-library";
+import { auth } from "@/main";
 import { useFieldArray } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import BaseContextMenuActions from "./BaseContextMenuActions.vue";
@@ -300,7 +300,7 @@ const { update, remove } = useFieldArray(
   `relationValues.${props.relationType}`,
 );
 const { getEntityUuid } = useEntitySingle();
-const auth = useAuth();
+
 const loading = ref<boolean>(props.loading);
 const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
