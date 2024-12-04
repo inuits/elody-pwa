@@ -4,8 +4,7 @@
   >
     <div class="flex w-full items-center">
       <BreadCrumbs />
-      <EditToggle v-if="auth.isAuthenticated.value === true" />
-      <!--      <EntityDetailHeaderContextMenu v-if="isSingle" />-->
+      <MetadataEditButton v-if="auth.isAuthenticated.value === true" />
     </div>
     <div class="flex w-full justify-end px-2">
       <LanguageSelect />
@@ -20,7 +19,7 @@
 
 <script lang="ts" setup>
 import BreadCrumbs from "@/components/BreadCrumbs.vue";
-import EditToggle from "@/components/toggles/EditToggle.vue";
+import MetadataEditButton from "@/components/MetadataEditButton.vue";
 import LanguageSelect from "@/components/LanguageSelect.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import TenantSwitcher from "@/components/menu/TenantSwitcher.vue";
