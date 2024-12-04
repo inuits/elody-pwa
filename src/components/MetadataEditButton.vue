@@ -1,21 +1,21 @@
 <template>
   <div
     data-cy="edit-toggle"
-    v-if="
-      isEditToggleVisible === 'edit' || isEditToggleVisible === 'edit-delete'
-    "
+    v-if="isEditToggleVisible === 'edit' || isEditToggleVisible === 'edit-delete'"
     class="mx-6"
   >
     <base-button-new
       v-if="!editMetadataBtnClicked"
-      :label="t('metadata.labels.edit-metadata')"
+      :button-size="buttonSize"
+      :label=" originalLabel ? originalLabel : t('metadata.labels.edit-metadata')"
       icon="Edit"
       button-style="accentAccent"
       @click="clickEditMetadataButton()"
     />
     <base-button-new
       v-else
-      :label="t('metadata.labels.editing-metadata')"
+      :button-size="buttonSize"
+      :label="clickedLabel ? clickedLabel : t('metadata.labels.editing-metadata')"
       :disabled="true"
     />
   </div>
@@ -27,12 +27,25 @@ import useRouteHelpers from "@/composables/useRouteHelpers";
 import { useRoute, useRouter } from "vue-router";
 import { asString } from "@/helpers";
 import { useMutation } from "@vue/apollo-composable";
-import { DeleteDataDocument, Collection } from "@/generated-types/queries";
+import { DeleteDataDocument, Collection, DamsIcons } from "@/generated-types/queries";
 import type { DeleteDataMutation } from "@/generated-types/queries";
 import { usePageInfo } from "@/composables/usePageInfo";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButtonNew, { type ButtonSize } from "@/components/base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";
 import useEditMode from "@/composables/useEdit";
+
+const props = withDefaults(
+  defineProps<{
+    buttonSize?: ButtonSize;
+    originalLabel?: string;
+    clickedLabel?: string;
+  }>(),
+  {
+    buttonSize: "normal",
+    originalLabel: undefined,
+    clickedLabel: undefined,
+  }
+);
 
 const {
   isEdit,
@@ -66,11 +79,14 @@ const deleteAsset = async () => {
 watch(isEdit, (value: boolean) => {
   editMetadataBtnClicked.value = value;
 });
-watch(isSingle, (value: boolean) => {
-  if (value === false) {
-    hideEditToggle();
-  }
-});
+
+watch(
+  () => isSingle,
+  () => {
+    if (isSingle.value === false) hideEditToggle();
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped></style>

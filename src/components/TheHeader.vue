@@ -4,7 +4,7 @@
   >
     <div class="flex w-full items-center">
       <BreadCrumbs />
-      <MetadataEditButton v-if="auth.isAuthenticated.value === true" />
+      <MetadataEditButton v-if="auth.isAuthenticated.value === true && determineEditMetadataButton"/>
     </div>
     <div class="flex w-full justify-end px-2">
       <LanguageSelect />
@@ -23,9 +23,26 @@ import MetadataEditButton from "@/components/MetadataEditButton.vue";
 import LanguageSelect from "@/components/LanguageSelect.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import TenantSwitcher from "@/components/menu/TenantSwitcher.vue";
-import { inject } from "vue";
+import { inject, computed } from "vue";
+import { useRoute } from "vue-router";
+import { getRouteMetadataInfoFromEntity } from "@/helpers";
+import { Entitytyping } from "@/generated-types/queries";
 import { auth } from "@/main";
 
+const route = useRoute()
 const config: any = inject("config");
 const showSearch = config.features.simpleSearch.hasSimpleSearch;
+
+const determineEditMetadataButton = computed(() => {
+  if (route.name !== "SingleEntity" && route.name !== "SingleMediafile") return false;
+
+  const possibleEntityType = route.fullPath.split("/")[1];
+  const entityType = Object.values(Entitytyping).filter((entityType) => possibleEntityType === entityType)[0];
+  if (!entityType) return true;
+
+  const meta = getRouteMetadataInfoFromEntity(config, entityType);
+  if (meta?.hasEditMetadataButton !== undefined)
+    return meta.hasEditMetadataButton
+  return true;
+})
 </script>

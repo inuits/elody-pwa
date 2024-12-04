@@ -11,15 +11,21 @@
     <div
       class="h-full w-full border-solid border-neutral-30 border-2 bg-neutral-0 rounded-t-md"
     >
-      <div class="border-solid border-neutral-30 border-b-2 rounded-t-md">
+      <div class="border-solid border-neutral-30 border-b-2 rounded-t-md flex flex-row">
         <h1
           data-cy="entity-element-window-title"
           class="subtitle text-text-body p-2"
         >
           {{ t(element.label) }}
         </h1>
+        <MetadataEditButton
+          class="my-2"
+          v-if="auth.isAuthenticated.value === true && element.editMetadataButton?.hasButton"
+          :button-size="'small'"
+          :original-label="element.editMetadataButton.originalLabel"
+          :clicked-label="element.editMetadataButton.clickedLabel"
+        />
       </div>
-
       <div v-for="(panel, index) in panels" :key="index">
         <entity-element-window-panel
           :panel="panel"
@@ -53,6 +59,8 @@ import BaseExpandButton from "../base/BaseExpandButton.vue";
 import { useColumnResizeHelper } from "@/composables/useResizeHelper";
 import { useI18n } from "vue-i18n";
 import { useEditMode } from "@/composables/useEdit";
+import MetadataEditButton from "@/components/MetadataEditButton.vue";
+import { auth } from "@/main";
 
 const props = defineProps<{
   element: WindowElement;
