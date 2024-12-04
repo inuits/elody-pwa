@@ -45,17 +45,6 @@
         </span>
       </div>
     </div>
-
-    <div>
-      <BaseButtonNew
-        v-if="showDeleteButton"
-        :label="$t('bulk-operations.delete')"
-        :icon="DamsIcons.Trash"
-        button-style="redDefault"
-        button-size="small"
-        @click="() => emit('delete')"
-      />
-    </div>
   </div>
 </template>
 
