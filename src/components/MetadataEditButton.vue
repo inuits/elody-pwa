@@ -9,7 +9,7 @@
       :button-size="buttonSize"
       :label="readmodeLabel ? readmodeLabel : t('metadata.labels.edit-metadata')"
       :icon="DamsIcons.Edit"
-      button-style="accentAccent"
+      button-style="accentNormal"
       @click="clickEditMetadataButton()"
     />
     <base-button-new
