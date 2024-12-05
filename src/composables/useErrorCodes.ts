@@ -204,6 +204,7 @@ export const useErrorCodes = (): {
   };
 
   const handleHttpError = async (httpResponse: Response): Promise<string> => {
+    if (new URL(httpResponse.url).pathname.includes("api/iiif")) return;
     t = await setupScopedUseI18n();
     const responseBody = await httpResponse.json();
     const httpErrorMessage: string =
