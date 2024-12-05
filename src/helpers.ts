@@ -590,3 +590,15 @@ export const getRouteMetadataInfoFromEntity = (config: any, entitytype: Entityty
   if (!entityRoute) return;
   return entityRoute.meta;
 };
+
+export function downloadCsv(fileName: string, csvString?: string): void {
+  const blob = new Blob([csvString], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.click();
+
+  URL.revokeObjectURL(url);
+}
