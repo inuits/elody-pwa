@@ -136,7 +136,7 @@ export const updateEntityMediafileOnlyForMediafiles = (
   entity: Entity,
   onlyRemove: boolean = false,
 ) => {
-  if (entity.type.toLowerCase() === Entitytyping.Mediafile) {
+  if (entity.type?.toLowerCase() === Entitytyping.Mediafile) {
     useEntityMediafileSelector().setEntityMediafiles(
       mediafileViewerContext,
       [],
