@@ -8,7 +8,7 @@ import {
 } from "@/generated-types/queries";
 import { findPanelMetadata } from "@/helpers";
 import { defineRule, type FormContext, useForm } from "vee-validate";
-import { ref } from "vue";
+import { ref, inject } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { all } from "@vee-validate/rules";
@@ -26,6 +26,8 @@ export type EntityValues = {
 };
 
 const useFormHelper = () => {
+  const config = inject("config") as any;
+
   const createEntityValues = (
     intialValueFields: PanelMetaData[],
   ): EntityValues => {
@@ -175,6 +177,7 @@ const useFormHelper = () => {
 
   const mustBeExistingDateRule = (value: string): boolean | string => {
     if (!value) return true;
+<<<<<<< HEAD
     if (!DateTime.fromJSDate(new Date(value)).isValid)
       return "notifications.errors.construct-date-error.title";
     return true;
@@ -218,6 +221,12 @@ const useFormHelper = () => {
     }
 
     return regex.test(String(value));
+=======
+
+    const isValid = DateTime.fromJSDate(new Date(value)).isValid;
+    if (!isValid) return "notifications.errors.construct-date-error.title";
+    return isValid;
+>>>>>>> c3d4c91b (optional property lang only for the defined keys)
   };
 
   const __isNotEmpty = (str: any) => str.trim() !== "";
@@ -399,12 +408,19 @@ const useFormHelper = () => {
       .filter((key) => key !== "__typename")
       .forEach((key) => {
         if (!editableFields.value[entityId]?.includes(key)) return;
-        //TODO: I think we should do it only if client has feature flag
-        metadata.push({
-          key,
-          value: (intialValues as any)[key],
-          lang: locale || "",
-        });
+        const normalizedMetadata: {
+          key: string;
+          value: unknown;
+          lang?: string;
+        } = { key, value: (intialValues as any)[key] };
+        const multilanguage = config.features.multilanguage;
+        if (
+          multilanguage.hasMultilanguage &&
+          multilanguage.metadataKeys?.includes(key)
+        ) {
+          normalizedMetadata.lang = locale;
+        }
+        metadata.push(normalizedMetadata);
       });
     return metadata;
   };
@@ -477,6 +493,7 @@ const useFormHelper = () => {
     return relations;
   };
 
+<<<<<<< HEAD
   const parseRelationRootDataForFormSubmit = (
     relationRootdata: IntialValues,
     relations: BaseRelationValuesInput[],
@@ -503,6 +520,8 @@ const useFormHelper = () => {
     return relations;
   };
 
+=======
+>>>>>>> c3d4c91b (optional property lang only for the defined keys)
   const parseFormValuesToFormInput = (
     uuid: string,
     values: EntityValues,
