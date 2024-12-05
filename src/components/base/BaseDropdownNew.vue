@@ -106,13 +106,13 @@ const props = withDefaults(
     disable: false,
     itemsSelected: false,
     multiple: false,
-  }
+  },
 );
 
 const emit = defineEmits<{
   (
     event: "update:modelValue",
-    modelValue: DropdownOption | DropdownOption[]
+    modelValue: DropdownOption | DropdownOption[],
   ): void;
 }>();
 
@@ -145,13 +145,13 @@ const selectItem = (event: Event) => {
       if (item.selected)
         newlySelectedOption.push(
           props.options.find(
-            (option: DropdownOption) => option.label === item?.value
-          )
+            (option: DropdownOption) => option.label === item?.value,
+          ),
         );
     }
   } else
     newlySelectedOption = props.options.find(
-      (option: DropdownOption) => option.label === event.target?.value
+      (option: DropdownOption) => option.label === event.target?.value,
     );
   if (
     !newlySelectedOption ||
@@ -190,7 +190,7 @@ watch(
         emit("update:modelValue", selectedItem.value);
       }
   },
-  { immediate: true }
+  { immediate: true },
 );
 watch(
   () => props.modelValue,
@@ -198,12 +198,12 @@ watch(
     if (!props.modelValue) return;
     if (typeof props.modelValue === "string") {
       selectedItem.value = props.options.find(
-        (option: DropdownOption) => option.value === props.modelValue
+        (option: DropdownOption) => option.value === props.modelValue,
       );
       return;
     }
     selectedItem.value = props.modelValue;
   },
-  { immediate: true }
+  { immediate: true, deep: true },
 );
 </script>
