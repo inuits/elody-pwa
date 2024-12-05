@@ -21,9 +21,9 @@
         <MetadataEditButton
           class="my-2"
           v-if="auth.isAuthenticated.value === true && element.editMetadataButton?.hasButton"
-          :button-size="'small'"
-          :original-label="element.editMetadataButton.originalLabel"
-          :clicked-label="element.editMetadataButton.clickedLabel"
+          button-size="small"
+          :readmode-label="element.editMetadataButton.readmodeLabel"
+          :editmode-label="element.editMetadataButton.editmodeLabel"
         />
       </div>
       <div v-for="(panel, index) in panels" :key="index">

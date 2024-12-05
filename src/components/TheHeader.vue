@@ -4,7 +4,7 @@
   >
     <div class="flex w-full items-center">
       <BreadCrumbs />
-      <MetadataEditButton v-if="auth.isAuthenticated.value === true && determineEditMetadataButton"/>
+      <MetadataEditButton v-if="auth.isAuthenticated.value === true && showEditMetadataButton"/>
       <DeleteButton v-if="auth.isAuthenticated.value === true && isSingleEntityPage"/>
     </div>
     <div class="flex w-full justify-end px-2">
@@ -43,7 +43,7 @@ const isSingleEntityPage = computed(() => {
   return route.name === "SingleEntity" || route.name === "SingleMediafile"
 })
 
-const determineEditMetadataButton = computed(() => {
+const showEditMetadataButton = computed(() => {
   if (!isSingleEntityPage.value) return false;
   if (!entityType.value) return true;
 
