@@ -47,7 +47,7 @@
             :enable-preview="true"
             :enable-advanced-filters="false"
             :enable-bulk-operations="true"
-            :enable-navigation="false"
+            :enable-navigation="enableNavigation"
             :parent-entity-identifiers="
               entityUuid ===
                 mediafileSelectionState[customQueryFilters].selectedMediafile
@@ -85,7 +85,7 @@
             :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
             :enable-advanced-filters="false"
             :enable-bulk-operations="true"
-            :enable-navigation="false"
+            :enable-navigation="enableNavigation"
             :entity-type="types[0]"
             :parent-entity-identifiers="identifiers"
             :parent-entity-type="entityType"
@@ -164,6 +164,7 @@ const props = withDefaults(
     identifiers: string[];
     relationType: string;
     viewMode?: EntityListViewMode;
+    enableNavigation?: boolean;
     baseLibraryMode?: BaseLibraryModes;
     entityUuid: string;
     entityListElements?: EntityListElement[];

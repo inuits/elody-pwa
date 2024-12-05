@@ -2,7 +2,7 @@
   <div v-if="hasAvailableContextMenuActions">
     <unicon
       :name="Unicons.EllipsisVThinline.name"
-      @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event?.clientX, y: event?.clientY})"
+      @click.stop="openContextMenu"
     />
     <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
       <context-menu-action
@@ -56,6 +56,12 @@ const emit = defineEmits(["toggleLoading"]);
 const handleEmit = () => {
   emit("toggleLoading");
 };
+
+const openContextMenu = (event: Event) => {
+  contextMenuHandler.value.openContextMenu({x: event?.clientX, y: event?.clientY})
+  event?.stopPropagation();
+  event?.preventDefault();
+}
 
 const { fetchPermissionsOfContextMenu, setExtraVariables } = usePermissions();
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
