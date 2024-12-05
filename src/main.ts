@@ -29,6 +29,8 @@ import { useErrorCodes } from "@/composables/useErrorCodes";
 import { addRouterNavigationGuards } from "./routerNavigationGuards";
 
 import type { GraphQLError } from "graphql/error";
+import { useServiceVersionManager } from "@/composables/useServiceVersionManager";
+import { ElodyServices } from "@/generated-types/queries";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
@@ -50,9 +52,13 @@ const applyCustomization = (rulesObject: any) => {
 const start = async () => {
   Unicon.add(Object.values(Unicons));
 
-  const { config, translations } = await getApplicationDetails();
+  const { config, translations, version } = await getApplicationDetails();
+  const { setVersion, getPwaVersion } = useServiceVersionManager();
+
   const { defineValidationRules } = useFormHelper();
 
+  setVersion(version["apollo-graphql-version"], ElodyServices.ApolloGraphql);
+  setVersion(await getPwaVersion(), ElodyServices.Pwa);
   defineValidationRules();
 
   if (config.customization) applyCustomization(config.customization);
