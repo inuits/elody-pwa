@@ -63,6 +63,7 @@ import {
   usePermissions,
   advancedPermissions,
 } from "@/composables/usePermissions";
+import { getValueForPanelMetadata } from "@/helpers";
 
 const { isEdit } = useEditMode();
 
