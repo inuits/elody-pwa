@@ -39,13 +39,13 @@ export const useServiceVersionManager = (): {
     const { setGlobalState } = useStateManagement();
     __setServiceVersionMapper[service](newVersion);
     compareAllServiceVersions();
-    setGlobalState(`${service}Version`, newVersion);
+    setGlobalState(`${service}Version`, newVersion, "sessionStorage");
     return { [service]: newVersion };
   };
 
   const getCurrentVersion = (service: ElodyServices) => {
     const { getGlobalState } = useStateManagement();
-    return getGlobalState(`${service}Version`);
+    return getGlobalState(`${service}Version`, "sessionStorage");
   };
 
   const getPwaVersion = async (): Promise<string> => {

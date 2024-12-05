@@ -32,27 +32,51 @@ const sliceSingleEntityRoutePath = (path): string => {
 };
 
 export const useStateManagement = () => {
-  const setGlobalState = (key: string, value: object) => {
+  const setGlobalState = (
+    key: string,
+    value: object,
+    storageType: "localStorage" | "sessionStorage" = "localStorage",
+  ) => {
     const state = JSON.stringify(value);
-    if (window.localStorage.getItem(key) !== state)
-      window.localStorage.setItem(key, state);
+    if (storageType === "localStorage") {
+      if (window.localStorage.getItem(key) !== state)
+        window.localStorage.setItem(key, state);
+    }
+    if (storageType === "sessionStorage") {
+      if (window.sessionStorage.getItem(key) !== state)
+        window.sessionStorage.setItem(key, state);
+    }
   };
 
-  const updateGlobalState = (key: string, value: object) => {
-    const state = getGlobalState(key);
-    if (!state) setGlobalState(key, value);
-    else setGlobalState(key, Object.assign(state, value));
+  const updateGlobalState = (
+    key: string,
+    value: object,
+    storageType: "localStorage" | "sessionStorage" = "localStorage",
+  ) => {
+    const state = getGlobalState(key, storageType);
+    if (!state) setGlobalState(key, value, storageType);
+    else setGlobalState(key, Object.assign(state, value), storageType);
   };
 
-  const getGlobalState = (key: string) => {
-    const state = window.localStorage.getItem(key);
-    if (state) return JSON.parse(state);
-    return undefined;
+  const getGlobalState = (
+    key: string,
+    storageType: "localStorage" | "sessionStorage" = "localStorage",
+  ) => {
+    if (storageType === "localStorage") {
+      const state = window.localStorage.getItem(key);
+      if (state) return JSON.parse(state);
+      return undefined;
+    }
+    if (storageType === "sessionStorage") {
+      const state = window.sessionStorage.getItem(key);
+      if (state) return JSON.parse(state);
+      return undefined;
+    }
   };
 
   const setStateForRoute = (
     route: RouteLocationNormalizedLoaded | undefined,
-    stateObject: StateObject
+    stateObject: StateObject,
   ) => {
     if (!route) return;
     if (route.name !== "SingleEntity" && route.name !== "SingleMediafile") {
@@ -70,7 +94,7 @@ export const useStateManagement = () => {
 
   const updateStateForRoute = (
     route: RouteLocationNormalizedLoaded | undefined,
-    stateObject: StateObject
+    stateObject: StateObject,
   ) => {
     const state = getStateForRoute(route);
     if (!state) setStateForRoute(route, stateObject);
@@ -78,7 +102,7 @@ export const useStateManagement = () => {
   };
 
   const getStateForRoute = (
-    route: RouteLocationNormalizedLoaded | undefined
+    route: RouteLocationNormalizedLoaded | undefined,
   ): StateObject | undefined => {
     if (!route) return;
     if (route.name !== "SingleEntity") {
@@ -86,7 +110,7 @@ export const useStateManagement = () => {
       if (state) return JSON.parse(state);
     } else {
       const state = window.sessionStorage.getItem(
-        sliceSingleEntityRoutePath(route.path)
+        sliceSingleEntityRoutePath(route.path),
       );
       if (state) return JSON.parse(state);
     }
