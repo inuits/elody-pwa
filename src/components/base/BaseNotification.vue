@@ -20,12 +20,12 @@
           data-cy="notification-title"
           :class="`${typeColors[notification.type].text}`"
         >
-          {{ notification.title }}
+          {{ t(notification.title) }}
         </h2>
       </div>
       <div>
         <p data-cy="notification-description" class="break-words">
-          {{ notification.description }}
+          {{ t(notification.description) }}
         </p>
       </div>
     </div>
@@ -35,6 +35,7 @@
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useI18n } from "vue-i18n";
 
 export enum NotificationType {
   default = "default",
@@ -82,6 +83,7 @@ export const useNotification = () => {
 export default defineComponent({
   name: "BaseNotification",
   setup() {
+    const { t } = useI18n();
     const { notification } = useNotification();
     const { someModalIsOpened } = useBaseModal();
     const typeColors = {
@@ -115,7 +117,7 @@ export default defineComponent({
       },
     );
 
-    return { NotificationType, typeColors, notification, someModalIsOpened };
+    return { NotificationType, typeColors, notification, someModalIsOpened, t };
   },
 });
 </script>

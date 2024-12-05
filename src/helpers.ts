@@ -29,7 +29,7 @@ import { apolloClient, typeUrlMapping } from "@/main";
 export const goToEntityPage = (
   entity: Entity,
   listItemRouteName: string,
-  router: Router
+  router: Router,
 ) => {
   const entityId =
     entity.intialValues?.slug ||
@@ -49,12 +49,12 @@ export const goToEntityTypeRoute = (
   entityType: Entitytyping,
   sorting: { key: string; asc: boolean } | undefined = undefined,
   destinations: { entityType: string; destination: string }[],
-  router: Router
+  router: Router,
 ) => {
   try {
     const route = destinations.find(
       (destination: { entityType: string; destination: string }) =>
-        destination.entityType === entityType
+        destination.entityType === entityType,
     );
 
     if (route) {
@@ -67,7 +67,7 @@ export const goToEntityTypeRoute = (
         const routes = router.getRoutes();
         const routeLocation = routes.find(
           (routeLocation: RouteLocationNormalizedLoaded) =>
-            routeLocation.path.includes(route.destination)
+            routeLocation.path.includes(route.destination),
         );
         setSortConfigurationForRoute(routeLocation, sorting);
       }
@@ -78,10 +78,11 @@ export const goToEntityTypeRoute = (
 };
 
 export const setupScopedUseI18n = async () => {
+  // TODO: Remove the getApplicationDetails function call and get config from the vue inject
   const { translations, config } = await getApplicationDetails();
   let language = config.customization.applicationLocale;
   const displayPreferences = useStateManagement().getGlobalState(
-    "_displayPreferences"
+    "_displayPreferences",
   );
   if (displayPreferences)
     if (displayPreferences.lang) language = displayPreferences.lang;
@@ -92,7 +93,7 @@ export const setupScopedUseI18n = async () => {
 
 export const setSortConfigurationForRoute = (
   route: RouteLocationNormalizedLoaded,
-  sorting: { key: string; asc: boolean }
+  sorting: { key: string; asc: boolean },
 ) => {
   const currentRouteState = useStateManagement().getStateForRoute(route);
   const newRouteState = { ...currentRouteState };
@@ -105,7 +106,7 @@ export const setSortConfigurationForRoute = (
 
 export const getEntityPageRoute = (
   entity: Entity,
-  listItemRouteName: string
+  listItemRouteName: string,
 ) => {
   const entityId =
     entity.intialValues?.slug ||
@@ -133,17 +134,17 @@ export const mapUrlToEntityType = (type: string): string | undefined => {
 export const updateEntityMediafileOnlyForMediafiles = (
   mediafileViewerContext: string,
   entity: Entity,
-  onlyRemove: boolean = false
+  onlyRemove: boolean = false,
 ) => {
   if (entity.type.toLowerCase() === Entitytyping.Mediafile) {
     useEntityMediafileSelector().setEntityMediafiles(
       mediafileViewerContext,
-      []
+      [],
     );
     if (onlyRemove) return;
     useEntityMediafileSelector().updateSelectedEntityMediafile(
       mediafileViewerContext,
-      entity
+      entity,
     );
   }
 };
@@ -179,7 +180,7 @@ export const processTextWithLinks = (value: unknown) => {
   const pattern = /\b(https?:\/\/\S+)\b/g;
   const textWithLinks = stringValue.replace(
     pattern,
-    '<a class="underline" target="_blank" href="$1">$1</a>'
+    '<a class="underline" target="_blank" href="$1">$1</a>',
   );
   return textWithLinks;
 };
@@ -213,7 +214,7 @@ export const getIdFromKey = (prefix: string = "entities", key: string) => {
 export const customSort = (
   customSortOrder: string[],
   arrayToSort: any[],
-  sortKey: string
+  sortKey: string,
 ) => {
   const ordering: any = {};
   for (let i = 0; i < customSortOrder.length; i++) {
@@ -250,7 +251,7 @@ export const getValueForPanelMetadata = (
   metadataItemKey: string,
   entityId: string,
   mediafileViewerContext: String,
-  typeOfInputField?: string
+  typeOfInputField?: string,
 ): string => {
   const form = useFormHelper().getForm(entityId);
   if (panelType === PanelType.Metadata && form) {
@@ -271,7 +272,7 @@ export const getValueForPanelMetadata = (
 export const getMetadataFields = (
   objectToGetMetadataFrom: WindowElementPanel | PanelMetaData[],
   panelType: PanelType,
-  formId: string
+  formId: string,
 ): Array<PanelMetaData | EntityListElement> => {
   const fields: Array<PanelMetaData | EntityListElement> = [];
 
@@ -302,7 +303,7 @@ export const getMetadataFields = (
             key,
             formId,
             undefined,
-            value.inputField?.type
+            value.inputField?.type,
           ),
         inputField: (value as PanelMetaData).inputField,
         showOnlyInEditMode: (value as PanelMetaData).showOnlyInEditMode,
@@ -318,7 +319,7 @@ export const getMetadataFields = (
 
 export const formatTeaserMetadata = (
   teaserMetadata: Record<string, Metadata>,
-  intialValues: Record<string, IntialValues>
+  intialValues: Record<string, IntialValues>,
 ): object => {
   const formatted = [];
   for (const key in teaserMetadata) {
@@ -359,7 +360,7 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
 };
 export const convertDateToReadbleFormat = (
   dateString: string,
-  format: string
+  format: string,
 ): string => {
   const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = {
@@ -407,7 +408,7 @@ export const createPlaceholderEntities = (amount: number): any[] => {
 
 export const findPanelMetadata = (
   obj: any,
-  parentIsEditable?: boolean
+  parentIsEditable?: boolean,
 ): PanelMetaData[] => {
   const results: PanelMetaData[] = [];
 
@@ -437,18 +438,23 @@ export const getEntityTitle = (entity: BaseEntity): string => {
   return title;
 };
 
+export const getFromExpressEndpoint = async (
+  endpoint: "config" | "translation" | "version",
+) => {
+  const response = await fetch(
+    import.meta.env.VUE_APP_CONFIG_URL
+      ? import.meta.env.VUE_APP_CONFIG_URL
+      : `/api/${endpoint}`,
+    { cache: "no-store" },
+  );
+  return await response.json();
+};
+
 export const getApplicationDetails = async () => {
-  const config = await fetch(
-    import.meta.env.VUE_APP_CONFIG_URL
-      ? import.meta.env.VUE_APP_CONFIG_URL
-      : "/api/config"
-  ).then((r) => r.json());
-  const translations = await fetch(
-    import.meta.env.VUE_APP_CONFIG_URL
-      ? import.meta.env.VUE_APP_CONFIG_URL
-      : "/api/translation"
-  ).then((r) => r.json());
-  return { config, translations };
+  const config = await getFromExpressEndpoint("config");
+  const translations = await getFromExpressEndpoint("translation");
+  const version = await getFromExpressEndpoint("version");
+  return { config, translations, version };
 };
 
 export const getFormattersSettings = async () => {
@@ -477,7 +483,7 @@ export const getTypeUrlMapping = async () => {
 
 export const getObjectsBasedOnTypename = (
   parent: any,
-  typename: string
+  typename: string,
 ): [] => {
   const objects = [];
   Object.values(parent).forEach((child) => {
@@ -497,7 +503,7 @@ export const isDateTime = (dateTimeString: any): boolean => {
 };
 
 export const addCurrentTimeZoneToDateTimeString = (
-  dateTimeString: any
+  dateTimeString: any,
 ): string => {
   if (typeof dateTimeString !== "string") return dateTimeString;
   const date = new Date();
