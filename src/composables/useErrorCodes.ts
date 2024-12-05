@@ -188,12 +188,13 @@ export const useErrorCodes = (): {
     const graphqlErrorMessage =
       error.response.errors[0]?.extensions?.response?.body?.message;
 
+    console.log(error);
     const { code, message } =
       extractMessageAndCodeFromErrorResponse(graphqlErrorMessage);
 
     if (!code) {
       const statusCode: number =
-        error.response.errors[0]?.extensions?.response?.status;
+        error.response.errors[0]?.extensions?.response?.status || error.response.errors[0]?.extensions?.statusCode;
       fallbackOnRequestStatusCode(statusCode?.toString(), ErrorCodeType.Read);
       return;
     }
