@@ -110,9 +110,10 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 import {
+  downloadCsv,
   formatTeaserMetadata,
   getChildrenOfHomeRoutes,
-  getHomeRoute,
+  getHomeRoute
 } from "@/helpers";
 import { useModalActions } from "@/composables/useModalActions";
 
@@ -227,15 +228,7 @@ const exportCsv = async () => {
       return response.text();
     })
     .then((csv: string) => {
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${entityType.value}.csv`;
-      link.click();
-
-      URL.revokeObjectURL(url);
+      downloadCsv(`${entityType.value}.csv`, csv);
     })
     .catch(async (response: Response) =>
       createNotificationOverwrite(
