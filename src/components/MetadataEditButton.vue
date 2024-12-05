@@ -7,7 +7,7 @@
     <base-button-new
       v-if="!editMetadataBtnClicked"
       :button-size="buttonSize"
-      :label="originalLabel ? originalLabel : t('metadata.labels.edit-metadata')"
+      :label="readmodeLabel ? readmodeLabel : t('metadata.labels.edit-metadata')"
       :icon="DamsIcons.Edit"
       button-style="accentAccent"
       @click="clickEditMetadataButton()"
@@ -15,7 +15,7 @@
     <base-button-new
       v-else
       :button-size="buttonSize"
-      :label="clickedLabel ? clickedLabel : t('metadata.labels.editing-metadata')"
+      :label="editmodeLabel ? editmodeLabel : t('metadata.labels.editing-metadata')"
       :disabled="true"
     />
   </div>
@@ -32,13 +32,13 @@ import { DamsIcons } from "@/generated-types/queries";
 const props = withDefaults(
   defineProps<{
     buttonSize?: ButtonSize;
-    originalLabel?: string;
-    clickedLabel?: string;
+    readmodeLabel?: string;
+    editmodeLabel?: string;
   }>(),
   {
     buttonSize: "small",
-    originalLabel: undefined,
-    clickedLabel: undefined,
+    readmodeLabel: undefined,
+    editmodeLabel: undefined,
   }
 );
 
