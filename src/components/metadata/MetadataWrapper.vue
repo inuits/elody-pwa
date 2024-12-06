@@ -312,6 +312,7 @@ const getValidationRules = (metadata: PanelMetaData): string => {
       /^\/|\/$/g,
       "",
     );
+    regex = regex?.replace(/\|/g, "?.");
     rules = `${rule}:${regex}`;
   }
   if (
