@@ -52,9 +52,9 @@
         />
         <div v-if="field.__typename === 'UploadContainer'">
           <div
-            v-for="(uploadContainerField, idx) in Object.values(field as any).filter(
-              (containerField) => typeof containerField === 'object'
-            )"
+            v-for="(uploadContainerField, idx) in Object.values(
+              field as any,
+            ).filter((containerField) => typeof containerField === 'object')"
             :key="idx"
           >
             <div class="pb-2">
@@ -62,15 +62,34 @@
                 v-if="uploadContainerField.__typename === 'UploadField'"
                 :upload-flow="(field as UploadContainer).uploadFlow"
                 :dropzone-label="(uploadContainerField as UploadField).label"
-                :validation="(uploadContainerField as UploadField).inputField.validation?.value"
-                :accepted-file-types="(uploadContainerField as UploadField).inputField.fileTypes"
-                :max-file-size="(uploadContainerField as UploadField).inputField.maxFileSize"
-                :dropzone-size="(uploadContainerField as UploadField).uploadFieldSize"
-                :max-amount-of-files="(uploadContainerField as UploadField).inputField.maxAmountOfFiles"
-                :upload-multiple="(uploadContainerField as UploadField).inputField.uploadMultiple"
+                :validation="
+                  (uploadContainerField as UploadField).inputField.validation
+                    ?.value
+                "
+                :accepted-file-types="
+                  (uploadContainerField as UploadField).inputField.fileTypes
+                "
+                :max-file-size="
+                  (uploadContainerField as UploadField).inputField.maxFileSize
+                "
+                :dropzone-size="
+                  (uploadContainerField as UploadField).uploadFieldSize
+                "
+                :max-amount-of-files="
+                  (uploadContainerField as UploadField).inputField
+                    .maxAmountOfFiles
+                "
+                :upload-multiple="
+                  (uploadContainerField as UploadField).inputField
+                    .uploadMultiple
+                "
                 :dry-run="(uploadContainerField as UploadField).dryRunUpload"
-                :upload-field-type="(uploadContainerField as UploadField).uploadFieldType"
-                :entity-types-for-upload="(uploadContainerField as UploadField).entityTypesForUpload"
+                :upload-field-type="
+                  (uploadContainerField as UploadField).uploadFieldType
+                "
+                :entity-types-for-upload="
+                  (uploadContainerField as UploadField).entityTypesForUpload
+                "
               />
             </div>
             <div class="pb-4">
@@ -85,32 +104,20 @@
             </div>
           </div>
         </div>
-        <div
-          v-if="
-            (isButtonDisabled ||
-              (field.actionType === ActionType.Upload &&
-                !enableUploadButton)) &&
-            field.__typename === 'FormAction'
-          "
-          class="h-auto mt-5"
-        >
-          <div
-            :title="t(`tooltip.buttons.disabled-${field.actionType}-button`)"
-          >
-            <unicon :name="Unicons.QuestionCircle.name" height="20" />
-          </div>
-        </div>
         <DynamicFormUploadButton
           v-if="
-            field.__typename === 'FormAction' &&
-            (field as FormAction).actionType == ActionType.Upload ||
-            (field as FormAction).actionType == ActionType.UploadCsvForReordening ||
+            (field.__typename === 'FormAction' &&
+              (field as FormAction).actionType == ActionType.Upload) ||
+            (field as FormAction).actionType ==
+              ActionType.UploadCsvForReordening ||
             (field as FormAction).actionType == ActionType.UpdateMetadata
           "
           :label="t((field as FormAction).label)"
           :icon="(field as FormAction).icon"
           :disabled="!enableUploadButton || isButtonDisabled"
-          :progressIndicatorType="(field as FormAction).actionProgressIndicator?.type"
+          :progressIndicatorType="
+            (field as FormAction).actionProgressIndicator?.type
+          "
           @click-upload-button="
             performActionButtonClickEvent(field as FormAction)
           "
@@ -132,7 +139,7 @@
               ? `${t(field.label)} ${t(`types.${field.creationType}`)}${
                   config.tenantDefiningTypes !== field.creationType
                     ? ` in ${t(
-                        `navigation.tenant`
+                        `navigation.tenant`,
                       ).toLowerCase()} ${currentTenant}`
                     : ''
                 }`
@@ -230,7 +237,7 @@ const props = withDefaults(
   }>(),
   {
     modalFormFields: undefined,
-  }
+  },
 );
 
 const emit = defineEmits(["entityCreated"]);
@@ -303,14 +310,14 @@ interface FormObject {
 }
 
 const findFormTabObjects = (
-  dynamicForm: Record<string, FormObject>
+  dynamicForm: Record<string, FormObject>,
 ): FormObject[] => {
   if (!dynamicForm) {
     return [];
   }
 
   return Object.values(dynamicForm).filter(
-    (value) => value && value.__typename === "FormTab"
+    (value) => value && value.__typename === "FormTab",
   );
 };
 
@@ -325,8 +332,8 @@ const formFields = computed<FormFieldTypes[] | undefined>(() => {
   const normalizeFields = (formFields: FormObject[]) => {
     return formFields.flatMap((formTab) =>
       Object.values(formTab.formFields).filter(
-        (value) => typeof value === "object"
-      )
+        (value) => typeof value === "object",
+      ),
     );
   };
 
@@ -346,7 +353,7 @@ const form = ref<FormContext<any>>();
 const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
 const showErrors = ref<boolean>(false);
 const isButtonDisabled = computed((): boolean =>
-  showErrors.value ? formContainsErrors.value : false
+  showErrors.value ? formContainsErrors.value : false,
 );
 const formClosing = ref<boolean>(false);
 const submitErrors = ref<string | undefined>(undefined);
@@ -358,7 +365,7 @@ const isLoading = computed(() => {
 const { t } = useI18n();
 const isLinkedUpload = computed<boolean>(() => {
   const uploadContainer: UploadContainer | undefined = formFields.value?.find(
-    (formField: any) => formField.__typename === "UploadContainer"
+    (formField: any) => formField.__typename === "UploadContainer",
   ) as UploadContainer | undefined;
   if (!uploadContainer) return false;
   return uploadContainer.uploadFlow === UploadFlow.MediafilesOnly;
@@ -366,7 +373,7 @@ const isLinkedUpload = computed<boolean>(() => {
 
 const createEntityFromFormInput = (
   entityType: Entitytyping,
-  relations: BaseRelationValuesInput[] = undefined
+  relations: BaseRelationValuesInput[] = undefined,
 ): EntityInput => {
   let entity: EntityInput = { type: entityType };
   entity.metadata = Object.keys(form.value?.values.intialValues)
@@ -411,7 +418,7 @@ const uploadActionFunction = async () => {
       standaloneFileType.value,
       { key: "date_updated", asc: false },
       getMenuDestinations(),
-      props.router
+      props.router,
     );
   return;
 };
@@ -421,7 +428,7 @@ const submitActionFunction = async (field: FormAction) => {
   const document = await getQuery(field.actionQuery as string);
   const entityInput = createEntityFromFormInput(
     field.creationType,
-    extractActionArguments(field.actionType)
+    extractActionArguments(field.actionType),
   );
   let entity: any;
   try {
@@ -453,7 +460,7 @@ const submitWithExtraMetadataActionFunction = async (field: FormAction) => {
   createNotificationOverwrite(
     NotificationType.default,
     t("notifications.success.entityCreated.title"),
-    t("notifications.success.entityCreated.description")
+    t("notifications.success.entityCreated.description"),
   );
   await getTenants();
   closeAndDeleteForm();
@@ -466,20 +473,20 @@ const downloadActionFunction = async (field: FormAction) => {
     const document = await getQuery(field.actionQuery as string);
     const entityInput = createEntityFromFormInput(
       field.creationType,
-      variables.relations
+      variables.relations,
     );
     const entity = (
       await performDownloadAction(
         document,
         variables,
         entityInput,
-        form.value.values
+        form.value.values,
       )
     ).data.DownloadItemsInZip;
     createNotificationOverwrite(
       NotificationType.default,
       t("notifications.success.downloadEntityCreated.title"),
-      t("notifications.success.downloadEntityCreated.description")
+      t("notifications.success.downloadEntityCreated.description"),
     );
     await props.router.replace({ name: RouteNames.Downloads });
     closeAndDeleteForm();
@@ -499,13 +506,13 @@ const updateMetdataActionFunction = async (field: FormAction) => {
     await performUpdateMetadataAction(
       document,
       form.value.values.intialValues.type,
-      csv
+      csv,
     );
     closeAndDeleteForm();
     createNotificationOverwrite(
       NotificationType.success,
       t("notifications.success.updataMetdataCsv.title"),
-      t("notifications.success.updataMetdataCsv.description")
+      t("notifications.success.updataMetdataCsv.description"),
     );
   } catch (error: ApolloError) {
     const errorObject = await getMessageAndCodeFromApolloError(error);
@@ -550,7 +557,7 @@ const reorderEntitiesActionFunction = async (field: FormAction) => {
     createNotificationOverwrite(
       NotificationType.success,
       t("notifications.success.csvReordering.title"),
-      t("notifications.success.csvReordering.description")
+      t("notifications.success.csvReordering.description"),
     );
   } catch (error) {
     handleHttpError(error);
@@ -565,10 +572,10 @@ const startOcrActionFunction = async (field: FormAction) => {
     addEditableMetadataKeys(Object.keys(form.value.values.intialValues), id);
     const metadata = parseIntialValuesForFormSubmit(
       form.value.values.intialValues,
-      id
+      id,
     );
     const relations = parseRelationValuesForFormSubmit(
-      form.value.values.relationValues
+      form.value.values.relationValues,
     );
     await mutate({
       id: id,
@@ -581,7 +588,7 @@ const startOcrActionFunction = async (field: FormAction) => {
       createNotificationOverwrite(
         NotificationType.default,
         t("notifications.success.entityUpdated.title"),
-        t("notifications.success.entityUpdated.description")
+        t("notifications.success.entityUpdated.description"),
       );
     });
     if (form.value.values.intialValues.ocr_type === OcrType.ManualUpload)
@@ -592,7 +599,7 @@ const startOcrActionFunction = async (field: FormAction) => {
       createNotificationOverwrite(
         NotificationType.default,
         t("notifications.default.generate-ocr.title"),
-        t("notifications.default.generate-ocr.description")
+        t("notifications.default.generate-ocr.description"),
       );
     });
     closeAndDeleteForm();
@@ -622,26 +629,26 @@ const performActionButtonClickEvent = (field: FormAction): void => {
 const getFormProgressIndicator = (): ActionProgress | undefined => {
   if (!formFields.value) return undefined;
   const actionButton: FormAction | undefined = formFields.value.find(
-    (formField: any) => formField.__typename === "FormAction"
+    (formField: any) => formField.__typename === "FormAction",
   );
   if (!actionButton) return undefined;
   return actionButton.actionProgressIndicator || undefined;
 };
 
 const getUploadProgressSteps = (
-  progressIndicator: ActionProgress
+  progressIndicator: ActionProgress,
 ): ActionProgressStep[] => {
   if (progressIndicator.type === ActionProgressIndicatorType.Spinner) return [];
 
   return Object.values(progressIndicator).filter(
     (value: any) =>
-      typeof value === "object" && value.__typename === "ActionProgressStep"
+      typeof value === "object" && value.__typename === "ActionProgressStep",
   ) as ActionProgressStep[];
 };
 
 const resetVeeValidateForDynamicForm = (
   newQueryName: string,
-  oldQueryName: string | undefined
+  oldQueryName: string | undefined,
 ) => {
   resetForm();
   if (oldQueryName) deleteForm(oldQueryName);
@@ -654,7 +661,7 @@ const resetVeeValidateForDynamicForm = (
 
 const initializeForm = async (
   newQueryName: string,
-  oldQueryName: string | undefined
+  oldQueryName: string | undefined,
 ) => {
   resetVeeValidateForDynamicForm(newQueryName, oldQueryName);
   if (!props.dynamicFormQuery) return;
@@ -686,7 +693,7 @@ watch(
       initializeForm(newValue, oldValue);
     await initializeForm(newValue, oldValue);
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
@@ -696,7 +703,7 @@ watch(
     if (progressIndicator)
       uploadProgress.value = getUploadProgressSteps(progressIndicator);
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
@@ -706,10 +713,10 @@ watch(
       standaloneFileType.value = intialValues.standaloneUploadType;
     useBaseModal().changeCloseConfirmation(
       TypeModals.DynamicForm,
-      form.value?.meta.dirty && !formClosing.value
+      form.value?.meta.dirty && !formClosing.value,
     );
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 );
 </script>
 
