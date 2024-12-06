@@ -40,7 +40,7 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 import useUpload from "@/composables/useUpload";
-import Papa from 'papaparse';
+// import Papa from 'papaparse';
 import { downloadCsv } from "@/helpers";
 
 const { files } = useUpload();

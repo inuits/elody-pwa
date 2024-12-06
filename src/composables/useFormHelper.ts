@@ -102,6 +102,7 @@ const useFormHelper = () => {
     );
     defineRule(ValidationRules.MaxDateToday, getMaxDateTodayRule);
     defineRule(ValidationRules.ExistingDate, mustBeExistingDateRule);
+    defineRule(ValidationRules.Regex, regexValidator);
   };
 
   const getHasSpecificRelationRule = (
@@ -173,10 +174,50 @@ const useFormHelper = () => {
 
   const mustBeExistingDateRule = (value: string): boolean | string => {
     if (!value) return true;
-    
+
     const isValid = DateTime.fromJSDate(new Date(value)).isValid;
     if (!isValid) return "notifications.errors.construct-date-error.title";
     return isValid;
+  };
+
+  const getSingleParam = <TParam = unknown>(
+    params: [TParam] | Record<string, TParam>,
+    paramName: string,
+  ) => {
+    return Array.isArray(params) ? params[0] : params[paramName];
+  };
+
+  const isEmpty = (value: unknown): boolean => {
+    if (value === null || value === undefined || value === "") {
+      return true;
+    }
+
+    if (Array.isArray(value) && value.length === 0) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const regexValidator = (
+    value: unknown,
+    params: [string | RegExp] | { regex: RegExp | string },
+  ): boolean => {
+    if (isEmpty(value)) {
+      return true;
+    }
+
+    let regex = getSingleParam(params, "regex");
+    if (typeof regex === "string") {
+      regex = regex.replace(/\?\./g, "|");
+      regex = new RegExp(regex);
+    }
+
+    if (Array.isArray(value)) {
+      return value.every((val) => regexValidator(val, { regex }));
+    }
+
+    return regex.test(String(value));
   };
 
   const __isNotEmpty = (str: any) => str.trim() !== "";
