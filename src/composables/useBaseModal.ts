@@ -112,9 +112,8 @@ export const useBaseModal = () => {
   };
 
   const someModalIsOpened = computed((): boolean => {
-    return modals.value.some((modal: ModalInfo) => {
-      return modal.open;
-    });
+    if (!modals) return false;
+    return Object.values(modals).some((modal: ModalInfo) => modal.open);
   });
 
   return {
