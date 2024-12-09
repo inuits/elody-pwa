@@ -26,7 +26,7 @@
               failedUploads.length
                 ? "actions.upload.errors"
                 : "actions.labels.success",
-              [failedUploads.length ? failedUploads.length : amountUploaded]
+              [failedUploads.length ? failedUploads.length : amountUploaded],
             )
           }}
         </p>
@@ -66,15 +66,16 @@
       class="w-full flex items-center p-2 bg-neutral-white h-[48px]"
     >
       <div
-        v-for="progressStep in uploadProgress"
+        v-for="(progressStep, index) in uploadProgress"
         :key="progressStep.label"
-        class="flex"
+        class="flex items-center"
       >
         <base-progress-step
           :label="progressStep.label"
           :status="progressStep.status"
         />
         <unicon
+          v-if="index !== uploadProgress.length - 1"
           :name="Unicons.EllipsisH.name"
           fill="text-neutral-black"
           :height="18"
@@ -103,7 +104,7 @@ const props = withDefaults(
     disabled: boolean;
     progressIndicatorType?: ActionProgressIndicatorType;
   }>(),
-  { progressIndicatorType: ActionProgressIndicatorType.Spinner }
+  { progressIndicatorType: ActionProgressIndicatorType.Spinner },
 );
 
 const emit = defineEmits<{
