@@ -77,8 +77,8 @@ export const useServiceVersionManager = (): {
     newVersion: string,
     service: ElodyServices,
   ): void => {
-    if (!newVersion || !service) return;
     const currentVersion = getCurrentVersion(service);
+    if (!newVersion || !service || !currentVersion) return;
     if (currentVersion === newVersion) return;
 
     __showNewVersionAvailableToUser();
