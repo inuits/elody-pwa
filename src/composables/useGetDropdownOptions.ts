@@ -130,7 +130,7 @@ export const useGetDropdownOptions = (
       let _value;
 
       if (formId && filterInput.value.includes("$")) {
-        _value = getVariableValueForFilter(formId, filterInput.value);
+        _value = getVariableValueForFilter(formId, filterInput.value, filterInput.returnIdAtIndex ?? 0);
       } else {
         _value = value
           ? filterInput.value === "*"
@@ -149,7 +149,7 @@ export const useGetDropdownOptions = (
     });
   };
 
-  const getVariableValueForFilter = (formId: string, variable: string) => {
+  const getVariableValueForFilter = (formId: string, variable: string, returnIdAtIndex: number = 0) => {
     const form = getFormWithRelationFieldCheck(
       formId,
       variable.replace("$", "")
@@ -166,7 +166,9 @@ export const useGetDropdownOptions = (
       return variable;
 
     const hasNew = hasNewRelations(relations);
-    return hasNew ? findNewRelationValue(relations) : relations[0].key;
+    if (hasNew) return findNewRelationValue(relations);
+    if (returnIdAtIndex === -1) return relations;
+    return relations[returnIdAtIndex].key;
   };
 
   const getFormWithRelationFieldCheck = (formId: string, field: string) => {
