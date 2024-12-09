@@ -319,7 +319,7 @@ watch(
   async () => {
     if (props.relatedActiveFilter) {
       filterOptions.forEach((option) => {
-        let isSelected = props.relatedActiveFilter?.value.includes(
+        let isSelected = props.relatedActiveFilter?.value?.includes(
           option.option.value
         );
         option.isSelected = isSelected;
