@@ -15,8 +15,11 @@
         <div v-if="isValidation" @click.stop>
           <p
             class="underline text-accent-accent"
-            @click="downloadCsvTemplate(`/upload-csv-template-${selectedItem}.csv`)"
-            >{{ $t("upload-fields.csv-template-link") }}
+            @click="
+              downloadCsvTemplate(`/upload-csv-template-${selectedItem}.csv`)
+            "
+          >
+            {{ $t("upload-fields.csv-template-link") }}
           </p>
           <select
             v-if="entityTypesForUpload"
@@ -40,7 +43,7 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 import useUpload from "@/composables/useUpload";
-import Papa from 'papaparse';
+import Papa from "papaparse";
 import { downloadCsv } from "@/helpers";
 
 const { files } = useUpload();
@@ -59,11 +62,11 @@ const props = withDefaults(
     style: "",
     isValidation: false,
     entityTypesForUpload: undefined,
-  }
+  },
 );
 
 const selectedItem = ref<string | undefined>(
-  props.entityTypesForUpload ? props.entityTypesForUpload[0] : undefined
+  props.entityTypesForUpload ? props.entityTypesForUpload[0] : undefined,
 );
 
 const emit = defineEmits<{
@@ -80,8 +83,9 @@ const downloadCsvTemplate = async (filePath: any) => {
 
   if (files.value.length > 0) {
     const header = results.meta.fields as string[];
-    const filenameIndex = header.indexOf('filename');
-    let columnToAddFilename = filenameIndex === -1 ? 'file_identifier' : 'filename';
+    const filenameIndex = header.indexOf("filename");
+    let columnToAddFilename =
+      filenameIndex === -1 ? "file_identifier" : "filename";
 
     files.value.forEach((file: any, index: number) => {
       results.data.push({});
@@ -90,7 +94,7 @@ const downloadCsvTemplate = async (filePath: any) => {
   }
   const csv = Papa.unparse(results.data);
   downloadCsv(filePath, csv);
-}
+};
 
 onMounted(() => {
   emit("update:modelValue", dropzoneView.value);

@@ -26,19 +26,23 @@
       >
         ( {{ t("metadata.labels.optional") }} )
       </p>
-      <base-tooltip v-if="metadata?.tooltip" position="top-right" :tooltip-offset="8">
-          <template #activator="{ on }">
-            <div v-on="on" class="pl-1">
-              <unicon :name="Unicons.QuestionCircle.name" height="20" />
+      <base-tooltip
+        v-if="metadata?.tooltip"
+        position="top-right"
+        :tooltip-offset="8"
+      >
+        <template #activator="{ on }">
+          <div v-on="on" class="pl-1">
+            <unicon :name="Unicons.QuestionCircle.name" height="20" />
+          </div>
+        </template>
+        <template #default>
+          <span class="text-sm text-text-placeholder">
+            <div>
+              {{ t(`${metadata.tooltip}`) }}
             </div>
-          </template>
-          <template #default>
-            <span class="text-sm text-text-placeholder">
-              <div>
-                {{ t(`${metadata.tooltip}`) }}
-              </div>
-            </span>
-          </template>
+          </span>
+        </template>
       </base-tooltip>
     </div>
     <entity-element-metadata-edit
@@ -102,13 +106,20 @@
           />
           <ViewModesAutocompleteMetadata
             v-else-if="
-              metadata.inputField?.type === InputFieldTypes.DropdownMultiselectMetadata ||
-              metadata.inputField?.type === InputFieldTypes.DropdownSingleselectMetadata
+              metadata.inputField?.type ===
+                InputFieldTypes.DropdownMultiselectMetadata ||
+              metadata.inputField?.type ===
+                InputFieldTypes.DropdownSingleselectMetadata
             "
             v-model:model-value="metadata.value"
             :metadata-dropdown-options="metadata.inputField.options"
             :formId="formId"
-            :select-type="metadata.inputField.type === InputFieldTypes.DropdownSingleselectMetadata ? 'single' : 'multi'"
+            :select-type="
+              metadata.inputField.type ===
+              InputFieldTypes.DropdownSingleselectMetadata
+                ? 'single'
+                : 'multi'
+            "
             :disabled="true"
             mode="view"
           />
@@ -186,7 +197,7 @@ const props = withDefaults(
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     formFlow: "edit",
     showErrors: false,
-  }
+  },
 );
 
 // Todo: Enabling this will break the validation
@@ -203,7 +214,7 @@ const setNewValue = (
     | string
     | string[]
     | BaseRelationValuesInput
-    | BaseRelationValuesInput[]
+    | BaseRelationValuesInput[],
 ) => {
   if (Array.isArray(newValue) && newValue.length === 1) newValue = newValue[0];
   value.value = newValue;
@@ -221,17 +232,17 @@ defineExpose({
 });
 
 const metadadaValueToDisplayOnTooltip = computed(
-  () => props.metadata?.value?.label || value.value
+  () => props.metadata?.value?.label || value.value,
 );
 
 const isMetadataOnRelation = computed(
-  () => props.metadata.__typename === "PanelRelationMetaData"
+  () => props.metadata.__typename === "PanelRelationMetaData",
 );
 const fieldKeyWithId = computed(
   () =>
     `${props.metadata.key}${
       props.linkedEntityId ? "-" + props.linkedEntityId : ""
-    }`
+    }`,
 );
 const fieldIsValid = computed(() => meta.valid);
 
@@ -239,38 +250,38 @@ const { conditionalFieldIsRequired } = useConditionalValidation();
 
 const isRequiredRelationField = computed(() => {
   return !!props.metadata?.inputField?.validation?.value?.includes(
-    ValidationRules.HasRequiredRelation
+    ValidationRules.HasRequiredRelation,
   );
 });
 const isOneOfRequiredRelationField = computed(() => {
   return !!props.metadata?.inputField?.validation?.value?.includes(
-    ValidationRules.HasOneOfRequiredRelations
+    ValidationRules.HasOneOfRequiredRelations,
   );
 });
 const isOneOfRequiredMetadataField = computed(() => {
   return !!props.metadata?.inputField?.validation?.value?.includes(
-    ValidationRules.HasOneOfRequiredMetadata
+    ValidationRules.HasOneOfRequiredMetadata,
   );
 });
 const isRegexField = computed(() => {
   return !!props.metadata?.inputField?.validation?.value?.includes(
-    ValidationRules.Regex
+    ValidationRules.Regex,
   );
 });
 
 const isFieldRequired = computed(() => {
   if (
     props.metadata?.inputField?.validation?.value?.includes(
-      ValidationRules.Required
+      ValidationRules.Required,
     ) ||
     props.metadata?.inputField?.validation?.value?.includes(
-      ValidationRules.HasRequiredRelation
+      ValidationRules.HasRequiredRelation,
     ) ||
     props.metadata?.inputField?.validation?.value?.includes(
-      ValidationRules.HasOneOfRequiredRelations
+      ValidationRules.HasOneOfRequiredRelations,
     ) ||
     props.metadata?.inputField?.validation?.value?.includes(
-      ValidationRules.Regex
+      ValidationRules.Regex,
     )
   )
     return true;
@@ -278,7 +289,7 @@ const isFieldRequired = computed(() => {
     return conditionalFieldIsRequired(
       props.metadata?.inputField?.validation?.required_if,
       props.formId,
-      mediafileViewerContext
+      mediafileViewerContext,
     );
   }
   return false;
@@ -286,7 +297,7 @@ const isFieldRequired = computed(() => {
 
 const isMaxDateToday = computed(() => {
   props.metadata?.inputField?.validation?.value?.includes(
-    ValidationRules.MaxDateToday
+    ValidationRules.MaxDateToday,
   );
 });
 
@@ -297,11 +308,12 @@ const getValidationRules = (metadata: PanelMetaData): string => {
   else rules = metadata?.inputField?.validation?.value?.join("|") as string;
   if (isRegexField.value) {
     const rule = ValidationRules.Regex;
-    let regex = metadata?.inputField?.validation?.regex?.replace(/^\/|\/$/g, '');
-    if (new RegExp(String(regex)).test(""))
-      return `${rule}:${regex}`;
-    else
-      return `required|${rule}:${regex}`;
+    let regex = metadata?.inputField?.validation?.regex?.replace(
+      /^\/|\/$/g,
+      "",
+    );
+    regex = regex?.replace(/\|/g, "?.");
+    rules = `${rule}:${regex}`;
   }
   if (
     (isRequiredRelationField.value || isOneOfRequiredRelationField.value) &&
@@ -319,7 +331,7 @@ const getValidationRules = (metadata: PanelMetaData): string => {
   if (isOneOfRequiredRelationField.value) {
     const relationTypes =
       metadata?.inputField?.validation?.has_one_of_required_relations?.relationTypes.join(
-        ":"
+        ":",
       );
     const amount =
       metadata?.inputField?.validation?.has_one_of_required_relations?.amount;
@@ -328,7 +340,7 @@ const getValidationRules = (metadata: PanelMetaData): string => {
   if (isOneOfRequiredMetadataField.value) {
     const relationTypes =
       metadata?.inputField?.validation?.has_one_of_required_metadata?.includedMetadataFields.join(
-        ":"
+        ":",
       );
     const amount =
       metadata?.inputField?.validation?.has_one_of_required_metadata?.amount;
@@ -346,7 +358,7 @@ const rules = computed(() => getValidationRules(props.metadata));
 const label = computed(() =>
   props.metadata.label
     ? t(props.metadata.label as string)
-    : t("metadata.no-label")
+    : t("metadata.no-label"),
 );
 
 const veeValidateField = computed(() => {
@@ -365,7 +377,7 @@ const veeValidateField = computed(() => {
     !props.isEdit
   ) {
     return `${ValidationFields.IntialValues}.${getKeyBasedOnInputField(
-      props.metadata
+      props.metadata,
     )}`;
   } else if (
     isRequiredRelationField.value ||
@@ -374,7 +386,7 @@ const veeValidateField = computed(() => {
     return `${ValidationFields.RelationValues}.${props.metadata.inputField.relationType}`;
   } else if (props.metadata.inputField)
     return `${ValidationFields.IntialValues}.${getKeyBasedOnInputField(
-      props.metadata
+      props.metadata,
     )}`;
   else if (props.linkedEntityId === undefined)
     return `${ValidationFields.RelationValues}.${props.metadata.key}`;
@@ -407,13 +419,13 @@ if (typeof props.metadata.value !== "object") {
     () => props.metadata.value,
     () => {
       setNewValue(props.metadata.value);
-    }
+    },
   );
 }
 watch(
   () => props.isEdit,
   () => {
     setNewValue(props.metadata.value);
-  }
+  },
 );
 </script>
