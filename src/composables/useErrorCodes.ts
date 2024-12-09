@@ -186,7 +186,7 @@ export const useErrorCodes = (): {
   const handleGraphqlError = async (error: GraphQLError): Promise<string> => {
     t = await setupScopedUseI18n();
     const graphqlErrorMessage =
-      error.response.errors[0]?.extensions?.response?.body?.message;
+      error.response.errors[0]?.extensions?.response?.body?.message || error.response.errors[0]?.message;
 
     console.log(error);
     const { code, message } =
@@ -195,7 +195,11 @@ export const useErrorCodes = (): {
     if (!code) {
       const statusCode: number =
         error.response.errors[0]?.extensions?.response?.status || error.response.errors[0]?.extensions?.statusCode;
-      fallbackOnRequestStatusCode(statusCode?.toString(), ErrorCodeType.Read);
+      if (statusCode) {
+        fallbackOnRequestStatusCode(statusCode.toString(), ErrorCodeType.Read);
+      } else {
+        createNotificationOverwrite(NotificationType.error, "Error", graphqlErrorMessage);
+      }
       return;
     }
 
