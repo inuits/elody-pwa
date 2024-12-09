@@ -104,7 +104,7 @@ export default defineComponent({
       () => notification.value.shown,
       (shown) => {
         if (shown) {
-          if (someModalIsOpened)
+          if (someModalIsOpened.value)
             // Remove this if no notifications pop-up when a modal is open
             console.info(
               `A modal is open at this time show the '${notification.value.title}' error inside of the modal instead of using notifications`,
