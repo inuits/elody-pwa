@@ -94,7 +94,9 @@ const {
 } = useGetDropdownOptions(
   props.metadataKeyToGetOptionsFor as Entitytyping,
   entityId as string,
-  props.fromRelationType
+  props.fromRelationType,
+  props.advancedFilterInputForSearchingOptions,
+  props.advancedFilterInputForRetrievingOptions,
 );
 
 onMounted(async () => {
