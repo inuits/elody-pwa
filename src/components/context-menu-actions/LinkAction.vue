@@ -2,6 +2,7 @@
   <router-link
     :to="{ params: { id: entityId, type: typeUrlMapping?.mapping[entityType] || entityType } }"
     target="_blank"
+    @click.stop
   >
     <base-context-menu-item :label="$t(label)" :icon="Unicons[icon].name" />
   </router-link>
