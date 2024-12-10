@@ -279,9 +279,6 @@ const isFieldRequired = computed(() => {
     ) ||
     props.metadata?.inputField?.validation?.value?.includes(
       ValidationRules.HasOneOfRequiredRelations,
-    ) ||
-    props.metadata?.inputField?.validation?.value?.includes(
-      ValidationRules.Regex,
     )
   )
     return true;
