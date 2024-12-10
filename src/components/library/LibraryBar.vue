@@ -157,7 +157,7 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
 
       const state = getStateForRoute(route);
       const sortKey =
-        state?.queryVariables?.searchValue.order_by ||
+        /*state?.queryVariables?.searchValue.order_by ||*/
         sortOptions.value?.[0]?.value;
       selectedSortOption.value = sortOptions.value.find(
         (option) => option.value === sortKey
