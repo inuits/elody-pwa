@@ -16,7 +16,7 @@
           <span v-if="itemsSelected" class="font-bold"
             >{{ getEnqueuedItemCount(context) }}/</span
           >{{ totalItemsCount }}
-          {{ $t("bulk-operations.items") }}
+          {{ t("bulk-operations.items") }}
           <span v-if="itemsSelected">{{ $t("bulk-operations.selected") }}</span>
         </span>
       </div>
@@ -28,7 +28,7 @@
           "
           @click="dequeueAllItemsForBulkProcessing(context)"
         >
-          {{ $t("bulk-operations.undo-selection") }}
+          {{ t("bulk-operations.undo-selection") }}
         </span>
       </div>
       <div
@@ -47,7 +47,7 @@
           "
           @click="() => emit('selectPage')"
         >
-          {{ $t("bulk-operations.select-page") }}
+          {{ t("bulk-operations.select-page") }}
         </span>
       </div>
       <!--      <div v-if="hasBulkOperationsWithItemsSelection">-->
@@ -108,6 +108,7 @@
         <ActionMenuGroup
           v-if="bulkOperations !== undefined"
           v-model="selectedBulkOperation"
+          @update:modelValue="handleSelectedBulkOperation"
           :options="bulkOperations"
           :items-selected="itemsSelected"
           :entity-type="entityType"
@@ -145,6 +146,7 @@ import { useQuery } from "@vue/apollo-composable";
 import { useImport } from "@/composables/useImport";
 import { useRoute } from "vue-router";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
+import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
   defineProps<{
@@ -166,7 +168,7 @@ const props = withDefaults(
     customBulkOperations: undefined,
     enableSelection: true,
     parentEntityId: undefined,
-  }
+  },
 );
 
 const emit = defineEmits<{
@@ -175,12 +177,12 @@ const emit = defineEmits<{
   (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
   (
     event: "setBulkOperationsAvailable",
-    isBulkOperationsAvailable: boolean
+    isBulkOperationsAvailable: boolean,
   ): void;
   (event: "refetch"): void;
   (
     event: "customBulkOperationsPromise",
-    bulkOperationsPromise: () => Promise<void>
+    bulkOperationsPromise: () => Promise<void>,
   ): void;
   (event: "applyCustomBulkOperations"): void;
   (event: "initializeEntityPickerComponent"): void;
@@ -188,17 +190,18 @@ const emit = defineEmits<{
 
 const route = useRoute();
 const { loadDocument } = useImport();
+const { t } = useI18n();
 const refetchEnabled = ref<boolean>(false);
 const entityType = computed(() => props.entityType || route.meta.entityType);
 const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
   GetBulkOperationsDocument,
   { entityType: entityType.value },
-  () => ({ enabled: entityType.value ? refetchEnabled.value : ref(false) })
+  () => ({ enabled: entityType.value ? refetchEnabled.value : ref(false) }),
 );
 const bulkOperations = ref<DropdownOption[]>([]);
 const selectedBulkOperation = ref<DropdownOption>();
 const bulkOperationsPromiseIsResolved = ref<boolean>(
-  !props.customBulkOperations
+  !props.customBulkOperations,
 );
 const {
   getEnqueuedItemCount,
@@ -210,6 +213,7 @@ const {
   initializePropertiesForDownload,
   initializePropertiesForCreateEntity,
   setCallbackFunction,
+  initializeDeleteEntitiesModal,
 } = useModalActions();
 const { openModal, getModalInfo } = useBaseModal();
 
@@ -231,13 +235,13 @@ const hasBulkOperationsWithItemsSelection = computed<boolean>(() => {
         item.actionContext?.entitiesSelectionType ===
         ActionContextEntitiesSelectionType.SomeSelected
       );
-    }
+    },
   );
   return (bulkOperations.value && operationsWithContext?.length > 0) || false;
 });
 
 const itemsSelected = computed<boolean>(
-  () => getEnqueuedItemCount(props.context) > 0
+  () => getEnqueuedItemCount(props.context) > 0,
 );
 
 const customBulkOperationsPromise = async () => {
@@ -262,22 +266,22 @@ onMounted(() => {
   refetch();
 });
 
-watch(selectedBulkOperation, () => {
+const handleSelectedBulkOperation = () => {
   if (!selectedBulkOperation.value) return;
   const modal = selectedBulkOperation.value?.bulkOperationModal;
   const bulkOperationType = selectedBulkOperation.value?.value;
 
   initializeGeneralProperties(
     route.params.id,
-    modal.formRelationType,
+    modal?.formRelationType,
     route.meta.type,
     props.refetchEntities,
-    bulkOperationType
+    bulkOperationType,
   );
   if (bulkOperationType === BulkOperationTypes.DownloadMediafiles)
     initializePropertiesForDownload(
       getEnqueuedItems(props.context),
-      props.context
+      props.context,
     );
   if (bulkOperationType === BulkOperationTypes.AddRelation)
     emit("initializeEntityPickerComponent");
@@ -288,6 +292,14 @@ watch(selectedBulkOperation, () => {
     setCallbackFunction(props.refetchEntities);
   }
 
+  if (bulkOperationType === BulkOperationTypes.DeleteEntities) {
+    return initializeDeleteEntitiesModal(
+      props.context,
+      props.refetchEntities,
+      t,
+    );
+  }
+
   openModal(
     modal.typeModal,
     ModalStyle.CenterWide,
@@ -296,9 +308,12 @@ watch(selectedBulkOperation, () => {
     modal.askForCloseConfirmation,
     bulkOperationType === BulkOperationTypes.ExportCsvOfMediafilesFromAsset
       ? RouteNames.Mediafiles
-      : props.context
+      : props.context,
+    bulkOperationType === BulkOperationTypes.DeleteEntities
+      ? "delete-entities"
+      : undefined,
   );
-});
+};
 
 watch(
   () =>
@@ -306,7 +321,7 @@ watch(
     getModalInfo(TypeModals.BulkOperations).open,
   (isBulkOperationModalOpen: boolean | undefined) => {
     if (!isBulkOperationModalOpen) selectedBulkOperation.value = undefined;
-  }
+  },
 );
 
 watch(
@@ -314,7 +329,7 @@ watch(
   (type: Entitytyping) => {
     if (!type) return;
     refetch({ entityType: type });
-  }
+  },
 );
 
 watch(
@@ -325,7 +340,7 @@ watch(
     emit("customBulkOperationsPromise", customBulkOperationsPromise);
     emit("applyCustomBulkOperations");
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
@@ -334,7 +349,7 @@ watch(
     if (props.confirmSelectionButton) return;
     emit("setBulkOperationsAvailable", hasBulkOperations);
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 
