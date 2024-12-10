@@ -5,9 +5,22 @@ import {
   Collection,
   EditStatus,
   RouteNames,
+  TypeModals,
 } from "@/generated-types/queries";
 import { ref } from "vue";
-import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
+import {
+  useBulkOperations,
+  BulkOperationsContextEnum,
+  type InBulkProcessableItem,
+  type Context,
+} from "@/composables/useBulkOperations";
+import { useConfirmModal } from "@/composables/useConfirmModal";
+import { useBaseModal } from "@/composables/useBaseModal";
+import { useDeleteEntities } from "@/composables/useDeleteEntities";
+import {
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
 
 export type DownloadMediafilesInformation = {
   mediafiles: [];
@@ -27,6 +40,13 @@ const downloadMediafilesInformation = ref<
 const savedSearchInformation = ref<any | undefined>(undefined);
 
 export const useModalActions = () => {
+  const { initializeConfirmModal } = useConfirmModal();
+  const { closeModal } = useBaseModal();
+  const { deleteEntities } = useDeleteEntities();
+  const { createNotificationOverwrite } = useNotification();
+  const { getEnqueuedItems, dequeueAllItemsForBulkProcessing } =
+    useBulkOperations();
+
   const getArgumentsForSubmit = (): BaseRelationValuesInput[] | Function => {
     const relations: BaseRelationValuesInput[] = [];
     if (parentId.value !== undefined) {
@@ -128,7 +148,7 @@ export const useModalActions = () => {
     relation: string,
     col: Collection,
     callbackFn: Function,
-    bulkoperationType: BulkOperationTypes
+    bulkoperationType: BulkOperationTypes,
   ): void => {
     parentId.value = parent;
     relationType.value = relation;
@@ -137,8 +157,8 @@ export const useModalActions = () => {
     bulkOperationType.value = bulkoperationType;
   };
   const initializePropertiesForDownload = (
-    enqueuedItems,
-    context: any
+    enqueuedItems: InBulkProcessableItem,
+    context: any,
   ): void => {
     const isMediafileArray =
       context === RouteNames.Mediafile ||
@@ -173,6 +193,38 @@ export const useModalActions = () => {
     callbackFunction.value = callback;
   };
 
+  const initializeDeleteEntitiesModal = (
+    context: Context,
+    callback: Function,
+    t: any,
+  ) => {
+    return initializeConfirmModal({
+      confirmButton: {
+        buttonCallback: async () => {
+          if (!context) return;
+
+          const isDeleted = await deleteEntities(getEnqueuedItems(context));
+          if (isDeleted) {
+            dequeueAllItemsForBulkProcessing(context);
+            callback();
+            createNotificationOverwrite(
+              NotificationType.default,
+              t("notifications.success.entitiesDeleted.title"),
+              t("notifications.success.entitiesDeleted.description"),
+            );
+          }
+        },
+      },
+      declineButton: {
+        buttonCallback: () => {
+          closeModal(TypeModals.Confirm);
+        },
+      },
+      translationKey: "delete-entities",
+      openImmediately: true,
+    });
+  };
+
   const resetAllProperties = () => {
     parentId.value = undefined;
     relationType.value = undefined;
@@ -189,6 +241,7 @@ export const useModalActions = () => {
     initializePropertiesForDownload,
     initializePropertiesForCreateEntity,
     initializePropertiesForSavedSearch,
+    initializeDeleteEntitiesModal,
     getParentId,
     getBulkOperationType,
     getCallbackFunction,
