@@ -1,5 +1,5 @@
 <template>
-  <div v-if="contextMenu.isVisible" class="context-menu" :style="getStyles()">
+  <div @click.prevent v-if="contextMenu.isVisible" class="context-menu" :style="getStyles()">
     <slot></slot>
   </div>
 </template>
