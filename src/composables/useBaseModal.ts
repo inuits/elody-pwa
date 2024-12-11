@@ -7,6 +7,7 @@ import {
   TypeModals,
 } from "@/generated-types/queries";
 import { type Context } from "@/composables/useBulkOperations";
+import useEntityPickerModal from "@/composables/useEntityPickerModal";
 
 export type ModalInfo = {
   open: boolean;
@@ -103,6 +104,12 @@ export const useBaseModal = () => {
     }
   };
 
+  const closeAllModals = (): void => {
+    modals.forEach((modal: ModalInfo) => {
+      modal.open = false;
+    });
+  };
+
   const changeCloseConfirmation = (modalType: TypeModals, value: boolean) => {
     modals[modalType].closeConfirmation = value;
   };
@@ -130,5 +137,6 @@ export const useBaseModal = () => {
     modalToCloseAfterConfirm,
     currentModalStyle,
     someModalIsOpened,
+    closeAllModals,
   };
 };
