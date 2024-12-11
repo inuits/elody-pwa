@@ -8,12 +8,9 @@
       </div>
       <div>
         <div class="pt-4">
-          {{ t(`confirm.delete-entities.message`) }}
+          {{ message }}
         </div>
-        <div v-if="form" class="pt-4">
-          <div class="text-md flex">
-            <p>{{ t(form.label) }}:</p>
-          </div>
+        <div v-if="form">
           <BaseInputCheckbox
             v-for="option in options"
             :key="option.key.value"
@@ -111,6 +108,12 @@ const normalizeOptionsToObjectOfKeyValue = (
     {} as { [key: string]: boolean },
   );
 };
+
+const message = computed(() => {
+  return form.value
+    ? `${t("confirm.delete-entities.message")} ${t(form.value.label)}`
+    : t("confirm.delete-entities.message");
+});
 
 const deleteSelectedItems = async () => {
   const context = modal.value.context as Context;
