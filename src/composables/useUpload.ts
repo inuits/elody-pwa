@@ -417,7 +417,7 @@ const useUpload = () => {
             __getCsvBlob(),
           )) as string[];
         uploadUrl = _prefetchedUploadUrls.find((url: string) =>
-          url.includes(file.name),
+          decodeURIComponent(url).includes(file.name),
         );
       } else {
         uploadUrl = await __getUploadUrlForStandaloneMediafile(
