@@ -15,7 +15,7 @@ vi.mock("@/composables/useFormHelper", () => ({
   }),
 }));
 
-describe("getVariableValueForFilter", () => {
+describe("GetVariableValueForFilter", () => {
   const { getVariableValueForFilter } = useGetDropdownOptions(
     "entityTypeMock" as Entitytyping,
     "parentMock"
@@ -97,6 +97,46 @@ describe("getVariableValueForFilter", () => {
 
     const result = getVariableValueForFilter(formId, variable);
     expect(result).toBe(variable);
+  });
+
+  it("returns the second one if you give 1 as returnIdAtIndex and all are unchanged", () => {
+    const formId = "existingFormId";
+    const variable = "$variableKey";
+
+    mocks.getForm.mockReturnValue({
+      values: {
+        relationValues: {
+          [variable.replace("$", "")]: [
+            { editStatus: EditStatus.Unchanged, key: "Unchanged1" },
+            { editStatus: EditStatus.Unchanged, key: "Unchanged2" },
+            { editStatus: EditStatus.Unchanged, key: "Unchanged3" },
+          ],
+        },
+      },
+    } as FormContext<any>);
+
+    const result = getVariableValueForFilter(formId, variable, 1);
+    expect(result).toBe("Unchanged2");
+  });
+
+  it("returns the new one if you give 1 as returnIdAtIndex there is a new one", () => {
+    const formId = "existingFormId";
+    const variable = "$variableKey";
+
+    mocks.getForm.mockReturnValue({
+      values: {
+        relationValues: {
+          [variable.replace("$", "")]: [
+            { editStatus: EditStatus.Unchanged, key: "Unchanged1" },
+            { editStatus: EditStatus.Unchanged, key: "Unchanged2" },
+            { editStatus: EditStatus.New, key: "newKey1" },
+          ],
+        },
+      },
+    } as FormContext<any>);
+
+    const result = getVariableValueForFilter(formId, variable, 1);
+    expect(result).toBe("newKey1");
   });
 });
 
