@@ -43,6 +43,8 @@ const props = withDefaults(
     metadataKeyToGetOptionsFor?: string | "no-key";
     selectType?: "multi" | "single";
     advancedFilterInputForRetrievingOptions?: [AdvancedFilterInput];
+    advancedFilterInputForRetrievingRelatedOptions?: [AdvancedFilterInput];
+    advancedFilterInputForRetrievingAllOptions?: [AdvancedFilterInput];
     advancedFilterInputForSearchingOptions: AdvancedFilterInput;
     relationType: string;
     fromRelationType: string;
@@ -72,6 +74,16 @@ const selectedDropdownOptions = ref<DropdownOption[]>([]);
 const { replaceRelationsFromSameType, addRelations } = useFormHelper();
 const entityId = getEntityIdFromRoute();
 const { createEntity } = useManageEntities();
+
+const advancedFilterInputForRetrievingAllOptions = computed(() => {
+  if (props.advancedFilterInputForRetrievingAllOptions.length > 0) return props.advancedFilterInputForRetrievingAllOptions;
+  return  props.advancedFilterInputForRetrievingOptions;
+});
+const advancedFilterInputForRetrievingRelatedOptions = computed(() => {
+  if (props.advancedFilterInputForRetrievingRelatedOptions.length > 0) return props.advancedFilterInputForRetrievingRelatedOptions;
+  return  props.advancedFilterInputForRetrievingOptions;
+});
+
 const {
   initialize,
   entityDropdownOptions,
@@ -83,7 +95,7 @@ const {
   "fetchAll",
   undefined,
   props.advancedFilterInputForSearchingOptions,
-  props.advancedFilterInputForRetrievingOptions,
+  advancedFilterInputForRetrievingAllOptions.value,
   props.formId
 );
 
@@ -96,7 +108,8 @@ const {
   entityId as string,
   props.fromRelationType,
   props.advancedFilterInputForSearchingOptions,
-  props.advancedFilterInputForRetrievingOptions,
+  advancedFilterInputForRetrievingRelatedOptions.value,
+  props.formId,
 );
 
 onMounted(async () => {
