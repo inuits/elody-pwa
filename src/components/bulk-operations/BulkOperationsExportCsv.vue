@@ -89,7 +89,6 @@ import {
   TypeModals,
 } from "@/generated-types/queries";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
-import BaseModal from "@/components/base/BaseModal.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
