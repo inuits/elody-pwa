@@ -16,7 +16,7 @@
           <span v-if="itemsSelected" class="font-bold"
             >{{ getEnqueuedItemCount(context) }}/</span
           >{{ totalItemsCount }}
-          {{ t("bulk-operations.items") }}
+          {{ $t("bulk-operations.items") }}
           <span v-if="itemsSelected">{{ $t("bulk-operations.selected") }}</span>
         </span>
       </div>
@@ -28,7 +28,7 @@
           "
           @click="dequeueAllItemsForBulkProcessing(context)"
         >
-          {{ t("bulk-operations.undo-selection") }}
+          {{ $t("bulk-operations.undo-selection") }}
         </span>
       </div>
       <div
@@ -47,7 +47,7 @@
           "
           @click="() => emit('selectPage')"
         >
-          {{ t("bulk-operations.select-page") }}
+          {{ $t("bulk-operations.select-page") }}
         </span>
       </div>
       <!--      <div v-if="hasBulkOperationsWithItemsSelection">-->
@@ -146,7 +146,6 @@ import { useQuery } from "@vue/apollo-composable";
 import { useImport } from "@/composables/useImport";
 import { useRoute } from "vue-router";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
-import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
   defineProps<{
@@ -190,7 +189,6 @@ const emit = defineEmits<{
 
 const route = useRoute();
 const { loadDocument } = useImport();
-const { t } = useI18n();
 const refetchEnabled = ref<boolean>(false);
 const entityType = computed(() => props.entityType || route.meta.entityType);
 const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(

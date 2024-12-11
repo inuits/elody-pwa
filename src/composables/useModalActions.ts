@@ -140,7 +140,7 @@ export const useModalActions = () => {
     bulkOperationType.value = bulkoperationType;
   };
   const initializePropertiesForDownload = (
-    enqueuedItems: InBulkProcessableItem,
+    enqueuedItems: InBulkProcessableItem[],
     context: any,
   ): void => {
     const isMediafileArray =
