@@ -9,6 +9,7 @@ import useTenant from "@/composables/useTenant";
 import { auth, router } from "@/main";
 import { ErrorCodeType } from "@/generated-types/queries";
 import type { ApolloError } from "@apollo/client/core";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 export const useErrorCodes = (): {
   handleErrorByCode: (code: string) => void;
@@ -76,16 +77,20 @@ export const useErrorCodes = (): {
     errorCodeType: ErrorCodeType = ErrorCodeType.Read,
   ) => {
     const { setTennantInSession } = useTenant();
+    const { closeAllModals } = useBaseModal();
 
     await auth.logout();
     useStateManagement().clearStorage();
     setTennantInSession("");
+    closeAllModals();
     router.push("/unauthorized");
   };
 
   const handleAccessDenied = (
     errorCodeType: ErrorCodeType = ErrorCodeType.Read,
   ) => {
+    const { closeAllModals } = useBaseModal();
+
     if (errorCodeType === ErrorCodeType.Write) {
       createNotificationOverwrite(
         NotificationType.error,
@@ -94,6 +99,7 @@ export const useErrorCodes = (): {
       );
       return;
     }
+    closeAllModals();
     router.push("/accessDenied");
   };
 
@@ -186,7 +192,8 @@ export const useErrorCodes = (): {
   const handleGraphqlError = async (error: GraphQLError): Promise<string> => {
     t = await setupScopedUseI18n();
     const graphqlErrorMessage =
-      error.response.errors[0]?.extensions?.response?.body?.message || error.response.errors[0]?.message;
+      error.response.errors[0]?.extensions?.response?.body?.message ||
+      error.response.errors[0]?.message;
 
     console.log(error);
     const { code, message } =
@@ -194,11 +201,16 @@ export const useErrorCodes = (): {
 
     if (!code) {
       const statusCode: number =
-        error.response.errors[0]?.extensions?.response?.status || error.response.errors[0]?.extensions?.statusCode;
+        error.response.errors[0]?.extensions?.response?.status ||
+        error.response.errors[0]?.extensions?.statusCode;
       if (statusCode) {
         fallbackOnRequestStatusCode(statusCode.toString(), ErrorCodeType.Read);
       } else {
-        createNotificationOverwrite(NotificationType.error, "Error", graphqlErrorMessage);
+        createNotificationOverwrite(
+          NotificationType.error,
+          "Error",
+          graphqlErrorMessage,
+        );
       }
       return;
     }
