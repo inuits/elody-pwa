@@ -213,7 +213,6 @@ const {
   initializePropertiesForDownload,
   initializePropertiesForCreateEntity,
   setCallbackFunction,
-  initializeDeleteEntitiesModal,
 } = useModalActions();
 const { openModal, getModalInfo } = useBaseModal();
 
@@ -270,6 +269,7 @@ const handleSelectedBulkOperation = () => {
   if (!selectedBulkOperation.value) return;
   const modal = selectedBulkOperation.value?.bulkOperationModal;
   const bulkOperationType = selectedBulkOperation.value?.value;
+  let modalStyle = ModalStyle.CenterWide;
 
   initializeGeneralProperties(
     route.params.id,
@@ -288,30 +288,26 @@ const handleSelectedBulkOperation = () => {
   if (bulkOperationType === BulkOperationTypes.CreateEntity)
     initializePropertiesForCreateEntity();
 
-  if (bulkOperationType === BulkOperationTypes.ReorderEntities) {
+  if (
+    bulkOperationType === BulkOperationTypes.ReorderEntities ||
+    bulkOperationType === BulkOperationTypes.DeleteEntities
+  ) {
     setCallbackFunction(props.refetchEntities);
   }
 
   if (bulkOperationType === BulkOperationTypes.DeleteEntities) {
-    return initializeDeleteEntitiesModal(
-      props.context,
-      props.refetchEntities,
-      t,
-    );
+    modalStyle = ModalStyle.Center;
   }
 
   openModal(
     modal.typeModal,
-    ModalStyle.CenterWide,
+    modalStyle,
     modal.formQuery,
     undefined,
     modal.askForCloseConfirmation,
     bulkOperationType === BulkOperationTypes.ExportCsvOfMediafilesFromAsset
       ? RouteNames.Mediafiles
       : props.context,
-    bulkOperationType === BulkOperationTypes.DeleteEntities
-      ? "delete-entities"
-      : undefined,
   );
 };
 
