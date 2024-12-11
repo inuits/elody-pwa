@@ -435,6 +435,7 @@ export const getEntityTitle = (entity: BaseEntity): string => {
   if (entity.intialValues?.title) title = entity.intialValues.title;
   if (entity.intialValues?.name) title = entity.intialValues.name;
   if (entity.intialValues?.email) title = entity.intialValues.email;
+  if (entity.intialValues?.prefLabel) title = entity.intialValues.prefLabel;
   return title;
 };
 

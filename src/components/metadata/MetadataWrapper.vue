@@ -100,6 +100,12 @@
             :advanced-filter-input-for-retrieving-options="
               metadata.inputField.advancedFilterInputForRetrievingOptions
             "
+            :advanced-filter-input-for-retrieving-related-options="
+              metadata.inputField.advancedFilterInputForRetrievingRelatedOptions
+            "
+            :advanced-filter-input-for-retrieving-all-options="
+              metadata.inputField.advancedFilterInputForRetrievingAllOptions
+            "
             :is-metadata-field="metadata.inputField?.isMetadataField"
             :from-relation-type="metadata.inputField?.fromRelationType"
             :disabled="true"
