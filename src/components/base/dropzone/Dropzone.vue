@@ -69,6 +69,19 @@ onMounted(() => {
     dropzone.removeEventListeners();
   });
 
+  dropzone.on('dragleave', (event) => {
+    event.preventDefault()
+    dropzone.element.classList.remove('dropzone-highlight');
+  });
+  dropzone.on('drop', (event) => {
+    event.preventDefault()
+    dropzone.element.classList.remove('dropzone-highlight');
+  });
+  dropzone.on('dragover', (event) => {
+    event.preventDefault()
+    dropzone.element.classList.add('dropzone-highlight');
+  });
+
   dynamicFormUploadFields.value.push(dropzone);
 
   watch(
@@ -93,3 +106,10 @@ onMounted(() => {
   );
 });
 </script>
+
+<style scoped>
+.dropzone-highlight {
+  border: 3px dashed #007bff;
+  background-color: #e7f3ff;
+}
+</style>
