@@ -167,7 +167,8 @@ export const useGetDropdownOptions = (
 
     const hasNew = hasNewRelations(relations);
     if (hasNew) return findNewRelationValue(relations);
-    if (returnIdAtIndex === -1) return relations;
+    if (returnIdAtIndex === -1)
+      return relations.map((rel) => rel.key);
     return relations[returnIdAtIndex].key;
   };
 
