@@ -195,7 +195,6 @@ export const useErrorCodes = (): {
       error.response.errors[0]?.extensions?.response?.body?.message ||
       error.response.errors[0]?.message;
 
-    console.log(error);
     const { code, message } =
       extractMessageAndCodeFromErrorResponse(graphqlErrorMessage);
 
