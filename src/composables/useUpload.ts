@@ -773,10 +773,13 @@ const useUpload = () => {
 
     if (!errorContainer || !errors) return;
     errorContainer.innerHTML = "";
+    const errorList = document.createElement("ul");
+    errorList.classList.add("list-disc");
+    errorContainer.appendChild(errorList);
     errors.forEach((error: string) => {
-      const errorNode = document.createElement("p");
+      const errorNode = document.createElement("li");
       errorNode.innerHTML = error;
-      errorContainer.appendChild(errorNode);
+      errorList.appendChild(errorNode);
     });
     errorContainer.classList.remove("hidden");
   };
