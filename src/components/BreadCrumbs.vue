@@ -31,7 +31,7 @@
             truncatePreviousRouteName = t(previousRoute.title).includes(' ')
           "
           @mouseleave="truncatePreviousRouteName = true"
-          @click="navigateToEntity(previousRoute)"
+          @click="checkNavigationAvailable(previousRoute)"
         >
           {{ t(previousRoute?.title) }}
         </p>
@@ -62,7 +62,7 @@
             .slice(0, -1)
             .reverse()"
           :key="breadcrumbRoute.title || breadcrumbRoute.overviewPage"
-          @click="navigateToEntity(breadcrumbRoute)"
+          @click="checkNavigationAvailable(breadcrumbRoute)"
         >
           <div class="flex flex-col items-end w-full">
             <div class="px-4">
@@ -117,6 +117,12 @@ import {
   breadcrumbRoutes,
   rootRoute,
 } from "@/composables/useBreadcrumbs";
+import useEditMode from "@/composables/useEdit";
+import { asString } from "@/helpers";
+import { TypeModals } from "@/generated-types/queries";
+import { useFormHelper } from "@/composables/useFormHelper";
+import { useBaseModal } from "@/composables/useBaseModal";
+import { useConfirmModal } from "@/composables/useConfirmModal";
 
 const { t } = useI18n();
 const config: any = inject("config");
@@ -127,9 +133,12 @@ const breadCrumbRoutesExist = computed(
   () => breadcrumbRoutes.value.length > 0 || getCurrentRouteTitle.value
 );
 const router = useRouter();
-
 const { clearBreadcrumbPathAndAddOverviewPage, previousRoute } =
   useBreadcrumbs(config);
+const { isEdit, discard, save } = useEditMode();
+const { discardEditForForm } = useFormHelper();
+const { initializeConfirmModal } = useConfirmModal();
+const { closeModal } = useBaseModal();
 
 router.beforeEach(() => {
   showHistory.value = false;
@@ -149,6 +158,40 @@ const toggleList = () => {
   }
   showHistory.value = !showHistory.value;
 };
+
+const openDiscardModal = (route: any) => {
+  initializeConfirmModal({
+    confirmButton: {
+      buttonCallback: () => {
+        discard();
+        const id = asString(route.id);
+        discardEditForForm(id);
+        closeModal(TypeModals.Confirm);
+        navigateToEntity(route);
+      },
+    },
+    secondaryConfirmButton: {
+      buttonCallback: async () => {
+        await save();
+        closeModal(TypeModals.Confirm);
+        navigateToEntity(route);
+      },
+      buttonStyle: "accentAccent",
+    },
+    declineButton: {
+      buttonCallback: () => {
+        closeModal(TypeModals.Confirm);
+      },
+    },
+    translationKey: "discard-edit",
+    openImmediately: true,
+  });
+};
+
+const checkNavigationAvailable = (route: any) => {
+  if (isEdit.value) openDiscardModal(route)
+  else navigateToEntity(route);
+}
 
 const navigateToEntity = (route: any) => {
   if (route.id) {
