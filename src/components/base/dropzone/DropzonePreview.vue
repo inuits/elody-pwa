@@ -32,7 +32,7 @@
         </div>
       </div>
       <div
-        class="error-message-container hidden bg-red-light text-red-default px-3 py-1"
+        class="error-message-container hidden bg-red-light text-red-default px-5 py-1"
       ></div>
     </div>
   </div>
