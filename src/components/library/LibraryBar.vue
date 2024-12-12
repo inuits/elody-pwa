@@ -163,7 +163,7 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
         (option) => option.value === sortKey
       );
       const sortOrder =
-        state?.queryVariables?.searchValue.isAsc ? "asc" : "desc" ||
+        /*state?.queryVariables?.searchValue.isAsc ? "asc" : "desc" ||*/
         sortingOptionsResult?.isAsc?.toLowerCase();
       isAsc.value = sortOrder === "asc";
       props.setSortKey(sortKey);
