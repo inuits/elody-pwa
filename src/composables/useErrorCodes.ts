@@ -45,32 +45,78 @@ export const useErrorCodes = (): {
     500: (errorCodeType) => undefined,
   };
 
-  const extractMessageAndCodeFromErrorResponse = (
+  const __parseVariableStringToVariableObject = (
+    stringVariables: string[],
+  ): Record<string, string> | undefined => {
+    try {
+      const variablesObject: record<string, string> = {};
+      stringVariables.forEach((variable) => {
+        const colonIndex = variable.indexOf(":");
+
+        if (colonIndex !== -1) {
+          const key = variable.substring(0, colonIndex);
+          const value = variable.substring(colonIndex + 1);
+          variablesObject[key] = value;
+        }
+      });
+      return variablesObject;
+    } catch {
+      return undefined;
+    }
+  };
+
+  const __getStringVariablesFromErrorMessage = (
     errorMessage: string,
-  ): {
+  ): string[] => {
+    try {
+      return errorMessage.split("|", 2)[1].split("-")[0].trim().split("|");
+    } catch {
+      return [];
+    }
+  };
+
+  const extractErrorComponentsFromErrorResponse = async (
+    errorMessage: string,
+  ): Promise<{
     code: string | undefined;
     message: string | undefined;
-  } => {
+    variables: Record<string, string> | undefined;
+  }> => {
     try {
       const errorCodeRegex = /\b[RW]\d{4,5}\b/g;
       const errorCodeMatch = errorMessage.match(errorCodeRegex);
       const errorCode: string = errorCodeMatch[0];
 
-      const messageParts: string[] = errorMessage.split(errorCode);
-      const message: string = messageParts[1] ? messageParts[1].trim() : "";
+      const stringVariables =
+        __getStringVariablesFromErrorMessage(errorMessage);
+      const variableObjects =
+        __parseVariableStringToVariableObject(stringVariables);
 
-      return { code: errorCode, message };
+      const messageParts: string[] = errorMessage.split("-", 2);
+      const message: string = messageParts[1] ? messageParts[1].trim() : "";
+      const translatedMessage = await getTranslatedErrorMessageForCode(
+        errorCode,
+        message,
+        variableObjects,
+      );
+
+      return {
+        code: errorCode,
+        message: translatedMessage,
+        variables: variableObjects,
+      };
     } catch (e) {
-      return { code: undefined, message: errorMessage };
+      return { code: undefined, message: errorMessage, variables: undefined };
     }
   };
 
   const getTranslatedErrorMessageForCode = async (
     code: string | undefined,
     defaultMessage: string,
+    variables: Record<string, string> | undefined,
   ): Promise<string> => {
     if (!code) return defaultMessage;
-    return t(`error-codes.${code}`);
+    return t(`error-codes.${code}`, variables);
   };
 
   const handleUnauthorized = async (
@@ -129,14 +175,8 @@ export const useErrorCodes = (): {
     readHandlers[code]();
   };
 
-  const handleErrorByCodeType = async (
-    code: string,
-    defaultMessage: string,
-  ): promise<void> => {
-    const message = await getTranslatedErrorMessageForCode(
-      code,
-      defaultMessage,
-    );
+  const handleErrorByCodeType = async (code: string): promise<void> => {
+    const message = await getTranslatedErrorMessageForCode(code);
     const genericCodePart: string = code.substring(1);
     const actionCodePart: string = Array.from(code)[0];
 
@@ -171,12 +211,8 @@ export const useErrorCodes = (): {
     error: string,
   ): Promise<{ code: string; message: string }> => {
     t = await setupScopedUseI18n();
-    const errorObject = extractMessageAndCodeFromErrorResponse(error);
-    errorObject.message = await getTranslatedErrorMessageForCode(
-      errorObject.code,
-      errorObject.message,
-    );
-    return errorObject;
+    const errorObject = await extractErrorComponentsFromErrorResponse(error);
+    return { code: errorObject.code, message: errorObject.message };
   };
 
   const getMessageAndCodeFromApolloError = async (
@@ -186,6 +222,7 @@ export const useErrorCodes = (): {
     let apolloMessage: string =
       apolloError.graphQLErrors[0].extensions.response.body;
     if (apolloMessage.message) apolloMessage = apolloMessage.message;
+    console.log(apolloMessage);
     return await getMessageAndCodeFromErrorString(apolloMessage);
   };
 
@@ -195,8 +232,8 @@ export const useErrorCodes = (): {
       error.response.errors[0]?.extensions?.response?.body?.message ||
       error.response.errors[0]?.message;
 
-    const { code, message } =
-      extractMessageAndCodeFromErrorResponse(graphqlErrorMessage);
+    const { code, message, variables } =
+      await extractErrorComponentsFromErrorResponse(graphqlErrorMessage);
 
     if (!code) {
       const statusCode: number =
@@ -225,8 +262,8 @@ export const useErrorCodes = (): {
     const httpErrorMessage: string =
       responseBody?.extensions?.response?.body?.message;
 
-    const { code, message } =
-      extractMessageAndCodeFromErrorResponse(httpErrorMessage);
+    const { code, message, variables } =
+      await extractErrorComponentsFromErrorResponse(httpErrorMessage);
 
     if (!code) {
       fallbackOnRequestStatusCode(
