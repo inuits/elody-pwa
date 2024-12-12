@@ -65,6 +65,7 @@
           metadata.inputField?.validation?.fastValidationMessage)
       "
       :field-is-valid="fieldIsValid"
+      @click.stop.prevent
       @update:value="setNewValue"
       @register-enter-pressed:value="registerEnterKeyPressed"
     />
@@ -109,6 +110,7 @@
             :is-metadata-field="metadata.inputField?.isMetadataField"
             :from-relation-type="metadata.inputField?.fromRelationType"
             :disabled="true"
+            @click.stop.prevent
           />
           <ViewModesAutocompleteMetadata
             v-else-if="
@@ -128,6 +130,7 @@
             "
             :disabled="true"
             mode="view"
+            @click.stop.prevent
           />
           <entity-element-metadata
             v-else
