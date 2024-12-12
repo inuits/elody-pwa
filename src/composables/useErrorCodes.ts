@@ -222,7 +222,7 @@ export const useErrorCodes = (): {
     let apolloMessage: string =
       apolloError.graphQLErrors[0].extensions.response.body;
     if (apolloMessage.message) apolloMessage = apolloMessage.message;
-    console.log(apolloMessage);
+
     return await getMessageAndCodeFromErrorString(apolloMessage);
   };
 
