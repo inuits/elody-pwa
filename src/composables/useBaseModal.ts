@@ -106,6 +106,7 @@ export const useBaseModal = () => {
 
   const closeAllModals = (): void => {
     Object.values(modals).forEach((modal: ModalInfo) => {
+      modal.closeConfirmation = false;
       modal.open = false;
     });
   };
