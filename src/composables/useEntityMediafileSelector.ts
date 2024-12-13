@@ -54,6 +54,7 @@ export const useEntityMediafileSelector = () => {
   ) => {
     if (!context) return;
     mediafileSelectionState.value[context].mediafiles = mediafiles;
+    updateSelectedEntityMediafile(context, mediafiles[0])
   };
 
   const updateSelectedEntityMediafile = (
