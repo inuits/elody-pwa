@@ -49,6 +49,7 @@
           form-flow="create"
           :show-errors="showErrors"
           :key="`${dynamicFormQuery}_field_${index}`"
+          :is-used-in-modal="true"
         />
         <div v-if="field.__typename === 'UploadContainer'">
           <div
@@ -100,6 +101,7 @@
                 :is-edit="true"
                 form-flow="create"
                 :key="`${dynamicFormQuery}_field_${index}`"
+                :is-used-in-modal="true"
               />
             </div>
           </div>

@@ -4,7 +4,9 @@
     @close="hideModal"
     :class="[
       {
-        'grid grid-rows-[max-content_1fr]': getModalInfo(props.modalType).open,
+        'grid grid-rows-[max-content_1fr] base-modal--opened': getModalInfo(
+          props.modalType,
+        ).open,
         'rounded-xl':
           currentModalStyle === ModalStyle.Center ||
           currentModalStyle === ModalStyle.CenterWide,
@@ -36,7 +38,7 @@ const props = withDefaults(
     modalType: TypeModals;
     modalHeightStyle?: string;
     iconHeight?: number;
-    modalColor?: String;
+    modalColor?: string;
     cancelButtonAvailabe?: boolean;
   }>(),
   {
@@ -44,7 +46,7 @@ const props = withDefaults(
     iconHeight: 18,
     modalColor: "bg-neutral-white",
     cancelButtonAvailabe: false,
-  }
+  },
 );
 
 const emit = defineEmits(["update:modalState", "hideModal"]);
@@ -71,7 +73,7 @@ watch(
     }
     dialog.value?.close();
     document.body.classList.remove("overflow-hidden");
-  }
+  },
 );
 
 const hideModal = () => {
