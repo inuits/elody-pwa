@@ -38,11 +38,13 @@ export const useErrorCodes = (): {
 
   const writeHandlers: Record<string, Function> = {};
 
-  const statusCodeHandlers: Record<number, Function> = {
-    401: (errorCodeType) => handleUnauthorized(errorCodeType),
-    403: (errorCodeType) => handleAccessDenied(errorCodeType),
-    404: (errorCodeType) => handleNotFound(errorCodeType),
-    500: (errorCodeType) => undefined,
+  const statusCodeHandlers: Record<number | string, Function> = {
+    401: (errorCodeType: ErrorCodeType) => handleUnauthorized(errorCodeType),
+    403: (errorCodeType: ErrorCodeType) => handleAccessDenied(errorCodeType),
+    404: (errorCodeType: ErrorCodeType) => handleNotFound(errorCodeType),
+    500: (errorCodeType: ErrorCodeType) => undefined,
+    default: (errorCodeType: ErrorCodeType, errorMessage: string) =>
+      showNotification(errorCodeType),
   };
 
   const __parseVariableStringToVariableObject = (
@@ -155,6 +157,14 @@ export const useErrorCodes = (): {
     router.push("/not-found");
   };
 
+  const showNotification = (
+    errorCodeType: ErrorCodeType = ErrorCodeType.Read,
+    errorMessage: string,
+  ) => {
+    const { createNotificationOverwrite } = useNotification();
+    createNotificationOverwrite(NotificationType.error, "", "");
+  };
+
   const handleAuthCodes = (
     genericCodePart: string,
     errorCodeType: ErrorCodeType,
@@ -199,8 +209,9 @@ export const useErrorCodes = (): {
     errorCodeType: ErrorCodeType,
   ): void => {
     if (!Object.keys(statusCodeHandlers).includes(statusCode)) {
+      statusCodeHandlers["default"](errorCodeType);
       console.info(
-        `An error with status code ${statusCode} could not be handled, add it to the statusCodeHandlers mapper or handle the error with the 'onError' directive on the call itself`,
+        `An error with status code ${statusCode} was handled by the default handler, add it to the statusCodeHandlers mapper to implement custom behaviour`,
       );
       return;
     }
@@ -226,6 +237,31 @@ export const useErrorCodes = (): {
     return await getMessageAndCodeFromErrorString(apolloMessage);
   };
 
+  const __extractStatusCodeAndMessageFromResponse = (
+    responseType: "graphql" | "http",
+    error: GraphQLError | Response,
+  ): {
+    statusCode: string;
+    message: string;
+  } => {
+    if (responseType === "graphql") {
+      const graphQLError = error as GraphQLError;
+      const statusCode: number =
+        graphQLError.response.errors[0]?.extensions?.response?.status.toString() ||
+        graphQLError.response.errors[0]?.extensions?.statusCode.toString();
+      const message: string =
+        graphQLError.extensions?.response?.body?.message ||
+        graphQLError.message;
+      return { statusCode, message };
+    }
+    const httpError = error as Response;
+    const statusCode: number =
+      httpError.status || httpError?.extensions?.statusCode;
+    const message =
+      httpError.statusText.toString() || httpError.message.toString();
+    return { statusCode, message };
+  };
+
   const handleGraphqlError = async (error: GraphQLError): Promise<string> => {
     t = await setupScopedUseI18n();
     const graphqlErrorMessage =
@@ -236,11 +272,12 @@ export const useErrorCodes = (): {
       await extractErrorComponentsFromErrorResponse(graphqlErrorMessage);
 
     if (!code) {
-      const statusCode: number =
-        error.response.errors[0]?.extensions?.response?.status ||
-        error.response.errors[0]?.extensions?.statusCode;
+      const { statusCode, message } = __extractStatusCodeAndMessageFromResponse(
+        "graphql",
+        error,
+      );
       if (statusCode) {
-        fallbackOnRequestStatusCode(statusCode.toString(), ErrorCodeType.Read);
+        fallbackOnRequestStatusCode(statusCode, ErrorCodeType.Read, message);
       } else {
         createNotificationOverwrite(
           NotificationType.error,
@@ -266,11 +303,11 @@ export const useErrorCodes = (): {
       await extractErrorComponentsFromErrorResponse(httpErrorMessage);
 
     if (!code) {
-      fallbackOnRequestStatusCode(
-        httpResponse.status?.toString() ||
-          responseBody?.extensions?.statusCode?.toString(),
-        ErrorCodeType.Read,
+      const { statusCode, message } = __extractStatusCodeAndMessageFromResponse(
+        "http",
+        error,
       );
+      fallbackOnRequestStatusCode(statusCode, ErrorCodeType.Read, message);
       return;
     }
 
