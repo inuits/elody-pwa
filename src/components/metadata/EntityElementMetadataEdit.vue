@@ -12,13 +12,21 @@
           : fieldKey
       "
       :select-type="
-        field.type === InputFieldTypes.DropdownSingleselectRelations ? 'single' : 'multi'
+        field.type === InputFieldTypes.DropdownSingleselectRelations
+          ? 'single'
+          : 'multi'
       "
       :relation-type="field.relationType"
       :from-relation-type="field.fromRelationType"
-      :advanced-filter-input-for-retrieving-options="field.advancedFilterInputForRetrievingOptions"
-      :advanced-filter-input-for-retrieving-related-options="field.advancedFilterInputForRetrievingRelatedOptions"
-      :advanced-filter-input-for-retrieving-all-options="field.advancedFilterInputForRetrievingAllOptions"
+      :advanced-filter-input-for-retrieving-options="
+        field.advancedFilterInputForRetrievingOptions
+      "
+      :advanced-filter-input-for-retrieving-related-options="
+        field.advancedFilterInputForRetrievingRelatedOptions
+      "
+      :advanced-filter-input-for-retrieving-all-options="
+        field.advancedFilterInputForRetrievingAllOptions
+      "
       :advanced-filter-input-for-searching-options="
         field.advancedFilterInputForSearchingOptions
       "
@@ -40,14 +48,18 @@
       v-model:model-value="metadataValue"
       :metadata-dropdown-options="field.options"
       :formId="formId"
-      :select-type="field.type === InputFieldTypes.DropdownSingleselectMetadata ? 'single' : 'multi'"
+      :select-type="
+        field.type === InputFieldTypes.DropdownSingleselectMetadata
+          ? 'single'
+          : 'multi'
+      "
       :disabled="field.disabled"
       mode="edit"
     />
     <BaseDropdownNew
       v-else-if="field.type === InputFieldTypes.Dropdown"
       v-model:model-value="metadataValue as DropdownOption | DropdownOption[]"
-      :options="(field.options as DropdownOption[])"
+      :options="field.options as DropdownOption[]"
       dropdown-style="defaultWithBorder"
       :disable="fieldEditIsDisabled"
       :multiple="field.multiple"
@@ -120,7 +132,7 @@ const mediafileViewerContext: any = inject("mediafileViewerContext");
 
 const { addEditableMetadataKeys } = useFormHelper();
 const metadataValue = ref<string | DropdownOption | DropdownOption[]>(
-  props.value
+  props.value,
 );
 const { conditionalFieldIsAvailable } = useConditionalValidation();
 
@@ -138,7 +150,7 @@ const fieldEditIsDisabled = computed(() => {
   return !conditionalFieldIsAvailable(
     props.field?.validation?.available_if as Conditional,
     props.formId,
-    mediafileViewerContext
+    mediafileViewerContext,
   );
 });
 
@@ -153,7 +165,7 @@ const getValueFromMetadata = (): string | BaseRelationValuesInput[] => {
     metadataValue.value.forEach((metadataItem) => {
       if (isDateTime(metadataItem.value)) {
         returnArray.push(
-          addCurrentTimeZoneToDateTimeString(metadataItem.value)
+          addCurrentTimeZoneToDateTimeString(metadataItem.value),
         );
       } else returnArray.push(metadataItem.value);
     });
@@ -201,7 +213,7 @@ watch(
   () => {
     const newValue = getValueFromMetadata();
     emit("update:value", newValue);
-  }
+  },
 );
 watch(
   () => isFieldHidden.value,
@@ -210,6 +222,6 @@ watch(
     const newValue = populateHiddenField();
     emit("update:value", newValue);
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
