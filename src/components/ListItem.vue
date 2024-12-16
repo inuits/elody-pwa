@@ -6,7 +6,7 @@
       {
         'flex items-center gap-6 px-8 py-4 mb-2': viewMode === 'list',
       },
-      { 'gap-6 px-8 py-4 mb-2': viewMode === 'grid' },
+      { 'gap-6 px-8 py-4 mb-2 w-full h-full': viewMode === 'grid' },
       {
         'border-dashed border-2 !border-accent-normal':
           isPreview || isMarkedAsToBeDeleted,
@@ -89,7 +89,7 @@
       v-if="canShowCopyRight() && media && !imageSrcError"
       :class="[
         'flex items-center',
-        { 'justify-center mb-4': viewMode === 'grid' },
+        { 'justify-center mb-4 h-[50%]': viewMode === 'grid' },
       ]"
     >
       <ImageViewer
