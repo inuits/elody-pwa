@@ -165,19 +165,18 @@ const useFormHelper = () => {
 
   const getMaxDateTodayRule = (value: string): string | boolean => {
     if (!value) return true;
+
     const timestamp = new Date(value).getTime();
     const now = Date.now();
-    if (!timestamp <= now)
+    if (now < timestamp)
       return "notifications.errors.future-date-error.title";
-    return timestamp <= now;
+    return true;
   };
 
   const mustBeExistingDateRule = (value: string): boolean | string => {
     if (!value) return true;
-
-    const isValid = DateTime.fromJSDate(new Date(value)).isValid;
-    if (!isValid) return "notifications.errors.construct-date-error.title";
-    return isValid;
+    if (!DateTime.fromJSDate(new Date(value)).isValid) return "notifications.errors.construct-date-error.title";
+    return true;
   };
 
   const getSingleParam = <TParam = unknown>(
