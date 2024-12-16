@@ -182,6 +182,7 @@
                     : (displayGrid ?? ViewModes.ViewModesGrid)
                 ]
               "
+              :expandFilters="expandFilters"
               :refetch-entities="refetchEntities"
             />
             <ViewModesMedia
