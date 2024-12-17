@@ -19,12 +19,8 @@ export const useDeleteEntities = () => {
 
   const form = ref<any | undefined>(undefined);
 
-  const getQuery = async (queryName: string) => {
-    return await loadDocument(queryName);
-  };
-
   const getDeletionForm = async (queryDocument: any): Promise<void> => {
-    const query = await getQuery(queryDocument);
+    const query = await loadDocument(queryDocument);
     const response = await apolloClient.query({
       query,
     });
