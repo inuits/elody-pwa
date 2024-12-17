@@ -71,7 +71,13 @@ export const useErrorCodes = (): {
     errorMessage: string,
   ): string[] => {
     try {
-      return errorMessage.split("|", 2)[1].split("-")[0].trim().split("|");
+      const variablesString = errorMessage.split("|");
+      const variables: string[] = [];
+      variablesString.forEach((variable, index) => {
+        if (index !== 0)
+          variables.push(...variable.split(" - ")[0].trim().split("|"));
+      })
+      return variables;
     } catch {
       return [];
     }
