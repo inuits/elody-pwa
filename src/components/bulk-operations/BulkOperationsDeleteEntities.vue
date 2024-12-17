@@ -18,8 +18,8 @@
             class="my-1"
             :label="t(option.key.label)"
             :item="{ id: option.key.value }"
-            :context="BulkOperationsContextEnum.BulkOperationsCsvExport"
             :required="false"
+            ignore-bulk-operations
             input-style="accentNormal"
           />
         </div>
@@ -32,7 +32,7 @@
           :icon="DamsIcons.Trash"
           button-style="redDefault"
           button-size="small"
-          @click="handleDelete"
+          @click="deleteSelectedItems"
         />
       </div>
 
@@ -64,7 +64,6 @@ import {
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
   type Context,
-  BulkOperationsContextEnum,
   InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
@@ -143,10 +142,6 @@ const deleteSelectedItems = async () => {
   } catch (error) {
     console.error("Error deleting selected items:", error);
   }
-};
-
-const handleDelete = () => {
-  deleteSelectedItems();
 };
 
 watch(
