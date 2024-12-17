@@ -1,20 +1,18 @@
-import { inject } from "vue";
 import { useMutation } from "@vue/apollo-composable";
 import {
   Collection,
-  DeleteDataDocument,
-  type DeleteDataMutation,
-  Entitytyping,
+  BulkDeleteEntitiesDocument,
+  type BulkDeleteEntitiesMutation,
 } from "@/generated-types/queries";
 import { type InBulkProcessableItem } from "@/composables/useBulkOperations";
-import { getChildrenOfHomeRoutes } from "@/helpers";
 import { apolloClient } from "@/main";
 import { ref } from "vue";
 import { useImport } from "./useImport";
 
 export const useDeleteEntities = () => {
-  const config: any = inject("config");
-  const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
+  const { mutate } = useMutation<BulkDeleteEntitiesMutation>(
+    BulkDeleteEntitiesDocument,
+  );
   const { loadDocument } = useImport();
 
   const form = ref<any | undefined>(undefined);
@@ -35,37 +33,18 @@ export const useDeleteEntities = () => {
   ) => {
     if (items.length === 0) return;
 
-    const childRoutes = getChildrenOfHomeRoutes(config).map(
-      (route: any) => route.meta,
-    );
-
     const deleteEntities = {
       ...(linkedEntitiesToRemove ? linkedEntitiesToRemove : {}),
       deleteMediafiles:
         linkedEntitiesToRemove?.["deleteMediafiles"] || deleteMediafiles,
     };
 
-    const deletePromises = items.map(
-      (item: InBulkProcessableItem | { id: string; type: string }) => {
-        let collection;
-        if (item?.type?.toLowerCase() === Entitytyping.Mediafile) {
-          collection = Collection.Mediafiles;
-        } else {
-          const matchedRoute = childRoutes.find(
-            (route: any) => route.entityType === item.type,
-          );
-          collection = matchedRoute?.type;
-        }
+    await mutate({
+      ids: items.map((item: { id: string }) => item.id),
+      path: Collection.Entities,
+      deleteEntities,
+    });
 
-        return mutate({
-          id: item.id,
-          path: collection,
-          ...deleteEntities,
-        });
-      },
-    );
-
-    await Promise.all(deletePromises);
     return true;
   };
 
