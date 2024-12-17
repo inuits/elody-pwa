@@ -91,7 +91,7 @@ const useBreadcrumbs = (config: any) => {
     const routeBreadcrumbsWithOverviewPage =
       routeBreadcrumbs[routeBreadcrumbs.length - 1];
     breadcrumbRoutes.value.unshift({
-      title: routeBreadcrumbsWithOverviewPage.overviewPage,
+      title: routeBreadcrumbsWithOverviewPage.title ?? routeBreadcrumbsWithOverviewPage.overviewPage,
       overviewPage: routeBreadcrumbsWithOverviewPage.overviewPage,
     });
     breadcrumbPathFinished.value = true;
@@ -182,11 +182,11 @@ const useBreadcrumbs = (config: any) => {
 
   useRouter()?.afterEach((to) => {
     try {
-      if (to.meta.title !== "Single Asset" && to.meta.title !== "Single Entity")
-        clearBreadcrumbPathAndAddOverviewPage(
-          to.meta.breadcrumbs[to.meta.breadcrumbs.length - 1]
-            .overviewPage as string
-        );
+      if (to.meta.title === "Single Asset" || to.meta.title === "Single Entity") return;
+      const overviewPage = to.meta.breadcrumbs[to.meta.breadcrumbs.length - 1];
+      clearBreadcrumbPathAndAddOverviewPage(
+        overviewPage.title ?? overviewPage.overviewPage as string
+      );
     } catch (e) {}
   });
 

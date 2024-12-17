@@ -92,7 +92,7 @@
                   color="text-body"
                 />
               </div>
-              <p>{{ breadcrumbRoute.title }}</p>
+              <p>{{ t(breadcrumbRoute.title) }}</p>
             </div>
           </div>
         </li>
