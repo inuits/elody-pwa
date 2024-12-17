@@ -9,7 +9,7 @@
       v-for="item in relations?.filter(
         (relation) =>
           relation.editStatus === EditStatus.New &&
-          relation.type === relationType
+          relation.type === relationType,
       )"
       :key="item.key"
     >
@@ -52,11 +52,11 @@
         "
         :entityTypename="getMappedSlug(entity)"
         :teaser-metadata="
-        formatTeaserMetadata(
-          entity.teaserMetadata,
-          entity.intialValues,
-        ) as Metadata[]
-      "
+          formatTeaserMetadata(
+            entity.teaserMetadata,
+            entity.intialValues,
+          ) as Metadata[]
+        "
         :intialValues="entity.intialValues"
         :media="
           entitiesLoading ? undefined : getMediaFilenameFromEntity(entity)
@@ -74,7 +74,7 @@
           findRelation(
             entity.id,
             relationType,
-            props.parentEntityIdentifiers[0]
+            props.parentEntityIdentifiers[0],
           )
         "
         :relation-type="relationType"
@@ -108,11 +108,12 @@ import useListItemHelper from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import {
   formatTeaserMetadata,
-  getEntityPageRoute, getMappedSlug,
+  getEntityPageRoute,
+  getMappedSlug,
   setCssVariable,
-  updateEntityMediafileOnlyForMediafiles
+  updateEntityMediafileOnlyForMediafiles,
 } from "@/helpers";
-import { computed, onMounted, onUnmounted, inject } from "vue";
+import { computed, onMounted, onUnmounted, inject, watch, nextTick } from "vue";
 import { OrderItem } from "@/composables/useOrderListItems";
 import { useFormHelper } from "@/composables/useFormHelper";
 import EventBus from "@/EventBus";
@@ -136,6 +137,7 @@ const props = withDefaults(
     mode: "list" | "grid";
     config?: ConfigItem[];
     refetchEntities?: Function;
+    expandFilters: boolean;
   }>(),
   {
     disablePreviews: false,
@@ -148,7 +150,7 @@ const props = withDefaults(
     allowedActionsOnRelations: () => [],
     mode: "list",
     refetchEntities: undefined,
-  }
+  },
 );
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 const { getMediaFilenameFromEntity } = useListItemHelper();
@@ -156,7 +158,7 @@ const { queryVariables } = useLibraryBar();
 const { getThumbnail } = useThumbnailHelper();
 const { getForm, findRelation, getTeaserMetadataInState } = useFormHelper();
 const relations = computed<BaseRelationValuesInput[]>(
-  () => getForm(props.parentEntityIdentifiers[0])?.values?.relationValues
+  () => getForm(props.parentEntityIdentifiers[0])?.values?.relationValues,
 );
 
 const getLinkSettings = (entity: Entity, listItemRouteName: string = "") => {
@@ -200,7 +202,7 @@ EventBus.on("orderList_changed", (orderItems: OrderItem[]) => {
   if (itemsFound) {
     props.entities.sort(
       (value, nextValue) =>
-        value.intialValues.order > nextValue.intialValues.order
+        value.intialValues.order > nextValue.intialValues.order,
     );
     if (!queryVariables.value.searchValue.isAsc) props.entities.reverse();
   }
@@ -219,6 +221,14 @@ const calculateGridColumns = () => {
 
   setCssVariable("--grid-cols", colAmount.toString());
 };
+
+watch(
+  () => props.expandFilters,
+  async () => {
+    await nextTick();
+    calculateGridColumns();
+  },
+);
 
 onMounted(() => {
   window.addEventListener("resize", calculateGridColumns);

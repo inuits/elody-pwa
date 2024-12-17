@@ -30,8 +30,8 @@
           baseLibraryMode === BaseLibraryModes.BasicBaseLibrary
             ? ''
             : parentEntityIdentifiers.length > 0
-            ? 'px-3 pt-3'
-            : 'px-6',
+              ? 'px-3 pt-3'
+              : 'px-6',
         ]"
       >
         <div
@@ -40,7 +40,7 @@
               'top-0 mb-2 pt-4 bg-neutral-lightest':
                 baseLibraryMode === BaseLibraryModes.NormalBaseLibrary,
             },
-            { 'sticky': hasStickyBars },
+            { sticky: hasStickyBars },
           ]"
         >
           <div class="flex flex-row items-center gap-y-4">
@@ -64,8 +64,8 @@
               @apply-filters="
                 async (
                   filters: AdvancedFilterInput[],
-                  stateSaved: Boolean = false,
-                  force: Boolean = true
+                  stateSaved: boolean = false,
+                  force: boolean = true,
                 ) => await setAdvancedFilters(filters, stateSaved, force, route)
               "
               @expand-filters="expandFilters = !expandFilters"
@@ -126,7 +126,9 @@
               @confirm-selection="
                 (selection) => emit('confirmSelection', selection)
               "
-              @set-bulk-operations-available="(value: boolean) => (hasBulkOperations = value)"
+              @set-bulk-operations-available="
+                (value: boolean) => (hasBulkOperations = value)
+              "
               @apply-custom-bulk-operations="
                 async () => await applyCustomBulkOperations()
               "
@@ -177,9 +179,10 @@
                 configPerViewMode[
                   displayList
                     ? ViewModes.ViewModesList
-                    : displayGrid ?? ViewModes.ViewModesGrid
+                    : (displayGrid ?? ViewModes.ViewModesGrid)
                 ]
               "
+              :expandFilters="expandFilters"
               :refetch-entities="refetchEntities"
             />
             <ViewModesMedia
@@ -374,7 +377,7 @@ const {
 } = useBaseLibrary(
   apolloClient as ApolloClient<any>,
   props.shouldUseStateForRoute,
-  props.baseLibraryMode
+  props.baseLibraryMode,
 );
 
 let filterMatcherMappingPromise: (entityType: Entitytyping) => Promise<void>;
@@ -409,13 +412,14 @@ const entityType = computed(() =>
   props.entityType
     ? props.entityType
     : route.meta.entityType
-    ? (route.meta.entityType as Entitytyping)
-    : ("BaseEntity" as Entitytyping)
+      ? (route.meta.entityType as Entitytyping)
+      : ("BaseEntity" as Entitytyping),
 );
 
 const relations = computed<BaseRelationValuesInput[]>(
   () =>
-    getForm(props.parentEntityIdentifiers[0])?.values?.relationValues?.relations
+    getForm(props.parentEntityIdentifiers[0])?.values?.relationValues
+      ?.relations,
 );
 
 const entityDropdownOptions = computed<DropdownOption[]>(() => {
@@ -431,12 +435,12 @@ const entityDropdownOptions = computed<DropdownOption[]>(() => {
 const isDeepRelationWithBreadcrumbInfo = computed(
   () =>
     props.fetchDeepRelations?.deepRelationsFetchStrategy ===
-    DeepRelationsFetchStrategy.UseExistingBreadcrumbsInfo
+    DeepRelationsFetchStrategy.UseExistingBreadcrumbsInfo,
 );
 const isDeepRelationUsingMethods = computed(
   () =>
     props.fetchDeepRelations?.deepRelationsFetchStrategy ===
-    DeepRelationsFetchStrategy.UseMethodsAndFetch
+    DeepRelationsFetchStrategy.UseMethodsAndFetch,
 );
 
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
@@ -448,7 +452,7 @@ const getSelectedOptions = () => {
   props.selectInputFieldValue.forEach((item: string) => {
     const valueOption: DropdownOption | undefined =
       entityDropdownOptions.value.find(
-        (option: DropdownOption) => option.label === item
+        (option: DropdownOption) => option.label === item,
       );
     if (!valueOption) return;
     selectedOptions.push(valueOption);
@@ -457,7 +461,7 @@ const getSelectedOptions = () => {
 };
 
 const mapDropdownOptionsToBulkProcessableItem = (
-  dropdownOptions: DropdownOption[]
+  dropdownOptions: DropdownOption[],
 ): InBulkProcessableItem[] => {
   const inBulkProcessableItems: InBulkProcessableItem[] = [];
   dropdownOptions.forEach((dropdownOption: DropdownOption) => {
@@ -487,7 +491,7 @@ const bulkSelect = (items = entities.value) => {
         id: entity.uuid,
         teaserMetadata: formatTeaserMetadata(
           entity.teaserMetadata,
-          entity.intialValues
+          entity.intialValues,
         ),
         type: entity.type,
       });
@@ -508,10 +512,10 @@ const initializeBaseLibrary = async () => {
     setEntityType(
       (props.filterType as Entitytyping) ||
         props.entityType ||
-        Entitytyping.BaseEntity
+        Entitytyping.BaseEntity,
     );
     setsearchInputType(
-      props.searchInputTypeOnDrawer || SearchInputType.AdvancedInputType
+      props.searchInputTypeOnDrawer || SearchInputType.AdvancedInputType,
     );
     enqueuePromise(filterMatcherMappingPromise);
     enqueuePromise(advancedFiltersPromise);
@@ -541,7 +545,7 @@ const initializeDeepRelations = async () => {
       const entityResult = await iterateOverBreadcrumbs(
         parentId,
         [routeConfig[index]],
-        false
+        false,
       );
       if (!entityResult) break;
       parentId = entityResult.id;
@@ -554,14 +558,29 @@ const initializeDeepRelations = async () => {
 
 const getDisplayPreferences = () => {
   const displayPreferences = getGlobalState("_displayPreferences");
-  if (displayPreferences) {
-    if (!displayPreview.value && displayPreferences.grid)
-      displayGrid.value = displayPreferences.grid;
-    if (displayGrid.value === false && !displayPreview.value)
-      displayList.value = true;
-    expandFilters.value = !props.enableAdvancedFilters
-      ? false
-      : displayPreferences.expandFilters;
+  if (!displayPreferences) return;
+
+  expandFilters.value = !props.enableAdvancedFilters
+    ? false
+    : displayPreferences.expandFilters;
+
+  if (
+    !displayPreview.value &&
+    !displayMap.value &&
+    Object.keys(configPerViewMode.value).length === 1
+  ) {
+    const keys = Object.keys(configPerViewMode.value);
+    displayList.value = keys.includes(ViewModes.ViewModesList);
+    displayGrid.value = keys.includes(ViewModes.ViewModesGrid);
+    return;
+  }
+
+  if (!displayPreview.value && displayPreferences.grid) {
+    displayGrid.value = displayPreferences.grid;
+  }
+
+  if (displayGrid.value === false && !displayPreview.value) {
+    displayList.value = true;
   }
 };
 
@@ -588,8 +607,8 @@ const configPerViewMode = computed(() => {
         resultObject[viewModeWithConfig.viewMode] = viewModeWithConfig.config;
         return resultObject;
       },
-      {}
-    ) || []
+      {},
+    ) || {}
   );
 });
 
@@ -609,14 +628,14 @@ watch(
       setsearchInputType(
         entityType.value === Entitytyping.Mediafile
           ? SearchInputType.AdvancedInputMediaFilesType
-          : SearchInputType.AdvancedInputType
+          : SearchInputType.AdvancedInputType,
       );
       setEntityType(entityType.value);
       enqueuePromise(advancedFiltersPromise);
       enqueuePromise(sortOptionsPromise);
       await getEntities(route);
     }
-  }
+  },
 );
 watch(
   () => props.predefinedEntities,
@@ -626,14 +645,14 @@ watch(
       totalEntityCount.value = props.predefinedEntities.length;
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 watch(
   () => props.filters,
   async () => {
     setAdvancedFilters(props.filters);
     await getEntities(route);
-  }
+  },
 );
 watch(
   () => entities.value,
@@ -650,7 +669,7 @@ watch(
     )
       return;
     const viewModes: any[] = entities.value[0].allowedViewModes.viewModes.map(
-      (viewModeWithConfig: ViewModesWithConfig) => viewModeWithConfig.viewMode
+      (viewModeWithConfig: ViewModesWithConfig) => viewModeWithConfig.viewMode,
     );
     if (viewModes.includes(ViewModesList.__name))
       toggles.unshift({
@@ -678,7 +697,7 @@ watch(
       });
     else displayMap.value = false;
     getDisplayPreferences();
-  }
+  },
 );
 watch([displayGrid, expandFilters], () => {
   let _expandFilters = expandFilters.value;
@@ -695,14 +714,14 @@ watch(
   () => uploadStatus.value,
   async () => {
     if (uploadStatus.value === "upload-finished") await refetchEntities();
-  }
+  },
 );
 watch(
   () => breadcrumbPathFinished.value,
   () => {
     if (breadcrumbPathFinished.value && isDeepRelationWithBreadcrumbInfo.value)
       initializeDeepRelations();
-  }
+  },
 );
 
 EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryMediafile, async () => {
