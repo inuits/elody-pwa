@@ -6,7 +6,7 @@
       {
         'flex items-center gap-6 px-8 py-4 mb-2': viewMode === 'list',
       },
-      { 'gap-6 px-8 py-4 mb-2': viewMode === 'grid' },
+      { 'px-8 py-4 mb-2 flex flex-col': viewMode === 'grid' },
       {
         'border-dashed border-2 !border-accent-normal':
           isPreview || isMarkedAsToBeDeleted,
@@ -89,7 +89,7 @@
       v-if="canShowCopyRight() && media && !imageSrcError"
       :class="[
         'flex items-center',
-        { 'justify-center mb-4': viewMode === 'grid' },
+        { 'justify-center mb-4 h-[50%]': viewMode === 'grid' },
       ]"
     >
       <ImageViewer
@@ -108,7 +108,7 @@
         @error="setNoImage()"
       />
     </div>
-    <unicon
+    <div
       v-if="
         !canShowCopyRight() ||
         (media && imageSrcError) ||
@@ -117,10 +117,19 @@
       :name="thumbIcon"
       :class="[
         { 'h-10 w-10': viewMode === 'list' },
-        { 'h-48 w-48': viewMode === 'grid' },
-        'text-neutral-700 rounded-sm outline-none shadow-sm self-center',
+        {
+          'h-48 w-48 flex flex-col justify-center items-center shadow-sm mb-4':
+            viewMode === 'grid',
+        },
+        'text-neutral-700 rounded-sm outline-none self-center',
       ]"
-    />
+    >
+      <unicon
+        :name="thumbIcon"
+        class="h-10 w-10 p-1 text-neutral-70 rounded-sm outline-none self-center"
+      />
+      <div v-if="viewMode === 'grid'" class="text-neutral-70">No media</div>
+    </div>
 
     <div
       v-if="!loading"
@@ -221,7 +230,7 @@ import {
   type MetadataField,
   type WindowElementPanel,
 } from "@/generated-types/queries";
-import { setCssVariable, stringIsUrl } from "@/helpers";
+import { stringIsUrl } from "@/helpers";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
 import EntityElementWindowPanel from "@/components/EntityElementWindowPanel.vue";
@@ -229,7 +238,7 @@ import ImageViewer from "@/components/base/ImageViewer.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import useEditMode from "@/composables/useEdit";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { computed, ref, watch, onUpdated, onMounted, onUnmounted } from "vue";
+import { computed, ref, watch, onUpdated } from "vue";
 import { Unicons } from "@/types";
 import { auth } from "@/main";
 import { useFieldArray } from "vee-validate";
