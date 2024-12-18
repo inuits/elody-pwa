@@ -42,9 +42,8 @@ export const useErrorCodes = (): {
     401: (errorCodeType: ErrorCodeType) => handleUnauthorized(errorCodeType),
     403: (errorCodeType: ErrorCodeType) => handleAccessDenied(errorCodeType),
     404: (errorCodeType: ErrorCodeType) => handleNotFound(errorCodeType),
-    500: (errorCodeType: ErrorCodeType) => undefined,
     default: (errorCodeType: ErrorCodeType, errorMessage: string) =>
-      showNotification(errorCodeType),
+      showNotification(errorCodeType, errorMessage),
   };
 
   const __parseVariableStringToVariableObject = (
@@ -168,7 +167,11 @@ export const useErrorCodes = (): {
     errorMessage: string,
   ) => {
     const { createNotificationOverwrite } = useNotification();
-    createNotificationOverwrite(NotificationType.error, "", "");
+    createNotificationOverwrite(
+      NotificationType.error,
+      "Error",
+      errorMessage,
+    );
   };
 
   const handleAuthCodes = (
@@ -213,9 +216,10 @@ export const useErrorCodes = (): {
   const fallbackOnRequestStatusCode = (
     statusCode: string,
     errorCodeType: ErrorCodeType,
+    errorMessage: string
   ): void => {
     if (!Object.keys(statusCodeHandlers).includes(statusCode)) {
-      statusCodeHandlers["default"](errorCodeType);
+      statusCodeHandlers["default"](errorCodeType, errorMessage);
       console.info(
         `An error with status code ${statusCode} was handled by the default handler, add it to the statusCodeHandlers mapper to implement custom behaviour`,
       );
@@ -282,15 +286,7 @@ export const useErrorCodes = (): {
         "graphql",
         error,
       );
-      if (statusCode) {
-        fallbackOnRequestStatusCode(statusCode, ErrorCodeType.Read, message);
-      } else {
-        createNotificationOverwrite(
-          NotificationType.error,
-          "Error",
-          graphqlErrorMessage,
-        );
-      }
+      fallbackOnRequestStatusCode(statusCode, ErrorCodeType.Read, graphqlErrorMessage);
       return;
     }
 
