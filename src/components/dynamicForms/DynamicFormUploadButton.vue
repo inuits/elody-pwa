@@ -125,9 +125,9 @@ const finishedStatusMessage = computed(() => {
     if (csvOnlyUploadSFailed.value) return t("actions.labels.csv-errors");
     return t("actions.labels.csv-success");
   }
-  if (!failedUploads.value) return t("actions.labels.success");
-  const amountFailed: number =
-    failedUploads.value.length || amountUploaded.value;
+  const amountSuccess: number = amountUploaded.value;
+  if (!failedUploads.value) return t("actions.labels.success", [amountSuccess]);
+  const amountFailed: number = failedUploads.value.length;
   return t("actions.upload.errors", [amountFailed]);
 });
 </script>
