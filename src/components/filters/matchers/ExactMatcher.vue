@@ -35,12 +35,14 @@
         :type="determineInputType"
         :placeholder="determinePlaceholder"
       />
-      <div v-if="filter.advancedFilter.type === AdvancedFilterTypes.Boolean">
+      <div
+        v-if="filter.advancedFilter.type === AdvancedFilterTypes.Boolean"
+        class="flex gap-2"
+      >
         <BaseInputCheckbox
           v-for="(filterOption, idx) in booleanFilterOptions"
           v-model="filterOption.isSelected"
           :key="idx"
-          :class="{ 'mb-2': filterOption.isSelected }"
           :label="String(filterOption.value)"
           :bulkOperationsContext="BulkOperationsContextEnum.FilterOptions"
           input-style="accentNormal"
@@ -394,7 +396,7 @@ const emitNewAdvancedFilterInput = () => {
         : totalInput.value
       : undefined;
 
-  if (props.filter.advancedFilter.type === AdvancedFilterTypes?.Boolean) {
+  if (props.filter.advancedFilter.type === AdvancedFilterTypes.Boolean) {
     value = input.value;
   }
 
@@ -413,17 +415,20 @@ const emitNewAdvancedFilterInput = () => {
       foreign_field: props.filter.advancedFilter.lookup.foreign_field,
       as: props.filter.advancedFilter.lookup.as,
     };
-  console.log("new filter", newAdvancedFilterInput);
   emit("newAdvancedFilterInput", newAdvancedFilterInput, force.value);
   force.value = false;
 };
 
-watch(input, () => {
-  if (typeof input.value === "string") {
-    emit("newInputValue", input.value);
-  }
+watch(
+  input,
+  () => {
+    if (typeof input.value === "string") {
+      emit("newInputValue", input.value);
+    }
 
-  emitNewAdvancedFilterInput();
-});
+    emitNewAdvancedFilterInput();
+  },
+  { deep: true },
+);
 watch(inputTime, () => emitNewAdvancedFilterInput());
 </script>
