@@ -54,6 +54,7 @@ const missingFileNames = ref<string[]>([]);
 const failedUploads = ref<string[]>([]);
 const standaloneFileType = ref<UploadEntityTypes | undefined>(undefined);
 const reinitializeDynamicFormFunc = ref<Function | undefined>(undefined);
+const csvOnlyUploadSFailed = ref<boolean>(false);
 
 const useUpload = () => {
   let _prefetchedUploadUrls: string[] | "not-prefetched-yet" =
@@ -69,6 +70,9 @@ const useUpload = () => {
     } = {
       updateMetadata: {
         checkUploadValidityFn: () => __checkUploadValidityUpdateMetadata(),
+      },
+      csvOnly: {
+        checkUploadValidityFn: () => __checkUploadValidityCsvOnly(),
       },
       mediafilesOnly: {
         checkUploadValidityFn: () => __checkUploadValidityMediafilesOnly(),
@@ -92,21 +96,29 @@ const useUpload = () => {
     return containsCsv.value;
   };
 
+  const __checkUploadValidityCsvOnly = (): boolean => {
+    return containsCsv.value;
+  };
+
   const __checkUploadValidityMediafilesOnly = (): boolean => {
     return !!mediafiles.value.length;
   };
 
   const __checkUploadValidityMediafilesWithCsv = (): boolean => {
     if (uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv) {
-      return uploadProgress.value
-        .filter(
-          (progressStep: ActionProgressStep) =>
-            progressStep.stepType !== ProgressStepType.Upload,
-        )
-        .every(
-          (progressStep: ActionProgressStep) =>
-            progressStep.status === ProgressStepStatus.Complete,
-        );
+      return (
+        mediafiles.value.length > 0 &&
+        containsCsv.value &&
+        uploadProgress.value
+          .filter(
+            (progressStep: ActionProgressStep) =>
+              progressStep.stepType !== ProgressStepType.Upload,
+          )
+          .every(
+            (progressStep: ActionProgressStep) =>
+              progressStep.status === ProgressStepStatus.Complete,
+          )
+      );
     }
     return (
       !!mediafiles.value.length &&
@@ -118,6 +130,21 @@ const useUpload = () => {
   const __checkUploadValidityuploadCsvForReordening = (): boolean => {
     return containsCsv.value;
   };
+
+  const __uploadCsvWithoutMediafiles = async () => {
+    try {
+      await __batchEntities(__getCsvBlob(), false)
+      toggleUploadStatus();
+      __updateGlobalUploadProgress(ProgressStepType.Upload, ProgressStepStatus.Complete);
+      csvOnlyUploadSFailed.value = false;
+    } catch (error: Promise<string>) {
+      csvOnlyUploadSFailed.value = true;
+      const message = await error;
+      __updateGlobalUploadProgress(ProgressStepType.Upload,ProgressStepStatus.Failed);
+      throw Error(message);
+    }
+
+  }
 
   const __uploadMediafilesWithTicketUrl = async (
     isLinkedUpload: boolean,
@@ -150,7 +177,7 @@ const useUpload = () => {
   };
 
   const upload = async (isLinkedUpload: boolean, config: any, t: Function) => {
-    if (!validateFiles()) return;
+    if (!validateFiles())  return;
     __updateGlobalUploadProgress(
       ProgressStepType.Upload,
       ProgressStepStatus.Loading,
@@ -163,7 +190,10 @@ const useUpload = () => {
         ProgressStepStatus.Complete,
       );
 
-    await __uploadMediafilesWithTicketUrl(isLinkedUpload, config, t);
+    if (uploadFlow.value === UploadFlow.CsvOnly)
+      await __uploadCsvWithoutMediafiles();
+    else
+      await __uploadMediafilesWithTicketUrl(isLinkedUpload, config, t);
   };
 
   const uploadCsvForReordering = async (parentId: string) => {
@@ -537,6 +567,9 @@ const useUpload = () => {
   }
 
   const validateFiles = () => {
+    if (uploadFlow.value === UploadFlow.CsvOnly)
+      return containsCsv.value;
+
     if (
       uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv ||
       uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv
@@ -801,6 +834,7 @@ const useUpload = () => {
     enableUploadButton,
     mediafiles,
     requiredMediafiles,
+    csvOnlyUploadSFailed,
     verifyAllNeededFilesArePresent,
     __updateGlobalUploadProgress,
     dryRunComplete,

@@ -22,11 +22,17 @@
       >
         <p class="w-full flex items-center">
           {{
-            t(
-              failedUploads.length
-                ? "actions.upload.errors"
-                : "actions.labels.success",
-              [failedUploads.length ? failedUploads.length : amountUploaded],
+            uploadFlow === UploadFlow.CsvOnly
+              ? t(
+                csvOnlyUploadSFailed
+                ? 'actions.labels.csv-errors'
+                : 'actions.labels.csv-success'
+              )
+              : t(
+                failedUploads.length
+                  ? "actions.upload.errors"
+                  : "actions.labels.success",
+                [failedUploads.length ? failedUploads.length : amountUploaded],
             )
           }}
         </p>
@@ -89,6 +95,7 @@
 import {
   ActionProgressIndicatorType,
   DamsIcons,
+  UploadFlow
 } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
@@ -121,6 +128,8 @@ const {
   resetUpload,
   missingFileNames,
   failedUploads,
+  uploadFlow,
+  csvOnlyUploadSFailed
 } = useUpload();
 </script>
 
