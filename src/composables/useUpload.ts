@@ -97,7 +97,18 @@ const useUpload = () => {
   };
 
   const __checkUploadValidityCsvOnly = (): boolean => {
-    return containsCsv.value;
+    return (
+      containsCsv.value &&
+      uploadProgress.value
+        .filter(
+          (progressStep: ActionProgressStep) =>
+            progressStep.stepType !== ProgressStepType.Upload,
+        )
+        .every(
+          (progressStep: ActionProgressStep) =>
+            progressStep.status === ProgressStepStatus.Complete,
+        )
+    );
   };
 
   const __checkUploadValidityMediafilesOnly = (): boolean => {
