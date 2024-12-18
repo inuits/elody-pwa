@@ -21,20 +21,7 @@
         ]"
       >
         <p class="w-full flex items-center">
-          {{
-            uploadFlow === UploadFlow.CsvOnly
-              ? t(
-                csvOnlyUploadSFailed
-                ? 'actions.labels.csv-errors'
-                : 'actions.labels.csv-success'
-              )
-              : t(
-                failedUploads.length
-                  ? "actions.upload.errors"
-                  : "actions.labels.success",
-                [failedUploads.length ? failedUploads.length : amountUploaded],
-            )
-          }}
+          {{ finishedStatusMessage }}
         </p>
         <div class="w-1/4">
           <base-button-new
@@ -95,10 +82,11 @@
 import {
   ActionProgressIndicatorType,
   DamsIcons,
-  UploadFlow
+  UploadFlow,
 } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
+import { computed } from "vue";
 import BaseProgressStep from "@/components/base/progressStep/BaseProgressStep.vue";
 import useUpload from "@/composables/useUpload";
 import ProgressBar from "@/components/ProgressBar.vue";
@@ -129,8 +117,19 @@ const {
   missingFileNames,
   failedUploads,
   uploadFlow,
-  csvOnlyUploadSFailed
+  csvOnlyUploadSFailed,
 } = useUpload();
+
+const finishedStatusMessage = computed(() => {
+  if (uploadFlow.value === UploadFlow.CsvOnly) {
+    if (csvOnlyUploadSFailed.value) return t("actions.labels.csv-errors");
+    return t("actions.labels.csv-success");
+  }
+  if (!failedUploads.value) return t("actions.labels.success");
+  const amountFailed: number =
+    failedUploads.value.length || amountUploaded.value;
+  return t("actions.upload.errors", [amountFailed]);
+});
 </script>
 
 <style scoped></style>
