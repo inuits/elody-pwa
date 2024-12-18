@@ -256,7 +256,7 @@ const useUpload = () => {
   ): Promise<void> => {
     try {
       const errors = await getDryRunErrors(dryRunResult);
-      if (dryRunResult?.mediafiles.length) {
+      if (dryRunResult?.mediafiles?.length) {
         requiredMediafiles.value = dryRunResult.mediafiles.map(
           (mediafile: any) => mediafile.filename,
         );
