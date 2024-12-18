@@ -397,7 +397,7 @@ const emitNewAdvancedFilterInput = () => {
       : undefined;
 
   if (props.filter.advancedFilter.type === AdvancedFilterTypes.Boolean) {
-    value = input.value;
+    value = input.value.length === 1 ? true : false;
   }
 
   const newAdvancedFilterInput: AdvancedFilterInput = {
@@ -415,23 +415,16 @@ const emitNewAdvancedFilterInput = () => {
       foreign_field: props.filter.advancedFilter.lookup.foreign_field,
       as: props.filter.advancedFilter.lookup.as,
     };
-  console.log("new filter: ", newAdvancedFilterInput);
   emit("newAdvancedFilterInput", newAdvancedFilterInput, force.value);
   force.value = false;
 };
 
-watch(
-  input,
-  () => {
-    if (typeof input.value === "string") {
-      emit("newInputValue", input.value);
-    }
+watch(input, () => {
+  if (typeof input.value === "string") {
+    emit("newInputValue", input.value);
+  }
 
-    console.log("uPDATED? :", input.value);
-
-    emitNewAdvancedFilterInput();
-  },
-  { deep: true },
-);
+  emitNewAdvancedFilterInput();
+});
 watch(inputTime, () => emitNewAdvancedFilterInput());
 </script>
