@@ -415,6 +415,7 @@ const emitNewAdvancedFilterInput = () => {
       foreign_field: props.filter.advancedFilter.lookup.foreign_field,
       as: props.filter.advancedFilter.lookup.as,
     };
+  console.log("new filter: ", newAdvancedFilterInput);
   emit("newAdvancedFilterInput", newAdvancedFilterInput, force.value);
   force.value = false;
 };
@@ -425,6 +426,8 @@ watch(
     if (typeof input.value === "string") {
       emit("newInputValue", input.value);
     }
+
+    console.log("uPDATED? :", input.value);
 
     emitNewAdvancedFilterInput();
   },
