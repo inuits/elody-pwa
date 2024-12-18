@@ -268,7 +268,7 @@ export const useErrorCodes = (): {
     const statusCode: number =
       httpError.status || httpError?.extensions?.statusCode;
     const message =
-      httpError.statusText.toString() || httpError.message.toString();
+      httpError?.statusText?.toString() || httpError?.message?.toString();
     return { statusCode, message };
   };
 
@@ -307,7 +307,7 @@ export const useErrorCodes = (): {
     if (!code) {
       const { statusCode, message } = __extractStatusCodeAndMessageFromResponse(
         "http",
-        error,
+        httpResponse,
       );
       fallbackOnRequestStatusCode(statusCode, ErrorCodeType.Read, message);
       return;
