@@ -249,6 +249,8 @@ watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
     isOpen.value = false;
     clearLastTypedValue();
+    advancedFilterInput.value.value = undefined;
+
     const matchersToResetToDefault = [
       Matchers.ANY_MATCHER,
       Matchers.NONE_MATCHER,
