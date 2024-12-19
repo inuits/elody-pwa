@@ -2,7 +2,6 @@
   <div
     class="flex items-center z-10 mx-6 my-8 px-6 py-4 rounded-3xl bg-neutral-white flex-wrap min-[1400px]:flex-nowrap"
   >
-    <!-- <div class="flex w-full items-center"></div> -->
     <BreadCrumbs />
     <MetadataEditButton
       class="ml-0 min-[880px]:ml-6"
@@ -14,7 +13,6 @@
       class="ml-6 w-64 flex justify-end pr-2"
       v-if="config.features.hasTenantSelect"
     />
-    <!-- <div class="flex w-full justify-end px-2"></div> -->
     <SearchBar
       class="flex justify-end"
       v-if="showSearch"
