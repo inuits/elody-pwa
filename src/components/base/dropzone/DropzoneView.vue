@@ -16,22 +16,22 @@
           <p
             class="underline text-accent-accent"
             @click="
-              downloadCsvTemplate(`/upload-csv-template-${selectedItem}.csv`)
+              downloadCsvTemplate(`/${selectedItem}`)
             "
           >
             {{ $t("upload-fields.csv-template-link") }}
           </p>
           <select
-            v-if="entityTypesForUpload"
+            v-if="templateCsvs"
             v-model="selectedItem"
             class="inline-block min-w-0 max-w-full pl-2 pr-8 border-none border-b underline text-accent-accent"
           >
             <option
-              v-for="entityType in entityTypesForUpload"
-              :key="entityType"
-              :value="entityType"
+              v-for="csv in templateCsvs"
+              :key="csv"
+              :value="csv"
             >
-              {{ entityType }}
+              {{ csv }}
             </option>
           </select>
         </div>
@@ -56,17 +56,17 @@ const props = withDefaults(
     isValidation: boolean;
     fileCount: number;
     style: string;
-    entityTypesForUpload?: string | undefined;
+    templateCsvs?: string | undefined;
   }>(),
   {
     style: "",
     isValidation: false,
-    entityTypesForUpload: undefined,
+    templateCsvs: undefined,
   },
 );
 
 const selectedItem = ref<string | undefined>(
-  props.entityTypesForUpload ? props.entityTypesForUpload[0] : undefined,
+  props.templateCsvs ? props.templateCsvs[0] : undefined,
 );
 
 const emit = defineEmits<{

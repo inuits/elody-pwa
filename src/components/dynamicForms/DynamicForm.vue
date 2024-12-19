@@ -88,8 +88,8 @@
                 :upload-field-type="
                   (uploadContainerField as UploadField).uploadFieldType
                 "
-                :entity-types-for-upload="
-                  (uploadContainerField as UploadField).entityTypesForUpload
+                :template-csvs="
+                  (uploadContainerField as UploadField).templateCsvs
                 "
               />
             </div>
