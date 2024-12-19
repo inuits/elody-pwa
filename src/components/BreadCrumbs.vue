@@ -1,6 +1,8 @@
 <template>
   <div v-if="breadCrumbRoutesExist">
-    <div class="flex h-10 z-[70] relative">
+    <div
+      class="flex flex-wrap gap-2 min-[900px]:h-10 min-[900px]:flex-nowrap z-[70] relative"
+    >
       <div
         :class="[
           'flex justify-center items-center bg-neutral-light h-full',
@@ -130,7 +132,7 @@ const config: any = inject("config");
 const showHistory = ref<boolean>(false);
 const truncatePreviousRouteName = ref<boolean>(true);
 const breadCrumbRoutesExist = computed(
-  () => breadcrumbRoutes.value.length > 0 || getCurrentRouteTitle.value
+  () => breadcrumbRoutes.value.length > 0 || getCurrentRouteTitle.value,
 );
 const router = useRouter();
 const { clearBreadcrumbPathAndAddOverviewPage, previousRoute } =
@@ -189,9 +191,9 @@ const openDiscardModal = (route: any) => {
 };
 
 const checkNavigationAvailable = (route: any) => {
-  if (isEdit.value) openDiscardModal(route)
+  if (isEdit.value) openDiscardModal(route);
   else navigateToEntity(route);
-}
+};
 
 const navigateToEntity = (route: any) => {
   if (route.id) {
