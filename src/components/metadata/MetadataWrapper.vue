@@ -78,72 +78,78 @@
       :tooltip-offset="8"
     >
       <template #activator="{ on }">
-        <div v-on="on">
-          <MetadataFormatter
-            v-if="metadata.value?.formatter"
-            v-bind="metadata.value"
-          />
-          <ViewModesAutocompleteRelations
-            v-else-if="
-              (metadata.inputField?.type ===
-                InputFieldTypes.DropdownMultiselectRelations ||
+        <div v-on="showTooltip ? on : {}">
+          <MetadataTruncatedText
+            @overflow-status="handleOverflowStatus"
+            :disabled="!linkedEntityId"
+            :line-clamp="1"
+          >
+            <MetadataFormatter
+              v-if="metadata.value?.formatter"
+              v-bind="metadata.value"
+            />
+            <ViewModesAutocompleteRelations
+              v-else-if="
+                (metadata.inputField?.type ===
+                  InputFieldTypes.DropdownMultiselectRelations ||
+                  metadata.inputField?.type ===
+                    InputFieldTypes.DropdownSingleselectRelations) &&
+                metadata.value &&
+                !metadata.value?.formatter
+              "
+              v-model="metadata.value"
+              :is-read-only="true"
+              :field-name="metadata.label"
+              :formId="formId"
+              :metadata-key-to-get-options-for="
+                metadata.inputField.advancedFilterInputForSearchingOptions
+                  ?.item_types?.[0]
+              "
+              :advanced-filter-input-for-retrieving-options="
+                metadata.inputField.advancedFilterInputForRetrievingOptions
+              "
+              :advanced-filter-input-for-retrieving-related-options="
+                metadata.inputField
+                  .advancedFilterInputForRetrievingRelatedOptions
+              "
+              :advanced-filter-input-for-retrieving-all-options="
+                metadata.inputField.advancedFilterInputForRetrievingAllOptions
+              "
+              :is-metadata-field="metadata.inputField?.isMetadataField"
+              :from-relation-type="metadata.inputField?.fromRelationType"
+              :disabled="true"
+              @click.stop.prevent
+            />
+            <ViewModesAutocompleteMetadata
+              v-else-if="
                 metadata.inputField?.type ===
-                  InputFieldTypes.DropdownSingleselectRelations) &&
-              metadata.value &&
-              !metadata.value?.formatter
-            "
-            v-model="metadata.value"
-            :is-read-only="true"
-            :field-name="metadata.label"
-            :formId="formId"
-            :metadata-key-to-get-options-for="
-              metadata.inputField.advancedFilterInputForSearchingOptions
-                ?.item_types?.[0]
-            "
-            :advanced-filter-input-for-retrieving-options="
-              metadata.inputField.advancedFilterInputForRetrievingOptions
-            "
-            :advanced-filter-input-for-retrieving-related-options="
-              metadata.inputField.advancedFilterInputForRetrievingRelatedOptions
-            "
-            :advanced-filter-input-for-retrieving-all-options="
-              metadata.inputField.advancedFilterInputForRetrievingAllOptions
-            "
-            :is-metadata-field="metadata.inputField?.isMetadataField"
-            :from-relation-type="metadata.inputField?.fromRelationType"
-            :disabled="true"
-            @click.stop.prevent
-          />
-          <ViewModesAutocompleteMetadata
-            v-else-if="
-              metadata.inputField?.type ===
-                InputFieldTypes.DropdownMultiselectMetadata ||
-              metadata.inputField?.type ===
+                  InputFieldTypes.DropdownMultiselectMetadata ||
+                metadata.inputField?.type ===
+                  InputFieldTypes.DropdownSingleselectMetadata
+              "
+              v-model:model-value="metadata.value"
+              :metadata-dropdown-options="metadata.inputField.options"
+              :formId="formId"
+              :select-type="
+                metadata.inputField.type ===
                 InputFieldTypes.DropdownSingleselectMetadata
-            "
-            v-model:model-value="metadata.value"
-            :metadata-dropdown-options="metadata.inputField.options"
-            :formId="formId"
-            :select-type="
-              metadata.inputField.type ===
-              InputFieldTypes.DropdownSingleselectMetadata
-                ? 'single'
-                : 'multi'
-            "
-            :disabled="true"
-            mode="view"
-            @click.stop.prevent
-          />
-          <entity-element-metadata
-            v-else
-            :class="linkedEntityId ? 'break-all line-clamp-1' : ''"
-            :label="metadata.label as string"
-            v-model:value="value"
-            :link-text="metadata.linkText"
-            :link-icon="metadata.linkIcon"
-            :unit="metadata.unit"
-            :base-library-mode="baseLibraryMode"
-          />
+                  ? 'single'
+                  : 'multi'
+              "
+              :disabled="true"
+              mode="view"
+              @click.stop.prevent
+            />
+            <entity-element-metadata
+              v-else
+              :label="metadata.label as string"
+              v-model:value="value"
+              :link-text="metadata.linkText"
+              :link-icon="metadata.linkIcon"
+              :unit="metadata.unit"
+              :base-library-mode="baseLibraryMode"
+            />
+          </MetadataTruncatedText>
         </div>
       </template>
       <template #default>
@@ -165,6 +171,7 @@
 import EntityElementMetadataEdit from "@/components/metadata/EntityElementMetadataEdit.vue";
 import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.vue";
 import MetadataFormatter from "@/components/metadata/MetadataFormatter.vue";
+import MetadataTruncatedText from "./MetadataTruncatedText.vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import {
   BaseLibraryModes,
@@ -175,7 +182,7 @@ import {
   type BaseRelationValuesInput,
   type PanelRelationMetaData,
 } from "@/generated-types/queries";
-import { computed, onMounted, onBeforeUnmount, watch, inject } from "vue";
+import { computed, onMounted, onBeforeUnmount, watch, inject, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   useOrderListItems,
@@ -221,6 +228,12 @@ const props = withDefaults(
 //     if (!Array.isArray(newvalue.value)) setNewValue(newvalue.value);
 //   }
 // );
+
+const showTooltip = ref<boolean>(false);
+
+const handleOverflowStatus = (status: boolean) => {
+  showTooltip.value = status;
+};
 
 const setNewValue = (
   newValue:
