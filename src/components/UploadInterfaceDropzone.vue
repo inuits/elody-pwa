@@ -11,7 +11,7 @@
       :dropzone-label="dropzoneLabel"
       view-style="p-3 h-full overflow-x-hidden mb-4"
       :isValidationFile="dryRun"
-      :entity-types-for-upload="entityTypesForUpload"
+      :template-csvs="templateCsvs"
     />
   </div>
 </template>
@@ -38,13 +38,13 @@ const props = withDefaults(
     dryRun: boolean;
     uploadFieldType: UploadFieldType;
     validation?: string;
-    entityTypesForUpload?: string | undefined;
+    templateCsvs?: string | undefined;
   }>(),
   {
     dropzoneSize: "normal",
     isLinkedUpload: false,
     dryRun: false,
-    entityTypesForUpload: undefined,
+    templateCsvs: undefined,
   }
 );
 

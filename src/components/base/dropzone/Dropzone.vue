@@ -5,7 +5,7 @@
     :isValidation="isValidationFile"
     :file-count="fileCount"
     :style="viewStyle"
-    :entity-types-for-upload="entityTypesForUpload"
+    :template-csvs="templateCsvs"
   />
   <dropzone-preview
     v-model="dropzonePreview"
@@ -32,12 +32,12 @@ const props = withDefaults(
     dropzoneLabel: string;
     viewStyle: string;
     isValidationFile: boolean;
-    entityTypesForUpload?: string | undefined;
+    templateCsvs?: string | undefined;
   }>(),
   {
     viewStyle: "",
     isValidationFile: false,
-    entityTypesForUpload: undefined,
+    templateCsvs: undefined,
   }
 );
 
