@@ -125,7 +125,6 @@ const deleteSelectedItems = async () => {
     );
     const isDeleted = await deleteEntities(
       selectedItems,
-      false,
       linkedEntitiesToRemove,
     );
 

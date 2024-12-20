@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useDeleteEntities } from "@/composables/useDeleteEntities";
 import { apolloClient } from "@/main";
-import { Collection } from "@/generated-types/queries";
+import { Collection, Entitytyping } from "@/generated-types/queries";
 
 vi.mock("@/main", () => ({
   apolloClient: {
@@ -36,8 +36,8 @@ vi.mock("@/composables/useImport", () => ({
 describe("useDeleteEntities", () => {
   let deleteEntitiesComposable: any;
   const mockedItems = [
-    { id: "item1", type: "typeA" },
-    { id: "item2", type: "typeB" },
+    { id: "item1", type: Entitytyping.BaseEntity },
+    { id: "item2", type: Entitytyping.BaseEntity },
   ];
 
   beforeEach(() => {
@@ -50,7 +50,6 @@ describe("useDeleteEntities", () => {
 
     await deleteEntitiesComposable.deleteEntities(
       mockedItems,
-      true,
       linkedEntitiesToRemove,
     );
 
@@ -58,34 +57,47 @@ describe("useDeleteEntities", () => {
     expect(mockMutate).toHaveBeenCalledWith({
       ids: ["item1", "item2"],
       path: Collection.Entities,
-      deleteEntities: {
-        customFlag: true,
-        deleteMediafiles: true,
-      },
+      customFlag: true,
     });
   });
 
-  it("should call mutate with default deleteMediafiles as false when not provided", async () => {
-    await deleteEntitiesComposable.deleteEntities(mockedItems);
+  it("should handle items of type Mediafile correctly", async () => {
+    const mediaItems = [
+      { id: "media1", type: Entitytyping.Mediafile },
+      { id: "media2", type: Entitytyping.Mediafile },
+    ];
+
+    await deleteEntitiesComposable.deleteEntities(mediaItems, {});
 
     expect(mockMutate).toHaveBeenCalledTimes(1);
     expect(mockMutate).toHaveBeenCalledWith({
-      ids: ["item1", "item2"],
-      path: Collection.Entities,
-      deleteEntities: {
-        deleteMediafiles: false,
-      },
+      ids: ["media1", "media2"],
+      path: Collection.Mediafiles,
     });
   });
 
-  it("should return true after successful mutation", async () => {
-    const result = await deleteEntitiesComposable.deleteEntities(mockedItems);
+  it("should log an error if items have multiple types", async () => {
+    const mixedItems = [
+      { id: "item1", type: "typeA" },
+      { id: "item2", type: "typeB" },
+    ];
 
-    expect(result).toBe(true);
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    await deleteEntitiesComposable.deleteEntities(mixedItems, {});
+
+    expect(mockMutate).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Items should have the same type",
+    );
+
+    consoleErrorSpy.mockRestore();
   });
 
   it("should not call mutate if items array is empty", async () => {
-    await deleteEntitiesComposable.deleteEntities([]);
+    await deleteEntitiesComposable.deleteEntities([], {});
 
     expect(mockMutate).not.toHaveBeenCalled();
   });

@@ -59,7 +59,7 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
 
   if (context) dequeueItemForBulkProcessing(context, id);
 
-  const isDeleted = await deleteEntities([{ id, type }], deleteMediafiles);
+  const isDeleted = await deleteEntities([{ id, type }], { deleteMediafiles });
 
   if (isDeleted) {
     await getTenants();

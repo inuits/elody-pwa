@@ -2,6 +2,7 @@ import { useMutation } from "@vue/apollo-composable";
 import {
   Collection,
   BulkDeleteEntitiesDocument,
+  Entitytyping,
   type BulkDeleteEntitiesMutation,
 } from "@/generated-types/queries";
 import { type InBulkProcessableItem } from "@/composables/useBulkOperations";
@@ -28,21 +29,27 @@ export const useDeleteEntities = () => {
 
   const deleteEntities = async (
     items: InBulkProcessableItem[] | { id: string; type: string }[],
-    deleteMediafiles: boolean = false,
-    linkedEntitiesToRemove: { [key: string]: boolean } | undefined,
+    linkedEntitiesToRemove: { [key: string]: boolean } | undefined = {},
   ) => {
     if (items.length === 0) return;
+    const types = [...new Set(items.map((item) => item.type))];
 
-    const deleteEntities = {
-      ...(linkedEntitiesToRemove ? linkedEntitiesToRemove : {}),
-      deleteMediafiles:
-        linkedEntitiesToRemove?.["deleteMediafiles"] || deleteMediafiles,
-    };
+    if (types.length > 1) {
+      console.error("Items should have the same type");
+      return;
+    }
+
+    let path;
+    if ((types as string[])[0].toLowerCase() === Entitytyping?.Mediafile) {
+      path = Collection.Mediafiles;
+    } else {
+      path = Collection.Entities;
+    }
 
     await mutate({
       ids: items.map((item: { id: string }) => item.id),
-      path: Collection.Entities,
-      deleteEntities,
+      path,
+      ...linkedEntitiesToRemove,
     });
 
     return true;

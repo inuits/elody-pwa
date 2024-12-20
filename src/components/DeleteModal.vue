@@ -140,7 +140,7 @@ const deleteSelectedItems = async () => {
   if (selectedItems.length <= 0) return;
 
   try {
-    const isDeleted = await deleteEntities(selectedItems, false);
+    const isDeleted = await deleteEntities(selectedItems);
 
     if (isDeleted) {
       createNotificationOverwrite(
