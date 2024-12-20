@@ -49,6 +49,12 @@ import { downloadCsv } from "@/helpers";
 const { files } = useUpload();
 const dropzoneView = ref<HTMLDivElement>();
 
+enum csvHeaders {
+  file_identifier = "file_identifier",
+  filename = "filename",
+  file_source ="file_source",
+}
+
 const props = withDefaults(
   defineProps<{
     modelValue: HTMLDivElement | undefined;
@@ -83,13 +89,16 @@ const downloadCsvTemplate = async (filePath: any) => {
 
   if (files.value.length > 0) {
     const header = results.meta.fields as string[];
-    const filenameIndex = header.indexOf("filename");
+    const filenameIndex = header.indexOf(csvHeaders.filename);
     let columnToAddFilename =
-      filenameIndex === -1 ? "file_identifier" : "filename";
+      filenameIndex === -1 ? csvHeaders.file_identifier : csvHeaders.filename;
 
     files.value.forEach((file: any, index: number) => {
       results.data.push({});
       results.data[index][columnToAddFilename] = file.name;
+      if (columnToAddFilename === csvHeaders.file_identifier) {
+        results.data[index][csvHeaders.file_source] = "File";
+      }
     });
   }
   const csv = Papa.unparse(results.data);
