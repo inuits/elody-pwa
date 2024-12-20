@@ -16,7 +16,7 @@
       </div>
       <div
         class="h-full flex flex-col justify-between p-4"
-        v-if="modalOpenend && deleteQueryOptions.customQueryBlockingRelations"
+        v-if="modalOpenend && deleteQueryOptions?.customQueryBlockingRelations"
         v-show="numberOfBlockingQueryEntities > 0"
       >
         <div class="title p-4">
@@ -48,7 +48,7 @@
         "
       >
         <div
-          v-if="deleteQueryOptions.customQueryDeleteRelations"
+          v-if="deleteQueryOptions?.customQueryDeleteRelations"
           v-show="numberOfRelatedEntities > 0"
         >
           <div class="title pl-4">
@@ -66,9 +66,8 @@
             :enable-advanced-filters="false"
             :enable-non-selectable-entities="false"
             @entities-updated="
-            (numberOfEntities) =>
-              (numberOfRelatedEntities = numberOfEntities)
-          "
+              (numberOfEntities) => (numberOfRelatedEntities = numberOfEntities)
+            "
             base-library-height="h-fit"
           />
         </div>
@@ -110,8 +109,8 @@ import {
 import { usePageInfo } from "@/composables/usePageInfo";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
-import { getChildrenOfHomeRoutes } from "@/helpers";
 import { useModalActions } from "@/composables/useModalActions";
+import { useDeleteEntities } from "@/composables/useDeleteEntities";
 
 const { t } = useI18n();
 const config: any = inject("config");
@@ -122,11 +121,11 @@ const { getEnqueuedItems, dequeueAllItemsForBulkProcessing } =
   useBulkOperations();
 const { getParentId, getCallbackFunction } = useModalActions();
 
-const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const router = useRouter();
 const { disableEditMode } = useEditMode();
 const { pageInfo } = usePageInfo();
+const { deleteEntities } = useDeleteEntities();
 
 const modalOpenend = ref<boolean>(false);
 const deleteQueryOptions = ref<DeleteQueryOptions | undefined>(undefined);
@@ -137,25 +136,21 @@ const parentId = computed(() => getParentId());
 const deleteSelectedItems = async () => {
   const selectedItems: InBulkProcessableItem[] = getEnqueuedItems(getContext());
   dequeueAllItemsForBulkProcessing(getContext());
+
   if (selectedItems.length <= 0) return;
-  const childRoutes = getChildrenOfHomeRoutes(config).map(
-    (route: any) => route.meta
-  );
-  for (const selectedItem of selectedItems) {
-    const id = selectedItem.id;
-    let collection;
-    if (selectedItem.type.toLowerCase() === Entitytyping.Mediafile) {
-      collection = Collection.Mediafiles;
-    } else {
-      collection = childRoutes.find(
-        (route: any) => route.entityType === selectedItem.type
-      ).type;
+
+  try {
+    const isDeleted = await deleteEntities(selectedItems);
+
+    if (isDeleted) {
+      createNotificationOverwrite(
+        NotificationType.default,
+        t("notifications.success.itemsDeleted.title"),
+        t("notifications.success.itemsDeleted.description"),
+      );
     }
-    try {
-      await mutate({ id, path: collection, deleteMediafiles: false });
-    } catch (e) {
-      console.log(e);
-    }
+  } catch (error) {
+    console.error("Error deleting selected items:", error);
   }
 };
 
@@ -167,17 +162,20 @@ const cleanupAfterDeletion = async () => {
   createNotificationOverwrite(
     NotificationType.default,
     t("notifications.success.entityDeleted.title"),
-    t("notifications.success.entityDeleted.description")
+    t("notifications.success.entityDeleted.description"),
   );
 };
 
 const deleteButtonClicked = async () => {
   await deleteSelectedItems();
-  getCallbackFunction()();
+  getCallbackFunction()?.();
   await cleanupAfterDeletion();
 };
 
 const getContext = () => {
+  const modalContext = getModalInfo(TypeModals.Delete).context;
+  if (modalContext) return modalContext;
+
   if (deleteQueryOptions.value.customQueryEntityTypes?.length > 0) {
     if (
       deleteQueryOptions.value.customQueryEntityTypes[0] !==
@@ -200,7 +198,7 @@ watch(
     numberOfBlockingQueryEntities.value = undefined;
     numberOfRelatedEntities.value = undefined;
     deleteQueryOptions.value = getModalInfo(
-      TypeModals.Delete
+      TypeModals.Delete,
     ).deleteQueryOptions;
     initializeConfirmModal({
       confirmButton: { buttonCallback: deleteButtonClicked },
@@ -209,11 +207,12 @@ watch(
           closeModal(TypeModals.Delete);
         },
       },
-      translationKey: "delete-entity",
+      translationKey:
+        getModalInfo(TypeModals.Delete).translationKey || "delete-entity",
       openImmediately: false,
     });
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 

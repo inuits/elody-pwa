@@ -108,6 +108,7 @@
         <ActionMenuGroup
           v-if="bulkOperations !== undefined"
           v-model="selectedBulkOperation"
+          @update:modelValue="handleSelectedBulkOperation"
           :options="bulkOperations"
           :items-selected="itemsSelected"
           :entity-type="entityType"
@@ -166,7 +167,7 @@ const props = withDefaults(
     customBulkOperations: undefined,
     enableSelection: true,
     parentEntityId: undefined,
-  }
+  },
 );
 
 const emit = defineEmits<{
@@ -175,12 +176,12 @@ const emit = defineEmits<{
   (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
   (
     event: "setBulkOperationsAvailable",
-    isBulkOperationsAvailable: boolean
+    isBulkOperationsAvailable: boolean,
   ): void;
   (event: "refetch"): void;
   (
     event: "customBulkOperationsPromise",
-    bulkOperationsPromise: () => Promise<void>
+    bulkOperationsPromise: () => Promise<void>,
   ): void;
   (event: "applyCustomBulkOperations"): void;
   (event: "initializeEntityPickerComponent"): void;
@@ -193,12 +194,12 @@ const entityType = computed(() => props.entityType || route.meta.entityType);
 const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
   GetBulkOperationsDocument,
   { entityType: entityType.value },
-  () => ({ enabled: entityType.value ? refetchEnabled.value : ref(false) })
+  () => ({ enabled: entityType.value ? refetchEnabled.value : ref(false) }),
 );
 const bulkOperations = ref<DropdownOption[]>([]);
 const selectedBulkOperation = ref<DropdownOption>();
 const bulkOperationsPromiseIsResolved = ref<boolean>(
-  !props.customBulkOperations
+  !props.customBulkOperations,
 );
 const {
   getEnqueuedItemCount,
@@ -231,13 +232,13 @@ const hasBulkOperationsWithItemsSelection = computed<boolean>(() => {
         item.actionContext?.entitiesSelectionType ===
         ActionContextEntitiesSelectionType.SomeSelected
       );
-    }
+    },
   );
   return (bulkOperations.value && operationsWithContext?.length > 0) || false;
 });
 
 const itemsSelected = computed<boolean>(
-  () => getEnqueuedItemCount(props.context) > 0
+  () => getEnqueuedItemCount(props.context) > 0,
 );
 
 const customBulkOperationsPromise = async () => {
@@ -262,43 +263,51 @@ onMounted(() => {
   refetch();
 });
 
-watch(selectedBulkOperation, () => {
+const handleSelectedBulkOperation = () => {
   if (!selectedBulkOperation.value) return;
   const modal = selectedBulkOperation.value?.bulkOperationModal;
   const bulkOperationType = selectedBulkOperation.value?.value;
+  let modalStyle = ModalStyle.CenterWide;
 
   initializeGeneralProperties(
     route.params.id,
-    modal.formRelationType,
+    modal?.formRelationType,
     route.meta.type,
     props.refetchEntities,
-    bulkOperationType
+    bulkOperationType,
   );
   if (bulkOperationType === BulkOperationTypes.DownloadMediafiles)
     initializePropertiesForDownload(
       getEnqueuedItems(props.context),
-      props.context
+      props.context,
     );
   if (bulkOperationType === BulkOperationTypes.AddRelation)
     emit("initializeEntityPickerComponent");
   if (bulkOperationType === BulkOperationTypes.CreateEntity)
     initializePropertiesForCreateEntity();
 
-  if (bulkOperationType === BulkOperationTypes.ReorderEntities) {
+  if (
+    bulkOperationType === BulkOperationTypes.ReorderEntities ||
+    bulkOperationType === BulkOperationTypes.DeleteEntities
+  ) {
     setCallbackFunction(props.refetchEntities);
+  }
+
+  if (bulkOperationType === BulkOperationTypes.DeleteEntities) {
+    modalStyle = ModalStyle.Center;
   }
 
   openModal(
     modal.typeModal,
-    ModalStyle.CenterWide,
+    modalStyle,
     modal.formQuery,
     undefined,
     modal.askForCloseConfirmation,
     bulkOperationType === BulkOperationTypes.ExportCsvOfMediafilesFromAsset
       ? RouteNames.Mediafiles
-      : props.context
+      : props.context,
   );
-});
+};
 
 watch(
   () =>
@@ -306,7 +315,7 @@ watch(
     getModalInfo(TypeModals.BulkOperations).open,
   (isBulkOperationModalOpen: boolean | undefined) => {
     if (!isBulkOperationModalOpen) selectedBulkOperation.value = undefined;
-  }
+  },
 );
 
 watch(
@@ -314,7 +323,7 @@ watch(
   (type: Entitytyping) => {
     if (!type) return;
     refetch({ entityType: type });
-  }
+  },
 );
 
 watch(
@@ -325,7 +334,7 @@ watch(
     emit("customBulkOperationsPromise", customBulkOperationsPromise);
     emit("applyCustomBulkOperations");
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
@@ -334,7 +343,7 @@ watch(
     if (props.confirmSelectionButton) return;
     emit("setBulkOperationsAvailable", hasBulkOperations);
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 
