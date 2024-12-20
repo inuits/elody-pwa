@@ -1,13 +1,10 @@
 import { computed, reactive, ref } from "vue";
 import {
-  BulkOperationTypes,
-  Collection,
   type DeleteQueryOptions,
   ModalStyle,
   TypeModals,
 } from "@/generated-types/queries";
 import { type Context } from "@/composables/useBulkOperations";
-import useEntityPickerModal from "@/composables/useEntityPickerModal";
 
 export type ModalInfo = {
   open: boolean;
