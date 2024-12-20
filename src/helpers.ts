@@ -577,6 +577,7 @@ export const getTitleOrNameFromEntity = (entity: Entity): string => {
   return (
     entity.intialValues.title ||
     entity.intialValues.name ||
+    entity.intialValues.original_filename ||
     entity.intialValues.filename ||
     entity.id
   );
