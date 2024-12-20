@@ -92,13 +92,14 @@ const downloadCsvTemplate = async (filePath: any) => {
     const filenameIndex = header.indexOf(csvHeaders.filename);
     let columnToAddFilename =
       filenameIndex === -1 ? csvHeaders.file_identifier : csvHeaders.filename;
+    const type = results.data[0]["type"];
 
     files.value.forEach((file: any, index: number) => {
       results.data.push({});
+      results.data[index]["type"] = type;
       results.data[index][columnToAddFilename] = file.name;
-      if (columnToAddFilename === csvHeaders.file_identifier) {
+      if (columnToAddFilename === csvHeaders.file_identifier)
         results.data[index][csvHeaders.file_source] = "File";
-      }
     });
   }
   const csv = Papa.unparse(results.data);
