@@ -12,7 +12,7 @@
 
     <Transition>
       <Teleport
-        :to="isUsedInModal ? '.base-modal--opened' : 'body'"
+        :to="someModalIsOpened ? '.base-modal--opened' : 'body'"
         v-if="hasContent && hover"
       >
         <div
@@ -36,20 +36,17 @@ import {
   type Placement,
   autoPlacement,
 } from "@floating-ui/vue";
+import { useBaseModal } from "@/composables/useBaseModal";
 
-const {
-  position = "top-end",
-  tooltipOffset = 0,
-  isUsedInModal = false,
-} = defineProps<{
+const { position = "top-end", tooltipOffset = 0 } = defineProps<{
   position: Placement;
   tooltipOffset: number;
-  isUsedInModal: boolean;
 }>();
 const hover = ref(false);
 
 const defaultSlotRef = ref<HTMLElement | null>(null);
 const activatorSlotRef = ref<HTMLElement | null>(null);
+const { someModalIsOpened } = useBaseModal();
 
 const slots = useSlots();
 
