@@ -7,7 +7,10 @@ import {
   RouteNames,
 } from "@/generated-types/queries";
 import { ref } from "vue";
-import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
+import {
+  BulkOperationsContextEnum,
+  type InBulkProcessableItem,
+} from "@/composables/useBulkOperations";
 
 export type DownloadMediafilesInformation = {
   mediafiles: [];
@@ -128,7 +131,7 @@ export const useModalActions = () => {
     relation: string,
     col: Collection,
     callbackFn: Function,
-    bulkoperationType: BulkOperationTypes
+    bulkoperationType: BulkOperationTypes,
   ): void => {
     parentId.value = parent;
     relationType.value = relation;
@@ -137,8 +140,8 @@ export const useModalActions = () => {
     bulkOperationType.value = bulkoperationType;
   };
   const initializePropertiesForDownload = (
-    enqueuedItems,
-    context: any
+    enqueuedItems: InBulkProcessableItem[],
+    context: any,
   ): void => {
     const isMediafileArray =
       context === RouteNames.Mediafile ||
