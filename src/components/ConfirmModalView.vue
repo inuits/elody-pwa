@@ -4,10 +4,10 @@
     class="h-full flex flex-col justify-between p-4"
   >
     <div class="title">
-      {{ t(`confirm.${confirmModalConfiguration?.translationKey}.title`) }}
+      {{ t(`confirm.${confirmModalConfiguration?.translationKey}.title`, [confirmModalConfiguration?.titleLabelVariable]) }}
     </div>
     <div class="pt-4">
-      {{ t(`confirm.${confirmModalConfiguration?.translationKey}.message`) }}
+      {{ t(`confirm.${confirmModalConfiguration?.translationKey}.message`, [confirmModalConfiguration?.messageLabelVariable]) }}
     </div>
     <div class="flex justify-between pt-8">
       <div
@@ -19,7 +19,7 @@
           <BaseButtonNew
             v-if="confirmModalConfiguration?.confirmButton.buttonCallback"
             :label="
-              t(`confirm.${confirmModalConfiguration.translationKey}.confirm`)
+              t(`confirm.${confirmModalConfiguration.translationKey}.confirm`, [confirmModalConfiguration?.confirmLabelVariable])
             "
             :button-style="buttonStyles.confirm"
             :button-size="buttonSizes.confirm"
