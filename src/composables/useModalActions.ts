@@ -28,6 +28,7 @@ const downloadMediafilesInformation = ref<
   DownloadMediafilesInformation | undefined
 >(undefined);
 const savedSearchInformation = ref<any | undefined>(undefined);
+const deletionInformation = ref<{ title: string } | undefined>(undefined);
 
 export const useModalActions = () => {
   const getArgumentsForSubmit = (): BaseRelationValuesInput[] | Function => {
@@ -84,7 +85,7 @@ export const useModalActions = () => {
     };
   };
 
-  const getArgumentsForEndpointInGraphql = (): { parentId: string } => {
+  const getArgumentsForEndpointInGraphql = (): { parentId: string | undefined } => {
     return {
       parentId: parentId.value,
     };
@@ -94,8 +95,12 @@ export const useModalActions = () => {
     return parentId.value;
   };
 
-  const getArgumentsForSubmitExtraMetadata = (): { parentId: string } => {
+  const getArgumentsForSubmitExtraMetadata = (): { savedSearchInformation: string } => {
     return savedSearchInformation.value;
+  };
+
+  const getInformationForDelete = (): { title: string } | undefined => {
+    return deletionInformation.value;
   };
 
   const extractActionArguments = (actionType: ActionType): any => {
@@ -159,6 +164,9 @@ export const useModalActions = () => {
   const initializePropertiesForSavedSearch = (savedSearchInfo: any): void => {
     savedSearchInformation.value = savedSearchInfo;
   };
+  const initializePropertiesForDeletion = (title: string): void => {
+    deletionInformation.value = { title: title};
+  };
 
   const getParentId = () => {
     return parentId.value;
@@ -192,9 +200,11 @@ export const useModalActions = () => {
     initializePropertiesForDownload,
     initializePropertiesForCreateEntity,
     initializePropertiesForSavedSearch,
+    initializePropertiesForDeletion,
     getParentId,
     getBulkOperationType,
     getCallbackFunction,
+    getInformationForDelete,
     setCallbackFunction,
     resetAllProperties,
   };
