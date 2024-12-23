@@ -9,7 +9,7 @@
       class="flex flex-col w-full h-full overflow-hidden"
       :class="[{ 'pt-5': numberOfBlockingQueryEntities <= 0 }]"
     >
-      <div class="w-full">
+      <div class="w-full px-8">
         <h1 class="title flex justify-center px-">
           {{ t("navigation.delete-entity-window", [`${translatedDeleteEntityLabel} "${parentEntityTitle}"`]) }}
         </h1>
@@ -215,6 +215,9 @@ watch(
       translationKey:
         getModalInfo(TypeModals.Delete).translationKey || "delete-entity",
       openImmediately: false,
+      titleLabelVariable: translatedDeleteEntityLabel.value,
+      messageLabelVariable: `${translatedDeleteEntityLabel.value} '${getInformationForDelete()?.title}'`,
+      confirmLabelVariable: translatedDeleteEntityLabel.value,
     });
   },
   { immediate: true },

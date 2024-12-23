@@ -26,6 +26,9 @@ export type ConfirmModalConfiguration = {
   declineButton: ButtonConfiguration;
   translationKey: string;
   openImmediately?: boolean;
+  titleLabelVariable?: string;
+  messageLabelVariable?: string;
+  confirmLabelVariable?: string;
 };
 
 export const useConfirmModal = () => {

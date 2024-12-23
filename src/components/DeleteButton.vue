@@ -78,6 +78,9 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
 };
 
 const openDeleteModal = () => {
+  const form = getForm(route.params["id"]);
+  const title = getTitleOrNameFromEntity(form.values);
+
   if (deleteQueryOptions.value) {
     initializeGeneralProperties(
       route.params.id,
@@ -86,8 +89,7 @@ const openDeleteModal = () => {
       deleteEntity,
       undefined,
     );
-    const form = getForm(route.params["id"]);
-    initializePropertiesForDeletion(getTitleOrNameFromEntity(form.values));
+    initializePropertiesForDeletion(title);
     openModal(
       TypeModals.Delete,
       ModalStyle.Center,
@@ -104,6 +106,9 @@ const openDeleteModal = () => {
       },
       translationKey: "delete-entity",
       openImmediately: true,
+      titleLabelVariable: entityType.value,
+      messageLabelVariable: `${entityType.value} '${title}'`,
+      confirmLabelVariable: entityType.value,
     });
   }
 };
