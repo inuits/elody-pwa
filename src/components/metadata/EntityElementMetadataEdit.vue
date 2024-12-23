@@ -192,14 +192,14 @@ const getIdForHiddenFieldFilter = (): any => {
 
 const populateHiddenField = (): BaseRelationValuesInput[] | undefined => {
   if (props.field.type === InputFieldTypes.DropdownMultiselectRelations) {
-    const relation: BaseRelationValuesInput[] = [];
-    relation.push({
+    const relations: BaseRelationValuesInput[] = [];
+    relations.push({
       editStatus: EditStatus.New,
       key: getIdForHiddenFieldFilter(),
       type: props.field.relationType,
       value: getIdForHiddenFieldFilter(),
     });
-    return relation;
+    return relations;
   }
 };
 
