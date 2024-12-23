@@ -23,7 +23,7 @@ import {
   useNotification,
 } from "@/components/base/BaseNotification.vue";
 import useEditMode from "@/composables/useEdit";
-import { asString, mapUrlToEntityType } from "@/helpers";
+import { asString, getTitleOrNameFromEntity, mapUrlToEntityType } from "@/helpers";
 import { usePageInfo } from "@/composables/usePageInfo";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useBulkOperations } from "@/composables/useBulkOperations";
@@ -32,6 +32,7 @@ import { apolloClient } from "@/main";
 import { useModalActions } from "@/composables/useModalActions";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useDeleteEntities } from "@/composables/useDeleteEntities";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 const config: any = inject("config");
 const { t } = useI18n();
@@ -43,9 +44,11 @@ const { previousPageInfo } = usePageInfo();
 const { isEditToggleVisible, disableEditMode } = useEditMode();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { closeModal, openModal, deleteQueryOptions } = useBaseModal();
-const { initializeGeneralProperties } = useModalActions();
+const { initializeGeneralProperties, initializePropertiesForDeletion } =
+  useModalActions();
 const { initializeConfirmModal } = useConfirmModal();
 const { deleteEntities } = useDeleteEntities();
+const { getForm } = useFormHelper();
 
 const entityType = computed(() => {
   const slug = String(route.params["type"]);
@@ -83,6 +86,8 @@ const openDeleteModal = () => {
       deleteEntity,
       undefined,
     );
+    const form = getForm(route.params["id"]);
+    initializePropertiesForDeletion(getTitleOrNameFromEntity(form.values));
     openModal(
       TypeModals.Delete,
       ModalStyle.Center,
