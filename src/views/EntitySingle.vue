@@ -142,12 +142,24 @@ const addContextToState = (context: String): void => {
   addMediafileSelectionStateContext(context);
 };
 
+const getElementsFromColumns = (columns: Column[]): any[] => {
+  const elementsForColumns = columns.map((column: Column) =>
+    Object.values(column.elements).filter(
+      (element: any) => typeof element !== "string",
+    ),
+  );
+  return elementsForColumns.flat();
+};
+
 const determineContextsForMediafileViewer = () => {
   if (columnList.value === "no-values") return;
-  const columns: Column[] = Object.values(columnList.value).map((value) => {
-    if (typeof value !== "string") return value;
-  });
-  Object.values(columns[0].elements).forEach(
+  const columns: Column[] = Object.values(columnList.value)
+    .map((value) => {
+      if (typeof value !== "string") return value;
+    })
+    .filter((column: Column) => !!column);
+  const elements = getElementsFromColumns(columns);
+  Object.values(elements).forEach(
     (element: EntityListElement | SingleMediaFileElement) => {
       if (element?.__typename === "SingleMediaFileElement") {
         addContextToState("SingleMediaFileElement");
@@ -156,8 +168,9 @@ const determineContextsForMediafileViewer = () => {
       if (
         element?.__typename === "EntityListElement" &&
         element?.type === MediaFileElementTypes.Media
-      )
+      ) {
         addContextToState(element.customQueryFilters);
+      }
     },
   );
 };
