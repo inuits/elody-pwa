@@ -18,7 +18,7 @@
         <div
           ref="defaultSlotRef"
           v-if="hasContent && hover"
-          class="shadow-lg rounded bg-neutral-0 max-w-56 p-2 z-50"
+          :class="`shadow-lg rounded bg-neutral-0 max-w-${maxWidth} p-2 z-50`"
           :style="floatingStyles"
         >
           <slot> </slot>
@@ -38,9 +38,16 @@ import {
 } from "@floating-ui/vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 
-const { position = "top-end", tooltipOffset = 0 } = defineProps<{
+const {
+  position = "top-end",
+  tooltipOffset = 0,
+  maxWidth = 56,
+  enableAutoPlacement = true,
+} = defineProps<{
   position: Placement;
   tooltipOffset: number;
+  maxWidth: number | string;
+  enableAutoPlacement: boolean;
 }>();
 const hover = ref(false);
 
@@ -54,7 +61,7 @@ const { floatingStyles } = useFloating(activatorSlotRef, defaultSlotRef, {
   placement: position,
   middleware: [
     offset(tooltipOffset),
-    autoPlacement({ placement: position, autoPlacement: true }),
+    autoPlacement({ placement: position, autoPlacement: enableAutoPlacement }),
   ],
   open: hover,
 });
