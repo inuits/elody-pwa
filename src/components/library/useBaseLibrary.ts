@@ -207,6 +207,7 @@ export const useBaseLibrary = (
       id: id,
       type: entityType,
     };
+    entitiesLoading.value = true;
     await apolloClient
       .query({
         query: GetEntityByIdDocument,
