@@ -38,8 +38,8 @@
           SearchInputType.AdvancedInputMediaFilesType
         "
         :predefined-entities="
-          entityUuid === mediafileSelectionState.selectedMediafile?.id ||
-          entityUuid === mediafileSelectionState.selectedMediafile?.uuid
+          entityId === mediafileSelectionState.selectedMediafile?.id ||
+          entityId === mediafileSelectionState.selectedMediafile?.uuid
             ? [mediafileSelectionState.selectedMediafile]
             : undefined
         "
@@ -48,8 +48,8 @@
         :enable-bulk-operations="true"
         :enable-navigation="false"
         :parent-entity-identifiers="
-          entityUuid === mediafileSelectionState.selectedMediafile?.id ||
-          entityUuid === mediafileSelectionState.selectedMediafile?.uuid
+          entityId === mediafileSelectionState.selectedMediafile?.id ||
+          entityId === mediafileSelectionState.selectedMediafile?.uuid
             ? undefined
             : identifiers
         "
@@ -64,7 +64,7 @@
         v-if="element.type === MediaFileElementTypes.Map && componentMetadata"
         :element="element"
         :mapData="componentMetadata"
-        :entity-uuid="entityUuid"
+        :entity-uuid="entityId"
       ></base-map>
     </template>
   </entity-element-wrapper>
@@ -99,7 +99,7 @@ const props = defineProps<{
   element: MediaFileElement;
   identifiers: string[];
   relationType: string;
-  entityUuid: string;
+  entityId: string;
 }>();
 
 const { t } = useI18n();
@@ -122,7 +122,7 @@ const componentMetadata = computed(() => {
         value: getValueForPanelMetadata(
           PanelType.Metadata,
           metadataItemKey,
-          props.entityUuid,
+          props.entityId,
           mediafileViewerContext
         ),
         inputField: (value as PanelMetaData).inputField,

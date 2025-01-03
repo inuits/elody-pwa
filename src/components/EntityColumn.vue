@@ -8,7 +8,7 @@
       <entity-element
         :elements="column.elements"
         :identifiers="identifiers"
-        :uuid="uuid"
+        :id="id"
         :entity-type="entityType"
       >
       </entity-element>
@@ -30,7 +30,7 @@ import { useEditMode } from "@/composables/useEdit";
 const props = defineProps<{
   columnList: ColumnList;
   identifiers: string[];
-  uuid: string;
+  id: string;
   entityType: Entitytyping;
 }>();
 

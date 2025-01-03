@@ -33,7 +33,7 @@
         :entity-list="(element.entityList as Entity[]) ?? []"
         :identifiers="identifiers"
         :relationType="element.relationType"
-        :entity-uuid="uuid"
+        :entity-id="id"
         :entity-list-elements="
           getObjectsBasedOnTypename(element, 'EntityListElement')
         "
@@ -48,7 +48,7 @@
         :element="element"
         :identifiers="identifiers"
         :relationType="element.relationType"
-        :entity-uuid="uuid"
+        :entity-id="id"
       />
       <entity-element-single-media
         v-if="element.__typename === 'SingleMediaFileElement'"
@@ -115,11 +115,11 @@ export type Elements =
 const props = defineProps<{
   elements: EntityViewElements;
   identifiers: string[];
-  uuid: string;
+  id: string;
   entityType: Entitytyping;
 }>();
 
-const formId = computed(() => props.uuid);
+const formId = computed(() => props.id);
 const { isEdit } = useEditMode();
 const { getStateForRoute, updateStateForRoute } = useStateManagement();
 const route = useRoute();
