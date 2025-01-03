@@ -348,6 +348,7 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
     COORDINATES: (value: string) =>
       `${(value as any).longitude}, ${(value as any).latitude}`,
     PERCENT: (value: string) => `${Number(value) * 100}%`,
+    VOLT: (value: string) => `${value} V`,
   };
 
   const details = unit.split("_");
