@@ -83,7 +83,7 @@ const openDeleteModal = () => {
 
   if (deleteQueryOptions.value) {
     initializeGeneralProperties(
-      route.params.id,
+      form.values.uuid,
       undefined,
       route.meta.type,
       deleteEntity,
