@@ -3,7 +3,7 @@
     <div class="flex">
       <div
         v-if="missingFileNames.length"
-        class="w-full bg-red-light p-2 text-red-default font-bold flex"
+        class="w-full bg-orange-light p-2 text-white font-bold flex"
       >
         <p>
           {{
