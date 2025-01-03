@@ -69,8 +69,12 @@
       @update:value="setNewValue"
       @register-enter-pressed:value="registerEnterKeyPressed"
     />
-    <div v-else class="grid grid-cols-[1fr_min-content] items-center">
-      <base-tooltip class="w-full" position="right-end" :tooltip-offset="8">
+    <div v-else class="flex gap-2">
+      <base-tooltip
+        class="w-full basis-[fit-content]"
+        position="right-end"
+        :tooltip-offset="8"
+      >
         <template #activator="{ on }">
           <div v-on="showTooltip ? on : {}">
             <MetadataTruncatedText
@@ -159,7 +163,7 @@
         </template>
       </base-tooltip>
       <MetadataValueTooltip
-        class="justify-start"
+        class="flex-grow-0 flex-shrink-0 basis-0 items-center"
         v-if="metadata.valueTooltip?.type && metadata.value"
         :value-tooltip="metadata.valueTooltip"
         :entity="metadata.value?.entity"
