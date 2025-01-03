@@ -8,7 +8,7 @@
     v-if="canBeShownForPreviewType || canBeShownForPlaneType"
   >
     <template #activator="{ on }">
-      <div v-on="on">
+      <div v-on="on" class="flex">
         <unicon :name="Unicons.InfoCircle.name" height="20" />
       </div>
     </template>
