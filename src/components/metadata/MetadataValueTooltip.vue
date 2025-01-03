@@ -1,28 +1,26 @@
 <template>
-  <div>
-    <base-tooltip
-      class="w-full"
-      position="right-end"
-      :tooltip-offset="8"
-      :max-width="isPreviewType ? 'md' : 56"
-      :enable-auto-placement="false"
-      v-if="canBeShownForPreviewType || canBeShownForPlaneType"
-    >
-      <template #activator="{ on }">
-        <div v-on="on">
-          <unicon :name="Unicons.QuestionCircle.name" height="20" />
-        </div>
-      </template>
-      <template #default>
-        <div :class="`min-w-${isPreviewType ? 'md' : '56'} min-h-10`">
-          <MetadataValueTooltipPreview
-            v-if="canBeShownForPreviewType"
-            :entity="entity"
-          />
-        </div>
-      </template>
-    </base-tooltip>
-  </div>
+  <base-tooltip
+    class="w-full"
+    position="right-end"
+    :tooltip-offset="8"
+    :max-width="isPreviewType ? 'md' : 56"
+    :enable-auto-placement="false"
+    v-if="canBeShownForPreviewType || canBeShownForPlaneType"
+  >
+    <template #activator="{ on }">
+      <div v-on="on">
+        <unicon :name="Unicons.InfoCircle.name" height="20" />
+      </div>
+    </template>
+    <template #default>
+      <div :class="`min-w-${isPreviewType ? 'md' : '56'} min-h-10`">
+        <MetadataValueTooltipPreview
+          v-if="canBeShownForPreviewType"
+          :entity="entity"
+        />
+      </div>
+    </template>
+  </base-tooltip>
 </template>
 
 <script lang="ts" setup>

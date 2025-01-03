@@ -1,6 +1,6 @@
 <template>
   <div class="flex gap-2">
-    <!-- <div v-if="media && !imageSrcError" :class="['flex items-center']">
+    <div v-if="media && !imageSrcError" :class="['flex items-center']">
       <ImageViewer
         v-if="media"
         :class="['object-cover self-center outline-none h-10 w-10']"
@@ -21,11 +21,11 @@
         name="image-slash"
         class="h-10 w-10 p-1 text-neutral-70 rounded-sm outline-none self-center"
       />
-    </div> -->
+    </div>
 
     <div v-for="(metadataItem, idx) in normalizedTeaserMetadata" :key="idx">
       <metadata-wrapper
-        class=""
+        class="w-40"
         form-id="listview"
         :metadata="metadataItem"
         :is-edit="false"
@@ -39,19 +39,15 @@
 import { onMounted } from "vue";
 import {
   BaseEntity,
-  BaseLibraryModes,
   Entitytyping,
   GetEntityByIdQueryVariables,
   GetEntityByIdDocument,
 } from "@/generated-types/queries";
-import { computed, inject, ref } from "vue";
+import { computed, ref } from "vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import ImageViewer from "@/components/base/ImageViewer.vue";
-import type { ApolloClient } from "@apollo/client/core";
-import { DefaultApolloClient } from "@vue/apollo-composable";
 import { formatTeaserMetadata, stringIsUrl } from "@/helpers";
 import useListItemHelper from "@/composables/useListItemHelper";
-import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { apolloClient } from "@/main";
 
 const props = defineProps<{
@@ -62,12 +58,6 @@ const imageSrcError = ref<boolean>(false);
 const entitiesLoading = ref<boolean>(true);
 const mediaIsLink = computed(() => stringIsUrl(media.value || ""));
 const { getMediaFilenameFromEntity } = useListItemHelper();
-
-// const { getEntityById, entities, entitiesLoading } = useBaseLibrary(
-//   apolloClient as ApolloClient<any>,
-//   false,
-//   BaseLibraryModes.NormalBaseLibrary,
-// );
 
 onMounted(async () => {
   await getEntityById(props.entity.type as Entitytyping, props.entity.id);

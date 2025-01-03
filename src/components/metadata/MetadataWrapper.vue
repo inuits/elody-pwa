@@ -69,7 +69,7 @@
       @update:value="setNewValue"
       @register-enter-pressed:value="registerEnterKeyPressed"
     />
-    <div v-else class="grid grid-cols-[1fr_min-content] gap-2 items-center">
+    <div v-else class="grid grid-cols-[1fr_min-content] items-center">
       <base-tooltip class="w-full" position="right-end" :tooltip-offset="8">
         <template #activator="{ on }">
           <div v-on="showTooltip ? on : {}">
@@ -159,7 +159,7 @@
         </template>
       </base-tooltip>
       <MetadataValueTooltip
-        class="justify-center"
+        class="justify-start"
         v-if="metadata.valueTooltip?.type && metadata.value"
         :value-tooltip="metadata.valueTooltip"
         :entity="metadata.value?.entity"
