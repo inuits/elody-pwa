@@ -25,7 +25,6 @@
 
     <div v-for="(metadataItem, idx) in normalizedTeaserMetadata" :key="idx">
       <metadata-wrapper
-        class="w-40"
         form-id="listview"
         :metadata="metadataItem"
         :is-edit="false"
@@ -67,7 +66,7 @@ const setNoImage = () => {
   imageSrcError.value = true;
 };
 
-const entityData = ref<any>(null);
+const entityData = ref<BaseEntity | null>(null);
 
 const media = computed(() => {
   if (!entityData.value) return null;
