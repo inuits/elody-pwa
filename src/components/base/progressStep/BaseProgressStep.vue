@@ -5,7 +5,7 @@
       { 'w-6 p-1': !showLabel },
       { 'w-min px-4': showLabel },
     ]"
-    :title="translatedLabel"
+    :title="translatedLabelStatus"
   >
     <unicon
       v-if="status === ProgressStepStatus.Empty"
@@ -24,7 +24,12 @@
       :name="Unicons.CheckCircle.name"
       class="fill-green-default"
       height="16"
-      loading
+    />
+    <unicon
+      v-if="status === ProgressStepStatus.Incomplete"
+      :name="Unicons.ImagePlus.name"
+      class="fill-neutral-white"
+      height="16"
     />
     <unicon
       v-if="status === ProgressStepStatus.Loading"
@@ -50,22 +55,29 @@ const props = withDefaults(
   }>(),
   {
     showLabel: true,
-  }
+  },
 );
 
 const { t } = useI18n();
-
-const translatedLabel = computed(() => (props.label ? t(props.label) : ""));
+const translatedLabel = computed(() =>
+  props.label ? t(props.label) : props.label,
+);
+const translatedLabelStatus = computed(() =>
+  props.label ? t(`${props.label}-labels.${props.status}`) : props.label,
+);
 
 const labelColor = computed(() => {
   if (props.status === ProgressStepStatus.Loading) return "text-neutral-white";
   if (props.status === ProgressStepStatus.Complete) return "text-green-default";
+  if (props.status === ProgressStepStatus.Incomplete)
+    return "text-neutral-white";
   if (props.status === ProgressStepStatus.Failed) return "text-neutral-white";
   return "bg-neutral-30";
 });
 const bgColor = computed(() => {
   if (props.status === ProgressStepStatus.Loading) return "bg-accent-accent";
   if (props.status === ProgressStepStatus.Complete) return "bg-green-light";
+  if (props.status === ProgressStepStatus.Incomplete) return "bg-orange-light";
   if (props.status === ProgressStepStatus.Failed) return "bg-red-default";
   return "bg-neutral-30";
 });

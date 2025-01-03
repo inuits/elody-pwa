@@ -144,18 +144,23 @@ const useUpload = () => {
 
   const __uploadCsvWithoutMediafiles = async () => {
     try {
-      await __batchEntities(__getCsvBlob(), false)
+      await __batchEntities(__getCsvBlob(), false);
       toggleUploadStatus();
-      __updateGlobalUploadProgress(ProgressStepType.Upload, ProgressStepStatus.Complete);
+      __updateGlobalUploadProgress(
+        ProgressStepType.Upload,
+        ProgressStepStatus.Complete,
+      );
       csvOnlyUploadSFailed.value = false;
     } catch (error: Promise<string>) {
       csvOnlyUploadSFailed.value = true;
       const message = await error;
-      __updateGlobalUploadProgress(ProgressStepType.Upload,ProgressStepStatus.Failed);
+      __updateGlobalUploadProgress(
+        ProgressStepType.Upload,
+        ProgressStepStatus.Failed,
+      );
       throw Error(message);
     }
-
-  }
+  };
 
   const __uploadMediafilesWithTicketUrl = async (
     isLinkedUpload: boolean,
@@ -188,7 +193,7 @@ const useUpload = () => {
   };
 
   const upload = async (isLinkedUpload: boolean, config: any, t: Function) => {
-    if (!validateFiles())  return;
+    if (!validateFiles()) return;
     __updateGlobalUploadProgress(
       ProgressStepType.Upload,
       ProgressStepStatus.Loading,
@@ -203,8 +208,7 @@ const useUpload = () => {
 
     if (uploadFlow.value === UploadFlow.CsvOnly)
       await __uploadCsvWithoutMediafiles();
-    else
-      await __uploadMediafilesWithTicketUrl(isLinkedUpload, config, t);
+    else await __uploadMediafilesWithTicketUrl(isLinkedUpload, config, t);
   };
 
   const uploadCsvForReordering = async (parentId: string) => {
@@ -578,8 +582,7 @@ const useUpload = () => {
   }
 
   const validateFiles = () => {
-    if (uploadFlow.value === UploadFlow.CsvOnly)
-      return containsCsv.value;
+    if (uploadFlow.value === UploadFlow.CsvOnly) return containsCsv.value;
 
     if (
       uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv ||
@@ -707,7 +710,7 @@ const useUpload = () => {
             file,
             ProgressStepType.Validate,
             ProgressStepStatus.Failed,
-            [`${file.name} is extraneous`],
+            [`${file.name} is not in CSV`],
           );
         }
       });
@@ -716,7 +719,7 @@ const useUpload = () => {
         ProgressStepType.Prepare,
         areAllFilesPresent
           ? ProgressStepStatus.Complete
-          : ProgressStepStatus.Failed,
+          : ProgressStepStatus.Incomplete,
       );
 
       return areAllFilesPresent;
