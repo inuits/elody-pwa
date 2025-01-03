@@ -1,5 +1,5 @@
 <template>
-  <div class="flex gap-2">
+  <div class="flex flex-col gap-2">
     <div v-if="media && !imageSrcError" :class="['flex items-center']">
       <ImageViewer
         v-if="media"
