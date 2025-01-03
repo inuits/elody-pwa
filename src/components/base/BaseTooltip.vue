@@ -46,8 +46,8 @@ const {
 } = defineProps<{
   position: Placement;
   tooltipOffset: number;
-  maxWidth: number | string;
-  enableAutoPlacement: boolean;
+  maxWidth?: number | string;
+  enableAutoPlacement?: boolean;
 }>();
 const hover = ref(false);
 
@@ -61,7 +61,9 @@ const { floatingStyles } = useFloating(activatorSlotRef, defaultSlotRef, {
   placement: position,
   middleware: [
     offset(tooltipOffset),
-    autoPlacement({ placement: position, autoPlacement: enableAutoPlacement }),
+    ...(enableAutoPlacement
+      ? [autoPlacement({ placement: position, autoPlacement: true })]
+      : []),
   ],
   open: hover,
 });
