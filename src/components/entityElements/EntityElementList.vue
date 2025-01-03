@@ -32,10 +32,10 @@
               SearchInputType.AdvancedInputMediaFilesType
             "
             :predefined-entities="
-              entityUuid ===
+              entityId ===
                 mediafileSelectionState[customQueryFilters].selectedMediafile
                   ?.id ||
-              entityUuid ===
+              entityId ===
                 mediafileSelectionState[customQueryFilters].selectedMediafile
                   ?.uuid
                 ? [
@@ -49,10 +49,10 @@
             :enable-bulk-operations="true"
             :enable-navigation="enableNavigation"
             :parent-entity-identifiers="
-              entityUuid ===
+              entityId ===
                 mediafileSelectionState[customQueryFilters].selectedMediafile
                   ?.id ||
-              entityUuid ===
+              entityId ===
                 mediafileSelectionState[customQueryFilters].selectedMediafile
                   ?.uuid
                 ? undefined
@@ -166,7 +166,7 @@ const props = withDefaults(
     viewMode?: EntityListViewMode;
     enableNavigation?: boolean;
     baseLibraryMode?: BaseLibraryModes;
-    entityUuid: string;
+    entityId: string;
     entityListElements?: EntityListElement[];
     allowedActionsOnRelations?: RelationActions[];
     fetchDeepRelations?: FetchDeepRelations;

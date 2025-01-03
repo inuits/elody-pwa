@@ -48,6 +48,7 @@ const props = defineProps<{
   intialValues: IntialValues;
   relationValues: { [key: string]: any };
   uuid: string;
+  id: string;
   type: string;
   deleteQueryOptions?: DeleteQueryOptions;
 }>();
@@ -85,11 +86,12 @@ const { mutate } = useMutation<
   MutateEntityValuesMutationVariables
 >(MutateEntityValuesDocument);
 
-let form = createForm(props.uuid, {
+let form = createForm(props.id, {
   intialValues: unref(props.intialValues),
   relationValues: unref(props.relationValues),
   relationMetadata: {},
   relatedEntityData: {},
+  uuid: props.uuid,
 });
 let mutatedEntity: Entity | undefined;
 const formContainsErrors = computed((): boolean => !form?.meta.value.valid);
@@ -106,8 +108,8 @@ const submit = useSubmitForm<EntityValues>(async () => {
   if (!collection) throw Error("Could not determine collection for submit");
 
   const result = await mutate({
-    id: props.uuid,
-    formInput: parseFormValuesToFormInput(props.uuid, unref(form.values)),
+    id: props.id,
+    formInput: parseFormValuesToFormInput(props.id, unref(form.values)),
     collection,
   });
 

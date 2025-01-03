@@ -9,6 +9,7 @@
         :intial-values="intialValues"
         :relation-values="relationValues"
         :uuid="entity.uuid"
+        :id="entity.id"
         :type="entityType"
         :delete-query-options="entity.deleteQueryOptions"
       >
@@ -16,7 +17,7 @@
           v-if="columnList != 'no-values'"
           :columnList="columnList"
           :identifiers="identifiers"
-          :uuid="entity.uuid"
+          :id="entity.id"
           :entity-type="entity.__typename"
         ></entity-column>
       </entity-form>
