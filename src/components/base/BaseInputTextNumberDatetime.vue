@@ -2,8 +2,11 @@
   <input
     data-cy="base-input-text"
     v-if="type !== 'textarea' && type !== 'checkbox'"
-    class="w-full h-full border rounded-lg focus:ring-0"
+    class=""
     :class="[
+      'border rounded-lg focus:ring-0',
+      { 'w-full h-full': type !== 'color' },
+      { 'w-10 h-6 mt-2': type === 'color' },
       `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
       `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
     ]"
@@ -103,13 +106,13 @@ const props = withDefaults(
     step: 1,
     disabled: false,
     isValidPredicate: () => true,
-  }
+  },
 );
 
 const emit = defineEmits<{
   (
     event: "update:modelValue",
-    modelValue: string | number | boolean | undefined
+    modelValue: string | number | boolean | undefined,
   ): void;
 }>();
 
