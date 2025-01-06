@@ -1,15 +1,12 @@
 <template>
   <div
-    :class="[
-      'flex flex-col w-full overflow-y-auto',
-      `${getDropzoneSize(dropzoneSize)}`,
-    ]"
+    :class="['flex flex-col w-full', `${getDropzoneSize(dropzoneSize)}`]"
     :key="uploadFieldType"
   >
     <dropzone
       :dropzone="dropzone"
       :dropzone-label="dropzoneLabel"
-      view-style="p-3 h-full overflow-x-hidden mb-4"
+      view-style="p-3 h-full overflow-x-hidden mb-4 flex-grow"
       :isValidationFile="dryRun"
       :template-csvs="templateCsvs"
     />
@@ -45,14 +42,14 @@ const props = withDefaults(
     isLinkedUpload: false,
     dryRun: false,
     templateCsvs: undefined,
-  }
+  },
 );
 
 const getDropzoneSize = (size: "small" | "normal" | "big") => {
   const sizeObject = {
-    small: "h-[15vh]",
-    normal: "h-[50vh]",
-    big: "h-[85vh]",
+    small: "min-h-[15vh]",
+    normal: "min-h-[50vh]",
+    big: "min-h-[85vh]",
   };
   return sizeObject[size];
 };
@@ -77,7 +74,7 @@ watch(
   () => {
     setUseUploadVariables();
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 
