@@ -1,5 +1,8 @@
 <template>
-  <div data-cy="dynamic-form-upload-button" class="rounded-md pb-2">
+  <div
+    data-cy="dynamic-form-upload-button"
+    class="rounded-md pb-2 bg-neutral-white absolute bottom-0 left-0 w-full"
+  >
     <div class="flex">
       <div
         v-if="missingFileNames.length"
