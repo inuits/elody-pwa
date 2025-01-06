@@ -201,6 +201,7 @@ import {
   BulkOperationsContextEnum,
 } from "@/composables/useBulkOperations";
 import { useFiltersBase } from "@/composables/useFiltersBase";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 const props = withDefaults(
   defineProps<{
@@ -378,15 +379,28 @@ const handleAdvancedFilters = () => {
                 advancedFilter.hidden) // this needs a refactor
             ) {
               if (props.parentEntityIdentifiers.length > 0) {
+                const relationsRegex = /^parent.relations-\$(.+)$/;
+                let match = hiddenFilter?.value.length > 0 ? hiddenFilter?.value?.match(relationsRegex) : false;
+                if (match && match[1]) {
+                  const form = useFormHelper().getForm(props.route.params["id"]);
+                  const relations = form.values.relationValues;
+                  const defaultValueInfo = match[1].split("-");
+                  if (defaultValueInfo[0] === "components") {
+                    const relation = relations.components.filter((relation) => relation.label === defaultValueInfo[defaultValueInfo.length-1]);
+                    if (relation.length > 0) hiddenFilter.value = [relation[0].key];
+                  }
+                }
+
                 if (
                   Array.isArray(hiddenFilter.value) &&
-                  hiddenFilter?.value.length > 0
+                  hiddenFilter?.value.length > 0 &&
+                  !match
                 ) {
-                  hiddenFilter.value = [
-                    ...props.parentEntityIdentifiers,
-                    ...hiddenFilter?.value,
-                  ];
-                } else {
+                    hiddenFilter.value = [
+                      ...props.parentEntityIdentifiers,
+                      ...hiddenFilter?.value,
+                    ];
+                } else if (!match) {
                   hiddenFilter.value = props.parentEntityIdentifiers;
                 }
                 if (advancedFilter.itemTypes)
