@@ -58,7 +58,7 @@
             ).filter((containerField) => typeof containerField === 'object')"
             :key="idx"
           >
-            <div class="pb-2">
+            <div class="pb-10">
               <upload-interface-dropzone
                 v-if="uploadContainerField.__typename === 'UploadField'"
                 :upload-flow="(field as UploadContainer).uploadFlow"
