@@ -82,7 +82,6 @@ const applyFilterToLibrary = () => {
     };
   });
   filters.push(...typeFilters);
-  console.log(filters);
   emit("updateFilters", filters);
 };
 
