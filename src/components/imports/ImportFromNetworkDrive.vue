@@ -33,12 +33,12 @@
 import {
   Entitytyping,
   GetDirectoriesDocument,
-  PostStartImportDocument,
+  PostStartImportDocument
 } from "@/generated-types/queries";
 import {
   useNotification,
   NotificationType,
-} from "../components/base/BaseNotification.vue";
+} from "../base/BaseNotification.vue";
 import FolderTreeLine from "@/components/FolderTreeLine.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
@@ -102,7 +102,7 @@ const doImport = (folder) => {
         createNotificationOverwrite(
           NotificationType.default,
           "Import",
-          t(`import.start-import`)
+          t(`import.import-started`)
         );
         goToEntityTypeRoute(
           Entitytyping.Job,

@@ -19,10 +19,14 @@
         :key="`${dynamicFormQuery}_field_${index}`"
         class="pb-2"
       >
-        <ImportComponent
+        <ImportWrapper
           v-if="
-            field.inputField?.type === BaseFieldType.BaseFileSystemImportField
+            field.inputField?.type === BaseFieldType.BaseFileSystemImportField ||
+            field.inputField?.type === BaseFieldType.BaseMagazineWithMetsImportField ||
+            field.inputField?.type === BaseFieldType.BaseMagazineWithCsvImportField ||
+            field.inputField?.type === BaseFieldType.BaseOcrImportField
           "
+          :input-field-type="field.inputField?.type"
           :close-and-delete-form="closeAndDeleteForm"
         />
         <EntityPickerComponent
@@ -219,16 +223,15 @@ import {
   useNotification,
 } from "@/components/base/BaseNotification.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
-import ImportComponent from "@/components/ImportComponent.vue";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import { useMutation } from "@vue/apollo-composable";
 import { type ApolloClient, ApolloError } from "@apollo/client/core";
-import { Unicons } from "@/types";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { useModalActions } from "@/composables/useModalActions";
 import { useErrorCodes } from "@/composables/useErrorCodes";
+import ImportWrapper from "@/components/imports/ImportWrapper.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -248,6 +251,9 @@ type FormFieldTypes = UploadContainer | PanelMetaData | FormAction;
 const nonStandardFieldTypes: BaseFieldType[] = [
   BaseFieldType.BaseFileSystemImportField,
   BaseFieldType.BaseEntityPickerField,
+  BaseFieldType.BaseMagazineWithMetsImportField,
+  BaseFieldType.BaseMagazineWithCsvImportField,
+  BaseFieldType.BaseOcrImportField,
 ];
 
 const modalFormFields = props.modalFormFields;
