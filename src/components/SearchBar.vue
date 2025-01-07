@@ -59,10 +59,9 @@ const entityTypeFilters = computed(() =>
 );
 onBeforeMount(() => applyFilterToLibrary());
 const applyFilterToLibrary = () => {
-  let filters: object[];
+  let filters: Array<AdvancedFilterInput> = [];
   if (entityTypeFilters.value !== undefined)
     filters = [...entityTypeFilters.value];
-  else filters = [];
   const item_types = config.features.simpleSearch.itemTypes;
   const metadataKeys = config.features.simpleSearch.simpleSearchMetadataKey;
   for (let index in metadataKeys) {
@@ -71,10 +70,19 @@ const applyFilterToLibrary = () => {
       value: inputValue.value,
       type: AdvancedFilterTypes.Text,
       operator: "or",
+      match_exact: false,
     });
-    if (item_types)
-      filters.forEach((filter) => (filter["item_types"] = item_types));
   }
+  if (!item_types) emit("updateFilters", filters);
+  const typeFilters = item_types.map((item_type: string) => {
+    return {
+      match_exact: true,
+      type: AdvancedFilterTypes.Type,
+      value: item_type,
+    };
+  });
+  filters.push(...typeFilters);
+  console.log(filters);
   emit("updateFilters", filters);
 };
 
