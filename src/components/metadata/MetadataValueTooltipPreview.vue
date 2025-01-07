@@ -28,7 +28,6 @@
         form-id="listview"
         :metadata="metadataItem"
         :is-edit="false"
-        :linked-entity-id="entity.id"
       />
     </div>
   </div>

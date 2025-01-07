@@ -3,7 +3,7 @@
     class="w-full"
     position="right-end"
     :tooltip-offset="8"
-    :max-width="isPreviewType ? 'md' : 56"
+    :max-width="isPreviewType ? '[24rem]' : 56"
     :enable-auto-placement="false"
     v-if="canBeShownForPreviewType || canBeShownForPlaneType"
   >
@@ -13,7 +13,7 @@
       </div>
     </template>
     <template #default>
-      <div :class="`min-w-${isPreviewType ? 'md' : '56'} min-h-10`">
+      <div :class="`max-w-[24rem] min-h-10`">
         <MetadataValueTooltipPreview
           v-if="canBeShownForPreviewType"
           :entity="entity"
