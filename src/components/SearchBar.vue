@@ -73,7 +73,7 @@ const applyFilterToLibrary = () => {
       match_exact: false,
     });
   }
-  if (!item_types) emit("updateFilters", filters);
+  if (!item_types) return emit("updateFilters", filters);
   const typeFilters = item_types.map((item_type: string) => {
     return {
       match_exact: true,
