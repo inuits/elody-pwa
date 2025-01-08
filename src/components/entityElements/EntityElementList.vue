@@ -103,6 +103,7 @@
               customQueryEntityPickerListFilters
             "
             :fetch-deep-relations="fetchDeepRelations"
+            :filters-need-context="filtersNeedContext"
           />
         </div>
       </template>
@@ -121,6 +122,7 @@ import {
   BaseLibraryModes,
   RelationActions,
   FetchDeepRelations,
+  EntitySubelement
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -172,6 +174,7 @@ const props = withDefaults(
     fetchDeepRelations?: FetchDeepRelations;
     entityType: Entitytyping;
     can?: string[];
+    filtersNeedContext?: EntitySubelement[];
   }>(),
   {
     types: () => [],
@@ -180,6 +183,7 @@ const props = withDefaults(
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     entityListElements: undefined,
     allowedActionsOnRelations: () => [],
+    filtersNeedContext: undefined,
   }
 );
 
