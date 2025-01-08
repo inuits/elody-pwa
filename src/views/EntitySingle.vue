@@ -39,6 +39,8 @@ import {
   type GetEntityByIdQuery,
   type BaseEntity,
   type MediaFileEntity,
+  type PanelMetaData,
+  InputFieldTypes,
   Column,
   MediaFileElementTypes,
   EntityListElement,
@@ -52,6 +54,7 @@ import {
   getTitleOrNameFromEntity,
   getMappedSlug,
   mapUrlToEntityType,
+  extractObjectsByTypename,
 } from "@/helpers";
 import { reactive, ref, watch, inject, computed, onBeforeMount } from "vue";
 import { auth } from "@/main";
@@ -189,6 +192,29 @@ onBeforeRouteUpdate(async (to: any) => {
   disableEditMode();
 });
 
+const determineDefaultInitialData = (initialData: any, columns: ColumnList) => {
+  const metadataFields = extractObjectsByTypename(columns, "PanelMetaData");
+
+  const newInitialData = { ...initialData };
+  const arrayMetadataFields = [
+    InputFieldTypes.DropdownMultiselectMetadata,
+    InputFieldTypes.DropdownSingleselectMetadata,
+  ];
+
+  (metadataFields as PanelMetaData[]).forEach((field: PanelMetaData) => {
+    const isMetadataCanBeAnArray = arrayMetadataFields.includes(
+      field.inputField?.type as InputFieldTypes,
+    );
+    const isMetadataEmpty = newInitialData[field.key] === "";
+
+    if (isMetadataCanBeAnArray && isMetadataEmpty) {
+      newInitialData[field.key] = [];
+    }
+  });
+
+  return newInitialData;
+};
+
 watch(
   () => result.value,
   (newvalue, oldvalue) => {
@@ -200,7 +226,10 @@ watch(
     determineBreadcrumbs();
 
     identifiers.value = [entity.value.uuid, entity.value.id];
-    intialValues.value = entity.value.intialValues;
+    intialValues.value = determineDefaultInitialData(
+      entity.value.intialValues,
+      entity.value.entityView,
+    );
     relationValues.value = entity.value.relationValues;
     columnList.value = entity.value.entityView;
     determineContextsForMediafileViewer();
