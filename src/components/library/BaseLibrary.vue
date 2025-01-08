@@ -57,6 +57,7 @@
               :enable-save-search-filters="enableSaveSearchFilters"
               :entity-type="entityType as Entitytyping"
               :should-use-state-for-route="shouldUseStateForRoute"
+              :filters-need-context="filtersNeedContext"
               @filter-matcher-mapping-promise="
                 (promise) => (filterMatcherMappingPromise = promise)
               "
@@ -238,6 +239,7 @@ import {
   Entitytyping,
   SearchInputType,
   TypeModals,
+  EntitySubelement
 } from "@/generated-types/queries";
 import { useBulkOperations } from "@/composables/useBulkOperations";
 import type {
@@ -304,6 +306,7 @@ export type BaseLibraryProps = {
   customQueryEntityPickerListFilters?: string;
   fetchDeepRelations?: FetchDeepRelations;
   parentEntityType?: Entitytyping;
+  filtersNeedContext?: EntitySubelement[];
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -331,6 +334,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   customBulkOperations: undefined,
   enableSaveSearchFilters: true,
   shouldUseStateForRoute: true,
+  filtersNeedContext: undefined,
 });
 
 const emit = defineEmits<{

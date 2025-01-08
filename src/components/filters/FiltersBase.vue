@@ -177,6 +177,7 @@ import {
   type FilterMatcherMap,
   type GetFilterMatcherMappingQuery,
   type Maybe,
+  EntitySubelement
 } from "@/generated-types/queries";
 import { useStateManagement } from "@/composables/useStateManagement";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
@@ -213,11 +214,13 @@ const props = withDefaults(
     enableSaveSearchFilters: boolean;
     entityType: Entitytyping;
     shouldUseStateForRoute: boolean;
+    filtersNeedContext?: EntitySubelement[];
   }>(),
   {
     parentEntityIdentifiers: () => [],
     enableSaveSearchFilters: true,
     shouldUseStateForRoute: true,
+    filtersNeedContext: undefined,
   },
 );
 
@@ -302,12 +305,21 @@ const filterMatcherMappingPromise = async () => {
 };
 
 const advancedFiltersPromise = async (entityType: Entitytyping) => {
+  const variables = { entityType: entityType, context: undefined };
+  if (props.filtersNeedContext) {
+    variables.context = [];
+    const formValues = useFormHelper().getForm(props.route.params["id"])?.values;
+    props.filtersNeedContext.forEach((contextItem) => {
+      variables.context.push(formValues[contextItem]);
+    });
+  }
+
   return apolloClient
     .query({
       query: props.manipulationQuery?.filtersDocument
         ? props.manipulationQuery.filtersDocument
         : GetAdvancedFiltersDocument,
-      variables: { entityType },
+      variables: variables,
       fetchPolicy: "no-cache",
       notifyOnNetworkStatusChange: true,
     })
@@ -367,40 +379,28 @@ const handleAdvancedFilters = () => {
 
             if (
               advancedFilter.hidden &&
-              advancedFilter.defaultValue === "entityType"
+              advancedFilter.defaultValue === "entityType" &&
+              !advancedFilter.doNotOverrideDefaultValue
             ) {
               hiddenFilter.value = router.meta.entityType;
             }
 
             if (
-              advancedFilter.parentKey === "relations" ||
-              advancedFilter.parentKey === "edge" ||
-              (advancedFilter.type === AdvancedFilterTypes.Selection &&
-                advancedFilter.hidden) // this needs a refactor
-            ) {
+              advancedFilter.type === AdvancedFilterTypes.Selection &&
+              advancedFilter.hidden &&
+              !advancedFilter.doNotOverrideDefaultValue
+            ) // this needs a refactor
+            {
               if (props.parentEntityIdentifiers.length > 0) {
-                const relationsRegex = /^parent.relations-\$(.+)$/;
-                let match = hiddenFilter?.value.length > 0 ? hiddenFilter?.value?.match(relationsRegex) : false;
-                if (match && match[1]) {
-                  const form = useFormHelper().getForm(props.route.params["id"]);
-                  const relations = form.values.relationValues;
-                  const defaultValueInfo = match[1].split("-");
-                  if (defaultValueInfo[0] === "components") {
-                    const relation = relations.components.filter((relation) => relation.label === defaultValueInfo[defaultValueInfo.length-1]);
-                    if (relation.length > 0) hiddenFilter.value = [relation[0].key];
-                  }
-                }
-
                 if (
                   Array.isArray(hiddenFilter.value) &&
-                  hiddenFilter?.value.length > 0 &&
-                  !match
+                  hiddenFilter?.value.length > 0
                 ) {
                     hiddenFilter.value = [
                       ...props.parentEntityIdentifiers,
                       ...hiddenFilter?.value,
                     ];
-                } else if (!match) {
+                } else {
                   hiddenFilter.value = props.parentEntityIdentifiers;
                 }
                 if (advancedFilter.itemTypes)
