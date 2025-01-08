@@ -257,8 +257,8 @@ export const useErrorCodes = (): {
     if (responseType === "graphql") {
       const graphQLError = error as GraphQLError;
       const statusCode: number =
-        graphQLError.response.errors[0]?.extensions?.response?.status.toString() ||
-        graphQLError.response.errors[0]?.extensions?.statusCode.toString();
+        graphQLError.response.errors[0]?.extensions?.response?.status?.toString() ||
+        graphQLError.response.errors[0]?.extensions?.statusCode?.toString();
       const message: string =
         graphQLError.extensions?.response?.body?.message ||
         graphQLError.message;

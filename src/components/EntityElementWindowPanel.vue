@@ -74,6 +74,7 @@
               :custom-query="metadata.customQuery"
               :custom-query-relation-type="metadata.customQueryRelationType"
               :custom-query-filters="metadata.customQueryFilters"
+              :filters-need-context="metadata.filtersNeedContext"
               :search-input-type="metadata.searchInputType"
               :base-library-mode="metadata.baseLibraryMode"
               :entity-list-elements="
