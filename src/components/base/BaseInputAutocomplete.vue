@@ -11,6 +11,7 @@
     :classes="classes"
     :caret="!disabled"
     :placeholder="placeholder"
+    :append-to="someModalIsOpened ? '.base-modal--opened' : undefined"
     :loading="loading"
     :disabled="disabled"
     :noOptionsText="noOptionsText"
@@ -18,10 +19,12 @@
     :create-option="canCreateOption"
     label="label"
     valueProp="value"
-    @search-change="(value: string) => {
+    @search-change="
+      (value: string) => {
         searchValue = value;
         emit('searchChange', value);
-      }"
+      }
+    "
     :on-create="handleTagCreate"
   />
 </template>
@@ -30,6 +33,7 @@
 import type { DropdownOption } from "@/generated-types/queries";
 import Multiselect from "@vueform/multiselect";
 import { computed, onMounted, ref, watch } from "vue";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 type AutocompleteStyle = "default" | "defaultWithBorder" | "readOnly";
 
@@ -53,7 +57,7 @@ const props = withDefaults(
     relation: false,
     loading: false,
     canCreateOption: false,
-  }
+  },
 );
 
 const emit = defineEmits<{
@@ -62,6 +66,7 @@ const emit = defineEmits<{
   (event: "addOption", option: DropdownOption[]): void;
 }>();
 
+const { someModalIsOpened } = useBaseModal();
 const classes = ref();
 const searchValue = ref<string>();
 
@@ -101,9 +106,8 @@ const setClasses = () => {
   classes.value["dropdown"] = "multiselect-dropdown -bottom-px";
 
   if (props.autocompleteStyle === "defaultWithBorder") {
-    classes.value[
-      "container"
-    ] = `${defaultContainerStyles} border-[rgba(0,58,82,0.6)]`;
+    classes.value["container"] =
+      `${defaultContainerStyles} border-[rgba(0,58,82,0.6)]`;
   }
 
   if (props.autocompleteStyle === "readOnly") {
@@ -117,7 +121,7 @@ onMounted(() => setClasses());
 
 watch(
   () => [inputValue.value, props.options],
-  () => setClasses()
+  () => setClasses(),
 );
 
 const handleTagCreate = async (option: any) => {
