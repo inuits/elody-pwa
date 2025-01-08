@@ -3,7 +3,7 @@
     v-if="mode === 'edit' || (modelValue && modelValue.length > 0)"
     v-model="inputValue"
     :autocomplete-style="!disabled ? 'defaultWithBorder' : 'readOnly'"
-    :options="!disabled ? dropdownOptions : selectedDropdownOptions"
+    :options="dropdownOptions"
     :select-type="selectType"
     :disabled="disabled"
     :can-create-option="canCreateOption"
@@ -19,10 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  DamsIcons,
-  DropdownOption,
-} from "@/generated-types/queries";
+import { DamsIcons, DropdownOption } from "@/generated-types/queries";
 import { ref, computed } from "vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 
@@ -47,16 +44,22 @@ const props = withDefaults(
     disabled: false,
     canCreateOption: false,
     mode: "view",
-  }
+  },
 );
 
-const dropdownOptions = ref<DropdownOption[]>(props.metadataDropdownOptions);
+const dropdownOptions = ref<DropdownOption[]>(
+  props.metadataDropdownOptions || [],
+);
 const inputValue = computed<DropdownOption[] | undefined>({
   get() {
     return mapModelValueToDropdownOptions(props.modelValue);
   },
   set(value) {
-    emit("update:modelValue", Array.isArray(value) ? value : [value]);
+    console.log('original value: ', value)
+    let valueToEmit = Array.isArray(value) ? value : [value];
+    valueToEmit = valueToEmit.length === 0 ? "" : valueToEmit;
+    console.log(valueToEmit)
+    emit("update:modelValue", valueToEmit);
   },
 });
 
@@ -70,21 +73,24 @@ const mapModelValueToDropdownOptions = (values: any[]): DropdownOption[] => {
         icon: DamsIcons.NoIcon,
         label: item,
         value: item,
-        __typename: "DropdownOption"
+        __typename: "DropdownOption",
       };
     });
   }
 
-  return [{
-    icon: DamsIcons.NoIcon,
-    label: values,
-    value: values,
-    __typename: "DropdownOption"
-  }];
-}
+  return [
+    {
+      icon: DamsIcons.NoIcon,
+      label: values,
+      value: values,
+      __typename: "DropdownOption",
+    },
+  ];
+};
 
 const filterAutocompleteOptions = (value: string): void => {
-  dropdownOptions.value = props.metadataDropdownOptions.filter((option: DropdownOption) => option.value.includes(value));
-}
-
+  dropdownOptions.value = props.metadataDropdownOptions.filter(
+    (option: DropdownOption) => option.value.includes(value),
+  );
+};
 </script>
