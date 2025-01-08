@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="isLoading"
-    class="bg-neutral-100 h-100 w-100 opacity-40 animate-pulse"
+    class="relative bg-neutral-100 h-100 w-100 opacity-40 animate-pulse z-0"
   />
   <img v-else :src="imageUrl" />
 </template>

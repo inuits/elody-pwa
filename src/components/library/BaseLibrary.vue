@@ -37,7 +37,7 @@
         <div
           :class="[
             {
-              'top-0 mb-2 pt-4 bg-neutral-lightest':
+              'relative top-0 mb-2 pt-4 bg-neutral-lightest z-40':
                 baseLibraryMode === BaseLibraryModes.NormalBaseLibrary,
             },
             { sticky: hasStickyBars },
