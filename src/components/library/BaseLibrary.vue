@@ -35,7 +35,7 @@
         ]"
       >
         <div
-          class="z-[40]"
+          class="relative z-[40]"
           :class="[
             'z-40',
             {
