@@ -3,7 +3,7 @@
     data-cy="menu-nav"
     ref="navigation"
     :class="[
-      'navbar fixed left-0 top-0 w-24 h-screen align-center pt-10 bg-neutral-white px-5 pb-16 z-40',
+      'navbar fixed left-0 top-0 w-24 h-screen align-center pt-10 bg-neutral-white px-5 pb-16 z-[100]',
       { 'w-80': isExpanded },
     ]"
     @click.self="changeExpandedStateOfMenu(true)"
