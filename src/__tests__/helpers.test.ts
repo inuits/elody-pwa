@@ -1,10 +1,16 @@
 import { describe, it, expect, vi } from "vitest";
 import {
   getEntityPageRoute,
-  getMappedTypeForRoute,
+  getMappedSlug,
   mapUrlToEntityType,
+  extractObjectsByTypename,
+  determineDefaultIntialValues,
 } from "@/helpers";
-import { Entity } from "@/generated-types/queries";
+import {
+  type Entity,
+  type ColumnList,
+  InputFieldTypes,
+} from "@/generated-types/queries";
 
 vi.mock("@/main", () => ({
   typeUrlMapping: {
@@ -26,16 +32,16 @@ vi.mock("@/main", () => ({
 }));
 
 describe("Entity Mapping Functions", () => {
-  describe("getMappedTypeForRoute", () => {
+  describe("getMappedSlug", () => {
     it("should return the mapped type for a known entity type", () => {
       const entity: Entity = { __typename: "Product" };
-      const result = getMappedTypeForRoute(entity);
+      const result = getMappedSlug(entity);
       expect(result).toBe("our-products");
     });
 
     it("should return the entity type when no mapping exists", () => {
       const entity: Entity = { __typename: "Unknown", type: "UnknownType" };
-      const result = getMappedTypeForRoute(entity);
+      const result = getMappedSlug(entity);
       expect(result).toBe("UnknownType");
     });
   });
@@ -97,5 +103,103 @@ describe("Entity Mapping Functions", () => {
         },
       });
     });
+  });
+});
+
+describe("determineDefaultIntialValues", () => {
+  it("should replace empty string with an array for fields of specified type", () => {
+    const initialData = {
+      field1: "",
+      field2: "value",
+      field3: "",
+    };
+
+    const columns: ColumnList = {
+      column: {
+        __typename: "PanelMetaData",
+        inputField: { type: InputFieldTypes.DropdownMultiselectMetadata },
+        key: "field1",
+      },
+      column2: {
+        __typename: "PanelMetaData",
+        inputField: { type: InputFieldTypes.DropdownMultiselectMetadata },
+        key: "field3",
+      },
+    };
+
+    const result = determineDefaultIntialValues(initialData, columns);
+
+    expect(result.field1).toEqual([]);
+    expect(result.field2).toEqual("value");
+    expect(result.field3).toEqual([]);
+  });
+
+  it("should not replace non-empty strings", () => {
+    const initialData = {
+      field1: "notEmpty",
+    };
+
+    const columns: ColumnList = {
+      column: {
+        __typename: "PanelMetaData",
+        inputField: { type: InputFieldTypes.DropdownMultiselectMetadata },
+        key: "field1",
+      },
+    };
+
+    const result = determineDefaultIntialValues(initialData, columns);
+
+    expect(result.field1).toEqual("notEmpty");
+  });
+
+  it("should not modify fields not of specified type", () => {
+    const initialData = {
+      field1: "",
+    };
+
+    const columns: ColumnList = {
+      column: {
+        __typename: "PanelMetaData",
+        inputField: { type: "someOtherType" },
+        key: "field1",
+      },
+    };
+
+    const result = determineDefaultIntialValues(initialData, columns);
+
+    expect(result.field1).toEqual("");
+  });
+});
+
+describe("extractObjectsByTypename", () => {
+  it("should extract objects matching the specified typename", () => {
+    const input = {
+      key1: { __typename: "PanelMetaData", data: "value1" },
+      key2: { __typename: "SomeOtherType", data: "value2" },
+      key3: {
+        nested: {
+          __typename: "PanelMetaData",
+          data: "value3",
+        },
+      },
+    };
+
+    const result = extractObjectsByTypename(input, "PanelMetaData");
+
+    expect(result).toEqual([
+      { __typename: "PanelMetaData", data: "value1" },
+      { __typename: "PanelMetaData", data: "value3" },
+    ]);
+  });
+
+  it("should return an empty array if no objects match the typename", () => {
+    const input = {
+      key1: { __typename: "SomeOtherType", data: "value1" },
+      key2: { __typename: "AnotherType", data: "value2" },
+    };
+
+    const result = extractObjectsByTypename(input, "PanelMetaData");
+
+    expect(result).toEqual([]);
   });
 });

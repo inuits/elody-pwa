@@ -9,6 +9,7 @@ import {
   type BaseEntity,
   type IntialValues,
   type Metadata,
+  type ColumnList,
   Entitytyping,
   InputFieldTypes,
   RouteNames,
@@ -630,4 +631,27 @@ export const extractObjectsByTypename = (
   recurse(obj);
 
   return result;
+};
+
+export const determineDefaultIntialValues = (
+  initialData: any,
+  columns: ColumnList,
+) => {
+  const metadataFields = extractObjectsByTypename(columns, "PanelMetaData");
+
+  const newInitialData = { ...initialData };
+  const arrayMetadataFields = [InputFieldTypes.DropdownMultiselectMetadata];
+
+  (metadataFields as PanelMetaData[]).forEach((field: PanelMetaData) => {
+    const isMetadataCanBeAnArray = arrayMetadataFields.includes(
+      field.inputField?.type as InputFieldTypes,
+    );
+    const isMetadataEmpty = newInitialData[field.key] === "";
+
+    if (isMetadataCanBeAnArray && isMetadataEmpty) {
+      newInitialData[field.key] = [];
+    }
+  });
+
+  return newInitialData;
 };

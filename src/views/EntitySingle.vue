@@ -54,7 +54,7 @@ import {
   getTitleOrNameFromEntity,
   getMappedSlug,
   mapUrlToEntityType,
-  extractObjectsByTypename,
+  determineDefaultIntialValues,
 } from "@/helpers";
 import { reactive, ref, watch, inject, computed, onBeforeMount } from "vue";
 import { auth } from "@/main";
@@ -192,26 +192,6 @@ onBeforeRouteUpdate(async (to: any) => {
   disableEditMode();
 });
 
-const determineDefaultInitialData = (initialData: any, columns: ColumnList) => {
-  const metadataFields = extractObjectsByTypename(columns, "PanelMetaData");
-
-  const newInitialData = { ...initialData };
-  const arrayMetadataFields = [InputFieldTypes.DropdownMultiselectMetadata];
-
-  (metadataFields as PanelMetaData[]).forEach((field: PanelMetaData) => {
-    const isMetadataCanBeAnArray = arrayMetadataFields.includes(
-      field.inputField?.type as InputFieldTypes,
-    );
-    const isMetadataEmpty = newInitialData[field.key] === "";
-
-    if (isMetadataCanBeAnArray && isMetadataEmpty) {
-      newInitialData[field.key] = [];
-    }
-  });
-
-  return newInitialData;
-};
-
 watch(
   () => result.value,
   (newvalue, oldvalue) => {
@@ -223,7 +203,7 @@ watch(
     determineBreadcrumbs();
 
     identifiers.value = [entity.value.uuid, entity.value.id];
-    intialValues.value = determineDefaultInitialData(
+    intialValues.value = determineDefaultIntialValues(
       entity.value.intialValues,
       entity.value.entityView,
     );
