@@ -78,7 +78,7 @@ const { createNotification } = useNotification();
 const { closeModal, openModal, updateDeleteQueryOptions } = useBaseModal();
 const { t } = useI18n();
 const childRoutes = getChildrenOfHomeRoutes(config).map(
-  (route: any) => route.meta
+  (route: any) => route.meta,
 );
 
 const { mutate } = useMutation<
@@ -102,7 +102,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
   const collection =
     childRoutes.find(
       (route: any) =>
-        route.entityType?.toLowerCase() === props.type.toLowerCase()
+        route.entityType?.toLowerCase() === props.type.toLowerCase(),
     )?.type || Collection.Entities;
 
   if (!collection) throw Error("Could not determine collection for submit");
@@ -142,7 +142,7 @@ onMounted(async () => {
   updateDeleteQueryOptions(props.deleteQueryOptions);
 });
 onUnmounted(() =>
-  document.removeEventListener("discardEdit", () => callRefetchFn)
+  document.removeEventListener("discardEdit", () => callRefetchFn),
 );
 
 watch(isEdit, () => {
@@ -151,10 +151,10 @@ watch(isEdit, () => {
     addSaveCallback(submit, "first");
   }
   dequeueAllItemsForBulkProcessing(
-    BulkOperationsContextEnum.EntityElementListEntityPickerModal
+    BulkOperationsContextEnum.EntityElementListEntityPickerModal,
   );
   dequeueAllItemsForBulkProcessing(
-    BulkOperationsContextEnum.EntityElementMediaEntityPickerModal
+    BulkOperationsContextEnum.EntityElementMediaEntityPickerModal,
   );
   mutatedEntity = undefined;
 });
@@ -166,7 +166,7 @@ watch(
       intialValues: props.intialValues,
       relationValues: props.relationValues,
     });
-  }
+  },
 );
 
 watch(
@@ -175,14 +175,14 @@ watch(
     await validateAndSetDisableState();
     if (!formContainsErrors.value && buttonClicked.value) resetButtonClicked();
   },
-  { deep: true }
+  { deep: true },
 );
 watch(
   () => buttonClicked.value,
   async () => {
     if (!buttonClicked.value) return;
     await validateAndSetDisableState();
-  }
+  },
 );
 
 const validateAndSetDisableState = async () => {

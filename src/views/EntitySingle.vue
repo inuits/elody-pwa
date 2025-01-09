@@ -39,6 +39,8 @@ import {
   type GetEntityByIdQuery,
   type BaseEntity,
   type MediaFileEntity,
+  type PanelMetaData,
+  InputFieldTypes,
   Column,
   MediaFileElementTypes,
   EntityListElement,
@@ -52,6 +54,7 @@ import {
   getTitleOrNameFromEntity,
   getMappedSlug,
   mapUrlToEntityType,
+  determineDefaultIntialValues,
 } from "@/helpers";
 import { reactive, ref, watch, inject, computed, onBeforeMount } from "vue";
 import { auth } from "@/main";
@@ -200,7 +203,10 @@ watch(
     determineBreadcrumbs();
 
     identifiers.value = [entity.value.uuid, entity.value.id];
-    intialValues.value = entity.value.intialValues;
+    intialValues.value = determineDefaultIntialValues(
+      entity.value.intialValues,
+      entity.value.entityView,
+    );
     relationValues.value = entity.value.relationValues;
     columnList.value = entity.value.entityView;
     determineContextsForMediafileViewer();
