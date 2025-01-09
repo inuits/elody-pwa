@@ -196,10 +196,7 @@ const determineDefaultInitialData = (initialData: any, columns: ColumnList) => {
   const metadataFields = extractObjectsByTypename(columns, "PanelMetaData");
 
   const newInitialData = { ...initialData };
-  const arrayMetadataFields = [
-    InputFieldTypes.DropdownMultiselectMetadata,
-    InputFieldTypes.DropdownSingleselectMetadata,
-  ];
+  const arrayMetadataFields = [InputFieldTypes.DropdownMultiselectMetadata];
 
   (metadataFields as PanelMetaData[]).forEach((field: PanelMetaData) => {
     const isMetadataCanBeAnArray = arrayMetadataFields.includes(
