@@ -140,10 +140,10 @@
       ]"
     >
       <div
-        v-for="metadataItem in teaserMetadata.filter(
+        v-for="(metadataItem, idx) in teaserMetadata.filter(
           (metadata) => !metadata.showOnlyInEditMode,
         )"
-        :key="metadataItem ? metadataItem.key : 'no-key'"
+        :key="metadataItem ? metadataItem.key : `no-key_${idx}`"
         :class="teaserMetadataStyle"
       >
         <metadata-wrapper

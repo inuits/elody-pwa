@@ -19,7 +19,7 @@ import { useStateManagement } from "@/composables/useStateManagement";
 export const useBaseLibrary = (
   apolloClient: ApolloClient<any>,
   shouldUseStateForRoute: boolean = true,
-  baseLibraryMode: BaseLibraryModes = BaseLibraryModes.NormalBaseLibrary
+  baseLibraryMode: BaseLibraryModes = BaseLibraryModes.NormalBaseLibrary,
 ) => {
   let entityType: Entitytyping = Entitytyping.BaseEntity;
   let _route: RouteLocationNormalizedLoaded | undefined;
@@ -50,7 +50,7 @@ export const useBaseLibrary = (
 
   const setManipulationOfQuery = (
     manipulate: boolean,
-    manipulation: object
+    manipulation: object,
   ) => {
     manipulateQuery.value = manipulate;
     manipulationQuery.value = manipulation;
@@ -77,7 +77,7 @@ export const useBaseLibrary = (
     filters: AdvancedFilterInput[],
     stateSaved: boolean = false,
     forceFetch: boolean = false,
-    route?: RouteLocationNormalizedLoaded
+    route?: RouteLocationNormalizedLoaded,
   ): Promise<void> => {
     if (filters === queryVariables.advancedFilterInputs && !isSaved.value)
       return;
@@ -93,7 +93,7 @@ export const useBaseLibrary = (
 
   const setSkip = async (
     skip: number,
-    forceFetch: boolean = false
+    forceFetch: boolean = false,
   ): Promise<void> => {
     queryVariables.skip = skip;
     if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
@@ -102,7 +102,7 @@ export const useBaseLibrary = (
 
   const setLimit = async (
     limit: number,
-    forceFetch: boolean = false
+    forceFetch: boolean = false,
   ): Promise<void> => {
     queryVariables.limit = limit;
     if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
@@ -111,7 +111,7 @@ export const useBaseLibrary = (
 
   const setSortKey = async (
     sortKey: string,
-    forceFetch: boolean = false
+    forceFetch: boolean = false,
   ): Promise<void> => {
     queryVariables.searchValue.order_by = sortKey;
     if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
@@ -120,7 +120,7 @@ export const useBaseLibrary = (
 
   const setSortOrder = async (
     sortOrder: "asc" | "desc",
-    forceFetch: boolean = false
+    forceFetch: boolean = false,
   ): Promise<void> => {
     queryVariables.searchValue.isAsc = sortOrder === "asc";
     if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
@@ -128,12 +128,12 @@ export const useBaseLibrary = (
   };
 
   const enqueuePromise = (
-    promise: (entityType: Entitytyping) => Promise<void>
+    promise: (entityType: Entitytyping) => Promise<void>,
   ) => {
     if (
       promise &&
       !promiseQueue.value.find(
-        (queuedPromise) => queuedPromise.name === promise.name
+        (queuedPromise) => queuedPromise.name === promise.name,
       )
     )
       promiseQueue.value.push(promise);
@@ -141,16 +141,16 @@ export const useBaseLibrary = (
 
   const getCustomBulkOperations = async () => {
     const bulkOperationsPromise = promiseQueue.value.find(
-      (promise) => promise.name === "customBulkOperationsPromise"
+      (promise) => promise.name === "customBulkOperationsPromise",
     );
     if (bulkOperationsPromise) await bulkOperationsPromise();
     promiseQueue.value = promiseQueue.value.filter(
-      (promise) => promise.name !== "customBulkOperationsPromise"
+      (promise) => promise.name !== "customBulkOperationsPromise",
     );
   };
 
   const getEntities = async (
-    route: RouteLocationNormalizedLoaded | undefined
+    route: RouteLocationNormalizedLoaded | undefined,
   ): Promise<void> => {
     if (entitiesLoading.value) return;
     entitiesLoading.value = true;
@@ -201,7 +201,7 @@ export const useBaseLibrary = (
 
   const getEntityById = async (
     entityType: Entitytyping,
-    id: string
+    id: string,
   ): Promise<void> => {
     const variables: GetEntityByIdQueryVariables = {
       id: id,
@@ -237,7 +237,7 @@ export const useBaseLibrary = (
           placeholderAmount = entityCountOnPage;
         entities.value = createPlaceholderEntities(placeholderAmount);
       }
-    }
+    },
   );
 
   return {
