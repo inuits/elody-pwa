@@ -55,7 +55,8 @@ const inputValue = computed<DropdownOption[] | undefined>({
     return mapModelValueToDropdownOptions(props.modelValue);
   },
   set(value) {
-    if (props.selectType === "single") return emit("update:modelValue", value);
+    if (props.selectType === "single")
+      return emit("update:modelValue", value[0]?.value || value[0]);
     emit("update:modelValue", Array.isArray(value) ? value : [value]);
   },
 });
