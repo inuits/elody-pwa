@@ -114,7 +114,7 @@
         (media && imageSrcError) ||
         (!media && isMediaType)
       "
-      :name="thumbIcon"
+      :key="`${itemId}-icon-${imageSize}`"
       :class="[
         { 'h-10 w-10': viewMode === 'list' },
         {
@@ -347,8 +347,8 @@ const toggleLoading = () => {
   loading.value = !loading.value;
 };
 
-const setNoImage = () => {
-  imageSrcError.value = true;
+const setNoImage = (value: boolean = true) => {
+  imageSrcError.value = value;
 };
 
 const canShowCopyRight = () => {
@@ -387,6 +387,14 @@ watch(
   () => isEdit.value,
   () => (!isEdit.value ? (isMarkedAsToBeDeleted.value = false) : ""),
 );
+
+watch(
+  () => props.viewMode,
+  () => {
+    setNoImage(false);
+  },
+);
+
 const removePreviewItem = (idx: number) => {
   deleteTeaserMetadataItemInState(props.itemId);
   remove(idx);
