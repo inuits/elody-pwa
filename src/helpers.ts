@@ -9,6 +9,7 @@ import {
   type BaseEntity,
   type IntialValues,
   type Metadata,
+  type ColumnList,
   Entitytyping,
   InputFieldTypes,
   RouteNames,
@@ -584,24 +585,73 @@ export const getTitleOrNameFromEntity = (entity: Entity): string => {
   );
 };
 
-export const getRouteMetadataInfoFromEntity = (config: any, entitytype: Entitytyping | string): any => {
+export const getRouteMetadataInfoFromEntity = (
+  config: any,
+  entitytype: Entitytyping | string,
+): any => {
   const homeRoutes = getChildrenOfHomeRoutes(config);
   const entityRoute = homeRoutes.filter(
     (item: any) =>
-      item.meta.entityType?.toLowerCase() === entitytype.toLowerCase()
+      item.meta.entityType?.toLowerCase() === entitytype.toLowerCase(),
   )[0];
   if (!entityRoute) return;
   return entityRoute.meta;
 };
 
 export function downloadCsv(fileName: string, csvString?: string): void {
-  const blob = new Blob([csvString], { type: 'text/csv' });
+  const blob = new Blob([csvString], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
 
-  const link = document.createElement('a');
+  const link = document.createElement("a");
   link.href = url;
   link.download = fileName;
   link.click();
 
   URL.revokeObjectURL(url);
 }
+
+export const extractObjectsByTypename = (
+  obj: Record<string, any>,
+  typename: string,
+): Record<string, any>[] => {
+  const result: Record<string, any>[] = [];
+
+  const recurse = (current: any): void => {
+    if (typeof current !== "object" || current === null) return;
+
+    if (current.__typename === typename) {
+      result.push(current);
+    }
+
+    Object.keys(current).forEach((key) => {
+      recurse(current[key]);
+    });
+  };
+
+  recurse(obj);
+
+  return result;
+};
+
+export const determineDefaultIntialValues = (
+  initialData: any,
+  columns: ColumnList,
+) => {
+  const metadataFields = extractObjectsByTypename(columns, "PanelMetaData");
+
+  const newInitialData = { ...initialData };
+  const arrayMetadataFields = [InputFieldTypes.DropdownMultiselectMetadata];
+
+  (metadataFields as PanelMetaData[]).forEach((field: PanelMetaData) => {
+    const isMetadataCanBeAnArray = arrayMetadataFields.includes(
+      field.inputField?.type as InputFieldTypes,
+    );
+    const isMetadataEmpty = newInitialData[field.key] === "";
+
+    if (isMetadataCanBeAnArray && isMetadataEmpty) {
+      newInitialData[field.key] = [];
+    }
+  });
+
+  return newInitialData;
+};
