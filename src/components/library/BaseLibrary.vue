@@ -35,7 +35,6 @@
         ]"
       >
         <div
-          class="relative z-[40]"
           :class="[
             'z-40',
             {
@@ -239,7 +238,7 @@ import {
   Entitytyping,
   SearchInputType,
   TypeModals,
-  EntitySubelement
+  EntitySubelement,
 } from "@/generated-types/queries";
 import { useBulkOperations } from "@/composables/useBulkOperations";
 import type {
