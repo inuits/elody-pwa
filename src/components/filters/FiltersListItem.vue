@@ -177,6 +177,7 @@ const icon = computed<string>(() =>
 const defaultMatcherMap: Partial<Record<AdvancedFilterTypes, string>> = {
   [AdvancedFilterTypes.Selection]: Matchers.EXACT_MATCHER,
   [AdvancedFilterTypes.Text]: Matchers.CONTAINS_MATCHERS,
+  [AdvancedFilterTypes.Boolean]: Matchers.EXACT_MATCHER,
 };
 
 const reloadMatcherComponent = () => {
@@ -248,6 +249,8 @@ watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
     isOpen.value = false;
     clearLastTypedValue();
+    advancedFilterInput.value.value = undefined;
+
     const matchersToResetToDefault = [
       Matchers.ANY_MATCHER,
       Matchers.NONE_MATCHER,
