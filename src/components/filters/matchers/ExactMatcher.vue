@@ -177,7 +177,7 @@ const mapOptionsFilterInput = (
         : filterInput.value,
       metadata_key_as_label: filterInput.metadata_key_as_label,
       item_types: filterInput.item_types ?? [],
-      provide_value_options_for_key: true,
+      provide_value_options_for_key: filterInput.type !== AdvancedFilterTypes.Type,
     });
   }
   return optionsFilterInput;
