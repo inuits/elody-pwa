@@ -145,6 +145,7 @@
         )"
         :key="metadataItem ? metadataItem.key : `no-key_${idx}`"
         :class="teaserMetadataStyle"
+        :style="metadataItem.width ? { width: metadataItem.width } : ''"
       >
         <metadata-wrapper
           :form-id="formId || 'listview'"
