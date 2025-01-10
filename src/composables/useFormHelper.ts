@@ -460,6 +460,32 @@ const useFormHelper = () => {
     return relations;
   };
 
+  const parseRelationRootDataForFormSubmit = (
+    relationRootdata: IntialValues,
+    relations: BaseRelationValuesInput[],
+    entityId: string,
+  ): BaseRelationValuesInput[] => {
+    const editableRelationRootdataItems = Object.entries(
+      relationRootdata,
+    ).filter((entry) => !editableFields.value[entityId].includes(entry.key));
+
+    editableRelationRootdataItems.forEach((entry) => {
+      const fieldKey: string = __fieldKeyWithoutId(entry[0]);
+      const fieldValue: any = entry[1];
+
+      const id = __linkedEntityId(entry[0]);
+      for (let i = 0; i < relations.length; i++) {
+        const relation = relations[i];
+        if (relation.key === id) {
+          relation[fieldKey] = fieldValue;
+          if (relation.editStatus !== EditStatus.Deleted)
+            relation.editStatus = EditStatus.Changed;
+        }
+      }
+    });
+    return relations;
+  };
+
   const parseFormValuesToFormInput = (uuid: string, values: EntityValues) => {
     let metadata: MetadataValuesInput[] = [];
     let relations: BaseRelationValuesInput[] = [];
@@ -468,9 +494,19 @@ const useFormHelper = () => {
       metadata = parseIntialValuesForFormSubmit(values.intialValues, uuid);
     if (values.relationValues)
       relations = parseRelationValuesForFormSubmit(values.relationValues);
+
+    console.log("Let the parsing begin:");
+    console.log(values.relationMetadata);
+    console.log(values.relationRootData);
     if (values.relationMetadata && relations)
       relations = parseRelationMetadataForFormSubmit(
         values.relationMetadata,
+        relations,
+        uuid,
+      );
+    if (values.relationRootdata && relations)
+      relations = parseRelationRootDataForFormSubmit(
+        values.relationRootdata,
         relations,
         uuid,
       );

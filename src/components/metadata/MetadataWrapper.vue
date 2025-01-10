@@ -47,7 +47,7 @@
     </div>
     <entity-element-metadata-edit
       v-if="isEdit && metadata.inputField"
-      :fieldKey="isMetadataOnRelation ? `${fieldKeyWithId}` : metadata.key"
+      :fieldKey="(isMetadataOnRelation || isRootdataOnRelation) ? `${fieldKeyWithId}` : metadata.key"
       :label="metadata.label as string"
       v-model:value="value"
       :field="metadata.inputField"
@@ -57,6 +57,7 @@
       :unit="metadata.unit"
       :link-text="metadata.linkText"
       :isMetadataOnRelation="isMetadataOnRelation"
+      :isRootdataOnRelation="isRootdataOnRelation"
       :error="errorMessage"
       :show-errors="
         showErrors ||
@@ -187,6 +188,7 @@ import {
   ValidationFields,
   type BaseRelationValuesInput,
   type PanelRelationMetaData,
+  type PanelRelationRootData,
 } from "@/generated-types/queries";
 import { computed, onMounted, onBeforeUnmount, watch, inject, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -211,7 +213,7 @@ const props = withDefaults(
   defineProps<{
     isEdit: boolean;
     formId: string;
-    metadata: PanelMetaData | PanelRelationMetaData;
+    metadata: PanelMetaData | PanelRelationMetaData | PanelRelationRootData;
     linkedEntityId?: String;
     baseLibraryMode?: BaseLibraryModes;
     formFlow?: "edit" | "create";
@@ -271,6 +273,9 @@ const metadadaValueToDisplayOnTooltip = computed(
 
 const isMetadataOnRelation = computed(
   () => props.metadata.__typename === "PanelRelationMetaData",
+);
+const isRootdataOnRelation = computed(
+  () => props.metadata.__typename === "PanelRelationRootData",
 );
 const fieldKeyWithId = computed(
   () =>
@@ -403,6 +408,8 @@ const veeValidateField = computed(() => {
   }
   if (isMetadataOnRelation.value)
     return `${ValidationFields.RelationMetadata}.${fieldKeyWithId.value}`;
+  if (isRootdataOnRelation.value)
+    return `${ValidationFields.RelationRootdata}.${fieldKeyWithId.value}`;
   else if (
     (isRequiredRelationField.value || isOneOfRequiredRelationField.value) &&
     !props.isEdit
