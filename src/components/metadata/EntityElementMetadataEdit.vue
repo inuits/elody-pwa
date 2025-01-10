@@ -122,6 +122,7 @@ const props = defineProps<{
   unit?: string;
   linkText?: string;
   isMetadataOnRelation?: boolean;
+  isRootDataOnRelation?: boolean;
   error?: string;
   showErrors: boolean;
   fieldIsValid: boolean;
@@ -155,7 +156,7 @@ const fieldEditIsDisabled = computed(() => {
 });
 
 onMounted(() => {
-  if (props.isMetadataOnRelation)
+  if (props.isMetadataOnRelation || props.isRootDataOnRelation)
     addEditableMetadataKeys([props.fieldKey], props.formId);
 });
 
