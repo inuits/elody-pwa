@@ -2,8 +2,9 @@
   <div
     class="grow"
     v-if="
-      filter.advancedFilter.type !== AdvancedFilterTypes.Selection &&
-      !Array.isArray(input)
+      (filter.advancedFilter.type !== AdvancedFilterTypes.Selection &&
+        !Array.isArray(input)) ||
+      filter.advancedFilter.type === AdvancedFilterTypes.Boolean
     "
   >
     <div
@@ -28,11 +29,26 @@
     </div>
     <div v-else>
       <BaseInputTextNumberDatetime
+        v-if="filter.advancedFilter.type !== AdvancedFilterTypes.Boolean"
         v-model="input"
         input-style="default"
         :type="determineInputType"
         :placeholder="determinePlaceholder"
       />
+      <div
+        v-if="filter.advancedFilter.type === AdvancedFilterTypes.Boolean"
+        class="flex gap-2"
+      >
+        <BaseInputCheckbox
+          v-for="(filterOption, idx) in booleanFilterOptions"
+          v-model="filterOption.isSelected"
+          :key="idx"
+          :label="String(filterOption.value)"
+          :bulkOperationsContext="BulkOperationsContextEnum.FilterOptions"
+          input-style="accentNormal"
+          :ignore-bulk-operations="true"
+        />
+      </div>
     </div>
   </div>
   <div v-else class="grow">
@@ -107,14 +123,14 @@ const props = withDefaults(
   {
     relatedActiveFilter: () => [],
     lastTypedValue: "",
-  }
+  },
 );
 
 const emit = defineEmits<{
   (
     event: "newAdvancedFilterInput",
     advancedFilterInput: AdvancedFilterInput,
-    force: boolean
+    force: boolean,
   ): void;
   (event: "filterOptions", filterOptions: string[]): void;
   (event: "newInputValue", input: string | number): void;
@@ -123,24 +139,24 @@ const emit = defineEmits<{
 const route = useRoute();
 const { t } = useI18n();
 
-const input = ref<string | number | DropdownOption[]>();
+const input = ref<string | number | DropdownOption[] | boolean[]>();
 const inputTime = ref<number | string | undefined>(undefined);
 const totalInput = computed(() =>
-  inputTime.value ? `${input.value}T${inputTime.value}` : input.value
+  inputTime.value ? `${input.value}T${inputTime.value}` : input.value,
 );
 
 const dropdownInputLength = ref<number>(0);
 const dropdownNoOptionsText = computed(() =>
   dropdownInputLength.value < 3
     ? t("filters.minDropdownSearchCharacters")
-    : undefined
+    : undefined,
 );
 const force = ref<boolean>(false);
 const showSpinner = ref<boolean>(false);
 
 const mapOptionsFilterInput = (
   advancedFilterInputForRetrievingOptions: AdvancedFilterInputType[],
-  value?: any
+  value?: any,
 ) => {
   const optionsFilterInput: AdvancedFilterInput[] = [];
   for (const filterInput of advancedFilterInputForRetrievingOptions) {
@@ -176,8 +192,15 @@ const { refetch: refetchFilterOptions, onResult: onFilterOptionsResult } =
     () => ({
       enabled: refetchFilterOptionsEnabled.value,
       fetchPolicy: "no-cache",
-    })
+    }),
   );
+
+const booleanFilterOptions = reactive<
+  { isSelected: boolean; value: boolean }[]
+>([
+  { isSelected: false, value: true },
+  { isSelected: false, value: false },
+]);
 
 const filterOptions = reactive<
   { isSelected: boolean; option: DropdownOption }[]
@@ -194,7 +217,7 @@ onFilterOptionsResult((result) => {
     });
     emit(
       "filterOptions",
-      filterOptions.map((filterOption) => filterOption.option.value)
+      filterOptions.map((filterOption) => filterOption.option.value),
     );
     showSpinner.value = false;
   }
@@ -212,7 +235,7 @@ const {
     enabled: refetchAutocompleteOptionsEnabled.value,
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "no-cache",
-  })
+  }),
 );
 
 const autocompleteOptions = ref<DropdownOption[]>([]);
@@ -227,7 +250,7 @@ const getAutocompleteOptions = (value: string) => {
     autocompleteOptionsQueryVariables.value = {
       input: mapOptionsFilterInput(
         props.filter.advancedFilter.advancedFilterInputForRetrievingOptions,
-        value
+        value,
       ),
       limit: 999999,
       entityType: route.meta.entityType as string,
@@ -269,7 +292,7 @@ const determineInputType = computed<"text" | "number" | ["date", "time"]>(
     if (props.filter.advancedFilter.type === AdvancedFilterTypes.Date)
       return ["date", "time"];
     return "text";
-  }
+  },
 );
 const determinePlaceholder = computed(() => {
   if (props.filter.advancedFilter.type === AdvancedFilterTypes.Number)
@@ -287,7 +310,7 @@ onMounted(() => {
     showSpinner.value = true;
     filterOptionsQueryVariables.value = {
       input: mapOptionsFilterInput(
-        props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
+        props.filter.advancedFilter.advancedFilterInputForRetrievingOptions,
       ),
       limit: 11,
       entityType: route.meta.entityType as string,
@@ -307,6 +330,13 @@ onMounted(() => {
       : undefined;
   force.value = Boolean(props.filter.inputFromState);
 
+  if (props.filter.advancedFilter.type === AdvancedFilterTypes.Boolean) {
+    booleanFilterOptions.forEach((option) => {
+      option.isSelected =
+        Array.isArray(input.value) && input.value.includes(option.value);
+    });
+  }
+
   if (props.filter.advancedFilter.type !== "date" && props.lastTypedValue) {
     input.value = props.lastTypedValue;
     force.value = true;
@@ -320,7 +350,7 @@ watch(
     if (props.relatedActiveFilter) {
       filterOptions.forEach((option) => {
         let isSelected = props.relatedActiveFilter?.value?.includes(
-          option.option.value
+          option.option.value,
         );
         option.isSelected = isSelected;
       });
@@ -330,7 +360,7 @@ watch(
       filter.isSelected = false;
     });
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 watch(
@@ -338,8 +368,17 @@ watch(
   () =>
     (input.value = filterOptions
       .filter((filterOption) => filterOption.isSelected)
-      .map((filterOption) => filterOption.option))
+      .map((filterOption) => filterOption.option)),
 );
+
+watch(
+  booleanFilterOptions,
+  () =>
+    (input.value = booleanFilterOptions
+      .filter((filterOption) => filterOption.isSelected)
+      .map((filterOption) => filterOption.value)),
+);
+
 const emitNewAdvancedFilterInput = () => {
   let value;
   if (Array.isArray(input.value))
@@ -356,6 +395,10 @@ const emitNewAdvancedFilterInput = () => {
         ? addCurrentTimeZoneToDateTimeString(totalInput.value)
         : totalInput.value
       : undefined;
+
+  if (props.filter.advancedFilter.type === AdvancedFilterTypes.Boolean) {
+    value = input.value;
+  }
 
   const newAdvancedFilterInput: AdvancedFilterInput = {
     type: props.filter.advancedFilter.type,

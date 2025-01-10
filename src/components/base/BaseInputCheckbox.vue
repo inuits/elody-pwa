@@ -79,7 +79,7 @@ const props = withDefaults(
     disabled: false,
     ignoreBulkOperations: false,
     required: false,
-  }
+  },
 );
 
 const emit = defineEmits<{
@@ -139,12 +139,12 @@ const handleItemSelection = () => {
   )
     return;
 
-  if (!inputValue.value)
+  if (!inputValue.value && !props.ignoreBulkOperations)
     enqueueItemForBulkProcessing(props.bulkOperationsContext, {
       ...props.item,
       required: props.required,
     });
-  else if (!props.required)
+  else if (!props.required && !props.ignoreBulkOperations)
     dequeueItemForBulkProcessing(props.bulkOperationsContext, props.item.id);
 
   inputValue.value = !inputValue.value;
@@ -152,9 +152,10 @@ const handleItemSelection = () => {
 
 const selectedInputStyle = computed<Input>(() => inputStyles[props.inputStyle]);
 const divSelectedBgColor = computed<string>(() =>
-  selectedInputStyle.value.textColor.replace(/^text/, "bg")
+  selectedInputStyle.value.textColor.replace(/^text/, "bg"),
 );
 const isDisabledByContextLimit = computed<boolean>(() => {
+  if (props.ignoreBulkOperations) return false;
   return (
     !isEnqueued(props.bulkOperationsContext, props.item.id) &&
     isBulkSelectionLimitReached(props.bulkOperationsContext)
@@ -188,6 +189,6 @@ watch(
   (isBulkOperationsModalOpen: boolean | undefined) => {
     if (isBulkOperationsModalOpen)
       inputValue.value = isEnqueued(props.bulkOperationsContext, props.item.id);
-  }
+  },
 );
 </script>
