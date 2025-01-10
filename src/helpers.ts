@@ -343,8 +343,10 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
   }
 
   const unitConversionTable: Record<string, ConversionFunction> = {
+    DATE: (value: string, detail: string) =>
+      convertDateToReadbleFormat(value, detail, false),
     DATETIME: (value: string, detail: string) =>
-      convertDateToReadbleFormat(value, detail),
+      convertDateToReadbleFormat(value, detail, true),
     SECONDS: (value: string) => `${value} s`,
     COORDINATES: (value: string) =>
       `${(value as any).longitude}, ${(value as any).latitude}`,
@@ -363,15 +365,16 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
 export const convertDateToReadbleFormat = (
   dateString: string,
   format: string,
+  showTime: boolean
 ): string => {
   const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "numeric",
     day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    second: "numeric",
+    hour: showTime ? "numeric" : undefined,
+    minute: showTime ? "numeric" : undefined,
+    second: showTime ? "numeric" : undefined,
     hour12: undefined,
   };
   let dateFormat;
