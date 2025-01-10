@@ -2,6 +2,7 @@
   <input
     data-cy="base-input-text"
     v-if="type !== 'textarea' && type !== 'checkbox'"
+    ref="baseInput"
     class=""
     :class="[
       'border rounded-lg focus:ring-0',
@@ -17,8 +18,10 @@
     :max="max"
     :disabled="disabled"
     :placeholder="placeholder"
+    @keydown="handleKeydown"
+    @focus="disableVirtualKeyboard"
     @change.stop
-    @click.stop
+    @click="openCalendar"
   />
   <input
     data-cy="base-input-checkbox"
@@ -49,7 +52,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 type PseudoStyle = {
   textColor: string;
@@ -125,6 +128,32 @@ const inputValue = computed<string | number | boolean | undefined>({
     if (props.isValidPredicate(value)) emit("update:modelValue", value);
   },
 });
+
+const baseInput = ref<HTMLInputElement | null>(null);
+
+const openCalendar = (event: KeyboardEvent) => {
+  if (props.type !== "date") {
+    event.preventDefault();
+    return;
+  }
+
+  if (baseInput.value.showPicker) {
+    baseInput.value.showPicker();
+  } else {
+    baseInput.value.focus();
+  }
+};
+
+const handleKeydown = (event: KeyboardEvent) => {
+  if (props.type === "date") {
+    event.preventDefault();
+  }
+};
+
+const disableVirtualKeyboard = (event: FocusEvent) => {
+  if (props.type !== "date") return;
+  (event.target as HTMLInputElement).blur();
+};
 
 const selectedInputStyle = computed<Input>(() => inputStyles[props.inputStyle]);
 </script>
