@@ -397,7 +397,7 @@ const emitNewAdvancedFilterInput = () => {
       : undefined;
 
   if (props.filter.advancedFilter.type === AdvancedFilterTypes.Boolean) {
-    value = input.value.length === 1 ? true : false;
+    value = input.value;
   }
 
   const newAdvancedFilterInput: AdvancedFilterInput = {
