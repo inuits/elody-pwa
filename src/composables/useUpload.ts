@@ -118,7 +118,7 @@ const useUpload = () => {
   const __checkUploadValidityMediafilesWithCsv = (): boolean => {
     if (uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv) {
       return (
-        mediafiles.value.length > 0 &&
+        verifyAllNeededFilesArePresent() &&
         containsCsv.value &&
         uploadProgress.value
           .filter(
