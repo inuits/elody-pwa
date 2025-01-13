@@ -38,10 +38,8 @@ import {
   BaseFieldType,
   GetUploadMagazinesWithCsvDocument,
   GetUploadMagazinesWithMetsDocument,
-  GetUploadOcrDocument,
   StartUploadMagazinesWithCsvDocument,
   StartUploadMagazinesWithMetsDocument,
-  StartUploadOcrDocument
 } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 import ImportListItem from "@/components/imports/ImportListItem.vue";
@@ -61,7 +59,6 @@ const selectedItem = ref<string>("");
 
 const { mutate: startImportOfMetsMagazines } = useMutation(StartUploadMagazinesWithMetsDocument);
 const { mutate: startImportOfCsvMagazines } = useMutation(StartUploadMagazinesWithCsvDocument);
-const { mutate: startImportOfOcr } = useMutation(StartUploadOcrDocument);
 
 if (props.inputFieldType === BaseFieldType.BaseMagazineWithMetsImportField) {
   const { onResult, loading } = useQuery(GetUploadMagazinesWithMetsDocument, {});
@@ -81,15 +78,6 @@ if (props.inputFieldType === BaseFieldType.BaseMagazineWithCsvImportField) {
   });
 }
 
-if (props.inputFieldType === BaseFieldType.BaseOcrImportField) {
-  const { onResult, loading } = useQuery(GetUploadOcrDocument, {});
-  onResult((result) => {
-    if (result && result.data && result.data.UploadOcr)
-      items.value = result.data.UploadOcr;
-    itemsLoading.value = loading.value;
-  });
-}
-
 const doImport = (item: string) => {
   try {
     switch (props.inputFieldType) {
@@ -98,9 +86,6 @@ const doImport = (item: string) => {
         break;
       case BaseFieldType.BaseMagazineWithCsvImportField:
         startImportOfCsvMagazines({ magazine: item });
-        break;
-      case BaseFieldType.BaseOcrImportField:
-        startImportOfOcr({ ocrFile: item });
         break;
       default:
         return;

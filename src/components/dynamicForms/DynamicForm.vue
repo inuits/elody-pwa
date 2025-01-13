@@ -23,8 +23,7 @@
           v-if="
             field.inputField?.type === BaseFieldType.BaseFileSystemImportField ||
             field.inputField?.type === BaseFieldType.BaseMagazineWithMetsImportField ||
-            field.inputField?.type === BaseFieldType.BaseMagazineWithCsvImportField ||
-            field.inputField?.type === BaseFieldType.BaseOcrImportField
+            field.inputField?.type === BaseFieldType.BaseMagazineWithCsvImportField
           "
           :input-field-type="field.inputField?.type"
           :close-and-delete-form="closeAndDeleteForm"
@@ -95,6 +94,9 @@
                 :template-csvs="
                   (uploadContainerField as UploadField).templateCsvs
                 "
+                :extra-mediafile-type="
+                  (uploadContainerField as UploadField).extraMediafileType
+                "
               />
             </div>
             <div class="pb-4">
@@ -114,6 +116,7 @@
           v-if="
             (field.__typename === 'FormAction' &&
               (field as FormAction).actionType == ActionType.Upload) ||
+            (field as FormAction).actionType == ActionType.UploadWithOcr ||
             (field as FormAction).actionType ==
               ActionType.UploadCsvForReordening ||
             (field as FormAction).actionType == ActionType.UpdateMetadata
@@ -253,7 +256,6 @@ const nonStandardFieldTypes: BaseFieldType[] = [
   BaseFieldType.BaseEntityPickerField,
   BaseFieldType.BaseMagazineWithMetsImportField,
   BaseFieldType.BaseMagazineWithCsvImportField,
-  BaseFieldType.BaseOcrImportField,
 ];
 
 const modalFormFields = props.modalFormFields;

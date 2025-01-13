@@ -18,6 +18,7 @@ import { useErrorCodes } from "@/composables/useErrorCodes";
 type UploadSettings = {
   uploadType: UploadFieldType;
   uploadFlow: UploadFlow;
+  extraMediafileType: string | undefined;
 };
 
 const { handleHttpError, getMessageAndCodeFromErrorString } = useErrorCodes();
@@ -55,6 +56,7 @@ const failedUploads = ref<string[]>([]);
 const standaloneFileType = ref<UploadEntityTypes | undefined>(undefined);
 const reinitializeDynamicFormFunc = ref<Function | undefined>(undefined);
 const csvOnlyUploadSFailed = ref<boolean>(false);
+const extraMediafileType = ref<string | undefined>(undefined);
 
 const useUpload = () => {
   let _prefetchedUploadUrls: string[] | "not-prefetched-yet" =
@@ -87,9 +89,15 @@ const useUpload = () => {
         checkUploadValidityFn: () =>
           __checkUploadValidityuploadCsvForReordening(),
       },
+      mediafilesWithOcr: {
+        checkUploadValidityFn: () => __checkUploadValidityMediafilesWithOcr(),
+      },
     };
     uploadValidationFn.value =
       settingsObject[uploadSettings.uploadFlow].checkUploadValidityFn;
+
+    if (uploadSettings.extraMediafileType)
+      extraMediafileType.value = uploadSettings.extraMediafileType;
   };
 
   const __checkUploadValidityUpdateMetadata = (): boolean => {
@@ -139,6 +147,10 @@ const useUpload = () => {
   };
 
   const __checkUploadValidityuploadCsvForReordening = (): boolean => {
+    return containsCsv.value;
+  };
+
+  const __checkUploadValidityMediafilesWithOcr = (): boolean => {
     return containsCsv.value;
   };
 
@@ -351,7 +363,7 @@ const useUpload = () => {
     isDryRun: boolean = false,
   ): Promise<string[] | number> => {
     const response = await fetch(
-      `/api/upload/batch${isDryRun ? "?dry_run=true" : ""}`,
+      `/api/upload/batch?${isDryRun ? "dry_run=true" : ""}${extraMediafileType.value ? `&extra_mediafile_type=${extraMediafileType.value}` : ""}`,
       {
         headers: { "Content-Type": "text/csv" },
         method: "POST",
@@ -454,12 +466,15 @@ const useUpload = () => {
 
     if (
       uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv ||
-      uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv
+      uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv ||
+      uploadFlow.value === UploadFlow.MediafilesWithOcr
     ) {
       if (containsCsv.value) {
         if (_prefetchedUploadUrls === "not-prefetched-yet")
           _prefetchedUploadUrls = (await __batchEntities(
             __getCsvBlob(),
+            false,
+
           )) as string[];
         uploadUrl = _prefetchedUploadUrls.find((url: string) =>
           decodeURIComponent(url).includes(file.name),
@@ -595,6 +610,9 @@ const useUpload = () => {
 
     if (uploadFlow.value === UploadFlow.MediafilesOnly)
       return !containsCsv.value && mediafiles.value.length > 0;
+
+    if (uploadFlow.value === UploadFlow.MediafilesWithOcr)
+      return containsCsv.value && mediafiles.value.length > 0;
     return false;
   };
 
@@ -661,6 +679,7 @@ const useUpload = () => {
     dryRunComplete.value = false;
     missingFileNames.value = [];
     requiredMediafiles.value = undefined;
+    extraMediafileType.value = undefined;
     resetUploadProgress();
     __resetFileThumbnails();
   };
@@ -863,6 +882,7 @@ const useUpload = () => {
     standaloneFileType,
     reinitializeDynamicFormFunc,
     __getCsvString,
+    extraMediafileType,
   };
 };
 
