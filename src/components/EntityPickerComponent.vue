@@ -100,7 +100,7 @@ const props = withDefaults(
   },
 );
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { loadDocument, getDocument } = useCustomQuery();
 const { closeModal } = useBaseModal();
 const { addRelations } = useFormHelper();
@@ -189,6 +189,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
     id: props.entityUuid,
     formInput: parseFormValuesToFormInput(props.entityUuid, unref(form.values)),
     collection,
+    preferredLanguage: locale.value,
   });
 
   if (!result?.data?.mutateEntityValues) return;

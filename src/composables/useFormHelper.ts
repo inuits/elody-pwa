@@ -518,9 +518,6 @@ const useFormHelper = () => {
     if (values.relationValues)
       relations = parseRelationValuesForFormSubmit(values.relationValues);
 
-    console.log("Let the parsing begin:");
-    console.log(values.relationMetadata);
-    console.log(values.relationRootData);
     if (values.relationMetadata && relations)
       relations = parseRelationMetadataForFormSubmit(
         values.relationMetadata,
