@@ -589,7 +589,7 @@ const useUpload = () => {
       uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv
     ) {
       if (uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv)
-        return containsCsv.value && mediafiles.value.length > 0;
+        return containsCsv.value && verifyAllNeededFilesArePresent();
       else return mediafiles.value.length > 0;
     }
 
