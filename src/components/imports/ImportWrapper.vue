@@ -6,8 +6,7 @@
   <import-items
     v-if="
       inputFieldType === BaseFieldType.BaseMagazineWithMetsImportField ||
-      inputFieldType === BaseFieldType.BaseMagazineWithCsvImportField ||
-      inputFieldType === BaseFieldType.BaseOcrImportField
+      inputFieldType === BaseFieldType.BaseMagazineWithCsvImportField
     "
     :input-field-type="inputFieldType"
     :close-and-delete-form="closeAndDeleteForm"
