@@ -60,7 +60,7 @@ const setSelectedLanguageOption = (): void => {
 
 const setLanguage = (option: DropdownOption | DropdownOption[]) => {
   if (config.features.multilanguage.hasMultilanguage && isEdit.value) {
-    return handleNewLocaleWithMultilanguage(option);
+    return openChangeLocaleConfirmationModal(option);
   }
 
   selectedLanguageOption.value = option as DropdownOption;
@@ -80,7 +80,7 @@ watch(selectedLanguageOption, () => {
   }
 });
 
-const handleNewLocaleWithMultilanguage = (
+const openChangeLocaleConfirmationModal = (
   option: DropdownOption | DropdownOption[],
 ) => {
   initializeConfirmModal({
