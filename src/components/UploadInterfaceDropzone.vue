@@ -9,6 +9,7 @@
       view-style="p-3 h-full overflow-x-hidden mb-4 flex-grow"
       :isValidationFile="dryRun"
       :template-csvs="templateCsvs"
+      :extra-mediafile-type="extraMediafileType"
     />
   </div>
 </template>
@@ -36,12 +37,14 @@ const props = withDefaults(
     uploadFieldType: UploadFieldType;
     validation?: string;
     templateCsvs?: string | undefined;
+    extraMediafileType?: string;
   }>(),
   {
     dropzoneSize: "normal",
     isLinkedUpload: false,
     dryRun: false,
     templateCsvs: undefined,
+    extraMediafileType: undefined,
   },
 );
 
@@ -58,6 +61,7 @@ const setUseUploadVariables = () => {
   initializeUpload({
     uploadType: props.uploadFieldType,
     uploadFlow: props.uploadFlow,
+    extraMediafileType: props.extraMediafileType
   });
   if (props.acceptedFileTypes)
     dropzone.dropzoneSettings.value.acceptedFiles = props.acceptedFileTypes
@@ -70,7 +74,7 @@ const setUseUploadVariables = () => {
 };
 
 watch(
-  () => [props.acceptedFileTypes, props.maxFileSize, props.uploadFieldType],
+  () => [props.acceptedFileTypes, props.maxFileSize, props.uploadFieldType, props.extraMediafileType],
   () => {
     setUseUploadVariables();
   },
