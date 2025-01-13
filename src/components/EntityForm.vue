@@ -114,6 +114,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
       props.locale,
     ),
     collection,
+    preferredLanguage: props.locale,
   });
 
   if (!result?.data?.mutateEntityValues) return;
