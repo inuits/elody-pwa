@@ -20,7 +20,7 @@ export class useDropzone {
   dropzoneSettings: Ref<DropzoneSettings> = ref({
     url: "/upload",
     autoProcessQueue: false,
-    acceptedFiles: ".csv, .jpg, .jpeg, .mp3, .srt, .png, .tiff, .mp4",
+    acceptedFiles: ".csv, .jpg, .jpeg, .mp3, .srt, .png, .tiff, .mp4, .txt, .xml",
     uploadMultiple: false,
     parallelUploads: 99,
     maxFiles: 99,
