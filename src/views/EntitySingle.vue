@@ -239,7 +239,7 @@ watch(
       () => {
         if (auth.isAuthenticated.value) {
           if (permissionToEdit.value && permissionToDelete.value)
-            showEditToggle("delete");
+            showEditToggle("edit-delete");
           else if (permissionToEdit.value && !permissionToDelete.value)
             showEditToggle("edit");
           else if (permissionToDelete.value && !permissionToEdit.value) {
