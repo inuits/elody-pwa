@@ -106,7 +106,7 @@
       </div>
       <div v-else class="w-full !m-0">
         <ActionMenuGroup
-          v-if="bulkOperations !== undefined"
+          v-if="bulkOperations !== undefined && auth.isAuthenticated.value"
           v-model="selectedBulkOperation"
           @update:modelValue="handleSelectedBulkOperation"
           :options="bulkOperations"
@@ -146,6 +146,7 @@ import { useQuery } from "@vue/apollo-composable";
 import { useImport } from "@/composables/useImport";
 import { useRoute } from "vue-router";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
+import { auth } from "@/main";
 
 const props = withDefaults(
   defineProps<{
