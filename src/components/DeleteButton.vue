@@ -1,7 +1,7 @@
 <template>
   <div data-cy="edit-toggle" class="ml-2 mr-6">
     <BaseButtonNew
-      v-if="isEditToggleVisible === 'edit-delete'"
+      v-if="deleteAvailable"
       :label="t('bulk-operations.delete')"
       :icon="DamsIcons.Trash"
       button-style="redDefault"
@@ -23,7 +23,11 @@ import {
   useNotification,
 } from "@/components/base/BaseNotification.vue";
 import useEditMode from "@/composables/useEdit";
-import { asString, getTitleOrNameFromEntity, mapUrlToEntityType } from "@/helpers";
+import {
+  asString,
+  getTitleOrNameFromEntity,
+  mapUrlToEntityType,
+} from "@/helpers";
 import { usePageInfo } from "@/composables/usePageInfo";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useBulkOperations } from "@/composables/useBulkOperations";
@@ -49,6 +53,12 @@ const { initializeGeneralProperties, initializePropertiesForDeletion } =
 const { initializeConfirmModal } = useConfirmModal();
 const { deleteEntities } = useDeleteEntities();
 const { getForm } = useFormHelper();
+
+const deleteAvailable = computed<boolean>(
+  () =>
+    isEditToggleVisible.value === "edit-delete" ||
+    isEditToggleVisible.value === "delete",
+);
 
 const entityType = computed(() => {
   const slug = String(route.params["type"]);
