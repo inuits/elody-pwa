@@ -242,7 +242,9 @@ watch(
             showEditToggle("delete");
           else if (permissionToEdit.value && !permissionToDelete.value)
             showEditToggle("edit");
-          else hideEditToggle();
+          else if (permissionToDelete.value && !permissionToEdit.value) {
+            showEditToggle("delete");
+          } else hideEditToggle();
         } else hideEditToggle();
       },
     );

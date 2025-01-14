@@ -7,13 +7,15 @@ export const toBeDeleted = ref<string[]>([]);
 export const isSaved = ref<boolean>(false);
 
 const showErrors = computed<boolean>(
-  () => buttonClicked.value && isDisabled.value
+  () => buttonClicked.value && isDisabled.value,
 );
 const buttonClicked = ref<boolean>(false);
 const isDisabled = ref<boolean>(false);
 const editMode = ref<EditModes>("view");
 const saveCallbacks = ref<callback[]>([]);
-const isEditToggleVisible = ref<"no-edit" | "edit" | "edit-delete">("no-edit");
+const isEditToggleVisible = ref<"no-edit" | "edit" | "delete" | "edit-delete">(
+  "no-edit",
+);
 const refetchFn = ref<Function>();
 
 export const useEditMode = () => {
@@ -36,13 +38,8 @@ export const useEditMode = () => {
       saveCallbacks.value.push(input);
     }
   };
-  const showEditToggle = (mode: "edit" | "delete" = "edit") => {
-    if (mode === "delete") {
-      isEditToggleVisible.value = "edit-delete";
-    }
-    if (mode === "edit") {
-      isEditToggleVisible.value = "edit";
-    }
+  const showEditToggle = (mode: "edit" | "delete" | "edit-delete" = "edit") => {
+    isEditToggleVisible.value = mode;
   };
   const hideEditToggle = () => (isEditToggleVisible.value = "no-edit");
   const clearSaveCallbacks = () => (saveCallbacks.value = []);
