@@ -474,7 +474,6 @@ const useUpload = () => {
           _prefetchedUploadUrls = (await __batchEntities(
             __getCsvBlob(),
             false,
-
           )) as string[];
         uploadUrl = _prefetchedUploadUrls.find((url: string) =>
           decodeURIComponent(url).includes(file.name),
@@ -697,10 +696,12 @@ const useUpload = () => {
       }
 
       if (!requiredMediafiles.value) {
-        __updateGlobalUploadProgress(
-          ProgressStepType.Prepare,
-          ProgressStepStatus.Complete,
-        );
+        if (dryRunComplete.value) {
+          __updateGlobalUploadProgress(
+            ProgressStepType.Prepare,
+            ProgressStepStatus.Complete,
+          );
+        }
         return true;
       }
 
