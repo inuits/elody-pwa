@@ -32,7 +32,6 @@
 <script setup lang="ts">
 
 const props = defineProps<{
-  items: any[];
   item: any;
   selectedItem: any;
 }>();

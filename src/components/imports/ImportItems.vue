@@ -7,7 +7,6 @@
       <li v-for="item in items" :key="item">
         <import-list-item
           :item="item"
-          :items="items"
           :selected-item="selectedItem"
           @update-selected-item="
             (newSelectedItem: any) => updateSelectedItem(newSelectedItem)
