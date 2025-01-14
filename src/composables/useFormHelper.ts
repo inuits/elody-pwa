@@ -116,13 +116,14 @@ const useFormHelper = () => {
       (relation: BaseRelationValuesInput) =>
         relation.editStatus !== EditStatus.Deleted,
     );
-    const [amount = 1, relationType] = parameters[0].split(":");
+    const [amount = 1, relationType, exact = false] = parameters[0].split(":");
     const specificRelationsLength =
       relations.filter(
         (relation: BaseRelationValuesInput) => relation.type === relationType,
       )?.length || 0;
 
-    return specificRelationsLength >= Number(amount);
+    if (exact == "true") return specificRelationsLength == Number(amount);
+    else return specificRelationsLength >= Number(amount);
   };
 
   const getHasOneOfSpecificRelationsRule = (

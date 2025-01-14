@@ -362,7 +362,9 @@ const getValidationRules = (metadata: PanelMetaData): string => {
       metadata?.inputField?.validation?.has_required_relation?.relationType;
     const amount =
       metadata?.inputField?.validation?.has_required_relation?.amount;
-    return `${rules}:${amount}:${relationType}`;
+    const exact =
+      metadata?.inputField?.validation?.has_required_relation?.exact || false;
+    return `${rules}:${amount}:${relationType}:${exact}`;
   }
   if (isOneOfRequiredRelationField.value) {
     const relationTypes =
