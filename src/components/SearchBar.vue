@@ -31,6 +31,7 @@ import {
 import { computed, inject, ref, watch, onBeforeMount } from "vue";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { type AdvancedSearchFilters } from "@/composables/useAdvancedSearch";
 
 withDefaults(
   defineProps<{
@@ -42,7 +43,16 @@ withDefaults(
 );
 
 const emit = defineEmits<{
-  (event: "updateFilters", filters: AdvancedFilterInput[]): void;
+  (
+    event: "updateFilters",
+    filters: AdvancedFilterInput[],
+    isOpenModal: boolean,
+  ): void;
+  (
+    event: "updateAdvancedSearchFilters",
+    filters: AdvancedSearchFilters,
+    isOpenModal: boolean,
+  ): void;
 }>();
 
 const config = inject("config") as any;
@@ -73,7 +83,8 @@ const applyFilterToLibrary = () => {
       match_exact: false,
     });
   }
-  if (!item_types) return emit("updateFilters", filters);
+  if (!item_types)
+    return emit("updateFilters", filters, getModalInfo(TypeModals.Search).open);
   const typeFilters = item_types.map((item_type: string) => {
     return {
       match_exact: true,
@@ -82,7 +93,20 @@ const applyFilterToLibrary = () => {
     };
   });
   filters.push(...typeFilters);
-  emit("updateFilters", filters);
+  emit("updateFilters", filters, getModalInfo(TypeModals.Search).open);
+  emit(
+    "updateAdvancedSearchFilters",
+    getFiltersForAdvancedSearch(),
+    getModalInfo(TypeModals.Search).open,
+  );
+};
+
+const getFiltersForAdvancedSearch = () => {
+  return {
+    q: inputValue.value.trim() === "" ? "*" : inputValue.value,
+    query_by: "metadata.value",
+    filter_by: "",
+  };
 };
 
 const openSearchModal = () => {
@@ -94,8 +118,8 @@ watch(
   (modalIsOpen: boolean | undefined) => {
     if (!modalIsOpen) {
       inputValue.value = "";
-      applyFilterToLibrary();
     }
+    applyFilterToLibrary();
   },
 );
 </script>
