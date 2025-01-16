@@ -391,10 +391,6 @@ const createEntityFromFormInput = (
   let entity: EntityInput = { type: entityType };
   entity.metadata = Object.keys(form.value?.values.intialValues)
     .map((key) => {
-      if (typeof form.value?.values.intialValues[key] === "boolean") {
-        let bool = form.value?.values.intialValues[key] ? "true" : "false";
-        return { key, value: bool };
-      }
       if (key === "ttl") {
         return {
           key,
