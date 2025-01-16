@@ -8,10 +8,11 @@
       <search-bar
         :input-enabled="true"
         @updateFilters="updateBaseLibraryFilters"
+        @update-advanced-search-filters="updateAdvancedSearchFilters"
       />
       <div class="overflow-y-scroll h-full">
         <base-library
-          v-if="getModalInfo(TypeModals.Search).open"
+          v-if="isModalOpened"
           :bulk-operations-context="BulkOperationsContextEnum.SearchModal"
           list-item-route-name="SingleEntity"
           :enable-advanced-filters="false"
@@ -19,6 +20,8 @@
           :enable-bulk-operations="true"
           :filters="filters"
           :is-search-library="true"
+          :predefinedEntities="hasAdvancedSearchEnabled ? items : undefined"
+          :ignore-fetching-data="hasAdvancedSearchEnabled"
         ></base-library>
       </div>
     </div>
@@ -35,13 +38,41 @@ import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
-import { ref } from "vue";
+import { ref, inject, computed } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
+import {
+  useAdvancedSearch,
+  type AdvancedSearchFilters,
+} from "@/composables/useAdvancedSearch";
 
-const { getModalInfo, closeModal } = useBaseModal();
+const { closeModal } = useBaseModal();
+const { setFilters, getEntities, items } = useAdvancedSearch();
 const filters = ref<AdvancedFilterInput[]>([]);
+const config: any = inject("config");
 
-const updateBaseLibraryFilters = (updatedFilters: AdvancedFilterInput[]) => {
+const hasAdvancedSearchEnabled = computed(() => {
+  return config.features.hasAdvancedSearch;
+});
+
+const isModalOpened = ref<boolean>(false);
+
+const updateBaseLibraryFilters = (
+  updatedFilters: AdvancedFilterInput[],
+  isOpenModal: boolean,
+) => {
+  if (hasAdvancedSearchEnabled.value) return;
   filters.value = updatedFilters;
+  isModalOpened.value = isOpenModal;
+};
+
+const updateAdvancedSearchFilters = async (
+  newFilters: AdvancedSearchFilters,
+  isOpenModal: boolean,
+) => {
+  if (!hasAdvancedSearchEnabled.value || !isOpenModal) return;
+
+  setFilters(newFilters as AdvancedSearchFilters);
+  await getEntities();
+  isModalOpened.value = isOpenModal;
 };
 </script>
