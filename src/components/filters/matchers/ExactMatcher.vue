@@ -42,6 +42,7 @@
         <BaseInputCheckbox
           v-for="(filterOption, idx) in booleanFilterOptions"
           v-model="filterOption.isSelected"
+          :disabled="input?.length === 1 && filterOption.value !== input?.[0]"
           :key="idx"
           :label="String(filterOption.value)"
           :bulkOperationsContext="BulkOperationsContextEnum.FilterOptions"
@@ -177,7 +178,8 @@ const mapOptionsFilterInput = (
         : filterInput.value,
       metadata_key_as_label: filterInput.metadata_key_as_label,
       item_types: filterInput.item_types ?? [],
-      provide_value_options_for_key: filterInput.type !== AdvancedFilterTypes.Type,
+      provide_value_options_for_key:
+        filterInput.type !== AdvancedFilterTypes.Type,
     });
   }
   return optionsFilterInput;
@@ -397,7 +399,7 @@ const emitNewAdvancedFilterInput = () => {
       : undefined;
 
   if (props.filter.advancedFilter.type === AdvancedFilterTypes.Boolean) {
-    value = input.value;
+    value = Array.isArray(input.value) && input.value[0];
   }
 
   const newAdvancedFilterInput: AdvancedFilterInput = {
