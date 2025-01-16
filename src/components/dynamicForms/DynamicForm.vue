@@ -21,9 +21,12 @@
       >
         <ImportWrapper
           v-if="
-            field.inputField?.type === BaseFieldType.BaseFileSystemImportField ||
-            field.inputField?.type === BaseFieldType.BaseMagazineWithMetsImportField ||
-            field.inputField?.type === BaseFieldType.BaseMagazineWithCsvImportField
+            field.inputField?.type ===
+              BaseFieldType.BaseFileSystemImportField ||
+            field.inputField?.type ===
+              BaseFieldType.BaseMagazineWithMetsImportField ||
+            field.inputField?.type ===
+              BaseFieldType.BaseMagazineWithCsvImportField
           "
           :input-field-type="field.inputField?.type"
           :close-and-delete-form="closeAndDeleteForm"
@@ -625,6 +628,7 @@ const performActionButtonClickEvent = (field: FormAction): void => {
     submit: () => submitActionFunction(field),
     updateMetadata: () => updateMetdataActionFunction(field),
     upload: () => uploadActionFunction(field),
+    uploadWithOcr: () => uploadActionFunction(field),
     download: () => downloadActionFunction(field),
     ocr: () => startOcrActionFunction(field),
     endpoint: () => callEndpointActionFunction(field),
