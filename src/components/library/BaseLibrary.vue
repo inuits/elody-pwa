@@ -306,6 +306,7 @@ export type BaseLibraryProps = {
   fetchDeepRelations?: FetchDeepRelations;
   parentEntityType?: Entitytyping;
   filtersNeedContext?: EntitySubelement[];
+  ignoreFetchingData?: boolean;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -334,6 +335,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   enableSaveSearchFilters: true,
   shouldUseStateForRoute: true,
   filtersNeedContext: undefined,
+  ignoreFetchingData: false,
 });
 
 const emit = defineEmits<{
@@ -511,6 +513,7 @@ const refetchEntities = async () => {
 
 const initializeBaseLibrary = async () => {
   setIsSearchLibrary(props.isSearchLibrary || false);
+  if (props.ignoreFetchingData) return;
   if (!props.predefinedEntities) {
     if (props.filters.length > 0)
       setAdvancedFilters(props.filters, false, false, route);
