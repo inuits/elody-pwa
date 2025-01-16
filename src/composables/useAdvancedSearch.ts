@@ -21,6 +21,7 @@ export const useAdvancedSearch = () => {
       variables: {
         ...filters.value,
       },
+      fetchPolicy: "no-cache",
     });
 
     items.value = response.data.EntitiesByAdvancedSearch.results;
