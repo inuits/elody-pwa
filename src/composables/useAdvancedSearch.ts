@@ -30,9 +30,18 @@ export const useAdvancedSearch = () => {
     filters.value = newFilters;
   };
 
+  const getFiltersForAdvancedSearch = (value: string) => {
+    return {
+      q: value.trim() === "" ? "*" : value,
+      query_by: "metadata.value",
+      filter_by: "",
+    };
+  };
+
   return {
     items,
     getEntities,
     setFilters,
+    getFiltersForAdvancedSearch,
   };
 };

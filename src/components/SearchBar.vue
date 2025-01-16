@@ -31,7 +31,10 @@ import {
 import { computed, inject, ref, watch, onBeforeMount } from "vue";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { type AdvancedSearchFilters } from "@/composables/useAdvancedSearch";
+import {
+  type AdvancedSearchFilters,
+  useAdvancedSearch,
+} from "@/composables/useAdvancedSearch";
 
 withDefaults(
   defineProps<{
@@ -57,6 +60,7 @@ const emit = defineEmits<{
 
 const config = inject("config") as any;
 const { openModal, getModalInfo } = useBaseModal();
+const { getFiltersForAdvancedSearch } = useAdvancedSearch();
 const inputValue = ref<string>("");
 const entityTypeFilters = computed(() =>
   config.features.simpleSearch.simpleSearchEntityTypes?.map((type: string) => {
@@ -96,17 +100,9 @@ const applyFilterToLibrary = () => {
   emit("updateFilters", filters, getModalInfo(TypeModals.Search).open);
   emit(
     "updateAdvancedSearchFilters",
-    getFiltersForAdvancedSearch(),
+    getFiltersForAdvancedSearch(inputValue.value),
     getModalInfo(TypeModals.Search).open,
   );
-};
-
-const getFiltersForAdvancedSearch = () => {
-  return {
-    q: inputValue.value.trim() === "" ? "*" : inputValue.value,
-    query_by: "metadata.value",
-    filter_by: "",
-  };
 };
 
 const openSearchModal = () => {
