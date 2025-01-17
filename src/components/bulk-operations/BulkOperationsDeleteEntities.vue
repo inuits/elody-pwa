@@ -3,7 +3,9 @@
     <div>
       <div class="w-full mb-2">
         <h1 class="title flex justify-center">
-          {{ t("confirm.delete-entities.title") }}
+          {{
+            t("confirm.delete-entities.title", { type: getCurrentRouteTitle })
+          }}
         </h1>
       </div>
       <div>
@@ -28,7 +30,9 @@
     <div class="flex justify-between mt-4">
       <div>
         <BaseButtonNew
-          :label="t('confirm.delete-entities.confirm')"
+          :label="
+            t('confirm.delete-entities.confirm', { type: getCurrentRouteTitle })
+          "
           :icon="DamsIcons.Trash"
           button-style="redDefault"
           button-size="small"
@@ -70,6 +74,7 @@ import {
 import { useModalActions } from "@/composables/useModalActions";
 import { useDeleteEntities } from "@/composables/useDeleteEntities";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
+import { rootRoute } from "@/composables/useBreadcrumbs";
 
 const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
@@ -94,6 +99,14 @@ const normalizeOptions = (
   }));
 };
 
+const getCurrentRouteTitle = computed(() => {
+  try {
+    return t(rootRoute.value.rootTitle)?.toLowerCase();
+  } catch {
+    return "";
+  }
+});
+
 const normalizeOptionsToObjectOfKeyValue = (
   options: { isSelected: boolean; key: DropdownOption }[],
 ) => {
@@ -110,8 +123,10 @@ const normalizeOptionsToObjectOfKeyValue = (
 
 const message = computed(() => {
   return form.value
-    ? `${t("confirm.delete-entities.message")} ${t(form.value.label)}`
-    : t("confirm.delete-entities.message");
+    ? `${t("confirm.delete-entities.message", { type: getCurrentRouteTitle.value })} ${t(form.value.label)}`
+    : t("confirm.delete-entities.message", {
+        type: getCurrentRouteTitle.value,
+      });
 });
 
 const deleteSelectedItems = async () => {
