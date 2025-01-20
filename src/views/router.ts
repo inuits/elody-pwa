@@ -34,6 +34,10 @@ const routeComponentConfig: RouteComponentConfig[] = [
     routeName: "NotFound",
     routeComponent: () => import("@/views/errorViews/NotFound.vue"),
   },
+  {
+    routeName: "WktPoC",
+    routeComponent: () => import("@/views/WktPoC.vue"),
+  },
 ];
 
 const getComponentForRoute = (route: RouteRecordRaw): any => {
