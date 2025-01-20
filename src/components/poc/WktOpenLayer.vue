@@ -9,8 +9,8 @@
     >
       <Map.OlView
         ref="view"
-        :zoom="4"
-        :center="[7963928.15, 5722324.97]"
+        :zoom="5"
+        :center="[4446952.390346387, 2956840.258814348]"
         projection="EPSG:3857"
       />
 
@@ -38,6 +38,7 @@ const props = defineProps<{
 const { getWktFeature } = useMaps();
 
 const features = computed(() => {
+  if (!props.wkt) return [];
   return [getWktFeature(props.wkt)];
 });
 </script>
