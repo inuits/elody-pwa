@@ -12,6 +12,7 @@
         :id="entity.id"
         :type="entityType"
         :delete-query-options="entity.deleteQueryOptions"
+        :locale="locale"
       >
         <entity-column
           v-if="columnList != 'no-values'"

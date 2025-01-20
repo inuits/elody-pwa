@@ -12,6 +12,7 @@ import { apolloClient } from "@/main";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { getChildrenOfHomeRoutes, getTitleOrNameFromEntity } from "@/helpers";
+import { useI18n } from "vue-i18n";
 
 export type VisitedRoute = {
   id: string;
@@ -35,6 +36,7 @@ const breadcrumbRoutes = ref<BreadcrumbRoute[]>([]);
 const breadcrumbPathFinished = ref<boolean>(false);
 
 const useBreadcrumbs = (config: any) => {
+  const { locale } = useI18n();
   const homeRoutes = getChildrenOfHomeRoutes(config);
   const previousRoute = computed<VisitedRoute | undefined>(
     () => breadcrumbRoutes.value[breadcrumbRoutes.value.length - 1]
@@ -155,6 +157,7 @@ const useBreadcrumbs = (config: any) => {
       searchInputType: SearchInputType.AdvancedInputType,
       advancedSearchValue: [],
       advancedFilterInputs: advancedFilters,
+      preferredLanguage: locale.value,
     };
     return queryVariables;
   };
