@@ -350,7 +350,7 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
     SECONDS: (value: string) => `${value} s`,
     COORDINATES: (value: string) =>
       `${(value as any).longitude}, ${(value as any).latitude}`,
-    PERCENT: (value: string) => `${Number(value) * 100}%`,
+    PERCENT: (value: string) => Number(value) !== -1 ? `${Number(value) * 100}%` : "charging",
     VOLT: (value: string) => `${value} V`,
   };
 
