@@ -1,4 +1,5 @@
 import { type ConfigItem } from "@/generated-types/queries";
+import WKT from "ol/format/WKT.js";
 
 export const useMaps = () => {
   const getBasicMapProperties = (config: ConfigItem[]) => {
@@ -23,8 +24,18 @@ export const useMaps = () => {
     return [x, y];
   };
 
+  const getWktFeature = (wkt: string) => {
+    const format = new WKT();
+    return format.readFeature(wkt, {
+      dataProjection: "EPSG:3857",
+      // dataProjection: "EPSG:4326" for the normal latitude/longitude,
+      featureProjection: "EPSG:3857",
+    });
+  };
+
   return {
     getBasicMapProperties,
     geoToMercator,
+    getWktFeature,
   };
 };
