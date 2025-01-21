@@ -91,6 +91,84 @@
       </div>
       <editor-content :editor="editor" class="h-full" />
     </div>
+  <div v-if="editor" class="container">
+    <div class="control-group">
+      <div class="button-group">
+        <button
+          @click="editor.chain().focus().setParagraph().run()"
+          :class="{ 'is-active': editor.isActive('paragraph') }"
+        >
+          Paragraph
+        </button>
+        <button
+          @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
+          :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"
+        >
+          H1
+        </button>
+        <button
+          @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
+          :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }"
+        >
+          H2
+        </button>
+        <button
+          @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
+          :class="{ 'is-active': editor.isActive('heading', { level: 3 }) }"
+        >
+          H3
+        </button>
+        <button
+          @click="editor.chain().focus().toggleHeading({ level: 4 }).run()"
+          :class="{ 'is-active': editor.isActive('heading', { level: 4 }) }"
+        >
+          H4
+        </button>
+        <button
+          @click="editor.chain().focus().toggleHeading({ level: 5 }).run()"
+          :class="{ 'is-active': editor.isActive('heading', { level: 5 }) }"
+        >
+          H5
+        </button>
+        <button
+          @click="editor.chain().focus().toggleHeading({ level: 6 }).run()"
+          :class="{ 'is-active': editor.isActive('heading', { level: 6 }) }"
+        >
+          H6
+        </button>
+        <button
+          @click="editor.chain().focus().toggleBulletList().run()"
+          :class="{ 'is-active': editor.isActive('bulletList') }"
+        >
+          Bullet list
+        </button>
+        <button
+          @click="editor.chain().focus().toggleOrderedList().run()"
+          :class="{ 'is-active': editor.isActive('orderedList') }"
+        >
+          Ordered list
+        </button>
+        <button
+          @click="editor.chain().focus().toggleCodeBlock().run()"
+          :class="{ 'is-active': editor.isActive('codeBlock') }"
+        >
+          Code block
+        </button>
+        <button
+          @click="editor.chain().focus().toggleBlockquote().run()"
+          :class="{ 'is-active': editor.isActive('blockquote') }"
+        >
+          Blockquote
+        </button>
+        <button @click="editor.chain().focus().setHorizontalRule().run()">
+          Horizontal rule
+        </button>
+        <button @click="editor.chain().focus().setHardBreak().run()">
+          Hard break
+        </button>
+      </div>
+    </div>
+    <editor-content :editor="editor" />
   </div>
 </template>
 
