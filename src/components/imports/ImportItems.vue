@@ -56,8 +56,8 @@ const itemsLoading = ref<boolean>(false);
 const items = ref<string[]>([]);
 const selectedItem = ref<string>("");
 
-const { mutate: startImportOfMetsMagazines } = useMutation(StartUploadMagazinesWithMetsDocument);
-const { mutate: startImportOfCsvMagazines } = useMutation(StartUploadMagazinesWithCsvDocument);
+const { mutate: startImportMagazinesWithMets } = useMutation(StartUploadMagazinesWithMetsDocument);
+const { mutate: startImportMagazinesWithCsv } = useMutation(StartUploadMagazinesWithCsvDocument);
 
 if (props.inputFieldType === BaseFieldType.BaseMagazineWithMetsImportField) {
   const { onResult, loading } = useQuery(GetUploadMagazinesWithMetsDocument, {});
@@ -77,14 +77,14 @@ if (props.inputFieldType === BaseFieldType.BaseMagazineWithCsvImportField) {
   });
 }
 
-const doImport = (item: string) => {
+const doImport = async (item: string) => {
   try {
     switch (props.inputFieldType) {
       case BaseFieldType.BaseMagazineWithMetsImportField:
-        startImportOfMetsMagazines({ magazine: item });
+        await startImportMagazinesWithMets({ magazine: item });
         break;
       case BaseFieldType.BaseMagazineWithCsvImportField:
-        startImportOfCsvMagazines({ magazine: item });
+        await startImportMagazinesWithCsv({ folder: item });
         break;
       default:
         return;
@@ -92,14 +92,10 @@ const doImport = (item: string) => {
     createNotificationOverwrite(
       NotificationType.default,
       "Import",
-      t(`import.import-started`)
+      t(`import.magazine-import-started`)
     );
   } catch (error) {
-    createNotificationOverwrite(
-      NotificationType.error,
-      t(`import.import-error`),
-      "" + error.message
-    );
+
   }
   props.closeAndDeleteForm();
 };
