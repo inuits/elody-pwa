@@ -82,15 +82,6 @@ const viteConfig = defineConfig({
         },
       },
     },
-    commonjsOptions: {
-      include: [
-        "@tiptap/vue-3",
-        "@tiptap/extension-color",
-        "@tiptap/extension-list-item",
-        "@tiptap/extension-text-style",
-        "@tiptap/starter-kit",
-      ],
-    },
   },
   optimizeDeps: {
     exclude: ["session-vue-3-oidc-library", "date-fns"],

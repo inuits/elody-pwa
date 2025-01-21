@@ -1,82 +1,96 @@
 <template>
-  <div v-if="editor" class="container">
-    <div class="control-group">
-      <div class="button-group">
-        <button
-          @click="editor.chain().focus().setParagraph().run()"
-          :class="{ 'is-active': editor.isActive('paragraph') }"
-        >
-          Paragraph
-        </button>
-        <button
-          @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
-          :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"
-        >
-          H1
-        </button>
-        <button
-          @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
-          :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }"
-        >
-          H2
-        </button>
-        <button
-          @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
-          :class="{ 'is-active': editor.isActive('heading', { level: 3 }) }"
-        >
-          H3
-        </button>
-        <button
-          @click="editor.chain().focus().toggleHeading({ level: 4 }).run()"
-          :class="{ 'is-active': editor.isActive('heading', { level: 4 }) }"
-        >
-          H4
-        </button>
-        <button
-          @click="editor.chain().focus().toggleHeading({ level: 5 }).run()"
-          :class="{ 'is-active': editor.isActive('heading', { level: 5 }) }"
-        >
-          H5
-        </button>
-        <button
-          @click="editor.chain().focus().toggleHeading({ level: 6 }).run()"
-          :class="{ 'is-active': editor.isActive('heading', { level: 6 }) }"
-        >
-          H6
-        </button>
-        <button
-          @click="editor.chain().focus().toggleBulletList().run()"
-          :class="{ 'is-active': editor.isActive('bulletList') }"
-        >
-          Bullet list
-        </button>
-        <button
-          @click="editor.chain().focus().toggleOrderedList().run()"
-          :class="{ 'is-active': editor.isActive('orderedList') }"
-        >
-          Ordered list
-        </button>
-        <button
-          @click="editor.chain().focus().toggleCodeBlock().run()"
-          :class="{ 'is-active': editor.isActive('codeBlock') }"
-        >
-          Code block
-        </button>
-        <button
-          @click="editor.chain().focus().toggleBlockquote().run()"
-          :class="{ 'is-active': editor.isActive('blockquote') }"
-        >
-          Blockquote
-        </button>
-        <button @click="editor.chain().focus().setHorizontalRule().run()">
-          Horizontal rule
-        </button>
-        <button @click="editor.chain().focus().setHardBreak().run()">
-          Hard break
-        </button>
-      </div>
+  <div
+    :class="[
+      'border-solid border-neutral-30 border-2 bg-neutral-0 rounded-t-md min-h-[300px]',
+      { 'animate-pulse': !editor },
+    ]"
+  >
+    <div
+      class="border-solid border-neutral-30 border-b-2 rounded-t-md flex flex-row p-2"
+    >
+      <h1 data-cy="entity-element-window-title" class="subtitle text-text-body">
+        {{ t(element.label) }}
+      </h1>
     </div>
-    <editor-content :editor="editor" />
+    <div v-if="editor" class="p-2">
+      <div class="control-group">
+        <div class="button-group">
+          <button
+            @click="editor.chain().focus().setParagraph().run()"
+            :class="{ 'is-active': editor.isActive('paragraph') }"
+          >
+            Paragraph
+          </button>
+          <button
+            @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
+            :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"
+          >
+            H1
+          </button>
+          <button
+            @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
+            :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }"
+          >
+            H2
+          </button>
+          <button
+            @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
+            :class="{ 'is-active': editor.isActive('heading', { level: 3 }) }"
+          >
+            H3
+          </button>
+          <button
+            @click="editor.chain().focus().toggleHeading({ level: 4 }).run()"
+            :class="{ 'is-active': editor.isActive('heading', { level: 4 }) }"
+          >
+            H4
+          </button>
+          <button
+            @click="editor.chain().focus().toggleHeading({ level: 5 }).run()"
+            :class="{ 'is-active': editor.isActive('heading', { level: 5 }) }"
+          >
+            H5
+          </button>
+          <button
+            @click="editor.chain().focus().toggleHeading({ level: 6 }).run()"
+            :class="{ 'is-active': editor.isActive('heading', { level: 6 }) }"
+          >
+            H6
+          </button>
+          <button
+            @click="editor.chain().focus().toggleBulletList().run()"
+            :class="{ 'is-active': editor.isActive('bulletList') }"
+          >
+            Bullet list
+          </button>
+          <button
+            @click="editor.chain().focus().toggleOrderedList().run()"
+            :class="{ 'is-active': editor.isActive('orderedList') }"
+          >
+            Ordered list
+          </button>
+          <button
+            @click="editor.chain().focus().toggleCodeBlock().run()"
+            :class="{ 'is-active': editor.isActive('codeBlock') }"
+          >
+            Code block
+          </button>
+          <button
+            @click="editor.chain().focus().toggleBlockquote().run()"
+            :class="{ 'is-active': editor.isActive('blockquote') }"
+          >
+            Blockquote
+          </button>
+          <button @click="editor.chain().focus().setHorizontalRule().run()">
+            Horizontal rule
+          </button>
+          <button @click="editor.chain().focus().setHardBreak().run()">
+            Hard break
+          </button>
+        </div>
+      </div>
+      <editor-content :editor="editor" class="h-full" />
+    </div>
   </div>
 </template>
 
@@ -85,6 +99,7 @@ import { Editor, EditorContent } from "@tiptap/vue-3";
 import { ref, onMounted, onUnmounted } from "vue";
 import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
 import { WysiwygElement } from "@/generated-types/queries";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   element: WysiwygElement;
@@ -93,6 +108,7 @@ const props = defineProps<{
 const editor = ref<Editor | undefined>(undefined);
 const { importEditorExtensions, getExtensionConfiguration } =
   useWYSIWYGEditor();
+const { t } = useI18n();
 
 onMounted(async () => {
   const importedExtensions = await importEditorExtensions(
@@ -102,7 +118,6 @@ onMounted(async () => {
     props.element.extensions,
     importedExtensions,
   );
-  console.log({ configuredExtensions });
 
   editor.value = new Editor({
     extensions: configuredExtensions,
@@ -115,9 +130,11 @@ onUnmounted(() => {
 });
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 /* Basic editor styles */
 .tiptap {
+  height: 100%;
+
   :first-child {
     margin-top: 0;
   }
