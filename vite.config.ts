@@ -66,13 +66,37 @@ const viteConfig = defineConfig({
           openlayers: ["vue3-openlayers"],
           dropzone: ["dropzone"],
           unicons: ["vue-unicons"],
+          tiptap: [
+            "@tiptap/vue-3",
+            "@tiptap/extension-color",
+            "@tiptap/extension-list-item",
+            "@tiptap/extension-text-style",
+            "@tiptap/starter-kit",
+          ],
         },
       },
+    },
+    commonjsOptions: {
+      include: [
+        "@tiptap/vue-3",
+        "@tiptap/extension-color",
+        "@tiptap/extension-list-item",
+        "@tiptap/extension-text-style",
+        "@tiptap/starter-kit",
+      ],
     },
   },
   optimizeDeps: {
     exclude: ["session-vue-3-oidc-library", "date-fns"],
-    include: ["vue", "@vue/runtime-core"],
+    include: [
+      "vue",
+      "@vue/runtime-core",
+      "@tiptap/vue-3",
+      "@tiptap/extension-color",
+      "@tiptap/extension-list-item",
+      "@tiptap/extension-text-style",
+      "@tiptap/starter-kit",
+    ],
   },
 });
 

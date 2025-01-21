@@ -78,6 +78,10 @@
         :element="element"
         :entity-id="id"
       />
+      <entity-element-w-y-s-i-w-y-g
+        v-if="element.__typename === 'WysiwygElement'"
+        :element="element"
+      />
     </div>
   </div>
 </template>
@@ -89,6 +93,7 @@ import EntityElementManifestViewer from "@/components/entityElements/EntityEleme
 import EntityElementMedia from "@/components/entityElements/EntityElementMedia.vue";
 import EntityElementSingleMedia from "@/components/entityElements/EntityElementSingleMedia.vue";
 import EntityElementWindow from "@/components/entityElements/EntityElementWindow.vue";
+import EntityElementWYSIWYG from "@/components/entityElements/EntityElementWYSIWYG.vue";
 import EntityElementMapViewer from "@/components/entityElements/EntityElementMapViewer.vue";
 import { computed, watch } from "vue";
 import { useEditMode } from "@/composables/useEdit";
@@ -106,6 +111,7 @@ import type {
   MediaFileElement,
   SingleMediaFileElement,
   WindowElement,
+  WysiwygElement,
 } from "@/generated-types/queries";
 import EntityElementMarkdownViewer from "@/components/entityElements/EntityElementMarkdownViewer.vue";
 import { getObjectsBasedOnTypename } from "@/helpers";
@@ -119,6 +125,7 @@ export type Elements =
   | MediaFileElement
   | SingleMediaFileElement
   | WindowElement
+  | WysiwygElement
   | MapElement;
 
 const props = defineProps<{
