@@ -168,7 +168,6 @@
         </button>
       </div>
     </div>
-    <editor-content :editor="editor" />
   </div>
 </template>
 
