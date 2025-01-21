@@ -129,6 +129,8 @@ export type Elements =
   | WysiwygElement;
   | WindowElement
   | MapElement;
+  | WindowElement
+  | WysiwygElement;
 
 const props = defineProps<{
   elements: EntityViewElements;
