@@ -72,6 +72,10 @@
         v-if="element.__typename === 'MarkdownViewerElement'"
         :element="element"
       />
+      <entity-element-w-y-s-i-w-y-g
+        v-if="element.__typename === 'WysiwygElement'"
+        :element="element"
+      />
     </div>
   </div>
 </template>
@@ -83,6 +87,7 @@ import EntityElementManifestViewer from "@/components/entityElements/EntityEleme
 import EntityElementMedia from "@/components/entityElements/EntityElementMedia.vue";
 import EntityElementSingleMedia from "@/components/entityElements/EntityElementSingleMedia.vue";
 import EntityElementWindow from "@/components/entityElements/EntityElementWindow.vue";
+import EntityElementWYSIWYG from "@/components/entityElements/EntityElementWYSIWYG.vue";
 import { computed, watch } from "vue";
 import { useEditMode } from "@/composables/useEdit";
 import { useRoute } from "vue-router";
@@ -98,6 +103,7 @@ import type {
   MediaFileElement,
   SingleMediaFileElement,
   WindowElement,
+  WysiwygElement,
 } from "@/generated-types/queries";
 import EntityElementMarkdownViewer from "@/components/entityElements/EntityElementMarkdownViewer.vue";
 import { getObjectsBasedOnTypename } from "@/helpers";
@@ -110,7 +116,8 @@ export type Elements =
   | MarkdownViewerElement
   | MediaFileElement
   | SingleMediaFileElement
-  | WindowElement;
+  | WindowElement
+  | WysiwygElement;
 
 const props = defineProps<{
   elements: EntityViewElements;
@@ -145,7 +152,7 @@ const getCollapsedStateForElement = (element: object): boolean => {
   if (!element.entityTypes) return;
   const state = getStateForRoute(route);
   return state?.UIPanelStateCollapsed?.filter(
-    (panelState) => panelState.key === element.entityTypes[0]
+    (panelState) => panelState.key === element.entityTypes[0],
   )[0]?.value;
 };
 
@@ -163,6 +170,6 @@ watch(
           UIPanelStateCollapsed: state,
         });
     }
-  }
+  },
 );
 </script>
