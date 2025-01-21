@@ -13,7 +13,7 @@ export const useWYSIWYGEditor = (): {
 } => {
   const editorExtensionImportMapping: Record<WysiwygExtensions, ExtensionInfo> =
     {
-      [WysiwygExtensions.color]: {
+      [WysiwygExtensions.Color]: {
         importName: "Color",
         from: "/node_modules/@tiptap/extension-color",
         isNamedExport: true,
@@ -58,8 +58,6 @@ export const useWYSIWYGEditor = (): {
       .map((extension: WysiwygExtensions) => {
         const extensionConfig: extensionInfo =
           editorExtensionImportMapping[extension];
-        const capitalizedExtensionName =
-          extension.charAt(0).toUpperCase() + extension.slice(1);
 
         const importedExtension = importedExtensions.find(
           (ext) => ext.name === extension,
