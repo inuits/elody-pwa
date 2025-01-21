@@ -82,6 +82,7 @@
         v-if="element.__typename === 'WysiwygElement'"
         :form-id="formId"
         :element="element"
+      />
       <EntityElementHierarchyListViewer
         v-if="element.__typename === 'HierarchyListElement'"
         :element="element"
@@ -118,8 +119,8 @@ import type {
   MediaFileElement,
   SingleMediaFileElement,
   WindowElement,
-  WysiwygElement,
   HierarchyListElement,
+  WysiwygElement,
 } from "@/generated-types/queries";
 import EntityElementMarkdownViewer from "@/components/entityElements/EntityElementMarkdownViewer.vue";
 import { getObjectsBasedOnTypename } from "@/helpers";
