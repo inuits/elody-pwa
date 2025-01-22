@@ -20,6 +20,11 @@ import {
   Collection,
   TypeModals,
   ModalStyle,
+  type BaseRelationValuesInput,
+  type Entity,
+  type MutateEntityValuesMutation,
+  type MutateEntityValuesMutationVariables,
+  MutateEntityValuesDocument,
 } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
@@ -33,6 +38,14 @@ import { Context, useBulkOperations } from "@/composables/useBulkOperations";
 import { getChildrenOfHomeRoutes } from "@/helpers";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { type EntityValues, useFormHelper } from "@/composables/useFormHelper";
+import { useI18n } from "vue-i18n";
+import {
+  useNotification,
+  NotificationType,
+} from "@/components/base/BaseNotification.vue";
+import { useSubmitForm } from "vee-validate";
+import type { FormContext } from "vee-validate";
 
 const props = defineProps<{
   label: String;
@@ -49,19 +62,39 @@ const props = defineProps<{
 }>();
 
 const { update } = useFieldArray(
-  `relationValues.${props.relation?.relation?.type}`
+  `relationValues.${props.relation?.relation?.type}`,
 );
 const { save, disableEditMode, addSaveCallback, clearSaveCallbacks, isEdit } =
   useEditMode();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal } = useBaseModal();
-
+const { t } = useI18n();
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
-const submitForm: callback = inject("submitForm") as callback;
+const entityFormData: {
+  id: string;
+  values: EntityValues;
+  collection: Collection;
+  setEntityFormValues: Function;
+  resetEntityForm: Function;
+} = inject("entityFormData") as {
+  id: string;
+  values: EntityValues;
+  collection: Collection;
+  setEntityFormValues: Function;
+  resetEntityForm: Function;
+};
 const apolloClient = inject(DefaultApolloClient);
 const { createShareLink } = useShareLink(apolloClient as ApolloClient<any>);
 const config: any = inject("config");
+const { getForm, addForm, getForms } = useFormHelper();
+const { parseFormValuesToFormInput } = useFormHelper();
+const { createNotification } = useNotification();
+
+const { mutate: mutateEntityValues } = useMutation<
+  MutateEntityValuesMutation,
+  MutateEntityValuesMutationVariables
+>(MutateEntityValuesDocument);
 
 const isDisabled = computed(() => {
   return (
@@ -72,39 +105,83 @@ const isDisabled = computed(() => {
 });
 
 const childRoutes = getChildrenOfHomeRoutes(config).map(
-  (route: any) => route.meta
+  (route: any) => route.meta,
 );
 
 const deleteRelation = async () => {
   dequeueItemForBulkProcessing(
     props.bulkOperationsContext,
-    props.relation.relation.key
+    props.relation.relation.key,
   );
   if (props.relation !== "no-relation-found")
     update(props.relation.idx, {
       ...props.relation.relation,
       editStatus: EditStatus.Deleted,
     });
+
   await save();
   disableEditMode();
 };
 
+const submit = useSubmitForm<EntityValues>(async () => {
+  const form = getForm(entityFormData.id) as FormContext;
+  if (!entityFormData.collection)
+    throw Error("Could not determine collection for submit");
+
+  const result = await mutateEntityValues({
+    id: entityFormData.id,
+    formInput: parseFormValuesToFormInput(
+      entityFormData.id,
+      form?.values,
+      true,
+    ),
+    collection: entityFormData.collection,
+  });
+
+  if (!result?.data?.mutateEntityValues) return;
+
+  const mutatedEntity = result.data.mutateEntityValues as Entity;
+  const updatedRelationValues = { ...mutatedEntity.relationValues };
+  Object.keys(form.values.relationValues).forEach((key) => {
+    if (!(key in mutatedEntity.relationValues)) {
+      updatedRelationValues[key] = [];
+    }
+  });
+
+  form.resetForm({
+    values: {
+      intialValues: mutatedEntity.intialValues,
+      relationValues: updatedRelationValues,
+    },
+  });
+
+  createNotification({
+    displayTime: 10,
+    type: NotificationType.default,
+    title: t("notifications.success.entityUpdated.title"),
+    description: t("notifications.success.entityUpdated.description"),
+    shown: true,
+  });
+
+  disableEditMode();
+});
+
 const addSaveHandler = () => {
   clearSaveCallbacks();
-  addSaveCallback(submitForm, "first");
+  addSaveCallback(submit, "first");
 };
 
 const deleteEntity = async () => {
   dequeueItemForBulkProcessing(
     props.bulkOperationsContext,
-    props.relation.relation.key
+    props.relation.relation.key,
   );
   let collection;
   if (props.entityType.toLowerCase() === Entitytyping.Mediafile) {
     collection = Collection.Mediafiles;
   } else {
     collection = childRoutes.find(
-      (route: any) => route.entityType === props.entityType
+      (route: any) => route.entityType === props.entityType,
     ).type;
   }
 
