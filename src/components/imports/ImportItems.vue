@@ -67,15 +67,6 @@ const initializeImport = async () => {
       items.value = result.data.UploadMagazinesWithMets;
     itemsLoading.value = false;
   }
-
-  if (props.inputFieldType === BaseFieldType.BaseMagazineWithCsvImportField) {
-    const result = await queryAsync(
-      queries.value.GetUploadMagazinesWithCsvDocument,
-    );
-    if (result && result.data && result.data.UploadMagazinesWithCsv)
-      items.value = result.data.UploadMagazinesWithCsv;
-    itemsLoading.value = false;
-  }
 };
 
 onMounted(() => {
@@ -87,11 +78,6 @@ const doImport = async (item: string) => {
     switch (props.inputFieldType) {
       case BaseFieldType.BaseMagazineWithMetsImportField:
         await mutateAsync(queries.value.startImportMagazinesWithMets, {
-          folder: item,
-        });
-        break;
-      case BaseFieldType.BaseMagazineWithCsvImportField:
-        await mutateAsync(queries.value.StartUploadMagazinesWithCsvDocument, {
           folder: item,
         });
         break;
