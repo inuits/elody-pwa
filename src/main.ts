@@ -49,7 +49,7 @@ const applyCustomization = (rulesObject: any) => {
     document.title = rulesObject.applicationTitle;
 };
 
-const start = async () => {
+const start = async (): Promise<void> => {
   Unicon.add(Object.values(Unicons));
 
   const { config, translations, version } = await getApplicationDetails();
