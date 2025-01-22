@@ -71,16 +71,10 @@ const { t } = useI18n();
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const entityFormData: {
   id: string;
-  values: EntityValues;
   collection: Collection;
-  setEntityFormValues: Function;
-  resetEntityForm: Function;
 } = inject("entityFormData") as {
   id: string;
-  values: EntityValues;
   collection: Collection;
-  setEntityFormValues: Function;
-  resetEntityForm: Function;
 };
 const apolloClient = inject(DefaultApolloClient);
 const { createShareLink } = useShareLink(apolloClient as ApolloClient<any>);
