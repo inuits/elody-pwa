@@ -31,18 +31,15 @@
 
 <script setup lang="ts">
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
-import { computed, ref } from "vue";
-import { useMutation, useQuery } from "@vue/apollo-composable";
-import {
-  BaseFieldType,
-  GetUploadMagazinesWithCsvDocument,
-  GetUploadMagazinesWithMetsDocument,
-  StartUploadMagazinesWithCsvDocument,
-  StartUploadMagazinesWithMetsDocument,
-} from "@/generated-types/queries";
+import { computed, ref, onMounted } from "vue";
+import { BaseFieldType } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 import ImportListItem from "@/components/imports/ImportListItem.vue";
-import { useNotification, NotificationType } from "@/components/base/BaseNotification.vue";
+import {
+  useNotification,
+  NotificationType,
+} from "@/components/base/BaseNotification.vue";
+import { useGraphqlAsync } from "@/composables/useGraphqlAsync";
 
 const props = defineProps<{
   inputFieldType: BaseFieldType;
@@ -51,40 +48,52 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
+const { getQueryDocument, queryAsync, mutateAsync } = useGraphqlAsync();
 
 const itemsLoading = ref<boolean>(false);
 const items = ref<string[]>([]);
 const selectedItem = ref<string>("");
+const queries = ref<any>();
 
-const { mutate: startImportMagazinesWithMets } = useMutation(StartUploadMagazinesWithMetsDocument);
-const { mutate: startImportMagazinesWithCsv } = useMutation(StartUploadMagazinesWithCsvDocument);
+const initializeImport = async () => {
+  queries.value = await getQueryDocument();
 
-if (props.inputFieldType === BaseFieldType.BaseMagazineWithMetsImportField) {
-  const { onResult, loading } = useQuery(GetUploadMagazinesWithMetsDocument, {});
-  onResult((result) => {
+  itemsLoading.value = true;
+  if (props.inputFieldType === BaseFieldType.BaseMagazineWithMetsImportField) {
+    const result = await queryAsync(
+      queries.value.GetUploadMagazinesWithMetsDocument,
+    );
     if (result && result.data && result.data.UploadMagazinesWithMets)
       items.value = result.data.UploadMagazinesWithMets;
-    itemsLoading.value = loading.value;
-  });
-}
+    itemsLoading.value = false;
+  }
 
-if (props.inputFieldType === BaseFieldType.BaseMagazineWithCsvImportField) {
-  const { onResult, loading } = useQuery(GetUploadMagazinesWithCsvDocument, {});
-  onResult((result) => {
+  if (props.inputFieldType === BaseFieldType.BaseMagazineWithCsvImportField) {
+    const result = await queryAsync(
+      queries.value.GetUploadMagazinesWithCsvDocument,
+    );
     if (result && result.data && result.data.UploadMagazinesWithCsv)
       items.value = result.data.UploadMagazinesWithCsv;
-    itemsLoading.value = loading.value;
-  });
-}
+    itemsLoading.value = false;
+  }
+};
+
+onMounted(() => {
+  initializeImport();
+});
 
 const doImport = async (item: string) => {
   try {
     switch (props.inputFieldType) {
       case BaseFieldType.BaseMagazineWithMetsImportField:
-        await startImportMagazinesWithMets({ magazine: item });
+        await mutateAsync(queries.value.startImportMagazinesWithMets, {
+          folder: item,
+        });
         break;
       case BaseFieldType.BaseMagazineWithCsvImportField:
-        await startImportMagazinesWithCsv({ folder: item });
+        await mutateAsync(queries.value.StartUploadMagazinesWithCsvDocument, {
+          folder: item,
+        });
         break;
       default:
         return;
@@ -92,10 +101,14 @@ const doImport = async (item: string) => {
     createNotificationOverwrite(
       NotificationType.default,
       "Import",
-      t(`import.magazine-import-started`)
+      t(`import.magazine-import-started`),
     );
   } catch (error) {
-
+    createNotificationOverwrite(
+      NotificationType.error,
+      t(`import.import-error`),
+      "" + error.message,
+    );
   }
   props.closeAndDeleteForm();
 };
