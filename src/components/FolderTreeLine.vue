@@ -70,6 +70,7 @@
       v-for="(subDirectory, index) in subDirectories"
       v-show="open"
       :key="subDirectory.id ? subDirectory.id : 'no-key'"
+      :query-for-sub-directories="queryForSubDirectories"
       :directory="subDirectory"
       :dictionary="dictionary"
       :default-open="false"
@@ -86,7 +87,6 @@
 <script lang="ts">
 import { defineComponent, inject, ref } from "vue";
 import type { PropType } from "vue";
-import { GetDirectoriesDocument } from "@/generated-types/queries";
 import type { Directory } from "@/generated-types/queries";
 
 import { useQuery } from "@vue/apollo-composable";
@@ -96,6 +96,11 @@ export default defineComponent({
   name: "ContractorTreeLine",
   components: { LoadingList },
   props: {
+    queryForSubDirectories: {
+      //Current directory
+      type: Object,
+      required: true,
+    },
     directory: {
       //Current directory
       type: Object as PropType<Directory>,
@@ -125,8 +130,9 @@ export default defineComponent({
   setup(props) {
     const open = ref<boolean>(props.defaultOpen);
     const fetchEnabled = ref(false);
+
     const { result, refetch, onResult, loading } = useQuery(
-      GetDirectoriesDocument,
+      props.queryForSubDirectories,
       { dir: `${props.directory.id}/` },
       () => ({
         enabled: fetchEnabled.value,
@@ -136,7 +142,9 @@ export default defineComponent({
 
     onResult((value) => {
       if (value.data) {
-        subDirectories.value = value.data.Directories as Directory[];
+        Object.keys(value.data).forEach((key) => {
+          subDirectories.value = value.data[key] as Directory[];
+        })
       }
     });
 

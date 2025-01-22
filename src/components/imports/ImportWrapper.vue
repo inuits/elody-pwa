@@ -1,12 +1,15 @@
 <template>
   <import-from-network-drive
-    v-if="inputFieldType === BaseFieldType.BaseFileSystemImportField"
+    v-if="
+      inputFieldType === BaseFieldType.BaseFileSystemImportField ||
+      inputFieldType === BaseFieldType.BaseMagazineWithCsvImportField
+    "
+    :input-field-type="inputFieldType"
     :close-and-delete-form="closeAndDeleteForm"
   />
   <import-items
     v-if="
-      inputFieldType === BaseFieldType.BaseMagazineWithMetsImportField ||
-      inputFieldType === BaseFieldType.BaseMagazineWithCsvImportField
+      inputFieldType === BaseFieldType.BaseMagazineWithMetsImportField
     "
     :input-field-type="inputFieldType"
     :close-and-delete-form="closeAndDeleteForm"

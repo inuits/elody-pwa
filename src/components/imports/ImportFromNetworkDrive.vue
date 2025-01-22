@@ -1,10 +1,11 @@
 <template>
   <div>
-    <div v-if="loading"><spinner-loader theme="accent" /></div>
+    <div v-if="itemsLoading"><spinner-loader theme="accent" /></div>
     <div v-else>
       <ul v-if="directories.length" class="max-h-[75vh] p-4 overflow-y-auto">
         <li v-for="directory in directories" :key="directory.id">
           <folder-tree-line
+            :query-for-sub-directories="queryForSubDirectories"
             :default-open="false"
             :dictionary="directories"
             :directory="directory"
@@ -31,8 +32,8 @@
 
 <script setup lang="ts">
 import {
+  BaseFieldType,
   Entitytyping,
-  GetDirectoriesDocument,
   PostStartImportDocument
 } from "@/generated-types/queries";
 import {
@@ -43,33 +44,93 @@ import FolderTreeLine from "@/components/FolderTreeLine.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { goToEntityTypeRoute } from "@/helpers";
-import { provide, ref, computed } from "vue";
+import { provide, ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
-import { useMutation, useQuery } from "@vue/apollo-composable";
+import { useMutation } from "@vue/apollo-composable";
 import { useRouter } from "vue-router";
+import { useGraphqlAsync } from "@/composables/useGraphqlAsync";
+
 
 const props = defineProps<{
+  inputFieldType: BaseFieldType;
   closeAndDeleteForm: Function;
 }>();
 
 const { t } = useI18n();
-const directories = ref([]);
 const selectedDirectory = ref(null);
 const { createNotificationOverwrite } = useNotification();
 const { getMenuDestinations } = useMenuHelper();
 const router = useRouter();
+const { getQueryDocument, queryAsync, mutateAsync } = useGraphqlAsync();
 
-const { onResult, loading } = useQuery(GetDirectoriesDocument, {});
+const itemsLoading = ref<boolean>(false);
+const directories = ref([]);
+const queries = ref<any>();
+const queryForSubDirectories = ref<any>();
 
-onResult((result) => {
-  if (result && result.data && result.data.Directories) {
-    directories.value = result.data.Directories;
+
+const initializeImport = async () => {
+  queries.value = await getQueryDocument();
+  itemsLoading.value = true;
+
+  if (props.inputFieldType === BaseFieldType.BaseFileSystemImportField) {
+    queryForSubDirectories.value = queries.value.GetDirectoriesDocument;
+    const result = await queryAsync(
+      queries.value.GetDirectoriesDocument,
+    );
+    if (result && result.data && result.data.Directories)
+      directories.value = result.data.Directories;
+    itemsLoading.value = false;
   }
+
+  if (props.inputFieldType === BaseFieldType.BaseMagazineWithCsvImportField) {
+    queryForSubDirectories.value = queries.value.GetUploadMagazinesWithCsvDocument;
+    const result = await queryAsync(
+      queries.value.GetUploadMagazinesWithCsvDocument,
+    );
+    if (result && result.data && result.data.UploadMagazinesWithCsv)
+      directories.value = result.data.UploadMagazinesWithCsv;
+    itemsLoading.value = false;
+  }
+};
+
+onMounted(() => {
+  initializeImport();
 });
+
+const doImport = async (folder: string) => {
+  try {
+    switch (props.inputFieldType) {
+      case BaseFieldType.BaseFileSystemImportField:
+        await doImportOfDirectories(folder);
+        break;
+      case BaseFieldType.BaseMagazineWithCsvImportField:
+        await mutateAsync(queries.value.StartUploadMagazinesWithCsvDocument, {
+          folder: folder,
+        });
+        break;
+      default:
+        return;
+    }
+    createNotificationOverwrite(
+      NotificationType.default,
+      "Import",
+      t(`import.magazine-import-started`),
+    );
+  } catch (error) {
+    createNotificationOverwrite(
+      NotificationType.error,
+      t(`import.import-error`),
+      "" + error.message,
+    );
+  }
+  props.closeAndDeleteForm();
+};
+
 
 const { mutate: startImport } = useMutation(PostStartImportDocument);
 
-const doImport = (folder) => {
+const doImportOfDirectories = async (folder) => {
   if (!folder) {
     createNotificationOverwrite(
       NotificationType.error,
