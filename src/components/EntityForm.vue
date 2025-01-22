@@ -106,7 +106,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
 
   const result = await mutate({
     id: props.id,
-    formInput: parseFormValuesToFormInput(props.id, unref(form.values), false),
+    formInput: parseFormValuesToFormInput(props.id, unref(form.values)),
     collection,
   });
 
