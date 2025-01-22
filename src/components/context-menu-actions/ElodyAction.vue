@@ -19,8 +19,6 @@ import {
   Entitytyping,
   Collection,
   TypeModals,
-  ModalStyle,
-  type BaseRelationValuesInput,
   type Entity,
   type MutateEntityValuesMutation,
   type MutateEntityValuesMutationVariables,
@@ -29,7 +27,7 @@ import {
 import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { useFieldArray } from "vee-validate";
-import useEditMode, { type callback } from "@/composables/useEdit";
+import useEditMode from "@/composables/useEdit";
 import { inject, computed } from "vue";
 import { useShareLink } from "@/composables/useShareLink";
 import { DefaultApolloClient, useMutation } from "@vue/apollo-composable";
@@ -87,7 +85,7 @@ const entityFormData: {
 const apolloClient = inject(DefaultApolloClient);
 const { createShareLink } = useShareLink(apolloClient as ApolloClient<any>);
 const config: any = inject("config");
-const { getForm, addForm, getForms } = useFormHelper();
+const { getForm } = useFormHelper();
 const { parseFormValuesToFormInput } = useFormHelper();
 const { createNotification } = useNotification();
 
