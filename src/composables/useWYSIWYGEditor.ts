@@ -35,6 +35,14 @@ export const useWYSIWYGEditor = (): {
         from: "node_modules/@tiptap/extension-text-style",
         configuration: [WysiwygExtensions.ListItem],
       },
+      [WysiwygExtensions.Italic]: {
+        importName: "Italic",
+        from: "node_modules/@tiptap/extension-italic",
+      },
+      [WysiwygExtensions.Bold]: {
+        importName: "Bold",
+        from: "node_modules/@tiptap/extension-bold",
+      },
     };
 
   const importEditorExtensions = async (
