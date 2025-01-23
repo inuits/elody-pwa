@@ -137,5 +137,8 @@ module.exports = {
       }),
     },
   },
-  plugins: [require("@tailwindcss/forms")({ useFormClasses: true })],
+  plugins: [
+    require("@tailwindcss/forms")({ useFormClasses: true }),
+    require("@tailwindcss/typography"),
+  ],
 };

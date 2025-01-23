@@ -94,4 +94,9 @@ button {
   background-color: theme("colors.neutral.40");
   border-radius: 0.25rem;
 }
+
+.is-active {
+  background-color: theme("colors.accent.normal");
+  color: theme("colors.white");
+}
 </style>
