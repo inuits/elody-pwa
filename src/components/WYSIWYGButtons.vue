@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="sticky top-0 bg-neutral-0 z-[100] p-2 flex">
     <div v-if="extensions.includes(WysiwygExtensions.StarterKit)">
       <button
         @click="editor.chain().focus().setParagraph().run()"
@@ -72,6 +72,22 @@
       </button>
       <button @click="editor.chain().focus().setHardBreak().run()">
         Hard break
+      </button>
+    </div>
+    <div v-if="extensions.includes(WysiwygExtensions.Bold)">
+      <button
+        @click="editor.chain().focus().toggleBold().run()"
+        :class="{ 'is-active': editor.isActive('bold') }"
+      >
+        Bold
+      </button>
+    </div>
+    <div v-if="extensions.includes(WysiwygExtensions.Italic)">
+      <button
+        @click="editor.chain().focus().toggleItalic().run()"
+        :class="{ 'is-active': editor.isActive('italic') }"
+      >
+        Italic
       </button>
     </div>
   </div>
