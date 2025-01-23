@@ -201,4 +201,9 @@ button {
 .transparent-bg {
   background-color: rgba(255, 255, 255, 0.95);
 }
+
+.is-active {
+  background-color: theme("colors.accent.normal");
+  color: theme("colors.white");
+}
 </style>
