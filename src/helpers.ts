@@ -126,6 +126,21 @@ export const getEntityPageRoute = (
   };
 };
 
+export const goToEntityPageById = (
+  entityId: string,
+  entityTypename: any,
+  listItemRouteName: string,
+  router: Router,
+) => {
+  router.replace({
+    name: listItemRouteName,
+    params: {
+      id: entityId,
+      type: getMappedSlug(entityTypename),
+    },
+  });
+};
+
 export const getMappedSlug = (entity: Entity): string => {
   const mappedSlug = typeUrlMapping?.mapping[entity.__typename];
   return mappedSlug ? mappedSlug : entity.type;

@@ -57,6 +57,7 @@ const standaloneFileType = ref<UploadEntityTypes | undefined>(undefined);
 const reinitializeDynamicFormFunc = ref<Function | undefined>(undefined);
 const csvOnlyUploadSFailed = ref<boolean>(false);
 const extraMediafileType = ref<string | undefined>(undefined);
+const jobIdentifier = ref<string | undefined>(undefined);
 
 const useUpload = () => {
   let _prefetchedUploadUrls: string[] | "not-prefetched-yet" =
@@ -386,7 +387,12 @@ const useUpload = () => {
       return Promise.reject(httpErrorMessage);
     }
 
-    if (!isDryRun) return JSON.parse(await response.text());
+    if (!isDryRun) {
+      const parsedResult = JSON.parse(await response.text());
+      if (parsedResult.jobIdWithDryRun)
+        jobIdentifier.value = parsedResult.jobIdWithDryRun;
+      return parsedResult.links;
+    }
     else return response.json();
   };
 
@@ -892,6 +898,7 @@ const useUpload = () => {
     missingFileNames,
     failedUploads,
     standaloneFileType,
+    jobIdentifier,
     reinitializeDynamicFormFunc,
     __getCsvString,
     extraMediafileType,
