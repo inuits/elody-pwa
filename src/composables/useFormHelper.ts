@@ -169,14 +169,14 @@ const useFormHelper = () => {
 
     const timestamp = new Date(value).getTime();
     const now = Date.now();
-    if (now < timestamp)
-      return "notifications.errors.future-date-error.title";
+    if (now < timestamp) return "notifications.errors.future-date-error.title";
     return true;
   };
 
   const mustBeExistingDateRule = (value: string): boolean | string => {
     if (!value) return true;
-    if (!DateTime.fromJSDate(new Date(value)).isValid) return "notifications.errors.construct-date-error.title";
+    if (!DateTime.fromJSDate(new Date(value)).isValid)
+      return "notifications.errors.construct-date-error.title";
     return true;
   };
 
@@ -487,7 +487,11 @@ const useFormHelper = () => {
     return relations;
   };
 
-  const parseFormValuesToFormInput = (uuid: string, values: EntityValues) => {
+  const parseFormValuesToFormInput = (
+    uuid: string,
+    values: EntityValues,
+    updateOnlyRelations = false,
+  ) => {
     let metadata: MetadataValuesInput[] = [];
     let relations: BaseRelationValuesInput[] = [];
 
@@ -509,7 +513,7 @@ const useFormHelper = () => {
         uuid,
       );
 
-    return { metadata, relations };
+    return { metadata, relations, updateOnlyRelations };
   };
 
   return {
