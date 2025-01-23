@@ -224,7 +224,7 @@ import useUpload from "@/composables/useUpload";
 import {
   calculateFutureDate,
   goToEntityPage,
-  goToEntityTypeRoute,
+  goToEntityPageById,
 } from "@/helpers";
 import type { Router } from "vue-router";
 import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUploadButton.vue";
@@ -299,6 +299,7 @@ const {
   enableUploadButton,
   uploadProgress,
   standaloneFileType,
+  jobIdentifier,
   reinitializeDynamicFormFunc,
   uploadCsvForReordering,
   __getCsvString,
@@ -429,12 +430,12 @@ const isFormValid = async () => {
 
 const uploadActionFunction = async () => {
   if (!enableUploadButton.value) return;
-  upload(isLinkedUpload.value, config, t);
-  if (standaloneFileType.value)
-    goToEntityTypeRoute(
-      standaloneFileType.value,
-      { key: "date_updated", asc: false },
-      getMenuDestinations(),
+  await upload(isLinkedUpload.value, config, t);
+  if (jobIdentifier.value)
+    goToEntityPageById(
+      jobIdentifier.value,
+      { type: "job", __typename: "job" },
+      "SingleEntity",
       props.router,
     );
   return;
