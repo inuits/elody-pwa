@@ -15,7 +15,7 @@ export const useWYSIWYGEditor = (): {
     {
       [WysiwygExtensions.Color]: {
         importName: "Color",
-        from: "/node_modules/@tiptap/extension-color",
+        from: "node_modules/@tiptap/extension-color",
         isNamedExport: true,
         configuration: [
           WysiwygExtensions.TextStyle,
@@ -24,15 +24,15 @@ export const useWYSIWYGEditor = (): {
       },
       [WysiwygExtensions.ListItem]: {
         importName: "ListItem",
-        from: "/node_modules/@tiptap/extension-list-item",
+        from: "node_modules/@tiptap/extension-list-item",
       },
       [WysiwygExtensions.StarterKit]: {
         importName: "StarterKit",
-        from: "/node_modules/@tiptap/starter-kit",
+        from: "node_modules/@tiptap/starter-kit",
       },
       [WysiwygExtensions.TextStyle]: {
         importName: "TextStyle",
-        from: "/node_modules/@tiptap/extension-text-style",
+        from: "node_modules/@tiptap/extension-text-style",
         configuration: [WysiwygExtensions.ListItem],
       },
     };
@@ -44,7 +44,7 @@ export const useWYSIWYGEditor = (): {
       extensions.map(async (extension) => {
         const { from, isNamedExport, importName } =
           editorExtensionImportMapping[extension];
-        const module = await import(from);
+        const module = await import(`../../${from}`);
         return isNamedExport ? module[importName] : module.default;
       }),
     );
