@@ -6,16 +6,13 @@
 import {
   MutateEntityValuesDocument,
   TypeModals,
-  type BaseRelationValuesInput,
   type Entity,
   type IntialValues,
-  type MetadataValuesInput,
   type MutateEntityValuesMutation,
   type MutateEntityValuesMutationVariables,
   DeleteQueryOptions,
   Collection,
   ModalStyle,
-  RouteNames,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -130,7 +127,14 @@ const submit = useSubmitForm<EntityValues>(async () => {
   disableEditMode();
 });
 
-provide("submitForm", submit);
+provide("entityFormData", {
+  id: props.id,
+  collection:
+    childRoutes.find(
+      (route: any) =>
+        route.entityType?.toLowerCase() === props.type.toLowerCase(),
+    )?.type || Collection.Entities,
+});
 
 const callRefetchFn = () => {
   const refetch = refetchFn.value;
