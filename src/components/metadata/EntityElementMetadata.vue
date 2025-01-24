@@ -23,11 +23,13 @@
           />
           <CustomIcon v-else-if="linkIcon" :icon="linkIcon" :size="12" />
         </div>
-        <p
+        <a
           data-cy="metadata-value"
+          class="underline" target="_blank"
+          :href="readableValue"
           v-html="processTextWithLinks(t(linkText) || readableValue)"
           @click.stop
-        ></p>
+        ></a>
       </div>
 
       <p
