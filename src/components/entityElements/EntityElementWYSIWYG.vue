@@ -12,7 +12,7 @@
         {{ t(element.label) }}
       </h1>
     </div>
-    <div v-if="editor" class="p-2 flex flex-col min-h-[300px]">
+    <div v-if="editor" class="p-2 flex flex-col">
       <WYSIWYGButtons :editor="editor" :extensions="element.extensions" />
       <editor-content :editor="editor" />
     </div>
@@ -21,20 +21,25 @@
 
 <script setup lang="ts">
 import { Editor, EditorContent } from "@tiptap/vue-3";
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch, computed } from "vue";
 import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
 import WYSIWYGButtons from "@/components/WYSIWYGButtons.vue";
-import { WysiwygElement } from "@/generated-types/queries";
+import { ValidationFields, WysiwygElement } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 const props = defineProps<{
+  formId: string;
   element: WysiwygElement;
 }>();
 
 const editor = ref<Editor | undefined>(undefined);
 const { importEditorExtensions, getExtensionConfiguration } =
   useWYSIWYGEditor();
+const { getForm } = useFormHelper();
 const { t } = useI18n();
+
+const content = computed(() => editor.value?.getHTML());
 
 onMounted(async () => {
   const importedExtensions = await importEditorExtensions(
@@ -50,7 +55,7 @@ onMounted(async () => {
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl m-5 focus:outline-none",
+          "prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl m-5 focus:outline-none border border-[rgba(0,58,82,0.6)] rounded-md min-h-[250px] p-2",
       },
     },
     content: ``,
@@ -60,6 +65,20 @@ onMounted(async () => {
 onUnmounted(() => {
   editor.value.destroy();
 });
+
+watch(
+  () => content.value,
+  () => {
+    console.log(content.value);
+    const form = getForm(props.formId);
+    if (form) {
+      form.setFieldValue(
+        `${ValidationFields.IntialValues}.${props.element.metadataKey}`,
+        content.value,
+      );
+    }
+  },
+);
 </script>
 
 <style></style>

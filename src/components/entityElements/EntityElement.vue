@@ -74,6 +74,7 @@
       />
       <entity-element-w-y-s-i-w-y-g
         v-if="element.__typename === 'WysiwygElement'"
+        :form-id="formId"
         :element="element"
       />
     </div>
