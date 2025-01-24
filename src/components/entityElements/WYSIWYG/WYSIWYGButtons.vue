@@ -206,4 +206,8 @@ button {
   background-color: theme("colors.accent.normal");
   color: theme("colors.white");
 }
+
+.transparent-bg {
+  background-color: rgba(255, 255, 255, 0.95);
+}
 </style>
