@@ -13,6 +13,20 @@ export const useWYSIWYGEditor = (): {
 } => {
   const editorExtensionImportMapping: Record<WysiwygExtensions, ExtensionInfo> =
     {
+      // Base-extensions if you don't want to use the starterkit
+      [WysiwygExtensions.Doc]: {
+        importName: "Document",
+        from: "node_modules/@tiptap/extension-document",
+      },
+      [WysiwygExtensions.Paragraph]: {
+        importName: "Paragraph",
+        from: "node_modules/@tiptap/extension-paragraph",
+      },
+      [WysiwygExtensions.Text]: {
+        importName: "Text",
+        from: "node_modules/@tiptap/extension-text",
+      },
+      // End of base-extensions
       [WysiwygExtensions.Color]: {
         importName: "Color",
         from: "node_modules/@tiptap/extension-color",
@@ -52,8 +66,13 @@ export const useWYSIWYGEditor = (): {
       extensions.map(async (extension) => {
         const { from, isNamedExport, importName } =
           editorExtensionImportMapping[extension];
-        const module = await import(`../../${from}`);
-        return isNamedExport ? module[importName] : module.default;
+        try {
+          const module = await import(`../../${from}`);
+          return isNamedExport ? module[importName] : module.default;
+        } catch (e) {
+          console.error(`Error importing ${extension}:`, error);
+          throw error;
+        }
       }),
     );
   };
