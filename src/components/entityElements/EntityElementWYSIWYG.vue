@@ -111,6 +111,7 @@ const { importEditorExtensions, getExtensionConfiguration } =
 const { t } = useI18n();
 
 onMounted(async () => {
+  addEditableMetadataKeys([props.element.metadataKey], props.formId);
   const importedExtensions = await importEditorExtensions(
     props.element.extensions,
   );
