@@ -73,6 +73,7 @@
               @expand-filters="expandFilters = !expandFilters"
             />
             <div
+              v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
               class="mr-2"
               :class="['flex', { 'ml-4': enableAdvancedFilters }]"
             >
