@@ -23,7 +23,7 @@
           class="text-neutral-700 cursor-pointer"
         />
       </a>
-      <a v-if="mediafileId" @click="downloadImage">
+      <a v-if="mediafileId" @click="downloadImage" :download="true">
         <unicon
           :name="Unicons.Download.name"
           height="20"
@@ -106,10 +106,18 @@ export default defineComponent({
         throw Error(
           `Could not download madiafile with id "${_props.mediafileId}"`
         );
-      const response = await fetch(
+
+      const imageUrl = await fetch(
         `/api/mediafiles/${_props.mediafileId}/download`
       );
-      window.open(await response.text(), "_blank");
+      const image = await fetch(await imageUrl.text());
+      const blob = await image.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `mediafile-${_props.mediafileId}.jpg`;
+      link.click();
+      URL.revokeObjectURL(url);
     };
 
     return {
