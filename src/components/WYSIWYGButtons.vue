@@ -2,6 +2,7 @@
   <div class="sticky top-0 transparent-bg z-[100] p-2 flex flex-wrap">
     <button
       v-if="extensions.includes(WysiwygExtensions.StarterKit)"
+      :disabled="buttonsDisabled"
       @click="editor.chain().focus().setParagraph().run()"
       :class="{ 'is-active': editor.isActive('paragraph') }"
       title="Paragraph"
@@ -10,6 +11,7 @@
     </button>
     <button
       v-if="extensions.includes(WysiwygExtensions.StarterKit)"
+      :disabled="buttonsDisabled"
       @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
       :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"
       title="H1"
@@ -18,6 +20,7 @@
     </button>
     <button
       v-if="extensions.includes(WysiwygExtensions.StarterKit)"
+      :disabled="buttonsDisabled"
       @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
       :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }"
       title="H2"
@@ -26,6 +29,7 @@
     </button>
     <button
       v-if="extensions.includes(WysiwygExtensions.StarterKit)"
+      :disabled="buttonsDisabled"
       @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
       :class="{ 'is-active': editor.isActive('heading', { level: 3 }) }"
       title="H3"
@@ -34,6 +38,8 @@
     </button>
     <button
       v-if="extensions.includes(WysiwygExtensions.StarterKit)"
+      :disabled="buttonsDisabled"
+      s
       @click="editor.chain().focus().toggleHeading({ level: 4 }).run()"
       :class="{ 'is-active': editor.isActive('heading', { level: 4 }) }"
       title="H4"
@@ -42,6 +48,7 @@
     </button>
     <button
       v-if="extensions.includes(WysiwygExtensions.StarterKit)"
+      :disabled="buttonsDisabled"
       @click="editor.chain().focus().toggleHeading({ level: 5 }).run()"
       :class="{ 'is-active': editor.isActive('heading', { level: 5 }) }"
       title="H5"
@@ -50,6 +57,7 @@
     </button>
     <button
       v-if="extensions.includes(WysiwygExtensions.StarterKit)"
+      :disabled="buttonsDisabled"
       @click="editor.chain().focus().toggleHeading({ level: 6 }).run()"
       :class="{ 'is-active': editor.isActive('heading', { level: 6 }) }"
       title="H6"
@@ -58,6 +66,7 @@
     </button>
     <button
       v-if="extensions.includes(WysiwygExtensions.StarterKit)"
+      :disabled="buttonsDisabled"
       @click="editor.chain().focus().toggleBulletList().run()"
       :class="{ 'is-active': editor.isActive('bulletList') }"
       title="Bullet list"
@@ -66,6 +75,7 @@
     </button>
     <button
       v-if="extensions.includes(WysiwygExtensions.StarterKit)"
+      :disabled="buttonsDisabled"
       @click="editor.chain().focus().toggleOrderedList().run()"
       :class="{ 'is-active': editor.isActive('orderedList') }"
       title="Ordered list"
@@ -74,6 +84,7 @@
     </button>
     <button
       v-if="extensions.includes(WysiwygExtensions.StarterKit)"
+      :disabled="buttonsDisabled"
       @click="editor.chain().focus().toggleCodeBlock().run()"
       :class="{ 'is-active': editor.isActive('codeBlock') }"
       title="Code block"
@@ -82,6 +93,7 @@
     </button>
     <button
       v-if="extensions.includes(WysiwygExtensions.StarterKit)"
+      :disabled="buttonsDisabled"
       @click="editor.chain().focus().toggleBlockquote().run()"
       :class="{ 'is-active': editor.isActive('blockquote') }"
       title="Blockquote"
@@ -90,6 +102,7 @@
     </button>
     <button
       v-if="extensions.includes(WysiwygExtensions.StarterKit)"
+      :disabled="buttonsDisabled"
       @click="editor.chain().focus().setHorizontalRule().run()"
       title="Horizontal rule"
     >
@@ -97,6 +110,7 @@
     </button>
     <button
       v-if="extensions.includes(WysiwygExtensions.StarterKit)"
+      :disabled="buttonsDisabled"
       @click="editor.chain().focus().setHardBreak().run()"
       title="Hard break"
     >
@@ -107,6 +121,7 @@
         extensions.includes(WysiwygExtensions.Bold) ||
         extensions.includes(WysiwygExtensions.StarterKit)
       "
+      :disabled="buttonsDisabled"
       @click="editor.chain().focus().toggleBold().run()"
       :class="['font-mono', { 'is-active': editor.isActive('bold') }]"
       title="Bold"
@@ -118,6 +133,7 @@
         extensions.includes(WysiwygExtensions.Italic) ||
         extensions.includes(WysiwygExtensions.StarterKit)
       "
+      :disabled="buttonsDisabled"
       @click="editor.chain().focus().toggleItalic().run()"
       :class="['font-mono', { 'is-active': editor.isActive('italic') }]"
       title="Italic"
@@ -131,11 +147,16 @@
 import { Editor } from "@tiptap/vue-3";
 import { WysiwygExtensions } from "@/generated-types/queries";
 import { Unicons } from "@/types";
+import useEdit from "@/composables/useEdit";
+import { computed } from "vue";
 
 const props = defineProps<{
   editor: Editor;
   extensions: WysiwygExtensions[];
 }>();
+
+const { isEdit } = useEdit();
+const buttonsDisabled = computed(() => !isEdit.value);
 </script>
 
 <style lang="scss" scoped>
