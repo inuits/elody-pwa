@@ -1,7 +1,10 @@
 <template>
   <div class="sticky top-0 transparent-bg z-[100] p-2 flex flex-wrap">
     <button
-      v-if="extensions.includes(WysiwygExtensions.StarterKit)"
+      v-if="
+        extensions.includes(WysiwygExtensions.StarterKit) ||
+        extensions.includes(WysiwygExtensions.Paragraph)
+      "
       :disabled="buttonsDisabled"
       @click="editor.chain().focus().setParagraph().run()"
       :class="{ 'is-active': editor.isActive('paragraph') }"
