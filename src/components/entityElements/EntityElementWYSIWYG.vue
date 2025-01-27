@@ -37,13 +37,15 @@ const props = defineProps<{
 const editor = ref<Editor | undefined>(undefined);
 const { importEditorExtensions, getExtensionConfiguration } =
   useWYSIWYGEditor();
-const { getForm } = useFormHelper();
+const { getForm, addEditableMetadataKeys } = useFormHelper();
 const { isEdit } = useEdit();
 const { t } = useI18n();
 
 const content = computed(() => editor.value?.getHTML());
+const form = computed(() => getForm(props.formId));
 
 onMounted(async () => {
+  addEditableMetadataKeys([props.element.metadataKey], props.formId);
   const importedExtensions = await importEditorExtensions(
     props.element.extensions,
   );
@@ -61,7 +63,7 @@ onMounted(async () => {
       },
     },
     editable: isEdit.value,
-    content: ``,
+    content: form.value?.values.intialValues[props.element.metadataKey] || "",
   });
 });
 
@@ -72,9 +74,8 @@ onUnmounted(() => {
 watch(
   () => content.value,
   () => {
-    const form = getForm(props.formId);
-    if (form) {
-      form.setFieldValue(
+    if (form.value) {
+      form.value.setFieldValue(
         `${ValidationFields.IntialValues}.${props.element.metadataKey}`,
         content.value,
       );
