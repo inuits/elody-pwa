@@ -27,6 +27,7 @@ import WYSIWYGButtons from "@/components/WYSIWYGButtons.vue";
 import { ValidationFields, WysiwygElement } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 import { useFormHelper } from "@/composables/useFormHelper";
+import useEdit from "@/composables/useEdit";
 
 const props = defineProps<{
   formId: string;
@@ -37,6 +38,7 @@ const editor = ref<Editor | undefined>(undefined);
 const { importEditorExtensions, getExtensionConfiguration } =
   useWYSIWYGEditor();
 const { getForm } = useFormHelper();
+const { isEdit } = useEdit();
 const { t } = useI18n();
 
 const content = computed(() => editor.value?.getHTML());
@@ -58,6 +60,7 @@ onMounted(async () => {
           "prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl m-5 focus:outline-none border border-[rgba(0,58,82,0.6)] rounded-md min-h-[250px] p-2",
       },
     },
+    editable: isEdit.value,
     content: ``,
   });
 });
@@ -69,13 +72,21 @@ onUnmounted(() => {
 watch(
   () => content.value,
   () => {
-    console.log(content.value);
     const form = getForm(props.formId);
     if (form) {
       form.setFieldValue(
         `${ValidationFields.IntialValues}.${props.element.metadataKey}`,
         content.value,
       );
+    }
+  },
+);
+
+watch(
+  () => isEdit.value,
+  () => {
+    if (editor.value) {
+      editor.value.setEditable(isEdit.value);
     }
   },
 );
