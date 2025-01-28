@@ -2,7 +2,7 @@
   <div
     ref="textContainer"
     class="text-container"
-    :style="{ '--line-clamp': clampLines }"
+    :style="{ '--line-clamp': lineClamp }"
     :class="{ 'line-clamp': isClamped }"
   >
     <slot></slot>
@@ -13,7 +13,7 @@
 import { ref, watch, onMounted, nextTick } from "vue";
 
 const props = defineProps({
-  clampLines: {
+  lineClamp: {
     type: Number,
     default: 1,
   },
@@ -46,7 +46,7 @@ onMounted(() => {
 });
 
 watch(
-  () => props.clampLines,
+  () => props.lineClamp,
   () => {
     checkOverflow();
   },

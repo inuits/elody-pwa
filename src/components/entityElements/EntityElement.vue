@@ -73,6 +73,11 @@
         v-if="element.__typename === 'MarkdownViewerElement'"
         :element="element"
       />
+      <entity-element-map-viewer
+        v-if="element.__typename === 'MapElement'"
+        :element="element"
+        :entity-id="id"
+      />
     </div>
   </div>
 </template>
@@ -84,6 +89,7 @@ import EntityElementManifestViewer from "@/components/entityElements/EntityEleme
 import EntityElementMedia from "@/components/entityElements/EntityElementMedia.vue";
 import EntityElementSingleMedia from "@/components/entityElements/EntityElementSingleMedia.vue";
 import EntityElementWindow from "@/components/entityElements/EntityElementWindow.vue";
+import EntityElementMapViewer from "@/components/entityElements/EntityElementMapViewer.vue";
 import { computed, watch } from "vue";
 import { useEditMode } from "@/composables/useEdit";
 import { useRoute } from "vue-router";
@@ -95,6 +101,7 @@ import type {
   EntityViewElements,
   GraphElement,
   ManifestViewerElement,
+  MapElement,
   MarkdownViewerElement,
   MediaFileElement,
   SingleMediaFileElement,
@@ -111,7 +118,8 @@ export type Elements =
   | MarkdownViewerElement
   | MediaFileElement
   | SingleMediaFileElement
-  | WindowElement;
+  | WindowElement
+  | MapElement;
 
 const props = defineProps<{
   elements: EntityViewElements;
@@ -146,7 +154,7 @@ const getCollapsedStateForElement = (element: object): boolean => {
   if (!element.entityTypes) return;
   const state = getStateForRoute(route);
   return state?.UIPanelStateCollapsed?.filter(
-    (panelState) => panelState.key === element.entityTypes[0]
+    (panelState) => panelState.key === element.entityTypes[0],
   )[0]?.value;
 };
 
@@ -164,6 +172,6 @@ watch(
           UIPanelStateCollapsed: state,
         });
     }
-  }
+  },
 );
 </script>
