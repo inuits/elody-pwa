@@ -1,10 +1,7 @@
 <template>
-  <div class="sticky top-0 transparent-bg z-[100] p-2 flex flex-wrap">
+  <div class="sticky top-0 transparent-bg z-[100] flex flex-wrap px-2">
     <button
-      v-if="
-        extensions.includes(WysiwygExtensions.StarterKit) ||
-        extensions.includes(WysiwygExtensions.Paragraph)
-      "
+      v-if="extensions.includes(WysiwygExtensions.StarterKit)"
       :disabled="buttonsDisabled"
       @click="editor.chain().focus().setParagraph().run()"
       :class="{ 'is-active': editor.isActive('paragraph') }"
@@ -142,6 +139,13 @@
       title="Italic"
     >
       <i>I</i>
+    </button>
+    <button
+      :disabled="buttonsDisabled"
+      @click="editor.commands.openTagModal()"
+      title="Italic"
+    >
+      Tag
     </button>
   </div>
 </template>
