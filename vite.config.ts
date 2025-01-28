@@ -43,12 +43,10 @@ const viteConfig = defineConfig({
     sourcemap: false,
     minify: "esbuild",
     rollupOptions: {
-      external: ["pdfjs-dist/types/src/display/api", "vue"],
+      external: ["pdfjs-dist/types/src/display/api"],
       output: {
-        globals: {
-          vue: "Vue",
-        },
         manualChunks: {
+          vue: ["vue", "vue-router"],
           apollo: ["@apollo/client", "@vue/apollo-composable"],
           leaflet: ["leaflet", "@vue-leaflet/vue-leaflet"],
           sentry: [
