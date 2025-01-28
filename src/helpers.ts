@@ -18,6 +18,8 @@ import {
   DamsIcons,
   type DropdownOption,
   type Column,
+  DamsIcons,
+  type DropdownOption
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -354,8 +356,7 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
     SECONDS: (value: string) => `${value} s`,
     COORDINATES: (value: string) =>
       `${(value as any).longitude}, ${(value as any).latitude}`,
-    PERCENT: (value: string) =>
-      Number(value) !== -1 ? `${Number(value) * 100}%` : "charging",
+    PERCENT: (value: string) => Number(value) !== -1 ? `${Number(value) * 100}%` : "charging",
     VOLT: (value: string) => `${value} V`,
   };
 
@@ -370,7 +371,7 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
 export const convertDateToReadbleFormat = (
   dateString: string,
   format: string,
-  showTime: boolean,
+  showTime: boolean
 ): string => {
   const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = {
@@ -417,7 +418,7 @@ export const createPlaceholderEntities = (amount: number): any[] => {
 };
 
 export const findPanelMetadata = (
-  obj: Record<string, Column>,
+  obj: any,
   parentIsEditable?: boolean,
 ): PanelMetaData[] => {
   const results: PanelMetaData[] = [];
