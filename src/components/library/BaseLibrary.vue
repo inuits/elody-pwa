@@ -605,7 +605,6 @@ const initializeEntityPickerComponent = () => {
   setAcceptedTypes([props.entityType] as Entitytyping[]);
   setEntityUuid(props.parentEntityIdentifiers[0]);
   setEntityId(props.id);
-  console.log('set to ', props.id);
   setParentEntityType(props.parentEntityType || route.meta.entityType);
   setRelationType(props.relationType);
   setCustomGetEntitiesQuery(props.customQueryEntityPickerList);
