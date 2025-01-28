@@ -79,7 +79,7 @@
             v-else
             :bulk-operations-context="
               createCustomContext(
-                BulkOperationsContextEnum.EntityElementList + relationType
+                BulkOperationsContextEnum.EntityElementList + relationType,
               )
             "
             :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
@@ -104,6 +104,7 @@
             "
             :fetch-deep-relations="fetchDeepRelations"
             :filters-need-context="filtersNeedContext"
+            :id="id"
           />
         </div>
       </template>
@@ -122,7 +123,7 @@ import {
   BaseLibraryModes,
   RelationActions,
   FetchDeepRelations,
-  EntitySubelement
+  EntitySubelement,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -175,6 +176,7 @@ const props = withDefaults(
     entityType: Entitytyping;
     can?: string[];
     filtersNeedContext?: EntitySubelement[];
+    id: string;
   }>(),
   {
     types: () => [],
@@ -184,7 +186,7 @@ const props = withDefaults(
     entityListElements: undefined,
     allowedActionsOnRelations: () => [],
     filtersNeedContext: undefined,
-  }
+  },
 );
 
 provide("mediafileViewerContext", props.customQueryFilters);
@@ -205,7 +207,7 @@ watch(
     if (!requiresCustomQuery.value) return;
     if (uploadStatus.value === "uploading") queryLoaded.value = false;
     else if (uploadStatus.value === "upload-finished") await useCustomQuery();
-  }
+  },
 );
 
 const useCustomQuery = async () => {
