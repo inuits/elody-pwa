@@ -15,7 +15,6 @@ import {
   RouteNames,
   GetCustomFormattersSettingsDocument,
   GetCustomTypeUrlMappingDocument,
-  type Column,
   DamsIcons,
   type DropdownOption
   type Column,
@@ -663,4 +662,29 @@ export const determineDefaultIntialValues = (
   });
 
   return newInitialData;
+};
+
+export const mapModelValueToDropdownOptions = (values: any[]): DropdownOption[] => {
+  if (!values) return [];
+
+  if (Array.isArray(values)) {
+    return values.map((item) => {
+      if (item.__typename === "DropdownOption") return item;
+      return {
+        icon: DamsIcons.NoIcon,
+        label: item,
+        value: item,
+        __typename: "DropdownOption",
+      };
+    });
+  }
+
+  return [
+    {
+      icon: DamsIcons.NoIcon,
+      label: values,
+      value: values,
+      __typename: "DropdownOption",
+    },
+  ];
 };
