@@ -105,7 +105,7 @@ const { loadDocument, getDocument } = useCustomQuery();
 const { closeModal } = useBaseModal();
 const { addRelations } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
-const { getEntityUuid, getRelationType } = useEntityPickerModal();
+const { getEntityUuid, getEntityId, getRelationType } = useEntityPickerModal();
 const { save, addSaveCallback, clearSaveCallbacks } = useEditMode();
 const { getForm } = useFormHelper();
 const { parseFormValuesToFormInput } = useFormHelper();
@@ -120,7 +120,7 @@ const { mutate } = useMutation<
   MutateEntityValuesMutationVariables
 >(MutateEntityValuesDocument);
 
-const form = getForm(getEntityUuid());
+const form = getForm(getEntityId());
 const ignoreCustomQuery = ref<boolean>(false);
 const newQuery = ref<object | undefined>(undefined);
 const queryLoaded = ref<boolean>(false);
@@ -132,7 +132,7 @@ const emitUpdatedEntities = (numberOfEntities: number) => {
 
 const confirmSelection = (selectedItems: InBulkProcessableItem[]) => {
   if (props.entityPickerMode === EntityPickerMode.Emit) return;
-  addRelations(selectedItems, getRelationType(), getEntityUuid(), true);
+  addRelations(selectedItems, getRelationType(), getEntityId(), true);
   dequeueAllItemsForBulkProcessing(getContext());
   addSaveHandler();
   save(true);

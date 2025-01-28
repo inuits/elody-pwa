@@ -42,6 +42,7 @@
         :fetch-deep-relations="element.fetchDeepRelations"
         :entity-type="entityType"
         :can="element.can"
+        :id="id"
       />
       <entity-element-media
         v-if="element.__typename === 'MediaFileElement'"
