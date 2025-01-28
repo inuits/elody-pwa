@@ -20,7 +20,8 @@
         v-for="menuItem in menuItems"
         :key="menuItem.label"
         @click.capture="
-          changeHoveredItem(menuItem) & changeExpandedStateOfMenu(true)
+          changeHoveredItem(menuItem);
+          changeExpandedStateOfMenu(true);
         "
       >
         <Menuitem
@@ -43,9 +44,9 @@
 </template>
 
 <script lang="ts" setup>
-import { MenuItem } from "@/generated-types/queries";
+import type { MenuItem } from "@/generated-types/queries";
 import LogInLogout from "@/components/LogInLogout.vue";
-import type Menuitem from "@/components/menu/MenuItem.vue";
+import Menuitem from "@/components/menu/MenuItem.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { ref, onMounted, onUnmounted } from "vue";
 import { RouterLink } from "vue-router";
