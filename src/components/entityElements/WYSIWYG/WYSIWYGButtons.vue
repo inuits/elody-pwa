@@ -141,6 +141,7 @@
       <i>I</i>
     </button>
     <button
+      v-if="isTextSelected"
       :disabled="buttonsDisabled"
       @click="editor.commands.openTagModal()"
       title="Italic"
@@ -164,6 +165,10 @@ const props = defineProps<{
 
 const { isEdit } = useEdit();
 const buttonsDisabled = computed(() => !isEdit.value);
+const isTextSelected = computed(() => {
+  const { selection } = props.editor.state;
+  return selection.from !== selection.to;
+});
 </script>
 
 <style lang="scss" scoped>
