@@ -126,8 +126,8 @@ export type Elements =
   | MediaFileElement
   | SingleMediaFileElement
   | WindowElement
-  | WysiwygElement
-  | MapElement;
+  | MapElement
+  | WysiwygElement;
 
 const props = defineProps<{
   elements: EntityViewElements;
