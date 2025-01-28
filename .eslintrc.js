@@ -12,4 +12,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: "latest",
   },
+  rules: {
+    "@typescript-eslint/consistent-type-imports": "error",
+  },
 };
