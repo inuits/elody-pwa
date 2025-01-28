@@ -308,6 +308,7 @@ export type BaseLibraryProps = {
   parentEntityType?: Entitytyping;
   filtersNeedContext?: EntitySubelement[];
   ignoreFetchingData?: boolean;
+  id: string;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -402,6 +403,7 @@ const { uploadStatus } = useUpload();
 const {
   setAcceptedTypes,
   setEntityUuid,
+  setEntityId,
   setRelationType,
   setCustomGetEntitiesQuery,
   setCustomGetEntitiesFiltersQuery,
@@ -602,6 +604,8 @@ const applyCustomBulkOperations = async () => {
 const initializeEntityPickerComponent = () => {
   setAcceptedTypes([props.entityType] as Entitytyping[]);
   setEntityUuid(props.parentEntityIdentifiers[0]);
+  setEntityId(props.id);
+  console.log('set to ', props.id);
   setParentEntityType(props.parentEntityType || route.meta.entityType);
   setRelationType(props.relationType);
   setCustomGetEntitiesQuery(props.customQueryEntityPickerList);
