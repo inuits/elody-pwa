@@ -37,7 +37,7 @@ import {
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import {
   BulkOperationsContextEnum,
-  InBulkProcessableItem,
+  type InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { useSaveSearchHepler } from "@/composables/useSaveSearchHepler";
@@ -60,7 +60,7 @@ const updateActiveFilter = async (selectedItems: InBulkProcessableItem[]) => {
   const savedFilter = await fetchSavedSearchById(selectedItems[0].id);
   setActiveFilter(normalizeSavedSearchFromEntity(savedFilter));
   dequeueAllItemsForBulkProcessing(
-    BulkOperationsContextEnum.SavedSearchFilterModal
+    BulkOperationsContextEnum.SavedSearchFilterModal,
   );
   handleCloseModal();
 };

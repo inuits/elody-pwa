@@ -87,11 +87,11 @@
 
 <script lang="ts" setup>
 import {
-  Conditional,
-  DropdownOption,
+  type Conditional,
+  type DropdownOption,
   EditStatus,
   Entitytyping,
-  HiddenField,
+  type HiddenField,
 } from "@/generated-types/queries";
 import { auth } from "@/main";
 import {

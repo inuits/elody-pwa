@@ -7,7 +7,11 @@
 </template>
 
 <script setup lang="ts">
-import { ConfigItem, Entity, MapTypes } from "@/generated-types/queries";
+import {
+  type ConfigItem,
+  type Entity,
+  MapTypes,
+} from "@/generated-types/queries";
 import HeatMap from "@/components/maps/HeatMap.vue";
 import { useMaps } from "@/composables/useMaps";
 

@@ -11,7 +11,11 @@
     >
       <div class="w-full px-8">
         <h1 class="title flex justify-center px-">
-          {{ t("navigation.delete-entity-window", [`${translatedDeleteEntityLabel} "${parentEntityTitle}"`]) }}
+          {{
+            t("navigation.delete-entity-window", [
+              `${translatedDeleteEntityLabel} "${parentEntityTitle}"`,
+            ])
+          }}
         </h1>
       </div>
       <div
@@ -20,7 +24,12 @@
         v-show="numberOfBlockingQueryEntities > 0"
       >
         <div class="title p-4">
-          {{ t("actions.labels.blocking-relations", [translatedDeleteEntityLabel, translatedBlockingRelationsLabel]) }}
+          {{
+            t("actions.labels.blocking-relations", [
+              translatedDeleteEntityLabel,
+              translatedBlockingRelationsLabel,
+            ])
+          }}
         </div>
         <entity-picker-component
           :entity-uuid="parentId"
@@ -52,7 +61,11 @@
           v-show="numberOfRelatedEntities > 0"
         >
           <div class="title pl-4">
-            {{ t("actions.labels.delete-relation-entities", [translatedDeleteRelationsLabel]) }}
+            {{
+              t("actions.labels.delete-relation-entities", [
+                translatedDeleteRelationsLabel,
+              ])
+            }}
           </div>
           <entity-picker-component
             :entity-uuid="parentId"
@@ -84,7 +97,7 @@ import ConfirmModalView from "@/components/ConfirmModalView.vue";
 import { useI18n } from "vue-i18n";
 import { ref, watch, inject, computed } from "vue";
 import {
-  DeleteQueryOptions,
+  type DeleteQueryOptions,
   Entitytyping,
   TypeModals,
 } from "@/generated-types/queries";
@@ -93,7 +106,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import {
   BulkOperationsContextEnum,
-  InBulkProcessableItem,
+  type InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { useEditMode } from "@/composables/useEdit";
@@ -115,7 +128,8 @@ const { initializeConfirmModal } = useConfirmModal();
 const { createNotificationOverwrite } = useNotification();
 const { getEnqueuedItems, dequeueAllItemsForBulkProcessing } =
   useBulkOperations();
-const { getParentId, getCallbackFunction, getInformationForDelete } = useModalActions();
+const { getParentId, getCallbackFunction, getInformationForDelete } =
+  useModalActions();
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const router = useRouter();
 const { disableEditMode } = useEditMode();
@@ -201,9 +215,17 @@ watch(
     deleteQueryOptions.value = getModalInfo(
       TypeModals.Delete,
     ).deleteQueryOptions;
-    translatedDeleteEntityLabel.value = t(deleteQueryOptions.value?.deleteEntityLabel);
-    translatedDeleteRelationsLabel.value = deleteQueryOptions.value?.deleteRelationsLabel ? t(deleteQueryOptions.value?.deleteRelationsLabel) : undefined;
-    translatedBlockingRelationsLabel.value = deleteQueryOptions.value?.blockingRelationsLabel ? t(deleteQueryOptions.value?.blockingRelationsLabel) : undefined;
+    translatedDeleteEntityLabel.value = t(
+      deleteQueryOptions.value?.deleteEntityLabel,
+    );
+    translatedDeleteRelationsLabel.value = deleteQueryOptions.value
+      ?.deleteRelationsLabel
+      ? t(deleteQueryOptions.value?.deleteRelationsLabel)
+      : undefined;
+    translatedBlockingRelationsLabel.value = deleteQueryOptions.value
+      ?.blockingRelationsLabel
+      ? t(deleteQueryOptions.value?.blockingRelationsLabel)
+      : undefined;
 
     initializeConfirmModal({
       confirmButton: { buttonCallback: deleteButtonClicked },

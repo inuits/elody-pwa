@@ -122,7 +122,7 @@ import {
   type EntityListElement,
   BaseLibraryModes,
   RelationActions,
-  FetchDeepRelations,
+  type FetchDeepRelations,
   EntitySubelement,
 } from "@/generated-types/queries";
 import {

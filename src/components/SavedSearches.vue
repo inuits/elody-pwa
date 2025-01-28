@@ -65,7 +65,7 @@ import {
 } from "@/generated-types/queries";
 import {
   useSaveSearchHepler,
-  SavedSearchType,
+  type SavedSearchType,
 } from "@/composables/useSaveSearchHepler";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
@@ -94,7 +94,7 @@ const props = withDefaults(
     activeFilters: () => [],
     savedSearches: () => [],
     hasActiveFilters: false,
-  }
+  },
 );
 
 const { t } = useI18n();
@@ -148,7 +148,7 @@ const handleOpenModal = (context: any = undefined) => {
     "GetSaveSearchForm",
     undefined,
     undefined,
-    context
+    context,
   );
 };
 
@@ -157,16 +157,16 @@ const saveChanges = async () => {
   const savedFilter = await fetchSavedSearchById(selectedFilter.value.id);
   const updatedSearch = await saveExistedSearch(
     savedFilter,
-    props.activeFilters
+    props.activeFilters,
   );
   addNewSavedFilterToLastUsedFiltersForRoute(
     props.route,
-    normalizeSavedSearchFromEntity(updatedSearch as SavedSearch)
+    normalizeSavedSearchFromEntity(updatedSearch as SavedSearch),
   );
   createNotificationOverwrite(
     NotificationType.default,
     t("notifications.success.entityUpdated.title"),
-    t("notifications.success.entityUpdated.description")
+    t("notifications.success.entityUpdated.description"),
   );
 };
 
@@ -220,7 +220,7 @@ const deleteFilter = async () => {
   createNotificationOverwrite(
     NotificationType.default,
     t("notifications.success.entityDeleted.title"),
-    t("notifications.success.entityDeleted.description")
+    t("notifications.success.entityDeleted.description"),
   );
 };
 
