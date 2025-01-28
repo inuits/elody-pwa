@@ -97,6 +97,9 @@
                 :template-csvs="
                   (uploadContainerField as UploadField).templateCsvs
                 "
+                :info-label-url="
+                  (uploadContainerField as UploadField).infoLabelUrl
+                "
                 :extra-mediafile-type="
                   (uploadContainerField as UploadField).extraMediafileType
                 "
