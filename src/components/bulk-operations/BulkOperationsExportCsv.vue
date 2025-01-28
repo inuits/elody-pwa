@@ -114,6 +114,7 @@ const entityTypeMappingByContext: {
   [key: string]: Entitytyping;
 } = {
   [BulkOperationsContextEnum.EntityElementMedia]: Entitytyping.Mediafile,
+  [BulkOperationsContextEnum.EntityElementListhasAsset]: Entitytyping.Asset,
 };
 
 const getEntityTypeByContext = (
