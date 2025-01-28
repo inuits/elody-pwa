@@ -94,7 +94,7 @@ import EntityElementManifestViewer from "@/components/entityElements/EntityEleme
 import EntityElementMedia from "@/components/entityElements/EntityElementMedia.vue";
 import EntityElementSingleMedia from "@/components/entityElements/EntityElementSingleMedia.vue";
 import EntityElementWindow from "@/components/entityElements/EntityElementWindow.vue";
-import EntityElementWYSIWYG from "@/components/entityElements/EntityElementWYSIWYG.vue";
+import EntityElementWYSIWYG from "@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue";
 import EntityElementMapViewer from "@/components/entityElements/EntityElementMapViewer.vue";
 import { computed, watch } from "vue";
 import { useEditMode } from "@/composables/useEdit";
