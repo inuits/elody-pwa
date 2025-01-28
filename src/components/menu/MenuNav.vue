@@ -46,7 +46,7 @@
 <script lang="ts" setup>
 import type { MenuItem } from "@/generated-types/queries";
 import LogInLogout from "@/components/LogInLogout.vue";
-import Menuitem from "@/components/menu/MenuItem.vue";
+import type Menuitem from "@/components/menu/MenuItem.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { ref, onMounted, onUnmounted } from "vue";
 import { RouterLink } from "vue-router";
