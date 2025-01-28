@@ -5,7 +5,6 @@
     :isValidation="isValidationFile"
     :file-count="fileCount"
     :style="viewStyle"
-    :template-csvs="templateCsvs"
   />
   <dropzone-preview
     v-model="dropzonePreview"
@@ -32,12 +31,10 @@ const props = withDefaults(
     dropzoneLabel: string;
     viewStyle: string;
     isValidationFile: boolean;
-    templateCsvs?: string | undefined;
   }>(),
   {
     viewStyle: "",
     isValidationFile: false,
-    templateCsvs: undefined,
   }
 );
 
