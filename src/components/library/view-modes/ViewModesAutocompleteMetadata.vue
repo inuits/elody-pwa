@@ -19,9 +19,10 @@
 </template>
 
 <script lang="ts" setup>
-import { DamsIcons, DropdownOption } from "@/generated-types/queries";
+import { DropdownOption } from "@/generated-types/queries";
 import { ref, computed } from "vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
+import { mapModelValueToDropdownOptions } from "@/helpers";
 
 const emit = defineEmits<{
   (event: "update:modelValue", modelValue: number | number[]): void;
@@ -60,31 +61,6 @@ const inputValue = computed<DropdownOption[] | undefined>({
     emit("update:modelValue", Array.isArray(value) ? value : [value]);
   },
 });
-
-const mapModelValueToDropdownOptions = (values: any[]): DropdownOption[] => {
-  if (!values) return [];
-
-  if (Array.isArray(values)) {
-    return values.map((item) => {
-      if (item.__typename === "DropdownOption") return item;
-      return {
-        icon: DamsIcons.NoIcon,
-        label: item,
-        value: item,
-        __typename: "DropdownOption",
-      };
-    });
-  }
-
-  return [
-    {
-      icon: DamsIcons.NoIcon,
-      label: values,
-      value: values,
-      __typename: "DropdownOption",
-    },
-  ];
-};
 
 const filterAutocompleteOptions = (value: string): void => {
   dropdownOptions.value = props.metadataDropdownOptions.filter(
