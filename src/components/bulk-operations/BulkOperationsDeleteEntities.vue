@@ -58,7 +58,7 @@ import { useI18n } from "vue-i18n";
 import { watch, computed, ref } from "vue";
 import {
   DamsIcons,
-  DropdownOption,
+  type DropdownOption,
   TypeModals,
 } from "@/generated-types/queries";
 import {
@@ -68,7 +68,7 @@ import {
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
   type Context,
-  InBulkProcessableItem,
+  type InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { useModalActions } from "@/composables/useModalActions";

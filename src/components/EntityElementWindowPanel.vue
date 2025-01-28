@@ -64,7 +64,7 @@
             />
             <entity-element-list
               v-if="metadata.__typename === 'EntityListElement'"
-              :label="(metadata.label as string)"
+              :label="metadata.label as string"
               :isCollapsed="metadata.isCollapsed"
               :types="metadata.entityTypes as string[]"
               :entity-list="(metadata.entityList as Entity[]) ?? []"
@@ -93,10 +93,10 @@
 
 <script lang="ts" setup>
 import {
-  PanelRelation,
-  WindowElementPanel,
-  Entity,
-  MetadataField,
+  type PanelRelation,
+  type WindowElementPanel,
+  type Entity,
+  type MetadataField,
   BaseLibraryModes,
   Unit,
 } from "@/generated-types/queries";
@@ -121,7 +121,7 @@ const props = withDefaults(
   }>(),
   {
     parentIsListItem: false,
-  }
+  },
 );
 
 const { t } = useI18n();
@@ -129,7 +129,7 @@ const { showErrors } = useEditMode();
 const panelType = ref<PanelType>(props.panel.panelType);
 const isCollapsed = ref<boolean>(props.panel.isCollapsed);
 const canBeMultipleColumns = ref<boolean>(
-  props.panel.canBeMultipleColumns || false
+  props.panel.canBeMultipleColumns || false,
 );
 const config = inject("config") as any;
 

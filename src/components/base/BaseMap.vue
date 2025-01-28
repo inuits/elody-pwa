@@ -5,7 +5,7 @@
         :use-global-leaflet="false"
         ref="map"
         v-model:zoom="zoom"
-        :center="(parsedMapData.coordinates as PointExpression)"
+        :center="parsedMapData.coordinates as PointExpression"
         @click="getMapCoordinates"
         :options="{ attributionControl: false }"
       >
@@ -14,7 +14,7 @@
           layer-type="base"
           name="OpenStreetMap"
         ></l-tile-layer>
-        <l-marker :lat-lng="(parsedMapData.coordinates as LatLngExpression)">
+        <l-marker :lat-lng="parsedMapData.coordinates as LatLngExpression">
           <l-icon
             :icon-size="customIcon.iconSize"
             :icon-anchor="customIcon.iconAnchor"
@@ -65,7 +65,7 @@ import { computed, ref } from "vue";
 import { useEditMode } from "@/composables/useEdit";
 import EntityElementCoordinateEdit from "../EntityElementCoordinateEdit.vue";
 import type { MediaFileElement } from "@/generated-types/queries";
-import { MetadataField, Unit } from "@/generated-types/queries";
+import { type MetadataField, Unit } from "@/generated-types/queries";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 
 const props = defineProps<{
@@ -85,7 +85,7 @@ const createNewCoordinatesObject = (coordinatesObject: any) => {
 
 const parsedMapData = computed(() => {
   const coordinatesObject = props.mapData.find(
-    (dataItem) => dataItem.key === "location"
+    (dataItem) => dataItem.key === "location",
   );
   let coordinates = coordinatesObject.value;
 

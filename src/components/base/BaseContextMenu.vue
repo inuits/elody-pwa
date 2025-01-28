@@ -1,11 +1,16 @@
 <template>
-  <div @click.prevent v-if="contextMenu.isVisible" class="context-menu" :style="getStyles()">
+  <div
+    @click.prevent
+    v-if="contextMenu.isVisible"
+    class="context-menu"
+    :style="getStyles()"
+  >
     <slot></slot>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ContextMenu } from "@/components/context-menu-actions/ContextMenuHandler";
+import { type ContextMenu } from "@/components/context-menu-actions/ContextMenuHandler";
 import { ContextMenuDirection } from "@/generated-types/queries";
 
 const props = withDefaults(
@@ -15,7 +20,7 @@ const props = withDefaults(
   }>(),
   {
     direction: ContextMenuDirection.Right,
-  }
+  },
 );
 
 const getStyles = () => {

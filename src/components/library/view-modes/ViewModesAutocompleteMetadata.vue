@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { DropdownOption } from "@/generated-types/queries";
+import { DamsIcons, type DropdownOption } from "@/generated-types/queries";
 import { ref, computed } from "vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import { mapModelValueToDropdownOptions } from "@/helpers";

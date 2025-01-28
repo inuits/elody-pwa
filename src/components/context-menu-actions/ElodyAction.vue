@@ -32,7 +32,10 @@ import { inject, computed } from "vue";
 import { useShareLink } from "@/composables/useShareLink";
 import { DefaultApolloClient, useMutation } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
-import { Context, useBulkOperations } from "@/composables/useBulkOperations";
+import {
+  type Context,
+  useBulkOperations,
+} from "@/composables/useBulkOperations";
 import { getChildrenOfHomeRoutes } from "@/helpers";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useBaseModal } from "@/composables/useBaseModal";

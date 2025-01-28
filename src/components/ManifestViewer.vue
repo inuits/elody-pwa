@@ -24,7 +24,7 @@ import { useI18n } from "vue-i18n";
 import {
   BulkOperationsContextEnum,
   useBulkOperations,
-  InBulkProcessableItem,
+  type InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
 
 const {
@@ -46,7 +46,7 @@ const props = withDefaults(
     viewers: () => {
       return ["mirador", "tify"];
     },
-  }
+  },
 );
 
 const { locale } = useI18n();
@@ -83,7 +83,7 @@ const initializeViewers = () => {
     ];
   } else {
     miradorConfig.windows = getEnqueuedItems(
-      BulkOperationsContextEnum.ManifestCollection
+      BulkOperationsContextEnum.ManifestCollection,
     ).map((item: InBulkProcessableItem) => {
       return { manifestId: item.id };
     });
@@ -113,6 +113,6 @@ watch(
   () => locale.value,
   () => {
     initializeViewers();
-  }
+  },
 );
 </script>
