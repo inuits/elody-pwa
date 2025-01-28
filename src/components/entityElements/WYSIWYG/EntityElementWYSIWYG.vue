@@ -28,6 +28,7 @@ import { ValidationFields, WysiwygElement } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useEdit from "@/composables/useEdit";
+import TagExtension from "./extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 
 const props = defineProps<{
   formId: string;
@@ -55,7 +56,7 @@ onMounted(async () => {
   );
 
   editor.value = new Editor({
-    extensions: configuredExtensions,
+    extensions: [...configuredExtensions, TagExtension],
     editorProps: {
       attributes: {
         class:
