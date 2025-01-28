@@ -43,12 +43,10 @@ const viteConfig = defineConfig({
     sourcemap: false,
     minify: "esbuild",
     rollupOptions: {
-      external: ["pdfjs-dist/types/src/display/api", "vue"],
+      external: ["pdfjs-dist/types/src/display/api"],
       output: {
-        globals: {
-          vue: "Vue",
-        },
         manualChunks: {
+          vue: ["vue", "vue-router"],
           apollo: ["@apollo/client", "@vue/apollo-composable"],
           leaflet: ["leaflet", "@vue-leaflet/vue-leaflet"],
           sentry: [
@@ -68,27 +66,13 @@ const viteConfig = defineConfig({
           openlayers: ["vue3-openlayers"],
           dropzone: ["dropzone"],
           unicons: ["vue-unicons"],
-          tiptap: [
-            "@tiptap/vue-3",
-            "@tiptap/extension-color",
-            "@tiptap/extension-list-item",
-            "@tiptap/extension-text-style",
-            "@tiptap/starter-kit",
-          ],
         },
       },
     },
   },
   optimizeDeps: {
     exclude: ["session-vue-3-oidc-library", "date-fns"],
-    include: [
-      "vue",
-      "@vue/runtime-core",
-      "prosemirror-state",
-      "prosemirror-transform",
-      "prosemirror-model",
-      "prosemirror-view",
-    ],
+    include: ["vue", "@vue/runtime-core"],
   },
 });
 
