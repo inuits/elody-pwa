@@ -133,7 +133,7 @@ const { getParentId, getCallbackFunction, getInformationForDelete } =
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const router = useRouter();
 const { disableEditMode } = useEditMode();
-const { pageInfo } = usePageInfo();
+const { pageInfo, previousPageInfo } = usePageInfo();
 const { deleteEntities } = useDeleteEntities();
 
 const modalOpenend = ref<boolean>(false);
@@ -172,7 +172,12 @@ const cleanupAfterDeletion = async () => {
   await getTenants();
   closeModal(TypeModals.Delete);
   disableEditMode();
-  router.push({ name: pageInfo.value.parentRouteName });
+
+  if (pageInfo.value.parentRouteName !== "SingleEntity")
+    router.push({ name: pageInfo.value.parentRouteName });
+  else
+    router.push({ path: previousPageInfo.value.fullPath });
+
   createNotificationOverwrite(
     NotificationType.default,
     t("notifications.success.entityDeleted.title"),
