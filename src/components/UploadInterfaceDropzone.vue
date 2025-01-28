@@ -96,8 +96,8 @@ const { initializeUpload } = useUpload();
 const { files } = useUpload();
 
 const dropzone = new useDropzone();
-const selectedItem = ref<DropdownOption[] | undefined>(
-  props.templateCsvs ? mapModelValueToDropdownOptions(props.templateCsvs[0]) : undefined,
+const selectedItem = ref<DropdownOption | undefined>(
+  props.templateCsvs ? mapModelValueToDropdownOptions(props.templateCsvs[0])[0] : undefined,
 );
 
 const getDropzoneSize = (size: "small" | "normal" | "big") => {
