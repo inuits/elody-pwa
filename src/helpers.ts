@@ -17,8 +17,7 @@ import {
   GetCustomTypeUrlMappingDocument,
   type Column,
   DamsIcons,
-  type DropdownOption
-  type Column,
+  type DropdownOption,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
