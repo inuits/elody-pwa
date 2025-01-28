@@ -73,6 +73,11 @@
         v-if="element.__typename === 'MarkdownViewerElement'"
         :element="element"
       />
+      <entity-element-map-viewer
+        v-if="element.__typename === 'MapElement'"
+        :element="element"
+        :entity-id="id"
+      />
       <entity-element-w-y-s-i-w-y-g
         v-if="element.__typename === 'WysiwygElement'"
         :form-id="formId"
@@ -90,6 +95,7 @@ import EntityElementMedia from "@/components/entityElements/EntityElementMedia.v
 import EntityElementSingleMedia from "@/components/entityElements/EntityElementSingleMedia.vue";
 import EntityElementWindow from "@/components/entityElements/EntityElementWindow.vue";
 import EntityElementWYSIWYG from "@/components/entityElements/EntityElementWYSIWYG.vue";
+import EntityElementMapViewer from "@/components/entityElements/EntityElementMapViewer.vue";
 import { computed, watch } from "vue";
 import { useEditMode } from "@/composables/useEdit";
 import { useRoute } from "vue-router";
@@ -101,6 +107,7 @@ import type {
   EntityViewElements,
   GraphElement,
   ManifestViewerElement,
+  MapElement,
   MarkdownViewerElement,
   MediaFileElement,
   SingleMediaFileElement,
@@ -120,6 +127,8 @@ export type Elements =
   | SingleMediaFileElement
   | WindowElement
   | WysiwygElement;
+  | WindowElement
+  | MapElement;
 
 const props = defineProps<{
   elements: EntityViewElements;

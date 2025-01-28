@@ -80,8 +80,8 @@
           <div v-on="showTooltip ? on : {}">
             <MetadataTruncatedText
               @overflow-status="handleOverflowStatus"
-              :disabled="!linkedEntityId"
-              :line-clamp="1"
+              :disabled="!linkedEntityId && !metadata.lineClamp"
+              :line-clamp="metadata.lineClamp || 1"
             >
               <MetadataFormatter
                 v-if="metadata.value?.formatter"
