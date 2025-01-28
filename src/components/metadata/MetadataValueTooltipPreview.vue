@@ -36,9 +36,9 @@
 <script lang="ts" setup>
 import { onMounted } from "vue";
 import {
-  BaseEntity,
+  type BaseEntity,
   Entitytyping,
-  GetEntityByIdQueryVariables,
+  type GetEntityByIdQueryVariables,
   GetEntityByIdDocument,
 } from "@/generated-types/queries";
 import { computed, ref } from "vue";

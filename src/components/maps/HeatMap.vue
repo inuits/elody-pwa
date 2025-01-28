@@ -45,7 +45,7 @@ import {
 import { Feature } from "ol";
 import { Point } from "ol/geom";
 import { useMaps } from "@/composables/useMaps";
-import { ConfigItem, Entity } from "@/generated-types/queries";
+import type { ConfigItem, Entity } from "@/generated-types/queries";
 
 const props = defineProps<{
   config: ConfigItem[];

@@ -41,11 +41,11 @@ import {
   type MediaFileEntity,
   type PanelMetaData,
   InputFieldTypes,
-  Column,
+  type Column,
   MediaFileElementTypes,
-  EntityListElement,
-  SingleMediaFileElement,
-  Entity,
+  type EntityListElement,
+  type SingleMediaFileElement,
+  type Entity,
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
 import EntityForm from "@/components/EntityForm.vue";
