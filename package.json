@@ -1,7 +1,6 @@
 {
   "name": "dams",
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
     "dev": "run-s generate dev-only",
     "dev-only": "vite",
@@ -102,7 +101,7 @@
     "ts-node": "10.9.2",
     "tsc-files": "^1.1.4",
     "typescript": "5.6.3",
-    "vite": "6.0.11",
+    "vite": "5.4.11",
     "vite-plugin-compression": "^0.5.1",
     "vitest": "2.1.5",
     "vue-tsc": "2.1.10",
