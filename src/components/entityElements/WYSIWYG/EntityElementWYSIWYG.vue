@@ -23,7 +23,7 @@
 import { Editor, EditorContent } from "@tiptap/vue-3";
 import { ref, onMounted, onUnmounted, watch, computed } from "vue";
 import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
-import WYSIWYGButtons from "@/components/WYSIWYGButtons.vue";
+import WYSIWYGButtons from "@/components/entityElements/WYSIWYG/WYSIWYGButtons.vue";
 import { ValidationFields, WysiwygElement } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 import { useFormHelper } from "@/composables/useFormHelper";
