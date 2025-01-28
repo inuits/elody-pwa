@@ -98,10 +98,10 @@ import {
   type Metadata,
   Entitytyping,
   MediaTypeEntities,
-  EntityListElement,
+  type EntityListElement,
   BaseLibraryModes,
   RelationActions,
-  ConfigItem,
+  type ConfigItem,
 } from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
 import useListItemHelper from "@/composables/useListItemHelper";
@@ -114,7 +114,7 @@ import {
   updateEntityMediafileOnlyForMediafiles,
 } from "@/helpers";
 import { computed, onMounted, onUnmounted, inject, watch, nextTick } from "vue";
-import { OrderItem } from "@/composables/useOrderListItems";
+import type { OrderItem } from "@/composables/useOrderListItems";
 import { useFormHelper } from "@/composables/useFormHelper";
 import EventBus from "@/EventBus";
 import { useLibraryBar } from "@/composables/useLibraryBar";

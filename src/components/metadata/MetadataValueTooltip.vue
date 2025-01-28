@@ -25,10 +25,10 @@
 
 <script lang="ts" setup>
 import {
-  BaseEntity,
-  PanelMetadataValueTooltip,
-  PanelMetadataValueTooltipTypes,
-  Metadata,
+  type BaseEntity,
+  type PanelMetadataValueTooltip,
+  type PanelMetadataValueTooltipTypes,
+  type Metadata,
 } from "@/generated-types/queries";
 import { computed } from "vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";

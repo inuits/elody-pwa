@@ -10,7 +10,7 @@ import {
   type IntialValues,
   type MutateEntityValuesMutation,
   type MutateEntityValuesMutationVariables,
-  DeleteQueryOptions,
+  type DeleteQueryOptions,
   Collection,
   ModalStyle,
 } from "@/generated-types/queries";

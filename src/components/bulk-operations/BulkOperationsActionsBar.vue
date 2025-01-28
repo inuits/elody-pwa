@@ -133,8 +133,8 @@ import {
   TypeModals,
 } from "@/generated-types/queries";
 import {
-  Context,
-  InBulkProcessableItem,
+  type Context,
+  type InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { useModalActions } from "@/composables/useModalActions";

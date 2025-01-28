@@ -49,7 +49,7 @@ import {
   ActionContextViewModeTypes,
   ContextMenuDirection,
   DamsIcons,
-  DropdownOption,
+  type DropdownOption,
   Entitytyping,
   PanelType,
 } from "@/generated-types/queries";
