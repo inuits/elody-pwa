@@ -85,14 +85,7 @@ const viteConfig = defineConfig({
   },
   optimizeDeps: {
     exclude: ["session-vue-3-oidc-library", "date-fns"],
-    include: [
-      "vue",
-      "@vue/runtime-core",
-      "prosemirror-state",
-      "prosemirror-transform",
-      "prosemirror-model",
-      "prosemirror-view",
-    ],
+    include: ["vue", "@vue/runtime-core"],
   },
 });
 

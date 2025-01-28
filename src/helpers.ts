@@ -15,7 +15,6 @@ import {
   RouteNames,
   GetCustomFormattersSettingsDocument,
   GetCustomTypeUrlMappingDocument,
-  type Column,
   DamsIcons,
   type DropdownOption,
   type Column,
