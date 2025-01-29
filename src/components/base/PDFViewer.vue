@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative w-full"
+    class="relative w-full h-full flex flex-col"
     :class="{
       'animated-pulse bg-blue-default10': loading,
       'bg-white-background': !loading,
@@ -18,8 +18,8 @@
     <div
       ref="spaceForPage"
       :class="[
-        'h-[55vh] flex justify-center mt-10 w-full overflow-scroll relative',
-        decentralizeFromTop ? 'mt-10' : 'items-center',
+        'h-full w-full flex justify-center w-full overflow-scroll relative',
+        decentralizeFromTop ? `mt-10` : 'items-center',
         { 'opacity-0': loading },
       ]"
     >
@@ -28,7 +28,7 @@
         ref="pageContainer"
         :class="[
           'absolute w-full flex',
-          decentralizeFromLeft ? '' : 'justify-center',
+          decentralizeFromLeft ? `` : 'justify-center',
         ]"
       >
         <div>

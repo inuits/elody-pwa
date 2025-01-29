@@ -7,7 +7,7 @@
         : 'no-filename'
     "
   >
-    <div v-if="canShowCopyRight() && !imageSrcError" class="relative group">
+    <div v-if="canShowCopyRight && !imageSrcError" class="relative group">
       <ImageViewer
         :class="[
           'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
@@ -23,29 +23,24 @@
           !getValueOfMediafile(
             mediafileViewerContext,
             'mimetype',
-            mediafile
-          ).includes('pdf') &&
-          !getValueOfMediafile(
-            mediafileViewerContext,
-            'mimetype',
-            mediafile
+            mediafile,
           ).includes('json/manifest')
             ? `/api/iiif/3/${
                 getValueOfMediafile(
                   mediafileViewerContext,
                   'transcode_filename',
-                  mediafile
+                  mediafile,
                 ) ||
                 getValueOfMediafile(
                   mediafileViewerContext,
                   'filename',
-                  mediafile
+                  mediafile,
                 )
               }/square/100,/0/default.jpg`
             : getValueOfMediafile(
                 mediafileViewerContext,
                 'thumbnail_file_location',
-                mediafile
+                mediafile,
               )
         "
         @click="
@@ -64,11 +59,13 @@
 </template>
 
 <script lang="ts" setup>
-import type { MediaFileEntity } from "@/generated-types/queries";
+import {
+  type MediaFileEntity,
+} from "@/generated-types/queries";
 import { toBeDeleted } from "@/composables/useEdit";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { auth } from "@/main";
-import { ref, inject } from "vue";
+import { inject, ref, computed } from "vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import ImageViewer from "@/components/base/ImageViewer.vue";
 
@@ -85,10 +82,10 @@ const setNoImage = () => {
   imageSrcError.value = true;
 };
 
-const canShowCopyRight = () => {
+const canShowCopyRight = computed(() => {
   if (auth.isAuthenticated.value === true) return true;
   return props.mediafile.intialValues.copyrightColor !== "red";
-};
+});
 
 const {
   mediafileSelectionState,

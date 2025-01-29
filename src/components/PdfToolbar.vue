@@ -1,6 +1,6 @@
 <template>
   <div
-    class="absolute w-11/12 bg-neutral-0 z-20 mx-4 mt-7 p-2 shadow-sm flex justify-between h-10"
+    class="absolute w-full bg-neutral-0 z-20 p-2 shadow-sm flex justify-between h-10"
   >
     <div class="select-none">
       <a ref="zoomInRef" class="mr-1">
