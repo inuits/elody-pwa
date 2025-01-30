@@ -1,14 +1,13 @@
 <template>
   <div>
     <Map.OlMap
-      ref="map"
       style="width: 100%; height: 65vh"
       :projection="projection"
       :loadTilesWhileAnimating="true"
       :loadTilesWhileInteracting="true"
     >
       <Map.OlView
-        ref="view"
+        ref="viewRef"
         :zoom="7"
         :center="mapCenter"
         :projection="projection"
@@ -27,9 +26,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch, onUpdated, nextTick } from "vue";
 import { Map, Layers, Sources } from "vue3-openlayers";
 import { useMaps } from "@/composables/useMaps";
+import { type Extent, extend } from "ol/extent"; // Import Extent type
+import type View from "ol/View";
 
 const props = withDefaults(
   defineProps<{
@@ -43,15 +44,46 @@ const props = withDefaults(
 
 const { getWktFeature, geoToMercator } = useMaps();
 
-const projection = ref<string>("EPSG:3857")
+const projection = ref<string>("EPSG:3857");
 
 const mapCenter = computed(() => {
   const [lat = 0, long = 0] = props.center;
   return geoToMercator(lat, long);
 });
 
+const viewRef = ref<{ view: View }>(null);
+
 const features = computed(() => {
   if (!props.wkt || props.wkt.length === 0) return [];
   return props.wkt.map(getWktFeature);
 });
+
+const focusOnPolygon = async () => {
+  const existedFeatures = features.value;
+  if (existedFeatures.length > 0 && viewRef.value) {
+    await nextTick();
+    const extent: Extent = existedFeatures.reduce((acc, feature) => {
+      if (!feature) return acc;
+      const featureExtent = feature.getGeometry()?.getExtent() as Extent;
+      return acc ? extend(acc, featureExtent) : featureExtent;
+    }, null);
+
+    viewRef.value.view.fit(extent, {
+      padding: [50, 50, 50, 50],
+      duration: 1000,
+    });
+  }
+};
+
+onUpdated(() => {
+  focusOnPolygon();
+});
+
+watch(
+  [features, viewRef],
+  () => {
+    focusOnPolygon();
+  },
+  { immediate: true, deep: true },
+);
 </script>
