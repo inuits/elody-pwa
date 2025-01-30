@@ -104,4 +104,11 @@ watch(
     }
   },
 );
+
+watch(
+  () => props.skip,
+  () => {
+    currentPage.value = props.skip;
+  },
+);
 </script>
