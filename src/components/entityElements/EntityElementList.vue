@@ -73,6 +73,7 @@
             :custom-query-entity-picker-list-filters="
               customQueryEntityPickerListFilters
             "
+            :id="id"
           />
           <BaseLibrary
             class="flex-1"
