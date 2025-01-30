@@ -56,7 +56,6 @@
 <script lang="ts" setup>
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { ref, toRefs, watch } from "vue";
-import { savedSkipForOrdering } from "@/composables/useOrderListItems";
 import { Unicons } from "@/types";
 
 const props = defineProps<{
@@ -74,21 +73,18 @@ const currentPage = ref<number>(skip.value);
 
 const previous = () => {
   if (currentPage.value <= 1) return;
-  //savedSkipForOrdering.value--;
   currentPage.value--;
   emit("update:skip", currentPage.value);
 };
 
 const next = () => {
   if (currentPage.value >= getLastPage()) return;
-  //savedSkipForOrdering.value++;
   currentPage.value++;
   emit("update:skip", currentPage.value);
 };
 
 const goToPage = (page: number) => {
   if (page < 1 || page > getLastPage()) return;
-  //savedSkipForOrdering.value = page;
   currentPage.value = page;
   emit("update:skip", currentPage.value);
 };
