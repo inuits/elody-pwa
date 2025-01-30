@@ -24,7 +24,9 @@
         v-model="currentPage"
         type="number"
         input-style="default"
-        :is-valid-predicate="(value: number) => value >= 1 && value <= getLastPage()"
+        :is-valid-predicate="
+          (value: number) => value >= 1 && value <= getLastPage()
+        "
         @focusout="emit('update:skip', currentPage)"
         @keyup.enter="emit('update:skip', currentPage)"
       />
@@ -100,7 +102,10 @@ const getLastPage = () => {
 watch(
   () => [props.limit, props.totalItems],
   () => {
-    if (currentPage.value > getLastPage()) currentPage.value = 1;
-  }
+    if (currentPage.value > getLastPage()) {
+      currentPage.value = 1;
+      emit("update:skip", currentPage.value);
+    }
+  },
 );
 </script>
