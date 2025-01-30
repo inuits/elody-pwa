@@ -70,8 +70,6 @@
       v-model:model-value="metadataValue"
       :type="field.type as any"
       input-style="defaultWithBorder"
-      @keyup.enter="keyUpEnterEvent()"
-      @focusout="keyUpEnterEvent()"
       :disabled="fieldEditIsDisabled"
     />
     <div v-if="showErrors && !fieldIsValid" class="text-red-default">
@@ -109,7 +107,7 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 
-const emit = defineEmits(["update:value", "registerEnterPressed:value"]);
+const emit = defineEmits(["update:value"]);
 const { t } = useI18n();
 
 const props = defineProps<{
@@ -202,11 +200,6 @@ const populateHiddenField = (): BaseRelationValuesInput[] | undefined => {
     });
     return relations;
   }
-};
-
-const keyUpEnterEvent = () => {
-  const newValue = getValueFromMetadata();
-  emit("registerEnterPressed:value", newValue);
 };
 
 watch(
