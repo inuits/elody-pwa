@@ -644,6 +644,7 @@ watch(
       );
       setEntityType(entityType.value);
       enqueuePromise(advancedFiltersPromise);
+      enqueuePromise(paginationLimitOptionsPromise);
       enqueuePromise(sortOptionsPromise);
       await getEntities(route);
     }
