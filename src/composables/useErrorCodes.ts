@@ -218,7 +218,7 @@ export const useErrorCodes = (): {
     errorCodeType: ErrorCodeType,
     errorMessage: string
   ): void => {
-    if (!Object.keys(statusCodeHandlers).includes(statusCode)) {
+    if (!Object.keys(statusCodeHandlers).includes(statusCode.toString())) {
       statusCodeHandlers["default"](errorCodeType, errorMessage);
       console.info(
         `An error with status code ${statusCode} was handled by the default handler, add it to the statusCodeHandlers mapper to implement custom behaviour`,
