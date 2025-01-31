@@ -37,7 +37,11 @@
         v-else-if="stringIsHtml(readableValue)"
         v-html="readableValue"
       ></p>
-      <p data-cy="metadata-value" v-else>
+      <p
+        v-else
+        class="whitespace-pre-wrap"
+        data-cy="metadata-value"
+      >
         {{ (readableValue as string) || "-" }}
       </p>
     </div>
