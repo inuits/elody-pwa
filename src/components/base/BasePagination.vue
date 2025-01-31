@@ -24,11 +24,9 @@
         v-model="currentPage"
         type="number"
         input-style="default"
-        :is-valid-predicate="
-          (value: number) => value >= 1 && value <= getLastPage()
-        "
-        @focusout="emit('update:skip', currentPage)"
-        @keyup.enter="emit('update:skip', currentPage)"
+        @focusin="canUpdateSkipAgain()"
+        @focusout="setManualEnteredSkip(currentPage)"
+        @keyup.enter="setManualEnteredSkip(currentPage)"
       />
     </div>
     <span>{{ $t("pagination.of") }}</span>
@@ -70,6 +68,20 @@ const emit = defineEmits<{
 
 const { skip } = toRefs(props);
 const currentPage = ref<number>(skip.value);
+const canUpdateSkip = ref<boolean>(true);
+
+const setManualEnteredSkip = (page: number) => {
+  if (!canUpdateSkip.value) return;
+
+  if (page < 1) currentPage.value = 1;
+  if (page > getLastPage()) currentPage.value = getLastPage();
+  emit("update:skip", currentPage.value);
+  canUpdateSkip.value = false;
+}
+
+const canUpdateSkipAgain = () => {
+  canUpdateSkip.value = true;
+}
 
 const previous = () => {
   if (currentPage.value <= 1) return;
@@ -96,6 +108,12 @@ const getLastPage = () => {
 };
 
 watch(
+  () => props.skip,
+  () => {
+    currentPage.value = props.skip;
+  },
+);
+watch(
   () => [props.limit, props.totalItems],
   () => {
     if (currentPage.value > getLastPage()) {
@@ -105,10 +123,4 @@ watch(
   },
 );
 
-watch(
-  () => props.skip,
-  () => {
-    currentPage.value = props.skip;
-  },
-);
 </script>
