@@ -9,6 +9,7 @@
       <Map.OlView
         ref="viewRef"
         :zoom="7"
+        :maxZoom="maxZoom"
         :center="mapCenter"
         :projection="projection"
       />
@@ -44,6 +45,7 @@ const props = withDefaults(
 
 const { getWktFeature, geoToMercator } = useMaps();
 
+const viewRef = ref<{ view: View }>(null);
 const projection = ref<string>("EPSG:3857");
 
 const mapCenter = computed(() => {
@@ -51,15 +53,26 @@ const mapCenter = computed(() => {
   return geoToMercator(lat, long);
 });
 
-const viewRef = ref<{ view: View }>(null);
-
-const features = computed(() => {
-  if (!props.wkt || props.wkt.length === 0) return [];
-  return props.wkt.map(getWktFeature);
+const maxZoom = computed(() => {
+  return features.value.length === 0 ? 28 : 14;
 });
 
-const focusOnPolygon = async () => {
-  const existedFeatures = features.value;
+const point = computed(() => {
+  const [point1, point2] = mapCenter.value;
+  return getWktFeature(`POINT(${point1} ${point2})`);
+});
+
+const wkt = computed(() => {
+  if ((!props.wkt || props.wkt.length === 0) && !point.value) return [];
+  return [...props.wkt].map(getWktFeature);
+});
+
+const features = computed(() => {
+  return [...wkt.value, point.value];
+});
+
+const focusOnFeatures = async () => {
+  const existedFeatures = wkt.value.length ? wkt.value : [point.value];
   if (existedFeatures.length > 0 && viewRef.value) {
     await nextTick();
     const extent: Extent = existedFeatures.reduce((acc, feature) => {
@@ -76,13 +89,13 @@ const focusOnPolygon = async () => {
 };
 
 onUpdated(() => {
-  focusOnPolygon();
+  focusOnFeatures();
 });
 
 watch(
   [features, viewRef],
   () => {
-    focusOnPolygon();
+    focusOnFeatures();
   },
   { immediate: true, deep: true },
 );
