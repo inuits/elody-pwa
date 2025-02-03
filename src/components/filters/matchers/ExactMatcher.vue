@@ -160,6 +160,22 @@ const mapOptionsFilterInput = (
   value?: any,
 ) => {
   const optionsFilterInput: AdvancedFilterInput[] = [];
+
+  const determineValue = (filterValue: any, externalValue: any) => {
+    if (externalValue) {
+      return filterValue === "*" ? externalValue : filterValue;
+    }
+    return filterValue;
+  };
+
+  const handleVariableValues = (filterValue: string) => {
+    const variablesMapper: { [key: string]: unknown } = {
+      $entityType: route.meta.entityType,
+    };
+
+    return variablesMapper[filterValue] ?? filterValue;
+  };
+
   for (const filterInput of advancedFilterInputForRetrievingOptions) {
     const lookup: LookupInput = {
       from: filterInput.lookup?.from || "",
@@ -167,21 +183,21 @@ const mapOptionsFilterInput = (
       foreign_field: filterInput.lookup?.foreign_field || "",
       as: filterInput.lookup?.as || "",
     };
+
+    const processedValue = handleVariableValues(filterInput.value);
+
     optionsFilterInput.push({
       lookup: filterInput.lookup ? lookup : undefined,
       type: filterInput.type,
       key: filterInput.key,
-      value: value
-        ? filterInput.value === "*"
-          ? value
-          : filterInput.value
-        : filterInput.value,
+      value: determineValue(processedValue, value),
       metadata_key_as_label: filterInput.metadata_key_as_label,
       item_types: filterInput.item_types ?? [],
       provide_value_options_for_key:
         filterInput.type !== AdvancedFilterTypes.Type,
     });
   }
+
   return optionsFilterInput;
 };
 
