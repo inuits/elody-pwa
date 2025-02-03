@@ -736,6 +736,14 @@ watch(
   },
   { deep: true, immediate: true },
 );
+
+watch(
+  () => form.value?.values,
+  async () => {
+    await form.value?.validate();
+  },
+  { deep: true },
+);
 </script>
 
 <style scoped></style>
