@@ -1,6 +1,6 @@
 import { Node } from "@tiptap/core";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { TypeModals } from "@/generated-types/queries";
+import { ModalStyle, TypeModals } from "@/generated-types/queries";
 
 const TagExtension = Node.create({
   name: "tag",
@@ -38,16 +38,9 @@ const TagExtension = Node.create({
         ({ commands, state }) => {
           const { selection } = state;
           const { from, to } = selection;
-          console.log(from, to);
-
-          // Check if there is a selection
-          if (from === to) {
-            alert("Please select some text to tag.");
-            return false;
-          }
 
           const { openModal } = useBaseModal();
-          openModal(TypeModals.ElodyEntityTaggingModal);
+          openModal(TypeModals.ElodyEntityTaggingModal, ModalStyle.Center);
         },
     };
   },

@@ -5,7 +5,10 @@
     :key="dynamicFormQuery"
   >
     <div v-show="!isLoading" class="w-full [&>*>button:last-child]:mb-0">
-      <h1 v-if="dynamicForm?.GetDynamicForm?.label" class="title pb-4">
+      <h1
+        v-if="dynamicForm?.GetDynamicForm?.label && showFormTitle"
+        class="title pb-4"
+      >
         {{ t(dynamicForm.GetDynamicForm.label) }}
       </h1>
       <p
@@ -248,9 +251,11 @@ const props = withDefaults(
     router: Router;
     modalFormFields?: object;
     tabName?: string;
+    showFormTitle?: boolean;
   }>(),
   {
     modalFormFields: undefined,
+    showFormTitle: true,
   },
 );
 
