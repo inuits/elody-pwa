@@ -1,8 +1,7 @@
+import type { BulkOperationTypes, Collection } from "@/generated-types/queries";
 import {
   ActionType,
   type BaseRelationValuesInput,
-  BulkOperationTypes,
-  Collection,
   EditStatus,
   RouteNames,
 } from "@/generated-types/queries";
@@ -85,7 +84,9 @@ export const useModalActions = () => {
     };
   };
 
-  const getArgumentsForEndpointInGraphql = (): { parentId: string | undefined } => {
+  const getArgumentsForEndpointInGraphql = (): {
+    parentId: string | undefined;
+  } => {
     return {
       parentId: parentId.value,
     };
@@ -95,7 +96,9 @@ export const useModalActions = () => {
     return parentId.value;
   };
 
-  const getArgumentsForSubmitExtraMetadata = (): { savedSearchInformation: string } => {
+  const getArgumentsForSubmitExtraMetadata = (): {
+    savedSearchInformation: string;
+  } => {
     return savedSearchInformation.value;
   };
 
@@ -144,6 +147,7 @@ export const useModalActions = () => {
     callbackFunction.value = callbackFn;
     bulkOperationType.value = bulkoperationType;
   };
+
   const initializePropertiesForDownload = (
     enqueuedItems: InBulkProcessableItem[],
     context: any,
@@ -158,14 +162,23 @@ export const useModalActions = () => {
       includeAssetCsv: context !== RouteNames.Mediafile,
     };
   };
+
   const initializePropertiesForCreateEntity = (): void => {
     if (!parentId.value) callbackFunction.value = undefined;
   };
+
   const initializePropertiesForSavedSearch = (savedSearchInfo: any): void => {
     savedSearchInformation.value = savedSearchInfo;
   };
+
   const initializePropertiesForDeletion = (title: string): void => {
-    deletionInformation.value = { title: title};
+    deletionInformation.value = { title: title };
+  };
+
+  const initializePropertiesForBulkDeleteRelations = (
+    newRelationType: string,
+  ): void => {
+    relationType.value = newRelationType;
   };
 
   const getParentId = () => {
@@ -179,6 +192,10 @@ export const useModalActions = () => {
   const getCallbackFunction = () => {
     return callbackFunction.value;
   };
+
+  const getRelationType = () => relationType.value;
+
+  const getCollection = () => collection.value;
 
   const setCallbackFunction = (callback: Function) => {
     callbackFunction.value = callback;
@@ -201,11 +218,14 @@ export const useModalActions = () => {
     initializePropertiesForCreateEntity,
     initializePropertiesForSavedSearch,
     initializePropertiesForDeletion,
+    initializePropertiesForBulkDeleteRelations,
     getParentId,
     getBulkOperationType,
     getCallbackFunction,
     getInformationForDelete,
     setCallbackFunction,
+    getRelationType,
+    getCollection,
     resetAllProperties,
   };
 };
