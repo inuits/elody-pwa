@@ -13,6 +13,7 @@
             : SearchInputType.AdvancedInputMediaFilesType
           : SearchInputType.AdvancedInputType
       "
+      :filters="computedFilters || undefined"
       :show-button="showButton"
       :confirm-selection-button="true"
       :enable-navigation="false"
@@ -42,6 +43,7 @@
 
 <script lang="ts" setup>
 import {
+  type AdvancedFilterInput,
   type BaseRelationValuesInput,
   Collection,
   type Entity,
@@ -85,7 +87,8 @@ const props = withDefaults(
     parentEntityType?: string;
     acceptedTypes: string[];
     customQuery: string;
-    customFiltersQuery: string;
+    customFiltersQuery?: string;
+    computedFilters?: AdvancedFilterInput[];
     showButton: boolean;
     enableBulkOperations: boolean;
     enableAdvancedFilters: boolean;
@@ -143,7 +146,6 @@ const confirmSelection = (selectedItems: InBulkProcessableItem[]) => {
 
 const getCustomQuery = async () => {
   await loadDocument(props.customQuery, props.customFiltersQuery);
-  console.log(getDocument());
   newQuery.value = getDocument();
   queryLoaded.value = true;
 };
