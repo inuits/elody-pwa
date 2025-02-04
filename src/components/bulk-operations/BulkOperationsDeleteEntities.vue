@@ -112,13 +112,16 @@ const normalizeOptionsToObjectOfKeyValue = (
 ) => {
   if (options.length === 0) return {};
 
-  return options.reduce(
+  const entitiesToRemove = options.reduce(
     (acc, option) => {
       acc[option.key.value] = option.isSelected;
       return acc;
     },
     {} as { [key: string]: boolean },
   );
+  return {
+    deleteEntities: entitiesToRemove,
+  }
 };
 
 const message = computed(() => {
