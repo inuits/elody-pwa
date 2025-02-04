@@ -4,7 +4,12 @@ export const useGetMediafile = () => {
   const { handleHttpError } = useErrorCodes();
 
   const fetchFile = async (path: string) => {
-    const response = await fetch(path);
+    const response = await fetch(path, {
+      cache: "force-cache",
+      headers: {
+        "Cache-Control": "max-age=36000",
+      },
+    });
 
     if (!response.ok) {
       return Promise.reject(response);
@@ -27,7 +32,7 @@ export const useGetMediafile = () => {
 
     return originalFileLocation.replace(
       /.*\/download-with-ticket\//,
-      "download-with-ticket/"
+      "download-with-ticket/",
     );
   };
 
