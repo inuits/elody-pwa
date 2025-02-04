@@ -59,7 +59,7 @@ import {
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
-import { ref, onMounted, inject, unref } from "vue";
+import { ref, onMounted, inject, unref, provide } from "vue";
 import { useSubmitForm } from "vee-validate";
 import { useMutation } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
@@ -99,6 +99,8 @@ const props = withDefaults(
     enableNonSelectableEntities: true,
   },
 );
+
+provide("mediafileViewerContext", props.customFiltersQuery);
 
 const { t } = useI18n();
 const { loadDocument, getDocument } = useCustomQuery();
@@ -141,6 +143,7 @@ const confirmSelection = (selectedItems: InBulkProcessableItem[]) => {
 
 const getCustomQuery = async () => {
   await loadDocument(props.customQuery, props.customFiltersQuery);
+  console.log(getDocument());
   newQuery.value = getDocument();
   queryLoaded.value = true;
 };
