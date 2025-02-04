@@ -29,11 +29,11 @@
           :entity-uuid="parentId"
           :accepted-types="[element.taggingConfiguration.entityType]"
           :custom-query="element.taggingConfiguration.customQuery"
-          :custom-filters-query="element.taggingConfiguration.customFilterQuery"
           :show-button="false"
           :enable-bulk-operations="false"
           :enable-advanced-filters="false"
-          base-library-height="max-h-[60vh]"
+          :computedFilters="computedAdvancedFilterInputs"
+          base-library-height="max-h-[50vh]"
         />
       </div>
       <div class="bg-neutral-lightest rounded-md">
@@ -59,7 +59,13 @@
 </template>
 
 <script setup lang="ts">
-import { TypeModals, type WysiwygElement } from "@/generated-types/queries";
+import {
+  type AdvancedFilterInput,
+  AdvancedFilterTypes,
+  Entitytyping,
+  TypeModals,
+  type WysiwygElement,
+} from "@/generated-types/queries";
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
@@ -87,14 +93,25 @@ const selectedText = computed<string>(
   () => getModalInfo(TypeModals.ElodyEntityTaggingModal).selectedText,
 );
 
-watch(
-  () => selectedText.value,
-  () => {
-    const fieldKey = `intialValues.${element.value.taggingConfiguration?.metadataKeyToFilter}`;
-    if (!fieldKey || !form.value || !selectedText.value) return;
-    form.value.setFieldValue(fieldKey, selectedText.value);
-  },
-);
+const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
+  const fieldKey = element.value.taggingConfiguration?.metadataKeyToFilter;
+  const entityType: Entitytyping =
+    element.value.taggingConfiguration.entityType;
+  if (!fieldKey || !form.value || !selectedText.value || !entityType) return [];
+  form.value.setFieldValue(`intialValues.${fieldKey}`, selectedText.value);
+  const typeFilter: AdvancedFilterInput = {
+    match_exact: true,
+    type: AdvancedFilterTypes.Type,
+    value: entityType,
+  };
+  const metadataFilter: AdvancedFilterInput = {
+    key: [`aicap:1|properties.${fieldKey}.value`],
+    value: selectedText.value,
+    type: AdvancedFilterTypes.Text,
+    match_exact: false,
+  };
+  return [typeFilter, metadataFilter];
+});
 </script>
 
 <style scoped></style>
