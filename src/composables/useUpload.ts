@@ -375,7 +375,7 @@ const useUpload = () => {
     isDryRun: boolean = false,
   ): Promise<string[] | number> => {
     const response = await fetch(
-      `/api/upload/batch?${isDryRun ? "dry_run=true" : ""}${extraMediafileType.value ? `&extra_mediafile_type=${extraMediafileType.value}` : ""}`,
+      `/api/upload/batch?${isDryRun ? "dry_run=true" : ""}${extraMediafileType.value ? `&extra_mediafile_type=${extraMediafileType.value}` : ""}${jobIdentifier.value ? `&main_job_id=${jobIdentifier.value}` : ""}`,
       {
         headers: { "Content-Type": "text/csv" },
         method: "POST",
@@ -387,13 +387,14 @@ const useUpload = () => {
       return Promise.reject(httpErrorMessage);
     }
 
-    if (!isDryRun) {
-      const parsedResult = JSON.parse(await response.text());
-      if (parsedResult.jobIdWithDryRun)
-        jobIdentifier.value = parsedResult.jobIdWithDryRun;
+    const parsedResult = JSON.parse(await response.text());
+    if (parsedResult.parent_job_id)
+      jobIdentifier.value = parsedResult.parent_job_id;
+
+    if (isDryRun)
+      return parsedResult;
+    else
       return parsedResult.links;
-    }
-    else return response.json();
   };
 
   const toggleUploadStatus = () => {
