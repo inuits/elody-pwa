@@ -36,7 +36,7 @@
           base-library-height="max-h-[60vh]"
         />
       </div>
-      <div>
+      <div class="bg-neutral-lightest rounded-md">
         <div class="p-2 bg-gray-200">
           <h4 class="text-md font-bold">
             {{
@@ -63,10 +63,11 @@ import { TypeModals, type WysiwygElement } from "@/generated-types/queries";
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 const { closeModal, getModalInfo } = useBaseModal();
 const route = useRoute();
@@ -76,6 +77,23 @@ const { t } = useI18n();
 const parentId = computed(() => route.params["id"]);
 const element = computed<WysiwygElement>(
   () => getModalInfo(TypeModals.ElodyEntityTaggingModal).element,
+);
+const form = computed(() =>
+  useFormHelper().getForm(
+    element.value.taggingConfiguration?.createNewEntityFormQuery,
+  ),
+);
+const selectedText = computed<string>(
+  () => getModalInfo(TypeModals.ElodyEntityTaggingModal).selectedText,
+);
+
+watch(
+  () => selectedText.value,
+  () => {
+    const fieldKey = `intialValues.${element.value.taggingConfiguration?.metadataKeyToFilter}`;
+    if (!fieldKey || !form.value || !selectedText.value) return;
+    form.value.setFieldValue(fieldKey, selectedText.value);
+  },
 );
 </script>
 

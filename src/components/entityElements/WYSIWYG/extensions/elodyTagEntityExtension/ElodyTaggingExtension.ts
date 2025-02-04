@@ -38,8 +38,10 @@ const TagExtension = Node.create({
         ({ commands, state }) => {
           const { selection } = state;
           const { from, to } = selection;
+          const selectedText = state.doc.textBetween(from, to, " ");
 
-          const { openModal } = useBaseModal();
+          const { openModal, updateModal } = useBaseModal();
+          updateModal(TypeModals.ElodyEntityTaggingModal, { selectedText });
           openModal(TypeModals.ElodyEntityTaggingModal, ModalStyle.Center);
         },
     };
