@@ -57,6 +57,10 @@ export const useWYSIWYGEditor = (): {
         importName: "Bold",
         from: "node_modules/@tiptap/extension-bold",
       },
+      [WysiwygExtensions.ElodyTaggingExtension]: {
+        importName: "ElodyTaggingExtension",
+        from: "src/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension",
+      },
     };
 
   const importEditorExtensions = async (
@@ -87,19 +91,22 @@ export const useWYSIWYGEditor = (): {
           editorExtensionImportMapping[extension];
 
         const importedExtension = importedExtensions.find(
-          (ext) => ext.name === extension,
+          (ext) => ext.name.toLowerCase() === extension.toLowerCase(),
         );
 
-        if (importedExtension) {
-          if (extensionConfig.configuration) {
-            return importedExtension.configure({
-              types: extensionConfig.configuration,
-            });
-          }
+        console.log(importedExtension);
 
-          return importedExtension;
+        if (!importedExtension) {
+          throw Error(`Tiptap extension with name '${extension}' not found.`);
         }
-        return null;
+
+        if (extensionConfig.configuration) {
+          return importedExtension.configure({
+            types: extensionConfig.configuration,
+          });
+        }
+
+        return importedExtension;
       })
       .filter(Boolean);
   };

@@ -94,18 +94,27 @@ const selectedText = computed<string>(
 );
 
 const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
-  const fieldKey = element.value.taggingConfiguration?.metadataKeyToFilter;
+  const metadataFilterString =
+    element.value.taggingConfiguration?.metadataFilter;
+  const metadataKey = metadataFilterString.split("|")[1].split(".")[1];
   const entityType: Entitytyping =
     element.value.taggingConfiguration.entityType;
-  if (!fieldKey || !form.value || !selectedText.value || !entityType) return [];
-  form.value.setFieldValue(`intialValues.${fieldKey}`, selectedText.value);
+  if (
+    !metadataFilterString ||
+    !metadataKey ||
+    !form.value ||
+    !selectedText.value ||
+    !entityType
+  )
+    return [];
+  form.value.setFieldValue(`intialValues.${metadataKey}`, selectedText.value);
   const typeFilter: AdvancedFilterInput = {
     match_exact: true,
     type: AdvancedFilterTypes.Type,
     value: entityType,
   };
   const metadataFilter: AdvancedFilterInput = {
-    key: [`aicap:1|properties.${fieldKey}.value`],
+    key: [metadataFilterString],
     value: selectedText.value,
     type: AdvancedFilterTypes.Text,
     match_exact: false,

@@ -141,10 +141,11 @@
       <i>I</i>
     </button>
     <button
-      v-if="isTextSelected"
-      :disabled="buttonsDisabled"
+      v-if="extensions.includes(WysiwygExtensions.ElodyTaggingExtension)"
+      :class="[{ 'opacity-30': !isTextSelected }]"
+      :disabled="buttonsDisabled || !isTextSelected"
       @click="editor.commands.openTagModal()"
-      title="Italic"
+      title="Tag"
     >
       Tag
     </button>
@@ -173,7 +174,7 @@ const isTextSelected = computed(() => {
 
 <style lang="scss" scoped>
 button {
-  padding: 0.5rem;
+  padding: 0.25rem;
   margin: 0.25rem;
   background-color: theme("colors.neutral.40");
   border-radius: 0.25rem;
