@@ -1,7 +1,9 @@
 <template>
   <input
     data-cy="base-input-text"
-    v-if="type !== 'textarea' && type !== 'checkbox'"
+    v-if="
+      type !== 'textarea' && type !== 'checkbox' && type !== 'resizableTextarea'
+    "
     ref="baseInput"
     class=""
     :class="[
@@ -36,7 +38,7 @@
   />
   <textarea
     data-cy="base-input-text-area"
-    v-else
+    v-else-if="type === 'textarea'"
     class="w-full h-full border rounded-lg focus:ring-0"
     :class="[
       `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
@@ -49,10 +51,19 @@
     @click.stop
     rows="3"
   ></textarea>
+  <BaseResizableTextarea
+    v-else
+    v-model="inputValue"
+    :class="[
+      `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
+      `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
+    ]"
+  ></BaseResizableTextarea>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref } from "vue";
+import BaseResizableTextarea from "./BaseResizableTextarea.vue";
 
 type PseudoStyle = {
   textColor: string;
@@ -168,5 +179,14 @@ input::-webkit-inner-spin-button {
 input[type="number"] {
   appearance: textfield;
   -moz-appearance: textfield;
+}
+
+.textarea {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  resize: both;
+  min-height: 40px;
+  line-height: 20px;
 }
 </style>
