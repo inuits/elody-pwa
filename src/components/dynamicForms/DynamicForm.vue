@@ -141,6 +141,7 @@
             performActionButtonClickEvent(field as FormAction)
           "
           @reset-upload="initializeForm"
+          @close-and-delete-form="closeAndDeleteForm"
         />
         <BaseButtonNew
           v-if="
