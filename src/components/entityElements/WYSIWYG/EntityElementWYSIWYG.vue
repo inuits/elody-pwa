@@ -37,7 +37,6 @@ import {
 import { useI18n } from "vue-i18n";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useEdit from "@/composables/useEdit";
-import TagExtension from "./extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import { useBaseModal } from "@/composables/useBaseModal";
 
 const props = defineProps<{
@@ -74,7 +73,7 @@ onMounted(async () => {
   );
 
   editor.value = new Editor({
-    extensions: [...configuredExtensions, TagExtension],
+    extensions: [...configuredExtensions],
     editorProps: {
       attributes: {
         class:

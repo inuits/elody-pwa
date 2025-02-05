@@ -2,9 +2,8 @@ import { Node } from "@tiptap/core";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { ModalStyle, TypeModals } from "@/generated-types/queries";
 
-const TagExtension = Node.create({
-  name: "tag",
-
+const ElodyTaggingExtension = Node.create({
+  name: "ElodyTaggingExtension",
   addSchema() {
     return {
       group: "inline",
@@ -48,4 +47,4 @@ const TagExtension = Node.create({
   },
 });
 
-export default TagExtension;
+export default ElodyTaggingExtension;
