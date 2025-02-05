@@ -25,12 +25,20 @@
         <p class="w-full flex items-center">
           {{ finishedStatusMessage }}
         </p>
-        <div class="w-1/4">
+        <div class="w-1/5">
           <base-button-new
             icon="Redo"
             :label="t('actions.labels.reset-upload')"
             button-style="accentAccent"
             @click="resetUpload()"
+          />
+        </div>
+        <div class="w-1/5 ml-5">
+          <base-button-new
+            icon="CheckCircle"
+            :label="t('actions.labels.complete')"
+            button-style="accentAccent"
+            @click="emit('closeAndDeleteForm')"
           />
         </div>
       </div>
@@ -84,7 +92,7 @@
 import {
   ActionProgressIndicatorType,
   DamsIcons,
-  UploadFlow,
+  UploadFlow
 } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
@@ -106,7 +114,8 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (event: "resetUpload"): void;
-  (event: "clickUploadButton"): void;
+  (event: "resetUpload"): void;
+  (event: "closeAndDeleteForm"): void;
 }>();
 
 const { t } = useI18n();
