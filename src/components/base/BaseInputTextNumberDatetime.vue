@@ -1,7 +1,9 @@
 <template>
   <input
     data-cy="base-input-text"
-    v-if="type !== 'textarea' && type !== 'checkbox'"
+    v-if="
+      type !== 'textarea' && type !== 'checkbox' && type !== 'resizableTextarea'
+    "
     ref="baseInput"
     class=""
     :class="[
@@ -36,7 +38,7 @@
   />
   <textarea
     data-cy="base-input-text-area"
-    v-else
+    v-else-if="type === 'textarea'"
     class="w-full h-full border rounded-lg focus:ring-0"
     :class="[
       `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
@@ -49,11 +51,51 @@
     @click.stop
     rows="3"
   ></textarea>
+  <BaseResizableTextarea
+    v-else
+    v-model="inputValue"
+    :class="[
+      `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
+      `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
+    ]"
+  ></BaseResizableTextarea>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref } from "vue";
-import { defaultWithBorderInput, defaultInput } from "@/inputStyles";
+import BaseResizableTextarea from "./BaseResizableTextarea.vue";
+
+type PseudoStyle = {
+  textColor: string;
+  bgColor: string;
+  borderColor: string;
+};
+type Input = {
+  textColor: string;
+  bgColor: string;
+  borderColor: string;
+  disabledStyle: PseudoStyle;
+};
+const defaultInput: Input = {
+  textColor: "text-text-body",
+  bgColor: "bg-neutral-white",
+  borderColor: "border-none",
+  disabledStyle: {
+    textColor: "disabled:text-text-disabled",
+    bgColor: "disabled:bg-neutral-lightest",
+    borderColor: "disabled:border-none",
+  },
+};
+const defaultWithBorderInput: Input = {
+  textColor: defaultInput.textColor,
+  bgColor: defaultInput.bgColor,
+  borderColor: "border-[rgba(0,58,82,0.6)] focus:border-[rgba(0,58,82,0.6)]",
+  disabledStyle: {
+    textColor: defaultInput.disabledStyle.textColor,
+    bgColor: defaultInput.disabledStyle.bgColor,
+    borderColor: "disabled:border-text-disabled",
+  },
+};
 
 type InputStyle = "default" | "defaultWithBorder";
 const inputStyles: Record<InputStyle, Input> = {
@@ -137,5 +179,14 @@ input::-webkit-inner-spin-button {
 input[type="number"] {
   appearance: textfield;
   -moz-appearance: textfield;
+}
+
+.textarea {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  resize: both;
+  min-height: 40px;
+  line-height: 20px;
 }
 </style>
