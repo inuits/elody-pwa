@@ -54,6 +54,7 @@ const { t } = useI18n();
 
 const content = computed(() => editor.value?.getHTML());
 const form = computed(() => getForm(props.formId));
+const initialValue = ref<string>("");
 
 const updateModalInfo = () => {
   updateModal(TypeModals.ElodyEntityTaggingModal, {
@@ -62,6 +63,8 @@ const updateModalInfo = () => {
 };
 
 onMounted(async () => {
+  initialValue.value =
+    form.value?.values.intialValues[props.element.metadataKey];
   addEditableMetadataKeys([props.element.metadataKey], props.formId);
   if (props.element.taggingConfiguration) updateModalInfo();
   const importedExtensions = await importEditorExtensions(
@@ -81,7 +84,7 @@ onMounted(async () => {
       },
     },
     editable: isEdit.value,
-    content: form.value?.values.intialValues[props.element.metadataKey] || "",
+    content: initialValue.value,
   });
 });
 
@@ -106,6 +109,11 @@ watch(
   () => {
     if (editor.value) {
       editor.value.setEditable(isEdit.value);
+      if (!isEdit.value) {
+        editor.value.commands.setContent(
+          form.value?.values.intialValues[props.element.metadataKey],
+        );
+      }
     }
   },
 );

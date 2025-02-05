@@ -7,7 +7,7 @@
   >
     <div v-if="element && element.taggingConfiguration" class="p-2">
       <div
-        class="p-2 bg-accent-normal rounded-t-md text-white flex justify-between items-center cursor-pointer"
+        class="p-2 bg-accent-normal rounded-t-md text-white flex justify-between items-center"
       >
         <h3 class="text-lg font-bold">
           {{
@@ -16,7 +16,10 @@
             })
           }}
         </h3>
-        <div @click="closeModal(TypeModals.ElodyEntityTaggingModal)">
+        <div
+          class="cursor-pointer"
+          @click="closeModal(TypeModals.ElodyEntityTaggingModal)"
+        >
           <unicon :name="Unicons.Cross.name" />
         </div>
       </div>

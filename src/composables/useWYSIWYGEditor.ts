@@ -94,8 +94,6 @@ export const useWYSIWYGEditor = (): {
           (ext) => ext.name.toLowerCase() === extension.toLowerCase(),
         );
 
-        console.log(importedExtension);
-
         if (!importedExtension) {
           throw Error(`Tiptap extension with name '${extension}' not found.`);
         }
