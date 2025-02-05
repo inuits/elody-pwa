@@ -6,7 +6,9 @@
     @hide-modal="closeModal(TypeModals.ElodyEntityTaggingModal)"
   >
     <div v-if="element && element.taggingConfiguration" class="p-2">
-      <div class="p-2 bg-accent-normal rounded-t-md text-white">
+      <div
+        class="p-2 bg-accent-normal rounded-t-md text-white flex justify-between items-center cursor-pointer"
+      >
         <h3 class="text-lg font-bold">
           {{
             t("tagging.tag-entity", {
@@ -14,6 +16,9 @@
             })
           }}
         </h3>
+        <div @click="closeModal(TypeModals.ElodyEntityTaggingModal)">
+          <unicon :name="Unicons.Cross.name" />
+        </div>
       </div>
       <div>
         <div class="p-2 bg-gray-200">
@@ -69,11 +74,12 @@ import {
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
-import { computed, watch } from "vue";
+import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { Unicons } from "@/types";
 
 const { closeModal, getModalInfo } = useBaseModal();
 const route = useRoute();
