@@ -1,47 +1,51 @@
-import { Node } from "@tiptap/core";
+import { mergeAttributes, Node } from "@tiptap/core";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { ModalStyle, TypeModals } from "@/generated-types/queries";
 
 const ElodyTaggingExtension = Node.create({
   name: "ElodyTaggingExtension",
-  addSchema() {
-    return {
-      group: "inline",
-      inline: true,
-      attrs: {
-        tag: { default: null },
-      },
-      parseDOM: [
-        {
-          tag: "span[data-tag]",
-          getAttrs: (dom) => ({
-            tag: dom.getAttribute("data-tag"),
-          }),
-        },
-      ],
-      toDOM: (node) => [
-        "span",
-        {
-          "data-tag": node.attrs.tag,
-          class: "bg-blue-500 text-white rounded-full px-2 py-1 inline-block",
-        },
-        node.content,
-      ],
-    };
+  group: "inline",
+  inline: true,
+  content: "text*",
+  parseHTML() {
+    return [{ tag: 'span[data-tag="ElodyTaggingExtension"]' }];
   },
-
+  renderHTML({ HTMLAttributes }) {
+    return [
+      "span",
+      mergeAttributes(
+        {
+          "data-tag": "ElodyTaggingExtension",
+          class: "bg-accent-normal text-white rounded-md px-1",
+        },
+        HTMLAttributes,
+      ),
+      0,
+    ];
+  },
   addCommands() {
     return {
       openTagModal:
         () =>
-        ({ commands, state }) => {
+        ({ commands, state, view }) => {
           const { selection } = state;
           const { from, to } = selection;
           const selectedText = state.doc.textBetween(from, to, " ");
 
-          const { openModal, updateModal } = useBaseModal();
+          const { openModal, updateModal, closeModal } = useBaseModal();
           updateModal(TypeModals.ElodyEntityTaggingModal, { selectedText });
           openModal(TypeModals.ElodyEntityTaggingModal, ModalStyle.Center);
+
+          commands.deleteRange({ from, to });
+          commands.insertContentAt(from, {
+            type: this.name,
+            attrs: { tag: "your-tag-value" },
+            content: [{ type: "text", text: selectedText }],
+          });
+          commands.selectNodeForward();
+          commands.insertContent({ type: "text", text: " " });
+
+          view.focus();
         },
     };
   },
