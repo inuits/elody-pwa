@@ -639,7 +639,10 @@ const performActionButtonClickEvent = (field: FormAction): void => {
     uploadCsvForReordening: () => reorderEntitiesActionFunction(field),
     submitWithExtraMetadata: () => submitWithExtraMetadataActionFunction(field),
   };
-  if (!field.actionType) throw Error("Field does not have an actionType");
+  if (!field.actionType || !actionFunctions[field.actionType])
+    throw Error(
+      `Either actionType is undefined or the Elody frontend has no actionFunction for actionType '${field.actionType}'`,
+    );
   showErrors.value = true;
   actionFunctions[field.actionType]();
 };
