@@ -14,12 +14,7 @@ import { createHead } from "@vueuse/head";
 import { createRouter, createWebHistory, type Router } from "vue-router";
 import { createUploadLink } from "apollo-upload-client";
 import { DefaultApolloClient } from "@vue/apollo-composable";
-import {
-  getApplicationDetails,
-  getFormattersSettings,
-  getTypeUrlMapping,
-  i18n,
-} from "@/helpers";
+import { getApplicationDetails, getFormattersSettings, i18n } from "@/helpers";
 import { onError } from "@apollo/client/link/error";
 import { OpenIdConnectClient } from "session-vue-3-oidc-library";
 import { setIgnorePermissions } from "./composables/usePermissions";
@@ -52,7 +47,9 @@ const applyCustomization = (rulesObject: any) => {
 const start = async (): Promise<void> => {
   Unicon.add(Object.values(Unicons));
 
-  const { config, translations, version } = await getApplicationDetails();
+  const { config, translations, version, urlMapping } =
+    await getApplicationDetails();
+  typeUrlMapping = urlMapping;
   const { setVersion, getPwaVersion } = useServiceVersionManager();
 
   const { defineValidationRules } = useFormHelper();
@@ -71,7 +68,7 @@ const start = async (): Promise<void> => {
   });
 
   auth.changeRedirectRoute(window.location.origin + window.location.pathname);
-  addRouterNavigationGuards(router);
+  addRouterNavigationGuards(router, config);
 
   const authCode = new URLSearchParams(window.location.search).get("code");
   auth.authCode = authCode;
@@ -127,12 +124,10 @@ const start = async (): Promise<void> => {
     });
   }
   setIgnorePermissions(config.IGNORE_PERMISSIONS);
-  const [formattersSettingsResult, typeUrlMappingResult] = await Promise.all([
+  const [formattersSettingsResult] = await Promise.all([
     getFormattersSettings(),
-    getTypeUrlMapping(),
   ]);
   formattersSettings = formattersSettingsResult;
-  typeUrlMapping = typeUrlMappingResult;
   app.mount("#app");
 };
 start();
