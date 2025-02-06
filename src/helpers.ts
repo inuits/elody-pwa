@@ -1,6 +1,6 @@
+import type { Unit } from "@/generated-types/queries";
 import {
   PanelType,
-  Unit,
   type PanelInfo,
   type PanelMetaData,
   type WindowElementPanel,
@@ -14,9 +14,8 @@ import {
   InputFieldTypes,
   RouteNames,
   GetCustomFormattersSettingsDocument,
-  GetCustomTypeUrlMappingDocument,
   DamsIcons,
-  type DropdownOption
+  type DropdownOption,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -27,7 +26,7 @@ import {
   useRoute,
 } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
-import { apolloClient, typeUrlMapping } from "@/main";
+import { apolloClient, typeUrlMapping, auth } from "@/main";
 
 export const goToEntityPage = (
   entity: Entity,
@@ -368,7 +367,8 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
     SECONDS: (value: string) => `${value} s`,
     COORDINATES: (value: string) =>
       `${(value as any).longitude}, ${(value as any).latitude}`,
-    PERCENT: (value: string) => Number(value) !== -1 ? `${Number(value) * 100}%` : "charging",
+    PERCENT: (value: string) =>
+      Number(value) !== -1 ? `${Number(value) * 100}%` : "charging",
     VOLT: (value: string) => `${value} V`,
   };
 
@@ -383,7 +383,7 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
 export const convertDateToReadbleFormat = (
   dateString: string,
   format: string,
-  showTime: boolean
+  showTime: boolean,
 ): string => {
   const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = {
@@ -463,7 +463,7 @@ export const getEntityTitle = (entity: BaseEntity): string => {
 };
 
 export const getFromExpressEndpoint = async (
-  endpoint: "config" | "translation" | "version",
+  endpoint: "config" | "translation" | "version" | "url-mapping",
 ) => {
   const response = await fetch(
     import.meta.env.VUE_APP_CONFIG_URL
@@ -475,10 +475,14 @@ export const getFromExpressEndpoint = async (
 };
 
 export const getApplicationDetails = async () => {
-  const config = await getFromExpressEndpoint("config");
-  const translations = await getFromExpressEndpoint("translation");
-  const version = await getFromExpressEndpoint("version");
-  return { config, translations, version };
+  const [config, translations, version, urlMapping] = await Promise.all([
+    getFromExpressEndpoint("config"),
+    getFromExpressEndpoint("translation"),
+    getFromExpressEndpoint("version"),
+    getFromExpressEndpoint("url-mapping"),
+  ]);
+
+  return { config, translations, version, urlMapping };
 };
 
 export const getFormattersSettings = async () => {
@@ -490,18 +494,6 @@ export const getFormattersSettings = async () => {
     })
     .then((result) => {
       return result.data.CustomFormattersSettings;
-    });
-};
-
-export const getTypeUrlMapping = async () => {
-  return await apolloClient
-    .query({
-      query: GetCustomTypeUrlMappingDocument,
-      fetchPolicy: "no-cache",
-      notifyOnNetworkStatusChange: true,
-    })
-    .then((result) => {
-      return result.data.CustomTypeUrlMapping;
     });
 };
 
@@ -677,7 +669,9 @@ export const determineDefaultIntialValues = (
   return newInitialData;
 };
 
-export const mapModelValueToDropdownOptions = (values: any[]): DropdownOption[] => {
+export const mapModelValueToDropdownOptions = (
+  values: any[],
+): DropdownOption[] => {
   if (!values) return [];
 
   if (Array.isArray(values)) {
@@ -700,4 +694,25 @@ export const mapModelValueToDropdownOptions = (values: any[]): DropdownOption[] 
       __typename: "DropdownOption",
     },
   ];
+};
+
+export const requiresAuthForEntity = (
+  type: string,
+  metaOfChildRoutes: {
+    entityType: string;
+    requiresAuth?: boolean;
+  }[],
+): boolean => {
+  const entityType = mapUrlToEntityType(type) || type;
+  const metaOfLinkedEntity = metaOfChildRoutes.find(
+    (item) =>
+      String(item.entityType).toLowerCase() ===
+      String(entityType).toLowerCase(),
+  );
+
+  if (!metaOfLinkedEntity || !metaOfLinkedEntity.requiresAuth) {
+    return false;
+  }
+
+  return !auth.isAuthenticated.value;
 };
