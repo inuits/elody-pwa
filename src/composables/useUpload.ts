@@ -696,7 +696,6 @@ const useUpload = () => {
     dryRunComplete.value = false;
     missingFileNames.value = [];
     requiredMediafiles.value = undefined;
-    extraMediafileType.value = undefined;
     jobIdentifier.value = undefined;
     resetUploadProgress();
     __resetFileThumbnails();
