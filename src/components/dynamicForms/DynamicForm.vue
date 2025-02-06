@@ -205,11 +205,11 @@ import {
   type MutateEntityValuesMutationVariables,
   OcrType,
   type PanelMetaData,
+  RouteNames,
   TypeModals,
   type UploadContainer,
   type UploadField,
   UploadFlow,
-  RouteNames,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -282,7 +282,7 @@ const {
 } = useFormHelper();
 const { createNotificationOverwrite } = useNotification();
 const { loadDocument } = useImport();
-const { closeModal } = useBaseModal();
+const { closeModal, getModalInfo } = useBaseModal();
 const {
   getDynamicForm,
   dynamicForm: dynamicFormValue,
@@ -445,7 +445,7 @@ const submitActionFunction = async (field: FormAction) => {
   const document = await getQuery(field.actionQuery as string);
   const entityInput = createEntityFromFormInput(
     field.creationType,
-    extractActionArguments(field.actionType),
+    extractActionArguments(field.actionType), //Use this
   );
   let entity: any;
   try {
