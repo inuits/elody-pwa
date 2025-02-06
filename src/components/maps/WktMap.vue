@@ -9,7 +9,6 @@
       <Map.OlView
         ref="viewRef"
         :zoom="7"
-        :maxZoom="maxZoom"
         :center="mapCenter"
         :projection="projection"
       />
@@ -51,10 +50,6 @@ const projection = ref<string>("EPSG:3857");
 const mapCenter = computed(() => {
   const [lat = 0, long = 0] = props.center;
   return geoToMercator(lat, long);
-});
-
-const maxZoom = computed(() => {
-  return features.value.length === 0 ? 28 : 14;
 });
 
 const point = computed(() => {
