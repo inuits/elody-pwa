@@ -85,7 +85,9 @@ export const useModalActions = () => {
     };
   };
 
-  const getArgumentsForEndpointInGraphql = (): { parentId: string | undefined } => {
+  const getArgumentsForEndpointInGraphql = (): {
+    parentId: string | undefined;
+  } => {
     return {
       parentId: parentId.value,
     };
@@ -95,7 +97,9 @@ export const useModalActions = () => {
     return parentId.value;
   };
 
-  const getArgumentsForSubmitExtraMetadata = (): { savedSearchInformation: string } => {
+  const getArgumentsForSubmitExtraMetadata = (): {
+    savedSearchInformation: string;
+  } => {
     return savedSearchInformation.value;
   };
 
@@ -144,6 +148,7 @@ export const useModalActions = () => {
     callbackFunction.value = callbackFn;
     bulkOperationType.value = bulkoperationType;
   };
+
   const initializePropertiesForDownload = (
     enqueuedItems: InBulkProcessableItem[],
     context: any,
@@ -165,7 +170,7 @@ export const useModalActions = () => {
     savedSearchInformation.value = savedSearchInfo;
   };
   const initializePropertiesForDeletion = (title: string): void => {
-    deletionInformation.value = { title: title};
+    deletionInformation.value = { title: title };
   };
 
   const getParentId = () => {

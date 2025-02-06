@@ -70,6 +70,8 @@
 import {
   type AdvancedFilterInput,
   AdvancedFilterTypes,
+  BulkOperationTypes,
+  Collection,
   Entitytyping,
   TypeModals,
   type WysiwygElement,
@@ -77,14 +79,16 @@ import {
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useModalActions } from "@/composables/useModalActions";
 import { Unicons } from "@/types";
 
 const { closeModal, getModalInfo } = useBaseModal();
+const { initializeGeneralProperties } = useModalActions();
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
@@ -130,6 +134,23 @@ const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
   };
   return [typeFilter, metadataFilter];
 });
+
+const tagNewlyCreatedEntityFlow = () => {
+  console.log("In tagNewlyCreatedEntityFlow flow");
+};
+
+watch(
+  () => element.value,
+  () => {
+    initializeGeneralProperties(
+      parentId.value,
+      element.value.taggingConfiguration?.relationType,
+      Collection.Entities,
+      () => tagNewlyCreatedEntityFlow(),
+      BulkOperationTypes.AddRelation,
+    );
+  },
+);
 </script>
 
 <style scoped></style>
