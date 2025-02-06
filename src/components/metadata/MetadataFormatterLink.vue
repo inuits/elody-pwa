@@ -1,12 +1,31 @@
 <template>
-  <a class="text-sm underline" :href="link" style="color: #1d4ed8" @click.stop>
+  <component
+    :is="requiredAuthForThisEntity ? 'p' : 'a'"
+    :class="[{ underline: !requiredAuthForThisEntity }, 'text-sm']"
+    :href="link"
+    :style="{ color: requiredAuthForThisEntity ? '#000' : '#1d4ed8' }"
+    @click.stop
+  >
     {{ label }}
-  </a>
+  </component>
 </template>
 
 <script lang="ts" setup>
-defineProps<{
+import { computed, inject } from "vue";
+import { getChildrenOfHomeRoutes, requiresAuthForEntity } from "@/helpers";
+
+const props = defineProps<{
   label: string;
   link: string;
+  entity: { type: string };
 }>();
+
+const config: any = inject("config");
+
+const requiredAuthForThisEntity = computed(() => {
+  const metaOfChildRoutes = getChildrenOfHomeRoutes(config).map(
+    (route: any) => route.meta,
+  );
+  return requiresAuthForEntity(props.entity.type, metaOfChildRoutes);
+});
 </script>
