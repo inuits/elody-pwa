@@ -42,7 +42,7 @@
         class="whitespace-pre-wrap"
         data-cy="metadata-value"
       >
-        {{ (readableValue as string) || "-" }}
+        {{ readableValue !== "" ? (readableValue as string) : "-" }}
       </p>
     </div>
   </div>
