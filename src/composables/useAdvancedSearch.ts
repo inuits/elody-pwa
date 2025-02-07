@@ -34,8 +34,10 @@ export const useAdvancedSearch = () => {
   const getFiltersForAdvancedSearch = (value: string) => {
     return {
       q: value.trim() === "" ? "*" : value,
-      query_by: "metadata.value",
-      filter_by: "",
+      query_by: "sort.title,relsort.hasPerson",
+      filter_by: "type:expression",
+      query_by_weights: "4,2",
+      sort_by: "_eval(nr_items:>7):desc"
     };
   };
 
