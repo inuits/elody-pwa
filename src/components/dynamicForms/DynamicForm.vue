@@ -250,6 +250,7 @@ import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { useModalActions } from "@/composables/useModalActions";
 import { useErrorCodes } from "@/composables/useErrorCodes";
 import ImportWrapper from "@/components/imports/ImportWrapper.vue";
+import useEntitySingle from "@/composables/useEntitySingle";
 
 const props = withDefaults(
   defineProps<{
@@ -310,6 +311,7 @@ const {
   uploadCsvForReordering,
   __getCsvString,
   resetUpload,
+  mediafiles,
 } = useUpload();
 const { handleHttpError, getMessageAndCodeFromApolloError } = useErrorCodes();
 const {
@@ -458,6 +460,38 @@ const submitActionFunction = async (field: FormAction) => {
   try {
     entity = (await performSubmitAction(document, entityInput)).data
       .CreateEntity;
+    showErrors.value = false;
+    await getTenants();
+    const callbackFunction: Function = extractActionArguments(field.actionType);
+    if (config.features.hasBulkSelect && callbackFunction) callbackFunction();
+    else {
+      setTimeout(() => goToEntityPage(entity, "SingleEntity", props.router), 1);
+    }
+    closeAndDeleteForm();
+  } catch (e: ApolloError) {
+    const errorObject = await getMessageAndCodeFromApolloError(e);
+    isPerformingAction.value = false;
+    submitErrors.value = errorObject.message;
+  }
+};
+
+const submitWithUploadActionFunction = async (field: FormAction) => {
+  if (!(await isFormValid())) return;
+  const document = await getQuery(field.actionQuery as string);
+  const entityInput = createEntityFromFormInput(
+    field.creationType,
+    extractActionArguments(field.actionType),
+  );
+  let entity: any;
+  try {
+    entity = (await performSubmitAction(document, entityInput)).data
+      .CreateEntity;
+
+    if (mediafiles.value.length > 0) {
+      useEntitySingle().setEntityUuid(entity.uuid || entity.id);
+      await uploadActionFunction();
+    }
+
     showErrors.value = false;
     await getTenants();
     const callbackFunction: Function = extractActionArguments(field.actionType);
@@ -637,6 +671,7 @@ const performActionButtonClickEvent = (field: FormAction): void => {
 
   const actionFunctions: { [key: string]: Function } = {
     submit: () => submitActionFunction(field),
+    submitWithUpload: () => submitWithUploadActionFunction(field),
     updateMetadata: () => updateMetdataActionFunction(field),
     upload: () => uploadActionFunction(field),
     uploadWithOcr: () => uploadActionFunction(field),

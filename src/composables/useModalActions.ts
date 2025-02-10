@@ -115,6 +115,9 @@ export const useModalActions = () => {
       [ActionType.Submit]: {
         extractActionArguments: () => getArgumentsForSubmit(),
       },
+      [ActionType.SubmitWithUpload]: {
+        extractActionArguments: () => getArgumentsForSubmit(),
+      },
       [ActionType.Download]: {
         extractActionArguments: () => getArgumentsForDownload(),
       },
