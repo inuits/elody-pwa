@@ -129,7 +129,8 @@
             (field as FormAction).actionType == ActionType.UploadWithOcr ||
             (field as FormAction).actionType ==
               ActionType.UploadCsvForReordening ||
-            (field as FormAction).actionType == ActionType.UpdateMetadata
+            (field as FormAction).actionType == ActionType.UpdateMetadata ||
+            (field as FormAction).actionType == ActionType.SubmitWithUpload
           "
           :label="t((field as FormAction).label)"
           :icon="(field as FormAction).icon"
@@ -147,6 +148,7 @@
           v-if="
             field.__typename === 'FormAction' &&
             field.actionType !== ActionType.Upload &&
+            field.actionType !== ActionType.SubmitWithUpload &&
             field.actionType !== ActionType.UploadCsvForReordening &&
             field.actionType !== ActionType.UpdateMetadata &&
             field.actionType !== ActionType.UploadWithOcr
@@ -494,7 +496,6 @@ const submitWithUploadActionFunction = async (field: FormAction) => {
     else {
       setTimeout(() => goToEntityPage(entity, "SingleEntity", props.router), 1);
     }
-    closeAndDeleteForm();
   } catch (e: ApolloError) {
     const errorObject = await getMessageAndCodeFromApolloError(e);
     isPerformingAction.value = false;
