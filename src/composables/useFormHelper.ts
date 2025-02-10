@@ -380,6 +380,15 @@ const useFormHelper = () => {
     return idx === "no-idx" ? "no-relation-found" : { relation, idx };
   };
 
+  const getRelationsBasedOnType = (
+    parentEntityId: string,
+    type: string,
+  ): BaseRelationValuesInput[] | [] => {
+    const form = getForm(parentEntityId);
+    if (!form || !form.values.relationValues) return [];
+    return form.values.relationValues[type];
+  };
+
   const parseIntialValuesForFormSubmit = (
     intialValues: IntialValues,
     entityId: string,
@@ -535,6 +544,7 @@ const useFormHelper = () => {
     addRelations,
     replaceRelationsFromSameType,
     findRelation,
+    getRelationsBasedOnType,
     getTeaserMetadataInState,
     deleteTeaserMetadataItemInState,
     parseFormValuesToFormInput,
