@@ -17,7 +17,7 @@ import { type Context, type InBulkProcessableItem, useBulkOperations } from "@/c
 type SelectedItem = { key: string } | InBulkProcessableItem;
 
 export function useDeleteRelations() {
-  const { findRelation, getForm, parseFormValuesToFormInput } = useFormHelper();
+  const { findRelation, getRelationsBasedOnType, getForm, parseFormValuesToFormInput } = useFormHelper();
   const { save, disableEditMode } = useEditMode();
   const { closeModal } = useBaseModal();
   const { createNotification } = useNotification();
@@ -36,12 +36,12 @@ export function useDeleteRelations() {
     const form = getForm(entityId) as FormContext;
     if (!form) return;
 
-    const relations: BaseRelationValuesInput[] = [];
+    let relations: BaseRelationValuesInput[] = getRelationsBasedOnType(entityId, relationType);
     selectedItems.forEach((item) => {
       const itemKey = "key" in item ? item.key : item.id;
       const relation = findRelation(itemKey, relationType, entityId);
-      console.log("relation: ", relation);
       if (relation !== "no-relation-found") {
+        relations = relations.filter((relation) => relation.key !== itemKey);
         relations.push({
           ...relation.relation,
           editStatus: EditStatus.Deleted,
