@@ -698,12 +698,12 @@ export const mapModelValueToDropdownOptions = (
 
 export const requiresAuthForEntity = (
   type: string,
-  metaOfChildRoutes: {
-    entityType: string;
-    requiresAuth?: boolean;
-  }[],
+  metaOfChildRoutes: any[],
 ): boolean => {
   const entityType = mapUrlToEntityType(type) || type;
+  console.log(entityType);
+  if (!entityType) return false;
+
   const metaOfLinkedEntity = metaOfChildRoutes.find(
     (item) =>
       String(item.entityType).toLowerCase() ===
@@ -714,5 +714,6 @@ export const requiresAuthForEntity = (
     return false;
   }
 
-  return !auth.isAuthenticated.value;
+  console.log(metaOfLinkedEntity);
+  return false;
 };

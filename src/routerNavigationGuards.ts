@@ -45,7 +45,9 @@ const handleRequiresAuthFromOverviewPage = (
   const metaOfChildRoutes = getChildrenOfHomeRoutes(config).map(
     (route: any) => route.meta,
   );
-  const type = String(to.params["type"]);
+  console.log(to);
+  const type = to.params["type"] ? String(to.params["type"]) : undefined;
+  if (!type) return next();
 
   if (requiresAuthForEntity(type, metaOfChildRoutes)) {
     return router.push("/unauthorized");
