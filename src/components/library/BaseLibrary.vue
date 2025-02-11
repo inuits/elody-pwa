@@ -222,6 +222,10 @@
 
 <script lang="ts" setup>
 import type { ApolloClient } from "@apollo/client/core";
+import type {
+  RelationActions,
+  EntitySubelement,
+} from "@/generated-types/queries";
 import {
   type AdvancedFilterInput,
   BaseLibraryModes,
@@ -230,7 +234,6 @@ import {
   type Entity,
   type EntityListElement,
   type FetchDeepRelations,
-  RelationActions,
   type ViewModesWithConfig,
   ViewModes,
   type BaseEntity,
@@ -240,7 +243,6 @@ import {
   Entitytyping,
   SearchInputType,
   TypeModals,
-  EntitySubelement,
 } from "@/generated-types/queries";
 import { useBulkOperations } from "@/composables/useBulkOperations";
 import type {
@@ -625,6 +627,36 @@ const configPerViewMode = computed(() => {
   );
 });
 
+const determineViewModes = (viewModes: any[]) => {
+  if (viewModes.includes(ViewModesList.__name))
+    toggles.unshift({
+      isOn: displayList,
+      iconOn: DamsIcons.ListUl,
+      iconOff: DamsIcons.ListUl,
+    });
+  if (viewModes.includes("ViewModesGrid"))
+    toggles.push({
+      isOn: displayGrid,
+      iconOn: DamsIcons.Apps,
+      iconOff: DamsIcons.Apps,
+    });
+  if (viewModes.includes(ViewModesMedia.__name) || props.enablePreview)
+    toggles.push({
+      isOn: displayPreview,
+      iconOn: DamsIcons.Image,
+      iconOff: DamsIcons.Image,
+    });
+  if (viewModes.includes(ViewModesMap.__name)) {
+    toggles.push({
+      isOn: displayMap,
+      iconOn: DamsIcons.Map,
+      iconOff: DamsIcons.Map,
+    });
+  } else {
+    displayMap.value = false;
+  }
+};
+
 onMounted(async () => {
   if (props.fetchDeepRelations) await initializeDeepRelations();
   else await initializeBaseLibrary();
@@ -657,6 +689,12 @@ watch(
     if (props.predefinedEntities) {
       entities.value = props.predefinedEntities;
       totalEntityCount.value = props.predefinedEntities.length;
+      const viewModes: any[] =
+        props.predefinedEntities[0].allowedViewModes.viewModes.map(
+          (viewModeWithConfig: ViewModesWithConfig) =>
+            viewModeWithConfig.viewMode,
+        );
+      determineViewModes(viewModes);
     }
   },
   { immediate: true },
@@ -685,31 +723,7 @@ watch(
     const viewModes: any[] = entities.value[0].allowedViewModes.viewModes.map(
       (viewModeWithConfig: ViewModesWithConfig) => viewModeWithConfig.viewMode,
     );
-    if (viewModes.includes(ViewModesList.__name))
-      toggles.unshift({
-        isOn: displayList,
-        iconOn: DamsIcons.ListUl,
-        iconOff: DamsIcons.ListUl,
-      });
-    if (viewModes.includes("ViewModesGrid"))
-      toggles.push({
-        isOn: displayGrid,
-        iconOn: DamsIcons.Apps,
-        iconOff: DamsIcons.Apps,
-      });
-    if (viewModes.includes(ViewModesMedia.__name) || props.enablePreview)
-      toggles.push({
-        isOn: displayPreview,
-        iconOn: DamsIcons.Image,
-        iconOff: DamsIcons.Image,
-      });
-    if (viewModes.includes(ViewModesMap.__name))
-      toggles.push({
-        isOn: displayMap,
-        iconOn: DamsIcons.Map,
-        iconOff: DamsIcons.Map,
-      });
-    else displayMap.value = false;
+    determineViewModes(viewModes);
     getDisplayPreferences();
   },
 );
