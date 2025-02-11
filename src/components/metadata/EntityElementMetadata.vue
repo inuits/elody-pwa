@@ -13,6 +13,9 @@
       </div>
       <div v-if="readableValue.length == 0">-</div>
     </div>
+    <div v-if="isCoordinates">
+      {{ `(${value.latitude}, ${value.longitude})` }}
+    </div>
     <div v-else>
       <div class="flex items-center" v-if="stringIsUrl(readableValue)">
         <div v-if="(linkIcon && Unicons[linkIcon]) || linkIcon" class="pr-2">
@@ -25,7 +28,8 @@
         </div>
         <a
           data-cy="metadata-value"
-          class="underline" target="_blank"
+          class="underline"
+          target="_blank"
           :href="readableValue"
           v-html="processTextWithLinks(t(linkText) || readableValue)"
           @click.stop
@@ -37,11 +41,7 @@
         v-else-if="stringIsHtml(readableValue)"
         v-html="readableValue"
       ></p>
-      <p
-        v-else
-        class="whitespace-pre-wrap"
-        data-cy="metadata-value"
-      >
+      <p v-else class="whitespace-pre-wrap" data-cy="metadata-value">
         {{ readableValue !== "" ? (readableValue as string) : "-" }}
       </p>
     </div>
@@ -49,7 +49,8 @@
 </template>
 
 <script lang="ts" setup>
-import { BaseLibraryModes, Unit } from "@/generated-types/queries";
+import type { Unit } from "@/generated-types/queries";
+import { BaseLibraryModes } from "@/generated-types/queries";
 import {
   convertUnitToReadbleFormat,
   processTextWithLinks,
@@ -73,12 +74,20 @@ const props = withDefaults(
   {
     linkText: "",
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
-  }
+  },
 );
 
 const { t } = useI18n();
 
+const isCoordinates = computed(() => {
+  return (
+    props.value?.hasOwnProperty("latitude") &&
+    props.value?.hasOwnProperty("longitude")
+  );
+});
+
 const readableValue = computed(() => {
+  if (isCoordinates.value) return {};
   return convertUnitToReadbleFormat(props.unit as Unit, props.value ?? "");
 });
 </script>

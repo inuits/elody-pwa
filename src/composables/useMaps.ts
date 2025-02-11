@@ -28,6 +28,7 @@ export const useMaps = () => {
     const format = new WKT();
     return format.readFeature(wkt, {
       dataProjection: "EPSG:3857",
+      // TODO: FIX IT TO EPSG:4326
       // dataProjection: "EPSG:4326" for the normal latitude/longitude,
       featureProjection: "EPSG:3857",
     });
