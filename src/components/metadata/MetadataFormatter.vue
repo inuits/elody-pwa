@@ -4,7 +4,7 @@
     :formatter="formatter"
     :label="readableLabel"
     :link="link"
-    :entity="entity"
+    :type="entity.type"
   />
   <MetadataFormatterPill
     v-if="formatterType === CustomFormatterTypes.Pill && label"
@@ -33,7 +33,7 @@ const props = withDefaults(
     formatter: string;
     label: string | string[];
     link: string;
-    entity: { type: string };
+    entity: any;
   }>(),
   {
     link: "",
