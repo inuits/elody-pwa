@@ -78,6 +78,11 @@
         :element="element"
         :entity-id="id"
       />
+      <EntityElementHierarchyListViewer
+        v-if="element.__typename === 'HierarchyListElement'"
+        :element="element"
+        :entity-id="id"
+      />
     </div>
   </div>
 </template>
@@ -90,6 +95,8 @@ import EntityElementMedia from "@/components/entityElements/EntityElementMedia.v
 import EntityElementSingleMedia from "@/components/entityElements/EntityElementSingleMedia.vue";
 import EntityElementWindow from "@/components/entityElements/EntityElementWindow.vue";
 import EntityElementMapViewer from "@/components/entityElements/EntityElementMapViewer.vue";
+import EntityElementHierarchyListViewer from "@/components/entityElements/EntityElementHierarchyListViewer.vue";
+
 import { computed, watch } from "vue";
 import { useEditMode } from "@/composables/useEdit";
 import { useRoute } from "vue-router";
@@ -106,6 +113,7 @@ import type {
   MediaFileElement,
   SingleMediaFileElement,
   WindowElement,
+  HierarchyListElement,
 } from "@/generated-types/queries";
 import EntityElementMarkdownViewer from "@/components/entityElements/EntityElementMarkdownViewer.vue";
 import { getObjectsBasedOnTypename } from "@/helpers";
@@ -119,7 +127,8 @@ export type Elements =
   | MediaFileElement
   | SingleMediaFileElement
   | WindowElement
-  | MapElement;
+  | MapElement
+  | HierarchyListElement;
 
 const props = defineProps<{
   elements: EntityViewElements;
