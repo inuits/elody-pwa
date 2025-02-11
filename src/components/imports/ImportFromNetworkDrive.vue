@@ -34,7 +34,8 @@
 import {
   BaseFieldType,
   Entitytyping,
-  PostStartImportDocument
+  PostStartImportDocument,
+  TypeModals,
 } from "@/generated-types/queries";
 import {
   useNotification,
@@ -49,9 +50,13 @@ import { useI18n } from "vue-i18n";
 import { useMutation } from "@vue/apollo-composable";
 import { useRouter } from "vue-router";
 import { useGraphqlAsync } from "@/composables/useGraphqlAsync";
+import { useFormHelper } from "@/composables/useFormHelper";
+import { useBaseModal } from "@/composables/useBaseModal";
 
+const emit = defineEmits(["setShowErrors"]);
 
 const props = defineProps<{
+  formId: string;
   inputFieldType: BaseFieldType;
   closeAndDeleteForm: Function;
 }>();
@@ -62,12 +67,12 @@ const { createNotificationOverwrite } = useNotification();
 const { getMenuDestinations } = useMenuHelper();
 const router = useRouter();
 const { getQueryDocument, queryAsync, mutateAsync } = useGraphqlAsync();
+const { getForm } = useFormHelper();
 
 const itemsLoading = ref<boolean>(false);
 const directories = ref([]);
 const queries = ref<any>();
 const queryForSubDirectories = ref<any>();
-
 
 const initializeImport = async () => {
   queries.value = await getQueryDocument();
@@ -75,21 +80,31 @@ const initializeImport = async () => {
 
   if (props.inputFieldType === BaseFieldType.BaseFileSystemImportField) {
     queryForSubDirectories.value = queries.value.GetDirectoriesDocument;
-    const result = await queryAsync(
-      queries.value.GetDirectoriesDocument,
-    );
+    const result = await queryAsync(queries.value.GetDirectoriesDocument);
     if (result && result.data && result.data.Directories)
       directories.value = result.data.Directories;
     itemsLoading.value = false;
   }
 
   if (props.inputFieldType === BaseFieldType.BaseMagazineWithCsvImportField) {
-    queryForSubDirectories.value = queries.value.GetUploadMagazinesWithCsvDocument;
+    queryForSubDirectories.value =
+      queries.value.GetUploadMagazinesWithCsvDocument;
     const result = await queryAsync(
       queries.value.GetUploadMagazinesWithCsvDocument,
     );
     if (result && result.data && result.data.UploadMagazinesWithCsv)
       directories.value = result.data.UploadMagazinesWithCsv;
+    itemsLoading.value = false;
+  }
+
+  if (props.inputFieldType === BaseFieldType.BaseMagazineWithMetsImportField) {
+    queryForSubDirectories.value =
+      queries.value.GetUploadMagazinesWithMetsDocument;
+    const result = await queryAsync(
+      queries.value.GetUploadMagazinesWithMetsDocument,
+    );
+    if (result && result.data && result.data.UploadMagazinesWithMets)
+      directories.value = result.data.UploadMagazinesWithMets;
     itemsLoading.value = false;
   }
 };
@@ -103,20 +118,30 @@ const doImport = async (folder: string) => {
     switch (props.inputFieldType) {
       case BaseFieldType.BaseFileSystemImportField:
         await doImportOfDirectories(folder);
+        createNotificationOverwrite(
+          NotificationType.default,
+          "Import",
+          t(`import.magazine-import-started`),
+        );
+        props.closeAndDeleteForm();
         break;
       case BaseFieldType.BaseMagazineWithCsvImportField:
         await mutateAsync(queries.value.StartUploadMagazinesWithCsvDocument, {
           folder: folder,
         });
+        createNotificationOverwrite(
+          NotificationType.default,
+          "Import",
+          t(`import.magazine-import-started`),
+        );
+        props.closeAndDeleteForm();
+        break;
+      case BaseFieldType.BaseMagazineWithMetsImportField:
+        await doMetsImport(folder);
         break;
       default:
         return;
     }
-    createNotificationOverwrite(
-      NotificationType.default,
-      "Import",
-      t(`import.magazine-import-started`),
-    );
   } catch (error) {
     createNotificationOverwrite(
       NotificationType.error,
@@ -124,18 +149,40 @@ const doImport = async (folder: string) => {
       "" + error.message,
     );
   }
+};
+
+const doMetsImport = async (folder) => {
+  const form = getForm(props.formId);
+  await form?.validate();
+  if (!form?.meta.valid) {
+    emit("setShowErrors", true);
+    return;
+  }
+  useBaseModal().changeCloseConfirmation(TypeModals.DynamicForm, false);
+
+  await mutateAsync(
+    queries.value.StartUploadMagazinesWithMetsDocument,
+    {
+      folder: folder,
+      externalSystem: form?.values.intialValues["external_system"],
+      externalId: form?.values.intialValues["external_id"],
+    },
+  );
+  createNotificationOverwrite(
+    NotificationType.default,
+    "Import",
+    t(`import.magazine-import-started`),
+  );
   props.closeAndDeleteForm();
 };
 
-
 const { mutate: startImport } = useMutation(PostStartImportDocument);
-
 const doImportOfDirectories = async (folder) => {
   if (!folder) {
     createNotificationOverwrite(
       NotificationType.error,
       "Error",
-      "Folder ID is required"
+      "Folder ID is required",
     );
     return;
   }
@@ -150,26 +197,26 @@ const doImportOfDirectories = async (folder) => {
           createNotificationOverwrite(
             NotificationType.error,
             t(`import.import-error`),
-            t(`import.${messageId}`, { folder, count })
+            t(`import.${messageId}`, { folder, count }),
           );
         } else {
           createNotificationOverwrite(
             NotificationType.error,
             t(`import.import-error`),
-            t(messageId)
+            t(messageId),
           );
         }
       } else {
         createNotificationOverwrite(
           NotificationType.default,
           "Import",
-          t(`import.import-started`)
+          t(`import.import-started`),
         );
         goToEntityTypeRoute(
           Entitytyping.Job,
           undefined,
           getMenuDestinations(),
-          router
+          router,
         );
         props.closeAndDeleteForm();
       }
@@ -178,7 +225,7 @@ const doImportOfDirectories = async (folder) => {
       createNotificationOverwrite(
         NotificationType.error,
         t(`import.import-error`),
-        "" + error.message
+        "" + error.message,
       );
     });
 };
