@@ -2,17 +2,13 @@
   <import-from-network-drive
     v-if="
       inputFieldType === BaseFieldType.BaseFileSystemImportField ||
-      inputFieldType === BaseFieldType.BaseMagazineWithCsvImportField
-    "
-    :input-field-type="inputFieldType"
-    :close-and-delete-form="closeAndDeleteForm"
-  />
-  <import-items
-    v-if="
+      inputFieldType === BaseFieldType.BaseMagazineWithCsvImportField ||
       inputFieldType === BaseFieldType.BaseMagazineWithMetsImportField
     "
+    :form-id="formId"
     :input-field-type="inputFieldType"
     :close-and-delete-form="closeAndDeleteForm"
+    @set-show-errors="(value) => emit('setShowErrors', value)"
   />
 </template>
 
@@ -21,9 +17,11 @@ import {
   BaseFieldType,
 } from "@/generated-types/queries";
 import ImportFromNetworkDrive from "@/components/imports/ImportFromNetworkDrive.vue";
-import ImportItems from "@/components/imports/ImportItems.vue";
+
+const emit = defineEmits(["setShowErrors"]);
 
 const props = defineProps<{
+  formId: string;
   inputFieldType: BaseFieldType;
   closeAndDeleteForm: Function;
 }>();
