@@ -45,7 +45,7 @@ const props = withDefaults(
 const { getWktFeature, geoToMercator } = useMaps();
 
 const viewRef = ref<{ view: View }>(null);
-const projection = ref<string>("EPSG:3857");
+const projection = ref<string>("EPSG:4326");
 
 const mapCenter = computed(() => {
   const [lat = 0, long = 0] = props.center;
