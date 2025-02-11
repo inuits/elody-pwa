@@ -29,7 +29,7 @@
 import { computed, ref, watch, onUpdated, nextTick } from "vue";
 import { Map, Layers, Sources } from "vue3-openlayers";
 import { useMaps } from "@/composables/useMaps";
-import { type Extent, extend } from "ol/extent"; // Import Extent type
+import { type Extent, extend } from "ol/extent";
 import type View from "ol/View";
 
 const props = withDefaults(
