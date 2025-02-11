@@ -28,8 +28,10 @@
             field.inputField?.type ===
               BaseFieldType.BaseMagazineWithCsvImportField
           "
+          :form-id="dynamicFormQuery"
           :input-field-type="field.inputField?.type"
           :close-and-delete-form="closeAndDeleteForm"
+          @set-show-errors="(value) => setShowErrors(value)"
         />
         <EntityPickerComponent
           v-if="field.inputField?.type === BaseFieldType.BaseEntityPickerField"
@@ -740,6 +742,10 @@ const downloadDataFromResponse = (data: any) => {
   a.click();
   window.URL.revokeObjectURL(url);
 };
+
+const setShowErrors = (show: boolean) => {
+  showErrors.value = show;
+}
 
 watch(
   () => props.dynamicFormQuery,
