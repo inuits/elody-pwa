@@ -45,13 +45,13 @@ import {
   type AdvancedSearchFilters,
 } from "@/composables/useAdvancedSearch";
 
-const { closeModal } = useBaseModal();
-const { setFilters, getEntities, items } = useAdvancedSearch();
-const filters = ref<AdvancedFilterInput[]>([]);
 const config: any = inject("config");
+const { closeModal } = useBaseModal();
+const { setFilters, getEntities, items } = useAdvancedSearch(config);
+const filters = ref<AdvancedFilterInput[]>([]);
 
 const hasAdvancedSearchEnabled = computed(() => {
-  return config.features.hasAdvancedSearch;
+  return !!config.features.advancedSearch;
 });
 
 const isModalOpened = ref<boolean>(false);

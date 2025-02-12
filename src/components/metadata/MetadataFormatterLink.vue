@@ -17,7 +17,7 @@ import { getChildrenOfHomeRoutes, requiresAuthForEntity } from "@/helpers";
 const props = defineProps<{
   label: string;
   link: string;
-  entity: { type: string };
+  type: string;
 }>();
 
 const config: any = inject("config");
@@ -26,6 +26,6 @@ const requiredAuthForThisEntity = computed(() => {
   const metaOfChildRoutes = getChildrenOfHomeRoutes(config).map(
     (route: any) => route.meta,
   );
-  return requiresAuthForEntity(props.entity.type, metaOfChildRoutes);
+  return requiresAuthForEntity(props.type, metaOfChildRoutes);
 });
 </script>
