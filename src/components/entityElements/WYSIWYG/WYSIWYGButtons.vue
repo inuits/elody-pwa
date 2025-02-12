@@ -142,8 +142,8 @@
     </button>
     <button
       v-if="extensions.includes(WysiwygExtensions.ElodyTaggingExtension)"
-      :class="[{ 'opacity-30': !isTextSelected }]"
-      :disabled="buttonsDisabled || !isTextSelected"
+      :class="[{ 'opacity-30': !isNonTaggedTextSelected }]"
+      :disabled="buttonsDisabled || !isNonTaggedTextSelected"
       @click="editor.commands.openTagModal()"
       title="Tag"
     >
@@ -158,6 +158,7 @@ import { WysiwygExtensions } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import useEdit from "@/composables/useEdit";
 import { computed } from "vue";
+import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
 
 const props = defineProps<{
   editor: Editor;
@@ -165,9 +166,20 @@ const props = defineProps<{
 }>();
 
 const { isEdit } = useEdit();
+const { editorExtensionImportMapping } = useWYSIWYGEditor();
+
 const buttonsDisabled = computed(() => !isEdit.value);
-const isTextSelected = computed(() => {
+const isNonTaggedTextSelected = computed(() => {
   const { selection } = props.editor.state;
+  const { from } = selection;
+  const selectedNode = props.editor.state.doc.nodeAt(from);
+  if (
+    selectedNode &&
+    selectedNode.type.name ===
+      editorExtensionImportMapping[WysiwygExtensions.ElodyTaggingExtension]
+        .importName
+  )
+    return false;
   return selection.from !== selection.to;
 });
 </script>

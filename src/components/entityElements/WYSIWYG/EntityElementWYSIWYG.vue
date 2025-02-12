@@ -59,6 +59,7 @@ const initialValue = ref<string>("");
 const updateModalInfo = () => {
   updateModal(TypeModals.ElodyEntityTaggingModal, {
     element: props.element,
+    editor: editor.value,
   });
 };
 
@@ -66,7 +67,6 @@ onMounted(async () => {
   initialValue.value =
     form.value?.values.intialValues[props.element.metadataKey];
   addEditableMetadataKeys([props.element.metadataKey], props.formId);
-  if (props.element.taggingConfiguration) updateModalInfo();
   const importedExtensions = await importEditorExtensions(
     props.element.extensions,
   );
@@ -86,6 +86,8 @@ onMounted(async () => {
     editable: isEdit.value,
     content: initialValue.value,
   });
+
+  if (props.element.taggingConfiguration) updateModalInfo();
 });
 
 onUnmounted(() => {

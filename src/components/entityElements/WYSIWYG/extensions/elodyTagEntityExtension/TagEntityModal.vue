@@ -37,11 +37,14 @@
           :entity-uuid="parentId"
           :accepted-types="[element.taggingConfiguration.entityType]"
           :custom-query="element.taggingConfiguration.customQuery"
+          :entity-picker-mode="EntityPickerMode.Emit"
           :show-button="false"
           :enable-bulk-operations="false"
           :enable-advanced-filters="false"
           :computedFilters="computedAdvancedFilterInputs"
+          :context="BulkOperationsContextEnum.TagEntityModal"
           base-library-height="max-h-[50vh]"
+          @entities-updated="tagExistingEntityFlow"
         />
       </div>
       <div class="bg-neutral-lightest rounded-md">
@@ -72,6 +75,7 @@ import {
   AdvancedFilterTypes,
   BulkOperationTypes,
   Collection,
+  EntityPickerMode,
   Entitytyping,
   TypeModals,
   type WysiwygElement,
@@ -86,21 +90,33 @@ import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useModalActions } from "@/composables/useModalActions";
 import { Unicons } from "@/types";
+import {
+  BulkOperationsContextEnum,
+  useBulkOperations,
+} from "@/composables/useBulkOperations";
+import useEntityPickerModal from "@/composables/useEntityPickerModal";
+import type { Editor } from "@tiptap/vue-3";
 
+const { setBulkSelectionLimit, isBulkSelectionLimitReached, getEnqueuedItems } =
+  useBulkOperations();
 const { closeModal, getModalInfo } = useBaseModal();
 const { initializeGeneralProperties } = useModalActions();
+const { confirmSelection } = useEntityPickerModal();
+const { getForm } = useFormHelper();
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 
 const parentId = computed(() => route.params["id"]);
+const selectionLimit: number = 1;
 const element = computed<WysiwygElement>(
   () => getModalInfo(TypeModals.ElodyEntityTaggingModal).element,
 );
+const editor = computed<Editor>(
+  () => getModalInfo(TypeModals.ElodyEntityTaggingModal).editor,
+);
 const form = computed(() =>
-  useFormHelper().getForm(
-    element.value.taggingConfiguration?.createNewEntityFormQuery,
-  ),
+  getForm(element.value.taggingConfiguration?.createNewEntityFormQuery),
 );
 const selectedText = computed<string>(
   () => getModalInfo(TypeModals.ElodyEntityTaggingModal).selectedText,
@@ -139,9 +155,36 @@ const tagNewlyCreatedEntityFlow = () => {
   console.log("In tagNewlyCreatedEntityFlow flow");
 };
 
+const tagExistingEntityFlow = () => {
+  const context = BulkOperationsContextEnum.TagEntityModal;
+  if (!isBulkSelectionLimitReached(context)) return;
+
+  const entityIdToTag = getEnqueuedItems(context)[0].id;
+  if (!entityIdToTag) return;
+
+  confirmSelection(
+    parentId.value,
+    element.value.taggingConfiguration?.relationType,
+    context,
+    TypeModals.ElodyEntityTaggingModal,
+  );
+  editor.value.commands.linkEntityToTaggedText(entityIdToTag);
+};
+
+watch(
+  () => isBulkSelectionLimitReached(BulkOperationsContextEnum.TagEntityModal),
+  () => {
+    tagExistingEntityFlow();
+  },
+);
+
 watch(
   () => element.value,
   () => {
+    setBulkSelectionLimit(
+      BulkOperationsContextEnum.TagEntityModal,
+      selectionLimit,
+    );
     initializeGeneralProperties(
       parentId.value,
       element.value.taggingConfiguration?.relationType,

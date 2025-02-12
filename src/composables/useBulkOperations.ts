@@ -12,6 +12,7 @@ export enum BulkOperationsContextEnum {
   EntityElementMediaEntityPickerModal = "EntityElementMediaEntityPickerModal",
   ManifestCollection = "ManifestCollection",
   SavedSearchFilterModal = "SavedSearchFilterModal",
+  TagEntityModal = "TagEntityModal",
 }
 
 export type Context = RouteNames | BulkOperationsContextEnum;
@@ -39,7 +40,7 @@ export const useBulkOperations = () => {
 
   const enqueueItemForBulkProcessing = (
     context: Context,
-    inBulkProcessableItem: InBulkProcessableItem
+    inBulkProcessableItem: InBulkProcessableItem,
   ) => {
     if (
       !isEnqueued(context, inBulkProcessableItem.id) &&
@@ -50,13 +51,13 @@ export const useBulkOperations = () => {
 
   const dequeueItemForBulkProcessing = (context: Context, itemId: string) => {
     items.value[context] = items.value[context]?.filter(
-      (item) => item.id != itemId
+      (item) => item.id != itemId,
     );
   };
 
   const dequeueAllItemsForBulkProcessing = (context: Context) => {
     items.value[context] = items.value[context]?.filter(
-      (item) => item.required
+      (item) => item.required,
     );
     triggerBulkSelectionEvent(context);
   };
@@ -64,7 +65,7 @@ export const useBulkOperations = () => {
   const getEnqueuedItems = (
     context: Context,
     skip: number = 1,
-    limit: number = Number.MAX_SAFE_INTEGER
+    limit: number = Number.MAX_SAFE_INTEGER,
   ) => items.value[context]?.slice((skip - 1) * limit, skip * limit) || [];
 
   const getEnqueuedItemCount = (context: Context) =>
