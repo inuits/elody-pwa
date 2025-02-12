@@ -14,10 +14,8 @@ import {
   InputFieldTypes,
   RouteNames,
   GetCustomFormattersSettingsDocument,
-  GetCustomTypeUrlMappingDocument,
   DamsIcons,
   type DropdownOption,
-  type Column,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -432,7 +430,7 @@ export const createPlaceholderEntities = (amount: number): any[] => {
 };
 
 export const findPanelMetadata = (
-  obj: Record<string, Column>,
+  obj: any,
   parentIsEditable?: boolean,
 ): PanelMetaData[] => {
   const results: PanelMetaData[] = [];
@@ -700,21 +698,19 @@ export const mapModelValueToDropdownOptions = (
 
 export const requiresAuthForEntity = (
   type: string,
-  metaOfChildRoutes: {
-    entityType: string;
-    requiresAuth?: boolean;
-  }[],
+  metaOfChildRoutes: any[],
 ): boolean => {
   const entityType = mapUrlToEntityType(type) || type;
+  if (!entityType)
+    return false;
+
   const metaOfLinkedEntity = metaOfChildRoutes.find(
     (item) =>
       String(item.entityType).toLowerCase() ===
       String(entityType).toLowerCase(),
   );
-
-  if (!metaOfLinkedEntity || !metaOfLinkedEntity.requiresAuth) {
+  if (!metaOfLinkedEntity || !metaOfLinkedEntity.requiresAuth)
     return false;
-  }
 
   return !auth.isAuthenticated.value;
 };

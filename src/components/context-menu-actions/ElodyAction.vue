@@ -28,9 +28,6 @@ import { type Context, useBulkOperations } from "@/composables/useBulkOperations
 import { getChildrenOfHomeRoutes } from "@/helpers";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { useFormHelper } from "@/composables/useFormHelper";
-import { useI18n } from "vue-i18n";
-import { useNotification } from "@/components/base/BaseNotification.vue";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
 
 const props = defineProps<{
@@ -49,7 +46,6 @@ const { addSaveCallback, clearSaveCallbacks, isEdit } = useEditMode();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal } = useBaseModal();
-const { t } = useI18n();
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const entityFormData: {
   id: string;
@@ -61,14 +57,6 @@ const entityFormData: {
 const apolloClient = inject(DefaultApolloClient);
 const { createShareLink } = useShareLink(apolloClient as ApolloClient<any>);
 const config: any = inject("config");
-const { getForm } = useFormHelper();
-const { parseFormValuesToFormInput } = useFormHelper();
-const { createNotification } = useNotification();
-
-const { mutate: mutateEntityValues } = useMutation<
-  MutateEntityValuesMutation,
-  MutateEntityValuesMutationVariables
->(MutateEntityValuesDocument);
 
 const isDisabled = computed(() => {
   return (
@@ -90,49 +78,6 @@ const deleteRelation = async () => {
     props.bulkOperationsContext,
   );
 };
-
-const submit = useSubmitForm<EntityValues>(async () => {
-  const form = getForm(entityFormData.id) as FormContext;
-  if (!entityFormData.collection)
-    throw Error("Could not determine collection for submit");
-
-  const result = await mutateEntityValues({
-    id: entityFormData.id,
-    formInput: parseFormValuesToFormInput(
-      entityFormData.id,
-      form?.values,
-      true,
-    ),
-    collection: entityFormData.collection,
-  });
-
-  if (!result?.data?.mutateEntityValues) return;
-
-  const mutatedEntity = result.data.mutateEntityValues as Entity;
-  const updatedRelationValues = { ...mutatedEntity.relationValues };
-  Object.keys(form.values.relationValues).forEach((key) => {
-    if (!(key in mutatedEntity.relationValues)) {
-      updatedRelationValues[key] = [];
-    }
-  });
-
-  form.resetForm({
-    values: {
-      intialValues: mutatedEntity.intialValues,
-      relationValues: updatedRelationValues,
-    },
-  });
-
-  createNotification({
-    displayTime: 10,
-    type: NotificationType.default,
-    title: t("notifications.success.entityUpdated.title"),
-    description: t("notifications.success.entityUpdated.description"),
-    shown: true,
-  });
-
-  disableEditMode();
-});
 
 const addSaveHandler = () => {
   clearSaveCallbacks();
