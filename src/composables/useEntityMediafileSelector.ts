@@ -9,6 +9,7 @@ type MediaFileRootKeys = "id" | "uuid";
 type MediaFileMetadataKeys =
   | "id"
   | "filename"
+  | "original_filename"
   | "original_file_location"
   | "transcode_filename"
   | "thumbnail_file_location"
