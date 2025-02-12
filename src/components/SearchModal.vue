@@ -51,7 +51,7 @@ const { setFilters, getEntities, items } = useAdvancedSearch(config);
 const filters = ref<AdvancedFilterInput[]>([]);
 
 const hasAdvancedSearchEnabled = computed(() => {
-  return config.features.advancedSearch.hasAdvancedSearch;
+  return !!config.features.advancedSearch;
 });
 
 const isModalOpened = ref<boolean>(false);
