@@ -70,8 +70,7 @@ const {
   resetButtonClicked,
   buttonClicked,
 } = useEditMode();
-const { createForm, parseFormValuesToFormInput, getEditableMetadataKeys } =
-  useFormHelper();
+const { createForm, parseFormValuesToFormInput } = useFormHelper();
 const { createNotification } = useNotification();
 const { closeModal, openModal, updateDeleteQueryOptions } = useBaseModal();
 const { t } = useI18n();

@@ -215,10 +215,10 @@ import {
   type MutateEntityValuesMutationVariables,
   OcrType,
   type PanelMetaData,
-  RouteNames,
   TypeModals,
   type UploadContainer,
   type UploadField,
+  RouteNames,
   UploadFlow,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";

@@ -28,6 +28,9 @@ import { type Context, useBulkOperations } from "@/composables/useBulkOperations
 import { getChildrenOfHomeRoutes } from "@/helpers";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useFormHelper } from "@/composables/useFormHelper";
+import { useI18n } from "vue-i18n";
+import { useNotification } from "@/components/base/BaseNotification.vue";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
 
 const props = defineProps<{
@@ -46,6 +49,7 @@ const { addSaveCallback, clearSaveCallbacks, isEdit } = useEditMode();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal } = useBaseModal();
+const { t } = useI18n();
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const entityFormData: {
   id: string;
