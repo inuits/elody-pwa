@@ -123,7 +123,7 @@ export default defineComponent({
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${_props.originalFilename}.jpg`;
+      link.download = `${_props.originalFilename}`;
       link.click();
       URL.revokeObjectURL(url);
     };
