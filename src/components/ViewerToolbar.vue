@@ -79,6 +79,10 @@ export default defineComponent({
       type: Object as PropType<HTMLDivElement | string | null>,
       default: null,
     },
+    originalFilename: {
+      type: String,
+      default: "",
+    },
     mediafileId: {
       type: String,
       default: "",
@@ -108,14 +112,18 @@ export default defineComponent({
         );
 
       const imageUrl = await fetch(
-        `/api/mediafiles/${_props.mediafileId}/download`
+        `/api/mediafiles/${_props.mediafileId}/download`, {
+          headers: {
+            'Accept': 'image/jpeg'
+          }
+        }
       );
       const image = await fetch(await imageUrl.text());
       const blob = await image.blob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `mediafile-${_props.mediafileId}.jpg`;
+      link.download = `${_props.originalFilename}.jpg`;
       link.click();
       URL.revokeObjectURL(url);
     };
