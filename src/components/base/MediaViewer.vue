@@ -24,6 +24,7 @@
           getValueOfMediafile(mediafileViewerContext, 'filename') ||
           ''
         "
+        :originalFilename="getValueOfMediafile(mediafileViewerContext, 'original_filename')"
         :mediafileId="
           getValueOfMediafile(
             mediafileViewerContext,
