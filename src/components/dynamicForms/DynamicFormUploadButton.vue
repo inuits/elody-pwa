@@ -1,7 +1,6 @@
 <template>
   <div
     data-cy="dynamic-form-upload-button"
-    class="rounded-md p-2 bg-neutral-white absolute bottom-0 left-0 w-full"
   >
     <div class="flex">
       <div

@@ -4,49 +4,34 @@
     :label="$t(label)"
     :icon="Unicons[icon].name"
     :disable="isDisabled"
-    :tooltipLabel="
-      isDisabled ? 'tooltip.bulkOperationsActionBar.readmode' : undefined
-    "
+    :tooltipLabel="isDisabled ? 'tooltip.bulkOperationsActionBar.readmode' : undefined"
   />
 </template>
 
 <script setup lang="ts">
 import {
-  EditStatus,
   ContextMenuElodyActionEnum,
   type DeleteDataMutation,
   DeleteDataDocument,
   Entitytyping,
   Collection,
   TypeModals,
-  type Entity,
-  type MutateEntityValuesMutation,
-  type MutateEntityValuesMutationVariables,
-  MutateEntityValuesDocument,
 } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
-import { useFieldArray } from "vee-validate";
 import useEditMode from "@/composables/useEdit";
 import { inject, computed } from "vue";
 import { useShareLink } from "@/composables/useShareLink";
 import { DefaultApolloClient, useMutation } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
-import {
-  type Context,
-  useBulkOperations,
-} from "@/composables/useBulkOperations";
+import { type Context, useBulkOperations } from "@/composables/useBulkOperations";
 import { getChildrenOfHomeRoutes } from "@/helpers";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { type EntityValues, useFormHelper } from "@/composables/useFormHelper";
+import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
-import {
-  useNotification,
-  NotificationType,
-} from "@/components/base/BaseNotification.vue";
-import { useSubmitForm } from "vee-validate";
-import type { FormContext } from "vee-validate";
+import { useNotification } from "@/components/base/BaseNotification.vue";
+import { useDeleteRelations } from "@/composables/useDeleteRelations";
 
 const props = defineProps<{
   label: String;
@@ -54,19 +39,13 @@ const props = defineProps<{
   action: ContextMenuElodyActionEnum;
   entityType: Entitytyping;
   entityId: String;
-  relation?:
-    | { idx: number; relation: object }
-    | "no-relation-found"
-    | undefined;
+  relation?: { idx: number; relation: object } | "no-relation-found" | undefined;
   bulkOperationsContext: Context;
   refetchEntities: Function;
 }>();
 
-const { update } = useFieldArray(
-  `relationValues.${props.relation?.relation?.type}`,
-);
-const { save, disableEditMode, addSaveCallback, clearSaveCallbacks, isEdit } =
-  useEditMode();
+const { deleteRelations, submit } = useDeleteRelations();
+const { addSaveCallback, clearSaveCallbacks, isEdit } = useEditMode();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal } = useBaseModal();
@@ -82,14 +61,6 @@ const entityFormData: {
 const apolloClient = inject(DefaultApolloClient);
 const { createShareLink } = useShareLink(apolloClient as ApolloClient<any>);
 const config: any = inject("config");
-const { getForm } = useFormHelper();
-const { parseFormValuesToFormInput } = useFormHelper();
-const { createNotification } = useNotification();
-
-const { mutate: mutateEntityValues } = useMutation<
-  MutateEntityValuesMutation,
-  MutateEntityValuesMutationVariables
->(MutateEntityValuesDocument);
 
 const isDisabled = computed(() => {
   return (
@@ -99,85 +70,31 @@ const isDisabled = computed(() => {
   );
 });
 
-const childRoutes = getChildrenOfHomeRoutes(config).map(
-  (route: any) => route.meta,
-);
+const childRoutes = getChildrenOfHomeRoutes(config).map((route: any) => route.meta);
 
 const deleteRelation = async () => {
-  dequeueItemForBulkProcessing(
+  dequeueItemForBulkProcessing(props.bulkOperationsContext, props.relation.relation.key);
+
+  deleteRelations(
+    entityFormData.id,
+    props.relation?.relation?.type,
+    [props.relation.relation],
     props.bulkOperationsContext,
-    props.relation.relation.key,
   );
-  if (props.relation !== "no-relation-found")
-    update(props.relation.idx, {
-      ...props.relation.relation,
-      editStatus: EditStatus.Deleted,
-    });
-
-  await save();
-  disableEditMode();
 };
-
-const submit = useSubmitForm<EntityValues>(async () => {
-  const form = getForm(entityFormData.id) as FormContext;
-  if (!entityFormData.collection)
-    throw Error("Could not determine collection for submit");
-
-  const result = await mutateEntityValues({
-    id: entityFormData.id,
-    formInput: parseFormValuesToFormInput(
-      entityFormData.id,
-      form?.values,
-      true,
-    ),
-    collection: entityFormData.collection,
-  });
-
-  if (!result?.data?.mutateEntityValues) return;
-
-  const mutatedEntity = result.data.mutateEntityValues as Entity;
-  const updatedRelationValues = { ...mutatedEntity.relationValues };
-  Object.keys(form.values.relationValues).forEach((key) => {
-    if (!(key in mutatedEntity.relationValues)) {
-      updatedRelationValues[key] = [];
-    }
-  });
-
-  form.resetForm({
-    values: {
-      intialValues: mutatedEntity.intialValues,
-      relationValues: updatedRelationValues,
-    },
-  });
-
-  createNotification({
-    displayTime: 10,
-    type: NotificationType.default,
-    title: t("notifications.success.entityUpdated.title"),
-    description: t("notifications.success.entityUpdated.description"),
-    shown: true,
-  });
-
-  disableEditMode();
-});
 
 const addSaveHandler = () => {
   clearSaveCallbacks();
-  addSaveCallback(submit, "first");
+  addSaveCallback(() => submit(entityFormData.id, entityFormData.collection), "first");
 };
 
 const deleteEntity = async () => {
-  dequeueItemForBulkProcessing(
-    props.bulkOperationsContext,
-    props.relation.relation.key,
-  );
+  dequeueItemForBulkProcessing(props.bulkOperationsContext, props.relation.relation.key);
   let collection;
   if (props.entityType.toLowerCase() === Entitytyping.Mediafile) {
     collection = Collection.Mediafiles;
   } else {
-    collection = childRoutes.find(
-      (route: any) => route.entityType === props.entityType,
-    ).type;
+    collection = childRoutes.find((route: any) => route.entityType === props.entityType).type;
   }
 
   try {
@@ -191,6 +108,7 @@ const deleteEntity = async () => {
     console.log(e);
   }
 };
+
 const openDeleteEntityConfirmation = async () => {
   initializeConfirmModal({
     confirmButton: { buttonCallback: deleteEntity },

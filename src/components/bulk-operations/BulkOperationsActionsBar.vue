@@ -120,12 +120,12 @@
 </template>
 
 <script lang="ts" setup>
+import type { Entitytyping } from "@/generated-types/queries";
 import {
   ActionContextEntitiesSelectionType,
   BulkOperationTypes,
   DamsIcons,
   type DropdownOption,
-  Entitytyping,
   GetBulkOperationsDocument,
   type GetBulkOperationsQuery,
   ModalStyle,
@@ -160,6 +160,7 @@ const props = withDefaults(
     refetchEntities: Function;
     enableSelection?: boolean;
     parentEntityId?: string | undefined;
+    relationType: string;
   }>(),
   {
     totalItemsCount: 0,
@@ -211,6 +212,7 @@ const {
   initializeGeneralProperties,
   initializePropertiesForDownload,
   initializePropertiesForCreateEntity,
+  initializePropertiesForBulkDeleteRelations,
   setCallbackFunction,
 } = useModalActions();
 const { openModal, getModalInfo } = useBaseModal();
@@ -296,6 +298,10 @@ const handleSelectedBulkOperation = () => {
 
   if (bulkOperationType === BulkOperationTypes.DeleteEntities) {
     modalStyle = ModalStyle.Center;
+  }
+
+  if (bulkOperationType === BulkOperationTypes.DeleteRelations) {
+    initializePropertiesForBulkDeleteRelations(props.relationType);
   }
 
   openModal(

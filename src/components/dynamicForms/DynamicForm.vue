@@ -67,9 +67,11 @@
             ).filter((containerField) => typeof containerField === 'object')"
             :key="idx"
           >
-            <div class="pb-10">
+            <div
+              v-if="uploadContainerField.__typename === 'UploadField'"
+              class="pb-4"
+            >
               <upload-interface-dropzone
-                v-if="uploadContainerField.__typename === 'UploadField'"
                 :upload-flow="(field as UploadContainer).uploadFlow"
                 :dropzone-label="(uploadContainerField as UploadField).label"
                 :validation="
@@ -108,9 +110,11 @@
                 "
               />
             </div>
-            <div class="pb-4">
+            <div
+              v-if="uploadContainerField.__typename === 'PanelMetaData'"
+              class="pb-4"
+            >
               <metadata-wrapper
-                v-if="uploadContainerField.__typename === 'PanelMetaData'"
                 :form-id="dynamicFormQuery"
                 :metadata="uploadContainerField"
                 :is-edit="true"
@@ -146,7 +150,8 @@
             field.__typename === 'FormAction' &&
             field.actionType !== ActionType.Upload &&
             field.actionType !== ActionType.UploadCsvForReordening &&
-            field.actionType !== ActionType.UpdateMetadata
+            field.actionType !== ActionType.UpdateMetadata &&
+            field.actionType !== ActionType.UploadWithOcr
           "
           :class="[
             { 'mt-5 mb-10': !isButtonDisabled },
@@ -738,6 +743,14 @@ watch(
     );
   },
   { deep: true, immediate: true },
+);
+
+watch(
+  () => form.value?.values,
+  async () => {
+    await form.value?.validate();
+  },
+  { deep: true },
 );
 </script>
 

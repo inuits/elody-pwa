@@ -67,8 +67,7 @@
         @click="
           () => {
             emit('deactivateFilter', advancedFilterInput.key, true);
-            clearLastTypedValue();
-            reloadMatcherComponent();
+            resetFilter()
           }
         "
       />
@@ -196,6 +195,24 @@ const clearLastTypedValue = () => {
   lastTypedValue.value = "";
 };
 
+const resetFilter = () => {
+  clearLastTypedValue();
+  advancedFilterInput.value.value = undefined;
+
+  const matchersToResetToDefault = [
+    Matchers.ANY_MATCHER,
+    Matchers.NONE_MATCHER,
+  ];
+  const matcher = selectedMatcher.value?.value;
+  if (!matchersToResetToDefault.includes(matcher))
+    return reloadMatcherComponent();
+
+  const defaultMatcher = getDefaultMatcher();
+  if (!defaultMatcher) return;
+
+  selectedMatcher.value = defaultMatcher;
+};
+
 onMounted(() => {
   const defaultMatcher = props.filter.selectedMatcher || getDefaultMatcher();
 
@@ -248,21 +265,7 @@ watch(advancedFilterInput, (newValue, oldValue) => {
 watch(clearAllActiveFilters, () => {
   if (clearAllActiveFilters.value) {
     isOpen.value = false;
-    clearLastTypedValue();
-    advancedFilterInput.value.value = undefined;
-
-    const matchersToResetToDefault = [
-      Matchers.ANY_MATCHER,
-      Matchers.NONE_MATCHER,
-    ];
-    const matcher = selectedMatcher.value?.value;
-    if (!matchersToResetToDefault.includes(matcher))
-      return reloadMatcherComponent();
-
-    const defaultMatcher = getDefaultMatcher();
-    if (!defaultMatcher) return;
-
-    selectedMatcher.value = defaultMatcher;
+    resetFilter()
   }
 });
 </script>
