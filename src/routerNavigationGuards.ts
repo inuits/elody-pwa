@@ -45,7 +45,6 @@ const handleRequiresAuthFromOverviewPage = (
   const metaOfChildRoutes = getChildrenOfHomeRoutes(config).map(
     (route: any) => route.meta,
   );
-  console.log(to);
   const type = to.params["type"] ? String(to.params["type"]) : undefined;
   if (!type) return next();
 

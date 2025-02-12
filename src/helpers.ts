@@ -701,19 +701,16 @@ export const requiresAuthForEntity = (
   metaOfChildRoutes: any[],
 ): boolean => {
   const entityType = mapUrlToEntityType(type) || type;
-  console.log(entityType);
-  if (!entityType) return false;
+  if (!entityType)
+    return false;
 
   const metaOfLinkedEntity = metaOfChildRoutes.find(
     (item) =>
       String(item.entityType).toLowerCase() ===
       String(entityType).toLowerCase(),
   );
-
-  if (!metaOfLinkedEntity || !metaOfLinkedEntity.requiresAuth) {
+  if (!metaOfLinkedEntity || !metaOfLinkedEntity.requiresAuth)
     return false;
-  }
 
-  console.log(metaOfLinkedEntity);
-  return false;
+  return !auth.isAuthenticated.value;
 };
