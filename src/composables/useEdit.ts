@@ -30,7 +30,6 @@ export const useEditMode = () => {
   const setRefetchFn = (refetch: Function) => (refetchFn.value = refetch);
 
   const addSaveCallback = (input: callback, order?: string) => {
-    console.log("Here I add the submit function", saveCallbacks.value);
     if (order === "first") {
       saveCallbacks.value.unshift(input);
     } else if (order === "second") {
@@ -38,7 +37,6 @@ export const useEditMode = () => {
     } else {
       saveCallbacks.value.push(input);
     }
-    console.log("Here I added the submit function", saveCallbacks.value);
   };
   const showEditToggle = (mode: "edit" | "delete" | "edit-delete" = "edit") => {
     isEditToggleVisible.value = mode;
@@ -48,14 +46,12 @@ export const useEditMode = () => {
 
   const save = async (force: boolean = false) => {
     if (!force && isDisabled.value) return;
-    console.log(saveCallbacks.value);
     isSaved.value = false;
     linkMediaFilesToEntity(addSaveCallback);
 
     for (const callback of saveCallbacks.value) {
       await callback();
     }
-    console.log("Callback executed");
     saveCallbacks.value = [];
     isSaved.value = true;
   };

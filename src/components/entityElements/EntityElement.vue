@@ -129,9 +129,7 @@ import { useStateManagement } from "@/composables/useStateManagement";
 export type Elements =
   | EntityListElement
   | GraphElement
-  | HierarchyListElement
   | ManifestViewerElement
-  | MapElement
   | MarkdownViewerElement
   | MediaFileElement
   | SingleMediaFileElement
