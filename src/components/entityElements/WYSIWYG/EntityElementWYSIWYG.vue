@@ -63,17 +63,10 @@ const updateModalInfo = () => {
   });
 };
 
-const updateModalInfo = () => {
-  updateModal(TypeModals.ElodyEntityTaggingModal, {
-    element: props.element,
-  });
-};
-
 onMounted(async () => {
   initialValue.value =
     form.value?.values.intialValues[props.element.metadataKey];
   addEditableMetadataKeys([props.element.metadataKey], props.formId);
-  if (props.element.taggingConfiguration) updateModalInfo();
   const importedExtensions = await importEditorExtensions(
     props.element.extensions,
   );
