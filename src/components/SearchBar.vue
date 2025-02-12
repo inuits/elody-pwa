@@ -60,7 +60,7 @@ const emit = defineEmits<{
 
 const config = inject("config") as any;
 const { openModal, getModalInfo } = useBaseModal();
-const { getFiltersForAdvancedSearch } = useAdvancedSearch();
+const { getFiltersForAdvancedSearch } = useAdvancedSearch(config);
 const inputValue = ref<string>("");
 const entityTypeFilters = computed(() =>
   config.features.simpleSearch.simpleSearchEntityTypes?.map((type: string) => {

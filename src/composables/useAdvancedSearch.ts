@@ -8,7 +8,7 @@ export type AdvancedSearchFilters = {
   query_by: string;
 };
 
-export const useAdvancedSearch = () => {
+export const useAdvancedSearch = (config: any) => {
   const { loadDocument } = useImport();
 
   const items = ref<any | undefined>(undefined);
@@ -31,14 +31,26 @@ export const useAdvancedSearch = () => {
     filters.value = newFilters;
   };
 
+
   const getFiltersForAdvancedSearch = (value: string) => {
-    return {
-      q: value.trim() === "" ? "*" : value,
-      query_by: "sort.title,relsort.hasPerson",
-      filter_by: "type:expression",
-      query_by_weights: "4,2",
-      sort_by: "_eval(nr_items:>7):desc"
-    };
+
+      if (config.features.advancedSearch.hasAdvancedSearch) {
+            return {
+                q: value.trim() === "" ? "*" : value,
+                query_by: config.features.advancedSearch.queryBy,
+                filter_by: config.features.advancedSearch.filterBy ,
+                query_by_weights: config.features.advancedSearch.queryByWeights,
+                sort_by: config.features.advancedSearch.sortBy,
+                limit: config.features.advancedSearch.limit,
+                per_page: config.features.advancedSearch.perPage,
+            }
+        }
+        else{
+            return {
+                q: value.trim() === "" ? "*" : value,
+                query_by: "metadata.value",
+            };
+        };
   };
 
   return {
