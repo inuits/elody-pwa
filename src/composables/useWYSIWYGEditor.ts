@@ -8,6 +8,7 @@ type ExtensionInfo = {
 };
 
 export const useWYSIWYGEditor = (): {
+  editorExtensionImportMapping: Record<WysiwygExtensions, ExtensionInfo>;
   importEditorExtensions: (extensions: WysiwygExtensions[]) => Promise<any>;
   getExtensionConfiguration: (extensions: WysiwygExtensions[]) => any[];
 } => {
@@ -109,5 +110,9 @@ export const useWYSIWYGEditor = (): {
       .filter(Boolean);
   };
 
-  return { importEditorExtensions, getExtensionConfiguration };
+  return {
+    importEditorExtensions,
+    getExtensionConfiguration,
+    editorExtensionImportMapping,
+  };
 };

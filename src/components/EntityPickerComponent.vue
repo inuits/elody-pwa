@@ -32,11 +32,7 @@
       @entities-updated="
         (numberOfEntities) => emitUpdatedEntities(numberOfEntities)
       "
-      @confirm-selection="
-        async (selectedItems) => {
-          confirmSelection(selectedItems);
-        }
-      "
+      @confirm-selection="saveRelations()"
     />
   </div>
 </template>
@@ -45,8 +41,6 @@
 import {
   type AdvancedFilterInput,
   type BaseRelationValuesInput,
-  Collection,
-  type Entity,
   EntityPickerMode,
   Entitytyping,
   MutateEntityValuesDocument,
@@ -57,24 +51,17 @@ import {
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
-  type InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
-import { ref, onMounted, inject, unref, provide } from "vue";
-import { useSubmitForm } from "vee-validate";
+import { inject, onMounted, provide, ref } from "vue";
 import { useMutation } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 import { useCustomQuery } from "@/composables/useCustomQuery";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { type EntityValues, useFormHelper } from "@/composables/useFormHelper";
+import { useFormHelper } from "@/composables/useFormHelper";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import useEditMode from "@/composables/useEdit";
-import {
-  useNotification,
-  NotificationType,
-} from "@/components/base/BaseNotification.vue";
-import { getChildrenOfHomeRoutes } from "@/helpers";
+import { useNotification } from "@/components/base/BaseNotification.vue";
 
 const emit = defineEmits<{
   (event: "entitiesUpdated", numberOfEntities: number): void;
@@ -89,6 +76,7 @@ const props = withDefaults(
     customQuery: string;
     customFiltersQuery?: string;
     computedFilters?: AdvancedFilterInput[];
+    context?: BulkOperationsContextEnum;
     showButton: boolean;
     enableBulkOperations: boolean;
     enableAdvancedFilters: boolean;
@@ -100,6 +88,7 @@ const props = withDefaults(
     entityPickerMode: EntityPickerMode.Emit,
     baseLibraryHeight: "h-[95vh]",
     enableNonSelectableEntities: true,
+    context: BulkOperationsContextEnum.EntityElementListEntityPickerModal,
   },
 );
 
@@ -108,17 +97,12 @@ provide("mediafileViewerContext", props.customFiltersQuery);
 const { t } = useI18n();
 const { loadDocument, getDocument } = useCustomQuery();
 const { closeModal } = useBaseModal();
-const { addRelations } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
-const { getEntityUuid, getEntityId, getRelationType } = useEntityPickerModal();
-const { save, addSaveCallback, clearSaveCallbacks } = useEditMode();
-const { getForm } = useFormHelper();
-const { parseFormValuesToFormInput } = useFormHelper();
-const { createNotification } = useNotification();
+const { getEntityId, confirmSelection, getRelationType } =
+  useEntityPickerModal();
 
-const childRoutes = getChildrenOfHomeRoutes(config).map(
-  (route: any) => route.meta,
-);
+const { getForm } = useFormHelper();
+const { createNotification } = useNotification();
 
 const { mutate } = useMutation<
   MutateEntityValuesMutation,
@@ -135,13 +119,14 @@ const emitUpdatedEntities = (numberOfEntities: number) => {
   emit("entitiesUpdated", numberOfEntities);
 };
 
-const confirmSelection = (selectedItems: InBulkProcessableItem[]) => {
+const saveRelations = () => {
   if (props.entityPickerMode === EntityPickerMode.Emit) return;
-  addRelations(selectedItems, getRelationType(), getEntityId(), true);
-  dequeueAllItemsForBulkProcessing(getContext());
-  addSaveHandler();
-  save(true);
-  closeModal(TypeModals.DynamicForm);
+  confirmSelection(
+    getEntityId(),
+    getRelationType(),
+    props.context,
+    TypeModals.DynamicForm,
+  );
 };
 
 const getCustomQuery = async () => {
@@ -151,15 +136,9 @@ const getCustomQuery = async () => {
 };
 
 const getContext = () => {
-  if (props.acceptedTypes.length > 0) {
-    if (props.acceptedTypes[0] !== Entitytyping.Mediafile) {
-      return BulkOperationsContextEnum.EntityElementListEntityPickerModal;
-    } else {
-      return BulkOperationsContextEnum.EntityElementMediaEntityPickerModal;
-    }
-  } else {
-    return BulkOperationsContextEnum.EntityElementListEntityPickerModal;
-  }
+  if (props.acceptedTypes[0] == Entitytyping.Mediafile)
+    return BulkOperationsContextEnum.EntityElementMediaEntityPickerModal;
+  return props.context;
 };
 
 const getAlreadySelectedEntityIds = (): string[] => {
@@ -179,46 +158,6 @@ const getAlreadySelectedEntityIds = (): string[] => {
     .map((relation: BaseRelationValuesInput) => relation.key);
 
   return filteredRelationIds;
-};
-
-const submit = useSubmitForm<EntityValues>(async () => {
-  const { setValues } = form;
-  const collection =
-    childRoutes.find(
-      (route: any) =>
-        route.entityType?.toLowerCase() ===
-        props.parentEntityType.toLowerCase(),
-    )?.type || Collection.Entities;
-  if (!collection) throw Error("Could not determine collection for submit");
-  const result = await mutate({
-    id: props.entityUuid,
-    formInput: parseFormValuesToFormInput(
-      props.entityUuid,
-      unref(form.values),
-      true,
-    ),
-    collection,
-  });
-
-  if (!result?.data?.mutateEntityValues) return;
-  const mutatedEntity: Entity = result.data.mutateEntityValues as Entity;
-  setValues({
-    intialValues: mutatedEntity.intialValues,
-    relationValues: mutatedEntity.relationValues,
-  });
-  createNotification({
-    displayTime: 10,
-    type: NotificationType.default,
-    title: t("notifications.success.entityUpdated.title"),
-    description: t("notifications.success.entityUpdated.description"),
-    shown: true,
-  });
-  form.resetForm({ values: form.values });
-});
-
-const addSaveHandler = () => {
-  clearSaveCallbacks();
-  addSaveCallback(submit, "first");
 };
 
 onMounted(async () => {
