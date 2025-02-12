@@ -117,6 +117,7 @@
               :use-extended-bulk-operations="!isSearchLibrary"
               :show-button="showButton"
               :confirm-selection-button="confirmSelectionButton"
+              :relation-type="relationType"
               :entity-type="entityType as Entitytyping"
               :custom-bulk-operations="customBulkOperations"
               :refetch-entities="refetchEntities"
@@ -644,6 +645,7 @@ watch(
       );
       setEntityType(entityType.value);
       enqueuePromise(advancedFiltersPromise);
+      enqueuePromise(paginationLimitOptionsPromise);
       enqueuePromise(sortOptionsPromise);
       await getEntities(route);
     }

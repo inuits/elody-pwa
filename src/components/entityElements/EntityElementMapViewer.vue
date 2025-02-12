@@ -29,7 +29,6 @@ import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import { getValueForPanelMetadata } from "@/helpers";
 import { computed } from "vue";
 import WktMap from "../maps/WktMap.vue";
-import { useMaps } from "@/composables/useMaps";
 
 const props = defineProps<{
   element: MapElement;
@@ -37,7 +36,10 @@ const props = defineProps<{
 }>();
 
 const shouldDisplayMap = computed(() => {
-  return mapData.value.length > 0;
+  return (
+    mapData.value.length > 0 ||
+    center.value.some((value: number) => !isNaN(value))
+  );
 });
 
 const center = computed(() => {

@@ -1,13 +1,14 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
-type infoTypes = "routerTitle" | "routeType" | "parentRouteName" | "entityId";
+type infoTypes = "routerTitle" | "routeType" | "parentRouteName" | "entityId" | "fullPath";
 
 type PageInfo = {
   routerTitle: string;
   routeType: string;
   parentRouteName: string;
   entityId: string;
+  fullPath: string;
 };
 
 const previousPageInfo = ref<PageInfo>({
@@ -15,6 +16,7 @@ const previousPageInfo = ref<PageInfo>({
   routeType: "",
   parentRouteName: "",
   entityId: "",
+  fullPath: "",
 });
 const pageInfo = ref<PageInfo>({
   routerTitle: "",
@@ -52,6 +54,7 @@ export const usePageInfo = () => {
     updatePreviousPageInfo(from.meta.type as string, "routeType");
     updatePreviousPageInfo(from.meta.title as string);
     updatePreviousPageInfo(from.meta.uuid as string);
+    updatePreviousPageInfo(from.fullPath as string, "fullPath");
   });
 
   return {

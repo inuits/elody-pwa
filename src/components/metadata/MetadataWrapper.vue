@@ -68,7 +68,6 @@
       :field-is-valid="fieldIsValid"
       @click.stop.prevent
       @update:value="setNewValue"
-      @register-enter-pressed:value="registerEnterKeyPressed"
     />
     <div v-else class="flex gap-2">
       <base-tooltip
@@ -190,12 +189,8 @@ import {
   type PanelRelationMetaData,
   type PanelRelationRootData,
 } from "@/generated-types/queries";
-import { computed, onMounted, onBeforeUnmount, watch, inject, ref } from "vue";
+import { computed, onMounted, watch, inject, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import {
-  useOrderListItems,
-  type OrderItem,
-} from "@/composables/useOrderListItems";
 import { useField } from "vee-validate";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -204,7 +199,6 @@ import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewM
 import { Unicons } from "@/types";
 
 const { t } = useI18n();
-const { addOrderItem, removeOrderItem, updateOrderItem } = useOrderListItems();
 const { getForm, getKeyBasedOnInputField } = useFormHelper();
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
@@ -255,9 +249,6 @@ const setNewValue = (
   }
 };
 
-const registerEnterKeyPressed = async (value: string) => {
-  await updateOrderItem(props.formId, fieldKeyWithId.value, value);
-};
 defineExpose({
   setNewValue,
 });
@@ -440,18 +431,6 @@ const { errorMessage, value, meta } = useField<
 onMounted(() => {
   if (props.metadata.hiddenField?.hidden) return;
   setNewValue(props.metadata.value);
-  if (isMetadataOnRelation.value && props.metadata.key === "order") {
-    const orderItem: OrderItem = {
-      field: fieldKeyWithId.value,
-      initialValue: parseInt(props.metadata.value),
-      currentValue: parseInt(props.metadata.value),
-    };
-    addOrderItem(props.formId, orderItem);
-  }
-});
-onBeforeUnmount(() => {
-  if (props.metadata.key !== "order") return;
-  removeOrderItem(props.formId, fieldKeyWithId.value);
 });
 
 if (typeof props.metadata.value !== "object") {

@@ -24,9 +24,9 @@
         v-model="currentPage"
         type="number"
         input-style="default"
-        :is-valid-predicate="(value: number) => value >= 1 && value <= getLastPage()"
-        @focusout="emit('update:skip', currentPage)"
-        @keyup.enter="emit('update:skip', currentPage)"
+        @focusin="canUpdateSkipAgain()"
+        @focusout="setManualEnteredSkip(currentPage)"
+        @keyup.enter="setManualEnteredSkip(currentPage)"
       />
     </div>
     <span>{{ $t("pagination.of") }}</span>
@@ -54,7 +54,6 @@
 <script lang="ts" setup>
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { ref, toRefs, watch } from "vue";
-import { savedSkipForOrdering } from "@/composables/useOrderListItems";
 import { Unicons } from "@/types";
 
 const props = defineProps<{
@@ -69,24 +68,35 @@ const emit = defineEmits<{
 
 const { skip } = toRefs(props);
 const currentPage = ref<number>(skip.value);
+const canUpdateSkip = ref<boolean>(true);
+
+const setManualEnteredSkip = (page: number) => {
+  if (!canUpdateSkip.value) return;
+
+  if (page < 1) currentPage.value = 1;
+  if (page > getLastPage()) currentPage.value = getLastPage();
+  emit("update:skip", currentPage.value);
+  canUpdateSkip.value = false;
+}
+
+const canUpdateSkipAgain = () => {
+  canUpdateSkip.value = true;
+}
 
 const previous = () => {
   if (currentPage.value <= 1) return;
-  //savedSkipForOrdering.value--;
   currentPage.value--;
   emit("update:skip", currentPage.value);
 };
 
 const next = () => {
   if (currentPage.value >= getLastPage()) return;
-  //savedSkipForOrdering.value++;
   currentPage.value++;
   emit("update:skip", currentPage.value);
 };
 
 const goToPage = (page: number) => {
   if (page < 1 || page > getLastPage()) return;
-  //savedSkipForOrdering.value = page;
   currentPage.value = page;
   emit("update:skip", currentPage.value);
 };
@@ -98,9 +108,19 @@ const getLastPage = () => {
 };
 
 watch(
+  () => props.skip,
+  () => {
+    currentPage.value = props.skip;
+  },
+);
+watch(
   () => [props.limit, props.totalItems],
   () => {
-    if (currentPage.value > getLastPage()) currentPage.value = 1;
-  }
+    if (currentPage.value > getLastPage()) {
+      currentPage.value = 1;
+      emit("update:skip", currentPage.value);
+    }
+  },
 );
+
 </script>
