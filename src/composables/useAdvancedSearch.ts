@@ -34,23 +34,15 @@ export const useAdvancedSearch = (config: any) => {
 
   const getFiltersForAdvancedSearch = (value: string) => {
 
-      if (config.features.advancedSearch.hasAdvancedSearch) {
-            return {
-                q: value.trim() === "" ? "*" : value,
-                query_by: config.features.advancedSearch.queryBy,
-                filter_by: config.features.advancedSearch.filterBy ,
-                query_by_weights: config.features.advancedSearch.queryByWeights,
-                sort_by: config.features.advancedSearch.sortBy,
-                limit: config.features.advancedSearch.limit,
-                per_page: config.features.advancedSearch.perPage,
-            }
-        }
-        else{
-            return {
-                q: value.trim() === "" ? "*" : value,
-                query_by: "metadata.value",
-            };
-        };
+    return {
+        q: value.trim() === "" ? "*" : value,
+        query_by: config.features.advancedSearch.queryBy,
+        filter_by: config.features.advancedSearch.filterBy ,
+        query_by_weights: config.features.advancedSearch.queryByWeights,
+        sort_by: config.features.advancedSearch.sortBy,
+        limit: config.features.advancedSearch.limit,
+        per_page: config.features.advancedSearch.perPage,
+    };
   };
 
   return {
