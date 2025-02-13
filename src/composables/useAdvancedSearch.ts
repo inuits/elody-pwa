@@ -33,7 +33,7 @@ export const useAdvancedSearch = (config: any) => {
 
 
   const getFiltersForAdvancedSearch = (value: string) => {
-
+    if (!config.features.advancedSearch) return {}
     return {
         q: value.trim() === "" ? "*" : value,
         query_by: config.features.advancedSearch.queryBy,
