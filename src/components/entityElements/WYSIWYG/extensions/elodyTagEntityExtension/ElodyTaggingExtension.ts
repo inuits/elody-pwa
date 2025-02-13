@@ -1,6 +1,25 @@
 import { mergeAttributes, Node } from "@tiptap/core";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { ModalStyle, TypeModals } from "@/generated-types/queries";
+import {
+  ModalStyle,
+  TypeModals,
+  WysiwygExtensions,
+} from "@/generated-types/queries";
+import type { Editor } from "@tiptap/vue-3";
+import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
+
+export const hasSelectionBeenTagged = (editor: Editor) => {
+  const { selection } = editor.state;
+  const { from } = selection;
+  const selectedNode = editor.state.doc.nodeAt(from);
+  return (
+    selectedNode &&
+    selectedNode.type.name ===
+      useWYSIWYGEditor().editorExtensionImportMapping[
+        WysiwygExtensions.ElodyTaggingExtension
+      ].importName
+  );
+};
 
 const ElodyTaggingExtension = Node.create({
   name: "ElodyTaggingExtension",
@@ -44,7 +63,7 @@ const ElodyTaggingExtension = Node.create({
       "w",
       mergeAttributes(
         {
-          "data-tag": "ElodyTaggingExtension",
+          "data-tag": this.name,
           class: "bg-accent-normal text-white rounded-md px-1 cursor-pointer",
         },
         HTMLAttributes,
@@ -77,7 +96,7 @@ const ElodyTaggingExtension = Node.create({
           commands.insertContentAt(from, {
             type: this.name,
             attrs: {
-              "data-tag": "ElodyTaggingExtension",
+              "data-tag": this.name,
               entityId,
             },
             content: [{ type: "text", text: selectedText }],
