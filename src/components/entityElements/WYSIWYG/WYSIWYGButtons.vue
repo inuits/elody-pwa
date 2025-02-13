@@ -158,7 +158,7 @@ import { WysiwygExtensions } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import useEdit from "@/composables/useEdit";
 import { computed } from "vue";
-import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
+import { hasSelectionBeenTagged } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 
 const props = defineProps<{
   editor: Editor;
@@ -166,21 +166,13 @@ const props = defineProps<{
 }>();
 
 const { isEdit } = useEdit();
-const { editorExtensionImportMapping } = useWYSIWYGEditor();
 
 const buttonsDisabled = computed(() => !isEdit.value);
 const isNonTaggedTextSelected = computed(() => {
   const { selection } = props.editor.state;
-  const { from } = selection;
-  const selectedNode = props.editor.state.doc.nodeAt(from);
-  if (
-    selectedNode &&
-    selectedNode.type.name ===
-      editorExtensionImportMapping[WysiwygExtensions.ElodyTaggingExtension]
-        .importName
-  )
-    return false;
-  return selection.from !== selection.to;
+  return (
+    selection.from !== selection.to && !hasSelectionBeenTagged(props.editor)
+  );
 });
 </script>
 
