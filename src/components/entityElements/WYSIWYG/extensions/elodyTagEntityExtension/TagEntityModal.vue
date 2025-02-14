@@ -44,7 +44,6 @@
           :computedFilters="computedAdvancedFilterInputs"
           :context="BulkOperationsContextEnum.TagEntityModal"
           base-library-height="max-h-[50vh]"
-          @entities-updated="tagExistingEntityFlow"
         />
       </div>
       <div class="bg-neutral-lightest rounded-md">
@@ -77,6 +76,8 @@ import {
   Collection,
   EntityPickerMode,
   Entitytyping,
+  type MetadataInput,
+  type TeaserMetadata,
   TypeModals,
   type WysiwygElement,
 } from "@/generated-types/queries";
@@ -92,16 +93,17 @@ import { useModalActions } from "@/composables/useModalActions";
 import { Unicons } from "@/types";
 import {
   BulkOperationsContextEnum,
+  type InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import type { Editor } from "@tiptap/vue-3";
+import { tagEntity } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 
 const { setBulkSelectionLimit, isBulkSelectionLimitReached, getEnqueuedItems } =
   useBulkOperations();
 const { closeModal, getModalInfo } = useBaseModal();
 const { initializeGeneralProperties } = useModalActions();
-const { confirmSelection } = useEntityPickerModal();
 const { getForm } = useFormHelper();
 const route = useRoute();
 const router = useRouter();
@@ -151,6 +153,21 @@ const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
   return [typeFilter, metadataFilter];
 });
 
+const extractTitleKeyFromFilter = (metadataFilter: string) => {
+  return metadataFilter.split(".")[1];
+};
+
+const getNewTaggingTextFromTeaserMetadata = (
+  teaserMetadataKey: string,
+  taggedEntity: InBulkProcessableItem,
+) => {
+  console.log(taggedEntity.teaserMetadata);
+  return taggedEntity.teaserMetadata.filter(
+    (teaserMetadataItem: MetadataInput) =>
+      teaserMetadataItem.key === teaserMetadataKey,
+  )[0].value;
+};
+
 const tagNewlyCreatedEntityFlow = () => {
   console.log("In tagNewlyCreatedEntityFlow flow");
 };
@@ -159,16 +176,24 @@ const tagExistingEntityFlow = () => {
   const context = BulkOperationsContextEnum.TagEntityModal;
   if (!isBulkSelectionLimitReached(context)) return;
 
-  const entityIdToTag = getEnqueuedItems(context)[0].id;
-  if (!entityIdToTag) return;
-
-  confirmSelection(
-    parentId.value,
-    element.value.taggingConfiguration?.relationType,
-    context,
-    TypeModals.ElodyEntityTaggingModal,
+  const entityToTag = getEnqueuedItems(context)[0];
+  const newTaggingTextKey = extractTitleKeyFromFilter(
+    element.value.taggingConfiguration?.metadataFilter,
   );
-  editor.value.commands.linkEntityToTaggedText(entityIdToTag);
+  const newTaggingText = getNewTaggingTextFromTeaserMetadata(
+    newTaggingTextKey,
+    entityToTag,
+  );
+  if (!entityToTag) return;
+
+  tagEntity(
+    entityToTag,
+    element.value.taggingConfiguration?.relationType,
+    parentId.value,
+    context,
+  );
+
+  editor.value.commands.linkEntityToTaggedText(entityToTag, newTaggingText);
 };
 
 watch(
