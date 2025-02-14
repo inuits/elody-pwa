@@ -397,7 +397,7 @@ const isLinkedUpload = computed<boolean>(() => {
     (formField: any) => formField.__typename === "UploadContainer",
   ) as UploadContainer | undefined;
   if (!uploadContainer) return false;
-  return uploadContainer.uploadFlow === UploadFlow.MediafilesOnly;
+  return uploadContainer.uploadFlow === UploadFlow.MediafilesOnly || uploadContainer.uploadFlow === UploadFlow.OptionalMediafiles;
 });
 
 const createEntityFromFormInput = (
@@ -492,6 +492,7 @@ const submitWithUploadActionFunction = async (field: FormAction) => {
     }
 
     showErrors.value = false;
+    submitErrors.value = undefined;
     await getTenants();
     const callbackFunction: Function = extractActionArguments(field.actionType);
     if (config.features.hasBulkSelect && callbackFunction) callbackFunction();
