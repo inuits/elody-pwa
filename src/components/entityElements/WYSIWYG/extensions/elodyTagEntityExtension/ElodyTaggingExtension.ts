@@ -7,19 +7,15 @@ import {
 } from "@/generated-types/queries";
 import type { Editor } from "@tiptap/vue-3";
 import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
+import {
+  type Context,
+  type InBulkProcessableItem,
+  useBulkOperations,
+} from "@/composables/useBulkOperations";
+import { useFormHelper } from "@/composables/useFormHelper";
 
-export const hasSelectionBeenTagged = (editor: Editor) => {
-  const { selection } = editor.state;
-  const { from } = selection;
-  const selectedNode = editor.state.doc.nodeAt(from);
-  return (
-    selectedNode &&
-    selectedNode.type.name ===
-      useWYSIWYGEditor().editorExtensionImportMapping[
-        WysiwygExtensions.ElodyTaggingExtension
-      ].importName
-  );
-};
+const { addRelations } = useFormHelper();
+const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 
 const ElodyTaggingExtension = Node.create({
   name: "ElodyTaggingExtension",
@@ -38,6 +34,19 @@ const ElodyTaggingExtension = Node.create({
 
           return {
             "data-entity-id": attributes.entityId,
+          };
+        },
+      },
+      entityMetadata: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("data-entity-metadata"),
+        renderHTML: (attributes) => {
+          if (!attributes.entityMetadata) {
+            return {};
+          }
+
+          return {
+            "data-entity-metadata": attributes.entityMetadata,
           };
         },
       },
@@ -85,19 +94,24 @@ const ElodyTaggingExtension = Node.create({
           openModal(TypeModals.ElodyEntityTaggingModal, ModalStyle.Center);
         },
       linkEntityToTaggedText:
-        (entityId: string) =>
+        (entity: InBulkProcessableItem, newText: string | undefined) =>
         ({ commands, state, view }) => {
-          if (!entityId) return;
+          if (!entity) return;
+          console.log(entity);
           const { selection } = state;
           const { from, to } = selection;
-          const selectedText = state.doc.textBetween(from, to, " ");
+          let selectedText = state.doc.textBetween(from, to, " ");
+
+          if (newText && newText !== selectedText)
+            selectedText = newText.toLowerCase();
 
           commands.deleteRange({ from, to });
           commands.insertContentAt(from, {
             type: this.name,
             attrs: {
               "data-tag": this.name,
-              entityId,
+              entityId: entity.id,
+              entityMetadata: entity.value,
             },
             content: [{ type: "text", text: selectedText }],
           });
@@ -128,5 +142,30 @@ const ElodyTaggingExtension = Node.create({
     };
   },
 });
+
+export const hasSelectionBeenTagged = (editor: Editor) => {
+  const { selection } = editor.state;
+  const { from } = selection;
+  const selectedNode = editor.state.doc.nodeAt(from);
+  return (
+    selectedNode &&
+    selectedNode.type.name ===
+      useWYSIWYGEditor().editorExtensionImportMapping[
+        WysiwygExtensions.ElodyTaggingExtension
+      ].importName
+  );
+};
+
+export const tagEntity = (
+  entityToTag: InBulkProcessableItem,
+  relationType: string,
+  parentEntityId: string,
+  context: Context,
+) => {
+  addRelations([entityToTag], relationType, parentEntityId, true);
+  dequeueAllItemsForBulkProcessing(context);
+};
+
+export const untagEntity = () => {};
 
 export default ElodyTaggingExtension;

@@ -32,7 +32,7 @@
       @entities-updated="
         (numberOfEntities) => emitUpdatedEntities(numberOfEntities)
       "
-      @confirm-selection="saveRelations()"
+      @confirm-selection="saveRelations"
     />
   </div>
 </template>
@@ -62,6 +62,9 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { useNotification } from "@/components/base/BaseNotification.vue";
+import useEditMode from "@/composables/useEdit";
+import { getChildrenOfHomeRoutes } from "@/helpers";
+import { useSubmitForm } from "vee-validate";
 
 const emit = defineEmits<{
   (event: "entitiesUpdated", numberOfEntities: number): void;
@@ -97,12 +100,17 @@ provide("mediafileViewerContext", props.customFiltersQuery);
 const { t } = useI18n();
 const { loadDocument, getDocument } = useCustomQuery();
 const { closeModal } = useBaseModal();
+const { addRelations } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
-const { getEntityId, confirmSelection, getRelationType } =
-  useEntityPickerModal();
-
+const { getEntityId, getRelationType } = useEntityPickerModal();
+const { save, addSaveCallback, clearSaveCallbacks } = useEditMode();
 const { getForm } = useFormHelper();
+const { parseFormValuesToFormInput } = useFormHelper();
 const { createNotification } = useNotification();
+
+const childRoutes = getChildrenOfHomeRoutes(config).map(
+  (route: any) => route.meta,
+);
 
 const { mutate } = useMutation<
   MutateEntityValuesMutation,
@@ -121,12 +129,11 @@ const emitUpdatedEntities = (numberOfEntities: number) => {
 
 const saveRelations = () => {
   if (props.entityPickerMode === EntityPickerMode.Emit) return;
-  confirmSelection(
-    getEntityId(),
-    getRelationType(),
-    props.context,
-    TypeModals.DynamicForm,
-  );
+  addRelations(selectedItems, getRelationType(), getEntityId(), true);
+  dequeueAllItemsForBulkProcessing(getContext());
+  addSaveHandler();
+  save(true);
+  closeModal(TypeModals.DynamicForm);
 };
 
 const getCustomQuery = async () => {
@@ -158,6 +165,46 @@ const getAlreadySelectedEntityIds = (): string[] => {
     .map((relation: BaseRelationValuesInput) => relation.key);
 
   return filteredRelationIds;
+};
+
+const submit = useSubmitForm<EntityValues>(async () => {
+  const { setValues } = form;
+  const collection =
+    childRoutes.find(
+      (route: any) =>
+        route.entityType?.toLowerCase() ===
+        props.parentEntityType.toLowerCase(),
+    )?.type || Collection.Entities;
+  if (!collection) throw Error("Could not determine collection for submit");
+  const result = await mutate({
+    id: props.entityUuid,
+    formInput: parseFormValuesToFormInput(
+      props.entityUuid,
+      unref(form.values),
+      true,
+    ),
+    collection,
+  });
+
+  if (!result?.data?.mutateEntityValues) return;
+  const mutatedEntity: Entity = result.data.mutateEntityValues as Entity;
+  setValues({
+    intialValues: mutatedEntity.intialValues,
+    relationValues: mutatedEntity.relationValues,
+  });
+  createNotification({
+    displayTime: 10,
+    type: NotificationType.default,
+    title: t("notifications.success.entityUpdated.title"),
+    description: t("notifications.success.entityUpdated.description"),
+    shown: true,
+  });
+  form.resetForm({ values: form.values });
+});
+
+const addSaveHandler = () => {
+  clearSaveCallbacks();
+  addSaveCallback(submit, "first");
 };
 
 onMounted(async () => {
