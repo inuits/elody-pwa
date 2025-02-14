@@ -8,14 +8,20 @@ import {
 import type { Editor } from "@tiptap/vue-3";
 import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
 import {
+  BulkOperationsContextEnum,
   type Context,
   type InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useDeleteRelations } from "@/composables/useDeleteRelations";
+import { computed } from "vue";
+import { useRoute } from "vue-router";
 
 const { addRelations } = useFormHelper();
+const { deleteRelations } = useDeleteRelations();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
+const route = useRoute();
 
 const ElodyTaggingExtension = Node.create({
   name: "ElodyTaggingExtension",
@@ -37,16 +43,16 @@ const ElodyTaggingExtension = Node.create({
           };
         },
       },
-      entityMetadata: {
+      relationType: {
         default: null,
-        parseHTML: (element) => element.getAttribute("data-entity-metadata"),
+        parseHTML: (element) => element.getAttribute("data-relation-type"),
         renderHTML: (attributes) => {
-          if (!attributes.entityMetadata) {
+          if (!attributes.relationType) {
             return {};
           }
 
           return {
-            "data-entity-metadata": attributes.entityMetadata,
+            "data-relation-type": attributes.relationType,
           };
         },
       },
@@ -57,7 +63,6 @@ const ElodyTaggingExtension = Node.create({
       {
         tag: 'w[data-tag="ElodyTaggingExtension"]',
         getAttrs: (element) => {
-          console.log(element);
           return {
             entityId: element.getAttribute("data-entity-id"),
           };
@@ -66,8 +71,6 @@ const ElodyTaggingExtension = Node.create({
     ];
   },
   renderHTML({ HTMLAttributes }) {
-    console.log(HTMLAttributes);
-    const { entityId } = HTMLAttributes;
     return [
       "w",
       mergeAttributes(
@@ -94,10 +97,14 @@ const ElodyTaggingExtension = Node.create({
           openModal(TypeModals.ElodyEntityTaggingModal, ModalStyle.Center);
         },
       linkEntityToTaggedText:
-        (entity: InBulkProcessableItem, newText: string | undefined) =>
+        (
+          entity: InBulkProcessableItem,
+          relationType: string,
+          newText: string | undefined,
+        ) =>
         ({ commands, state, view }) => {
           if (!entity) return;
-          console.log(entity);
+
           const { selection } = state;
           const { from, to } = selection;
           let selectedText = state.doc.textBetween(from, to, " ");
@@ -111,7 +118,7 @@ const ElodyTaggingExtension = Node.create({
             attrs: {
               "data-tag": this.name,
               entityId: entity.id,
-              entityMetadata: entity.value,
+              relationType: relationType,
             },
             content: [{ type: "text", text: selectedText }],
           });
@@ -128,6 +135,7 @@ const ElodyTaggingExtension = Node.create({
         this.editor.commands.command(({ tr, state }) => {
           const { selection } = state;
           const { empty, anchor } = selection;
+          const parentId = computed(() => route.params["id"]);
 
           if (!empty) {
             return false;
@@ -136,6 +144,12 @@ const ElodyTaggingExtension = Node.create({
           state.doc.nodesBetween(anchor - 1, anchor, (node, pos) => {
             if (node.type.name === this.name) {
               this.editor.commands.deleteNode(node);
+              deleteRelations(
+                parentId,
+                "",
+                node.attrs.entityId,
+                BulkOperationsContextEnum.TagEntityModal,
+              );
             }
           });
         }),
@@ -166,6 +180,13 @@ export const tagEntity = (
   dequeueAllItemsForBulkProcessing(context);
 };
 
-export const untagEntity = () => {};
+export const untagEntity = async (
+  parentEntityId: string,
+  relationType: string,
+  tagToDelete: InBulkProcessableItem,
+  context: Context,
+) => {
+  await deleteRelations(parentEntityId, relationType, [tagToDelete], context);
+};
 
 export default ElodyTaggingExtension;
