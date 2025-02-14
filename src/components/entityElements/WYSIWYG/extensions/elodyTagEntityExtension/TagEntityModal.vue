@@ -161,7 +161,6 @@ const getNewTaggingTextFromTeaserMetadata = (
   teaserMetadataKey: string,
   taggedEntity: InBulkProcessableItem,
 ) => {
-  console.log(taggedEntity.teaserMetadata);
   return taggedEntity.teaserMetadata.filter(
     (teaserMetadataItem: MetadataInput) =>
       teaserMetadataItem.key === teaserMetadataKey,
@@ -184,16 +183,16 @@ const tagExistingEntityFlow = () => {
     newTaggingTextKey,
     entityToTag,
   );
+  const relationType = element.value.taggingConfiguration?.relationType;
   if (!entityToTag) return;
 
-  tagEntity(
-    entityToTag,
-    element.value.taggingConfiguration?.relationType,
-    parentId.value,
-    context,
-  );
+  tagEntity(entityToTag, relationType, parentId.value, context);
 
-  editor.value.commands.linkEntityToTaggedText(entityToTag, newTaggingText);
+  editor.value.commands.linkEntityToTaggedText(
+    entityToTag,
+    relationType,
+    newTaggingText,
+  );
 };
 
 watch(
