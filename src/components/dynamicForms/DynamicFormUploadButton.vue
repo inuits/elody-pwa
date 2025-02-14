@@ -137,7 +137,7 @@ const finishedStatusMessage = computed(() => {
     return t("actions.labels.csv-success");
   }
   const amountSuccess: number = amountUploaded.value;
-  if (!failedUploads.value) return t("actions.labels.success", [amountSuccess]);
+  if (failedUploads.value.length <= 0) return t("actions.labels.success", [amountSuccess]);
   const amountFailed: number = failedUploads.value.length;
   return t("actions.upload.errors", [amountFailed]);
 });
