@@ -190,7 +190,7 @@
               :refetch-entities="refetchEntities"
             />
             <ViewModesMedia
-              v-if="displayPreview"
+              v-if="viewModesIncludeViewModesMedia && displayPreview"
               :entities="entities as Entity[]"
               :entities-loading="entitiesLoading"
               :config="configPerViewMode[ViewModes.ViewModesMedia]"
@@ -627,6 +627,14 @@ const configPerViewMode = computed(() => {
   );
 });
 
+const viewModesIncludeViewModesMedia = computed(() => {
+  if (entities.value.length <= 0) return false;
+  return entities.value[0].allowedViewModes?.viewModes?.map(
+    (viewModeWithConfig: ViewModesWithConfig) =>
+        viewModeWithConfig.viewMode,
+  ).includes(ViewModesMedia.__name);
+})
+
 const determineViewModes = (viewModes: any[]) => {
   if (viewModes.includes(ViewModesList.__name))
     toggles.unshift({
@@ -640,7 +648,7 @@ const determineViewModes = (viewModes: any[]) => {
       iconOn: DamsIcons.Apps,
       iconOff: DamsIcons.Apps,
     });
-  if (viewModes.includes(ViewModesMedia.__name) || props.enablePreview)
+  if (viewModes.includes(ViewModesMedia.__name))
     toggles.push({
       isOn: displayPreview,
       iconOn: DamsIcons.Image,
