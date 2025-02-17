@@ -226,7 +226,9 @@ const filterOptions = reactive<
 onFilterOptionsResult((result) => {
   const options = result.data?.FilterOptions;
   if (options) {
-    input.value = [];
+    if (props.filter.advancedFilter.type !== "date" && props.lastTypedValue)
+      input.value = props.lastTypedValue;
+    else input.value = [];
     options.forEach((option) => {
       const isSelected =
         props.relatedActiveFilter &&
