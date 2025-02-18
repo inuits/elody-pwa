@@ -45,6 +45,7 @@ export const useAdvancedSearch = (config: any) => {
         sort_by: config.features.advancedSearch.sortBy,
         limit: config.features.advancedSearch.limit,
         per_page: config.features.advancedSearch.perPage,
+        facet_by: config.features.advancedSearch.facetBy,
     };
   };
 
