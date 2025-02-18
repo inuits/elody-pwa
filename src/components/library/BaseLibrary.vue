@@ -694,7 +694,7 @@ watch(
 watch(
   () => props.predefinedEntities,
   () => {
-    if (props.predefinedEntities) {
+    if (props.predefinedEntities && props.predefinedEntities.length > 0) {
       entities.value = props.predefinedEntities;
       totalEntityCount.value = props.predefinedEntities.length;
       const viewModes: any[] =
