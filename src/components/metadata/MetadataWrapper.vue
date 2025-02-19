@@ -249,8 +249,7 @@ const setNewValue = (
 ) => {
   if (
     props.metadata?.inputField &&
-    (props.metadata.inputField.type === InputFieldTypes.BaseDateField ||
-    props.metadata.inputField.type === InputFieldTypes.BaseDateTimeField)
+    props.metadata.inputField.type === InputFieldTypes.Date
   ) {
     const parsedDate = DateTime.fromISO(newValue);
     if (parsedDate.isValid)
