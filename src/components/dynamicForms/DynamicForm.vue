@@ -4,7 +4,17 @@
     class="p-4 pt-0 h-full w-full overflow-y-auto"
     :key="dynamicFormQuery"
   >
-    <div v-show="!isLoading" class="w-full [&>*>button:last-child]:mb-0">
+    <div v-if="isLoading" class="w-full">
+      <div class="absolute block top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl text-gray-700">
+        <spinner-loader theme="accent" />
+      </div>
+    </div>
+    <div
+      class="w-full [&>*>button:last-child]:mb-0"
+      :class="[
+        isLoading ? 'opacity-20' : 'opacity-100'
+      ]"
+    >
       <h1 v-if="dynamicForm?.GetDynamicForm?.label" class="title pb-4">
         {{ t(dynamicForm.GetDynamicForm.label) }}
       </h1>
@@ -182,12 +192,6 @@
           {{ submitErrors }}
         </p>
       </div>
-    </div>
-    <div
-      v-show="isLoading"
-      class="min-h-[20rem] w-full flex justify-center items-center"
-    >
-      <spinner-loader theme="accent" />
     </div>
   </div>
 </template>
@@ -485,6 +489,7 @@ const submitWithUploadActionFunction = async (field: FormAction) => {
   try {
     entity = (await performSubmitAction(document, entityInput)).data
       .CreateEntity;
+    submitErrors.value = undefined;
 
     if (mediafiles.value.length > 0) {
       useEntitySingle().setEntityUuid(entity.uuid || entity.id);
@@ -492,7 +497,6 @@ const submitWithUploadActionFunction = async (field: FormAction) => {
     }
 
     showErrors.value = false;
-    submitErrors.value = undefined;
     await getTenants();
     const callbackFunction: Function = extractActionArguments(field.actionType);
     if (config.features.hasBulkSelect && callbackFunction) callbackFunction();
