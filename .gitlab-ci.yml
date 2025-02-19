@@ -1,14 +1,35 @@
 ---
-###############################################################################
-# NPM APPLICATION PIPELINE
-###############################################################################
 
+# --------------------------------------------------------------
+# Includes
+# --------------------------------------------------------------
 include:
   - project: 'inuits/gitlab-ci/pipeline-templates'
-    file: 'npm-pipeline.yml'
-    ref: 'v1.7.0'
+    ref: 'v4.0.0'
+    file: 
+      - 'pipelines/customers/deploy.yml'
+      - 'jobs/docker/build-npm.yml'
 
+
+# --------------------------------------------------------------
+# Variables
+# --------------------------------------------------------------
 variables:
-  CUSTOMER: 'inuits'
-  APPLICATION: 'dams-frontend'
+  CUSTOMER: inuits
+  PROJECT: dams
+  APPLICATION: frontend
+
   SKIP_DEPLOY: 'true'
+
+  HARBOR_PROJECT_DEV: inuits-infra-dev
+  TARGET_CLUSTER_DEV: inuits-prod
+
+
+# --------------------------------------------------------------
+# Template overrides
+# --------------------------------------------------------------
+
+# Disable prod, not needed
+prod:
+  rules:
+    - when: never
