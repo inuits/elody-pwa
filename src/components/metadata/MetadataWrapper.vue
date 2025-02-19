@@ -247,11 +247,18 @@ const setNewValue = (
     | BaseRelationValuesInput
     | BaseRelationValuesInput[],
 ) => {
-  const parsedDate = DateTime.fromISO(newValue);
-  if (parsedDate.isValid)
-    value.value = parsedDate.toFormat("yyyy-MM-dd");
-  else
+  if (
+    props.metadata?.inputField &&
+    (props.metadata.inputField.type === InputFieldTypes.BaseDateField ||
+    props.metadata.inputField.type === InputFieldTypes.BaseDateTimeField)
+  ) {
+    const parsedDate = DateTime.fromISO(newValue);
+    if (parsedDate.isValid)
+      value.value = parsedDate.toFormat("yyyy-MM-dd");
+  }
+  else {
     value.value = newValue;
+  }
 
   const form = getForm(props.formId);
   if (form) {
