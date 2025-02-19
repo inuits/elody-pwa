@@ -21,7 +21,7 @@ variables:
 
   SKIP_DEPLOY: 'true'
 
-  HARBOR_PROJECT_DEV: inuits-infra-dev
+  HARBOR_PROJECT_DEV: elody-dams-dev
   TARGET_CLUSTER_DEV: inuits-prod
 
 
