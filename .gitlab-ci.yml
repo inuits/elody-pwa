@@ -29,6 +29,11 @@ variables:
 # Template overrides
 # --------------------------------------------------------------
 
+# Disable uat, not needed
+uat:
+  rules:
+    - when: never
+
 # Disable prod, not needed
 prod:
   rules:
