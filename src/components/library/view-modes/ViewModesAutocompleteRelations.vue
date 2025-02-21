@@ -46,6 +46,7 @@ const props = withDefaults(
     advancedFilterInputForRetrievingRelatedOptions?: [AdvancedFilterInput];
     advancedFilterInputForRetrievingAllOptions?: [AdvancedFilterInput];
     advancedFilterInputForSearchingOptions: AdvancedFilterInput;
+    relationFilter: AdvancedFilterInput;
     relationType: string;
     fromRelationType: string;
     dependsOn: string;
@@ -94,9 +95,10 @@ const {
   props.metadataKeyToGetOptionsFor as Entitytyping,
   "fetchAll",
   undefined,
+  undefined,
   props.advancedFilterInputForSearchingOptions,
   advancedFilterInputForRetrievingAllOptions.value,
-  props.formId
+  props.formId,
 );
 
 const {
@@ -106,10 +108,12 @@ const {
 } = useGetDropdownOptions(
   props.metadataKeyToGetOptionsFor as Entitytyping,
   entityId as string,
+  props.relationType,
   props.fromRelationType,
   props.advancedFilterInputForSearchingOptions,
   advancedFilterInputForRetrievingRelatedOptions.value,
   props.formId,
+  props.relationFilter,
 );
 
 onMounted(async () => {
@@ -125,7 +129,7 @@ onMounted(async () => {
 
 const initAutocompleteOption = async () => {
   await initialize();
-  if (entityId && props.fromRelationType && props.mode !== "create") {
+  if (entityId && (props.relationType || props.fromRelationType) && props.mode !== "create") {
     await relatedEntitiesInitialize();
   }
 

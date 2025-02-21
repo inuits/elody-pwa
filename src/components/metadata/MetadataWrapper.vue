@@ -120,7 +120,11 @@
                 :advanced-filter-input-for-retrieving-all-options="
                   metadata.inputField.advancedFilterInputForRetrievingAllOptions
                 "
+                :relation-filter="
+                  metadata.inputField.relationFilter
+                "
                 :is-metadata-field="metadata.inputField?.isMetadataField"
+                :relation-type="metadata.inputField?.relationType"
                 :from-relation-type="metadata.inputField?.fromRelationType"
                 :disabled="true"
                 @click.stop.prevent
