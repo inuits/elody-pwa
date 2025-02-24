@@ -11,10 +11,12 @@ export type AdvancedSearchFilters = {
 export const useAdvancedSearch = (config: any) => {
   const { loadDocument } = useImport();
 
+  const entitiesLoading = ref<boolean>(false);
   const items = ref<any | undefined>(undefined);
   const filters = ref<AdvancedSearchFilters | undefined>(undefined);
 
   const getEntities = async (): Promise<void> => {
+    entitiesLoading.value = true;
     const query = await loadDocument("GetEntitiesByAdvancedSearch");
     const response = await apolloClient.query({
       query,
@@ -25,6 +27,7 @@ export const useAdvancedSearch = (config: any) => {
     });
 
     items.value = response.data.EntitiesByAdvancedSearch.results;
+    entitiesLoading.value = false;
   };
 
   const setFilters = (newFilters: AdvancedSearchFilters) => {
@@ -33,7 +36,7 @@ export const useAdvancedSearch = (config: any) => {
 
 
   const getFiltersForAdvancedSearch = (value: string) => {
-
+    if (!config.features.advancedSearch) return {}
     return {
         q: value.trim() === "" ? "*" : value,
         query_by: config.features.advancedSearch.queryBy,
@@ -42,6 +45,7 @@ export const useAdvancedSearch = (config: any) => {
         sort_by: config.features.advancedSearch.sortBy,
         limit: config.features.advancedSearch.limit,
         per_page: config.features.advancedSearch.perPage,
+        facet_by: config.features.advancedSearch.facetBy,
     };
   };
 
@@ -50,5 +54,6 @@ export const useAdvancedSearch = (config: any) => {
     getEntities,
     setFilters,
     getFiltersForAdvancedSearch,
+    entitiesLoading,
   };
 };

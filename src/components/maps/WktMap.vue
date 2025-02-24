@@ -42,19 +42,19 @@ const props = withDefaults(
   },
 );
 
-const { getWktFeature, geoToMercator } = useMaps();
+const { getWktFeature, getMarkerFeature } = useMaps();
 
 const viewRef = ref<{ view: View }>(null);
 const projection = ref<string>("EPSG:4326");
 
 const mapCenter = computed(() => {
   const [lat = 0, long = 0] = props.center;
-  return geoToMercator(lat, long);
+  return [lat, long];
 });
 
 const point = computed(() => {
-  const [point1, point2] = mapCenter.value;
-  return getWktFeature(`POINT(${point1} ${point2})`);
+  const [lat, long] = mapCenter.value;
+  return getMarkerFeature(lat, long);
 });
 
 const wkt = computed(() => {

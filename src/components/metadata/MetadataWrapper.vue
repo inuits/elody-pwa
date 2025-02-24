@@ -47,7 +47,11 @@
     </div>
     <entity-element-metadata-edit
       v-if="isEdit && metadata.inputField"
-      :fieldKey="(isMetadataOnRelation || isRootdataOnRelation) ? `${fieldKeyWithId}` : metadata.key"
+      :fieldKey="
+        isMetadataOnRelation || isRootdataOnRelation
+          ? `${fieldKeyWithId}`
+          : metadata.key
+      "
       :label="metadata.label as string"
       v-model:value="value"
       :field="metadata.inputField"
@@ -197,6 +201,7 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import { Unicons } from "@/types";
+import { DateTime } from "luxon";
 
 const { t } = useI18n();
 const { getForm, getKeyBasedOnInputField } = useFormHelper();
@@ -242,10 +247,21 @@ const setNewValue = (
     | BaseRelationValuesInput
     | BaseRelationValuesInput[],
 ) => {
-  value.value = newValue;
+  if (
+    props.metadata?.inputField &&
+    props.metadata.inputField.type === InputFieldTypes.Date
+  ) {
+    const parsedDate = DateTime.fromISO(newValue);
+    if (parsedDate.isValid)
+      value.value = parsedDate.toFormat("yyyy-MM-dd");
+  }
+  else {
+    value.value = newValue;
+  }
+
   const form = getForm(props.formId);
   if (form) {
-    form.setFieldValue(veeValidateField.value, newValue);
+    form.setFieldValue(veeValidateField.value, value.value);
   }
 };
 

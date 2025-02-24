@@ -1,7 +1,7 @@
 <template>
   <base-context-menu-item
     @clicked="doAction()"
-    :label="$t(label)"
+    :label="$t(label, [entityTypeLabel])"
     :icon="Unicons[icon].name"
     :disable="isDisabled"
     :tooltipLabel="isDisabled ? 'tooltip.bulkOperationsActionBar.readmode' : undefined"
@@ -62,6 +62,7 @@ const apolloClient = inject(DefaultApolloClient);
 const { createShareLink } = useShareLink(apolloClient as ApolloClient<any>);
 const config: any = inject("config");
 
+const entityTypeLabel = computed(() => t(`entity-translations.singular.${props.entityType}`));
 const isDisabled = computed(() => {
   return (
     isEdit.value &&

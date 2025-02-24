@@ -93,6 +93,9 @@ const useUpload = () => {
       mediafilesWithOcr: {
         checkUploadValidityFn: () => __checkUploadValidityMediafilesWithOcr(),
       },
+      optionalMediafiles: {
+        checkUploadValidityFn: () => __checkUploadValidityOptionalMediafiles(),
+      },
     };
     uploadValidationFn.value =
       settingsObject[uploadSettings.uploadFlow].checkUploadValidityFn;
@@ -166,6 +169,10 @@ const useUpload = () => {
     );
   };
 
+  const __checkUploadValidityOptionalMediafiles = (): boolean => {
+    return true;
+  };
+
   const __uploadCsvWithoutMediafiles = async () => {
     try {
       await __batchEntities(__getCsvBlob(), false);
@@ -224,7 +231,7 @@ const useUpload = () => {
     );
     toggleUploadStatus();
 
-    if (uploadFlow.value === UploadFlow.MediafilesOnly)
+    if (uploadFlow.value === UploadFlow.MediafilesOnly || uploadFlow.value === UploadFlow.OptionalMediafiles)
       __updateGlobalUploadProgress(
         ProgressStepType.Prepare,
         ProgressStepStatus.Complete,
@@ -503,7 +510,7 @@ const useUpload = () => {
         );
       }
     }
-    if (uploadFlow.value === UploadFlow.MediafilesOnly) {
+    if (uploadFlow.value === UploadFlow.MediafilesOnly || uploadFlow.value === UploadFlow.OptionalMediafiles) {
       uploadUrl = await __getUploadUrlForMediafileOnEntity(entityId, file);
     }
 
@@ -625,6 +632,9 @@ const useUpload = () => {
       else return mediafiles.value.length > 0;
     }
 
+    if (uploadFlow.value === UploadFlow.OptionalMediafiles)
+      return true;
+
     if (uploadFlow.value === UploadFlow.MediafilesOnly)
       return !containsCsv.value && mediafiles.value.length > 0;
 
@@ -707,6 +717,7 @@ const useUpload = () => {
 
       if (
         uploadFlow.value === UploadFlow.MediafilesOnly ||
+        uploadFlow.value === UploadFlow.OptionalMediafiles ||
         (uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv &&
           !containsCsv.value)
       ) {

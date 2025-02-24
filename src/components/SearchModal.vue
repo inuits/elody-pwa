@@ -12,7 +12,7 @@
       />
       <div class="overflow-y-scroll h-full">
         <base-library
-          v-if="isModalOpened"
+          v-if="isModalOpened && !entitiesLoading"
           :bulk-operations-context="BulkOperationsContextEnum.SearchModal"
           list-item-route-name="SingleEntity"
           :enable-advanced-filters="false"
@@ -23,6 +23,18 @@
           :predefinedEntities="hasAdvancedSearchEnabled ? items : undefined"
           :ignore-fetching-data="hasAdvancedSearchEnabled"
         ></base-library>
+        <div v-else >
+          <div
+            data-cy="base-library-grid-container"
+            id="gridContainer"
+          >
+            <ViewModesList
+              :entities="createPlaceholderEntities(20) as Entity[]"
+              :entities-loading="true"
+              :mode="'list'"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </BaseModal>
@@ -31,6 +43,7 @@
 <script setup lang="ts">
 import {
   type AdvancedFilterInput,
+  type Entity,
   SearchInputType,
   TypeModals,
 } from "@/generated-types/queries";
@@ -44,10 +57,12 @@ import {
   useAdvancedSearch,
   type AdvancedSearchFilters,
 } from "@/composables/useAdvancedSearch";
+import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
+import { createPlaceholderEntities } from "@/helpers";
 
 const config: any = inject("config");
 const { closeModal } = useBaseModal();
-const { setFilters, getEntities, items } = useAdvancedSearch(config);
+const { setFilters, getEntities, items, entitiesLoading } = useAdvancedSearch(config);
 const filters = ref<AdvancedFilterInput[]>([]);
 
 const hasAdvancedSearchEnabled = computed(() => {
