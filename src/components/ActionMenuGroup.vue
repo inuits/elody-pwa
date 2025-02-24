@@ -7,7 +7,7 @@
       button-style="accentNormal"
       button-size="small"
       :disabled="isMainActionDisabled || !primaryOption.active"
-      :label="t(primaryOption.label, [entityType])"
+      :label="t(primaryOption.label, [entityTypeLabel])"
       :tooltip-label="primaryOption.actionContext?.labelForTooltip"
       @click="handleEmit(primaryOption)"
     />
@@ -32,7 +32,7 @@
       <BaseContextMenuItem
         v-for="(option, idx) in filterSecondaryDropdownOptions"
         :key="idx"
-        :label="t(option?.label, [entityType])"
+        :label="t(option?.label, [entityTypeLabel])"
         :tooltip-label="option?.actionContext?.labelForTooltip"
         :disable="!option.active"
         @clicked="handleEmit(option)"
@@ -91,6 +91,7 @@ const { t } = useI18n();
 
 const availableOptions = ref<DropdownOption[]>([]);
 
+const entityTypeLabel = computed(() => t(`entity-translations.plural.${props.entityType}`));
 const primaryOption = computed(() => {
   let option = availableOptions.value.find(
     (item: DropdownOption) => item.primary,

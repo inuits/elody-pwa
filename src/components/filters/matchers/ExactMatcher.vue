@@ -87,7 +87,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { FilterListItem } from "@/composables/useStateManagement";
+import { type FilterListItem } from "@/composables/useStateManagement";
 import {
   AdvancedFilterTypes,
   AutocompleteSelectionOptions,
@@ -110,7 +110,7 @@ import {
   isDateTime,
 } from "@/helpers";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
-import { computed, defineEmits, onMounted, reactive, ref, watch } from "vue";
+import { computed, defineEmits, inject, onMounted, reactive, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute } from "vue-router";
@@ -137,9 +137,9 @@ const emit = defineEmits<{
   (event: "newInputValue", input: string | number): void;
 }>();
 
+const config = inject("config") as any;
 const route = useRoute();
-const { t } = useI18n();
-
+const { locale, t } = useI18n();
 const input = ref<string | number | DropdownOption[] | boolean[]>();
 const inputTime = ref<number | string | undefined>(undefined);
 const totalInput = computed(() =>
@@ -186,7 +186,7 @@ const mapOptionsFilterInput = (
 
     const processedValue = handleVariableValues(filterInput.value);
 
-    optionsFilterInput.push({
+    const optionFilter: AdvancedFilterInput = {
       lookup: filterInput.lookup ? lookup : undefined,
       type: filterInput.type,
       key: filterInput.key,
@@ -195,7 +195,12 @@ const mapOptionsFilterInput = (
       item_types: filterInput.item_types ?? [],
       provide_value_options_for_key:
         filterInput.type !== AdvancedFilterTypes.Type,
-    });
+    };
+
+    if (config.features.contentIsMultiLanguage)
+      optionFilter["inner_exact_matches"] = { "lang": locale.value };
+
+    optionsFilterInput.push(optionFilter);
   }
 
   return optionsFilterInput;
@@ -226,7 +231,9 @@ const filterOptions = reactive<
 onFilterOptionsResult((result) => {
   const options = result.data?.FilterOptions;
   if (options) {
-    input.value = [];
+    if (props.filter.advancedFilter.type !== "date" && props.lastTypedValue)
+      input.value = props.lastTypedValue;
+    else input.value = [];
     options.forEach((option) => {
       const isSelected =
         props.relatedActiveFilter &&
