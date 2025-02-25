@@ -15,13 +15,12 @@ import {
 } from "@/composables/useBulkOperations";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
-import { computed } from "vue";
 import { useRoute } from "vue-router";
+import useEntitySingle from "@/composables/useEntitySingle";
 
 const { addRelations } = useFormHelper();
 const { deleteRelations } = useDeleteRelations();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
-const route = useRoute();
 
 const ElodyTaggingExtension = Node.create({
   name: "ElodyTaggingExtension",
@@ -126,6 +125,7 @@ const ElodyTaggingExtension = Node.create({
           commands.insertContent({ type: "text", text: " " });
 
           view.focus();
+          useBaseModal().closeModal(TypeModals.ElodyEntityTaggingModal);
         },
     };
   },
@@ -135,7 +135,7 @@ const ElodyTaggingExtension = Node.create({
         this.editor.commands.command(({ tr, state }) => {
           const { selection } = state;
           const { empty, anchor } = selection;
-          const parentId = computed(() => route.params["id"]);
+          const { getEntityUuid } = useEntitySingle();
 
           if (!empty) {
             return false;
@@ -143,12 +143,14 @@ const ElodyTaggingExtension = Node.create({
 
           state.doc.nodesBetween(anchor - 1, anchor, (node, pos) => {
             if (node.type.name === this.name) {
+              console.log("delete", node);
               this.editor.commands.deleteNode(node);
               deleteRelations(
-                parentId,
-                "",
-                node.attrs.entityId,
+                getEntityUuid(),
+                "refWords",
+                [{ key: node.attrs.entityId }],
                 BulkOperationsContextEnum.TagEntityModal,
+                false,
               );
             }
           });
