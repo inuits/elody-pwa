@@ -42,6 +42,7 @@ export function useDeleteRelations() {
     relationType: string,
     selectedItems: SelectedItem[],
     context: Context,
+    saveImmediately: boolean = true,
   ) => {
     const form = getForm(entityId) as FormContext;
     if (!form) return;
@@ -64,7 +65,7 @@ export function useDeleteRelations() {
     });
 
     form.setFieldValue(`relationValues.${relationType}`, relations);
-    await save();
+    if (saveImmediately) await save();
   };
 
   const submit = async (

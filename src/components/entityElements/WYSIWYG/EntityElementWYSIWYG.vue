@@ -83,6 +83,9 @@ onMounted(async () => {
           "prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl mx-4 focus:outline-none border border-[rgba(0,58,82,0.6)] rounded-md min-h-[250px] p-2",
       },
     },
+    parseOptions: {
+      preserveWhitespace: true,
+    },
     editable: isEdit.value,
     content: initialValue.value,
   });
