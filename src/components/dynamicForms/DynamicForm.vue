@@ -5,15 +5,15 @@
     :key="dynamicFormQuery"
   >
     <div v-if="isLoading" class="w-full">
-      <div class="absolute block top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl text-gray-700">
+      <div
+        class="absolute block top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl text-gray-700"
+      >
         <spinner-loader theme="accent" />
       </div>
     </div>
     <div
       class="w-full [&>*>button:last-child]:mb-0"
-      :class="[
-        isLoading ? 'opacity-20' : 'opacity-100'
-      ]"
+      :class="[isLoading ? 'opacity-20' : 'opacity-100']"
     >
       <h1
         v-if="dynamicForm?.GetDynamicForm?.label && showFormTitle"
@@ -219,11 +219,11 @@ import {
   type MutateEntityValuesMutationVariables,
   OcrType,
   type PanelMetaData,
+  RouteNames,
   TypeModals,
   type UploadContainer,
   type UploadField,
   UploadFlow,
-  RouteNames,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -406,7 +406,10 @@ const isLinkedUpload = computed<boolean>(() => {
     (formField: any) => formField.__typename === "UploadContainer",
   ) as UploadContainer | undefined;
   if (!uploadContainer) return false;
-  return uploadContainer.uploadFlow === UploadFlow.MediafilesOnly || uploadContainer.uploadFlow === UploadFlow.OptionalMediafiles;
+  return (
+    uploadContainer.uploadFlow === UploadFlow.MediafilesOnly ||
+    uploadContainer.uploadFlow === UploadFlow.OptionalMediafiles
+  );
 });
 
 const createEntityFromFormInput = (
@@ -473,7 +476,13 @@ const submitActionFunction = async (field: FormAction) => {
     const callbackFunction: Function = extractActionArguments(field.actionType);
     if (config.features.hasBulkSelect && callbackFunction) callbackFunction();
     else {
-      setTimeout(() => goToEntityPage(entity, "SingleEntity", props.router), 1);
+      if (getModalInfo(TypeModals.ElodyEntityTaggingModal).open)
+        closeModal(TypeModals.ElodyEntityTaggingModal);
+      else
+        setTimeout(
+          () => goToEntityPage(entity, "SingleEntity", props.router),
+          1,
+        );
     }
     closeAndDeleteForm();
   } catch (e: ApolloError) {
@@ -758,7 +767,7 @@ const downloadDataFromResponse = (data: any) => {
 
 const setShowErrors = (show: boolean) => {
   showErrors.value = show;
-}
+};
 
 watch(
   () => props.dynamicFormQuery,
