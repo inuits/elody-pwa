@@ -476,9 +476,12 @@ const submitActionFunction = async (field: FormAction) => {
     const callbackFunction: Function = extractActionArguments(field.actionType);
     if (config.features.hasBulkSelect && callbackFunction) callbackFunction();
     else {
-      if (getModalInfo(TypeModals.ElodyEntityTaggingModal).open)
-        closeModal(TypeModals.ElodyEntityTaggingModal);
-      else
+      if (getModalInfo(TypeModals.ElodyEntityTaggingModal).open) {
+        const modalInfo = getModalInfo(TypeModals.ElodyEntityTaggingModal);
+        const relationType =
+          modalInfo.element.taggingConfiguration?.relationType;
+        modalInfo.editor.commands.linkEntityToTaggedText(entity, relationType);
+      } else
         setTimeout(
           () => goToEntityPage(entity, "SingleEntity", props.router),
           1,
