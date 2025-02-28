@@ -452,7 +452,8 @@ const useFormHelper = () => {
       for (let i = 0; i < relations.length; i++) {
         const relation = relations[i];
         if (relation.key === id) {
-          if (!relation.metadata) relation.metadata = [];
+          if (!relation.metadata || !Array.isArray(relation.metadata))
+            relation.metadata = [];
           const existingField = relation.metadata.find(
             (metadataItem: any) => metadataItem.key === fieldKey,
           );
