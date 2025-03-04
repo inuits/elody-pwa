@@ -75,7 +75,6 @@ const ElodyTaggingExtension = Node.create({
       mergeAttributes(
         {
           "data-tag": this.name,
-          class: "bg-accent-normal text-white rounded-md px-1 cursor-pointer",
         },
         HTMLAttributes,
       ),

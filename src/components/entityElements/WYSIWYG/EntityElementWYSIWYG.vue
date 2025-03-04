@@ -124,7 +124,7 @@ watch(
 );
 </script>
 
-<style scoped>
+<style>
 .v-enter-active,
 .v-leave-active {
   transition: opacity 0.5s ease;
@@ -133,5 +133,9 @@ watch(
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
+}
+
+w {
+  @apply bg-accent-normal text-white rounded-md px-1 cursor-pointer;
 }
 </style>
