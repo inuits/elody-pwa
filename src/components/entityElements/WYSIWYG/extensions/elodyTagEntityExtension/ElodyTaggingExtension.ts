@@ -143,7 +143,6 @@ const ElodyTaggingExtension = Node.create({
 
           state.doc.nodesBetween(anchor - 1, anchor, (node, pos) => {
             if (node.type.name === this.name) {
-              console.log("delete", node);
               this.editor.commands.deleteNode(node);
               deleteRelations(
                 getEntityUuid(),

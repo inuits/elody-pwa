@@ -252,10 +252,8 @@ const setNewValue = (
     props.metadata.inputField.type === InputFieldTypes.Date
   ) {
     const parsedDate = DateTime.fromISO(newValue);
-    if (parsedDate.isValid)
-      value.value = parsedDate.toFormat("yyyy-MM-dd");
-  }
-  else {
+    if (parsedDate.isValid) value.value = parsedDate.toFormat("yyyy-MM-dd");
+  } else {
     value.value = newValue;
   }
 

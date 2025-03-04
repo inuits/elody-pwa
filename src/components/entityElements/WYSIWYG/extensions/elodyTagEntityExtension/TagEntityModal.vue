@@ -77,7 +77,6 @@ import {
   EntityPickerMode,
   Entitytyping,
   type MetadataInput,
-  type TeaserMetadata,
   TypeModals,
   type WysiwygElement,
 } from "@/generated-types/queries";
@@ -96,9 +95,9 @@ import {
   type InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
-import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import type { Editor } from "@tiptap/vue-3";
 import { tagEntity } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
+import { extractTitleKeyFromMetadataFilter } from "@/helpers";
 
 const { setBulkSelectionLimit, isBulkSelectionLimitReached, getEnqueuedItems } =
   useBulkOperations();
@@ -120,9 +119,9 @@ const editor = computed<Editor>(
 const form = computed(() =>
   getForm(element.value.taggingConfiguration?.createNewEntityFormQuery),
 );
-const selectedText = computed<string>(
-  () => getModalInfo(TypeModals.ElodyEntityTaggingModal).selectedText,
-);
+const selectedText = computed<string>(() => {
+  return getModalInfo(TypeModals.ElodyEntityTaggingModal).selectedText;
+});
 
 const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
   const metadataFilterString =
@@ -138,7 +137,10 @@ const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
     !entityType
   )
     return [];
-  form.value.setFieldValue(`intialValues.${metadataKey}`, selectedText.value);
+  const veeValidateKey: string = `intialValues.${metadataKey}`;
+  if (!form.value.values.intialValues[metadataKey] && !form.value.meta.dirty)
+    form.value.setFieldValue(veeValidateKey, selectedText.value);
+
   const typeFilter: AdvancedFilterInput = {
     match_exact: true,
     type: AdvancedFilterTypes.Type,
@@ -152,10 +154,6 @@ const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
   };
   return [typeFilter, metadataFilter];
 });
-
-const extractTitleKeyFromFilter = (metadataFilter: string) => {
-  return metadataFilter.split(".")[1];
-};
 
 const getNewTaggingTextFromTeaserMetadata = (
   teaserMetadataKey: string,
@@ -176,7 +174,7 @@ const tagExistingEntityFlow = () => {
   if (!isBulkSelectionLimitReached(context)) return;
 
   const entityToTag = getEnqueuedItems(context)[0];
-  const newTaggingTextKey = extractTitleKeyFromFilter(
+  const newTaggingTextKey = extractTitleKeyFromMetadataFilter(
     element.value.taggingConfiguration?.metadataFilter,
   );
   const newTaggingText = getNewTaggingTextFromTeaserMetadata(
@@ -208,13 +206,6 @@ watch(
     setBulkSelectionLimit(
       BulkOperationsContextEnum.TagEntityModal,
       selectionLimit,
-    );
-    initializeGeneralProperties(
-      parentId.value,
-      element.value.taggingConfiguration?.relationType,
-      Collection.Entities,
-      () => tagNewlyCreatedEntityFlow(),
-      BulkOperationTypes.AddRelation,
     );
   },
 );

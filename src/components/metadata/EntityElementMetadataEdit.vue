@@ -135,7 +135,6 @@ const metadataValue = computed<string | DropdownOption | DropdownOption[]>({
     return props.value;
   },
   set(newValue) {
-    console.log("set");
     const valueFromMetadata = getValueFromMetadata(newValue);
     emit("update:value", valueFromMetadata);
   },
