@@ -701,16 +701,18 @@ export const requiresAuthForEntity = (
   metaOfChildRoutes: any[],
 ): boolean => {
   const entityType = mapUrlToEntityType(type) || type;
-  if (!entityType)
-    return false;
+  if (!entityType) return false;
 
   const metaOfLinkedEntity = metaOfChildRoutes.find(
     (item) =>
       String(item.entityType).toLowerCase() ===
       String(entityType).toLowerCase(),
   );
-  if (!metaOfLinkedEntity || !metaOfLinkedEntity.requiresAuth)
-    return false;
+  if (!metaOfLinkedEntity || !metaOfLinkedEntity.requiresAuth) return false;
 
   return !auth.isAuthenticated.value;
+};
+
+export const extractTitleKeyFromMetadataFilter = (metadataFilter: string) => {
+  return metadataFilter.split(".")[1];
 };

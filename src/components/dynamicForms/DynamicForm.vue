@@ -209,6 +209,7 @@ import {
   BaseFieldType,
   type BaseRelationValuesInput,
   EndpointResponseActions,
+  type Entity,
   type EntityInput,
   EntityPickerMode,
   Entitytyping,
@@ -237,8 +238,9 @@ import {
   calculateFutureDate,
   goToEntityPage,
   goToEntityPageById,
+  extractTitleKeyFromMetadataFilter,
 } from "@/helpers";
-import type { Router } from "vue-router";
+import { type Router, useRoute } from "vue-router";
 import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUploadButton.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
@@ -259,6 +261,8 @@ import { useModalActions } from "@/composables/useModalActions";
 import { useErrorCodes } from "@/composables/useErrorCodes";
 import ImportWrapper from "@/components/imports/ImportWrapper.vue";
 import useEntitySingle from "@/composables/useEntitySingle";
+import { tagEntity } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
+import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 
 const props = withDefaults(
   defineProps<{
@@ -330,6 +334,7 @@ const {
   getCustomGetEntitiesQuery,
 } = useEntityPickerModal();
 const { extractActionArguments, getCallbackFunction } = useModalActions();
+const route = useRoute();
 
 const { mutate } = useMutation<
   MutateEntityValuesMutation,
@@ -460,6 +465,27 @@ const uploadActionFunction = async () => {
   return;
 };
 
+const tagNewlyCreatedEntity = (entity: Entity): void => {
+  const parentId = route.params["id"];
+  const modalInfo = getModalInfo(TypeModals.ElodyEntityTaggingModal);
+  const relationType = modalInfo.element.taggingConfiguration?.relationType;
+  const titleKey = extractTitleKeyFromMetadataFilter(
+    modalInfo.element.taggingConfiguration?.metadataFilter,
+  );
+  const newText = entity.intialValues[titleKey].toLowerCase();
+  tagEntity(
+    entity,
+    relationType,
+    parentId,
+    BulkOperationsContextEnum.TagEntityModal,
+  );
+  modalInfo.editor.commands.linkEntityToTaggedText(
+    entity,
+    relationType,
+    newText,
+  );
+};
+
 const submitActionFunction = async (field: FormAction) => {
   if (!(await isFormValid())) return;
   const document = await getQuery(field.actionQuery as string);
@@ -467,7 +493,7 @@ const submitActionFunction = async (field: FormAction) => {
     field.creationType,
     extractActionArguments(field.actionType), //Use this
   );
-  let entity: any;
+  let entity: Entity;
   try {
     entity = (await performSubmitAction(document, entityInput)).data
       .CreateEntity;
@@ -476,12 +502,9 @@ const submitActionFunction = async (field: FormAction) => {
     const callbackFunction: Function = extractActionArguments(field.actionType);
     if (config.features.hasBulkSelect && callbackFunction) callbackFunction();
     else {
-      if (getModalInfo(TypeModals.ElodyEntityTaggingModal).open) {
-        const modalInfo = getModalInfo(TypeModals.ElodyEntityTaggingModal);
-        const relationType =
-          modalInfo.element.taggingConfiguration?.relationType;
-        modalInfo.editor.commands.linkEntityToTaggedText(entity, relationType);
-      } else
+      if (getModalInfo(TypeModals.ElodyEntityTaggingModal).open)
+        tagNewlyCreatedEntity(entity);
+      else
         setTimeout(
           () => goToEntityPage(entity, "SingleEntity", props.router),
           1,
@@ -489,6 +512,7 @@ const submitActionFunction = async (field: FormAction) => {
     }
     closeAndDeleteForm();
   } catch (e: ApolloError) {
+    console.error(e);
     const errorObject = await getMessageAndCodeFromApolloError(e);
     isPerformingAction.value = false;
     submitErrors.value = errorObject.message;
