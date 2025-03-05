@@ -12,7 +12,7 @@
         {{ t(element.label) }}
       </h1>
     </div>
-    <div v-if="editor" class="flex flex-col py-4">
+    <div v-if="editor" ref="editorNode" class="flex flex-col py-4">
       <Transition>
         <WYSIWYGButtons
           v-if="isEdit"
@@ -38,6 +38,7 @@ import { useI18n } from "vue-i18n";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useEdit from "@/composables/useEdit";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { setTaggedEntityInfoTooltip } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 
 const props = defineProps<{
   formId: string;
@@ -54,6 +55,7 @@ const { t } = useI18n();
 
 const content = computed(() => editor.value?.getHTML());
 const form = computed(() => getForm(props.formId));
+const editorNode = ref<HTMLDivElement | undefined>(undefined);
 const initialValue = ref<string>("");
 
 const updateModalInfo = () => {
@@ -88,6 +90,16 @@ onMounted(async () => {
     },
     editable: isEdit.value,
     content: initialValue.value,
+    onCreate: () => {
+      setTaggedEntityInfoTooltip(editorNode.value);
+    },
+    onUpdate: () => {
+      setTaggedEntityInfoTooltip(editorNode.value, false);
+      setTaggedEntityInfoTooltip(editorNode.value);
+    },
+    onDestroy: () => {
+      setTaggedEntityInfoTooltip(editorNode.value, false);
+    },
   });
 
   if (props.element.taggingConfiguration) updateModalInfo();
@@ -112,6 +124,7 @@ watch(
 watch(
   () => isEdit.value,
   () => {
+    if (!isEdit.value) setTaggedEntityInfoTooltip(editorNode.value, false);
     if (editor.value) {
       editor.value.setEditable(isEdit.value);
       if (!isEdit.value) {

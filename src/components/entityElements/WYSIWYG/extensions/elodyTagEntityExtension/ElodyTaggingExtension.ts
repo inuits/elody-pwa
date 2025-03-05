@@ -15,12 +15,13 @@ import {
 } from "@/composables/useBulkOperations";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
-import { useRoute } from "vue-router";
 import useEntitySingle from "@/composables/useEntitySingle";
 
 const { addRelations } = useFormHelper();
 const { deleteRelations } = useDeleteRelations();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
+
+const customNodes: string[] = ["w"];
 
 const ElodyTaggingExtension = Node.create({
   name: "ElodyTaggingExtension",
@@ -42,25 +43,12 @@ const ElodyTaggingExtension = Node.create({
           };
         },
       },
-      relationType: {
-        default: null,
-        parseHTML: (element) => element.getAttribute("data-relation-type"),
-        renderHTML: (attributes) => {
-          if (!attributes.relationType) {
-            return {};
-          }
-
-          return {
-            "data-relation-type": attributes.relationType,
-          };
-        },
-      },
     };
   },
   parseHTML() {
     return [
       {
-        tag: 'w[data-tag="ElodyTaggingExtension"]',
+        tag: "w",
         getAttrs: (element) => {
           return {
             entityId: element.getAttribute("data-entity-id"),
@@ -70,16 +58,7 @@ const ElodyTaggingExtension = Node.create({
     ];
   },
   renderHTML({ HTMLAttributes }) {
-    return [
-      "w",
-      mergeAttributes(
-        {
-          "data-tag": this.name,
-        },
-        HTMLAttributes,
-      ),
-      0,
-    ];
+    return ["w", mergeAttributes(HTMLAttributes), 0];
   },
   addCommands() {
     return {
@@ -114,9 +93,7 @@ const ElodyTaggingExtension = Node.create({
           commands.insertContentAt(from, {
             type: this.name,
             attrs: {
-              "data-tag": this.name,
               entityId: entity.id,
-              relationType: relationType,
             },
             content: [{ type: "text", text: selectedText }],
           });
@@ -187,6 +164,38 @@ export const untagEntity = async (
   context: Context,
 ) => {
   await deleteRelations(parentEntityId, relationType, [tagToDelete], context);
+};
+
+const openDetailModal = (element: HTMLElement) => {
+  const entityId = element.getAttribute("data-entity-id");
+  useBaseModal().updateModal(TypeModals.EntityDetailModal, { entityId });
+  useBaseModal().openModal(TypeModals.EntityDetailModal, ModalStyle.Center);
+};
+
+const listenToHoveredElements = (
+  elementsToListenTo: HTMLElement[],
+  enable: boolean = true,
+  event: string = "click",
+) => {
+  elementsToListenTo.forEach((element: HTMLElement) => {
+    if (!enable) console.log("Disable eventlistener");
+    else console.log("Enable eventlistener");
+    if (enable) element.addEventListener(event, () => openDetailModal(element));
+    else element.removeEventListener(event, () => openDetailModal(element));
+  });
+};
+
+export const setTaggedEntityInfoTooltip = (
+  tipTapDocumentNode: HTMLDivElement,
+  enable: boolean = true,
+) => {
+  customNodes.forEach(async (node: string) => {
+    const elements: HTMLElement[] = Array.from(
+      tipTapDocumentNode.getElementsByTagName(node),
+    );
+    if (!elements) return;
+    listenToHoveredElements(elements, enable);
+  });
 };
 
 export default ElodyTaggingExtension;

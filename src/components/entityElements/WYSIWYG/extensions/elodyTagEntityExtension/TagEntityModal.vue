@@ -88,7 +88,6 @@ import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { useModalActions } from "@/composables/useModalActions";
 import { Unicons } from "@/types";
 import {
   BulkOperationsContextEnum,
@@ -102,7 +101,6 @@ import { extractTitleKeyFromMetadataFilter } from "@/helpers";
 const { setBulkSelectionLimit, isBulkSelectionLimitReached, getEnqueuedItems } =
   useBulkOperations();
 const { closeModal, getModalInfo } = useBaseModal();
-const { initializeGeneralProperties } = useModalActions();
 const { getForm } = useFormHelper();
 const route = useRoute();
 const router = useRouter();

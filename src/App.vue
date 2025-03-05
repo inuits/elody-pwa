@@ -24,6 +24,7 @@
       <!--        :context="route.name as Context"-->
       <!--      />-->
       <TagEntityModal />
+      <EntityDetailModal />
       <ConfirmModal><ConfirmModalView /></ConfirmModal>
     </div>
   </div>
@@ -54,6 +55,7 @@ import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
 import CreateSavedSearchModal from "./components/CreateSavedSearchModal.vue";
 import TagEntityModal from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/TagEntityModal.vue";
+import EntityDetailModal from "@/components/EntityDetailModal.vue";
 
 const config = inject<{
   features: { hasTenantSelect: boolean };
