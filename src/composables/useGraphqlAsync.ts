@@ -5,8 +5,10 @@ export const useGraphqlAsync = () => {
     return await import("@/generated-types/queries");
   };
 
-  const queryAsync = async (query: any) => {
-    return await apolloClient.query({ query });
+  const queryAsync = async (query: any, variables: any = undefined) => {
+    const queryInput = { query };
+    if (variables) queryInput["variables"] = variables;
+    return await apolloClient.query(queryInput);
   };
 
   const mutateAsync = async (mutation: any, variables: any) => {
