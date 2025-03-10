@@ -1,5 +1,8 @@
 <template>
-  <div v-if="isEdit" class="flex justify-center relative w-full p-5 z-20">
+  <div
+    v-if="isEdit"
+    class="flex justify-center fixed bottom-0 w-[calc(100%-6rem)] p-5 z-20"
+  >
     <BulkOperationsSubmitBar
       :button-label="$t('bulk-operations.save')"
       :button-icon="DamsIcons.Save"
