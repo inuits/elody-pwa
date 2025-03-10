@@ -91,7 +91,11 @@ onMounted(async () => {
     editable: isEdit.value,
     content: initialValue.value,
     onCreate: () => {
-      setTaggedEntityInfoTooltip(editorNode.value);
+      setTaggedEntityInfoTooltip(
+        editorNode.value,
+        true,
+        props.element.taggingConfiguration?.customNodeMapping,
+      );
     },
     onUpdate: () => {
       setTaggedEntityInfoTooltip(editorNode.value, false);
