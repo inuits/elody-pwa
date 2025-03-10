@@ -2,10 +2,11 @@
   <div>
     <div
       v-if="!loading && entity"
-      class="pl-24 pb-5 h-full w-full flex fixed top-0 bg-neutral-lightest pt-24 left-0 z-2"
+      class="h-full w-full flex bg-neutral-lightest z-2 overflow-y-scroll pb-4"
     >
       <entity-form
         v-if="intialValues != 'no-values' && relationValues != 'no-values'"
+        :key="entity.id"
         :intial-values="intialValues"
         :relation-values="relationValues"
         :uuid="entity.uuid"
@@ -24,7 +25,7 @@
     </div>
     <div
       v-else
-      class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0 animate-pulse text-neutral-20 z-2"
+      class="h-full w-full flex bg-neutral-0 animate-pulse text-neutral-20 z-2"
     />
   </div>
 </template>
@@ -46,6 +47,7 @@ import {
   type EntityListElement,
   type SingleMediaFileElement,
   type Entity,
+  type Entitytyping,
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
 import EntityForm from "@/components/EntityForm.vue";
@@ -95,12 +97,22 @@ const {
 } = useEntityMediafileSelector();
 const mediafileViewerContexts = ref<string[]>([]);
 
-const id = ref<string[]>(asString(route.params["id"]));
+const props = withDefaults(
+  defineProps<{
+    entityId?: string;
+    entityType?: string;
+    viewOnly: boolean;
+  }>(),
+  { viewOnly: false },
+);
+
+const id = ref<string[]>(asString(props.entityId || route.params["id"]));
 const identifiers = ref<string[]>([]);
 const loading = ref<boolean>(true);
 const { getEditableMetadataKeys } = useFormHelper();
 
 const entityType = computed(() => {
+  if (props.entityType) return props.entityType;
   const slug = String(route.params["type"]);
   return mapUrlToEntityType(slug) || slug;
 });
@@ -237,6 +249,10 @@ watch(
     watch(
       () => permissionToDelete.value || permissionToEdit.value,
       () => {
+        if (props.viewOnly) {
+          hideEditToggle();
+          return;
+        }
         if (auth.isAuthenticated.value) {
           if (permissionToEdit.value && permissionToDelete.value)
             showEditToggle("edit-delete");

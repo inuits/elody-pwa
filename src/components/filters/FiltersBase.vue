@@ -177,7 +177,7 @@ import {
   type FilterMatcherMap,
   type GetFilterMatcherMappingQuery,
   type Maybe,
-  EntitySubelement
+  EntitySubelement,
 } from "@/generated-types/queries";
 import { useStateManagement } from "@/composables/useStateManagement";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
@@ -308,7 +308,9 @@ const advancedFiltersPromise = async (entityType: Entitytyping) => {
   const variables = { entityType: entityType, context: undefined };
   if (props.filtersNeedContext) {
     variables.context = [];
-    const formValues = useFormHelper().getForm(props.route.params["id"])?.values;
+    const formValues = useFormHelper().getForm(
+      inject("entityFormData").id,
+    )?.values;
     props.filtersNeedContext.forEach((contextItem) => {
       variables.context.push(formValues[contextItem]);
     });
@@ -389,17 +391,17 @@ const handleAdvancedFilters = () => {
               advancedFilter.type === AdvancedFilterTypes.Selection &&
               advancedFilter.hidden &&
               !advancedFilter.doNotOverrideDefaultValue
-            ) // this needs a refactor
-            {
+            ) {
+              // this needs a refactor
               if (props.parentEntityIdentifiers.length > 0) {
                 if (
                   Array.isArray(hiddenFilter.value) &&
                   hiddenFilter?.value.length > 0
                 ) {
-                    hiddenFilter.value = [
-                      ...props.parentEntityIdentifiers,
-                      ...hiddenFilter?.value,
-                    ];
+                  hiddenFilter.value = [
+                    ...props.parentEntityIdentifiers,
+                    ...hiddenFilter?.value,
+                  ];
                 } else {
                   hiddenFilter.value = props.parentEntityIdentifiers;
                 }

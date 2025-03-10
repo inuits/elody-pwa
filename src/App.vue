@@ -8,7 +8,7 @@
         :class="[`pl-24 h-screen flex flex-col`]"
       >
         <the-header />
-        <div :class="['flex-grow', { 'h-full overflow-hidden': isSingle }]">
+        <div :class="['flex-grow', { 'h-full': isSingle }]">
           <router-view />
         </div>
         <edit-modal />

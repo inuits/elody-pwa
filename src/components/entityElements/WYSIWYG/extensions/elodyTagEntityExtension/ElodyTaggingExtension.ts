@@ -169,7 +169,7 @@ export const untagEntity = async (
 const openDetailModal = (element: HTMLElement) => {
   const entityId = element.getAttribute("data-entity-id");
   useBaseModal().updateModal(TypeModals.EntityDetailModal, { entityId });
-  useBaseModal().openModal(TypeModals.EntityDetailModal, ModalStyle.Center);
+  useBaseModal().openModal(TypeModals.EntityDetailModal, ModalStyle.CenterWide);
 };
 
 const listenToHoveredElements = (
@@ -178,8 +178,6 @@ const listenToHoveredElements = (
   event: string = "click",
 ) => {
   elementsToListenTo.forEach((element: HTMLElement) => {
-    if (!enable) console.log("Disable eventlistener");
-    else console.log("Enable eventlistener");
     if (enable) element.addEventListener(event, () => openDetailModal(element));
     else element.removeEventListener(event, () => openDetailModal(element));
   });
@@ -189,6 +187,7 @@ export const setTaggedEntityInfoTooltip = (
   tipTapDocumentNode: HTMLDivElement,
   enable: boolean = true,
 ) => {
+  if (!tipTapDocumentNode) return;
   customNodes.forEach(async (node: string) => {
     const elements: HTMLElement[] = Array.from(
       tipTapDocumentNode.getElementsByTagName(node),

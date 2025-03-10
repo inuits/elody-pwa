@@ -3,7 +3,7 @@
     <div
       v-for="(column, index) in currentColumnConfig"
       :key="index"
-      :class="['h-full p-5', convertSizeToTailwind(column.size)]"
+      :class="['h-full px-5', convertSizeToTailwind(column.size)]"
     >
       <entity-element
         :elements="column.elements"
@@ -54,6 +54,6 @@ watch(
   () => {
     if (columns.value) setInitialColumns(columns.value);
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
