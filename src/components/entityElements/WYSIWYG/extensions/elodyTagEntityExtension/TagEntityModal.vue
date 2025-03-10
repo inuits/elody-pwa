@@ -72,8 +72,6 @@
 import {
   type AdvancedFilterInput,
   AdvancedFilterTypes,
-  BulkOperationTypes,
-  Collection,
   EntityPickerMode,
   Entitytyping,
   type MetadataInput,
@@ -161,10 +159,6 @@ const getNewTaggingTextFromTeaserMetadata = (
     (teaserMetadataItem: MetadataInput) =>
       teaserMetadataItem.key === teaserMetadataKey,
   )[0].value;
-};
-
-const tagNewlyCreatedEntityFlow = () => {
-  console.log("In tagNewlyCreatedEntityFlow flow");
 };
 
 const tagExistingEntityFlow = () => {
