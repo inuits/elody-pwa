@@ -21,7 +21,7 @@
       </div>
       <entity-single
         :entity-id="entityId"
-        entityType="word"
+        :entityType="entityType"
         :view-only="true"
       />
     </div>
@@ -48,22 +48,14 @@ import SpinnerLoader from "@/components/SpinnerLoader.vue";
 
 const { getModalInfo, closeModal } = useBaseModal();
 
-const metadataColumn = computed(() => {
-  const entity = result.value?.Entity;
-  if (!entity) return undefined;
-  const columns = Object.values(entity.entityView).filter(
-    (item: string | object) => typeof item === "object",
-  );
-  return columns.find((column: any) =>
-    Object.keys(column.elements).includes("windowElement"),
-  );
-});
-
 const entityId = computed<string>(() => {
   return getModalInfo(TypeModals.EntityDetailModal).entityId;
 });
+const entityType = computed<string>(() => {
+  return getModalInfo(TypeModals.EntityDetailModal).entityType;
+});
 const queryVariables = computed(() => {
-  return { id: entityId.value, type: "word" };
+  return { id: entityId.value, type: entityType.value };
 });
 
 const { result, refetch, onError, loading } = useQuery<GetEntityByIdQuery>(

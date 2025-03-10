@@ -1,7 +1,9 @@
 import { mergeAttributes, Node } from "@tiptap/core";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
+  Entitytyping,
   ModalStyle,
+  type TaggingExtensionNodeMapping,
   TypeModals,
   WysiwygExtensions,
 } from "@/generated-types/queries";
@@ -21,7 +23,7 @@ const { addRelations } = useFormHelper();
 const { deleteRelations } = useDeleteRelations();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 
-const customNodes: string[] = ["w"];
+let nodeMapping: TaggingExtensionNodeMapping[] = [];
 
 const ElodyTaggingExtension = Node.create({
   name: "ElodyTaggingExtension",
@@ -166,9 +168,23 @@ export const untagEntity = async (
   await deleteRelations(parentEntityId, relationType, [tagToDelete], context);
 };
 
+const getEntityTypeByTagFromMapping = (tag: string): string => {
+  const mappingForTag = nodeMapping.find(
+    (mappingItem: TaggingExtensionNodeMapping) => mappingItem.tag === tag,
+  );
+  if (!mappingForTag)
+    throw Error(`Mapping for '${tag}' tag could not be found`);
+  else return mappingForTag.entityType;
+};
+
 const openDetailModal = (element: HTMLElement) => {
   const entityId = element.getAttribute("data-entity-id");
-  useBaseModal().updateModal(TypeModals.EntityDetailModal, { entityId });
+  const tag = element.localName;
+  const entityType = getEntityTypeByTagFromMapping(tag);
+  useBaseModal().updateModal(TypeModals.EntityDetailModal, {
+    entityId,
+    entityType,
+  });
   useBaseModal().openModal(TypeModals.EntityDetailModal, ModalStyle.CenterWide);
 };
 
@@ -186,9 +202,14 @@ const listenToHoveredElements = (
 export const setTaggedEntityInfoTooltip = (
   tipTapDocumentNode: HTMLDivElement,
   enable: boolean = true,
+  customNodeMapping: TaggingExtensionNodeMapping[] | undefined = undefined,
 ) => {
   if (!tipTapDocumentNode) return;
-  customNodes.forEach(async (node: string) => {
+  if (customNodeMapping) nodeMapping = customNodeMapping;
+  const tags = nodeMapping.map(
+    (nodeMappingItem: TaggingExtensionNodeMapping) => nodeMappingItem.tag,
+  );
+  tags.forEach(async (node: string) => {
     const elements: HTMLElement[] = Array.from(
       tipTapDocumentNode.getElementsByTagName(node),
     );
