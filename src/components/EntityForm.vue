@@ -129,6 +129,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
 
 provide("entityFormData", {
   id: props.id,
+  type: props.type,
   collection:
     childRoutes.find(
       (route: any) =>
@@ -154,12 +155,15 @@ watch(isEdit, () => {
     clearSaveCallbacks();
     addSaveCallback(submit, "first");
   }
-  dequeueAllItemsForBulkProcessing(
+
+  const contextsToReset: BulkOperationsContextEnum[] = [
     BulkOperationsContextEnum.EntityElementListEntityPickerModal,
-  );
-  dequeueAllItemsForBulkProcessing(
     BulkOperationsContextEnum.EntityElementMediaEntityPickerModal,
+  ];
+  contextsToReset.forEach((context: BulkOperationsContextEnum) =>
+    dequeueAllItemsForBulkProcessing(context),
   );
+
   mutatedEntity = undefined;
 });
 

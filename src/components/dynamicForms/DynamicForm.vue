@@ -466,7 +466,7 @@ const uploadActionFunction = async () => {
 };
 
 const tagNewlyCreatedEntity = (entity: Entity): void => {
-  const parentId = route.params["id"];
+  const parentId = inject("entityFormData").id;
   const modalInfo = getModalInfo(TypeModals.ElodyEntityTaggingModal);
   const relationType = modalInfo.element.taggingConfiguration?.relationType;
   const titleKey = extractTitleKeyFromMetadataFilter(

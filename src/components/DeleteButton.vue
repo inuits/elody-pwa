@@ -54,6 +54,8 @@ const { initializeConfirmModal } = useConfirmModal();
 const { deleteEntities } = useDeleteEntities();
 const { getForm } = useFormHelper();
 
+const entityDetails = inject("entityFormData");
+
 const deleteAvailable = computed<boolean>(
   () =>
     isEditToggleVisible.value === "edit-delete" ||
@@ -61,12 +63,12 @@ const deleteAvailable = computed<boolean>(
 );
 
 const entityType = computed(() => {
-  const slug = String(route.params["type"]);
+  const slug = entityDetails.type;
   return mapUrlToEntityType(slug) || slug;
 });
 
 const deleteEntity = async (deleteMediafiles: boolean = false) => {
-  const id = asString(route.params["id"]);
+  const id = entityDetails.id;
   const type = entityType.value;
   const context = previousPageInfo.value.parentRouteName;
 
@@ -88,7 +90,7 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
 };
 
 const openDeleteModal = () => {
-  const form = getForm(route.params["id"]);
+  const form = getForm(entityDetails.id);
   const title = getTitleOrNameFromEntity(form.values);
 
   if (deleteQueryOptions.value) {

@@ -30,7 +30,7 @@ import Chart from "chart.js/auto";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import { asString } from "@/helpers";
 import { Colors } from "chart.js";
-import { computed, ref, watch } from "vue";
+import { computed, inject, ref, watch } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute } from "vue-router";
 
@@ -39,7 +39,7 @@ const props = defineProps<{
 }>();
 
 const loading = ref<boolean>(true);
-const entityId = computed(() => asString(useRoute().params["id"]));
+const entityId = computed(() => inject("entityFormData").id);
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 let chart: Chart | null = null;
 
@@ -66,7 +66,7 @@ const { onResult, refetch } = useQuery(
     enabled: !props.element.isCollapsed,
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "no-cache",
-  })
+  }),
 );
 onResult((result) => {
   if (canvasRef.value === null || !result?.data?.GraphData) return;
@@ -96,6 +96,6 @@ watch(
   () => {
     loading.value = true;
     if (canvasRef.value && !props.element.isCollapsed) refetch();
-  }
+  },
 );
 </script>
