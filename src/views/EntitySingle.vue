@@ -209,7 +209,7 @@ watch(
     if (!entity.value || !entity.value.intialValues) return;
     useEntitySingle().setEntityUuid(entity.value.uuid || entity.value.id);
     entityForBreadcrumb.value = entity.value;
-    determineBreadcrumbs();
+    if (!props.viewOnly) determineBreadcrumbs();
 
     identifiers.value = [entity.value.uuid, entity.value.id];
     intialValues.value = determineDefaultIntialValues(
