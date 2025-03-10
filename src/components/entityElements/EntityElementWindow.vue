@@ -11,7 +11,9 @@
     <div
       class="h-full w-full border-solid border-neutral-30 border-2 bg-neutral-0 rounded-t-md"
     >
-      <div class="border-solid border-neutral-30 border-b-2 rounded-t-md flex flex-row">
+      <div
+        class="border-solid border-neutral-30 border-b-2 rounded-t-md flex flex-row"
+      >
         <h1
           data-cy="entity-element-window-title"
           class="subtitle text-text-body p-2"
@@ -20,7 +22,10 @@
         </h1>
         <MetadataEditButton
           class="my-2"
-          v-if="auth.isAuthenticated.value === true && element.editMetadataButton?.hasButton"
+          v-if="
+            auth.isAuthenticated.value === true &&
+            element.editMetadataButton?.hasButton
+          "
           button-size="small"
           :readmode-label="element.editMetadataButton.readmodeLabel"
           :editmode-label="element.editMetadataButton.editmodeLabel"
@@ -76,9 +81,9 @@ const computedIsEdit = computed(() => props.isEditOverwrite || isEdit.value);
 
 const resizeColumn = (toggled: Boolean) => {
   if (toggled) {
-    setColumnSizes([ColumnSizes.Fifty, ColumnSizes.Fifty]);
+    setColumnSizes(props.formId, [ColumnSizes.Fifty, ColumnSizes.Fifty]);
   } else {
-    resetToDefaultSizes();
+    resetToDefaultSizes(props.formId);
   }
 };
 

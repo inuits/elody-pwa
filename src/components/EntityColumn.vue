@@ -1,7 +1,7 @@
 <template>
   <div :class="['w-full flex mt-5 overflow-y-scroll', { 'mb-20': isEdit }]">
     <div
-      v-for="(column, index) in currentColumnConfig"
+      v-for="(column, index) in currentColumnConfig[id]"
       :key="index"
       :class="['h-full px-5', convertSizeToTailwind(column.size)]"
     >
@@ -52,7 +52,7 @@ const columns = computed<Column[]>(() => {
 watch(
   () => columns.value,
   () => {
-    if (columns.value) setInitialColumns(columns.value);
+    if (columns.value) setInitialColumns(props.id, columns.value);
   },
   { immediate: true },
 );
