@@ -30,6 +30,7 @@
       :advanced-filter-input-for-searching-options="
         field.advancedFilterInputForSearchingOptions
       "
+      :relation-filter="relationFilter"
       :mode="formFlow"
       :form-id="formId"
       :auto-selectable="field.autoSelectable"
@@ -85,11 +86,12 @@
 
 <script lang="ts" setup>
 import {
+  type AdvancedFilterInput,
   type Conditional,
   type DropdownOption,
   EditStatus,
   Entitytyping,
-  type HiddenField,
+  type HiddenField
 } from "@/generated-types/queries";
 import { auth } from "@/main";
 import {
@@ -117,6 +119,7 @@ const props = defineProps<{
   hiddenField?: HiddenField;
   field: InputFieldType;
   formId: string;
+  relationFilter?: AdvancedFilterInput;
   unit?: string;
   linkText?: string;
   isMetadataOnRelation?: boolean;
