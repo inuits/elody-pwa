@@ -63,6 +63,9 @@
       :isMetadataOnRelation="isMetadataOnRelation"
       :isRootdataOnRelation="isRootdataOnRelation"
       :error="errorMessage"
+      :relation-filter="
+        metadata.inputField.relationFilter
+      "
       :show-errors="
         showErrors ||
         (meta.dirty &&
