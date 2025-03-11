@@ -16,6 +16,9 @@
     <div v-else-if="isCoordinates">
       {{ `(${value.latitude}, ${value.longitude})` }}
     </div>
+    <div v-else-if="customValue">
+      {{ customValue }}
+    </div>
     <div v-else>
       <div class="flex items-center" v-if="stringIsUrl(readableValue)">
         <div v-if="(linkIcon && Unicons[linkIcon]) || linkIcon" class="pr-2">
@@ -68,6 +71,7 @@ const props = withDefaults(
     value?: any;
     unit?: string;
     linkText?: string;
+    customValue?: string;
     linkIcon?: string;
     baseLibraryMode?: BaseLibraryModes;
   }>(),
