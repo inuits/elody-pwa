@@ -99,8 +99,6 @@ onMounted(async () => {
     );
   }
 
-  console.log(editorExtensions);
-
   editor.value = new Editor({
     extensions: editorExtensions,
     editorProps: {
