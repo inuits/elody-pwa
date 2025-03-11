@@ -262,7 +262,10 @@ import { useModalActions } from "@/composables/useModalActions";
 import { useErrorCodes } from "@/composables/useErrorCodes";
 import ImportWrapper from "@/components/imports/ImportWrapper.vue";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { tagEntity } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
+import {
+  getNodeMappingForEntityType,
+  tagEntity,
+} from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 
 const props = withDefaults(
@@ -468,12 +471,12 @@ const uploadActionFunction = async () => {
 
 const tagNewlyCreatedEntity = (entity: Entity): void => {
   const parentId = route.params["id"];
-  const modalInfo = getModalInfo(TypeModals.ElodyEntityTaggingModal);
-  const relationType = modalInfo.element.taggingConfiguration?.relationType;
-  const titleKey = extractTitleKeyFromMetadataFilter(
-    modalInfo.element.taggingConfiguration?.metadataFilter,
+  const { relationType, metadataFilter } = getNodeMappingForEntityType(
+    entity.type,
   );
-  console.log(titleKey);
+  const modalInfo = getModalInfo(TypeModals.ElodyEntityTaggingModal);
+  const titleKey = extractTitleKeyFromMetadataFilter(metadataFilter);
+
   const newText = entity.intialValues[titleKey].toLowerCase();
   tagEntity(
     entity,
