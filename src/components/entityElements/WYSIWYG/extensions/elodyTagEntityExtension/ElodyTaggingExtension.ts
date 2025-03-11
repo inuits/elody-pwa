@@ -135,7 +135,6 @@ export const createGlobalCommandsExtension = Extension.create({
               (mappingItem: TaggingExtensionNodeMapping) =>
                 mappingItem.tag === node.type.name,
             );
-            console.log(node);
             if (entityNodeMapping) {
               this.editor.commands.deleteNode(node);
               deleteRelations(
