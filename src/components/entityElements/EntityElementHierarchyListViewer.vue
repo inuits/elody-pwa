@@ -22,6 +22,7 @@
           :is-search-library="true"
           :predefinedEntities="hierachyList"
           :ignore-fetching-data="true"
+          :has-sticky-bars="false"
         />
         <div
           v-if="!isLoading && hierachyList.length === 0"
@@ -99,7 +100,7 @@ const fetchAllHierarchy = async () => {
     isLoading.value = false;
   }
 
-  hierachyList.value = entities;
+  hierachyList.value = entities.reverse();
 };
 
 const fetchEntity = async (id: string, type: Entitytyping) => {
