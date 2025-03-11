@@ -239,6 +239,7 @@ import {
   goToEntityPage,
   goToEntityPageById,
   extractTitleKeyFromMetadataFilter,
+  getEntityIdFromRoute,
 } from "@/helpers";
 import { type Router, useRoute } from "vue-router";
 import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUploadButton.vue";
@@ -466,12 +467,13 @@ const uploadActionFunction = async () => {
 };
 
 const tagNewlyCreatedEntity = (entity: Entity): void => {
-  const parentId = inject("entityFormData").id;
+  const parentId = route.params["id"];
   const modalInfo = getModalInfo(TypeModals.ElodyEntityTaggingModal);
   const relationType = modalInfo.element.taggingConfiguration?.relationType;
   const titleKey = extractTitleKeyFromMetadataFilter(
     modalInfo.element.taggingConfiguration?.metadataFilter,
   );
+  console.log(titleKey);
   const newText = entity.intialValues[titleKey].toLowerCase();
   tagEntity(
     entity,
