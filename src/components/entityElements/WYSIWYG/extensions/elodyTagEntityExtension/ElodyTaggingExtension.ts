@@ -5,10 +5,8 @@ import {
   ModalStyle,
   type TaggingExtensionNodeMapping,
   TypeModals,
-  WysiwygExtensions,
 } from "@/generated-types/queries";
-import type { Editor } from "@tiptap/vue-3";
-import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
+import { type Editor, Extension } from "@tiptap/vue-3";
 import {
   BulkOperationsContextEnum,
   type Context,
@@ -18,50 +16,63 @@ import {
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
 import useEntitySingle from "@/composables/useEntitySingle";
+import { ref, computed } from "vue";
 
 const { addRelations } = useFormHelper();
 const { deleteRelations } = useDeleteRelations();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 
-let nodeMapping: TaggingExtensionNodeMapping[] = [];
+export const nodeMapping = ref<TaggingExtensionNodeMapping[]>([]);
+export const tags = computed<string[]>(() =>
+  nodeMapping.value.map(
+    (mappingItem: TaggingExtensionNodeMapping) => mappingItem.tag,
+  ),
+);
 
-const ElodyTaggingExtension = Node.create({
-  name: "ElodyTaggingExtension",
-  group: "inline",
-  inline: true,
-  content: "text*",
-  addAttributes() {
-    return {
-      entityId: {
-        default: null,
-        parseHTML: (element) => element.getAttribute("data-entity-id"),
-        renderHTML: (attributes) => {
-          if (!attributes.entityId) {
-            return {};
-          }
+export const createTipTapNodeExtension = (
+  nodeMapping: TaggingExtensionNodeMapping,
+) => {
+  return Node.create({
+    name: nodeMapping.tag,
+    group: "inline",
+    inline: true,
+    content: "text*",
+    addAttributes() {
+      return {
+        entityId: {
+          default: null,
+          parseHTML: (element) => element.getAttribute("data-entity-id"),
+          renderHTML: (attributes) => {
+            if (!attributes.entityId) {
+              return {};
+            }
 
-          return {
-            "data-entity-id": attributes.entityId,
-          };
+            return {
+              "data-entity-id": attributes.entityId,
+            };
+          },
         },
-      },
-    };
-  },
-  parseHTML() {
-    return [
-      {
-        tag: "w",
-        getAttrs: (element) => {
-          return {
-            entityId: element.getAttribute("data-entity-id"),
-          };
+      };
+    },
+    parseHTML() {
+      return [
+        {
+          tag: nodeMapping.tag,
+          getAttrs: (element) => {
+            return {
+              entityId: element.getAttribute("data-entity-id"),
+            };
+          },
         },
-      },
-    ];
-  },
-  renderHTML({ HTMLAttributes }) {
-    return ["w", mergeAttributes(HTMLAttributes), 0];
-  },
+      ];
+    },
+    renderHTML({ HTMLAttributes }) {
+      return [nodeMapping.tag, mergeAttributes(HTMLAttributes), 0];
+    },
+  });
+};
+
+export const createGlobalCommandsExtension = Extension.create({
   addCommands() {
     return {
       openTagModal:
@@ -93,7 +104,7 @@ const ElodyTaggingExtension = Node.create({
 
           commands.deleteRange({ from, to });
           commands.insertContentAt(from, {
-            type: this.name,
+            type: getNodeMappingForEntityType(entity.type).tag,
             attrs: {
               entityId: entity.id,
             },
@@ -120,11 +131,16 @@ const ElodyTaggingExtension = Node.create({
           }
 
           state.doc.nodesBetween(anchor - 1, anchor, (node, pos) => {
-            if (node.type.name === this.name) {
+            const entityNodeMapping = nodeMapping.value.find(
+              (mappingItem: TaggingExtensionNodeMapping) =>
+                mappingItem.tag === node.type.name,
+            );
+            console.log(node);
+            if (entityNodeMapping) {
               this.editor.commands.deleteNode(node);
               deleteRelations(
                 getEntityUuid(),
-                "refWords",
+                entityNodeMapping.relationType,
                 [{ key: node.attrs.entityId }],
                 BulkOperationsContextEnum.TagEntityModal,
                 false,
@@ -136,17 +152,26 @@ const ElodyTaggingExtension = Node.create({
   },
 });
 
+export const setNodeMapping = (
+  taggingExtensionNodeMapping: TaggingExtensionNodeMapping,
+) => {
+  nodeMapping.value = taggingExtensionNodeMapping;
+};
+
+export const getNodeMappingForEntityType = (
+  entityType: Entitytyping,
+): TaggingExtensionnodeMapping =>
+  nodeMapping.value.find(
+    (mappingItem: TaggingExtensionNodeMapping) =>
+      mappingItem.entityType === entityType,
+  );
+
 export const hasSelectionBeenTagged = (editor: Editor) => {
   const { selection } = editor.state;
   const { from } = selection;
   const selectedNode = editor.state.doc.nodeAt(from);
-  return (
-    selectedNode &&
-    selectedNode.type.name ===
-      useWYSIWYGEditor().editorExtensionImportMapping[
-        WysiwygExtensions.ElodyTaggingExtension
-      ].importName
-  );
+
+  return selectedNode && tags.value.includes(selectedNode.type.name);
 };
 
 export const tagEntity = (
@@ -169,7 +194,7 @@ export const untagEntity = async (
 };
 
 const getEntityTypeByTagFromMapping = (tag: string): string => {
-  const mappingForTag = nodeMapping.find(
+  const mappingForTag = nodeMapping.value.find(
     (mappingItem: TaggingExtensionNodeMapping) => mappingItem.tag === tag,
   );
   if (!mappingForTag)
@@ -202,14 +227,10 @@ const listenToHoveredElements = (
 export const setTaggedEntityInfoTooltip = (
   tipTapDocumentNode: HTMLDivElement,
   enable: boolean = true,
-  customNodeMapping: TaggingExtensionNodeMapping[] | undefined = undefined,
 ) => {
   if (!tipTapDocumentNode) return;
-  if (customNodeMapping) nodeMapping = customNodeMapping;
-  const tags = nodeMapping.map(
-    (nodeMappingItem: TaggingExtensionNodeMapping) => nodeMappingItem.tag,
-  );
-  tags.forEach(async (node: string) => {
+
+  tags.value.forEach(async (node: string) => {
     const elements: HTMLElement[] = Array.from(
       tipTapDocumentNode.getElementsByTagName(node),
     );
@@ -217,5 +238,3 @@ export const setTaggedEntityInfoTooltip = (
     listenToHoveredElements(elements, enable);
   });
 };
-
-export default ElodyTaggingExtension;

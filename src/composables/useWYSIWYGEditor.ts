@@ -58,10 +58,6 @@ export const useWYSIWYGEditor = (): {
         importName: "Bold",
         from: "node_modules/@tiptap/extension-bold",
       },
-      [WysiwygExtensions.ElodyTaggingExtension]: {
-        importName: "ElodyTaggingExtension",
-        from: "src/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension",
-      },
     };
 
   const importEditorExtensions = async (

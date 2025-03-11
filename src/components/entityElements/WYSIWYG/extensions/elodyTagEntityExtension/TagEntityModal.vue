@@ -5,14 +5,17 @@
     :cancel-button-availabe="true"
     @hide-modal="closeModal(TypeModals.ElodyEntityTaggingModal)"
   >
-    <div v-if="element && element.taggingConfiguration" class="p-2">
+    <div
+      v-if="element && element.taggingConfiguration && nodeMapping"
+      class="p-2"
+    >
       <div
         class="p-2 bg-accent-normal rounded-t-md text-white flex justify-between items-center"
       >
         <h3 class="text-lg font-bold">
           {{
             t("tagging.tag-entity", {
-              entityType: element.taggingConfiguration.entityType,
+              entityType: nodeMapping[0].entityType,
             })
           }}
         </h3>
@@ -28,14 +31,14 @@
           <h4 class="text-md font-bold">
             {{
               t("tagging.tag-existing", {
-                entityType: element.taggingConfiguration.entityType,
+                entityType: nodeMapping[0].entityType,
               })
             }}
           </h4>
         </div>
         <entity-picker-component
           :entity-uuid="parentId"
-          :accepted-types="[element.taggingConfiguration.entityType]"
+          :accepted-types="acceptedTypes"
           :custom-query="element.taggingConfiguration.customQuery"
           :entity-picker-mode="EntityPickerMode.Emit"
           :show-button="false"
@@ -51,15 +54,13 @@
           <h4 class="text-md font-bold">
             {{
               t("tagging.tag-new", {
-                entityType: element.taggingConfiguration.entityType,
+                entityType: nodeMapping[0].entityType,
               })
             }}
           </h4>
         </div>
         <dynamic-form
-          :dynamic-form-query="
-            element.taggingConfiguration.createNewEntityFormQuery
-          "
+          :dynamic-form-query="nodeMapping[0].createNewEntityFormQuery"
           :router="router"
           :show-form-title="false"
         />
@@ -75,6 +76,7 @@ import {
   EntityPickerMode,
   Entitytyping,
   type MetadataInput,
+  type TaggingExtensionNodeMapping,
   TypeModals,
   type WysiwygElement,
 } from "@/generated-types/queries";
@@ -93,7 +95,11 @@ import {
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import type { Editor } from "@tiptap/vue-3";
-import { tagEntity } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
+import {
+  getNodeMappingForEntityType,
+  nodeMapping,
+  tagEntity,
+} from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import { extractTitleKeyFromMetadataFilter } from "@/helpers";
 
 const { setBulkSelectionLimit, isBulkSelectionLimitReached, getEnqueuedItems } =
@@ -106,6 +112,9 @@ const { t } = useI18n();
 
 const parentId = computed(() => route.params["id"]);
 const selectionLimit: number = 1;
+const acceptedTypes = computed(() =>
+  nodeMapping.value.map((mappingItem) => mappingItem.entityType),
+);
 const element = computed<WysiwygElement>(
   () => getModalInfo(TypeModals.ElodyEntityTaggingModal).element,
 );
@@ -113,42 +122,51 @@ const editor = computed<Editor>(
   () => getModalInfo(TypeModals.ElodyEntityTaggingModal).editor,
 );
 const form = computed(() =>
-  getForm(element.value.taggingConfiguration?.createNewEntityFormQuery),
-);
+  getForm(nodeMapping.value[0].createNewEntityFormQuery),
+); //Todo:
 const selectedText = computed<string>(() => {
   return getModalInfo(TypeModals.ElodyEntityTaggingModal).selectedText;
 });
 
 const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
-  const metadataFilterString =
-    element.value.taggingConfiguration?.metadataFilter;
-  const metadataKey = metadataFilterString.split("|")[1].split(".")[1];
-  const entityType: Entitytyping =
-    element.value.taggingConfiguration.entityType;
-  if (
-    !metadataFilterString ||
-    !metadataKey ||
-    !form.value ||
-    !selectedText.value ||
-    !entityType
-  )
-    return [];
-  const veeValidateKey: string = `intialValues.${metadataKey}`;
-  if (!form.value.values.intialValues[metadataKey] && !form.value.meta.dirty)
-    form.value.setFieldValue(veeValidateKey, selectedText.value);
+  const entityTypes: Entitytyping[] = nodeMapping.value.map(
+    (mappingItem: TaggingExtensionNodeMapping) => mappingItem.entityType,
+  );
+  if (!entityTypes) return [];
 
-  const typeFilter: AdvancedFilterInput = {
-    match_exact: true,
-    type: AdvancedFilterTypes.Type,
-    value: entityType,
-  };
-  const metadataFilter: AdvancedFilterInput = {
-    key: [metadataFilterString],
-    value: selectedText.value,
-    type: AdvancedFilterTypes.Text,
-    match_exact: false,
-  };
-  return [typeFilter, metadataFilter];
+  const typeFilters: AdvancedFilterInput[] = [];
+  const metadataFilters: AdvancedFilterInput[] = [];
+
+  entityTypes.forEach((type: Entitytyping) => {
+    const fullMappingItem: TaggingExtensionNodeMapping =
+      getNodeMappingForEntityType(type);
+    const metadataKey = extractTitleKeyFromMetadataFilter(
+      fullMappingItem.metadataFilter,
+    );
+
+    const veeValidateKey: string = `intialValues.${metadataKey}`;
+    // if (
+    //   form.value &&
+    //   !form.value.values.intialValues[metadataKey] &&
+    //   !form.value.meta.dirty
+    // )
+    //   form.value.setFieldValue(veeValidateKey, selectedText.value);
+
+    typeFilters.push({
+      match_exact: true,
+      type: AdvancedFilterTypes.Type,
+      value: type,
+    });
+
+    metadataFilters.push({
+      key: [fullMappingItem.metadataFilter],
+      value: selectedText.value,
+      type: AdvancedFilterTypes.Text,
+      match_exact: false,
+    });
+  });
+
+  return [...typeFilters, ...metadataFilters];
 });
 
 const getNewTaggingTextFromTeaserMetadata = (
@@ -166,14 +184,16 @@ const tagExistingEntityFlow = () => {
   if (!isBulkSelectionLimitReached(context)) return;
 
   const entityToTag = getEnqueuedItems(context)[0];
+  const entityTypeMappingItem: TaggingExtensionNodeMapping =
+    getNodeMappingForEntityType(entityToTag.type);
   const newTaggingTextKey = extractTitleKeyFromMetadataFilter(
-    element.value.taggingConfiguration?.metadataFilter,
+    entityTypeMappingItem.metadataFilter,
   );
   const newTaggingText = getNewTaggingTextFromTeaserMetadata(
     newTaggingTextKey,
     entityToTag,
   );
-  const relationType = element.value.taggingConfiguration?.relationType;
+  const relationType = entityTypeMappingItem.relationType;
   if (!entityToTag) return;
 
   tagEntity(entityToTag, relationType, parentId.value, context);

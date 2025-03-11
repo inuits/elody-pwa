@@ -33,12 +33,19 @@ import {
   TypeModals,
   ValidationFields,
   WysiwygElement,
+  WysiwygExtensions,
 } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useEdit from "@/composables/useEdit";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { setTaggedEntityInfoTooltip } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
+import {
+  createGlobalCommandsExtension,
+  createTipTapNodeExtension,
+  nodeMapping,
+  setNodeMapping,
+  setTaggedEntityInfoTooltip,
+} from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 
 const props = defineProps<{
   formId: string;
@@ -69,16 +76,33 @@ onMounted(async () => {
   initialValue.value =
     form.value?.values.intialValues[props.element.metadataKey];
   addEditableMetadataKeys([props.element.metadataKey], props.formId);
-  const importedExtensions = await importEditorExtensions(
-    props.element.extensions,
+
+  const customExtensions = [WysiwygExtensions.ElodyTaggingExtension];
+  const extensionsToImport = props.element.extensions.filter(
+    (extension: WysiwygExtensions) => !customExtensions.includes(extension),
   );
+
+  const importedExtensions = await importEditorExtensions(extensionsToImport);
   const configuredExtensions = getExtensionConfiguration(
-    props.element.extensions,
+    extensionsToImport,
     importedExtensions,
   );
 
+  const editorExtensions = [...configuredExtensions];
+  if (
+    props.element.extensions.includes(WysiwygExtensions.ElodyTaggingExtension)
+  ) {
+    setNodeMapping(props.element.taggingConfiguration?.customNodeMapping);
+    editorExtensions.push(
+      ...nodeMapping.value.map((nodeMap) => createTipTapNodeExtension(nodeMap)),
+      createGlobalCommandsExtension,
+    );
+  }
+
+  console.log(editorExtensions);
+
   editor.value = new Editor({
-    extensions: [...configuredExtensions],
+    extensions: editorExtensions,
     editorProps: {
       attributes: {
         class:
@@ -91,11 +115,7 @@ onMounted(async () => {
     editable: isEdit.value,
     content: initialValue.value,
     onCreate: () => {
-      setTaggedEntityInfoTooltip(
-        editorNode.value,
-        true,
-        props.element.taggingConfiguration?.customNodeMapping,
-      );
+      setTaggedEntityInfoTooltip(editorNode.value, true);
     },
     onUpdate: () => {
       setTaggedEntityInfoTooltip(editorNode.value, false);
