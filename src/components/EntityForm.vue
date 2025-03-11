@@ -39,7 +39,7 @@ import { useI18n } from "vue-i18n";
 import { useMutation } from "@vue/apollo-composable";
 import { onBeforeRouteLeave } from "vue-router";
 import { useSubmitForm } from "vee-validate";
-import { getChildrenOfHomeRoutes } from "@/helpers";
+import { getChildrenOfHomeRoutes, deepToRaw } from "@/helpers";
 
 const props = defineProps<{
   intialValues: IntialValues;
@@ -84,8 +84,8 @@ const { mutate } = useMutation<
 >(MutateEntityValuesDocument);
 
 let form = createForm(props.id, {
-  intialValues: unref(props.intialValues),
-  relationValues: unref(props.relationValues),
+  intialValues: structuredClone(deepToRaw(props.intialValues)),
+  relationValues: structuredClone(deepToRaw(props.relationValues)),
   relationMetadata: {},
   relatedEntityData: {},
   uuid: props.uuid,
