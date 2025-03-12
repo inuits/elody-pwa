@@ -27,6 +27,7 @@ import {
 } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { apolloClient, typeUrlMapping, auth } from "@/main";
+import { toRaw, isProxy } from "vue";
 
 export const goToEntityPage = (
   entity: Entity,
@@ -653,7 +654,10 @@ export const determineDefaultIntialValues = (
   const metadataFields = extractObjectsByTypename(columns, "PanelMetaData");
 
   const newInitialData = { ...initialData };
-  const arrayMetadataFields = [InputFieldTypes.DropdownMultiselectMetadata];
+  const arrayMetadataFields = [
+    InputFieldTypes.DropdownMultiselectMetadata,
+    InputFieldTypes.DropdownMultiselectRelations,
+  ];
 
   (metadataFields as PanelMetaData[]).forEach((field: PanelMetaData) => {
     const isMetadataCanBeAnArray = arrayMetadataFields.includes(
@@ -667,6 +671,22 @@ export const determineDefaultIntialValues = (
   });
 
   return newInitialData;
+};
+
+export const deepToRaw = <T>(obj: T): T => {
+  if (isProxy(obj)) {
+    obj = toRaw(obj);
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(deepToRaw) as T;
+  } else if (obj !== null && typeof obj === "object") {
+    return Object.fromEntries(
+      Object.entries(obj).map(([key, value]) => [key, deepToRaw(value)]),
+    ) as T;
+  }
+
+  return obj;
 };
 
 export const mapModelValueToDropdownOptions = (

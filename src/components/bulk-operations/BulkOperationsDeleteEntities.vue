@@ -89,6 +89,7 @@ const modal = computed(() => {
 });
 
 const options = ref<{ isSelected: boolean; key: DropdownOption }[]>([]);
+const configuredRouteTitle = ref<string | undefined>(undefined);
 
 const normalizeOptions = (
   options: DropdownOption[],
@@ -101,6 +102,7 @@ const normalizeOptions = (
 
 const getCurrentRouteTitle = computed(() => {
   try {
+    if (configuredRouteTitle.value) return t(configuredRouteTitle.value)?.toLowerCase();
     return t(rootRoute.value.rootTitle)?.toLowerCase();
   } catch {
     return "";
@@ -125,7 +127,7 @@ const normalizeOptionsToObjectOfKeyValue = (
 };
 
 const message = computed(() => {
-  return form.value
+  return options.value.length > 0
     ? `${t("confirm.delete-entities.message", { type: getCurrentRouteTitle.value })} ${t(form.value.label)}`
     : t("confirm.delete-entities.message", {
         type: getCurrentRouteTitle.value,
@@ -167,7 +169,8 @@ watch(
     if (newModal.open && newModal.formQuery) {
       await getDeletionForm(newModal.formQuery);
       if (!form.value) return;
-      options.value = normalizeOptions(form.value.inputField.options);
+      if (form.value.inputField) options.value = normalizeOptions(form.value.inputField.options);
+      else configuredRouteTitle.value = form.value.label;
     }
   },
   { immediate: true },

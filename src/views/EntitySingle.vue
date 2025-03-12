@@ -19,7 +19,7 @@
           :columnList="columnList"
           :identifiers="identifiers"
           :id="entity.id"
-          :entity-type="entity.__typename"
+          :entity-type="entityType"
         ></entity-column>
       </entity-form>
     </div>
