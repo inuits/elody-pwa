@@ -1,13 +1,13 @@
 import {
+  type AdvancedFilterInput,
+  type AdvancedFilterInputType,
+  AdvancedFilterTypes,
   type BaseEntity,
   DamsIcons,
   type DropdownOption,
+  EditStatus,
   Entitytyping,
   SearchInputType,
-  type AdvancedFilterInput,
-  AdvancedFilterTypes,
-  type AdvancedFilterInputType,
-  EditStatus,
 } from "@/generated-types/queries";
 import { computed, inject } from "vue";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
@@ -15,14 +15,17 @@ import { DefaultApolloClient } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
 import { getEntityTitle } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { omitDeep } from "@apollo/client/utilities";
 
 export const useGetDropdownOptions = (
   entityType: Entitytyping,
   parent: "fetchAll" | string,
   relationType: string = "",
+  fromRelationType: string = "",
   searchFilterInput?: AdvancedFilterInput,
   advancedFilterInputForRetrievingOptions?: [AdvancedFilterInput],
-  formId?: string
+  formId?: string,
+  relationFilter?: AdvancedFilterInput,
 ) => {
   const apolloClient = inject(DefaultApolloClient);
   const {
@@ -41,9 +44,20 @@ export const useGetDropdownOptions = (
     match_exact: true,
   };
 
-  const getRelationFilter = (parentId: string, relationType: string) => {
+  const getRelationFilter = (
+    parentId: string,
+    relationType: string,
+    relationFilter: AdvancedFilterInput | undefined,
+  ): AdvancedFilterInput => {
+    if (relationFilter) {
+      let completeRelationFilter =  omitDeep(relationFilter, '__typename');
+      if (completeRelationFilter.value.includes("$parentId"))
+        completeRelationFilter.value = [parent];
+      return completeRelationFilter;
+    }
+
     return {
-      type: "selection",
+      type: AdvancedFilterTypes.Selection,
       key: [`elody:1|relations.${relationType}.key`],
       value: [parentId],
       match_exact: true,
@@ -58,17 +72,19 @@ export const useGetDropdownOptions = (
       advancedFilterInputForRetrievingOptions.length > 0
     ) {
       filters = mapOptionsFilterInput(advancedFilterInputForRetrievingOptions);
-      filters = parent !== "fetchAll" && relationType ? 
-        [...filters, getRelationFilter(parent, relationType)] : filters
+      filters =
+        parent !== "fetchAll" && (relationType || fromRelationType)
+          ? [...filters, getRelationFilter(parent, fromRelationType, relationFilter)]
+          : filters;
       entityTypeToSet =
         filters.find(
-          (filterInput) => filterInput.type === AdvancedFilterTypes.Type
+          (filterInput) => filterInput.type === AdvancedFilterTypes.Type,
         )?.value || entityType;
     } else {
       filters =
-        parent === "fetchAll" || !relationType
+        parent === "fetchAll" || !fromRelationType
           ? [baseTypeFilter]
-          : [getRelationFilter(parent, relationType)];
+          : [getRelationFilter(parent, fromRelationType, relationFilter)];
     }
     setIsSearchLibrary(false);
     setAdvancedFilters(filters as AdvancedFilterInput[]);
@@ -86,7 +102,7 @@ export const useGetDropdownOptions = (
     ) {
       advancedFilters = mapOptionsFilterInput(
         advancedFilterInputForRetrievingOptions,
-        searchValue
+        searchValue,
       );
     } else {
       const isEmptyAdvancedSearchFilter =
@@ -105,7 +121,7 @@ export const useGetDropdownOptions = (
 
   const getSearchFilter = (
     value: string,
-    searchFilterInput: AdvancedFilterInput
+    searchFilterInput: AdvancedFilterInput,
   ) => {
     const { __typename, ...filterProps } = searchFilterInput;
     return { ...filterProps, value };
@@ -119,18 +135,22 @@ export const useGetDropdownOptions = (
           label: getEntityTitle(entity),
           value: entity.id,
         };
-      }) || []
+      }) || [],
   );
 
   const mapOptionsFilterInput = (
     advancedFilterInputForRetrievingOptions: AdvancedFilterInputType[],
-    value?: any
+    value?: any,
   ) => {
     return advancedFilterInputForRetrievingOptions.map((filterInput) => {
       let _value;
 
       if (formId && filterInput.value.includes("$")) {
-        _value = getVariableValueForFilter(formId, filterInput.value, filterInput.returnIdAtIndex ?? 0);
+        _value = getVariableValueForFilter(
+          formId,
+          filterInput.value,
+          filterInput.returnIdAtIndex ?? 0,
+        );
       } else {
         _value = value
           ? filterInput.value === "*"
@@ -149,10 +169,14 @@ export const useGetDropdownOptions = (
     });
   };
 
-  const getVariableValueForFilter = (formId: string, variable: string, returnIdAtIndex: number = 0) => {
+  const getVariableValueForFilter = (
+    formId: string,
+    variable: string,
+    returnIdAtIndex: number = 0,
+  ) => {
     const form = getFormWithRelationFieldCheck(
       formId,
-      variable.replace("$", "")
+      variable.replace("$", ""),
     );
     if (!form) return variable;
 
@@ -167,8 +191,7 @@ export const useGetDropdownOptions = (
 
     const hasNew = hasNewRelations(relations);
     if (hasNew) return findNewRelationValue(relations);
-    if (returnIdAtIndex === -1)
-      return relations.map((rel) => rel.key);
+    if (returnIdAtIndex === -1) return relations.map((rel) => rel.key);
     return relations[returnIdAtIndex].key;
   };
 
@@ -180,7 +203,7 @@ export const useGetDropdownOptions = (
 
   const hasOnlyDeletedRelations = (relations: { editStatus?: string }[]) => {
     const hasDeleted = relations.some((item) =>
-      ([EditStatus.Deleted] as string[]).includes(item?.editStatus || "")
+      ([EditStatus.Deleted] as string[]).includes(item?.editStatus || ""),
     );
 
     const hasNew = hasNewRelations(relations);
@@ -190,12 +213,12 @@ export const useGetDropdownOptions = (
 
   const hasNewRelations = (relations: { editStatus?: string }[]) => {
     return relations.some((item) =>
-      ([EditStatus.New] as string[]).includes(item?.editStatus || "")
+      ([EditStatus.New] as string[]).includes(item?.editStatus || ""),
     );
   };
 
   const findNewRelationValue = (
-    relations: { editStatus?: string; key: string }[]
+    relations: { editStatus?: string; key: string }[],
   ) => {
     return (
       relations.find((item) => item.editStatus === EditStatus.New)?.key || null

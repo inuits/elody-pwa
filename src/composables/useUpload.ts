@@ -21,6 +21,7 @@ type UploadSettings = {
   extraMediafileType: string | undefined;
 };
 
+import { router } from "@/main";
 const { handleHttpError, getMessageAndCodeFromErrorString } = useErrorCodes();
 const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
   "no-upload",
@@ -874,11 +875,88 @@ const useUpload = () => {
     errorContainer.appendChild(errorList);
     errors.forEach((error: string) => {
       const errorNode = document.createElement("li");
-      errorNode.innerHTML = error;
+      const htmlLinkElement = checkErrorMessageForLinks(error);
+      if (htmlLinkElement) {
+        errorNode.appendChild(htmlLinkElement);
+      } else {
+        errorNode.innerHTML = error;
+      }
       errorList.appendChild(errorNode);
     });
     errorContainer.classList.remove("hidden");
   };
+
+  const extractStringBeforeLink = (input: string): string | undefined => {
+    const regex = /(.*?)\$LINK\(/;
+    const match = input.match(regex);
+
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+
+    return undefined;
+  }
+
+  const extractLinkContent = (
+    error: string,
+  ): string | undefined => {
+    const linkRegex = /\$LINK\(([^)]+)\)/;
+    const match = error.match(linkRegex);
+
+    if (match && match[1])
+      return match[1];
+
+    return undefined;
+  }
+
+  const extractLinkArguments = (
+    linkContent: string,
+  ): [string, string] | undefined => {
+    const partsRegex = /([^,]+)\s*,\s*([^)]+)/;
+    const match = linkContent.match(partsRegex);
+
+    if (match && match[1] && match[2])
+      return [match[1].trim(), match[2].trim()];
+
+    return undefined;
+  }
+
+  const extractEntityId = (
+    entityIdWithName: string,
+  ): string | undefined => {
+    const entityIdregex = /^([^-]+)-/;
+    const match = entityIdWithName.match(entityIdregex)
+
+    if (match && match[1])
+      return match[1];
+
+    return undefined;
+  }
+
+  const checkErrorMessageForLinks = (
+    error: string,
+  ): HTMLAnchorElement | undefined => {
+    const linkContent = extractLinkContent(error);
+    if (!linkContent) return undefined;
+
+    const [type, entityIdWithName] = extractLinkArguments(linkContent);
+    if (!type || !entityIdWithName) return undefined;
+
+    const entityId = extractEntityId(entityIdWithName);
+    if (!entityId) return undefined;
+
+    const anchor = document.createElement('a');
+    anchor.href = '#';
+    anchor.textContent = extractStringBeforeLink(error) || error;
+    anchor.classList.add('underline');
+    anchor.addEventListener('click', (event) => {
+      event.preventDefault();
+      const routePath = `/${type}/${entityId}`;
+      const route = router.resolve({ path: routePath });
+      window.open(route.fullPath, '_blank');
+    });
+    return anchor;
+  }
 
   return {
     resetUpload,

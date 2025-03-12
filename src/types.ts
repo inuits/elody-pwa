@@ -94,6 +94,7 @@ import {
   uniVolume,
   uniWindowGrid,
   uniWindowMaximize,
+  uniCopy,
 } from "vue-unicons/dist/icons";
 
 export const Unicons: Record<DamsIcons, { name: string }> = {
@@ -192,4 +193,5 @@ export const Unicons: Record<DamsIcons, { name: string }> = {
   videoSlash: uniVideoSlash,
   WindowGrid: uniWindowGrid,
   WindowMaximize: uniWindowMaximize,
+  Copy: uniCopy,
 };

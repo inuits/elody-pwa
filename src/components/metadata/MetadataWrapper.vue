@@ -63,6 +63,9 @@
       :isMetadataOnRelation="isMetadataOnRelation"
       :isRootdataOnRelation="isRootdataOnRelation"
       :error="errorMessage"
+      :relation-filter="
+        metadata.inputField.relationFilter
+      "
       :show-errors="
         showErrors ||
         (meta.dirty &&
@@ -80,7 +83,10 @@
         :tooltip-offset="8"
       >
         <template #activator="{ on }">
-          <div v-on="showTooltip ? on : {}">
+          <div
+            v-on="showTooltip ? on : {}"
+            class="flex column gap-2 items-center"
+          >
             <MetadataTruncatedText
               @overflow-status="handleOverflowStatus"
               :disabled="!linkedEntityId && !metadata.lineClamp"
@@ -117,7 +123,11 @@
                 :advanced-filter-input-for-retrieving-all-options="
                   metadata.inputField.advancedFilterInputForRetrievingAllOptions
                 "
+                :relation-filter="
+                  metadata.inputField.relationFilter
+                "
                 :is-metadata-field="metadata.inputField?.isMetadataField"
+                :relation-type="metadata.inputField?.relationType"
                 :from-relation-type="metadata.inputField?.fromRelationType"
                 :disabled="true"
                 @click.stop.prevent
@@ -150,15 +160,22 @@
                 :link-icon="metadata.linkIcon"
                 :unit="metadata.unit"
                 :base-library-mode="baseLibraryMode"
+                :custom-value="metadata.customValue"
               />
             </MetadataTruncatedText>
+            <BaseCopyToClipboard
+              v-if="metadata.copyToClipboard"
+              class="w-6 h-6"
+              :value="metadata.value"
+              @click.stop.prevent
+            />
           </div>
         </template>
         <template #default>
           <entity-element-metadata
             class="text-text-placeholder"
             :label="metadata.label as string"
-            v-model:value="metadadaValueToDisplayOnTooltip"
+            v-model:value="metadataValueToDisplayOnTooltip"
             :link-text="metadata.linkText"
             :link-icon="metadata.linkIcon"
             :unit="metadata.unit"
@@ -202,6 +219,7 @@ import ViewModesAutocompleteRelations from "@/components/library/view-modes/View
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import { Unicons } from "@/types";
 import { DateTime } from "luxon";
+import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 
 const { t } = useI18n();
 const { getForm, getKeyBasedOnInputField } = useFormHelper();
@@ -272,7 +290,7 @@ const showMetadavaValueTooltip = computed(() => {
   return props.metadata.valueTooltip?.type && props.metadata.value;
 });
 
-const metadadaValueToDisplayOnTooltip = computed(
+const metadataValueToDisplayOnTooltip = computed(
   () => props.metadata?.value?.label || value.value,
 );
 
