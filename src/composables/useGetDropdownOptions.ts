@@ -47,12 +47,13 @@ export const useGetDropdownOptions = (
   const getRelationFilter = (
     parentId: string,
     relationType: string,
+    relationFilter: AdvancedFilterInput | undefined,
   ): AdvancedFilterInput => {
     if (relationFilter) {
-      relationFilter = omitDeep(relationFilter, '__typename');
-      if (relationFilter.value.includes("$parentId"))
-        relationFilter.value = [parent];
-      return relationFilter;
+      let completeRelationFilter =  omitDeep(relationFilter, '__typename');
+      if (completeRelationFilter.value.includes("$parentId"))
+        completeRelationFilter.value = [parent];
+      return completeRelationFilter;
     }
 
     return {
@@ -73,7 +74,7 @@ export const useGetDropdownOptions = (
       filters = mapOptionsFilterInput(advancedFilterInputForRetrievingOptions);
       filters =
         parent !== "fetchAll" && (relationType || fromRelationType)
-          ? [...filters, getRelationFilter(parent, fromRelationType)]
+          ? [...filters, getRelationFilter(parent, fromRelationType, relationFilter)]
           : filters;
       entityTypeToSet =
         filters.find(
@@ -83,7 +84,7 @@ export const useGetDropdownOptions = (
       filters =
         parent === "fetchAll" || !fromRelationType
           ? [baseTypeFilter]
-          : [getRelationFilter(parent, fromRelationType)];
+          : [getRelationFilter(parent, fromRelationType, relationFilter)];
     }
     setIsSearchLibrary(false);
     setAdvancedFilters(filters as AdvancedFilterInput[]);
