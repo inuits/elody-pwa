@@ -25,9 +25,6 @@
         :view-only="true"
       />
     </div>
-    <div v-if="loading" class="min-h-[30vh]">
-      <spinner-loader></spinner-loader>
-    </div>
   </BaseModal>
 </template>
 

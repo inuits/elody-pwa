@@ -24,6 +24,12 @@
       </entity-form>
     </div>
     <div
+      v-else-if="loading && viewOnly"
+      class="min-h-[30vh] flex justify-center items-center"
+    >
+      <spinner-loader theme="accent" />
+    </div>
+    <div
       v-else
       class="h-full w-full flex bg-neutral-0 animate-pulse text-neutral-20 z-2"
     />
@@ -66,6 +72,7 @@ import { useQuery } from "@vue/apollo-composable";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
 
 const config: any = inject("config");
 const router = useRouter();
