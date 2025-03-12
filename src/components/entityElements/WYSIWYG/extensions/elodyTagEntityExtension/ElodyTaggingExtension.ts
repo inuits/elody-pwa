@@ -136,7 +136,7 @@ export const createGlobalCommandsExtension = Extension.create({
                 mappingItem.tag === node.type.name,
             );
             if (entityNodeMapping) {
-              this.editor.commands.deleteNode(node);
+              tr.insertText("", pos, pos + node.nodeSize);
               deleteRelations(
                 getEntityUuid(),
                 entityNodeMapping.relationType,
@@ -147,6 +147,26 @@ export const createGlobalCommandsExtension = Extension.create({
             }
           });
         }),
+      // Space: () =>
+      //   this.editor.commands.command(({ tr, state }) => {
+      //     const { selection } = state;
+      //     const { empty, anchor } = selection;
+      //
+      //     if (!empty) {
+      //       return false;
+      //     }
+      //
+      //     state.doc.nodesBetween(anchor - 1, anchor, (node, pos) => {
+      //       const entityNodeMapping = nodeMapping.value.find(
+      //         (mappingItem: TaggingExtensionNodeMapping) =>
+      //           mappingItem.tag === node.type.name,
+      //       );
+      //       if (entityNodeMapping) {
+      //         console.log("yuu");
+      //         this.editor.commands.selectParentNode();
+      //       }
+      //     });
+      //   }),
     };
   },
 });
