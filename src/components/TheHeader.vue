@@ -42,7 +42,7 @@ import { auth } from "@/main";
 const route = useRoute();
 const config: any = inject("config");
 const showSearch = config.features.simpleSearch.hasSimpleSearch;
-const showSearchAI = config.features.aiSearch.hasAiSearch;
+const showSearchAI = config.features?.aiSearch?.hasAiSearch;
 
 const entityType = computed(() => {
   const slug = String(route.params["type"]);
