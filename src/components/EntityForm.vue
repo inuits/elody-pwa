@@ -167,8 +167,8 @@ watch(
   () => props.intialValues,
   () => {
     setValues({
-      intialValues: props.intialValues,
-      relationValues: props.relationValues,
+      intialValues: structuredClone(deepToRaw(props.intialValues)),
+      relationValues: structuredClone(deepToRaw(props.relationValues)),
     });
   },
 );
