@@ -239,7 +239,6 @@ import {
   goToEntityPage,
   goToEntityPageById,
   extractTitleKeyFromMetadataFilter,
-  getEntityIdFromRoute,
 } from "@/helpers";
 import { type Router, useRoute } from "vue-router";
 import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUploadButton.vue";
@@ -263,7 +262,7 @@ import { useErrorCodes } from "@/composables/useErrorCodes";
 import ImportWrapper from "@/components/imports/ImportWrapper.vue";
 import useEntitySingle from "@/composables/useEntitySingle";
 import {
-  getNodeMappingForEntityType,
+  getExtensionConfigurationForEntityType,
   tagEntity,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
@@ -471,11 +470,12 @@ const uploadActionFunction = async () => {
 
 const tagNewlyCreatedEntity = (entity: Entity): void => {
   const parentId = route.params["id"];
-  const { relationType, metadataFilter } = getNodeMappingForEntityType(
-    entity.type,
-  );
+  const { relationType, metadataFilterForTagContent } =
+    getExtensionConfigurationForEntityType(entity.type);
   const modalInfo = getModalInfo(TypeModals.ElodyEntityTaggingModal);
-  const titleKey = extractTitleKeyFromMetadataFilter(metadataFilter);
+  const titleKey = extractTitleKeyFromMetadataFilter(
+    metadataFilterForTagContent,
+  );
 
   const newText = entity.intialValues[titleKey].toLowerCase();
   tagEntity(
