@@ -19,6 +19,7 @@
       <CreateSavedSearchModal />
       <BulkoperationsModal v-if="route.name !== undefined" />
       <search-modal />
+      <search-modal-ai />
       <!--      <BulkOperationsEditModal-->
       <!--        v-if="route.name !== undefined"-->
       <!--        :context="route.name as Context"-->
@@ -42,6 +43,7 @@ import DynamicFormModal from "@/components/dynamicForms/DynamicFormModal.vue";
 import DeleteModal from "@/components/DeleteModal.vue";
 import EditModal from "@/components/EditModal.vue";
 import SearchModal from "@/components/SearchModal.vue";
+import SearchModalAi from "@/components/SearchModalAi.vue";
 import SavedSearchesPickerModal from "@/components/SavedSearchesPickerModal.vue";
 import TheHeader from "@/components/TheHeader.vue";
 import TheNavigation from "@/components/menu/MenuNav.vue";
