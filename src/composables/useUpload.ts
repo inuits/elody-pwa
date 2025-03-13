@@ -39,7 +39,7 @@ const mediafiles = computed((): DropzoneFile[] =>
 );
 const uploadProgressPercentage = ref<number>(0);
 const uploadType = ref<UploadFieldType>(UploadFieldType.Batch);
-const requiredMediafiles = ref<string[] | undefined>(undefined);
+const requiredMediafiles = ref<string[]>([]);
 const containsCsv = computed(
   () =>
     !!files.value.find(
@@ -706,7 +706,7 @@ const useUpload = () => {
     dryRunErrors.value = [];
     dryRunComplete.value = false;
     missingFileNames.value = [];
-    requiredMediafiles.value = undefined;
+    requiredMediafiles.value = [];
     jobIdentifier.value = undefined;
     resetUploadProgress();
     __resetFileThumbnails();
@@ -722,16 +722,6 @@ const useUpload = () => {
         (uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv &&
           !containsCsv.value)
       ) {
-        return true;
-      }
-
-      if (!requiredMediafiles.value) {
-        if (dryRunComplete.value) {
-          __updateGlobalUploadProgress(
-            ProgressStepType.Prepare,
-            ProgressStepStatus.Complete,
-          );
-        }
         return true;
       }
 
@@ -771,6 +761,20 @@ const useUpload = () => {
           ? ProgressStepStatus.Complete
           : ProgressStepStatus.Incomplete,
       );
+
+      if (
+        (
+          uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv ||
+          uploadFlow.value === UploadFlow.MediafilesWithOcr
+        ) &&
+        mediafiles.value.length <= 0
+      ) {
+        __updateGlobalUploadProgress(
+          ProgressStepType.Prepare,
+          ProgressStepStatus.Failed,
+        );
+        return false
+      }
 
       return areAllFilesPresent;
     } catch {
