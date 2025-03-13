@@ -23,11 +23,8 @@
           :predefinedEntities="hasAiSearchEnabled ? items : undefined"
           :ignore-fetching-data="hasAiEnabled"
         ></base-library>
-        <div v-else >
-          <div
-            data-cy="base-library-grid-container"
-            id="gridContainer"
-          >
+        <div v-else>
+          <div data-cy="base-library-grid-container" id="gridContainer">
             <ViewModesList
               :entities="createPlaceholderEntities(20) as Entity[]"
               :entities-loading="true"
@@ -53,10 +50,7 @@ import SearchBarAi from "@/components/SearchBarAi.vue";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import { ref, inject, computed } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
-import {
-  useAiSearch,
-  type AiSearchFilters,
-} from "@/composables/useAiSearch";
+import { useAiSearch, type AiSearchFilters } from "@/composables/useAiSearch";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import { createPlaceholderEntities } from "@/helpers";
 
@@ -66,7 +60,7 @@ const { setFilters, getEntities, items, entitiesLoading } = useAiSearch(config);
 const filters = ref<AdvancedFilterInput[]>([]);
 
 const hasAiSearchEnabled = computed(() => {
-  return !!config.features.aiSearch.hasAiSearch;
+  return !!config.features?.aiSearch?.hasAiSearch;
 });
 
 const isModalOpened = ref<boolean>(false);
