@@ -36,9 +36,9 @@
             v-for="(metadata, index) in metadatafields"
             v-show="itemMustBeShown(metadata.value)"
             :key="index"
-            class="py-2 px-2"
           >
             <metadata-wrapper
+              class="py-2 px-2"
               v-if="
                 (metadata.__typename !== 'EntityListElement' ||
                   metadata.baseLibraryMode ===
@@ -61,6 +61,7 @@
               v-model:value="metadata.value"
               :input-field="metadata.inputField"
               :entity-uuid="formId"
+              :can="metadata.can"
             />
             <entity-element-list
               v-if="metadata.__typename === 'EntityListElement'"
