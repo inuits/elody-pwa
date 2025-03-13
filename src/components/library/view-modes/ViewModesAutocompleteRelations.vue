@@ -67,7 +67,7 @@ const props = withDefaults(
     disabled: false,
     canCreateOption: false,
     isMetadataField: false,
-  }
+  },
 );
 
 const isCreatingEntity = ref<boolean>(false);
@@ -77,12 +77,14 @@ const entityId = getEntityIdFromRoute();
 const { createEntity } = useManageEntities();
 
 const advancedFilterInputForRetrievingAllOptions = computed(() => {
-  if (props.advancedFilterInputForRetrievingAllOptions.length > 0) return props.advancedFilterInputForRetrievingAllOptions;
-  return  props.advancedFilterInputForRetrievingOptions;
+  if (props.advancedFilterInputForRetrievingAllOptions.length > 0)
+    return props.advancedFilterInputForRetrievingAllOptions;
+  return props.advancedFilterInputForRetrievingOptions;
 });
 const advancedFilterInputForRetrievingRelatedOptions = computed(() => {
-  if (props.advancedFilterInputForRetrievingRelatedOptions.length > 0) return props.advancedFilterInputForRetrievingRelatedOptions;
-  return  props.advancedFilterInputForRetrievingOptions;
+  if (props.advancedFilterInputForRetrievingRelatedOptions.length > 0)
+    return props.advancedFilterInputForRetrievingRelatedOptions;
+  return props.advancedFilterInputForRetrievingOptions;
 });
 
 const {
@@ -129,7 +131,11 @@ onMounted(async () => {
 
 const initAutocompleteOption = async () => {
   await initialize();
-  if (entityId && (props.relationType || props.fromRelationType) && props.mode !== "create") {
+  if (
+    entityId &&
+    (props.relationType || props.fromRelationType) &&
+    props.mode !== "create"
+  ) {
     await relatedEntitiesInitialize();
   }
 
@@ -146,7 +152,7 @@ const initAutocompleteOption = async () => {
 };
 
 const mapDropdownOptionsToBulkProcessableItem = (
-  dropdownOptions: DropdownOption[]
+  dropdownOptions: DropdownOption[],
 ): InBulkProcessableItem[] => {
   const inBulkProcessableItems: InBulkProcessableItem[] = [];
   dropdownOptions.forEach((dropdownOption: DropdownOption) => {
@@ -165,7 +171,7 @@ const populateSelectedOptions = (options: DropdownOption[]) => {
 
 const handleSelect = (
   options: DropdownOption[] | undefined,
-  isPreSelect = false
+  isPreSelect = false,
 ) => {
   if (options === undefined) return;
   const bulkProcessableItems: InBulkProcessableItem[] =
@@ -179,7 +185,7 @@ const handleSelect = (
     replaceRelationsFromSameType(
       bulkProcessableItems,
       props.relationType as string,
-      props.formId
+      props.formId,
     );
   }
 
@@ -242,12 +248,12 @@ watch(
         .filter(Boolean),
       oldValue
         .flatMap((item: { editStatus?: string }) => item.editStatus)
-        .filter(Boolean)
+        .filter(Boolean),
     );
     if (hasNoUpdates) return;
 
     handleSelect([]);
   },
-  { deep: true }
+  { deep: true },
 );
 </script>
