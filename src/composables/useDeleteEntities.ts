@@ -40,7 +40,9 @@ export const useDeleteEntities = () => {
     }
 
     let path;
-    if ((types as string[])[0].toLowerCase() === Entitytyping?.Mediafile) {
+    if ((types as string[])[0].toLowerCase() === Entitytyping?.Job) {
+      path = Collection.Jobs;
+    } else if ((types as string[])[0].toLowerCase() === Entitytyping?.Mediafile) {
       path = Collection.Mediafiles;
     } else {
       path = Collection.Entities;

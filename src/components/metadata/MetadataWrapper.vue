@@ -63,9 +63,7 @@
       :isMetadataOnRelation="isMetadataOnRelation"
       :isRootdataOnRelation="isRootdataOnRelation"
       :error="errorMessage"
-      :relation-filter="
-        metadata.inputField.relationFilter
-      "
+      :relation-filter="metadata.inputField.relationFilter"
       :show-errors="
         showErrors ||
         (meta.dirty &&
@@ -103,7 +101,8 @@
                     metadata.inputField?.type ===
                       InputFieldTypes.DropdownSingleselectRelations) &&
                   metadata.value &&
-                  !metadata.value?.formatter
+                  !metadata.value?.formatter &&
+                  metadata.value?.length > 0
                 "
                 v-model="metadata.value"
                 :is-read-only="true"
@@ -123,9 +122,7 @@
                 :advanced-filter-input-for-retrieving-all-options="
                   metadata.inputField.advancedFilterInputForRetrievingAllOptions
                 "
-                :relation-filter="
-                  metadata.inputField.relationFilter
-                "
+                :relation-filter="metadata.inputField.relationFilter"
                 :is-metadata-field="metadata.inputField?.isMetadataField"
                 :relation-type="metadata.inputField?.relationType"
                 :from-relation-type="metadata.inputField?.fromRelationType"
