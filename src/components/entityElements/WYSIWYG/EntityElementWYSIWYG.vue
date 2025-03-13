@@ -42,8 +42,8 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import {
   createGlobalCommandsExtension,
   createTipTapNodeExtension,
-  nodeMapping,
-  setNodeMapping,
+  extensionConfiguration,
+  setExtensionConfiguration,
   setTaggedEntityInfoTooltip,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 
@@ -92,9 +92,13 @@ onMounted(async () => {
   if (
     props.element.extensions.includes(WysiwygExtensions.ElodyTaggingExtension)
   ) {
-    setNodeMapping(props.element.taggingConfiguration?.customNodeMapping);
+    setExtensionConfiguration(
+      props.element.taggingConfiguration?.taggableEntityConfiguration,
+    );
     editorExtensions.push(
-      ...nodeMapping.value.map((nodeMap) => createTipTapNodeExtension(nodeMap)),
+      ...extensionConfiguration.value.map((nodeMap) =>
+        createTipTapNodeExtension(nodeMap),
+      ),
       createGlobalCommandsExtension,
     );
   }

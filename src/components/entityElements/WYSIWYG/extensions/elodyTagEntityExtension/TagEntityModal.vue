@@ -6,7 +6,7 @@
     @hide-modal="closeModal(TypeModals.ElodyEntityTaggingModal)"
   >
     <div
-      v-if="element && element.taggingConfiguration && nodeMapping"
+      v-if="element && element.taggingConfiguration && extensionConfiguration"
       class="p-2"
     >
       <div
@@ -15,7 +15,7 @@
         <h3 class="text-lg font-bold">
           {{
             t("tagging.tag-entity", {
-              entityType: nodeMapping[0].entityType,
+              entityType: extensionConfiguration[0].taggableEntityType,
             })
           }}
         </h3>
@@ -31,7 +31,7 @@
           <h4 class="text-md font-bold">
             {{
               t("tagging.tag-existing", {
-                entityType: nodeMapping[0].entityType,
+                entityType: extensionConfiguration[0].taggableEntityType,
               })
             }}
           </h4>
@@ -54,13 +54,15 @@
           <h4 class="text-md font-bold">
             {{
               t("tagging.tag-new", {
-                entityType: nodeMapping[0].entityType,
+                entityType: extensionConfiguration[0].taggableEntityType,
               })
             }}
           </h4>
         </div>
         <dynamic-form
-          :dynamic-form-query="nodeMapping[0].createNewEntityFormQuery"
+          :dynamic-form-query="
+            extensionConfiguration[0].createNewEntityFormQuery
+          "
           :router="router"
           :show-form-title="false"
         />
@@ -76,7 +78,7 @@ import {
   EntityPickerMode,
   Entitytyping,
   type MetadataInput,
-  type TaggingExtensionNodeMapping,
+  type TaggableEntityConfiguration,
   TypeModals,
   type WysiwygElement,
 } from "@/generated-types/queries";
@@ -96,8 +98,8 @@ import {
 } from "@/composables/useBulkOperations";
 import type { Editor } from "@tiptap/vue-3";
 import {
-  getNodeMappingForEntityType,
-  nodeMapping,
+  getExtensionConfigurationForEntityType,
+  extensionConfiguration,
   tagEntity,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import { extractTitleKeyFromMetadataFilter } from "@/helpers";
@@ -113,7 +115,9 @@ const { t } = useI18n();
 const parentId = computed(() => route.params["id"]);
 const selectionLimit: number = 1;
 const acceptedTypes = computed(() =>
-  nodeMapping.value.map((mappingItem) => mappingItem.entityType),
+  extensionConfiguration.value.map(
+    (configurationItem) => configurationItem.taggableEntityType,
+  ),
 );
 const element = computed<WysiwygElement>(
   () => getModalInfo(TypeModals.ElodyEntityTaggingModal).element,
@@ -122,15 +126,16 @@ const editor = computed<Editor>(
   () => getModalInfo(TypeModals.ElodyEntityTaggingModal).editor,
 );
 const form = computed(() =>
-  getForm(nodeMapping.value[0].createNewEntityFormQuery),
+  getForm(extensionConfiguration.value[0].createNewEntityFormQuery),
 ); //Todo:
 const selectedText = computed<string>(() => {
   return getModalInfo(TypeModals.ElodyEntityTaggingModal).selectedText;
 });
 
 const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
-  const entityTypes: Entitytyping[] = nodeMapping.value.map(
-    (mappingItem: TaggingExtensionNodeMapping) => mappingItem.entityType,
+  const entityTypes: Entitytyping[] = extensionConfiguration.value.map(
+    (configurationItem: TaggableEntityConfiguration) =>
+      configurationItem.taggableEntityType,
   );
   if (!entityTypes) return [];
 
@@ -138,10 +143,10 @@ const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
   const metadataFilters: AdvancedFilterInput[] = [];
 
   entityTypes.forEach((type: Entitytyping) => {
-    const fullMappingItem: TaggingExtensionNodeMapping =
-      getNodeMappingForEntityType(type);
+    const configurationItem: TaggableEntityConfiguration =
+      getExtensionConfigurationForEntityType(type);
     const metadataKey = extractTitleKeyFromMetadataFilter(
-      fullMappingItem.metadataFilter,
+      configurationItem.metadataFilterForTagContent,
     );
 
     const veeValidateKey: string = `intialValues.${metadataKey}`;
@@ -159,7 +164,7 @@ const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
     });
 
     metadataFilters.push({
-      key: [fullMappingItem.metadataFilter],
+      key: [configurationItem.metadataFilterForTagContent],
       value: selectedText.value,
       type: AdvancedFilterTypes.Text,
       match_exact: false,
@@ -184,10 +189,10 @@ const tagExistingEntityFlow = () => {
   if (!isBulkSelectionLimitReached(context)) return;
 
   const entityToTag = getEnqueuedItems(context)[0];
-  const entityTypeMappingItem: TaggingExtensionNodeMapping =
-    getNodeMappingForEntityType(entityToTag.type);
+  const entityTypeConfigurationItem: TaggableEntityConfiguration =
+    getExtensionConfigurationForEntityType(entityToTag.type);
   const newTaggingTextKey = extractTitleKeyFromMetadataFilter(
-    entityTypeMappingItem.metadataFilter,
+    entityTypeConfigurationItem.metadataFilterForTagContent,
   );
   const newTaggingText = getNewTaggingTextFromTeaserMetadata(
     newTaggingTextKey,

@@ -1,9 +1,12 @@
 import { mergeAttributes, Node } from "@tiptap/core";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
+  type BaseEntity,
+  type Entity,
   Entitytyping,
   ModalStyle,
-  type TaggingExtensionNodeMapping,
+  type TagConfigurationByEntity,
+  type TaggableEntityConfiguration,
   TypeModals,
 } from "@/generated-types/queries";
 import { type Editor, Extension } from "@tiptap/vue-3";
@@ -22,18 +25,18 @@ const { addRelations } = useFormHelper();
 const { deleteRelations } = useDeleteRelations();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 
-export const nodeMapping = ref<TaggingExtensionNodeMapping[]>([]);
+export const extensionConfiguration = ref<TaggableEntityConfiguration[]>([]);
 export const tags = computed<string[]>(() =>
-  nodeMapping.value.map(
-    (mappingItem: TaggingExtensionNodeMapping) => mappingItem.tag,
+  extensionConfiguration.value.map(
+    (configurationItem: TaggableEntityConfiguration) => configurationItem.tag,
   ),
 );
 
 export const createTipTapNodeExtension = (
-  nodeMapping: TaggingExtensionNodeMapping,
+  extensionConfiguration: TaggableEntityConfiguration,
 ) => {
   return Node.create({
-    name: nodeMapping.tag,
+    name: extensionConfiguration.tag,
     group: "inline",
     inline: true,
     content: "text*",
@@ -57,7 +60,7 @@ export const createTipTapNodeExtension = (
     parseHTML() {
       return [
         {
-          tag: nodeMapping.tag,
+          tag: extensionConfiguration.tag,
           getAttrs: (element) => {
             return {
               entityId: element.getAttribute("data-entity-id"),
@@ -67,7 +70,7 @@ export const createTipTapNodeExtension = (
       ];
     },
     renderHTML({ HTMLAttributes }) {
-      return [nodeMapping.tag, mergeAttributes(HTMLAttributes), 0];
+      return [extensionConfiguration.tag, mergeAttributes(HTMLAttributes), 0];
     },
   });
 };
@@ -93,18 +96,37 @@ export const createGlobalCommandsExtension = Extension.create({
           newText: string | undefined,
         ) =>
         ({ commands, state, view }) => {
-          if (!entity) return;
+          const configurationItem = getExtensionConfigurationForEntityType(
+            entity.type,
+          );
+          if (!entity) throw Error("Error tagging text: no entity to tag");
+          if (
+            !configurationItem.tag &&
+            !configurationItem.tagConfigurationByEntity
+          )
+            throw Error(
+              "Error tagging text: config should contain either 'tag' or 'tagConfigurationByEntity'",
+            );
+
+          console.log(entity);
 
           const { selection } = state;
           const { from, to } = selection;
           let selectedText = state.doc.textBetween(from, to, " ");
+
+          if (configurationItem.tagConfigurationByEntity)
+            configureNewPlugin(
+              entity,
+              configurationItem.tagConfigurationByEntity,
+              this.editor,
+            );
 
           if (newText && newText !== selectedText)
             selectedText = newText.toLowerCase();
 
           commands.deleteRange({ from, to });
           commands.insertContentAt(from, {
-            type: getNodeMappingForEntityType(entity.type).tag,
+            type: configurationItem.tag,
             attrs: {
               entityId: entity.id,
             },
@@ -131,15 +153,16 @@ export const createGlobalCommandsExtension = Extension.create({
           }
 
           state.doc.nodesBetween(anchor - 1, anchor, (node, pos) => {
-            const entityNodeMapping = nodeMapping.value.find(
-              (mappingItem: TaggingExtensionNodeMapping) =>
-                mappingItem.tag === node.type.name,
-            );
-            if (entityNodeMapping) {
+            const entityExtensionConfiguration =
+              extensionConfiguration.value.find(
+                (mappingItem: TaggableEntityConfiguration) =>
+                  mappingItem.tag === node.type.name,
+              );
+            if (entityExtensionConfiguration) {
               tr.insertText("", pos, pos + node.nodeSize);
               deleteRelations(
                 getEntityUuid(),
-                entityNodeMapping.relationType,
+                entityExtensionConfiguration.relationType,
                 [{ key: node.attrs.entityId }],
                 BulkOperationsContextEnum.TagEntityModal,
                 false,
@@ -147,42 +170,49 @@ export const createGlobalCommandsExtension = Extension.create({
             }
           });
         }),
-      // Space: () =>
-      //   this.editor.commands.command(({ tr, state }) => {
-      //     const { selection } = state;
-      //     const { empty, anchor } = selection;
-      //
-      //     if (!empty) {
-      //       return false;
-      //     }
-      //
-      //     state.doc.nodesBetween(anchor - 1, anchor, (node, pos) => {
-      //       const entityNodeMapping = nodeMapping.value.find(
-      //         (mappingItem: TaggingExtensionNodeMapping) =>
-      //           mappingItem.tag === node.type.name,
-      //       );
-      //       if (entityNodeMapping) {
-      //         console.log("yuu");
-      //         this.editor.commands.selectParentNode();
-      //       }
-      //     });
-      //   }),
     };
   },
 });
 
-export const setNodeMapping = (
-  taggingExtensionNodeMapping: TaggingExtensionNodeMapping,
+export const setExtensionConfiguration = (
+  TaggableEntityConfiguration: TaggableEntityConfiguration,
 ) => {
-  nodeMapping.value = taggingExtensionNodeMapping;
+  extensionConfiguration.value = TaggableEntityConfiguration;
 };
 
-export const getNodeMappingForEntityType = (
+const registerNewTaggingExtension = (
+  editor: Editor,
+  tagConfigurationByEntity: TagConfigurationByEntity,
+) => {
+  console.log(editor, tagConfigurationByEntity);
+};
+
+const getPluginDetailsFromEntity = (
+  entity: BaseEntity,
+  tagConfigurationByEntity: TagConfigurationByEntity,
+) => {
+  const tagConfigurationEntityId =
+    entity.relationValues[
+      tagConfigurationByEntity.configurationEntityRelationType
+    ][0].id;
+};
+
+const configureNewPlugin = (
+  entity: BaseEntity,
+  tagConfigurationByEntity: TagConfigurationByEntity,
+  editor: Editor,
+) => {
+  getPluginDetailsFromEntity(entity, tagConfigurationByEntity);
+
+  registerNewTaggingExtension(editor, tagConfigurationByEntity);
+};
+
+export const getExtensionConfigurationForEntityType = (
   entityType: Entitytyping,
-): TaggingExtensionnodeMapping =>
-  nodeMapping.value.find(
-    (mappingItem: TaggingExtensionNodeMapping) =>
-      mappingItem.entityType === entityType,
+): TaggableEntityConfiguration =>
+  extensionConfiguration.value.find(
+    (configurationItem: TaggableEntityConfiguration) =>
+      configurationItem.taggableEntityType === entityType,
   );
 
 export const hasSelectionBeenTagged = (editor: Editor) => {
@@ -213,8 +243,8 @@ export const untagEntity = async (
 };
 
 const getEntityTypeByTagFromMapping = (tag: string): string => {
-  const mappingForTag = nodeMapping.value.find(
-    (mappingItem: TaggingExtensionNodeMapping) => mappingItem.tag === tag,
+  const mappingForTag = extensionConfiguration.value.find(
+    (mappingItem: TaggableEntityConfiguration) => mappingItem.tag === tag,
   );
   if (!mappingForTag)
     throw Error(`Mapping for '${tag}' tag could not be found`);
