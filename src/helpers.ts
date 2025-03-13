@@ -327,6 +327,7 @@ export const getMetadataFields = (
         showOnlyInEditMode: (value as PanelMetaData).showOnlyInEditMode,
         tooltip: (value as PanelMetaData).tooltip,
         lineClamp: (value as PanelMetaData).lineClamp,
+        can: (value as PanelMetaData).can,
       };
 
       fields.push(field);

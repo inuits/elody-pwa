@@ -2,7 +2,9 @@
   <div
     data-cy="metadata-wrapper"
     v-if="
-      !metadata.showOnlyInEditMode || (metadata.showOnlyInEditMode && isEdit)
+      (!metadata.showOnlyInEditMode ||
+        (metadata.showOnlyInEditMode && isEdit)) &&
+      isPermitted
     "
     :key="label"
   >
@@ -217,9 +219,11 @@ import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewM
 import { Unicons } from "@/types";
 import { DateTime } from "luxon";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
+import { usePermissions } from "@/composables/usePermissions";
 
 const { t } = useI18n();
 const { getForm, getKeyBasedOnInputField } = useFormHelper();
+const { fetchAdvancedPermission } = usePermissions();
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 
@@ -250,6 +254,7 @@ const props = withDefaults(
 // );
 
 const showTooltip = ref<boolean>(false);
+const isPermitted = ref<boolean>(false);
 
 const handleOverflowStatus = (status: boolean) => {
   showTooltip.value = status;
@@ -280,11 +285,6 @@ const setNewValue = (
 
 defineExpose({
   setNewValue,
-});
-
-const showMetadavaValueTooltip = computed(() => {
-  // TODO: the condition should be better
-  return props.metadata.valueTooltip?.type && props.metadata.value;
 });
 
 const metadataValueToDisplayOnTooltip = computed(
@@ -457,10 +457,22 @@ const { errorMessage, value, meta } = useField<
   string | BaseRelationValuesInput[]
 >(veeValidateField, rules, { label: label });
 
-onMounted(() => {
+onMounted(async () => {
   if (props.metadata.hiddenField?.hidden) return;
   setNewValue(props.metadata.value);
+  await isPermittedToDisplay();
 });
+
+const isPermittedToDisplay = async () => {
+  const permissions = props.metadata.can;
+  const hasPermissionsToCheck = permissions && permissions?.length > 0;
+
+  if (!hasPermissionsToCheck) {
+    isPermitted.value = true;
+    return;
+  }
+  isPermitted.value = await fetchAdvancedPermission(permissions);
+};
 
 if (typeof props.metadata.value !== "object") {
   watch(
