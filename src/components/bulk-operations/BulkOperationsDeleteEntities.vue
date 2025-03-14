@@ -56,6 +56,7 @@
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";
 import { watch, computed, ref } from "vue";
+import { router } from "@/main";
 import {
   DamsIcons,
   type DropdownOption,
@@ -75,13 +76,14 @@ import { useModalActions } from "@/composables/useModalActions";
 import { useDeleteEntities } from "@/composables/useDeleteEntities";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import { rootRoute } from "@/composables/useBreadcrumbs";
+import { goToEntityPageById } from "@/helpers";
 
 const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
 const { dequeueAllItemsForBulkProcessing, getEnqueuedItems } =
   useBulkOperations();
 const { closeModal, getModalInfo } = useBaseModal();
-const { getCallbackFunction } = useModalActions();
+const { getCallbackFunction, getInformationForBulkDeleteEntities } = useModalActions();
 const { deleteEntities, getDeletionForm, form } = useDeleteEntities();
 
 const modal = computed(() => {
@@ -143,19 +145,31 @@ const deleteSelectedItems = async () => {
     const linkedEntitiesToRemove = normalizeOptionsToObjectOfKeyValue(
       options.value,
     );
-    const isDeleted = await deleteEntities(
+    const jobIdentifier = await deleteEntities(
       selectedItems,
       linkedEntitiesToRemove,
+      getInformationForBulkDeleteEntities(),
     );
 
-    if (isDeleted) {
+    if (jobIdentifier) {
       closeModal(TypeModals.BulkOperationsDeleteEntities);
       dequeueAllItemsForBulkProcessing(context);
-      getCallbackFunction()?.();
       createNotificationOverwrite(
         NotificationType.default,
         t("notifications.success.entityDeleted.title"),
         t("notifications.success.entityDeleted.description"),
+      );
+      goToEntityPageById(
+        jobIdentifier,
+        { type: "job", __typename: "job" },
+        "SingleEntity",
+        router,
+      );
+    } else {
+      createNotificationOverwrite(
+        NotificationType.default,
+        t("notifications.errors.entityDeleted.title"),
+        t("notifications.errors.entityDeleted.description"),
       );
     }
   } catch (error) {

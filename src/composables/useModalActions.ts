@@ -28,6 +28,7 @@ const downloadMediafilesInformation = ref<
 >(undefined);
 const savedSearchInformation = ref<any | undefined>(undefined);
 const deletionInformation = ref<{ title: string } | undefined>(undefined);
+const skipItemsWithRelationDuringBulkDelete = ref<string[] | undefined>(undefined);
 
 export const useModalActions = () => {
   const getArgumentsForSubmit = (): BaseRelationValuesInput[] | Function => {
@@ -104,6 +105,10 @@ export const useModalActions = () => {
 
   const getInformationForDelete = (): { title: string } | undefined => {
     return deletionInformation.value;
+  };
+
+  const getInformationForBulkDeleteEntities = (): string[] | undefined => {
+    return skipItemsWithRelationDuringBulkDelete.value;
   };
 
   const extractActionArguments = (actionType: ActionType): any => {
@@ -184,6 +189,12 @@ export const useModalActions = () => {
     relationType.value = newRelationType;
   };
 
+  const initializePropertiesForBulkDeleteEntities = (
+    newSkipItemsWithRelationDuringBulkDelete: string[],
+  ): void => {
+    skipItemsWithRelationDuringBulkDelete.value = newSkipItemsWithRelationDuringBulkDelete;
+  };
+
   const getParentId = () => {
     return parentId.value;
   };
@@ -212,6 +223,7 @@ export const useModalActions = () => {
     bulkOperationType.value = undefined;
     downloadMediafilesInformation.value = undefined;
     savedSearchInformation.value = undefined;
+    skipItemsWithRelationDuringBulkDelete.value = undefined;
   };
 
   return {
@@ -222,10 +234,12 @@ export const useModalActions = () => {
     initializePropertiesForSavedSearch,
     initializePropertiesForDeletion,
     initializePropertiesForBulkDeleteRelations,
+    initializePropertiesForBulkDeleteEntities,
     getParentId,
     getBulkOperationType,
     getCallbackFunction,
     getInformationForDelete,
+    getInformationForBulkDeleteEntities,
     setCallbackFunction,
     getRelationType,
     getCollection,
