@@ -39,7 +39,7 @@ export const goToEntityPage = (
     entity.uuid ||
     entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")?.value;
 
-  router.replace({
+  router.push({
     name: listItemRouteName,
     params: {
       id: entityId,
