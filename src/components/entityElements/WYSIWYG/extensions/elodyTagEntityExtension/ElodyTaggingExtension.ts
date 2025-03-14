@@ -5,6 +5,7 @@ import {
   type Entity,
   Entitytyping,
   ModalStyle,
+  type RelationFieldInput,
   type TagConfigurationByEntity,
   type TaggableEntityConfiguration,
   TypeModals,
@@ -191,10 +192,15 @@ const getPluginDetailsFromEntity = (
   entity: BaseEntity,
   tagConfigurationByEntity: TagConfigurationByEntity,
 ) => {
-  const tagConfigurationEntityId =
+  const tagConfigurationRelations: RelationFieldInput[] =
     entity.relationValues[
       tagConfigurationByEntity.configurationEntityRelationType
-    ][0].id;
+    ];
+  if (tagConfigurationRelations.length >= 2)
+    throw Error("There can only be one configuration entity relation");
+  const tagConfigurationEntityId = tagConfigurationRelations[0].key;
+  if (!tagConfigurationEntityId)
+    throw Error("No relation with tag configuration entity found");
 };
 
 const configureNewPlugin = (
