@@ -161,6 +161,7 @@ const props = withDefaults(
     enableSelection?: boolean;
     parentEntityId?: string | undefined;
     relationType: string;
+    skipItemsWithRelationDuringBulkDelete?: string[];
   }>(),
   {
     totalItemsCount: 0,
@@ -169,6 +170,7 @@ const props = withDefaults(
     customBulkOperations: undefined,
     enableSelection: true,
     parentEntityId: undefined,
+    skipItemsWithRelationDuringBulkDelete: undefined,
   },
 );
 
@@ -213,6 +215,7 @@ const {
   initializePropertiesForDownload,
   initializePropertiesForCreateEntity,
   initializePropertiesForBulkDeleteRelations,
+  initializePropertiesForBulkDeleteEntities,
   setCallbackFunction,
 } = useModalActions();
 const { openModal, getModalInfo } = useBaseModal();
@@ -298,6 +301,7 @@ const handleSelectedBulkOperation = () => {
 
   if (bulkOperationType === BulkOperationTypes.DeleteEntities) {
     modalStyle = ModalStyle.Center;
+    initializePropertiesForBulkDeleteEntities(modal?.skipItemsWithRelationDuringBulkDelete)
   }
 
   if (bulkOperationType === BulkOperationTypes.DeleteRelations) {
