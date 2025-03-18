@@ -123,9 +123,9 @@ onMounted(async () => {
     if (props.isMetadataField) preSelect();
     else await initAutocompleteOption();
   } else {
-    if (props.advancedFilterInputForRetrievingOptions && props.modelValue)
-      preSelect();
     await initAutocompleteOption();
+    if (props.advancedFilterInputForRetrievingOptions && props.modelValue)
+      if (props.isMetadataField) preSelect();
   }
 });
 
