@@ -12,7 +12,12 @@
         {{ t(element.label) }}
       </h1>
     </div>
-    <div v-if="editor" ref="editorNode" class="flex flex-col py-4">
+    <div
+      v-if="editor"
+      id="wysiwyg-container"
+      ref="editorNode"
+      class="flex flex-col py-4"
+    >
       <Transition>
         <WYSIWYGButtons
           v-if="isEdit"
@@ -195,9 +200,5 @@ watch(
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
-}
-
-w {
-  @apply bg-accent-normal text-white rounded-md px-1 cursor-pointer;
 }
 </style>

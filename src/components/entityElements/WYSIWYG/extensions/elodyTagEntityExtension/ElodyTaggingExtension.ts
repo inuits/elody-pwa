@@ -30,6 +30,8 @@ const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 
 type TaggableEntityConfigurationFromEntity = TaggableEntityConfiguration & {
   configurationEntityId: string;
+  tagColor: string;
+  attributes?: Record<string, string>;
 };
 
 export const extensionConfiguration = ref<
@@ -199,6 +201,19 @@ const createConfigurationItemsFromMapping = (
               ?.tagMetadataKey
           ],
           configurationEntityId: configurationEntity.id,
+          tagColor:
+            configurationEntity.intialValues[
+              mappingItem.configurationItem.tagConfigurationByEntity
+                ?.colorMetadataKey
+            ],
+          attributes:
+            mappingItem.configurationItem.tagConfigurationByEntity?.metadataKeysToSetAsAttribute?.reduce(
+              (o, key) => ({
+                ...o,
+                [key]: configurationEntity.intialValues[key],
+              }),
+              {},
+            ),
           tagConfigurationByEntity:
             mappingItem.configurationItem.tagConfigurationByEntity,
           taggableEntityType: mappingItem.configurationItem.taggableEntityType,
@@ -263,11 +278,32 @@ const getConfigurationEntities = async (
   return createConfigurationItemsFromMapping(configurationItemEntitiesMapping);
 };
 
+const applyColorStylingFromConfigurationToEditor = (
+  configurations: TaggableEntityConfigurationFromEntity[],
+) => {
+  const style = document.createElement("style");
+  configurations.forEach(
+    (configurationItem: TaggableEntityConfigurationFromEntity) => {
+      style.textContent += `
+      #wysiwyg-container ${configurationItem.tag} {
+        background-color: ${configurationItem.tagColor};
+        color: #fff;
+        border-radius: 0.375rem;
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+        cursor: pointer;
+      }`;
+    },
+  );
+  document.head.appendChild(style);
+};
+
 export const getPluginsFromConfigurationEntities = async (
   configurations: TaggableEntityConfiguration[],
 ): Promise<TaggableEntityConfiguration[]> => {
   const configurationEntities: TaggableEntityConfigurationFromEntity[] =
     await getConfigurationEntities(configurations);
+  applyColorStylingFromConfigurationToEditor(configurationEntities);
   return configurationEntities;
 };
 
