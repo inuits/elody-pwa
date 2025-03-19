@@ -98,7 +98,7 @@ import {
 } from "@/composables/useBulkOperations";
 import type { Editor } from "@tiptap/vue-3";
 import {
-  getExtensionConfigurationForEntityType,
+  getExtensionConfigurationForEntity,
   extensionConfiguration,
   tagEntity,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
@@ -144,7 +144,7 @@ const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
 
   entityTypes.forEach((type: Entitytyping) => {
     const configurationItem: TaggableEntityConfiguration =
-      getExtensionConfigurationForEntityType(type);
+      getExtensionConfigurationForEntity({ type });
     const metadataKey = extractTitleKeyFromMetadataFilter(
       configurationItem.metadataFilterForTagContent,
     );
