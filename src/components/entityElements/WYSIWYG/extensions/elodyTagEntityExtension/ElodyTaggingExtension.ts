@@ -429,7 +429,7 @@ const getEntityTypeByTagFromMapping = (tag: string): string => {
   );
   if (!mappingForTag)
     throw Error(`Mapping for '${tag}' tag could not be found`);
-  else return mappingForTag.entityType;
+  else return mappingForTag.taggableEntityType;
 };
 
 const openDetailModal = (element: HTMLElement) => {
