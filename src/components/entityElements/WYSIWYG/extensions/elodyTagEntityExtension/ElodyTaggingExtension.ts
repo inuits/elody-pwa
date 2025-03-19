@@ -46,13 +46,19 @@ export const tags = computed<string[]>(() =>
 export const createTipTapNodeExtension = (
   extensionConfiguration: TaggableEntityConfiguration,
 ) => {
+  const additionalAttributes = [
+    ...extensionConfiguration.tagConfigurationByEntity
+      ?.metadataKeysToSetAsAttribute,
+    ...extensionConfiguration.metadataKeysToSetAsAttribute,
+  ];
+
   return Node.create({
     name: extensionConfiguration.tag,
     group: "inline",
     inline: true,
     content: "text*",
     addAttributes() {
-      return {
+      const attributes = {
         entityId: {
           default: null,
           parseHTML: (element) => element.getAttribute("data-entity-id"),
@@ -67,15 +73,47 @@ export const createTipTapNodeExtension = (
           },
         },
       };
+
+      if (additionalAttributes) {
+        additionalAttributes.forEach((attribute) => {
+          attributes[attribute] = {
+            [attribute]: {
+              default: null,
+              parseHTML: (element) => element.getAttribute(`data-${attribute}`),
+              renderHTML: (attributes) => {
+                if (!attributes[attribute]) {
+                  return {};
+                }
+
+                return {
+                  [`data-${attribute}`]: attributes[attribute],
+                };
+              },
+            },
+          };
+        });
+      }
+
+      return attributes;
     },
     parseHTML() {
       return [
         {
           tag: extensionConfiguration.tag,
           getAttrs: (element) => {
-            return {
+            const attributes = {
               entityId: element.getAttribute("data-entity-id"),
             };
+
+            if (additionalAttributes) {
+              additionalAttributes.forEach((attribute) => {
+                attributes[attribute] = {
+                  [attribute]: element.getAttribute(`data-${attribute}`),
+                };
+              });
+            }
+
+            return attributes;
           },
         },
       ];
@@ -108,12 +146,25 @@ export const createGlobalCommandsExtension = Extension.create({
         ) =>
         async ({ commands, state, view }) => {
           const configurationItem = getExtensionConfigurationForEntity(entity);
-          console.log(extensionConfiguration.value, configurationItem, entity);
+          const additionalAttributes = {};
+
           if (!entity) throw Error("Error tagging text: no entity to tag");
           if (!configurationItem.tag)
             throw Error(
               "Error tagging text: config should contain 'tag' or should have received the 'tag' property from its 'tagConfigurationByEntity' block",
             );
+
+          if (configurationItem.attributes) {
+            Object.assign(additionalAttributes, configurationItem.attributes);
+          }
+          if (configurationItem.metadataKeysToSetAsAttribute) {
+            configurationItem.metadataKeysToSetAsAttribute.forEach(
+              (key: string) =>
+                Object.assign(additionalAttributes, {
+                  [key]: entity.intialValues[key] || "",
+                }),
+            );
+          }
 
           const { selection } = state;
           const { from, to } = selection;
@@ -122,14 +173,18 @@ export const createGlobalCommandsExtension = Extension.create({
           if (newText && newText !== selectedText)
             selectedText = newText.toLowerCase();
 
-          commands.deleteRange({ from, to });
-          commands.insertContentAt(from, {
+          const newNodeContent = {
             type: configurationItem.tag,
             attrs: {
               entityId: entity.id,
             },
             content: [{ type: "text", text: selectedText }],
-          });
+          };
+
+          Object.assign(newNodeContent.attrs, additionalAttributes);
+
+          commands.deleteRange({ from, to });
+          commands.insertContentAt(from, newNodeContent);
           commands.selectNodeForward();
           commands.insertContent({ type: "text", text: " " });
 
@@ -369,7 +424,8 @@ export const untagEntity = async (
 
 const getEntityTypeByTagFromMapping = (tag: string): string => {
   const mappingForTag = extensionConfiguration.value.find(
-    (mappingItem: TaggableEntityConfiguration) => mappingItem.tag === tag,
+    (mappingItem: TaggableEntityConfiguration) =>
+      mappingItem.tag?.toLowerCase() === tag,
   );
   if (!mappingForTag)
     throw Error(`Mapping for '${tag}' tag could not be found`);
