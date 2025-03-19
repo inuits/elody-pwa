@@ -9,6 +9,7 @@ import { type InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { apolloClient } from "@/main";
 import { ref } from "vue";
 import { useImport } from "./useImport";
+import { goToEntityPageById } from "@/helpers";
 
 export const useDeleteEntities = () => {
   const { mutate } = useMutation<BulkDeleteEntitiesMutation>(
@@ -30,6 +31,7 @@ export const useDeleteEntities = () => {
   const deleteEntities = async (
     items: InBulkProcessableItem[] | { id: string; type: string }[],
     linkedEntitiesToRemove: { [key: string]: boolean } | undefined = {},
+    skipItemsWithRelationDuringBulkDelete: string[] | undefined = undefined,
   ) => {
     if (items.length === 0) return;
     const types = [...new Set(items.map((item) => item.type))];
@@ -48,13 +50,16 @@ export const useDeleteEntities = () => {
       path = Collection.Entities;
     }
 
-    await mutate({
+    const result = await mutate({
       ids: items.map((item: { id: string }) => item.id),
       path,
       ...linkedEntitiesToRemove,
+      skipItemsWithRelationDuringBulkDelete,
     });
 
-    return true;
+    if (result?.data)
+      return result.data.bulkDeleteEntities;
+    return false;
   };
 
   return {

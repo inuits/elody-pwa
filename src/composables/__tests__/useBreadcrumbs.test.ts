@@ -169,7 +169,6 @@ describe("useBreadcrumbs", () => {
               meta: {
                 title: "Single Entity",
                 requiresAuth: true,
-                showEntityTitle: true,
               },
             },
             {
@@ -186,7 +185,6 @@ describe("useBreadcrumbs", () => {
               meta: {
                 title: "navigation.documents",
                 requiresAuth: true,
-                showEntityTitle: true,
                 type: "entities",
                 entityType: "document",
                 breadcrumbs: [

@@ -123,9 +123,9 @@ onMounted(async () => {
     if (props.isMetadataField) preSelect();
     else await initAutocompleteOption();
   } else {
-    if (props.advancedFilterInputForRetrievingOptions && props.modelValue)
-      preSelect();
     await initAutocompleteOption();
+    if (props.advancedFilterInputForRetrievingOptions)
+      if (props.isMetadataField) preSelect();
   }
 });
 
@@ -225,7 +225,9 @@ const preSelect = () => {
     selection = props.modelValue.map((value) => {
       return { label: value, value };
     });
-  else selection = [{ label: props.modelValue || "", value: props.modelValue }];
+  else if (props.modelValue)
+    selection = [{ label: props.modelValue, value: props.modelValue }];
+  else selection = []
   handleSelect(selection, true);
 };
 

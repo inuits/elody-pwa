@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="metadata-wrapper"
-    v-if="inputField"
+    v-if="inputField && isPermitted"
     class="text-text-light text-sm"
   >
     <p data-cy="metadata-label">
@@ -41,12 +41,13 @@ import type {
   InputField as InputFieldType,
 } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { type PropType, computed, onMounted, inject } from "vue";
+import { type PropType, computed, onMounted, inject, ref } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useField } from "vee-validate";
 import { useEditMode } from "@/composables/useEdit";
 import { useI18n } from "vue-i18n";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
+import { usePermissions } from "@/composables/usePermissions";
 
 export type Location = {
   latitude: string;
@@ -59,6 +60,7 @@ const props = defineProps({
   value: { type: Object as PropType<Location>, required: true },
   inputField: { type: Object as PropType<InputFieldType>, required: false },
   entityUuid: { type: String, required: true },
+  can: { type: Array, required: false },
 });
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
@@ -79,10 +81,25 @@ const coordinateEditIsDisabled = computed(() => {
   );
 });
 const { t } = useI18n();
+const { fetchAdvancedPermission } = usePermissions();
 
-onMounted(() => {
+const isPermitted = ref<boolean>(false);
+
+onMounted(async () => {
   setFormValues(computedLatitude.value, computedLongitude.value);
+  await isPermittedToDisplay();
 });
+
+const isPermittedToDisplay = async () => {
+  const permissions = props.can || [];
+  const hasPermissionsToCheck = permissions && permissions?.length > 0;
+
+  if (!hasPermissionsToCheck) {
+    isPermitted.value = true;
+    return;
+  }
+  isPermitted.value = await fetchAdvancedPermission(permissions as string[]);
+};
 
 const setFormValues = (latitude: string, longitude: string) => {
   if (form) {

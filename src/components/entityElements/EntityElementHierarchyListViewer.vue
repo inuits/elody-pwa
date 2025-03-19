@@ -1,5 +1,6 @@
 <template>
   <entity-element-wrapper
+    v-if="showHierarchyList"
     :isCollapsed="element.isCollapsed"
     :label="element.label"
     :use-vshow-instead-of-vif="true"
@@ -50,19 +51,23 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useI18n } from "vue-i18n";
+import { usePermissions } from "@/composables/usePermissions";
 
 const props = defineProps<{
   element: HierarchyListElement;
   entityId: string;
+  can?: string[];
 }>();
 
 const { loadDocument } = useImport();
 const { getForm } = useFormHelper();
 const { t } = useI18n();
+const { fetchAdvancedPermission } = usePermissions();
 
 const query = ref<any>(null);
 const isLoading = ref<boolean>(true);
 const hierachyList = ref<any[]>([]);
+const showHierarchyList = ref<boolean>(false);
 
 const getQuery = async () => {
   if (query.value) return query.value;
@@ -125,7 +130,17 @@ const fetchEntity = async (id: string, type: Entitytyping) => {
     });
 };
 
-onMounted(() => {
+onMounted(async () => {
   fetchAllHierarchy();
+  await checkHierarchyListPermission();
 });
+
+const checkHierarchyListPermission = async () => {
+  if (!props.can) {
+    showHierarchyList.value = true;
+    return;
+  }
+
+  showHierarchyList.value = await fetchAdvancedPermission(props.can);
+};
 </script>
