@@ -41,7 +41,6 @@ import { useQuery } from "@vue/apollo-composable";
 import { getEntityTitle } from "@/helpers";
 import { Unicons } from "@/types";
 import EntitySingle from "@/views/EntitySingle.vue";
-import SpinnerLoader from "@/components/SpinnerLoader.vue";
 
 const { getModalInfo, closeModal } = useBaseModal();
 
