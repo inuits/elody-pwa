@@ -87,6 +87,7 @@
         v-if="element.__typename === 'HierarchyListElement'"
         :element="element"
         :entity-id="id"
+        :can="element.can"
       />
     </div>
   </div>

@@ -39,7 +39,7 @@ export const goToEntityPage = (
     entity.uuid ||
     entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")?.value;
 
-  router.replace({
+  router.push({
     name: listItemRouteName,
     params: {
       id: entityId,
@@ -327,6 +327,7 @@ export const getMetadataFields = (
         showOnlyInEditMode: (value as PanelMetaData).showOnlyInEditMode,
         tooltip: (value as PanelMetaData).tooltip,
         lineClamp: (value as PanelMetaData).lineClamp,
+        can: (value as PanelMetaData).can,
       };
 
       fields.push(field);

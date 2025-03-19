@@ -30,6 +30,7 @@
       :advanced-filter-input-for-searching-options="
         field.advancedFilterInputForSearchingOptions
       "
+      :is-metadata-field="field.isMetadataField"
       :relation-filter="relationFilter"
       :mode="formFlow"
       :form-id="formId"
