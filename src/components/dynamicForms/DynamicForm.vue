@@ -262,7 +262,7 @@ import { useErrorCodes } from "@/composables/useErrorCodes";
 import ImportWrapper from "@/components/imports/ImportWrapper.vue";
 import useEntitySingle from "@/composables/useEntitySingle";
 import {
-  getExtensionConfigurationForEntityType,
+  getExtensionConfigurationForEntity,
   tagEntity,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
@@ -471,7 +471,7 @@ const uploadActionFunction = async () => {
 const tagNewlyCreatedEntity = (entity: Entity): void => {
   const parentId = route.params["id"];
   const { relationType, metadataFilterForTagContent } =
-    getExtensionConfigurationForEntityType(entity.type);
+    getExtensionConfigurationForEntity(entity);
   const modalInfo = getModalInfo(TypeModals.ElodyEntityTaggingModal);
   const titleKey = extractTitleKeyFromMetadataFilter(
     metadataFilterForTagContent,

@@ -1,12 +1,13 @@
 import { mergeAttributes, Node } from "@tiptap/core";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
+  AdvancedFilterTypes,
   type BaseEntity,
-  type Entity,
   Entitytyping,
+  GetEntitiesDocument,
+  type GetEntitiesQueryVariables,
   ModalStyle,
-  type RelationFieldInput,
-  type TagConfigurationByEntity,
+  SearchInputType,
   type TaggableEntityConfiguration,
   TypeModals,
 } from "@/generated-types/queries";
@@ -20,13 +21,20 @@ import {
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
+import { apolloClient } from "@/main";
 
 const { addRelations } = useFormHelper();
 const { deleteRelations } = useDeleteRelations();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 
-export const extensionConfiguration = ref<TaggableEntityConfiguration[]>([]);
+type TaggableEntityConfigurationFromEntity = TaggableEntityConfiguration & {
+  configurationEntityId: string;
+};
+
+export const extensionConfiguration = ref<
+  (TaggableEntityConfiguration | TaggableEntityConfigurationFromEntity)[]
+>([]);
 export const tags = computed<string[]>(() =>
   extensionConfiguration.value.map(
     (configurationItem: TaggableEntityConfiguration) => configurationItem.tag,
@@ -96,31 +104,18 @@ export const createGlobalCommandsExtension = Extension.create({
           relationType: string,
           newText: string | undefined,
         ) =>
-        ({ commands, state, view }) => {
-          const configurationItem = getExtensionConfigurationForEntityType(
-            entity.type,
-          );
+        async ({ commands, state, view }) => {
+          const configurationItem = getExtensionConfigurationForEntity(entity);
+          console.log(extensionConfiguration.value, configurationItem, entity);
           if (!entity) throw Error("Error tagging text: no entity to tag");
-          if (
-            !configurationItem.tag &&
-            !configurationItem.tagConfigurationByEntity
-          )
+          if (!configurationItem.tag)
             throw Error(
-              "Error tagging text: config should contain either 'tag' or 'tagConfigurationByEntity'",
+              "Error tagging text: config should contain 'tag' or should have received the 'tag' property from its 'tagConfigurationByEntity' block",
             );
-
-          console.log(entity);
 
           const { selection } = state;
           const { from, to } = selection;
           let selectedText = state.doc.textBetween(from, to, " ");
-
-          if (configurationItem.tagConfigurationByEntity)
-            configureNewPlugin(
-              entity,
-              configurationItem.tagConfigurationByEntity,
-              this.editor,
-            );
 
           if (newText && newText !== selectedText)
             selectedText = newText.toLowerCase();
@@ -181,45 +176,133 @@ export const setExtensionConfiguration = (
   extensionConfiguration.value = TaggableEntityConfiguration;
 };
 
-const registerNewTaggingExtension = (
-  editor: Editor,
-  tagConfigurationByEntity: TagConfigurationByEntity,
-) => {
-  console.log(editor, tagConfigurationByEntity);
+const createConfigurationItemsFromMapping = (
+  configurationItemEntitiesMapping: {
+    configurationItem: TaggableEntityConfiguration;
+    configurationEntities: BaseEntity[];
+  }[],
+): TaggableEntityConfigurationFromEntity[] => {
+  const configurations: TaggableEntityConfigurationFromEntity[] = [];
+  configurationItemEntitiesMapping.forEach((mappingItem) => {
+    const config = mappingItem.configurationEntities.map(
+      (configurationEntity: BaseEntity) => {
+        return {
+          createNewEntityFormQuery:
+            mappingItem.configurationItem.createNewEntityFormQuery,
+          metadataFilterForTagContent:
+            mappingItem.configurationItem.metadataFilterForTagContent,
+          metadataKeysToSetAsAttribute:
+            mappingItem.configurationItem.metadataKeysToSetAsAttribute,
+          relationType: mappingItem.configurationItem.relationType,
+          tag: configurationEntity.intialValues[
+            mappingItem.configurationItem.tagConfigurationByEntity
+              ?.tagMetadataKey
+          ],
+          configurationEntityId: configurationEntity.id,
+          tagConfigurationByEntity:
+            mappingItem.configurationItem.tagConfigurationByEntity,
+          taggableEntityType: mappingItem.configurationItem.taggableEntityType,
+        };
+      },
+    );
+    configurations.push(...config);
+  });
+  return configurations;
 };
 
-const getPluginDetailsFromEntity = (
-  entity: BaseEntity,
-  tagConfigurationByEntity: TagConfigurationByEntity,
+const getConfigurationEntities = async (
+  configurations: TaggableEntityConfiguration[],
 ) => {
-  const tagConfigurationRelations: RelationFieldInput[] =
-    entity.relationValues[
-      tagConfigurationByEntity.configurationEntityRelationType
-    ];
-  if (tagConfigurationRelations.length >= 2)
-    throw Error("There can only be one configuration entity relation");
-  const tagConfigurationEntityId = tagConfigurationRelations[0].key;
-  if (!tagConfigurationEntityId)
-    throw Error("No relation with tag configuration entity found");
+  const configurationsByEntity: TaggableEntityConfiguration[] =
+    configurations.filter(
+      (configurationItem) => configurationItem.tagConfigurationByEntity,
+    );
+  if (!configurationsByEntity.length) return;
+
+  const query = GetEntitiesDocument;
+
+  const configurationItemEntitiesMappingPromises: Promise<{
+    configurationItem: TaggableEntityConfiguration;
+    configurationEntities: BaseEntity[];
+  }>[] = configurationsByEntity.map(async (configurationItem) => {
+    const queryVariables: GetEntitiesQueryVariables = {
+      advancedFilterInputs: {
+        match_exact: true,
+        type: AdvancedFilterTypes.Type,
+        value:
+          configurationItem.tagConfigurationByEntity?.configurationEntityType,
+      },
+      searchInputType: SearchInputType.AdvancedInputType,
+      searchValue: {
+        isAsc: true,
+      },
+      type: Entitytyping.BaseEntity,
+      limit: 100,
+      skip: 1,
+    };
+
+    const response = await apolloClient.query({
+      query,
+      variables: queryVariables,
+      fetchPolicy: "no-cache",
+    });
+
+    const configurationEntities: BaseEntity[] = response.data.Entities.results;
+
+    return {
+      configurationItem,
+      configurationEntities,
+    };
+  });
+
+  const configurationItemEntitiesMapping: {
+    configurationItem: TaggableEntityConfiguration;
+    configurationEntities: BaseEntity[];
+  }[] = await Promise.all(configurationItemEntitiesMappingPromises);
+
+  return createConfigurationItemsFromMapping(configurationItemEntitiesMapping);
 };
 
-const configureNewPlugin = (
-  entity: BaseEntity,
-  tagConfigurationByEntity: TagConfigurationByEntity,
-  editor: Editor,
-) => {
-  getPluginDetailsFromEntity(entity, tagConfigurationByEntity);
-
-  registerNewTaggingExtension(editor, tagConfigurationByEntity);
+export const getPluginsFromConfigurationEntities = async (
+  configurations: TaggableEntityConfiguration[],
+): Promise<TaggableEntityConfiguration[]> => {
+  const configurationEntities: TaggableEntityConfigurationFromEntity[] =
+    await getConfigurationEntities(configurations);
+  return configurationEntities;
 };
 
-export const getExtensionConfigurationForEntityType = (
-  entityType: Entitytyping,
-): TaggableEntityConfiguration =>
-  extensionConfiguration.value.find(
-    (configurationItem: TaggableEntityConfiguration) =>
-      configurationItem.taggableEntityType === entityType,
+export const getExtensionConfigurationForEntity = (
+  entity: BaseEntity | { type: string },
+): TaggableEntityConfiguration | undefined => {
+  let configuration = undefined;
+
+  if (!entity.relationValues)
+    return extensionConfiguration.value.find(
+      (configurationItem) =>
+        configurationItem.taggableEntityType === entity.type,
+    );
+
+  const configurationEntityIds: string[] = extensionConfiguration.value.map(
+    (
+      configurationItem:
+        | TaggableEntityConfiguration
+        | TaggableEntityConfigurationFromEntity,
+    ) => configurationItem.configurationEntityId,
   );
+
+  const entityRelationValues = Object.values(entity.relationValues).map(
+    (relationValue) => relationValue[0].key,
+  );
+  entityRelationValues.forEach((relationValue: any) => {
+    if (configurationEntityIds.includes(relationValue))
+      configuration = extensionConfiguration.value.find(
+        (configurationItem) =>
+          configurationItem.configurationEntityId === relationValue,
+      );
+  });
+
+  return configuration;
+};
 
 export const hasSelectionBeenTagged = (editor: Editor) => {
   const { selection } = editor.state;

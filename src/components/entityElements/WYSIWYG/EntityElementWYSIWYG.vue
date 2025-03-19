@@ -30,6 +30,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
 import WYSIWYGButtons from "@/components/entityElements/WYSIWYG/WYSIWYGButtons.vue";
 import {
+  type TaggableEntityConfiguration,
   TypeModals,
   ValidationFields,
   WysiwygElement,
@@ -43,6 +44,7 @@ import {
   createGlobalCommandsExtension,
   createTipTapNodeExtension,
   extensionConfiguration,
+  getPluginsFromConfigurationEntities,
   setExtensionConfiguration,
   setTaggedEntityInfoTooltip,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
@@ -92,13 +94,34 @@ onMounted(async () => {
   if (
     props.element.extensions.includes(WysiwygExtensions.ElodyTaggingExtension)
   ) {
-    setExtensionConfiguration(
-      props.element.taggingConfiguration?.taggableEntityConfiguration,
+    const initialExtensionConfigurationsWithTag =
+      props.element.taggingConfiguration?.taggableEntityConfiguration.filter(
+        (configurationItem: TaggableEntityConfiguration) =>
+          configurationItem.tag,
+      );
+    const extensionConfigurationsFromEntities: TaggableEntityConfiguration[] =
+      await getPluginsFromConfigurationEntities(
+        props.element.taggingConfiguration?.taggableEntityConfiguration,
+      );
+
+    const usableExtensionConfigurations = [
+      ...initialExtensionConfigurationsWithTag,
+      ...extensionConfigurationsFromEntities,
+    ];
+    setExtensionConfiguration(usableExtensionConfigurations);
+
+    const extensionsFromEntities = extensionConfigurationsFromEntities.map(
+      (configuration) => createTipTapNodeExtension(configuration),
     );
+    const extensionConfigurationsWithTag = extensionConfiguration.value.filter(
+      (item) => item.tag,
+    );
+
     editorExtensions.push(
-      ...extensionConfiguration.value.map((nodeMap) =>
-        createTipTapNodeExtension(nodeMap),
+      ...extensionConfigurationsWithTag.map((configurationItem) =>
+        createTipTapNodeExtension(configurationItem),
       ),
+      ...extensionsFromEntities,
       createGlobalCommandsExtension,
     );
   }
