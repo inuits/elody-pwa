@@ -245,6 +245,20 @@ const useUpload = () => {
     );
     toggleUploadStatus();
 
+    if (uploadFlow.value === UploadFlow.XmlMarc) {
+      await __getUploadUrlForXml();
+
+      [
+        ProgressStepType.Prepare,
+        ProgressStepType.Validate,
+        ProgressStepType.Upload,
+      ].forEach((status: ProgressStepType) => {
+        __updateGlobalUploadProgress(status, ProgressStepStatus.Complete);
+      });
+
+      return;
+    }
+
     if (
       uploadFlow.value === UploadFlow.MediafilesOnly ||
       uploadFlow.value === UploadFlow.OptionalMediafiles
@@ -448,25 +462,7 @@ const useUpload = () => {
     return JSON.parse(await response.text());
   };
 
-  const __getUploadUrlForXml = async (file: any): Promise<string> => {
-    console.log(file);
-
-    // if (file) {
-    //   const reader = new FileReader();
-
-    //   reader.onload = (e) => {
-    //     const xmlText = e.target.result;
-    //     const parser = new DOMParser();
-    //     const xmlDoc = parser.parseFromString(xmlText, "application/xml");
-
-    //     console.log("Parsed XML:", xmlDoc);
-    //   };
-
-    // }
-
-    const formData = new FormData();
-    formData.append("xml", file);
-
+  const __getUploadUrlForXml = async (): Promise<string> => {
     const response = await fetch(`api/upload/xml`, {
       headers: { "Content-Type": "application/json" },
       method: "POST",
@@ -564,7 +560,7 @@ const useUpload = () => {
     }
 
     if (uploadFlow.value === UploadFlow.XmlMarc) {
-      uploadUrl = await __getUploadUrlForXml(file);
+      uploadUrl = "url";
     }
 
     if (!uploadUrl) throw new Error("Upload url is undefined.");
