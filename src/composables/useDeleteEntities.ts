@@ -58,7 +58,7 @@ export const useDeleteEntities = () => {
     });
 
     if (result?.data)
-      return result.data.bulkDeleteEntities;
+      return result.data.bulkDeleteEntities || true;
     return false;
   };
 
