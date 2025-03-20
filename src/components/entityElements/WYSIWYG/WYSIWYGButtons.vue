@@ -176,7 +176,7 @@ const isNonTaggedTextSelected = computed(() => {
 });
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 button {
   padding: 0.25rem;
   margin: 0.25rem;
