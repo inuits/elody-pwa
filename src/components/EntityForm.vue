@@ -95,14 +95,6 @@ let form = createForm(props.id, {
 let mutatedEntity: Entity | undefined;
 const formContainsErrors = computed((): boolean => !form?.meta.value.valid);
 
-// onUpdated(() => {}
-// console.L
-// );
-
-onRenderTriggered((e) => {
-  console.log(e);
-});
-
 const { setValues } = form;
 
 const submit = useSubmitForm<EntityValues>(async () => {
