@@ -336,7 +336,7 @@ const getConfigurationEntities = async (
 const applyColorStylingFromConfigurationToEditor = (
   configurations: TaggableEntityConfigurationFromEntity[],
 ) => {
-  const style = document.createElement("style");
+  const style = document.createElement("style"); // Todo: Set styles based on attribute
   configurations.forEach(
     (configurationItem: TaggableEntityConfigurationFromEntity) => {
       style.textContent += `
