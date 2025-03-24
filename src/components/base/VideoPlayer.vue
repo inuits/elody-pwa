@@ -34,10 +34,12 @@ const mediafileViewerContext: any = inject("mediafileViewerContext");
 const videoUrl = ref("");
 
 const getVideo = async () => {
+  if (!props.source?.intialValues?.original_file_location)
+    throw Error("original_file_location was not found on mediafile");
   const response = await getMediafile(
     `/api/mediafile/${getMediafilePath(
-      props.source?.intialValues?.originalFileLocation
-    )}`
+      props.source?.intialValues?.original_file_location,
+    )}`,
   );
   const videoBlob = await response.blob();
 
