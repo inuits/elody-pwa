@@ -246,7 +246,7 @@ const useUpload = () => {
     toggleUploadStatus();
 
     if (uploadFlow.value === UploadFlow.XmlMarc) {
-      await __getUploadUrlForXml();
+      await __uploadXml();
 
       [
         ProgressStepType.Prepare,
@@ -256,6 +256,7 @@ const useUpload = () => {
         __updateGlobalUploadProgress(status, ProgressStepStatus.Complete);
       });
 
+      toggleUploadStatus();
       return;
     }
 
@@ -462,7 +463,8 @@ const useUpload = () => {
     return JSON.parse(await response.text());
   };
 
-  const __getUploadUrlForXml = async (): Promise<string> => {
+  // TODO: this is temp handler for demo #139636
+  const __uploadXml = async (): Promise<string> => {
     const response = await fetch(`api/upload/xml`, {
       headers: { "Content-Type": "application/json" },
       method: "POST",
