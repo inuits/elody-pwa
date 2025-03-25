@@ -1,13 +1,16 @@
-import Dropzone, { type DropzoneFile } from "dropzone";
+import type Dropzone from "dropzone";
+import { type DropzoneFile } from "dropzone";
 import { computed, ref, toRaw, watch } from "vue";
+import type {
+  Entitytyping,
+  UploadEntityTypes,
+} from "@/generated-types/queries";
 import {
   type ActionProgressStep,
-  Entitytyping,
   ProgressStepStatus,
   ProgressStepType,
   UploadFieldType,
   UploadFlow,
-  UploadEntityTypes,
   TypeModals,
 } from "@/generated-types/queries";
 import useEntitySingle from "@/composables/useEntitySingle";
@@ -46,6 +49,9 @@ const containsCsv = computed(
       (file: DropzoneFile) =>
         file.type === "text/csv" || file.type === "application/vnd.ms-excel",
     ),
+);
+const containsXml = computed(
+  () => !!files.value.find((file: DropzoneFile) => file.type === "text/xml"),
 );
 const uploadFlow = ref<UploadFlow>(UploadFlow.MediafilesOnly);
 const uploadValidationFn = ref<Function>(() => {
@@ -97,6 +103,9 @@ const useUpload = () => {
       optionalMediafiles: {
         checkUploadValidityFn: () => __checkUploadValidityOptionalMediafiles(),
       },
+      xmlMarc: {
+        checkUploadValidityFn: () => __checkUploadValidityXmlFile(),
+      },
     };
     uploadValidationFn.value =
       settingsObject[uploadSettings.uploadFlow].checkUploadValidityFn;
@@ -107,6 +116,10 @@ const useUpload = () => {
 
   const __checkUploadValidityUpdateMetadata = (): boolean => {
     return containsCsv.value;
+  };
+
+  const __checkUploadValidityXmlFile = (): boolean => {
+    return containsXml.value;
   };
 
   const __checkUploadValidityCsvOnly = (): boolean => {
@@ -232,7 +245,25 @@ const useUpload = () => {
     );
     toggleUploadStatus();
 
-    if (uploadFlow.value === UploadFlow.MediafilesOnly || uploadFlow.value === UploadFlow.OptionalMediafiles)
+    if (uploadFlow.value === UploadFlow.XmlMarc) {
+      await __uploadXml();
+
+      [
+        ProgressStepType.Prepare,
+        ProgressStepType.Validate,
+        ProgressStepType.Upload,
+      ].forEach((status: ProgressStepType) => {
+        __updateGlobalUploadProgress(status, ProgressStepStatus.Complete);
+      });
+
+      toggleUploadStatus();
+      return;
+    }
+
+    if (
+      uploadFlow.value === UploadFlow.MediafilesOnly ||
+      uploadFlow.value === UploadFlow.OptionalMediafiles
+    )
       __updateGlobalUploadProgress(
         ProgressStepType.Prepare,
         ProgressStepStatus.Complete,
@@ -399,10 +430,8 @@ const useUpload = () => {
     if (parsedResult.parent_job_id)
       jobIdentifier.value = parsedResult.parent_job_id;
 
-    if (isDryRun)
-      return parsedResult;
-    else
-      return parsedResult.links;
+    if (isDryRun) return parsedResult;
+    else return parsedResult.links;
   };
 
   const toggleUploadStatus = () => {
@@ -431,6 +460,20 @@ const useUpload = () => {
       return Promise.reject(httpErrorMessage);
     }
 
+    return JSON.parse(await response.text());
+  };
+
+  // TODO: this is temp handler for demo #139636
+  const __uploadXml = async (): Promise<string> => {
+    const response = await fetch(`api/upload/xml`, {
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+
+    if (!response.ok) {
+      const httpErrorMessage = handleHttpError(response);
+      return Promise.reject(httpErrorMessage);
+    }
     return JSON.parse(await response.text());
   };
 
@@ -511,8 +554,15 @@ const useUpload = () => {
         );
       }
     }
-    if (uploadFlow.value === UploadFlow.MediafilesOnly || uploadFlow.value === UploadFlow.OptionalMediafiles) {
+    if (
+      uploadFlow.value === UploadFlow.MediafilesOnly ||
+      uploadFlow.value === UploadFlow.OptionalMediafiles
+    ) {
       uploadUrl = await __getUploadUrlForMediafileOnEntity(entityId, file);
+    }
+
+    if (uploadFlow.value === UploadFlow.XmlMarc) {
+      uploadUrl = "url";
     }
 
     if (!uploadUrl) throw new Error("Upload url is undefined.");
@@ -623,6 +673,7 @@ const useUpload = () => {
 
   const validateFiles = () => {
     if (uploadFlow.value === UploadFlow.CsvOnly) return containsCsv.value;
+    if (uploadFlow.value === UploadFlow.XmlMarc) return containsXml.value;
 
     if (
       uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv ||
@@ -633,8 +684,7 @@ const useUpload = () => {
       else return mediafiles.value.length > 0;
     }
 
-    if (uploadFlow.value === UploadFlow.OptionalMediafiles)
-      return true;
+    if (uploadFlow.value === UploadFlow.OptionalMediafiles) return true;
 
     if (uploadFlow.value === UploadFlow.MediafilesOnly)
       return !containsCsv.value && mediafiles.value.length > 0;
@@ -719,6 +769,7 @@ const useUpload = () => {
       if (
         uploadFlow.value === UploadFlow.MediafilesOnly ||
         uploadFlow.value === UploadFlow.OptionalMediafiles ||
+        (uploadFlow.value === UploadFlow.XmlMarc && containsXml.value) ||
         (uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv &&
           !containsCsv.value)
       ) {
@@ -763,17 +814,15 @@ const useUpload = () => {
       );
 
       if (
-        (
-          uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv ||
-          uploadFlow.value === UploadFlow.MediafilesWithOcr
-        ) &&
+        (uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv ||
+          uploadFlow.value === UploadFlow.MediafilesWithOcr) &&
         mediafiles.value.length <= 0
       ) {
         __updateGlobalUploadProgress(
           ProgressStepType.Prepare,
           ProgressStepStatus.Failed,
         );
-        return false
+        return false;
       }
 
       return areAllFilesPresent;
@@ -899,19 +948,16 @@ const useUpload = () => {
     }
 
     return undefined;
-  }
+  };
 
-  const extractLinkContent = (
-    error: string,
-  ): string | undefined => {
+  const extractLinkContent = (error: string): string | undefined => {
     const linkRegex = /\$LINK\(([^)]+)\)/;
     const match = error.match(linkRegex);
 
-    if (match && match[1])
-      return match[1];
+    if (match && match[1]) return match[1];
 
     return undefined;
-  }
+  };
 
   const extractLinkArguments = (
     linkContent: string,
@@ -923,19 +969,16 @@ const useUpload = () => {
       return [match[1].trim(), match[2].trim()];
 
     return undefined;
-  }
+  };
 
-  const extractEntityId = (
-    entityIdWithName: string,
-  ): string | undefined => {
+  const extractEntityId = (entityIdWithName: string): string | undefined => {
     const entityIdregex = /^([^-]+)-/;
-    const match = entityIdWithName.match(entityIdregex)
+    const match = entityIdWithName.match(entityIdregex);
 
-    if (match && match[1])
-      return match[1];
+    if (match && match[1]) return match[1];
 
     return undefined;
-  }
+  };
 
   const checkErrorMessageForLinks = (
     error: string,
@@ -949,18 +992,18 @@ const useUpload = () => {
     const entityId = extractEntityId(entityIdWithName);
     if (!entityId) return undefined;
 
-    const anchor = document.createElement('a');
-    anchor.href = '#';
+    const anchor = document.createElement("a");
+    anchor.href = "#";
     anchor.textContent = extractStringBeforeLink(error) || error;
-    anchor.classList.add('underline');
-    anchor.addEventListener('click', (event) => {
+    anchor.classList.add("underline");
+    anchor.addEventListener("click", (event) => {
       event.preventDefault();
       const routePath = `/${type}/${entityId}`;
       const route = router.resolve({ path: routePath });
-      window.open(route.fullPath, '_blank');
+      window.open(route.fullPath, "_blank");
     });
     return anchor;
-  }
+  };
 
   return {
     resetUpload,

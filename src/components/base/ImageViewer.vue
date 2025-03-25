@@ -12,6 +12,7 @@ import { useGetMediafile } from "@/composables/useGetMediafile";
 
 const props = defineProps<{
   url?: any;
+  mediaIsLink: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -23,6 +24,12 @@ const imageUrl = ref("");
 const isLoading = ref(true);
 
 const getImage = async () => {
+  if (props.mediaIsLink) {
+    imageUrl.value = props.url;
+    isLoading.value = false;
+    return;
+  }
+
   try {
     const response = await getMediafile(props.url);
     const videoBlob = await response.blob();
