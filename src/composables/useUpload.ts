@@ -232,7 +232,10 @@ const useUpload = () => {
     );
     toggleUploadStatus();
 
-    if (uploadFlow.value === UploadFlow.MediafilesOnly || uploadFlow.value === UploadFlow.OptionalMediafiles)
+    if (
+      uploadFlow.value === UploadFlow.MediafilesOnly ||
+      uploadFlow.value === UploadFlow.OptionalMediafiles
+    )
       __updateGlobalUploadProgress(
         ProgressStepType.Prepare,
         ProgressStepStatus.Complete,
@@ -326,13 +329,13 @@ const useUpload = () => {
         dryRunStatus === ProgressStepStatus.Complete &&
         mediafiles.value.length
       )
-        mediafiles.value.forEach((mediafile: DropzoneFile) =>
+        mediafiles.value.forEach((mediafile: DropzoneFile) => {
           __updateFileThumbnails(
             mediafile,
             ProgressStepType.Validate,
             ProgressStepStatus.Complete,
-          ),
-        );
+          );
+        });
       verifyAllNeededFilesArePresent();
     } catch {
       dryRunErrors.value.push("upload-fields.errors.dry-run-failed");
@@ -399,10 +402,8 @@ const useUpload = () => {
     if (parsedResult.parent_job_id)
       jobIdentifier.value = parsedResult.parent_job_id;
 
-    if (isDryRun)
-      return parsedResult;
-    else
-      return parsedResult.links;
+    if (isDryRun) return parsedResult;
+    else return parsedResult.links;
   };
 
   const toggleUploadStatus = () => {
@@ -511,7 +512,10 @@ const useUpload = () => {
         );
       }
     }
-    if (uploadFlow.value === UploadFlow.MediafilesOnly || uploadFlow.value === UploadFlow.OptionalMediafiles) {
+    if (
+      uploadFlow.value === UploadFlow.MediafilesOnly ||
+      uploadFlow.value === UploadFlow.OptionalMediafiles
+    ) {
       uploadUrl = await __getUploadUrlForMediafileOnEntity(entityId, file);
     }
 
@@ -633,8 +637,7 @@ const useUpload = () => {
       else return mediafiles.value.length > 0;
     }
 
-    if (uploadFlow.value === UploadFlow.OptionalMediafiles)
-      return true;
+    if (uploadFlow.value === UploadFlow.OptionalMediafiles) return true;
 
     if (uploadFlow.value === UploadFlow.MediafilesOnly)
       return !containsCsv.value && mediafiles.value.length > 0;
@@ -725,6 +728,8 @@ const useUpload = () => {
         return true;
       }
 
+      if (!containsCsv.value && !dryRunComplete.value) return false;
+
       const requiredFileNames: string[] = [...requiredMediafiles.value];
       let areAllFilesPresent: boolean = true;
 
@@ -744,7 +749,7 @@ const useUpload = () => {
       });
 
       mediafiles.value.forEach((file: DropzoneFile) => {
-        if (!requiredFileNames.includes(file.name)) {
+        if (!requiredFileNames.includes(file.name) && dryRunComplete.value) {
           areAllFilesPresent = false;
           __updateFileThumbnails(
             file,
@@ -763,17 +768,15 @@ const useUpload = () => {
       );
 
       if (
-        (
-          uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv ||
-          uploadFlow.value === UploadFlow.MediafilesWithOcr
-        ) &&
+        (uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv ||
+          uploadFlow.value === UploadFlow.MediafilesWithOcr) &&
         mediafiles.value.length <= 0
       ) {
         __updateGlobalUploadProgress(
           ProgressStepType.Prepare,
           ProgressStepStatus.Failed,
         );
-        return false
+        return false;
       }
 
       return areAllFilesPresent;
@@ -855,7 +858,7 @@ const useUpload = () => {
     __hideAllFileProgressSteps(stepTypeContainer);
     stepNode.classList.remove("hidden");
 
-    if (status !== ProgressStepStatus.Failed) return;
+    if (status !== ProgressStepStatus.Failed && !errors.length) return;
     __handleFileThumbnailError(file, errors);
   };
 
@@ -899,19 +902,16 @@ const useUpload = () => {
     }
 
     return undefined;
-  }
+  };
 
-  const extractLinkContent = (
-    error: string,
-  ): string | undefined => {
+  const extractLinkContent = (error: string): string | undefined => {
     const linkRegex = /\$LINK\(([^)]+)\)/;
     const match = error.match(linkRegex);
 
-    if (match && match[1])
-      return match[1];
+    if (match && match[1]) return match[1];
 
     return undefined;
-  }
+  };
 
   const extractLinkArguments = (
     linkContent: string,
@@ -923,19 +923,16 @@ const useUpload = () => {
       return [match[1].trim(), match[2].trim()];
 
     return undefined;
-  }
+  };
 
-  const extractEntityId = (
-    entityIdWithName: string,
-  ): string | undefined => {
+  const extractEntityId = (entityIdWithName: string): string | undefined => {
     const entityIdregex = /^([^-]+)-/;
-    const match = entityIdWithName.match(entityIdregex)
+    const match = entityIdWithName.match(entityIdregex);
 
-    if (match && match[1])
-      return match[1];
+    if (match && match[1]) return match[1];
 
     return undefined;
-  }
+  };
 
   const checkErrorMessageForLinks = (
     error: string,
@@ -949,18 +946,18 @@ const useUpload = () => {
     const entityId = extractEntityId(entityIdWithName);
     if (!entityId) return undefined;
 
-    const anchor = document.createElement('a');
-    anchor.href = '#';
+    const anchor = document.createElement("a");
+    anchor.href = "#";
     anchor.textContent = extractStringBeforeLink(error) || error;
-    anchor.classList.add('underline');
-    anchor.addEventListener('click', (event) => {
+    anchor.classList.add("underline");
+    anchor.addEventListener("click", (event) => {
       event.preventDefault();
       const routePath = `/${type}/${entityId}`;
       const route = router.resolve({ path: routePath });
-      window.open(route.fullPath, '_blank');
+      window.open(route.fullPath, "_blank");
     });
     return anchor;
-  }
+  };
 
   return {
     resetUpload,
