@@ -188,6 +188,7 @@
               "
               :expandFilters="expandFilters"
               :refetch-entities="refetchEntities"
+              :parent-entity-type="entityType"
             />
             <ViewModesMedia
               v-if="viewModesIncludeViewModesMedia && displayPreview"

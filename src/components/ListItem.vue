@@ -152,6 +152,8 @@
           v-model:metadata="metadataItem as MetadataField"
           :is-edit="isEdit"
           :linked-entity-id="intialValues?.id || itemId"
+          :parentEntityType="parentEntityType"
+          :intialValues="intialValues"
         />
       </div>
     </div>
@@ -273,6 +275,7 @@ const props = withDefaults(
     entityListElements?: EntityListElement[];
     viewMode?: "list" | "grid";
     refetchEntities?: Function;
+    parentEntityType: string;
   }>(),
   {
     contextMenuActions: undefined,
@@ -297,6 +300,7 @@ const props = withDefaults(
     entityListElements: undefined,
     viewMode: "list",
     refetchEntities: undefined,
+    parentEntityType: "",
   },
 );
 

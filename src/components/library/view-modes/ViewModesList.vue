@@ -84,6 +84,7 @@
         :entity-list-elements="entityListElements"
         :view-mode="mode"
         :refetch-entities="refetchEntities"
+        :parentEntityType="parentEntityType"
       />
     </component>
   </div>
@@ -138,6 +139,7 @@ const props = withDefaults(
     config?: ConfigItem[];
     refetchEntities?: Function;
     expandFilters: boolean;
+    parentEntityType: string;
   }>(),
   {
     disablePreviews: false,
@@ -150,6 +152,7 @@ const props = withDefaults(
     allowedActionsOnRelations: () => [],
     mode: "list",
     refetchEntities: undefined,
+    parentEntityType: "",
   },
 );
 const mediafileViewerContext: any = inject("mediafileViewerContext");

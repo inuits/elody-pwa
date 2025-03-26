@@ -152,6 +152,16 @@
                 @click.stop.prevent
               />
               <entity-element-metadata
+                v-else-if="isHistoryParentType"
+                :label="metadata.label as string"
+                v-model:value="historyValue"
+                :link-text="metadata.linkText"
+                :link-icon="metadata.linkIcon"
+                :unit="metadata.unit"
+                :base-library-mode="baseLibraryMode"
+                :custom-value="metadata.customValue"
+              />
+              <entity-element-metadata
                 v-else
                 :label="metadata.label as string"
                 v-model:value="value"
@@ -208,6 +218,7 @@ import {
   type BaseRelationValuesInput,
   type PanelRelationMetaData,
   type PanelRelationRootData,
+  type IntialValues,
 } from "@/generated-types/queries";
 import { computed, onMounted, watch, inject, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -236,6 +247,8 @@ const props = withDefaults(
     baseLibraryMode?: BaseLibraryModes;
     formFlow?: "edit" | "create";
     showErrors?: boolean;
+    parentEntityType: string;
+    intialValues?: IntialValues | undefined;
   }>(),
   {
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
@@ -258,6 +271,16 @@ const isPermitted = ref<boolean>(false);
 
 const handleOverflowStatus = (status: boolean) => {
   showTooltip.value = status;
+};
+
+const isHistoryParentType = computed(() => {
+  return props.parentEntityType === "history";
+});
+
+const historyValue = ref<any>("");
+const extractHistoryValue = () => {
+  if (!isHistoryParentType.value) return;
+  historyValue.value = props.intialValues[props.metadata.key];
 };
 
 const setNewValue = (
@@ -461,6 +484,7 @@ onMounted(async () => {
   if (props.metadata.hiddenField?.hidden) return;
   setNewValue(props.metadata.value);
   await isPermittedToDisplay();
+  extractHistoryValue();
 });
 
 const isPermittedToDisplay = async () => {

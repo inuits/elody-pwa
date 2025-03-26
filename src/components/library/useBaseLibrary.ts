@@ -1,9 +1,9 @@
 import type { ApolloClient } from "@apollo/client/core";
 import type { RouteLocationNormalizedLoaded } from "vue-router";
+import type { SearchInputType } from "@/generated-types/queries";
 import {
   Entitytyping,
   GetEntitiesDocument,
-  SearchInputType,
   type AdvancedFilterInput,
   type Entity,
   type GetEntitiesQueryVariables,
@@ -20,6 +20,7 @@ export const useBaseLibrary = (
   apolloClient: ApolloClient<any>,
   shouldUseStateForRoute: boolean = true,
   baseLibraryMode: BaseLibraryModes = BaseLibraryModes.NormalBaseLibrary,
+  parentId: string = "",
 ) => {
   let entityType: Entitytyping = Entitytyping.BaseEntity;
   let _route: RouteLocationNormalizedLoaded | undefined;
@@ -30,6 +31,7 @@ export const useBaseLibrary = (
   const manipulationQuery = ref<object>();
   const promiseQueue = ref<((entityType: Entitytyping) => Promise<void>)[]>([]);
   const totalEntityCount = ref<number>(0);
+  const entityParentId = ref<string>("");
   const { getStateForRoute, updateStateForRoute } = useStateManagement();
   const { isSaved } = useEditMode();
   let queryVariables: GetEntitiesQueryVariables = {
@@ -184,8 +186,15 @@ export const useBaseLibrary = (
       })
       .then((result) => {
         const fetchedEntities = result.data.Entities;
-        entities.value = fetchedEntities?.results as Entity[];
-        totalEntityCount.value = fetchedEntities?.count || 0;
+        entities.value = extractEntities(
+          fetchedEntities?.results as Entity[],
+          entityType,
+        );
+        totalEntityCount.value = extractCount(
+          fetchedEntities?.results as Entity[],
+          fetchedEntities?.count || 0,
+          entityType,
+        );
         if (shouldUseStateForRoute)
           updateStateForRoute(_route, {
             entityCountOnPage: fetchedEntities.results.length,
@@ -197,6 +206,20 @@ export const useBaseLibrary = (
         entities.value = [];
         entitiesLoading.value = false;
       });
+  };
+
+  const extractEntities = (entities: Entity[], type: string) => {
+    if (type !== "history") return entities;
+    return entities
+      .filter((item: Entity) => item.type === "person")
+      .filter((item: Entity) => item.id === queryVariables.userUuid);
+  };
+
+  const extractCount = (entities: Entity[], count: number, type: string) => {
+    if (type !== "history") return count;
+    return entities
+      .filter((item: Entity) => item.type === "person")
+      .filter((item: Entity) => item.id === queryVariables.userUuid).length;
   };
 
   const getEntityById = async (
