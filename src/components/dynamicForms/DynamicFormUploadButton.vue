@@ -1,7 +1,5 @@
 <template>
-  <div
-    data-cy="dynamic-form-upload-button"
-  >
+  <div data-cy="dynamic-form-upload-button">
     <div class="flex">
       <div
         v-if="missingFileNames.length"
@@ -92,7 +90,7 @@
 import {
   ActionProgressIndicatorType,
   DamsIcons,
-  UploadFlow
+  UploadFlow,
 } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
@@ -136,8 +134,12 @@ const finishedStatusMessage = computed(() => {
     if (csvOnlyUploadSFailed.value) return t("actions.labels.csv-errors");
     return t("actions.labels.csv-success");
   }
+  if (uploadFlow.value === UploadFlow.XmlMarc) {
+    return t("actions.labels.xml-success");
+  }
   const amountSuccess: number = amountUploaded.value;
-  if (failedUploads.value.length <= 0) return t("actions.labels.success", [amountSuccess]);
+  if (failedUploads.value.length <= 0)
+    return t("actions.labels.success", [amountSuccess]);
   const amountFailed: number = failedUploads.value.length;
   return t("actions.upload.errors", [amountFailed]);
 });
