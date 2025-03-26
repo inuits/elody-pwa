@@ -310,6 +310,7 @@ const handleSelectedBulkOperation = () => {
     initializePropertiesForBulkDeleteRelations(props.relationType);
   }
 
+  // TODO: remove after demo #139636
   if (bulkOperationType === "importVlacc") {
     return;
   }
