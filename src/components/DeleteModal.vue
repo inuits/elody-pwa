@@ -6,7 +6,7 @@
     @hide-modal="closeModal(TypeModals.Delete)"
   >
     <div
-      class="flex flex-col w-full h-full overflow-hidden"
+      class="flex flex-col w-full h-full"
       :class="[{ 'pt-5': numberOfBlockingQueryEntities <= 0 }]"
     >
       <div class="w-full px-8">
@@ -175,8 +175,7 @@ const cleanupAfterDeletion = async () => {
 
   if (pageInfo.value.parentRouteName !== "SingleEntity")
     router.push({ name: pageInfo.value.parentRouteName });
-  else
-    router.push({ path: previousPageInfo.value.fullPath });
+  else router.push({ path: previousPageInfo.value.fullPath });
 
   createNotificationOverwrite(
     NotificationType.default,
