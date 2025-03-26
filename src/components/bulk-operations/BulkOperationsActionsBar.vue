@@ -301,11 +301,17 @@ const handleSelectedBulkOperation = () => {
 
   if (bulkOperationType === BulkOperationTypes.DeleteEntities) {
     modalStyle = ModalStyle.Center;
-    initializePropertiesForBulkDeleteEntities(modal?.skipItemsWithRelationDuringBulkDelete)
+    initializePropertiesForBulkDeleteEntities(
+      modal?.skipItemsWithRelationDuringBulkDelete,
+    );
   }
 
   if (bulkOperationType === BulkOperationTypes.DeleteRelations) {
     initializePropertiesForBulkDeleteRelations(props.relationType);
+  }
+
+  if (bulkOperationType === "importVlacc") {
+    return;
   }
 
   openModal(
