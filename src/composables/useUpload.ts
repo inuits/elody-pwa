@@ -1,13 +1,16 @@
-import Dropzone, { type DropzoneFile } from "dropzone";
+import type Dropzone from "dropzone";
+import { type DropzoneFile } from "dropzone";
 import { computed, ref, toRaw, watch } from "vue";
+import type {
+  Entitytyping,
+  UploadEntityTypes,
+} from "@/generated-types/queries";
 import {
   type ActionProgressStep,
-  Entitytyping,
   ProgressStepStatus,
   ProgressStepType,
   UploadFieldType,
   UploadFlow,
-  UploadEntityTypes,
   TypeModals,
 } from "@/generated-types/queries";
 import useEntitySingle from "@/composables/useEntitySingle";
@@ -46,6 +49,9 @@ const containsCsv = computed(
       (file: DropzoneFile) =>
         file.type === "text/csv" || file.type === "application/vnd.ms-excel",
     ),
+);
+const containsXml = computed(
+  () => !!files.value.find((file: DropzoneFile) => file.type === "text/xml"),
 );
 const uploadFlow = ref<UploadFlow>(UploadFlow.MediafilesOnly);
 const uploadValidationFn = ref<Function>(() => {
@@ -97,6 +103,9 @@ const useUpload = () => {
       optionalMediafiles: {
         checkUploadValidityFn: () => __checkUploadValidityOptionalMediafiles(),
       },
+      xmlMarc: {
+        checkUploadValidityFn: () => __checkUploadValidityXmlFile(),
+      },
     };
     uploadValidationFn.value =
       settingsObject[uploadSettings.uploadFlow].checkUploadValidityFn;
@@ -107,6 +116,10 @@ const useUpload = () => {
 
   const __checkUploadValidityUpdateMetadata = (): boolean => {
     return containsCsv.value;
+  };
+
+  const __checkUploadValidityXmlFile = (): boolean => {
+    return containsXml.value;
   };
 
   const __checkUploadValidityCsvOnly = (): boolean => {
@@ -231,6 +244,22 @@ const useUpload = () => {
       ProgressStepStatus.Loading,
     );
     toggleUploadStatus();
+
+    if (
+      uploadFlow.value === UploadFlow.XmlMarc) {
+      await __uploadXml();
+
+      [
+        ProgressStepType.Prepare,
+        ProgressStepType.Validate,
+        ProgressStepType.Upload,
+      ].forEach((status: ProgressStepType) => {
+        __updateGlobalUploadProgress(status, ProgressStepStatus.Complete);
+      });
+
+      toggleUploadStatus();
+      return;
+    }
 
     if (
       uploadFlow.value === UploadFlow.MediafilesOnly ||
@@ -435,6 +464,20 @@ const useUpload = () => {
     return JSON.parse(await response.text());
   };
 
+  // TODO: this is temp handler for demo #139636
+  const __uploadXml = async (): Promise<string> => {
+    const response = await fetch(`api/upload/xml`, {
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+
+    if (!response.ok) {
+      const httpErrorMessage = handleHttpError(response);
+      return Promise.reject(httpErrorMessage);
+    }
+    return JSON.parse(await response.text());
+  };
+
   const __getUploadUrlForMediafileOnEntity = async (
     entityId: string,
     file: DropzoneFile,
@@ -517,6 +560,10 @@ const useUpload = () => {
       uploadFlow.value === UploadFlow.OptionalMediafiles
     ) {
       uploadUrl = await __getUploadUrlForMediafileOnEntity(entityId, file);
+    }
+
+    if (uploadFlow.value === UploadFlow.XmlMarc) {
+      uploadUrl = "url";
     }
 
     if (!uploadUrl) throw new Error("Upload url is undefined.");
@@ -627,6 +674,7 @@ const useUpload = () => {
 
   const validateFiles = () => {
     if (uploadFlow.value === UploadFlow.CsvOnly) return containsCsv.value;
+    if (uploadFlow.value === UploadFlow.XmlMarc) return containsXml.value;
 
     if (
       uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv ||
@@ -722,6 +770,7 @@ const useUpload = () => {
       if (
         uploadFlow.value === UploadFlow.MediafilesOnly ||
         uploadFlow.value === UploadFlow.OptionalMediafiles ||
+        (uploadFlow.value === UploadFlow.XmlMarc && containsXml.value) ||
         (uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv &&
           !containsCsv.value)
       ) {
