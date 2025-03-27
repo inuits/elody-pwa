@@ -105,6 +105,7 @@
             ? media
             : `/api/iiif/3/${media}/square/${imageSize},/0/default.jpg`
         "
+        :mediaIsLink="mediaIsLink"
         @error="setNoImage()"
       />
     </div>
@@ -216,11 +217,11 @@
 
 <script lang="ts" setup>
 import type { Context } from "@/composables/useBulkOperations";
+import type { Entitytyping } from "@/generated-types/queries";
 import {
   BaseLibraryModes,
   DamsIcons,
   EditStatus,
-  Entitytyping,
   PanelType,
   type BaseRelationValuesInput,
   type ContextMenuActions,

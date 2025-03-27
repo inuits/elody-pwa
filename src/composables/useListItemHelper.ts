@@ -14,17 +14,23 @@ const useListItemHelper = () => {
           const customUrl: string = metadata[key].customUrl;
           if (customUrl) return customUrl;
           if (metadata[key].filename) return metadata[key].filename;
+          if (metadata[key].key)
+            return getValueFromIntialValue(metadata[key].key, entity);
           thumbnailKey = key;
         }
       }
 
       if (!thumbnailKey) return mediafile;
-      const intialValues: { [key: string]: any } = entity.intialValues;
-      mediafile = intialValues[thumbnailKey];
+      mediafile = getValueFromIntialValue(thumbnailKey, entity);
     } catch (e) {
       console.log(e);
     }
     return mediafile;
+  };
+
+  const getValueFromIntialValue = (key: string, entity: BaseEntity) => {
+    const intialValues: { [key: string]: any } = entity.intialValues;
+    return intialValues[key];
   };
 
   return { getMediaFilenameFromEntity };
