@@ -1,23 +1,19 @@
 <template>
-  <div v-if="progress" class="w-full bg-neutral-0 rounded-md">
+  <div v-if="progressPercentage" class="w-full bg-neutral-0 rounded-md">
     <div class="top-0 w-full"></div>
 
-    <div
-      :class="`font-bold flex bg-accent-normal progress_bar h-full rounded-md text-neutral-white justify-center items-center p-2`"
+    <progress
+      :class="`h-full w-full rounded-md text-neutral-white`"
+      max="100"
+      :value="progressPercentage"
     >
-      <p v-if="progressBarType === 'percentage'">
-        {{ t("actions.progress-bar.percentage", [progressPercentage]) }}
-      </p>
-      <p v-else>
-        {{ t("actions.progress-bar.steps", [progress, totalAmountOfSteps]) }}
-      </p>
-    </div>
+      {{ progressText }}
+    </progress>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { setCssVariable } from "@/helpers";
-import { watch, computed } from "vue";
+import { computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
@@ -29,30 +25,44 @@ const props = withDefaults(
   {
     progress: 0,
     progressBarType: "percentage",
-  }
+  },
 );
 
 const { t } = useI18n();
 const progressPercentage = computed((): number => {
   if (props.progressBarType === "percentage") return props.progress;
-  return (props.progress / props.totalAmountOfSteps) * 100;
+  return Math.round((props.progress / props.totalAmountOfSteps) * 100);
+});
+
+const progressText = computed(() => {
+  if (props.progressBarType === "percentage")
+    return t("actions.progress-bar.percentage", [progressPercentage.value]);
+  else
+    return t("actions.progress-bar.steps", [
+      props.progress,
+      props.totalAmountOfSteps,
+    ]);
 });
 
 watch(
   () => progressPercentage.value,
   () => {
-    if (progressPercentage.value)
-      setCssVariable(
-        "--progress-bar-width-percentage",
-        progressPercentage.value.toString() + "%"
-      );
+    console.log("progressPercentage", progressPercentage.value);
   },
-  { immediate: true }
 );
 </script>
 
 <style scoped>
-.progress_bar {
-  width: var(--progress-bar-width-percentage);
+progress {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+progress::-webkit-progress-value {
+  @apply bg-accent-normal;
+}
+
+progress::-moz-progress-bar {
+  @apply bg-accent-normal;
 }
 </style>

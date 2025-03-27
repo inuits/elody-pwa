@@ -35,7 +35,7 @@ const props = withDefaults(
   {
     viewStyle: "",
     isValidationFile: false,
-  }
+  },
 );
 
 const emit = defineEmits<{
@@ -49,7 +49,7 @@ const { addFileToUpload, removeFileToUpload, files, uploadStatus } =
 onMounted(() => {
   const dropzone = props.dropzone.initDropzone(
     dropzoneView.value!,
-    dropzonePreview.value!
+    dropzonePreview.value!,
   );
 
   dropzone.on("addedfile", (file: DropzoneFile) => {
@@ -66,17 +66,17 @@ onMounted(() => {
     dropzone.removeEventListeners();
   });
 
-  dropzone.on('dragleave', (event) => {
-    event.preventDefault()
-    dropzone.element.classList.remove('dropzone-highlight');
+  dropzone.on("dragleave", (event) => {
+    event.preventDefault();
+    dropzone.element.classList.remove("dropzone-highlight");
   });
-  dropzone.on('drop', (event) => {
-    event.preventDefault()
-    dropzone.element.classList.remove('dropzone-highlight');
+  dropzone.on("drop", (event) => {
+    event.preventDefault();
+    dropzone.element.classList.remove("dropzone-highlight");
   });
-  dropzone.on('dragover', (event) => {
-    event.preventDefault()
-    dropzone.element.classList.add('dropzone-highlight');
+  dropzone.on("dragover", (event) => {
+    event.preventDefault();
+    dropzone.element.classList.add("dropzone-highlight");
   });
 
   dynamicFormUploadFields.value.push(dropzone);
@@ -87,7 +87,7 @@ onMounted(() => {
       filesInDropzone.value = dropzone.files;
       fileCount.value = dropzone.files.length;
     },
-    { immediate: true }
+    { immediate: true },
   );
 
   watch(
@@ -99,7 +99,7 @@ onMounted(() => {
       }
       dropzone.removeEventListeners();
     },
-    { immediate: true }
+    { immediate: true },
   );
 });
 </script>

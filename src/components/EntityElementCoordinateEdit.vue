@@ -2,7 +2,7 @@
   <div
     data-cy="metadata-wrapper"
     v-if="inputField && isPermitted"
-    class="text-text-light text-sm"
+    class="text-text-light text-sm px-2"
   >
     <p data-cy="metadata-label">
       {{ label ? t(label) : t("metadata.no-label") }}
@@ -77,7 +77,7 @@ const coordinateEditIsDisabled = computed(() => {
   return !conditionalFieldIsAvailable(
     props.inputField.validation.available_if as Conditional,
     props.entityUuid,
-    mediafileViewerContext
+    mediafileViewerContext,
   );
 });
 const { t } = useI18n();
