@@ -44,7 +44,7 @@ import {
   type HierarchyRelationListOutput,
 } from "@/generated-types/queries";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { apolloClient } from "@/main";
 import { useImport } from "@/composables/useImport";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -62,7 +62,7 @@ const props = defineProps<{
 const { loadDocument } = useImport();
 const { getForm } = useFormHelper();
 const { t } = useI18n();
-const { fetchAdvancedPermission } = usePermissions();
+const { fetchAdvancedPermission, setExtraVariables } = usePermissions();
 
 const query = ref<any>(null);
 const isLoading = ref<boolean>(true);
@@ -135,6 +135,13 @@ onMounted(async () => {
   await checkHierarchyListPermission();
 });
 
+const updatePermissionVariables = () => {
+  setExtraVariables({
+    parentEntityId: props.entityId,
+    childEntityId: "",
+  });
+};
+
 const checkHierarchyListPermission = async () => {
   if (!props.can) {
     showHierarchyList.value = true;
@@ -143,4 +150,12 @@ const checkHierarchyListPermission = async () => {
 
   showHierarchyList.value = await fetchAdvancedPermission(props.can);
 };
+
+watch(
+  () => props.entityId,
+  () => {
+    updatePermissionVariables();
+  },
+  { immediate: true },
+);
 </script>
