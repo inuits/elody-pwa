@@ -6,7 +6,9 @@
     @hide-modal="closeModal(TypeModals.ElodyEntityTaggingModal)"
   >
     <div
-      v-if="element && element.taggingConfiguration && extensionConfiguration"
+      v-if="
+        element && element.taggingConfiguration && extensionConfiguration.length
+      "
       class="p-2"
     >
       <div
