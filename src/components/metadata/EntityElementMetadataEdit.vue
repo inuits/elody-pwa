@@ -136,7 +136,11 @@ const mediafileViewerContext: any = inject("mediafileViewerContext");
 const { addEditableMetadataKeys } = useFormHelper();
 const metadataValue = computed<string | DropdownOption | DropdownOption[]>({
   get() {
-    return props.value;
+    if (typeof props.value === "object" && props.value?.formatter) {
+      return { label: props.value.label, value: props.value.entity.id } as DropdownOption;
+    } else {
+      return props.value;
+    }
   },
   set(newValue) {
     const valueFromMetadata = getValueFromMetadata(newValue);
