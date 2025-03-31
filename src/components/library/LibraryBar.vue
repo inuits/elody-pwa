@@ -54,9 +54,9 @@
 
 <script lang="ts" setup>
 import { useRoute } from "vue-router";
+import type { Entitytyping } from "@/generated-types/queries";
 import {
   DamsIcons,
-  Entitytyping,
   GetPaginationLimitOptionsDocument,
   GetSortOptionsDocument,
   type DropdownOption,
@@ -82,11 +82,11 @@ const props = defineProps<{
 const emit = defineEmits<{
   (
     event: "paginationLimitOptionsPromise",
-    paginationLimitOptionsPromise: (entityType: Entitytyping) => Promise<void>
+    paginationLimitOptionsPromise: (entityType: Entitytyping) => Promise<void>,
   ): void;
   (
     event: "sortOptionsPromise",
-    sortOptionsPromise: (entityType: Entitytyping) => Promise<void>
+    sortOptionsPromise: (entityType: Entitytyping) => Promise<void>,
   ): void;
 }>();
 
@@ -120,7 +120,7 @@ const paginationLimitOptionsPromise = async () => {
       const skip = state?.queryVariables?.skip || 1;
 
       selectedPaginationLimitOption.value = paginationLimitOptions.value.find(
-        (option) => option.value === limit
+        (option) => option.value === limit,
       );
       selectedSkip.value = skip;
       props.setLimit(limit);
@@ -157,14 +157,14 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
 
       const state = getStateForRoute(route);
       const sortKey =
-        /*state?.queryVariables?.searchValue.order_by ||*/
+        state?.queryVariables?.searchValue.order_by ||
         sortOptions.value?.[0]?.value;
       selectedSortOption.value = sortOptions.value.find(
-        (option) => option.value === sortKey
+        (option) => option.value === sortKey,
       );
-      const sortOrder =
-        /*state?.queryVariables?.searchValue.isAsc ? "asc" : "desc" ||*/
-        sortingOptionsResult?.isAsc?.toLowerCase();
+      const sortOrder = state?.queryVariables?.searchValue.isAsc
+        ? "asc"
+        : "desc" || sortingOptionsResult?.isAsc?.toLowerCase();
       isAsc.value = sortOrder === "asc";
       props.setSortKey(sortKey);
       props.setSortOrder(sortOrder);
@@ -183,14 +183,17 @@ const setSkip = async (newSkip: number) => {
 watch(
   () => selectedPaginationLimitOption.value,
   async () =>
-    await props.setLimit(selectedPaginationLimitOption.value?.value, true)
+    await props.setLimit(selectedPaginationLimitOption.value?.value, true),
 );
 watch(
   () => selectedSortOption.value,
-  async () => await props.setSortKey(selectedSortOption.value?.value, true)
+  async () => {
+    await props.setSortKey(selectedSortOption.value?.value, true);
+  },
+  { deep: true },
 );
 watch(
   () => isAsc.value,
-  async () => await props.setSortOrder(isAsc.value ? "asc" : "desc", true)
+  async () => await props.setSortOrder(isAsc.value ? "asc" : "desc", true),
 );
 </script>

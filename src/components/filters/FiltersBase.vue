@@ -164,10 +164,10 @@
 
 <script lang="ts" setup>
 import type { RouteLocationNormalizedLoaded } from "vue-router";
+import type { Entitytyping, EntitySubelement } from "@/generated-types/queries";
 import {
   AdvancedFilterTypes,
   DamsIcons,
-  Entitytyping,
   GetAdvancedFiltersDocument,
   GetFilterMatcherMappingDocument,
   type AdvancedFilterInput,
@@ -177,7 +177,6 @@ import {
   type FilterMatcherMap,
   type GetFilterMatcherMappingQuery,
   type Maybe,
-  EntitySubelement,
 } from "@/generated-types/queries";
 import { useStateManagement } from "@/composables/useStateManagement";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
