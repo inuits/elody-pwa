@@ -51,17 +51,18 @@ import {
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
+  InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
-import { inject, onMounted, provide, ref } from "vue";
+import { inject, onMounted, provide, ref, unref } from "vue";
 import { useMutation } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 import { useCustomQuery } from "@/composables/useCustomQuery";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import { useNotification } from "@/components/base/BaseNotification.vue";
+import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
 import useEditMode from "@/composables/useEdit";
 import { getChildrenOfHomeRoutes } from "@/helpers";
 import { useSubmitForm } from "vee-validate";
@@ -127,7 +128,7 @@ const emitUpdatedEntities = (numberOfEntities: number) => {
   emit("entitiesUpdated", numberOfEntities);
 };
 
-const saveRelations = () => {
+const saveRelations = (selectedItems: InBulkProcessableItem[]) => {
   if (props.entityPickerMode === EntityPickerMode.Emit) return;
   addRelations(selectedItems, getRelationType(), getEntityId(), true);
   dequeueAllItemsForBulkProcessing(getContext());
