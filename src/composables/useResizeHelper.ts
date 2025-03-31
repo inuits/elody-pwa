@@ -3,25 +3,28 @@ import type { Column, ColumnSizes } from "@/generated-types/queries";
 import { convertSizeToTailwind } from "@/helpers";
 import { ref } from "vue";
 
-let defaultColumnConfig: Column[] = [];
-const currentColumnConfig = ref<Column[] | []>([]);
+let defaultColumnConfig: Record<string, Column[]> = {};
+const currentColumnConfig = ref<Record<string, Column[]> | {}>({});
 
 const useColumnResizeHelper = () => {
-  const setInitialColumns = (columns: Column[]) => {
-    defaultColumnConfig = JSON.parse(JSON.stringify(columns));
-    currentColumnConfig.value = columns;
+  const setInitialColumns = (entityId: string, columns: Column[]) => {
+    defaultColumnConfig[entityId] = JSON.parse(JSON.stringify(columns));
+    currentColumnConfig.value[entityId] = columns;
   };
 
   const setColumnSize = (
+    entityId: string,
     column: Column,
-    newSize: ColumnSizes
+    newSize: ColumnSizes,
   ): string | void => {
     try {
-      const foundColumn = currentColumnConfig.value.find(
-        (columnConfig: Column) => columnConfig == column
+      const foundColumn = currentColumnConfig.value[entityId].find(
+        (columnConfig: Column) => columnConfig == column,
       );
       if (!foundColumn) {
-        throw Error("Column does not exist in current config");
+        throw Error(
+          `Column does not exist in current config for entity with id ${entityId}`,
+        );
       }
       foundColumn.size = newSize;
       return convertSizeToTailwind(newSize);
@@ -30,13 +33,16 @@ const useColumnResizeHelper = () => {
     }
   };
 
-  const setColumnSizes = (sizeList: ColumnSizes[]): Column[] | void => {
+  const setColumnSizes = (
+    entityId: string,
+    sizeList: ColumnSizes[],
+  ): Column[] | void => {
     try {
       if (sizeList.length != currentColumnConfig.value.length) {
         throw Error("Not all columns received sizes");
       }
       sizeList.forEach((size: ColumnSizes, index: number) => {
-        currentColumnConfig.value[index].size = size;
+        currentColumnConfig.value[entityId][index].size = size;
       });
       return currentColumnConfig.value;
     } catch (e) {
@@ -44,13 +50,15 @@ const useColumnResizeHelper = () => {
     }
   };
 
-  const getColumnSize = (column: Column): string | void => {
+  const getColumnSize = (entityId: string, column: Column): string | void => {
     try {
-      const foundColumn = currentColumnConfig.value.find(
-        (columnConfig: Column) => columnConfig == column
+      const foundColumn = currentColumnConfig.value[entityId].find(
+        (columnConfig: Column) => columnConfig == column,
       );
       if (!foundColumn) {
-        throw Error("Column does not exist or is out of date");
+        throw Error(
+          `Column does not exist in current config for entity with id ${entityId}`,
+        );
       }
       return convertSizeToTailwind(foundColumn.size);
     } catch (e) {
@@ -58,10 +66,12 @@ const useColumnResizeHelper = () => {
     }
   };
 
-  const resetToDefaultSizes = (): Column[] => {
-    currentColumnConfig.value.forEach((column: Column, index: number) => {
-      column.size = defaultColumnConfig[index].size;
-    });
+  const resetToDefaultSizes = (entityId: string): Column[] => {
+    currentColumnConfig.value[entityId].forEach(
+      (column: Column, index: number) => {
+        column.size = defaultColumnConfig[entityId][index].size;
+      },
+    );
     return currentColumnConfig.value;
   };
 
@@ -78,7 +88,7 @@ const useColumnResizeHelper = () => {
 
 const useEntityElementCollapseHelper = () => {
   const getElementByLabel = (
-    elementLabel: string
+    elementLabel: string,
   ): { column: Column | undefined; element: Elements | undefined } => {
     try {
       let toggleElement: Elements | undefined = undefined;
@@ -109,7 +119,7 @@ const useEntityElementCollapseHelper = () => {
 
   const toggleElementCollapse = (
     elementLabel: string,
-    collapse: undefined | boolean = undefined
+    collapse: undefined | boolean = undefined,
   ) => {
     const { element, column } = getElementByLabel(elementLabel);
     if (element && column) {

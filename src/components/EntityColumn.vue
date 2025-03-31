@@ -1,9 +1,9 @@
 <template>
   <div :class="['w-full flex mt-5 overflow-y-scroll', { 'mb-20': isEdit }]">
     <div
-      v-for="(column, index) in currentColumnConfig"
+      v-for="(column, index) in currentColumnConfig[id]"
       :key="index"
-      :class="['h-full p-5', convertSizeToTailwind(column.size)]"
+      :class="['h-full px-5', convertSizeToTailwind(column.size)]"
     >
       <entity-element
         :elements="column.elements"
@@ -52,8 +52,8 @@ const columns = computed<Column[]>(() => {
 watch(
   () => columns.value,
   () => {
-    if (columns.value) setInitialColumns(columns.value);
+    if (columns.value) setInitialColumns(props.id, columns.value);
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>

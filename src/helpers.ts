@@ -734,3 +734,7 @@ export const requiresAuthForEntity = (
 
   return !auth.isAuthenticated.value;
 };
+
+export const extractTitleKeyFromMetadataFilter = (metadataFilter: string) => {
+  return metadataFilter.split(".")[1];
+};

@@ -5,17 +5,20 @@
     :key="dynamicFormQuery"
   >
     <div v-if="isLoading" class="w-full">
-      <div class="absolute block top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl text-gray-700">
+      <div
+        class="absolute block top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl text-gray-700"
+      >
         <spinner-loader theme="accent" />
       </div>
     </div>
     <div
       class="w-full [&>*>button:last-child]:mb-0"
-      :class="[
-        isLoading ? 'opacity-20' : 'opacity-100'
-      ]"
+      :class="[isLoading ? 'opacity-20' : 'opacity-100']"
     >
-      <h1 v-if="dynamicForm?.GetDynamicForm?.label" class="title pb-4">
+      <h1
+        v-if="dynamicForm?.GetDynamicForm?.label && showFormTitle"
+        class="title pb-4"
+      >
         {{ t(dynamicForm.GetDynamicForm.label) }}
       </h1>
       <p
@@ -206,6 +209,7 @@ import {
   BaseFieldType,
   type BaseRelationValuesInput,
   EndpointResponseActions,
+  type Entity,
   type EntityInput,
   EntityPickerMode,
   Entitytyping,
@@ -216,11 +220,11 @@ import {
   type MutateEntityValuesMutationVariables,
   OcrType,
   type PanelMetaData,
+  RouteNames,
   TypeModals,
   type UploadContainer,
   type UploadField,
   UploadFlow,
-  RouteNames,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -234,8 +238,9 @@ import {
   calculateFutureDate,
   goToEntityPage,
   goToEntityPageById,
+  extractTitleKeyFromMetadataFilter,
 } from "@/helpers";
-import type { Router } from "vue-router";
+import { type Router, useRoute } from "vue-router";
 import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUploadButton.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
@@ -256,6 +261,11 @@ import { useModalActions } from "@/composables/useModalActions";
 import { useErrorCodes } from "@/composables/useErrorCodes";
 import ImportWrapper from "@/components/imports/ImportWrapper.vue";
 import useEntitySingle from "@/composables/useEntitySingle";
+import {
+  getExtensionConfigurationForEntity,
+  tagEntity,
+} from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
+import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 
 const props = withDefaults(
   defineProps<{
@@ -263,9 +273,11 @@ const props = withDefaults(
     router: Router;
     modalFormFields?: object;
     tabName?: string;
+    showFormTitle?: boolean;
   }>(),
   {
     modalFormFields: undefined,
+    showFormTitle: true,
   },
 );
 
@@ -292,7 +304,7 @@ const {
 } = useFormHelper();
 const { createNotificationOverwrite } = useNotification();
 const { loadDocument } = useImport();
-const { closeModal } = useBaseModal();
+const { closeModal, getModalInfo } = useBaseModal();
 const {
   getDynamicForm,
   dynamicForm: dynamicFormValue,
@@ -325,6 +337,7 @@ const {
   getCustomGetEntitiesQuery,
 } = useEntityPickerModal();
 const { extractActionArguments, getCallbackFunction } = useModalActions();
+const route = useRoute();
 
 const { mutate } = useMutation<
   MutateEntityValuesMutation,
@@ -401,7 +414,10 @@ const isLinkedUpload = computed<boolean>(() => {
     (formField: any) => formField.__typename === "UploadContainer",
   ) as UploadContainer | undefined;
   if (!uploadContainer) return false;
-  return uploadContainer.uploadFlow === UploadFlow.MediafilesOnly || uploadContainer.uploadFlow === UploadFlow.OptionalMediafiles;
+  return (
+    uploadContainer.uploadFlow === UploadFlow.MediafilesOnly ||
+    uploadContainer.uploadFlow === UploadFlow.OptionalMediafiles
+  );
 });
 
 const createEntityFromFormInput = (
@@ -452,14 +468,37 @@ const uploadActionFunction = async () => {
   return;
 };
 
+const tagNewlyCreatedEntity = (entity: Entity): void => {
+  const parentId = route.params["id"];
+  const { relationType, metadataFilterForTagContent } =
+    getExtensionConfigurationForEntity(entity);
+  const modalInfo = getModalInfo(TypeModals.ElodyEntityTaggingModal);
+  const titleKey = extractTitleKeyFromMetadataFilter(
+    metadataFilterForTagContent,
+  );
+
+  const newText = entity.intialValues[titleKey].toLowerCase();
+  tagEntity(
+    entity,
+    relationType,
+    parentId,
+    BulkOperationsContextEnum.TagEntityModal,
+  );
+  modalInfo.editor.commands.linkEntityToTaggedText(
+    entity,
+    relationType,
+    newText,
+  );
+};
+
 const submitActionFunction = async (field: FormAction) => {
   if (!(await isFormValid())) return;
   const document = await getQuery(field.actionQuery as string);
   const entityInput = createEntityFromFormInput(
     field.creationType,
-    extractActionArguments(field.actionType),
+    extractActionArguments(field.actionType), //Use this
   );
-  let entity: any;
+  let entity: Entity;
   try {
     entity = (await performSubmitAction(document, entityInput)).data
       .CreateEntity;
@@ -468,10 +507,17 @@ const submitActionFunction = async (field: FormAction) => {
     const callbackFunction: Function = extractActionArguments(field.actionType);
     if (config.features.hasBulkSelect && callbackFunction) callbackFunction();
     else {
-      setTimeout(() => goToEntityPage(entity, "SingleEntity", props.router), 1);
+      if (getModalInfo(TypeModals.ElodyEntityTaggingModal).open)
+        tagNewlyCreatedEntity(entity);
+      else
+        setTimeout(
+          () => goToEntityPage(entity, "SingleEntity", props.router),
+          1,
+        );
     }
     closeAndDeleteForm();
   } catch (e: ApolloError) {
+    console.error(e);
     const errorObject = await getMessageAndCodeFromApolloError(e);
     isPerformingAction.value = false;
     submitErrors.value = errorObject.message;
@@ -684,7 +730,10 @@ const performActionButtonClickEvent = (field: FormAction): void => {
     uploadCsvForReordening: () => reorderEntitiesActionFunction(field),
     submitWithExtraMetadata: () => submitWithExtraMetadataActionFunction(field),
   };
-  if (!field.actionType) return;
+  if (!field.actionType || !actionFunctions[field.actionType])
+    throw Error(
+      `Either actionType is undefined or the Elody frontend has no actionFunction for actionType '${field.actionType}'`,
+    );
   showErrors.value = true;
   actionFunctions[field.actionType]();
 };
@@ -750,7 +799,7 @@ const downloadDataFromResponse = (data: any) => {
 
 const setShowErrors = (show: boolean) => {
   showErrors.value = show;
-}
+};
 
 watch(
   () => props.dynamicFormQuery,

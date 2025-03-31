@@ -54,6 +54,8 @@ const { initializeConfirmModal } = useConfirmModal();
 const { deleteEntities } = useDeleteEntities();
 const { getForm } = useFormHelper();
 
+const entityId = computed<string>(() => route.params["id"]);
+
 const deleteAvailable = computed<boolean>(
   () =>
     isEditToggleVisible.value === "edit-delete" ||
@@ -66,13 +68,15 @@ const entityType = computed(() => {
 });
 
 const deleteEntity = async (deleteMediafiles: boolean = false) => {
-  const id = asString(route.params["id"]);
+  const id = entityId.value;
   const type = entityType.value;
   const context = previousPageInfo.value.parentRouteName;
 
   if (context) dequeueItemForBulkProcessing(context, id);
 
-  const isDeleted = await deleteEntities([{ id, type }], { deleteMediafiles });
+  const isDeleted = await deleteEntities([{ id, type }], {
+    deleteMediafiles,
+  });
 
   if (isDeleted) {
     await getTenants();
@@ -88,7 +92,7 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
 };
 
 const openDeleteModal = () => {
-  const form = getForm(route.params["id"]);
+  const form = getForm(entityId.value);
   const title = getTitleOrNameFromEntity(form.values);
 
   if (deleteQueryOptions.value) {
