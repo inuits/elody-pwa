@@ -1,5 +1,8 @@
 <template>
-  <div v-if="isEdit" class="flex justify-center relative w-full p-5 z-20">
+  <div
+    v-if="isEdit"
+    class="flex justify-center fixed bottom-0 w-[calc(100%-6rem)] p-5 z-20"
+  >
     <BulkOperationsSubmitBar
       :button-label="$t('bulk-operations.save')"
       :button-icon="DamsIcons.Save"
@@ -21,14 +24,10 @@
 
 <script lang="ts" setup>
 import type { ApolloClient } from "@apollo/client/core";
-import {
-  DamsIcons,
-  TypeModals,
-} from "@/generated-types/queries";
+import { DamsIcons, TypeModals } from "@/generated-types/queries";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
-import { asString } from "@/helpers";
 import { inject } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
@@ -37,14 +36,8 @@ import { useRoute } from "vue-router";
 import { useFormHelper } from "@/composables/useFormHelper";
 
 const route = useRoute();
-const {
-  isEdit,
-  save,
-  discard,
-  showErrors,
-  clickButton,
-  isEditToggleVisible,
-} = useEditMode();
+const { isEdit, save, discard, showErrors, clickButton, isEditToggleVisible } =
+  useEditMode();
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal } = useBaseModal();
 const { discardEditForForm } = useFormHelper();
@@ -56,7 +49,7 @@ const openDiscardModal = () => {
     confirmButton: {
       buttonCallback: () => {
         discard();
-        const id = asString(route.params["id"]);
+        const id = inject("entityFormData").id;
         discardEditForForm(id);
         closeModal(TypeModals.Confirm);
       },

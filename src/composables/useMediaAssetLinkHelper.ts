@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { inject, ref } from "vue";
 import { LinkMediafileToEntityDocument } from "@/generated-types/queries";
 import type {
   LinkMediafileToEntityMutation,
@@ -13,13 +13,13 @@ const linkList = ref<Array<MediaFile>>([]);
 
 const useMediaAssetLinkHelper = () => {
   const { mutate } = useMutation<LinkMediafileToEntityMutation>(
-    LinkMediafileToEntityDocument
+    LinkMediafileToEntityDocument,
   );
   const route = useRoute();
 
   const removeMediaFileFromLinkList = (id: string) => {
     linkList.value = linkList.value.filter(
-      (link: MediaFile) => link._id !== id
+      (link: MediaFile) => link._id !== id,
     );
   };
 
@@ -48,7 +48,7 @@ const useMediaAssetLinkHelper = () => {
 
       addSaveCallback(async () => {
         await mutate({
-          entityId: route.params["id"],
+          entityId: inject("entityFormData").id,
           mediaFileInput: mediaFile,
         });
       }, "second");

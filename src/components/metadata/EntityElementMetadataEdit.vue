@@ -134,9 +134,15 @@ const props = defineProps<{
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 
 const { addEditableMetadataKeys } = useFormHelper();
-const metadataValue = ref<string | DropdownOption | DropdownOption[]>(
-  props.value,
-);
+const metadataValue = computed<string | DropdownOption | DropdownOption[]>({
+  get() {
+    return props.value;
+  },
+  set(newValue) {
+    const valueFromMetadata = getValueFromMetadata(newValue);
+    emit("update:value", valueFromMetadata);
+  },
+});
 const { conditionalFieldIsAvailable } = useConditionalValidation();
 
 const isFieldHidden = computed(() => props.hiddenField?.hidden);
@@ -162,10 +168,12 @@ onMounted(() => {
     addEditableMetadataKeys([props.fieldKey], props.formId);
 });
 
-const getValueFromMetadata = (): string | BaseRelationValuesInput[] => {
-  if (Array.isArray(metadataValue.value)) {
+const getValueFromMetadata = (
+  newValue: any,
+): string | BaseRelationValuesInput[] => {
+  if (Array.isArray(newValue)) {
     const returnArray = [];
-    metadataValue.value.forEach((metadataItem) => {
+    newValue.forEach((metadataItem) => {
       if (isDateTime(metadataItem.value)) {
         returnArray.push(
           addCurrentTimeZoneToDateTimeString(metadataItem.value),
@@ -174,13 +182,13 @@ const getValueFromMetadata = (): string | BaseRelationValuesInput[] => {
     });
     return returnArray;
   }
-  if (typeof metadataValue.value !== "object") {
-    if (isDateTime(metadataValue.value)) {
-      return addCurrentTimeZoneToDateTimeString(metadataValue.value);
+  if (typeof newValue !== "object") {
+    if (isDateTime(newValue)) {
+      return addCurrentTimeZoneToDateTimeString(newValue);
     }
-    return metadataValue.value;
+    return newValue;
   }
-  return metadataValue.value.value;
+  return newValue.value;
 };
 
 const getIdForHiddenFieldFilter = (): any => {
@@ -206,13 +214,6 @@ const populateHiddenField = (): BaseRelationValuesInput[] | undefined => {
   }
 };
 
-watch(
-  () => metadataValue.value,
-  () => {
-    const newValue = getValueFromMetadata();
-    emit("update:value", newValue);
-  },
-);
 watch(
   () => isFieldHidden.value,
   () => {

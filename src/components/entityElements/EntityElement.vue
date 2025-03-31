@@ -78,6 +78,11 @@
         :element="element"
         :entity-id="id"
       />
+      <entity-element-w-y-s-i-w-y-g
+        v-if="element.__typename === 'WysiwygElement'"
+        :form-id="formId"
+        :element="element"
+      />
       <EntityElementHierarchyListViewer
         v-if="element.__typename === 'HierarchyListElement'"
         :element="element"
@@ -95,6 +100,7 @@ import EntityElementManifestViewer from "@/components/entityElements/EntityEleme
 import EntityElementMedia from "@/components/entityElements/EntityElementMedia.vue";
 import EntityElementSingleMedia from "@/components/entityElements/EntityElementSingleMedia.vue";
 import EntityElementWindow from "@/components/entityElements/EntityElementWindow.vue";
+import EntityElementWYSIWYG from "@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue";
 import EntityElementMapViewer from "@/components/entityElements/EntityElementMapViewer.vue";
 import EntityElementHierarchyListViewer from "@/components/entityElements/EntityElementHierarchyListViewer.vue";
 
@@ -115,6 +121,7 @@ import type {
   SingleMediaFileElement,
   WindowElement,
   HierarchyListElement,
+  WysiwygElement,
 } from "@/generated-types/queries";
 import EntityElementMarkdownViewer from "@/components/entityElements/EntityElementMarkdownViewer.vue";
 import { getObjectsBasedOnTypename } from "@/helpers";
@@ -129,6 +136,7 @@ export type Elements =
   | SingleMediaFileElement
   | WindowElement
   | MapElement
+  | WysiwygElement
   | HierarchyListElement;
 
 const props = defineProps<{

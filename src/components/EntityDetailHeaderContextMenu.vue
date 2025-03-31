@@ -5,7 +5,13 @@
   >
     <unicon
       :name="Unicons.EllipsisVThinline.name"
-      @click.stop="(event: MouseEvent) => contextMenuHandler.openContextMenu({x: event?.clientX, y: event?.clientY})"
+      @click.stop="
+        (event: MouseEvent) =>
+          contextMenuHandler.openContextMenu({
+            x: event?.clientX,
+            y: event?.clientY,
+          })
+      "
     />
     <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
       <context-menu-action
@@ -24,7 +30,7 @@
 import { Unicons } from "@/types";
 import ContextMenuAction from "@/components/context-menu-actions/ContextMenuAction.vue";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
-import { ref, computed } from "vue";
+import { ref, computed, inject } from "vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import { useQuery } from "@vue/apollo-composable";
 import {
@@ -32,17 +38,17 @@ import {
   GetEntityDetailContextMenuActionsDocument,
   type GetEntityDetailContextMenuActionsQuery,
 } from "@/generated-types/queries";
-import { asString } from "@/helpers";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
+const entityDetails = inject("entityFormData");
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
-const entityId = computed<string>(() => asString(route.params["id"]));
-const entityType = computed<string>(() => asString(route.params["type"]));
+const entityId = computed<string>(() => entityDetails.id);
+const entityType = computed<string>(() => entityDetails.type);
 
 const { result: contextMenuActions } =
   useQuery<GetEntityDetailContextMenuActionsQuery>(
-    GetEntityDetailContextMenuActionsDocument
+    GetEntityDetailContextMenuActionsDocument,
   );
 </script>
 

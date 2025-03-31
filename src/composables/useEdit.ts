@@ -97,6 +97,7 @@ export const useEditMode = () => {
     clickButton,
     resetButtonClicked,
     clearSaveCallbacks,
+    saveCallbacks,
   };
 };
 

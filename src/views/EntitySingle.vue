@@ -2,10 +2,11 @@
   <div>
     <div
       v-if="!loading && entity"
-      class="pl-24 pb-5 h-full w-full flex fixed top-0 bg-neutral-lightest pt-24 left-0 z-2"
+      class="h-full w-full flex bg-neutral-lightest z-2 overflow-y-scroll pb-4"
     >
       <entity-form
         v-if="intialValues != 'no-values' && relationValues != 'no-values'"
+        :key="entity.id"
         :intial-values="intialValues"
         :relation-values="relationValues"
         :uuid="entity.uuid"
@@ -23,8 +24,14 @@
       </entity-form>
     </div>
     <div
+      v-else-if="loading && viewOnly"
+      class="min-h-[30vh] flex justify-center items-center"
+    >
+      <spinner-loader theme="accent" />
+    </div>
+    <div
       v-else
-      class="h-full w-full flex fixed top-0 bg-neutral-0 pt-24 pl-20 left-0 animate-pulse text-neutral-20 z-2"
+      class="h-full w-full flex bg-neutral-0 animate-pulse text-neutral-20 z-2"
     />
   </div>
 </template>
@@ -39,8 +46,6 @@ import {
   type GetEntityByIdQuery,
   type BaseEntity,
   type MediaFileEntity,
-  type PanelMetaData,
-  InputFieldTypes,
   type Column,
   MediaFileElementTypes,
   type EntityListElement,
@@ -67,6 +72,7 @@ import { useQuery } from "@vue/apollo-composable";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
 
 const config: any = inject("config");
 const router = useRouter();
@@ -95,12 +101,22 @@ const {
 } = useEntityMediafileSelector();
 const mediafileViewerContexts = ref<string[]>([]);
 
-const id = ref<string[]>(asString(route.params["id"]));
+const props = withDefaults(
+  defineProps<{
+    entityId?: string;
+    entityType?: string;
+    viewOnly: boolean;
+  }>(),
+  { viewOnly: false },
+);
+
+const id = ref<string[]>(asString(props.entityId || route.params["id"]));
 const identifiers = ref<string[]>([]);
 const loading = ref<boolean>(true);
 const { getEditableMetadataKeys } = useFormHelper();
 
 const entityType = computed(() => {
+  if (props.entityType) return props.entityType;
   const slug = String(route.params["type"]);
   return mapUrlToEntityType(slug) || slug;
 });
@@ -200,7 +216,7 @@ watch(
     if (!entity.value || !entity.value.intialValues) return;
     useEntitySingle().setEntityUuid(entity.value.uuid || entity.value.id);
     entityForBreadcrumb.value = entity.value;
-    determineBreadcrumbs();
+    if (!props.viewOnly) determineBreadcrumbs();
 
     identifiers.value = [entity.value.uuid, entity.value.id];
     intialValues.value = determineDefaultIntialValues(
@@ -237,6 +253,10 @@ watch(
     watch(
       () => permissionToDelete.value || permissionToEdit.value,
       () => {
+        if (props.viewOnly) {
+          hideEditToggle();
+          return;
+        }
         if (auth.isAuthenticated.value) {
           if (permissionToEdit.value && permissionToDelete.value)
             showEditToggle("edit-delete");

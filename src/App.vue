@@ -8,7 +8,7 @@
         :class="[`pl-24 h-screen flex flex-col`]"
       >
         <the-header />
-        <div :class="['flex-grow', { 'h-full overflow-hidden': isSingle }]">
+        <div :class="['flex-grow', { 'h-full': isSingle }]">
           <router-view />
         </div>
         <edit-modal />
@@ -24,6 +24,8 @@
       <!--        v-if="route.name !== undefined"-->
       <!--        :context="route.name as Context"-->
       <!--      />-->
+      <TagEntityModal />
+      <EntityDetailModal />
       <ConfirmModal><ConfirmModalView /></ConfirmModal>
     </div>
   </div>
@@ -54,6 +56,8 @@ import { auth } from "@/main";
 import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
 import CreateSavedSearchModal from "./components/CreateSavedSearchModal.vue";
+import TagEntityModal from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/TagEntityModal.vue";
+import EntityDetailModal from "@/components/EntityDetailModal.vue";
 
 const config = inject<{
   features: { hasTenantSelect: boolean };

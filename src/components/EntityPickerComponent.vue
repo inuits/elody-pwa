@@ -13,6 +13,7 @@
             : SearchInputType.AdvancedInputMediaFilesType
           : SearchInputType.AdvancedInputType
       "
+      :filters="computedFilters || undefined"
       :show-button="showButton"
       :confirm-selection-button="true"
       :enable-navigation="false"
@@ -31,20 +32,15 @@
       @entities-updated="
         (numberOfEntities) => emitUpdatedEntities(numberOfEntities)
       "
-      @confirm-selection="
-        async (selectedItems) => {
-          confirmSelection(selectedItems);
-        }
-      "
+      @confirm-selection="saveRelations"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
 import {
+  type AdvancedFilterInput,
   type BaseRelationValuesInput,
-  Collection,
-  type Entity,
   EntityPickerMode,
   Entitytyping,
   MutateEntityValuesDocument,
@@ -55,24 +51,20 @@ import {
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
-  type InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
-import { ref, onMounted, inject, unref } from "vue";
-import { useSubmitForm } from "vee-validate";
+import { inject, onMounted, provide, ref } from "vue";
 import { useMutation } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 import { useCustomQuery } from "@/composables/useCustomQuery";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { type EntityValues, useFormHelper } from "@/composables/useFormHelper";
+import { useFormHelper } from "@/composables/useFormHelper";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
+import { useNotification } from "@/components/base/BaseNotification.vue";
 import useEditMode from "@/composables/useEdit";
-import {
-  useNotification,
-  NotificationType,
-} from "@/components/base/BaseNotification.vue";
 import { getChildrenOfHomeRoutes } from "@/helpers";
+import { useSubmitForm } from "vee-validate";
 
 const emit = defineEmits<{
   (event: "entitiesUpdated", numberOfEntities: number): void;
@@ -85,7 +77,9 @@ const props = withDefaults(
     parentEntityType?: string;
     acceptedTypes: string[];
     customQuery: string;
-    customFiltersQuery: string;
+    customFiltersQuery?: string;
+    computedFilters?: AdvancedFilterInput[];
+    context?: BulkOperationsContextEnum;
     showButton: boolean;
     enableBulkOperations: boolean;
     enableAdvancedFilters: boolean;
@@ -97,15 +91,18 @@ const props = withDefaults(
     entityPickerMode: EntityPickerMode.Emit,
     baseLibraryHeight: "h-[95vh]",
     enableNonSelectableEntities: true,
+    context: BulkOperationsContextEnum.EntityElementListEntityPickerModal,
   },
 );
+
+provide("mediafileViewerContext", props.customFiltersQuery);
 
 const { t } = useI18n();
 const { loadDocument, getDocument } = useCustomQuery();
 const { closeModal } = useBaseModal();
 const { addRelations } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
-const { getEntityUuid, getEntityId, getRelationType } = useEntityPickerModal();
+const { getEntityId, getRelationType } = useEntityPickerModal();
 const { save, addSaveCallback, clearSaveCallbacks } = useEditMode();
 const { getForm } = useFormHelper();
 const { parseFormValuesToFormInput } = useFormHelper();
@@ -130,7 +127,7 @@ const emitUpdatedEntities = (numberOfEntities: number) => {
   emit("entitiesUpdated", numberOfEntities);
 };
 
-const confirmSelection = (selectedItems: InBulkProcessableItem[]) => {
+const saveRelations = () => {
   if (props.entityPickerMode === EntityPickerMode.Emit) return;
   addRelations(selectedItems, getRelationType(), getEntityId(), true);
   dequeueAllItemsForBulkProcessing(getContext());
@@ -146,15 +143,9 @@ const getCustomQuery = async () => {
 };
 
 const getContext = () => {
-  if (props.acceptedTypes.length > 0) {
-    if (props.acceptedTypes[0] !== Entitytyping.Mediafile) {
-      return BulkOperationsContextEnum.EntityElementListEntityPickerModal;
-    } else {
-      return BulkOperationsContextEnum.EntityElementMediaEntityPickerModal;
-    }
-  } else {
-    return BulkOperationsContextEnum.EntityElementListEntityPickerModal;
-  }
+  if (props.acceptedTypes[0] == Entitytyping.Mediafile)
+    return BulkOperationsContextEnum.EntityElementMediaEntityPickerModal;
+  return props.context;
 };
 
 const getAlreadySelectedEntityIds = (): string[] => {
