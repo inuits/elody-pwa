@@ -43,6 +43,16 @@ export const tags = computed<string[]>(() =>
   ),
 );
 
+const getTagNameFromConfiguration = (
+  configurationItem: TaggableEntityConfigurationFromEntity,
+): string => {
+  let extensionName = configurationItem.tag;
+  if (configurationItem.configurationEntityId) {
+    extensionName += `-${configurationItem.configurationEntityId}`;
+  }
+  return extensionName;
+};
+
 export const createTipTapNodeExtension = (
   extensionConfiguration: TaggableEntityConfiguration,
 ) => {
@@ -52,10 +62,7 @@ export const createTipTapNodeExtension = (
     ...extensionConfiguration.metadataKeysToSetAsAttribute,
   ];
 
-  let extensionName = extensionConfiguration.tag;
-  if (extensionConfiguration.configurationEntityId) {
-    extensionName += `-${extensionConfiguration.configurationEntityId}`;
-  }
+  const extensionName = getTagNameFromConfiguration(extensionConfiguration);
 
   return Node.create({
     name: extensionName,
@@ -179,7 +186,7 @@ export const createGlobalCommandsExtension = Extension.create({
             selectedText = newText.toLowerCase();
 
           const newNodeContent = {
-            type: configurationItem.tag,
+            type: getTagNameFromConfiguration(configurationItem),
             attrs: {
               entityId: entity.id,
             },
