@@ -32,6 +32,7 @@ type TaggableEntityConfigurationFromEntity = TaggableEntityConfiguration & {
   configurationEntityId: string;
   tagColor: string;
   attributes?: Record<string, string>;
+  extensionName: string;
 };
 
 export const extensionConfiguration = ref<
@@ -42,6 +43,13 @@ export const tags = computed<string[]>(() =>
     (configurationItem: TaggableEntityConfiguration) => configurationItem.tag,
   ),
 );
+export const customExtensionNames = computed<string>(() =>
+  extensionConfiguration.value.map(
+    (configurationItem: TaggableEntityConfigurationFromEntity) => {
+      configurationItem.extensionName;
+    },
+  ),
+);
 
 const getTagNameFromConfiguration = (
   configurationItem: TaggableEntityConfigurationFromEntity,
@@ -49,6 +57,12 @@ const getTagNameFromConfiguration = (
   let extensionName = configurationItem.tag;
   if (configurationItem.configurationEntityId) {
     extensionName += `-${configurationItem.configurationEntityId}`;
+  }
+  if (customExtensionNames.value.includes(extensionName)) {
+    const occurrences: number = customExtensionNames.value.filter(
+      (name: string) => name.includes(extensionName),
+    ).length;
+    extensionName += `-${occurrences + 1}`;
   }
   return extensionName;
 };
@@ -63,6 +77,7 @@ export const createTipTapNodeExtension = (
   ];
 
   const extensionName = getTagNameFromConfiguration(extensionConfiguration);
+  extensionConfiguration.extensionName = extensionName;
 
   return Node.create({
     name: extensionName,
@@ -157,7 +172,8 @@ export const createGlobalCommandsExtension = Extension.create({
           newText: string | undefined,
         ) =>
         async ({ commands, state, view }) => {
-          const configurationItem = getExtensionConfigurationForEntity(entity);
+          const configurationItem: TaggableEntityConfigurationFromEntity =
+            getExtensionConfigurationForEntity(entity);
           const additionalAttributes = {};
 
           if (!entity) throw Error("Error tagging text: no entity to tag");
@@ -186,7 +202,7 @@ export const createGlobalCommandsExtension = Extension.create({
             selectedText = newText.toLowerCase();
 
           const newNodeContent = {
-            type: getTagNameFromConfiguration(configurationItem),
+            type: configurationItem.extensionName,
             attrs: {
               entityId: entity.id,
             },
@@ -348,11 +364,14 @@ const getConfigurationEntities = async (
 const applyColorStylingFromConfigurationToEditor = (
   configurations: TaggableEntityConfigurationFromEntity[],
 ) => {
-  const style = document.createElement("style"); // Todo: Set styles based on attribute
+  const style = document.createElement("style");
   configurations.forEach(
     (configurationItem: TaggableEntityConfigurationFromEntity) => {
+      const styleDefiningAttribute: string =
+        configurationItem.tagConfigurationByEntity
+          .secondaryAttributeToDetermineTagConfig;
       style.textContent += `
-      #wysiwyg-container ${configurationItem.tag} {
+      #wysiwyg-container ${configurationItem.tag}[${styleDefiningAttribute}="${configurationItem.attributes[styleDefiningAttribute]}"] {
         background-color: ${configurationItem.tagColor};
         color: #fff;
         border-radius: 0.375rem;
@@ -376,7 +395,7 @@ export const getPluginsFromConfigurationEntities = async (
 
 export const getExtensionConfigurationForEntity = (
   entity: BaseEntity | { type: string },
-): TaggableEntityConfiguration | undefined => {
+): TaggableEntityConfigurationFromEntity | undefined => {
   let configuration = undefined;
 
   if (!entity.relationValues)
