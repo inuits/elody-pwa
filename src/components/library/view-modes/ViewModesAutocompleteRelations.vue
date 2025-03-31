@@ -123,9 +123,10 @@ onMounted(async () => {
     if (props.isMetadataField) preSelect();
     else await initAutocompleteOption();
   } else {
+    const preSelectValue = props.modelValue
     await initAutocompleteOption();
     if (props.advancedFilterInputForRetrievingOptions)
-      if (props.isMetadataField) preSelect();
+      if (props.isMetadataField) preSelect(preSelectValue);
   }
 });
 
@@ -219,7 +220,8 @@ const handleCreatingFromTag = async (option: any) => {
   }
 };
 
-const preSelect = () => {
+const preSelect = (preSelectValue: DropdownOption | DropdownOption[] | undefined) => {
+  preSelectValue = preSelectValue || props.modelValue;
   let selection: DropdownOption[];
   if (Array.isArray(props.modelValue))
     selection = props.modelValue.map((value) => {
