@@ -17,7 +17,7 @@
         <h3 class="text-lg font-bold">
           {{
             t("tagging.tag-entity", {
-              entityType: extensionConfiguration[0].taggableEntityType,
+              entityType: extensionConfiguration[formIndex].taggableEntityType,
             })
           }}
         </h3>
@@ -33,7 +33,8 @@
           <h4 class="text-md font-bold">
             {{
               t("tagging.tag-existing", {
-                entityType: extensionConfiguration[0].taggableEntityType,
+                entityType:
+                  extensionConfiguration[formIndex].taggableEntityType,
               })
             }}
           </h4>
@@ -56,14 +57,15 @@
           <h4 class="text-md font-bold">
             {{
               t("tagging.tag-new", {
-                entityType: extensionConfiguration[0].taggableEntityType,
+                entityType:
+                  extensionConfiguration[formIndex].taggableEntityType,
               })
             }}
           </h4>
         </div>
         <dynamic-form
           :dynamic-form-query="
-            extensionConfiguration[0].createNewEntityFormQuery
+            extensionConfiguration[formIndex].createNewEntityFormQuery
           "
           :router="router"
           :show-form-title="false"
@@ -115,6 +117,7 @@ const router = useRouter();
 const { t } = useI18n();
 
 const parentId = computed(() => route.params["id"]);
+const formIndex: number = [0];
 const selectionLimit: number = 1;
 const acceptedTypes = computed(() =>
   extensionConfiguration.value.map(
@@ -128,11 +131,36 @@ const editor = computed<Editor>(
   () => getModalInfo(TypeModals.ElodyEntityTaggingModal).editor,
 );
 const form = computed(() =>
-  getForm(extensionConfiguration.value[0].createNewEntityFormQuery),
-); //Todo:
+  getForm(extensionConfiguration.value[formIndex].createNewEntityFormQuery),
+);
 const selectedText = computed<string>(() => {
   return getModalInfo(TypeModals.ElodyEntityTaggingModal).selectedText;
 });
+
+watch(
+  () => getModalInfo(TypeModals.ElodyEntityTaggingModal).open,
+  () => {
+    const entityTypes: Entitytyping[] = extensionConfiguration.value.map(
+      (configurationItem: TaggableEntityConfiguration) =>
+        configurationItem.taggableEntityType,
+    );
+
+    if (!selectedText.value || !entityTypes) return;
+
+    const titleKeys = entityTypes.map((type: Entitytyping) => {
+      const configuration: TaggableEntityConfiguration =
+        getExtensionConfigurationForEntity({ type });
+      return extractTitleKeyFromMetadataFilter(
+        configuration.metadataFilterForTagContent,
+      );
+    });
+
+    if (form.value && !form.value.values.intialValues[titleKeys[formIndex]]) {
+      const veeValidateKey = `intialValues.${titleKeys[formIndex]}`;
+      form.value.setFieldValue(veeValidateKey, selectedText.value);
+    }
+  },
+);
 
 const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
   const entityTypes: Entitytyping[] = extensionConfiguration.value.map(
@@ -147,17 +175,6 @@ const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
   entityTypes.forEach((type: Entitytyping) => {
     const configurationItem: TaggableEntityConfiguration =
       getExtensionConfigurationForEntity({ type });
-    const metadataKey = extractTitleKeyFromMetadataFilter(
-      configurationItem.metadataFilterForTagContent,
-    );
-
-    const veeValidateKey: string = `intialValues.${metadataKey}`;
-    // if (
-    //   form.value &&
-    //   !form.value.values.intialValues[metadataKey] &&
-    //   !form.value.meta.dirty
-    // )
-    //   form.value.setFieldValue(veeValidateKey, selectedText.value);
 
     typeFilters.push({
       match_exact: true,
