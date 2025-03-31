@@ -1,9 +1,9 @@
 import type { ApolloClient } from "@apollo/client/core";
 import type { RouteLocationNormalizedLoaded } from "vue-router";
+import type { SearchInputType } from "@/generated-types/queries";
 import {
   Entitytyping,
   GetEntitiesDocument,
-  SearchInputType,
   type AdvancedFilterInput,
   type Entity,
   type GetEntitiesQueryVariables,
@@ -67,6 +67,18 @@ export const useBaseLibrary = (
   const setEntityType = (type: Entitytyping): void => {
     entityType = type;
     queryVariables.type = type;
+    updateSearchValue();
+  };
+
+  const updateSearchValue = () => {
+    const state = getStateForRoute(_route);
+    queryVariables.searchValue = {
+      value: "",
+      isAsc: false,
+      key: "title",
+      order_by: "",
+      ...(state?.queryVariables?.searchValue || {}),
+    };
   };
 
   const setsearchInputType = (searchInputType: SearchInputType): void => {
@@ -81,7 +93,16 @@ export const useBaseLibrary = (
   ): Promise<void> => {
     if (filters === queryVariables.advancedFilterInputs && !isSaved.value)
       return;
-    if (route) _route = route;
+    if (route) {
+      _route = route;
+      const storedState = getStateForRoute(_route);
+      if (storedState?.queryVariables) {
+        queryVariables.searchValue = {
+          ...queryVariables.searchValue,
+          ...(storedState.queryVariables.searchValue || {}),
+        };
+      }
+    }
 
     queryVariables.advancedFilterInputs = [];
     queryVariables.advancedFilterInputs = filters;
@@ -113,8 +134,13 @@ export const useBaseLibrary = (
     sortKey: string,
     forceFetch: boolean = false,
   ): Promise<void> => {
-    queryVariables.searchValue.order_by = sortKey;
-    if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
+    queryVariables.searchValue = {
+      ...queryVariables.searchValue,
+      order_by: sortKey,
+    };
+
+    if (shouldUseStateForRoute)
+      updateStateForRoute(_route, { queryVariables: { ...queryVariables } });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
@@ -123,7 +149,8 @@ export const useBaseLibrary = (
     forceFetch: boolean = false,
   ): Promise<void> => {
     queryVariables.searchValue.isAsc = sortOrder === "asc";
-    if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
+    if (shouldUseStateForRoute)
+      updateStateForRoute(_route, { queryVariables }, "useBaseLibrary#129");
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
