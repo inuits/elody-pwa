@@ -145,11 +145,11 @@ export const useSaveSearchHepler = () => {
     () =>
       entities.value.map((entity: SavedSearch) => {
         return normalizeSavedSearchFromEntity(entity);
-      }) || []
+      }) || [],
   );
 
   const getLastUsedFiltersForRoute = (
-    path: RouteLocationNormalizedLoaded
+    path: RouteLocationNormalizedLoaded,
   ): SavedSearchType[] => {
     const stateForRoute = stateManager.getStateForRoute(path);
     const lastUsedFilters = stateForRoute?.lastUsedFilters;
@@ -158,7 +158,7 @@ export const useSaveSearchHepler = () => {
   };
 
   const getLastUsedFilterForRoute = (
-    path: RouteLocationNormalizedLoaded
+    path: RouteLocationNormalizedLoaded,
   ): SavedSearchType | undefined => {
     const stateForRoute = stateManager.getStateForRoute(path);
     const lastUsedFilters = stateForRoute?.lastUsedFilter;
@@ -168,11 +168,11 @@ export const useSaveSearchHepler = () => {
 
   const addNewSavedFilterToLastUsedFiltersForRoute = (
     route: RouteLocationNormalizedLoaded,
-    filter: SavedSearchType
+    filter: SavedSearchType,
   ) => {
     let lastUsedFilters = getLastUsedFiltersForRoute(route);
     lastUsedFilters = lastUsedFilters.filter(
-      (item: SavedSearchType) => item.id !== filter.id
+      (item: SavedSearchType) => item.id !== filter.id,
     );
 
     lastUsedFilters.unshift(filter);
@@ -187,11 +187,11 @@ export const useSaveSearchHepler = () => {
 
   const removeFilterFromStateForRoute = (
     route: RouteLocationNormalizedLoaded,
-    filter: SavedSearchType
+    filter: SavedSearchType,
   ) => {
     const routeFilters = getLastUsedFiltersForRoute(route);
     const filteredFilters = routeFilters.filter(
-      (item: SavedSearchType) => item.id !== filter.id
+      (item: SavedSearchType) => item.id !== filter.id,
     );
 
     stateManager.updateStateForRoute(route, {
@@ -201,7 +201,7 @@ export const useSaveSearchHepler = () => {
 
   const addLastUsedFilterToStateForRoute = (
     route: RouteLocationNormalizedLoaded,
-    filter: SavedSearchType | undefined
+    filter: SavedSearchType | undefined,
   ) => {
     stateManager.updateStateForRoute(route, {
       lastUsedFilter: filter ? JSON.parse(JSON.stringify(filter)) : undefined,
