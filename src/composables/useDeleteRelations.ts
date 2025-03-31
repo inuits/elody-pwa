@@ -7,7 +7,7 @@ import {
 import { useFormHelper } from "@/composables/useFormHelper";
 import useEditMode from "@/composables/useEdit";
 import {
-  type MutateEntityValuesMutation,
+  MutateEntityValuesDocument,
   Collection,
 } from "@/generated-types/queries";
 import type { FormContext } from "vee-validate";
@@ -76,10 +76,13 @@ export function useDeleteRelations() {
     const form = getForm(entityId) as FormContext;
     if (!form) return;
 
-    const result = await apolloClient.mutate(MutateEntityValuesMutation, {
-      id: entityId,
-      formInput: parseFormValuesToFormInput(entityId, form.values, true),
-      collection,
+    const result = await apolloClient.mutate({
+      mutation: MutateEntityValuesDocument,
+      variables: {
+        id: entityId,
+        formInput: parseFormValuesToFormInput(entityId, form.values, true),
+        collection,
+      }
     });
 
     if (!result?.data?.mutateEntityValues) return;
