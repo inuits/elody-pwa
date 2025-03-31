@@ -52,8 +52,13 @@ export const createTipTapNodeExtension = (
     ...extensionConfiguration.metadataKeysToSetAsAttribute,
   ];
 
+  let extensionName = extensionConfiguration.tag;
+  if (extensionConfiguration.configurationEntityId) {
+    extensionName += `-${extensionConfiguration.configurationEntityId}`;
+  }
+
   return Node.create({
-    name: extensionConfiguration.tag,
+    name: extensionName,
     group: "inline",
     inline: true,
     content: "text*",
