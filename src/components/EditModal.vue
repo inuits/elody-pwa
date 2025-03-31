@@ -32,10 +32,8 @@ import { inject } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useEditMode } from "@/composables/useEdit";
-import { useRoute } from "vue-router";
 import { useFormHelper } from "@/composables/useFormHelper";
 
-const route = useRoute();
 const { isEdit, save, discard, showErrors, clickButton, isEditToggleVisible } =
   useEditMode();
 const { initializeConfirmModal } = useConfirmModal();
@@ -49,7 +47,7 @@ const openDiscardModal = () => {
     confirmButton: {
       buttonCallback: () => {
         discard();
-        const id = inject("entityFormData").id;
+        const id = inject("entityFormData")?.id;
         discardEditForForm(id);
         closeModal(TypeModals.Confirm);
       },
