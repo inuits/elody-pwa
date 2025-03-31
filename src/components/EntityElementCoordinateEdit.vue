@@ -41,7 +41,7 @@ import type {
   InputField as InputFieldType,
 } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { type PropType, computed, onMounted, inject, ref } from "vue";
+import { type PropType, computed, onMounted, inject, ref, watch } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useField } from "vee-validate";
 import { useEditMode } from "@/composables/useEdit";
@@ -81,7 +81,7 @@ const coordinateEditIsDisabled = computed(() => {
   );
 });
 const { t } = useI18n();
-const { fetchAdvancedPermission } = usePermissions();
+const { fetchAdvancedPermission, setExtraVariables } = usePermissions();
 
 const isPermitted = ref<boolean>(false);
 
@@ -127,4 +127,19 @@ const computedLatitude = computed<any>({
     if (form) setFormValues(value, computedLongitude.value);
   },
 });
+
+const updatePermissionVariables = () => {
+  setExtraVariables({
+    parentEntityId: props.entityUuid,
+    childEntityId: "",
+  });
+};
+
+watch(
+  () => props.entityUuid,
+  () => {
+    updatePermissionVariables();
+  },
+  { immediate: true },
+);
 </script>

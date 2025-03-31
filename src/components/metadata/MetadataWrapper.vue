@@ -223,7 +223,7 @@ import { usePermissions } from "@/composables/usePermissions";
 
 const { t } = useI18n();
 const { getForm, getKeyBasedOnInputField } = useFormHelper();
-const { fetchAdvancedPermission } = usePermissions();
+const { fetchAdvancedPermission, setExtraVariables } = usePermissions();
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 
@@ -463,6 +463,13 @@ onMounted(async () => {
   await isPermittedToDisplay();
 });
 
+const updatePermissionVariables = () => {
+  setExtraVariables({
+    parentEntityId: props.formId,
+    childEntityId: "",
+  });
+};
+
 const isPermittedToDisplay = async () => {
   const permissions = props.metadata.can;
   const hasPermissionsToCheck = permissions && permissions?.length > 0;
@@ -487,5 +494,13 @@ watch(
   () => {
     setNewValue(props.metadata.value);
   },
+);
+
+watch(
+  () => props.formId,
+  () => {
+    updatePermissionVariables();
+  },
+  { immediate: true },
 );
 </script>
