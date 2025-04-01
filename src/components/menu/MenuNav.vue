@@ -10,7 +10,7 @@
   >
     <div>
       <router-link
-        :to="{ name: 'Home' }"
+        :to="{ path: '/' }"
         @click="setSelectedMenuItem(menuItems[0])"
         class="mt-4 text-neutral-700 font-semibold mb-8 text-xl flex justify-center"
       >
