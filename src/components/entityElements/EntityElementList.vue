@@ -7,6 +7,7 @@
       :class="[
         { 'pb-1': baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary },
       ]"
+      :entity-id="entityId"
       :label="label"
       :isCollapsed="isCollapsed"
       :base-library-mode="baseLibraryMode"

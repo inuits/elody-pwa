@@ -1,6 +1,7 @@
 <template>
   <entity-element-wrapper
     :isCollapsed="element.isCollapsed"
+    :entity-id="entityId"
     :label="element.label"
     class="flex flex-col h-full"
   >
@@ -28,11 +29,9 @@ import { GetGraphDataDocument } from "@/generated-types/queries";
 import "chartjs-adapter-date-fns";
 import Chart from "chart.js/auto";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
-import { asString } from "@/helpers";
 import { Colors } from "chart.js";
 import { computed, inject, ref, watch } from "vue";
 import { useQuery } from "@vue/apollo-composable";
-import { useRoute } from "vue-router";
 
 const props = defineProps<{
   element: GraphElement;
