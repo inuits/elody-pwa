@@ -221,15 +221,20 @@ const handleCreatingFromTag = async (option: any) => {
 };
 
 const preSelect = (preSelectValue: DropdownOption | DropdownOption[] | undefined) => {
-  preSelectValue = preSelectValue || props.modelValue;
-  let selection: DropdownOption[];
-  if (Array.isArray(props.modelValue))
-    selection = props.modelValue.map((value) => {
-      return { label: value, value };
-    });
-  else if (props.modelValue)
-    selection = [{ label: props.modelValue, value: props.modelValue }];
-  else selection = []
+  let selection: DropdownOption[] = []
+  if (preSelectValue) {
+    if (Array.isArray(preSelectValue))
+      selection = preSelectValue;
+    else selection = [preSelectValue];
+  } else {
+    if (Array.isArray(props.modelValue))
+      selection = props.modelValue.map((value) => {
+        return { label: value, value };
+      });
+    else if (props.modelValue)
+      selection = [{ label: props.modelValue, value: props.modelValue }];
+    else selection = []
+  }
   handleSelect(selection, true);
 };
 
