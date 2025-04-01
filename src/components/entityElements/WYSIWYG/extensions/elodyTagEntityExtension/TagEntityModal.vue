@@ -9,6 +9,7 @@
       v-if="
         element && element.taggingConfiguration && extensionConfiguration.length
       "
+      :key="`${extensionConfiguration[formIndex].createNewEntityFormQuery}-${getModalInfo(TypeModals.ElodyEntityTaggingModal).open}`"
       class="p-2"
     >
       <div
@@ -117,7 +118,7 @@ const router = useRouter();
 const { t } = useI18n();
 
 const parentId = computed(() => route.params["id"]);
-const formIndex: number = [0];
+const formIndex: number = 0;
 const selectionLimit: number = 1;
 const acceptedTypes = computed(() =>
   extensionConfiguration.value.map(
@@ -155,10 +156,10 @@ watch(
       );
     });
 
-    if (form.value && !form.value.values.intialValues[titleKeys[formIndex]]) {
-      const veeValidateKey = `intialValues.${titleKeys[formIndex]}`;
-      form.value.setFieldValue(veeValidateKey, selectedText.value);
-    }
+    // if (form.value && !form.value.values.intialValues[titleKeys[formIndex]]) {
+    //   const veeValidateKey = `intialValues.${titleKeys[formIndex]}`;
+    //   form.value.setFieldValue(veeValidateKey, selectedText.value);
+    // }
   },
 );
 
