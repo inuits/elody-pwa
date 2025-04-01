@@ -9,7 +9,7 @@
         baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder
       "
       class="flex items-center justify-between cursor-pointer"
-      @click.self="toggleElementCollapse(label)"
+      @click.self="toggleElementCollapse(entityId, label)"
     >
       <div class="flex p-2">
         <span data-cy="entity-element-wrapper-title" class="subtitle mr-2">{{
@@ -19,7 +19,7 @@
       </div>
       <span
         class="p-2 text-text-subtitle"
-        @click="toggleElementCollapse(label)"
+        @click="toggleElementCollapse(entityId, label)"
       >
         <unicon
           :name="isCollapsed ? Unicons.AngleDown.name : Unicons.AngleUp.name"
@@ -44,6 +44,7 @@ import { BaseLibraryModes } from "@/generated-types/queries";
 withDefaults(
   defineProps<{
     label: string;
+    entityId: string;
     isCollapsed: Boolean;
     baseLibraryMode?: BaseLibraryModes;
     useVshowInsteadOfVif?: boolean;

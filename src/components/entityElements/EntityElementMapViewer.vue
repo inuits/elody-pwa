@@ -1,6 +1,7 @@
 <template>
   <entity-element-wrapper
     :isCollapsed="element.isCollapsed"
+    :entity-id="entityId"
     :label="element.label"
     :use-vshow-instead-of-vif="element.type === MediaFileElementTypes.Map"
     class="flex flex-col h-full"

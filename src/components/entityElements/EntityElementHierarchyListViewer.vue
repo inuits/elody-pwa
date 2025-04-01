@@ -2,6 +2,7 @@
   <entity-element-wrapper
     v-if="showHierarchyList"
     :isCollapsed="element.isCollapsed"
+    :entity-id="entityId"
     :label="element.label"
     :use-vshow-instead-of-vif="true"
     class="flex flex-col h-full"

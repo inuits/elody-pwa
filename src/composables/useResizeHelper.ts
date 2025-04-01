@@ -88,13 +88,13 @@ const useColumnResizeHelper = () => {
 
 const useEntityElementCollapseHelper = () => {
   const getElementByLabel = (
-    elementLabel: string,
+    entityId: string, elementLabel: string,
   ): { column: Column | undefined; element: Elements | undefined } => {
     try {
       let toggleElement: Elements | undefined = undefined;
       let toggleElementColumn: Column | undefined = undefined;
 
-      currentColumnConfig.value.forEach((col: Column) => {
+      currentColumnConfig.value[entityId].forEach((col: Column) => {
         const elements: { [key: string]: any } = col.elements;
         const columnElements = Object.getOwnPropertyNames(col.elements);
         columnElements.forEach((el: string) => {
@@ -118,10 +118,11 @@ const useEntityElementCollapseHelper = () => {
   };
 
   const toggleElementCollapse = (
+    entityId: string,
     elementLabel: string,
     collapse: undefined | boolean = undefined,
   ) => {
-    const { element, column } = getElementByLabel(elementLabel);
+    const { element, column } = getElementByLabel(entityId, elementLabel);
     if (element && column) {
       element.isCollapsed =
         collapse === undefined ? !element.isCollapsed : collapse;
