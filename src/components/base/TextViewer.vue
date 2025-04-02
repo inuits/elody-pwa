@@ -5,37 +5,31 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent, onMounted, ref } from "vue";
+
+<script setup lang="ts">
+import { ref, watch, onMounted } from "vue";
 import { useGetMediafile } from "@/composables/useGetMediafile";
 
-export default defineComponent({
-  name: "TextViewer",
-  components: {},
-  props: {
-    source: {
-      type: Object,
-      required: true,
-    },
-  },
-  setup(props) {
-    const fileContent = ref<string>();
-    const { getMediafile, getMediafilePath } = useGetMediafile();
+interface Source {
+  intialValues: {
+    original_file_location: string;
+  };
+}
 
-    const getText = async () => {
-      const response = await getMediafile(
-        "/api/mediafile/" +
-          getMediafilePath(props.source.intialValues.original_file_location)
-      );
-      const text = await response.text();
-      fileContent.value = text.split(/\r\n|\n/).join("<br/>");
-    };
+const props = defineProps<{ source: Source }>();
 
-    onMounted(() => {
-      getText();
-    });
+const fileContent = ref<string>("");
+const { getMediafile, getMediafilePath } = useGetMediafile();
 
-    return { fileContent };
-  },
-});
+const getText = async () => {
+  const response = await getMediafile(
+    `/api/mediafile/${getMediafilePath(props.source.intialValues.original_file_location)}`,
+  );
+  const text = await response.text();
+  fileContent.value = text.split(/\r\n|\n/).join("<br/>");
+};
+
+watch(() => props.source, getText, { deep: true });
+
+onMounted(getText);
 </script>
