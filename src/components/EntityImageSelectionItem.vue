@@ -52,16 +52,24 @@
     <div v-else class="relative group">
       <unicon
         :name="getThumbnail(mediafile)"
-        class="h-20 w-20 text-neutral-700 rounded-sm outline-none shadow-sm self-center"
+        @click="
+          updateSelectedEntityMediafile(mediafileViewerContext, mediafile)
+        "
+        :class="[
+          'h-20 w-20 text-neutral-700 rounded-sm outline-none shadow-sm self-center',
+          mediafileSelectionState[mediafileViewerContext].selectedMediafile &&
+          getValueOfMediafile(mediafileViewerContext, 'filename', mediafile) ===
+            getValueOfMediafile(mediafileViewerContext, 'filename')
+            ? 'p-6 border-2 border-accent-normal'
+            : '',
+        ]"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {
-  type MediaFileEntity,
-} from "@/generated-types/queries";
+import { type MediaFileEntity } from "@/generated-types/queries";
 import { toBeDeleted } from "@/composables/useEdit";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { auth } from "@/main";
