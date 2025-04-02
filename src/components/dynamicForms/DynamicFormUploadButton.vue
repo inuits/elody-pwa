@@ -5,12 +5,14 @@
         v-if="missingFileNames.length"
         class="w-full bg-orange-light p-2 text-white font-bold flex"
       >
-        <p>
-          {{
-            t("actions.upload.errors", [missingFileNames.length]) +
-            t("actions.upload.missing", [missingFileNames.join(", ")])
-          }}
-        </p>
+        <div>
+          <p>{{ t("actions.upload.errors", [missingFileNames.length]) }}</p>
+          <ul class="list-disc list-inside">
+            <li v-for="file in missingFileNames" :key="file">
+              {{ t("actions.upload.missing", [file]) }}
+            </li>
+          </ul>
+        </div>
       </div>
       <div
         v-if="uploadStatus === 'upload-finished'"
@@ -51,7 +53,7 @@
         type="button"
         :disabled="disabled"
         @click="emit('clickUploadButton')"
-        class="flex justify-center items-center w-full p-2 rounded-md outline-none transition-colors duration-300 disabled:cursor-auto text-neutral-white bg-accent-accent hover:text-accent-accent hover:bg-neutral-lightest active:text-accent-accent active:bg-accent-light disabled:text-text-disabled disabled:bg-neutral-lightest"
+        class="flex h-max self-center justify-center items-center w-full p-2 rounded-md outline-none transition-colors duration-300 disabled:cursor-auto text-neutral-white bg-accent-accent hover:text-accent-accent hover:bg-neutral-lightest active:text-accent-accent active:bg-accent-light disabled:text-text-disabled disabled:bg-neutral-lightest"
       >
         <unicon
           v-if="props.icon !== DamsIcons.NoIcon"
