@@ -274,6 +274,7 @@ const props = withDefaults(
     modalFormFields?: object;
     tabName?: string;
     showFormTitle?: boolean;
+    prefilledFormValues?: object;
   }>(),
   {
     modalFormFields: undefined,
@@ -281,7 +282,7 @@ const props = withDefaults(
   },
 );
 
-const emit = defineEmits(["entityCreated"]);
+const emit = defineEmits(["entityCreated", "dynamicFormReady"]);
 
 type FormFieldTypes = UploadContainer | PanelMetaData | FormAction;
 const nonStandardFieldTypes: BaseFieldType[] = [
@@ -315,6 +316,7 @@ const {
   performOcrAction,
   resetDynamicForm,
   isPerformingAction,
+  dynamicFormLoaded,
 } = useDynamicForm();
 const {
   upload,
@@ -841,6 +843,17 @@ watch(
     await form.value?.validate();
   },
   { deep: true },
+);
+
+watch(
+  () => dynamicFormLoaded.value,
+  () => {
+    if (dynamicFormLoaded.value && props.prefilledFormValues) {
+      setTimeout(() => {
+        form.value.setValues(props.prefilledFormValues);
+      }, 100);
+    }
+  },
 );
 </script>
 
