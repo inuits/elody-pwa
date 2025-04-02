@@ -7,7 +7,10 @@
   >
     <div
       v-if="
-        element && element.taggingConfiguration && extensionConfiguration.length
+        element &&
+        element.taggingConfiguration &&
+        extensionConfiguration.length &&
+        selectedText
       "
       :key="`${extensionConfiguration[formIndex].createNewEntityFormQuery}-${getModalInfo(TypeModals.ElodyEntityTaggingModal).open}`"
       class="p-2"
@@ -70,6 +73,7 @@
           "
           :router="router"
           :show-form-title="false"
+          :prefilled-form-values="prefilledFormValues"
         />
       </div>
     </div>
@@ -90,7 +94,7 @@ import {
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
-import { computed, watch } from "vue";
+import { computed, watch, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
@@ -137,30 +141,32 @@ const form = computed(() =>
 const selectedText = computed<string>(() => {
   return getModalInfo(TypeModals.ElodyEntityTaggingModal).selectedText;
 });
+const prefilledFormValues = ref<object | undefined>(undefined);
+
+const setEntityName = () => {
+  const entityTypes: Entitytyping[] = extensionConfiguration.value.map(
+    (configurationItem: TaggableEntityConfiguration) =>
+      configurationItem.taggableEntityType,
+  );
+
+  if (!selectedText.value || !entityTypes) return;
+
+  const titleKeys = entityTypes.map((type: Entitytyping) => {
+    const configuration: TaggableEntityConfiguration =
+      getExtensionConfigurationForEntity({ type });
+    return extractTitleKeyFromMetadataFilter(
+      configuration.metadataFilterForTagContent,
+    );
+  });
+
+  prefilledFormValues.value = {
+    intialValues: { [titleKeys[formIndex]]: selectedText.value },
+  };
+};
 
 watch(
-  () => getModalInfo(TypeModals.ElodyEntityTaggingModal).open,
-  () => {
-    const entityTypes: Entitytyping[] = extensionConfiguration.value.map(
-      (configurationItem: TaggableEntityConfiguration) =>
-        configurationItem.taggableEntityType,
-    );
-
-    if (!selectedText.value || !entityTypes) return;
-
-    const titleKeys = entityTypes.map((type: Entitytyping) => {
-      const configuration: TaggableEntityConfiguration =
-        getExtensionConfigurationForEntity({ type });
-      return extractTitleKeyFromMetadataFilter(
-        configuration.metadataFilterForTagContent,
-      );
-    });
-
-    // if (form.value && !form.value.values.intialValues[titleKeys[formIndex]]) {
-    //   const veeValidateKey = `intialValues.${titleKeys[formIndex]}`;
-    //   form.value.setFieldValue(veeValidateKey, selectedText.value);
-    // }
-  },
+  () => selectedText.value,
+  () => setEntityName(),
 );
 
 const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {

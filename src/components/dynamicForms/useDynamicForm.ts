@@ -7,6 +7,7 @@ import { OcrType } from "@/generated-types/queries";
 const dynamicForm = ref<any | undefined>(undefined);
 const dynamicFormUploadFields = ref<any[]>([]);
 const isPerformingAction = ref<boolean>(false);
+const dynamicFormLoaded = ref<boolean>(false);
 const { selectedTenant } = useTenant(undefined);
 
 const useDynamicForm = () => {
@@ -19,7 +20,7 @@ const useDynamicForm = () => {
 
   const getDynamicForm = (
     queryDocument: any,
-    tabName: string | undefined = undefined
+    tabName: string | undefined = undefined,
   ): void => {
     apolloClient
       .query({
@@ -34,12 +35,13 @@ const useDynamicForm = () => {
           return;
         }
         dynamicForm.value = result.data;
+        dynamicFormLoaded.value = true;
       });
   };
 
   const performSubmitAction = async (
     queryDocument: any,
-    entity: EntityInput
+    entity: EntityInput,
   ): Promise<any> => {
     isPerformingAction.value = true;
     const submitResult = await apolloClient.mutate({
@@ -54,7 +56,7 @@ const useDynamicForm = () => {
     queryDocument: any,
     variables: any,
     downloadEntity: any,
-    form: any
+    form: any,
   ): Promise<any> => {
     variables["basicCsv"] = !!form.intialValues.basic_csv;
     variables["downloadEntity"] = downloadEntity;
@@ -67,7 +69,7 @@ const useDynamicForm = () => {
   const performUpdateMetadataAction = async (
     queryDocument: any,
     entityType: string,
-    csv: any
+    csv: any,
   ): Promise<any> => {
     return await apolloClient.mutate({
       mutation: queryDocument,
@@ -78,7 +80,7 @@ const useDynamicForm = () => {
   const performOcrAction = async (
     queryDocument: any,
     id: any,
-    form: any
+    form: any,
   ): Promise<any> => {
     const operation = [form.intialValues.ocr_type];
     if (operation[0] === OcrType.Pdf) operation.unshift(OcrType.Alto);
@@ -113,6 +115,7 @@ const useDynamicForm = () => {
     resetDynamicForm,
     isPerformingAction,
     getDynamicFormTabs,
+    dynamicFormLoaded,
   };
 };
 
