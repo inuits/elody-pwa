@@ -237,7 +237,7 @@ export const createGlobalCommandsExtension = Extension.create({
             const entityExtensionConfiguration =
               extensionConfiguration.value.find(
                 (mappingItem: TaggableEntityConfiguration) =>
-                  mappingItem.tag === node.type.name,
+                  mappingItem.extensionName === node.type.name,
               );
             if (entityExtensionConfiguration) {
               tr.insertText("", pos, pos + node.nodeSize);
