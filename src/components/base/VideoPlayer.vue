@@ -1,13 +1,8 @@
 <template>
   <div class="w-full h-full relative">
-    <video
-      class="w-full h-full bg-white"
-      :src="videoUrl"
-      controls
-      refs="myVideo"
-    >
+    <video class="w-full h-full bg-white" controls>
       <source
-        :src="videoUrl"
+        :src="getVideoUrl()"
         :type="
           source && getValueOfMediafile(mediafileViewerContext, 'mimetype')
             ? getValueOfMediafile(mediafileViewerContext, 'mimetype')
@@ -31,22 +26,12 @@ const { getMediafile, getMediafilePath } = useGetMediafile();
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 
-const videoUrl = ref("");
-
-const getVideo = async () => {
+const getVideoUrl = (): string => {
   if (!props.source?.intialValues?.original_file_location)
     throw Error("original_file_location was not found on mediafile");
-  const response = await getMediafile(
-    `/api/mediafile/${getMediafilePath(
-      props.source?.intialValues?.original_file_location,
-    )}`,
-  );
-  const videoBlob = await response.blob();
 
-  videoUrl.value = URL.createObjectURL(videoBlob);
+  return `/api/mediafile/${getMediafilePath(
+    props.source?.intialValues?.original_file_location,
+  )}`;
 };
-
-onMounted(() => {
-  getVideo();
-});
 </script>
