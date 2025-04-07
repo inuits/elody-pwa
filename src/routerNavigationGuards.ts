@@ -22,16 +22,13 @@ const handleRequiredAuthentication = (router: Router) => {
 const handleTenantParameterInUrl = (
   to: RouteLocationNormalized,
   next: NavigationGuardNext,
+  router: Router,
 ) => {
   const { selectedTenant, getCodeById } = useTenant();
 
   if (!to.params.tenant && selectedTenant.value) {
     const tenant = getCodeById(selectedTenant.value) || selectedTenant.value;
-    next({
-      name: to.name as string,
-      params: { ...to.params, tenant },
-      query: to.query,
-    });
+    router.replace({ path: `/${tenant}${to.path}`, query: to.query })
   } else {
     next();
   }
@@ -109,6 +106,6 @@ export const addRouterNavigationGuards = (router: Router, config: any) => {
   router.beforeEach(async (to, from, next) => {
     await handleAlternativeRoutes(to, next);
     await handleRequiresAuthFromOverviewPage(to, config, next, router);
-    handleTenantParameterInUrl(to, next);
+    handleTenantParameterInUrl(to, next, router);
   });
 };
