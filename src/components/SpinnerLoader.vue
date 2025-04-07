@@ -1,6 +1,6 @@
 <template>
   <svg
-    class="animate-spin -ml-1 mr-3 h-20 w-20 text-white"
+    :class="`animate-spin -ml-1 mr-3 text-white ${dimensions}`"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"
@@ -25,10 +25,12 @@ import { computed } from "vue";
 const props = withDefaults(
   defineProps<{
     theme: string;
+    dimensions: number;
   }>(),
   {
     theme: "default",
-  }
+    dimensions: 20,
+  },
 );
 
 const colorMapping: { [key: string]: { stroke: string; fill: string } } = {
@@ -36,5 +38,13 @@ const colorMapping: { [key: string]: { stroke: string; fill: string } } = {
   accent: { stroke: "stroke-accent-accent", fill: "fill-accent-accent" },
 };
 
+const dimensionMapping: { [key: number]: string } = {
+  10: "w-10 h-10",
+  14: "w-14 h-14",
+  16: "w-16 h-16",
+  20: "w-20 h-20",
+};
+
 const color = computed(() => colorMapping[props.theme]);
+const dimensions = computed(() => dimensionMapping[props.dimensions]);
 </script>

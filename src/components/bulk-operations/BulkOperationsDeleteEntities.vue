@@ -8,7 +8,7 @@
           }}
         </h1>
       </div>
-      <div>
+      <div v-if="!isDeleting">
         <div class="pt-4">
           {{ message }}
         </div>
@@ -25,6 +25,13 @@
             input-style="accentNormal"
           />
         </div>
+      </div>
+      <div v-if="isDeleting">
+        <spinner-loader
+          class="w-full flex justify-center py-4"
+          theme="accent"
+          :dimensions="16"
+        />
       </div>
     </div>
     <div class="flex justify-between mt-4">
@@ -77,13 +84,15 @@ import { useDeleteEntities } from "@/composables/useDeleteEntities";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import { rootRoute } from "@/composables/useBreadcrumbs";
 import { goToEntityPageById } from "@/helpers";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
 
 const { t } = useI18n();
 const { createNotificationOverwrite } = useNotification();
 const { dequeueAllItemsForBulkProcessing, getEnqueuedItems } =
   useBulkOperations();
 const { closeModal, getModalInfo } = useBaseModal();
-const { getCallbackFunction, getInformationForBulkDeleteEntities } = useModalActions();
+const { getCallbackFunction, getInformationForBulkDeleteEntities } =
+  useModalActions();
 const { deleteEntities, getDeletionForm, form } = useDeleteEntities();
 
 const modal = computed(() => {
@@ -92,6 +101,7 @@ const modal = computed(() => {
 
 const options = ref<{ isSelected: boolean; key: DropdownOption }[]>([]);
 const configuredRouteTitle = ref<string | undefined>(undefined);
+const isDeleting = ref<boolean>(false);
 
 const normalizeOptions = (
   options: DropdownOption[],
@@ -104,7 +114,8 @@ const normalizeOptions = (
 
 const getCurrentRouteTitle = computed(() => {
   try {
-    if (configuredRouteTitle.value) return t(configuredRouteTitle.value)?.toLowerCase();
+    if (configuredRouteTitle.value)
+      return t(configuredRouteTitle.value)?.toLowerCase();
     return t(rootRoute.value.rootTitle)?.toLowerCase();
   } catch {
     return "";
@@ -125,7 +136,7 @@ const normalizeOptionsToObjectOfKeyValue = (
   );
   return {
     deleteEntities: entitiesToRemove,
-  }
+  };
 };
 
 const message = computed(() => {
@@ -137,6 +148,7 @@ const message = computed(() => {
 });
 
 const deleteSelectedItems = async () => {
+  isDeleting.value = true;
   const context = modal.value.context as Context;
   const selectedItems: InBulkProcessableItem[] = getEnqueuedItems(context);
   if (selectedItems.length <= 0) return;
@@ -150,6 +162,8 @@ const deleteSelectedItems = async () => {
       linkedEntitiesToRemove,
       getInformationForBulkDeleteEntities(),
     );
+
+    isDeleting.value = false;
 
     if (jobIdentifier) {
       closeModal(TypeModals.BulkOperationsDeleteEntities);
@@ -173,6 +187,7 @@ const deleteSelectedItems = async () => {
       );
     }
   } catch (error) {
+    isDeleting.value = false;
     console.error("Error deleting selected items:", error);
   }
 };
@@ -183,7 +198,8 @@ watch(
     if (newModal.open && newModal.formQuery) {
       await getDeletionForm(newModal.formQuery);
       if (!form.value) return;
-      if (form.value.inputField) options.value = normalizeOptions(form.value.inputField.options);
+      if (form.value.inputField)
+        options.value = normalizeOptions(form.value.inputField.options);
       else configuredRouteTitle.value = form.value.label;
     }
   },
