@@ -38,7 +38,7 @@ export const useBaseLibrary = (
     skip: 1,
     searchValue: {
       value: "",
-      isAsc: false,
+      isAsc: undefined,
       key: "title",
       order_by: "",
     },
@@ -74,7 +74,7 @@ export const useBaseLibrary = (
     const state = getStateForRoute(_route);
     queryVariables.searchValue = {
       value: "",
-      isAsc: false,
+      isAsc: undefined,
       key: "title",
       order_by: "",
       ...(state?.queryVariables?.searchValue || {}),

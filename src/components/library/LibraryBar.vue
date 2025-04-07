@@ -162,9 +162,10 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
       selectedSortOption.value = sortOptions.value.find(
         (option) => option.value === sortKey,
       );
-      const sortOrder = state?.queryVariables?.searchValue.isAsc
-        ? "asc"
-        : "desc" || sortingOptionsResult?.isAsc?.toLowerCase();
+      const isAscFromState = state?.queryVariables?.searchValue.isAsc !== undefined
+        ? state?.queryVariables?.searchValue.isAsc
+        : sortingOptionsResult?.isAsc?.toLowerCase() === "asc";
+      const sortOrder = isAscFromState ? "asc" : "desc";
       isAsc.value = sortOrder === "asc";
       props.setSortKey(sortKey);
       props.setSortOrder(sortOrder);
