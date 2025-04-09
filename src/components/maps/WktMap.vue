@@ -14,7 +14,10 @@
       />
 
       <Layers.OlTileLayer>
-        <Sources.OlSourceOsm />
+        <Sources.OlSourceXyz
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          :attributions="['Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community']"
+        />
       </Layers.OlTileLayer>
 
       <Layers.OlVectorLayer>
