@@ -1,6 +1,6 @@
 <template>
   <div class="w-full h-full relative">
-    <video class="w-full h-full bg-white" controls>
+    <video class="w-full h-full bg-white" preload="auto" controls>
       <source
         :src="getVideoUrl()"
         :type="
@@ -27,11 +27,18 @@ const { getMediafile, getMediafilePath } = useGetMediafile();
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 
 const getVideoUrl = (): string => {
-  if (!props.source?.intialValues?.original_file_location)
-    throw Error("original_file_location was not found on mediafile");
+  const fileLocationValues: string[] = [
+    "transcode_file_location",
+    "original_file_location",
+  ];
+  const fileLocation = fileLocationValues.find(
+    (locationValue: string) => props.source.intialValues[locationValue],
+  );
+  if (!fileLocation) throw Error("No video location was found in intialValues");
 
   return `/api/mediafile/${getMediafilePath(
-    props.source?.intialValues?.original_file_location,
+    props.source?.intialValues?.original_file_location ||
+      props.source?.intialValues?.transcode_file_location,
   )}`;
 };
 </script>
