@@ -187,10 +187,17 @@ export const createGlobalCommandsExtension = Extension.create({
           }
           if (configurationItem.metadataKeysToSetAsAttribute) {
             configurationItem.metadataKeysToSetAsAttribute.forEach(
-              (key: string) =>
+              (key: string) => {
+                let value = "";
+                if (entity.intialValues) value = entity.intialValues[key];
+                if (entity.teaserMetadata)
+                  value = entity.teaserMetadata.find(
+                    (metadataItem: any) => metadataItem.key === key,
+                  )?.value;
                 Object.assign(additionalAttributes, {
-                  [key]: entity.intialValues[key] || "",
-                }),
+                  [key]: value,
+                });
+              },
             );
           }
 

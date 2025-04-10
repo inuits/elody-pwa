@@ -183,7 +183,7 @@
                 configPerViewMode[
                   displayList
                     ? ViewModes.ViewModesList
-                    : (displayGrid ?? ViewModes.ViewModesGrid)
+                    : displayGrid ?? ViewModes.ViewModesGrid
                 ]
               "
               :expandFilters="expandFilters"
@@ -629,11 +629,12 @@ const configPerViewMode = computed(() => {
 
 const viewModesIncludeViewModesMedia = computed(() => {
   if (entities.value.length <= 0) return false;
-  return entities.value[0].allowedViewModes?.viewModes?.map(
-    (viewModeWithConfig: ViewModesWithConfig) =>
-        viewModeWithConfig.viewMode,
-  ).includes(ViewModesMedia.__name);
-})
+  return entities.value[0].allowedViewModes?.viewModes
+    ?.map(
+      (viewModeWithConfig: ViewModesWithConfig) => viewModeWithConfig.viewMode,
+    )
+    .includes(ViewModesMedia.__name);
+});
 
 const determineViewModes = (viewModes: any[]) => {
   if (viewModes.includes(ViewModesList.__name))

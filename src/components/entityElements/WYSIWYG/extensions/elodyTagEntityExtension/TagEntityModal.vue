@@ -6,13 +6,8 @@
     @hide-modal="closeModal(TypeModals.ElodyEntityTaggingModal)"
   >
     <div
-      v-if="
-        element &&
-        element.taggingConfiguration &&
-        extensionConfiguration.length &&
-        selectedText
-      "
-      :key="`${extensionConfiguration[formIndex].createNewEntityFormQuery}-${getModalInfo(TypeModals.ElodyEntityTaggingModal).open}`"
+      v-if="element && taggingConfiguration.length && selectedText"
+      :key="`${taggingConfiguration[formIndex].createNewEntityFormQuery}-${getModalInfo(TypeModals.ElodyEntityTaggingModal).open}`"
       class="p-2"
     >
       <div
@@ -21,7 +16,7 @@
         <h3 class="text-lg font-bold">
           {{
             t("tagging.tag-entity", {
-              entityType: extensionConfiguration[formIndex].taggableEntityType,
+              entityType: taggingConfiguration[formIndex].taggableEntityType,
             })
           }}
         </h3>
@@ -32,17 +27,17 @@
           <unicon :name="Unicons.Cross.name" />
         </div>
       </div>
-      <div>
+      <div v-if="computedAdvancedFilterInputs">
         <div class="p-2 bg-gray-200">
           <h4 class="text-md font-bold">
             {{
               t("tagging.tag-existing", {
-                entityType:
-                  extensionConfiguration[formIndex].taggableEntityType,
+                entityType: taggingConfiguration[formIndex].taggableEntityType,
               })
             }}
           </h4>
         </div>
+        {{ computedAdvancedFilterInputs }}
         <entity-picker-component
           :entity-uuid="parentId"
           :accepted-types="acceptedTypes"
@@ -53,6 +48,7 @@
           :enable-advanced-filters="false"
           :computedFilters="computedAdvancedFilterInputs"
           :context="BulkOperationsContextEnum.TagEntityModal"
+          :should-use-state-for-route="false"
           base-library-height="max-h-[50vh]"
         />
       </div>
@@ -61,15 +57,14 @@
           <h4 class="text-md font-bold">
             {{
               t("tagging.tag-new", {
-                entityType:
-                  extensionConfiguration[formIndex].taggableEntityType,
+                entityType: taggingConfiguration[formIndex].taggableEntityType,
               })
             }}
           </h4>
         </div>
         <dynamic-form
           :dynamic-form-query="
-            extensionConfiguration[formIndex].createNewEntityFormQuery
+            taggingConfiguration[formIndex].createNewEntityFormQuery
           "
           :router="router"
           :show-form-title="false"
@@ -108,7 +103,6 @@ import {
 import type { Editor } from "@tiptap/vue-3";
 import {
   getExtensionConfigurationForEntity,
-  extensionConfiguration,
   tagEntity,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import { extractTitleKeyFromMetadataFilter } from "@/helpers";
@@ -125,18 +119,21 @@ const parentId = computed(() => route.params["id"]);
 const formIndex: number = 0;
 const selectionLimit: number = 1;
 const acceptedTypes = computed(() =>
-  extensionConfiguration.value.map(
+  taggingConfiguration.value.map(
     (configurationItem) => configurationItem.taggableEntityType,
   ),
 );
 const element = computed<WysiwygElement>(
   () => getModalInfo(TypeModals.ElodyEntityTaggingModal).element,
 );
+const taggingConfiguration = computed<TaggableEntityConfiguration[]>(
+  () => element.value.taggingConfiguration.taggableEntityConfiguration,
+);
 const editor = computed<Editor>(
   () => getModalInfo(TypeModals.ElodyEntityTaggingModal).editor,
 );
 const form = computed(() =>
-  getForm(extensionConfiguration.value[formIndex].createNewEntityFormQuery),
+  getForm(taggingConfiguration.value[formIndex].createNewEntityFormQuery),
 );
 const selectedText = computed<string>(() => {
   return getModalInfo(TypeModals.ElodyEntityTaggingModal).selectedText;
@@ -144,7 +141,7 @@ const selectedText = computed<string>(() => {
 const prefilledFormValues = ref<object | undefined>(undefined);
 
 const setEntityName = () => {
-  const entityTypes: Entitytyping[] = extensionConfiguration.value.map(
+  const entityTypes: Entitytyping[] = taggingConfiguration.value.map(
     (configurationItem: TaggableEntityConfiguration) =>
       configurationItem.taggableEntityType,
   );
@@ -170,7 +167,7 @@ watch(
 );
 
 const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
-  const entityTypes: Entitytyping[] = extensionConfiguration.value.map(
+  const entityTypes: Entitytyping[] = taggingConfiguration.value.map(
     (configurationItem: TaggableEntityConfiguration) =>
       configurationItem.taggableEntityType,
   );
@@ -216,7 +213,7 @@ const tagExistingEntityFlow = () => {
 
   const entityToTag = getEnqueuedItems(context)[0];
   const entityTypeConfigurationItem: TaggableEntityConfiguration =
-    getExtensionConfigurationForEntityType(entityToTag.type);
+    getExtensionConfigurationForEntity({ type: entityToTag.type });
   const newTaggingTextKey = extractTitleKeyFromMetadataFilter(
     entityTypeConfigurationItem.metadataFilterForTagContent,
   );
@@ -224,7 +221,7 @@ const tagExistingEntityFlow = () => {
     newTaggingTextKey,
     entityToTag,
   );
-  const relationType = entityTypeMappingItem.relationType;
+  const relationType = entityTypeConfigurationItem.relationType;
   if (!entityToTag) return;
 
   tagEntity(entityToTag, relationType, parentId.value, context);
