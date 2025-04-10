@@ -164,19 +164,22 @@
 
 <script lang="ts" setup>
 import type { RouteLocationNormalizedLoaded } from "vue-router";
-import type { Entitytyping, EntitySubelement } from "@/generated-types/queries";
+import { useRoute } from "vue-router";
 import {
-  AdvancedFilterTypes,
-  DamsIcons,
-  GetAdvancedFiltersDocument,
-  GetFilterMatcherMappingDocument,
   type AdvancedFilterInput,
   type AdvancedFilters,
+  AdvancedFilterTypes,
   type BaseEntity,
+  DamsIcons,
   type DropdownOption,
+  EntitySubelement,
+  Entitytyping,
   type FilterMatcherMap,
+  GetAdvancedFiltersDocument,
+  GetFilterMatcherMappingDocument,
   type GetFilterMatcherMappingQuery,
   type Maybe,
+  TypeModals,
 } from "@/generated-types/queries";
 import { useStateManagement } from "@/composables/useStateManagement";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
@@ -185,8 +188,8 @@ import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import FiltersListItem from "@/components/filters/FiltersListItem.vue";
 import SavedSearches from "@/components/SavedSearches.vue";
 import useEditMode from "@/composables/useEdit";
-import { apolloClient } from "@/main";
-import { computed, defineProps, onMounted, ref, watch, inject } from "vue";
+import { apolloClient, auth } from "@/main";
+import { computed, defineProps, inject, onMounted, ref, watch } from "vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
@@ -194,14 +197,13 @@ import {
   type SavedSearchType,
   useSaveSearchHepler,
 } from "@/composables/useSaveSearchHepler";
-import { useRoute } from "vue-router";
-import { auth } from "@/main";
 import {
-  useBulkOperations,
   BulkOperationsContextEnum,
+  useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { useFiltersBase } from "@/composables/useFiltersBase";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 const props = withDefaults(
   defineProps<{
@@ -441,7 +443,9 @@ const applyFilters = (saveState = false, force = true) => {
     updateStateForRoute(props.route, {
       filterListItems: JSON.parse(JSON.stringify(filters.value)),
     });
-  emit("applyFilters", activeFilters.value, saveState, force);
+  if (!useBaseModal().getModalInfo(TypeModals.ElodyEntityTaggingModal).open)
+    // Todo: Find out why this changes the filters when opening the modal, this is ugly
+    emit("applyFilters", activeFilters.value, saveState, force);
 };
 
 const getAngleIcon = computed<DamsIcons>(() =>
