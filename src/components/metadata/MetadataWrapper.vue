@@ -458,9 +458,9 @@ const { errorMessage, value, meta } = useField<
 >(veeValidateField, rules, { label: label });
 
 onMounted(async () => {
+  await isPermittedToDisplay();
   if (props.metadata.hiddenField?.hidden) return;
   setNewValue(props.metadata.value);
-  await isPermittedToDisplay();
 });
 
 const updatePermissionVariables = () => {
