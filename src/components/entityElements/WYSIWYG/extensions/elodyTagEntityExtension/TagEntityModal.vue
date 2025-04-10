@@ -37,7 +37,6 @@
             }}
           </h4>
         </div>
-        {{ computedAdvancedFilterInputs }}
         <entity-picker-component
           :entity-uuid="parentId"
           :accepted-types="acceptedTypes"
