@@ -160,7 +160,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  editor.value.destroy();
+  editor.value?.destroy();
 });
 
 watch(
