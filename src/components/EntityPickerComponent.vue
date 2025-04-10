@@ -32,6 +32,7 @@
       @entities-updated="
         (numberOfEntities) => emitUpdatedEntities(numberOfEntities)
       "
+      :should-use-state-for-route="shouldUseStateForRoute"
       @confirm-selection="saveRelations"
     />
   </div>
@@ -62,7 +63,10 @@ import { useCustomQuery } from "@/composables/useCustomQuery";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import { NotificationType, useNotification } from "@/components/base/BaseNotification.vue";
+import {
+  NotificationType,
+  useNotification,
+} from "@/components/base/BaseNotification.vue";
 import useEditMode from "@/composables/useEdit";
 import { getChildrenOfHomeRoutes } from "@/helpers";
 import { useSubmitForm } from "vee-validate";
@@ -87,12 +91,14 @@ const props = withDefaults(
     entityPickerMode: EntityPickerMode;
     baseLibraryHeight?: string;
     enableNonSelectableEntities?: boolean;
+    shouldUseStateForRoute?: boolean;
   }>(),
   {
     entityPickerMode: EntityPickerMode.Emit,
     baseLibraryHeight: "h-[95vh]",
     enableNonSelectableEntities: true,
     context: BulkOperationsContextEnum.EntityElementListEntityPickerModal,
+    shouldUseStateForRoute: true,
   },
 );
 
