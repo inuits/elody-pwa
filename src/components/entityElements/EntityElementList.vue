@@ -157,13 +157,13 @@ const props = withDefaults(
     isCollapsed: Boolean;
     types: string[];
     label: string;
-    type: MediaFileElementTypes;
+    type?: MediaFileElementTypes;
     customQuery: string;
     customQueryRelationType: string;
     customBulkOperations?: string | undefined;
     customQueryFilters: string;
-    customQueryEntityPickerList: string;
-    customQueryEntityPickerListFilters: string;
+    customQueryEntityPickerList?: string;
+    customQueryEntityPickerListFilters?: string;
     searchInputType: string;
     entityList: Entity[];
     identifiers: string[];

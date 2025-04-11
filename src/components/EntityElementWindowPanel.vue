@@ -68,6 +68,9 @@
               :label="metadata.label as string"
               :isCollapsed="metadata.isCollapsed"
               :types="metadata.entityTypes as string[]"
+              :entity-type="metadata.entityTypes[0] as Entitytyping"
+              :id="formId"
+              :entity-id="formId"
               :entity-list="(metadata.entityList as Entity[]) ?? []"
               :identifiers="identifiers"
               :relationType="metadata.relationType"
@@ -99,7 +102,7 @@ import {
   type Entity,
   type MetadataField,
   BaseLibraryModes,
-  Unit,
+  Unit, Entitytyping
 } from "@/generated-types/queries";
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
 import EntityElementList from "@/components/entityElements/EntityElementList.vue";
