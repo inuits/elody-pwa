@@ -104,7 +104,7 @@ import BaseDropdownNew from "../base/BaseDropdownNew.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import { addCurrentTimeZoneToDateTimeString, isDateTime } from "@/helpers";
-import { onMounted, watch, ref, computed, inject } from "vue";
+import { onMounted, watch, computed, inject } from "vue";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
@@ -137,7 +137,13 @@ const { addEditableMetadataKeys } = useFormHelper();
 const metadataValue = computed<string | DropdownOption | DropdownOption[]>({
   get() {
     if (typeof props.value === "object" && props.value?.formatter) {
-      return { label: props.value.label, value: props.value.entity.id } as DropdownOption;
+      if (props.value?.formatter.startsWith("link")) {
+        return { label: props.value.label, value: props.value.entity.id } as DropdownOption;
+      } else if (props.value?.formatter.startsWith("pill")) {
+        return props.value.label;
+      } else {
+        return props.value;
+      }
     } else {
       return props.value;
     }

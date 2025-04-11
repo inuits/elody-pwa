@@ -25,7 +25,11 @@ const props = defineProps<{
 
 const pillSettings = computed(() => {
   let [formatterType, pillType] = props.formatter.split("|");
-  if (!pillType) pillType = props.label.toLowerCase();
-  return formattersSettings[formatterType][pillType];
+  if (pillType === "auto") {
+    return {background: props.label, text: "#FFFFFF"}
+  } else {
+    if (!pillType) pillType = props.label.toLowerCase();
+    return formattersSettings[formatterType][pillType];
+  }
 });
 </script>
