@@ -3,7 +3,7 @@
     v-if="
       paginationLimitOptionsPromiseIsResolved && sortOptionsPromiseIsResolved
     "
-    class="flex justify-between items-center w-full"
+    class="flex justify-between items-center flex-wrap min-[1400px]:flex-nowrap"
   >
     <div class="flex justify-start gap-x-3">
       <div v-if="paginationLimitOptions.length > 0">
