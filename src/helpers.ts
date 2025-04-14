@@ -305,7 +305,10 @@ export const getMetadataFields = (
 
   Object.values(objectToGetMetadataFrom).forEach((value) => {
     if (!value || typeof value !== "object") return;
-    if (value.__typename && value.__typename === "EntityListElement") {
+    if (
+      (value.__typename && value.__typename === "EntityListElement") ||
+      value.__typename === "WysiwygElement"
+    ) {
       fields.push(value);
     } else {
       const key: string = (value as PanelMetaData).key;

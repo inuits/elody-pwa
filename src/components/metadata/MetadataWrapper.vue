@@ -8,45 +8,7 @@
     "
     :key="label"
   >
-    <div class="text-text-light text-sm flex">
-      <p data-cy="metadata-label">
-        {{ metadata.label ? t(metadata.label) : t("metadata.no-label") }}
-      </p>
-      <p
-        v-if="
-          props.metadata?.inputField &&
-          isEdit &&
-          (isOneOfRequiredMetadataField || isOneOfRequiredRelationField)
-        "
-        class="pl-1"
-      >
-        ( {{ t("metadata.labels.one-of-required") }} )
-      </p>
-      <p
-        v-else-if="metadata?.inputField && !isFieldRequired && isEdit"
-        class="pl-1"
-      >
-        ( {{ t("metadata.labels.optional") }} )
-      </p>
-      <base-tooltip
-        v-if="metadata?.tooltip"
-        position="top-right"
-        :tooltip-offset="8"
-      >
-        <template #activator="{ on }">
-          <div v-on="on" class="pl-1">
-            <unicon :name="Unicons.QuestionCircle.name" height="20" />
-          </div>
-        </template>
-        <template #default>
-          <span class="text-sm text-text-placeholder">
-            <div>
-              {{ t(`${metadata.tooltip}`) }}
-            </div>
-          </span>
-        </template>
-      </base-tooltip>
-    </div>
+    <metadata-title :metadata="metadata" />
     <entity-element-metadata-edit
       v-if="isEdit && metadata.inputField"
       :fieldKey="
@@ -216,10 +178,10 @@ import { useConditionalValidation } from "@/composables/useConditionalValidation
 import { useFormHelper } from "@/composables/useFormHelper";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
-import { Unicons } from "@/types";
 import { DateTime } from "luxon";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 import { usePermissions } from "@/composables/usePermissions";
+import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 
 const { t } = useI18n();
 const { getForm, getKeyBasedOnInputField } = useFormHelper();
