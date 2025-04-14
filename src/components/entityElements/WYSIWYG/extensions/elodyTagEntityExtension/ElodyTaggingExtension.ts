@@ -295,7 +295,7 @@ const createConfigurationItemsFromMapping = (
             configurationEntity.intialValues[
               mappingItem.configurationItem.tagConfigurationByEntity
                 ?.colorMetadataKey
-            ],
+            ].label,
           attributes:
             mappingItem.configurationItem.tagConfigurationByEntity?.metadataKeysToSetAsAttribute?.reduce(
               (o, key) => ({
