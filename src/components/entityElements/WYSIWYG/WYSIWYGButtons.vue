@@ -1,5 +1,10 @@
 <template>
-  <div class="sticky top-0 transparent-bg z-[100] flex flex-wrap px-2">
+  <div
+    :class="[
+      'sticky top-0 transparent-bg z-[100] flex flex-wrap',
+      { 'px-2': !displayInline },
+    ]"
+  >
     <button
       v-if="extensions.includes(WysiwygExtensions.StarterKit)"
       :disabled="buttonsDisabled"
@@ -163,6 +168,7 @@ import { hasSelectionBeenTagged } from "@/components/entityElements/WYSIWYG/exte
 const props = defineProps<{
   editor: Editor;
   extensions: WysiwygExtensions[];
+  displayInline: boolean;
 }>();
 
 const { isEdit } = useEdit();

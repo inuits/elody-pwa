@@ -40,7 +40,7 @@
             <metadata-wrapper
               class="py-2 px-2"
               v-if="
-                (metadata.__typename !== 'EntityListElement' ||
+                (!nonStandardFieldTypes.includes(metadata.__typename) ||
                   metadata.baseLibraryMode ===
                     BaseLibraryModes.BasicBaseLibrary) &&
                 !parentIsListItem &&
@@ -64,7 +64,7 @@
               :can="metadata.can"
             />
             <entity-element-list
-              v-if="metadata.__typename === 'EntityListElement'"
+              v-if="metadata.__typename === nonStandardFieldTypes[0]"
               :label="metadata.label as string"
               :isCollapsed="metadata.isCollapsed"
               :types="metadata.entityTypes as string[]"
@@ -82,11 +82,17 @@
               :search-input-type="metadata.searchInputType"
               :base-library-mode="metadata.baseLibraryMode"
               :entity-list-elements="
-                getObjectsBasedOnTypename(metadata, 'EntityListElement')
+                getObjectsBasedOnTypename(metadata, nonStandardFieldTypes[0])
               "
               :can="metadata.can"
               :fetch-deep-relations="metadata.fetchDeepRelations"
               class="pt-2"
+            />
+            <entity-element-w-y-s-i-w-y-g
+              v-if="metadata.__typename === nonStandardFieldTypes[1]"
+              :form-id="formId"
+              :element="metadata"
+              :display-inline="true"
             />
           </div>
         </div>
@@ -102,7 +108,8 @@ import {
   type Entity,
   type MetadataField,
   BaseLibraryModes,
-  Unit, Entitytyping
+  Unit,
+  Entitytyping,
 } from "@/generated-types/queries";
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
 import EntityElementList from "@/components/entityElements/EntityElementList.vue";
@@ -114,6 +121,7 @@ import { useI18n } from "vue-i18n";
 import { useEditMode } from "@/composables/useEdit";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import EntityElementCoordinateEdit from "@/components/EntityElementCoordinateEdit.vue";
+import EntityElementWYSIWYG from "@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -135,6 +143,7 @@ const isCollapsed = ref<boolean>(props.panel.isCollapsed);
 const canBeMultipleColumns = ref<boolean>(
   props.panel.canBeMultipleColumns || false,
 );
+const nonStandardFieldTypes = ["EntityListElement", "WysiwygElement"];
 const config = inject("config") as any;
 
 const itemMustBeShown = (value: any): boolean => {

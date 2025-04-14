@@ -1,28 +1,34 @@
 <template>
   <div
     :class="[
-      'border-solid border-neutral-30 border-2 bg-neutral-0 rounded-t-md',
+      'bg-neutral-0 rounded-t-md',
+      { 'border-solid border-neutral-30 border-2': !displayInline },
       { 'animate-pulse': !editor },
     ]"
   >
     <div
+      v-if="!displayInline"
       class="border-solid border-neutral-30 border-b-2 rounded-t-md flex flex-row p-2"
     >
       <h1 data-cy="entity-element-window-title" class="subtitle text-text-body">
         {{ t(element.label) }}
       </h1>
     </div>
+    <div v-else class="py-2">
+      <metadata-title :metadata="element" />
+    </div>
     <div
       v-if="editor"
       id="wysiwyg-container"
       ref="editorNode"
-      class="flex flex-col py-4"
+      :class="['flex flex-col', { 'py-4': !displayInline }]"
     >
       <Transition>
         <WYSIWYGButtons
           v-if="isEdit"
           :editor="editor"
           :extensions="element.extensions"
+          :displayInline="displayInline"
       /></Transition>
       <editor-content :editor="editor" />
     </div>
@@ -38,6 +44,7 @@ import {
   type TaggableEntityConfiguration,
   TypeModals,
   ValidationFields,
+  type WindowElementPanel,
   WysiwygElement,
   WysiwygExtensions,
 } from "@/generated-types/queries";
@@ -53,11 +60,18 @@ import {
   setExtensionConfiguration,
   setTaggedEntityInfoTooltip,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
+import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 
-const props = defineProps<{
-  formId: string;
-  element: WysiwygElement;
-}>();
+const props = withDefaults(
+  defineProps<{
+    formId: string;
+    element: WysiwygElement;
+    displayInline: boolean;
+  }>(),
+  {
+    displayInline: false,
+  },
+);
 
 const editor = ref<Editor | undefined>(undefined);
 const { importEditorExtensions, getExtensionConfiguration } =
@@ -135,8 +149,7 @@ onMounted(async () => {
     extensions: editorExtensions,
     editorProps: {
       attributes: {
-        class:
-          "prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl mx-4 focus:outline-none border border-[rgba(0,58,82,0.6)] rounded-md min-h-[250px] p-2",
+        class: `prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl ${props.displayInline ? "mx-2 min-h-[125px]" : "mx-4 min-h-[250px]"} focus:outline-none border border-[rgba(0,58,82,0.6)] rounded-md  p-2`,
       },
     },
     parseOptions: {
