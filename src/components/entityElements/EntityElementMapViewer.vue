@@ -13,6 +13,12 @@
           :wkt="mapData"
           :center="center"
         />
+        <HeatMap
+          v-if="element.type === MapTypes.HeatMap"
+          :center="center"
+          :config="element.config"
+          :entities="entity !== undefined ? [entity] : undefined"
+        />
       </div>
     </template>
   </entity-element-wrapper>
@@ -28,13 +34,16 @@ import {
 } from "@/generated-types/queries";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import { getValueForPanelMetadata } from "@/helpers";
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import WktMap from "../maps/WktMap.vue";
+import HeatMap from "@/components/maps/HeatMap.vue";
 
 const props = defineProps<{
   element: MapElement;
   entityId: string;
 }>();
+
+const entity: any = inject("EntityProvider");
 
 const shouldDisplayMap = computed(() => {
   return (
@@ -44,17 +53,34 @@ const shouldDisplayMap = computed(() => {
 });
 
 const center = computed(() => {
-  const metdataCenterValue = getValueForPanelMetadata(
-    PanelType.Metadata,
-    props.element.center,
-    props.entityId,
-    "",
-  ) as string | { latitude: number; longitude: number };
+  const centerKey = props.element.center;
+  if (centerKey.includes("|")) {
+    const latitude = getValueForPanelMetadata(
+      PanelType.Metadata,
+      centerKey.split('|')[0],
+      props.entityId,
+      "",
+    ) as string;
+    const longitude = getValueForPanelMetadata(
+      PanelType.Metadata,
+      centerKey.split('|')[1],
+      props.entityId,
+      "",
+    ) as string;
+    return [latitude, longitude];
+  } else {
+    const metdataCenterValue = getValueForPanelMetadata(
+      PanelType.Metadata,
+      centerKey,
+      props.entityId,
+      "",
+    ) as string | { latitude: number; longitude: number };
 
-  return [
-    (metdataCenterValue as { latitude: number }).latitude,
-    (metdataCenterValue as { longitude: number }).longitude,
-  ];
+    return [
+      (metdataCenterValue as { latitude: number }).latitude,
+      (metdataCenterValue as { longitude: number }).longitude,
+    ];
+  }
 });
 
 const mapData = computed(() => {
