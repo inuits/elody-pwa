@@ -1,6 +1,7 @@
 <template>
   <Map.OlMap
     ref="map"
+    v-if="entities && entities?.length >= 0"
     :loadTilesWhileAnimating="true"
     :loadTilesWhileInteracting="true"
     style="height: 65vh"
@@ -8,7 +9,7 @@
     <Map.OlView
       ref="view"
       :zoom="getBasicMapProperties(config).zoom"
-      :center="getBasicMapProperties(config).center"
+      :center="mapCenter"
     />
 
     <Layers.OlTileLayer>
@@ -44,16 +45,24 @@ import {
 } from "vue3-openlayers";
 import { Feature } from "ol";
 import { Point } from "ol/geom";
+import { fromLonLat } from 'ol/proj';
 import { useMaps } from "@/composables/useMaps";
 import type { ConfigItem, Entity } from "@/generated-types/queries";
+import { router } from "@/main";
 
-const props = defineProps<{
-  config: ConfigItem[];
-  entities: Entity[];
-}>();
+const props = withDefaults(
+  defineProps<{
+    config: ConfigItem[];
+    entities: Entity[] | undefined;
+    center?: number[] | undefined;
+  }>(),
+  {
+    center: undefined,
+  },
+);
 
 const { t } = useI18n();
-const { getBasicMapProperties, geoToMercator } = useMaps();
+const { getBasicMapProperties } = useMaps();
 
 const { entities } = toRefs(props);
 const view = ref<View | null>(null);
@@ -69,18 +78,35 @@ contextMenuItems.value = [
   "-",
 ];
 
-const heatmapPoints = computed(() =>
-  entities.value?.map((entity) => {
-    const mapData = entity.mapComponent;
+const mapCenter = computed(() => {
+  if (props.center !== undefined)
+    return fromLonLat([props.center[1], props.center[0]]);
+  const center = getBasicMapProperties(props.config).center;
+  return fromLonLat([center[1], center[0]]);
+});
+
+const heatmapPoints = computed(() => {
+  if (router.currentRoute.value.name === "SingleEntity") {
+    const mapData = entities.value[0].entityView.column.elements.mapElement;
     if (!mapData) return new Feature();
-    return new Feature({
-      geometry: new Point(
-        geoToMercator(mapData.coordinateX.value, mapData.coordinateY.value),
-      ),
-      weight: mapData.weight.value,
-    });
-  }),
-);
+    return [
+      new Feature({
+        geometry: new Point(fromLonLat([mapData.longitude?.value, mapData.latitude?.value])),
+        weight: mapData.weight?.value,
+      }),
+    ];
+  } else {
+    return entities.value?.map((entity) => {
+      if (!entity) return [];
+      const mapData = entity.mapElement;
+      if (!mapData) return new Feature();
+      return new Feature({
+        geometry: new Point(fromLonLat([mapData.longitude?.value, mapData.latitude?.value])),
+        weight: mapData.weight?.value,
+      });
+    })
+  }
+});
 
 const heatmapWeight = function (feature: Feature) {
   const weight = feature.get("weight");

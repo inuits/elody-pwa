@@ -61,7 +61,7 @@ import {
   mapUrlToEntityType,
   determineDefaultIntialValues,
 } from "@/helpers";
-import { reactive, ref, watch, inject, computed, onBeforeMount } from "vue";
+import { reactive, ref, watch, inject, computed, onBeforeMount, provide } from "vue";
 import { auth } from "@/main";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useEditMode } from "@/composables/useEdit";
@@ -155,6 +155,7 @@ const columnList = ref<ColumnList | "no-values">("no-values");
 const permissionToEdit = ref<boolean>();
 const permissionToDelete = ref<boolean>();
 const entity = ref<BaseEntity>();
+provide("EntityProvider", entity);
 const entityForBreadcrumb = ref<Entity>();
 
 const addContextToState = (context: String): void => {
