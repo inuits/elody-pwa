@@ -394,14 +394,16 @@ const handleAdvancedFilters = () => {
               advancedFilter.hidden &&
               !advancedFilter.doNotOverrideDefaultValue
             ) {
-              // Regex for adding ids of a relation in value
-              const regex = /relations\.([^.]+)\.key/;
-              const match = advancedFilter.defaultValue.match(regex);
-              if (match && match[1]) {
-                const ids = parentEntity.value.relationValues[match[1].split("$")[1]].map(relation => relation["key"]);
-                hiddenFilter.value = ids;
-                activeFilters.value.push(hiddenFilter);
-                return;
+              if ( typeof advancedFilter.defaultValue === "string") {
+                // Regex for adding ids of a relation in value
+                const regex = /relations\.([^.]+)\.key/;
+                const match = advancedFilter.defaultValue?.match(regex);
+                if (match && match[1]) {
+                  const ids = parentEntity.value.relationValues[match[1].split("$")[1]].map(relation => relation["key"]);
+                  hiddenFilter.value = ids;
+                  activeFilters.value.push(hiddenFilter);
+                  return;
+                }
               }
 
               // this needs a refactor
