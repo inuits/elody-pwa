@@ -43,7 +43,7 @@ const props = defineProps<{
   entityId: string;
 }>();
 
-const entity: any = inject("EntityProvider");
+const entity: any = inject("ParentEntityProvider");
 
 const shouldDisplayMap = computed(() => {
   return (

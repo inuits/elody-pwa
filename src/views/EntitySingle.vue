@@ -155,7 +155,7 @@ const columnList = ref<ColumnList | "no-values">("no-values");
 const permissionToEdit = ref<boolean>();
 const permissionToDelete = ref<boolean>();
 const entity = ref<BaseEntity>();
-provide("EntityProvider", entity);
+provide("ParentEntityProvider", entity);
 const entityForBreadcrumb = ref<Entity>();
 
 const addContextToState = (context: String): void => {
@@ -219,7 +219,11 @@ watch(
     entityForBreadcrumb.value = entity.value;
     if (!props.viewOnly) determineBreadcrumbs();
 
-    identifiers.value = [entity.value.uuid, entity.value.id];
+    if (entity.value.intialValues?.identifiers)
+      identifiers.value = entity.value.intialValues.identifiers;
+    else
+      identifiers.value = [entity.value.uuid, entity.value.id];
+
     intialValues.value = determineDefaultIntialValues(
       entity.value.intialValues,
       entity.value.entityView,
