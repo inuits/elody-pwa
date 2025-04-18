@@ -43,13 +43,6 @@ const progressText = computed(() => {
       props.totalAmountOfSteps,
     ]);
 });
-
-watch(
-  () => progressPercentage.value,
-  () => {
-    console.log("progressPercentage", progressPercentage.value);
-  },
-);
 </script>
 
 <style scoped>
