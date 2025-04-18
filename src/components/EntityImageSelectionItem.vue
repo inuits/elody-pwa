@@ -36,7 +36,7 @@
                   'filename',
                   mediafile,
                 )
-              }/square/100,/0/default.jpg`
+              }/square/^100,/0/default.jpg`
             : getValueOfMediafile(
                 mediafileViewerContext,
                 'thumbnail_file_location',

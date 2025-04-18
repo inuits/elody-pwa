@@ -103,7 +103,7 @@
         :url="
           mediaIsLink
             ? media
-            : `/api/iiif/3/${media}/square/${imageSize},/0/default.jpg`
+            : `/api/iiif/3/${media}/square/^${imageSize},/0/default.jpg`
         "
         :mediaIsLink="mediaIsLink"
         @error="setNoImage()"
