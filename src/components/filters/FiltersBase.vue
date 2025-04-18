@@ -456,7 +456,10 @@ const applyFilters = (saveState = false, force = true) => {
     updateStateForRoute(props.route, {
       filterListItems: JSON.parse(JSON.stringify(filters.value)),
     });
-  if (!useBaseModal().getModalInfo(TypeModals.ElodyEntityTaggingModal).open)
+  if (
+    !useBaseModal().getModalInfo(TypeModals.ElodyEntityTaggingModal).open &&
+    !useBaseModal().getModalInfo(TypeModals.Search).open
+  )
     // Todo: Find out why this changes the filters when opening the modal, this is ugly
     emit("applyFilters", activeFilters.value, saveState, force);
 };

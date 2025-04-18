@@ -21,7 +21,7 @@
               openModal(
                 TypeModals.DynamicForm,
                 ModalStyle.RightWide,
-                'GetEntityPickerForm'
+                'GetEntityPickerForm',
               );
             }
           "
@@ -35,9 +35,7 @@
         class="flex-1"
         v-if="element.type === MediaFileElementTypes.Media"
         :bulk-operations-context="BulkOperationsContextEnum.EntityElementMedia"
-        :search-input-type-on-drawer="
-          SearchInputType.AdvancedInputMediaFilesType
-        "
+        :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
         :predefined-entities="
           entityId === mediafileSelectionState.selectedMediafile?.id ||
           entityId === mediafileSelectionState.selectedMediafile?.uuid
@@ -124,7 +122,7 @@ const componentMetadata = computed(() => {
           PanelType.Metadata,
           metadataItemKey,
           props.entityId,
-          mediafileViewerContext
+          mediafileViewerContext,
         ),
         inputField: (value as PanelMetaData).inputField,
         unit: (value as PanelMetaData).unit,

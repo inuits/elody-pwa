@@ -8,16 +8,19 @@
         v-model="inputValue"
         @keydown.enter="applyFilterToLibrary"
       />
-      <button
-        type="button"
-        class="flex justify-center items-center h-10 w-10 p-2.5 text-sm font-medium text-neutral-white bg-accent-normal rounded-lg"
-        @click="
-          inputEnabled === false ? openSearchModal() : applyFilterToLibrary()
-        "
-      >
-        <unicon :name="Unicons.SearchGlass.name"></unicon>
-      </button>
     </div>
+    <button
+      type="button"
+      :class="[
+        'flex justify-center items-center h-10 w-10 p-2.5 text-sm font-medium text-neutral-white bg-accent-normal rounded-lg',
+        { 'ml-2': inputEnabled },
+      ]"
+      @click="
+        inputEnabled === false ? openSearchModal() : applyFilterToLibrary()
+      "
+    >
+      <unicon :name="Unicons.SearchGlass.name"></unicon>
+    </button>
   </div>
 </template>
 
@@ -71,7 +74,7 @@ const entityTypeFilters = computed(() =>
     };
   }),
 );
-onBeforeMount(() => applyFilterToLibrary());
+
 const applyFilterToLibrary = () => {
   let filters: Array<AdvancedFilterInput> = [];
   if (entityTypeFilters.value !== undefined)
@@ -106,7 +109,7 @@ const applyFilterToLibrary = () => {
 };
 
 const openSearchModal = () => {
-  openModal(TypeModals.Search, ModalStyle.RightWide);
+  openModal(TypeModals.Search, ModalStyle.CenterWide);
 };
 
 watch(
@@ -114,8 +117,8 @@ watch(
   (modalIsOpen: boolean | undefined) => {
     if (!modalIsOpen) {
       inputValue.value = "";
+      emit("updateFilters", [], modalIsOpen);
     }
-    applyFilterToLibrary();
   },
 );
 </script>

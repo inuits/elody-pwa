@@ -29,9 +29,7 @@
             :bulk-operations-context="
               BulkOperationsContextEnum.EntityElementMedia
             "
-            :search-input-type-on-drawer="
-              SearchInputType.AdvancedInputMediaFilesType
-            "
+            :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
             :predefined-entities="
               entityId ===
                 mediafileSelectionState[customQueryFilters].selectedMediafile
