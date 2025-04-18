@@ -6,13 +6,7 @@
       v-if="queryLoaded || ignoreCustomQuery"
       :bulk-operations-context="getContext()"
       :entity-type="acceptedTypes?.[0]"
-      :search-input-type-on-drawer="
-        acceptedTypes.length > 0
-          ? acceptedTypes[0] !== Entitytyping.Mediafile
-            ? SearchInputType.AdvancedInputType
-            : SearchInputType.AdvancedInputMediaFilesType
-          : SearchInputType.AdvancedInputType
-      "
+      :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
       :filters="computedFilters || undefined"
       :show-button="showButton"
       :confirm-selection-button="true"

@@ -183,7 +183,7 @@
                 configPerViewMode[
                   displayList
                     ? ViewModes.ViewModesList
-                    : displayGrid ?? ViewModes.ViewModesGrid
+                    : (displayGrid ?? ViewModes.ViewModesGrid)
                 ]
               "
               :expandFilters="expandFilters"
@@ -679,11 +679,7 @@ watch(
       !props.predefinedEntities &&
       router.currentRoute.value.name !== "SingleEntity"
     ) {
-      setsearchInputType(
-        entityType.value === Entitytyping.Mediafile
-          ? SearchInputType.AdvancedInputMediaFilesType
-          : SearchInputType.AdvancedInputType,
-      );
+      setsearchInputType(SearchInputType.AdvancedInputType);
       setEntityType(entityType.value);
       enqueuePromise(advancedFiltersPromise);
       enqueuePromise(paginationLimitOptionsPromise);
