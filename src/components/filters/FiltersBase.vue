@@ -188,6 +188,7 @@ import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import FiltersListItem from "@/components/filters/FiltersListItem.vue";
 import SavedSearches from "@/components/SavedSearches.vue";
 import useEditMode from "@/composables/useEdit";
+import { useRegexChecker } from "@/composables/useRegexChecker";
 import { apolloClient, auth } from "@/main";
 import { computed, defineProps, inject, onMounted, ref, watch } from "vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
@@ -261,6 +262,7 @@ const displayedFilterOptions = ref<DropdownOption[]>([]);
 const lastActiveFilter = ref<SavedSearchType | undefined>(undefined);
 const matchers = ref<DropdownOption[]>([]);
 const { getStateForRoute, updateStateForRoute } = useStateManagement();
+const { checkRegexForOneWayRelations } = useRegexChecker();
 const { isSaved } = useEditMode();
 const { t } = useI18n();
 const {
@@ -396,10 +398,8 @@ const handleAdvancedFilters = () => {
             ) {
               if ( typeof advancedFilter.defaultValue === "string") {
                 // Regex for adding ids of a relation in value
-                const regex = /relations\.([^.]+)\.key/;
-                const match = advancedFilter.defaultValue?.match(regex);
-                if (match && match[1]) {
-                  const ids = parentEntity.value.relationValues[match[1].split("$")[1]].map(relation => relation["key"]);
+                const [matchesRegex, ids] = checkRegexForOneWayRelations(advancedFilter.defaultValue, parentEntity.value);
+                if (matchesRegex) {
                   hiddenFilter.value = ids;
                   activeFilters.value.push(hiddenFilter);
                   return;

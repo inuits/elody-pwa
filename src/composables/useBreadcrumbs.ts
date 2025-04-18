@@ -12,6 +12,7 @@ import { apolloClient } from "@/main";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { getChildrenOfHomeRoutes, getTitleOrNameFromEntity } from "@/helpers";
+import { useRegexChecker } from "@/composables/useRegexChecker";
 
 export type VisitedRoute = {
   id: string;
@@ -33,6 +34,7 @@ export type BreadcrumbRoute = {
 const rootRoute = ref<RootRoute>({});
 const breadcrumbRoutes = ref<BreadcrumbRoute[]>([]);
 const breadcrumbPathFinished = ref<boolean>(false);
+const { checkRegexForOneWayRelations } = useRegexChecker();
 
 const useBreadcrumbs = (config: any) => {
   const homeRoutes = getChildrenOfHomeRoutes(config);
@@ -53,7 +55,8 @@ const useBreadcrumbs = (config: any) => {
   const iterateOverBreadcrumbs = async (
     parentId: string[],
     routeBreadcrumbs: any,
-    modifyBreadcrumbRoutesArray: boolean
+    modifyBreadcrumbRoutesArray: boolean,
+    entity: Entity | undefined = undefined,
   ) => {
     let entities: Entity[] = [];
     for (const index in routeBreadcrumbs) {
@@ -63,8 +66,9 @@ const useBreadcrumbs = (config: any) => {
       }
       const entityType = routeBreadcrumbs[index].entityType;
       const relation = routeBreadcrumbs[index].relation;
+      const key = routeBreadcrumbs[index].key;
       entities = await fetchRelationsBasedOnEntityType(
-        createFilters(parentId, entityType, relation)
+        createFilters(parentId, entityType, relation, key, entity)
       );
       if (entities.length > 0 && modifyBreadcrumbRoutesArray) {
         const idOfParent = entities[0].id;
@@ -127,7 +131,9 @@ const useBreadcrumbs = (config: any) => {
   const createFilters = (
     parentId: string[],
     entityType: Entitytyping,
-    relation: string
+    relation: string,
+    key?: string | undefined,
+    entity?: Entity | undefined,
   ) => {
     const advancedFilters: AdvancedFilterInput[] = [
       {
@@ -135,13 +141,26 @@ const useBreadcrumbs = (config: any) => {
         type: AdvancedFilterTypes.Type,
         value: entityType,
       },
-      {
-        match_exact: true,
-        type: AdvancedFilterTypes.Selection,
-        key: [`elody:1|relations.${relation}.key`],
-        value: parentId,
-      },
     ];
+    const [matchesRegex, ids] = checkRegexForOneWayRelations(relation, entity);
+    if (matchesRegex)
+      advancedFilters.push(
+        {
+          match_exact: true,
+          type: AdvancedFilterTypes.Selection,
+          key: key,
+          value: ids,
+        },
+      );
+    else
+      advancedFilters.push(
+        {
+          match_exact: true,
+          type: AdvancedFilterTypes.Selection,
+          key: [`elody:1|relations.${relation}.key`],
+          value: parentId,
+        },
+      );
     const queryVariables: GetEntitiesQueryVariables = {
       type: entityType,
       limit: 20,

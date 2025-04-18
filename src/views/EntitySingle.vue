@@ -293,6 +293,7 @@ const determineBreadcrumbs = async () => {
       [entityForBreadcrumb.value.id],
       routeBreadcrumbs,
       true,
+      entityForBreadcrumb.value
     );
   } while (entityForBreadcrumb.value);
 };
