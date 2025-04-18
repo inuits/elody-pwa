@@ -1,14 +1,8 @@
 <template>
   <div class="w-full h-full relative">
     <video class="w-full h-full bg-white" preload="auto" controls>
-      <source
-        :src="getVideoUrl()"
-        :type="
-          source && getValueOfMediafile(mediafileViewerContext, 'mimetype')
-            ? getValueOfMediafile(mediafileViewerContext, 'mimetype')
-            : 'no-type'
-        "
-      />
+      <source :src="getVideoUrl()" :type="mimetype" />
+      Video not supported
     </video>
   </div>
 </template>
@@ -26,6 +20,10 @@ const { getMediafile, getMediafilePath } = useGetMediafile();
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 
+const mimetype = ref<string>(
+  getValueOfMediafile(mediafileViewerContext, "mimetype") || "no-type",
+);
+
 const getVideoUrl = (): string => {
   const fileLocationValues: string[] = [
     "transcode_file_location",
@@ -36,9 +34,12 @@ const getVideoUrl = (): string => {
   );
   if (!fileLocation) throw Error("No video location was found in intialValues");
 
+  if (props.source?.intialValues?.transcode_file_location)
+    mimetype.value = "video/mp4";
+
   return `/api/mediafile/${getMediafilePath(
-    props.source?.intialValues?.original_file_location ||
-      props.source?.intialValues?.transcode_file_location,
+    props.source?.intialValues?.transcode_file_location ||
+      props.source?.intialValues?.original_file_location,
   )}`;
 };
 </script>
