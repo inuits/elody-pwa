@@ -23,10 +23,7 @@
         ></entity-column>
       </entity-form>
     </div>
-    <div
-      v-else
-      class="min-h-[30vh] flex justify-center items-center"
-    >
+    <div v-else class="min-h-[30vh] flex justify-center items-center">
       <spinner-loader theme="accent" />
     </div>
   </div>
@@ -57,7 +54,15 @@ import {
   mapUrlToEntityType,
   determineDefaultIntialValues,
 } from "@/helpers";
-import { reactive, ref, watch, inject, computed, onBeforeMount, provide } from "vue";
+import {
+  reactive,
+  ref,
+  watch,
+  inject,
+  computed,
+  onBeforeMount,
+  provide,
+} from "vue";
 import { auth } from "@/main";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useEditMode } from "@/composables/useEdit";
@@ -138,8 +143,8 @@ const { result, refetch, onError } = useQuery<GetEntityByIdQuery>(
 
 onBeforeMount(() => {
   onError((error) => {
-    if (error.message === "404: NOT FOUND")
-      router.replace({ name: "NotFound" });
+    console.log("In the on error from the query.. GOOOD!");
+    router.replace({ name: "NotFound" });
   });
 });
 
@@ -208,7 +213,10 @@ onBeforeRouteUpdate(async (to: any) => {
 watch(
   () => result.value,
   (newvalue, oldvalue) => {
+    console.log("going to fetch entity");
     entity.value = result.value?.Entity as BaseEntity;
+    console.log("result");
+    console.log(result.value);
     if (!entity.value && !oldvalue) router.push("/notFound");
     if (!entity.value || !entity.value.intialValues) return;
     useEntitySingle().setEntityUuid(entity.value.uuid || entity.value.id);
@@ -217,8 +225,7 @@ watch(
 
     if (entity.value.intialValues?.identifiers)
       identifiers.value = entity.value.intialValues.identifiers;
-    else
-      identifiers.value = [entity.value.uuid, entity.value.id];
+    else identifiers.value = [entity.value.uuid, entity.value.id];
 
     intialValues.value = determineDefaultIntialValues(
       entity.value.intialValues,
@@ -289,7 +296,7 @@ const determineBreadcrumbs = async () => {
       [entityForBreadcrumb.value.id],
       routeBreadcrumbs,
       true,
-      entityForBreadcrumb.value
+      entityForBreadcrumb.value,
     );
   } while (entityForBreadcrumb.value);
 };
