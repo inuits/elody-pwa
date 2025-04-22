@@ -45,7 +45,7 @@ import {
   type HierarchyRelationListOutput,
 } from "@/generated-types/queries";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, provide } from "vue";
 import { apolloClient } from "@/main";
 import { useImport } from "@/composables/useImport";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -59,6 +59,8 @@ const props = defineProps<{
   entityId: string;
   can?: string[];
 }>();
+
+provide("mediafileViewerContext", props.element.customQuery);
 
 const { loadDocument } = useImport();
 const { getForm } = useFormHelper();
