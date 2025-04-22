@@ -24,15 +24,11 @@
       </entity-form>
     </div>
     <div
-      v-else-if="loading && viewOnly"
+      v-else
       class="min-h-[30vh] flex justify-center items-center"
     >
       <spinner-loader theme="accent" />
     </div>
-    <div
-      v-else
-      class="h-full w-full flex bg-neutral-0 animate-pulse text-neutral-20 z-2"
-    />
   </div>
 </template>
 
