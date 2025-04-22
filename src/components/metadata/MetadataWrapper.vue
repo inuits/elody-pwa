@@ -8,7 +8,11 @@
     "
     :key="label"
   >
-    <metadata-title :metadata="metadata" />
+    <metadata-title
+      :metadata="metadata"
+      :is-one-of-required-metadata-field="isOneOfRequiredMetadataField"
+      :is-one-of-required-relation-field="isOneOfRequiredRelationField"
+    />
     <entity-element-metadata-edit
       v-if="isEdit && metadata.inputField"
       :fieldKey="
@@ -314,7 +318,7 @@ const isFieldRequired = computed(() => {
 });
 
 const isMaxDateToday = computed(() => {
-  props.metadata?.inputField?.validation?.value?.includes(
+  return props.metadata?.inputField?.validation?.value?.includes(
     ValidationRules.MaxDateToday,
   );
 });

@@ -5,7 +5,7 @@
     </p>
     <p
       v-if="
-        props.metadata?.inputField &&
+        metadata?.inputField &&
         isEdit &&
         (isOneOfRequiredMetadataField || isOneOfRequiredRelationField)
       "
@@ -14,7 +14,7 @@
       ( {{ t("metadata.labels.one-of-required") }} )
     </p>
     <p
-      v-else-if="metadata?.inputField && !isFieldRequired && isEdit"
+      v-else-if="metadata?.inputField && !metadata.isFieldRequired && isEdit"
       class="pl-1"
     >
       ( {{ t("metadata.labels.optional") }} )
@@ -49,14 +49,18 @@ import type {
   PanelRelationMetaData,
   PanelRelationRootData,
 } from "@/generated-types/queries";
+import { useEditMode } from "@/composables/useEdit";
 
 const props = withDefaults(
   defineProps<{
     metadata: PanelMetaData | PanelRelationMetaData | PanelRelationRootData;
+    isOneOfRequiredMetadataField?: Boolean;
+    isOneOfRequiredRelationField?: Boolean;
   }>(),
-  {},
+  { isOneOfRequiredMetadataField: false, isOneOfRequiredRelationField: false },
 );
 
+const { isEdit } = useEditMode();
 const { t } = useI18n();
 </script>
 
