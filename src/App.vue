@@ -29,7 +29,7 @@
       <ConfirmModal><ConfirmModalView /></ConfirmModal>
     </div>
   </div>
-  <div v-else class="w-full h-screen flex justify-center items-center">
+  <div v-else class="w-full h-screen flex justify-center items-center animate-pulse">
     <img src="/logo.svg" alt="Elody logo" class="h-48" />
   </div>
 </template>
