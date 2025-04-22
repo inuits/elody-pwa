@@ -26,7 +26,7 @@ const handleTenantParameterInUrl = (
 ) => {
   const { selectedTenant, getCodeById } = useTenant();
 
-  if (!to.params.tenant && selectedTenant.value) {
+  if (!to.params.tenant && selectedTenant.value && !to.path.includes("not-found")) {
     const tenant = getCodeById(selectedTenant.value) || selectedTenant.value;
     router.replace({ path: `/${tenant}${to.path}`, query: to.query })
   } else {

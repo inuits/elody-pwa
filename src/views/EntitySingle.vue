@@ -142,8 +142,8 @@ const { result, refetch, onError } = useQuery<GetEntityByIdQuery>(
 );
 
 onBeforeMount(() => {
-  onError((error) => {
-    router.replace({ name: "NotFound" });
+  onError(() => {
+    router.replace("/notFound");
   });
 });
 
