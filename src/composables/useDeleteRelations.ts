@@ -65,7 +65,7 @@ export function useDeleteRelations() {
     });
 
     form.setFieldValue(`relationValues.${relationType}`, relations);
-    if (saveImmediately) await save();
+    if (saveImmediately) await save(true);
   };
 
   const submit = async (
