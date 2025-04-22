@@ -50,6 +50,19 @@
           :should-use-state-for-route="false"
           base-library-height="max-h-[50vh]"
         />
+        <div class="py-2">
+          <BaseButtonNew
+            :label="
+              t('tagging.tag-selected-button', {
+                entityType: taggingConfiguration[formIndex].taggableEntityType,
+              })
+            "
+            :icon="DamsIcons.Tag"
+            button-style="accentAccent"
+            :disabled="!existingEntitySelected"
+            @click="tagExistingEntityFlow()"
+          />
+        </div>
       </div>
       <div class="bg-neutral-lightest rounded-md">
         <div class="p-2 bg-gray-200">
@@ -75,15 +88,16 @@
 </template>
 
 <script setup lang="ts">
+import type { Entitytyping } from "@/generated-types/queries";
 import {
   type AdvancedFilterInput,
   AdvancedFilterTypes,
   EntityPickerMode,
-  Entitytyping,
   type MetadataInput,
   type TaggableEntityConfiguration,
   TypeModals,
   type WysiwygElement,
+  DamsIcons,
 } from "@/generated-types/queries";
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
@@ -105,6 +119,7 @@ import {
   tagEntity,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import { extractTitleKeyFromMetadataFilter } from "@/helpers";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 
 const { setBulkSelectionLimit, isBulkSelectionLimitReached, getEnqueuedItems } =
   useBulkOperations();
@@ -137,6 +152,9 @@ const form = computed(() =>
 const selectedText = computed<string>(() => {
   return getModalInfo(TypeModals.ElodyEntityTaggingModal).selectedText;
 });
+const existingEntitySelected = computed<boolean>(() =>
+  isBulkSelectionLimitReached(BulkOperationsContextEnum.TagEntityModal),
+);
 const prefilledFormValues = ref<object | undefined>(undefined);
 
 const setEntityName = () => {
@@ -231,13 +249,6 @@ const tagExistingEntityFlow = () => {
     newTaggingText,
   );
 };
-
-watch(
-  () => isBulkSelectionLimitReached(BulkOperationsContextEnum.TagEntityModal),
-  () => {
-    tagExistingEntityFlow();
-  },
-);
 
 watch(
   () => element.value,
