@@ -143,7 +143,6 @@ const { result, refetch, onError } = useQuery<GetEntityByIdQuery>(
 
 onBeforeMount(() => {
   onError((error) => {
-    console.log("In the on error from the query.. GOOOD!");
     router.replace({ name: "NotFound" });
   });
 });
@@ -213,10 +212,7 @@ onBeforeRouteUpdate(async (to: any) => {
 watch(
   () => result.value,
   (newvalue, oldvalue) => {
-    console.log("going to fetch entity");
     entity.value = result.value?.Entity as BaseEntity;
-    console.log("result");
-    console.log(result.value);
     if (!entity.value && !oldvalue) router.push("/notFound");
     if (!entity.value || !entity.value.intialValues) return;
     useEntitySingle().setEntityUuid(entity.value.uuid || entity.value.id);
