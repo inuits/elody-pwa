@@ -44,7 +44,6 @@ import {
   type TaggableEntityConfiguration,
   TypeModals,
   ValidationFields,
-  type WindowElementPanel,
   WysiwygElement,
   WysiwygExtensions,
 } from "@/generated-types/queries";
@@ -58,7 +57,7 @@ import {
   extensionConfiguration,
   getPluginsFromConfigurationEntities,
   setExtensionConfiguration,
-  setTaggedEntityInfoTooltip,
+  openDetailModal,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 
@@ -151,22 +150,15 @@ onMounted(async () => {
       attributes: {
         class: `prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl ${props.displayInline ? "mx-2 min-h-[125px]" : "mx-4 min-h-[250px]"} focus:outline-none border border-[rgba(0,58,82,0.6)] rounded-md  p-2`,
       },
+      handleClickOn: (view, pos, node) => {
+        if (node.attrs.entityId && !isEdit.value) openDetailModal(node);
+      },
     },
     parseOptions: {
       preserveWhitespace: true,
     },
     editable: isEdit.value,
     content: initialValue.value,
-    onCreate: () => {
-      setTaggedEntityInfoTooltip(editorNode.value, true);
-    },
-    onUpdate: () => {
-      setTaggedEntityInfoTooltip(editorNode.value, false);
-      setTaggedEntityInfoTooltip(editorNode.value);
-    },
-    onDestroy: () => {
-      setTaggedEntityInfoTooltip(editorNode.value, false);
-    },
   });
 
   if (props.element.taggingConfiguration) updateModalInfo();
@@ -191,7 +183,6 @@ watch(
 watch(
   () => isEdit.value,
   () => {
-    if (!isEdit.value) setTaggedEntityInfoTooltip(editorNode.value, false);
     if (editor.value) {
       editor.value.setEditable(isEdit.value);
       if (!isEdit.value) {
@@ -201,6 +192,7 @@ watch(
       }
     }
   },
+  { immediate: true },
 );
 </script>
 

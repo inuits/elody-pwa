@@ -38,23 +38,13 @@ type TaggableEntityConfigurationFromEntity = TaggableEntityConfiguration & {
 export const extensionConfiguration = ref<
   (TaggableEntityConfiguration | TaggableEntityConfigurationFromEntity)[]
 >([]);
-export const tags = computed<string[]>(() =>
-  extensionConfiguration.value.map(
-    (configurationItem: TaggableEntityConfiguration) => configurationItem.tag,
-  ),
-);
-export const customExtensionNames = computed<string>(() =>
-  extensionConfiguration.value.map(
-    (configurationItem: TaggableEntityConfigurationFromEntity) => {
-      configurationItem.extensionName;
-    },
-  ),
-);
 
-const getTagNameFromConfiguration = (
+export const customExtensionNames = ref<string[]>([]);
+
+const generateExtensionNameFromConfiguration = (
   configurationItem: TaggableEntityConfigurationFromEntity,
 ): string => {
-  let extensionName = configurationItem.tag;
+  let extensionName: string = configurationItem.tag || "";
   if (configurationItem.configurationEntityId) {
     extensionName += `-${configurationItem.configurationEntityId}`;
   }
@@ -64,11 +54,30 @@ const getTagNameFromConfiguration = (
     ).length;
     extensionName += `-${occurrences + 1}`;
   }
+  customExtensionNames.value.push(extensionName);
   return extensionName;
 };
 
+const getNodeFromSelection = (state) => {
+  let node = undefined;
+  let pos = undefined;
+  const { selection } = state;
+  const { empty, anchor } = selection;
+
+  if (!empty) {
+    return false;
+  }
+
+  state.doc.nodesBetween(anchor - 1, anchor, (node, pos) => {
+    node = node;
+    pos = pos;
+  });
+
+  return { node, pos };
+};
+
 export const createTipTapNodeExtension = (
-  extensionConfiguration: TaggableEntityConfiguration,
+  extensionConfiguration: TaggableEntityConfigurationFromEntity,
 ) => {
   const additionalAttributes = [
     ...extensionConfiguration.tagConfigurationByEntity
@@ -76,7 +85,9 @@ export const createTipTapNodeExtension = (
     ...extensionConfiguration.metadataKeysToSetAsAttribute,
   ];
 
-  const extensionName = getTagNameFromConfiguration(extensionConfiguration);
+  const extensionName = generateExtensionNameFromConfiguration(
+    extensionConfiguration as TaggableEntityConfigurationFromEntity,
+  );
   extensionConfiguration.extensionName = extensionName;
 
   return Node.create({
@@ -88,7 +99,8 @@ export const createTipTapNodeExtension = (
       const attributes = {
         entityId: {
           default: null,
-          parseHTML: (element) => element.getAttribute("data-entity-id"),
+          parseHTML: (element: HTMLElement) =>
+            element.getAttribute("data-entity-id"),
           renderHTML: (attributes) => {
             if (!attributes.entityId) {
               return {};
@@ -106,7 +118,8 @@ export const createTipTapNodeExtension = (
           attributes[attribute] = {
             [attribute]: {
               default: null,
-              parseHTML: (element) => element.getAttribute(`data-${attribute}`),
+              parseHTML: (element: HTMLElement) =>
+                element.getAttribute(`data-${attribute}`),
               renderHTML: (attributes) => {
                 if (!attributes[attribute]) {
                   return {};
@@ -226,37 +239,64 @@ export const createGlobalCommandsExtension = Extension.create({
           view.focus();
           useBaseModal().closeModal(TypeModals.ElodyEntityTaggingModal);
         },
+      untagSelectedText:
+        () =>
+        async ({ commands, state }) => {
+          const selectedNode = state.selection.$from.parent;
+          const nodeContent: string = selectedNode.content.content[0].text;
+          const entityId = selectedNode.attrs.entityId;
+
+          const { selection } = state;
+          commands.deleteNode(selectedNode.type.name);
+          commands.insertContentAt(selection.from, {
+            type: "text",
+            text: nodeContent,
+          });
+
+          const entityExtensionConfiguration =
+            extensionConfiguration.value.find(
+              (mappingItem: TaggableEntityConfiguration) =>
+                mappingItem.extensionName === selectedNode.type.name,
+            );
+          if (entityExtensionConfiguration) {
+            deleteRelations(
+              entityId,
+              entityExtensionConfiguration.relationType,
+              [{ key: entityId }],
+              BulkOperationsContextEnum.TagEntityModal,
+              false,
+            );
+          }
+        },
     };
   },
   addKeyboardShortcuts() {
     return {
       Backspace: () =>
         this.editor.commands.command(({ tr, state }) => {
-          const { selection } = state;
-          const { empty, anchor } = selection;
+          const { node, pos } = getNodeFromSelection(state);
           const { getEntityUuid } = useEntitySingle();
+          const entityId = getEntityUuid();
 
-          if (!empty) {
+          if (!node || !pos || !entityId) {
             return false;
           }
 
-          state.doc.nodesBetween(anchor - 1, anchor, (node, pos) => {
-            const entityExtensionConfiguration =
-              extensionConfiguration.value.find(
-                (mappingItem: TaggableEntityConfiguration) =>
-                  mappingItem.extensionName === node.type.name,
-              );
-            if (entityExtensionConfiguration) {
-              tr.insertText("", pos, pos + node.nodeSize);
-              deleteRelations(
-                getEntityUuid(),
-                entityExtensionConfiguration.relationType,
-                [{ key: node.attrs.entityId }],
-                BulkOperationsContextEnum.TagEntityModal,
-                false,
-              );
-            }
-          });
+          const entityExtensionConfiguration =
+            extensionConfiguration.value.find(
+              (mappingItem: TaggableEntityConfiguration) =>
+                mappingItem.extensionName === node.type.name,
+            );
+          if (entityExtensionConfiguration) {
+            tr.insertText("", pos, pos + node.nodeSize);
+            deleteRelations(
+              entityId,
+              entityExtensionConfiguration.relationType,
+              [{ key: node.attrs.entityId }],
+              BulkOperationsContextEnum.TagEntityModal,
+              false,
+            );
+          }
         }),
     };
   },
@@ -434,11 +474,12 @@ export const getExtensionConfigurationForEntity = (
 };
 
 export const hasSelectionBeenTagged = (editor: Editor) => {
-  const { selection } = editor.state;
-  const { from } = selection;
-  const selectedNode = editor.state.doc.nodeAt(from);
+  const selectedNode = editor.state.selection.$from.parent;
+  const selectedNodeName = selectedNode?.type.name;
 
-  return selectedNode && tags.value.includes(selectedNode.type.name);
+  return (
+    selectedNodeName && customExtensionNames.value.includes(selectedNodeName)
+  );
 };
 
 export const tagEntity = (
@@ -470,39 +511,13 @@ const getEntityTypeByTagFromMapping = (tag: string): string => {
   else return mappingForTag.taggableEntityType;
 };
 
-const openDetailModal = (element: HTMLElement) => {
-  const entityId = element.getAttribute("data-entity-id");
-  const tag = element.localName;
+export const openDetailModal = (node: any) => {
+  const entityId = node.attrs.entityId;
+  const tag = node.type.name.split("-")[0];
   const entityType = getEntityTypeByTagFromMapping(tag);
   useBaseModal().updateModal(TypeModals.EntityDetailModal, {
     entityId,
     entityType,
   });
   useBaseModal().openModal(TypeModals.EntityDetailModal, ModalStyle.CenterWide);
-};
-
-const listenToHoveredElements = (
-  elementsToListenTo: HTMLElement[],
-  enable: boolean = true,
-  event: string = "click",
-) => {
-  elementsToListenTo.forEach((element: HTMLElement) => {
-    if (enable) element.addEventListener(event, () => openDetailModal(element));
-    else element.removeEventListener(event, () => openDetailModal(element));
-  });
-};
-
-export const setTaggedEntityInfoTooltip = (
-  tipTapDocumentNode: HTMLDivElement,
-  enable: boolean = true,
-) => {
-  if (!tipTapDocumentNode) return;
-
-  tags.value.forEach(async (node: string) => {
-    const elements: HTMLElement[] = Array.from(
-      tipTapDocumentNode.getElementsByTagName(node),
-    );
-    if (!elements) return;
-    listenToHoveredElements(elements, enable);
-  });
 };

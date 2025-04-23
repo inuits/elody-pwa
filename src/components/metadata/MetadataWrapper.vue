@@ -210,15 +210,6 @@ const props = withDefaults(
   },
 );
 
-// Todo: Enabling this will break the validation
-// Todo: Check if turning this off has other implications
-// watch(
-//   () => props.metadata,
-//   (newvalue, oldvalue) => {
-//     if (!Array.isArray(newvalue.value)) setNewValue(newvalue.value);
-//   }
-// );
-
 const showTooltip = ref<boolean>(false);
 const isPermitted = ref<boolean>(false);
 
