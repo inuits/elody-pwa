@@ -147,12 +147,21 @@
     </button>
     <button
       v-if="extensions.includes(WysiwygExtensions.ElodyTaggingExtension)"
-      :class="[{ 'opacity-30': !isNonTaggedTextSelected }]"
-      :disabled="buttonsDisabled || !isNonTaggedTextSelected"
+      :class="[{ 'opacity-30': tagButtonEnabled }]"
+      :disabled="buttonsDisabled || tagButtonEnabled"
       @click="editor.commands.openTagModal()"
       title="Tag"
     >
       Tag
+    </button>
+    <button
+      v-if="extensions.includes(WysiwygExtensions.ElodyTaggingExtension)"
+      :class="[{ 'opacity-30': untagButtonEnabled }]"
+      :disabled="buttonsDisabled || untagButtonEnabled"
+      @click="editor.commands.untagSelectedText()"
+      title="Untag"
+    >
+      Untag
     </button>
   </div>
 </template>
@@ -174,11 +183,20 @@ const props = defineProps<{
 const { isEdit } = useEdit();
 
 const buttonsDisabled = computed(() => !isEdit.value);
-const isNonTaggedTextSelected = computed(() => {
+const editorHasSelection = computed(() => {
   const { selection } = props.editor.state;
-  return (
-    selection.from !== selection.to && !hasSelectionBeenTagged(props.editor)
-  );
+  return selection.from !== selection.to;
+});
+const isNonTaggedTextSelected = computed(() => {
+  return !hasSelectionBeenTagged(props.editor);
+});
+const tagButtonEnabled = computed(() => {
+  if (!editorHasSelection.value) return true;
+  return !isNonTaggedTextSelected.value;
+});
+const untagButtonEnabled = computed(() => {
+  if (!editorHasSelection.value) return true;
+  return isNonTaggedTextSelected.value;
 });
 </script>
 
