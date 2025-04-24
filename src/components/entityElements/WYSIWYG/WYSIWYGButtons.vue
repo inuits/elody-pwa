@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'sticky top-0 transparent-bg z-[100] flex flex-wrap',
+      'sticky top-0 transparent-bg z-[19] flex flex-wrap',
       { 'px-2': !displayInline },
     ]"
   >
@@ -167,7 +167,7 @@
 </template>
 
 <script setup lang="ts">
-import { Editor } from "@tiptap/vue-3";
+import type { Editor } from "@tiptap/vue-3";
 import { WysiwygExtensions } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import useEdit from "@/composables/useEdit";
