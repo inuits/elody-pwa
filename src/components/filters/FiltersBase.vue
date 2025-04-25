@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="filter-base"
-    class="relative h-full bg-neutral-white w-full"
+    class="relative bg-neutral-white w-full"
     :class="expandFilters ? 'rounded-t' : 'rounded-xl'"
     @keydown.enter="applyFilters(true)"
   >
@@ -41,10 +41,11 @@
 
     <div
       :class="[
-        'absolute w-full rounded-b bg-neutral-white',
+        'w-full rounded-b bg-neutral-white',
+        { 'hidden': !expandFilters },
         {
           'scrollable border-x border-b-2 border-neutral-light': expandFilters,
-        },
+        }
       ]"
     >
       <div v-if="expandFilters" class="p-4 sticky top-0 bg-white z-10">
@@ -213,6 +214,7 @@ const props = withDefaults(
     parentEntityIdentifiers?: string[];
     route: RouteLocationNormalizedLoaded;
     setAdvancedFilters: Function;
+    additionalDefaultFiltersEnabled?: boolean;
     enableSaveSearchFilters: boolean;
     entityType: Entitytyping;
     shouldUseStateForRoute: boolean;
@@ -220,6 +222,7 @@ const props = withDefaults(
   }>(),
   {
     parentEntityIdentifiers: () => [],
+    additionalDefaultFiltersEnabled: false,
     enableSaveSearchFilters: true,
     shouldUseStateForRoute: true,
     filtersNeedContext: undefined,
@@ -255,7 +258,7 @@ const filterMatcherMapping = ref<FilterMatcherMap>({
   type: [],
   metadata_on_relation: [],
 });
-const advancedFilters = ref<Maybe<AdvancedFilters>>();
+const advancedFilters = ref<Maybe<AdvancedFilters | undefined>>(undefined);
 const clearAllActiveFilters = ref<boolean>(false);
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const displayedFilterOptions = ref<DropdownOption[]>([]);
@@ -308,7 +311,28 @@ const filterMatcherMappingPromise = async () => {
     });
 };
 
+const getFiltersQueryPromise = async (variables: any, executeDefaultFiltersDocument: boolean): Promise<void> => {
+  return apolloClient
+    .query({
+      query: !executeDefaultFiltersDocument
+        ? props.manipulationQuery?.filtersDocument
+            ? props.manipulationQuery.filtersDocument
+            : GetAdvancedFiltersDocument
+        : GetAdvancedFiltersDocument,
+      variables: variables,
+      fetchPolicy: "no-cache",
+      notifyOnNetworkStatusChange: true,
+    })
+    .then((result) => {
+      const filters = (
+        result.data?.EntityTypeFilters as BaseEntity
+      )?.advancedFilters || {};
+      advancedFilters.value = { ...advancedFilters.value, ...filters };
+    });
+}
+
 const advancedFiltersPromise = async (entityType: Entitytyping) => {
+  advancedFilters.value = undefined;
   const variables = { entityType: entityType, context: undefined };
   if (props.filtersNeedContext) {
     variables.context = [];
@@ -320,21 +344,13 @@ const advancedFiltersPromise = async (entityType: Entitytyping) => {
     });
   }
 
-  return apolloClient
-    .query({
-      query: props.manipulationQuery?.filtersDocument
-        ? props.manipulationQuery.filtersDocument
-        : GetAdvancedFiltersDocument,
-      variables: variables,
-      fetchPolicy: "no-cache",
-      notifyOnNetworkStatusChange: true,
-    })
-    .then((result) => {
-      advancedFilters.value = (
-        result.data?.EntityTypeFilters as BaseEntity
-      )?.advancedFilters;
-      handleAdvancedFilters();
-    });
+  const promiseQueue: ((variables: any, executeDefaultFiltersDocument: boolean) => Promise<void>)[] = [];
+  promiseQueue.push(getFiltersQueryPromise);
+  if (props.additionalDefaultFiltersEnabled)
+    promiseQueue.push(getFiltersQueryPromise);
+
+  await Promise.all(promiseQueue.map((promise, index) => promise(variables, index !== 0)));
+  handleAdvancedFilters();
 };
 
 const handleFilterMatcherMapping = () => {

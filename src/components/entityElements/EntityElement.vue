@@ -19,6 +19,7 @@
         :label="element.label as string"
         :type="element.type"
         :isCollapsed="element.isCollapsed"
+        :enable-advanced-filters="element.enableAdvancedFilters"
         :enable-navigation="element.enableNavigation"
         :types="element.entityTypes as string[]"
         :custom-query="element.customQuery"

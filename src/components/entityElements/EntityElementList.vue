@@ -44,7 +44,7 @@
                 : undefined
             "
             :enable-preview="true"
-            :enable-advanced-filters="false"
+            :enable-advanced-filters="enableAdvancedFilters"
             :enable-bulk-operations="true"
             :enable-navigation="enableNavigation"
             :parent-entity-identifiers="
@@ -83,7 +83,7 @@
               )
             "
             :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
-            :enable-advanced-filters="false"
+            :enable-advanced-filters="enableAdvancedFilters"
             :enable-bulk-operations="true"
             :enable-navigation="enableNavigation"
             :entity-type="types[0]"
@@ -153,6 +153,7 @@ const { fetchAdvancedPermission } = usePermissions();
 const props = withDefaults(
   defineProps<{
     isCollapsed: Boolean;
+    enableAdvancedFilters: Boolean;
     types: string[];
     label: string;
     type?: MediaFileElementTypes;
@@ -179,6 +180,7 @@ const props = withDefaults(
     id: string;
   }>(),
   {
+    enableAdvancedFilters: false,
     types: () => [],
     customBulkOperations: undefined,
     viewMode: EntityListViewMode.Library,
