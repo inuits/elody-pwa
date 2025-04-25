@@ -19,202 +19,196 @@
     </div>
     <div
       v-else
-      class="lg:flex bg-neutral-lightest"
+      class="bg-neutral-lightest grid grid-cols-[30%_70%] grid-rows-[6vh_1fr] w-full"
       :class="[
+        baseLibraryMode === BaseLibraryModes.BasicBaseLibrary
+          ? ''
+          : parentEntityIdentifiers.length > 0
+            ? 'px-3 pt-3'
+            : 'px-6',
         { '!bg-white': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary },
       ]"
     >
       <div
-        class="w-full"
+        class="h-fit pt-3 pb-2 top-0 z-40 bg-neutral-lightest"
         :class="[
-          baseLibraryMode === BaseLibraryModes.BasicBaseLibrary
-            ? ''
-            : parentEntityIdentifiers.length > 0
-              ? 'px-3 pt-3'
-              : 'px-6',
+          { 'hidden': !enableAdvancedFilters },
+          { 'row-span-1': !expandFilters },
+          { 'row-span-2': expandFilters },
+          { 'sticky': hasStickyBars },
+        ]"
+      >
+        <FiltersBase
+          v-show="enableAdvancedFilters"
+          :expandFilters="expandFilters"
+          :manipulation-query="manipulationQuery"
+          :parent-entity-identifiers="parentEntityIdentifiers"
+          :route="route"
+          :set-advanced-filters="setAdvancedFilters"
+          :additional-default-filters-enabled="additionalDefaultFiltersEnabled"
+          :enable-save-search-filters="enableSaveSearchFilters"
+          :entity-type="entityType as Entitytyping"
+          :should-use-state-for-route="shouldUseStateForRoute"
+          :filters-need-context="filtersNeedContext"
+          @filter-matcher-mapping-promise="
+          (promise) => (filterMatcherMappingPromise = promise)
+        "
+          @advanced-filters-promise="
+          (promise) => (advancedFiltersPromise = promise)
+        "
+          @apply-filters="
+          async (
+            filters: AdvancedFilterInput[],
+            stateSaved: boolean = false,
+            force: boolean = true,
+          ) => await setAdvancedFilters(filters, stateSaved, force, route)
+        "
+          @expand-filters="expandFilters = !expandFilters"
+        />
+      </div>
+      <div
+        :class="[
+          'h-fit z-40 pl-[1%] pb-4',
+          {
+            'top-0 mb-2 pt-4 bg-neutral-lightest':
+              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary,
+          },
+          { sticky: hasStickyBars },
+        ]"
+      >
+        <div class="h-full flex flex-row items-center gap-y-4">
+          <div
+            v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
+            class="mr-2"
+          >
+            <BaseToggleGroup v-if="toggles.length > 1" :toggles="toggles" />
+          </div>
+          <LibraryBar
+            v-if="
+              !predefinedEntities &&
+              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
+            "
+            :route="route"
+            :set-limit="setLimit"
+            :set-skip="setSkip"
+            :set-sort-key="setSortKey"
+            :set-sort-order="setSortOrder"
+            :total-items="totalEntityCount || NaN"
+            :filters-available-on-detail-page="filtersAvailableOnDetailPage"
+            @pagination-limit-options-promise="
+              (promise) => (paginationLimitOptionsPromise = promise)
+            "
+            @sort-options-promise="(promise) => (sortOptionsPromise = promise)"
+          />
+        </div>
+      </div>
+      <div
+        :class="[
+          { 'col-span-1 pl-[1%]': expandFilters },
+          { 'col-span-2': !expandFilters },
         ]"
       >
         <div
-          :class="[
-            'z-40',
-            {
-              'top-0 mb-2 pt-4 bg-neutral-lightest':
-                baseLibraryMode === BaseLibraryModes.NormalBaseLibrary,
-            },
-            { sticky: hasStickyBars },
-          ]"
+          v-if="
+            enableBulkOperations &&
+            baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
+          "
+          class="z-50 sticky top-[6vh] my-3"
         >
-          <div class="flex flex-row items-center gap-y-4">
-            <FiltersBase
-              v-show="enableAdvancedFilters"
-              class="lg:w-[46%]"
-              :expandFilters="expandFilters"
-              :manipulation-query="manipulationQuery"
-              :parent-entity-identifiers="parentEntityIdentifiers"
-              :route="route"
-              :set-advanced-filters="setAdvancedFilters"
-              :enable-save-search-filters="enableSaveSearchFilters"
-              :entity-type="entityType as Entitytyping"
-              :should-use-state-for-route="shouldUseStateForRoute"
-              :filters-need-context="filtersNeedContext"
-              @filter-matcher-mapping-promise="
-                (promise) => (filterMatcherMappingPromise = promise)
-              "
-              @advanced-filters-promise="
-                (promise) => (advancedFiltersPromise = promise)
-              "
-              @apply-filters="
-                async (
-                  filters: AdvancedFilterInput[],
-                  stateSaved: boolean = false,
-                  force: boolean = true,
-                ) => await setAdvancedFilters(filters, stateSaved, force, route)
-              "
-              @expand-filters="expandFilters = !expandFilters"
-            />
-            <div
-              v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
-              class="mr-2"
-              :class="['flex', { 'ml-4': enableAdvancedFilters }]"
-            >
-              <BaseToggleGroup v-if="toggles.length > 1" :toggles="toggles" />
-            </div>
-            <LibraryBar
-              v-if="
-                !predefinedEntities &&
-                baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
-              "
-              :route="route"
-              :set-limit="setLimit"
-              :set-skip="setSkip"
-              :set-sort-key="setSortKey"
-              :set-sort-order="setSortOrder"
-              :total-items="totalEntityCount || NaN"
-              @pagination-limit-options-promise="
-                (promise) => (paginationLimitOptionsPromise = promise)
-              "
-              @sort-options-promise="
-                (promise) => (sortOptionsPromise = promise)
-              "
-            />
-          </div>
-
-          <div
-            v-if="
-              enableBulkOperations &&
-              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
+          <BulkOperationsActionsBar
+            :context="bulkOperationsContext"
+            :total-items-count="totalEntityCount"
+            :use-extended-bulk-operations="!isSearchLibrary"
+            :show-button="showButton"
+            :confirm-selection-button="confirmSelectionButton"
+            :relation-type="relationType"
+            :entity-type="entityType as Entitytyping"
+            :custom-bulk-operations="customBulkOperations"
+            :refetch-entities="refetchEntities"
+            :enable-selection="enableSelection"
+            :parent-entity-id="props.parentEntityIdentifiers[0]"
+            @custom-bulk-operations-promise="
+              (promise) => (customBulkOperationsPromise = promise)
             "
-            class="my-3"
-            :class="{ 'flex justify-end': expandFilters }"
-          >
-            <BulkOperationsActionsBar
-              :class="[
-                { 'w-[67%]': expandFilters && toggles.length <= 1 },
-                { 'w-[69.75%]': expandFilters && toggles.length > 1 },
-              ]"
-              :context="bulkOperationsContext"
-              :total-items-count="totalEntityCount"
-              :use-extended-bulk-operations="!isSearchLibrary"
-              :show-button="showButton"
-              :confirm-selection-button="confirmSelectionButton"
-              :relation-type="relationType"
-              :entity-type="entityType as Entitytyping"
-              :custom-bulk-operations="customBulkOperations"
-              :refetch-entities="refetchEntities"
-              :enable-selection="enableSelection"
-              :parent-entity-id="props.parentEntityIdentifiers[0]"
-              @custom-bulk-operations-promise="
-                (promise) => (customBulkOperationsPromise = promise)
-              "
-              @select-page="bulkSelect"
-              @confirm-selection="
-                (selection) => emit('confirmSelection', selection)
-              "
-              @set-bulk-operations-available="
-                (value: boolean) => (hasBulkOperations = value)
-              "
-              @apply-custom-bulk-operations="
-                async () => await applyCustomBulkOperations()
-              "
-              @initialize-entity-picker-component="
-                () => initializeEntityPickerComponent()
-              "
-              @refetch="async () => await refetchEntities()"
-            />
-          </div>
+            @select-page="bulkSelect"
+            @confirm-selection="
+              (selection) => emit('confirmSelection', selection)
+            "
+            @set-bulk-operations-available="
+              (value: boolean) => (hasBulkOperations = value)
+            "
+            @apply-custom-bulk-operations="
+              async () => await applyCustomBulkOperations()
+            "
+            @initialize-entity-picker-component="
+              () => initializeEntityPickerComponent()
+            "
+            @refetch="async () => await refetchEntities()"
+          />
         </div>
         <div
           v-if="entities?.length !== 0 || relations?.length !== 0"
-          :class="{ 'flex justify-end': expandFilters }"
+          data-cy="base-library-grid-container"
+          id="gridContainer"
+          @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
         >
-          <div
-            data-cy="base-library-grid-container"
-            id="gridContainer"
-            :class="[
-              { 'w-[67%]': expandFilters && toggles.length <= 1 },
-              { 'w-[69.75%]': expandFilters && toggles.length > 1 },
-            ]"
-            @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
-          >
-            <ViewModesList
-              v-if="
-                displayList ||
-                displayGrid ||
-                (entitiesLoading &&
-                  (route?.name !== 'SingleEntity' ||
-                    props.baseLibraryMode ===
-                      BaseLibraryModes.BasicBaseLibrary))
-              "
-              :entities="entities as Entity[]"
-              :entities-loading="entitiesLoading"
-              :bulk-operations-context="bulkOperationsContext"
-              :list-item-route-name="listItemRouteName"
-              :disable-previews="disableNewEntityPreviews"
-              :enable-navigation="enableNavigation"
-              :parent-entity-identifiers="parentEntityIdentifiers"
-              :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
-              :relation-type="relationType"
-              :enable-selection="enableSelection"
-              :base-library-mode="baseLibraryMode"
-              :entity-list-elements="entityListElements"
-              :allowed-actions-on-relations="allowedActionsOnRelations"
-              :mode="displayGrid ? 'grid' : 'list'"
-              :config="
-                configPerViewMode[
-                  displayList
-                    ? ViewModes.ViewModesList
-                    : (displayGrid ?? ViewModes.ViewModesGrid)
-                ]
-              "
-              :expandFilters="expandFilters"
-              :refetch-entities="refetchEntities"
-            />
-            <ViewModesMedia
-              v-if="viewModesIncludeViewModesMedia && displayPreview"
-              :entities="entities as Entity[]"
-              :entities-loading="entitiesLoading"
-              :config="configPerViewMode[ViewModes.ViewModesMedia]"
-            />
-            <ViewModesMap
-              v-if="displayMap"
-              :entities="entities as Entity[]"
-              :config="configPerViewMode[ViewModes.ViewModesMap]"
-            />
-          </div>
+          <ViewModesList
+            v-if="
+              displayList ||
+              displayGrid ||
+              (entitiesLoading &&
+                (route?.name !== 'SingleEntity' ||
+                  props.baseLibraryMode === BaseLibraryModes.BasicBaseLibrary))
+            "
+            :entities="entities as Entity[]"
+            :entities-loading="entitiesLoading"
+            :bulk-operations-context="bulkOperationsContext"
+            :list-item-route-name="listItemRouteName"
+            :disable-previews="disableNewEntityPreviews"
+            :enable-navigation="enableNavigation"
+            :parent-entity-identifiers="parentEntityIdentifiers"
+            :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
+            :relation-type="relationType"
+            :enable-selection="enableSelection"
+            :base-library-mode="baseLibraryMode"
+            :entity-list-elements="entityListElements"
+            :allowed-actions-on-relations="allowedActionsOnRelations"
+            :mode="displayGrid ? 'grid' : 'list'"
+            :config="
+              configPerViewMode[
+                displayList
+                  ? ViewModes.ViewModesList
+                  : (displayGrid ?? ViewModes.ViewModesGrid)
+              ]
+            "
+            :expandFilters="expandFilters"
+            :refetch-entities="refetchEntities"
+          />
+          <ViewModesMedia
+            v-if="viewModesIncludeViewModesMedia && displayPreview"
+            :entities="entities as Entity[]"
+            :entities-loading="entitiesLoading"
+            :config="configPerViewMode[ViewModes.ViewModesMedia]"
+          />
+          <ViewModesMap
+            v-if="displayMap"
+            :entities="entities as Entity[]"
+            :config="configPerViewMode[ViewModes.ViewModesMap]"
+          />
         </div>
+      </div>
 
-        <div
-          v-if="entities?.length === 0 && !entitiesLoading"
-          :class="{
-            'text-center my-2':
-              baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary,
-          }"
-        >
-          <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">
-            -
-          </div>
-          <div v-else>{{ t("search.noresult") }}</div>
+      <div
+        v-if="entities?.length === 0 && !entitiesLoading"
+        :class="{
+          'text-center my-2':
+            baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary,
+        }"
+      >
+        <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">
+          -
         </div>
+        <div v-else>{{ t("search.noresult") }}</div>
       </div>
     </div>
   </div>
@@ -364,6 +358,11 @@ const enableSelection = computed<boolean>(() => {
       props.enableBulkOperations &&
       !props.isSearchLibrary) ||
     props.selectionEnabled
+  );
+});
+const additionalDefaultFiltersEnabled = computed(() => {
+  return (
+    props.enableAdvancedFilters && manipulationQuery.value?.filtersDocument
   );
 });
 

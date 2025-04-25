@@ -3,7 +3,11 @@
     v-if="
       paginationLimitOptionsPromiseIsResolved && sortOptionsPromiseIsResolved
     "
-    class="flex justify-between items-center w-full flex-wrap min-[1400px]:flex-nowrap"
+    class="flex justify-between items-center w-full"
+    :class="[
+      { 'flex-wrap': filtersAvailableOnDetailPage },
+      { 'flex-nowrap': !filtersAvailableOnDetailPage },
+    ]"
   >
     <div class="flex justify-start gap-x-3">
       <div v-if="paginationLimitOptions.length > 0">
@@ -71,13 +75,19 @@ import { onMounted, ref, toRefs, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useStateManagement } from "@/composables/useStateManagement";
 
-const props = defineProps<{
-  setLimit: Function;
-  setSkip: Function;
-  setSortKey: Function;
-  setSortOrder: Function;
-  totalItems: number;
-}>();
+const props = withDefaults(
+  defineProps<{
+    setLimit: Function;
+    setSkip: Function;
+    setSortKey: Function;
+    setSortOrder: Function;
+    totalItems: number;
+    filtersAvailableOnDetailPage?: boolean;
+  }>(),
+  {
+    filtersAvailableOnDetailPage: false,
+  },
+);
 
 const emit = defineEmits<{
   (
