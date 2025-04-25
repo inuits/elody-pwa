@@ -1,13 +1,12 @@
 import { mount } from "@vue/test-utils";
 import ActionMenuGroup from "../ActionMenuGroup.vue";
 import { describe, it, expect, vi, afterEach } from "vitest";
+import type { Entitytyping, DropdownOption } from "@/generated-types/queries";
 import {
-  Entitytyping,
   ActionContextEntitiesSelectionType,
   TypeModals,
   Permission,
   ActionContextViewModeTypes,
-  DropdownOption,
 } from "@/generated-types/queries";
 import { flushPromises } from "@vue/test-utils";
 
@@ -43,6 +42,7 @@ vi.mock("@/composables/usePermissions", () => ({
     can: vi.fn(),
     fetchAdvancedPermission: vi.fn(),
     fetchPermissionsForDropdownOptions: vi.fn(),
+    setExtraVariables: vi.fn(),
   }),
   ignorePermissions: { value: false },
   advancedPermissions: mocks.advancedPermissions,
