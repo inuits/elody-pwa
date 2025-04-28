@@ -27,6 +27,7 @@
             ? 'px-3 pt-3'
             : 'px-6',
         { '!bg-white': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary },
+        { 'grid-rows-[1vh_1fr]': baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary  },
       ]"
     >
       <div
@@ -68,7 +69,7 @@
       </div>
       <div
         :class="[
-          'h-fit z-40 pl-[1%] pb-4',
+          'h-fit pl-[1%] pb-4',
           {
             'top-0 mb-2 pt-4 bg-neutral-lightest':
               baseLibraryMode === BaseLibraryModes.NormalBaseLibrary,
@@ -196,19 +197,19 @@
             :config="configPerViewMode[ViewModes.ViewModesMap]"
           />
         </div>
-      </div>
-
-      <div
-        v-if="entities?.length === 0 && !entitiesLoading"
-        :class="{
-          'text-center my-2':
-            baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary,
-        }"
-      >
-        <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">
-          -
+        <div
+          v-if="entities?.length === 0 && !entitiesLoading"
+          :class="[
+          { 'text-center my-2': baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary },
+          { 'col-span-1 pl-[1%]': expandFilters },
+          { 'col-span-2': !expandFilters },
+        ]"
+        >
+          <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">
+            -
+          </div>
+          <div v-else>{{ t("search.noresult") }}</div>
         </div>
-        <div v-else>{{ t("search.noresult") }}</div>
       </div>
     </div>
   </div>
