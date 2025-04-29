@@ -41,7 +41,6 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
 import WYSIWYGButtons from "@/components/entityElements/WYSIWYG/WYSIWYGButtons.vue";
 import {
-  type TaggableEntityConfiguration,
   TypeModals,
   ValidationFields,
   WysiwygElement,
@@ -52,12 +51,8 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import useEdit from "@/composables/useEdit";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
-  createGlobalCommandsExtension,
-  createTipTapNodeExtension,
-  extensionConfiguration,
-  getPluginsFromConfigurationEntities,
-  setExtensionConfiguration,
   openDetailModal,
+  initializeTaggingExtension,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 
@@ -112,36 +107,12 @@ onMounted(async () => {
   if (
     props.element.extensions.includes(WysiwygExtensions.ElodyTaggingExtension)
   ) {
-    const initialExtensionConfigurationsWithTag =
-      props.element.taggingConfiguration?.taggableEntityConfiguration.filter(
-        (configurationItem: TaggableEntityConfiguration) =>
-          configurationItem.tag,
-      );
-    const extensionConfigurationsFromEntities: TaggableEntityConfiguration[] =
-      await getPluginsFromConfigurationEntities(
-        props.element.taggingConfiguration?.taggableEntityConfiguration,
-      );
-
-    const usableExtensionConfigurations = [
-      ...initialExtensionConfigurationsWithTag,
-      ...extensionConfigurationsFromEntities,
-    ];
-    setExtensionConfiguration(usableExtensionConfigurations);
-
-    const extensionsFromEntities = extensionConfigurationsFromEntities.map(
-      (configuration) => createTipTapNodeExtension(configuration),
+    const taggableEntityConfiguration =
+      props.element.taggingConfiguration?.taggableEntityConfiguration;
+    const taggingExtensions = await initializeTaggingExtension(
+      taggableEntityConfiguration,
     );
-    const extensionConfigurationsWithTag = extensionConfiguration.value.filter(
-      (item) => item.tag,
-    );
-
-    editorExtensions.push(
-      ...extensionConfigurationsWithTag.map((configurationItem) =>
-        createTipTapNodeExtension(configurationItem),
-      ),
-      ...extensionsFromEntities,
-      createGlobalCommandsExtension,
-    );
+    editorExtensions.push(...taggingExtensions);
   }
 
   editor.value = new Editor({
