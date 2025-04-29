@@ -305,20 +305,41 @@ export const createGlobalCommandsExtension = Extension.create({
         },
       untagSelectedText:
         () =>
-        async ({ commands, state }) => {
-          const selectedNode = state.selection.$from.parent;
-          const nodeContent: string = selectedNode.content.content[0].text;
-          const entityId = selectedNode.attrs.entityId;
+        async ({ editor, state }) => {
+          const { selection, doc } = state;
+          const { from, to } = selection;
 
-          const { selection } = state;
-          commands.deleteNode(selectedNode.type.name);
-          commands.insertContentAt(selection.from, nodeContent);
+          let selectedNode = null;
+          let nodePos = null;
+
+          doc.nodesBetween(from, to, (node, pos) => {
+            if (node.attrs?.entityId) {
+              selectedNode = node;
+              nodePos = pos;
+              return false;
+            }
+          });
+
+          if (!selectedNode || nodePos === null) return;
+
+          const nodeContent: string = selectedNode.attrs.label;
+          const entityId = selectedNode.attrs.entityId;
+          const insertEndPos = nodePos + nodeContent.length;
+
+          editor
+            .chain()
+            .focus()
+            .deleteRange({ from: nodePos, to: nodePos + selectedNode.nodeSize })
+            .insertContentAt(nodePos, nodeContent)
+            .setTextSelection(insertEndPos)
+            .run();
 
           const entityExtensionConfiguration =
             extensionConfiguration.value.find(
               (mappingItem: TaggableEntityConfiguration) =>
                 mappingItem.extensionName === selectedNode.type.name,
             );
+
           if (entityExtensionConfiguration) {
             deleteRelations(
               entityId,
@@ -542,12 +563,18 @@ export const getExtensionConfigurationForEntity = (
 };
 
 export const hasSelectionBeenTagged = (editor: Editor) => {
-  const selectedNode = editor.state.selection.$from.parent;
-  const selectedNodeName = selectedNode?.type.name;
+  const { state } = editor;
+  const { $from } = state.selection;
 
-  return (
-    selectedNodeName && customExtensionNames.value.includes(selectedNodeName)
-  );
+  const nodeBefore = $from.nodeBefore;
+  const nodeAfter = $from.nodeAfter;
+
+  const isTagged =
+    (nodeBefore && customExtensionNames.value.includes(nodeBefore.type.name)) ||
+    (nodeAfter && customExtensionNames.value.includes(nodeAfter.type.name));
+
+  console.log(isTagged);
+  return isTagged;
 };
 
 export const tagEntity = (
