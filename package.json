@@ -70,7 +70,7 @@
     "tiny-cookie": "^2.5.1",
     "ts-debounce": "^3.0.0",
     "url-slug": "^3.0.6",
-    "vee-validate": "4.14.7",
+    "vee-validate": "4.15.0",
     "vue": "3.5.13",
     "vue-i18n": "10.0.4",
     "vue-markdown-render": "^2.2.1",
