@@ -40,10 +40,10 @@ import { Editor, EditorContent } from "@tiptap/vue-3";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
 import WYSIWYGButtons from "@/components/entityElements/WYSIWYG/WYSIWYGButtons.vue";
+import type { WysiwygElement } from "@/generated-types/queries";
 import {
   TypeModals,
   ValidationFields,
-  WysiwygElement,
   WysiwygExtensions,
 } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
@@ -87,7 +87,14 @@ const updateModalInfo = () => {
   });
 };
 
+const resetContent = () => {
+  if (!editor.value) return;
+  console.log("resetContent");
+  editor.value.commands.setContent(initialValue.value);
+};
+
 onMounted(async () => {
+  document.addEventListener("discardEdit", resetContent);
   initialValue.value =
     form.value?.values.intialValues[props.element.metadataKey];
   addEditableMetadataKeys([props.element.metadataKey], props.formId);
@@ -136,6 +143,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  document.removeEventListener("discardEdit", resetContent);
   editor.value?.destroy();
 });
 
@@ -156,11 +164,6 @@ watch(
   () => {
     if (editor.value) {
       editor.value.setEditable(isEdit.value);
-      if (!isEdit.value) {
-        editor.value.commands.setContent(
-          form.value?.values.intialValues[props.element.metadataKey],
-        );
-      }
     }
   },
   { immediate: true },
