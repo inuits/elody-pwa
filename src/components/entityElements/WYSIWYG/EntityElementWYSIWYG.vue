@@ -75,7 +75,6 @@ const { updateModal } = useBaseModal();
 const { isEdit } = useEdit();
 const { t } = useI18n();
 
-const content = computed(() => editor.value?.getHTML());
 const form = computed(() => getForm(props.formId));
 const editorNode = ref<HTMLDivElement | undefined>(undefined);
 const initialValue = ref<string>("");
@@ -89,7 +88,6 @@ const updateModalInfo = () => {
 
 const resetContent = () => {
   if (!editor.value) return;
-  console.log("resetContent");
   editor.value.commands.setContent(initialValue.value);
 };
 
@@ -137,6 +135,13 @@ onMounted(async () => {
     },
     editable: isEdit.value,
     content: initialValue.value,
+    onUpdate({ editor }) {
+      if (!form.value) return;
+      form.value.setFieldValue(
+        `${ValidationFields.IntialValues}.${props.element.metadataKey}`,
+        editor.getHTML(),
+      );
+    },
   });
 
   if (props.element.taggingConfiguration) updateModalInfo();
@@ -146,18 +151,6 @@ onUnmounted(() => {
   document.removeEventListener("discardEdit", resetContent);
   editor.value?.destroy();
 });
-
-watch(
-  () => content.value,
-  () => {
-    if (form.value) {
-      form.value.setFieldValue(
-        `${ValidationFields.IntialValues}.${props.element.metadataKey}`,
-        content.value,
-      );
-    }
-  },
-);
 
 watch(
   () => isEdit.value,

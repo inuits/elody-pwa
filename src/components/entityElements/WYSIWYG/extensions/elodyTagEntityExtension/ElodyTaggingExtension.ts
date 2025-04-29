@@ -139,7 +139,8 @@ export const createTipTapNodeExtension = (
     name: extensionName,
     group: "inline",
     inline: true,
-    content: "text*",
+    selectable: false,
+    atom: true,
     addAttributes() {
       const attributes = {
         entityId: {
@@ -153,6 +154,20 @@ export const createTipTapNodeExtension = (
 
             return {
               "data-entity-id": attributes.entityId,
+            };
+          },
+        },
+        label: {
+          default: null,
+          parseHTML: (element: HTMLElement) =>
+            element.getAttribute("data-label"),
+          renderHTML: (attributes) => {
+            if (!attributes.label) {
+              return {};
+            }
+
+            return {
+              "data-label": attributes.label,
             };
           },
         },
@@ -188,6 +203,7 @@ export const createTipTapNodeExtension = (
           getAttrs: (element) => {
             const attributes = {
               entityId: element.getAttribute("data-entity-id"),
+              label: element.getAttribute("data-label"),
             };
 
             if (additionalAttributes) {
@@ -203,8 +219,12 @@ export const createTipTapNodeExtension = (
         },
       ];
     },
-    renderHTML({ HTMLAttributes }) {
-      return [extensionConfiguration.tag, mergeAttributes(HTMLAttributes), 0];
+    renderHTML({ node, HTMLAttributes }) {
+      return [
+        extensionConfiguration.tag,
+        mergeAttributes(HTMLAttributes),
+        node.attrs.label,
+      ];
     },
   });
 };
@@ -269,9 +289,9 @@ export const createGlobalCommandsExtension = Extension.create({
           const newNodeContent = {
             type: configurationItem.extensionName,
             attrs: {
+              label: selectedText,
               entityId: entity.id,
             },
-            content: [{ type: "text", text: selectedText }],
           };
 
           Object.assign(newNodeContent.attrs, additionalAttributes);
@@ -279,9 +299,8 @@ export const createGlobalCommandsExtension = Extension.create({
           commands.deleteRange({ from, to });
           commands.insertContentAt(from, newNodeContent);
           commands.selectNodeForward();
-          commands.insertContent({ type: "text", text: " " });
 
-          view.focus();
+          view.dom.ownerDocument.defaultView?.getSelection()?.collapseToEnd();
           useBaseModal().closeModal(TypeModals.ElodyEntityTaggingModal);
         },
       untagSelectedText:
@@ -469,7 +488,12 @@ const applyColorStylingFromConfigurationToEditor = (
         padding-left: 0.25rem;
         padding-right: 0.25rem;
         cursor: pointer;
-      }`;
+      }
+      
+      #wysiwyg-container ${configurationItem.tag}[${styleDefiningAttribute}="${configurationItem.attributes[styleDefiningAttribute]}"]::after {
+      content: "\\200B";
+      }
+      `;
     },
   );
   document.head.appendChild(style);
