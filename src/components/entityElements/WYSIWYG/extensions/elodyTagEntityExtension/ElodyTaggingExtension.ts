@@ -1,4 +1,4 @@
-import { mergeAttributes, Node } from "@tiptap/core";
+import { mergeAttributes, Node, Extension } from "@tiptap/core";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
   AdvancedFilterTypes,
@@ -11,7 +11,7 @@ import {
   type TaggableEntityConfiguration,
   TypeModals,
 } from "@/generated-types/queries";
-import { type Editor, Extension } from "@tiptap/vue-3";
+import { type Editor } from "@tiptap/vue-3";
 import {
   BulkOperationsContextEnum,
   type Context,
@@ -35,11 +35,56 @@ type TaggableEntityConfigurationFromEntity = TaggableEntityConfiguration & {
   extensionName: string;
 };
 
+export const extensionConfigurationsByEntity = ref<
+  TaggableEntityConfiguration[]
+>([]);
+
 export const extensionConfiguration = ref<
   (TaggableEntityConfiguration | TaggableEntityConfigurationFromEntity)[]
 >([]);
 
+export const isInNeedOfConfigurationEntities = computed<boolean>(() => {
+  if (!extensionConfiguration.value.length) {
+    if (extensionConfigurationsByEntity.value.length) return true;
+  }
+
+  return false;
+});
+
 export const customExtensionNames = ref<string[]>([]);
+
+export const initializeTaggingExtension: Promise<
+  (Node<any, any> | Extension<any, any>)[]
+> = async (taggableEntityConfiguration: TaggableEntityConfiguration[]) => {
+  const initialExtensionConfigurationsWithTag =
+    taggableEntityConfiguration.filter(
+      (configurationItem: TaggableEntityConfiguration) => configurationItem.tag,
+    );
+  const extensionConfigurationsFromEntities: TaggableEntityConfiguration[] =
+    await getPluginsFromConfigurationEntities(taggableEntityConfiguration);
+
+  const usableExtensionConfigurations: TaggableEntityConfiguration[] = [
+    ...initialExtensionConfigurationsWithTag,
+    ...extensionConfigurationsFromEntities,
+  ];
+
+  setExtensionConfiguration(usableExtensionConfigurations);
+
+  const extensionsFromEntities = extensionConfigurationsFromEntities.map(
+    (configuration) => createTipTapNodeExtension(configuration),
+  );
+  const extensionConfigurationsWithTag = extensionConfiguration.value.filter(
+    (item) => item.tag,
+  );
+
+  return [
+    ...extensionConfigurationsWithTag.map((configurationItem) =>
+      createTipTapNodeExtension(configurationItem),
+    ),
+    ...extensionsFromEntities,
+    createGlobalCommandsExtension,
+  ];
+};
 
 const generateExtensionNameFromConfiguration = (
   configurationItem: TaggableEntityConfigurationFromEntity,
@@ -77,7 +122,7 @@ const getNodeFromSelection = (state) => {
 };
 
 export const createTipTapNodeExtension = (
-  extensionConfiguration: TaggableEntityConfigurationFromEntity,
+  extensionConfiguration: TaggableEntityConfiguration,
 ) => {
   const additionalAttributes = [
     ...extensionConfiguration.tagConfigurationByEntity
@@ -303,7 +348,7 @@ export const createGlobalCommandsExtension = Extension.create({
 });
 
 export const setExtensionConfiguration = (
-  TaggableEntityConfiguration: TaggableEntityConfiguration,
+  TaggableEntityConfiguration: TaggableEntityConfiguration[],
 ) => {
   extensionConfiguration.value = TaggableEntityConfiguration;
 };
@@ -358,47 +403,50 @@ const createConfigurationItemsFromMapping = (
 const getConfigurationEntities = async (
   configurations: TaggableEntityConfiguration[],
 ) => {
-  const configurationsByEntity: TaggableEntityConfiguration[] =
-    configurations.filter(
-      (configurationItem) => configurationItem.tagConfigurationByEntity,
-    );
-  if (!configurationsByEntity.length) return;
+  extensionConfigurationsByEntity.value = configurations.filter(
+    (configurationItem) => configurationItem.tagConfigurationByEntity,
+  );
+  console.log(extensionConfigurationsByEntity.value);
+  if (!extensionConfigurationsByEntity.value.length) return;
 
   const query = GetEntitiesDocument;
 
   const configurationItemEntitiesMappingPromises: Promise<{
     configurationItem: TaggableEntityConfiguration;
     configurationEntities: BaseEntity[];
-  }>[] = configurationsByEntity.map(async (configurationItem) => {
-    const queryVariables: GetEntitiesQueryVariables = {
-      advancedFilterInputs: {
-        match_exact: true,
-        type: AdvancedFilterTypes.Type,
-        value:
-          configurationItem.tagConfigurationByEntity?.configurationEntityType,
-      },
-      searchInputType: SearchInputType.AdvancedInputType,
-      searchValue: {
-        isAsc: true,
-      },
-      type: Entitytyping.BaseEntity,
-      limit: 100,
-      skip: 1,
-    };
+  }>[] = extensionConfigurationsByEntity.value.map(
+    async (configurationItem) => {
+      const queryVariables: GetEntitiesQueryVariables = {
+        advancedFilterInputs: {
+          match_exact: true,
+          type: AdvancedFilterTypes.Type,
+          value:
+            configurationItem.tagConfigurationByEntity?.configurationEntityType,
+        },
+        searchInputType: SearchInputType.AdvancedInputType,
+        searchValue: {
+          isAsc: true,
+        },
+        type: Entitytyping.BaseEntity,
+        limit: 100,
+        skip: 1,
+      };
 
-    const response = await apolloClient.query({
-      query,
-      variables: queryVariables,
-      fetchPolicy: "no-cache",
-    });
+      const response = await apolloClient.query({
+        query,
+        variables: queryVariables,
+        fetchPolicy: "no-cache",
+      });
 
-    const configurationEntities: BaseEntity[] = response.data.Entities.results;
+      const configurationEntities: BaseEntity[] =
+        response.data.Entities.results;
 
-    return {
-      configurationItem,
-      configurationEntities,
-    };
-  });
+      return {
+        configurationItem,
+        configurationEntities,
+      };
+    },
+  );
 
   const configurationItemEntitiesMapping: {
     configurationItem: TaggableEntityConfiguration;

@@ -145,24 +145,44 @@
     >
       <i>I</i>
     </button>
-    <button
-      v-if="extensions.includes(WysiwygExtensions.ElodyTaggingExtension)"
-      :class="[{ 'opacity-30': tagButtonEnabled }]"
-      :disabled="buttonsDisabled || tagButtonEnabled"
-      @click="editor.commands.openTagModal()"
-      title="Tag"
-    >
-      Tag
-    </button>
-    <button
-      v-if="extensions.includes(WysiwygExtensions.ElodyTaggingExtension)"
-      :class="[{ 'opacity-30': untagButtonEnabled }]"
-      :disabled="buttonsDisabled || untagButtonEnabled"
-      @click="editor.commands.untagSelectedText()"
-      title="Untag"
-    >
-      Untag
-    </button>
+    <base-tooltip position="top-right" :tooltip-offset="8">
+      <template #activator="{ on }">
+        <div v-on="on">
+          <button
+            v-if="extensions.includes(WysiwygExtensions.ElodyTaggingExtension)"
+            :class="[{ 'opacity-30': tagButtonDisabled }]"
+            :disabled="buttonsDisabled || tagButtonDisabled"
+            @click="editor.commands.openTagModal()"
+            title="Tag"
+          >
+            Tag
+          </button>
+          <button
+            v-if="extensions.includes(WysiwygExtensions.ElodyTaggingExtension)"
+            :class="[{ 'opacity-30': untagButtonDisabled }]"
+            :disabled="buttonsDisabled || untagButtonDisabled"
+            @click="editor.commands.untagSelectedText()"
+            title="Untag"
+          >
+            Untag
+          </button>
+        </div>
+      </template>
+      <template #default>
+        <span
+          v-if="isInNeedOfConfigurationEntities"
+          class="text-sm text-text-placeholder"
+        >
+          <div>
+            {{
+              t("tagging.configuration-entity-required", {
+                entityType: neededConfigurationEntityTypes,
+              })
+            }}
+          </div>
+        </span>
+      </template>
+    </base-tooltip>
   </div>
 </template>
 
@@ -172,7 +192,13 @@ import { WysiwygExtensions } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import useEdit from "@/composables/useEdit";
 import { computed } from "vue";
-import { hasSelectionBeenTagged } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
+import BaseTooltip from "@/components/base/BaseTooltip.vue";
+import {
+  hasSelectionBeenTagged,
+  isInNeedOfConfigurationEntities,
+  extensionConfigurationsByEntity,
+} from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   editor: Editor;
@@ -181,6 +207,7 @@ const props = defineProps<{
 }>();
 
 const { isEdit } = useEdit();
+const { t } = useI18n();
 
 const buttonsDisabled = computed(() => !isEdit.value);
 const editorHasSelection = computed(() => {
@@ -190,13 +217,24 @@ const editorHasSelection = computed(() => {
 const isNonTaggedTextSelected = computed(() => {
   return !hasSelectionBeenTagged(props.editor);
 });
-const tagButtonEnabled = computed(() => {
-  if (!editorHasSelection.value) return true;
+const tagButtonDisabled = computed(() => {
+  if (!editorHasSelection.value || isInNeedOfConfigurationEntities.value)
+    return true;
   return !isNonTaggedTextSelected.value;
 });
-const untagButtonEnabled = computed(() => {
-  if (!editorHasSelection.value) return true;
+const untagButtonDisabled = computed(() => {
+  if (!editorHasSelection.value || isInNeedOfConfigurationEntities.value)
+    return true;
   return isNonTaggedTextSelected.value;
+});
+const neededConfigurationEntityTypes = computed<string>(() => {
+  if (!extensionConfigurationsByEntity.value) return "";
+  const configurationEntityTypes: string[] =
+    extensionConfigurationsByEntity.value.map(
+      (configurationItem) =>
+        configurationItem.tagConfigurationByEntity.configurationEntityType,
+    );
+  return configurationEntityTypes.join(" or ");
 });
 </script>
 
