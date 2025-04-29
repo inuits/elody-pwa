@@ -293,10 +293,7 @@ export const createGlobalCommandsExtension = Extension.create({
 
           const { selection } = state;
           commands.deleteNode(selectedNode.type.name);
-          commands.insertContentAt(selection.from, {
-            type: "text",
-            text: nodeContent,
-          });
+          commands.insertContentAt(selection.from, nodeContent);
 
           const entityExtensionConfiguration =
             extensionConfiguration.value.find(
