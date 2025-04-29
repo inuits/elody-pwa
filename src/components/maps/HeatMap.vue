@@ -1,10 +1,11 @@
 <template>
   <Map.OlMap
-    ref="map"
+    ref="mapRef"
     v-if="entities && entities?.length >= 0"
     :loadTilesWhileAnimating="true"
     :loadTilesWhileInteracting="true"
     style="height: 65vh"
+    @moveend="handleMoveEnd"
   >
     <Map.OlView
       ref="view"
@@ -43,6 +44,10 @@ import {
   Sources,
   MapControls,
 } from "vue3-openlayers";
+import { Polygon } from 'ol/geom';
+import { fromExtent } from 'ol/geom/Polygon';
+import { transform } from 'ol/proj';
+import GeoJSON from 'ol/format/GeoJSON';
 import { Feature } from "ol";
 import { Point } from "ol/geom";
 import { fromLonLat } from 'ol/proj';
@@ -63,8 +68,9 @@ const props = withDefaults(
 
 const { t } = useI18n();
 const { getBasicMapProperties } = useMaps();
-
 const { entities } = toRefs(props);
+
+const mapRef = ref<InstanceType<typeof Map.OlMap> | null>(null);
 const view = ref<View | null>(null);
 const contextMenuItems = ref<Item[]>([]);
 
@@ -112,6 +118,26 @@ const heatmapWeight = function (feature: Feature) {
   const weight = feature.get("weight");
   return weight / 100;
 };
+
+const handleMoveEnd = () => {
+  const map = mapRef.value?.map;
+  if (map) {
+    const extent = map.getView().calculateExtent(map.getSize());
+    console.log('Bounding Box:', extent);
+
+    const polygon = fromExtent(extent); // extent: [minX, minY, maxX, maxY]
+    console.log('Polygon:', polygon);
+
+    const polygon4326 = polygon.clone().transform('EPSG:3857', 'EPSG:4326');
+    console.log('Polygon in LAT/LONG:', polygon4326);
+
+    const geojsonFormat = new GeoJSON();
+    const geojsonPolygon = geojsonFormat.writeGeometryObject(polygon4326);
+    console.log('geojsonPolygon:');
+    console.log(JSON.stringify(geojsonPolygon, null, 2));
+  }
+};
+
 </script>
 
 <style scoped></style>
