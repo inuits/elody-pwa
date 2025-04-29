@@ -406,7 +406,6 @@ const getConfigurationEntities = async (
   extensionConfigurationsByEntity.value = configurations.filter(
     (configurationItem) => configurationItem.tagConfigurationByEntity,
   );
-  console.log(extensionConfigurationsByEntity.value);
   if (!extensionConfigurationsByEntity.value.length) return;
 
   const query = GetEntitiesDocument;
@@ -552,7 +551,7 @@ export const untagEntity = async (
 const getEntityTypeByTagFromMapping = (tag: string): string => {
   const mappingForTag = extensionConfiguration.value.find(
     (mappingItem: TaggableEntityConfiguration) =>
-      mappingItem.tag?.toLowerCase() === tag,
+      mappingItem.tag?.toLowerCase() === tag.toLowerCase(),
   );
   if (!mappingForTag)
     throw Error(`Mapping for '${tag}' tag could not be found`);
