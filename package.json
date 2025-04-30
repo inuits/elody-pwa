@@ -60,7 +60,7 @@
     "mirador": "3.3.0",
     "ol": "^10.2.1",
     "openseadragon": "^5.0.0",
-    "pdfjs-dist": "^2.16.105",
+    "pdfjs-dist": "^4.2.67",
     "prosemirror-model": "^1.24.1",
     "prosemirror-state": "^1.4.3",
     "prosemirror-transform": "^1.10.2",

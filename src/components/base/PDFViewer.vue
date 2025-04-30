@@ -50,7 +50,7 @@ import type { PropType } from "vue";
 //PDFJS imports
 import * as pdfjsLibImport from "pdfjs-dist";
 const pdfjsLib: typeof import("pdfjs-dist") = pdfjsLibImport;
-import "pdfjs-dist/build/pdf.worker.entry";
+import "pdfjs-dist/build/pdf.worker";
 import { Unicons } from "../../types";
 import PdfToolbar from "../PdfToolbar.vue";
 import { useGetMediafile } from "@/composables/useGetMediafile";
@@ -171,7 +171,7 @@ export default defineComponent({
       });
     };
 
-    watch(source, (oldSrc, newSrc) => {
+    watch(source, () => {
       initialRender();
     });
 
