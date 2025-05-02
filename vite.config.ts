@@ -37,13 +37,6 @@ const viteConfig = defineConfig({
     watch: {
       usePolling: true,
     },
-    proxy: {
-      '/api': {
-        target: 'http://localhost:4000',
-        changeOrigin: true,
-        rewrite: (path) => path,
-      },
-    },
   },
   cacheDir,
   build: {
