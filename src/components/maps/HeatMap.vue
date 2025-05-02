@@ -6,6 +6,7 @@
     :loadTilesWhileInteracting="true"
     style="height: 65vh"
     @moveend="handleMoveEnd"
+    @pointermove="handlePointerMove"
   >
     <Map.OlView
       ref="view"
@@ -44,15 +45,14 @@ import {
   Sources,
   MapControls,
 } from "vue3-openlayers";
-import { Polygon } from 'ol/geom';
-import { fromExtent } from 'ol/geom/Polygon';
-import { transform } from 'ol/proj';
-import GeoJSON from 'ol/format/GeoJSON';
+import { fromExtent } from "ol/geom/Polygon";
+import GeoJSON from "ol/format/GeoJSON";
 import { Feature } from "ol";
 import { Point } from "ol/geom";
-import { fromLonLat } from 'ol/proj';
+import { fromLonLat } from "ol/proj";
 import { useMaps } from "@/composables/useMaps";
-import type { ConfigItem, Entity } from "@/generated-types/queries";
+import type { ConfigItem, Entity, MapElement } from "@/generated-types/queries";
+import { useListItemHelper } from "@/composables/useListItemHelper";
 import { router } from "@/main";
 
 const props = withDefaults(
@@ -68,11 +68,13 @@ const props = withDefaults(
 
 const { t } = useI18n();
 const { getBasicMapProperties } = useMaps();
+const { setHoveredListItem } = useListItemHelper();
 const { entities } = toRefs(props);
 
 const mapRef = ref<InstanceType<typeof Map.OlMap> | null>(null);
 const view = ref<View | null>(null);
 const contextMenuItems = ref<Item[]>([]);
+const hoveredFeature = ref<string | undefined>(undefined);
 
 contextMenuItems.value = [
   {
@@ -91,26 +93,28 @@ const mapCenter = computed(() => {
   return fromLonLat([center[1], center[0]]);
 });
 
+const createFeature = (mapData: MapElement, id: string): Feature => {
+  return new Feature({
+    geometry: new Point(
+      fromLonLat([mapData.longitude?.value, mapData.latitude?.value]),
+    ),
+    weight: mapData.weight?.value,
+    id: id,
+  });
+};
+
 const heatmapPoints = computed(() => {
   if (router.currentRoute.value.name === "SingleEntity") {
     const mapData = entities.value[0].entityView.column.elements.mapElement;
     if (!mapData) return new Feature();
-    return [
-      new Feature({
-        geometry: new Point(fromLonLat([mapData.longitude?.value, mapData.latitude?.value])),
-        weight: mapData.weight?.value,
-      }),
-    ];
+    return [createFeature(mapData, entities.value[0].id)];
   } else {
     return entities.value?.map((entity) => {
       if (!entity) return [];
       const mapData = entity.mapElement;
       if (!mapData) return new Feature();
-      return new Feature({
-        geometry: new Point(fromLonLat([mapData.longitude?.value, mapData.latitude?.value])),
-        weight: mapData.weight?.value,
-      });
-    })
+      return createFeature(mapData, entity.id);
+    });
   }
 });
 
@@ -123,21 +127,33 @@ const handleMoveEnd = () => {
   const map = mapRef.value?.map;
   if (map) {
     const extent = map.getView().calculateExtent(map.getSize());
-    console.log('Bounding Box:', extent);
+    console.log("Bounding Box:", extent);
 
     const polygon = fromExtent(extent); // extent: [minX, minY, maxX, maxY]
-    console.log('Polygon:', polygon);
+    console.log("Polygon:", polygon);
 
-    const polygon4326 = polygon.clone().transform('EPSG:3857', 'EPSG:4326');
-    console.log('Polygon in LAT/LONG:', polygon4326);
+    const polygon4326 = polygon.clone().transform("EPSG:3857", "EPSG:4326");
+    console.log("Polygon in LAT/LONG:", polygon4326);
 
     const geojsonFormat = new GeoJSON();
     const geojsonPolygon = geojsonFormat.writeGeometryObject(polygon4326);
-    console.log('geojsonPolygon:');
+    console.log("geojsonPolygon:");
     console.log(JSON.stringify(geojsonPolygon, null, 2));
   }
 };
 
+const handlePointerMove = (event: Event) => {
+  const feature = mapRef.value.forEachFeatureAtPixel(
+    event.pixel,
+    (feature) => feature,
+  );
+  if (feature) {
+    hoveredFeature.value = feature.get("id");
+  } else {
+    hoveredFeature.value = undefined;
+  }
+  setHoveredListItem(hoveredFeature.value);
+};
 </script>
 
 <style scoped></style>

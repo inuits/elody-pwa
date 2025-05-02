@@ -1,4 +1,7 @@
 import type { BaseEntity } from "@/generated-types/queries";
+import { ref } from "vue";
+
+const hoveredListItem = ref<string | undefined>(undefined);
 
 const useListItemHelper = () => {
   const getMediaFilenameFromEntity = (entity: BaseEntity) => {
@@ -33,7 +36,17 @@ const useListItemHelper = () => {
     return intialValues[key];
   };
 
-  return { getMediaFilenameFromEntity };
+  const setHoveredListItem = (id: string | undefined) => {
+    hoveredListItem.value = id;
+  }
+
+  return {
+    getMediaFilenameFromEntity,
+    setHoveredListItem
+  };
 };
 
-export default useListItemHelper;
+export {
+  useListItemHelper,
+  hoveredListItem
+};

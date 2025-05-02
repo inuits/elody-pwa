@@ -19,7 +19,7 @@
     </div>
     <div
       v-else
-      class="bg-neutral-lightest grid grid-cols-[30%_70%] w-full"
+      class="bg-neutral-lightest grid grid-cols-[30%_70%] gap-y-[0.5vh] w-full"
       :class="[
         baseLibraryMode === BaseLibraryModes.BasicBaseLibrary
           ? ''
@@ -27,17 +27,17 @@
             ? 'px-3 pt-3'
             : 'px-6',
         { '!bg-white': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary },
-        { 'grid-rows-[6vh_1fr]': baseLibraryMode === BaseLibraryModes.NormalBaseLibrary },
+        { 'grid-rows-[5vh_1fr]': baseLibraryMode === BaseLibraryModes.NormalBaseLibrary },
         { 'grid-rows-[1vh_1fr]': baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder },
         { 'grid-rows-[0vh_1fr]': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary },
       ]"
     >
       <div
-        class="h-fit pt-3 pb-2 top-0 z-40 bg-neutral-lightest"
+        class="z-40 top-0 pt-3 pb-2 bg-neutral-lightest"
         :class="[
           { 'hidden': !enableAdvancedFilters },
           { 'row-span-1': !expandFilters },
-          { 'row-span-2': expandFilters },
+          { 'row-span-2 h-fit': expandFilters },
           { 'sticky': hasStickyBars },
         ]"
       >
@@ -71,9 +71,9 @@
       </div>
       <div
         :class="[
-          'h-fit pl-[1%] pb-4',
+          'z-40 pl-[1%] right-0 pb-4',
           {
-            'top-0 mb-2 pt-4 bg-neutral-lightest':
+            'top-0 bg-neutral-lightest pt-4':
               baseLibraryMode === BaseLibraryModes.NormalBaseLibrary,
           },
           { sticky: hasStickyBars },
@@ -106,6 +106,7 @@
         </div>
       </div>
       <div
+        class="top-[5.5vh] mt-[0.5vh]"
         :class="[
           { 'col-span-1 pl-[1%]': expandFilters },
           { 'col-span-2': !expandFilters },
@@ -116,7 +117,7 @@
             enableBulkOperations &&
             baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
           "
-          class="z-50 sticky top-[6vh] my-3"
+          class="z-50 sticky top-[5vh] my-3"
         >
           <BulkOperationsActionsBar
             :context="bulkOperationsContext"
@@ -184,8 +185,10 @@
                   : (displayGrid ?? ViewModes.ViewModesGrid)
               ]
             "
+            :config-per-view-mode="configPerViewMode"
             :expandFilters="expandFilters"
             :refetch-entities="refetchEntities"
+            :entity-type="entityType"
           />
           <ViewModesMedia
             v-if="viewModesIncludeViewModesMedia && displayPreview"

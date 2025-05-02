@@ -343,6 +343,7 @@ export const getMetadataFields = (
 export const formatTeaserMetadata = (
   teaserMetadata: Record<string, Metadata>,
   intialValues: Record<string, IntialValues>,
+  previewComponentEnabled: boolean = false,
 ): object => {
   const formatted = [];
   for (const key in teaserMetadata) {
@@ -354,6 +355,7 @@ export const formatTeaserMetadata = (
       formatted.push(newTeaserMetadata);
     }
   }
+  if (previewComponentEnabled) return [formatted[0]];
   return formatted;
 };
 
