@@ -45,7 +45,7 @@ import { computed, ref } from "vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import ImageViewer from "@/components/base/ImageViewer.vue";
 import { formatTeaserMetadata, stringIsUrl } from "@/helpers";
-import useListItemHelper from "@/composables/useListItemHelper";
+import { useListItemHelper } from "@/composables/useListItemHelper";
 import { apolloClient } from "@/main";
 
 const props = defineProps<{
