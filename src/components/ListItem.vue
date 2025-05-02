@@ -2,7 +2,7 @@
   <li
     data-cy="list-item"
     :class="[
-      'bg-neutral-white border border-neutral-light rounded cursor-pointer list-none z-[-1]',
+      'border border-neutral-light rounded cursor-pointer list-none z-[-1]',
       {
         'flex items-center gap-6 px-8 py-4 mb-2': viewMode === 'list',
       },
@@ -15,6 +15,8 @@
       { '!border-status-deleted': isMarkedAsToBeDeleted },
       { 'grayscale brightness-95 !cursor-default': isDisabled },
       { 'animate-pulse': loading },
+      { 'bg-neutral-white': !isHoveredListItems },
+      { 'bg-blue-800': isHoveredListItems },
     ]"
   >
     <div
@@ -198,6 +200,12 @@
         @toggle-loading="toggleLoading"
       />
     </div>
+    <unicon
+      v-if="previewComponentIconVisible"
+      :name="previewComponentEnabled ? Unicons.EyeSlash.name : Unicons.Eye.name"
+      class="h-5.5 w-5.5 text-text-body"
+      @click.stop.prevent="emit('togglePreviewComponent')"
+    />
   </li>
   <template v-if="entityListElements">
     <div
@@ -273,6 +281,9 @@ const props = withDefaults(
     entityListElements?: EntityListElement[];
     viewMode?: "list" | "grid";
     refetchEntities?: Function;
+    previewComponentEnabled: boolean;
+    previewComponentIconVisible: boolean;
+    isHoveredListItems: boolean;
   }>(),
   {
     contextMenuActions: undefined,
@@ -302,6 +313,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (event: "navigateTo"): void;
+  (event: "togglePreviewComponent"): void;
 }>();
 
 const { deleteTeaserMetadataItemInState } = useFormHelper();
@@ -361,7 +373,7 @@ const canShowCopyRight = () => {
 
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 const onlyEditableTeaserMetadata = computed(() =>
-  props.teaserMetadata.filter((metadata) => metadata.showOnlyInEditMode),
+  props.teaserMetadata?.filter((metadata) => metadata?.showOnlyInEditMode),
 );
 
 watch(
