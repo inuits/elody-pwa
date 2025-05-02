@@ -573,7 +573,6 @@ export const hasSelectionBeenTagged = (editor: Editor) => {
     (nodeBefore && customExtensionNames.value.includes(nodeBefore.type.name)) ||
     (nodeAfter && customExtensionNames.value.includes(nodeAfter.type.name));
 
-  console.log(isTagged);
   return isTagged;
 };
 
