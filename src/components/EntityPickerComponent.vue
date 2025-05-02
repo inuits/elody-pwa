@@ -36,6 +36,8 @@
 import {
   type AdvancedFilterInput,
   type BaseRelationValuesInput,
+  Collection,
+  Entity,
   EntityPickerMode,
   Entitytyping,
   MutateEntityValuesDocument,
@@ -55,7 +57,7 @@ import { useMutation } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 import { useCustomQuery } from "@/composables/useCustomQuery";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { useFormHelper } from "@/composables/useFormHelper";
+import { EntityValues, useFormHelper } from "@/composables/useFormHelper";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import {
   NotificationType,
