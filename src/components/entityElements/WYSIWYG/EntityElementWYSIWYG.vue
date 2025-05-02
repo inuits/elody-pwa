@@ -87,7 +87,8 @@ const updateModalInfo = () => {
 };
 
 const resetContent = () => {
-  if (!editor.value) return;
+  const content = editor.value?.options?.content
+  if (!content && content !== "") return;
   editor.value.commands.setContent(initialValue.value);
 };
 
@@ -157,6 +158,18 @@ watch(
   () => {
     if (editor.value) {
       editor.value.setEditable(isEdit.value);
+    }
+  },
+  { immediate: true },
+);
+
+watch(
+  () => form.value?.values.intialValues[props.element.metadataKey],
+  () => {
+    if (editor.value && !isEdit.value) {
+      initialValue.value =
+        form.value?.values.intialValues[props.element.metadataKey];
+      editor.value.commands.setContent(initialValue.value);
     }
   },
   { immediate: true },
