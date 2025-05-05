@@ -16,7 +16,7 @@
       { 'grayscale brightness-95 !cursor-default': isDisabled },
       { 'animate-pulse': loading },
       { 'bg-neutral-white': !isHoveredListItems },
-      { 'bg-blue-800': isHoveredListItems },
+      { 'bg-blue-900 animate-pulse border-4 border-neutral-800': isHoveredListItems },
     ]"
   >
     <div
