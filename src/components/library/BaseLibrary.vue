@@ -19,7 +19,7 @@
     </div>
     <div
       v-else
-      class="bg-neutral-lightest grid grid-cols-[30%_70%] grid-rows-[6vh_1fr] w-full"
+      class="bg-neutral-lightest grid grid-cols-[30%_70%] w-full"
       :class="[
         baseLibraryMode === BaseLibraryModes.BasicBaseLibrary
           ? ''
@@ -27,7 +27,9 @@
             ? 'px-3 pt-3'
             : 'px-6',
         { '!bg-white': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary },
-        { 'grid-rows-[1vh_1fr]': baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary  },
+        { 'grid-rows-[6vh_1fr]': baseLibraryMode === BaseLibraryModes.NormalBaseLibrary },
+        { 'grid-rows-[1vh_1fr]': baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder },
+        { 'grid-rows-[0vh_1fr]': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary },
       ]"
     >
       <div
