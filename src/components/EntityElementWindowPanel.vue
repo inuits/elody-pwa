@@ -86,7 +86,6 @@
               "
               :can="metadata.can"
               :fetch-deep-relations="metadata.fetchDeepRelations"
-              class="pt-2"
             />
             <entity-element-w-y-s-i-w-y-g
               v-if="metadata.__typename === nonStandardFieldTypes[1]"
