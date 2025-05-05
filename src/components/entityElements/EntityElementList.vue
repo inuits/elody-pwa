@@ -3,9 +3,9 @@
     <entity-element-wrapper
       data-test="entity-element-wrapper"
       v-if="showElementList"
-      class="mb-5"
       :class="[
-        { 'pb-1': baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary },
+        { 'mb-5 pb-1': baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary },
+        { 'ml-2': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary },
       ]"
       :entity-id="entityId"
       :label="label"
