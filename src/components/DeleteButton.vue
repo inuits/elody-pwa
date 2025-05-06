@@ -45,7 +45,7 @@ const router = useRouter();
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const { createNotificationOverwrite } = useNotification();
 const { previousPageInfo } = usePageInfo();
-const { isEditToggleVisible, disableEditMode } = useEditMode();
+const { editMode, disableEditMode } = useEditMode();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { closeModal, openModal, deleteQueryOptions } = useBaseModal();
 const { initializeGeneralProperties, initializePropertiesForDeletion } =
@@ -57,9 +57,7 @@ const { getForm } = useFormHelper();
 const entityId = computed<string>(() => route.params["id"]);
 
 const deleteAvailable = computed<boolean>(
-  () =>
-    isEditToggleVisible.value === "edit-delete" ||
-    isEditToggleVisible.value === "delete",
+  () => editMode.value === "edit-delete" || editMode.value === "delete",
 );
 
 const entityType = computed(() => {

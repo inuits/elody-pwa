@@ -1,13 +1,15 @@
 <template>
   <div
     data-cy="edit-toggle"
-    v-if="isEditToggleVisible === 'edit' || isEditToggleVisible === 'edit-delete'"
+    v-if="editMode === 'edit' || editMode === 'edit-delete'"
     class="ml-6"
   >
     <base-button-new
       v-if="!editMetadataBtnClicked"
       :button-size="buttonSize"
-      :label="readmodeLabel ? readmodeLabel : t('metadata.labels.edit-metadata')"
+      :label="
+        readmodeLabel ? readmodeLabel : t('metadata.labels.edit-metadata')
+      "
       :icon="DamsIcons.Edit"
       button-style="accentNormal"
       @click="clickEditMetadataButton()"
@@ -15,7 +17,9 @@
     <base-button-new
       v-else
       :button-size="buttonSize"
-      :label="editmodeLabel ? editmodeLabel : t('metadata.labels.editing-metadata')"
+      :label="
+        editmodeLabel ? editmodeLabel : t('metadata.labels.editing-metadata')
+      "
       :disabled="true"
     />
   </div>
@@ -24,7 +28,9 @@
 <script lang="ts" setup>
 import { ref, watch } from "vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
-import BaseButtonNew, { type ButtonSize } from "@/components/base/BaseButtonNew.vue";
+import BaseButtonNew, {
+  type ButtonSize,
+} from "@/components/base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";
 import useEditMode from "@/composables/useEdit";
 import { DamsIcons } from "@/generated-types/queries";
@@ -39,15 +45,10 @@ const props = withDefaults(
     buttonSize: "small",
     readmodeLabel: undefined,
     editmodeLabel: undefined,
-  }
+  },
 );
 
-const {
-  isEdit,
-  setEditMode,
-  hideEditToggle,
-  isEditToggleVisible,
-} = useEditMode();
+const { isEdit, setEditMode, hideEditToggle, editMode } = useEditMode();
 const { isSingle } = useRouteHelpers();
 const { t } = useI18n();
 
@@ -55,7 +56,7 @@ const editMetadataBtnClicked = ref<boolean>(false);
 const clickEditMetadataButton = () => {
   editMetadataBtnClicked.value = true;
   setEditMode();
-}
+};
 
 watch(isEdit, (value: boolean) => {
   editMetadataBtnClicked.value = value;
@@ -66,7 +67,7 @@ watch(
   () => {
     if (isSingle.value === false) hideEditToggle();
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 

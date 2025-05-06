@@ -106,7 +106,7 @@ const { closeModal } = useBaseModal();
 const { addRelations } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const { getEntityId, getRelationType } = useEntityPickerModal();
-const { save, addSaveCallback, clearSaveCallbacks } = useEditMode();
+const { save, setRefetchFn } = useEditMode();
 const { getForm } = useFormHelper();
 const { parseFormValuesToFormInput } = useFormHelper();
 const { createNotification } = useNotification();
@@ -134,7 +134,7 @@ const saveRelations = (selectedItems: InBulkProcessableItem[]) => {
   if (props.entityPickerMode === EntityPickerMode.Emit) return;
   addRelations(selectedItems, getRelationType(), getEntityId(), true);
   dequeueAllItemsForBulkProcessing(getContext());
-  addSaveHandler();
+  setRefetchFn(submit);
   save(true);
   closeModal(TypeModals.DynamicForm);
 };
@@ -204,11 +204,6 @@ const submit = useSubmitForm<EntityValues>(async () => {
   });
   form.resetForm({ values: form.values });
 });
-
-const addSaveHandler = () => {
-  clearSaveCallbacks();
-  addSaveCallback(submit, "first");
-};
 
 onMounted(async () => {
   if (props.customQuery && props.customFiltersQuery) await getCustomQuery();
