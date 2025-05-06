@@ -72,7 +72,7 @@ const { importEditorExtensions, getExtensionConfiguration } =
   useWYSIWYGEditor();
 const { getForm, addEditableMetadataKeys } = useFormHelper();
 const { updateModal } = useBaseModal();
-const { isEdit } = useEdit();
+const useEditHelper = useEdit(props.formId);
 const { t } = useI18n();
 
 const form = computed(() => getForm(props.formId));
@@ -87,7 +87,7 @@ const updateModalInfo = () => {
 };
 
 const resetContent = () => {
-  const content = editor.value?.options?.content
+  const content = editor.value?.options?.content;
   if (!content && content !== "") return;
   editor.value.commands.setContent(initialValue.value);
 };
@@ -128,13 +128,13 @@ onMounted(async () => {
         class: `prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl ${props.displayInline ? "mx-2 min-h-[125px]" : "mx-4 min-h-[250px]"} focus:outline-none border border-[rgba(0,58,82,0.6)] rounded-md  p-2`,
       },
       handleClickOn: (view, pos, node) => {
-        if (node.attrs.entityId && !isEdit.value) openDetailModal(node);
+        if (node.attrs.entityId && !useEditHelper.isEdit) openDetailModal(node);
       },
     },
     parseOptions: {
       preserveWhitespace: true,
     },
-    editable: isEdit.value,
+    editable: useEditHelper.isEdit,
     content: initialValue.value,
     onUpdate({ editor }) {
       if (!form.value) return;
@@ -154,10 +154,10 @@ onUnmounted(() => {
 });
 
 watch(
-  () => isEdit.value,
+  () => useEditHelper.isEdit,
   () => {
     if (editor.value) {
-      editor.value.setEditable(isEdit.value);
+      editor.value.setEditable(useEditHelper.isEdit);
     }
   },
   { immediate: true },
@@ -166,7 +166,7 @@ watch(
 watch(
   () => form.value?.values.intialValues[props.element.metadataKey],
   () => {
-    if (editor.value && !isEdit.value) {
+    if (editor.value && !useEditHelper.isEdit) {
       initialValue.value =
         form.value?.values.intialValues[props.element.metadataKey];
       editor.value.commands.setContent(initialValue.value);

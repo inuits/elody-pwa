@@ -76,8 +76,10 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const { setColumnSizes, resetToDefaultSizes } = useColumnResizeHelper();
-const { isEdit } = useEditMode();
-const computedIsEdit = computed(() => props.isEditOverwrite || isEdit.value);
+const useEditHelper = useEditMode(props.formId);
+const computedIsEdit = computed(
+  () => props.isEditOverwrite || useEditHelper.isEdit,
+);
 
 const resizeColumn = (toggled: Boolean) => {
   if (toggled) {

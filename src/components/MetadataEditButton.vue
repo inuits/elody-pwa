@@ -1,18 +1,22 @@
 <template>
   <div
     data-cy="edit-toggle"
-    v-if="editMode === 'edit' || editMode === 'edit-delete'"
+    v-if="
+      editModeHelper.editMode === 'view' ||
+      editModeHelper.editMode === 'edit' ||
+      editModeHelper.editMode === 'edit-delete'
+    "
     class="ml-6"
   >
     <base-button-new
-      v-if="!editMetadataBtnClicked"
+      v-if="!editModeHelper.isEdit"
       :button-size="buttonSize"
       :label="
         readmodeLabel ? readmodeLabel : t('metadata.labels.edit-metadata')
       "
       :icon="DamsIcons.Edit"
       button-style="accentNormal"
-      @click="clickEditMetadataButton()"
+      @click="() => editModeHelper.setEditMode()"
     />
     <base-button-new
       v-else
@@ -26,7 +30,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from "vue";
+import { ref, watch, inject, computed } from "vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
 import BaseButtonNew, {
   type ButtonSize,
@@ -34,6 +38,7 @@ import BaseButtonNew, {
 import { useI18n } from "vue-i18n";
 import useEditMode from "@/composables/useEdit";
 import { DamsIcons } from "@/generated-types/queries";
+import { useRoute } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -48,24 +53,17 @@ const props = withDefaults(
   },
 );
 
-const { isEdit, setEditMode, hideEditToggle, editMode } = useEditMode();
+const entityFormData = inject("entityFormData");
+const route = useRoute();
+const entityId = computed<string>(() => entityFormData?.id || route.params.id);
+const editModeHelper = useEditMode(entityId.value);
 const { isSingle } = useRouteHelpers();
 const { t } = useI18n();
-
-const editMetadataBtnClicked = ref<boolean>(false);
-const clickEditMetadataButton = () => {
-  editMetadataBtnClicked.value = true;
-  setEditMode();
-};
-
-watch(isEdit, (value: boolean) => {
-  editMetadataBtnClicked.value = value;
-});
 
 watch(
   () => isSingle,
   () => {
-    if (isSingle.value === false) hideEditToggle();
+    if (isSingle.value === false) editModeHelper.hideEditButton();
   },
   { immediate: true },
 );
