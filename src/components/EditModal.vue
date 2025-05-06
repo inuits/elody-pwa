@@ -1,17 +1,17 @@
 <template>
   <div
-    v-if="isEdit"
+    v-if="editModeHelper.isEdit"
     class="flex justify-center fixed bottom-0 w-[calc(100%-6rem)] p-5 z-[200]"
   >
     <BulkOperationsSubmitBar
       :button-label="$t('bulk-operations.save')"
       :button-icon="DamsIcons.Save"
-      :show-delete-button="editMode === 'edit-delete'"
-      :disabled="showErrors"
+      :show-delete-button="editModeHelper.editMode === 'edit-delete'"
+      :disabled="editModeHelper.showErrors"
       @submit="
         async () => {
-          clickButton();
-          await save();
+          editModeHelper.clickButton();
+          await editModeHelper.save();
           await getTenants();
         }
       "
@@ -28,14 +28,17 @@ import { DamsIcons, TypeModals } from "@/generated-types/queries";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
-import { inject } from "vue";
+import { inject, computed } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useRoute } from "vue-router";
 
-const { isEdit, save, discard, showErrors, clickButton, editMode } =
-  useEditMode();
+const entityFormData = inject("entityFormData");
+const route = useRoute();
+const entityId = computed(() => entityFormData?.id || route.params.id);
+const editModeHelper = useEditMode(entityId.value);
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal } = useBaseModal();
 const { discardEditForForm } = useFormHelper();
@@ -46,9 +49,8 @@ const openDiscardModal = () => {
   initializeConfirmModal({
     confirmButton: {
       buttonCallback: () => {
-        discard();
-        const id = inject("entityFormData")?.id;
-        discardEditForForm(id);
+        editModeHelper.discard();
+        discardEditForForm(entityId.value);
         closeModal(TypeModals.Confirm);
       },
     },

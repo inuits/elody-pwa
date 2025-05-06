@@ -32,7 +32,6 @@ export function useDeleteRelations() {
     getForm,
     parseFormValuesToFormInput,
   } = useFormHelper();
-  const { save, disableEditMode } = useEditMode();
   const { closeModal } = useBaseModal();
   const { createNotification } = useNotification();
   const { dequeueItemForBulkProcessing } = useBulkOperations();
@@ -44,6 +43,7 @@ export function useDeleteRelations() {
     context: Context,
     saveImmediately: boolean = true,
   ) => {
+    const { save } = useEditMode(entityId);
     const form = getForm(entityId) as FormContext;
     if (!form) return;
 
@@ -73,6 +73,7 @@ export function useDeleteRelations() {
     collection: Collection,
     modalType?: TypeModals,
   ) => {
+    const { disableEditMode } = useEditMode(entityId);
     const form = getForm(entityId) as FormContext;
     if (!form) return;
 
@@ -82,7 +83,7 @@ export function useDeleteRelations() {
         id: entityId,
         formInput: parseFormValuesToFormInput(entityId, form.values, true),
         collection,
-      }
+      },
     });
 
     if (!result?.data?.mutateEntityValues) return;

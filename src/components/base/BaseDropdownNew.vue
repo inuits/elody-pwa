@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, inject } from "vue";
 import {
   ActionContextEntitiesSelectionType,
   ActionContextViewModeTypes,
@@ -38,6 +38,7 @@ import {
 } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 import useEditMode from "@/composables/useEdit";
+import { useRoute } from "vue-router";
 
 type Dropdown = {
   style: string;
@@ -106,18 +107,21 @@ const props = withDefaults(
     disable: false,
     itemsSelected: false,
     multiple: false,
-  }
+  },
 );
 
 const emit = defineEmits<{
   (
     event: "update:modelValue",
-    modelValue: DropdownOption | DropdownOption[]
+    modelValue: DropdownOption | DropdownOption[],
   ): void;
 }>();
 
 const { t } = useI18n();
-const { isEdit } = useEditMode();
+const route = useRoute();
+const entityFormData: any = inject("entityFormData");
+const entityId = computed<string>(() => entityFormData?.id || route.params.id);
+const { isEdit } = useEditMode(entityId.value);
 const defaultOption: DropdownOption = {
   icon: DamsIcons.AngleDown,
   label: "dropdown.select-option",
@@ -145,13 +149,13 @@ const selectItem = (event: Event) => {
       if (item.selected)
         newlySelectedOption.push(
           props.options.find(
-            (option: DropdownOption) => option.label === item?.value
-          )
+            (option: DropdownOption) => option.label === item?.value,
+          ),
         );
     }
   } else
     newlySelectedOption = props.options.find(
-      (option: DropdownOption) => option.label === event.target?.value
+      (option: DropdownOption) => option.label === event.target?.value,
     );
   if (
     !newlySelectedOption ||
@@ -190,7 +194,7 @@ watch(
         emit("update:modelValue", selectedItem.value);
       }
   },
-  { immediate: true }
+  { immediate: true },
 );
 watch(
   () => props.modelValue,
@@ -198,12 +202,12 @@ watch(
     if (!props.modelValue) return;
     if (typeof props.modelValue === "string") {
       selectedItem.value = props.options.find(
-        (option: DropdownOption) => option.value === props.modelValue
+        (option: DropdownOption) => option.value === props.modelValue,
       );
       return;
     }
     selectedItem.value = props.modelValue;
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>

@@ -87,13 +87,6 @@ const {
   setRootRoute,
   iterateOverBreadcrumbs,
 } = useBreadcrumbs(config);
-const {
-  isEdit,
-  hideEditToggle,
-  disableEditMode,
-  showEditToggle,
-  setRefetchFn,
-} = useEditMode();
 
 const {
   mediafileSelectionState,
@@ -112,6 +105,14 @@ const props = withDefaults(
 );
 
 const id = ref<string[]>(asString(props.entityId || route.params["id"]));
+const {
+  isEdit,
+  hideEditButton,
+  disableEditMode,
+  setRefetchFn,
+  editMode,
+  setEditMode,
+} = useEditMode(id.value);
 const identifiers = ref<string[]>([]);
 const loading = ref<boolean>(true);
 const { getEditableMetadataKeys } = useFormHelper();
@@ -258,18 +259,19 @@ watch(
       () => permissionToDelete.value || permissionToEdit.value,
       () => {
         if (props.viewOnly) {
-          hideEditToggle();
+          hideEditButton();
           return;
         }
         if (auth.isAuthenticated.value) {
           if (permissionToEdit.value && permissionToDelete.value)
-            showEditToggle("edit-delete");
+            setEditMode("edit-delete");
           else if (permissionToEdit.value && !permissionToDelete.value)
-            showEditToggle("edit");
+            setEditMode("edit");
           else if (permissionToDelete.value && !permissionToEdit.value) {
-            showEditToggle("delete");
-          } else hideEditToggle();
-        } else hideEditToggle();
+            setEditMode("delete");
+          } else hideEditButton();
+        } else hideEditButton();
+        console.log(editMode.value, id.value);
       },
     );
     setRefetchFn(refetch);

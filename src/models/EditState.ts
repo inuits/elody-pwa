@@ -1,13 +1,13 @@
 import { ref, computed } from "vue";
 
-export type EditModes = "edit" | "view" | "delete" | "edit-delete";
+export type EditModes = "edit" | "no-edit" | "view" | "delete" | "edit-delete";
 export type callback = (e?: Event | undefined) => Promise<unknown>;
 
 export class EditState {
   editStateName: string | undefined = undefined;
   buttonClicked = ref<boolean>(false);
   isDisabled = ref<boolean>(false);
-  editMode = ref<EditModes>("view");
+  editMode = ref<EditModes>("no-edit");
   submitFn = ref<callback | undefined>(undefined);
   refetchFn = ref<Function | undefined>(undefined);
 
@@ -28,7 +28,7 @@ export class EditState {
     this.resetButtonClicked();
   };
 
-  disableEditMode = () => (this.editMode.value = "view");
+  disableEditMode = () => this.setEditMode("view");
 
   setSubmitFunction = (editSubmitFn: callback | undefined) => {
     this.submitFn.value = editSubmitFn;
@@ -36,11 +36,7 @@ export class EditState {
 
   setRefetchFn = (refetch: Function) => (this.refetchFn.value = refetch);
 
-  showEditToggle = (mode: "edit" | "delete" | "edit-delete" = "edit") => {
-    this.editMode.value = mode;
-  };
-
-  hideEditToggle = () => (this.editMode.value = "view");
+  hideEditButton = () => this.setEditMode("no-edit");
 
   save = async (force: boolean = false) => {
     if (!force && this.isDisabled.value) return;
