@@ -127,18 +127,10 @@ const handleMoveEnd = () => {
   const map = mapRef.value?.map;
   if (map) {
     const extent = map.getView().calculateExtent(map.getSize());
-    console.log("Bounding Box:", extent);
-
     const polygon = fromExtent(extent); // extent: [minX, minY, maxX, maxY]
-    console.log("Polygon:", polygon);
-
     const polygon4326 = polygon.clone().transform("EPSG:3857", "EPSG:4326");
-    console.log("Polygon in LAT/LONG:", polygon4326);
-
     const geojsonFormat = new GeoJSON();
     const geojsonPolygon = geojsonFormat.writeGeometryObject(polygon4326);
-    console.log("geojsonPolygon:");
-    console.log(JSON.stringify(geojsonPolygon, null, 2));
   }
 };
 
