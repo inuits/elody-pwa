@@ -2,7 +2,7 @@
   <li
     data-cy="list-item"
     :class="[
-      'border border-neutral-light rounded cursor-pointer list-none z-[-1]',
+      'border rounded cursor-pointer list-none z-[-1]',
       {
         'flex items-center gap-6 px-8 py-4 mb-2': viewMode === 'list',
       },
@@ -16,6 +16,7 @@
       { 'grayscale brightness-95 !cursor-default': isDisabled },
       { 'animate-pulse': loading },
       { 'bg-neutral-white': !isHoveredListItems },
+      { 'border-neutral-light': !isHoveredListItems },
       { 'bg-blue-900 animate-pulse border-4 border-neutral-800': isHoveredListItems },
     ]"
   >
