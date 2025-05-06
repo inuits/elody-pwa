@@ -275,7 +275,7 @@ const calculateGridColumns = () => {
 const getPreviewItemsForEntity = async () => {
   previewComponent.value = undefined;
   previewComponentEnabled.value = false;
-  await apolloClient
+  apolloClient
     .query({
       query: GetPreviewComponentsDocument,
       variables: { entityType: props.entityType },
