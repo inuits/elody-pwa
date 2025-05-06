@@ -6,7 +6,7 @@
     {{ t(previewComponent.title)}}
   </h1>
   <ViewModesMap
-    v-if="previewComponent.previewType === PreviewTypesEnum.MapPreview"
+    v-if="previewComponent.type === PreviewTypes.Map"
     :config="configPerViewMode[ViewModes.ViewModesMap]"
     :entities="entities"
   />
@@ -19,7 +19,7 @@ import {
   type Entity,
   type PreviewComponent,
   ViewModes,
-  PreviewTypesEnum
+  PreviewTypes
 } from "@/generated-types/queries";
 import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
 import { useI18n } from "vue-i18n";
