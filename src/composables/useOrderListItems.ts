@@ -36,7 +36,7 @@ const savedSkipForOrdering = ref<number>(selectedSkip.value);
 const pagination = computed(() =>
   selectedPaginationLimitOption.value?.value
     ? selectedPaginationLimitOption.value?.value
-    : 20
+    : 20,
 );
 
 const useOrderListItems = () => {
@@ -51,12 +51,12 @@ const useOrderListItems = () => {
   };
   const getOrderItemInList = (formId: string, field: String): OrderItem => {
     return orderItemsPerForm.value[formId].filter(
-      (item) => item.field === field
+      (item) => item.field === field,
     )[0];
   };
   const sortList = (formId: string) => {
     orderItemsPerForm.value[formId].sort(
-      (value, nextValue) => value.currentValue > nextValue.currentValue
+      (value, nextValue) => value.currentValue > nextValue.currentValue,
     );
   };
   const setStatus = (item: any): EditStatus => {
@@ -85,14 +85,14 @@ const useOrderListItems = () => {
   const removeOrderItem = (formId: string, field: string) => {
     if (!formExists(formId) || isFormEmpty(formId)) return;
     orderItemsPerForm.value[formId] = orderItemsPerForm.value[formId].filter(
-      (item) => item.field !== field
+      (item) => item.field !== field,
     );
   };
 
   const updateOrderItem = async (
     formId: string,
     field: string,
-    newValue: string
+    newValue: string,
   ) => {
     if (!formExists(formId)) return;
     const item = getOrderItemInList(formId, field);
@@ -135,7 +135,7 @@ const useOrderListItems = () => {
     oldValue: any,
     newValue: any,
     indexToSave: any,
-    isMultipage: any
+    isMultipage: any,
   ) => {
     for (oldValue; oldValue > newValue; oldValue--) {
       if (
@@ -162,7 +162,7 @@ const useOrderListItems = () => {
     oldValue: any,
     newValue: any,
     indexToSave: any,
-    isMultipage: any
+    isMultipage: any,
   ) => {
     for (oldValue; oldValue < newValue; oldValue++) {
       const checkIndex = orderItemsPerForm.value[formId].length - 1;
@@ -190,7 +190,7 @@ const useOrderListItems = () => {
     formId: string,
     field: string,
     oldValue: number,
-    newValue: number
+    newValue: number,
   ) => {
     const form = orderItemsPerForm.value[formId];
     const indexToSave = orderItemsPerForm.value[formId]
@@ -207,7 +207,7 @@ const useOrderListItems = () => {
         oldValue,
         newValue,
         indexToSave,
-        isMultipage
+        isMultipage,
       );
     } else {
       const multiPageIndexCompare =
@@ -222,7 +222,7 @@ const useOrderListItems = () => {
         oldValue,
         newValue,
         indexToSave,
-        isMultipage
+        isMultipage,
       );
     }
     sortList(formId);
@@ -257,7 +257,7 @@ const useOrderListItems = () => {
           oldValue,
           newValue,
           indexToSave,
-          isMultipage
+          isMultipage,
         );
       } else {
         if (
@@ -281,13 +281,13 @@ const useOrderListItems = () => {
           oldValue,
           newValue,
           indexToSave,
-          isMultipage
+          isMultipage,
         );
       }
       sortList(formId);
       EventBus.emit("orderList_changed", form);
       setChangePaginationNumber(undefined);
-    }
+    },
   );
 
   return {

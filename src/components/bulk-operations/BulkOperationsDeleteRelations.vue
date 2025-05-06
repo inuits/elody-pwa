@@ -39,9 +39,16 @@
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";
 import { computed } from "vue";
-import { TypeModals, type Collection, DamsIcons } from "@/generated-types/queries";
+import {
+  TypeModals,
+  type Collection,
+  DamsIcons,
+} from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { type Context, useBulkOperations } from "@/composables/useBulkOperations";
+import {
+  type Context,
+  useBulkOperations,
+} from "@/composables/useBulkOperations";
 import { useModalActions } from "@/composables/useModalActions";
 import useEditMode from "@/composables/useEdit";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
@@ -50,7 +57,7 @@ const { t } = useI18n();
 const { getEnqueuedItems } = useBulkOperations();
 const { closeModal, getModalInfo } = useBaseModal();
 const { getRelationType, getParentId, getCollection } = useModalActions();
-const { addSaveCallback, clearSaveCallbacks } = useEditMode();
+const { setRefetchFn } = useEditMode();
 
 const { deleteRelations, submit } = useDeleteRelations();
 
@@ -58,21 +65,19 @@ const modal = computed(() => {
   return getModalInfo(TypeModals.BulkOperationsDeleteRelations);
 });
 
-const addSaveHandler = () => {
-  clearSaveCallbacks();
-  addSaveCallback(
-    () => submit(getParentId() as string, getCollection() as Collection, TypeModals.BulkOperationsDeleteRelations),
-    "first",
-  );
-};
-
 const getSelectedItems = () => {
   const context = modal.value.context as Context;
   return getEnqueuedItems(context);
 };
 
 const deleteSelectedRelations = () => {
-  addSaveHandler();
+  setRefetchFn(() =>
+    submit(
+      getParentId() as string,
+      getCollection() as Collection,
+      TypeModals.BulkOperationsDeleteRelations,
+    ),
+  );
   deleteRelations(
     getParentId() as string,
     getRelationType() as string,

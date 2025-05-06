@@ -35,7 +35,7 @@ const props = defineProps<{
 }>();
 
 const { setInitialColumns, currentColumnConfig } = useColumnResizeHelper();
-const { isEdit } = useEditMode();
+const { isEdit } = useEditMode(props.id);
 
 const columns = computed<Column[]>(() => {
   const returnArray: Column[] = [];

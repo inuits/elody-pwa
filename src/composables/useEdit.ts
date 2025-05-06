@@ -1,104 +1,17 @@
-import useMediaAssetLinkHelper from "@/composables/useMediaAssetLinkHelper";
-import { computed, ref } from "vue";
+import { EditState } from "@/models/EditState";
+import { ref } from "vue";
 
-export type EditModes = "edit" | "view" | "loading";
-export type callback = (e?: Event | undefined) => Promise<unknown>;
-export const toBeDeleted = ref<string[]>([]);
-export const isSaved = ref<boolean>(false);
+const editStates = ref<Record<string, EditState>>({});
 
-const showErrors = computed<boolean>(
-  () => buttonClicked.value && isDisabled.value,
-);
-const buttonClicked = ref<boolean>(false);
-const isDisabled = ref<boolean>(false);
-const editMode = ref<EditModes>("view");
-const saveCallbacks = ref<callback[]>([]);
-const isEditToggleVisible = ref<"no-edit" | "edit" | "delete" | "edit-delete">(
-  "no-edit",
-);
-const refetchFn = ref<Function>();
-
-export const useEditMode = () => {
-  const { linkMediaFilesToEntity, clearMediaFilesToLinkToEntity } =
-    useMediaAssetLinkHelper();
-  const setEditMode = () => {
-    editMode.value = "edit";
-    resetButtonClicked();
-  };
-  const disableEditMode = () => (editMode.value = "view");
-  const isEdit = computed<boolean>(() => editMode.value === "edit");
-  const setRefetchFn = (refetch: Function) => (refetchFn.value = refetch);
-
-  const addSaveCallback = (input: callback, order?: string) => {
-    if (order === "first") {
-      saveCallbacks.value.unshift(input);
-    } else if (order === "second") {
-      saveCallbacks.value.splice(1, 0, input);
-    } else {
-      saveCallbacks.value.push(input);
-    }
-  };
-  const showEditToggle = (mode: "edit" | "delete" | "edit-delete" = "edit") => {
-    isEditToggleVisible.value = mode;
-  };
-  const hideEditToggle = () => (isEditToggleVisible.value = "no-edit");
-  const clearSaveCallbacks = () => (saveCallbacks.value = []);
-
-  const save = async (force: boolean = false) => {
-    if (!force && isDisabled.value) return;
-    isSaved.value = false;
-    linkMediaFilesToEntity(addSaveCallback);
-
-    for (const callback of saveCallbacks.value) {
-      await callback();
-    }
-    saveCallbacks.value = [];
-    isSaved.value = true;
+export const useEditMode = (editStateName: string): EditState => {
+  const createNewEditState = () => {
+    const newEditState: EditState = new EditState(editStateName);
+    editStates.value[editStateName] = newEditState;
+    return newEditState;
   };
 
-  const discard = () => {
-    const discardEvent = new Event("discardEdit");
-    disableEditMode();
-    saveCallbacks.value = [];
-    toBeDeleted.value = [];
-    clearMediaFilesToLinkToEntity();
-    document.dispatchEvent(discardEvent);
-  };
-
-  const setDisableState = (value: boolean) => {
-    isDisabled.value = value;
-  };
-
-  const clickButton = () => {
-    buttonClicked.value = true;
-  };
-  const resetButtonClicked = () => {
-    buttonClicked.value = false;
-  };
-
-  return {
-    save,
-    isEdit,
-    editMode,
-    discard,
-    setEditMode,
-    addSaveCallback,
-    disableEditMode,
-    showEditToggle,
-    hideEditToggle,
-    isEditToggleVisible,
-    setRefetchFn,
-    refetchFn,
-    isSaved,
-    showErrors,
-    isDisabled,
-    setDisableState,
-    buttonClicked,
-    clickButton,
-    resetButtonClicked,
-    clearSaveCallbacks,
-    saveCallbacks,
-  };
+  if (!editStates.value[editStateName]) return createNewEditState();
+  return editStates.value[editStateName];
 };
 
 export default useEditMode;

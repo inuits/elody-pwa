@@ -63,15 +63,14 @@ const {
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const {
   isEdit,
-  addSaveCallback,
   save,
   refetchFn,
   disableEditMode,
   setDisableState,
-  clearSaveCallbacks,
+  setRefetchFn,
   resetButtonClicked,
   buttonClicked,
-} = useEditMode();
+} = useEditMode(props.id);
 const { createForm, parseFormValuesToFormInput } = useFormHelper();
 const { createNotification } = useNotification();
 const { closeModal, openModal, updateDeleteQueryOptions } = useBaseModal();
@@ -154,8 +153,7 @@ onUnmounted(() =>
 
 watch(isEdit, () => {
   if (isEdit.value) {
-    clearSaveCallbacks();
-    addSaveCallback(submit, "first");
+    setRefetchFn(submit);
   }
 
   const contextsToReset: BulkOperationsContextEnum[] = [

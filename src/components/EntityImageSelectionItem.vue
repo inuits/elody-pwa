@@ -70,7 +70,7 @@
 
 <script lang="ts" setup>
 import { type MediaFileEntity } from "@/generated-types/queries";
-import { toBeDeleted } from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { auth } from "@/main";
 import { inject, ref, computed } from "vue";
@@ -85,6 +85,9 @@ const { getThumbnail } = useThumbnailHelper();
 const imageSrcError = ref<boolean>(false);
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
+const entityFormData: any = inject("entityFormData");
+
+const toBeDeleted = computed(() => useEditMode(entityFormData.id).toBeDeleted);
 
 const setNoImage = () => {
   imageSrcError.value = true;

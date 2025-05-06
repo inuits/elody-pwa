@@ -6,7 +6,7 @@
     <BulkOperationsSubmitBar
       :button-label="$t('bulk-operations.save')"
       :button-icon="DamsIcons.Save"
-      :show-delete-button="isEditToggleVisible === 'edit-delete'"
+      :show-delete-button="editMode === 'edit-delete'"
       :disabled="showErrors"
       @submit="
         async () => {
@@ -34,7 +34,7 @@ import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
 
-const { isEdit, save, discard, showErrors, clickButton, isEditToggleVisible } =
+const { isEdit, save, discard, showErrors, clickButton, editMode } =
   useEditMode();
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal } = useBaseModal();
