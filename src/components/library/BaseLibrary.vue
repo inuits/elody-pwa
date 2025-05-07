@@ -79,7 +79,7 @@
           { sticky: hasStickyBars },
         ]"
       >
-        <div class="h-full flex flex-row items-center gap-y-4">
+        <div class="h-fit flex flex-row items-center gap-y-4">
           <div
             v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
             class="mr-2"
