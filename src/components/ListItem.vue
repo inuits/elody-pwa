@@ -96,7 +96,7 @@
       ]"
     >
       <ImageViewer
-        v-if="canShowCopyRight() && media && !imageSrcError"
+        v-if="canShowCopyRight() && media && !imageSrcError && !previewComponentEnabledForListItem"
         :key="`${itemId}-image-${imageSize}`"
         :class="[
           { 'h-10 w-10': viewMode === 'list' },
@@ -203,9 +203,9 @@
     </div>
     <unicon
       v-if="previewComponentIconVisible"
-      :name="previewComponentEnabled ? Unicons.EyeSlash.name : Unicons.Eye.name"
+      :name="previewComponentEnabledForListItem ? Unicons.EyeSlash.name : Unicons.Eye.name"
       class="h-5.5 w-5.5 text-text-body"
-      @click.stop.prevent="emit('togglePreviewComponent')"
+      @click.stop.prevent="emit('togglePreviewComponent', itemId)"
     />
   </li>
   <template v-if="entityListElements">
@@ -282,7 +282,7 @@ const props = withDefaults(
     entityListElements?: EntityListElement[];
     viewMode?: "list" | "grid";
     refetchEntities?: Function;
-    previewComponentEnabled: boolean;
+    previewComponentEnabledForListItem: boolean;
     previewComponentIconVisible: boolean;
     isHoveredListItems: boolean;
   }>(),
@@ -314,7 +314,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (event: "navigateTo"): void;
-  (event: "togglePreviewComponent"): void;
+  (event: "togglePreviewComponent", previewForEntityId: string): void;
 }>();
 
 const { isEdit } = useEditMode();
