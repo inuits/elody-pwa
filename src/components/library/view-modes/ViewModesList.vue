@@ -99,24 +99,25 @@
           :entity-list-elements="entityListElements"
           :view-mode="mode"
           :refetch-entities="refetchEntities"
-          :preview-component-enabled="previewComponentEnabled"
+          :preview-component-enabled-for-list-item="isPreviewComponentEnabledForListItem(entity.id)"
           :preview-component-icon-visible="previewComponent !== undefined"
           :is-hovered-list-items="hoveredListItem === entity.id"
           @toggle-preview-component="
-            () => (previewComponentEnabled = !previewComponentEnabled)
+            (previewForEntityId) => togglePreviewComponent(previewForEntityId)
           "
         />
       </component>
     </div>
     <div
       v-if="previewComponentEnabled"
-      class="top-[11vh] sticky mt-2 h-fit border-solid border-neutral-300 border-2 bg-neutral-0"
+      class="top-[11vh] sticky my-2 h-fit border-solid border-accent-normal border-2 bg-neutral-0"
     >
       <PreviewWrapper
-        :preview-component="previewComponent"
+        :preview-component="previewComponent!"
         :entity-type="entityType"
         :entities="entities"
         :config-per-view-mode="configPerViewMode"
+        :preview-for-entity="previewForEntity"
       />
     </div>
   </div>
@@ -125,44 +126,37 @@
 <script lang="ts" setup>
 import type { Context } from "@/composables/useBulkOperations";
 import {
-  EditStatus,
-  type BaseRelationValuesInput,
-  type Entity,
-  type Metadata,
-  Entitytyping,
-  MediaTypeEntities,
-  type EntityListElement,
   BaseLibraryModes,
-  RelationActions,
+  type BaseRelationValuesInput,
   type ConfigItem,
-  type PreviewComponent,
+  EditStatus,
+  type Entity,
+  type EntityListElement,
+  Entitytyping,
   GetPreviewComponentsDocument,
+  ListItemCoverageTypes,
+  MediaTypeEntities,
+  type Metadata,
+  type PreviewComponent,
+  RelationActions
 } from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
-import { useListItemHelper, hoveredListItem } from "@/composables/useListItemHelper";
+import { hoveredListItem, useListItemHelper } from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import {
   formatTeaserMetadata,
   getEntityPageRoute,
   getMappedSlug,
   setCssVariable,
-  updateEntityMediafileOnlyForMediafiles,
+  updateEntityMediafileOnlyForMediafiles
 } from "@/helpers";
-import {
-  computed,
-  onMounted,
-  onUnmounted,
-  inject,
-  watch,
-  nextTick,
-  ref,
-} from "vue";
+import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import type { OrderItem } from "@/composables/useOrderListItems";
 import { useFormHelper } from "@/composables/useFormHelper";
 import EventBus from "@/EventBus";
 import { useLibraryBar } from "@/composables/useLibraryBar";
-import PreviewWrapper from "@/components/PreviewWrapper.vue";
 import { apolloClient } from "@/main";
+import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -202,6 +196,7 @@ const props = withDefaults(
 
 const previewComponent = ref<PreviewComponent | undefined>(undefined);
 const previewComponentEnabled = ref<boolean>(false);
+const previewForEntity = ref<string | undefined>(undefined);
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { queryVariables } = useLibraryBar();
@@ -275,6 +270,7 @@ const calculateGridColumns = () => {
 const getPreviewItemsForEntity = async () => {
   previewComponent.value = undefined;
   previewComponentEnabled.value = false;
+  previewForEntity.value = undefined;
   apolloClient
     .query({
       query: GetPreviewComponentsDocument,
@@ -284,8 +280,27 @@ const getPreviewItemsForEntity = async () => {
     })
     .then((result) => {
       previewComponent.value = result.data.PreviewComponents?.previewComponent;
+    }).catch((error) => {
     });
 };
+
+const togglePreviewComponent = (entityId: string) => {
+  if (previewComponent.value?.listItemsCoverage === ListItemCoverageTypes.AllListItems) previewComponentEnabled.value = !previewComponentEnabled.value;
+  else previewComponentEnabled.value = !(previewComponentEnabled.value && previewForEntity.value === entityId);
+  previewForEntity.value = entityId;
+}
+
+const isPreviewComponentEnabledForListItem = (entityId: string): boolean => {
+  if (!previewComponentEnabled.value) return false;
+  if (previewComponent.value?.listItemsCoverage === ListItemCoverageTypes.AllListItems) return true;
+  if (previewComponent.value?.listItemsCoverage === ListItemCoverageTypes.OneListItem && previewForEntity.value === entityId) return true;
+  return false;
+}
+
+const configurePreviewComponentWithNewEntities = (entities: Entity[]): void => {
+  if (previewComponentEnabled.value && previewComponent.value?.listItemsCoverage === ListItemCoverageTypes.OneListItem)
+    previewForEntity.value = entities[0].id;
+}
 
 watch(
   () => props.expandFilters,
@@ -302,7 +317,12 @@ watch(
   },
   { immediate: true },
 );
-
+watch(
+  () => props.entities,
+  () => {
+    configurePreviewComponentWithNewEntities(props.entities);
+  }
+);
 watch(
   () => previewComponentEnabled.value,
   () => {
