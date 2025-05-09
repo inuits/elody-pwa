@@ -232,6 +232,7 @@ const exportCsv = async () => {
         15,
       ),
     );
+  dequeueAllItemsInBulk();
   closeModal(TypeModals.BulkOperations);
 };
 
@@ -258,6 +259,14 @@ mediafilesResult((result) => {
   });
   executeNormalFlow();
 });
+
+
+const dequeueAllItemsInBulk = () => {
+  dequeueAllItemsForBulkProcessing(
+    BulkOperationsContextEnum.BulkOperationsCsvExport,
+  );
+  dequeueAllItemsForBulkProcessing(RouteNames.Mediafiles);
+}
 
 const firstFetchMediafilesOfEntities = () => {
   let assets = getEnqueuedItems(RouteNames.Assets, skip.value, limit.value);
@@ -295,10 +304,7 @@ watch(
   (isBulkOperationsModalOpen: boolean | undefined) => {
     if (isBulkOperationsModalOpen) determineFlow();
     else {
-      dequeueAllItemsForBulkProcessing(
-        BulkOperationsContextEnum.BulkOperationsCsvExport,
-      );
-      dequeueAllItemsForBulkProcessing(RouteNames.Mediafiles);
+      dequeueAllItemsInBulk();
     }
   },
 );
