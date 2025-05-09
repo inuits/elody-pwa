@@ -17,7 +17,10 @@
       { 'animate-pulse': loading },
       { 'bg-neutral-white': !isHoveredListItems },
       { 'border-neutral-light': !isHoveredListItems },
-      { 'bg-blue-900 animate-pulse border-4 border-neutral-800': isHoveredListItems },
+      {
+        'bg-blue-900 animate-pulse border-4 border-neutral-800':
+          isHoveredListItems,
+      },
     ]"
   >
     <div
@@ -96,7 +99,12 @@
       ]"
     >
       <ImageViewer
-        v-if="canShowCopyRight() && media && !imageSrcError && !previewComponentEnabledForListItem"
+        v-if="
+          canShowCopyRight() &&
+          media &&
+          !imageSrcError &&
+          !previewComponentEnabled
+        "
         :key="`${itemId}-image-${imageSize}`"
         :class="[
           { 'h-10 w-10': viewMode === 'list' },
@@ -203,7 +211,7 @@
     </div>
     <unicon
       v-if="previewComponentIconVisible"
-      :name="previewComponentEnabledForListItem ? Unicons.EyeSlash.name : Unicons.Eye.name"
+      :name="previewComponentEnabled ? Unicons.EyeSlash.name : Unicons.Eye.name"
       class="h-5.5 w-5.5 text-text-body"
       @click.stop.prevent="emit('togglePreviewComponent', itemId)"
     />
@@ -282,7 +290,7 @@ const props = withDefaults(
     entityListElements?: EntityListElement[];
     viewMode?: "list" | "grid";
     refetchEntities?: Function;
-    previewComponentEnabledForListItem: boolean;
+    previewComponentEnabled: boolean;
     previewComponentIconVisible: boolean;
     isHoveredListItems: boolean;
   }>(),
