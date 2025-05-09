@@ -102,8 +102,7 @@
         v-if="
           canShowCopyRight() &&
           media &&
-          !imageSrcError &&
-          !previewComponentEnabled
+          !imageSrcError
         "
         :key="`${itemId}-image-${imageSize}`"
         :class="[

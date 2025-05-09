@@ -145,7 +145,7 @@ import {
 import ListItem from "@/components/ListItem.vue";
 import {
   hoveredListItem,
-  useListItemHelpe,
+  useListItemHelper,
 } from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import {
@@ -162,7 +162,7 @@ import {
   onMounted,
   onUnmounted,
   ref,
-  watc,
+  watch,
 } from "vue";
 import type { OrderItem } from "@/composables/useOrderListItems";
 import { useFormHelper } from "@/composables/useFormHelper";
