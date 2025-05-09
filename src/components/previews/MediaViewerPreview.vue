@@ -39,7 +39,6 @@ const getMediafilesOfEntity = async () => {
     })
     .then((result) => {
       mediafiles.value = result.data.FetchMediafilesOfEntity;
-    }).catch((error) => {
     });
 };
 
