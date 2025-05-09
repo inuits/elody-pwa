@@ -185,8 +185,7 @@ const determineContextsForMediafileViewer = () => {
         setEntityMediafiles("SingleMediaFileElement", [entity.value]);
       }
       if (
-        element?.__typename === "EntityListElement" &&
-        element?.type === MediaFileElementTypes.Media
+        element?.__typename === "EntityListElement"
       ) {
         addContextToState(element.customQueryFilters);
       }
