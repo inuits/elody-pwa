@@ -99,7 +99,9 @@
           :entity-list-elements="entityListElements"
           :view-mode="mode"
           :refetch-entities="refetchEntities"
-          :preview-component-enabled-for-list-item="isPreviewComponentEnabledForListItem(entity.id)"
+          :preview-component-enabled="
+            isPreviewComponentEnabledForListItem(entity.id)
+          "
           :preview-component-icon-visible="previewComponent !== undefined"
           :is-hovered-list-items="hoveredListItem === entity.id"
           @toggle-preview-component="
@@ -138,19 +140,30 @@ import {
   MediaTypeEntities,
   type Metadata,
   type PreviewComponent,
-  RelationActions
+  RelationActions,
 } from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
-import { hoveredListItem, useListItemHelper } from "@/composables/useListItemHelper";
+import {
+  hoveredListItem,
+  useListItemHelpe,
+} from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import {
   formatTeaserMetadata,
   getEntityPageRoute,
   getMappedSlug,
   setCssVariable,
-  updateEntityMediafileOnlyForMediafiles
+  updateEntityMediafileOnlyForMediafiles,
 } from "@/helpers";
-import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import {
+  computed,
+  inject,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref,
+  watc,
+} from "vue";
 import type { OrderItem } from "@/composables/useOrderListItems";
 import { useFormHelper } from "@/composables/useFormHelper";
 import EventBus from "@/EventBus";
@@ -280,27 +293,46 @@ const getPreviewItemsForEntity = async () => {
     })
     .then((result) => {
       previewComponent.value = result.data.PreviewComponents?.previewComponent;
-    }).catch((error) => {
     });
 };
 
 const togglePreviewComponent = (entityId: string) => {
-  if (previewComponent.value?.listItemsCoverage === ListItemCoverageTypes.AllListItems) previewComponentEnabled.value = !previewComponentEnabled.value;
-  else previewComponentEnabled.value = !(previewComponentEnabled.value && previewForEntity.value === entityId);
+  if (
+    previewComponent.value?.listItemsCoverage ===
+    ListItemCoverageTypes.AllListItems
+  )
+    previewComponentEnabled.value = !previewComponentEnabled.value;
+  else
+    previewComponentEnabled.value = !(
+      previewComponentEnabled.value && previewForEntity.value === entityId
+    );
   previewForEntity.value = entityId;
-}
+};
 
 const isPreviewComponentEnabledForListItem = (entityId: string): boolean => {
   if (!previewComponentEnabled.value) return false;
-  if (previewComponent.value?.listItemsCoverage === ListItemCoverageTypes.AllListItems) return true;
-  if (previewComponent.value?.listItemsCoverage === ListItemCoverageTypes.OneListItem && previewForEntity.value === entityId) return true;
+  if (
+    previewComponent.value?.listItemsCoverage ===
+    ListItemCoverageTypes.AllListItems
+  )
+    return true;
+  if (
+    previewComponent.value?.listItemsCoverage ===
+      ListItemCoverageTypes.OneListItem &&
+    previewForEntity.value === entityId
+  )
+    return true;
   return false;
-}
+};
 
 const configurePreviewComponentWithNewEntities = (entities: Entity[]): void => {
-  if (previewComponentEnabled.value && previewComponent.value?.listItemsCoverage === ListItemCoverageTypes.OneListItem)
+  if (
+    previewComponentEnabled.value &&
+    previewComponent.value?.listItemsCoverage ===
+      ListItemCoverageTypes.OneListItem
+  )
     previewForEntity.value = entities[0].id;
-}
+};
 
 watch(
   () => props.expandFilters,
@@ -321,7 +353,7 @@ watch(
   () => props.entities,
   () => {
     configurePreviewComponentWithNewEntities(props.entities);
-  }
+  },
 );
 watch(
   () => previewComponentEnabled.value,

@@ -1,6 +1,6 @@
 
 import ViewModesList from "../library/view-modes/ViewModesList.vue";
-import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { shallowMount, flushPromises } from "@vue/test-utils";
 import {
   ListItemCoverageTypes,
@@ -39,24 +39,9 @@ vi.mock("@/main", () => {
 });
 
 describe("ViewModesList", () => {
-  beforeEach(() => {
-    // Create a mock DOM element
-    const gridContainer = document.createElement('div');
-    gridContainer.setAttribute('id', 'gridContainer');
-    gridContainer.style.width = '1000px'; // Set a width for testing
-
-    // Append the element to the body
-    document.body.appendChild(gridContainer);
-  });
-
   afterEach(() => {
     vi.clearAllMocks();
     vi.resetAllMocks();
-    // Clean up the mock DOM element
-    const gridContainer = document.getElementById('gridContainer');
-    if (gridContainer) {
-      document.body.removeChild(gridContainer);
-    }
   });
 
   describe("PreviewComponent", () => {
@@ -72,20 +57,26 @@ describe("ViewModesList", () => {
       listItemsCoverage: ListItemCoverageTypes.AllListItems,
     } as PreviewComponent;
 
-    it("Should enable previewcomponent (media type) with preview enabled for only 1 list items with the given id", async () => {
+    it("Enables previewcomponent (media type) with preview enabled for only 1 list items with the given id", async () => {
       const wrapper = shallowMount(ViewModesList);
       await flushPromises();
 
       wrapper.vm.previewComponent = previewComponentMediaViewer;
-      expect(wrapper.vm.previewComponent).toStrictEqual(previewComponentMediaViewer);
+      expect(wrapper.vm.previewComponent).toStrictEqual(
+        previewComponentMediaViewer,
+      );
 
       wrapper.vm.togglePreviewComponent("entity1");
       expect(wrapper.vm.previewComponentEnabled).toBe(true);
-      expect(wrapper.vm.isPreviewComponentEnabledForListItem("entity1")).toBe(true);
-      expect(wrapper.vm.isPreviewComponentEnabledForListItem("entity2")).toBe(false);
+      expect(wrapper.vm.isPreviewComponentEnabledForListItem("entity1")).toBe(
+        tru,
+      );
+      expect(wrapper.vm.isPreviewComponentEnabledForListItem("entity2")).toBe(
+        fals,
+      );
     });
 
-    it("Should enable previewcomponent (map type) with preview enabled for all list items", async () => {
+    it("Enables previewcomponent (map type) with preview enabled for all list items", async () => {
       const wrapper = shallowMount(ViewModesList);
       await flushPromises();
 
@@ -94,26 +85,41 @@ describe("ViewModesList", () => {
 
       wrapper.vm.togglePreviewComponent("entity1");
       expect(wrapper.vm.previewComponentEnabled).toBe(true);
-      expect(wrapper.vm.isPreviewComponentEnabledForListItem("entity1")).toBe(true);
-      expect(wrapper.vm.isPreviewComponentEnabledForListItem("entity2")).toBe(true);
+      expect(wrapper.vm.isPreviewComponentEnabledForListItem("entity1")).toBe(
+        true,
+      );
+      expect(wrapper.vm.isPreviewComponentEnabledForListItem("entity2")).toBe(
+        true,
+      );
     });
 
-    it("Should change current previewForEntity when new entities are fetched and ListItemCoverageTypes is OneListItem", async () => {
+    //TODO: Try and achieve the same result with editing the prop 'entities' to let the watch hook do it's work
+    it("Changes current previewForEntity when new entities are fetched and ListItemCoverageTypes is OneListItem", async () => {
       const wrapper = shallowMount(ViewModesList);
       await flushPromises();
 
       wrapper.vm.previewComponent = previewComponentMediaViewer;
       wrapper.vm.togglePreviewComponent("entity1");
       expect(wrapper.vm.previewComponentEnabled).toBe(true);
-      expect(wrapper.vm.isPreviewComponentEnabledForListItem("entity1")).toBe(true);
+      expect(wrapper.vm.isPreviewComponentEnabledForListItem("entity1")).toBe(
+        true,
+      );
 
-      wrapper.vm.configurePreviewComponentWithNewEntities([{ id: "new_entity" }, { id: "another_new_entity" }]);
+      wrapper.vm.configurePreviewComponentWithNewEntities([
+        { id: "new_entity" },
+        { id: "another_new_entity" ,
+      ]);
 
       expect(wrapper.vm.previewComponentEnabled).toBe(true);
-      expect(wrapper.vm.isPreviewComponentEnabledForListItem("new_entity")).toBe(true);
-      expect(wrapper.vm.isPreviewComponentEnabledForListItem("entity1")).toBe(false);
-      expect(wrapper.vm.isPreviewComponentEnabledForListItem("another_new_entity")).toBe(false);
+      expect(
+        wrapper.vm.isPreviewComponentEnabledForListItem("new_entity")
+      ).toBe(true);
+      expect(wrapper.vm.isPreviewComponentEnabledForListItem("entity1")).toBe(
+        false
+      );
+      expect(
+        wrapper.vm.isPreviewComponentEnabledForListItem("another_new_entity")
+      ).toBe(false);
     });
   });
-
 });
