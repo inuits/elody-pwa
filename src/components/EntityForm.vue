@@ -136,9 +136,10 @@ onMounted(async () => {
   document.addEventListener("discardEdit", () => callRefetchFn);
   updateDeleteQueryOptions(props.deleteQueryOptions);
 });
-onUnmounted(() =>
-  document.removeEventListener("discardEdit", () => callRefetchFn),
-);
+onUnmounted(() => {
+  document.removeEventListener("discardEdit", () => callRefetchFn);
+  useEditMode(props.id, "delete");
+});
 
 watch(useEditHelper, () => {
   if (useEditHelper.isEdit) {
