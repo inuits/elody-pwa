@@ -53,7 +53,6 @@ const props = defineProps<{
 }>();
 
 const { deleteRelations, submit } = useDeleteRelations();
-const { setRefetchFn, isEdit } = useEditMode();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal } = useBaseModal();
@@ -66,6 +65,7 @@ const entityFormData: {
   id: string;
   collection: Collection;
 };
+const useEditHelper = useEditMode(entityFormData.id);
 const apolloClient = inject(DefaultApolloClient);
 const { createShareLink } = useShareLink(apolloClient as ApolloClient<any>);
 const config: any = inject("config");
@@ -75,7 +75,7 @@ const entityTypeLabel = computed(() =>
 );
 const isDisabled = computed(() => {
   return (
-    isEdit.value &&
+    useEditHelper.isEdit.value &&
     (props.action === ContextMenuElodyActionEnum.DeleteRelation ||
       props.action === ContextMenuElodyActionEnum.DeleteEntity)
   );
@@ -140,7 +140,9 @@ const openDeleteEntityConfirmation = async () => {
 
 const doAction = () => {
   if (props.action === ContextMenuElodyActionEnum.DeleteRelation) {
-    setRefetchFn(() => submit(entityFormData.id, entityFormData.collection));
+    useEditHelper.setRefetchFn(() =>
+      submit(entityFormData.id, entityFormData.collection),
+    );
     deleteRelation();
   }
   if (props.action === ContextMenuElodyActionEnum.DeleteEntity) {
