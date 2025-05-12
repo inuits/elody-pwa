@@ -1,10 +1,8 @@
 import { shallowMount } from "@vue/test-utils";
 import BaseContextMenuActions from "../BaseContextMenuActions.vue";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import {
-  Entitytyping,
-  type ContextMenuActions,
-} from "@/generated-types/queries";
+import type { Entitytyping } from "@/generated-types/queries";
+import { type ContextMenuActions } from "@/generated-types/queries";
 import { flushPromises } from "@vue/test-utils";
 
 vi.mock("@/types", () => ({
@@ -41,6 +39,7 @@ vi.mock("@/composables/usePermissions", () => ({
     can: vi.fn(),
     fetchAdvancedPermission: vi.fn(),
     fetchPermissionsOfContextMenu: vi.fn(),
+    setExtraVariables: vi.fn(),
   }),
   ignorePermissions: { value: false },
   advancedPermissions: mocks.advancedPermissions,
@@ -81,7 +80,7 @@ describe("BaseContextMenuActions", () => {
 
     expect(Object.keys(wrapper.vm.availableContextMenuActions).length).toBe(2);
     expect(wrapper.vm.availableContextMenuActions).toStrictEqual(
-      contextMenuActions
+      contextMenuActions,
     );
   });
 
@@ -131,7 +130,7 @@ describe("BaseContextMenuActions", () => {
 
     expect(Object.keys(wrapper.vm.availableContextMenuActions).length).toBe(2);
     expect(wrapper.vm.availableContextMenuActions).toStrictEqual(
-      basicContextMenuActions
+      basicContextMenuActions,
     );
   });
 
@@ -159,7 +158,7 @@ describe("BaseContextMenuActions", () => {
 
     expect(Object.keys(wrapper.vm.availableContextMenuActions).length).toBe(2);
     expect(Object.keys(wrapper.vm.availableContextMenuActions)).toStrictEqual(
-      Object.keys(contextMenuActions)
+      Object.keys(contextMenuActions),
     );
   });
 });

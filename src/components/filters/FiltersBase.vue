@@ -425,6 +425,10 @@ const handleAdvancedFilters = () => {
                   advancedFilter.defaultValue,
                   parentEntity.value,
                 );
+                const [matchesRegex, ids] = checkRegexForOneWayRelations(
+                  advancedFilter.defaultValue,
+                  parentEntity?.value,
+                );
                 if (matchesRegex) {
                   hiddenFilter.value = ids;
                   activeFilters.value.push(hiddenFilter);

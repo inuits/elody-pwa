@@ -6,10 +6,8 @@ import {
 } from "@/generated-types/queries";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useEditMode from "@/composables/useEdit";
-import {
-  MutateEntityValuesDocument,
-  Collection,
-} from "@/generated-types/queries";
+import type { Collection } from "@/generated-types/queries";
+import { MutateEntityValuesDocument } from "@/generated-types/queries";
 import type { FormContext } from "vee-validate";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
