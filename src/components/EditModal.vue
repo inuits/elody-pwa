@@ -28,17 +28,20 @@ import { DamsIcons, TypeModals } from "@/generated-types/queries";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
-import { inject, computed } from "vue";
+import { inject } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { useRoute } from "vue-router";
 
-const entityFormData = inject("entityFormData");
-const route = useRoute();
-const entityId = computed(() => entityFormData?.id || route.params.id);
-const editModeHelper = useEditMode(entityId.value);
+const props = withDefaults(
+  defineProps<{
+    entityId: string;
+  }>(),
+  {},
+);
+
+const editModeHelper = useEditMode(props.entityId);
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal } = useBaseModal();
 const { discardEditForForm } = useFormHelper();
@@ -50,7 +53,7 @@ const openDiscardModal = () => {
     confirmButton: {
       buttonCallback: () => {
         editModeHelper.discard();
-        discardEditForForm(entityId.value);
+        discardEditForForm(props.entityId);
         closeModal(TypeModals.Confirm);
       },
     },

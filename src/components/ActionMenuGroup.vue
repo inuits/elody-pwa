@@ -65,8 +65,6 @@ import {
 } from "@/composables/usePermissions";
 import { getValueForPanelMetadata } from "@/helpers";
 
-const { isEdit } = useEditMode();
-
 const emit = defineEmits(["update:modelValue"]);
 const { fetchPermissionsForDropdownOptions, setExtraVariables } =
   usePermissions();
@@ -87,11 +85,14 @@ const props = withDefaults(
   },
 );
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
+const useEditHelper = useEditMode(props.parentEntityId);
 const { t } = useI18n();
 
 const availableOptions = ref<DropdownOption[]>([]);
 
-const entityTypeLabel = computed(() => t(`entity-translations.plural.${props.entityType}`));
+const entityTypeLabel = computed(() =>
+  t(`entity-translations.plural.${props.entityType}`),
+);
 const primaryOption = computed(() => {
   let option = availableOptions.value.find(
     (item: DropdownOption) => item.primary,
@@ -148,7 +149,7 @@ const determineActiveState = (item: DropdownOption) => {
   let isActive = false;
   const activeViewMode = item.actionContext.activeViewMode;
   const entitiesSelectionType = item.actionContext.entitiesSelectionType;
-  const viewMode = isEdit.value
+  const viewMode = useEditHelper.isEdit
     ? activeViewMode.includes(ActionContextViewModeTypes.EditMode)
     : activeViewMode.includes(ActionContextViewModeTypes.ReadMode);
   const numberOfEntities = props.itemsSelected

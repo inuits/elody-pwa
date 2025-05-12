@@ -30,8 +30,6 @@ import {
   watch,
   computed,
   provide,
-  onUpdated,
-  onRenderTriggered,
 } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
@@ -61,16 +59,7 @@ const {
   pathToNavigate,
 } = useConfirmModal();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
-const {
-  isEdit,
-  save,
-  refetchFn,
-  disableEditMode,
-  setDisableState,
-  setRefetchFn,
-  resetButtonClicked,
-  buttonClicked,
-} = useEditMode(props.id);
+const useEditHelper = useEditMode(props.id);
 const { createForm, parseFormValuesToFormInput } = useFormHelper();
 const { createNotification } = useNotification();
 const { closeModal, openModal, updateDeleteQueryOptions } = useBaseModal();
@@ -125,7 +114,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
     shown: true,
   });
   form.resetForm({ values: form.values });
-  disableEditMode();
+  useEditHelper.disableEditMode();
 });
 
 provide("entityFormData", {
@@ -139,7 +128,7 @@ provide("entityFormData", {
 });
 
 const callRefetchFn = () => {
-  const refetch = refetchFn.value;
+  const refetch = useEditHelper.refetchFn;
   if (refetch) refetch();
 };
 
@@ -151,9 +140,12 @@ onUnmounted(() =>
   document.removeEventListener("discardEdit", () => callRefetchFn),
 );
 
-watch(isEdit, () => {
-  if (isEdit.value) {
-    setRefetchFn(submit);
+watch(useEditHelper, () => {
+  // Todo: Not working
+  console.log("hey");
+  console.log("yuu");
+  if (useEditHelper.isEdit) {
+    useEditHelper.setSubmitFunction(submit);
   }
 
   const contextsToReset: BulkOperationsContextEnum[] = [
@@ -181,25 +173,26 @@ watch(
   () => form.values,
   async () => {
     await validateAndSetDisableState();
-    if (!formContainsErrors.value && buttonClicked.value) resetButtonClicked();
+    if (!formContainsErrors.value && useEditHelper.buttonClicked)
+      useEditHelper.resetButtonClicked();
   },
   { deep: true },
 );
 watch(
-  () => buttonClicked.value,
-  async () => {
-    if (!buttonClicked.value) return;
+  () => useEditHelper.buttonClicked,
+  async (buttonClicked: boolean) => {
+    if (!buttonClicked) return;
     await validateAndSetDisableState();
   },
 );
 
 const validateAndSetDisableState = async () => {
   await form.validate();
-  setDisableState(formContainsErrors.value);
+  useEditHelper.setDisableState(formContainsErrors.value);
 };
 
 onBeforeRouteLeave((to, from, next) => {
-  if (!isEdit.value || !form.meta.value.dirty) return next();
+  if (!useEditHelper.isEdit || !form.meta.value.dirty) return next();
   if (pathToNavigate.value != undefined) {
     deletePathToNavigate();
     return next();
@@ -219,7 +212,7 @@ const openNavigationModal = () => {
     },
     secondaryConfirmButton: {
       buttonCallback: async () => {
-        await save();
+        await useEditHelper.save();
         performRoute();
         deletePathToNavigate();
         closeModal(TypeModals.Confirm);

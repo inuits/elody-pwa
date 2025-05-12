@@ -39,10 +39,12 @@ export class EditState {
   hideEditButton = () => this.setEditMode("no-edit");
 
   save = async (force: boolean = false) => {
+    console.log(this.submitFn);
     if (!force && this.isDisabled.value) return;
     this.isSaved.value = false;
 
-    if (this.submitFn.value) await this.submitFn.value();
+    const submit = this.submitFn.value;
+    if (submit) await submit();
     this.setSubmitFunction(undefined);
     this.isSaved.value = true;
   };

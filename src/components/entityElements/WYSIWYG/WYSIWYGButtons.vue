@@ -201,15 +201,16 @@ import {
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
+  formId: string;
   editor: Editor;
   extensions: WysiwygExtensions[];
   displayInline: boolean;
 }>();
 
-const { isEdit } = useEdit();
+const useEditHelper = useEdit(props.formId);
 const { t } = useI18n();
 
-const buttonsDisabled = computed(() => !isEdit.value);
+const buttonsDisabled = computed(() => !useEditHelper.isEdit);
 const editorHasSelection = computed(() => {
   const { selection } = props.editor.state;
   return selection.from !== selection.to;

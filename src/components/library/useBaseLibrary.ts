@@ -12,7 +12,7 @@ import {
   BaseLibraryModes,
 } from "@/generated-types/queries";
 import useEditMode from "@/composables/useEdit";
-import { createPlaceholderEntities } from "@/helpers";
+import { asString, createPlaceholderEntities } from "@/helpers";
 import { ref, watch } from "vue";
 import { useStateManagement } from "@/composables/useStateManagement";
 
@@ -31,7 +31,6 @@ export const useBaseLibrary = (
   const promiseQueue = ref<((entityType: Entitytyping) => Promise<void>)[]>([]);
   const totalEntityCount = ref<number>(0);
   const { getStateForRoute, updateStateForRoute } = useStateManagement();
-  const { isSaved } = useEditMode();
   let queryVariables: GetEntitiesQueryVariables = {
     type: entityType,
     limit: 20,
@@ -91,9 +90,13 @@ export const useBaseLibrary = (
     forceFetch: boolean = false,
     route?: RouteLocationNormalizedLoaded,
   ): Promise<void> => {
-    if (filters === queryVariables.advancedFilterInputs && !isSaved.value)
-      return;
     if (route) {
+      const useEditHelper = useEditMode(asString(route.params.id));
+      if (
+        filters === queryVariables.advancedFilterInputs &&
+        !useEditHelper.isSaved.value
+      )
+        return;
       _route = route;
       const storedState = getStateForRoute(_route);
       if (storedState?.queryVariables) {

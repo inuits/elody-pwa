@@ -42,10 +42,10 @@
     <div
       :class="[
         'w-full rounded-b bg-neutral-white',
-        { 'hidden': !expandFilters },
+        { hidden: !expandFilters },
         {
           'scrollable border-x border-b-2 border-neutral-light': expandFilters,
-        }
+        },
       ]"
     >
       <div v-if="expandFilters" class="p-4 sticky top-0 bg-white z-10">
@@ -311,25 +311,27 @@ const filterMatcherMappingPromise = async () => {
     });
 };
 
-const getFiltersQueryPromise = async (variables: any, executeDefaultFiltersDocument: boolean): Promise<void> => {
+const getFiltersQueryPromise = async (
+  variables: any,
+  executeDefaultFiltersDocument: boolean,
+): Promise<void> => {
   return apolloClient
     .query({
       query: !executeDefaultFiltersDocument
         ? props.manipulationQuery?.filtersDocument
-            ? props.manipulationQuery.filtersDocument
-            : GetAdvancedFiltersDocument
+          ? props.manipulationQuery.filtersDocument
+          : GetAdvancedFiltersDocument
         : GetAdvancedFiltersDocument,
       variables: variables,
       fetchPolicy: "no-cache",
       notifyOnNetworkStatusChange: true,
     })
     .then((result) => {
-      const filters = (
-        result.data?.EntityTypeFilters as BaseEntity
-      )?.advancedFilters || {};
+      const filters =
+        (result.data?.EntityTypeFilters as BaseEntity)?.advancedFilters || {};
       advancedFilters.value = { ...advancedFilters.value, ...filters };
     });
-}
+};
 
 const advancedFiltersPromise = async (entityType: Entitytyping) => {
   advancedFilters.value = undefined;
@@ -344,12 +346,17 @@ const advancedFiltersPromise = async (entityType: Entitytyping) => {
     });
   }
 
-  const promiseQueue: ((variables: any, executeDefaultFiltersDocument: boolean) => Promise<void>)[] = [];
+  const promiseQueue: ((
+    variables: any,
+    executeDefaultFiltersDocument: boolean,
+  ) => Promise<void>)[] = [];
   promiseQueue.push(getFiltersQueryPromise);
   if (props.additionalDefaultFiltersEnabled)
     promiseQueue.push(getFiltersQueryPromise);
 
-  await Promise.all(promiseQueue.map((promise, index) => promise(variables, index !== 0)));
+  await Promise.all(
+    promiseQueue.map((promise, index) => promise(variables, index !== 0)),
+  );
   handleAdvancedFilters();
 };
 
@@ -412,9 +419,12 @@ const handleAdvancedFilters = () => {
               advancedFilter.hidden &&
               !advancedFilter.doNotOverrideDefaultValue
             ) {
-              if ( typeof advancedFilter.defaultValue === "string") {
+              if (typeof advancedFilter.defaultValue === "string") {
                 // Regex for adding ids of a relation in value
-                const [matchesRegex, ids] = checkRegexForOneWayRelations(advancedFilter.defaultValue, parentEntity.value);
+                const [matchesRegex, ids] = checkRegexForOneWayRelations(
+                  advancedFilter.defaultValue,
+                  parentEntity.value,
+                );
                 if (matchesRegex) {
                   hiddenFilter.value = ids;
                   activeFilters.value.push(hiddenFilter);
