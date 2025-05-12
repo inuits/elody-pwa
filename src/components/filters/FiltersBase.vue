@@ -42,10 +42,10 @@
     <div
       :class="[
         'w-full rounded-b bg-neutral-white',
-        { 'hidden': !expandFilters },
+        { hidden: !expandFilters },
         {
           'scrollable border-x border-b-2 border-neutral-light': expandFilters,
-        }
+        },
       ]"
     >
       <div v-if="expandFilters" class="p-4 sticky top-0 bg-white z-10">
@@ -98,53 +98,12 @@
           v-for="filter in displayedFilters"
           :key="filter.advancedFilter.key || ''"
           :filter="filter"
-          :related-active-filter="
-            activeFilters.filter(
-              (activeFilter) =>
-                JSON.stringify(activeFilter.key) ===
-                JSON.stringify(filter.advancedFilter.key),
-            )[0]
-          "
-          :matchers="
-            matchers.filter((option) =>
-              filterMatcherMapping[filter.advancedFilter.type].includes(
-                option.value,
-              ),
-            )
-          "
+          :matchers="getMatchers(filter.advancedFilter.type)"
           :clear-all-active-filters="clearAllActiveFilters"
-          @activate-filter="
-            (
-              filterInput: AdvancedFilterInput,
-              matcher: DropdownOption | undefined,
-            ) => {
-              filter.isActive = true;
-              filter.inputFromState = filterInput;
-              filter.selectedMatcher = matcher;
-              activeFilters = activeFilters.filter(
-                (activeFilter) => activeFilter.key !== filterInput.key,
-              );
-              let index = activeFilters.findIndex(
-                (activeFilter) =>
-                  JSON.stringify(activeFilter.key) ===
-                  JSON.stringify(filterInput.key),
-              );
-              if (index !== -1) activeFilters.splice(index, 1, filterInput);
-              else activeFilters.push(filterInput);
-            }
-          "
+          @activate-filter="activateFilter"
           @deactivate-filter="
             (key, forceApply = false) => {
-              const filter = filters.filter(
-                (filter) => filter.advancedFilter.key === key,
-              )[0];
-              if (filter.advancedFilter.hidden) return;
-              filter.isActive = false;
-              filter.inputFromState = undefined;
-              filter.selectedMatcher = undefined;
-              activeFilters = activeFilters.filter(
-                (filter) => JSON.stringify(filter.key) !== JSON.stringify(key),
-              );
+              deactivateFilter(key);
               if (forceApply) applyFilters(true);
             }
           "
@@ -165,22 +124,20 @@
 
 <script lang="ts" setup>
 import type { RouteLocationNormalizedLoaded } from "vue-router";
-import { useRoute } from "vue-router";
-import {
-  type AdvancedFilterInput,
-  type AdvancedFilters,
-  AdvancedFilterTypes,
-  type BaseEntity,
-  DamsIcons,
-  type DropdownOption,
-  EntitySubelement,
+import type {
   Entitytyping,
-  type FilterMatcherMap,
+  EntitySubelement,
+  AdvancedFilterInput,
+  AdvancedFilters,
+  DropdownOption,
+  FilterMatcherMap,
+  GetFilterMatcherMappingQuery,
+  AdvancedFilterTypes,
+} from "@/generated-types/queries";
+import {
+  DamsIcons,
   GetAdvancedFiltersDocument,
   GetFilterMatcherMappingDocument,
-  type GetFilterMatcherMappingQuery,
-  type Maybe,
-  TypeModals,
 } from "@/generated-types/queries";
 import { useStateManagement } from "@/composables/useStateManagement";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
@@ -189,9 +146,8 @@ import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import FiltersListItem from "@/components/filters/FiltersListItem.vue";
 import SavedSearches from "@/components/SavedSearches.vue";
 import useEditMode from "@/composables/useEdit";
-import { useRegexChecker } from "@/composables/useRegexChecker";
-import { apolloClient, auth } from "@/main";
-import { computed, defineProps, inject, onMounted, ref, watch } from "vue";
+import { apolloClient } from "@/main";
+import { computed, defineProps, onMounted, ref, watch, inject } from "vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
@@ -199,13 +155,9 @@ import {
   type SavedSearchType,
   useSaveSearchHepler,
 } from "@/composables/useSaveSearchHepler";
-import {
-  BulkOperationsContextEnum,
-  useBulkOperations,
-} from "@/composables/useBulkOperations";
-import { useFiltersBase } from "@/composables/useFiltersBase";
+import { auth } from "@/main";
+import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { useBaseModal } from "@/composables/useBaseModal";
 
 const props = withDefaults(
   defineProps<{
@@ -214,18 +166,19 @@ const props = withDefaults(
     parentEntityIdentifiers?: string[];
     route: RouteLocationNormalizedLoaded;
     setAdvancedFilters: Function;
-    additionalDefaultFiltersEnabled?: boolean;
     enableSaveSearchFilters: boolean;
     entityType: Entitytyping;
     shouldUseStateForRoute: boolean;
     filtersNeedContext?: EntitySubelement[];
+    predefinedFilters: AdvancedFilterInput[];
+    additionalDefaultFiltersEnabled?: boolean;
   }>(),
   {
     parentEntityIdentifiers: () => [],
-    additionalDefaultFiltersEnabled: false,
     enableSaveSearchFilters: true,
     shouldUseStateForRoute: true,
     filtersNeedContext: undefined,
+    additionalDefaultFiltersEnabled: false,
   },
 );
 
@@ -247,7 +200,12 @@ const emit = defineEmits<{
   (event: "expandFilters", expandFilters: boolean): void;
 }>();
 
-const parentEntity: any = inject("ParentEntityProvider");
+const clearAllActiveFilters = ref<boolean>(false);
+const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
+const displayedFilterOptions = ref<DropdownOption[]>([]);
+const lastActiveFilter = ref<SavedSearchType | undefined>(undefined);
+const matchers = ref<DropdownOption[]>([]);
+// TODO: id & metadata_on_relation need to be removed
 const filterMatcherMapping = ref<FilterMatcherMap>({
   id: [],
   text: [],
@@ -258,14 +216,7 @@ const filterMatcherMapping = ref<FilterMatcherMap>({
   type: [],
   metadata_on_relation: [],
 });
-const advancedFilters = ref<Maybe<AdvancedFilters | undefined>>(undefined);
-const clearAllActiveFilters = ref<boolean>(false);
-const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
-const displayedFilterOptions = ref<DropdownOption[]>([]);
-const lastActiveFilter = ref<SavedSearchType | undefined>(undefined);
-const matchers = ref<DropdownOption[]>([]);
 const { getStateForRoute, updateStateForRoute } = useStateManagement();
-const { checkRegexForOneWayRelations } = useRegexChecker();
 const { isSaved } = useEditMode();
 const { t } = useI18n();
 const {
@@ -275,12 +226,22 @@ const {
   addNewSavedFilterToLastUsedFiltersForRoute,
   addLastUsedFilterToStateForRoute,
 } = useSaveSearchHepler();
-const router = useRoute();
-const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
-const { filters, activeFilters, activeFilterCount, displayedFilters } =
-  useFiltersBase();
-const config = inject("config") as any;
+const {
+  filters,
+  rawFilters,
+  activeFilterCount,
+  displayedFilters,
+  initializeFilters,
+  transformFilterInputIntoAdvancedFilters,
+  getNormalizedFiltersForApi,
+  setVariables,
+  activateFilter,
+  deactivateFilter,
+  resetFilters,
+} = useFiltersBaseNew();
 
+const config = inject("config") as any;
+const parentEntity: any = inject("ParentEntityProvider");
 const hasSavedSearch = config.features.hasSavedSearch || false;
 
 const addFilterOptions = computed(() =>
@@ -295,69 +256,100 @@ const addFilterOptions = computed(() =>
       };
     }),
 );
+
 const selectedSavedFilter = computed(() => {
   return getActiveFilter();
 });
 
 const filterMatcherMappingPromise = async () => {
+  if (props.predefinedFilters && props.predefinedFilters.length > 0) return;
+
   return apolloClient
     .query<GetFilterMatcherMappingQuery>({
       query: GetFilterMatcherMappingDocument,
       fetchPolicy: "no-cache",
     })
     .then((result) => {
-      filterMatcherMapping.value = result.data.FilterMatcherMapping;
-      handleFilterMatcherMapping();
+      filterMatcherMapping.value = result.data
+        .FilterMatcherMapping as FilterMatcherMap;
+      handleFilterMatcherMapping(filterMatcherMapping.value);
     });
 };
 
-const getFiltersQueryPromise = async (variables: any, executeDefaultFiltersDocument: boolean): Promise<void> => {
-  return apolloClient
-    .query({
-      query: !executeDefaultFiltersDocument
-        ? props.manipulationQuery?.filtersDocument
-            ? props.manipulationQuery.filtersDocument
-            : GetAdvancedFiltersDocument
-        : GetAdvancedFiltersDocument,
-      variables: variables,
-      fetchPolicy: "no-cache",
-      notifyOnNetworkStatusChange: true,
-    })
-    .then((result) => {
-      const filters = (
-        result.data?.EntityTypeFilters as BaseEntity
-      )?.advancedFilters || {};
-      advancedFilters.value = { ...advancedFilters.value, ...filters };
-    });
-}
+const getMatchers = (type: AdvancedFilterTypes) => {
+  return matchers.value.filter((option) =>
+    filterMatcherMapping.value[type].includes(option.value),
+  );
+};
 
 const advancedFiltersPromise = async (entityType: Entitytyping) => {
-  advancedFilters.value = undefined;
-  const variables = { entityType: entityType, context: undefined };
-  if (props.filtersNeedContext) {
-    variables.context = [];
-    const formValues = useFormHelper().getForm(
-      inject("entityFormData").id,
-    )?.values;
-    props.filtersNeedContext.forEach((contextItem) => {
-      variables.context.push(formValues[contextItem]);
-    });
+  if (props.predefinedFilters && props.predefinedFilters.length > 0) {
+    await handlePredefinedAdvancedFilters();
+    return;
   }
 
-  const promiseQueue: ((variables: any, executeDefaultFiltersDocument: boolean) => Promise<void>)[] = [];
-  promiseQueue.push(getFiltersQueryPromise);
-  if (props.additionalDefaultFiltersEnabled)
-    promiseQueue.push(getFiltersQueryPromise);
+  const queue = [
+    fetchEntityFilters({
+      queryDocument: props.manipulationQuery?.filtersDocument,
+      entityType,
+    }),
+    ...(props.additionalDefaultFiltersEnabled
+      ? [
+          fetchEntityFilters({
+            queryDocument: undefined,
+            entityType,
+          }),
+        ]
+      : []),
+  ];
 
-  await Promise.all(promiseQueue.map((promise, index) => promise(variables, index !== 0)));
-  handleAdvancedFilters();
+  try {
+    const result = await Promise.all(queue);
+    rawFilters.value = Object.assign({}, ...result);
+
+    await handleAdvancedFilters();
+  } catch (error) {
+    console.error("Failed to fetch advanced filters:", error);
+  }
 };
 
-const handleFilterMatcherMapping = () => {
+const fetchEntityFilters = async ({
+  queryDocument,
+  entityType,
+}: {
+  queryDocument?: any;
+  entityType: Entitytyping;
+}): Promise<AdvancedFilters> => {
+  const variables = buildFilterVariables(entityType);
+
+  const result = await apolloClient.query({
+    query: queryDocument || GetAdvancedFiltersDocument,
+    variables,
+    fetchPolicy: "no-cache",
+    notifyOnNetworkStatusChange: true,
+  });
+
+  return result.data?.EntityTypeFilters?.advancedFilters;
+};
+
+const buildFilterVariables = (entityType: Entitytyping) => {
+  const variables: Record<string, any> = { entityType };
+
+  if (props.filtersNeedContext) {
+    variables.context = getContextValues();
+  }
+
+  return variables;
+};
+
+const handleFilterMatcherMapping = (filterMatcherMapping: FilterMatcherMap) => {
   const matcherSet = new Set<string>();
-  Object.values(filterMatcherMapping.value).forEach((matcherArray) => {
-    if (typeof matcherArray !== "string")
-      for (const matcher of matcherArray) matcherSet.add(matcher);
+  Object.values(filterMatcherMapping).forEach((matcherArray) => {
+    if (typeof matcherArray !== "string") {
+      for (const matcher of matcherArray) {
+        matcherSet.add(matcher);
+      }
+    }
   });
 
   matchers.value = Array.from(matcherSet).map((matcher) => {
@@ -369,115 +361,80 @@ const handleFilterMatcherMapping = () => {
   });
 };
 
+const getContextValues = () => {
+  const formId = inject("entityFormData")?.id;
+  if (!formId) return;
+
+  const formValues = useFormHelper().getForm(id)?.values;
+  return props.filtersNeedContext?.map(
+    (contextItem) => formValues[contextItem],
+  );
+};
+
 const handleAdvancedFilters = () => {
   filters.value = [];
-  activeFilters.value = [];
 
-  if (advancedFilters.value) {
-    const state =
-      props.shouldUseStateForRoute &&
-      props.route.name !== "SingleEntity" &&
-      getStateForRoute(props.route);
-    if (!state?.filterListItems || state.filterListItems.length == 0) {
-      Object.values(advancedFilters.value).forEach((advancedFilter) => {
-        if (typeof advancedFilter !== "string") {
-          let hiddenFilter: AdvancedFilterInput | undefined;
-          if (advancedFilter.hidden || advancedFilter.defaultValue) {
-            hiddenFilter = {
-              type: advancedFilter.type,
-              key: advancedFilter.key,
-              value: advancedFilter.defaultValue,
-              item_types: advancedFilter.itemTypes,
-              parent_key: advancedFilter.parentKey,
-              match_exact: true,
-            };
-            if (advancedFilter.lookup)
-              hiddenFilter.lookup = {
-                from: advancedFilter.lookup.from,
-                local_field: advancedFilter.lookup.local_field,
-                foreign_field: advancedFilter.lookup.foreign_field,
-                as: advancedFilter.lookup.as,
-              };
+  if (!rawFilters.value) return;
 
-            if (
-              advancedFilter.hidden &&
-              advancedFilter.defaultValue === "entityType" &&
-              !advancedFilter.doNotOverrideDefaultValue
-            ) {
-              hiddenFilter.value = router.meta.entityType;
-            }
+  const shouldUseState =
+    props.shouldUseStateForRoute && props.route.name !== "SingleEntity";
 
-            if (
-              advancedFilter.type === AdvancedFilterTypes.Selection &&
-              advancedFilter.hidden &&
-              !advancedFilter.doNotOverrideDefaultValue
-            ) {
-              if ( typeof advancedFilter.defaultValue === "string") {
-                // Regex for adding ids of a relation in value
-                const [matchesRegex, ids] = checkRegexForOneWayRelations(advancedFilter.defaultValue, parentEntity?.value);
-                if (matchesRegex) {
-                  hiddenFilter.value = ids;
-                  activeFilters.value.push(hiddenFilter);
-                  return;
-                }
-              }
+  const { filtersToUse, fromState } = getFiltersFromState(shouldUseState);
+  if (!filtersToUse) return;
 
-              // this needs a refactor
-              if (props.parentEntityIdentifiers.length > 0) {
-                if (
-                  Array.isArray(hiddenFilter.value) &&
-                  hiddenFilter?.value.length > 0
-                ) {
-                  hiddenFilter.value = [
-                    ...props.parentEntityIdentifiers,
-                    ...hiddenFilter?.value,
-                  ];
-                } else {
-                  hiddenFilter.value = props.parentEntityIdentifiers;
-                }
-                if (advancedFilter.itemTypes)
-                  activeFilters.value = [hiddenFilter];
-                else activeFilters.value.push(hiddenFilter);
-              } else if (advancedFilter.key === "type")
-                activeFilters.value.push(hiddenFilter);
-            } else activeFilters.value.push(hiddenFilter);
-          }
+  initializeFilters({
+    advancedFilters: filtersToUse,
+    fromState,
+  });
 
-          filters.value.push({
-            isActive: advancedFilter.hidden || advancedFilter.defaultValue,
-            isDisplayed: advancedFilter.isDisplayedByDefault ?? false,
-            advancedFilter,
-            inputFromState: hiddenFilter,
-            selectedMatcher: undefined,
-          });
-        }
-      });
-      if (props.shouldUseStateForRoute)
-        updateStateForRoute(props.route, {
-          filterListItems: JSON.parse(JSON.stringify(filters.value)),
-        });
-    } else {
-      filters.value = state?.filterListItems;
-      activeFilters.value = filters.value
-        .filter((filter) => filter.isActive && filter.inputFromState)
-        .map((filter) => filter.inputFromState) as AdvancedFilterInput[];
-    }
+  if (shouldUseState && !fromState) {
+    saveFiltersToState();
   }
 
   applyFilters();
 };
 
+const handlePredefinedAdvancedFilters = async () => {
+  const advancedFilters = transformFilterInputIntoAdvancedFilters(
+    props.predefinedFilters,
+  );
+
+  await initializeFilters({
+    advancedFilters,
+    fromState: false,
+  });
+
+  applyFilters();
+  return true;
+};
+
+const getFiltersFromState = (shouldUseState: boolean) => {
+  if (!shouldUseState) {
+    return {
+      filtersToUse: rawFilters.value,
+      fromState: false,
+    };
+  }
+
+  const state = getStateForRoute(props.route);
+  const hasStateFilters = !!state?.filterListItems?.length;
+
+  return {
+    filtersToUse: hasStateFilters ? state.filterListItems : rawFilters.value,
+    fromState: hasStateFilters,
+  };
+};
+
+const saveFiltersToState = () => {
+  updateStateForRoute(props.route, {
+    filterListItems: JSON.parse(JSON.stringify(filters.value)),
+  });
+};
+
 const applyFilters = (saveState = false, force = true) => {
-  if (saveState && props.shouldUseStateForRoute)
-    updateStateForRoute(props.route, {
-      filterListItems: JSON.parse(JSON.stringify(filters.value)),
-    });
-  if (
-    !useBaseModal().getModalInfo(TypeModals.ElodyEntityTaggingModal).open &&
-    !useBaseModal().getModalInfo(TypeModals.Search).open
-  )
-    // Todo: Find out why this changes the filters when opening the modal, this is ugly
-    emit("applyFilters", activeFilters.value, saveState, force);
+  if (saveState && props.shouldUseStateForRoute) saveFiltersToState();
+
+  emit("applyFilters", getNormalizedFiltersForApi(), saveState, force);
 };
 
 const getAngleIcon = computed<DamsIcons>(() =>
@@ -498,13 +455,20 @@ onMounted(() => {
   emit("filterMatcherMappingPromise", filterMatcherMappingPromise);
   emit("advancedFiltersPromise", advancedFiltersPromise);
   lastActiveFilter.value = getLastUsedFilterForRoute(props.route);
+  setVariables({
+    parentIds: props.parentEntityIdentifiers,
+    entityType: props.entityType,
+    entity: parentEntity?.value,
+  });
 });
 
 if (props.parentEntityIdentifiers.length > 0)
   watch(
     () => isSaved.value,
     () => {
-      if (isSaved.value) applyFilters();
+      if (isSaved.value) {
+        applyFilters();
+      }
     },
   );
 watch(displayedFilterOptions, () => toggleDisplayedFilters());
@@ -521,10 +485,10 @@ watch(selectedSavedFilter, () => {
     return clearAllFilters({ saveState: false, clearSavedFilter: false });
   }
 
-  filters.value = selectedSavedFilter.value.value;
-  activeFilters.value = filters.value
-    .filter((filter) => filter.isActive && filter.inputFromState)
-    .map((filter) => filter.inputFromState) as AdvancedFilterInput[];
+  initializeFilters({
+    advancedFilters: selectedSavedFilter.value.value,
+    fromState: true,
+  });
 
   addNewSavedFilterToLastUsedFiltersForRoute(
     props.route,
@@ -532,6 +496,7 @@ watch(selectedSavedFilter, () => {
   );
   addLastUsedFilterToStateForRoute(props.route, selectedSavedFilter.value);
   lastActiveFilter.value = selectedSavedFilter.value;
+
   applyFilters(true);
 });
 
@@ -540,7 +505,6 @@ watch(
   () => {
     setActiveSavedFilter(null);
     lastActiveFilter.value = getLastUsedFilterForRoute(props.route);
-    dequeueAllItemsForBulkProcessing(BulkOperationsContextEnum.FilterOptions);
   },
 );
 
@@ -559,21 +523,16 @@ const clearAllFilters = async ({
     displayedFilterOption = displayedFilterOptions.value.pop();
   toggleDisplayedFilters();
 
-  activeFilters.value = filters.value
-    .filter((filter) => !!filter.advancedFilter.hidden)
-    .map((filter) => filter.inputFromState);
-  filters.value.forEach((filter) => {
-    if (filter.advancedFilter.hidden) return;
-    filter.isActive = false;
-    filter.inputFromState = undefined;
-    filter.selectedMatcher = undefined;
-  });
+  await resetFilters();
+
   setTimeout(() => (clearAllActiveFilters.value = false), 50);
+
   if (clearSavedFilter) {
     setActiveSavedFilter(null);
     lastActiveFilter.value = undefined;
     addLastUsedFilterToStateForRoute(props.route, undefined);
   }
+
   applyFilters(saveState);
 };
 </script>
