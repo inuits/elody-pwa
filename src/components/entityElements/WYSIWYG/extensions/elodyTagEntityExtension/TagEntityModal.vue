@@ -102,7 +102,7 @@ import {
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
-import { computed, watch, ref } from "vue";
+import { computed, watch, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
@@ -252,15 +252,12 @@ const tagExistingEntityFlow = () => {
   );
 };
 
-watch(
-  () => props.element,
-  () => {
-    setBulkSelectionLimit(
-      BulkOperationsContextEnum.TagEntityModal,
-      selectionLimit,
-    );
-  },
-);
+onMounted(() => {
+  setBulkSelectionLimit(
+    BulkOperationsContextEnum.TagEntityModal,
+    selectionLimit,
+  );
+});
 </script>
 
 <style scoped></style>
