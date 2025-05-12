@@ -3,6 +3,7 @@
     v-if="getBasicMapProperties(config).mapType === MapTypes.HeatMap"
     :config="config"
     :entities="entities"
+    :is-enabled-in-preview="isEnabledInPreview"
   />
   <WktMap
     v-if="getBasicMapProperties(config).mapType === MapTypes.WktMap"
@@ -22,10 +23,16 @@ import WktMap from "@/components/maps/WktMap.vue";
 import { useMaps } from "@/composables/useMaps";
 import { computed } from "vue";
 
-const props = defineProps<{
-  config: ConfigItem[];
-  entities: Entity[];
-}>();
+const props = withDefaults(
+  defineProps<{
+    config: ConfigItem[];
+    entities: Entity[];
+    isEnabledInPreview?: boolean;
+  }>(),
+  {
+    isEnabledInPreview: false,
+  },
+);
 
 const { getBasicMapProperties } = useMaps();
 
