@@ -127,7 +127,7 @@
             enableBulkOperations &&
             baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
           "
-          class="z-50 sticky top-[5vh] my-3"
+          class="sticky top-[5vh] my-3"
         >
           <BulkOperationsActionsBar
             :context="bulkOperationsContext"
