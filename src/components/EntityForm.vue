@@ -141,9 +141,6 @@ onUnmounted(() =>
 );
 
 watch(useEditHelper, () => {
-  // Todo: Not working
-  console.log("hey");
-  console.log("yuu");
   if (useEditHelper.isEdit) {
     useEditHelper.setSubmitFunction(submit);
   }
