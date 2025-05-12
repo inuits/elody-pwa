@@ -1,9 +1,6 @@
 import { computed, ref, watch, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
-import {
-  AdvancedFilterTypes,
-  type AdvancedFilterInput,
-} from "@/generated-types/queries";
+import { AdvancedFilterTypes } from "@/generated-types/queries";
 import {
   addCurrentTimeZoneToDateTimeString,
   isDateTime,
@@ -12,9 +9,13 @@ import {
 } from "@/helpers";
 import type { FilterListItem } from "@/composables/useStateManagement";
 
+const isEmptyValue = (value: unknown) => {
+  return value == null || value == undefined || value === "";
+};
+
 export function useMinMaxAdvancedFilter(
   filter: FilterListItem,
-  emitEvent: (event: string, ...args: any[]) => void,
+  emitEvent: (event: string, ...args: any[] | any) => void,
 ) {
   const { t } = useI18n();
 
@@ -54,42 +55,24 @@ export function useMinMaxAdvancedFilter(
     () => filter.advancedFilter.type === AdvancedFilterTypes.Number,
   );
 
+  const normalizeValue = (value: number | string | undefined) => {
+    if (isEmptyValue(value)) return undefined;
+
+    return isDateTime(value)
+      ? addCurrentTimeZoneToDateTimeString(value)
+      : value;
+  };
+
   const emitNewAdvancedFilterInput = () => {
     const value =
-      totalInputMin.value || totalInputMax.value
-        ? {
-            min: totalInputMin.value
-              ? isDateTime(totalInputMin.value)
-                ? addCurrentTimeZoneToDateTimeString(totalInputMin.value)
-                : totalInputMin.value
-              : undefined,
-            max: totalInputMax.value
-              ? isDateTime(totalInputMax.value)
-                ? addCurrentTimeZoneToDateTimeString(totalInputMax.value)
-                : totalInputMax.value
-              : undefined,
+      isEmptyValue(totalInputMin.value) && isEmptyValue(totalInputMax.value)
+        ? undefined
+        : {
+            min: normalizeValue(totalInputMin.value),
+            max: normalizeValue(totalInputMax.value),
             included: true,
-          }
-        : undefined;
-
-    const newAdvancedFilterInput: AdvancedFilterInput = {
-      type: filter.advancedFilter.type,
-      parent_key: filter.advancedFilter.parentKey,
-      key: filter.advancedFilter.key,
-      value,
-      aggregation: filter.advancedFilter.aggregation,
-    };
-
-    if (filter.advancedFilter.lookup) {
-      newAdvancedFilterInput.lookup = {
-        from: filter.advancedFilter.lookup.from,
-        local_field: filter.advancedFilter.lookup.local_field,
-        foreign_field: filter.advancedFilter.lookup.foreign_field,
-        as: filter.advancedFilter.lookup.as,
-      };
-    }
-    emitEvent("newAdvancedFilterInput", newAdvancedFilterInput, force.value);
-    force.value = false;
+          };
+    emitEvent("updateValue", value);
   };
 
   watch(

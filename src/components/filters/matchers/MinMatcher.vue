@@ -29,17 +29,12 @@
 
 <script lang="ts" setup>
 import type { FilterListItem } from "@/composables/useStateManagement";
-import { type AdvancedFilterInput } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { useMinMaxAdvancedFilter } from "@/composables/useMinMaxAdvancedFilter";
+import { useMinMaxAdvancedFilter } from "@/composables/useMinMaxAdvancedFilterNew";
 
 const props = defineProps<{ filter: FilterListItem }>();
 const emit = defineEmits<{
-  (
-    event: "newAdvancedFilterInput",
-    advancedFilterInput: AdvancedFilterInput,
-    force: boolean,
-  ): void;
+  (event: "updateValue", value: any): void;
 }>();
 
 const { inputMin, inputTimeMin, determineInputType, determinePlaceholder } =

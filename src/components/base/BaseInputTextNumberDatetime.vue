@@ -143,7 +143,7 @@ const inputValue = computed<string | number | boolean | undefined>({
 const baseInput = ref<HTMLInputElement | null>(null);
 
 const openCalendar = (event: KeyboardEvent) => {
-  if (!["date", "datetime-local"].includes(props.type)) {
+  if (!["date", "datetime-local", "time"].includes(props.type)) {
     event.preventDefault();
     return;
   }

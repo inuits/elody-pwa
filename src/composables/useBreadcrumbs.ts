@@ -11,7 +11,7 @@ import { apolloClient } from "@/main";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { getChildrenOfHomeRoutes, getTitleOrNameFromEntity } from "@/helpers";
-import { useRegexChecker } from "@/composables/useRegexChecker";
+import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
 
 export type VisitedRoute = {
   id: string;
@@ -33,10 +33,10 @@ export type BreadcrumbRoute = {
 const rootRoute = ref<RootRoute>({});
 const breadcrumbRoutes = ref<BreadcrumbRoute[]>([]);
 const breadcrumbPathFinished = ref<boolean>(false);
-const { checkRegexForOneWayRelations } = useRegexChecker();
 
 const useBreadcrumbs = (config: any) => {
   const homeRoutes = getChildrenOfHomeRoutes(config);
+  const { extractValueFromObject } = useFiltersBaseNew();
   const previousRoute = computed<VisitedRoute | undefined>(
     () => breadcrumbRoutes.value[breadcrumbRoutes.value.length - 1],
   );
@@ -46,8 +46,8 @@ const useBreadcrumbs = (config: any) => {
   ): any => {
     const entityRoute = homeRoutes.filter(
       (item: any) =>
-        item.meta.entityType?.toLowerCase() === entitytype?.toLowerCase() ||
-        item.meta.slug?.toLowerCase() === entitytype?.toLowerCase(),
+        item.meta.entityType?.toLowerCase() === entitytype.toLowerCase() ||
+        item.meta.slug?.toLowerCase() === entitytype.toLowerCase(),
     )[0];
     if (!entityRoute) return;
     return entityRoute.meta.breadcrumbs;
@@ -145,21 +145,20 @@ const useBreadcrumbs = (config: any) => {
         value: entityType,
       },
     ];
-    const [matchesRegex, ids] = checkRegexForOneWayRelations(relation, entity);
-    if (matchesRegex)
-      advancedFilters.push({
-        match_exact: true,
-        type: AdvancedFilterTypes.Selection,
-        key: key,
-        value: ids,
-      });
-    else
-      advancedFilters.push({
-        match_exact: true,
-        type: AdvancedFilterTypes.Selection,
-        key: [`elody:1|relations.${relation}.key`],
-        value: parentId,
-      });
+
+    const extractedIds = entity
+      ? extractValueFromObject(entity, relation)
+      : undefined;
+
+    const relationFitler: AdvancedFilterInput = {
+      type: AdvancedFilterTypes.Selection,
+      key: extractedIds ? key : [`elody:1|relations.${relation}.key`],
+      value: extractedIds || parentId,
+      match_exact: true,
+    };
+
+    advancedFilters.push(relationFitler);
+
     const queryVariables: GetEntitiesQueryVariables = {
       type: entityType,
       limit: 20,

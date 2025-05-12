@@ -1,182 +1,119 @@
 <template>
-  <div
-    data-cy="filters-list-item"
-    v-show="!filter.advancedFilter.hidden"
-    class="flex relative items-center justify-between px-6 py-4 border-t-2 border-neutral-light cursor-pointer select-none"
-    :class="{ 'bg-accent-normal text-neutral-white': filter.isActive }"
-    @click="isOpen = !isOpen"
-  >
-    <div class="flex flex-col">
-      <span data-cy="filters-list-item-label" class="text-lg">
-        {{ t(filter.advancedFilter.label || "") }}
-      </span>
-    </div>
-    <div class="flex gap-x-2">
-      <base-tooltip
-        v-if="filter.advancedFilter.tooltip"
-        position="top-end"
-        :tooltip-offset="8"
-      >
-        <template #activator="{ on }">
-          <div v-on="on">
-            <unicon :name="Unicons.QuestionCircle.name" height="20" />
-          </div>
-        </template>
-        <template #default>
-          <span class="text-sm text-text-placeholder">
-            <div>
-              {{
-                t(
-                  `tooltip.advancedFilterTypes.${props.filter.advancedFilter.type}`,
-                )
-              }}
-            </div>
-          </span>
-        </template>
-      </base-tooltip>
-      <unicon :name="icon" height="20" />
-    </div>
-  </div>
-  <div
-    data-cy="filters-list-item-panel"
-    v-show="isOpen"
-    class="flex flex-col gap-4 p-6 bg-neutral-light"
-  >
-    <div class="flex w-full justify-start gap-4">
-      <div>
-        <BaseDropdownNew
-          data-cy="filter-matcher-dropdown"
-          class="max-h-9"
-          v-model:model-value="selectedMatcher"
-          :options="matchers"
-          :default-option="filter.selectedMatcher"
-          label-position="inline"
-          :default-label="t('filters.matcher-labels.select-filter-type')"
-          dropdown-style="default"
-        />
-      </div>
-      <div class="flex-grow"></div>
-      <BaseButtonNew
-        class="!w-9 h-9"
-        label=""
-        :icon="DamsIcons.Cross"
-        :icon-height="22"
-        :disabled="!selectedMatcher"
-        button-style="accentNormal"
-        button-size="small"
-        @click="
-          () => {
-            emit('deactivateFilter', advancedFilterInput.key, true);
-            resetFilter()
-          }
-        "
-      />
-    </div>
-    <component
-      v-if="selectedMatcher"
-      :is="matcherComponent"
-      :filter="filter"
-      :related-active-filter="relatedActiveFilter"
-      @new-advanced-filter-input="
-        (input: AdvancedFilterInput) => (advancedFilterInput = input)
-      "
-      :last-typed-value="lastTypedValue"
-      @new-input-value="(value: string) => (lastTypedValue = value)"
-      @filter-options="(options: string[]) => (filterOptions = options)"
+  <div v-show="!filter.advancedFilter.hidden">
+    <FiltersListItemHeader
+      :is-active="filter.isActive"
+      :label="filterLabel"
+      :tooltip="filter.advancedFilter.tooltip"
+      :tooltip-text="tooltipText"
+      :icon="headerIcon"
+      @toggle="toggleOpen"
     />
+
+    <FiltersListItemPanel
+      v-show="isOpen"
+      :matchers="filterMatchers"
+      :selected-matcher="selectedMatcher"
+      :default-label="matcherDefaultLabel"
+      @update:selected-matcher="updateSelectedMatcher"
+      @reset="resetFilter"
+    >
+      <component
+        v-if="selectedMatcher"
+        :is="matcherComponent"
+        :filter="filter"
+        :last-typed-value="lastTypedValue"
+        @new-input-value="updateLastTypedValue"
+        @filter-options="updateFilterOptions"
+        @updateValue="updateFilterValue"
+      />
+    </FiltersListItemPanel>
   </div>
 </template>
 
 <script lang="ts" setup>
 import type { FilterListItem } from "@/composables/useStateManagement";
-import type {
-  AdvancedFilterInput,
-  DropdownOption,
-  InputMaybe,
-} from "@/generated-types/queries";
+import type { DropdownOption } from "@/generated-types/queries";
+import { AdvancedFilterTypes } from "@/generated-types/queries";
 import {
-  BulkOperationsContextEnum,
   useBulkOperations,
+  BulkOperationsContextEnum,
 } from "@/composables/useBulkOperations";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
-import BaseTooltip from "@/components/base/BaseTooltip.vue";
-import { AdvancedFilterTypes, DamsIcons } from "@/generated-types/queries";
-import { computed, markRaw, onMounted, ref, toRefs, watch } from "vue";
+import { computed, markRaw, onMounted, ref, watch } from "vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import isEqual from "lodash.isequal";
+import FiltersListItemPanel from "@/components/filters/FiltersListItemPanel.vue";
+import FiltersListItemHeader from "@/components/filters/FiltersListItemHeader.vue";
 
-enum Matchers {
-  EXACT_MATCHER = "ExactMatcher",
-  CONTAINS_MATCHERS = "ContainsMatcher",
-  ANY_MATCHER = "AnyMatcher",
-  NONE_MATCHER = "NoneMatcher",
+interface Props {
+  filter: FilterListItem;
+  matchers: DropdownOption[];
+  clearAllActiveFilters: boolean;
 }
 
-const props = withDefaults(
-  defineProps<{
-    filter: FilterListItem;
-    matchers: DropdownOption[];
-    clearAllActiveFilters: boolean;
-    relatedActiveFilter: string[];
-  }>(),
-  {
-    relatedActiveFilter: () => [],
-  },
-);
-
+const props = defineProps<Props>();
 const emit = defineEmits<{
   (
-    event: "activateFilter",
-    advancedFilterInput: AdvancedFilterInput,
-    selectedMatcher: DropdownOption | undefined,
+    e: "activateFilter",
+    key: string | string[],
+    input: any,
+    matcher?: DropdownOption,
   ): void;
-  (
-    event: "deactivateFilter",
-    advancedFilterKey: string | InputMaybe<string> | undefined,
-    forceApply: Boolean | undefined,
-  ): void;
+  (e: "deactivateFilter", key: string, forceApply?: boolean): void;
 }>();
 
 const { t } = useI18n();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
-const { matchers, clearAllActiveFilters } = toRefs(props);
-const isOpen = ref<boolean>(props.filter.isActive || false);
+const isOpen = ref(props.filter.isActive);
 const matcherComponent = ref();
 const selectedMatcher = ref<DropdownOption>();
-const advancedFilterInput = ref<AdvancedFilterInput>({
-  type: props.filter.advancedFilter.type,
-  key: props.filter.advancedFilter.key,
-  value: undefined,
-});
 const filterOptions = ref<string[]>([]);
 const lastTypedValue = ref<string>("");
 
-const loadMatcher = async () => {
-  let matcher = selectedMatcher.value?.value;
-  if (matcher === "MetadataOnRelationExactMatcher") matcher = "ExactMatcher";
-  else if (matcher === "MetadataOnRelationContainsMatcher")
-    matcher = "ContainsMatcher";
+const filterLabel = computed(() => t(props.filter.advancedFilter.label || ""));
+const tooltipText = computed(() =>
+  t(`tooltip.advancedFilterTypes.${props.filter.advancedFilter.type}`),
+);
+const headerIcon = computed(() =>
+  isOpen.value ? Unicons.Minus.name : Unicons.Plus.name,
+);
+const filterMatchers = computed(() => props.matchers);
+const matcherDefaultLabel = computed(() =>
+  t("filters.matcher-labels.select-filter-type"),
+);
+const defaultMatcher = computed(
+  () => props.filter.selectedMatcher || getDefaultMatcher(),
+);
 
-  if (!matcher) return;
+const loadMatcher = async () => {
+  if (!selectedMatcher.value?.value) return;
 
   try {
+    const matcher = selectedMatcher.value.value;
+
     const module = await import(`@/components/filters/matchers/${matcher}.vue`);
     matcherComponent.value = markRaw(module.default);
   } catch (e) {
-    console.info(`Matcher with name '${matcher}' could not be loaded `);
+    console.error(
+      `Matcher '${selectedMatcher.value?.value}' could not be loaded`,
+      e,
+    );
   }
 };
 
-const icon = computed<string>(() =>
-  isOpen.value ? Unicons.Minus.name : Unicons.Plus.name,
-);
+const getDefaultMatcher = (): DropdownOption | undefined => {
+  const defaultMatchers: { [type: string]: string } = {
+    [AdvancedFilterTypes.Selection]: "ExactMatcher",
+    [AdvancedFilterTypes.Text]: "ContainsMatcher",
+    [AdvancedFilterTypes.Boolean]: "ExactMatcher",
+  };
 
-const defaultMatcherMap: Partial<Record<AdvancedFilterTypes, string>> = {
-  [AdvancedFilterTypes.Selection]: Matchers.EXACT_MATCHER,
-  [AdvancedFilterTypes.Text]: Matchers.CONTAINS_MATCHERS,
-  [AdvancedFilterTypes.Boolean]: Matchers.EXACT_MATCHER,
+  const matcherName = defaultMatchers[props.filter.advancedFilter.type];
+  return props.matchers.find((m) => m.value === matcherName);
+};
+
+const updateSelectedMatcher = (matcher: DropdownOption) => {
+  selectedMatcher.value = matcher;
 };
 
 const reloadMatcherComponent = () => {
@@ -184,88 +121,93 @@ const reloadMatcherComponent = () => {
   loadMatcher();
 };
 
-const getDefaultMatcher = () => {
-  return matchers.value.find(
-    (matcher) =>
-      matcher.value === defaultMatcherMap[advancedFilterInput.value.type],
-  );
-};
-
-const clearLastTypedValue = () => {
-  lastTypedValue.value = "";
-};
-
 const resetFilter = () => {
-  clearLastTypedValue();
-  advancedFilterInput.value.value = undefined;
+  lastTypedValue.value = "";
+  emit("deactivateFilter", props.filter.advancedFilter.key);
 
-  const matchersToResetToDefault = [
-    Matchers.ANY_MATCHER,
-    Matchers.NONE_MATCHER,
-  ];
-  const matcher = selectedMatcher.value?.value;
-  if (!matchersToResetToDefault.includes(matcher))
-    return reloadMatcherComponent();
+  const shouldResetToDefault = ["AnyMatcher", "NoneMatcher"].includes(
+    selectedMatcher.value?.value,
+  );
+  if (!shouldResetToDefault) {
+    reloadMatcherComponent();
+    return;
+  }
 
   const defaultMatcher = getDefaultMatcher();
-  if (!defaultMatcher) return;
-
-  selectedMatcher.value = defaultMatcher;
+  if (defaultMatcher) {
+    selectedMatcher.value = defaultMatcher;
+  }
 };
 
-onMounted(() => {
-  const defaultMatcher = props.filter.selectedMatcher || getDefaultMatcher();
+const updateLastTypedValue = (value: string) => {
+  lastTypedValue.value = value;
+};
 
-  if (defaultMatcher && !selectedMatcher.value)
-    selectedMatcher.value = defaultMatcher;
-});
-
-watch(selectedMatcher, async (newValue, oldValue) => {
-  if (oldValue !== undefined && !lastTypedValue.value)
-    emit("deactivateFilter", advancedFilterInput.value.key);
-  if (selectedMatcher.value) await loadMatcher();
-
-  filterOptions.value.forEach((option) =>
+const updateFilterOptions = (options: string[]) => {
+  filterOptions.value = options;
+  options.forEach((option) =>
     dequeueItemForBulkProcessing(
       BulkOperationsContextEnum.FilterOptions,
       option,
     ),
   );
-});
+};
 
-watch(advancedFilterInput, (newValue, oldValue) => {
-  if (Array.isArray(advancedFilterInput.value.value)) {
-    if (
-      Array.isArray(oldValue?.value) !== Array.isArray(newValue?.value) ||
-      oldValue?.value.length === 0 ||
-      newValue?.value.length === 0
-    ) {
-      oldValue = Array.isArray(oldValue?.value)
-        ? oldValue?.value[0]
-        : oldValue?.value;
-      newValue = Array.isArray(newValue?.value)
-        ? newValue?.value[0]
-        : newValue?.value;
-    } else {
-      oldValue = oldValue?.value;
-      newValue = newValue?.value;
-    }
+const toggleOpen = () => {
+  isOpen.value = !isOpen.value;
+};
 
-    if (isEqual(newValue, oldValue)) return;
-    if (advancedFilterInput.value.value.length > 0)
-      emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
-    else emit("deactivateFilter", advancedFilterInput.value.key);
-  } else {
-    if (isEqual(newValue, oldValue)) return;
-    if (advancedFilterInput.value.value !== undefined)
-      emit("activateFilter", advancedFilterInput.value, selectedMatcher.value);
-    else emit("deactivateFilter", advancedFilterInput.value.key);
+watch(selectedMatcher, async (newVal, oldVal) => {
+  if (oldVal !== undefined) {
+    emit("deactivateFilter", props.filter.advancedFilter.key);
+  }
+
+  if (newVal) {
+    await loadMatcher();
   }
 });
-watch(clearAllActiveFilters, () => {
-  if (clearAllActiveFilters.value) {
-    isOpen.value = false;
-    resetFilter()
+
+const updateFilterValue = (value: unknown) => {
+  if (typeof value === "string") updateLastTypedValue(value);
+  if (isEqual(value, props.filter.inputFromState?.value)) return;
+
+  const isEmpty =
+    value === "" ||
+    value === null ||
+    value === undefined ||
+    (Array.isArray(value) && value.length === 0) ||
+    (typeof value === "object" &&
+      value !== null &&
+      Object.keys(value).length === 0);
+
+  if (isEmpty) {
+    emit("deactivateFilter", props.filter.advancedFilter.key);
+  } else {
+    console.log("activate :", props.filter.advancedFilter.key);
+    console.log("with matcher: ", selectedMatcher.value);
+    emit(
+      "activateFilter",
+      props.filter.advancedFilter.key,
+      value,
+      selectedMatcher.value,
+    );
+  }
+};
+
+watch(
+  () => props.clearAllActiveFilters,
+  (shouldClear) => {
+    if (shouldClear) {
+      isOpen.value = false;
+      resetFilter();
+    }
+  },
+);
+
+onMounted(() => {
+  if (defaultMatcher.value && !selectedMatcher.value) {
+    selectedMatcher.value = defaultMatcher.value;
+    loadMatcher();
   }
 });
 </script>

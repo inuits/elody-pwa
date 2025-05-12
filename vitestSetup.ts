@@ -36,8 +36,8 @@ vi.mock("vue3-openlayers", () => ({
   },
 }));
 
-vi.mock('@/generated-types/queries', async () => {
-  return await import('@/__mocks__/queries');
+vi.mock("@/generated-types/queries", async () => {
+  return await import("@/__mocks__/queries");
 });
 
 vi.mock("@/main", () => {

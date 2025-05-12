@@ -17,6 +17,16 @@ export type Scalars = {
   StringOrInt: any;
 };
 
+export enum Matchers {
+  AnyMatcher = 'AnyMatcher',
+  ContainsMatcher = 'ContainsMatcher',
+  ExactMatcher = 'ExactMatcher',
+  InBetweenMatcher = 'InBetweenMatcher',
+  MaxIncludedMatcher = 'MaxIncludedMatcher',
+  MinIncludedMatcher = 'MinIncludedMatcher',
+  NoneMatcher = 'NoneMatcher'
+}
+
 export type ActionContext = {
   __typename?: 'ActionContext';
   activeViewMode?: Maybe<Array<Maybe<ActionContextViewModeTypes>>>;

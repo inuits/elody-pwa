@@ -3,7 +3,7 @@
     v-if="Array.isArray(determineInputType) && determineInputType.length === 2"
   >
     <BaseInputTextNumberDatetime
-      class="mt-2"
+      class="mb-2"
       v-model="inputMax"
       input-style="default"
       :type="determineInputType[0]"
@@ -29,18 +29,13 @@
 
 <script lang="ts" setup>
 import type { FilterListItem } from "@/composables/useStateManagement";
-import type { AdvancedFilterInput } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { useMinMaxAdvancedFilter } from "@/composables/useMinMaxAdvancedFilter";
+import { useMinMaxAdvancedFilter } from "@/composables/useMinMaxAdvancedFilterNew";
 
 const props = defineProps<{ filter: FilterListItem }>();
 
 const emit = defineEmits<{
-  (
-    event: "newAdvancedFilterInput",
-    advancedFilterInput: AdvancedFilterInput,
-    force: boolean,
-  ): void;
+  (event: "updateValue", value: any, force: boolean): void;
 }>();
 
 const { inputMax, inputTimeMax, determineInputType, determinePlaceholder } =
