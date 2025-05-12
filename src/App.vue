@@ -11,10 +11,8 @@
         <div :class="['flex-grow', { 'h-full': isSingle }]">
           <router-view />
         </div>
-        <edit-modal />
       </div>
       <DynamicFormModal></DynamicFormModal>
-      <DeleteModal></DeleteModal>
       <SavedSearchesPickerModal />
       <CreateSavedSearchModal />
       <BulkoperationsModal v-if="route.name !== undefined" />
@@ -24,12 +22,14 @@
       <!--        v-if="route.name !== undefined"-->
       <!--        :context="route.name as Context"-->
       <!--      />-->
-      <TagEntityModal />
       <EntityDetailModal />
       <ConfirmModal><ConfirmModalView /></ConfirmModal>
     </div>
   </div>
-  <div v-else class="w-full h-screen flex justify-center items-center animate-pulse">
+  <div
+    v-else
+    class="w-full h-screen flex justify-center items-center animate-pulse"
+  >
     <img src="/logo.svg" alt="Elody logo" class="h-48" />
   </div>
 </template>
@@ -43,7 +43,6 @@ import ConfirmModal from "./components/base/ConfirmModal.vue";
 import ConfirmModalView from "./components/ConfirmModalView.vue";
 import DynamicFormModal from "@/components/dynamicForms/DynamicFormModal.vue";
 import DeleteModal from "@/components/DeleteModal.vue";
-import EditModal from "@/components/EditModal.vue";
 import SearchModal from "@/components/SearchModal.vue";
 import SearchModalAi from "@/components/SearchModalAi.vue";
 import SavedSearchesPickerModal from "@/components/SavedSearchesPickerModal.vue";
@@ -56,7 +55,6 @@ import { auth } from "@/main";
 import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
 import CreateSavedSearchModal from "./components/CreateSavedSearchModal.vue";
-import TagEntityModal from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/TagEntityModal.vue";
 import EntityDetailModal from "@/components/EntityDetailModal.vue";
 
 const config = inject<{

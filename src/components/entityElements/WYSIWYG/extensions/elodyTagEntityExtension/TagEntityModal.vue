@@ -129,6 +129,14 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 
+const props = withDefaults(
+  defineProps<{
+    element: WysiwygElement;
+    editor: Editor;
+  }>(),
+  {},
+);
+
 const parentId = computed(() => route.params["id"]);
 const formIndex: number = 0;
 const selectionLimit: number = 1;
@@ -137,14 +145,8 @@ const acceptedTypes = computed(() =>
     (configurationItem) => configurationItem.taggableEntityType,
   ),
 );
-const element = computed<WysiwygElement>(
-  () => getModalInfo(TypeModals.ElodyEntityTaggingModal).element,
-);
 const taggingConfiguration = computed<TaggableEntityConfiguration[]>(
-  () => element.value.taggingConfiguration.taggableEntityConfiguration,
-);
-const editor = computed<Editor>(
-  () => getModalInfo(TypeModals.ElodyEntityTaggingModal).editor,
+  () => props.element?.taggingConfiguration?.taggableEntityConfiguration,
 );
 const form = computed(() =>
   getForm(taggingConfiguration.value[formIndex].createNewEntityFormQuery),
@@ -243,7 +245,7 @@ const tagExistingEntityFlow = () => {
 
   tagEntity(entityToTag, relationType, parentId.value, context);
 
-  editor.value.commands.linkEntityToTaggedText(
+  props.editor.commands.linkEntityToTaggedText(
     entityToTag,
     relationType,
     newTaggingText,
@@ -251,7 +253,7 @@ const tagExistingEntityFlow = () => {
 };
 
 watch(
-  () => element.value,
+  () => props.element,
   () => {
     setBulkSelectionLimit(
       BulkOperationsContextEnum.TagEntityModal,

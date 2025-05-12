@@ -23,11 +23,7 @@ import {
   useNotification,
 } from "@/components/base/BaseNotification.vue";
 import useEditMode from "@/composables/useEdit";
-import {
-  asString,
-  getTitleOrNameFromEntity,
-  mapUrlToEntityType,
-} from "@/helpers";
+import { getTitleOrNameFromEntity, mapUrlToEntityType } from "@/helpers";
 import { usePageInfo } from "@/composables/usePageInfo";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useBulkOperations } from "@/composables/useBulkOperations";
@@ -39,13 +35,17 @@ import { useDeleteEntities } from "@/composables/useDeleteEntities";
 import { useFormHelper } from "@/composables/useFormHelper";
 
 const config: any = inject("config");
+const entityFormData: any = inject("entityFormData");
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+const entityId = computed<string>(
+  () => entityFormData?.id || route.params["id"],
+);
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const { createNotificationOverwrite } = useNotification();
 const { previousPageInfo } = usePageInfo();
-const { editMode, disableEditMode } = useEditMode();
+const useEditHelper = useEditMode(entityId.value);
 const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { closeModal, openModal, deleteQueryOptions } = useBaseModal();
 const { initializeGeneralProperties, initializePropertiesForDeletion } =
@@ -54,11 +54,12 @@ const { initializeConfirmModal } = useConfirmModal();
 const { deleteEntities } = useDeleteEntities();
 const { getForm } = useFormHelper();
 
-const entityId = computed<string>(() => route.params["id"]);
-
-const deleteAvailable = computed<boolean>(
-  () => editMode.value === "edit-delete" || editMode.value === "delete",
-);
+const deleteAvailable = computed<boolean>(() => {
+  return (
+    useEditHelper.editMode.value === "edit-delete" ||
+    useEditHelper.editMode.value === "delete"
+  );
+});
 
 const entityType = computed(() => {
   const slug = String(route.params["type"]);
@@ -79,7 +80,7 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
   if (isDeleted) {
     await getTenants();
     closeModal(TypeModals.Confirm);
-    disableEditMode();
+    useEditHelper.disableEditMode();
     router.push({ name: context ? context : "Home" });
     createNotificationOverwrite(
       NotificationType.default,

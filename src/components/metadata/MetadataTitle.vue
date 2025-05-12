@@ -6,7 +6,7 @@
     <p
       v-if="
         metadata?.inputField &&
-        isEdit &&
+        useEditHelper.isEdit &&
         (isOneOfRequiredMetadataField || isOneOfRequiredRelationField)
       "
       class="pl-1"
@@ -14,7 +14,11 @@
       ( {{ t("metadata.labels.one-of-required") }} )
     </p>
     <p
-      v-else-if="metadata?.inputField && !metadata.isFieldRequired && isEdit"
+      v-else-if="
+        metadata?.inputField &&
+        !metadata.isFieldRequired &&
+        useEditHelper.isEdit
+      "
       class="pl-1"
     >
       ( {{ t("metadata.labels.optional") }} )
@@ -50,6 +54,7 @@ import type {
   PanelRelationRootData,
 } from "@/generated-types/queries";
 import { useEditMode } from "@/composables/useEdit";
+import { inject } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -60,7 +65,8 @@ const props = withDefaults(
   { isOneOfRequiredMetadataField: false, isOneOfRequiredRelationField: false },
 );
 
-const { isEdit } = useEditMode();
+const entityFormData: any = inject("entityFormData");
+const useEditHelper = useEditMode(entityFormData?.id);
 const { t } = useI18n();
 </script>
 

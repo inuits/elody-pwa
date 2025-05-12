@@ -21,6 +21,8 @@
           :id="entity.id"
           :entity-type="entityType"
         ></entity-column>
+        <edit-modal :entityId="entity.id" />
+        <DeleteModal></DeleteModal>
       </entity-form>
     </div>
     <div v-else class="min-h-[30vh] flex justify-center items-center">
@@ -74,6 +76,8 @@ import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import EditModal from "@/components/EditModal.vue";
+import DeleteModal from "@/components/DeleteModal.vue";
 
 const config: any = inject("config");
 const router = useRouter();
@@ -105,14 +109,7 @@ const props = withDefaults(
 );
 
 const id = ref<string[]>(asString(props.entityId || route.params["id"]));
-const {
-  isEdit,
-  hideEditButton,
-  disableEditMode,
-  setRefetchFn,
-  editMode,
-  setEditMode,
-} = useEditMode(id.value);
+const useEditHelper = useEditMode(id.value);
 const identifiers = ref<string[]>([]);
 const loading = ref<boolean>(true);
 const { getEditableMetadataKeys } = useFormHelper();
@@ -198,7 +195,7 @@ const determineContextsForMediafileViewer = () => {
 };
 
 router.beforeEach(() => {
-  if (isEdit) disableEditMode();
+  if (useEditHelper.isEdit) useEditHelper.disableEditMode();
 });
 
 onBeforeRouteUpdate(async (to: any) => {
@@ -207,7 +204,7 @@ onBeforeRouteUpdate(async (to: any) => {
   intialValues.value = "no-values";
   relationValues.value = "no-values";
   columnList.value = "no-values";
-  disableEditMode();
+  useEdithelper.disableEditMode();
 });
 
 watch(
@@ -259,22 +256,21 @@ watch(
       () => permissionToDelete.value || permissionToEdit.value,
       () => {
         if (props.viewOnly) {
-          hideEditButton();
+          useEditHelper.hideEditButton();
           return;
         }
         if (auth.isAuthenticated.value) {
           if (permissionToEdit.value && permissionToDelete.value)
-            setEditMode("edit-delete");
+            useEditHelper.setEditMode("edit-delete");
           else if (permissionToEdit.value && !permissionToDelete.value)
-            setEditMode("edit");
+            useEditHelper.setEditMode("edit");
           else if (permissionToDelete.value && !permissionToEdit.value) {
-            setEditMode("delete");
-          } else hideEditButton();
-        } else hideEditButton();
-        console.log(editMode.value, id.value);
+            useEditHelper.setEditMode("delete");
+          } else useEditHelper.hideEditButton();
+        } else useEditHelper.hideEditButton();
       },
     );
-    setRefetchFn(refetch);
+    useEditHelper.setRefetchFn(refetch);
     loading.value = false;
   },
 );

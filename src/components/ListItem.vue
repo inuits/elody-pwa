@@ -49,7 +49,7 @@
         'flex items-center rounded-2xl p-2 bg-neutral-light',
         { 'mb-4': viewMode === 'grid' },
       ]"
-      v-show="isEdit"
+      v-show="useEditHelper.isEdit"
       v-if="onlyEditableTeaserMetadata.length > 0"
     >
       <div v-if="!loading" class="w-16 pr-2">
@@ -62,7 +62,7 @@
             ref="orderMetadataChild"
             :form-id="formId"
             v-model:metadata="metadataItem as MetadataField"
-            :is-edit="isEdit"
+            :is-edit="useEditHelper.isEdit"
             :linked-entity-id="intialValues?.id || itemId"
             :should-hide="true"
           />
@@ -150,7 +150,7 @@
         <metadata-wrapper
           :form-id="formId || 'listview'"
           v-model:metadata="metadataItem as MetadataField"
-          :is-edit="isEdit"
+          :is-edit="useEditHelper.isEdit"
           :linked-entity-id="intialValues?.id || itemId"
         />
       </div>
@@ -304,7 +304,6 @@ const emit = defineEmits<{
   (event: "navigateTo"): void;
 }>();
 
-const { isEdit } = useEditMode();
 const { deleteTeaserMetadataItemInState } = useFormHelper();
 const { update, remove } = useFieldArray(
   `relationValues.${props.relationType}`,
@@ -316,6 +315,7 @@ const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
 const formId = computed(() => getEntityUuid());
+const useEditHelper = useEditMode(formId.value);
 const imageSize = computed(() => (props.viewMode === "grid" ? 500 : 100));
 const teaserMetadataStyle = computed<string>(() => {
   if (props.viewMode === "grid") return "w-full";
@@ -385,8 +385,8 @@ watch(
 );
 
 watch(
-  () => isEdit.value,
-  () => (!isEdit.value ? (isMarkedAsToBeDeleted.value = false) : ""),
+  () => useEditHelper.isEdit,
+  (isEdit: boolean) => (!isEdit ? (isMarkedAsToBeDeleted.value = false) : ""),
 );
 
 watch(

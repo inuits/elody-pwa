@@ -1,5 +1,10 @@
 <template>
-  <div :class="['w-full flex mt-5 overflow-y-scroll', { 'mb-20': isEdit }]">
+  <div
+    :class="[
+      'w-full flex mt-5 overflow-y-scroll',
+      { 'mb-20': useEditHelper.isEdit },
+    ]"
+  >
     <div
       v-for="(column, index) in currentColumnConfig[id]"
       :key="index"
@@ -35,7 +40,7 @@ const props = defineProps<{
 }>();
 
 const { setInitialColumns, currentColumnConfig } = useColumnResizeHelper();
-const { isEdit } = useEditMode(props.id);
+const useEditHelper = useEditMode(props.id);
 
 const columns = computed<Column[]>(() => {
   const returnArray: Column[] = [];

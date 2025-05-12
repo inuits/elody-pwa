@@ -132,7 +132,6 @@ const { getParentId, getCallbackFunction, getInformationForDelete } =
   useModalActions();
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const router = useRouter();
-const { disableEditMode } = useEditMode();
 const { pageInfo, previousPageInfo } = usePageInfo();
 const { deleteEntities } = useDeleteEntities();
 
@@ -146,6 +145,8 @@ const parentEntityTitle = ref<string | undefined>(undefined);
 const translatedDeleteEntityLabel = ref<string | undefined>(undefined);
 const translatedDeleteRelationsLabel = ref<string | undefined>(undefined);
 const translatedBlockingRelationsLabel = ref<string | undefined>(undefined);
+
+const useEditHelper = useEditMode(parentId.value);
 
 const deleteSelectedItems = async () => {
   const selectedItems: InBulkProcessableItem[] = getEnqueuedItems(getContext());
@@ -171,7 +172,7 @@ const deleteSelectedItems = async () => {
 const cleanupAfterDeletion = async () => {
   await getTenants();
   closeModal(TypeModals.Delete);
-  disableEditMode();
+  useEditHelper.disableEditMode();
 
   if (pageInfo.value.parentRouteName !== "SingleEntity")
     router.push({ name: pageInfo.value.parentRouteName });

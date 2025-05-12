@@ -137,7 +137,6 @@ const breadCrumbRoutesExist = computed(
 const router = useRouter();
 const { clearBreadcrumbPathAndAddOverviewPage, previousRoute } =
   useBreadcrumbs(config);
-const { isEdit, discard, save } = useEditMode();
 const { discardEditForForm } = useFormHelper();
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal } = useBaseModal();
@@ -162,11 +161,12 @@ const toggleList = () => {
 };
 
 const openDiscardModal = (route: any) => {
+  const id = asString(route.id);
+  const useEditHelper = useEditMode(id);
   initializeConfirmModal({
     confirmButton: {
       buttonCallback: () => {
-        discard();
-        const id = asString(route.id);
+        useEditHelper.discard();
         discardEditForForm(id);
         closeModal(TypeModals.Confirm);
         navigateToEntity(route);
@@ -174,7 +174,7 @@ const openDiscardModal = (route: any) => {
     },
     secondaryConfirmButton: {
       buttonCallback: async () => {
-        await save();
+        await useEditHelper.save();
         closeModal(TypeModals.Confirm);
         navigateToEntity(route);
       },
@@ -191,7 +191,8 @@ const openDiscardModal = (route: any) => {
 };
 
 const checkNavigationAvailable = (route: any) => {
-  if (isEdit.value) openDiscardModal(route);
+  const useEditHelper = useEditMode(route.id);
+  if (useEditHelper.isEdit) openDiscardModal(route);
   else navigateToEntity(route);
 };
 

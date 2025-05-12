@@ -1,9 +1,9 @@
 <template>
   <div
+    v-if="editorLoaded"
     :class="[
       'bg-neutral-0 rounded-t-md',
       { 'border-solid border-neutral-30 border-2': !displayInline },
-      { 'animate-pulse': !editor },
     ]"
   >
     <div
@@ -25,13 +25,21 @@
     >
       <Transition>
         <WYSIWYGButtons
-          v-if="isEdit"
+          v-if="useEditHelper.isEdit"
+          :formId="formId"
           :editor="editor"
           :extensions="element.extensions"
           :displayInline="displayInline"
       /></Transition>
       <editor-content :editor="editor" />
     </div>
+    <TagEntityModal
+      v-if="
+        element.extensions.includes(WysiwygExtensions.ElodyTaggingExtension)
+      "
+      :element="element"
+      :editor="editor"
+    />
   </div>
 </template>
 
@@ -41,20 +49,17 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
 import WYSIWYGButtons from "@/components/entityElements/WYSIWYG/WYSIWYGButtons.vue";
 import type { WysiwygElement } from "@/generated-types/queries";
-import {
-  TypeModals,
-  ValidationFields,
-  WysiwygExtensions,
-} from "@/generated-types/queries";
+import { ValidationFields, WysiwygExtensions } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useEdit from "@/composables/useEdit";
-import { useBaseModal } from "@/composables/useBaseModal";
 import {
   openDetailModal,
   initializeTaggingExtension,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
+import TagEntityModal from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/TagEntityModal.vue";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -71,20 +76,13 @@ const editor = ref<Editor | undefined>(undefined);
 const { importEditorExtensions, getExtensionConfiguration } =
   useWYSIWYGEditor();
 const { getForm, addEditableMetadataKeys } = useFormHelper();
-const { updateModal } = useBaseModal();
 const useEditHelper = useEdit(props.formId);
 const { t } = useI18n();
 
 const form = computed(() => getForm(props.formId));
 const editorNode = ref<HTMLDivElement | undefined>(undefined);
 const initialValue = ref<string>("");
-
-const updateModalInfo = () => {
-  updateModal(TypeModals.ElodyEntityTaggingModal, {
-    element: props.element,
-    editor: editor.value,
-  });
-};
+const editorLoaded = ref<boolean>(false);
 
 const resetContent = () => {
   const content = editor.value?.options?.content;
@@ -144,20 +142,20 @@ onMounted(async () => {
       );
     },
   });
-
-  if (props.element.taggingConfiguration) updateModalInfo();
+  editorLoaded.value = true;
 });
 
 onUnmounted(() => {
   document.removeEventListener("discardEdit", resetContent);
   editor.value?.destroy();
+  editorLoaded.value = false;
 });
 
 watch(
   () => useEditHelper.isEdit,
-  () => {
+  (isEdit: boolean) => {
     if (editor.value) {
-      editor.value.setEditable(useEditHelper.isEdit);
+      editor.value.setEditable(isEdit);
     }
   },
   { immediate: true },
