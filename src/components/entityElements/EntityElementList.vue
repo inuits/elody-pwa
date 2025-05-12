@@ -113,6 +113,10 @@
 </template>
 
 <script lang="ts" setup>
+import type {
+  RelationActions,
+  EntitySubelement,
+} from "@/generated-types/queries";
 import {
   SearchInputType,
   EntityListViewMode,
@@ -121,9 +125,7 @@ import {
   MediaFileElementTypes,
   type EntityListElement,
   BaseLibraryModes,
-  RelationActions,
   type FetchDeepRelations,
-  EntitySubelement,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,

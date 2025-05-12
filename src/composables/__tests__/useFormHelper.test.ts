@@ -1,7 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { useFormHelper } from "@/composables/useFormHelper";
 import type { FormContext } from "vee-validate";
-import type { IntialValues } from "../../generated-types/queries";
+
 const { addRelations, createForm, getForm } = useFormHelper();
 
 const getRelationIds = (form: FormContext, relationType: string) => {
@@ -14,7 +14,7 @@ describe("useFormHelper", () => {
   it("adds new relations to the form", () => {
     const formId = "ef78b938";
     createForm(formId, {
-      intialValues: {} as IntialValues,
+      intialValues: {} as any,
       relationValues: {},
     });
 
@@ -58,13 +58,13 @@ describe("useFormHelper", () => {
     addRelations([relationsToBeAdded[0]], "hasRelation", formId);
 
     expect(
-      getRelationIds(getForm(formId) as FormContext, "hasRelation")
+      getRelationIds(getForm(formId) as FormContext, "hasRelation"),
     ).toEqual([relationsToBeAdded[0].id]);
 
     addRelations([relationsToBeAdded[1]], "hasRelation", formId);
 
     expect(
-      getRelationIds(getForm(formId) as FormContext, "hasRelation").sort()
+      getRelationIds(getForm(formId) as FormContext, "hasRelation").sort(),
     ).toEqual([relationsToBeAdded[1].id]);
   });
 
@@ -88,7 +88,7 @@ describe("useFormHelper", () => {
     const newFormId = "b88c8bdd";
 
     createForm(newFormId, {
-      intialValues: {} as IntialValues,
+      intialValues: {} as any,
       relationValues: {
         hasRelation: initialRelations,
       },
@@ -136,25 +136,24 @@ describe("useFormHelper", () => {
     expect(
       [
         ...getRelationIds(getForm(newFormId) as FormContext, "hasRelation"),
-      ].sort()
+      ].sort(),
     ).toEqual(
       [
         ...initialRelationIds,
         ...relationsToBeAdded.map((relation) => relation.id),
-      ].sort()
+      ].sort(),
     );
   });
 
   it("gets form if exists or undefined", () => {
     const formId = "ef7";
     createForm(formId, {
-      intialValues: {} as IntialValues,
+      intialValues: {} as any,
       relationValues: {},
     });
 
     expect(getForm(formId)).toBeDefined();
-
-    expect(getForm("test")).toBeUndefined;
+    expect(getForm("test")).toBeUndefined();
   });
 
   // it("should reset form values to initial values", async () => {

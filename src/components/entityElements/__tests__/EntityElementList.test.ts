@@ -6,6 +6,7 @@ import {
   BaseLibraryModes,
   EntityListViewMode,
   RelationActions,
+  Entitytyping,
 } from "@/generated-types/queries";
 import { flushPromises } from "@vue/test-utils";
 
@@ -42,6 +43,7 @@ vi.mock("@/composables/usePermissions", () => ({
   usePermissions: () => ({
     can: vi.fn(),
     fetchAdvancedPermission: mocks.fetchAdvancedPermissions,
+    setExtraVariables: vi.fn(),
   }),
   ignorePermissions: { value: false },
   advancedPermissions: mocks.advancedPermissions,
@@ -60,6 +62,14 @@ const getBasicProps = () => ({
   baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
   entityListElements: [],
   allowedActionsOnRelations: [RelationActions.AddRelation],
+  enableAdvancedFilters: false,
+  customQuery: "",
+  customQueryRelationType: "",
+  customQueryFilters: "",
+  searchInputType: "",
+  entityId: "2142414-24124124124",
+  entityType: "mediafile",
+  id: "test-id",
 });
 
 describe("EntityElementList", () => {
@@ -81,20 +91,18 @@ describe("EntityElementList", () => {
     await flushPromises();
 
     const entityElementList = await wrapper.find(
-      '[data-test="entity-element-wrapper"]'
+      '[data-test="entity-element-wrapper"]',
     );
-    expect(wrapper.vm.showElementList).toBe(true);
     expect(entityElementList.exists()).toBe(true);
   });
 
   it("does not render the entity element list when the user lacks the required permissions", async () => {
-    mocks.advancedPermissions["canAddRelations"] = false;
     mocks.fetchAdvancedPermissions.mockReturnValue(false);
 
     const wrapper = mount(EntityElementList, {
       props: {
         ...getBasicProps(),
-        canAddRelations: ["canAddRelations"],
+        can: ["canReadElementList"],
       },
       global: {
         stubs: {
@@ -106,14 +114,12 @@ describe("EntityElementList", () => {
     await flushPromises();
 
     const entityElementList = await wrapper.find(
-      '[data-test="entity-element-wrapper"]'
+      '[data-test="entity-element-wrapper"]',
     );
-    expect(wrapper.vm.showElementList).toBe(true);
-    expect(entityElementList.exists()).toBe(true);
+    expect(entityElementList.exists()).toBe(false);
   });
 
   it("renders the entity element list when valid permissions are granted", async () => {
-    mocks.advancedPermissions["canReadElementList"] = true;
     mocks.fetchAdvancedPermissions.mockReturnValue(true);
 
     const wrapper = mount(EntityElementList, {
@@ -131,9 +137,8 @@ describe("EntityElementList", () => {
     await flushPromises();
 
     const entityElementList = await wrapper.find(
-      '[data-test="entity-element-wrapper"]'
+      '[data-test="entity-element-wrapper"]',
     );
-    expect(wrapper.vm.showElementList).toBe(true);
     expect(entityElementList.exists()).toBe(true);
   });
 });

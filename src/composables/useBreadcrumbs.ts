@@ -1,9 +1,8 @@
+import type { DamsIcons, Entitytyping } from "@/generated-types/queries";
 import {
   type AdvancedFilterInput,
   AdvancedFilterTypes,
-  DamsIcons,
   type Entity,
-  Entitytyping,
   GetEntitiesDocument,
   type GetEntitiesQueryVariables,
   SearchInputType,
@@ -39,14 +38,16 @@ const { checkRegexForOneWayRelations } = useRegexChecker();
 const useBreadcrumbs = (config: any) => {
   const homeRoutes = getChildrenOfHomeRoutes(config);
   const previousRoute = computed<VisitedRoute | undefined>(
-    () => breadcrumbRoutes.value[breadcrumbRoutes.value.length - 1]
+    () => breadcrumbRoutes.value[breadcrumbRoutes.value.length - 1],
   );
 
-  const getRouteBreadcrumbsOfEntity = (entitytype: Entitytyping | string): any => {
+  const getRouteBreadcrumbsOfEntity = (
+    entitytype: Entitytyping | string,
+  ): any => {
     const entityRoute = homeRoutes.filter(
       (item: any) =>
-        item.meta.entityType?.toLowerCase() === entitytype.toLowerCase() ||
-        item.meta.slug?.toLowerCase() === entitytype.toLowerCase()
+        item.meta.entityType?.toLowerCase() === entitytype?.toLowerCase() ||
+        item.meta.slug?.toLowerCase() === entitytype?.toLowerCase(),
     )[0];
     if (!entityRoute) return;
     return entityRoute.meta.breadcrumbs;
@@ -68,7 +69,7 @@ const useBreadcrumbs = (config: any) => {
       const relation = routeBreadcrumbs[index].relation;
       const key = routeBreadcrumbs[index].key;
       entities = await fetchRelationsBasedOnEntityType(
-        createFilters(parentId, entityType, relation, key, entity)
+        createFilters(parentId, entityType, relation, key, entity),
       );
       if (entities.length > 0 && modifyBreadcrumbRoutesArray) {
         const idOfParent = entities[0].id;
@@ -95,7 +96,9 @@ const useBreadcrumbs = (config: any) => {
     const routeBreadcrumbsWithOverviewPage =
       routeBreadcrumbs[routeBreadcrumbs.length - 1];
     breadcrumbRoutes.value.unshift({
-      title: routeBreadcrumbsWithOverviewPage.title ?? routeBreadcrumbsWithOverviewPage.overviewPage,
+      title:
+        routeBreadcrumbsWithOverviewPage.title ??
+        routeBreadcrumbsWithOverviewPage.overviewPage,
       overviewPage: routeBreadcrumbsWithOverviewPage.overviewPage,
     });
     breadcrumbPathFinished.value = true;
@@ -144,23 +147,19 @@ const useBreadcrumbs = (config: any) => {
     ];
     const [matchesRegex, ids] = checkRegexForOneWayRelations(relation, entity);
     if (matchesRegex)
-      advancedFilters.push(
-        {
-          match_exact: true,
-          type: AdvancedFilterTypes.Selection,
-          key: key,
-          value: ids,
-        },
-      );
+      advancedFilters.push({
+        match_exact: true,
+        type: AdvancedFilterTypes.Selection,
+        key: key,
+        value: ids,
+      });
     else
-      advancedFilters.push(
-        {
-          match_exact: true,
-          type: AdvancedFilterTypes.Selection,
-          key: [`elody:1|relations.${relation}.key`],
-          value: parentId,
-        },
-      );
+      advancedFilters.push({
+        match_exact: true,
+        type: AdvancedFilterTypes.Selection,
+        key: [`elody:1|relations.${relation}.key`],
+        value: parentId,
+      });
     const queryVariables: GetEntitiesQueryVariables = {
       type: entityType,
       limit: 20,
@@ -179,7 +178,7 @@ const useBreadcrumbs = (config: any) => {
   };
 
   const fetchRelationsBasedOnEntityType = async (
-    queryVariables: GetEntitiesQueryVariables
+    queryVariables: GetEntitiesQueryVariables,
   ) => {
     let entities: Entity[] = [];
     await apolloClient
@@ -200,13 +199,12 @@ const useBreadcrumbs = (config: any) => {
   };
 
   useRouter()?.afterEach((to) => {
-    try {
-      if (to.meta.title === "Single Asset" || to.meta.title === "Single Entity") return;
-      const overviewPage = to.meta.breadcrumbs[to.meta.breadcrumbs.length - 1];
-      clearBreadcrumbPathAndAddOverviewPage(
-        overviewPage.title ?? overviewPage.overviewPage as string
-      );
-    } catch (e) {}
+    if (to.meta.title === "Single Asset" || to.meta.title === "Single Entity")
+      return;
+    const overviewPage = to.meta.breadcrumbs[to.meta.breadcrumbs.length - 1];
+    clearBreadcrumbPathAndAddOverviewPage(
+      overviewPage.title ?? (overviewPage.overviewPage as string),
+    );
   });
 
   return {

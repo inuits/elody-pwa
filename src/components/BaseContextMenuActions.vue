@@ -20,13 +20,11 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  Entitytyping,
-  type ContextMenuActions,
-} from "@/generated-types/queries";
+import type { Entitytyping } from "@/generated-types/queries";
+import { type ContextMenuActions } from "@/generated-types/queries";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import ContextMenuAction from "@/components/context-menu-actions/ContextMenuAction.vue";
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import { Unicons } from "@/types";
 import {
@@ -48,7 +46,7 @@ const props = withDefaults(
   {
     contextMenuActions: undefined,
     refetchEntities: undefined,
-  }
+  },
 );
 
 const emit = defineEmits(["toggleLoading"]);
@@ -58,15 +56,18 @@ const handleEmit = () => {
 };
 
 const openContextMenu = (event: Event) => {
-  contextMenuHandler.value.openContextMenu({x: event?.clientX, y: event?.clientY})
+  contextMenuHandler.value.openContextMenu({
+    x: event?.clientX,
+    y: event?.clientY,
+  });
   event?.stopPropagation();
   event?.preventDefault();
-}
+};
 
 const { fetchPermissionsOfContextMenu, setExtraVariables } = usePermissions();
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const availableContextMenuActions = ref<ContextMenuActions | undefined>(
-  undefined
+  undefined,
 );
 
 const hasAvailableContextMenuActions = computed(() => {
@@ -95,13 +96,23 @@ const getAvailableContextMenuActions = () => {
 };
 
 onMounted(async () => {
-  if (props.contextMenuActions) {
-    setExtraVariables({
-      parentEntityId: props.parentEntityId,
-      childEntityId: props.entityId,
-    });
-    await fetchPermissionsOfContextMenu(props.contextMenuActions);
-    getAvailableContextMenuActions();
-  }
+  await initializeMenuActions();
 });
+
+watch(
+  () => props.contextMenuActions,
+  async () => {
+    await initializeMenuActions();
+  },
+);
+
+const initializeMenuActions = async () => {
+  if (!props.contextMenuActions) return;
+  setExtraVariables({
+    parentEntityId: props.parentEntityId,
+    childEntityId: props.entityId,
+  });
+  await fetchPermissionsOfContextMenu(props.contextMenuActions);
+  getAvailableContextMenuActions();
+};
 </script>

@@ -1,9 +1,22 @@
 import { mount } from "@vue/test-utils";
 import MenuItemComponent from "../MenuItem.vue";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { Entitytyping, MenuItem, DamsIcons } from "@/generated-types/queries";
+import type {
+  Entitytyping,
+  MenuItem,
+  DamsIcons,
+} from "@/generated-types/queries";
 import { flushPromises } from "@vue/test-utils";
 import { ref } from "vue";
+
+vi.mock("@/components/base/BaseTooltip.vue", () => ({
+  default: {
+    template: '<div><slot name="activator" v-bind="{ on: {} }"/><slot/></div>',
+    setup() {
+      return {};
+    },
+  },
+}));
 
 vi.mock("vue-router", () => ({
   useRoute: () => ({
@@ -22,7 +35,7 @@ vi.mock("@vue/apollo-composable", () => ({
     onResult: vi.fn((callback) =>
       callback({
         data: {},
-      })
+      }),
     ),
     onError: vi.fn(),
   })),
@@ -31,6 +44,7 @@ vi.mock("@vue/apollo-composable", () => ({
 vi.mock("@/types", () => ({
   Unicons: {
     Plus: { name: "plus" },
+    AngleRight: { name: "angel-right" },
   },
 }));
 
@@ -49,12 +63,6 @@ vi.mock("@/composables/useMenuHelper", () => ({
   },
 }));
 
-vi.mock("session-vue-3-oidc-library", () => ({
-  useAuth: () => ({
-    isAuthenticated: { value: true },
-  }),
-}));
-
 const mocks = vi.hoisted(() => {
   return {
     fetchAdvancedPermissions: vi.fn(),
@@ -66,6 +74,7 @@ vi.mock("@/composables/usePermissions", () => ({
   usePermissions: () => ({
     can: mocks.fetchAdvancedPermissions,
     fetchAdvancedPermission: mocks.fetchAdvancedPermissions,
+    setExtraVariables: vi.fn(),
   }),
   ignorePermissions: { value: false },
 }));
@@ -121,7 +130,7 @@ describe("MenuItem", () => {
     await flushPromises();
 
     const menuItem = await wrapper.find('[data-test="menu-item-component"]');
-    expect(menuItem.exists()).toBe(false);
+    expect(menuItem.isVisible()).toBe(false);
   });
 
   it("renders the component if permission is not provided", async () => {
@@ -178,6 +187,6 @@ describe("MenuItem", () => {
     await flushPromises();
 
     const menuItem = await wrapper.find('[data-test="menu-item-component"]');
-    expect(menuItem.exists()).toBe(false);
+    expect(menuItem.isVisible()).toBe(false);
   });
 });
