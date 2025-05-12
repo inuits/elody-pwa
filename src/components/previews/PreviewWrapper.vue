@@ -9,6 +9,7 @@
     v-if="previewComponent.type === PreviewTypes.Map"
     :config="configPerViewMode[ViewModes.ViewModesMap]"
     :entities="entities"
+    :is-enabled-in-preview="true"
   />
   <MediaViewerPreview
     v-if="previewComponent.type === PreviewTypes.MediaViewer"

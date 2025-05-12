@@ -60,6 +60,7 @@ const props = withDefaults(
     config: ConfigItem[];
     entities: Entity[] | undefined;
     center?: number[] | undefined;
+    isEnabledInPreview: boolean;
   }>(),
   {
     center: undefined,
@@ -104,7 +105,7 @@ const createFeature = (mapData: MapElement, id: string): Feature => {
 };
 
 const heatmapPoints = computed(() => {
-  if (router.currentRoute.value.name === "SingleEntity") {
+  if (router.currentRoute.value.name === "SingleEntity" && !props.isEnabledInPreview) {
     const mapData = entities.value[0].entityView.column.elements.mapElement;
     if (!mapData) return new Feature();
     return [createFeature(mapData, entities.value[0].id)];
