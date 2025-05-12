@@ -10,7 +10,7 @@ import { ModalStyle, TypeModals } from "@/generated-types/queries";
 const { openModal } = useBaseModal();
 
 const confirmModalConfiguration = ref<ConfirmModalConfiguration | undefined>(
-  undefined
+  undefined,
 );
 const pathToNavigate = ref<string | undefined>(undefined);
 

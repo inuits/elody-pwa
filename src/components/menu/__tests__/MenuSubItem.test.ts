@@ -1,7 +1,7 @@
 import { mount } from "@vue/test-utils";
 import MenuSubItem from "../MenuSubItem.vue";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { Entitytyping, MenuItem } from "@/generated-types/queries";
+import type { Entitytyping, MenuItem } from "@/generated-types/queries";
 import { flushPromises } from "@vue/test-utils";
 
 vi.mock("vue-router", () => ({
@@ -31,7 +31,7 @@ vi.mock("@vue/apollo-composable", () => ({
     onResult: vi.fn((callback) =>
       callback({
         data: {},
-      })
+      }),
     ),
     onError: vi.fn(),
   })),
@@ -53,6 +53,7 @@ vi.mock("@/composables/usePermissions", () => ({
   usePermissions: () => ({
     can: vi.fn(() => true),
     fetchAdvancedPermission: mocks.fetchAdvancedPermissions,
+    setExtraVariables: vi.fn(),
   }),
 }));
 
