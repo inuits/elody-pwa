@@ -33,11 +33,11 @@
 </template>
 
 <script lang="ts" setup>
+import type { Entity } from "@/generated-types/queries";
 import {
   type AdvancedFilterInput,
   type BaseRelationValuesInput,
   Collection,
-  Entity,
   EntityPickerMode,
   Entitytyping,
   MutateEntityValuesDocument,
@@ -46,9 +46,9 @@ import {
   SearchInputType,
   TypeModals,
 } from "@/generated-types/queries";
+import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import {
   BulkOperationsContextEnum,
-  InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
@@ -57,7 +57,8 @@ import { useMutation } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 import { useCustomQuery } from "@/composables/useCustomQuery";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { EntityValues, useFormHelper } from "@/composables/useFormHelper";
+import type { EntityValues } from "@/composables/useFormHelper";
+import { useFormHelper } from "@/composables/useFormHelper";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import {
   NotificationType,
@@ -106,7 +107,7 @@ const { closeModal } = useBaseModal();
 const { addRelations } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const { getEntityId, getRelationType } = useEntityPickerModal();
-const { save, setRefetchFn } = useEditMode();
+const useEditHelper = useEditMode(getEntityId());
 const { getForm } = useFormHelper();
 const { parseFormValuesToFormInput } = useFormHelper();
 const { createNotification } = useNotification();
@@ -134,8 +135,8 @@ const saveRelations = (selectedItems: InBulkProcessableItem[]) => {
   if (props.entityPickerMode === EntityPickerMode.Emit) return;
   addRelations(selectedItems, getRelationType(), getEntityId(), true);
   dequeueAllItemsForBulkProcessing(getContext());
-  setRefetchFn(submit);
-  save(true);
+  useEditHelper.setRefetchFn(submit);
+  useEditHelper.save(true);
   closeModal(TypeModals.DynamicForm);
 };
 
