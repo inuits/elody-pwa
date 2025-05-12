@@ -57,7 +57,7 @@ const { t } = useI18n();
 const { getEnqueuedItems } = useBulkOperations();
 const { closeModal, getModalInfo } = useBaseModal();
 const { getRelationType, getParentId, getCollection } = useModalActions();
-const { setRefetchFn } = useEditMode();
+const useEditHelper = useEditMode(getParentId());
 
 const { deleteRelations, submit } = useDeleteRelations();
 
@@ -71,7 +71,7 @@ const getSelectedItems = () => {
 };
 
 const deleteSelectedRelations = () => {
-  setRefetchFn(() =>
+  useEditHelper.setRefetchFn(() =>
     submit(
       getParentId() as string,
       getCollection() as Collection,
