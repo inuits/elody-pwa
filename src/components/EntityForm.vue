@@ -60,7 +60,6 @@ const {
 } = useConfirmModal();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const useEditHelper = useEditMode(props.id);
-const useEditHelper = useEditMode(props.id);
 const { createForm, parseFormValuesToFormInput } = useFormHelper();
 const { createNotification } = useNotification();
 const { closeModal, openModal, updateDeleteQueryOptions } = useBaseModal();
