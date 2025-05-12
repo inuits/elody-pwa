@@ -100,6 +100,13 @@ const vitestConfig = defineVitestConfig({
   test: {
     setupFiles: "./vitestSetup.ts",
     environment: "jsdom",
+    deps: {
+      optimizer: {
+        web: {
+          include: ['@/generated-types/queries'],
+        },
+      },
+    },
   },
 });
 

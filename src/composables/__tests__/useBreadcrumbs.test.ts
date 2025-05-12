@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   breadcrumbRoutes,
   rootRoute,
@@ -19,7 +19,7 @@ describe("useBreadcrumbs", () => {
 
     const createFiltersSpy = vi.spyOn(
       useBreadcrumbs(undefined),
-      "createFilters"
+      "createFilters",
     );
     const createdFilters = createFiltersSpy(id, entityType, relation);
 
@@ -73,13 +73,13 @@ describe("useBreadcrumbs", () => {
 
     const clearBreadcrumbPathAndAddOverviewPageSpy = vi.spyOn(
       useBreadcrumbs(undefined),
-      "clearBreadcrumbPathAndAddOverviewPage"
+      "clearBreadcrumbPathAndAddOverviewPage",
     );
     clearBreadcrumbPathAndAddOverviewPageSpy(title);
 
     expect(clearBreadcrumbPathAndAddOverviewPageSpy).toHaveBeenCalledTimes(1);
     expect(clearBreadcrumbPathAndAddOverviewPageSpy).toHaveBeenCalledWith(
-      "this_is_an_overviewpage test"
+      "this_is_an_overviewpage test",
     );
     expect(clearBreadcrumbPathAndAddOverviewPageSpy).toHaveReturned();
     expect(breadcrumbRoutes.value).toEqual([]);
@@ -114,7 +114,7 @@ describe("useBreadcrumbs", () => {
 
     const addOverviewPageToBreadcrumbSpy = vi.spyOn(
       useBreadcrumbs(undefined),
-      "addOverviewPageToBreadcrumb"
+      "addOverviewPageToBreadcrumb",
     );
     addOverviewPageToBreadcrumbSpy(breadcrumbs);
 
@@ -219,11 +219,9 @@ describe("useBreadcrumbs", () => {
 
     const getRouteBreadcrumbsOfEntitySpy = vi.spyOn(
       useBreadcrumbs(config),
-      "getRouteBreadcrumbsOfEntity"
+      "getRouteBreadcrumbsOfEntity",
     );
-    const routeBreadcrumbs = getRouteBreadcrumbsOfEntitySpy(
-      Entitytyping.Document
-    );
+    const routeBreadcrumbs = getRouteBreadcrumbsOfEntitySpy("document");
 
     expect(getRouteBreadcrumbsOfEntitySpy).toHaveBeenCalledTimes(1);
     expect(getRouteBreadcrumbsOfEntitySpy).toHaveReturned();

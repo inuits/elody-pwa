@@ -18,7 +18,7 @@ vi.mock("@/composables/useFormHelper", () => ({
 describe("GetVariableValueForFilter", () => {
   const { getVariableValueForFilter } = useGetDropdownOptions(
     "entityTypeMock" as Entitytyping,
-    "parentMock"
+    "parentMock",
   );
 
   it("returns the variable if the form is not found", () => {
@@ -143,7 +143,7 @@ describe("GetVariableValueForFilter", () => {
 describe("hasNewRelations", () => {
   const { hasNewRelations } = useGetDropdownOptions(
     "entityType" as Entitytyping,
-    "parent"
+    "parent",
   );
 
   it("returns true if a relation with editStatus New is present", () => {
@@ -177,7 +177,7 @@ describe("hasNewRelations", () => {
 describe("findNewRelationValue", () => {
   const { findNewRelationValue } = useGetDropdownOptions(
     "entityType" as Entitytyping,
-    "parent"
+    "parent",
   );
 
   it("returns the key of the first relation with editStatus New", () => {
