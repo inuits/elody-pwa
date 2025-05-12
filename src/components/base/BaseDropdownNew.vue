@@ -37,7 +37,7 @@ import {
   type DropdownOption,
 } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
-import useEditMode from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import { useRoute } from "vue-router";
 
 type Dropdown = {

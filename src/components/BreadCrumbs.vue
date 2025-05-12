@@ -119,7 +119,7 @@ import {
   breadcrumbRoutes,
   rootRoute,
 } from "@/composables/useBreadcrumbs";
-import useEditMode from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import { asString } from "@/helpers";
 import { TypeModals } from "@/generated-types/queries";
 import { useFormHelper } from "@/composables/useFormHelper";

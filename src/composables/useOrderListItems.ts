@@ -1,6 +1,6 @@
 import { EditStatus } from "@/generated-types/queries";
 import { ref, computed, watch } from "vue";
-import useEditMode from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import { useLibraryBar } from "@/composables/useLibraryBar";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
 

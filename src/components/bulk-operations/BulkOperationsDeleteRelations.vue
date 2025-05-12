@@ -50,7 +50,7 @@ import {
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { useModalActions } from "@/composables/useModalActions";
-import useEditMode from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
 
 const { t } = useI18n();

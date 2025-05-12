@@ -17,7 +17,7 @@
 import type { ApolloClient } from "@apollo/client/core";
 import type { DropdownOption } from "@/generated-types/queries";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
-import useEditMode from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import useTenant from "@/composables/useTenant";
 import { DamsIcons } from "@/generated-types/queries";
 import { DefaultApolloClient } from "@vue/apollo-composable";
@@ -41,7 +41,7 @@ const {
   isAllTenantsLoaded,
   selectedTenant,
   selectTenant,
-  tenantsAsDropdownOptions
+  tenantsAsDropdownOptions,
 } = useTenant(apolloClient as ApolloClient<any>, config);
 
 const tenant = ref<string | undefined>();
@@ -66,7 +66,7 @@ watch(
   async (newTenant?: string, oldTenant?: string) => {
     if (!oldTenant && newTenant) return;
     if (newTenant) await selectTenant(newTenant);
-  }
+  },
 );
 
 const normalizeTenantMetadataToId = (tenant: string): string => {
@@ -83,14 +83,20 @@ watch(
     if (!loaded) return;
     const tenantParam = route.params?.tenant as string;
     tenant.value =
-      (tenantParam && normalizeTenantMetadataToId(tenantParam)) || selectedTenant.value;
+      (tenantParam && normalizeTenantMetadataToId(tenantParam)) ||
+      selectedTenant.value;
     router.replace({
       name: route.name as string,
-      params: { ...route.params, tenant: tenantParam || normalizeTenantIdToMetadata(selectedTenant.value || "") },
+      params: {
+        ...route.params,
+        tenant:
+          tenantParam ||
+          normalizeTenantIdToMetadata(selectedTenant.value || ""),
+      },
       query: route.query,
     });
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 

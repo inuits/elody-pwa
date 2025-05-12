@@ -22,7 +22,7 @@ import {
   NotificationType,
   useNotification,
 } from "@/components/base/BaseNotification.vue";
-import useEditMode from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import { getTitleOrNameFromEntity, mapUrlToEntityType } from "@/helpers";
 import { usePageInfo } from "@/composables/usePageInfo";
 import { useBaseModal } from "@/composables/useBaseModal";

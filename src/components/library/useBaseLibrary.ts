@@ -11,7 +11,7 @@ import {
   type GetEntityByIdQueryVariables,
   BaseLibraryModes,
 } from "@/generated-types/queries";
-import useEditMode from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import { asString, createPlaceholderEntities } from "@/helpers";
 import { ref, watch } from "vue";
 import { useStateManagement } from "@/composables/useStateManagement";

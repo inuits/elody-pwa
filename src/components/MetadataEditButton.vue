@@ -36,7 +36,7 @@ import BaseButtonNew, {
   type ButtonSize,
 } from "@/components/base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";
-import useEditMode from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import { DamsIcons } from "@/generated-types/queries";
 import { useRoute } from "vue-router";
 

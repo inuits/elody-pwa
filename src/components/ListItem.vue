@@ -99,11 +99,7 @@
       ]"
     >
       <ImageViewer
-        v-if="
-          canShowCopyRight() &&
-          media &&
-          !imageSrcError
-        "
+        v-if="canShowCopyRight() && media && !imageSrcError"
         :key="`${itemId}-image-${imageSize}`"
         :class="[
           { 'h-10 w-10': viewMode === 'list' },
@@ -253,7 +249,7 @@ import BaseToggle from "@/components/base/BaseToggle.vue";
 import EntityElementWindowPanel from "@/components/EntityElementWindowPanel.vue";
 import ImageViewer from "@/components/base/ImageViewer.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
-import useEditMode from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, ref, watch, onUpdated } from "vue";
 import { Unicons } from "@/types";

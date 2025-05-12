@@ -21,7 +21,7 @@ import {
 } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
-import useEditMode from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import { inject, computed } from "vue";
 import { useShareLink } from "@/composables/useShareLink";
 import { DefaultApolloClient, useMutation } from "@vue/apollo-composable";

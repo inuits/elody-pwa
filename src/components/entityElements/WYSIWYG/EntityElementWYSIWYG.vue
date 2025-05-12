@@ -52,7 +52,7 @@ import type { WysiwygElement } from "@/generated-types/queries";
 import { ValidationFields, WysiwygExtensions } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 import { useFormHelper } from "@/composables/useFormHelper";
-import useEdit from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import {
   openDetailModal,
   initializeTaggingExtension,
@@ -76,7 +76,7 @@ const editor = ref<Editor | undefined>(undefined);
 const { importEditorExtensions, getExtensionConfiguration } =
   useWYSIWYGEditor();
 const { getForm, addEditableMetadataKeys } = useFormHelper();
-const useEditHelper = useEdit(props.formId);
+const useEditHelper = useEditMode(props.formId);
 const { t } = useI18n();
 
 const form = computed(() => getForm(props.formId));

@@ -190,7 +190,7 @@
 import type { Editor } from "@tiptap/vue-3";
 import { WysiwygExtensions } from "@/generated-types/queries";
 import { Unicons } from "@/types";
-import useEdit from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import { computed } from "vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import {
@@ -207,7 +207,7 @@ const props = defineProps<{
   displayInline: boolean;
 }>();
 
-const useEditHelper = useEdit(props.formId);
+const useEditHelper = useEditMode(props.formId);
 const { t } = useI18n();
 
 const buttonsDisabled = computed(() => !useEditHelper.isEdit);

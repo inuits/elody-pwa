@@ -57,7 +57,7 @@ import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
-import useEditMode from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import { auth } from "@/main";
 import {
   usePermissions,

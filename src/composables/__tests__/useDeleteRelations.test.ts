@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
 import { useFormHelper } from "@/composables/useFormHelper";
-import useEditMode from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import { useI18n } from "vue-i18n";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useNotification } from "@/components/base/BaseNotification.vue";

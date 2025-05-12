@@ -64,7 +64,7 @@ import {
   NotificationType,
   useNotification,
 } from "@/components/base/BaseNotification.vue";
-import useEditMode from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import { getChildrenOfHomeRoutes } from "@/helpers";
 import { useSubmitForm } from "vee-validate";
 

@@ -1,20 +1,21 @@
-import { EditState } from "@/models/EditState";
+import { useEditState } from "@/composables/useEditState";
 import { ref } from "vue";
 
-const editStates = ref<Record<string, EditState>>({});
+const editStates = ref<Record<string, ReturnType<typeof useEditState>>>({});
 
 export const useEditMode = (
   editStateName: string = "GlobalEditState",
   mode: "get" | "delete" = "get",
-): EditState | void => {
+) => {
   if (!editStateName || typeof editStateName !== "string") {
     console.error(
-      `The editStateName is a required property of useEditMode and must be of type string | {name: ${editStateName},type: ${typeof editStateName}}`,
+      `The editStateName is a required property of useEditMode and must be a string.`,
     );
+    return;
   }
 
   const createNewEditState = () => {
-    const newEditState: EditState = new EditState(editStateName);
+    const newEditState = useEditState(editStateName);
     editStates.value = {
       ...editStates.value,
       [editStateName]: newEditState,
@@ -22,25 +23,19 @@ export const useEditMode = (
     return newEditState;
   };
 
-  const getEditState = (): EditState => {
+  const getEditState = () => {
     if (!editStates.value[editStateName]) return createNewEditState();
     return editStates.value[editStateName];
   };
 
-  const deleteEditState = (): void => {
-    try {
-      delete editStates.value[editStateName];
-    } catch {
-      console.error(`No edit state with name ${editStateName} to delete`);
-    }
+  const deleteEditState = () => {
+    delete editStates.value[editStateName];
   };
 
-  const operationModeMapping: Record<string, () => EditState | void> = {
-    get: () => getEditState(),
-    delete: () => deleteEditState(),
+  const operationModeMapping = {
+    get: getEditState,
+    delete: deleteEditState,
   };
 
   return operationModeMapping[mode]();
 };
-
-export default useEditMode;

@@ -188,7 +188,7 @@ import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import FiltersListItem from "@/components/filters/FiltersListItem.vue";
 import SavedSearches from "@/components/SavedSearches.vue";
-import useEditMode from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import { useRegexChecker } from "@/composables/useRegexChecker";
 import { apolloClient, auth } from "@/main";
 import { computed, defineProps, inject, onMounted, ref, watch } from "vue";

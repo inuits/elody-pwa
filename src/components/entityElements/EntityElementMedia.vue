@@ -84,7 +84,7 @@ import {
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseMap from "../base/BaseMap.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
-import useEditMode from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { getValueForPanelMetadata } from "@/helpers";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
