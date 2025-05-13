@@ -4,7 +4,7 @@ import { defineConfig } from "vite";
 import viteCompression from "vite-plugin-compression";
 import vue from "@vitejs/plugin-vue";
 
-const parsePort = (port: string) => {
+const parsePort = (port) => {
   return parseInt(port) ? parseInt(port) : 8080;
 };
 
