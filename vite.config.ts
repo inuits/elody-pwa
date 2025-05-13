@@ -1,6 +1,6 @@
 import { fileURLToPath, URL } from "node:url";
-import { defineConfig, mergeConfig } from "vite";
-import { defineConfig as defineVitestConfig } from "vitest/config";
+import { defineConfig } from "vite";
+
 import viteCompression from "vite-plugin-compression";
 import vue from "@vitejs/plugin-vue";
 
@@ -113,18 +113,4 @@ const viteConfig = defineConfig({
   },
 });
 
-const vitestConfig = defineVitestConfig({
-  test: {
-    setupFiles: "./vitestSetup.ts",
-    environment: "jsdom",
-    deps: {
-      optimizer: {
-        web: {
-          include: ["@/generated-types/queries"],
-        },
-      },
-    },
-  },
-});
-
-export default mergeConfig(viteConfig, vitestConfig);
+export default mergeConfig(viteConfig);
