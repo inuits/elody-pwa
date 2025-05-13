@@ -113,4 +113,4 @@ const viteConfig = defineConfig({
   },
 });
 
-export default mergeConfig(viteConfig);
+export default viteConfig;
