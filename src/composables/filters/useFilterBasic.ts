@@ -28,6 +28,7 @@ export const useFilterBasic = () => {
       itemTypes: input.item_types,
       matchExact: input.match_exact,
       distinctBy: input.distinct_by,
+      metadataKeyAsLabel: input.metadata_key_as_label,
       hidden: true,
     };
   };
