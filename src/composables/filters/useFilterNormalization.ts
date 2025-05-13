@@ -20,8 +20,10 @@ export const useFilterNormalization = () => {
       value: filter.inputFromState?.value ?? undefined,
       match_exact: filter.inputFromState?.match_exact ?? undefined,
       item_types: filter.inputFromState?.item_types ?? undefined,
-      aggregation: filter.advancedFilter.aggregation,
       distinct_by: filter.advancedFilter.distinctBy ?? undefined,
+      metadata_key_as_label:
+        filter.inputFromState?.metadata_key_as_label ?? undefined,
+      aggregation: filter.advancedFilter.aggregation,
     };
 
     if (filter.advancedFilter.lookup) {
