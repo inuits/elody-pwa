@@ -2,6 +2,7 @@ import {
   ApolloClient,
   InMemoryCache,
   type NormalizedCacheObject,
+  createHttpLink,
 } from "@apollo/client/core";
 import "./assets/base.css";
 import * as Sentry from "@sentry/vue";
@@ -88,6 +89,12 @@ const start = async (): Promise<void> => {
   });
 
   apolloClient = new ApolloClient({
+    link: graphqlErrorInterceptor.concat(
+      createHttpLink({
+        uri: config.graphQlLink || "/api/graphql",
+        headers: { "Apollo-Require-Preflight": "true" },
+      }),
+    ),
     cache: new InMemoryCache(),
   });
 
