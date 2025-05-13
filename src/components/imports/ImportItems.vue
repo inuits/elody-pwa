@@ -87,7 +87,7 @@ const doImport = async (item: string) => {
     createNotificationOverwrite(
       NotificationType.default,
       "Import",
-      t(`import.magazine-import-started`),
+      t(`import.import-started`),
     );
   } catch (error) {
     createNotificationOverwrite(
