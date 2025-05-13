@@ -1,5 +1,5 @@
 import { fileURLToPath, URL } from "node:url";
-import { defineConfig } from "vite";
+import { defineConfig, splitVendorChunkPlugin } from "vite";
 
 import viteCompression from "vite-plugin-compression";
 import vue from "@vitejs/plugin-vue";
@@ -51,7 +51,7 @@ const cacheDir =
 
 // https://vitejs.dev/config/
 const viteConfig = defineConfig({
-  plugins: [vue(), viteCompression()],
+  plugins: [vue(), viteCompression(), splitVendorChunkPlugin()],
   define: {
     __VUE_I18N_FULL_INSTALL__: true,
     __VUE_I18N_LEGACY_API__: false,
@@ -77,39 +77,31 @@ const viteConfig = defineConfig({
   cacheDir,
   build: {
     sourcemap: false,
-    brotliSize: false,
     minify: "esbuild",
     rollupOptions: {
       external: ["pdfjs-dist/types/src/display/api"],
-      output: {
-        manualChunks(id) {
-          for (const [chunkName, deps] of Object.entries(LARGE_MODULES)) {
-            if (deps.some((dep) => id.includes(`/node_modules/${dep}/`))) {
-              return `vendor-${chunkName}`;
-            }
+      // output: {
+      //   manualChunks(id) {
+      //     for (const [chunkName, deps] of Object.entries(LARGE_MODULES)) {
+      //       if (deps.some((dep) => id.includes(`/node_modules/${dep}/`))) {
+      //         return `vendor-${chunkName}`;
+      //       }
 
-            if (id.includes("/generated-types/")) {
-              return "graphql-queries";
-            }
+      //       if (id.includes("/generated-types/")) {
+      //         return "graphql-queries";
+      //       }
 
-            if (id.includes("/node_modules/")) {
-              return "vendor";
-            }
-          }
-        },
-      },
+      //       if (id.includes("/node_modules/")) {
+      //         return "vendor";
+      //       }
+      //     }
+      //   },
+      // },
     },
   },
   optimizeDeps: {
     exclude: ["session-vue-3-oidc-library", "date-fns"],
-    include: [
-      "vue",
-      "@vue/runtime-core",
-      "prosemirror-state",
-      "prosemirror-transform",
-      "prosemirror-model",
-      "prosemirror-view",
-    ],
+    include: ["@apollo/client/core", "@apollo/client/cache"],
   },
 });
 
