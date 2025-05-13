@@ -12,7 +12,6 @@ import { BrowserTracing } from "@sentry/tracing";
 import { createApp } from "vue";
 import { createHead } from "@vueuse/head";
 import { createRouter, createWebHistory, type Router } from "vue-router";
-import { createUploadLink } from "apollo-upload-client";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { getApplicationDetails, getFormattersSettings, i18n } from "@/helpers";
 import { onError } from "@apollo/client/link/error";
@@ -89,12 +88,6 @@ const start = async (): Promise<void> => {
   });
 
   apolloClient = new ApolloClient({
-    link: graphqlErrorInterceptor.concat(
-      createUploadLink({
-        uri: config.graphQlLink || "/api/graphql",
-        headers: { "Apollo-Require-Preflight": "true" },
-      }),
-    ),
     cache: new InMemoryCache(),
   });
 
