@@ -121,7 +121,7 @@ const doImport = async (folder: string) => {
         createNotificationOverwrite(
           NotificationType.default,
           "Import",
-          t(`import.magazine-import-started`),
+          t(`import.import-started`),
         );
         props.closeAndDeleteForm();
         break;
@@ -132,7 +132,7 @@ const doImport = async (folder: string) => {
         createNotificationOverwrite(
           NotificationType.default,
           "Import",
-          t(`import.magazine-import-started`),
+          t(`import.import-started`),
         );
         props.closeAndDeleteForm();
         break;
@@ -171,7 +171,7 @@ const doMetsImport = async (folder) => {
   createNotificationOverwrite(
     NotificationType.default,
     "Import",
-    t(`import.magazine-import-started`),
+    t(`import.import-started`),
   );
   props.closeAndDeleteForm();
 };
