@@ -42,7 +42,7 @@ const LARGE_MODULES = {
     "@tiptap/extension-paragraph",
     "@tiptap/extension-text",
   ],
-},
+}
 
 const cacheDir =
   process.env.NODE_ENV === "development-docker"
