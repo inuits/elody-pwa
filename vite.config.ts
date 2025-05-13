@@ -8,6 +8,42 @@ const parsePort = (port: string) => {
   return parseInt(port) ? parseInt(port) : 8080;
 };
 
+const LARGE_MODULES = {
+  vue: ["vue", "vue-router"],
+  apollo: ["@apollo/client", "@vue/apollo-composable"],
+  leaflet: ["leaflet", "@vue-leaflet/vue-leaflet"],
+  sentry: [
+    "@sentry/browser",
+    "@sentry/integrations",
+    "@sentry/tracing",
+    "@sentry/vue",
+  ],
+  openseadragon: ["openseadragon"],
+  pdfjs: ["pdfjs-dist"],
+  ol: ["ol"],
+  chart: [
+    "chart.js",
+    "chartjs-adapter-date-fns",
+    "chartjs-plugin-datasource-prometheus",
+  ],
+  openlayers: ["vue3-openlayers"],
+  dropzone: ["dropzone"],
+  unicons: ["vue-unicons"],
+  tiptap: [
+    "@tiptap/vue-3",
+    "@tiptap/extension-color",
+    "@tiptap/extension-list-item",
+    "@tiptap/extension-text-style",
+    "@tiptap/starter-kit",
+    "@tiptap/core",
+    "@tiptap/extension-bold",
+    "@tiptap/extension-italic",
+    "@tiptap/extension-document",
+    "@tiptap/extension-paragraph",
+    "@tiptap/extension-text",
+  ],
+},
+
 const cacheDir =
   process.env.NODE_ENV === "development-docker"
     ? "/app/node_modules/.vite"
@@ -41,47 +77,28 @@ const viteConfig = defineConfig({
   cacheDir,
   build: {
     sourcemap: false,
+    brotliSize: false,
     minify: "esbuild",
     rollupOptions: {
       external: ["pdfjs-dist/types/src/display/api"],
       output: {
-        manualChunks: {
-          vue: ["vue", "vue-router"],
-          apollo: ["@apollo/client", "@vue/apollo-composable"],
-          leaflet: ["leaflet", "@vue-leaflet/vue-leaflet"],
-          sentry: [
-            "@sentry/browser",
-            "@sentry/integrations",
-            "@sentry/tracing",
-            "@sentry/vue",
-          ],
-          openseadragon: ["openseadragon"],
-          pdfjs: ["pdfjs-dist"],
-          ol: ["ol"],
-          chart: [
-            "chart.js",
-            "chartjs-adapter-date-fns",
-            "chartjs-plugin-datasource-prometheus",
-          ],
-          openlayers: ["vue3-openlayers"],
-          dropzone: ["dropzone"],
-          unicons: ["vue-unicons"],
-          tiptap: [
-            "@tiptap/vue-3",
-            "@tiptap/extension-color",
-            "@tiptap/extension-list-item",
-            "@tiptap/extension-text-style",
-            "@tiptap/starter-kit",
-            "@tiptap/core",
-            "@tiptap/extension-bold",
-            "@tiptap/extension-italic",
-            "@tiptap/extension-document",
-            "@tiptap/extension-paragraph",
-            "@tiptap/extension-text",
-          ],
-        },
-      },
-    },
+        manualChunks(id): {
+          for (const [chunkName, deps] of Object.entries(LARGE_MODULES)) {
+            if (deps.some(dep => id.includes(`/node_modules/${dep}/`))) {
+              return `vendor-${chunkName}`;
+            }
+
+            if (id.includes("/generated-types/")) {
+              return "graphql-queries";
+            }
+
+            if (id.includes("/node_modules/")) {
+              return "vendor";
+            }
+          }
+        }
+      }
+    }
   },
   optimizeDeps: {
     exclude: ["session-vue-3-oidc-library", "date-fns"],
@@ -103,7 +120,7 @@ const vitestConfig = defineVitestConfig({
     deps: {
       optimizer: {
         web: {
-          include: ['@/generated-types/queries'],
+          include: ["@/generated-types/queries"],
         },
       },
     },
