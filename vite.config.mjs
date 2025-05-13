@@ -44,6 +44,43 @@ const viteConfig = defineConfig({
     minify: "esbuild",
     rollupOptions: {
       external: ["pdfjs-dist/types/src/display/api"],
+      output: {
+        manualChunks: {
+          vue: ["vue", "vue-router"],
+          apollo: ["@apollo/client", "@vue/apollo-composable"],
+          leaflet: ["leaflet", "@vue-leaflet/vue-leaflet"],
+          sentry: [
+            "@sentry/browser",
+            "@sentry/integrations",
+            "@sentry/tracing",
+            "@sentry/vue",
+          ],
+          openseadragon: ["openseadragon"],
+          pdfjs: ["pdfjs-dist"],
+          ol: ["ol"],
+          chart: [
+            "chart.js",
+            "chartjs-adapter-date-fns",
+            "chartjs-plugin-datasource-prometheus",
+          ],
+          openlayers: ["vue3-openlayers"],
+          dropzone: ["dropzone"],
+          unicons: ["vue-unicons"],
+          tiptap: [
+            "@tiptap/vue-3",
+            "@tiptap/extension-color",
+            "@tiptap/extension-list-item",
+            "@tiptap/extension-text-style",
+            "@tiptap/starter-kit",
+            "@tiptap/core",
+            "@tiptap/extension-bold",
+            "@tiptap/extension-italic",
+            "@tiptap/extension-document",
+            "@tiptap/extension-paragraph",
+            "@tiptap/extension-text",
+          ],
+        },
+      },
     },
   },
   optimizeDeps: {
