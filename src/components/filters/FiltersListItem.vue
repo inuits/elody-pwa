@@ -183,8 +183,6 @@ const updateFilterValue = (value: unknown) => {
   if (isEmpty) {
     emit("deactivateFilter", props.filter.advancedFilter.key);
   } else {
-    console.log("activate :", props.filter.advancedFilter.key);
-    console.log("with matcher: ", selectedMatcher.value);
     emit(
       "activateFilter",
       props.filter.advancedFilter.key,
