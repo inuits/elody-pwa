@@ -42,7 +42,7 @@ const LARGE_MODULES = {
     "@tiptap/extension-paragraph",
     "@tiptap/extension-text",
   ],
-}
+};
 
 const cacheDir =
   process.env.NODE_ENV === "development-docker"
@@ -82,9 +82,9 @@ const viteConfig = defineConfig({
     rollupOptions: {
       external: ["pdfjs-dist/types/src/display/api"],
       output: {
-        manualChunks(id): {
+        manualChunks(id) {
           for (const [chunkName, deps] of Object.entries(LARGE_MODULES)) {
-            if (deps.some(dep => id.includes(`/node_modules/${dep}/`))) {
+            if (deps.some((dep) => id.includes(`/node_modules/${dep}/`))) {
               return `vendor-${chunkName}`;
             }
 
@@ -96,9 +96,9 @@ const viteConfig = defineConfig({
               return "vendor";
             }
           }
-        }
-      }
-    }
+        },
+      },
+    },
   },
   optimizeDeps: {
     exclude: ["session-vue-3-oidc-library", "date-fns"],
