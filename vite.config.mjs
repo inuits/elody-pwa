@@ -1,5 +1,5 @@
 import { fileURLToPath, URL } from "node:url";
-import { defineConfig, splitVendorChunkPlugin } from "vite";
+import { defineConfig } from "vite";
 
 import viteCompression from "vite-plugin-compression";
 import vue from "@vitejs/plugin-vue";
@@ -15,7 +15,7 @@ const cacheDir =
 
 // https://vitejs.dev/config/
 const viteConfig = defineConfig({
-  plugins: [vue(), viteCompression(), splitVendorChunkPlugin()],
+  plugins: [vue(), viteCompression()],
   define: {
     __VUE_I18N_FULL_INSTALL__: true,
     __VUE_I18N_LEGACY_API__: false,
