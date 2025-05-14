@@ -38,8 +38,6 @@ import { inject, computed, onMounted } from "vue";
 import { getRouteMetadataInfoFromEntity, mapUrlToEntityType } from "@/helpers";
 import DeleteButton from "@/components/DeleteButton.vue";
 import { auth } from "@/main";
-import { useNotification } from "@kyvg/vue3-notification";
-import { useBaseNotification } from "@/composables/useBaseNotification";
 
 const route = useRoute();
 const config: any = inject("config");
