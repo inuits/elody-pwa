@@ -160,6 +160,7 @@ const toggleOpen = () => {
 watch(selectedMatcher, async (newVal, oldVal) => {
   if (oldVal !== undefined) {
     emit("deactivateFilter", props.filter.advancedFilter.key);
+    lastTypedValue.value = "";
   }
 
   if (newVal) {
