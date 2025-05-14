@@ -34,7 +34,7 @@ import LanguageSelect from "@/components/LanguageSelect.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import SearchBarAi from "@/components/SearchBarAi.vue";
 import TenantSwitcher from "@/components/menu/TenantSwitcher.vue";
-import { inject, computed, onMounted } from "vue";
+import { inject, computed } from "vue";
 import { getRouteMetadataInfoFromEntity, mapUrlToEntityType } from "@/helpers";
 import DeleteButton from "@/components/DeleteButton.vue";
 import { auth } from "@/main";
