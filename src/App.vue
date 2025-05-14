@@ -39,7 +39,6 @@
 
 <script setup lang="ts">
 import type { Context } from "./composables/useBulkOperations";
-import BaseNotification from "@/components/base/BaseNotification.vue";
 //import BulkOperationsEditModal from "@/components/bulk-operations/BulkOperationsEditModal.vue";
 import BulkoperationsModal from "@/components/bulk-operations/BulkOperationsModal.vue";
 import ConfirmModal from "./components/base/ConfirmModal.vue";
