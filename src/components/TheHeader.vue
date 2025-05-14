@@ -46,23 +46,6 @@ const config: any = inject("config");
 const showSearch = config.features.simpleSearch.hasSimpleSearch;
 const showSearchAI = config.features?.aiSearch?.hasAiSearch;
 
-const { notify } = useNotification();
-const { getSuccessNotification, getErrorNotification, getWarningNotification } =
-  useBaseNotification();
-
-onMounted(() => {
-  notify(
-    getSuccessNotification("Success!", "The performed action was succesfull!"),
-  );
-  notify(getErrorNotification("Error!", "The performed action failed!"));
-  notify(
-    getWarningNotification(
-      "Warning!",
-      "The performed action finished with a warning!",
-    ),
-  );
-});
-
 const entityType = computed(() => {
   const slug = String(route.params["type"]);
   return mapUrlToEntityType(slug) || slug;
