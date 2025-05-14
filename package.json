@@ -41,6 +41,7 @@
     "@vueform/multiselect": "^2.6.10",
     "@vueform/slider": "^2.1.10",
     "@vueuse/head": "^0.6.0",
+    "@kyvg/vue3-notification": "3.4.1",
     "chart.js": "^4.4.6",
     "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-plugin-datasource-prometheus": "^2.3.0",

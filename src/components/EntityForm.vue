@@ -18,10 +18,8 @@ import {
   BulkOperationsContextEnum,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
-import {
-  useNotification,
-  NotificationType,
-} from "@/components/base/BaseNotification.vue";
+import { useNotification } from "@kyvg/vue3-notification";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 import {
   inject,
   onMounted,
@@ -73,7 +71,8 @@ const {
   buttonClicked,
 } = useEditMode();
 const { createForm, parseFormValuesToFormInput } = useFormHelper();
-const { createNotification } = useNotification();
+const { getSuccessNotification } = useBaseNotification();
+const { notify } = useNotification();
 const { closeModal, openModal, updateDeleteQueryOptions } = useBaseModal();
 const { t } = useI18n();
 const childRoutes = getChildrenOfHomeRoutes(config).map(
@@ -118,13 +117,13 @@ const submit = useSubmitForm<EntityValues>(async () => {
     intialValues: mutatedEntity.intialValues,
     relationValues: mutatedEntity.relationValues,
   });
-  createNotification({
-    displayTime: 10,
-    type: NotificationType.default,
-    title: t("notifications.success.entityUpdated.title"),
-    description: t("notifications.success.entityUpdated.description"),
-    shown: true,
-  });
+  notify(
+    getSuccessNotification(
+      t("notifications.success.entityUpdated.title"),
+      t("notifications.success.entityUpdated.description"),
+    ),
+  );
+
   form.resetForm({ values: form.values });
   disableEditMode();
 });

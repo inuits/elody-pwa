@@ -59,10 +59,8 @@ import { useCustomQuery } from "@/composables/useCustomQuery";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { EntityValues, useFormHelper } from "@/composables/useFormHelper";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { useNotification } from "@kyvg/vue3-notification";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 import useEditMode from "@/composables/useEdit";
 import { getChildrenOfHomeRoutes } from "@/helpers";
 import { useSubmitForm } from "vee-validate";
@@ -109,7 +107,8 @@ const { getEntityId, getRelationType } = useEntityPickerModal();
 const { save, addSaveCallback, clearSaveCallbacks } = useEditMode();
 const { getForm } = useFormHelper();
 const { parseFormValuesToFormInput } = useFormHelper();
-const { createNotification } = useNotification();
+const { getSuccessNotification } = useBaseNotification();
+const { notify } = useNotification();
 
 const childRoutes = getChildrenOfHomeRoutes(config).map(
   (route: any) => route.meta,
@@ -195,14 +194,13 @@ const submit = useSubmitForm<EntityValues>(async () => {
     intialValues: mutatedEntity.intialValues,
     relationValues: mutatedEntity.relationValues,
   });
-  createNotification({
-    displayTime: 10,
-    type: NotificationType.default,
-    title: t("notifications.success.entityUpdated.title"),
-    description: t("notifications.success.entityUpdated.description"),
-    shown: true,
-  });
-  form.resetForm({ values: form.values });
+  notify(
+    getSuccessNotification(
+      t("notifications.success.entityUpdated.title"),
+      t("notifications.success.entityUpdated.description"),
+    ),
+  );
+  if (form) form.resetForm({ values: form.values });
 });
 
 const addSaveHandler = () => {

@@ -35,10 +35,8 @@ import { computed, ref, onMounted } from "vue";
 import { BaseFieldType } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 import ImportListItem from "@/components/imports/ImportListItem.vue";
-import {
-  useNotification,
-  NotificationType,
-} from "@/components/base/BaseNotification.vue";
+import { useBaseNotification } from "@/composables/useBaseNotification";
+import { useNotification } from "@kyvg/vue3-notification";
 import { useGraphqlAsync } from "@/composables/useGraphqlAsync";
 
 const props = defineProps<{
@@ -47,7 +45,8 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const { createNotificationOverwrite } = useNotification();
+const { notify } = useNotification();
+const { getSuccessNotification, getErrorNotification } = useBaseNotification();
 const { getQueryDocument, queryAsync, mutateAsync } = useGraphqlAsync();
 
 const itemsLoading = ref<boolean>(false);
@@ -84,16 +83,18 @@ const doImport = async (item: string) => {
       default:
         return;
     }
-    createNotificationOverwrite(
-      NotificationType.default,
-      "Import",
-      t(`import.import-started`),
+    notify(
+      getSuccessNotification(
+        t(`notifications.success.import.title`),
+        t(`notifications.success.import.description`),
+      ),
     );
-  } catch (error) {
-    createNotificationOverwrite(
-      NotificationType.error,
-      t(`import.import-error`),
-      "" + error.message,
+  } catch (error: any) {
+    notify(
+      getErrorNotification(
+        t(`notifications.errors.import.title`),
+        "" + error.message,
+      ),
     );
   }
   props.closeAndDeleteForm();

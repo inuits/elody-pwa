@@ -34,15 +34,34 @@ import LanguageSelect from "@/components/LanguageSelect.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import SearchBarAi from "@/components/SearchBarAi.vue";
 import TenantSwitcher from "@/components/menu/TenantSwitcher.vue";
-import { inject, computed } from "vue";
+import { inject, computed, onMounted } from "vue";
 import { getRouteMetadataInfoFromEntity, mapUrlToEntityType } from "@/helpers";
 import DeleteButton from "@/components/DeleteButton.vue";
 import { auth } from "@/main";
+import { useNotification } from "@kyvg/vue3-notification";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 
 const route = useRoute();
 const config: any = inject("config");
 const showSearch = config.features.simpleSearch.hasSimpleSearch;
 const showSearchAI = config.features?.aiSearch?.hasAiSearch;
+
+const { notify } = useNotification();
+const { getSuccessNotification, getErrorNotification, getWarningNotification } =
+  useBaseNotification();
+
+onMounted(() => {
+  notify(
+    getSuccessNotification("Success!", "The performed action was succesfull!"),
+  );
+  notify(getErrorNotification("Error!", "The performed action failed!"));
+  notify(
+    getWarningNotification(
+      "Warning!",
+      "The performed action finished with a warning!",
+    ),
+  );
+});
 
 const entityType = computed(() => {
   const slug = String(route.params["type"]);

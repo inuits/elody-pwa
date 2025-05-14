@@ -69,10 +69,8 @@ import {
   type DropdownOption,
   TypeModals,
 } from "@/generated-types/queries";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { useNotification } from "@kyvg/vue3-notification";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
   type Context,
@@ -87,7 +85,8 @@ import { goToEntityPageById } from "@/helpers";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 
 const { t } = useI18n();
-const { createNotificationOverwrite } = useNotification();
+const { notify } = useNotification();
+const { getSuccessNotification, getErrorNotification } = useBaseNotification();
 const { dequeueAllItemsForBulkProcessing, getEnqueuedItems } =
   useBulkOperations();
 const { closeModal, getModalInfo } = useBaseModal();
@@ -168,10 +167,11 @@ const deleteSelectedItems = async () => {
     if (jobIdentifier) {
       closeModal(TypeModals.BulkOperationsDeleteEntities);
       dequeueAllItemsForBulkProcessing(context);
-      createNotificationOverwrite(
-        NotificationType.default,
-        t("notifications.success.entityDeleted.title"),
-        t("notifications.success.entityDeleted.description"),
+      notify(
+        getSuccessNotification(
+          t("notifications.success.entityDeleted.title"),
+          t("notifications.success.entityDeleted.description"),
+        ),
       );
       goToEntityPageById(
         jobIdentifier,
@@ -180,10 +180,11 @@ const deleteSelectedItems = async () => {
         router,
       );
     } else {
-      createNotificationOverwrite(
-        NotificationType.default,
-        t("notifications.errors.entityDeleted.title"),
-        t("notifications.errors.entityDeleted.description"),
+      notify(
+        getErrorNotification(
+          t("notifications.errors.entityDeleted.title"),
+          t("notifications.errors.entityDeleted.description"),
+        ),
       );
     }
   } catch (error) {
