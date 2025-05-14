@@ -166,7 +166,9 @@ describe("useDeleteRelations", () => {
         TypeModals.BulkOperationsDeleteRelations,
       );
 
-      expect(useNotification().displaySuccessNotification).toHaveBeenCalled();
+      expect(
+        useBaseNotification().displaySuccessNotification,
+      ).toHaveBeenCalled();
       expect(useEditMode().disableEditMode).toHaveBeenCalled();
     });
 
