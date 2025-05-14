@@ -1,6 +1,6 @@
 <template>
   <div v-if="!showSplashScreen">
-    <BaseNotification />
+    <notifications class="pt-2" />
     <the-navigation class="navbar" />
     <div>
       <div
@@ -29,7 +29,10 @@
       <ConfirmModal><ConfirmModalView /></ConfirmModal>
     </div>
   </div>
-  <div v-else class="w-full h-screen flex justify-center items-center animate-pulse">
+  <div
+    v-else
+    class="w-full h-screen flex justify-center items-center animate-pulse"
+  >
     <img src="/logo.svg" alt="Elody logo" class="h-48" />
   </div>
 </template>
@@ -107,6 +110,14 @@ useHead({
   -o-transition: padding-left 300ms ease-in-out;
   transition: padding-left 300ms ease-in-out;
   padding-left: 20rem;
+}
+
+.notification-title {
+  @apply text-xl;
+}
+
+.notification-content {
+  @apply text-base;
 }
 
 @keyframes logo-animation {

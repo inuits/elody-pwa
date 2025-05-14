@@ -22,6 +22,7 @@ import { Unicons } from "./types";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useErrorCodes } from "@/composables/useErrorCodes";
 import { addRouterNavigationGuards } from "./routerNavigationGuards";
+import Notifications from "@kyvg/vue3-notification";
 
 import type { GraphQLError } from "graphql/error";
 import { useServiceVersionManager } from "@/composables/useServiceVersionManager";
@@ -103,6 +104,7 @@ const start = async (): Promise<void> => {
     .use(Unicon, {
       fill: "currentColor",
     })
+    .use(Notifications)
     .use(router)
     .use(auth)
     .use(head)

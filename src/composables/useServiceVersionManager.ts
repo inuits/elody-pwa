@@ -1,13 +1,14 @@
 import { ref, type Ref } from "vue";
 import { ElodyServices } from "@/generated-types/queries";
 import { useStateManagement } from "@/composables/useStateManagement";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { useBaseNotification } from "@/composables/useBaseNotification";
+import { useNotification } from "@kyvg/vue3-notification";
 
 const pwaVersion = ref<string>();
 const apolloGraphqlVersion = ref<string>();
+
+const { notify } = useNotification();
+const { getSuccessNotification } = useBaseNotification();
 
 export const useServiceVersionManager = (): {
   pwaVersion: Ref<string>;
@@ -85,12 +86,11 @@ export const useServiceVersionManager = (): {
   };
 
   const __showNewVersionAvailableToUser = () => {
-    const { createNotificationOverwrite } = useNotification();
-    createNotificationOverwrite(
-      NotificationType.default,
-      "notifications.default.new-version-available.title",
-      "notifications.default.new-version-available.description",
-      20,
+    notify(
+      getSuccessNotification(
+        "notifications.default.new-version-available.title",
+        "notifications.default.new-version-available.description",
+      ),
     );
   };
 

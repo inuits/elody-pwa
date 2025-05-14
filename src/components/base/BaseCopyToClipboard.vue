@@ -8,13 +8,12 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import Clipboard from "clipboard";
 import { Unicons } from "@/types";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { useNotification } from "@kyvg/vue3-notification";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useI18n } from "vue-i18n";
 
-const { createNotificationOverwrite } = useNotification();
+const { notify } = useNotification();
+const { getSuccessNotification, getErrorNotification } = useBaseNotification();
 const { t } = useI18n();
 
 const props = defineProps<{
@@ -43,16 +42,21 @@ onMounted(() => {
     });
 
     clipboardInstance.on("success", () => {
-      createNotificationOverwrite(
-        NotificationType.default,
-        t("notifications.success.copiedToClipboard.title"),
-        t("notifications.success.copiedToClipboard.description"),
-        3,
+      notify(
+        getSuccessNotification(
+          t("notifications.success.copiedToClipboard.title"),
+          t("notifications.success.copiedToClipboard.description"),
+        ),
       );
     });
 
     clipboardInstance.on("error", () => {
-      console.error("Copy failed");
+      notify(
+        getErrorNotification(
+          t("notifications.errors.copiedToClipboard.title"),
+          t("notifications.errors.copiedToClipboard.description"),
+        ),
+      );
     });
   }
 });

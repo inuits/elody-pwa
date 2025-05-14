@@ -1,10 +1,8 @@
 import type { GraphQLError } from "graphql/error";
 import { setupScopedUseI18n } from "@/helpers";
 import { useStateManagement } from "@/composables/useStateManagement";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { useBaseNotification } from "@/composables/useBaseNotification";
+import { useNotification } from "@kyvg/vue3-notification";
 import useTenant from "@/composables/useTenant";
 import { auth, router } from "@/main";
 import { ErrorCodeType } from "@/generated-types/queries";
@@ -24,7 +22,8 @@ export const useErrorCodes = (): {
   ) => Promise<{ code: string; message: string }>;
 } => {
   let t;
-  const { createNotificationOverwrite } = useNotification();
+  const { notify } = useNotification();
+  const { getErrorNotification } = useBaseNotification();
 
   const authHandlers: Record<string, Function> = {
     "1001": (errorCodeType) => handleUnauthorized(errorCodeType),
@@ -75,7 +74,7 @@ export const useErrorCodes = (): {
       variablesString.forEach((variable, index) => {
         if (index !== 0)
           variables.push(...variable.split(" - ")[0].trim().split("|"));
-      })
+      });
       return variables;
     } catch {
       return [];
@@ -145,10 +144,11 @@ export const useErrorCodes = (): {
     const { closeAllModals } = useBaseModal();
 
     if (errorCodeType === ErrorCodeType.Write) {
-      createNotificationOverwrite(
-        NotificationType.error,
-        t("notifications.graphql-errors.forbidden.title"),
-        t("notifications.graphql-errors.forbidden.description"),
+      notify(
+        getErrorNotification(
+          t("notifications.graphql-errors.forbidden.title"),
+          t("notifications.graphql-errors.forbidden.description"),
+        ),
       );
       return;
     }
@@ -166,12 +166,7 @@ export const useErrorCodes = (): {
     errorCodeType: ErrorCodeType = ErrorCodeType.Read,
     errorMessage: string,
   ) => {
-    const { createNotificationOverwrite } = useNotification();
-    createNotificationOverwrite(
-      NotificationType.error,
-      "Error",
-      errorMessage,
-    );
+    notify(getErrorNotification("Error", errorMessage));
   };
 
   const handleAuthCodes = (
@@ -183,7 +178,7 @@ export const useErrorCodes = (): {
 
   const handleWriteTypeError = (code: string, message: string): void => {
     if (!Object.keys(writeHandlers).includes(code)) {
-      createNotificationOverwrite(NotificationType.error, "Error", message);
+      notify(getErrorNotification("Error", message));
       return;
     }
     writeHandlers[code]();
@@ -216,7 +211,7 @@ export const useErrorCodes = (): {
   const fallbackOnRequestStatusCode = (
     statusCode: string,
     errorCodeType: ErrorCodeType,
-    errorMessage: string
+    errorMessage: string,
   ): void => {
     if (!Object.keys(statusCodeHandlers).includes(statusCode.toString())) {
       statusCodeHandlers["default"](errorCodeType, errorMessage);
@@ -286,7 +281,11 @@ export const useErrorCodes = (): {
         "graphql",
         error,
       );
-      fallbackOnRequestStatusCode(statusCode, ErrorCodeType.Read, graphqlErrorMessage);
+      fallbackOnRequestStatusCode(
+        statusCode,
+        ErrorCodeType.Read,
+        graphqlErrorMessage,
+      );
       return;
     }
 

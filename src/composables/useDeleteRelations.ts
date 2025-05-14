@@ -10,10 +10,8 @@ import type { Collection } from "@/generated-types/queries";
 import { MutateEntityValuesDocument } from "@/generated-types/queries";
 import type { FormContext } from "vee-validate";
 import { useBaseModal } from "@/composables/useBaseModal";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { useBaseNotification } from "@/composables/useBaseNotification";
+import { useNotification } from "@kyvg/vue3-notification";
 import {
   type Context,
   type InBulkProcessableItem,
@@ -32,7 +30,8 @@ export function useDeleteRelations() {
   } = useFormHelper();
   const { save, disableEditMode } = useEditMode();
   const { closeModal } = useBaseModal();
-  const { createNotification } = useNotification();
+  const { notify } = useNotification();
+  const { getSuccessNotification } = useBaseNotification();
   const { dequeueItemForBulkProcessing } = useBulkOperations();
 
   const deleteRelations = async (
@@ -102,13 +101,12 @@ export function useDeleteRelations() {
 
     if (modalType) closeModal(TypeModals.BulkOperationsDeleteRelations);
 
-    createNotification({
-      displayTime: 10,
-      type: NotificationType.default,
-      title: "notifications.success.entityUpdated.title",
-      description: "notifications.success.entityUpdated.description",
-      shown: true,
-    });
+    notify(
+      getSuccessNotification(
+        "notifications.success.entityUpdated.title",
+        "notifications.success.entityUpdated.description",
+      ),
+    );
 
     disableEditMode();
   };

@@ -4,7 +4,9 @@
     :label="$t(label, [entityTypeLabel])"
     :icon="Unicons[icon].name"
     :disable="isDisabled"
-    :tooltipLabel="isDisabled ? 'tooltip.bulkOperationsActionBar.readmode' : undefined"
+    :tooltipLabel="
+      isDisabled ? 'tooltip.bulkOperationsActionBar.readmode' : undefined
+    "
   />
 </template>
 
@@ -19,18 +21,19 @@ import {
 } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
-import useEditMode from "@/composables/useEdit";
+import { useEditMode } from "@/composables/useEdit";
 import { inject, computed } from "vue";
 import { useShareLink } from "@/composables/useShareLink";
 import { DefaultApolloClient, useMutation } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
-import { type Context, useBulkOperations } from "@/composables/useBulkOperations";
+import {
+  type Context,
+  useBulkOperations,
+} from "@/composables/useBulkOperations";
 import { getChildrenOfHomeRoutes } from "@/helpers";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
-import { useNotification } from "@/components/base/BaseNotification.vue";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
 
 const props = defineProps<{
@@ -39,13 +42,15 @@ const props = defineProps<{
   action: ContextMenuElodyActionEnum;
   entityType: Entitytyping;
   entityId: String;
-  relation?: { idx: number; relation: object } | "no-relation-found" | undefined;
+  relation?:
+    | { idx: number; relation: object }
+    | "no-relation-found"
+    | undefined;
   bulkOperationsContext: Context;
   refetchEntities: Function;
 }>();
 
 const { deleteRelations, submit } = useDeleteRelations();
-const { addSaveCallback, clearSaveCallbacks, isEdit } = useEditMode();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal } = useBaseModal();
@@ -58,23 +63,31 @@ const entityFormData: {
   id: string;
   collection: Collection;
 };
+const useEditHelper = useEditMode(entityFormData.id);
 const apolloClient = inject(DefaultApolloClient);
 const { createShareLink } = useShareLink(apolloClient as ApolloClient<any>);
 const config: any = inject("config");
 
-const entityTypeLabel = computed(() => t(`entity-translations.singular.${props.entityType}`));
+const entityTypeLabel = computed(() =>
+  t(`entity-translations.singular.${props.entityType}`),
+);
 const isDisabled = computed(() => {
   return (
-    isEdit.value &&
+    useEditHelper.isEdit.value &&
     (props.action === ContextMenuElodyActionEnum.DeleteRelation ||
       props.action === ContextMenuElodyActionEnum.DeleteEntity)
   );
 });
 
-const childRoutes = getChildrenOfHomeRoutes(config).map((route: any) => route.meta);
+const childRoutes = getChildrenOfHomeRoutes(config).map(
+  (route: any) => route.meta,
+);
 
 const deleteRelation = async () => {
-  dequeueItemForBulkProcessing(props.bulkOperationsContext, props.relation.relation.key);
+  dequeueItemForBulkProcessing(
+    props.bulkOperationsContext,
+    props.relation.relation.key,
+  );
 
   deleteRelations(
     entityFormData.id,
@@ -84,18 +97,18 @@ const deleteRelation = async () => {
   );
 };
 
-const addSaveHandler = () => {
-  clearSaveCallbacks();
-  addSaveCallback(() => submit(entityFormData.id, entityFormData.collection), "first");
-};
-
 const deleteEntity = async () => {
-  dequeueItemForBulkProcessing(props.bulkOperationsContext, props.relation.relation.key);
+  dequeueItemForBulkProcessing(
+    props.bulkOperationsContext,
+    props.relation.relation.key,
+  );
   let collection;
   if (props.entityType.toLowerCase() === Entitytyping.Mediafile) {
     collection = Collection.Mediafiles;
   } else {
-    collection = childRoutes.find((route: any) => route.entityType === props.entityType).type;
+    collection = childRoutes.find(
+      (route: any) => route.entityType === props.entityType,
+    ).type;
   }
 
   try {
@@ -125,7 +138,9 @@ const openDeleteEntityConfirmation = async () => {
 
 const doAction = () => {
   if (props.action === ContextMenuElodyActionEnum.DeleteRelation) {
-    addSaveHandler();
+    useEditHelper.setRefetchFn(() =>
+      submit(entityFormData.id, entityFormData.collection),
+    );
     deleteRelation();
   }
   if (props.action === ContextMenuElodyActionEnum.DeleteEntity) {

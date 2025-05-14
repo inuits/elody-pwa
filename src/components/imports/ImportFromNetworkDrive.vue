@@ -37,10 +37,8 @@ import {
   PostStartImportDocument,
   TypeModals,
 } from "@/generated-types/queries";
-import {
-  useNotification,
-  NotificationType,
-} from "../base/BaseNotification.vue";
+import { useNotification } from "@kyvg/vue3-notification";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 import FolderTreeLine from "@/components/FolderTreeLine.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
@@ -63,7 +61,8 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const selectedDirectory = ref(null);
-const { createNotificationOverwrite } = useNotification();
+const { notify } = useNotification();
+const { getSuccessNotification, getErrorNotification } = useBaseNotification();
 const { getMenuDestinations } = useMenuHelper();
 const router = useRouter();
 const { getQueryDocument, queryAsync, mutateAsync } = useGraphqlAsync();
@@ -118,22 +117,12 @@ const doImport = async (folder: string) => {
     switch (props.inputFieldType) {
       case BaseFieldType.BaseFileSystemImportField:
         await doImportOfDirectories(folder);
-        createNotificationOverwrite(
-          NotificationType.default,
-          "Import",
-          t(`import.import-started`),
-        );
         props.closeAndDeleteForm();
         break;
       case BaseFieldType.BaseMagazineWithCsvImportField:
         await mutateAsync(queries.value.StartUploadMagazinesWithCsvDocument, {
           folder: folder,
         });
-        createNotificationOverwrite(
-          NotificationType.default,
-          "Import",
-          t(`import.import-started`),
-        );
         props.closeAndDeleteForm();
         break;
       case BaseFieldType.BaseMagazineWithMetsImportField:
@@ -142,11 +131,18 @@ const doImport = async (folder: string) => {
       default:
         return;
     }
-  } catch (error) {
-    createNotificationOverwrite(
-      NotificationType.error,
-      t(`import.import-error`),
-      "" + error.message,
+    notify(
+      getSuccessNotification(
+        t("notifications.success.import.title"),
+        t(`notifications.success.import.description`),
+      ),
+    );
+  } catch (error: any) {
+    notify(
+      getErrorNotification(
+        t(`notifications.errors.import.title`),
+        "" + error.message,
+      ),
     );
   }
 };
@@ -160,18 +156,16 @@ const doMetsImport = async (folder) => {
   }
   useBaseModal().changeCloseConfirmation(TypeModals.DynamicForm, false);
 
-  await mutateAsync(
-    queries.value.StartUploadMagazinesWithMetsDocument,
-    {
-      folder: folder,
-      externalSystem: form?.values.intialValues["external_system"],
-      externalId: form?.values.intialValues["external_id"],
-    },
-  );
-  createNotificationOverwrite(
-    NotificationType.default,
-    "Import",
-    t(`import.import-started`),
+  await mutateAsync(queries.value.StartUploadMagazinesWithMetsDocument, {
+    folder: folder,
+    externalSystem: form?.values.intialValues["external_system"],
+    externalId: form?.values.intialValues["external_id"],
+  });
+  notify(
+    getSuccessNotification(
+      t("notifications.success.import.title"),
+      t(`notifications.success.import.description`),
+    ),
   );
   props.closeAndDeleteForm();
 };
@@ -179,10 +173,11 @@ const doMetsImport = async (folder) => {
 const { mutate: startImport } = useMutation(PostStartImportDocument);
 const doImportOfDirectories = async (folder) => {
   if (!folder) {
-    createNotificationOverwrite(
-      NotificationType.error,
-      "Error",
-      "Folder ID is required",
+    notify(
+      getErrorNotification(
+        t("notifications.errors.directoryImport.title"),
+        t("notifications.errors.directoryImport.description"),
+      ),
     );
     return;
   }
@@ -194,23 +189,26 @@ const doImportOfDirectories = async (folder) => {
         if (messageId === "error-csv-count") {
           const folder = selectedDirectory.value.dir;
           const count = obj.data.postStartImport.count;
-          createNotificationOverwrite(
-            NotificationType.error,
-            t(`import.import-error`),
-            t(`import.${messageId}`, { folder, count }),
+          notify(
+            getErrorNotification(
+              t(`notifications.errors.import.title`),
+              t(`import.${messageId}`, { folder, count }),
+            ),
           );
         } else {
-          createNotificationOverwrite(
-            NotificationType.error,
-            t(`import.import-error`),
-            t(messageId),
+          notify(
+            getErrorNotification(
+              t(`notifications.errors.import.title`),
+              t(messageId),
+            ),
           );
         }
       } else {
-        createNotificationOverwrite(
-          NotificationType.default,
-          "Import",
-          t(`import.import-started`),
+        notify(
+          getSuccessNotification(
+            t(`notifications.success.import.title`),
+            t(`notifications.success.import.description`),
+          ),
         );
         goToEntityTypeRoute(
           Entitytyping.Job,
@@ -222,10 +220,11 @@ const doImportOfDirectories = async (folder) => {
       }
     })
     .catch((error) => {
-      createNotificationOverwrite(
-        NotificationType.error,
-        t(`import.import-error`),
-        "" + error.message,
+      notify(
+        getErrorNotification(
+          t(`notifications.errors.import.title`),
+          "" + error.message,
+        ),
       );
     });
 };

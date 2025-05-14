@@ -246,10 +246,8 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { useNotification } from "@kyvg/vue3-notification";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 import useMenuHelper from "@/composables/useMenuHelper";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
@@ -303,7 +301,8 @@ const {
   parseIntialValuesForFormSubmit,
   addEditableMetadataKeys,
 } = useFormHelper();
-const { createNotificationOverwrite } = useNotification();
+const { notify } = useNotification();
+const { getSuccessNotification } = useBaseNotification();
 const { loadDocument } = useImport();
 const { closeModal, getModalInfo } = useBaseModal();
 const {
@@ -566,10 +565,11 @@ const submitWithExtraMetadataActionFunction = async (field: FormAction) => {
   const entity = (await performSubmitAction(document, entityInput)).data
     .CreateEntity;
   emit("entityCreated", { ...entity, metadata: entityInput.metadata });
-  createNotificationOverwrite(
-    NotificationType.default,
-    t("notifications.success.entityCreated.title"),
-    t("notifications.success.entityCreated.description"),
+  notify(
+    getSuccessNotification(
+      t("notifications.success.entityCreated.title"),
+      t("notifications.success.entityCreated.description"),
+    ),
   );
   await getTenants();
   closeAndDeleteForm();
@@ -592,10 +592,11 @@ const downloadActionFunction = async (field: FormAction) => {
         form.value.values,
       )
     ).data.DownloadItemsInZip;
-    createNotificationOverwrite(
-      NotificationType.default,
-      t("notifications.success.downloadEntityCreated.title"),
-      t("notifications.success.downloadEntityCreated.description"),
+    notify(
+      getSuccessNotification(
+        t("notifications.success.downloadEntityCreated.title"),
+        t("notifications.success.downloadEntityCreated.description"),
+      ),
     );
     await props.router.replace({ name: RouteNames.Downloads });
     closeAndDeleteForm();
@@ -618,10 +619,11 @@ const updateMetdataActionFunction = async (field: FormAction) => {
       csv,
     );
     closeAndDeleteForm();
-    createNotificationOverwrite(
-      NotificationType.success,
-      t("notifications.success.updataMetdataCsv.title"),
-      t("notifications.success.updataMetdataCsv.description"),
+    notify(
+      getSuccessNotification(
+        t("notifications.success.updataMetdataCsv.title"),
+        t("notifications.success.updataMetdataCsv.description"),
+      ),
     );
   } catch (error: ApolloError) {
     const errorObject = await getMessageAndCodeFromApolloError(error);
@@ -663,10 +665,11 @@ const reorderEntitiesActionFunction = async (field: FormAction) => {
     const callback = getCallbackFunction();
     if (callback) await callback();
     closeAndDeleteForm();
-    createNotificationOverwrite(
-      NotificationType.success,
-      t("notifications.success.csvReordering.title"),
-      t("notifications.success.csvReordering.description"),
+    notify(
+      getSuccessNotification(
+        t("notifications.success.csvReordering.title"),
+        t("notifications.success.csvReordering.description"),
+      ),
     );
   } catch (error) {
     handleHttpError(error);
@@ -694,10 +697,11 @@ const startOcrActionFunction = async (field: FormAction) => {
       },
       collection: collection,
     }).then(() => {
-      createNotificationOverwrite(
-        NotificationType.default,
-        t("notifications.success.entityUpdated.title"),
-        t("notifications.success.entityUpdated.description"),
+      notify(
+        getSuccessNotification(
+          t("notifications.success.entityUpdated.title"),
+          t("notifications.success.entityUpdated.description"),
+        ),
       );
     });
     if (form.value.values.intialValues.ocr_type === OcrType.ManualUpload)
@@ -705,10 +709,11 @@ const startOcrActionFunction = async (field: FormAction) => {
 
     const document = await getQuery(field.actionQuery as string);
     await performOcrAction(document, id, form.value.values).then(() => {
-      createNotificationOverwrite(
-        NotificationType.default,
-        t("notifications.default.generate-ocr.title"),
-        t("notifications.default.generate-ocr.description"),
+      notify(
+        getSuccessNotification(
+          t("notifications.default.generate-ocr.title"),
+          t("notifications.default.generate-ocr.description"),
+        ),
       );
     });
     closeAndDeleteForm();
