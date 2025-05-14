@@ -27,8 +27,8 @@ const props = defineProps<{
   parentEntityId: string;
 }>();
 const { t } = useI18n();
-const { notify } = useNotification();
-const { getSuccessNotification, getErrorNotification } = useBaseNotification();
+const { displaySuccessNotification, displayErrorNotification } =
+  useBaseNotification();
 const { loadDocument } = useImport();
 
 const doGeneralAction = async () => {
@@ -42,20 +42,16 @@ const doGeneralAction = async () => {
         notifyOnNetworkStatusChange: true,
       })
       .then(() => {
-        notify(
-          getSuccessNotification(
-            t("notifications.success.entityUpdated.title"),
-            t("notifications.success.entityUpdated.description"),
-          ),
+        displaySuccessNotification(
+          t("notifications.success.entityUpdated.title"),
+          t("notifications.success.entityUpdated.description"),
         );
         EventBus.emit(props.action);
       });
   } catch (e) {
-    notify(
-      getErrorNotification(
-        t("notifications.errors.validation-error.title"),
-        t("notifications.errors.validation-error.title"),
-      ),
+    displayErrorNotification(
+      t("notifications.errors.validation-error.title"),
+      t("notifications.errors.validation-error.title"),
     );
   } finally {
     emit("toggleLoading");

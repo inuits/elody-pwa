@@ -5,37 +5,30 @@ import {
 
 type NotificationType = "warn" | "success" | "error" | (string & {});
 
+const { notify } = useNotification();
+
 export const useBaseNotification = (): {
-  getSuccessNotification: (title: string, text: string) => NotificationOptions;
-  getWarningNotification: (title: string, text: string) => NotificationOptions;
-  getErrorNotification: (title: string, text: string) => NotificationOptions;
+  dispalySuccessNotification: (title: string, text: string) => void;
+  dispayWarningNotification: (title: string, text: string) => void;
+  displayErrorNotification: (title: string, text: string) => void;
 } => {
   const baseDuration: number = 10000;
 
-  const getSuccessNotification = (
-    title: string,
-    text: string,
-  ): NotificationOptions => {
-    return { title, text, type: "success", duration: baseDuration };
+  const displaySuccessNotification = (title: string, text: string): void => {
+    notify({ title, text, type: "success", duration: baseDuration });
   };
 
-  const getWarningNotification = (
-    title: string,
-    text: string,
-  ): NotificationOptions => {
-    return { title, text, type: "warn", duration: baseDuration };
+  const dispalyWarningNotification = (title: string, text: string): void => {
+    notify({ title, text, type: "warn", duration: baseDuration });
   };
 
-  const getErrorNotification = (
-    title: string,
-    text: string,
-  ): NotificationOptions => {
-    return { title, text, type: "error", duration: baseDuration };
+  const displayErrorNotification = (title: string, text: string): void => {
+    notify({ title, text, type: "error", duration: baseDuration });
   };
 
   return {
-    getSuccessNotification,
-    getWarningNotification,
-    getErrorNotification,
+    displaySuccessNotification,
+    dispalyWarningNotification,
+    displayErrorNotification,
   };
 };

@@ -301,8 +301,7 @@ const {
   parseIntialValuesForFormSubmit,
   addEditableMetadataKeys,
 } = useFormHelper();
-const { notify } = useNotification();
-const { getSuccessNotification } = useBaseNotification();
+const { displaySuccessNotification } = useBaseNotification();
 const { loadDocument } = useImport();
 const { closeModal, getModalInfo } = useBaseModal();
 const {
@@ -565,11 +564,9 @@ const submitWithExtraMetadataActionFunction = async (field: FormAction) => {
   const entity = (await performSubmitAction(document, entityInput)).data
     .CreateEntity;
   emit("entityCreated", { ...entity, metadata: entityInput.metadata });
-  notify(
-    getSuccessNotification(
-      t("notifications.success.entityCreated.title"),
-      t("notifications.success.entityCreated.description"),
-    ),
+  displaySuccessNotification(
+    t("notifications.success.entityCreated.title"),
+    t("notifications.success.entityCreated.description"),
   );
   await getTenants();
   closeAndDeleteForm();
@@ -592,11 +589,9 @@ const downloadActionFunction = async (field: FormAction) => {
         form.value.values,
       )
     ).data.DownloadItemsInZip;
-    notify(
-      getSuccessNotification(
-        t("notifications.success.downloadEntityCreated.title"),
-        t("notifications.success.downloadEntityCreated.description"),
-      ),
+    displaySuccessNotification(
+      t("notifications.success.downloadEntityCreated.title"),
+      t("notifications.success.downloadEntityCreated.description"),
     );
     await props.router.replace({ name: RouteNames.Downloads });
     closeAndDeleteForm();
@@ -619,11 +614,9 @@ const updateMetdataActionFunction = async (field: FormAction) => {
       csv,
     );
     closeAndDeleteForm();
-    notify(
-      getSuccessNotification(
-        t("notifications.success.updataMetdataCsv.title"),
-        t("notifications.success.updataMetdataCsv.description"),
-      ),
+    displaySuccessNotification(
+      t("notifications.success.updataMetdataCsv.title"),
+      t("notifications.success.updataMetdataCsv.description"),
     );
   } catch (error: ApolloError) {
     const errorObject = await getMessageAndCodeFromApolloError(error);
@@ -665,11 +658,9 @@ const reorderEntitiesActionFunction = async (field: FormAction) => {
     const callback = getCallbackFunction();
     if (callback) await callback();
     closeAndDeleteForm();
-    notify(
-      getSuccessNotification(
-        t("notifications.success.csvReordering.title"),
-        t("notifications.success.csvReordering.description"),
-      ),
+    displaySuccessNotification(
+      t("notifications.success.csvReordering.title"),
+      t("notifications.success.csvReordering.description"),
     );
   } catch (error) {
     handleHttpError(error);
@@ -697,11 +688,9 @@ const startOcrActionFunction = async (field: FormAction) => {
       },
       collection: collection,
     }).then(() => {
-      notify(
-        getSuccessNotification(
-          t("notifications.success.entityUpdated.title"),
-          t("notifications.success.entityUpdated.description"),
-        ),
+      displaySuccessNotification(
+        t("notifications.success.entityUpdated.title"),
+        t("notifications.success.entityUpdated.description"),
       );
     });
     if (form.value.values.intialValues.ocr_type === OcrType.ManualUpload)
@@ -709,11 +698,9 @@ const startOcrActionFunction = async (field: FormAction) => {
 
     const document = await getQuery(field.actionQuery as string);
     await performOcrAction(document, id, form.value.values).then(() => {
-      notify(
-        getSuccessNotification(
-          t("notifications.default.generate-ocr.title"),
-          t("notifications.default.generate-ocr.description"),
-        ),
+      displaySuccessNotification(
+        t("notifications.default.generate-ocr.title"),
+        t("notifications.default.generate-ocr.description"),
       );
     });
     closeAndDeleteForm();

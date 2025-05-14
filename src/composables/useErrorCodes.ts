@@ -22,8 +22,7 @@ export const useErrorCodes = (): {
   ) => Promise<{ code: string; message: string }>;
 } => {
   let t;
-  const { notify } = useNotification();
-  const { getErrorNotification } = useBaseNotification();
+  const { displayErrorNotification } = useBaseNotification();
 
   const authHandlers: Record<string, Function> = {
     "1001": (errorCodeType) => handleUnauthorized(errorCodeType),
@@ -144,11 +143,9 @@ export const useErrorCodes = (): {
     const { closeAllModals } = useBaseModal();
 
     if (errorCodeType === ErrorCodeType.Write) {
-      notify(
-        getErrorNotification(
-          t("notifications.graphql-errors.forbidden.title"),
-          t("notifications.graphql-errors.forbidden.description"),
-        ),
+      displayErrorNotification(
+        t("notifications.graphql-errors.forbidden.title"),
+        t("notifications.graphql-errors.forbidden.description"),
       );
       return;
     }
@@ -166,7 +163,7 @@ export const useErrorCodes = (): {
     errorCodeType: ErrorCodeType = ErrorCodeType.Read,
     errorMessage: string,
   ) => {
-    notify(getErrorNotification("Error", errorMessage));
+    displayErrorNotification("Error", errorMessage);
   };
 
   const handleAuthCodes = (
@@ -178,7 +175,7 @@ export const useErrorCodes = (): {
 
   const handleWriteTypeError = (code: string, message: string): void => {
     if (!Object.keys(writeHandlers).includes(code)) {
-      notify(getErrorNotification("Error", message));
+      displayErrorNotification("Error", message);
       return;
     }
     writeHandlers[code]();

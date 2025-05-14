@@ -107,8 +107,7 @@ const { getEntityId, getRelationType } = useEntityPickerModal();
 const { save, addSaveCallback, clearSaveCallbacks } = useEditMode();
 const { getForm } = useFormHelper();
 const { parseFormValuesToFormInput } = useFormHelper();
-const { getSuccessNotification } = useBaseNotification();
-const { notify } = useNotification();
+const { displaySuccessNotification } = useBaseNotification();
 
 const childRoutes = getChildrenOfHomeRoutes(config).map(
   (route: any) => route.meta,
@@ -194,11 +193,9 @@ const submit = useSubmitForm<EntityValues>(async () => {
     intialValues: mutatedEntity.intialValues,
     relationValues: mutatedEntity.relationValues,
   });
-  notify(
-    getSuccessNotification(
-      t("notifications.success.entityUpdated.title"),
-      t("notifications.success.entityUpdated.description"),
-    ),
+  displaySuccessNotification(
+    t("notifications.success.entityUpdated.title"),
+    t("notifications.success.entityUpdated.description"),
   );
   if (form) form.resetForm({ values: form.values });
 });
