@@ -5,7 +5,6 @@ import useEditMode from "@/composables/useEdit";
 import { useI18n } from "vue-i18n";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useBaseNotification } from "@/composables/useBaseNotification";
-import { useNotification } from "@kyvg/vue3-notification";
 import { useBulkOperations } from "@/composables/useBulkOperations";
 import type { Collection } from "@/generated-types/queries";
 import { EditStatus, TypeModals } from "@/generated-types/queries";
@@ -51,7 +50,7 @@ describe("useDeleteRelations", () => {
     });
     const mockSave = vi.fn().mockResolvedValue(undefined);
     const mockCloseModal = vi.fn();
-    const mockCreateNotification = vi.fn();
+    const mockDisplaySuccessNotification = vi.fn();
     const mockT = vi.fn().mockReturnValue("translated text");
     const mockDequeueItemForBulkProcessing = vi.fn();
 
@@ -81,8 +80,8 @@ describe("useDeleteRelations", () => {
     (useBaseModal as any).mockReturnValue({
       closeModal: mockCloseModal,
     });
-    (useNotification as any).mockReturnValue({
-      createNotification: mockCreateNotification,
+    (useBaseNotification as any).mockReturnValue({
+      displaySuccessNotification: mockDisplaySuccessNotification,
     });
     (useBulkOperations as any).mockReturnValue({
       dequeueItemForBulkProcessing: mockDequeueItemForBulkProcessing,
@@ -167,7 +166,7 @@ describe("useDeleteRelations", () => {
         TypeModals.BulkOperationsDeleteRelations,
       );
 
-      expect(useNotification().notify).toHaveBeenCalled();
+      expect(useNotification().displaySuccessNotification).toHaveBeenCalled();
       expect(useEditMode().disableEditMode).toHaveBeenCalled();
     });
 
