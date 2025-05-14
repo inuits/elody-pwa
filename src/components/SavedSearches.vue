@@ -96,8 +96,7 @@ const props = withDefaults(
 );
 
 const { t } = useI18n();
-const { getSuccessNotification } = useBaseNotification();
-const { notify } = useNotification();
+const { displaySuccessNotification } = useBaseNotification();
 const { openModal, closeModal } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const { initializePropertiesForSavedSearch } = useModalActions();
@@ -162,11 +161,9 @@ const saveChanges = async () => {
     props.route,
     normalizeSavedSearchFromEntity(updatedSearch as SavedSearch),
   );
-  notify(
-    getSuccessNotification(
-      t("notifications.success.entityUpdated.title"),
-      t("notifications.success.entityUpdated.description"),
-    ),
+  displaySuccessNotification(
+    t("notifications.success.entityUpdated.title"),
+    t("notifications.success.entityUpdated.description"),
   );
 };
 
@@ -217,11 +214,9 @@ const deleteFilter = async () => {
   await deleteSavedSearch(selectedFilter.value.id);
   removeFilterFromStateForRoute(props.route, selectedFilter.value);
   setActiveFilter(null);
-  notify(
-    getSuccessNotification(
-      t("notifications.success.entityDeleted.title"),
-      t("notifications.success.entityDeleted.description"),
-    ),
+  displaySuccessNotification(
+    t("notifications.success.entityDeleted.title"),
+    t("notifications.success.entityDeleted.description"),
   );
 };
 

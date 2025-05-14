@@ -61,8 +61,8 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const selectedDirectory = ref(null);
-const { notify } = useNotification();
-const { getSuccessNotification, getErrorNotification } = useBaseNotification();
+const { displaySuccessNotification, displayErrorNotification } =
+  useBaseNotification();
 const { getMenuDestinations } = useMenuHelper();
 const router = useRouter();
 const { getQueryDocument, queryAsync, mutateAsync } = useGraphqlAsync();
@@ -131,18 +131,14 @@ const doImport = async (folder: string) => {
       default:
         return;
     }
-    notify(
-      getSuccessNotification(
-        t("notifications.success.import.title"),
-        t(`notifications.success.import.description`),
-      ),
+    displaySuccessNotification(
+      t("notifications.success.import.title"),
+      t(`notifications.success.import.description`),
     );
   } catch (error: any) {
-    notify(
-      getErrorNotification(
-        t(`notifications.errors.import.title`),
-        "" + error.message,
-      ),
+    displayErrorNotification(
+      t(`notifications.errors.import.title`),
+      "" + error.message,
     );
   }
 };
@@ -161,11 +157,9 @@ const doMetsImport = async (folder) => {
     externalSystem: form?.values.intialValues["external_system"],
     externalId: form?.values.intialValues["external_id"],
   });
-  notify(
-    getSuccessNotification(
-      t("notifications.success.import.title"),
-      t(`notifications.success.import.description`),
-    ),
+  displaySuccessNotification(
+    t("notifications.success.import.title"),
+    t(`notifications.success.import.description`),
   );
   props.closeAndDeleteForm();
 };
@@ -173,11 +167,9 @@ const doMetsImport = async (folder) => {
 const { mutate: startImport } = useMutation(PostStartImportDocument);
 const doImportOfDirectories = async (folder) => {
   if (!folder) {
-    notify(
-      getErrorNotification(
-        t("notifications.errors.directoryImport.title"),
-        t("notifications.errors.directoryImport.description"),
-      ),
+    displayErrorNotification(
+      t("notifications.errors.directoryImport.title"),
+      t("notifications.errors.directoryImport.description"),
     );
     return;
   }
@@ -189,26 +181,20 @@ const doImportOfDirectories = async (folder) => {
         if (messageId === "error-csv-count") {
           const folder = selectedDirectory.value.dir;
           const count = obj.data.postStartImport.count;
-          notify(
-            getErrorNotification(
-              t(`notifications.errors.import.title`),
-              t(`import.${messageId}`, { folder, count }),
-            ),
+          displayErrorNotification(
+            t(`notifications.errors.import.title`),
+            t(`import.${messageId}`, { folder, count }),
           );
         } else {
-          notify(
-            getErrorNotification(
-              t(`notifications.errors.import.title`),
-              t(messageId),
-            ),
+          displayErrorNotification(
+            t(`notifications.errors.import.title`),
+            t(messageId),
           );
         }
       } else {
-        notify(
-          getSuccessNotification(
-            t(`notifications.success.import.title`),
-            t(`notifications.success.import.description`),
-          ),
+        displaySuccessNotification(
+          t(`notifications.success.import.title`),
+          t(`notifications.success.import.description`),
         );
         goToEntityTypeRoute(
           Entitytyping.Job,
@@ -220,11 +206,9 @@ const doImportOfDirectories = async (folder) => {
       }
     })
     .catch((error) => {
-      notify(
-        getErrorNotification(
-          t(`notifications.errors.import.title`),
-          "" + error.message,
-        ),
+      displayErrorNotification(
+        t(`notifications.errors.import.title`),
+        "" + error.message,
       );
     });
 };

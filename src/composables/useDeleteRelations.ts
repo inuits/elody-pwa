@@ -30,8 +30,7 @@ export function useDeleteRelations() {
   } = useFormHelper();
   const { save, disableEditMode } = useEditMode();
   const { closeModal } = useBaseModal();
-  const { notify } = useNotification();
-  const { getSuccessNotification } = useBaseNotification();
+  const { displaySuccessNotification } = useBaseNotification();
   const { dequeueItemForBulkProcessing } = useBulkOperations();
 
   const deleteRelations = async (
@@ -101,11 +100,9 @@ export function useDeleteRelations() {
 
     if (modalType) closeModal(TypeModals.BulkOperationsDeleteRelations);
 
-    notify(
-      getSuccessNotification(
-        "notifications.success.entityUpdated.title",
-        "notifications.success.entityUpdated.description",
-      ),
+    displaySuccessNotification(
+      "notifications.success.entityUpdated.title",
+      "notifications.success.entityUpdated.description",
     );
 
     disableEditMode();

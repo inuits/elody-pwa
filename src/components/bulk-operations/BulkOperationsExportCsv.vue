@@ -141,8 +141,7 @@ const { getBulkOperationType } = useModalActions();
 
 const config = inject("config") as any;
 const { t } = useI18n();
-const { notify } = useNotification();
-const { getErrorNotification } = useBaseNotification();
+const { displayErrorNotification } = useBaseNotification();
 const { getThumbnail } = useThumbnailHelper();
 const { getModal, closeModal } = useBaseModal();
 
@@ -224,11 +223,9 @@ const exportCsv = async () => {
       downloadCsv(`${entityType.value}.csv`, csv);
     })
     .catch(async (response: Response) =>
-      notify(
-        getErrorNotification(
-          t("bulk-operations.csv-export.error.title"),
-          await response.text(),
-        ),
+      displayErrorNotification(
+        t("bulk-operations.csv-export.error.title"),
+        await response.text(),
       ),
     );
   dequeueAllItemsInBulk();

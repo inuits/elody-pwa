@@ -132,8 +132,7 @@ const router = useRouter();
 const { disableEditMode } = useEditMode();
 const { pageInfo, previousPageInfo } = usePageInfo();
 const { deleteEntities } = useDeleteEntities();
-const { getSuccessNotification } = useBaseNotification();
-const { notify } = useNotification();
+const { displaySuccessNotification } = useBaseNotification();
 
 const modalOpenend = ref<boolean>(false);
 const deleteQueryOptions = ref<DeleteQueryOptions | undefined>(undefined);
@@ -156,11 +155,9 @@ const deleteSelectedItems = async () => {
     const isDeleted = await deleteEntities(selectedItems);
 
     if (isDeleted) {
-      notify(
-        getSuccessNotification(
-          t("notifications.success.itemsDeleted.title"),
-          t("notifications.success.itemsDeleted.description"),
-        ),
+      displaySuccessNotification(
+        t("notifications.success.itemsDeleted.title"),
+        t("notifications.success.itemsDeleted.description"),
       );
     }
   } catch (error) {

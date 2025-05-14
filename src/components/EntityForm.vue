@@ -71,8 +71,7 @@ const {
   buttonClicked,
 } = useEditMode();
 const { createForm, parseFormValuesToFormInput } = useFormHelper();
-const { getSuccessNotification } = useBaseNotification();
-const { notify } = useNotification();
+const { displaySuccessNotification } = useBaseNotification();
 const { closeModal, openModal, updateDeleteQueryOptions } = useBaseModal();
 const { t } = useI18n();
 const childRoutes = getChildrenOfHomeRoutes(config).map(
@@ -117,11 +116,9 @@ const submit = useSubmitForm<EntityValues>(async () => {
     intialValues: mutatedEntity.intialValues,
     relationValues: mutatedEntity.relationValues,
   });
-  notify(
-    getSuccessNotification(
-      t("notifications.success.entityUpdated.title"),
-      t("notifications.success.entityUpdated.description"),
-    ),
+  displaySuccessNotification(
+    t("notifications.success.entityUpdated.title"),
+    t("notifications.success.entityUpdated.description"),
   );
 
   form.resetForm({ values: form.values });

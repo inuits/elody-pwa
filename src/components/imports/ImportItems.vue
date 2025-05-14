@@ -45,8 +45,8 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const { notify } = useNotification();
-const { getSuccessNotification, getErrorNotification } = useBaseNotification();
+const { displaySuccessNotification, displayErrorNotification } =
+  useBaseNotification();
 const { getQueryDocument, queryAsync, mutateAsync } = useGraphqlAsync();
 
 const itemsLoading = ref<boolean>(false);
@@ -83,18 +83,14 @@ const doImport = async (item: string) => {
       default:
         return;
     }
-    notify(
-      getSuccessNotification(
-        t(`notifications.success.import.title`),
-        t(`notifications.success.import.description`),
-      ),
+    displaySuccessNotification(
+      t(`notifications.success.import.title`),
+      t(`notifications.success.import.description`),
     );
   } catch (error: any) {
-    notify(
-      getErrorNotification(
-        t(`notifications.errors.import.title`),
-        "" + error.message,
-      ),
+    displayErrorNotification(
+      t(`notifications.errors.import.title`),
+      "" + error.message,
     );
   }
   props.closeAndDeleteForm();

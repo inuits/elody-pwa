@@ -37,8 +37,7 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
-const { getSuccessNotification } = useBaseNotification;
-const { notify } = useNotification();
+const { displaySuccessNotification } = useBaseNotification;
 const { previousPageInfo } = usePageInfo();
 const { isEditToggleVisible, disableEditMode } = useEditMode();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
@@ -78,11 +77,9 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
     closeModal(TypeModals.Confirm);
     disableEditMode();
     router.push({ name: context ? context : "Home" });
-    notify(
-      getSuccessNotification(
-        t("notifications.success.entityDeleted.title"),
-        t("notifications.success.entityDeleted.description"),
-      ),
+    displaySuccessNotification(
+      t("notifications.success.entityDeleted.title"),
+      t("notifications.success.entityDeleted.description"),
     );
   }
 };

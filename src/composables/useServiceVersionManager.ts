@@ -7,8 +7,7 @@ import { useNotification } from "@kyvg/vue3-notification";
 const pwaVersion = ref<string>();
 const apolloGraphqlVersion = ref<string>();
 
-const { notify } = useNotification();
-const { getSuccessNotification } = useBaseNotification();
+const { displaySuccessNotification } = useBaseNotification();
 
 export const useServiceVersionManager = (): {
   pwaVersion: Ref<string>;
@@ -79,6 +78,7 @@ export const useServiceVersionManager = (): {
     service: ElodyServices,
   ): void => {
     const currentVersion = getCurrentVersion(service);
+    console.log(newVersion, service, currentVersion);
     if (!newVersion || !service || !currentVersion) return;
     if (currentVersion === newVersion) return;
 
@@ -86,11 +86,9 @@ export const useServiceVersionManager = (): {
   };
 
   const __showNewVersionAvailableToUser = () => {
-    notify(
-      getSuccessNotification(
-        "notifications.default.new-version-available.title",
-        "notifications.default.new-version-available.description",
-      ),
+    displaySuccessNotification(
+      "notifications.default.new-version-available.title",
+      "notifications.default.new-version-available.description",
     );
   };
 

@@ -85,8 +85,8 @@ import { goToEntityPageById } from "@/helpers";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 
 const { t } = useI18n();
-const { notify } = useNotification();
-const { getSuccessNotification, getErrorNotification } = useBaseNotification();
+const { displaySuccessNotification, displayErrorNotification } =
+  useBaseNotification();
 const { dequeueAllItemsForBulkProcessing, getEnqueuedItems } =
   useBulkOperations();
 const { closeModal, getModalInfo } = useBaseModal();
@@ -167,11 +167,9 @@ const deleteSelectedItems = async () => {
     if (jobIdentifier) {
       closeModal(TypeModals.BulkOperationsDeleteEntities);
       dequeueAllItemsForBulkProcessing(context);
-      notify(
-        getSuccessNotification(
-          t("notifications.success.entityDeleted.title"),
-          t("notifications.success.entityDeleted.description"),
-        ),
+      displaySuccessNotification(
+        t("notifications.success.entityDeleted.title"),
+        t("notifications.success.entityDeleted.description"),
       );
       goToEntityPageById(
         jobIdentifier,
@@ -180,11 +178,9 @@ const deleteSelectedItems = async () => {
         router,
       );
     } else {
-      notify(
-        getErrorNotification(
-          t("notifications.errors.entityDeleted.title"),
-          t("notifications.errors.entityDeleted.description"),
-        ),
+      displayErrorNotification(
+        t("notifications.errors.entityDeleted.title"),
+        t("notifications.errors.entityDeleted.description"),
       );
     }
   } catch (error) {

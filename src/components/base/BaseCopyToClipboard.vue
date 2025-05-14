@@ -12,8 +12,8 @@ import { useNotification } from "@kyvg/vue3-notification";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useI18n } from "vue-i18n";
 
-const { notify } = useNotification();
-const { getSuccessNotification, getErrorNotification } = useBaseNotification();
+const { displaySuccessNotification, displayErrorNotification } =
+  useBaseNotification();
 const { t } = useI18n();
 
 const props = defineProps<{
@@ -42,20 +42,16 @@ onMounted(() => {
     });
 
     clipboardInstance.on("success", () => {
-      notify(
-        getSuccessNotification(
-          t("notifications.success.copiedToClipboard.title"),
-          t("notifications.success.copiedToClipboard.description"),
-        ),
+      displaySuccessNotification(
+        t("notifications.success.copiedToClipboard.title"),
+        t("notifications.success.copiedToClipboard.description"),
       );
     });
 
     clipboardInstance.on("error", () => {
-      notify(
-        getErrorNotification(
-          t("notifications.errors.copiedToClipboard.title"),
-          t("notifications.errors.copiedToClipboard.description"),
-        ),
+      displayErrorNotification(
+        t("notifications.errors.copiedToClipboard.title"),
+        t("notifications.errors.copiedToClipboard.description"),
       );
     });
   }
