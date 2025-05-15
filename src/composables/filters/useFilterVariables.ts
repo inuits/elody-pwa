@@ -15,6 +15,8 @@ export const useFilterVariables = () => {
   };
 
   const extractValueFromObject = (object: any, path: string): unknown => {
+    if (!path) return null;
+
     const segments = path.split(".");
     let current = object;
 
