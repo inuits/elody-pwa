@@ -1,6 +1,11 @@
 <template>
   <div v-if="!showSplashScreen">
     <notifications class="pt-2" />
+    <notifications
+      class="pt-2 cursor-pointer"
+      group="serviceVersionManager"
+      @click="refreshPage()"
+    />
     <the-navigation class="navbar" />
     <div>
       <div
@@ -80,6 +85,10 @@ useHead({
     },
   ],
 });
+
+const refreshPage = (): void => {
+  window.location.reload();
+};
 </script>
 
 <style>

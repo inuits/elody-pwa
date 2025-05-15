@@ -14,7 +14,11 @@ import { createApp } from "vue";
 import { createHead } from "@vueuse/head";
 import { createRouter, createWebHistory, type Router } from "vue-router";
 import { DefaultApolloClient } from "@vue/apollo-composable";
-import { getApplicationDetails, getFormattersSettings, i18n } from "@/helpers";
+import {
+  getApplicationDetails,
+  getFormattersSettings,
+  setupI18n,
+} from "@/helpers";
 import { onError } from "@apollo/client/link/error";
 import { OpenIdConnectClient } from "session-vue-3-oidc-library";
 import { setIgnorePermissions } from "./composables/usePermissions";
@@ -23,6 +27,7 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useErrorCodes } from "@/composables/useErrorCodes";
 import { addRouterNavigationGuards } from "./routerNavigationGuards";
 import Notifications from "@kyvg/vue3-notification";
+import { type I18n } from "vue-i18n";
 
 import type { GraphQLError } from "graphql/error";
 import { useServiceVersionManager } from "@/composables/useServiceVersionManager";
@@ -30,6 +35,7 @@ import { ElodyServices } from "@/generated-types/queries";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
+export let i18n: I18n<any>;
 export let bulkSelectAllSizeLimit: number = 999999;
 export let formattersSettings: any = {};
 export let router: Router;
@@ -50,6 +56,8 @@ const start = async (): Promise<void> => {
 
   const { config, translations, version, urlMapping } =
     await getApplicationDetails();
+  i18n = setupI18n(translations, config.customization.applicationLocale);
+
   typeUrlMapping = urlMapping;
   const { setVersion, getPwaVersion } = useServiceVersionManager();
 
@@ -100,7 +108,7 @@ const start = async (): Promise<void> => {
   });
 
   const app = createApp(App)
-    .use(i18n(translations, config.customization.applicationLocale))
+    .use(i18n)
     .use(Unicon, {
       fill: "currentColor",
     })
