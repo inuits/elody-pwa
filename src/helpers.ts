@@ -18,6 +18,7 @@ import {
   type DropdownOption,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
+import { i18n } from "@/main.ts";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
 import {
@@ -80,19 +81,7 @@ export const goToEntityTypeRoute = (
   }
 };
 
-export const setupScopedUseI18n = async () => {
-  // TODO: Remove the getApplicationDetails function call and get config from the vue inject
-  const { translations, config } = await getApplicationDetails();
-  let language = config.customization.applicationLocale;
-  const displayPreferences = useStateManagement().getGlobalState(
-    "_displayPreferences",
-  );
-  if (displayPreferences)
-    if (displayPreferences.lang) language = displayPreferences.lang;
-
-  const { t } = i18n(translations, language).global;
-  return t;
-};
+export const getTranslatedMessage = (key) => i18n.global.t(key);
 
 export const setSortConfigurationForRoute = (
   route: RouteLocationNormalizedLoaded,
@@ -171,7 +160,7 @@ export const getEntityIdFromRoute = (): string | undefined => {
   return asString(useRoute()?.params["id"]) || undefined;
 };
 
-export const i18n = (translations: Object, applicationLocale: string) => {
+export const setupI18n = (translations: Object, applicationLocale: string) => {
   return createI18n({
     legacy: false,
     globalInjection: true,

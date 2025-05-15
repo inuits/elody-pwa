@@ -1,5 +1,4 @@
 import type { GraphQLError } from "graphql/error";
-import { setupScopedUseI18n } from "@/helpers";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useNotification } from "@kyvg/vue3-notification";
@@ -8,6 +7,7 @@ import { auth, router } from "@/main";
 import { ErrorCodeType } from "@/generated-types/queries";
 import type { ApolloError } from "@apollo/client/core";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { getTranslatedMessage } from "@/helpers";
 
 export const useErrorCodes = (): {
   handleErrorByCode: (code: string) => void;
@@ -121,7 +121,7 @@ export const useErrorCodes = (): {
     variables: Record<string, string> | undefined,
   ): Promise<string> => {
     if (!code) return defaultMessage;
-    return t(`error-codes.${code}`, variables);
+    return getTranslatedMessage(`error-codes.${code}`, variables);
   };
 
   const handleUnauthorized = async (
@@ -144,8 +144,10 @@ export const useErrorCodes = (): {
 
     if (errorCodeType === ErrorCodeType.Write) {
       displayErrorNotification(
-        t("notifications.graphql-errors.forbidden.title"),
-        t("notifications.graphql-errors.forbidden.description"),
+        getTranslatedMessage("notifications.graphql-errors.forbidden.title"),
+        getTranslatedMessage(
+          "notifications.graphql-errors.forbidden.description",
+        ),
       );
       return;
     }
@@ -223,7 +225,6 @@ export const useErrorCodes = (): {
   const getMessageAndCodeFromErrorString = async (
     error: string,
   ): Promise<{ code: string; message: string }> => {
-    t = await setupScopedUseI18n();
     const errorObject = await extractErrorComponentsFromErrorResponse(error);
     return { code: errorObject.code, message: errorObject.message };
   };
@@ -231,7 +232,6 @@ export const useErrorCodes = (): {
   const getMessageAndCodeFromApolloError = async (
     apolloError: ApolloError,
   ): Promise<{ code: string; message: string }> => {
-    t = await setupScopedUseI18n();
     let apolloMessage: string =
       apolloError.graphQLErrors[0].extensions.response.body;
     if (apolloMessage.message) apolloMessage = apolloMessage.message;
@@ -265,7 +265,6 @@ export const useErrorCodes = (): {
   };
 
   const handleGraphqlError = async (error: GraphQLError): Promise<string> => {
-    t = await setupScopedUseI18n();
     const graphqlErrorMessage =
       error.response.errors[0]?.extensions?.response?.body?.message ||
       error.response.errors[0]?.message;
@@ -292,7 +291,6 @@ export const useErrorCodes = (): {
 
   const handleHttpError = async (httpResponse: Response): Promise<string> => {
     if (new URL(httpResponse.url).pathname.includes("api/iiif")) return;
-    t = await setupScopedUseI18n();
     const responseBody = await httpResponse.json();
     const httpErrorMessage: string =
       responseBody?.extensions?.response?.body?.message;
