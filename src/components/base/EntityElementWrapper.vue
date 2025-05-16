@@ -6,7 +6,8 @@
     <div
       v-if="
         baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-        baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder
+        baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder ||
+        baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
       "
       class="flex items-center justify-between cursor-pointer"
       @click.self="toggleElementCollapse(entityId, label)"
@@ -52,7 +53,7 @@ withDefaults(
   {
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     useVshowInsteadOfVif: false,
-  }
+  },
 );
 
 const { t } = useI18n();

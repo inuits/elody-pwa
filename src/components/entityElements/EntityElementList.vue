@@ -4,7 +4,8 @@
       data-test="entity-element-wrapper"
       v-if="showElementList"
       :class="[
-        { 'mb-5 pb-1': baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary },
+        { 'mb-5': baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary && !isPreviewElement },
+        { 'pb-1': baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary },
         { 'ml-2': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary },
       ]"
       :entity-id="entityId"
@@ -19,7 +20,8 @@
             {
               'mx-1 pb-2 bg-neutral-lightest':
                 baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-                baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder,
+                baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder ||
+                baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
             },
           ]"
         >
@@ -133,7 +135,7 @@ import {
 } from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
-import { watch, ref, onBeforeMount, computed, provide } from "vue";
+import { watch, ref, onBeforeMount, computed, provide, inject } from "vue";
 import { useImport } from "@/composables/useImport";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
@@ -194,6 +196,7 @@ const props = withDefaults(
 );
 
 provide("mediafileViewerContext", props.customQueryFilters);
+const isPreviewElement: boolean = inject("IsPreviewElement", false);
 
 const requiresCustomQuery = computed(() => props.customQuery != undefined);
 const queryLoaded = ref<boolean>(false);

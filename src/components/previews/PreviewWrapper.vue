@@ -2,36 +2,53 @@
   <h1
     data-cy="entity-element-window-title"
     class="subtitle text-text-body p-2 text-center"
+    v-if="previewComponent.title"
   >
-    {{ t(previewComponent.title)}}
+    {{ t(previewComponent.title) }}
   </h1>
+  <entity-column
+    :key="entityId"
+    v-if="previewElement && previewComponent.type === PreviewTypes.ColumnList"
+    :id="entityId"
+    :column-list="previewElement"
+    :identifiers="[entityId]"
+    :entity-type="entityType"
+  />
   <ViewModesMap
-    v-if="previewComponent.type === PreviewTypes.Map"
+    v-else-if="previewComponent.type === PreviewTypes.Map"
     :config="configPerViewMode[ViewModes.ViewModesMap]"
-    :entities="entities"
+    :entities="getEntitiesOrEntity()"
     :is-enabled-in-preview="true"
   />
   <MediaViewerPreview
-    v-if="previewComponent.type === PreviewTypes.MediaViewer"
-    :entities="entities"
-    :preview-for-entity="previewForEntity"
+    v-else-if="previewComponent.type === PreviewTypes.MediaViewer"
+    :mediafiles="getEntitiesOrEntity()"
+    :entity-id="entityId"
   />
 </template>
-
 
 <script setup lang="ts">
 
 import {
+  type ColumnList,
   type Entity,
+  ListItemCoverageTypes,
   type PreviewComponent,
-  ViewModes,
-  PreviewTypes
+  PreviewTypes,
+  ViewModes
 } from "@/generated-types/queries";
 import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
 import MediaViewerPreview from "@/components/previews/MediaViewerPreview.vue";
 import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { onMounted, provide, ref, watch } from "vue";
+import { useImport } from "@/composables/useImport";
+import { apolloClient } from "@/main";
+import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
+import EntityColumn from "@/components/EntityColumn.vue";
 
+const { t } = useI18n();
+const { loadDocument } = useImport();
+const { addMediafileSelectionStateContext } = useEntityMediafileSelector();
 
 const props = withDefaults(
   defineProps<{
@@ -39,14 +56,48 @@ const props = withDefaults(
     entityType: string;
     entities: Entity[];
     configPerViewMode: object;
-    previewForEntity: string | undefined;
+    entityId: string | undefined;
   }>(),
   {
   },
 );
 
+provide("IsPreviewElement", true);
+const previewElement = ref<ColumnList | undefined>(undefined);
+
+const fetchPreviewQuery = async () => {
+  const document = await loadDocument(props.previewComponent.previewQuery!);
+  apolloClient
+    .query({
+      query: document,
+    })
+    .then((result) => {
+      previewElement.value = result.data.PreviewElement;
+    });
+}
+
+const getEntitiesOrEntity = (): Entity[] | [] => {
+  if (props.previewComponent.listItemsCoverage === ListItemCoverageTypes.AllListItems) return props.entities;
+  if (props.previewComponent.listItemsCoverage === ListItemCoverageTypes.OneListItem) {
+    const entity = props.entities.find((entity) => entity.id === props.entityId);
+    if (entity) return [entity];
+    else return []
+  }
+}
+
+onMounted(async () => {
+  if (props.previewComponent.previewQuery)
+    await fetchPreviewQuery();
+});
+
+watch(
+  () => previewElement.value,
+  () => {
+    if (previewElement.value)
+      addMediafileSelectionStateContext(previewElement.value.column.elements.entityListElement.customQueryFilters);
+  },
+  { immediate: true }
+);
 </script>
 
-
-<style scoped>
-</style>
+<style scoped></style>

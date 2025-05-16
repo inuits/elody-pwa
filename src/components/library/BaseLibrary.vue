@@ -33,7 +33,7 @@
         },
         {
           'grid-rows-[1vh_1fr]':
-            baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder,
+            baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder || baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
         },
         {
           'grid-rows-[0vh_1fr]':
@@ -172,7 +172,7 @@
               displayGrid ||
               (entitiesLoading &&
                 (route?.name !== 'SingleEntity' ||
-                  props.baseLibraryMode === BaseLibraryModes.BasicBaseLibrary))
+                  props.baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary))
             "
             :entities="entities as Entity[]"
             :entities-loading="entitiesLoading"
@@ -363,6 +363,7 @@ const emit = defineEmits<{
 
 const config: any = inject("config");
 const apolloClient = inject(DefaultApolloClient);
+const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
@@ -611,7 +612,7 @@ const getDisplayPreferences = () => {
     displayGrid.value = displayPreferences.grid;
   }
 
-  if (displayGrid.value === false && !displayPreview.value) {
+  if (displayGrid.value === false && (!displayPreview.value || isPreviewElement)) {
     displayList.value = true;
   }
 };

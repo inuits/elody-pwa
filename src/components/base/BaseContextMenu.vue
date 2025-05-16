@@ -1,12 +1,16 @@
 <template>
-  <div
-    @click.prevent
-    v-if="contextMenu.isVisible"
-    class="context-menu"
-    :style="getStyles()"
-  >
-    <slot></slot>
-  </div>
+  <Teleport to="body">
+    <Transition class="base-context-menu-container">
+      <div
+        @click.prevent
+        v-if="contextMenu.isVisible"
+        class="context-menu"
+        :style="getStyles()"
+      >
+        <slot></slot>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script lang="ts" setup>
@@ -51,6 +55,12 @@ const getStyles = () => {
   border: 1px solid #ccc;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   min-width: 120px;
+}
+
+.modal-enter-from .base-context-menu-container,
+.modal-leave-to .base-context-menu-container {
+  -webkit-transform: scale(0.5);
+  transform: scale(0.5);
 }
 
 .context-menu div {

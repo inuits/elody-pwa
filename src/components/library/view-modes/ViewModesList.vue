@@ -103,7 +103,7 @@
             isPreviewComponentEnabledForListItem(entity.id)
           "
           :preview-component-icon-visible="previewComponent !== undefined"
-          :is-hovered-list-items="hoveredListItem === entity.id"
+          :preview-component-list-items-coverage="previewComponent?.listItemsCoverage"
           @toggle-preview-component="
             (previewForEntityId) => togglePreviewComponent(previewForEntityId)
           "
@@ -112,14 +112,14 @@
     </div>
     <div
       v-if="previewComponentEnabled"
-      class="top-[11vh] sticky my-2 h-fit border-solid border-accent-normal border-2 bg-neutral-0"
+      class="top-[11vh] sticky my-2 h-fit border-solid border-accent-normal border-2 bg-neutral-0 rounded-lg"
     >
       <PreviewWrapper
         :preview-component="previewComponent!"
         :entity-type="entityType"
         :entities="entities"
         :config-per-view-mode="configPerViewMode"
-        :preview-for-entity="previewForEntity"
+        :entity-id="previewForEntity"
       />
     </div>
   </div>
@@ -144,7 +144,6 @@ import {
 } from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
 import {
-  hoveredListItem,
   useListItemHelper,
 } from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";

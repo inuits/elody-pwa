@@ -15,16 +15,16 @@
       { '!border-status-deleted': isMarkedAsToBeDeleted },
       { 'grayscale brightness-95 !cursor-default': isDisabled },
       { 'animate-pulse': loading },
-      { 'bg-neutral-white': !isHoveredListItems },
-      { 'border-neutral-light': !isHoveredListItems },
+      { 'bg-neutral-white': !isActiveListItem },
+      { 'border-neutral-light': !isActiveListItem },
       {
         'bg-blue-900 animate-pulse border-4 border-neutral-800':
-          isHoveredListItems,
+          isActiveListItem,
       },
     ]"
   >
     <div
-      v-if="viewMode === 'grid'"
+      v-if="viewMode === 'grid' && !isPreviewElement"
       class="flex justify-between items-center pb-2"
     >
       <BaseInputCheckbox
@@ -102,7 +102,7 @@
         v-if="canShowCopyRight() && media && !imageSrcError"
         :key="`${itemId}-image-${imageSize}`"
         :class="[
-          { 'h-10 w-10': viewMode === 'list' },
+          { 'h-10 w-10 min-w-10 min-h-10': viewMode === 'list' },
           { 'h-48 w-48': viewMode === 'grid' },
           'object-cover self-center outline-none',
         ]"
@@ -180,18 +180,20 @@
       />
     </div>
 
-    <div
-      v-if="!isPreview && isEnableNavigation && viewMode !== 'grid'"
-      class="flex flex-row"
-      @click="() => emit('navigateTo')"
-    >
-      <slot>
-        <unicon
-          :name="Unicons.AngleRight.name"
-          class="h-5.5 w-5.5 text-text-body"
-        />
-      </slot>
-    </div>
+    <!--    //TEMP: Disable arrow on list item-->
+    <!--    <div-->
+    <!--      v-if="!isPreview && isEnableNavigation && viewMode !== 'grid'"-->
+    <!--      class="flex flex-row"-->
+    <!--      @click="() => emit('navigateTo')"-->
+    <!--    >-->
+    <!--      <slot>-->
+    <!--        <unicon-->
+    <!--          :name="Unicons.AngleRight.name"-->
+    <!--          class="h-5.5 w-5.5 text-text-body"-->
+    <!--        />-->
+    <!--      </slot>-->
+    <!--    </div>-->
+
     <div v-if="viewMode === 'list'">
       <BaseContextMenuActions
         :context-menu-actions="contextMenuActions"
@@ -204,12 +206,21 @@
         @toggle-loading="toggleLoading"
       />
     </div>
-    <unicon
-      v-if="previewComponentIconVisible"
-      :name="previewComponentEnabled ? Unicons.EyeSlash.name : Unicons.Eye.name"
-      class="h-5.5 w-5.5 text-text-body"
-      @click.stop.prevent="emit('togglePreviewComponent', itemId)"
-    />
+    <div
+      v-if="
+        baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+        baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
+      "
+    >
+      <unicon
+        v-if="previewComponentIconVisible"
+        :name="
+          previewComponentEnabled ? Unicons.EyeSlash.name : Unicons.Eye.name
+        "
+        class="h-5.5 w-5.5 text-text-body"
+        @click.stop.prevent="emit('togglePreviewComponent', itemId)"
+      />
+    </div>
   </li>
   <template v-if="entityListElements">
     <div
@@ -229,18 +240,19 @@
 
 <script lang="ts" setup>
 import type { Context } from "@/composables/useBulkOperations";
-import type { Entitytyping } from "@/generated-types/queries";
 import {
   BaseLibraryModes,
-  DamsIcons,
-  EditStatus,
-  PanelType,
   type BaseRelationValuesInput,
   type ContextMenuActions,
+  DamsIcons,
+  EditStatus,
   type EntityListElement,
+  type Entitytyping,
   type IntialValues,
+  ListItemCoverageTypes,
   type Metadata,
   type MetadataField,
+  PanelType,
   type WindowElementPanel,
 } from "@/generated-types/queries";
 import { stringIsUrl } from "@/helpers";
@@ -251,12 +263,13 @@ import ImageViewer from "@/components/base/ImageViewer.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useEditMode } from "@/composables/useEdit";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { computed, ref, watch, onUpdated } from "vue";
+import { computed, inject, onUpdated, ref, watch } from "vue";
 import { Unicons } from "@/types";
 import { auth } from "@/main";
 import { useFieldArray } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import BaseContextMenuActions from "./BaseContextMenuActions.vue";
+import { hoveredListItem } from "@/composables/useListItemHelper";
 
 const props = withDefaults(
   defineProps<{
@@ -287,7 +300,7 @@ const props = withDefaults(
     refetchEntities?: Function;
     previewComponentEnabled: boolean;
     previewComponentIconVisible: boolean;
-    isHoveredListItems: boolean;
+    previewComponentListItemsCoverage?: ListItemCoverageTypes | undefined;
   }>(),
   {
     contextMenuActions: undefined,
@@ -312,6 +325,7 @@ const props = withDefaults(
     entityListElements: undefined,
     viewMode: "list",
     refetchEntities: undefined,
+    previewComponentListItemsCoverage: undefined,
   },
 );
 
@@ -326,6 +340,7 @@ const { update, remove } = useFieldArray(
 );
 const { getEntityUuid } = useEntitySingle();
 
+const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const loading = ref<boolean>(props.loading);
 const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
@@ -379,6 +394,22 @@ const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 const onlyEditableTeaserMetadata = computed(() =>
   props.teaserMetadata?.filter((metadata) => metadata?.showOnlyInEditMode),
 );
+
+const isActiveListItem = computed<boolean>(() => {
+  if (
+    props.previewComponentListItemsCoverage ===
+      ListItemCoverageTypes.AllListItems &&
+    hoveredListItem.value === props.itemId!
+  )
+    return true;
+  if (
+    props.previewComponentListItemsCoverage ===
+      ListItemCoverageTypes.OneListItem &&
+    props.previewComponentEnabled
+  )
+    return true;
+  return false;
+});
 
 watch(
   () => isMarkedAsToBeDeleted.value,

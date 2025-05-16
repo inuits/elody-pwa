@@ -242,6 +242,7 @@ const {
 
 const config = inject("config") as any;
 const parentEntity: any = inject("ParentEntityProvider");
+const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const hasSavedSearch = config.features.hasSavedSearch || false;
 
 const addFilterOptions = computed(() =>
@@ -377,7 +378,7 @@ const handleAdvancedFilters = () => {
   if (!rawFilters.value) return;
 
   const shouldUseState =
-    props.shouldUseStateForRoute && props.route.name !== "SingleEntity";
+    props.shouldUseStateForRoute && props.route.name !== "SingleEntity" && !isPreviewElement;
 
   const { filtersToUse, fromState } = getFiltersFromState(shouldUseState);
   if (!filtersToUse) return;

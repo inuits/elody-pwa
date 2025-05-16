@@ -1,14 +1,18 @@
 <template>
   <div
     :class="[
-      'w-full flex mt-5 overflow-y-scroll',
-      { 'mb-20': useEditHelper.isEdit },
+      { 'w-full flex mt-5 overflow-y-scroll': !isPreviewElement },
+      { 'mb-20': useEditHelper.isEdit && !isPreviewElement },
     ]"
   >
     <div
       v-for="(column, index) in currentColumnConfig[id]"
       :key="index"
-      :class="['h-full px-5', convertSizeToTailwind(column.size)]"
+      :class="[
+        'h-full',
+        convertSizeToTailwind(column.size),
+        { 'px-5': !isPreviewElement },
+      ]"
     >
       <entity-element
         :elements="column.elements"
@@ -21,7 +25,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, watch } from "vue";
+import { computed, inject, reactive, isReactive, watch } from "vue";
 import type {
   ColumnList,
   Column,
@@ -41,13 +45,19 @@ const props = defineProps<{
 
 const { setInitialColumns, currentColumnConfig } = useColumnResizeHelper();
 const useEditHelper = useEditMode(props.id);
+const isPreviewElement: boolean = inject("IsPreviewElement", false);
 
 const columns = computed<Column[]>(() => {
   const returnArray: Column[] = [];
 
   Object.values(props.columnList).forEach((value) => {
     if (typeof value !== "string") {
-      returnArray.push(value);
+      if (isReactive(value)) {
+        returnArray.push(value);
+      } else {
+        const clonedValue = JSON.parse(JSON.stringify(value));
+        returnArray.push(reactive(clonedValue));
+      }
     }
   });
 
