@@ -84,8 +84,9 @@
           'z-40 pl-[1%] right-0 pb-4',
           {
             'top-0 bg-neutral-lightest pt-4':
-              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary,
+              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary || baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
           },
+          { 'row-span-2': baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary },
           { sticky: hasStickyBars },
         ]"
       >
@@ -99,7 +100,8 @@
           <LibraryBar
             v-if="
               !predefinedEntities &&
-              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
+              (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+              baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
             "
             :route="route"
             :set-limit="setLimit"

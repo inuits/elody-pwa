@@ -344,7 +344,13 @@ watch(
 watch(
   () => props.entityType,
   () => {
-    if (props.entityType !== undefined) getPreviewItemsForEntity();
+    if (
+      props.entityType === undefined || (
+        props.baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary &&
+        props.baseLibraryMode !== BaseLibraryModes.PreviewBaseLibrary
+      )
+    ) return;
+    getPreviewItemsForEntity();
   },
   { immediate: true },
 );
