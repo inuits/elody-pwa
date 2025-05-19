@@ -211,6 +211,7 @@
         baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
         baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
       "
+      @click.stop.prevent="emit('togglePreviewComponent', itemId)"
     >
       <unicon
         v-if="previewComponentIconVisible"
@@ -218,7 +219,6 @@
           previewComponentEnabled ? Unicons.EyeSlash.name : Unicons.Eye.name
         "
         class="h-5.5 w-5.5 text-text-body"
-        @click.stop.prevent="emit('togglePreviewComponent', itemId)"
       />
     </div>
   </li>

@@ -1,8 +1,10 @@
 <template>
-  <div v-if="hasAvailableContextMenuActions">
+  <div
+    v-if="hasAvailableContextMenuActions"
+    @click.stop.prevent="openContextMenu"
+  >
     <unicon
       :name="Unicons.EllipsisVThinline.name"
-      @click.stop="openContextMenu"
     />
     <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
       <context-menu-action
@@ -60,8 +62,6 @@ const openContextMenu = (event: Event) => {
     x: event?.clientX,
     y: event?.clientY,
   });
-  event?.stopPropagation();
-  event?.preventDefault();
 };
 
 const { fetchPermissionsOfContextMenu, setExtraVariables } = usePermissions();
