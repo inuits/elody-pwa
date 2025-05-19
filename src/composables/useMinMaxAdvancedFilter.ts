@@ -98,11 +98,15 @@ export function useMinMaxAdvancedFilter(
   );
 
   onMounted(() => {
-    inputMin.value = extractDate(filter.inputFromState?.value?.min);
+    inputMin.value = isNumberType.value
+      ? filter.inputFromState?.value?.min
+      : extractDate(filter.inputFromState?.value?.min);
     inputTimeMin.value =
       extractTime(filter.inputFromState?.value?.min) || "00:00:00";
 
-    inputMax.value = extractDate(filter.inputFromState?.value?.max);
+    inputMax.value = isNumberType.value
+      ? filter.inputFromState?.value?.max
+      : extractDate(filter.inputFromState?.value?.max);
 
     inputTimeMax.value = inputMax.value
       ? extractTime(filter.inputFromState?.value?.max) || "00:00:00"

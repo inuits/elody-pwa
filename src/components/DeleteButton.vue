@@ -18,10 +18,7 @@ import { inject, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { DamsIcons, ModalStyle, TypeModals } from "@/generated-types/queries";
 import type { ApolloClient } from "@apollo/client/core";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { useNotification } from "@kyvg/vue3-notification";
 import { useEditMode } from "@/composables/useEdit";
 import { getTitleOrNameFromEntity, mapUrlToEntityType } from "@/helpers";
 import { usePageInfo } from "@/composables/usePageInfo";
@@ -33,6 +30,7 @@ import { useModalActions } from "@/composables/useModalActions";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useDeleteEntities } from "@/composables/useDeleteEntities";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 
 const config: any = inject("config");
 const entityFormData: any = inject("entityFormData");
@@ -43,7 +41,7 @@ const entityId = computed<string>(
   () => entityFormData?.id || route.params["id"],
 );
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
-const { createNotificationOverwrite } = useNotification();
+const { displaySuccessNotification } = useBaseNotification;
 const { previousPageInfo } = usePageInfo();
 const useEditHelper = useEditMode(entityId.value);
 const { dequeueItemForBulkProcessing } = useBulkOperations();
@@ -82,8 +80,7 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
     closeModal(TypeModals.Confirm);
     useEditHelper.disableEditMode();
     router.push({ name: context ? context : "Home" });
-    createNotificationOverwrite(
-      NotificationType.default,
+    displaySuccessNotification(
       t("notifications.success.entityDeleted.title"),
       t("notifications.success.entityDeleted.description"),
     );

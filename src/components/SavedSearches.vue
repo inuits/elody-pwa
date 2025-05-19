@@ -74,10 +74,8 @@ import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useRouter } from "vue-router";
 import { goToEntityPage } from "@/helpers";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { useNotification } from "@kyvg/vue3-notification";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useI18n } from "vue-i18n";
 import type { RouteLocationNormalizedLoaded } from "vue-router";
 import { useModalActions } from "@/composables/useModalActions";
@@ -98,7 +96,7 @@ const props = withDefaults(
 );
 
 const { t } = useI18n();
-const { createNotificationOverwrite } = useNotification();
+const { displaySuccessNotification } = useBaseNotification();
 const { openModal, closeModal } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const { initializePropertiesForSavedSearch } = useModalActions();
@@ -163,8 +161,7 @@ const saveChanges = async () => {
     props.route,
     normalizeSavedSearchFromEntity(updatedSearch as SavedSearch),
   );
-  createNotificationOverwrite(
-    NotificationType.default,
+  displaySuccessNotification(
     t("notifications.success.entityUpdated.title"),
     t("notifications.success.entityUpdated.description"),
   );
@@ -217,8 +214,7 @@ const deleteFilter = async () => {
   await deleteSavedSearch(selectedFilter.value.id);
   removeFilterFromStateForRoute(props.route, selectedFilter.value);
   setActiveFilter(null);
-  createNotificationOverwrite(
-    NotificationType.default,
+  displaySuccessNotification(
     t("notifications.success.entityDeleted.title"),
     t("notifications.success.entityDeleted.description"),
   );

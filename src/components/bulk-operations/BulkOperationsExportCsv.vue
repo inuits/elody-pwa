@@ -94,10 +94,8 @@ import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperations
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import ListItem from "@/components/ListItem.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { useBaseNotification } from "@/composables/useBaseNotification";
+import { useNotification } from "@kyvg/vue3-notification";
 import { computed, inject, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
@@ -143,7 +141,7 @@ const { getBulkOperationType } = useModalActions();
 
 const config = inject("config") as any;
 const { t } = useI18n();
-const { createNotificationOverwrite } = useNotification();
+const { displayErrorNotification } = useBaseNotification();
 const { getThumbnail } = useThumbnailHelper();
 const { getModal, closeModal } = useBaseModal();
 
@@ -225,11 +223,9 @@ const exportCsv = async () => {
       downloadCsv(`${entityType.value}.csv`, csv);
     })
     .catch(async (response: Response) =>
-      createNotificationOverwrite(
-        NotificationType.error,
+      displayErrorNotification(
         t("bulk-operations.csv-export.error.title"),
         await response.text(),
-        15,
       ),
     );
   dequeueAllItemsInBulk();
@@ -260,13 +256,12 @@ mediafilesResult((result) => {
   executeNormalFlow();
 });
 
-
 const dequeueAllItemsInBulk = () => {
   dequeueAllItemsForBulkProcessing(
     BulkOperationsContextEnum.BulkOperationsCsvExport,
   );
   dequeueAllItemsForBulkProcessing(RouteNames.Mediafiles);
-}
+};
 
 const firstFetchMediafilesOfEntities = () => {
   let assets = getEnqueuedItems(RouteNames.Assets, skip.value, limit.value);

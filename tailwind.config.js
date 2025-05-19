@@ -4,7 +4,13 @@ const svgToDataUri = require("mini-svg-data-uri");
 
 module.exports = {
   mode: "jit",
-  content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
+  content: [
+    "./index.html",
+    "./src/**/*.{vue,ts}",
+    "!./src/**/queries.ts",
+    "!./src/__mocks__/**/*.ts",
+    "!./src/tests/**/*.ts",
+  ],
   theme: {
     fontFamily: {
       sans: ["Lato", ...defaultTheme.fontFamily.sans],

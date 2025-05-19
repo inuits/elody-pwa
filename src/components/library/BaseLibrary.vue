@@ -27,18 +27,27 @@
             ? 'px-3 pt-3'
             : 'px-6',
         { '!bg-white': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary },
-        { 'grid-rows-[5vh_1fr]': baseLibraryMode === BaseLibraryModes.NormalBaseLibrary },
-        { 'grid-rows-[1vh_1fr]': baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder },
-        { 'grid-rows-[0vh_1fr]': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary },
+        {
+          'grid-rows-[5vh_1fr]':
+            baseLibraryMode === BaseLibraryModes.NormalBaseLibrary,
+        },
+        {
+          'grid-rows-[1vh_1fr]':
+            baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder,
+        },
+        {
+          'grid-rows-[0vh_1fr]':
+            baseLibraryMode === BaseLibraryModes.BasicBaseLibrary,
+        },
       ]"
     >
       <div
         class="z-40 top-0 pt-3 pb-2 bg-neutral-lightest"
         :class="[
-          { 'hidden': !enableAdvancedFilters },
+          { hidden: !enableAdvancedFilters },
           { 'row-span-1': !expandFilters },
           { 'row-span-2 h-fit': expandFilters },
-          { 'sticky': hasStickyBars },
+          { sticky: hasStickyBars },
         ]"
       >
         <FiltersBase
@@ -53,19 +62,20 @@
           :entity-type="entityType as Entitytyping"
           :should-use-state-for-route="shouldUseStateForRoute"
           :filters-need-context="filtersNeedContext"
+          :predefined-filters="filters"
           @filter-matcher-mapping-promise="
-          (promise) => (filterMatcherMappingPromise = promise)
-        "
+            (promise) => (filterMatcherMappingPromise = promise)
+          "
           @advanced-filters-promise="
-          (promise) => (advancedFiltersPromise = promise)
-        "
+            (promise) => (advancedFiltersPromise = promise)
+          "
           @apply-filters="
-          async (
-            filters: AdvancedFilterInput[],
-            stateSaved: boolean = false,
-            force: boolean = true,
-          ) => await setAdvancedFilters(filters, stateSaved, force, route)
-        "
+            async (
+              filters: AdvancedFilterInput[],
+              stateSaved: boolean = false,
+              force: boolean = true,
+            ) => await setAdvancedFilters(filters, stateSaved, force, route)
+          "
           @expand-filters="expandFilters = !expandFilters"
         />
       </div>
@@ -117,7 +127,7 @@
             enableBulkOperations &&
             baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
           "
-          class="z-50 sticky top-[5vh] my-3"
+          class="sticky top-[5vh] my-3"
         >
           <BulkOperationsActionsBar
             :context="bulkOperationsContext"
@@ -205,10 +215,13 @@
         <div
           v-if="entities?.length === 0 && !entitiesLoading"
           :class="[
-          { 'text-center my-2': baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary },
-          { 'col-span-1 pl-[1%]': expandFilters },
-          { 'col-span-2': !expandFilters },
-        ]"
+            {
+              'text-center my-2':
+                baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary,
+            },
+            { 'col-span-1 pl-[1%]': expandFilters },
+            { 'col-span-2': !expandFilters },
+          ]"
         >
           <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">
             -

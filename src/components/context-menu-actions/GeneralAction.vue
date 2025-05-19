@@ -11,8 +11,8 @@ import { ContextMenuGeneralActionEnum } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
-import { NotificationType } from "@/components/base/BaseNotification.vue";
-import { useNotification } from "@/components/base/BaseNotification.vue";
+import { useNotification } from "@kyvg/vue3-notification";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useImport } from "@/composables/useImport";
 import { apolloClient } from "@/main";
 import EventBus from "@/EventBus";
@@ -27,7 +27,8 @@ const props = defineProps<{
   parentEntityId: string;
 }>();
 const { t } = useI18n();
-const { createNotificationOverwrite } = useNotification();
+const { displaySuccessNotification, displayErrorNotification } =
+  useBaseNotification();
 const { loadDocument } = useImport();
 
 const doGeneralAction = async () => {
@@ -41,18 +42,16 @@ const doGeneralAction = async () => {
         notifyOnNetworkStatusChange: true,
       })
       .then(() => {
-        createNotificationOverwrite(
-          NotificationType.default,
+        displaySuccessNotification(
           t("notifications.success.entityUpdated.title"),
-          t("notifications.success.entityUpdated.description")
+          t("notifications.success.entityUpdated.description"),
         );
         EventBus.emit(props.action);
       });
   } catch (e) {
-    createNotificationOverwrite(
-      NotificationType.error,
+    displayErrorNotification(
       t("notifications.errors.validation-error.title"),
-      t("notifications.errors.validation-error.title")
+      t("notifications.errors.validation-error.title"),
     );
   } finally {
     emit("toggleLoading");

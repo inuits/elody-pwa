@@ -1,13 +1,13 @@
 import { ref, type Ref } from "vue";
 import { ElodyServices } from "@/generated-types/queries";
 import { useStateManagement } from "@/composables/useStateManagement";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { useBaseNotification } from "@/composables/useBaseNotification";
+import { useNotification } from "@kyvg/vue3-notification";
 
 const pwaVersion = ref<string>();
 const apolloGraphqlVersion = ref<string>();
+
+const { displaySuccessNotification } = useBaseNotification();
 
 export const useServiceVersionManager = (): {
   pwaVersion: Ref<string>;
@@ -17,7 +17,7 @@ export const useServiceVersionManager = (): {
     service: ElodyServices,
   ) => Record<ElodyServices, string>;
   getPwaVersion: () => Promise<string>;
-  compareAllServiceVersions: () => void;
+  compareServiceVersions: () => void;
 } => {
   const __setServiceVersionMapper: Record<ElodyServices, Function> = {
     [ElodyServices.Pwa]: (version) => {
@@ -38,7 +38,7 @@ export const useServiceVersionManager = (): {
   const setVersion = (newVersion: string, service: ElodyServices) => {
     const { setGlobalState } = useStateManagement();
     __setServiceVersionMapper[service](newVersion);
-    compareAllServiceVersions();
+    compareServiceVersions();
     setGlobalState(`${service}Version`, newVersion, "sessionStorage");
     return { [service]: newVersion };
   };
@@ -62,36 +62,25 @@ export const useServiceVersionManager = (): {
     }
   };
 
-  const compareAllServiceVersions = () => {
-    const services: string[] = Object.values(ElodyServices);
-
-    services.forEach((service) => {
-      compareVersionOfService(
-        __getServiceVersionMapper[service](service),
-        service,
-      );
-    });
-  };
-
-  const compareVersionOfService = (
-    newVersion: string,
-    service: ElodyServices,
-  ): void => {
-    const currentVersion = getCurrentVersion(service);
-    if (!newVersion || !service || !currentVersion) return;
-    if (currentVersion === newVersion) return;
-
-    __showNewVersionAvailableToUser();
-  };
-
   const __showNewVersionAvailableToUser = () => {
-    const { createNotificationOverwrite } = useNotification();
-    createNotificationOverwrite(
-      NotificationType.default,
+    displaySuccessNotification(
       "notifications.default.new-version-available.title",
       "notifications.default.new-version-available.description",
-      20,
+      { group: "serviceVersionManager" },
     );
+  };
+
+  const compareServiceVersions = () => {
+    const services: string[] = Object.values(ElodyServices);
+    const versions: string[] = services.map((service: string) =>
+      getCurrentVersion(service),
+    );
+
+    const equalVersions = versions.every(
+      (version: string) => version === versions[0],
+    );
+
+    if (!equalVersions) __showNewVersionAvailableToUser();
   };
 
   return {
@@ -99,6 +88,6 @@ export const useServiceVersionManager = (): {
     apolloGraphqlVersion,
     setVersion,
     getPwaVersion,
-    compareAllServiceVersions,
+    compareServiceVersions,
   };
 };

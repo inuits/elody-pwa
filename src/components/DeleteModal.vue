@@ -111,10 +111,8 @@ import {
 } from "@/composables/useBulkOperations";
 import { useEditMode } from "@/composables/useEdit";
 import { useRouter } from "vue-router";
-import {
-  NotificationType,
-  useNotification,
-} from "@/components/base/BaseNotification.vue";
+import { useNotification } from "@kyvg/vue3-notification";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 import { usePageInfo } from "@/composables/usePageInfo";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
@@ -125,7 +123,6 @@ const { t } = useI18n();
 const config: any = inject("config");
 const { closeModal, getModalInfo } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
-const { createNotificationOverwrite } = useNotification();
 const { getEnqueuedItems, dequeueAllItemsForBulkProcessing } =
   useBulkOperations();
 const { getParentId, getCallbackFunction, getInformationForDelete } =
@@ -134,6 +131,7 @@ const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const router = useRouter();
 const { pageInfo, previousPageInfo } = usePageInfo();
 const { deleteEntities } = useDeleteEntities();
+const { displaySuccessNotification } = useBaseNotification();
 
 const modalOpenend = ref<boolean>(false);
 const deleteQueryOptions = ref<DeleteQueryOptions | undefined>(undefined);
@@ -158,8 +156,7 @@ const deleteSelectedItems = async () => {
     const isDeleted = await deleteEntities(selectedItems);
 
     if (isDeleted) {
-      createNotificationOverwrite(
-        NotificationType.default,
+      displaySuccessNotification(
         t("notifications.success.itemsDeleted.title"),
         t("notifications.success.itemsDeleted.description"),
       );

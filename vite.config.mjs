@@ -1,10 +1,10 @@
 import { fileURLToPath, URL } from "node:url";
-import { defineConfig, mergeConfig } from "vite";
-import { defineConfig as defineVitestConfig } from "vitest/config";
+import { defineConfig } from "vite";
+
 import viteCompression from "vite-plugin-compression";
 import vue from "@vitejs/plugin-vue";
 
-const parsePort = (port: string) => {
+const parsePort = (port) => {
   return parseInt(port) ? parseInt(port) : 8080;
 };
 
@@ -85,29 +85,7 @@ const viteConfig = defineConfig({
   },
   optimizeDeps: {
     exclude: ["session-vue-3-oidc-library", "date-fns"],
-    include: [
-      "vue",
-      "@vue/runtime-core",
-      "prosemirror-state",
-      "prosemirror-transform",
-      "prosemirror-model",
-      "prosemirror-view",
-    ],
   },
 });
 
-const vitestConfig = defineVitestConfig({
-  test: {
-    setupFiles: "./vitestSetup.ts",
-    environment: "jsdom",
-    deps: {
-      optimizer: {
-        web: {
-          include: ['@/generated-types/queries'],
-        },
-      },
-    },
-  },
-});
-
-export default mergeConfig(viteConfig, vitestConfig);
+export default viteConfig;

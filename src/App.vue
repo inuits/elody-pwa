@@ -1,6 +1,11 @@
 <template>
   <div v-if="!showSplashScreen">
-    <BaseNotification />
+    <notifications class="pt-2" />
+    <notifications
+      class="pt-2 cursor-pointer"
+      group="serviceVersionManager"
+      @click="refreshPage()"
+    />
     <the-navigation class="navbar" />
     <div>
       <div
@@ -36,7 +41,6 @@
 
 <script setup lang="ts">
 import type { Context } from "./composables/useBulkOperations";
-import BaseNotification from "@/components/base/BaseNotification.vue";
 //import BulkOperationsEditModal from "@/components/bulk-operations/BulkOperationsEditModal.vue";
 import BulkoperationsModal from "@/components/bulk-operations/BulkOperationsModal.vue";
 import ConfirmModal from "./components/base/ConfirmModal.vue";
@@ -76,6 +80,10 @@ useHead({
     },
   ],
 });
+
+const refreshPage = (): void => {
+  window.location.reload();
+};
 </script>
 
 <style>
@@ -105,6 +113,14 @@ useHead({
   -o-transition: padding-left 300ms ease-in-out;
   transition: padding-left 300ms ease-in-out;
   padding-left: 20rem;
+}
+
+.notification-title {
+  @apply text-xl;
+}
+
+.notification-content {
+  @apply text-base;
 }
 
 @keyframes logo-animation {

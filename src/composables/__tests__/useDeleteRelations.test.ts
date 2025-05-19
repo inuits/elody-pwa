@@ -4,7 +4,7 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useEditMode } from "@/composables/useEdit";
 import { useI18n } from "vue-i18n";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { useNotification } from "@/components/base/BaseNotification.vue";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useBulkOperations } from "@/composables/useBulkOperations";
 import type { Collection } from "@/generated-types/queries";
 import { EditStatus, TypeModals } from "@/generated-types/queries";
@@ -16,7 +16,7 @@ vi.mock("@/composables/useFormHelper");
 vi.mock("@/composables/useEdit");
 vi.mock("vue-i18n");
 vi.mock("@/composables/useBaseModal");
-vi.mock("@/components/base/BaseNotification.vue");
+vi.mock("@/composables/useBaseNotification");
 vi.mock("@/composables/useBulkOperations");
 vi.mock("@/main", () => ({
   apolloClient: {
@@ -50,7 +50,7 @@ describe("useDeleteRelations", () => {
     });
     const mockSave = vi.fn().mockResolvedValue(undefined);
     const mockCloseModal = vi.fn();
-    const mockCreateNotification = vi.fn();
+    const mockDisplaySuccessNotification = vi.fn();
     const mockT = vi.fn().mockReturnValue("translated text");
     const mockDequeueItemForBulkProcessing = vi.fn();
 
@@ -80,8 +80,8 @@ describe("useDeleteRelations", () => {
     (useBaseModal as any).mockReturnValue({
       closeModal: mockCloseModal,
     });
-    (useNotification as any).mockReturnValue({
-      createNotification: mockCreateNotification,
+    (useBaseNotification as any).mockReturnValue({
+      displaySuccessNotification: mockDisplaySuccessNotification,
     });
     (useBulkOperations as any).mockReturnValue({
       dequeueItemForBulkProcessing: mockDequeueItemForBulkProcessing,
@@ -166,7 +166,9 @@ describe("useDeleteRelations", () => {
         TypeModals.BulkOperationsDeleteRelations,
       );
 
-      expect(useNotification().createNotification).toHaveBeenCalled();
+      expect(
+        useBaseNotification().displaySuccessNotification,
+      ).toHaveBeenCalled();
       expect(useEditMode().disableEditMode).toHaveBeenCalled();
     });
 
