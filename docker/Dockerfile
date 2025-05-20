@@ -21,6 +21,4 @@ touch /app/src/generated-types/queries.ts
 
 RUN pnpm install
 
-RUN cat package.json | grep test:unit
-
-RUN echo "Starting tests..." && pnpm run test:unit && echo "Tests finished ✅"
+RUN pnpm run test:unit
