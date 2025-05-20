@@ -24,7 +24,10 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, ref } from "vue";
-import { AutocompleteSelectionOptions } from "@/generated-types/queries";
+import {
+  AutocompleteSelectionOptions,
+  AdvancedFilterTypes,
+} from "@/generated-types/queries";
 import AutocompleteFilter from "./AutocompleteFilter.vue";
 import CheckboxFilter from "./CheckboxFilter.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
@@ -49,6 +52,7 @@ const { options, setFilters, getOptions, getBaseOptions, init } =
 const route = useRoute();
 
 const isLoading = ref<boolean>(true);
+const initialAmountOfOptions = ref<number>(0);
 
 const useAutocomplete = computed(() => {
   if (
@@ -61,7 +65,9 @@ const useAutocomplete = computed(() => {
     AutocompleteSelectionOptions.Checkboxlist
   )
     return false;
-  return options.value.length > 10 || options.value.length === 0;
+  return (
+    initialAmountOfOptions.value > 10 || initialAmountOfOptions.value === 0
+  );
 });
 
 onMounted(async () => {
@@ -75,6 +81,7 @@ onMounted(async () => {
     await fetchSelectionOptions(
       props.filter.advancedFilter.advancedFilterInputForRetrievingOptions,
     );
+    initialAmountOfOptions.value = options.value.length;
     isLoading.value = false;
   } catch (error) {
     isLoading.value = false;
@@ -91,19 +98,31 @@ const fetchSelectionOptions = async (filters?: AdvancedFilterInput[]) => {
 const searchOptions = async (searchValue: string) => {
   const newFilters =
     props.filter.advancedFilter.advancedFilterInputForRetrievingOptions;
-  const normalizedFitlers = newFilters?.map((filter: AdvancedFilterInput) => {
-    if (filter.value === "*" && !!searchValue) {
-      filter.value = searchValue;
-      filter.match_exact = false;
-    }
-    return filter;
-  });
+  const normalizedFitlers = newFilters?.map(buildFilterForSearch(searchValue));
 
   if (!normalizedFitlers) return;
 
   await setFilters(normalizedFitlers);
   await getSelectionOptions();
 };
+
+const buildFilterForSearch =
+  (searchValue: string) =>
+  (filter: AdvancedFilterInput): AdvancedFilterInput => {
+    if (filter.type !== AdvancedFilterTypes.Text) {
+      return filter;
+    }
+
+    const updatedFilter = { ...filter };
+    updatedFilter.value = searchValue || "*";
+    updatedFilter.match_exact = false;
+
+    if (searchValue && "distinct_by" in updatedFilter) {
+      delete updatedFilter.distinct_by;
+    }
+
+    return updatedFilter;
+  };
 
 const getSelectionOptions = async () => {
   const useNewWayToFetchOptions =
