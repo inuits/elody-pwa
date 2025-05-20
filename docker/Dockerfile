@@ -21,4 +21,6 @@ touch /app/src/generated-types/queries.ts
 
 RUN pnpm install
 
+RUN cat package.json | grep test:unit
+
 RUN pnpm run test:unit
