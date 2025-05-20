@@ -42,7 +42,6 @@ import {
   type BaseEntity,
   type MediaFileEntity,
   type Column,
-  MediaFileElementTypes,
   type EntityListElement,
   type SingleMediaFileElement,
   type Entity,
@@ -108,7 +107,7 @@ const props = withDefaults(
   { viewOnly: false },
 );
 
-const id = ref<string[]>(asString(props.entityId || route.params["id"]));
+const id = ref<string>(asString(props.entityId || route.params["id"]));
 const useEditHelper = useEditMode(id.value);
 const identifiers = ref<string[]>([]);
 const loading = ref<boolean>(true);
@@ -121,7 +120,7 @@ const entityType = computed(() => {
 });
 
 const queryVariables = reactive<GetEntityByIdQueryVariables>({
-  id: id,
+  id: id.value,
   type: entityType.value,
   preferredLanguage: locale.value,
 });
@@ -184,9 +183,7 @@ const determineContextsForMediafileViewer = () => {
         addContextToState("SingleMediaFileElement");
         setEntityMediafiles("SingleMediaFileElement", [entity.value]);
       }
-      if (
-        element?.__typename === "EntityListElement"
-      ) {
+      if (element?.__typename === "EntityListElement") {
         addContextToState(element.customQueryFilters);
       }
     },

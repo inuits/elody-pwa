@@ -11,7 +11,6 @@ import { ContextMenuGeneralActionEnum } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
-import { useNotification } from "@kyvg/vue3-notification";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useImport } from "@/composables/useImport";
 import { apolloClient } from "@/main";

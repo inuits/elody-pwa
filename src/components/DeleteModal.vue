@@ -111,7 +111,6 @@ import {
 } from "@/composables/useBulkOperations";
 import { useEditMode } from "@/composables/useEdit";
 import { useRouter } from "vue-router";
-import { useNotification } from "@kyvg/vue3-notification";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import { usePageInfo } from "@/composables/usePageInfo";
 import useTenant from "@/composables/useTenant";

@@ -18,7 +18,6 @@ import {
   BulkOperationsContextEnum,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
-import { useNotification } from "@kyvg/vue3-notification";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import {
   inject,

@@ -6,7 +6,7 @@ const editStates = ref<Record<string, ReturnType<typeof useEditState>>>({});
 export const useEditMode = (
   editStateName: string = "GlobalEditState",
   mode: "get" | "delete" = "get",
-) => {
+): EditState => {
   if (!editStateName || typeof editStateName !== "string") {
     console.error(
       `The editStateName is a required property of useEditMode and must be a string.`,
@@ -29,7 +29,9 @@ export const useEditMode = (
   };
 
   const deleteEditState = () => {
+    const stateToDelete = editStates.value[editStateName];
     delete editStates.value[editStateName];
+    return stateToDelete;
   };
 
   const operationModeMapping = {

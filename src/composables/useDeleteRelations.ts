@@ -11,7 +11,6 @@ import { MutateEntityValuesDocument } from "@/generated-types/queries";
 import type { FormContext } from "vee-validate";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useBaseNotification } from "@/composables/useBaseNotification";
-import { useNotification } from "@kyvg/vue3-notification";
 import {
   type Context,
   type InBulkProcessableItem,

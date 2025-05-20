@@ -74,7 +74,6 @@ import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useRouter } from "vue-router";
 import { goToEntityPage } from "@/helpers";
-import { useNotification } from "@kyvg/vue3-notification";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useI18n } from "vue-i18n";
 import type { RouteLocationNormalizedLoaded } from "vue-router";

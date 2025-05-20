@@ -246,7 +246,6 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { useNotification } from "@kyvg/vue3-notification";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import useMenuHelper from "@/composables/useMenuHelper";
 import useTenant from "@/composables/useTenant";

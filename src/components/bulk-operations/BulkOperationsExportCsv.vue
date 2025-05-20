@@ -95,7 +95,6 @@ import LibraryBar from "@/components/library/LibraryBar.vue";
 import ListItem from "@/components/ListItem.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import { useBaseNotification } from "@/composables/useBaseNotification";
-import { useNotification } from "@kyvg/vue3-notification";
 import { computed, inject, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";

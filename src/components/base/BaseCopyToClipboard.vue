@@ -8,7 +8,6 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import Clipboard from "clipboard";
 import { Unicons } from "@/types";
-import { useNotification } from "@kyvg/vue3-notification";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useI18n } from "vue-i18n";
 

@@ -18,7 +18,6 @@ import { inject, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { DamsIcons, ModalStyle, TypeModals } from "@/generated-types/queries";
 import type { ApolloClient } from "@apollo/client/core";
-import { useNotification } from "@kyvg/vue3-notification";
 import { useEditMode } from "@/composables/useEdit";
 import { getTitleOrNameFromEntity, mapUrlToEntityType } from "@/helpers";
 import { usePageInfo } from "@/composables/usePageInfo";
@@ -54,8 +53,8 @@ const { getForm } = useFormHelper();
 
 const deleteAvailable = computed<boolean>(() => {
   return (
-    useEditHelper.editMode.value === "edit-delete" ||
-    useEditHelper.editMode.value === "delete"
+    useEditHelper.editMode === "edit-delete" ||
+    useEditHelper.editMode === "delete"
   );
 });
 

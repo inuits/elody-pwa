@@ -2,7 +2,6 @@ import { ref, type Ref } from "vue";
 import { ElodyServices } from "@/generated-types/queries";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useBaseNotification } from "@/composables/useBaseNotification";
-import { useNotification } from "@kyvg/vue3-notification";
 
 const pwaVersion = ref<string>();
 const apolloGraphqlVersion = ref<string>();

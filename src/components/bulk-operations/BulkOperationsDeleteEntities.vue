@@ -69,7 +69,6 @@ import {
   type DropdownOption,
   TypeModals,
 } from "@/generated-types/queries";
-import { useNotification } from "@kyvg/vue3-notification";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {

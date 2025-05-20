@@ -36,7 +36,6 @@ import { BaseFieldType } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 import ImportListItem from "@/components/imports/ImportListItem.vue";
 import { useBaseNotification } from "@/composables/useBaseNotification";
-import { useNotification } from "@kyvg/vue3-notification";
 import { useGraphqlAsync } from "@/composables/useGraphqlAsync";
 
 const props = defineProps<{

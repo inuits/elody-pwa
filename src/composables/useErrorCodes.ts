@@ -1,7 +1,6 @@
 import type { GraphQLError } from "graphql/error";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useBaseNotification } from "@/composables/useBaseNotification";
-import { useNotification } from "@kyvg/vue3-notification";
 import useTenant from "@/composables/useTenant";
 import { auth, router } from "@/main";
 import { ErrorCodeType } from "@/generated-types/queries";
