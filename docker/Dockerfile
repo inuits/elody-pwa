@@ -23,4 +23,4 @@ RUN pnpm install
 
 RUN cat package.json | grep test:unit
 
-RUN pnpm run test:unit
+RUN echo "Starting tests..." && pnpm run test:unit && echo "Tests finished ✅"
