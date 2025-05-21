@@ -117,10 +117,6 @@ const buildFilterForSearch =
     updatedFilter.value = searchValue || "*";
     updatedFilter.match_exact = false;
 
-    if (searchValue && "distinct_by" in updatedFilter) {
-      delete updatedFilter.distinct_by;
-    }
-
     return updatedFilter;
   };
 
