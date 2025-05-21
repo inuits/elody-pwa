@@ -1,26 +1,24 @@
 import {
   useNotification,
-  type NotificationOptions,
+  type NotificationsOptions,
 } from "@kyvg/vue3-notification";
 import { getTranslatedMessage } from "@/helpers";
 
-type NotificationType = "warn" | "success" | "error" | (string & {});
-
 export const useBaseNotification = (): {
-  dispalySuccessNotification: (
+  displaySuccessNotification: (
     title: string,
     text: string,
-    extraOptions?: NotificationOptions,
+    extraOptions?: NotificationsOptions,
   ) => void;
-  dispayWarningNotification: (
+  displayWarningNotification: (
     title: string,
     text: string,
-    extraOptions?: NotificationOptions,
+    extraOptions?: NotificationsOptions,
   ) => void;
   displayErrorNotification: (
     title: string,
     text: string,
-    extraOptions?: NotificationOptions,
+    extraOptions?: NotificationsOptions,
   ) => void;
 } => {
   const { notify } = useNotification();
@@ -29,7 +27,7 @@ export const useBaseNotification = (): {
   const displaySuccessNotification = (
     title: string,
     text: string,
-    extraOptions: NotificationOptions = {},
+    extraOptions: NotificationsOptions = {},
   ): void => {
     notify({
       title: getTranslatedMessage(title),
@@ -40,10 +38,10 @@ export const useBaseNotification = (): {
     });
   };
 
-  const dispalyWarningNotification = (
+  const displayWarningNotification = (
     title: string,
     text: string,
-    extraOptions: NotificationOptions = {},
+    extraOptions: NotificationsOptions = {},
   ): void => {
     notify({
       title: getTranslatedMessage(title),
@@ -57,7 +55,7 @@ export const useBaseNotification = (): {
   const displayErrorNotification = (
     title: string,
     text: string,
-    extraOptions: NotificationOptions = {},
+    extraOptions: NotificationsOptions = {},
   ): void => {
     notify({
       title: getTranslatedMessage(title),
@@ -70,7 +68,7 @@ export const useBaseNotification = (): {
 
   return {
     displaySuccessNotification,
-    dispalyWarningNotification,
+    displayWarningNotification,
     displayErrorNotification,
   };
 };
