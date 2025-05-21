@@ -146,7 +146,7 @@ export const useFilterState = () => {
       filter.type === AdvancedFilterTypes.Selection &&
       filter.hidden &&
       !filter.doNotOverrideDefaultValue &&
-      !value
+      (!value || (Array.isArray(value) && value.length === 0))
     ) {
       value = "$parentIds";
     }

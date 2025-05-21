@@ -74,7 +74,8 @@ onMounted(async () => {
   try {
     isLoading.value = true;
     await init(
-      route.meta.entityType as Entitytyping,
+      (props.filter.advancedFilter?.entityType ||
+        route.meta.entityType) as Entitytyping,
       props.filter.advancedFilter.filterOptionsMapping,
     );
 
