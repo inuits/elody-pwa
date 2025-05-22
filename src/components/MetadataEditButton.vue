@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, inject, computed } from "vue";
+import { watch, inject, computed, onMounted } from "vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
 import BaseButtonNew, {
   type ButtonSize,
@@ -39,6 +39,7 @@ import { useI18n } from "vue-i18n";
 import { useEditMode } from "@/composables/useEdit";
 import { DamsIcons } from "@/generated-types/queries";
 import { useRoute } from "vue-router";
+import type { useEditState } from "@/composables/useEditState";
 
 const props = withDefaults(
   defineProps<{
@@ -56,14 +57,16 @@ const props = withDefaults(
 const entityFormData = inject("entityFormData");
 const route = useRoute();
 const entityId = computed<string>(() => entityFormData?.id || route.params.id);
-const editModeHelper = useEditMode(entityId.value);
+const editModeHelper = computed<ReturnType<typeof useEditState>>(() =>
+  useEditMode(entityId.value),
+);
 const { isSingle } = useRouteHelpers();
 const { t } = useI18n();
 
 watch(
   () => isSingle,
   () => {
-    if (isSingle.value === false) editModeHelper.hideEditButton();
+    if (!isSingle.value) editModeHelper.value.hideEditButton();
   },
   { immediate: true },
 );
