@@ -95,7 +95,10 @@ const getValueFromTeaserMetadata = (
   return teaserMetadataItem.value;
 };
 
-export const getTranslatedMessage = (key, variables) => i18n.global.t(key, variables);
+export const getTranslatedMessage = (
+  key: string,
+  variables: Record<string, string> | undefined = undefined,
+) => i18n.global.t(key, variables);
 
 export const setSortConfigurationForRoute = (
   route: RouteLocationNormalizedLoaded,

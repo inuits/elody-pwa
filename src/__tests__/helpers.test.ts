@@ -5,12 +5,29 @@ import {
   mapUrlToEntityType,
   extractObjectsByTypename,
   determineDefaultIntialValues,
+  getTranslatedMessage,
 } from "@/helpers";
 import {
   type Entity,
   type ColumnList,
   InputFieldTypes,
 } from "@/generated-types/queries";
+
+const mockTranslations = {
+  notification: {
+    success: {
+      "test-run": { title: "The test ran successfully" },
+      "variables-run": { title: "Successfully Added some variables: {{name}}" },
+    },
+  },
+};
+
+const getNestedValue = (obj: any, path: string): string => {
+  return (
+    path.split(".").reduce((acc, key) => acc?.[key], obj) ||
+    `missing.translation.${path}`
+  );
+};
 
 vi.mock("@/main", () => ({
   typeUrlMapping: {
@@ -27,6 +44,19 @@ vi.mock("@/main", () => ({
       "our-orders": "Order",
       "our-customers": "Customer",
       "our-invoices": "Invoice",
+    },
+  },
+  i18n: {
+    global: {
+      t: (key: string, variables?: Record<string, string>) => {
+        let translation = getNestedValue(mockTranslations, key);
+        if (variables) {
+          for (const [varKey, varValue] of Object.entries(variables)) {
+            translation = translation.replace(`{{${varKey}}}`, varValue);
+          }
+        }
+        return translation;
+      },
     },
   },
 }));
@@ -201,5 +231,33 @@ describe("extractObjectsByTypename", () => {
     const result = extractObjectsByTypename(input, "PanelMetaData");
 
     expect(result).toEqual([]);
+  });
+
+  describe("Get translation outside of setup scope", () => {
+    it("should return a translation string from a translations json", () => {
+      const result = getTranslatedMessage(
+        "notification.success.test-run.title",
+      );
+
+      expect(result).toEqual(
+        mockTranslations.notification.success["test-run"].title,
+      );
+    });
+
+    it("should return a translation string from a translations json with included variables", () => {
+      const nameVariableString = "variables-have-been-added";
+      const result = getTranslatedMessage(
+        "notification.success.variables-run.title",
+        { name: nameVariableString },
+      );
+
+      expect(result).toContain(
+        mockTranslations.notification.success["variables-run"].title.replace(
+          "{{name}}",
+          "",
+        ),
+      );
+      expect(result).toContain(nameVariableString);
+    });
   });
 });
