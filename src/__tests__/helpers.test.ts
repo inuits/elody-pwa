@@ -77,7 +77,7 @@ describe("Entity Mapping Functions", () => {
     it("should return the correct route object when the entity has teaserMetadata", () => {
       const entity: Entity = {
         __typename: "Order",
-        teaserMetadata: [{ key: "id", value: "order-789" }],
+        teaserMetadata: { id: { key: "id", value: "order-789" } },
       };
       const result = getEntityPageRoute(entity, "order-list");
       expect(result).toEqual({

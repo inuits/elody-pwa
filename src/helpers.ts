@@ -16,6 +16,7 @@ import {
   GetCustomFormattersSettingsDocument,
   DamsIcons,
   type DropdownOption,
+  type MetadataInput,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { i18n } from "@/main.ts";
@@ -38,7 +39,10 @@ export const goToEntityPage = (
   const entityId =
     entity.intialValues?.slug ||
     entity.uuid ||
-    entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")?.value;
+    getValueFromTeaserMetadata(
+      entity.teaserMetadata as Record<string, MetadataInput>,
+      "id",
+    );
 
   router.push({
     name: listItemRouteName,
@@ -81,6 +85,16 @@ export const goToEntityTypeRoute = (
   }
 };
 
+const getValueFromTeaserMetadata = (
+  teaserMetadata: Record<string, MetadataInput> = {},
+  key: string,
+): string | undefined => {
+  if (!teaserMetadata[key]) return undefined;
+  const teaserMetadataItem = teaserMetadata[key];
+
+  return teaserMetadataItem.value;
+};
+
 export const getTranslatedMessage = (key, variables) => i18n.global.t(key, variables);
 
 export const setSortConfigurationForRoute = (
@@ -100,10 +114,13 @@ export const getEntityPageRoute = (
   entity: Entity,
   listItemRouteName: string,
 ) => {
-  const teaserMetadata: Maybe<TeaserMetadata> | undefined =
-    entity.teaserMetadata;
   const entityId =
-    entity.intialValues?.slug || entity.uuid || teaserMetadata?.["id"];
+    entity.intialValues?.slug ||
+    entity.uuid ||
+    getValueFromTeaserMetadata(
+      entity.teaserMetadata as Record<string, metadataInput>,
+      "id",
+    );
 
   return {
     name: listItemRouteName,
