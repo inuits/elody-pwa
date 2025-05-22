@@ -81,7 +81,7 @@ export const goToEntityTypeRoute = (
   }
 };
 
-export const getTranslatedMessage = (key) => i18n.global.t(key);
+export const getTranslatedMessage = (key, variables) => i18n.global.t(key, variables);
 
 export const setSortConfigurationForRoute = (
   route: RouteLocationNormalizedLoaded,
