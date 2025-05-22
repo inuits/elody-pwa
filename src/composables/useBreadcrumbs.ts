@@ -198,9 +198,14 @@ const useBreadcrumbs = (config: any) => {
   };
 
   useRouter()?.afterEach((to) => {
-    if (to.meta.title === "Single Asset" || to.meta.title === "Single Entity")
+    const excludedRouteTitles: string[] = ["Single Asset", "Single Entity"];
+    if (
+      excludedRouteTitles.includes(to.meta.title as string) ||
+      !to.meta.breadcrumbs
+    )
       return;
-    const overviewPage = to.meta.breadcrumbs[to.meta.breadcrumbs.length - 1];
+    const breadcrumbs = to.meta.breadcrumbs as BreadcrumbRoute[];
+    const overviewPage = breadcrumbs[breadcrumbs.length - 1];
     clearBreadcrumbPathAndAddOverviewPage(
       overviewPage.title ?? (overviewPage.overviewPage as string),
     );
