@@ -138,7 +138,7 @@ const openDeleteEntityConfirmation = async () => {
 
 const doAction = () => {
   if (props.action === ContextMenuElodyActionEnum.DeleteRelation) {
-    useEditHelper.setRefetchFn(() =>
+    useEditHelper.setSubmitFunction(() =>
       submit(entityFormData.id, entityFormData.collection),
     );
     deleteRelation();

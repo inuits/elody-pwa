@@ -132,7 +132,7 @@ const saveRelations = (selectedItems: InBulkProcessableItem[]) => {
   if (props.entityPickerMode === EntityPickerMode.Emit) return;
   addRelations(selectedItems, getRelationType(), getEntityId(), true);
   dequeueAllItemsForBulkProcessing(getContext());
-  useEditHelper.setRefetchFn(submit);
+  useEditHelper.setSubmitFunction(submit);
   useEditHelper.save(true);
   closeModal(TypeModals.DynamicForm);
 };

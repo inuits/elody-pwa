@@ -71,7 +71,7 @@ const getSelectedItems = () => {
 };
 
 const deleteSelectedRelations = () => {
-  useEditHelper.setRefetchFn(() =>
+  useEditHelper.setSubmitFunction(() =>
     submit(
       getParentId() as string,
       getCollection() as Collection,
