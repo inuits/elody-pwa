@@ -1,5 +1,5 @@
 <template>
-  <div class="flex ml-1 h-full checkboard select-none">
+  <div class="flex h-full checkboard select-none">
     <div
       v-if="
         !loading &&
