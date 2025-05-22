@@ -100,10 +100,10 @@ export const getEntityPageRoute = (
   entity: Entity,
   listItemRouteName: string,
 ) => {
+  const teaserMetadata: Maybe<TeaserMetadata> | undefined =
+    entity.teaserMetadata;
   const entityId =
-    entity.intialValues?.slug ||
-    entity.uuid ||
-    entity.teaserMetadata?.find((dataItem) => dataItem?.key === "id")?.value;
+    entity.intialValues?.slug || entity.uuid || teaserMetadata?.["id"];
 
   return {
     name: listItemRouteName,

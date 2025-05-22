@@ -103,7 +103,9 @@
             isPreviewComponentEnabledForListItem(entity.id)
           "
           :preview-component-icon-visible="previewComponent !== undefined"
-          :preview-component-list-items-coverage="previewComponent?.listItemsCoverage"
+          :preview-component-list-items-coverage="
+            previewComponent?.listItemsCoverage
+          "
           @toggle-preview-component="
             (previewForEntityId) => togglePreviewComponent(previewForEntityId)
           "
@@ -143,9 +145,7 @@ import {
   RelationActions,
 } from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
-import {
-  useListItemHelper,
-} from "@/composables/useListItemHelper";
+import { useListItemHelper } from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import {
   formatTeaserMetadata,
@@ -169,6 +169,7 @@ import EventBus from "@/EventBus";
 import { useLibraryBar } from "@/composables/useLibraryBar";
 import { apolloClient } from "@/main";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
+import { useRouter } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -228,6 +229,7 @@ const getLinkSettings = (entity: Entity, listItemRouteName: string = "") => {
     }
     return { tag: "div", path: undefined };
   }
+
   return {
     tag: "router-link",
     path: getEntityPageRoute(entity, listItemRouteName),
@@ -345,11 +347,11 @@ watch(
   () => props.entityType,
   () => {
     if (
-      props.entityType === undefined || (
-        props.baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary &&
-        props.baseLibraryMode !== BaseLibraryModes.PreviewBaseLibrary
-      )
-    ) return;
+      props.entityType === undefined ||
+      (props.baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary &&
+        props.baseLibraryMode !== BaseLibraryModes.PreviewBaseLibrary)
+    )
+      return;
     getPreviewItemsForEntity();
   },
   { immediate: true },

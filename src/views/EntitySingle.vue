@@ -200,7 +200,7 @@ onBeforeRouteUpdate(async (to: any) => {
   intialValues.value = "no-values";
   relationValues.value = "no-values";
   columnList.value = "no-values";
-  useEdithelper.disableEditMode();
+  useEditHelper.disableEditMode();
 });
 
 watch(
