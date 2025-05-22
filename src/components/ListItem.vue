@@ -255,7 +255,7 @@ import {
   PanelType,
   type WindowElementPanel,
 } from "@/generated-types/queries";
-import { stringIsUrl } from "@/helpers";
+import { stringIsUrl, asString } from "@/helpers";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
 import EntityElementWindowPanel from "@/components/EntityElementWindowPanel.vue";
@@ -265,7 +265,7 @@ import { useEditMode } from "@/composables/useEdit";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, inject, onUpdated, ref, watch } from "vue";
 import { Unicons } from "@/types";
-import { auth } from "@/main";
+import { auth, router } from "@/main";
 import { useFieldArray } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import BaseContextMenuActions from "./BaseContextMenuActions.vue";
@@ -346,7 +346,9 @@ const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
 const formId = computed(() => getEntityUuid());
-const useEditHelper = useEditMode(formId.value);
+const useEditHelper = useEditMode(
+  getEntityUuid() || asString(router.currentRoute.value.params.id),
+);
 const imageSize = computed(() => (props.viewMode === "grid" ? 500 : 100));
 const teaserMetadataStyle = computed<string>(() => {
   if (props.viewMode === "grid") return "w-full";
