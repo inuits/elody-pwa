@@ -4,9 +4,9 @@
     :class="[
       'border rounded cursor-pointer list-none z-[-1]',
       {
-        'flex items-center gap-6 px-8 py-4 mb-2': viewMode === 'list',
+        'flex items-center gap-2 p-1 mb-2': viewMode === 'list',
       },
-      { 'px-8 py-4 mb-2 flex flex-col': viewMode === 'grid' },
+      { 'p-1 mb-2 flex flex-col': viewMode === 'grid' },
       {
         'border-dashed border-2 !border-accent-normal':
           isPreview || isMarkedAsToBeDeleted,
@@ -148,7 +148,7 @@
     >
       <div
         v-for="(metadataItem, idx) in teaserMetadata.filter(
-          (metadata) => !metadata.showOnlyInEditMode,
+          (metadata) => !metadata.showOnlyInEditMode
         )"
         :key="metadataItem ? metadataItem.key : `no-key_${idx}`"
         :class="teaserMetadataStyle"
@@ -194,7 +194,7 @@
     <!--      </slot>-->
     <!--    </div>-->
 
-    <div v-if="viewMode === 'list'">
+    <div v-if="viewMode === 'list'" class="flex">
       <BaseContextMenuActions
         :context-menu-actions="contextMenuActions"
         :parent-entity-id="formId"
@@ -211,6 +211,7 @@
         baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
         baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
       "
+      class="flex"
       @click.stop.prevent="emit('togglePreviewComponent', itemId)"
     >
       <unicon
@@ -218,7 +219,7 @@
         :name="
           previewComponentEnabled ? Unicons.EyeSlash.name : Unicons.Eye.name
         "
-        class="h-5.5 w-5.5 text-text-body"
+        class="h-5.5 w-5.5 text-text-body mx-1"
       />
     </div>
   </li>
@@ -326,7 +327,7 @@ const props = withDefaults(
     viewMode: "list",
     refetchEntities: undefined,
     previewComponentListItemsCoverage: undefined,
-  },
+  }
 );
 
 const emit = defineEmits<{
@@ -336,7 +337,7 @@ const emit = defineEmits<{
 
 const { deleteTeaserMetadataItemInState } = useFormHelper();
 const { update, remove } = useFieldArray(
-  `relationValues.${props.relationType}`,
+  `relationValues.${props.relationType}`
 );
 const { getEntityUuid } = useEntitySingle();
 
@@ -347,7 +348,7 @@ const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
 const formId = computed(() => getEntityUuid());
 const useEditHelper = useEditMode(
-  getEntityUuid() || asString(router.currentRoute.value.params.id),
+  getEntityUuid() || asString(router.currentRoute.value.params.id)
 );
 const imageSize = computed(() => (props.viewMode === "grid" ? 500 : 100));
 const teaserMetadataStyle = computed<string>(() => {
@@ -367,7 +368,7 @@ const teaserMetadataStyle = computed<string>(() => {
 
   return baseListViewModeStyles.concat(
     " ",
-    listStylesBasedOnAmount[amountOfTeaserMetadataItems],
+    listStylesBasedOnAmount[amountOfTeaserMetadataItems]
   );
 });
 
@@ -394,7 +395,7 @@ const canShowCopyRight = () => {
 
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 const onlyEditableTeaserMetadata = computed(() =>
-  props.teaserMetadata?.filter((metadata) => metadata?.showOnlyInEditMode),
+  props.teaserMetadata?.filter((metadata) => metadata?.showOnlyInEditMode)
 );
 
 const isActiveListItem = computed<boolean>(() => {
@@ -430,19 +431,19 @@ watch(
           editStatus: EditStatus.Unchanged,
         });
       }
-  },
+  }
 );
 
 watch(
   () => useEditHelper.isEdit,
-  (isEdit: boolean) => (!isEdit ? (isMarkedAsToBeDeleted.value = false) : ""),
+  (isEdit: boolean) => (!isEdit ? (isMarkedAsToBeDeleted.value = false) : "")
 );
 
 watch(
   () => props.viewMode,
   () => {
     setNoImage(false);
-  },
+  }
 );
 
 const removePreviewItem = (idx: number) => {
@@ -451,7 +452,7 @@ const removePreviewItem = (idx: number) => {
 };
 
 const createWindowPanelsFromEntityListElements = (
-  entityListElement: EntityListElement,
+  entityListElement: EntityListElement
 ) => {
   const panel: WindowElementPanel = {
     label: entityListElement.label,
