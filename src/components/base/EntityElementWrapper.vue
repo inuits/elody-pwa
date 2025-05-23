@@ -14,7 +14,7 @@
     >
       <div class="flex p-2">
         <span data-cy="entity-element-wrapper-title" class="subtitle mr-2">{{
-          t(label)
+          previewLabel ? previewLabel : t(label)
         }}</span>
         <slot name="actions"></slot>
       </div>
@@ -49,10 +49,12 @@ withDefaults(
     isCollapsed: Boolean;
     baseLibraryMode?: BaseLibraryModes;
     useVshowInsteadOfVif?: boolean;
+    previewLabel?: string;
   }>(),
   {
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     useVshowInsteadOfVif: false,
+    previewLabel: undefined,
   },
 );
 

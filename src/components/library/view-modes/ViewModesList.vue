@@ -67,6 +67,7 @@
               entity.teaserMetadata,
               entity.intialValues,
               previewComponentEnabled,
+              isPreviewElement
             ) as Metadata[]
           "
           :intialValues="entity.intialValues"
@@ -169,7 +170,6 @@ import EventBus from "@/EventBus";
 import { useLibraryBar } from "@/composables/useLibraryBar";
 import { apolloClient } from "@/main";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
-import { useRouter } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -211,6 +211,7 @@ const previewComponent = ref<PreviewComponent | undefined>(undefined);
 const previewComponentEnabled = ref<boolean>(false);
 const previewForEntity = ref<string | undefined>(undefined);
 const mediafileViewerContext: any = inject("mediafileViewerContext");
+const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { queryVariables } = useLibraryBar();
 const { getThumbnail } = useThumbnailHelper();
@@ -294,6 +295,7 @@ const getPreviewItemsForEntity = async () => {
     })
     .then((result) => {
       previewComponent.value = result.data.PreviewComponents?.previewComponent;
+      if (previewComponent.value?.openByDefault) togglePreviewComponent(props.entities[0].id);
     });
 };
 

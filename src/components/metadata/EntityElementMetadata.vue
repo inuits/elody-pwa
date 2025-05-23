@@ -44,7 +44,14 @@
         v-else-if="stringIsHtml(readableValue)"
         v-html="readableValue"
       ></p>
-      <p v-else class="whitespace-pre-wrap" data-cy="metadata-value">
+      <p
+        v-else
+        :class="[
+          { 'whitespace-pre-wrap': !isPreviewElement },
+          { 'truncate': isPreviewElement }
+        ]"
+        data-cy="metadata-value"
+      >
         {{ readableValue !== "" ? (readableValue as string) : "-" }}
       </p>
     </div>
@@ -60,7 +67,7 @@ import {
   stringIsHtml,
   stringIsUrl,
 } from "@/helpers";
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import { useI18n } from "vue-i18n";
 import { Unicons } from "@/types";
 import CustomIcon from "@/components/CustomIcon.vue";
@@ -82,6 +89,7 @@ const props = withDefaults(
 );
 
 const { t } = useI18n();
+const isPreviewElement: boolean = inject("IsPreviewElement", false);
 
 const isCoordinates = computed(() => {
   return (

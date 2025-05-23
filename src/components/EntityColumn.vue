@@ -19,6 +19,7 @@
         :identifiers="identifiers"
         :id="id"
         :entity-type="entityType"
+        :preview-label="previewLabel"
       >
       </entity-element>
     </div>
@@ -36,12 +37,18 @@ import { convertSizeToTailwind } from "@/helpers";
 import { useColumnResizeHelper } from "../composables/useResizeHelper";
 import { useEditMode } from "@/composables/useEdit";
 
-const props = defineProps<{
-  columnList: ColumnList;
-  identifiers: string[];
-  id: string;
-  entityType: Entitytyping;
-}>();
+const props = withDefaults(
+  defineProps<{
+    columnList: ColumnList;
+    identifiers: string[];
+    id: string;
+    entityType: Entitytyping;
+    previewLabel?: string;
+  }>(),
+  {
+    previewLabel: undefined,
+  },
+);
 
 const { setInitialColumns, currentColumnConfig } = useColumnResizeHelper();
 const useEditHelper = useEditMode(props.id);

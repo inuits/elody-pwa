@@ -12,6 +12,7 @@
       :label="label"
       :isCollapsed="isCollapsed"
       :base-library-mode="baseLibraryMode"
+      :preview-label="previewLabel"
     >
       <template v-slot:content>
         <div
@@ -182,6 +183,7 @@ const props = withDefaults(
     can?: string[];
     filtersNeedContext?: EntitySubelement[];
     id: string;
+    previewLabel?: string;
   }>(),
   {
     enableAdvancedFilters: false,
@@ -192,6 +194,7 @@ const props = withDefaults(
     entityListElements: undefined,
     allowedActionsOnRelations: () => [],
     filtersNeedContext: undefined,
+    previewLabel: undefined,
   },
 );
 

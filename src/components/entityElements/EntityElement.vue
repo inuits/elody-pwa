@@ -44,6 +44,7 @@
         :entity-type="entityType"
         :can="element.can"
         :id="id"
+        :preview-label="previewLabel"
       />
       <entity-element-media
         v-if="element.__typename === 'MediaFileElement'"
@@ -140,12 +141,18 @@ export type Elements =
   | WysiwygElement
   | HierarchyListElement;
 
-const props = defineProps<{
-  elements: EntityViewElements;
-  identifiers: string[];
-  id: string;
-  entityType: Entitytyping;
-}>();
+const props = withDefaults(
+  defineProps<{
+    elements: EntityViewElements;
+    identifiers: string[];
+    id: string;
+    entityType: Entitytyping;
+    previewLabel?: string;
+  }>(),
+  {
+    previewLabel: undefined,
+  },
+);
 
 const formId = computed(() => props.id);
 const { isEdit } = useEditMode();
