@@ -1,15 +1,41 @@
 <template>
-  <div>
+  <div
+    class="flex items-center justify-between"
+    :class="[{ 'my-2': previewComponent.type !== PreviewTypes.ColumnList }]"
+  >
+    <base-tooltip
+      v-if="previewComponent.type !== PreviewTypes.ColumnList"
+      position="top-right"
+      :tooltip-offset="8"
+      @click="emit('closePreviewComponent')"
+    >
+      <template #activator="{ on }">
+        <div class="flex items-center" v-on="on">
+          <unicon
+            class="cursor-pointer mr-4 ml-2 flex justify-center items-center"
+            :name="Unicons.Cross.name"
+            height="24"
+          />
+        </div>
+      </template>
+      <template #default>
+        <span class="text-sm text-text-placeholder">
+          <div>
+            {{ t("preview-component.close") }}
+          </div>
+        </span>
+      </template>
+    </base-tooltip>
     <h1
       data-cy="entity-element-window-title"
-      class="subtitle text-text-body p-2 text-center"
+      class="subtitle text-text-body p-2 text-center absolute left-1/2 transform -translate-x-1/2"
       v-if="previewComponent.title"
     >
       {{ t(previewComponent.title) }}
     </h1>
     <h1
       data-cy="entity-element-window-title"
-      class="subtitle text-text-body p-2 text-center"
+      class="subtitle text-text-body p-2 text-center absolute left-1/2 transform -translate-x-1/2"
       v-if="previewComponent.type === PreviewTypes.MediaViewer"
     >
       {{ getTitleFromEntity }}
@@ -23,6 +49,7 @@
     :identifiers="[entityId]"
     :entity-type="entityType"
     :preview-label="getTitleFromEntity"
+    @close-preview-component="emit('closePreviewComponent')"
   />
   <ViewModesMap
     v-else-if="previewComponent.type === PreviewTypes.Map"
@@ -55,6 +82,8 @@ import { apolloClient } from "@/main";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import EntityColumn from "@/components/EntityColumn.vue";
 import { getTitleOrNameFromEntity } from "@/helpers";
+import { Unicons } from "@/types";
+import BaseTooltip from "@/components/base/BaseTooltip.vue";
 
 const { t } = useI18n();
 const { loadDocument } = useImport();
@@ -68,9 +97,9 @@ const props = withDefaults(
     configPerViewMode: object;
     entityId: string | undefined;
   }>(),
-  {
-  },
+  {},
 );
+const emit = defineEmits(["closePreviewComponent"]);
 
 provide("IsPreviewElement", true);
 const previewElement = ref<ColumnList | undefined>(undefined);
@@ -84,7 +113,7 @@ const fetchPreviewQuery = async () => {
     .then((result) => {
       previewElement.value = result.data.PreviewElement;
     });
-}
+};
 
 const getEntitiesOrEntity = (): Entity[] | [] => {
   if (
@@ -110,17 +139,19 @@ const getTitleFromEntity = computed(() => {
 });
 
 onMounted(async () => {
-  if (props.previewComponent.previewQuery)
-    await fetchPreviewQuery();
+  if (props.previewComponent.previewQuery) await fetchPreviewQuery();
 });
 
 watch(
   () => previewElement.value,
   () => {
     if (previewElement.value)
-      addMediafileSelectionStateContext(previewElement.value.column.elements.entityListElement.customQueryFilters);
+      addMediafileSelectionStateContext(
+        previewElement.value.column.elements.entityListElement
+          .customQueryFilters,
+      );
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 

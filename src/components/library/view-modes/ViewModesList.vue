@@ -123,6 +123,7 @@
         :entities="entities"
         :config-per-view-mode="configPerViewMode"
         :entity-id="previewForEntity"
+        @close-preview-component="closePreviewComponent"
       />
     </div>
   </div>
@@ -311,6 +312,11 @@ const togglePreviewComponent = (entityId: string) => {
     );
   previewForEntity.value = entityId;
 };
+
+const closePreviewComponent = () => {
+  previewComponentEnabled.value = false;
+  previewForEntity.value = undefined;
+}
 
 const isPreviewComponentEnabledForListItem = (entityId: string): boolean => {
   if (!previewComponentEnabled.value) return false;

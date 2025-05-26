@@ -45,6 +45,7 @@
         :can="element.can"
         :id="id"
         :preview-label="previewLabel"
+        @close-preview-component="emit('closePreviewComponent')"
       />
       <entity-element-media
         v-if="element.__typename === 'MediaFileElement'"
@@ -128,6 +129,7 @@ import type {
 import EntityElementMarkdownViewer from "@/components/entityElements/EntityElementMarkdownViewer.vue";
 import { getObjectsBasedOnTypename } from "@/helpers";
 import { useStateManagement } from "@/composables/useStateManagement";
+import EntityColumn from "@/components/EntityColumn.vue";
 
 export type Elements =
   | EntityListElement
@@ -153,6 +155,7 @@ const props = withDefaults(
     previewLabel: undefined,
   },
 );
+const emit = defineEmits(["closePreviewComponent"]);
 
 const formId = computed(() => props.id);
 const { isEdit } = useEditMode();

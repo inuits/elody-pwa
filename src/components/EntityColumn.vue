@@ -20,6 +20,7 @@
         :id="id"
         :entity-type="entityType"
         :preview-label="previewLabel"
+        @close-preview-component="emit('closePreviewComponent')"
       >
       </entity-element>
     </div>
@@ -49,6 +50,7 @@ const props = withDefaults(
     previewLabel: undefined,
   },
 );
+const emit = defineEmits(["closePreviewComponent"]);
 
 const { setInitialColumns, currentColumnConfig } = useColumnResizeHelper();
 const useEditHelper = useEditMode(props.id);

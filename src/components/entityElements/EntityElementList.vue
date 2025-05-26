@@ -13,6 +13,7 @@
       :isCollapsed="isCollapsed"
       :base-library-mode="baseLibraryMode"
       :preview-label="previewLabel"
+      @close-preview-component="emit('closePreviewComponent')"
     >
       <template v-slot:content>
         <div
@@ -197,6 +198,7 @@ const props = withDefaults(
     previewLabel: undefined,
   },
 );
+const emit = defineEmits(["closePreviewComponent"]);
 
 provide("mediafileViewerContext", props.customQueryFilters);
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
