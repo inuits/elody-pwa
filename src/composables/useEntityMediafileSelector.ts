@@ -118,7 +118,7 @@ export const useEntityMediafileSelector = () => {
     mediafileSelectionState.value[context].selectedMediafile =
       mediafileSelectionState.value[context].mediafiles[index];
 
-    return (mediafileSelectionState.value[context].mediafiles[index]?.intialValues as any)?.["id" as MediaFileMetadataKeys];
+    return (mediafileSelectionState.value[context].mediafiles[index] as any)?.["id" as MediaFileMetadataKeys];
   };
 
   return {

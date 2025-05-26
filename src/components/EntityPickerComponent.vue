@@ -51,6 +51,7 @@ import {
   BulkOperationsContextEnum,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
+import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import { inject, onMounted, provide, ref, unref } from "vue";
 import { useMutation } from "@vue/apollo-composable";
@@ -64,6 +65,7 @@ import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useEditMode } from "@/composables/useEdit";
 import { getChildrenOfHomeRoutes } from "@/helpers";
 import { useSubmitForm } from "vee-validate";
+const { addMediafileSelectionStateContext } = useEntityMediafileSelector();
 
 const emit = defineEmits<{
   (event: "entitiesUpdated", numberOfEntities: number): void;
@@ -96,7 +98,8 @@ const props = withDefaults(
   },
 );
 
-provide("mediafileViewerContext", props.customFiltersQuery);
+provide("mediafileViewerContext", props.customFiltersQuery ? props.customFiltersQuery : 'EntityPickerComponent');
+addMediafileSelectionStateContext(props.customFiltersQuery ? props.customFiltersQuery : 'EntityPickerComponent');
 
 const { t } = useI18n();
 const { loadDocument, getDocument } = useCustomQuery();

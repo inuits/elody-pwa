@@ -10,8 +10,6 @@
 </template>
 
 <script setup lang="ts">
-
-
 import {
   type Entity,
 } from "@/generated-types/queries";
