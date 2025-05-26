@@ -114,8 +114,11 @@ const buildFilterForSearch =
       return filter;
     }
 
+    const shouldReplaceFilterValue = filter.value === "*";
     const updatedFilter = { ...filter };
-    updatedFilter.value = searchValue || "*";
+    updatedFilter.value = shouldReplaceFilterValue
+      ? searchValue || "*"
+      : filter.value;
     updatedFilter.match_exact = false;
 
     return updatedFilter;
