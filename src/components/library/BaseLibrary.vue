@@ -33,7 +33,8 @@
         },
         {
           'grid-rows-[1vh_1fr]':
-            baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder || baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
+            baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder ||
+            baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
         },
         {
           'grid-rows-[0vh_1fr]':
@@ -84,9 +85,13 @@
           'z-40 pl-[1%] right-0 pb-4',
           {
             'top-0 bg-neutral-lightest pt-4':
-              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary || baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
+              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+              baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
           },
-          { 'row-span-2': baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary },
+          {
+            'row-span-2':
+              baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
+          },
           { sticky: hasStickyBars },
         ]"
       >
@@ -101,7 +106,7 @@
             v-if="
               !predefinedEntities &&
               (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-              baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
+                baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
             "
             :route="route"
             :set-limit="setLimit"
@@ -165,7 +170,6 @@
         <div
           v-if="entities?.length !== 0 || relations?.length !== 0"
           data-cy="base-library-grid-container"
-          id="gridContainer"
           @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
         >
           <ViewModesList
@@ -614,7 +618,10 @@ const getDisplayPreferences = () => {
     displayGrid.value = displayPreferences.grid;
   }
 
-  if (displayGrid.value === false && (!displayPreview.value || isPreviewElement)) {
+  if (
+    displayGrid.value === false &&
+    (!displayPreview.value || isPreviewElement)
+  ) {
     displayList.value = true;
   }
 };

@@ -9,7 +9,10 @@
             {
               'flex items-center gap-2 p-1 mb-2': viewMode === 'list',
             },
-            { 'p-1 mb-2 flex flex-col': viewMode === 'grid' },
+            {
+              'p-1 mb-2 flex flex-col w-[300px] min-h-[350px]':
+                viewMode === 'grid',
+            },
             {
               'border-dashed border-2 !border-accent-normal':
                 isPreview || isMarkedAsToBeDeleted,
@@ -147,7 +150,7 @@
             :class="[
               'w-full',
               { 'flex items-center': viewMode === 'list' },
-              { '': viewMode === 'grid' },
+              { 'p-4': viewMode === 'grid' },
             ]"
           >
             <div
@@ -241,8 +244,8 @@
                   <div>
                     {{
                       previewComponentEnabled
-                        ? t('preview-component.close')
-                        : t('preview-component.open')
+                        ? t("preview-component.close")
+                        : t("preview-component.open")
                     }}
                   </div>
                 </span>
@@ -310,6 +313,7 @@ import BaseContextMenuActions from "./BaseContextMenuActions.vue";
 import { hoveredListItem } from "@/composables/useListItemHelper";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { useI18n } from "vue-i18n";
+import { vi } from "vitest";
 
 const props = withDefaults(
   defineProps<{

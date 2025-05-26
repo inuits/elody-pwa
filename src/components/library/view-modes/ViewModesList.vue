@@ -1,5 +1,6 @@
 <template>
   <div
+    :key="mode + '-' + previewComponentEnabled"
     :class="[
       { 'grid grid-cols-[25%_75%] gap-x-2 mr-2': previewComponentEnabled },
     ]"
@@ -7,7 +8,10 @@
     <div
       data-cy="view-modes-list"
       :class="[
-        { 'grid grid_cols gap-2 justify-items-center': mode === 'grid' },
+        {
+          'grid grid-cols-[repeat(auto-fit,_minmax(300px,_1fr))] gap-2 justify-items-center max-w-full':
+            mode === 'grid',
+        },
       ]"
     >
       <div
@@ -67,7 +71,7 @@
               entity.teaserMetadata,
               entity.intialValues,
               previewComponentEnabled,
-              isPreviewElement
+              isPreviewElement,
             ) as Metadata[]
           "
           :intialValues="entity.intialValues"
@@ -269,20 +273,6 @@ EventBus.on("orderList_changed", (orderItems: OrderItem[]) => {
   }
 });
 
-const calculateGridColumns = () => {
-  const gridContainerWidth =
-    document.getElementById("gridContainer")?.offsetWidth;
-  const gridItemWidth = 330;
-  let colAmount = 0;
-
-  if (gridContainerWidth) {
-    colAmount = Math.floor(gridContainerWidth / gridItemWidth);
-    if (props.parentEntityIdentifiers.length > 0) --colAmount;
-  }
-
-  setCssVariable("--grid-cols", colAmount.toString());
-};
-
 const getPreviewItemsForEntity = async () => {
   previewComponent.value = undefined;
   previewComponentEnabled.value = false;
@@ -296,7 +286,8 @@ const getPreviewItemsForEntity = async () => {
     })
     .then((result) => {
       previewComponent.value = result.data.PreviewComponents?.previewComponent;
-      if (previewComponent.value?.openByDefault) togglePreviewComponent(props.entities[0].id);
+      if (previewComponent.value?.openByDefault)
+        togglePreviewComponent(props.entities[0].id);
     });
 };
 
@@ -344,14 +335,6 @@ const configurePreviewComponentWithNewEntities = (entities: Entity[]): void => {
 };
 
 watch(
-  () => props.expandFilters,
-  async () => {
-    await nextTick();
-    calculateGridColumns();
-  },
-);
-
-watch(
   () => props.entityType,
   () => {
     if (
@@ -370,27 +353,6 @@ watch(
     configurePreviewComponentWithNewEntities(props.entities);
   },
 );
-watch(
-  () => previewComponentEnabled.value,
-  () => {
-    calculateGridColumns();
-  },
-  { immediate: true },
-);
-
-onMounted(() => {
-  window.addEventListener("resize", calculateGridColumns);
-  window.addEventListener("popstate", calculateGridColumns);
-  calculateGridColumns();
-});
-onUnmounted(() => {
-  window.removeEventListener("resize", calculateGridColumns);
-  window.removeEventListener("popstate", calculateGridColumns);
-});
 </script>
 
-<style scoped>
-.grid_cols {
-  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
-}
-</style>
+<style scoped></style>
