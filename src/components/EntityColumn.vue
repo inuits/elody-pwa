@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      { 'w-full flex mt-5 overflow-y-scroll': !isPreviewElement },
+      { 'w-full flex mt-5 overflow-y-auto': !isPreviewElement },
       { 'mb-20': useEditHelper.isEdit && !isPreviewElement },
     ]"
   >

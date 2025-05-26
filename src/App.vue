@@ -13,7 +13,7 @@
         :class="[`pl-24 h-screen flex flex-col`]"
       >
         <the-header />
-        <div :class="['flex-grow', { 'h-full': isSingle }]">
+        <div :class="['flex-grow', { 'h-0': isSingle }]">
           <router-view />
         </div>
       </div>
