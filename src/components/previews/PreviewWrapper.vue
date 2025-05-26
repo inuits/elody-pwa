@@ -59,8 +59,10 @@
   />
   <MediaViewerPreview
     v-else-if="previewComponent.type === PreviewTypes.MediaViewer"
-    :mediafiles="getEntitiesOrEntity()"
+    :current-mediafile="getEntitiesOrEntity()[0]"
+    :mediafiles="entities"
     :entity-id="entityId"
+    @toggle-preview-component="(id: string) => emit('togglePreviewComponent', id)"
   />
 </template>
 
@@ -99,7 +101,10 @@ const props = withDefaults(
   }>(),
   {},
 );
-const emit = defineEmits(["closePreviewComponent"]);
+const emit = defineEmits<{
+    (event: "closePreviewComponent"): void;
+    (event: "togglePreviewComponent", entityId: string): void;
+}>();
 
 provide("IsPreviewElement", true);
 const previewElement = ref<ColumnList | undefined>(undefined);

@@ -8,6 +8,7 @@
       v-model:home="homeDiv"
       :originalFilename="originalFilename"
       :mediafileId="mediafileId"
+      @toggle-preview-component:entity-id="(id) => togglePreviewComponent(id)"
     />
     <div ref="OpenSeadragonDiv" class="w-full h-full z-0" />
   </div>
@@ -29,7 +30,8 @@ export default defineComponent({
     originalFilename: { type: String },
     mediafileId: { type: String },
   },
-  setup: (props) => {
+  emits: ["togglePreviewComponent:entityId"],
+  setup: (props, { emit }) => {
     const OpenSeadragonDiv = ref<HTMLDivElement | undefined>(undefined);
     const zoomInDiv = ref<string | undefined>(undefined);
     const zoomOutDiv = ref<string | undefined>(undefined);
@@ -82,6 +84,10 @@ export default defineComponent({
       }
     });
 
+    const togglePreviewComponent = (id: string): void => {
+      emit("togglePreviewComponent:entityId", id);
+    }
+
     return {
       OpenSeadragonDiv,
       fullPageButtonDiv,
@@ -89,6 +95,7 @@ export default defineComponent({
       zoomOutDiv,
       homeDiv,
       loading,
+      togglePreviewComponent,
     };
   },
 });

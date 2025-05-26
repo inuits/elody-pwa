@@ -128,6 +128,9 @@
         :config-per-view-mode="configPerViewMode"
         :entity-id="previewForEntity"
         @close-preview-component="closePreviewComponent"
+        @toggle-preview-component="
+          (id) => togglePreviewComponent(id)
+        "
       />
     </div>
   </div>

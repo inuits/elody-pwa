@@ -66,9 +66,9 @@ export const useEntityMediafileSelector = () => {
     mediafileSelectionState.value[context].selectedMediafile = mediafile;
   };
 
-  const selectPreviousMediafile = (context: string) => {
+  const selectPreviousMediafile = (context: string): string | undefined => {
     const currentIndex = getCurrentlySelectedMediafileIndex(context);
-    if (currentIndex === undefined) return;
+    if (currentIndex === undefined) return undefined;
 
     let previousIndex = 0;
     if (currentIndex > 0) previousIndex = currentIndex - 1;
@@ -76,12 +76,12 @@ export const useEntityMediafileSelector = () => {
       previousIndex =
         mediafileSelectionState.value[context].mediafiles.length - 1;
 
-    setSelectedMediafileByIndex(context, previousIndex);
+    return setSelectedMediafileByIndex(context, previousIndex);
   };
 
-  const selectNextMediafile = (context: string) => {
+  const selectNextMediafile = (context: string): string | undefined => {
     const currentIndex = getCurrentlySelectedMediafileIndex(context);
-    if (currentIndex === undefined) return;
+    if (currentIndex === undefined) return undefined;
 
     let nextIndex = 0;
     if (
@@ -91,7 +91,7 @@ export const useEntityMediafileSelector = () => {
       nextIndex = currentIndex + 1;
     else nextIndex = 0;
 
-    setSelectedMediafileByIndex(context, nextIndex);
+    return setSelectedMediafileByIndex(context, nextIndex);
   };
 
   const getCurrentlySelectedMediafileIndex = (
@@ -109,14 +109,16 @@ export const useEntityMediafileSelector = () => {
     return index;
   };
 
-  const setSelectedMediafileByIndex = (context: string, index: number) => {
+  const setSelectedMediafileByIndex = (context: string, index: number): string | undefined => {
     if (
       index >= mediafileSelectionState.value[context].mediafiles.length ||
       index < 0
     )
-      return;
+      return undefined;
     mediafileSelectionState.value[context].selectedMediafile =
       mediafileSelectionState.value[context].mediafiles[index];
+
+    return (mediafileSelectionState.value[context].mediafiles[index]?.intialValues as any)?.["id" as MediaFileMetadataKeys];
   };
 
   return {

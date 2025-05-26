@@ -32,14 +32,20 @@
       </a>
     </div>
     <div>
-      <a @click="selectPreviousMediafile(mediafileViewerContext)">
+      <a @click="() => {
+        const id = selectPreviousMediafile(mediafileViewerContext);
+        if (id) togglePreviewComponent(id);
+      }">
         <unicon
           :name="Unicons.ArrowCircleLeft.name"
           height="20"
           class="text-neutral-700 cursor-pointer"
         />
       </a>
-      <a @click="selectNextMediafile(mediafileViewerContext)">
+      <a @click="() => {
+        const id = selectNextMediafile(mediafileViewerContext);
+        if (id) togglePreviewComponent(id);
+      }">
         <unicon
           :name="Unicons.ArrowCircleRight.name"
           height="20"
@@ -88,7 +94,7 @@ export default defineComponent({
       default: "",
     },
   },
-  emits: ["update:zoomIn", "update:zoomOut", "update:fullPage", "update:home"],
+  emits: ["update:zoomIn", "update:zoomOut", "update:fullPage", "update:home", "togglePreviewComponent:entityId"],
   setup: (_props, { emit }) => {
     const zoomInRef = ref<HTMLDivElement | undefined>(undefined);
     const zoomOutRef = ref<HTMLDivElement | undefined>(undefined);
@@ -128,6 +134,10 @@ export default defineComponent({
       URL.revokeObjectURL(url);
     };
 
+    const togglePreviewComponent = (id: string): void => {
+      emit("togglePreviewComponent:entityId", id);
+    }
+
     return {
       Unicons,
       zoomInRef,
@@ -138,6 +148,7 @@ export default defineComponent({
       downloadImage,
       selectNextMediafile,
       selectPreviousMediafile,
+      togglePreviewComponent,
     };
   },
 });

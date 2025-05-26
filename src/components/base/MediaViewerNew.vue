@@ -23,6 +23,7 @@
             KeyValueSource.Root,
           )
         "
+        @toggle-preview-component:entity-id="(id: string) => emit('togglePreviewComponent', id)"
       />
       <VideoPlayer
         v-if="viewerType === ElodyViewers.Video"
@@ -55,8 +56,9 @@
 <script lang="ts" setup>
 import {
   ElodyViewers,
+  type Entity,
   KeyValueSource,
-  type MediaFileEntity,
+  type MediaFileEntity
 } from "@/generated-types/queries";
 import AudioPlayer from "@/components/base/AudioPlayer.vue";
 import IIIFViewer from "@/components/IIIFViewer.vue";
@@ -70,8 +72,12 @@ const PDFViewer = defineAsyncComponent(
 );
 
 const props = defineProps<{
+  currentMediafile?: Entity | undefined;
   mediafiles?: MediaFileEntity[];
   loading?: boolean;
+}>();
+const emit = defineEmits<{
+  (event: "togglePreviewComponent", entityId: string): void;
 }>();
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
@@ -112,8 +118,12 @@ watch(
     if (props.loading || !mediafiles.value) return;
     mediafileSelectionState.value[mediafileViewerContext].mediafiles =
       mediafiles?.value;
-    mediafileSelectionState.value[mediafileViewerContext].selectedMediafile =
-      mediafiles?.value?.[0];
+    if (props.currentMediafile)
+      mediafileSelectionState.value[mediafileViewerContext].selectedMediafile =
+        props.currentMediafile;
+    else
+      mediafileSelectionState.value[mediafileViewerContext].selectedMediafile =
+        mediafiles?.value?.[0];
   },
   { immediate: true },
 );
