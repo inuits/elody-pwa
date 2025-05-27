@@ -133,7 +133,6 @@ onMounted(async () => {
 });
 onUnmounted(() => {
   document.removeEventListener("discardEdit", () => callRefetchFn);
-  useEditMode(props.id, "delete");
 });
 
 watch(useEditHelper, () => {

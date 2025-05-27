@@ -63,6 +63,7 @@ import {
   computed,
   onBeforeMount,
   provide,
+  onUnmounted,
 } from "vue";
 import { auth } from "@/main";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -246,26 +247,24 @@ watch(
       mappings.then((result) => {
         permissionToEdit.value = result.get(Permission.Canupdate);
         permissionToDelete.value = result.get(Permission.Candelete);
-      });
-    }
-    watch(
-      () => permissionToDelete.value || permissionToEdit.value,
-      () => {
+
         if (props.viewOnly) {
           useEditHelper.hideEditButton();
           return;
         }
+
         if (auth.isAuthenticated.value) {
-          if (permissionToEdit.value && permissionToDelete.value)
+          if (permissionToEdit.value && permissionToDelete.value) {
             useEditHelper.setEditMode("edit-delete");
-          else if (permissionToEdit.value && !permissionToDelete.value)
+          } else if (permissionToEdit.value && !permissionToDelete.value) {
             useEditHelper.setEditMode("edit");
-          else if (permissionToDelete.value && !permissionToEdit.value) {
+          } else if (permissionToDelete.value && !permissionToEdit.value) {
             useEditHelper.setEditMode("delete");
           } else useEditHelper.hideEditButton();
         } else useEditHelper.hideEditButton();
-      },
-    );
+      });
+    }
+
     useEditHelper.setRefetchFn(refetch);
     loading.value = false;
   },
@@ -298,4 +297,6 @@ watch(
     refetch(queryVariables);
   },
 );
+
+onUnmounted(() => useEditMode(id.value, "delete"));
 </script>
