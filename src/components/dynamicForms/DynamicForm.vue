@@ -614,8 +614,8 @@ const updateMetdataActionFunction = async (field: FormAction) => {
     );
     closeAndDeleteForm();
     displaySuccessNotification(
-      t("notifications.success.updataMetdataCsv.title"),
-      t("notifications.success.updataMetdataCsv.description"),
+      t("notifications.success.updateMetadataCsv.title"),
+      t("notifications.success.updateMetadataCsv.description"),
     );
   } catch (error: ApolloError) {
     const errorObject = await getMessageAndCodeFromApolloError(error);

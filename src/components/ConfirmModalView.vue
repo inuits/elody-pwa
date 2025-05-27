@@ -3,11 +3,21 @@
     v-if="confirmModalConfiguration?.translationKey"
     class="h-full flex flex-col justify-between p-4"
   >
-    <div class="title">
-      {{ t(`confirm.${confirmModalConfiguration?.translationKey}.title`, [confirmModalConfiguration?.titleLabelVariable]) }}
-    </div>
-    <div class="pt-4">
-      {{ t(`confirm.${confirmModalConfiguration?.translationKey}.message`, [confirmModalConfiguration?.messageLabelVariable]) }}
+    <div v-if="!onlyButtons">
+      <div class="title">
+        {{
+          t(`confirm.${confirmModalConfiguration?.translationKey}.title`, [
+            confirmModalConfiguration?.titleLabelVariable,
+          ])
+        }}
+      </div>
+      <div class="pt-4">
+        {{
+          t(`confirm.${confirmModalConfiguration?.translationKey}.message`, [
+            confirmModalConfiguration?.messageLabelVariable,
+          ])
+        }}
+      </div>
     </div>
     <div class="flex justify-between pt-8">
       <div
@@ -19,13 +29,15 @@
           <BaseButtonNew
             v-if="confirmModalConfiguration?.confirmButton.buttonCallback"
             :label="
-              t(`confirm.${confirmModalConfiguration.translationKey}.confirm`, [confirmModalConfiguration?.confirmLabelVariable])
+              t(`confirm.${confirmModalConfiguration.translationKey}.confirm`, [
+                confirmModalConfiguration?.confirmLabelVariable,
+              ])
             "
             :button-style="buttonStyles.confirm"
             :button-size="buttonSizes.confirm"
             @click="
               performConfirmFunction(
-                confirmModalConfiguration.confirmButton.buttonCallback
+                confirmModalConfiguration.confirmButton.buttonCallback,
               )
             "
           />
@@ -35,14 +47,14 @@
             "
             :label="
               t(
-                `confirm.${confirmModalConfiguration.translationKey}.secondary-confirm`
+                `confirm.${confirmModalConfiguration.translationKey}.secondary-confirm`,
               )
             "
             :button-style="buttonStyles.secondaryConfirm"
             :button-size="buttonSizes.secondaryConfirm"
             @click="
               performConfirmFunction(
-                confirmModalConfiguration.secondaryConfirmButton.buttonCallback
+                confirmModalConfiguration.secondaryConfirmButton.buttonCallback,
               )
             "
           />
@@ -74,6 +86,13 @@ import { computed } from "vue";
 const { t } = useI18n();
 const { confirmModalConfiguration } = useConfirmModal();
 const { closeModal } = useBaseModal();
+
+const props = withDefaults(
+  defineProps<{
+    onlyButtons: boolean;
+  }>(),
+  { onlyButtons: false },
+);
 
 const buttonStyles = computed(() => {
   return {

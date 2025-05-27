@@ -40,9 +40,9 @@ const entityId = computed<string>(
   () => entityFormData?.id || route.params["id"],
 );
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
-const { displaySuccessNotification } = useBaseNotification;
+const { displaySuccessNotification } = useBaseNotification();
 const { previousPageInfo } = usePageInfo();
-const useEditHelper = useEditMode(entityId.value);
+const useEditHelper = computed(() => useEditMode(entityId.value));
 const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { closeModal, openModal, deleteQueryOptions } = useBaseModal();
 const { initializeGeneralProperties, initializePropertiesForDeletion } =
@@ -53,8 +53,8 @@ const { getForm } = useFormHelper();
 
 const deleteAvailable = computed<boolean>(() => {
   return (
-    useEditHelper.editMode === "edit-delete" ||
-    useEditHelper.editMode === "delete"
+    useEditHelper.value.editMode === "edit-delete" ||
+    useEditHelper.value.editMode === "delete"
   );
 });
 
@@ -77,7 +77,7 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
   if (isDeleted) {
     await getTenants();
     closeModal(TypeModals.Confirm);
-    useEditHelper.disableEditMode();
+    useEditHelper.value.disableEditMode();
     router.push({ name: context ? context : "Home" });
     displaySuccessNotification(
       t("notifications.success.entityDeleted.title"),

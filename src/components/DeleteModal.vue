@@ -10,7 +10,7 @@
       :class="[{ 'pt-5': numberOfBlockingQueryEntities <= 0 }]"
     >
       <div class="w-full px-8">
-        <h1 class="title flex justify-center px-">
+        <h1 class="title text-pretty flex justify-center pb-12">
           {{
             t("navigation.delete-entity-window", [
               `${translatedDeleteEntityLabel} "${parentEntityTitle}"`,
@@ -60,7 +60,7 @@
           v-if="deleteQueryOptions?.customQueryDeleteRelations"
           v-show="numberOfRelatedEntities > 0"
         >
-          <div class="title pl-4">
+          <div class="text-lg pb-2">
             {{
               t("actions.labels.delete-relation-entities", [
                 translatedDeleteRelationsLabel,
@@ -84,7 +84,7 @@
             base-library-height="h-fit"
           />
         </div>
-        <ConfirmModalView class="h-max"></ConfirmModalView>
+        <ConfirmModalView :only-buttons="true" class="h-max"></ConfirmModalView>
       </div>
     </div>
   </BaseModal>
@@ -156,8 +156,8 @@ const deleteSelectedItems = async () => {
 
     if (isDeleted) {
       displaySuccessNotification(
-        t("notifications.success.itemsDeleted.title"),
-        t("notifications.success.itemsDeleted.description"),
+        t("notifications.success.items-deleted.title"),
+        t("notifications.success.items-deleted.description"),
       );
     }
   } catch (error) {
@@ -176,8 +176,8 @@ const cleanupAfterDeletion = async () => {
 
   createNotificationOverwrite(
     NotificationType.default,
-    t("notifications.success.entityDeleted.title"),
-    t("notifications.success.entityDeleted.description"),
+    t("notifications.success.entity-deleted.title"),
+    t("notifications.success.entity-deleted.description"),
   );
 };
 
