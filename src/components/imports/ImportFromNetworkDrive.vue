@@ -41,7 +41,7 @@ import { useBaseNotification } from "@/composables/useBaseNotification";
 import FolderTreeLine from "@/components/FolderTreeLine.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
-import { goToEntityTypeRoute } from "@/helpers";
+import { goToEntityPageById, goToEntityTypeRoute } from "@/helpers";
 import { provide, ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useMutation } from "@vue/apollo-composable";
@@ -119,10 +119,7 @@ const doImport = async (folder: string) => {
         props.closeAndDeleteForm();
         break;
       case BaseFieldType.BaseMagazineWithCsvImportField:
-        await mutateAsync(queries.value.StartUploadMagazinesWithCsvDocument, {
-          folder: folder,
-        });
-        props.closeAndDeleteForm();
+        await doCsvImport(folder);
         break;
       case BaseFieldType.BaseMagazineWithMetsImportField:
         await doMetsImport(folder);
@@ -142,24 +139,45 @@ const doImport = async (folder: string) => {
   }
 };
 
+const doCsvImport = async (folder) => {
+  const result = await mutateAsync(queries.value.StartUploadMagazinesWithCsvDocument, {
+    folder: folder,
+  });
+  const jobIdentifier = result?.data?.StartUploadMagazinesWithCsv;
+  if (jobIdentifier) {
+    goToEntityPageById(
+      jobIdentifier,
+      { type: "job", __typename: "job" },
+      "SingleEntity",
+      router,
+    );
+  }
+  props.closeAndDeleteForm();
+}
+
 const doMetsImport = async (folder) => {
   const form = getForm(props.formId);
   await form?.validate();
   if (!form?.meta.valid) {
     emit("setShowErrors", true);
-    return;
+    throw new Error(`Error in form`);
   }
   useBaseModal().changeCloseConfirmation(TypeModals.DynamicForm, false);
 
-  await mutateAsync(queries.value.StartUploadMagazinesWithMetsDocument, {
+  const result = await mutateAsync(queries.value.StartUploadMagazinesWithMetsDocument, {
     folder: folder,
     externalSystem: form?.values.intialValues["external_system"],
     externalId: form?.values.intialValues["external_id"],
   });
-  displaySuccessNotification(
-    t("notifications.success.import.title"),
-    t(`notifications.success.import.description`),
-  );
+  const jobIdentifier = result?.data?.StartUploadMagazinesWithMets;
+  if (jobIdentifier) {
+    goToEntityPageById(
+      jobIdentifier,
+      { type: "job", __typename: "job" },
+      "SingleEntity",
+      router,
+    );
+  }
   props.closeAndDeleteForm();
 };
 
