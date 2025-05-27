@@ -75,6 +75,7 @@ export const useEntityMediafileSelector = () => {
     else
       previousIndex =
         mediafileSelectionState.value[context].mediafiles.length - 1;
+    if (currentIndex === previousIndex) return undefined;
 
     return setSelectedMediafileByIndex(context, previousIndex);
   };
@@ -90,6 +91,7 @@ export const useEntityMediafileSelector = () => {
     )
       nextIndex = currentIndex + 1;
     else nextIndex = 0;
+    if (currentIndex === nextIndex) return undefined;
 
     return setSelectedMediafileByIndex(context, nextIndex);
   };
