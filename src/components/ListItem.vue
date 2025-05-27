@@ -223,7 +223,7 @@
           >
             <base-tooltip position="top-right" :tooltip-offset="8">
               <template #activator="{ on }">
-                <div v-on="on">
+                <div v-on="on" class="flex">
                   <unicon
                     v-if="previewComponentIconVisible"
                     :name="

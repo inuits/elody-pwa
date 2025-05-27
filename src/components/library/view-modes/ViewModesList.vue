@@ -334,7 +334,7 @@ const configurePreviewComponentWithNewEntities = (entities: Entity[]): void => {
     previewComponent.value?.listItemsCoverage ===
       ListItemCoverageTypes.OneListItem
   )
-    previewForEntity.value = entities[0].id;
+    previewForEntity.value = entities[0]?.id;
 };
 
 watch(
@@ -353,7 +353,8 @@ watch(
 watch(
   () => props.entities,
   () => {
-    configurePreviewComponentWithNewEntities(props.entities);
+    if (props.entities.length > 0)
+      configurePreviewComponentWithNewEntities(props.entities);
   },
 );
 </script>

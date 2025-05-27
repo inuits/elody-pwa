@@ -65,6 +65,7 @@ import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useEditMode } from "@/composables/useEdit";
 import { getChildrenOfHomeRoutes } from "@/helpers";
 import { useSubmitForm } from "vee-validate";
+import { useModalActions } from "@/composables/useModalActions";
 const { addMediafileSelectionStateContext } = useEntityMediafileSelector();
 
 const emit = defineEmits<{
@@ -98,8 +99,13 @@ const props = withDefaults(
   },
 );
 
-provide("mediafileViewerContext", props.customFiltersQuery ? props.customFiltersQuery : 'EntityPickerComponent');
-addMediafileSelectionStateContext(props.customFiltersQuery ? props.customFiltersQuery : 'EntityPickerComponent');
+provide(
+  "mediafileViewerContext",
+  props.customFiltersQuery ? props.customFiltersQuery : "EntityPickerComponent",
+);
+addMediafileSelectionStateContext(
+  props.customFiltersQuery ? props.customFiltersQuery : "EntityPickerComponent",
+);
 
 const { t } = useI18n();
 const { loadDocument, getDocument } = useCustomQuery();
@@ -111,6 +117,7 @@ const useEditHelper = useEditMode(getEntityId());
 const { getForm } = useFormHelper();
 const { parseFormValuesToFormInput } = useFormHelper();
 const { displaySuccessNotification } = useBaseNotification();
+const { getCallbackFunction } = useModalActions();
 
 const childRoutes = getChildrenOfHomeRoutes(config).map(
   (route: any) => route.meta,
@@ -137,7 +144,6 @@ const saveRelations = (selectedItems: InBulkProcessableItem[]) => {
   dequeueAllItemsForBulkProcessing(getContext());
   useEditHelper.setSubmitFunction(submit);
   useEditHelper.save(true);
-  closeModal(TypeModals.DynamicForm);
 };
 
 const getCustomQuery = async () => {
@@ -201,6 +207,9 @@ const submit = useSubmitForm<EntityValues>(async () => {
     t("notifications.success.entityUpdated.description"),
   );
   if (form) form.resetForm({ values: form.values });
+  const callback = getCallbackFunction();
+  if (callback) await callback();
+  closeModal(TypeModals.DynamicForm);
 });
 
 onMounted(async () => {

@@ -35,6 +35,7 @@ import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 
 const props = defineProps<{
   label: String;
@@ -53,6 +54,7 @@ const props = defineProps<{
 const { deleteRelations, submit } = useDeleteRelations();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { initializeConfirmModal } = useConfirmModal();
+const { displaySuccessNotification } = useBaseNotification();
 const { closeModal } = useBaseModal();
 const { t } = useI18n();
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
@@ -89,12 +91,13 @@ const deleteRelation = async () => {
     props.relation.relation.key,
   );
 
-  deleteRelations(
+  await deleteRelations(
     entityFormData.id,
     props.relation?.relation?.type,
     [props.relation.relation],
     props.bulkOperationsContext,
   );
+  await props.refetchEntities();
 };
 
 const deleteEntity = async () => {
@@ -118,8 +121,16 @@ const deleteEntity = async () => {
       deleteMediafiles: false,
     });
     await props.refetchEntities();
+    displaySuccessNotification(
+      "notifications.success.entityDeleted.title",
+      "notifications.success.entityDeleted.description",
+    );
   } catch (e) {
     console.log(e);
+    displaySuccessNotification(
+      "notifications.errors.entityDeleted.title",
+      "notifications.errors.entityDeleted.description",
+    );
   }
 };
 
