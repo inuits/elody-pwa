@@ -24,10 +24,10 @@ export const useErrorCodes = (): {
   const { displayErrorNotification } = useBaseNotification();
 
   const authHandlers: Record<string, Function> = {
-    "1001": (errorCodeType) => handleUnauthorized(errorCodeType),
-    "1003": (errorCodeType) => handleAccessDenied(errorCodeType),
-    "1004": (errorCodeType) => handleAccessDenied(errorCodeType),
-    "1008": (errorCodeType) => handleAccessDenied(errorCodeType),
+    "1001": (errorCodeType: ErrorCodeType) => handleUnauthorized(errorCodeType),
+    "1003": (errorCodeType: ErrorCodeType) => handleAccessDenied(errorCodeType),
+    "1004": (errorCodeType: ErrorCodeType) => handleAccessDenied(errorCodeType),
+    "1008": (errorCodeType: ErrorCodeType) => handleAccessDenied(errorCodeType),
   };
 
   const readHandlers: Record<string, Function> = {
