@@ -27,6 +27,7 @@ export const useErrorCodes = (): {
     "1001": (errorCodeType) => handleUnauthorized(errorCodeType),
     "1003": (errorCodeType) => handleAccessDenied(errorCodeType),
     "1004": (errorCodeType) => handleAccessDenied(errorCodeType),
+    "1008": (errorCodeType) => handleAccessDenied(errorCodeType),
   };
 
   const readHandlers: Record<string, Function> = {
