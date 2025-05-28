@@ -71,7 +71,6 @@
               entity.teaserMetadata,
               entity.intialValues,
               previewComponentEnabled,
-              isPreviewElement,
             ) as Metadata[]
           "
           :intialValues="entity.intialValues"
