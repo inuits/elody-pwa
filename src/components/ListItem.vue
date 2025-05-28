@@ -226,11 +226,7 @@
                 <div v-on="on" class="flex">
                   <unicon
                     v-if="previewComponentIconVisible"
-                    :name="
-                      previewComponentEnabled
-                        ? Unicons.EyeSlash.name
-                        : Unicons.Eye.name
-                    "
+                    :name="Unicons.Eye.name"
                     class="h-5.5 w-5.5 text-text-body mx-1"
                     :class="{
                       '!text-accent-accent fill-current':

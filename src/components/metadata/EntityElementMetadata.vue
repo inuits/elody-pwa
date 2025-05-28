@@ -46,10 +46,6 @@
       ></p>
       <p
         v-else
-        :class="[
-          { 'whitespace-pre-wrap': !isPreviewElement },
-          { 'truncate': isPreviewElement }
-        ]"
         data-cy="metadata-value"
       >
         {{ readableValue !== "" ? (readableValue as string) : "-" }}
@@ -89,7 +85,6 @@ const props = withDefaults(
 );
 
 const { t } = useI18n();
-const isPreviewElement: boolean = inject("IsPreviewElement", false);
 
 const isCoordinates = computed(() => {
   return (
