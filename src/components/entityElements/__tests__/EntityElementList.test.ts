@@ -1,6 +1,6 @@
 import { mount } from "@vue/test-utils";
 import { ref } from "vue";
-// import EntityElementList from "../EntityElementList.vue";
+import EntityElementList from "../EntityElementList.vue";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   BaseLibraryModes,
@@ -38,6 +38,12 @@ const mocks = vi.hoisted(() => {
   };
 });
 
+vi.mock("@/components/library/BaseLibrary.vue", () => ({
+  default: {
+    template: '<div data-test="base-library-stub"></div>',
+  },
+}));
+
 vi.mock("@/composables/usePermissions", () => ({
   usePermissions: () => ({
     can: vi.fn(),
@@ -72,76 +78,57 @@ const getBasicProps = () => ({
 });
 
 describe("EntityElementList", () => {
-  // afterEach(() => {
-  //   vi.clearAllMocks();
-  //   vi.resetAllMocks();
-  // });
-
-  it("renders the entity element list when advanced permissions are not provided", async () => {
-    expect(true).toBe(true);
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
-  // it("renders the entity element list when advanced permissions are not provided", async () => {
-  //   const wrapper = mount(EntityElementList, {
-  //     props: getBasicProps(),
-  //     global: {
-  //       stubs: {
-  //         BaseLibrary: true,
-  //       },
-  //     },
-  //   });
+  it("renders the entity element list when advanced permissions are not provided", async () => {
+    const wrapper = mount(EntityElementList, {
+      props: getBasicProps(),
+    });
 
-  //   await flushPromises();
+    await flushPromises();
 
-  //   const entityElementList = await wrapper.find(
-  //     '[data-test="entity-element-wrapper"]',
-  //   );
-  //   expect(entityElementList.exists()).toBe(true);
-  // });
+    const entityElementList = await wrapper.find(
+      '[data-test="entity-element-wrapper"]',
+    );
+    expect(entityElementList.exists()).toBe(true);
+  });
 
-  // it("does not render the entity element list when the user lacks the required permissions", async () => {
-  //   mocks.fetchAdvancedPermissions.mockReturnValue(false);
+  it("does not render the entity element list when the user lacks the required permissions", async () => {
+    mocks.fetchAdvancedPermissions.mockReturnValue(false);
 
-  //   const wrapper = mount(EntityElementList, {
-  //     props: {
-  //       ...getBasicProps(),
-  //       can: ["canReadElementList"],
-  //     },
-  //     global: {
-  //       stubs: {
-  //         BaseLibrary: true,
-  //       },
-  //     },
-  //   });
+    const wrapper = mount(EntityElementList, {
+      props: {
+        ...getBasicProps(),
+        can: ["canReadElementList"],
+      },
+    });
 
-  //   await flushPromises();
+    await flushPromises();
 
-  //   const entityElementList = await wrapper.find(
-  //     '[data-test="entity-element-wrapper"]',
-  //   );
-  //   expect(entityElementList.exists()).toBe(false);
-  // });
+    const entityElementList = await wrapper.find(
+      '[data-test="entity-element-wrapper"]',
+    );
+    expect(entityElementList.exists()).toBe(false);
+  });
 
-  // it("renders the entity element list when valid permissions are granted", async () => {
-  //   mocks.fetchAdvancedPermissions.mockReturnValue(true);
+  it("renders the entity element list when valid permissions are granted", async () => {
+    mocks.fetchAdvancedPermissions.mockReturnValue(true);
 
-  //   const wrapper = mount(EntityElementList, {
-  //     props: {
-  //       ...getBasicProps(),
-  //       can: ["canReadElementList"],
-  //     },
-  //     global: {
-  //       stubs: {
-  //         BaseLibrary: true,
-  //       },
-  //     },
-  //   });
+    const wrapper = mount(EntityElementList, {
+      props: {
+        ...getBasicProps(),
+        can: ["canReadElementList"],
+      },
+    });
 
-  //   await flushPromises();
+    await flushPromises();
 
-  //   const entityElementList = await wrapper.find(
-  //     '[data-test="entity-element-wrapper"]',
-  //   );
-  //   expect(entityElementList.exists()).toBe(true);
-  // });
+    const entityElementList = await wrapper.find(
+      '[data-test="entity-element-wrapper"]',
+    );
+    expect(entityElementList.exists()).toBe(true);
+  });
 });
