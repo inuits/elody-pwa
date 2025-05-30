@@ -41,39 +41,58 @@
       {{ getTitleFromEntity }}
     </h1>
   </div>
-  <entity-column
-    :key="entityId"
-    v-if="previewElement && previewComponent.type === PreviewTypes.ColumnList"
-    :id="entityId"
-    :column-list="previewElement"
-    :identifiers="[entityId]"
-    :entity-type="entityType"
-    :preview-label="getTitleFromEntity"
-    @close-preview-component="emit('closePreviewComponent')"
-  />
-  <ViewModesMap
-    v-else-if="previewComponent.type === PreviewTypes.Map"
-    :config="configPerViewMode[ViewModes.ViewModesMap]"
-    :entities="getEntitiesOrEntity()"
-    :is-enabled-in-preview="true"
-  />
-  <MediaViewerPreview
-    v-else-if="previewComponent.type === PreviewTypes.MediaViewer"
-    :current-mediafile="getEntitiesOrEntity()[0]"
-    :mediafiles="entities"
-    :entity-id="entityId"
-    @toggle-preview-component="(id: string) => emit('togglePreviewComponent', id)"
-  />
+  <div class="primary-preview">
+    <entity-column
+      :key="entityId"
+      v-if="
+        primaryPreviewElement &&
+        previewComponent.type === PreviewTypes.ColumnList
+      "
+      :entity="getEntitiesOrEntity()"
+      :column-list="primaryPreviewElement"
+      :identifiers="[entityId]"
+      :entity-type="entityType"
+      :preview-label="getTitleFromEntity"
+      @close-preview-component="emit('closePreviewComponent')"
+    />
+    <ViewModesMap
+      v-else-if="previewComponent.type === PreviewTypes.Map"
+      :config="configPerViewMode[ViewModes.ViewModesMap]"
+      :entities="getEntitiesOrEntity()"
+      :is-enabled-in-preview="true"
+    />
+    <MediaViewerPreview
+      v-else-if="previewComponent.type === PreviewTypes.MediaViewer"
+      :current-mediafile="getEntitiesOrEntity()"
+      :mediafiles="entities"
+      :entity-id="entityId"
+      @toggle-preview-component="
+        (id: string) => emit('togglePreviewComponent', id)
+      "
+    />
+  </div>
+  <div class="metadata-preview" v-if="metadataPreviewElement">
+    <entity-column
+      :key="entityId"
+      :entity="getEntitiesOrEntity()"
+      :column-list="metadataPreviewElement"
+      :identifiers="[entityId]"
+      :entity-type="entityType"
+      :preview-label="getTitleFromEntity"
+      @close-preview-component="emit('closePreviewComponent')"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
 import {
   type ColumnList,
   type Entity,
+  type Entitytyping,
   ListItemCoverageTypes,
   type PreviewComponent,
   PreviewTypes,
-  ViewModes,
+  ViewModes
 } from "@/generated-types/queries";
 import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
 import MediaViewerPreview from "@/components/previews/MediaViewerPreview.vue";
@@ -94,7 +113,7 @@ const { addMediafileSelectionStateContext } = useEntityMediafileSelector();
 const props = withDefaults(
   defineProps<{
     previewComponent: PreviewComponent;
-    entityType: string;
+    entityType: Entitytyping;
     entities: Entity[];
     configPerViewMode: object;
     entityId: string | undefined;
@@ -102,12 +121,13 @@ const props = withDefaults(
   {},
 );
 const emit = defineEmits<{
-    (event: "closePreviewComponent"): void;
-    (event: "togglePreviewComponent", entityId: string): void;
+  (event: "closePreviewComponent"): void;
+  (event: "togglePreviewComponent", entityId: string): void;
 }>();
 
 provide("IsPreviewElement", true);
-const previewElement = ref<ColumnList | undefined>(undefined);
+const primaryPreviewElement = ref<ColumnList | undefined>(undefined);
+const metadataPreviewElement = ref<ColumnList | undefined>(undefined);
 
 const fetchPreviewQuery = async () => {
   const document = await loadDocument(props.previewComponent.previewQuery!);
@@ -116,11 +136,24 @@ const fetchPreviewQuery = async () => {
       query: document,
     })
     .then((result) => {
-      previewElement.value = result.data.PreviewElement;
+      primaryPreviewElement.value = result.data.PreviewElement;
     });
 };
 
-const getEntitiesOrEntity = (): Entity[] | [] => {
+const fetchMetadataPreviewQuery = async () => {
+  const document = await loadDocument(
+    props.previewComponent.metadataPreviewQuery!,
+  );
+  apolloClient
+    .query({
+      query: document,
+    })
+    .then((result) => {
+      metadataPreviewElement.value = result.data.PreviewElement;
+    });
+};
+
+const getEntitiesOrEntity = (): Entity[] | Entity => {
   if (
     props.previewComponent.listItemsCoverage ===
     ListItemCoverageTypes.AllListItems
@@ -133,26 +166,30 @@ const getEntitiesOrEntity = (): Entity[] | [] => {
     const entity = props.entities.find(
       (entity) => entity.id === props.entityId,
     );
-    if (entity) return [entity];
+    if (entity) return entity;
     else return [];
   }
 };
 
 const getTitleFromEntity = computed(() => {
-  const entity: Entity = getEntitiesOrEntity()[0];
-  return getTitleOrNameFromEntity(entity);
+  const entity = getEntitiesOrEntity();
+  if (Array.isArray(entity)) return getTitleOrNameFromEntity(entity[0]);
+  else return getTitleOrNameFromEntity(entity)
 });
 
 onMounted(async () => {
-  if (props.previewComponent.previewQuery) await fetchPreviewQuery();
+  if (props.previewComponent.previewQuery)
+    await fetchPreviewQuery();
+  if (props.previewComponent.metadataPreviewQuery)
+    await fetchMetadataPreviewQuery();
 });
 
 watch(
-  () => previewElement.value,
+  () => primaryPreviewElement.value,
   () => {
-    if (previewElement.value)
+    if (primaryPreviewElement.value)
       addMediafileSelectionStateContext(
-        previewElement.value.column.elements.entityListElement
+        primaryPreviewElement.value.column.elements.entityListElement
           .customQueryFilters,
       );
   },

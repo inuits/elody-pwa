@@ -31,13 +31,20 @@
           :editmode-label="element.editMetadataButton.editmodeLabel"
         />
       </div>
-      <div v-for="(panel, index) in panels" :key="index">
-        <entity-element-window-panel
-          :panel="panel"
-          :identifiers="identifiers"
-          :is-edit="computedIsEdit"
-          :form-id="formId"
-        />
+      <div
+        :class="[
+          { 'grid grid-cols-[repeat(auto-fit,_minmax(200px,_1fr))] gap-2 justify-items-center max-w-full': props.element.layout === WindowElementLayout.HorizontalGrid }
+        ]"
+      >
+        <div
+          v-for="(panel, index) in panels" :key="index">
+          <entity-element-window-panel
+            :panel="panel"
+            :identifiers="identifiers"
+            :is-edit="computedIsEdit"
+            :form-id="formId"
+          />
+        </div>
       </div>
     </div>
     <base-expand-button
@@ -54,9 +61,10 @@
 <script lang="ts" setup>
 import {
   ColumnSizes,
-  type WindowElement,
-  type WindowElementPanel,
   Orientations,
+  type WindowElement,
+  WindowElementLayout,
+  type WindowElementPanel,
 } from "@/generated-types/queries";
 import EntityElementWindowPanel from "../EntityElementWindowPanel.vue";
 import { computed } from "vue";

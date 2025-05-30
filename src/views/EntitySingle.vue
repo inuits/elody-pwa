@@ -4,26 +4,16 @@
       v-if="!loading && entity"
       class="h-full w-full flex bg-neutral-lightest z-2 overflow-y-auto pb-4"
     >
-      <entity-form
-        v-if="intialValues != 'no-values' && relationValues != 'no-values'"
-        :key="entity.id"
-        :intial-values="intialValues"
-        :relation-values="relationValues"
-        :uuid="entity.uuid"
+      <entity-column
+        v-if="columnList != 'no-values'"
+        :entity="entity"
+        :columnList="columnList"
+        :identifiers="identifiers"
         :id="entity.id"
-        :type="entityType"
-        :delete-query-options="entity.deleteQueryOptions"
-      >
-        <entity-column
-          v-if="columnList != 'no-values'"
-          :columnList="columnList"
-          :identifiers="identifiers"
-          :id="entity.id"
-          :entity-type="entityType"
-        ></entity-column>
-        <edit-modal :entityId="entity.id" />
-        <DeleteModal></DeleteModal>
-      </entity-form>
+        :entity-type="entityType"
+      />
+      <edit-modal :entityId="entity.id" />
+      <DeleteModal></DeleteModal>
     </div>
     <div v-else class="min-h-[30vh] flex justify-center items-center">
       <spinner-loader theme="accent" />
@@ -145,10 +135,6 @@ onBeforeMount(() => {
   });
 });
 
-const intialValues = ref<IntialValues | "no-values">("no-values");
-const relationValues = ref<{ [key: string]: Object } | "no-values">(
-  "no-values",
-);
 const columnList = ref<ColumnList | "no-values">("no-values");
 const permissionToEdit = ref<boolean>();
 const permissionToDelete = ref<boolean>();
@@ -198,8 +184,6 @@ router.beforeEach(() => {
 onBeforeRouteUpdate(async (to: any) => {
   queryVariables.id = to.params.id;
   queryVariables.type = entityType.value;
-  intialValues.value = "no-values";
-  relationValues.value = "no-values";
   columnList.value = "no-values";
   useEditHelper.disableEditMode();
 });
@@ -218,11 +202,6 @@ watch(
       identifiers.value = entity.value.intialValues.identifiers;
     else identifiers.value = [entity.value.uuid, entity.value.id];
 
-    intialValues.value = determineDefaultIntialValues(
-      entity.value.intialValues,
-      entity.value.entityView,
-    );
-    relationValues.value = entity.value.relationValues;
     columnList.value = entity.value.entityView;
     determineContextsForMediafileViewer();
 
