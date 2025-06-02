@@ -3,7 +3,8 @@
     <div
       v-if="
         !loading &&
-        mediafileSelectionState[mediafileViewerContext].selectedMediafile
+        mediafileSelectionState[mediafileViewerContext].selectedMediafile &&
+        viewerType
       "
       class="w-full"
     >
@@ -14,7 +15,9 @@
           getValueOfMediafile(mediafileViewerContext, 'filename') ||
           ''
         "
-        :originalFilename="getValueOfMediafile(mediafileViewerContext, 'original_filename')"
+        :originalFilename="
+          getValueOfMediafile(mediafileViewerContext, 'original_filename')
+        "
         :mediafileId="
           getValueOfMediafile(
             mediafileViewerContext,
@@ -23,7 +26,9 @@
             KeyValueSource.Root,
           )
         "
-        @toggle-preview-component:entity-id="(id: string) => emit('togglePreviewComponent', id)"
+        @toggle-preview-component:entity-id="
+          (id: string) => emit('togglePreviewComponent', id)
+        "
       />
       <VideoPlayer
         v-if="viewerType === ElodyViewers.Video"
@@ -50,6 +55,21 @@
         "
       />
     </div>
+    <div
+      v-else-if="!loading && !viewerType"
+      class="flex flex-col justify-center items-center h-full w-full p-12 text-center"
+    >
+      <unicon
+        height="64"
+        width="64"
+        class="pb-4"
+        :name="Unicons.DesktopSlash.name"
+      />
+      <p>{{ t("media-viewer.unsupported-mimetype", { mimetype }) }}</p>
+    </div>
+    <div v-else class="h-full w-full flex justify-center items-center">
+      <spinner-loader theme="accent" />
+    </div>
   </div>
 </template>
 
@@ -58,7 +78,7 @@ import {
   ElodyViewers,
   type Entity,
   KeyValueSource,
-  type MediaFileEntity
+  type MediaFileEntity,
 } from "@/generated-types/queries";
 import AudioPlayer from "@/components/base/AudioPlayer.vue";
 import IIIFViewer from "@/components/IIIFViewer.vue";
@@ -66,6 +86,9 @@ import TextViewer from "@/components/base/TextViewer.vue";
 import VideoPlayer from "@/components/base/VideoPlayer.vue";
 import { computed, toRefs, watch, inject, defineAsyncComponent } from "vue";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
+import { Unicons } from "@/types";
+import { useI18n } from "vue-i18n";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
 
 const PDFViewer = defineAsyncComponent(
   () => import("@/components/base/PDFViewer.vue"),
@@ -84,6 +107,14 @@ const mediafileViewerContext: any = inject("mediafileViewerContext");
 const { mediafiles } = toRefs(props);
 const { mediafileSelectionState, getValueOfMediafile } =
   useEntityMediafileSelector();
+const mimetype = computed<string>(() =>
+  getValueOfMediafile(
+    mediafileViewerContext,
+    "mimetype",
+    mediafileSelectionState.value[mediafileViewerContext].selectedMediafile,
+  ),
+);
+const { t } = useI18n();
 
 const viewerMap: Record<string, ElodyViewers> = {
   pdf: ElodyViewers.Pdf,
@@ -95,13 +126,8 @@ const viewerMap: Record<string, ElodyViewers> = {
 
 const viewerType = computed<ElodyViewers | undefined>(() => {
   try {
-    const mimetype: string = getValueOfMediafile(
-      mediafileViewerContext,
-      "mimetype",
-      mediafileSelectionState.value[mediafileViewerContext].selectedMediafile,
-    );
     for (const type in viewerMap) {
-      if (mimetype.includes(type)) {
+      if (mimetype.value.includes(type)) {
         return viewerMap[type];
       }
     }

@@ -28,14 +28,14 @@
     </base-tooltip>
     <h1
       data-cy="entity-element-window-title"
-      class="subtitle text-text-body p-2 text-center absolute left-1/2 transform -translate-x-1/2"
+      class="subtitle text-text-body p-2 text-center absolute left-1/2 transform -translate-x-1/2 truncate max-w-[90%]"
       v-if="previewComponent.title"
     >
       {{ t(previewComponent.title) }}
     </h1>
     <h1
       data-cy="entity-element-window-title"
-      class="subtitle text-text-body p-2 text-center absolute left-1/2 transform -translate-x-1/2"
+      class="subtitle text-text-body p-2 text-center absolute left-1/2 transform -translate-x-1/2 truncate max-w-[90%]"
       v-if="previewComponent.type === PreviewTypes.MediaViewer"
     >
       {{ getTitleFromEntity }}
@@ -92,7 +92,7 @@ import {
   ListItemCoverageTypes,
   type PreviewComponent,
   PreviewTypes,
-  ViewModes
+  ViewModes,
 } from "@/generated-types/queries";
 import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
 import MediaViewerPreview from "@/components/previews/MediaViewerPreview.vue";
@@ -174,12 +174,11 @@ const getEntitiesOrEntity = (): Entity[] | Entity => {
 const getTitleFromEntity = computed(() => {
   const entity = getEntitiesOrEntity();
   if (Array.isArray(entity)) return getTitleOrNameFromEntity(entity[0]);
-  else return getTitleOrNameFromEntity(entity)
+  else return getTitleOrNameFromEntity(entity);
 });
 
 onMounted(async () => {
-  if (props.previewComponent.previewQuery)
-    await fetchPreviewQuery();
+  if (props.previewComponent.previewQuery) await fetchPreviewQuery();
   if (props.previewComponent.metadataPreviewQuery)
     await fetchMetadataPreviewQuery();
 });
