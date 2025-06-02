@@ -198,7 +198,7 @@ export const Unicons: Record<DamsIcons, { name: string }> = {
   User: uniUser,
   UserCircle: uniUserCircle,
   UserSquare: uniUserSquare,
-  videoSlash: uniVideoSlash,
+  VideoSlash: uniVideoSlash,
   WindowGrid: uniWindowGrid,
   WindowMaximize: uniWindowMaximize,
   Copy: uniCopy,
