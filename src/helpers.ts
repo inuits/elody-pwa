@@ -573,12 +573,15 @@ export const getUserName = (auth: any): string => {
 };
 
 export const getHomeRoute = (config: any) => {
-  return config.routerConfig.filter((item) => item.name === RouteNames.Home)[0];
+  return config.routerConfig?.filter(
+    (item) => item.name === RouteNames.Home,
+  )[0];
 };
 
 export const getChildrenOfHomeRoutes = (config: any): [] => {
-  return config?.routerConfig.filter((item) => item.name === RouteNames.Home)[0]
-    .children;
+  return config?.routerConfig?.filter(
+    (item) => item.name === RouteNames.Home,
+  )[0].children;
 };
 
 // period string is in format of: "1 week", "2 month", "5 year"

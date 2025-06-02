@@ -11,16 +11,22 @@ import {
   SearchInputType,
 } from "@/generated-types/queries";
 
+const config = {
+  features: {
+    multilanguage: {
+      supportsMultilingualMetadataEditing: false,
+    },
+    routerConfig: [],
+  },
+};
+
 describe("useBreadcrumbs", () => {
   it("Should have correct filters when creating them", async () => {
     const id = "test_id";
     const entityType = Entitytyping.BaseEntity;
     const relation = "hasBaseEntity";
 
-    const createFiltersSpy = vi.spyOn(
-      useBreadcrumbs(undefined),
-      "createFilters",
-    );
+    const createFiltersSpy = vi.spyOn(useBreadcrumbs(config), "createFilters");
     const createdFilters = createFiltersSpy(id, entityType, relation);
 
     expect(createFiltersSpy).toHaveBeenCalledTimes(1);
@@ -72,7 +78,7 @@ describe("useBreadcrumbs", () => {
     ]);
 
     const clearBreadcrumbPathAndAddOverviewPageSpy = vi.spyOn(
-      useBreadcrumbs(undefined),
+      useBreadcrumbs(config),
       "clearBreadcrumbPathAndAddOverviewPage",
     );
     clearBreadcrumbPathAndAddOverviewPageSpy(title);
@@ -113,7 +119,7 @@ describe("useBreadcrumbs", () => {
     ];
 
     const addOverviewPageToBreadcrumbSpy = vi.spyOn(
-      useBreadcrumbs(undefined),
+      useBreadcrumbs(config),
       "addOverviewPageToBreadcrumb",
     );
     addOverviewPageToBreadcrumbSpy(breadcrumbs);

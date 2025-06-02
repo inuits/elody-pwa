@@ -7,6 +7,26 @@ vi.mock("vue-i18n", () => ({
   }),
 }));
 
+vi.mock("vue", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("vue")>();
+
+  return {
+    ...actual,
+    inject: (key: string) => {
+      if (key === "config") {
+        return {
+          features: {
+            multilanguage: {
+              supportsMultilingualMetadataEditing: false,
+            },
+          },
+        };
+      }
+      return actual.inject(key);
+    },
+  };
+});
+
 // Mock OpenLayers and vue3-openlayers
 vi.mock("ol/Feature", () => ({
   default: vi.fn(),
