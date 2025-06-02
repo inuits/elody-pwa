@@ -12,6 +12,7 @@ import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { getChildrenOfHomeRoutes, getTitleOrNameFromEntity } from "@/helpers";
 import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
+import { useI18n } from "vue-i18n";
 
 export type VisitedRoute = {
   id: string;
@@ -40,6 +41,7 @@ const useBreadcrumbs = (config: any) => {
   const previousRoute = computed<VisitedRoute | undefined>(
     () => breadcrumbRoutes.value[breadcrumbRoutes.value.length - 1],
   );
+  const { locale } = useI18n();
 
   const getRouteBreadcrumbsOfEntity = (
     entitytype: Entitytyping | string,
@@ -172,6 +174,10 @@ const useBreadcrumbs = (config: any) => {
       searchInputType: SearchInputType.AdvancedInputType,
       advancedSearchValue: [],
       advancedFilterInputs: advancedFilters,
+      preferredLanguage: config.features.multilanguage
+        ?.supportsMultilingualMetadataEditing
+        ? locale.value
+        : undefined,
     };
     return queryVariables;
   };

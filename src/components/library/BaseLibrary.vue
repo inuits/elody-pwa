@@ -372,7 +372,7 @@ const apolloClient = inject(DefaultApolloClient);
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const route = useRoute();
 const router = useRouter();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { getGlobalState, updateGlobalState } = useStateManagement();
 const { iterateOverBreadcrumbs } = useBreadcrumbs(config);
 
@@ -408,6 +408,7 @@ const {
   setParentEntityIdentifiers,
   setsearchInputType,
   setSkip,
+  setLocale,
   setSortKey,
   setSortOrder,
   totalEntityCount,
@@ -782,6 +783,16 @@ watch(
   () => {
     if (breadcrumbPathFinished.value && isDeepRelationWithBreadcrumbInfo.value)
       initializeDeepRelations();
+  },
+);
+
+watch(
+  () => locale.value,
+  (newValue: string) => {
+    if (!config.features.multilanguage?.supportsMultilingualMetadataEditing)
+      return;
+    setLocale(newValue);
+    refetchEntities();
   },
 );
 

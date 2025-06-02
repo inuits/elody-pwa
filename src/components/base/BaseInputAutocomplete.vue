@@ -11,12 +11,13 @@
     :classes="classes"
     :caret="!disabled"
     :placeholder="placeholder"
-    :append-to="someModalIsOpened ? '.base-modal--opened' : undefined"
+    :append-to="someModalIsOpened ? '.base-modal--opened' : 'body'"
     :loading="loading"
     :disabled="disabled"
     :noOptionsText="noOptionsText"
     :object="true"
     :create-option="canCreateOption"
+    :search-filter="searchFilter"
     label="label"
     valueProp="value"
     @search-change="
@@ -49,6 +50,7 @@ const props = withDefaults(
     loading?: boolean;
     noOptionsText?: string;
     canCreateOption?: boolean;
+    searchFilter?: Function;
   }>(),
   {
     selectType: "multi",
@@ -57,6 +59,7 @@ const props = withDefaults(
     relation: false,
     loading: false,
     canCreateOption: false,
+    searchFilter: undefined,
   },
 );
 

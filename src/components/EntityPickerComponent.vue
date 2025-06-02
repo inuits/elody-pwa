@@ -107,7 +107,7 @@ addMediafileSelectionStateContext(
   props.customFiltersQuery ? props.customFiltersQuery : "EntityPickerComponent",
 );
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { loadDocument, getDocument } = useCustomQuery();
 const { closeModal } = useBaseModal();
 const { addRelations } = useFormHelper();
@@ -194,6 +194,10 @@ const submit = useSubmitForm<EntityValues>(async () => {
       true,
     ),
     collection,
+    preferredLanguage: config.features.multilanguage
+      ?.supportsMultilingualMetadataEditing
+      ? locale.value
+      : undefined,
   });
 
   if (!result?.data?.mutateEntityValues) return;

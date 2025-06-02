@@ -13,8 +13,9 @@ import {
 } from "@/generated-types/queries";
 import { useEditMode } from "@/composables/useEdit";
 import { asString, createPlaceholderEntities } from "@/helpers";
-import { ref, watch } from "vue";
+import { ref, watch, inject } from "vue";
 import { useStateManagement } from "@/composables/useStateManagement";
+import { useI18n } from "vue-i18n";
 
 export const useBaseLibrary = (
   apolloClient: ApolloClient<any>,
@@ -23,6 +24,7 @@ export const useBaseLibrary = (
 ) => {
   let entityType: Entitytyping = Entitytyping.BaseEntity;
   let _route: RouteLocationNormalizedLoaded | undefined;
+  const config: any = inject("config");
   const entities = ref<Entity[]>([]);
   const entitiesLoading = ref<boolean>(false);
   const isSearchLibrary = ref<boolean>(false);
@@ -30,6 +32,7 @@ export const useBaseLibrary = (
   const manipulationQuery = ref<object>();
   const promiseQueue = ref<((entityType: Entitytyping) => Promise<void>)[]>([]);
   const totalEntityCount = ref<number>(0);
+  const { locale } = useI18n();
   const { getStateForRoute, updateStateForRoute } = useStateManagement();
   let queryVariables: GetEntitiesQueryVariables = {
     type: entityType,
@@ -45,6 +48,10 @@ export const useBaseLibrary = (
     advancedFilterInputs: [],
     searchInputType: undefined,
     userUuid: "", // refactor needed
+    preferredLanguage: config.features.multilanguage
+      ?.supportsMultilingualMetadataEditing
+      ? locale.value
+      : undefined,
   };
 
   const setManipulationOfQuery = (
@@ -67,6 +74,12 @@ export const useBaseLibrary = (
     entityType = type;
     queryVariables.type = type;
     updateSearchValue();
+  };
+
+  const setLocale = async (locale: string) => {
+    queryVariables.preferredLanguage = locale;
+    if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
+    return true;
   };
 
   const updateSearchValue = () => {
@@ -288,6 +301,7 @@ export const useBaseLibrary = (
     setSkip,
     setSortKey,
     setSortOrder,
+    setLocale,
     totalEntityCount,
   };
 };

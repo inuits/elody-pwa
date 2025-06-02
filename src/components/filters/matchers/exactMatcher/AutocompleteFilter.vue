@@ -5,7 +5,12 @@
     autocomplete-style="default"
     :placeholder="placeholder"
     :no-options-text="noOptionsText"
-    @search-change="handleSearchChange"
+    @search-change="debouncedHandleSearchChange"
+    :search-filter="
+      function (option: any) {
+        return option;
+      }
+    "
   />
 </template>
 
@@ -15,6 +20,7 @@ import { useI18n } from "vue-i18n";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import type { DropdownOption } from "@/generated-types/queries";
 import { type FilterListItem } from "@/composables/useStateManagement";
+import { debounce } from "@/helpers";
 
 const props = defineProps<{
   filter: FilterListItem;
@@ -48,13 +54,13 @@ const noOptionsText = computed(() =>
     : undefined,
 );
 
-const handleSearchChange = (value: string) => {
+const debouncedHandleSearchChange = debounce((value: string) => {
   searchQuery.value = value;
   emit(
     "searchOptions",
     value?.length >= minDropdownSearchCharacters.value ? value : "",
   );
-};
+}, 300);
 
 watch(selectedOptions, (newValue) => {
   emit(

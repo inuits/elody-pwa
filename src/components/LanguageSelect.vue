@@ -2,7 +2,8 @@
   <div data-cy="language-select" :key="locale" class="float-right">
     <BaseDropdownNew
       v-if="languageOptions"
-      v-model:model-value="selectedLanguageOption"
+      :model-value="selectedLanguageOption"
+      @update:model-value="setLanguage"
       :options="languageOptions"
       label-position="inline"
       dropdown-style="default"
@@ -11,18 +12,30 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch, computed } from "vue";
+import { ref, onMounted, watch, computed, inject } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRoute } from "vue-router";
 import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
-import { DamsIcons, type DropdownOption } from "@/generated-types/queries";
+import {
+  DamsIcons,
+  TypeModals,
+  type DropdownOption,
+} from "@/generated-types/queries";
 import { useStateManagement } from "@/composables/useStateManagement";
+import { useEditMode } from "@/composables/useEdit";
+import { useBaseModal } from "@/composables/useBaseModal";
+import { useConfirmModal } from "@/composables/useConfirmModal";
 
+const { closeModal } = useBaseModal();
 const { availableLocales, locale, t } = useI18n();
 const { updateGlobalState, getGlobalState } = useStateManagement();
+const { initializeConfirmModal } = useConfirmModal();
 const selectedLanguageOption = ref<DropdownOption | undefined>();
+const config = inject("config") as any;
+const route = useRoute();
 
 const createOptionsFromAvailableLanguages = (
-  availableLanguages: string[]
+  availableLanguages: string[],
 ): DropdownOption[] => {
   return availableLanguages.map((language) => ({
     icon: DamsIcons.NoIcon,
@@ -42,7 +55,7 @@ if (displayPreferences?.lang) {
 
 const setSelectedLanguageOption = (): void => {
   selectedLanguageOption.value = languageOptions.value.find(
-    (language) => language.value === locale.value
+    (language) => language.value === locale.value,
   );
 };
 
@@ -59,4 +72,42 @@ watch(selectedLanguageOption, () => {
     setSelectedLanguageOption();
   }
 });
+
+const setLanguage = (option: DropdownOption | DropdownOption[]) => {
+  const id = String(route.params["id"]);
+  if (!id) return;
+
+  const editState = useEditMode(id);
+  if (
+    config.features.multilanguage?.supportsMultilingualMetadataEditing &&
+    editState.isEdit
+  ) {
+    return openChangeLocaleConfirmationModal(option);
+  }
+
+  selectedLanguageOption.value = option as DropdownOption;
+};
+
+const openChangeLocaleConfirmationModal = (
+  option: DropdownOption | DropdownOption[],
+) => {
+  initializeConfirmModal({
+    confirmButton: {
+      buttonCallback: () => {
+        selectedLanguageOption.value = option as DropdownOption;
+        closeModal(TypeModals.Confirm);
+      },
+    },
+    declineButton: {
+      buttonCallback: () => {
+        selectedLanguageOption.value = {
+          ...selectedLanguageOption.value,
+        } as DropdownOption;
+        closeModal(TypeModals.Confirm);
+      },
+    },
+    translationKey: "discard-edit-change-locale",
+    openImmediately: true,
+  });
+};
 </script>

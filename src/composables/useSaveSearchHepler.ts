@@ -19,7 +19,7 @@ import { useI18n } from "vue-i18n";
 import type { ApolloClient } from "@apollo/client/core";
 import { useMutation, provideApolloClient } from "@vue/apollo-composable";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import { apolloClient } from "@/main";
 import { useStateManagement } from "@/composables/useStateManagement";
 import type { RouteLocationNormalizedLoaded } from "vue-router";
@@ -42,6 +42,7 @@ export const useSaveSearchHepler = () => {
     setsearchInputType,
   } = useBaseLibrary(apolloClient as ApolloClient<any>);
   const { locale } = useI18n();
+  const config: any = inject("config");
 
   const stateManager = useStateManagement();
 
@@ -75,7 +76,10 @@ export const useSaveSearchHepler = () => {
     const queryVariables: GetEntityByIdQueryVariables = {
       id,
       type: Entitytyping.SavedSearch,
-      preferredLanguage: locale.value,
+      preferredLanguage: config.features.multilanguage
+        ?.supportsMultilingualMetadataEditing
+        ? locale.value
+        : undefined,
     };
 
     return await apolloClient

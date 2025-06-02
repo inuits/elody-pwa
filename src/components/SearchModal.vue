@@ -50,8 +50,7 @@ import {
 
 const config: any = inject("config");
 const { closeModal } = useBaseModal();
-const { setFilters, getEntities, items, entitiesLoading } =
-  useAdvancedSearch(config);
+const { setFilters, getEntities, items } = useAdvancedSearch(config);
 const filters = ref<AdvancedFilterInput[]>([]);
 
 const hasAdvancedSearchEnabled = computed(() => {
