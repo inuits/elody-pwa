@@ -1,7 +1,11 @@
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
+import { usePermissions } from "@/composables/usePermissions";
+import { type Entitytyping, Permission } from "@/generated-types/queries";
+import useEntitySingle from "@/composables/useEntitySingle";
 
 export type EditModes = "edit" | "no-edit" | "view" | "delete" | "edit-delete";
 export type Callback = (e?: Event | undefined) => Promise<unknown>;
+const { fetchUpdateAndDeletePermission } = usePermissions();
 
 export const useEditState = (editStateName: string) => {
   const buttonClicked = ref(false);
@@ -21,7 +25,7 @@ export const useEditState = (editStateName: string) => {
     resetButtonClicked();
   };
 
-  const disableEditMode = () => setEditMode("view");
+  const disableEditMode = () => applyPermittedEditMode();
 
   const setSubmitFunction = (editSubmitFn: Callback | undefined) => {
     submitFn.value = editSubmitFn;
@@ -62,6 +66,24 @@ export const useEditState = (editStateName: string) => {
 
   const resetButtonClicked = () => {
     buttonClicked.value = false;
+  };
+
+  const applyPermittedEditMode = () => {
+    const entityId: string = useEntitySingle().getEntityUuid() as string;
+    const entityType: Entitytyping =
+      useEntitySingle().getEntityType() as Entitytyping;
+    const mappings = fetchUpdateAndDeletePermission(entityId, entityType);
+    if (mappings) {
+      mappings.then((mappingResult) => {
+        const canEdit = mappingResult.get(Permission.Canupdate);
+        const canDelete = mappingResult.get(Permission.Candelete);
+
+        if (canEdit && canDelete) setEditMode("edit-delete");
+        else if (canEdit && !canDelete) setEditMode("edit");
+        else if (canDelete && !canEdit) setEditMode("delete");
+        else setEditMode("view");
+      });
+    } else setEditMode("view");
   };
 
   return {

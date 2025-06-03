@@ -198,6 +198,7 @@ watch(
     if (!entity.value && !oldvalue) router.push("/notFound");
     if (!entity.value || !entity.value.intialValues) return;
     useEntitySingle().setEntityUuid(entity.value.uuid || entity.value.id);
+    useEntitySingle().setEntityType(entityType.value);
     entityForBreadcrumb.value = entity.value;
     if (!props.viewOnly) determineBreadcrumbs();
 

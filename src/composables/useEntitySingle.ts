@@ -1,15 +1,21 @@
 import { ref } from "vue";
 
 const entityUuid = ref<string>();
+const entityType = ref<string>();
 
 const useEntitySingle = () => {
   const setEntityUuid = (id: string) => {
     entityUuid.value = id;
   };
 
-  const getEntityUuid = () => entityUuid.value;
+  const setEntityType = (type: string) => {
+    entityType.value = type;
+  };
 
-  return { setEntityUuid, getEntityUuid };
+  const getEntityUuid = () => entityUuid.value;
+  const getEntityType = () => entityType.value;
+
+  return { setEntityUuid, getEntityUuid, setEntityType, getEntityType };
 };
 
 export default useEntitySingle;

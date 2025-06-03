@@ -23,7 +23,7 @@ const permittedEntitiesToCreate = ref<Entitytyping[]>([]);
 let advancedPermissions: { [key: string]: boolean } = {};
 
 const permissionsMappings = ref<Map<string, Map<Permission, boolean>>>(
-  new Map<string, Map<Permission, boolean>>()
+  new Map<string, Map<Permission, boolean>>(),
 );
 
 type ContextMenuActionType =
@@ -43,7 +43,7 @@ const setPermissionsMappings = async () => {
     })
     .then((result) => {
       permissionsMappings.value = normalizePermissions(
-        result.data.PermissionMapping
+        result.data.PermissionMapping,
       );
     });
 };
@@ -58,7 +58,7 @@ const normalizePermissions = (response: {
   const normalizedData: { [key: string]: Map<Permission, boolean> } = {};
   for (const property in response) {
     normalizedData[property] = new Map(
-      Object.entries(response[property])
+      Object.entries(response[property]),
     ) as Map<Permission, boolean>;
   }
 
@@ -70,28 +70,27 @@ const usePermissions = () => {
   let parentEntityId: string | undefined = undefined;
   let childEntityId: string | undefined = undefined;
 
-  const can = (permission: Permission, entity: Entitytyping | undefined) => {
+  const can = (
+    permission: Permission.Canread | Permission.Cancreate,
+    entity: Entitytyping | undefined,
+  ) => {
     if (ignorePermissions.value) return true;
     try {
       if (permissionsMappings.value.size < 1)
         throw Error("The mappings are not fetched yet. Wait a bit.");
-      if (
-        (permission === Permission.Canread ||
-          permission === Permission.Cancreate) &&
-        entity != undefined
-      ) {
+      if (entity != undefined) {
         const entityMapping = permissionsMappings.value!.get(entity);
         return entityMapping?.get(permission);
       }
       throw Error("There is something wrong with how this function is used");
     } catch (e) {
-      // console.log(e);
+      console.log(e);
     }
   };
 
   const fetchAdvancedPermission = (
     permissions: string[],
-    forceFetch: boolean = false
+    forceFetch: boolean = false,
   ) => {
     const permission = permissions[0];
     if (!forceFetch && permission in advancedPermissions) {
@@ -119,7 +118,7 @@ const usePermissions = () => {
         });
     } catch (e) {
       console.log(
-        `Error in usePermissions fetch advanced permissions function: ${e}`
+        `Error in usePermissions fetch advanced permissions function: ${e}`,
       );
     }
   };
@@ -133,7 +132,7 @@ const usePermissions = () => {
   };
 
   const fetchPermissionsForDropdownOptions = async (
-    options: DropdownOption[]
+    options: DropdownOption[],
   ) => {
     const listOfPermissions = options
       .filter((option: DropdownOption) => option.can && option.can.length > 0)
@@ -181,13 +180,13 @@ const usePermissions = () => {
           )
             permissions.set(
               result.data?.PermissionMappingEntityDetail[i].permission,
-              result.data?.PermissionMappingEntityDetail[i].hasPermission
+              result.data?.PermissionMappingEntityDetail[i].hasPermission,
             );
           return permissions;
         });
     } catch (e) {
       console.log(
-        `Error in usePermissions fetch function for update & delete entities/id: ${e}`
+        `Error in usePermissions fetch function for update & delete entities/id: ${e}`,
       );
     }
   };
