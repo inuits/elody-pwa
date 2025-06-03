@@ -1,5 +1,5 @@
 <template>
-  <div class="" v-if="hasContent">
+  <div class="">
     <div ref="activatorSlotRef" class="min-w-0">
       <slot
         name="activator"
