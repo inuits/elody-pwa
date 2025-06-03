@@ -24,6 +24,7 @@ export const useFilterNormalization = () => {
       metadata_key_as_label:
         filter.inputFromState?.metadata_key_as_label ?? undefined,
       aggregation: filter.advancedFilter.aggregation,
+      operator: filter.advancedFilter.operator ?? undefined,
     };
 
     if (filter.advancedFilter.lookup) {

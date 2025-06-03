@@ -394,13 +394,10 @@ const additionalDefaultFiltersEnabled = computed(() => {
   );
 });
 
-const setPaginationLimit = (
-  limit: number,
-  forceFetch: boolean = false,
-) => {
+const setPaginationLimit = (limit: number, forceFetch: boolean = false) => {
   selectedPaginationLimitOption.value = limit;
   setLimit(limit, forceFetch);
-}
+};
 
 const {
   enqueuePromise,
@@ -557,8 +554,9 @@ const initializeBaseLibrary = async () => {
   setIsSearchLibrary(props.isSearchLibrary || false);
   if (props.ignoreFetchingData) return;
   if (!props.predefinedEntities) {
-    if (props.filters.length > 0)
+    if (props.filters.length > 0) {
       setAdvancedFilters(props.filters, false, false, route);
+    }
     setEntityType(
       (props.filterType as Entitytyping) ||
         props.entityType ||

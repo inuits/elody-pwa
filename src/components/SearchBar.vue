@@ -15,9 +15,7 @@
         'flex justify-center items-center h-10 w-10 p-2.5 text-sm font-medium text-neutral-white bg-accent-normal rounded-lg',
         { 'ml-2': inputEnabled },
       ]"
-      @click="
-        inputEnabled === false ? openSearchModal() : applyFilterToLibrary()
-      "
+      @click="!inputEnabled ? openSearchModal() : applyFilterToLibrary()"
     >
       <unicon :name="Unicons.SearchGlass.name"></unicon>
     </button>
@@ -26,18 +24,22 @@
 
 <script lang="ts" setup>
 import {
-  AdvancedFilterTypes,
-  TypeModals,
   type AdvancedFilterInput,
+  AdvancedFilterTypes,
+  Entitytyping,
   ModalStyle,
+  Permission,
+  TypeModals,
+  Operator,
 } from "@/generated-types/queries";
-import { computed, inject, ref, watch, onBeforeMount } from "vue";
+import { computed, inject, ref, watch } from "vue";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
   type AdvancedSearchFilters,
   useAdvancedSearch,
 } from "@/composables/useAdvancedSearch";
+import { usePermissions } from "@/composables/usePermissions";
 
 withDefaults(
   defineProps<{
@@ -56,7 +58,7 @@ const emit = defineEmits<{
   ): void;
   (
     event: "updateAdvancedSearchFilters",
-    filters: AdvancedSearchFilters,
+    filters: AdvancedSearchFilters[],
     isOpenModal: boolean,
   ): void;
 }>();
@@ -64,42 +66,37 @@ const emit = defineEmits<{
 const config = inject("config") as any;
 const { openModal, getModalInfo } = useBaseModal();
 const { getFiltersForAdvancedSearch } = useAdvancedSearch(config);
+const { can } = usePermissions();
 const inputValue = ref<string>("");
 const entityTypeFilters = computed(() =>
-  config.features.simpleSearch.simpleSearchEntityTypes?.map((type: string) => {
-    return {
-      match_exact: true,
-      type: AdvancedFilterTypes.Type,
-      value: type,
-    };
-  }),
+  config.features.simpleSearch.itemTypes
+    ?.filter((type: string) => {
+      return !!can(Permission.Canread, type as Entitytyping);
+    })
+    .map((type: string) => {
+      return {
+        match_exact: true,
+        type: AdvancedFilterTypes.Type,
+        value: type,
+      };
+    }),
 );
 
 const applyFilterToLibrary = () => {
   let filters: Array<AdvancedFilterInput> = [];
   if (entityTypeFilters.value !== undefined)
     filters = [...entityTypeFilters.value];
-  const item_types = config.features.simpleSearch.itemTypes;
   const metadataKeys = config.features.simpleSearch.simpleSearchMetadataKey;
   for (let index in metadataKeys) {
     filters.push({
       key: [`elody:1|metadata.${metadataKeys[index]}.value`],
       value: inputValue.value,
       type: AdvancedFilterTypes.Text,
-      operator: "or",
+      operator: Operator.Or,
       match_exact: false,
     });
   }
-  if (!item_types)
-    return emit("updateFilters", filters, getModalInfo(TypeModals.Search).open);
-  const typeFilters = item_types.map((item_type: string) => {
-    return {
-      match_exact: true,
-      type: AdvancedFilterTypes.Type,
-      value: item_type,
-    };
-  });
-  filters.push(...typeFilters);
+
   emit("updateFilters", filters, getModalInfo(TypeModals.Search).open);
   emit(
     "updateAdvancedSearchFilters",

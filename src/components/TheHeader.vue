@@ -41,7 +41,7 @@ import { auth } from "@/main";
 
 const route = useRoute();
 const config: any = inject("config");
-const showSearch = config.features.simpleSearch.hasSimpleSearch;
+const showSearch = config.features.simpleSearch;
 const showSearchAI = config.features?.aiSearch?.hasAiSearch;
 
 const entityType = computed(() => {
