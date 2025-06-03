@@ -408,7 +408,7 @@ const useFormHelper = () => {
         } = { key, value: (intialValues as any)[key] };
         const multilanguage = config.features.multilanguage;
         if (
-          multilanguage.supportsMultilingualMetadataEditing &&
+          multilanguage?.supportsMultilingualMetadataEditing &&
           multilanguage.metadataKeys?.includes(key)
         ) {
           normalizedMetadata.lang = locale;
