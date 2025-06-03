@@ -92,6 +92,7 @@
             'row-span-2':
               baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
           },
+          { 'col-span-2': !enableAdvancedFilters },
           { sticky: hasStickyBars },
         ]"
       >

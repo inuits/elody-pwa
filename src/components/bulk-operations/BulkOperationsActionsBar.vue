@@ -102,7 +102,7 @@
     </div>
     <div
       v-if="showButton && useExtendedBulkOperations"
-      class="flex justify-end w-60"
+      class="flex justify-end w-fit"
     >
       <div v-if="confirmSelectionButton" class="w-full !m-0">
         <BaseButtonNew
@@ -113,7 +113,7 @@
           @click="emit('confirmSelection', getEnqueuedItems(context))"
         />
       </div>
-      <div v-else class="w-full !m-0">
+      <div v-else class="w-60 !m-0">
         <ActionMenuGroup
           v-if="bulkOperations !== undefined && auth.isAuthenticated.value"
           v-model="selectedBulkOperation"

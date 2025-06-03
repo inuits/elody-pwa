@@ -45,7 +45,7 @@
             width="18"
           />
           <p class="text-center">
-            {{ addLabelToValue ? label : '' }} {{ addLabelToValue ? ':' : '' }} {{ t(option.label) }}
+            {{ addLabelToValue ? label : '' }}{{ addLabelToValue ? ':' : '' }}  {{ t(option.label) }}
           </p>
         </div>
       </template>
