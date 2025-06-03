@@ -23,7 +23,7 @@
         class="text-center"
         v-model="currentPage"
         type="number"
-        input-style="default"
+        input-style="defaultWithDarkBackgroundInput"
         @focusin="canUpdateSkipAgain()"
         @focusout="setManualEnteredSkip(currentPage)"
         @keyup.enter="setManualEnteredSkip(currentPage)"

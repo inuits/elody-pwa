@@ -91,6 +91,17 @@
       <!--      </div>-->
     </div>
 
+    <div class="flex">
+      <BasePaginationNew
+        v-model:skip="selectedSkip"
+        :limit="selectedPaginationLimitOption ?? NaN"
+        :total-items="
+          totalItems || getStateForRoute(route)?.totalEntityCount || 1
+        "
+        @update:skip="setSkip"
+      />
+    </div>
+
     <div
       v-if="showButton && useExtendedBulkOperations"
       class="flex justify-end w-60"
@@ -140,13 +151,15 @@ import {
 import { useModalActions } from "@/composables/useModalActions";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { apolloClient } from "@/main";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, toRefs, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useQuery } from "@vue/apollo-composable";
 import { useImport } from "@/composables/useImport";
 import { useRoute } from "vue-router";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
 import { auth } from "@/main";
+import BasePaginationNew from "@/components/base/BasePagination.vue";
+import { useStateManagement } from "@/composables/useStateManagement";
 
 const props = withDefaults(
   defineProps<{
@@ -162,6 +175,9 @@ const props = withDefaults(
     parentEntityId?: string | undefined;
     relationType: string;
     skipItemsWithRelationDuringBulkDelete?: string[];
+    selectedPaginationLimitOption: number;
+    setSkip: Function;
+    totalItems: number;
   }>(),
   {
     totalItemsCount: 0,
@@ -192,8 +208,10 @@ const emit = defineEmits<{
 }>();
 
 const route = useRoute();
+const { getStateForRoute } = useStateManagement();
 const { loadDocument } = useImport();
 const refetchEnabled = ref<boolean>(false);
+const { totalItems } = toRefs(props);
 const entityType = computed(() => props.entityType || route.meta.entityType);
 const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
   GetBulkOperationsDocument,
@@ -205,6 +223,8 @@ const selectedBulkOperation = ref<DropdownOption>();
 const bulkOperationsPromiseIsResolved = ref<boolean>(
   !props.customBulkOperations,
 );
+const selectedSkip = ref<number>(1);
+
 const {
   getEnqueuedItemCount,
   getEnqueuedItems,
@@ -263,7 +283,19 @@ const customBulkOperationsPromise = async () => {
     });
 };
 
+const setSelectedSkipFromState = () => {
+  const state = getStateForRoute(route);
+  const skip = state?.queryVariables?.skip || 1;
+  selectedSkip.value = skip;
+  props.setSkip(skip);
+}
+
+const setSkip = async (newSkip: number) => {
+  await props.setSkip(newSkip, true);
+};
+
 onMounted(() => {
+  setSelectedSkipFromState();
   if (entityType.value && !props.customBulkOperations)
     refetchEnabled.value = true;
   refetch();

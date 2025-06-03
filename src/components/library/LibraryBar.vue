@@ -41,16 +41,6 @@
         />
       </div>
     </div>
-    <div class="flex justify-end">
-      <BasePaginationNew
-        v-model:skip="selectedSkip"
-        :limit="selectedPaginationLimitOption ?? NaN"
-        :total-items="
-          totalItems || getStateForRoute(route)?.totalEntityCount || 1
-        "
-        @update:skip="setSkip"
-      />
-    </div>
   </div>
 </template>
 
@@ -65,7 +55,6 @@ import {
   type GetPaginationLimitOptionsQuery,
   type GetSortOptionsQuery,
 } from "@/generated-types/queries";
-import BasePaginationNew from "@/components/base/BasePagination.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
 import { apolloClient } from "@/main";
 import { onMounted, ref, toRefs, watch } from "vue";
@@ -76,10 +65,8 @@ import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 const props = withDefaults(
   defineProps<{
     setLimit: Function;
-    setSkip: Function;
     setSortKey: Function;
     setSortOrder: Function;
-    totalItems: number;
     filtersAvailableOnDetailPage?: boolean;
   }>(),
   {
@@ -102,11 +89,9 @@ const isAsc = ref<boolean>(true);
 const paginationLimitOptions = ref<DropdownOption[]>([]);
 const paginationLimitOptionsPromiseIsResolved = ref<boolean>(false);
 const selectedPaginationLimitOption = ref<number>();
-const selectedSkip = ref<number>(1);
 const selectedSortOption = ref<any>();
 const sortOptions = ref<DropdownOption[]>([]);
 const sortOptionsPromiseIsResolved = ref<boolean>(false);
-const { totalItems } = toRefs(props);
 const { getStateForRoute } = useStateManagement();
 const { t } = useI18n();
 const route = useRoute();
@@ -125,14 +110,11 @@ const paginationLimitOptionsPromise = async () => {
         state?.queryVariables?.limit ||
         paginationLimitOptions.value?.[0].value ||
         20;
-      const skip = state?.queryVariables?.skip || 1;
 
       selectedPaginationLimitOption.value = paginationLimitOptions.value.find(
         (option) => option.value === limit,
       )?.value;
-      selectedSkip.value = skip;
       props.setLimit(limit);
-      props.setSkip(skip);
       paginationLimitOptionsPromiseIsResolved.value = true;
     });
 };
@@ -186,9 +168,6 @@ onMounted(() => {
   emit("sortOptionsPromise", sortOptionsPromise);
 });
 
-const setSkip = async (newSkip: number) => {
-  await props.setSkip(newSkip, true);
-};
 watch(
   () => selectedPaginationLimitOption.value,
   async () =>

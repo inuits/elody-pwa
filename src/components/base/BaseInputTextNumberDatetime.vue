@@ -96,11 +96,22 @@ const defaultWithBorderInput: Input = {
     borderColor: "disabled:border-text-disabled",
   },
 };
+const defaultWithDarkBackgroundInput: Input = {
+  textColor: defaultInput.textColor,
+  bgColor: "bg-neutral-light",
+  borderColor: defaultInput.borderColor,
+  disabledStyle: {
+    textColor: defaultInput.disabledStyle.textColor,
+    bgColor: defaultInput.disabledStyle.bgColor,
+    borderColor: defaultInput.disabledStyle.borderColor,
+  },
+};
 
-type InputStyle = "default" | "defaultWithBorder";
+type InputStyle = "default" | "defaultWithBorder" | "defaultWithDarkBackgroundInput";
 const inputStyles: Record<InputStyle, Input> = {
   default: defaultInput,
   defaultWithBorder: defaultWithBorderInput,
+  defaultWithDarkBackgroundInput: defaultWithDarkBackgroundInput,
 };
 
 const props = withDefaults(

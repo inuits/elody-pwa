@@ -109,11 +109,9 @@
                 baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
             "
             :route="route"
-            :set-limit="setLimit"
-            :set-skip="setSkip"
+            :set-limit="setPaginationLimit"
             :set-sort-key="setSortKey"
             :set-sort-order="setSortOrder"
-            :total-items="totalEntityCount || NaN"
             :filters-available-on-detail-page="filtersAvailableOnDetailPage"
             @pagination-limit-options-promise="
               (promise) => (paginationLimitOptionsPromise = promise)
@@ -148,6 +146,9 @@
             :refetch-entities="refetchEntities"
             :enable-selection="enableSelection"
             :parent-entity-id="props.parentEntityIdentifiers[0]"
+            :selected-pagination-limit-option="selectedPaginationLimitOption"
+            :total-items="totalEntityCount || NaN"
+            :set-skip="setSkip"
             @custom-bulk-operations-promise="
               (promise) => (customBulkOperationsPromise = promise)
             "
@@ -377,6 +378,7 @@ const { getGlobalState, updateGlobalState } = useStateManagement();
 const { iterateOverBreadcrumbs } = useBreadcrumbs(config);
 
 const hasBulkOperations = ref<boolean>(true);
+const selectedPaginationLimitOption = ref<number>();
 const enableSelection = computed<boolean>(() => {
   return (
     (config.features.hasBulkSelect &&
@@ -391,6 +393,14 @@ const additionalDefaultFiltersEnabled = computed(() => {
     props.enableAdvancedFilters && manipulationQuery.value?.filtersDocument
   );
 });
+
+const setPaginationLimit = (
+  limit: number,
+  forceFetch: boolean = false,
+) => {
+  selectedPaginationLimitOption.value = limit;
+  setLimit(limit, forceFetch);
+}
 
 const {
   enqueuePromise,
