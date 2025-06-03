@@ -90,7 +90,6 @@
       <!--        </span>-->
       <!--      </div>-->
     </div>
-
     <div class="flex">
       <BasePaginationNew
         v-model:skip="selectedSkip"
@@ -101,7 +100,6 @@
         @update:skip="setSkip"
       />
     </div>
-
     <div
       v-if="showButton && useExtendedBulkOperations"
       class="flex justify-end w-60"

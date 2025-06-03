@@ -161,10 +161,10 @@ export const useBaseLibrary = (
   };
 
   const setSortOrder = async (
-    sortOrder: "asc" | "desc",
+    isAsc: boolean,
     forceFetch: boolean = false,
   ): Promise<void> => {
-    queryVariables.searchValue.isAsc = sortOrder === "asc";
+    queryVariables.searchValue.isAsc = isAsc;
     if (shouldUseStateForRoute)
       updateStateForRoute(_route, { queryVariables }, "useBaseLibrary#129");
     if (forceFetch && _route !== undefined) await getEntities(_route);

@@ -15,8 +15,8 @@
           v-model="selectedPaginationLimitOption"
           :options="paginationLimitOptions"
           :label="t('library.items')"
-          :select-first-option-by-default="false"
           :clearable="false"
+          :add-label-to-value="true"
           label-position="inline"
         />
       </div>
@@ -26,18 +26,20 @@
           v-model="selectedSortOption"
           :options="sortOptions"
           :label="t('library.sort')"
-          :select-first-option-by-default="false"
           :clearable="false"
+          :add-label-to-value="true"
           label-position="inline"
         />
       </div>
       <div v-if="sortOptions.length > 0" class="flex items-center">
-        <BaseToggle
+        <AdvancedDropdown
           data-cy="sort-toggle"
-          v-model="isAsc"
-          :icon-on="DamsIcons.AngleUp"
-          :icon-off="DamsIcons.AngleDown"
-          :icon-height="24"
+          v-model="selectedSortDirection"
+          :options="sortDirectionOptions"
+          :label="t('library.sort-direction')"
+          :clearable="false"
+          :add-icon-to-value="true"
+          label-position="inline"
         />
       </div>
     </div>
@@ -46,18 +48,17 @@
 
 <script lang="ts" setup>
 import { useRoute } from "vue-router";
-import type { Entitytyping } from "@/generated-types/queries";
 import {
   DamsIcons,
-  GetPaginationLimitOptionsDocument,
-  GetSortOptionsDocument,
   type DropdownOption,
+  type Entitytyping,
+  GetPaginationLimitOptionsDocument,
   type GetPaginationLimitOptionsQuery,
+  GetSortOptionsDocument,
   type GetSortOptionsQuery,
 } from "@/generated-types/queries";
-import BaseToggle from "@/components/base/BaseToggle.vue";
 import { apolloClient } from "@/main";
-import { onMounted, ref, toRefs, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useStateManagement } from "@/composables/useStateManagement";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
@@ -85,16 +86,25 @@ const emit = defineEmits<{
   ): void;
 }>();
 
-const isAsc = ref<boolean>(true);
+const isAsc = ref<boolean>(false);
 const paginationLimitOptions = ref<DropdownOption[]>([]);
 const paginationLimitOptionsPromiseIsResolved = ref<boolean>(false);
 const selectedPaginationLimitOption = ref<number>();
 const selectedSortOption = ref<any>();
 const sortOptions = ref<DropdownOption[]>([]);
 const sortOptionsPromiseIsResolved = ref<boolean>(false);
+const selectedSortDirection = ref<any>();
+const sortDirectionOptions = ref<DropdownOption[]>([
+  { label: "library.desc", value: "desc", icon: DamsIcons.SortDown },
+  { label: "library.asc", value: "asc", icon: DamsIcons.SortUp },
+]);
 const { getStateForRoute } = useStateManagement();
 const { t } = useI18n();
 const route = useRoute();
+
+const setIsAsc = (sortDirection: 'asc' | 'desc') => {
+  isAsc.value = sortDirection === 'asc';
+}
 
 const paginationLimitOptionsPromise = async () => {
   return apolloClient
@@ -152,13 +162,16 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
       selectedSortOption.value = sortOptions.value.find(
         (option) => option.value === sortKey,
       )?.value;
-      const isAscFromState = state?.queryVariables?.searchValue.isAsc !== undefined
-        ? state?.queryVariables?.searchValue.isAsc
-        : sortingOptionsResult?.isAsc?.toLowerCase() === "asc";
-      const sortOrder = isAscFromState ? "asc" : "desc";
-      isAsc.value = sortOrder === "asc";
       props.setSortKey(sortKey);
-      props.setSortOrder(sortOrder);
+      const isAscFromState =
+        state?.queryVariables?.searchValue.isAsc !== undefined
+          ? state?.queryVariables?.searchValue.isAsc
+          : sortingOptionsResult?.isAsc?.toLowerCase() === "asc";
+      const sortOrder = isAscFromState ? "asc" : "desc";
+      selectedSortDirection.value = sortDirectionOptions.value.find(
+        (option) => option.value === sortOrder
+      )?.value;
+      setIsAsc(sortOrder);
       sortOptionsPromiseIsResolved.value = true;
     });
 };
@@ -170,18 +183,21 @@ onMounted(() => {
 
 watch(
   () => selectedPaginationLimitOption.value,
-  async () =>
-    await props.setLimit(selectedPaginationLimitOption.value, true),
+  async () => await props.setLimit(selectedPaginationLimitOption.value, true),
+  { deep: true },
 );
 watch(
   () => selectedSortOption.value,
-  async () => {
-    await props.setSortKey(selectedSortOption.value, true);
-  },
+  async () => await props.setSortKey(selectedSortOption.value, true),
+  { deep: true },
+);
+watch(
+  () => selectedSortDirection.value,
+  async () => setIsAsc(selectedSortDirection.value),
   { deep: true },
 );
 watch(
   () => isAsc.value,
-  async () => await props.setSortOrder(isAsc.value ? "asc" : "desc", true),
+  async () => await props.setSortOrder(isAsc.value, true),
 );
 </script>

@@ -32,12 +32,21 @@
           <unicon :name="Unicons.Check.name" height="24" width="24" />
         </div>
         <div class="text-text-body">
-          {{ option.value }}
+          {{ t(option.label) }}
         </div>
       </template>
       <template #value="{ option, index }">
-        <div class="text-text-body">
-          {{ selectedItem ? label : '' }} {{ selectedItem ? ':' : '' }} {{ option.value }}
+        <div class="text-text-body flex items-center">
+          <unicon
+            v-if="addIconToValue && option.icon && Unicons[option.icon]?.name"
+            class="mx-1"
+            :name="Unicons[option.icon].name"
+            height="18"
+            width="18"
+          />
+          <p class="text-center">
+            {{ addLabelToValue ? label : '' }} {{ addLabelToValue ? ':' : '' }} {{ t(option.label) }}
+          </p>
         </div>
       </template>
     </VueSelect>
@@ -55,6 +64,7 @@ import { useEditMode } from "@/composables/useEdit";
 import { useRoute } from "vue-router";
 import VueSelect from "vue3-select-component";
 import { Unicons } from "@/types";
+import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
   defineProps<{
@@ -67,6 +77,8 @@ const props = withDefaults(
     itemsSelected?: boolean;
     multiple?: boolean;
     clearable?: boolean;
+    addLabelToValue?: boolean;
+    addIconToValue?: boolean;
   }>(),
   {
     selectFirstOptionByDefault: false,
@@ -75,6 +87,8 @@ const props = withDefaults(
     itemsSelected: false,
     multiple: false,
     clearable: true,
+    addLabelToValue: false,
+    addIconToValue: false,
   },
 );
 
@@ -86,6 +100,7 @@ const emit = defineEmits<{
 }>();
 
 const route = useRoute();
+const { t } = useI18n();
 const entityFormData: any = inject("entityFormData");
 const entityId = computed<string>(() => entityFormData?.id || route.params.id);
 const { isEdit } = useEditMode(entityId.value);
@@ -117,7 +132,7 @@ watch(
   () => props.options,
   () => {
     if (props.options.length > 0)
-      if (props.selectFirstOptionByDefault || !props.clearable) {
+      if (props.selectFirstOptionByDefault || (!props.clearable && !selectedItem.value && !props.modelValue)) {
         selectedItem.value = props.options[0].value;
         emit("update:modelValue", selectedItem.value);
       }
