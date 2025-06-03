@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-row justify-end items-center !m-0">
+  <div class="flex flex-row justify-end items-center !m-0" :class="[ { 'w-60': primaryOption }]">
     <BaseButtonNew
       v-if="primaryOption"
       class="pr-6"
