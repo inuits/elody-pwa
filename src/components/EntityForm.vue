@@ -11,6 +11,7 @@ import {
   type MutateEntityValuesMutation,
   type MutateEntityValuesMutationVariables,
   type DeleteQueryOptions,
+  type PanelMetaData,
   Collection,
   ModalStyle,
 } from "@/generated-types/queries";
@@ -46,6 +47,7 @@ const props = defineProps<{
   type: string;
   deleteQueryOptions?: DeleteQueryOptions;
   locale: string;
+  fields: Record<string, PanelMetaData>;
 }>();
 
 const config: any = inject("config");
@@ -99,10 +101,10 @@ const submit = useSubmitForm<EntityValues>(async () => {
       unref(form.values),
       false,
       props.locale,
+      props.fields,
     ),
     collection,
-    preferredLanguage: config.features.multilanguage
-      ?.supportsMultilingualMetadataEditing
+    preferredLanguage: config.features.supportsMultilingualMetadataEditing
       ? props.locale
       : undefined,
   });

@@ -395,6 +395,7 @@ const useFormHelper = () => {
     intialValues: IntialValues,
     entityId: string,
     locale?: string,
+    fields?: Record<string, PanelMetaData>,
   ): MetadataValuesInput[] => {
     const metadata: any[] = [];
     Object.keys(intialValues)
@@ -406,11 +407,9 @@ const useFormHelper = () => {
           value: unknown;
           lang?: string;
         } = { key, value: (intialValues as any)[key] };
-        const multilanguage = config.features.multilanguage;
-        if (
-          multilanguage?.supportsMultilingualMetadataEditing &&
-          multilanguage.metadataKeys?.includes(key)
-        ) {
+        const isEnabledMultilanguage =
+          config.features.supportsMultilingualMetadataEditing;
+        if (isEnabledMultilanguage && fields?.[key]?.isMultilingual) {
           normalizedMetadata.lang = locale;
         }
         metadata.push(normalizedMetadata);
@@ -517,6 +516,7 @@ const useFormHelper = () => {
     values: EntityValues,
     updateOnlyRelations = false,
     locale?: string,
+    fields?: Record<string, PanelMetaData>,
   ) => {
     let metadata: MetadataValuesInput[] = [];
     let relations: BaseRelationValuesInput[] = [];
@@ -526,6 +526,7 @@ const useFormHelper = () => {
         values.intialValues,
         uuid,
         locale,
+        fields,
       );
 
     if (values.relationValues)

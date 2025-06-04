@@ -13,9 +13,7 @@ import {
 
 const config = {
   features: {
-    multilanguage: {
-      supportsMultilingualMetadataEditing: false,
-    },
+    supportsMultilingualMetadataEditing: false,
     routerConfig: [],
   },
 };

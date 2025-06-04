@@ -76,8 +76,7 @@ export const useSaveSearchHepler = () => {
     const queryVariables: GetEntityByIdQueryVariables = {
       id,
       type: Entitytyping.SavedSearch,
-      preferredLanguage: config.features.multilanguage
-        ?.supportsMultilingualMetadataEditing
+      preferredLanguage: config.features?.supportsMultilingualMetadataEditing
         ? locale.value
         : undefined,
     };

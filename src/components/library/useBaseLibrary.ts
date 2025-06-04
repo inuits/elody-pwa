@@ -48,8 +48,7 @@ export const useBaseLibrary = (
     advancedFilterInputs: [],
     searchInputType: undefined,
     userUuid: "", // refactor needed
-    preferredLanguage: config.features.multilanguage
-      ?.supportsMultilingualMetadataEditing
+    preferredLanguage: config.features.supportsMultilingualMetadataEditing
       ? locale.value
       : undefined,
   };

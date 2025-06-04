@@ -194,8 +194,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
       true,
     ),
     collection,
-    preferredLanguage: config.features.multilanguage
-      ?.supportsMultilingualMetadataEditing
+    preferredLanguage: config.features.supportsMultilingualMetadataEditing
       ? locale.value
       : undefined,
   });

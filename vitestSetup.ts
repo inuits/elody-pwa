@@ -16,9 +16,7 @@ vi.mock("vue", async (importOriginal) => {
       if (key === "config") {
         return {
           features: {
-            multilanguage: {
-              supportsMultilingualMetadataEditing: false,
-            },
+            supportsMultilingualMetadataEditing: false,
           },
         };
       }

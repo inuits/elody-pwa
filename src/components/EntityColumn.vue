@@ -8,6 +8,8 @@
     :id="entity.id"
     :type="entityType"
     :delete-query-options="entity.deleteQueryOptions"
+    :locale="locale"
+    :fields="panelsFields"
   >
     <div
       :class="[
@@ -39,20 +41,35 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, reactive, isReactive, watch, ref, onMounted } from "vue";
+import {
+  computed,
+  inject,
+  reactive,
+  isReactive,
+  watch,
+  ref,
+  onMounted,
+} from "vue";
 import type {
   ColumnList,
   Column,
   Entitytyping,
   IntialValues,
-  BaseEntity
+  BaseEntity,
+  PanelMetaData,
+  WindowElementPanel,
 } from "@/generated-types/queries";
 import EntityElement from "./entityElements/EntityElement.vue";
-import { convertSizeToTailwind, determineDefaultIntialValues } from "@/helpers";
+import {
+  convertSizeToTailwind,
+  determineDefaultIntialValues,
+  findPanelMetadata,
+} from "@/helpers";
 import { useColumnResizeHelper } from "../composables/useResizeHelper";
 import { useEditMode } from "@/composables/useEdit";
 import EntityForm from "@/components/EntityForm.vue";
 import { onBeforeRouteUpdate } from "vue-router";
+import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
   defineProps<{
@@ -71,6 +88,7 @@ const emit = defineEmits(["closePreviewComponent"]);
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const { setInitialColumns, currentColumnConfig } = useColumnResizeHelper();
 const useEditHelper = useEditMode(props.entity.id);
+const { locale } = useI18n();
 
 const intialValues = ref<IntialValues | "no-values">("no-values");
 const relationValues = ref<{ [key: string]: Object } | "no-values">(
@@ -102,10 +120,51 @@ watch(
   { immediate: true },
 );
 
-onBeforeRouteUpdate(async (to: any) => {
+onBeforeRouteUpdate(async () => {
   intialValues.value = "no-values";
   relationValues.value = "no-values";
 });
+
+const panelsFields = computed<Record<string, PanelMetaData>>(() => {
+  const panelMetadataArray = getPanelMetadataFromViewData(columns.value);
+  const metadataMap: Record<string, PanelMetaData> = {};
+
+  panelMetadataArray.forEach((panel) => {
+    if (panel.key) {
+      metadataMap[panel.key] = panel;
+    }
+  });
+
+  return metadataMap;
+});
+
+const getPanelMetadataFromViewData = (viewData: any[]): PanelMetaData[] => {
+  return viewData.flatMap((column) => {
+    const windowElementPanels = getWindowElementPanels(column.elements || {});
+
+    return [
+      ...windowElementPanels.flatMap((panel) => findPanelMetadata(panel)),
+      ...findPanelMetadata(column),
+    ];
+  });
+};
+
+const getWindowElementPanels = (
+  elements: Record<string, any>,
+): WindowElementPanel[] => {
+  const panels: WindowElementPanel[] = [];
+
+  Object.values(elements).forEach((value) => {
+    if (
+      typeof value === "object" &&
+      value?.__typename === "WindowElementPanel"
+    ) {
+      panels.push(value);
+    }
+  });
+
+  return panels;
+};
 
 onMounted(() => {
   intialValues.value = determineDefaultIntialValues(
@@ -113,5 +172,5 @@ onMounted(() => {
     props.entity.entityView,
   );
   relationValues.value = props.entity.relationValues;
-})
+});
 </script>

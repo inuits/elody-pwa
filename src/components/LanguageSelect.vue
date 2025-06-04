@@ -78,10 +78,7 @@ const setLanguage = (option: DropdownOption | DropdownOption[]) => {
   if (!id) return;
 
   const editState = useEditMode(id);
-  if (
-    config.features.multilanguage?.supportsMultilingualMetadataEditing &&
-    editState.isEdit
-  ) {
+  if (config.features.supportsMultilingualMetadataEditing && editState.isEdit) {
     return openChangeLocaleConfirmationModal(option);
   }
 

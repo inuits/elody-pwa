@@ -113,8 +113,7 @@ const entityType = computed(() => {
 const queryVariables = reactive<GetEntityByIdQueryVariables>({
   id: id.value,
   type: entityType.value,
-  preferredLanguage: config.features.multilanguage
-    ?.supportsMultilingualMetadataEditing
+  preferredLanguage: config.features.supportsMultilingualMetadataEditing
     ? locale.value
     : undefined,
 });

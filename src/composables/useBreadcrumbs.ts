@@ -174,8 +174,7 @@ const useBreadcrumbs = (config: any) => {
       searchInputType: SearchInputType.AdvancedInputType,
       advancedSearchValue: [],
       advancedFilterInputs: advancedFilters,
-      preferredLanguage: config.features.multilanguage
-        ?.supportsMultilingualMetadataEditing
+      preferredLanguage: config.features.supportsMultilingualMetadataEditing
         ? locale.value
         : undefined,
     };
