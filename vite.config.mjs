@@ -4,6 +4,8 @@ import { defineConfig } from "vite";
 import viteCompression from "vite-plugin-compression";
 import vue from "@vitejs/plugin-vue";
 import vueDevTools from "vite-plugin-vue-devtools";
+import tailwindcss from "@tailwindcss/vite";
+import tailwindSvgPlugin from "./plugin/vite-plugin-tailwind-svg.js";
 
 const parsePort = (port) => {
   return parseInt(port) ? parseInt(port) : 8080;
@@ -16,7 +18,13 @@ const cacheDir =
 
 // https://vitejs.dev/config/
 const viteConfig = defineConfig({
-  plugins: [vue(), viteCompression(), vueDevTools()],
+  plugins: [
+    vue(),
+    viteCompression(),
+    vueDevTools(),
+    tailwindSvgPlugin(),
+    tailwindcss(),
+  ],
   define: {
     __VUE_I18N_FULL_INSTALL__: true,
     __VUE_I18N_LEGACY_API__: false,

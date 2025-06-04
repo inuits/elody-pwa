@@ -7,7 +7,7 @@
     </div>
     <p class="w-2/6 mx-4 flex items-center">{{ job.job_info }}</p>
     <BaseLabel :name="getJobStatus.name" :color="getJobStatus.color" />
-    <div class="flex-grow p-10">
+    <div class="grow p-10">
       {{ job.message ? job.message : "" }}
     </div>
     <BaseButton

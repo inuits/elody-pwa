@@ -4,7 +4,7 @@ import {
   type NormalizedCacheObject,
   createHttpLink,
 } from "@apollo/client/core";
-import "./assets/base.css";
+import "./assets/main.css";
 import * as Sentry from "@sentry/vue";
 import App from "./App.vue";
 import Unicon from "vue-unicons";

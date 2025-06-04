@@ -1,0 +1,185 @@
+/* src/main.css */
+@import "tailwindcss";
+
+@theme {
+  /* Fonts */
+  --font-sans: "Lato", system-ui, sans-serif; /* Add defaultTheme.fontFamily.sans values if needed */
+
+  /* Theme colors */
+  --color-accent-light: #DCF4F9;
+  --color-accent-normal: #6BC6B3;
+  --color-accent-accent: #0CB2BC;
+
+  /* Colors */
+  --color-white: #FFFFFF;
+  --color-black: #000000;
+  --color-transparent: transparent;
+
+  --color-tag-neutral: #e0dfdf;
+  --color-tag-selected: #2d242a;
+
+  --color-text-disabled: #6795A2;
+  --color-text-light: #355BA9;
+  --color-text-body: #003A52;
+  --color-text-subtitle: #FFFFFF;
+  --color-text-placeholder: #9CA3AF;
+
+  --color-background-frosted: rgba(220, 244, 249, 0.25);
+
+  --color-status-new: #6BC6B3;
+  --color-status-deleted: #9b0000;
+
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f4f4f5;
+  --color-gray-200: #e4e4e7;
+  --color-gray-300: #d4d4d8;
+  --color-gray-400: #a1a1aa;
+  --color-gray-500: #71717a;
+  --color-gray-600: #52525b;
+  --color-gray-700: #3f3f46;
+  --color-gray-800: #27272a;
+  --color-gray-900: #18181b;
+
+  --color-green-50: #f0fdf4;
+  --color-green-100: #dcfce7;
+  --color-green-200: #bbf7d0;
+  --color-green-300: #86efac;
+  --color-green-400: #4ade80;
+  --color-green-500: #22c55e;
+  --color-green-600: #16a34a;
+  --color-green-700: #15803d;
+  --color-green-800: #166534;
+  --color-green-900: #14532d;
+  --color-green-light: #DAF1DC;
+  --color-green-default: #00b200;
+
+  --color-neutral-0: #FFFFFF;
+  --color-neutral-10: #FAFBFC;
+  --color-neutral-20: #F4F5F7;
+  --color-neutral-30: #EBECF0;
+  --color-neutral-40: #DFE1E6;
+  --color-neutral-50: #C1C7D0;
+  --color-neutral-60: #B3BAC5;
+  --color-neutral-70: #A5ADBA;
+  --color-neutral-80: #97A0AF;
+  --color-neutral-90: #8993A4;
+  --color-neutral-100: #7A869A;
+  --color-neutral-200: #6B778C;
+  --color-neutral-300: #5E6C84;
+  --color-neutral-400: #505F79;
+  --color-neutral-500: #42526E;
+  --color-neutral-600: #344563;
+  --color-neutral-700: #253858;
+  --color-neutral-800: #172B4D;
+  --color-neutral-900: #091E42;
+  --color-neutral-black: #000;
+  --color-neutral-white: #FFFFFF;
+  --color-neutral-lightest: #F2F7F8;
+  --color-neutral-light: #E8EEF0;
+
+  --color-blue-50: #DEEBFF;
+  --color-blue-75: #B3D4FF;
+  --color-blue-100: #4C9AFF;
+  --color-blue-200: #2684FF;
+  --color-blue-300: #0065FF;
+  --color-blue-400: #0052CC;
+  --color-blue-500: #0747A6;
+
+  --color-cyan-600: #22D3EE;
+
+  --color-red-lightest: #F8F2F2;
+  --color-red-light: #F9DCDC;
+  --color-red-default: #D11800;
+  --color-red-dark: #9b0000;
+
+  --color-orange-light: #ffb347;
+  --color-orange-default: #fa9200;
+
+  --color-main-light: #DEEBFF;
+  --color-main-dark: #0052CC;
+
+  --spacing-76: 305px; /* Convert from theme.spacing */
+
+  --z-index-1: 1;
+  --z-index-2: 2;
+}
+
+
+/* Utilities */
+@layer utilities {
+  .w-1\/10 {
+    width: 10%;
+  }
+  .w-2\/10 {
+    width: 20%;
+  }
+  .w-3\/10 {
+    width: 30%;
+  }
+  .w-4\/10 {
+    width: 40%;
+  }
+  .w-5\/10 {
+    width: 50%;
+  }
+  .w-6\/10 {
+    width: 60%;
+  }
+  .w-7\/10 {
+    width: 70%;
+  }
+  .w-8\/10 {
+    width: 80%;
+  }
+  .w-9\/10 {
+    width: 90%;
+  }
+
+  /* Text utilities */
+  .title {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--color-text-body);
+  }
+   .subtitle {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--color-text-subtitle);
+  }
+
+  /* Other utilities */
+  .checkboard {
+    background-color: #fff;
+    background-size: 60px 60px;
+    background-position: 0 0, 30px 30px;
+    background-image: linear-gradient(
+            45deg,
+            #f4f5f7 25%,
+            transparent 25%,
+            transparent 75%,
+            #f4f5f7 75%,
+            #f4f5f7
+    ),
+    linear-gradient(
+            45deg,
+            #f4f5f7 25%,
+            transparent 25%,
+            transparent 75%,
+            #f4f5f7 75%,
+            #f4f5f7
+    );
+  }
+}
+
+@utility bg-multiselect-remove {
+  background-image: var(--bg-multiselect-remove);
+}
+@utility bg-multiselect-caret {
+  background-image: var(--bg-multiselect-caret);
+}
+@utility bg-multiselect-spinner {
+  background-image: var(--bg-multiselect-spinner);
+}
+
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";

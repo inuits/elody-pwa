@@ -13,7 +13,7 @@
         :class="[`pl-24 h-screen flex flex-col`]"
       >
         <the-header />
-        <div :class="['flex-grow', { 'h-0': isSingle }]">
+        <div :class="['grow', { 'h-0': isSingle }]">
           <router-view />
         </div>
       </div>
@@ -87,7 +87,7 @@ const refreshPage = (): void => {
 </script>
 
 <style>
-@import "@/assets/base.css";
+@import "@/assets/main.css";
 
 .logo {
   writing-mode: vertical-lr;

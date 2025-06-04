@@ -52,10 +52,10 @@ progress {
 }
 
 progress::-webkit-progress-value {
-  @apply bg-accent-normal;
+  background-color: var(--color-accent-normal);
 }
 
 progress::-moz-progress-bar {
-  @apply bg-accent-normal;
+  background-color: var(--color-accent-normal);
 }
 </style>

@@ -15,7 +15,6 @@
           v-if="auth.isAuthenticated.value === false"
           @click="auth.redirectToLogin()"
           class="overflow-hidden px-4 font-bold"
-          ss
         >
           {{ t("navigation.log-in") }}
         </span>

@@ -116,7 +116,7 @@ const setClasses = () => {
   if (props.autocompleteStyle === "readOnly") {
     classes.value["container"] = "multiselect border-none !bg-white";
     classes.value["tags"] =
-      "flex-grow flex-shrink flex flex-wrap items-center mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
+      "grow shrink flex flex-wrap items-center mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
   }
 };
 
@@ -134,7 +134,8 @@ const handleTagCreate = async (option: any) => {
 </script>
 
 <style>
-@import "@vueform/multiselect/themes/tailwind.css";
+@reference "@/assets/main.css";
+@import "@/assets/multiselect-custom-theme.css";
 
 .multiselect-search {
   border: none;

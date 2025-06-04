@@ -10,14 +10,14 @@
     <li
       data-test="li-tree"
       :data-test-depth="`depth-${depth}`"
-      class="text-neutral-700 font-bold flex items-center relative flex-grow justify-between border-neutral-50 hover:border-blue-500 border-r-4"
+      class="text-neutral-700 font-bold flex items-center relative grow justify-between border-neutral-50 hover:border-blue-500 border-r-4"
       :class="{
         'bg-blue-75':
           selectedDirectory && selectedDirectory.id === directory.id,
       }"
     >
       <div
-        class="py-4 flex items-center flex-grow mr-10 group cursor-pointer"
+        class="py-4 flex items-center grow mr-10 group cursor-pointer"
         @click="updateSelectedDirectory && updateSelectedDirectory(directory)"
       >
         <span
@@ -36,7 +36,7 @@
         </span>
       </div>
       <div
-        class="flex-grow-0"
+        class="grow-0"
         :class="{ 'w-11': !hasSubDirectories() }"
         @click="toggle"
       >
@@ -136,7 +136,7 @@ export default defineComponent({
       { dir: `${props.directory.id}/` },
       () => ({
         enabled: fetchEnabled.value,
-      })
+      }),
     );
     const subDirectories = ref<Directory[]>([]);
 
@@ -144,7 +144,7 @@ export default defineComponent({
       if (value.data) {
         Object.keys(value.data).forEach((key) => {
           subDirectories.value = value.data[key] as Directory[];
-        })
+        });
       }
     });
 
@@ -165,7 +165,7 @@ export default defineComponent({
     >("updateSelectedDirectory");
 
     const selectedDirectory = inject<Directory | undefined>(
-      "selectedDirectory"
+      "selectedDirectory",
     );
 
     return {

@@ -149,7 +149,7 @@
         </template>
       </base-tooltip>
       <MetadataValueTooltip
-        class="flex-grow-0 flex-shrink-0 basis-0 items-center"
+        class="grow-0 shrink-0 basis-0 items-center"
         v-if="metadata.valueTooltip?.type && metadata.value"
         :value-tooltip="metadata.valueTooltip"
         :entity="metadata.value?.entity"

@@ -35,10 +35,7 @@
     </div>
     <LogInLogout
       :is-expanded="isExpanded"
-      :class="[
-        'fixed bg-white pb-8 bottom-0 left-0 pl-4 w-100 w-20 logInOut',
-        { 'w-72': isExpanded },
-      ]"
+      :class="['fixed bg-white pb-8 bottom-0 left-0 pl-4']"
     />
   </nav>
 </template>

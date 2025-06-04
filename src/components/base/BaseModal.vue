@@ -90,7 +90,7 @@ dialog {
 }
 
 dialog::backdrop {
-  background-color: theme("colors.accent.normal");
+  background-color: var(--color-accent-normal);
   opacity: 0.3;
 }
 

@@ -243,14 +243,14 @@ const neededConfigurationEntityTypes = computed<string>(() => {
 button {
   padding: 0.25rem;
   margin: 0.25rem;
-  background-color: theme("colors.neutral.40");
+  background-color: var(--color-neutral-40);
   border-radius: 0.25rem;
   min-width: 2rem;
 }
 
 .is-active {
-  background-color: theme("colors.accent.normal");
-  color: theme("colors.white");
+  background-color: var(--color-accent-normal);
+  color: var(--color-white);
 }
 
 .transparent-bg {
@@ -258,8 +258,8 @@ button {
 }
 
 .is-active {
-  background-color: theme("colors.accent.normal");
-  color: theme("colors.white");
+  background-color: var(--color-accent-normal);
+  color: var(--color-white);
 }
 
 .transparent-bg {

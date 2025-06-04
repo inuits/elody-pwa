@@ -1,18 +1,14 @@
 <template>
-  <ul
-    v-if="item"
-    class="border-neutral-700"
-  >
+  <ul v-if="item" class="border-neutral-700">
     <li
       data-test="li-tree"
-      class="text-neutral-700 font-bold flex items-center relative flex-grow justify-between border-neutral-50 hover:border-blue-500 border-r-4"
+      class="text-neutral-700 font-bold flex items-center relative grow justify-between border-neutral-50 hover:border-blue-500 border-r-4"
       :class="{
-        'bg-blue-75':
-          selectedItem && selectedItem === item
+        'bg-blue-75': selectedItem && selectedItem === item,
       }"
     >
       <div
-        class="py-4 flex items-center flex-grow mr-10 group cursor-pointer"
+        class="py-4 flex items-center grow mr-10 group cursor-pointer"
         @click="emit('updateSelectedItem', item)"
       >
         <span
@@ -30,7 +26,6 @@
 </template>
 
 <script setup lang="ts">
-
 const props = defineProps<{
   item: any;
   selectedItem: any;
@@ -39,7 +34,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: "updateSelectedItem", selectedItem: any): void;
 }>();
-
 </script>
 
 <style scoped></style>

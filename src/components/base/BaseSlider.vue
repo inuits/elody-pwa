@@ -31,7 +31,7 @@ const handleChange = (value: number | number[]) => {
 
 <style scoped>
 .base-slider {
-  --slider-connect-bg: theme("colors.accent.normal");
+  --slider-connect-bg: var(--color-accent-normal);
   --slider-handle-ring-color: rgba(0, 0, 0, 0.32);
   --slider-handle-shadow: 0.5px 0.5px 2px 1px rgba(0, 0, 0, 0.32);
   --slider-handle-height: 0.875rem;

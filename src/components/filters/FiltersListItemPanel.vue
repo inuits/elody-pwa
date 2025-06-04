@@ -14,7 +14,7 @@
         dropdown-style="default"
         @update:model-value="$emit('update:selected-matcher', $event)"
       />
-      <div class="flex-grow"></div>
+      <div class="grow"></div>
       <BaseButtonNew
         class="!w-9 h-9"
         label=""
