@@ -123,8 +123,6 @@ const useEntityElementCollapseHelper = () => {
     collapse: undefined | boolean = undefined,
     isPreviewElement: boolean | undefined = undefined,
   ) => {
-    console.log("isPreviewElement");
-    console.log(isPreviewElement);
     if (isPreviewElement) return;
     const { element, column } = getElementByLabel(entityId, elementLabel);
     if (element && column) {
