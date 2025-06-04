@@ -4,10 +4,8 @@
       <div class="h-full basis-[56%]">
         <div class="h-[40px] mb-6">
           <LibraryBar
-            v-model:skip="skip"
             v-model:limit="limit"
             :total-items="getEnqueuedItemCount(context)"
-            @update:skip="loadItems()"
             @update:limit="loadItems()"
           />
         </div>
@@ -28,6 +26,7 @@
             :context="BulkOperationsContextEnum.BulkOperationsCsvExport"
             :total-items-count="csvExportOptions.length"
             :use-extended-bulk-operations="false"
+            :exclude-pagination="true"
             @select-page="bulkSelect"
             @select-all="bulkSelect"
           />
@@ -52,6 +51,7 @@
     <div class="basis-full h-[55px]">
       <BulkOperationsSubmitBar
         :button-label="t('bulk-operations.export-to-csv')"
+        tooltip-label="export-csv"
         :button-icon="DamsIcons.DocumentInfo"
         :disabled="
           getEnqueuedItemCount(
@@ -160,9 +160,10 @@ const context: Context = computed(
 );
 
 const items = ref<InBulkProcessableItem[]>([]);
-const loadItems = () =>
-  (items.value = getEnqueuedItems(context.value, skip.value, limit.value));
-
+const loadItems = (newSkip: number | undefined = undefined) => {
+  if (skip)  skip.value = newSkip;
+  items.value = getEnqueuedItems(context.value, skip.value, limit.value);
+};
 const refetchEnabled = ref<boolean>(false);
 const queryVariablesForExportKeys: GetBulkOperationCsvExportKeysQueryVariables =
   {

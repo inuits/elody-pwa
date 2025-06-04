@@ -90,7 +90,7 @@
       <!--        </span>-->
       <!--      </div>-->
     </div>
-    <div class="flex">
+    <div v-if="!excludePagination" class="flex">
       <BasePaginationNew
         v-model:skip="selectedSkip"
         :limit="selectedPaginationLimitOption ?? NaN"
@@ -174,7 +174,8 @@ const props = withDefaults(
     relationType: string;
     skipItemsWithRelationDuringBulkDelete?: string[];
     selectedPaginationLimitOption: number;
-    setSkip: Function;
+    excludePagination: boolean;
+    setSkip?: Function;
     totalItems: number;
   }>(),
   {
@@ -185,6 +186,8 @@ const props = withDefaults(
     enableSelection: true,
     parentEntityId: undefined,
     skipItemsWithRelationDuringBulkDelete: undefined,
+    setSkip: undefined,
+    excludePagination: false,
   },
 );
 
@@ -293,7 +296,7 @@ const setSkip = async (newSkip: number) => {
 };
 
 onMounted(() => {
-  setSelectedSkipFromState();
+  if (!props.excludePagination) setSelectedSkipFromState();
   if (entityType.value && !props.customBulkOperations)
     refetchEnabled.value = true;
   refetch();

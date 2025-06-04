@@ -14,7 +14,7 @@
           <template #default>
             <span class="text-sm text-text-placeholder">
               <div>
-                {{ t(`tooltip.buttons.disabled-${buttonLabel}-button`) }}
+                {{ t(`tooltip.buttons.disabled-${tooltipLabel}-button`) }}
               </div>
             </span>
           </template>
@@ -60,6 +60,7 @@ const { t } = useI18n();
 withDefaults(
   defineProps<{
     buttonLabel?: string;
+    tooltipLabel?: string;
     buttonIcon?: DamsIcons;
     disabled?: boolean;
     showDeleteButton?: boolean;
