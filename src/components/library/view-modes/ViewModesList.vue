@@ -117,7 +117,7 @@
       </component>
     </div>
     <div
-      v-if="previewComponentEnabled"
+      v-if="previewComponentEnabled && entities?.find((entity) => entity.id === previewForEntity)"
       class="top-[11vh] sticky my-2 h-fit border-solid border-accent-normal border-2 bg-neutral-0 rounded-lg"
     >
       <PreviewWrapper
