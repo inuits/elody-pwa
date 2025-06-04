@@ -6,8 +6,8 @@
   >
     <template v-slot:actions> </template>
     <template v-slot:content>
-      <div class="h-[75vh]">
-        <media-viewer />
+      <div class="h-[75vh] mx-1 mb-1 ">
+        <media-viewer-new />
       </div>
     </template>
   </entity-element-wrapper>
@@ -16,8 +16,8 @@
 <script lang="ts" setup>
 import type { SingleMediaFileElement } from "@/generated-types/queries";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
-import MediaViewer from "@/components/base/MediaViewer.vue";
 import { provide } from "vue";
+import MediaViewerNew from "@/components/base/MediaViewerNew.vue";
 
 provide("mediafileViewerContext", "SingleMediaFileElement");
 

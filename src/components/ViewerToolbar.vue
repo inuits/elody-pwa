@@ -31,7 +31,7 @@
         />
       </a>
     </div>
-    <div>
+    <div v-if="viewerContainsMultipleMediafiles">
       <a @click="() => {
         const id = selectPreviousMediafile(mediafileViewerContext);
         if (id) togglePreviewComponent(id);
@@ -60,7 +60,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from "vue";
+import { computed, defineComponent, onMounted, ref } from "vue";
 import { type PropType, inject } from "vue";
 import { Unicons } from "../types";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -100,7 +100,7 @@ export default defineComponent({
     const zoomOutRef = ref<HTMLDivElement | undefined>(undefined);
     const fullPageRef = ref<HTMLDivElement | undefined>(undefined);
     const homeRef = ref<HTMLDivElement | undefined>(undefined);
-    const { selectNextMediafile, selectPreviousMediafile } =
+    const { mediafileSelectionState, selectNextMediafile, selectPreviousMediafile } =
       useEntityMediafileSelector();
     const mediafileViewerContext: any = inject("mediafileViewerContext");
 
@@ -110,6 +110,8 @@ export default defineComponent({
       emit("update:fullPage", fullPageRef.value);
       emit("update:home", homeRef.value);
     });
+
+    const viewerContainsMultipleMediafiles = computed(() => mediafileSelectionState.value[mediafileViewerContext].mediafiles.length > 1)
 
     const downloadImage = async () => {
       if (!_props.mediafileId)
@@ -146,6 +148,7 @@ export default defineComponent({
       homeRef,
       mediafileViewerContext,
       downloadImage,
+      viewerContainsMultipleMediafiles,
       selectNextMediafile,
       selectPreviousMediafile,
       togglePreviewComponent,
