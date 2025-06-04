@@ -9,8 +9,11 @@
         baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder ||
         baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
       "
-      class="flex items-center justify-between cursor-pointer"
-      @click.self="toggleElementCollapse(entityId, label)"
+      :class="[
+        'flex items-center justify-between',
+        { 'cursor-pointer': !isPreviewElement }
+      ]"
+      @click.self="toggleElementCollapse(entityId, label, undefined, isPreviewElement)"
     >
       <div class="flex p-2">
         <base-tooltip
@@ -46,6 +49,7 @@
         <slot name="actions"></slot>
       </div>
       <span
+        v-if="!isPreviewElement"
         class="p-2 text-text-subtitle"
         @click="toggleElementCollapse(entityId, label)"
       >
@@ -69,6 +73,7 @@ import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
 import { useI18n } from "vue-i18n";
 import { BaseLibraryModes } from "@/generated-types/queries";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
+import { inject } from "vue";
 
 withDefaults(
   defineProps<{
@@ -86,6 +91,7 @@ withDefaults(
   },
 );
 const emit = defineEmits(["closePreviewComponent"]);
+const isPreviewElement: boolean = inject("IsPreviewElement", false);
 
 const { t } = useI18n();
 const { toggleElementCollapse } = useEntityElementCollapseHelper();
