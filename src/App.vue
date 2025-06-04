@@ -89,23 +89,6 @@ const refreshPage = (): void => {
 <style>
 @import "@/assets/main.css";
 
-.logo {
-  writing-mode: vertical-lr;
-  font-size: 20px;
-  font-weight: bold;
-  transition:
-    writing-mode 300ms ease-in-out,
-    transform 300ms ease-in-out;
-}
-
-.move-by-nav {
-  padding-left: 6rem;
-  -webkit-transition: padding-left 300ms ease-in-out;
-  -moz-transition: padding-left 300ms ease-in-out;
-  -o-transition: padding-left 300ms ease-in-out;
-  transition: padding-left 300ms ease-in-out;
-}
-
 .navbar:hover ~ .move-by-nav,
 .navbar:hover + .move-by-nav .move-by-nav {
   -webkit-transition: padding-left 300ms ease-in-out;
