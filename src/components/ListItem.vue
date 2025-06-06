@@ -24,7 +24,8 @@
             { 'bg-neutral-white': !isActiveListItem },
             { 'border-neutral-light': !isActiveListItem },
             {
-              'border-4 border-neutral-800': isActiveListItem,
+              'border-4 border-neutral-800 bg-accent-light/30':
+                isActiveListItem,
             },
           ]"
         >
