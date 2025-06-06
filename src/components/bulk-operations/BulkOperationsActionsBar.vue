@@ -393,7 +393,9 @@ watch(
 );
 </script>
 
-<style>
+<style scoped>
+@reference "@/assets/main.css";
+
 .alignment-nested-divs div div {
   @apply py-1 mr-3;
 }
