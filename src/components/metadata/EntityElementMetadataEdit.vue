@@ -6,11 +6,7 @@
         field.type === InputFieldTypes.DropdownSingleselectRelations
       "
       v-model="metadataValue"
-      :metadata-key-to-get-options-for="
-        field.advancedFilterInputForSearchingOptions?.item_types
-          ? field.advancedFilterInputForSearchingOptions?.item_types[0]
-          : fieldKey
-      "
+      :metadata-key-to-get-options-for="metadataKeyToGetOptionsFor"
       :select-type="
         field.type === InputFieldTypes.DropdownSingleselectRelations
           ? 'single'
@@ -92,7 +88,7 @@ import {
   type DropdownOption,
   EditStatus,
   Entitytyping,
-  type HiddenField
+  type HiddenField,
 } from "@/generated-types/queries";
 import { auth } from "@/main";
 import {
@@ -138,7 +134,10 @@ const metadataValue = computed<string | DropdownOption | DropdownOption[]>({
   get() {
     if (typeof props.value === "object" && props.value?.formatter) {
       if (props.value?.formatter.startsWith("link")) {
-        return { label: props.value.label, value: props.value.entity.id } as DropdownOption;
+        return {
+          label: props.value.label,
+          value: props.value.entity.id,
+        } as DropdownOption;
       } else if (props.value?.formatter.startsWith("pill")) {
         return props.value.label;
       } else {
@@ -200,6 +199,15 @@ const getValueFromMetadata = (
   }
   return newValue.value;
 };
+
+const metadataKeyToGetOptionsFor = computed(() => {
+  const field = props.field;
+  if (field.entityType) return field.entityType;
+
+  return field.advancedFilterInputForSearchingOptions?.item_types
+    ? field.advancedFilterInputForSearchingOptions?.item_types[0]
+    : props.fieldKey;
+});
 
 const getIdForHiddenFieldFilter = (): any => {
   if (

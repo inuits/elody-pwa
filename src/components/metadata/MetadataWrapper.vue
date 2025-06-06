@@ -77,8 +77,7 @@
                 :field-name="metadata.label"
                 :formId="formId"
                 :metadata-key-to-get-options-for="
-                  metadata.inputField.advancedFilterInputForSearchingOptions
-                    ?.item_types?.[0]
+                  metadataKeyToGetOptionsForRelationDropdown
                 "
                 :advanced-filter-input-for-retrieving-options="
                   metadata.inputField.advancedFilterInputForRetrievingOptions
@@ -261,6 +260,20 @@ const fieldKeyWithId = computed(
     }`,
 );
 const fieldIsValid = computed(() => meta.valid);
+
+const metadataKeyToGetOptionsForRelationDropdown = computed(() => {
+  const field = props.metadata.inputField;
+  if (field.entityType) return field.entityType;
+
+  const fieldKey =
+    isMetadataOnRelation.value || isRootdataOnRelation.value
+      ? fieldKeyWithId.value
+      : props.metadata.key;
+
+  return field.advancedFilterInputForSearchingOptions?.item_types
+    ? field.advancedFilterInputForSearchingOptions?.item_types[0]
+    : fieldKey;
+});
 
 const { conditionalFieldIsRequired } = useConditionalValidation();
 
