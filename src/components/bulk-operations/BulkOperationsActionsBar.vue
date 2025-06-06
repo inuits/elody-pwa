@@ -289,7 +289,7 @@ const setSelectedSkipFromState = () => {
   const skip = state?.queryVariables?.skip || 1;
   selectedSkip.value = skip;
   props.setSkip(skip);
-}
+};
 
 const setSkip = async (newSkip: number) => {
   await props.setSkip(newSkip, true);
@@ -334,7 +334,9 @@ const handleSelectedBulkOperation = () => {
 
   if (bulkOperationType === BulkOperationTypes.DeleteEntities) {
     modalStyle = ModalStyle.Center;
-    initializePropertiesForBulkDeleteEntities(modal?.skipItemsWithRelationDuringBulkDelete)
+    initializePropertiesForBulkDeleteEntities(
+      modal?.skipItemsWithRelationDuringBulkDelete,
+    );
   }
 
   if (bulkOperationType === BulkOperationTypes.DeleteRelations) {
@@ -391,7 +393,7 @@ watch(
 );
 </script>
 
-<style lang="postcss" scoped>
+<style scoped>
 .alignment-nested-divs div div {
   @apply py-1 mr-3;
 }
