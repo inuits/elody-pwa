@@ -45,7 +45,8 @@
             width="18"
           />
           <p class="text-center">
-            {{ addLabelToValue ? label : '' }}{{ addLabelToValue ? ':' : '' }}  {{ t(option.label) }}
+            {{ addLabelToValue ? label : "" }}{{ addLabelToValue ? ":" : "" }}
+            {{ t(option.label) }}
           </p>
         </div>
       </template>
@@ -132,7 +133,10 @@ watch(
   () => props.options,
   () => {
     if (props.options.length > 0)
-      if (props.selectFirstOptionByDefault || (!props.clearable && !selectedItem.value && !props.modelValue)) {
+      if (
+        props.selectFirstOptionByDefault ||
+        (!props.clearable && !selectedItem.value && !props.modelValue)
+      ) {
         selectedItem.value = props.options[0].value;
         emit("update:modelValue", selectedItem.value);
       }
@@ -154,3 +158,16 @@ watch(
   { immediate: true },
 );
 </script>
+
+<style>
+div.menu-option.selected {
+  background-color: var(--color-accent-light) !important;
+}
+div.menu-option:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--color-accent-light) 30%,
+    transparent
+  ) !important;
+}
+</style>
