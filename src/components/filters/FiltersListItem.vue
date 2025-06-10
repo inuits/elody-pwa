@@ -172,8 +172,6 @@ const updateFilterValue = (value: unknown) => {
   if (typeof value === "string") updateLastTypedValue(value);
   if (isEqual(value, props.filter.inputFromState?.value)) return;
 
-  console.log("Updating filter with value:", value);
-
   const isEmpty =
     (value === "" && selectedMatcher.value !== "NoneMatcher") ||
     value === null ||
