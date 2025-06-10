@@ -38,14 +38,14 @@
         </svg>
         <p
           class="fill-current underline pr-4 cursor-pointer"
-          @click="downloadCsvTemplate(`/${selectedItem.value}`)"
+          @click="downloadCsvTemplate(`/${selectedItem}`)"
         >
           {{ $t("upload-fields.csv-template-link") }}
         </p>
-        <base-dropdown-new
+        <AdvancedDropdown
           v-model:model-value="selectedItem"
           :options="mapModelValueToDropdownOptions(templateCsvs)"
-          dropdown-style="default"
+          :clearable="false"
         />
       </div>
     </div>
@@ -77,7 +77,7 @@ import type {
 import Papa from "papaparse";
 import { ref, watch } from "vue";
 import { downloadCsv, mapModelValueToDropdownOptions } from "@/helpers";
-import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
+import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 
 enum csvHeaders {
   file_identifier = "file_identifier",
@@ -117,7 +117,7 @@ const { files } = useUpload();
 const dropzone = new useDropzone();
 const selectedItem = ref<DropdownOption | undefined>(
   props.templateCsvs
-    ? mapModelValueToDropdownOptions(props.templateCsvs[0])[0]
+    ? mapModelValueToDropdownOptions(props.templateCsvs[0])[0]?.value
     : undefined,
 );
 
