@@ -711,7 +711,7 @@ export const deepToRaw = <T>(obj: T): T => {
 };
 
 export const mapModelValueToDropdownOptions = (
-  values: any[],
+  values: any | any[],
 ): DropdownOption[] => {
   if (!values) return [];
 

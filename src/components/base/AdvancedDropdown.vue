@@ -17,7 +17,7 @@
       :should-autofocus-option="false"
       @option-selected="selectItem"
     >
-      <template #menu-header>
+      <template #menu-header v-if="label">
         <div class="text-center my-1">
           <h3>{{ label }}</h3>
         </div>
@@ -72,7 +72,7 @@ import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
   defineProps<{
-    modelValue: DropdownOption | number | string | undefined;
+    modelValue: DropdownOption | number | string | string[] | undefined;
     options: DropdownOption[];
     selectFirstOptionByDefault?: boolean;
     labelPosition?: "above" | "inline";
@@ -99,7 +99,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   (
     event: "update:modelValue",
-    modelValue: DropdownOption | DropdownOption[],
+    modelValue: DropdownOption | number | string | string[] | undefined,
   ): void;
 }>();
 

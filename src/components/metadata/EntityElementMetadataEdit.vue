@@ -54,13 +54,12 @@
       :disabled="field.disabled"
       mode="edit"
     />
-    <BaseDropdownNew
+    <AdvancedDropdown
       v-else-if="field.type === InputFieldTypes.Dropdown"
-      v-model:model-value="metadataValue as DropdownOption | DropdownOption[]"
+      v-model:model-value="metadataValue"
       :options="field.options as DropdownOption[]"
-      dropdown-style="defaultWithBorder"
+      :multiple="field.multiple || false"
       :disable="fieldEditIsDisabled"
-      :multiple="field.multiple"
     />
     <BaseInputTextNumberDatetime
       v-else
@@ -96,7 +95,6 @@ import {
   type BaseRelationValuesInput,
   type InputField as InputFieldType,
 } from "@/generated-types/queries";
-import BaseDropdownNew from "../base/BaseDropdownNew.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import { addCurrentTimeZoneToDateTimeString, isDateTime } from "@/helpers";
@@ -105,6 +103,7 @@ import { useConditionalValidation } from "@/composables/useConditionalValidation
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
+import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 
 const emit = defineEmits(["update:value"]);
 const { t } = useI18n();
@@ -130,14 +129,11 @@ const props = defineProps<{
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 
 const { addEditableMetadataKeys } = useFormHelper();
-const metadataValue = computed<string | DropdownOption | DropdownOption[]>({
+const metadataValue = computed<string | string[]>({
   get() {
     if (typeof props.value === "object" && props.value?.formatter) {
       if (props.value?.formatter.startsWith("link")) {
-        return {
-          label: props.value.label,
-          value: props.value.entity.id,
-        } as DropdownOption;
+        return props.value.entity.id;
       } else if (props.value?.formatter.startsWith("pill")) {
         return props.value.label;
       } else {
