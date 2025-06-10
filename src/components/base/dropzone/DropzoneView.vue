@@ -1,13 +1,13 @@
 <template>
   <div
     ref="dropzoneView"
-    class="bg-neutral-white w-full inline-block border-dashed border-[3px] border-text-light rounded-xl"
     :class="[
-      fileCount === 0 ? 'flex justify-center items-center cursor-pointer' : '',
-      `${style}`,
+      'bg-neutral-white w-full h-full border-dashed border-[3px] border-text-light rounded-xl',
+      { 'flex justify-center items-center': fileCount === 0 },
+      style,
     ]"
   >
-    <div v-show="fileCount === 0" class="inline-block w-9/12 text-center">
+    <div v-show="fileCount === 0" class="text-center inline-block">
       <div class="dz-message" data-dz-message>
         <div class="text-body">
           {{ $t(dropzoneLabel) }}
@@ -21,7 +21,6 @@
 import { onMounted, ref } from "vue";
 
 const dropzoneView = ref<HTMLDivElement>();
-
 
 const props = withDefaults(
   defineProps<{
