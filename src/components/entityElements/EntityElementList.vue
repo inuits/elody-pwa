@@ -4,7 +4,11 @@
       data-test="entity-element-wrapper"
       v-if="showElementList"
       :class="[
-        { 'mb-5': baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary && !isPreviewElement },
+        {
+          'mb-5':
+            baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary &&
+            !isPreviewElement,
+        },
         { 'pb-1': baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary },
         { 'ml-2': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary },
       ]"
@@ -22,7 +26,8 @@
             {
               'mx-1 pb-2 bg-neutral-lightest':
                 baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-                baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder ||
+                baseLibraryMode ===
+                  BaseLibraryModes.BasicBaseLibraryWithBorder ||
                 baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
             },
           ]"

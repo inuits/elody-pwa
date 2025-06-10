@@ -28,18 +28,19 @@
     </base-tooltip>
     <h1
       data-cy="entity-element-window-title"
-      class="subtitle text-text-body p-2 text-center absolute left-1/2 transform -translate-x-1/2 truncate max-w-[90%]"
+      class="subtitle text-text-body p-2 truncate max-w-[90%]"
       v-if="previewComponent.title"
     >
       {{ t(previewComponent.title) }}
     </h1>
     <h1
       data-cy="entity-element-window-title"
-      class="subtitle text-text-body p-2 text-center absolute left-1/2 transform -translate-x-1/2 truncate max-w-[90%]"
+      class="subtitle text-text-body p-2 truncate max-w-[90%]"
       v-if="previewComponent.type === PreviewTypes.MediaViewer"
     >
       {{ getTitleFromEntity }}
     </h1>
+    <div><!-- Only here to center the title :) --></div>
   </div>
   <div class="primary-preview">
     <entity-column
