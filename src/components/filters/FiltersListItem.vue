@@ -66,7 +66,7 @@ const { t } = useI18n();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
 const isOpen = ref(props.filter.isActive);
 const matcherComponent = ref();
-const selectedMatcher = ref<DropdownOption>();
+const selectedMatcher = ref<string>();
 const filterOptions = ref<string[]>([]);
 const lastTypedValue = ref<string>("");
 
@@ -86,22 +86,22 @@ const defaultMatcher = computed(
 );
 
 const loadMatcher = async () => {
-  if (!selectedMatcher.value?.value) return;
+  if (!selectedMatcher.value) return;
 
   try {
-    const matcher = selectedMatcher.value.value;
+    const matcher = selectedMatcher.value;
 
     const module = await import(`@/components/filters/matchers/${matcher}.vue`);
     matcherComponent.value = markRaw(module.default);
   } catch (e) {
     console.error(
-      `Matcher '${selectedMatcher.value?.value}' could not be loaded`,
+      `Matcher '${selectedMatcher.value}' could not be loaded`,
       e,
     );
   }
 };
 
-const getDefaultMatcher = (): DropdownOption | undefined => {
+const getDefaultMatcher = (): string | undefined => {
   const defaultMatchers: { [type: string]: string } = {
     [AdvancedFilterTypes.Selection]: "ExactMatcher",
     [AdvancedFilterTypes.Text]: "ContainsMatcher",
@@ -109,10 +109,10 @@ const getDefaultMatcher = (): DropdownOption | undefined => {
   };
 
   const matcherName = defaultMatchers[props.filter.advancedFilter.type];
-  return props.matchers.find((m) => m.value === matcherName);
+  return props.matchers.find((m) => m.value === matcherName)?.value;
 };
 
-const updateSelectedMatcher = (matcher: DropdownOption) => {
+const updateSelectedMatcher = (matcher: string) => {
   selectedMatcher.value = matcher;
 };
 
@@ -125,8 +125,8 @@ const resetFilter = () => {
   lastTypedValue.value = "";
   emit("deactivateFilter", props.filter.advancedFilter.key);
 
-  const shouldResetToDefault = ["AnyMatcher", "NoneMatcher"].includes(
-    selectedMatcher.value?.value,
+  const shouldResetToDefault = selectedMatcher.value !== undefined && ["AnyMatcher", "NoneMatcher"].includes(
+    selectedMatcher.value,
   );
   if (!shouldResetToDefault) {
     reloadMatcherComponent();

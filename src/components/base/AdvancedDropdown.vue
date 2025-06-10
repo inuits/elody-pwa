@@ -17,7 +17,7 @@
       :should-autofocus-option="false"
       @option-selected="selectItem"
     >
-      <template #menu-header v-if="label">
+      <template #menu-header v-if="showMenuHeader">
         <div class="text-center my-1">
           <h3>{{ label }}</h3>
         </div>
@@ -83,6 +83,7 @@ const props = withDefaults(
     clearable?: boolean;
     addLabelToValue?: boolean;
     addIconToValue?: boolean;
+    showMenuHeader?: boolean;
   }>(),
   {
     selectFirstOptionByDefault: false,
@@ -93,6 +94,7 @@ const props = withDefaults(
     clearable: true,
     addLabelToValue: false,
     addIconToValue: false,
+    showMenuHeader: true,
   },
 );
 

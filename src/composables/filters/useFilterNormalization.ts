@@ -47,14 +47,14 @@ export const useFilterNormalization = () => {
       .map(normalizeFilterForApi);
   };
 
-  const shouldMatchExact = (matcher?: DropdownOption): boolean => {
+  const shouldMatchExact = (matcher?: string): boolean => {
     return (
       !!matcher &&
       [
         Matchers.ExactMatcher,
         Matchers.MinIncludedMatcher,
         Matchers.MaxIncludedMatcher,
-      ].includes(matcher.value)
+      ].includes(matcher)
     );
   };
 

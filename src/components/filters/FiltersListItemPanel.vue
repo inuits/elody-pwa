@@ -4,14 +4,14 @@
     class="flex flex-col gap-4 p-6 bg-neutral-light"
   >
     <div class="flex w-full justify-start gap-4">
-      <BaseDropdownNew
+      <AdvancedDropdown
         data-cy="filter-matcher-dropdown"
         class="max-h-9"
         :model-value="selectedMatcher"
         :options="matchers"
+        :label="defaultLabel"
+        :show-menu-header="false"
         label-position="inline"
-        :default-label="defaultLabel"
-        dropdown-style="default"
         @update:model-value="$emit('update:selected-matcher', $event)"
       />
       <div class="grow"></div>
@@ -32,9 +32,9 @@
 
 <script lang="ts" setup>
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import type { DropdownOption } from "@/generated-types/queries";
 import { DamsIcons } from "@/generated-types/queries";
+import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 
 defineProps({
   matchers: {
@@ -42,7 +42,7 @@ defineProps({
     required: true,
   },
   selectedMatcher: {
-    type: Object as () => DropdownOption,
+    type: String,
     default: undefined,
   },
   defaultLabel: {

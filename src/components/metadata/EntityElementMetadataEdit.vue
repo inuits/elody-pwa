@@ -60,6 +60,7 @@
       :options="field.options as DropdownOption[]"
       :multiple="field.multiple || false"
       :disable="fieldEditIsDisabled"
+      :show-menu-header="false"
     />
     <BaseInputTextNumberDatetime
       v-else

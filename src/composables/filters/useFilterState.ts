@@ -57,7 +57,7 @@ export const useFilterState = () => {
   const activateFilter = (
     key: string | string[],
     value: any,
-    matcher?: DropdownOption,
+    matcher?: string,
   ) => {
     const filter = filters.value.find((f) =>
       isEqual(f.advancedFilter.key, key),

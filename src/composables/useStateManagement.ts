@@ -12,7 +12,7 @@ export type FilterListItem = {
   isDisplayed: boolean;
   advancedFilter: AdvancedFilter;
   inputFromState: AdvancedFilterInput | undefined;
-  selectedMatcher: DropdownOption | undefined;
+  selectedMatcher: string | undefined;
 };
 
 type BaseLibraryState = {
