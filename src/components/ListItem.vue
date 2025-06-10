@@ -107,11 +107,9 @@
             <ImageViewer
               v-if="canShowCopyRight() && media && !imageSrcError"
               :key="`${itemId}-image-${imageSize}`"
-              :class="[
-                { '!h-10 !w-10 min-w-10 min-h-10': viewMode === 'list' },
-                { '!h-48 !w-48': viewMode === 'grid' },
-                'object-cover self-center outline-none',
-              ]"
+              class="object-cover self-center outline-none"
+              :height-class="viewMode === 'list' ? 'h-10' : '!h-48'"
+              :width-class="viewMode === 'list' ? 'w-10' : '!w-48'"
               :url="
                 mediaIsLink
                   ? media

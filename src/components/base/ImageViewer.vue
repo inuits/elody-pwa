@@ -1,19 +1,35 @@
 <template>
   <div
     v-if="isLoading"
-    class="relative bg-neutral-100 h-100 w-100 opacity-40 animate-pulse z-0"
+    :class="[
+      'relative bg-neutral-100 opacity-40 animate-pulse z-0',
+      heightClass,
+      widthClass,
+    ]"
   />
-  <img v-else :src="imageUrl" />
+  <img v-else :class="[heightClass, widthClass]" :src="imageUrl" />
 </template>
 
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 import { useGetMediafile } from "@/composables/useGetMediafile";
+import type {
+  Context,
+  InBulkProcessableItem,
+} from "@/composables/useBulkOperations";
 
-const props = defineProps<{
-  url?: any;
-  mediaIsLink: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    url?: any;
+    mediaIsLink: boolean;
+    heightClass: string;
+    widthClass: string;
+  }>(),
+  {
+    heightClass: "h-10",
+    widthClass: "w-10",
+  },
+);
 
 const emit = defineEmits<{
   (event: "error"): void;
