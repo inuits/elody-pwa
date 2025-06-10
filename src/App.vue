@@ -8,10 +8,7 @@
     />
     <the-navigation class="navbar" />
     <div>
-      <div
-        class="bg-neutral-lightest"
-        :class="[`pl-24 h-screen flex flex-col`]"
-      >
+      <div class="bg-neutral-lightest pl-24 h-screen flex flex-col">
         <the-header />
         <div :class="['grow', { 'h-0': isSingle }]">
           <router-view />

@@ -1,21 +1,20 @@
 <template>
   <div data-cy="language-select" :key="locale" class="float-right">
-    <BaseDropdownNew
-      v-if="languageOptions"
-      :model-value="selectedLanguageOption"
+    <AdvancedDropdown
+      v-model:model-value="selectedLanguageOption"
       @update:model-value="setLanguage"
       :options="languageOptions"
+      :label="t('library.language')"
+      :clearable="false"
       label-position="inline"
-      dropdown-style="default"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch, computed, inject } from "vue";
+import { ref, watch, computed, inject, onBeforeMount } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
-import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import {
   DamsIcons,
   TypeModals,
@@ -25,12 +24,13 @@ import { useStateManagement } from "@/composables/useStateManagement";
 import { useEditMode } from "@/composables/useEdit";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
+import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 
 const { closeModal } = useBaseModal();
 const { availableLocales, locale, t } = useI18n();
 const { updateGlobalState, getGlobalState } = useStateManagement();
 const { initializeConfirmModal } = useConfirmModal();
-const selectedLanguageOption = ref<DropdownOption | undefined>();
+const selectedLanguageOption = ref<string | undefined>();
 const config = inject("config") as any;
 const route = useRoute();
 
@@ -56,16 +56,16 @@ if (displayPreferences?.lang) {
 const setSelectedLanguageOption = (): void => {
   selectedLanguageOption.value = languageOptions.value.find(
     (language) => language.value === locale.value,
-  );
+  )?.value;
 };
 
-onMounted(() => {
+onBeforeMount(() => {
   setSelectedLanguageOption();
 });
 
 watch(selectedLanguageOption, () => {
   if (selectedLanguageOption.value) {
-    locale.value = selectedLanguageOption.value.value;
+    locale.value = selectedLanguageOption.value;
 
     updateGlobalState("_displayPreferences", { lang: locale.value });
     createOptionsFromAvailableLanguages(availableLocales);
@@ -73,7 +73,7 @@ watch(selectedLanguageOption, () => {
   }
 });
 
-const setLanguage = (option: DropdownOption | DropdownOption[]) => {
+const setLanguage = (option: string) => {
   const id = String(route.params["id"]);
   if (!id) return;
 
@@ -82,7 +82,7 @@ const setLanguage = (option: DropdownOption | DropdownOption[]) => {
     return openChangeLocaleConfirmationModal(option);
   }
 
-  selectedLanguageOption.value = option as DropdownOption;
+  selectedLanguageOption.value = option;
 };
 
 const openChangeLocaleConfirmationModal = (
@@ -91,15 +91,12 @@ const openChangeLocaleConfirmationModal = (
   initializeConfirmModal({
     confirmButton: {
       buttonCallback: () => {
-        selectedLanguageOption.value = option as DropdownOption;
+        selectedLanguageOption.value = Array.isArray(option) ? option[0].value : option.value;
         closeModal(TypeModals.Confirm);
       },
     },
     declineButton: {
       buttonCallback: () => {
-        selectedLanguageOption.value = {
-          ...selectedLanguageOption.value,
-        } as DropdownOption;
         closeModal(TypeModals.Confirm);
       },
     },

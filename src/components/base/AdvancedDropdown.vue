@@ -163,6 +163,9 @@ watch(
 </script>
 
 <style>
+:deep(.vue-select) {
+  --vs-border-radius: 10px;
+}
 div.menu-option.selected {
   background-color: var(--color-accent-light) !important;
 }
