@@ -38,7 +38,7 @@ import {
   useBulkOperations,
   BulkOperationsContextEnum,
 } from "@/composables/useBulkOperations";
-import { computed, markRaw, onMounted, ref, watch } from "vue";
+import { computed, markRaw, onBeforeMount, ref, watch } from "vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import isEqual from "lodash.isequal";
@@ -203,7 +203,7 @@ watch(
   },
 );
 
-onMounted(() => {
+onBeforeMount(() => {
   if (defaultMatcher.value && !selectedMatcher.value) {
     selectedMatcher.value = defaultMatcher.value;
     loadMatcher();

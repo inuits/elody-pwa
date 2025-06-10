@@ -10,6 +10,7 @@
         :model-value="selectedMatcher"
         :options="matchers"
         :label="defaultLabel"
+        :clearable="false"
         :show-menu-header="false"
         label-position="inline"
         @update:model-value="$emit('update:selected-matcher', $event)"
