@@ -16,7 +16,7 @@ const emit = defineEmits<{
 }>();
 
 onMounted(() => {
-  emit("updateValue", "*");
+  emit("updateValue", "");
 });
 </script>
 

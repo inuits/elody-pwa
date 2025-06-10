@@ -173,7 +173,7 @@ const updateFilterValue = (value: unknown) => {
   if (isEqual(value, props.filter.inputFromState?.value)) return;
 
   const isEmpty =
-    value === "" ||
+    (value === "" && selectedMatcher.value !== "NoneMatcher") ||
     value === null ||
     value === undefined ||
     (Array.isArray(value) && value.length === 0) ||
