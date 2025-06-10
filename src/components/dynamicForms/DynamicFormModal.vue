@@ -7,11 +7,11 @@
         ? 'bg-neutral-lightest'
         : 'bg-neutral-white'
     "
-    :modalHeightStyle="'max-h-[90vh] my-auto'"
+    :modalHeightStyle="'max-h-[90vh]'"
     @hide-modal="handleCloseModal"
   >
     <div class="flex flex-col w-full h-full overflow-auto">
-      <template v-if="shouldRenderTabs" class="h-full">
+      <template v-if="shouldRenderTabs">
         <baseTabs :tabs="tabsTitles">
           <baseTab v-for="(formTab, tabIndex) in formTabArray" :key="tabIndex">
             <dynamic-form
@@ -80,14 +80,14 @@ watch(
     if (modalIsOpen) {
       clearFormTabs();
     }
-  }
+  },
 );
 
 watch(
   () => formTabs.value,
   () => {
     if (formTabs.value) initializeModal();
-  }
+  },
 );
 
 onMounted(() => {
@@ -111,7 +111,7 @@ const tabsTitles = computed(() => {
   return Object.values(formTabs.value ?? {}).flatMap((value) =>
     Object.entries(value)
       .filter(([_, nestedValue]) => nestedValue.__typename === "FormTab")
-      .map(([nestedKey, _]) => t("entity." + nestedKey))
+      .map(([nestedKey, _]) => t("entity." + nestedKey)),
   );
 });
 
@@ -123,9 +123,9 @@ const shouldRenderTabs = computed(() => {
         (value?.__typename === "FormTab"
           ? 1
           : typeof value === "object"
-          ? countFormTabs(value)
-          : 0),
-      0
+            ? countFormTabs(value)
+            : 0),
+      0,
     );
 
   return formTabs.value ? countFormTabs(formTabs.value) > 1 : false;
@@ -139,7 +139,7 @@ const formTabArray = computed(() => {
         (typeof value === "object" &&
           value !== null &&
           extractFormTabs(value)) ||
-        []
+        [],
     );
 
   return formTabs.value ? extractFormTabs(formTabs.value) : [];

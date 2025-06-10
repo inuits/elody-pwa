@@ -108,8 +108,8 @@
               v-if="canShowCopyRight() && media && !imageSrcError"
               :key="`${itemId}-image-${imageSize}`"
               :class="[
-                { 'h-10 w-10 min-w-10 min-h-10': viewMode === 'list' },
-                { 'h-48 w-48': viewMode === 'grid' },
+                { '!h-10 !w-10 min-w-10 min-h-10': viewMode === 'list' },
+                { '!h-48 !w-48': viewMode === 'grid' },
                 'object-cover self-center outline-none',
               ]"
               :url="
@@ -310,7 +310,6 @@ import BaseContextMenuActions from "./BaseContextMenuActions.vue";
 import { hoveredListItem } from "@/composables/useListItemHelper";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { useI18n } from "vue-i18n";
-import { vi } from "vitest";
 
 const props = withDefaults(
   defineProps<{

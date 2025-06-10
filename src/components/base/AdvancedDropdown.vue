@@ -1,7 +1,10 @@
 <template>
   <div
     data-cy="base-dropdown-new"
-    :class="[labelPosition === 'inline' ? 'flex items-center' : undefined]"
+    :class="[
+      labelPosition === 'inline' ? 'flex items-center' : undefined,
+      'vue-advanced-select',
+    ]"
   >
     <VueSelect
       class="text-text-body bg-neutral-white border-none rounded-lg"
@@ -19,7 +22,7 @@
           <h3>{{ label }}</h3>
         </div>
       </template>
-      <template #option="{ option, index }" class="flex">
+      <template #option="{ option }">
         <div v-if="option.value !== selectedItem" class="mr-2">
           <unicon
             v-if="option.icon && Unicons[option.icon]?.name"
@@ -35,7 +38,7 @@
           {{ t(option.label) }}
         </div>
       </template>
-      <template #value="{ option, index }">
+      <template #value="{ option }">
         <div class="text-text-body flex items-center">
           <unicon
             v-if="addIconToValue && option.icon && Unicons[option.icon]?.name"
@@ -169,5 +172,12 @@ div.menu-option:hover {
     var(--color-accent-light) 30%,
     transparent
   ) !important;
+}
+
+.vue-advanced-select .search-input {
+  &:focus {
+    outline: none !important;
+    box-shadow: none;
+  }
 }
 </style>

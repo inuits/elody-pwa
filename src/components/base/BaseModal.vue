@@ -58,8 +58,8 @@ const modalStyle = computed(() => modalStyles[currentModalStyle.value]);
 const modalStyles: { [key: string]: string } = {
   right: `min-w-[40vw] w-fit h-screen max-h-screen mr-0 my-0`,
   rightWide: `min-w-[80vw] w-fit h-screen max-h-screen mr-0 my-0`,
-  center: `min-w-[50vw] w-fit ${props.modalHeightStyle}`,
-  centerWide: `min-w-[80vw] w-fit max-h-[90vh]`,
+  center: `min-w-[50vw] w-fit m-auto ${props.modalHeightStyle}`,
+  centerWide: `min-w-[80vw] w-fit m-auto max-h-[90vh]`,
   left: "",
 };
 
