@@ -364,7 +364,19 @@ watch(
 }
 
 /* Parent container queries */
-@container parent (min-width: 768px) {
+@container parent (min-width: 500px) {
+  .responsive-grid {
+    grid-template-columns: 40% 60%;
+  }
+}
+
+@container parent (min-width: 630px) {
+  .responsive-grid {
+    grid-template-columns: 35% 65%;
+  }
+}
+
+@container parent (min-width: 830px) {
   .responsive-grid {
     grid-template-columns: 30% 70%;
   }
@@ -377,7 +389,7 @@ watch(
 }
 
 /* Preview container queries */
-@container preview (min-width: 500px) {
+@container preview (min-width: 450px) {
   .responsive-grid {
     grid-template-columns: 40% 60%;
   }

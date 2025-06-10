@@ -46,7 +46,8 @@
       </div>
       <div
         :class="[
-          'flex max-w-[45vw] items-center subtitle text-neutral-black truncate',
+          `flex max-w-[10vw] min-[1200px]:max-w-[20vw] min-[1250px]:max-w-[25vw] min-[1330px]:max-w-[30vw] min-[1400px]:max-w-[33vw] min-[1550px]:max-w-[40vw] min-[1650px]:max-w-[45vw]
+            items-center subtitle text-neutral-black truncate`,
           { 'max-w-[40vw] truncate': !truncatePreviousRouteName },
         ]"
       >
