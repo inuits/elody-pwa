@@ -3,7 +3,7 @@
     data-cy="base-button-new"
     type="button"
     :disabled="disabled"
-    class="flex justify-center items-center whitespace-nowrap w-full rounded-md outline-none transition-colors duration-300 disabled:cursor-auto"
+    class="flex justify-center items-center whitespace-nowrap w-full rounded-md outline-none transition-colors duration-300 cursor-pointer disabled:cursor-auto"
     :class="[
       label ? `pl-1.5` : ``,
       `${selectedButtonStyle.textColor} ${selectedButtonStyle.bgColor}`,
@@ -141,12 +141,12 @@ const props = withDefaults(
     disabled: false,
     iconHeight: 18,
     loading: false,
-  }
+  },
 );
 
 const { t } = useI18n();
 
 const selectedButtonStyle = computed<Button>(
-  () => buttonStyles[props.buttonStyle]
+  () => buttonStyles[props.buttonStyle],
 );
 </script>
