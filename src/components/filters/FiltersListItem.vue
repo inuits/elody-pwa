@@ -123,7 +123,7 @@ const reloadMatcherComponent = () => {
 
 const resetFilter = () => {
   lastTypedValue.value = "";
-  emit("deactivateFilter", props.filter.advancedFilter.key);
+  emit("deactivateFilter", props.filter.advancedFilter.key, true);
 
   const shouldResetToDefault = selectedMatcher.value !== undefined && ["AnyMatcher", "NoneMatcher"].includes(
     selectedMatcher.value,
@@ -171,6 +171,8 @@ watch(selectedMatcher, async (newVal, oldVal) => {
 const updateFilterValue = (value: unknown) => {
   if (typeof value === "string") updateLastTypedValue(value);
   if (isEqual(value, props.filter.inputFromState?.value)) return;
+
+  console.log("Updating filter with value:", value);
 
   const isEmpty =
     (value === "" && selectedMatcher.value !== "NoneMatcher") ||
