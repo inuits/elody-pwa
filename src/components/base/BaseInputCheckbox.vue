@@ -16,7 +16,7 @@
           { [selectedInputStyle.disabledStyle.textColor]: disabled },
           { [selectedInputStyle.disabledStyle.bgColor]: disabled },
           { [selectedInputStyle.disabledStyle.borderColor]: disabled },
-          `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
+          `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor} `,
         ]"
         v-model="inputValue"
         type="checkbox"
@@ -108,11 +108,11 @@ type Input = {
 };
 const accentNormalInput: Input = {
   textColor: "text-accent-normal",
-  bgColor: "bg-neutral-white",
+  bgColor: "accent-accent-normal",
   borderColor: "border-text-light checked:border-neutral-white",
   disabledStyle: {
     textColor: "disabled:text-text-light",
-    bgColor: "disabled:bg-neutral-white",
+    bgColor: "disabled:accent-neutral-white",
     borderColor: "disabled:border-neutral-light",
   },
 };

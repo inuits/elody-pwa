@@ -401,7 +401,7 @@ watch(
 }
 
 .select-actions {
-  @apply underline cursor-pointer select-none;
+  @apply px-2 underline cursor-pointer select-none;
 }
 
 .disabled-select-actions {
