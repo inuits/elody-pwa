@@ -1,13 +1,13 @@
 <template>
   <div data-cy="tenant-switcher" class="min-height-custom block">
     <div>
-      <BaseDropdownNew
+      <AdvancedDropdown
         v-model="computedValue"
         :options="tenantsAsDropdownOptions"
         :label="t('navigation.tenant')"
+        :clearable="false"
         :disable="isEdit"
         label-position="inline"
-        dropdown-style="neutralLight"
       />
     </div>
   </div>
@@ -15,15 +15,13 @@
 
 <script lang="ts" setup>
 import type { ApolloClient } from "@apollo/client/core";
-import type { DropdownOption } from "@/generated-types/queries";
-import BaseDropdownNew from "@/components/base/BaseDropdownNew.vue";
 import { useEditMode } from "@/composables/useEdit";
 import useTenant from "@/composables/useTenant";
-import { DamsIcons } from "@/generated-types/queries";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { inject, computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
+import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 
 const apolloClient = inject(DefaultApolloClient);
 const config = inject<{
@@ -46,18 +44,12 @@ const {
 
 const tenant = ref<string | undefined>();
 
-const computedValue = computed<DropdownOption>({
+const computedValue = computed<string | undefined>({
   get() {
-    return tenant.value
-      ? {
-          value: tenant.value,
-          label: getLabelById(tenant.value),
-          icon: DamsIcons.NoIcon,
-        }
-      : undefined;
+    return tenant.value;
   },
   set(value) {
-    tenant.value = value.value;
+    tenant.value = value;
   },
 });
 
