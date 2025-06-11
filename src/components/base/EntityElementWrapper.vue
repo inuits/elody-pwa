@@ -10,10 +10,12 @@
         baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
       "
       :class="[
-        'flex items-center justify-between',
-        { 'cursor-pointer': !isPreviewElement }
+        'flex items-center justify-between relative',
+        { 'cursor-pointer': !isPreviewElement },
       ]"
-      @click.self="toggleElementCollapse(entityId, label, undefined, isPreviewElement)"
+      @click.self="
+        toggleElementCollapse(entityId, label, undefined, isPreviewElement)
+      "
     >
       <div class="flex p-2">
         <base-tooltip
@@ -42,10 +44,14 @@
         <span
           data-cy="entity-element-wrapper-title"
           class="subtitle mr-2"
-          :class="[{ 'text-center absolute left-1/2 transform -translate-x-1/2': baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary }]"
-        >{{
-          previewLabel ? previewLabel : t(label)
-        }}</span>
+          :class="[
+            {
+              'text-center absolute left-1/2 transform -translate-x-1/2':
+                baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
+            },
+          ]"
+          >{{ previewLabel ? previewLabel : t(label) }}</span
+        >
         <slot name="actions"></slot>
       </div>
       <span

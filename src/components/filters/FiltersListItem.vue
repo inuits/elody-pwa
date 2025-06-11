@@ -33,7 +33,7 @@
 <script lang="ts" setup>
 import type { FilterListItem } from "@/composables/useStateManagement";
 import type { DropdownOption } from "@/generated-types/queries";
-import { AdvancedFilterTypes } from "@/generated-types/queries";
+import { AdvancedFilterTypes, Matchers } from "@/generated-types/queries";
 import {
   useBulkOperations,
   BulkOperationsContextEnum,
@@ -94,18 +94,17 @@ const loadMatcher = async () => {
     const module = await import(`@/components/filters/matchers/${matcher}.vue`);
     matcherComponent.value = markRaw(module.default);
   } catch (e) {
-    console.error(
-      `Matcher '${selectedMatcher.value}' could not be loaded`,
-      e,
-    );
+    console.error(`Matcher '${selectedMatcher.value}' could not be loaded`, e);
   }
 };
 
 const getDefaultMatcher = (): string | undefined => {
   const defaultMatchers: { [type: string]: string } = {
-    [AdvancedFilterTypes.Selection]: "ExactMatcher",
-    [AdvancedFilterTypes.Text]: "ContainsMatcher",
-    [AdvancedFilterTypes.Boolean]: "ExactMatcher",
+    [AdvancedFilterTypes.Selection]: Matchers.ExactMatcher,
+    [AdvancedFilterTypes.Text]: Matchers.ContainsMatcher,
+    [AdvancedFilterTypes.Boolean]: Matchers.ExactMatcher,
+    [AdvancedFilterTypes.Date]: Matchers.ExactMatcher,
+    [AdvancedFilterTypes.Number]: Matchers.ExactMatcher,
   };
 
   const matcherName = defaultMatchers[props.filter.advancedFilter.type];
@@ -125,9 +124,10 @@ const resetFilter = () => {
   lastTypedValue.value = "";
   emit("deactivateFilter", props.filter.advancedFilter.key, true);
 
-  const shouldResetToDefault = selectedMatcher.value !== undefined && ["AnyMatcher", "NoneMatcher"].includes(
-    selectedMatcher.value,
-  );
+  const shouldResetToDefault = [
+    Matchers.AnyMatcher,
+    Matchers.NoneMatcher,
+  ].includes(selectedMatcher.value);
   if (!shouldResetToDefault) {
     reloadMatcherComponent();
     return;
