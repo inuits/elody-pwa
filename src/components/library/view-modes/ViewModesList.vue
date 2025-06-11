@@ -9,7 +9,7 @@
       <div
         data-cy="view-modes-list"
         :class="[
-          'max-h-[68vh] overflow-scroll',
+          'max-h-[68vh] overflow-y-auto',
           {
             'grid grid-cols-[repeat(auto-fit,_minmax(300px,_1fr))] gap-2 justify-items-center max-w-full':
               mode === 'grid',
@@ -123,7 +123,7 @@
           previewComponentEnabled &&
           entities?.find((entity) => entity.id === previewForEntity)
         "
-        class="my-2 max-h-[68vh] overflow-scroll bg-neutral-0 rounded-lg"
+        class="my-2 max-h-[68vh] overflow-y-auto bg-neutral-0 rounded-lg"
       >
         <PreviewWrapper
           :preview-component="previewComponent!"
