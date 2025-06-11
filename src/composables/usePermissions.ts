@@ -80,11 +80,12 @@ const usePermissions = () => {
   ) => {
     if (ignorePermissions.value) return true;
     try {
-      if (!isPermissionsLoaded.value && permissionsMappings.value.size < 1)
+      if (!isPermissionsLoaded.value && permissionsMappings.value.size < 1) {
         throw Error("The mappings are not fetched yet. Wait a bit.");
+      }
       if (entity != undefined) {
         const entityMapping = permissionsMappings.value!.get(entity);
-        return entityMapping?.get(permission);
+        return entityMapping?.get(permission) || false;
       }
       throw Error("There is something wrong with how this function is used");
     } catch (e) {
