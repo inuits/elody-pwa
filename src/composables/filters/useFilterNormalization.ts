@@ -61,9 +61,8 @@ export const useFilterNormalization = () => {
   const normalizeFilterValue = (
     filter: { advancedFilter: AdvancedFilter },
     value: any,
-    matcher?: DropdownOption,
+    matcherType?: string,
   ): any => {
-    const matcherType = matcher?.value;
     if (matcherType === Matchers.AnyMatcher) return "*";
     if (matcherType === Matchers.NoneMatcher) return "";
 
