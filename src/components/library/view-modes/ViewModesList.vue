@@ -283,8 +283,9 @@ const getPreviewItemsForEntity = async () => {
     })
     .then((result) => {
       previewComponent.value = result.data.PreviewComponents?.previewComponent;
-      if (previewComponent.value?.openByDefault)
+      if (previewComponent.value?.openByDefault && props.entities?.[0]?.id) {
         togglePreviewComponent(props.entities[0].id);
+      }
     });
 };
 

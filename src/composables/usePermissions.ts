@@ -1,21 +1,24 @@
+import type {
+  Permission,
+  GetPermissionMappingEntityDetailQuery,
+  GetPermissionMappingEntityDetailQueryVariables,
+  DropdownOption,
+  ContextMenuActions,
+  ContextMenuElodyAction,
+  ContextMenuGeneralAction,
+  ContextMenuLinkAction,
+} from "@/generated-types/queries";
 import {
   GetPermissionMappingDocument,
   GetPermissionMappingEntityDetailDocument,
   GetAdvancedPermissionDocument,
-  type GetPermissionMappingEntityDetailQuery,
-  type GetPermissionMappingEntityDetailQueryVariables,
-  Permission,
   Entitytyping,
-  type DropdownOption,
-  type ContextMenuActions,
-  type ContextMenuElodyAction,
-  type ContextMenuGeneralAction,
-  type ContextMenuLinkAction,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
 import { reactive, ref } from "vue";
 
 const ignorePermissions = ref<boolean>(false);
+const isPermissionsLoaded = ref<boolean>(false);
 const setIgnorePermissions = (value: boolean) => {
   ignorePermissions.value = value;
 };
@@ -45,6 +48,7 @@ const setPermissionsMappings = async () => {
       permissionsMappings.value = normalizePermissions(
         result.data.PermissionMapping,
       );
+      isPermissionsLoaded.value = true;
     });
 };
 
@@ -76,7 +80,7 @@ const usePermissions = () => {
   ) => {
     if (ignorePermissions.value) return true;
     try {
-      if (permissionsMappings.value.size < 1)
+      if (!isPermissionsLoaded.value && permissionsMappings.value.size < 1)
         throw Error("The mappings are not fetched yet. Wait a bit.");
       if (entity != undefined) {
         const entityMapping = permissionsMappings.value!.get(entity);
@@ -114,6 +118,7 @@ const usePermissions = () => {
         .then((result) => {
           const isPermitted = result.data.AdvancedPermission;
           advancedPermissions[permission] = isPermitted;
+
           return isPermitted;
         });
     } catch (e) {

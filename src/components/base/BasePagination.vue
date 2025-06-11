@@ -77,11 +77,11 @@ const setManualEnteredSkip = (page: number) => {
   if (page > getLastPage()) currentPage.value = getLastPage();
   emit("update:skip", currentPage.value);
   canUpdateSkip.value = false;
-}
+};
 
 const canUpdateSkipAgain = () => {
   canUpdateSkip.value = true;
-}
+};
 
 const previous = () => {
   if (currentPage.value <= 1) return;
@@ -122,5 +122,4 @@ watch(
     }
   },
 );
-
 </script>

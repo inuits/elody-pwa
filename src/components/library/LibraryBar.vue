@@ -102,9 +102,9 @@ const { getStateForRoute } = useStateManagement();
 const { t } = useI18n();
 const route = useRoute();
 
-const setIsAsc = (sortDirection: 'asc' | 'desc') => {
-  isAsc.value = sortDirection === 'asc';
-}
+const setIsAsc = (sortDirection: "asc" | "desc") => {
+  isAsc.value = sortDirection === "asc";
+};
 
 const paginationLimitOptionsPromise = async () => {
   return apolloClient
@@ -169,7 +169,7 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
           : sortingOptionsResult?.isAsc?.toLowerCase() === "asc";
       const sortOrder = isAscFromState ? "asc" : "desc";
       selectedSortDirection.value = sortDirectionOptions.value.find(
-        (option) => option.value === sortOrder
+        (option) => option.value === sortOrder,
       )?.value;
       setIsAsc(sortOrder);
       sortOptionsPromiseIsResolved.value = true;

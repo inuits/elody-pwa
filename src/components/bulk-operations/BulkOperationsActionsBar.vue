@@ -50,52 +50,13 @@
           {{ $t("bulk-operations.select-page") }}
         </span>
       </div>
-      <!--      <div v-if="hasBulkOperationsWithItemsSelection">-->
-      <!--        <span-->
-      <!--          :class="[-->
-      <!--            totalItemsCount <= bulkSelectAllSizeLimit-->
-      <!--              ? 'select-actions'-->
-      <!--              : 'disabled-select-actions',-->
-      <!--            useExtendedBulkOperations && itemsSelected-->
-      <!--              ? `text-accent-accent`-->
-      <!--              : `text-text-body`,-->
-      <!--          ]"-->
-      <!--          @click="-->
-      <!--            () => {-->
-      <!--              if (totalItemsCount <= bulkSelectAllSizeLimit) emit('selectAll');-->
-      <!--            }-->
-      <!--          "-->
-      <!--        >-->
-      <!--          <div class="flex flex-row items-center">-->
-      <!--            {{ $t("bulk-operations.select-all") }}-->
-      <!--            <base-tooltip-->
-      <!--              v-if="totalItemsCount > bulkSelectAllSizeLimit"-->
-      <!--              position="center"-->
-      <!--            >-->
-      <!--              <template #activator="{ on }">-->
-      <!--                <div v-on="on">-->
-      <!--                  <unicon-->
-      <!--                    :name="Unicons.QuestionCircle.name"-->
-      <!--                    height="20"-->
-      <!--                  />-->
-      <!--                </div>-->
-      <!--              </template>-->
-      <!--              <template #default>-->
-      <!--                <span class="w-max hover:text-accent-accent">-->
-      <!--                  {{ t("bulk-operations.bulk-select-all-size-limit-reached", [bulkSelectAllSizeLimit]) }}-->
-      <!--                </span>-->
-      <!--              </template>-->
-      <!--            </base-tooltip>-->
-      <!--          </div>-->
-      <!--        </span>-->
-      <!--      </div>-->
     </div>
     <div v-if="!excludePagination" class="flex">
       <BasePaginationNew
         v-model:skip="selectedSkip"
         :limit="selectedPaginationLimitOption ?? NaN"
         :total-items="
-          totalItems || getStateForRoute(route)?.totalEntityCount || 1
+          totalItemsCount ?? (getStateForRoute(route)?.totalEntityCount || 1)
         "
         @update:skip="setSkip"
       />
@@ -149,7 +110,7 @@ import {
 import { useModalActions } from "@/composables/useModalActions";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { apolloClient } from "@/main";
-import { computed, onMounted, ref, toRefs, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useQuery } from "@vue/apollo-composable";
 import { useImport } from "@/composables/useImport";
@@ -176,7 +137,6 @@ const props = withDefaults(
     selectedPaginationLimitOption: number;
     excludePagination: boolean;
     setSkip?: Function;
-    totalItems: number;
   }>(),
   {
     totalItemsCount: 0,
@@ -212,7 +172,6 @@ const route = useRoute();
 const { getStateForRoute } = useStateManagement();
 const { loadDocument } = useImport();
 const refetchEnabled = ref<boolean>(false);
-const { totalItems } = toRefs(props);
 const entityType = computed(() => props.entityType || route.meta.entityType);
 const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
   GetBulkOperationsDocument,
