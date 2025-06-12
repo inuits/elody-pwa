@@ -324,11 +324,7 @@ const isPreviewComponentEnabledForListItem = (entityId: string): boolean => {
 };
 
 const configurePreviewComponentWithNewEntities = (entities: Entity[]): void => {
-  if (
-    previewComponentEnabled.value &&
-    previewComponent.value?.listItemsCoverage ===
-      ListItemCoverageTypes.OneListItem
-  )
+  if (previewComponentEnabled.value)
     previewForEntity.value = entities[0]?.id;
 };
 

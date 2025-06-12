@@ -97,7 +97,7 @@ const mapCenter = computed(() => {
 const createFeature = (mapData: MapElement, id: string): Feature => {
   return new Feature({
     geometry: new Point(
-      fromLonLat([mapData.longitude?.value, mapData.latitude?.value]),
+      fromLonLat([mapData.coordinates?.value[0], mapData.coordinates?.value[1]]),
     ),
     weight: mapData.weight?.value,
     id: id,

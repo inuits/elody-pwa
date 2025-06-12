@@ -74,11 +74,10 @@ const center = computed(() => {
       centerKey,
       props.entityId,
       "",
-    ) as string | { latitude: number; longitude: number };
-
+    );
     return [
-      (metdataCenterValue as { latitude: number }).latitude,
-      (metdataCenterValue as { longitude: number }).longitude,
+      metdataCenterValue[1],
+      metdataCenterValue[0],
     ];
   }
 });
