@@ -66,8 +66,8 @@ import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
-import EditModal from "@/components/EditModal.vue";
-import DeleteModal from "@/components/DeleteModal.vue";
+import EditModal from "@/components/modals/EditModal.vue";
+import DeleteModal from "@/components/modals/DeleteModal.vue";
 
 const config: any = inject("config");
 const router = useRouter();

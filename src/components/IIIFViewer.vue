@@ -11,6 +11,7 @@
       @toggle-preview-component:entity-id="(id) => togglePreviewComponent(id)"
     />
     <div ref="OpenSeadragonDiv" class="w-full h-full z-0" />
+    <iiif-operations-modal :fileName="imageFilename" :dimensions="dimensions" />
   </div>
 </template>
 
@@ -18,10 +19,12 @@
 import { defineComponent, onMounted, ref, watch } from "vue";
 import OpenSeadragon from "openseadragon";
 import ViewerToolbar from "./ViewerToolbar.vue";
+import IiifOperationsModal from "@/components/modals/IiifOperationsModal.vue";
 
 export default defineComponent({
   name: "IIIFViewer",
   components: {
+    IiifOperationsModal,
     ViewerToolbar,
   },
   props: {
@@ -29,6 +32,7 @@ export default defineComponent({
     isPublic: { type: Boolean, default: true },
     originalFilename: { type: String },
     mediafileId: { type: String },
+    dimensions: { type: Object },
   },
   emits: ["togglePreviewComponent:entityId"],
   setup: (props, { emit }) => {
@@ -79,14 +83,14 @@ export default defineComponent({
                 loading.value = false;
               }
             }
-          }
+          },
         );
       }
     });
 
     const togglePreviewComponent = (id: string): void => {
       emit("togglePreviewComponent:entityId", id);
-    }
+    };
 
     return {
       OpenSeadragonDiv,

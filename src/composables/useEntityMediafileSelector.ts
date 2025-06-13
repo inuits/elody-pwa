@@ -15,7 +15,9 @@ type MediaFileMetadataKeys =
   | "thumbnail_file_location"
   | "mimetype"
   | "is_primary"
-  | "is_primary_thumbnail";
+  | "is_primary_thumbnail"
+  | "height"
+  | "width";
 
 type MediafileSelectionState = {
   mediafiles: MediaFileEntity[];
@@ -40,7 +42,7 @@ export const useEntityMediafileSelector = () => {
     mediafile: MediaFileEntity | undefined = mediafileSelectionState.value[
       context
     ].selectedMediafile,
-    source: KeyValueSource = KeyValueSource.Metadata
+    source: KeyValueSource = KeyValueSource.Metadata,
   ) => {
     if (source === KeyValueSource.Metadata)
       return (mediafile?.intialValues as any)?.[key as MediaFileMetadataKeys];
@@ -51,16 +53,16 @@ export const useEntityMediafileSelector = () => {
 
   const setEntityMediafiles = (
     context: string,
-    mediafiles: MediaFileEntity[]
+    mediafiles: MediaFileEntity[],
   ) => {
     if (!context) return;
     mediafileSelectionState.value[context].mediafiles = mediafiles;
-    updateSelectedEntityMediafile(context, mediafiles[0])
+    updateSelectedEntityMediafile(context, mediafiles[0]);
   };
 
   const updateSelectedEntityMediafile = (
     context: string,
-    mediafile: MediaFileEntity | undefined
+    mediafile: MediaFileEntity | undefined,
   ) => {
     if (!context) return;
     mediafileSelectionState.value[context].selectedMediafile = mediafile;
@@ -97,7 +99,7 @@ export const useEntityMediafileSelector = () => {
   };
 
   const getCurrentlySelectedMediafileIndex = (
-    context: string
+    context: string,
   ): number | undefined => {
     if (
       mediafileSelectionState.value[context].mediafiles.length === 0 ||
@@ -106,12 +108,15 @@ export const useEntityMediafileSelector = () => {
       return undefined;
 
     const index = mediafileSelectionState.value[context].mediafiles.indexOf(
-      mediafileSelectionState.value[context].selectedMediafile
+      mediafileSelectionState.value[context].selectedMediafile,
     );
     return index;
   };
 
-  const setSelectedMediafileByIndex = (context: string, index: number): string | undefined => {
+  const setSelectedMediafileByIndex = (
+    context: string,
+    index: number,
+  ): string | undefined => {
     if (
       index >= mediafileSelectionState.value[context].mediafiles.length ||
       index < 0
@@ -120,7 +125,9 @@ export const useEntityMediafileSelector = () => {
     mediafileSelectionState.value[context].selectedMediafile =
       mediafileSelectionState.value[context].mediafiles[index];
 
-    return (mediafileSelectionState.value[context].mediafiles[index] as any)?.["id" as MediaFileMetadataKeys];
+    return (mediafileSelectionState.value[context].mediafiles[index] as any)?.[
+      "id" as MediaFileMetadataKeys
+    ];
   };
 
   return {

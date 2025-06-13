@@ -27,7 +27,7 @@
   </base-modal>
 </template>
 <script setup lang="ts">
-import BaseModal from "./base/BaseModal.vue";
+import BaseModal from "../base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
   TypeModals,

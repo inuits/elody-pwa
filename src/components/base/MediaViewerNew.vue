@@ -26,6 +26,7 @@
             KeyValueSource.Root,
           )
         "
+        :dimensions="dimensions"
         @toggle-preview-component:entity-id="
           (id: string) => emit('togglePreviewComponent', id)
         "
@@ -114,7 +115,27 @@ const mimetype = computed<string>(() =>
     mediafileSelectionState.value[mediafileViewerContext].selectedMediafile,
   ),
 );
+const dimensions = computed<{ width: number; height: number } | undefined>(() =>
+  getMediaDimensions(),
+);
 const { t } = useI18n();
+
+const getMediaDimensions = ():
+  | { width: number; height: number }
+  | undefined => {
+  const height = getValueOfMediafile(
+    mediafileViewerContext,
+    "height",
+    mediafileSelectionState.value[mediafileViewerContext].selectedMediafile,
+  );
+  const width = getValueOfMediafile(
+    mediafileViewerContext,
+    "width",
+    mediafileSelectionState.value[mediafileViewerContext].selectedMediafile,
+  );
+  if (height && width) return { width, height };
+  return undefined;
+};
 
 const viewerMap: Record<string, ElodyViewers> = {
   pdf: ElodyViewers.Pdf,

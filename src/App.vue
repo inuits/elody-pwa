@@ -43,10 +43,10 @@ import BulkoperationsModal from "@/components/bulk-operations/BulkOperationsModa
 import ConfirmModal from "./components/base/ConfirmModal.vue";
 import ConfirmModalView from "./components/ConfirmModalView.vue";
 import DynamicFormModal from "@/components/dynamicForms/DynamicFormModal.vue";
-import DeleteModal from "@/components/DeleteModal.vue";
-import SearchModal from "@/components/SearchModal.vue";
-import SearchModalAi from "@/components/SearchModalAi.vue";
-import SavedSearchesPickerModal from "@/components/SavedSearchesPickerModal.vue";
+import DeleteModal from "@/components/modals/DeleteModal.vue";
+import SearchModal from "@/components/modals/SearchModal.vue";
+import SearchModalAi from "@/components/modals/SearchModalAi.vue";
+import SavedSearchesPickerModal from "@/components/modals/SavedSearchesPickerModal.vue";
 import TheHeader from "@/components/TheHeader.vue";
 import TheNavigation from "@/components/menu/MenuNav.vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
@@ -56,7 +56,7 @@ import { auth } from "@/main";
 import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
 import CreateSavedSearchModal from "./components/CreateSavedSearchModal.vue";
-import EntityDetailModal from "@/components/EntityDetailModal.vue";
+import EntityDetailModal from "@/components/modals/EntityDetailModal.vue";
 
 const config = inject<{
   features: { hasTenantSelect: boolean };

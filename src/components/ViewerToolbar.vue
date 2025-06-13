@@ -1,69 +1,98 @@
 <template>
   <div
-    class="absolute w-full bg-neutral-0 z-[5] p-2 shadow-sm flex justify-between h-10"
+    class="absolute w-full bg-neutral-0 z-[5] p-2 shadow-sm flex justify-between items-center h-10"
   >
-    <div>
-      <a ref="fullPageRef" class="mr-2 ml-2">
+    <div class="pt-[10px]">
+      <button ref="fullPageRef" class="mr-2 ml-2">
         <unicon
           :name="Unicons.Desktop.name"
           height="20"
           class="text-neutral-700 cursor-pointer"
         />
-      </a>
-      <a ref="zoomInRef" class="mr-2"
-        ><unicon
+      </button>
+      <button ref="zoomInRef" class="mr-2">
+        <unicon
           :name="Unicons.SearchPlus.name"
           height="20"
           class="text-neutral-700 cursor-pointer"
-      /></a>
-      <a ref="zoomOutRef">
+        />
+      </button>
+      <button ref="zoomOutRef">
         <unicon
           :name="Unicons.SearchMinus.name"
           height="20"
           class="text-neutral-700 cursor-pointer"
         />
-      </a>
-      <a v-if="mediafileId" @click="downloadImage" :download="true">
+      </button>
+      <button v-if="mediafileId" @click="downloadImage">
         <unicon
           :name="Unicons.Download.name"
           height="20"
           class="text-neutral-700 cursor-pointer ml-1"
         />
-      </a>
+      </button>
     </div>
     <div v-if="viewerContainsMultipleMediafiles">
-      <a @click="() => {
-        const id = selectPreviousMediafile(mediafileViewerContext);
-        if (id) togglePreviewComponent(id);
-      }">
+      <button
+        @click="
+          () => {
+            const id = selectPreviousMediafile(mediafileViewerContext);
+            if (id) togglePreviewComponent(id);
+          }
+        "
+      >
         <unicon
           :name="Unicons.ArrowCircleLeft.name"
           height="20"
           class="text-neutral-700 cursor-pointer"
         />
-      </a>
-      <a @click="() => {
-        const id = selectNextMediafile(mediafileViewerContext);
-        if (id) togglePreviewComponent(id);
-      }">
+      </button>
+      <button
+        @click="
+          () => {
+            const id = selectNextMediafile(mediafileViewerContext);
+            if (id) togglePreviewComponent(id);
+          }
+        "
+      >
         <unicon
           :name="Unicons.ArrowCircleRight.name"
           height="20"
           class="text-neutral-700 cursor-pointer"
         />
-      </a>
+      </button>
     </div>
-    <a ref="homeRef" class="text-sm mr-2 text-neutral-700 cursor-pointer">{{
-      $t("entity.reset-viewer")
-    }}</a>
+    <div>
+      <button class="mr-2 pt-[10px]" @click="openIiifOperationsModal">
+        <unicon
+          :name="Unicons.ImageResizeLandscape.name"
+          height="20"
+          class="text-neutral-700 cursor-pointer"
+        />
+      </button>
+      <button
+        ref="homeRef"
+        class="text-sm mr-2 text-neutral-700 cursor-pointer"
+      >
+        {{ $t("entity.reset-viewer") }}
+      </button>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from "vue";
-import { type PropType, inject } from "vue";
+import {
+  computed,
+  defineComponent,
+  inject,
+  onMounted,
+  type PropType,
+  ref,
+} from "vue";
 import { Unicons } from "../types";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
+import { useBaseModal } from "@/composables/useBaseModal";
+import { ModalStyle, TypeModals } from "@/generated-types/queries";
 
 export default defineComponent({
   name: "ViewerToolbar",
@@ -94,15 +123,25 @@ export default defineComponent({
       default: "",
     },
   },
-  emits: ["update:zoomIn", "update:zoomOut", "update:fullPage", "update:home", "togglePreviewComponent:entityId"],
+  emits: [
+    "update:zoomIn",
+    "update:zoomOut",
+    "update:fullPage",
+    "update:home",
+    "togglePreviewComponent:entityId",
+  ],
   setup: (_props, { emit }) => {
     const zoomInRef = ref<HTMLDivElement | undefined>(undefined);
     const zoomOutRef = ref<HTMLDivElement | undefined>(undefined);
     const fullPageRef = ref<HTMLDivElement | undefined>(undefined);
     const homeRef = ref<HTMLDivElement | undefined>(undefined);
-    const { mediafileSelectionState, selectNextMediafile, selectPreviousMediafile } =
-      useEntityMediafileSelector();
+    const {
+      mediafileSelectionState,
+      selectNextMediafile,
+      selectPreviousMediafile,
+    } = useEntityMediafileSelector();
     const mediafileViewerContext: any = inject("mediafileViewerContext");
+    const { openModal } = useBaseModal();
 
     onMounted(() => {
       emit("update:zoomIn", zoomInRef.value);
@@ -111,20 +150,25 @@ export default defineComponent({
       emit("update:home", homeRef.value);
     });
 
-    const viewerContainsMultipleMediafiles = computed(() => mediafileSelectionState.value[mediafileViewerContext].mediafiles.length > 1)
+    const viewerContainsMultipleMediafiles = computed(
+      () =>
+        mediafileSelectionState.value[mediafileViewerContext].mediafiles
+          .length > 1,
+    );
 
     const downloadImage = async () => {
       if (!_props.mediafileId)
         throw Error(
-          `Could not download madiafile with id "${_props.mediafileId}"`
+          `Could not download madiafile with id "${_props.mediafileId}"`,
         );
 
       const imageUrl = await fetch(
-        `/api/mediafiles/${_props.mediafileId}/download`, {
+        `/api/mediafiles/${_props.mediafileId}/download`,
+        {
           headers: {
-            'Accept': 'image/jpeg'
-          }
-        }
+            Accept: "image/jpeg",
+          },
+        },
       );
       const image = await fetch(await imageUrl.text());
       const blob = await image.blob();
@@ -138,7 +182,11 @@ export default defineComponent({
 
     const togglePreviewComponent = (id: string): void => {
       emit("togglePreviewComponent:entityId", id);
-    }
+    };
+
+    const openIiifOperationsModal = () => {
+      openModal(TypeModals.IiifOperationsModal, ModalStyle.Center);
+    };
 
     return {
       Unicons,
@@ -152,6 +200,7 @@ export default defineComponent({
       selectNextMediafile,
       selectPreviousMediafile,
       togglePreviewComponent,
+      openIiifOperationsModal,
     };
   },
 });
