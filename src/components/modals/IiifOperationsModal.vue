@@ -52,6 +52,26 @@
             </button>
           </div>
         </div>
+        <div>
+          <div class="w-full">
+            <h4 class="text-md font-bold">
+              {{ t("iiif-operations-modal.format") }}
+            </h4>
+          </div>
+          <div class="flex justify-center p-4">
+            <button
+              v-for="format in availableFormats"
+              :class="[
+                'p-2 mx-2 w-[60px] h-[40px] rounded-lg text-white cursor-pointer',
+                { 'bg-accent-accent': format === currentFormat },
+                { 'bg-neutral-100': format !== currentFormat },
+              ]"
+              @click="currentFormat = format"
+            >
+              {{ format }}
+            </button>
+          </div>
+        </div>
       </div>
       <div>
         <base-button-new
@@ -82,7 +102,9 @@ const { closeModal } = useBaseModal();
 const { t } = useI18n();
 
 const availableScales = [0.25, 0.5, 1.0];
+const availableFormats = ["png", "jpg", "tif"];
 const currentScale = ref(1.0);
+const currentFormat = ref("jpg");
 const originalWidth = props.dimensions?.width || 1920;
 const originalHeight = props.dimensions?.height || 1080;
 const scaledWidth = ref(originalWidth);
@@ -90,7 +112,7 @@ const scaledHeight = ref(originalHeight);
 
 const getImage = () => {
   window.open(
-    `/api/iiif/3/${props.fileName}/full/${scaledWidth.value},${scaledHeight.value}/0/default.jpg`,
+    `/api/iiif/3/${props.fileName}/full/${scaledWidth.value},${scaledHeight.value}/0/default.${currentFormat.value}`,
     "_blank",
   );
 };
