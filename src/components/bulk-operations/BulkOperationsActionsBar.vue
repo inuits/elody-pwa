@@ -51,7 +51,7 @@
         </span>
       </div>
     </div>
-    <div v-if="!excludePagination" class="flex">
+    <div v-if="!excludePagination && !isMapViewmode" class="flex">
       <BasePaginationNew
         v-model:skip="selectedSkip"
         :limit="selectedPaginationLimitOption ?? NaN"
@@ -137,6 +137,7 @@ const props = withDefaults(
     selectedPaginationLimitOption: number;
     excludePagination: boolean;
     setSkip?: Function;
+    isMapViewmode?: boolean;
   }>(),
   {
     totalItemsCount: 0,
@@ -148,6 +149,7 @@ const props = withDefaults(
     skipItemsWithRelationDuringBulkDelete: undefined,
     setSkip: undefined,
     excludePagination: false,
+    isMapViewmode: false,
   },
 );
 
@@ -255,7 +257,7 @@ const setSkip = async (newSkip: number) => {
 };
 
 onMounted(() => {
-  if (!props.excludePagination) setSelectedSkipFromState();
+  if (!props.excludePagination && !props.isMapViewmode) setSelectedSkipFromState();
   if (entityType.value && !props.customBulkOperations)
     refetchEnabled.value = true;
   refetch();

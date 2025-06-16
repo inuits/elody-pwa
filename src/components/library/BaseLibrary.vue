@@ -64,6 +64,7 @@
           :should-use-state-for-route="shouldUseStateForRoute"
           :filters-need-context="filtersNeedContext"
           :predefined-filters="filters"
+          :on-register-api="handleRegisterAPI"
           @filter-matcher-mapping-promise="
             (promise) => (filterMatcherMappingPromise = promise)
           "
@@ -109,8 +110,10 @@
               (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
                 baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
             "
+            v-show="!displayMap"
             :route="route"
             :set-limit="setPaginationLimit"
+            :selected-pagination-limit-option="selectedPaginationLimitOption"
             :set-sort-key="setSortKey"
             :set-sort-order="setSortOrder"
             :filters-available-on-detail-page="filtersAvailableOnDetailPage"
@@ -150,6 +153,7 @@
             :selected-pagination-limit-option="selectedPaginationLimitOption"
             :total-items="totalEntityCount || NaN"
             :set-skip="setSkip"
+            :is-map-viewmode="displayMap"
             @custom-bulk-operations-promise="
               (promise) => (customBulkOperationsPromise = promise)
             "
@@ -179,6 +183,7 @@
               displayList ||
               displayGrid ||
               (entitiesLoading &&
+                !displayMap &&
                 (route?.name !== 'SingleEntity' ||
                   props.baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary))
             "
@@ -216,8 +221,13 @@
           />
           <ViewModesMap
             v-if="displayMap"
+            :map-type="
+              getBasicMapProperties(configPerViewMode[ViewModes.ViewModesMap])
+                .mapType
+            "
             :entities="entities as Entity[]"
             :config="configPerViewMode[ViewModes.ViewModesMap]"
+            :filters-base-api="filtersBaseAPI"
             :entityTypeAsCenterPoint="entityTypeAsCenterPoint"
             :centerCoordinatesKey="centerCoordinatesKey"
           />
@@ -276,7 +286,9 @@ import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
 import EventBus from "@/EventBus";
-import FiltersBase from "@/components/filters/FiltersBase.vue";
+import FiltersBase, {
+  FiltersBaseAPI,
+} from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import useUpload from "@/composables/useUpload";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
@@ -290,6 +302,7 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
+import { useMaps } from "@/composables/useMaps";
 import { watch, ref, onMounted, inject, computed } from "vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import {
@@ -297,6 +310,7 @@ import {
   breadcrumbPathFinished,
   breadcrumbRoutes,
 } from "@/composables/useBreadcrumbs";
+import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
 
 export type BaseLibraryProps = {
   bulkOperationsContext: Context;
@@ -382,7 +396,9 @@ const router = useRouter();
 const { t, locale } = useI18n();
 const { getGlobalState, updateGlobalState } = useStateManagement();
 const { iterateOverBreadcrumbs } = useBreadcrumbs(config);
+const { getBasicMapProperties } = useMaps();
 
+const filtersBaseAPI = ref<FiltersBaseAPI | undefined>(undefined);
 const hasBulkOperations = ref<boolean>(true);
 const selectedPaginationLimitOption = ref<number>();
 const enableSelection = computed<boolean>(() => {
@@ -399,6 +415,10 @@ const additionalDefaultFiltersEnabled = computed(() => {
     props.enableAdvancedFilters && manipulationQuery.value?.filtersDocument
   );
 });
+
+const handleRegisterAPI = (api: FiltersBaseAPI) => {
+  filtersBaseAPI.value = api;
+};
 
 const setPaginationLimit = (limit: number, forceFetch: boolean = false) => {
   selectedPaginationLimitOption.value = limit;
@@ -442,6 +462,7 @@ const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
 const { closeModal } = useBaseModal();
 const { replaceRelationsFromSameType, getForm } = useFormHelper();
 const { uploadStatus } = useUpload();
+const { getNormalizedFiltersForApi } = useFiltersBaseNew();
 const {
   setAcceptedTypes,
   setEntityUuid,
@@ -709,6 +730,15 @@ const determineViewModes = (viewModes: any[]) => {
   }
 };
 
+const setQueryVariablesForMapViewmode = () => {
+  setPaginationLimit(-1);
+  setSkip(1);
+}
+const unsetQueryVariablesForMapViewmode = () => {
+  setAdvancedFilters(filtersBaseAPI.value!.getNormalizedFiltersForApi());
+  setPaginationLimit(20, true);
+}
+
 onMounted(async () => {
   if (props.fetchDeepRelations) await initializeDeepRelations();
   else await initializeBaseLibrary();
@@ -786,6 +816,16 @@ watch([displayGrid, expandFilters], () => {
     expandFilters: _expandFilters,
   });
 });
+watch(
+  () => displayMap.value,
+  () => {
+    if (displayMap.value)
+      setQueryVariablesForMapViewmode();
+    else
+      unsetQueryVariablesForMapViewmode();
+  },
+  { flush: 'post' },
+);
 watch(
   () => uploadStatus.value,
   async () => {

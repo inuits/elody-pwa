@@ -16,6 +16,9 @@
         <HeatMap
           v-if="element.type === MapTypes.HeatMap"
           :center="center"
+          :zoom="getBasicMapProperties(element.config).zoom"
+          :blur="getBasicMapProperties(element.config).blur"
+          :radius="getBasicMapProperties(element.config).radius"
           :config="element.config"
           :entities="entity !== undefined ? [entity] : undefined"
         />
@@ -38,6 +41,9 @@ import { computed, inject } from "vue";
 import { useMapCenter } from "@/composables/useMapCenter";
 import WktMap from "@/components/maps/WktMap.vue";
 import HeatMap from "@/components/maps/HeatMap.vue";
+import { useMaps } from "@/composables/useMaps";
+
+const { getBasicMapProperties } = useMaps();
 
 const props = defineProps<{
   element: MapElement;

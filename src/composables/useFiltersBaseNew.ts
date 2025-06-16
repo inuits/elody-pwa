@@ -27,9 +27,11 @@ export const useFiltersBaseNew = () => {
     displayedFilters: state.displayedFilters,
     activeFilters: state.activeFilters,
     initializeFilters: state.initializeFilters,
+    initializeNewFilters: state.initializeNewFilters,
     resetFilters: state.resetFilters,
     activateFilter: state.activateFilter,
     deactivateFilter: state.deactivateFilter,
+    removeFilterFromList: state.removeFilterFromList,
 
     //helpers
     extractValueFromObject: vars.extractValueFromObject,

@@ -1,12 +1,11 @@
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
 import isEqual from "lodash.isequal";
-import type {
-  AdvancedFilterInput,
-  AdvancedFilters,
-  AdvancedFilter,
-  DropdownOption,
+import {
+  type AdvancedFilter,
+  type AdvancedFilterInput,
+  type AdvancedFilters,
+  AdvancedFilterTypes,
 } from "@/generated-types/queries";
-import { AdvancedFilterTypes } from "@/generated-types/queries";
 import { useFilterVariables } from "./useFilterVariables";
 import { useFilterNormalization } from "./useFilterNormalization";
 import { type FilterListItem } from "@/composables/useStateManagement";
@@ -59,6 +58,7 @@ export const useFilterState = () => {
     value: any,
     matcher?: string,
   ) => {
+    if (!key) return;
     const filter = filters.value.find((f) =>
       isEqual(f.advancedFilter.key, key),
     );
@@ -110,6 +110,11 @@ export const useFilterState = () => {
       selectedMatcher: undefined,
     });
   };
+
+  const removeFilterFromList = (key: string) => {
+    if (!key) return;
+    filters.value = filters.value.filter((f) => f.advancedFilter.key !== key);
+  }
 
   const createFilterInput = (filter: AdvancedFilter) => {
     if (!filter.hidden && !filter.defaultValue) return undefined;
@@ -170,8 +175,10 @@ export const useFilterState = () => {
     displayedFilters,
     activeFilters,
     initializeFilters,
+    initializeNewFilters,
     resetFilters,
     activateFilter,
     deactivateFilter,
+    removeFilterFromList,
   };
 };

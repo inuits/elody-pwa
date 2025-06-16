@@ -133,6 +133,7 @@ import type {
   FilterMatcherMap,
   GetFilterMatcherMappingQuery,
   AdvancedFilterTypes,
+  AdvancedFilter,
 } from "@/generated-types/queries";
 import {
   DamsIcons,
@@ -159,6 +160,17 @@ import { auth } from "@/main";
 import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
 import { useFormHelper } from "@/composables/useFormHelper";
 
+export type FiltersBaseAPI = {
+  initializeAndActivateNewFilter: (
+    advancedFilters: AdvancedFilters,
+    value: any,
+  ) => void;
+  removeFilterFromList: (
+    key: string,
+  ) => void;
+  getNormalizedFiltersForApi: () => AdvancedFilterInput[];
+};
+
 const props = withDefaults(
   defineProps<{
     expandFilters: boolean;
@@ -172,6 +184,7 @@ const props = withDefaults(
     filtersNeedContext?: EntitySubelement[];
     predefinedFilters: AdvancedFilterInput[];
     additionalDefaultFiltersEnabled?: boolean;
+    onRegisterApi?: (api: FiltersBaseAPI) => void;
   }>(),
   {
     parentEntityIdentifiers: () => [],
@@ -179,6 +192,7 @@ const props = withDefaults(
     shouldUseStateForRoute: true,
     filtersNeedContext: undefined,
     additionalDefaultFiltersEnabled: false,
+    onRegisterApi: undefined,
   },
 );
 
@@ -232,11 +246,13 @@ const {
   activeFilterCount,
   displayedFilters,
   initializeFilters,
+  initializeNewFilters,
   transformFilterInputIntoAdvancedFilters,
   getNormalizedFiltersForApi,
   setVariables,
   activateFilter,
   deactivateFilter,
+  removeFilterFromList,
   resetFilters,
 } = useFiltersBaseNew();
 
@@ -378,7 +394,9 @@ const handleAdvancedFilters = () => {
   if (!rawFilters.value) return;
 
   const shouldUseState =
-    props.shouldUseStateForRoute && props.route.name !== "SingleEntity" && !isPreviewElement;
+    props.shouldUseStateForRoute &&
+    props.route.name !== "SingleEntity" &&
+    !isPreviewElement;
 
   const { filtersToUse, fromState } = getFiltersFromState(shouldUseState);
   if (!filtersToUse) return;
@@ -452,7 +470,25 @@ const toggleDisplayedFilters = () => {
   });
 };
 
+const initializeAndActivateNewFilter = (
+  advancedFilters: AdvancedFilters,
+  value: any,
+) => {
+  initializeNewFilters(advancedFilters);
+  Object.values(advancedFilters).forEach((advancedFilter: AdvancedFilter) => {
+    activateFilter(advancedFilter.key, value);
+  });
+  applyFilters(false);
+};
+
 onMounted(() => {
+  if (props.onRegisterApi) {
+    props.onRegisterApi({
+      initializeAndActivateNewFilter: initializeAndActivateNewFilter,
+      removeFilterFromList: removeFilterFromList,
+      getNormalizedFiltersForApi: getNormalizedFiltersForApi,
+    });
+  }
   emit("filterMatcherMappingPromise", filterMatcherMappingPromise);
   emit("advancedFiltersPromise", advancedFiltersPromise);
   lastActiveFilter.value = getLastUsedFilterForRoute(props.route);
