@@ -49,7 +49,7 @@
               :form-id="formId"
               :is-edit="isEdit"
               v-model:metadata="metadata as MetadataField"
-              :show-errors="showErrors"
+              :show-errors="editState.showErrors"
               :base-library-mode="metadata.baseLibraryMode"
             />
             <entity-element-coordinate-edit
@@ -136,7 +136,7 @@ const props = withDefaults(
 );
 
 const { t } = useI18n();
-const { showErrors } = useEditMode();
+const editState = useEditMode(props.formId);
 const panelType = ref<PanelType>(props.panel.panelType);
 const isCollapsed = ref<boolean>(props.panel.isCollapsed);
 const canBeMultipleColumns = ref<boolean>(
