@@ -62,14 +62,23 @@
         />
       </button>
     </div>
-    <div>
-      <button class="mr-2 pt-[10px]" @click="openIiifOperationsModal">
-        <unicon
-          :name="Unicons.ImageResizeLandscape.name"
-          height="20"
-          class="text-neutral-700 cursor-pointer"
-        />
-      </button>
+    <div class="flex">
+      <BaseTooltip position="top-end" :tooltip-offset="8">
+        <template #activator="{ on }">
+          <div v-on="on">
+            <button class="mr-2 pt-[10px]" @click="openIiifOperationsModal">
+              <unicon
+                :name="Unicons.ImageResizeLandscape.name"
+                height="20"
+                class="text-neutral-700 cursor-pointer"
+              />
+            </button>
+          </div>
+        </template>
+        <span class="text-sm text-text-placeholder">
+          {{ $t("iiif-operations-modal.title") }}
+        </span>
+      </BaseTooltip>
       <button
         ref="homeRef"
         class="text-sm mr-2 text-neutral-700 cursor-pointer"
@@ -93,10 +102,11 @@ import { Unicons } from "../types";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { ModalStyle, TypeModals } from "@/generated-types/queries";
+import BaseTooltip from "@/components/base/BaseTooltip.vue";
 
 export default defineComponent({
   name: "ViewerToolbar",
-  components: {},
+  components: { BaseTooltip },
   props: {
     zoomIn: {
       type: Object as PropType<HTMLDivElement | string | null>,
