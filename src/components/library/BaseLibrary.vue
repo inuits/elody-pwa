@@ -218,6 +218,8 @@
             v-if="displayMap"
             :entities="entities as Entity[]"
             :config="configPerViewMode[ViewModes.ViewModesMap]"
+            :entityTypeAsCenterPoint="entityTypeAsCenterPoint"
+            :centerCoordinatesKey="centerCoordinatesKey"
           />
         </div>
         <div
@@ -333,6 +335,8 @@ export type BaseLibraryProps = {
   filtersNeedContext?: EntitySubelement[];
   ignoreFetchingData?: boolean;
   id: string;
+  entityTypeAsCenterPoint?: string;
+  centerCoordinatesKey?: string;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -362,6 +366,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   shouldUseStateForRoute: true,
   filtersNeedContext: undefined,
   ignoreFetchingData: false,
+  centerCoordinatesKey: "",
 });
 
 const emit = defineEmits<{

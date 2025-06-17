@@ -25,6 +25,8 @@
           :predefinedEntities="hierachyList"
           :ignore-fetching-data="true"
           :has-sticky-bars="false"
+          :entityTypeAsCenterPoint="element.entityTypeAsCenterPoint"
+          :centerCoordinatesKey="element.centerCoordinatesKey"
         />
         <div
           v-if="!isLoading && hierachyList.length === 0"

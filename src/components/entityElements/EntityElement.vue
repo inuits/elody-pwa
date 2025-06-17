@@ -129,7 +129,6 @@ import type {
 import EntityElementMarkdownViewer from "@/components/entityElements/EntityElementMarkdownViewer.vue";
 import { getObjectsBasedOnTypename } from "@/helpers";
 import { useStateManagement } from "@/composables/useStateManagement";
-import EntityColumn from "@/components/EntityColumn.vue";
 
 export type Elements =
   | EntityListElement
