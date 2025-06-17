@@ -58,6 +58,10 @@
     />
     <ViewModesMap
       v-else-if="previewComponent.type === PreviewTypes.Map"
+      :map-type="
+        getBasicMapProperties(configPerViewMode[ViewModes.ViewModesMap])
+          .mapType
+      "
       :config="configPerViewMode[ViewModes.ViewModesMap]"
       :entities="getEntitiesOrEntity()"
       :is-enabled-in-preview="true"
@@ -106,10 +110,12 @@ import EntityColumn from "@/components/EntityColumn.vue";
 import { getTitleOrNameFromEntity } from "@/helpers";
 import { Unicons } from "@/types";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
+import { useMaps } from "@/composables/useMaps";
 
 const { t } = useI18n();
 const { loadDocument } = useImport();
 const { addMediafileSelectionStateContext } = useEntityMediafileSelector();
+const { getBasicMapProperties } = useMaps();
 
 const props = withDefaults(
   defineProps<{

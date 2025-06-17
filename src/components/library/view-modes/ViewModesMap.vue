@@ -36,12 +36,13 @@ const props = withDefaults(
     config: ConfigItem[];
     entities: Entity[];
     isEnabledInPreview?: boolean;
-    filtersBaseApi: FiltersBaseAPI;
+    filtersBaseApi?: FiltersBaseAPI;
     entityTypeAsCenterPoint: string;
     centerCoordinatesKey: string;
   }>(),
   {
     isEnabledInPreview: false,
+    filtersBaseApi: undefined,
   },
 );
 

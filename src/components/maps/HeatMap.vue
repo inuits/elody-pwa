@@ -223,6 +223,7 @@ onBeforeMount( async () => {
 })
 
 onBeforeUnmount(() => {
+  if (!props.filtersBaseApi) return;
   Object.values(geoFilter.value)?.forEach((advancedFilter: AdvancedFilter) => {
     props.filtersBaseApi.removeFilterFromList(advancedFilter.key);
   });
