@@ -469,7 +469,6 @@ const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
 const { closeModal } = useBaseModal();
 const { replaceRelationsFromSameType, getForm } = useFormHelper();
 const { uploadStatus } = useUpload();
-const { getNormalizedFiltersForApi } = useFiltersBaseNew();
 const {
   setAcceptedTypes,
   setEntityUuid,
@@ -818,7 +817,7 @@ watch([displayGrid, expandFilters], () => {
   if (route.name === "SingleEntity")
     _expandFilters = getGlobalState("_displayPreferences").expandFilters;
 
-  displayList.value = !displayGrid.value;
+  displayList.value = !displayGrid.value && !displayMap.value;
   updateGlobalState("_displayPreferences", {
     grid: displayPreview.value ? false : displayGrid.value,
     expandFilters: _expandFilters,
