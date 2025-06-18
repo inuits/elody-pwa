@@ -188,6 +188,7 @@
                   props.baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary))
             "
             :entities="entities as Entity[]"
+            :placeholder-entities="placeholderEntities as Entity[]"
             :entities-loading="entitiesLoading"
             :bulk-operations-context="bulkOperationsContext"
             :list-item-route-name="listItemRouteName"
@@ -429,6 +430,7 @@ const setPaginationLimit = (limit: number, forceFetch: boolean = false) => {
 const {
   enqueuePromise,
   entities,
+  placeholderEntities,
   entitiesLoading,
   getCustomBulkOperations,
   getEntities,

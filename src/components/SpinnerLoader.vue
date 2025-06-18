@@ -24,8 +24,8 @@ import { computed } from "vue";
 
 const props = withDefaults(
   defineProps<{
-    theme: string;
-    dimensions: number;
+    theme?: string;
+    dimensions?: number;
   }>(),
   {
     theme: "default",

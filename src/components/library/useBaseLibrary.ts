@@ -1,5 +1,6 @@
 import type { ApolloClient } from "@apollo/client/core";
 import type { RouteLocationNormalizedLoaded } from "vue-router";
+import isEqual from "lodash.isequal";
 import type { SearchInputType } from "@/generated-types/queries";
 import {
   Entitytyping,
@@ -26,6 +27,7 @@ export const useBaseLibrary = (
   let _route: RouteLocationNormalizedLoaded | undefined;
   const config: any = inject("config");
   const entities = shallowRef<Entity[]>([]);
+  const placeholderEntities = shallowRef<Entity[]>([]);
   const entitiesLoading = ref<boolean>(false);
   const isSearchLibrary = ref<boolean>(false);
   const manipulateQuery = ref<boolean>(false);
@@ -226,13 +228,15 @@ export const useBaseLibrary = (
       })
       .then((result) => {
         const fetchedEntities = result.data.Entities;
-        entities.value = fetchedEntities?.results as Entity[];
-        totalEntityCount.value = fetchedEntities?.count || 0;
-        if (shouldUseStateForRoute)
-          updateStateForRoute(_route, {
-            entityCountOnPage: fetchedEntities.results.length,
-            totalEntityCount: fetchedEntities.count,
-          });
+        if (!isEqual(entities.value, fetchedEntities?.results as Entity[])) {
+          entities.value = fetchedEntities?.results as Entity[];
+          totalEntityCount.value = fetchedEntities?.count || 0;
+          if (shouldUseStateForRoute)
+            updateStateForRoute(_route, {
+              entityCountOnPage: fetchedEntities.results.length,
+              totalEntityCount: fetchedEntities.count,
+            });
+        }
         entitiesLoading.value = false;
       })
       .catch(() => {
@@ -277,7 +281,9 @@ export const useBaseLibrary = (
         const entityCountOnPage = getStateForRoute(_route)?.entityCountOnPage;
         if (entityCountOnPage !== undefined)
           placeholderAmount = entityCountOnPage;
-        entities.value = createPlaceholderEntities(placeholderAmount);
+        placeholderEntities.value = createPlaceholderEntities(placeholderAmount);
+      } else {
+        placeholderEntities.value = [];
       }
     },
   );
@@ -285,6 +291,7 @@ export const useBaseLibrary = (
   return {
     enqueuePromise,
     entities,
+    placeholderEntities,
     entitiesLoading,
     getCustomBulkOperations,
     getEntities,

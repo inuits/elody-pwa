@@ -1,30 +1,38 @@
 <template>
-  <OLMap.OlMap
-    ref="mapRef"
-    :loadTilesWhileAnimating="true"
-    :loadTilesWhileInteracting="true"
-    style="height: 65vh"
-    @moveend="debouncedHandleMoveBoundingBox"
-    @pointermove="handlePointerMove"
-  >
-    <Layers.OlTileLayer>
-      <Sources.OlSourceOsm />
-    </Layers.OlTileLayer>
-
-    <Layers.OlHeatmapLayer
-      title="heatmap"
-      :source="heatmapSource"
-      :blur="blur"
-      :radius="radius"
-      :weight="heatmapWeight"
-      :zIndex="1"
+  <div class="relative">
+    <div
+      v-if="entitiesLoading"
+      class="absolute inset-0 bg-white/60 z-50 flex items-center justify-center"
     >
-    </Layers.OlHeatmapLayer>
+      <spinner-loader theme="accent" />
+    </div>
+    <OLMap.OlMap
+      ref="mapRef"
+      :loadTilesWhileAnimating="true"
+      :loadTilesWhileInteracting="true"
+      style="height: 65vh"
+      @moveend="debouncedHandleMoveBoundingBox"
+      @pointermove="handlePointerMove"
+    >
+      <Layers.OlTileLayer>
+        <Sources.OlSourceOsm />
+      </Layers.OlTileLayer>
 
-    <MapControls.OlContextMenuControl :items="contextMenuItems" />
+      <Layers.OlHeatmapLayer
+        title="heatmap"
+        :source="heatmapSource"
+        :blur="blur"
+        :radius="radius"
+        :weight="heatmapWeight"
+        :zIndex="1"
+      >
+      </Layers.OlHeatmapLayer>
 
-    <MapControls.OlFullscreenControl />
-  </OLMap.OlMap>
+      <MapControls.OlContextMenuControl :items="contextMenuItems" />
+
+      <MapControls.OlFullscreenControl />
+    </OLMap.OlMap>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -56,6 +64,7 @@ import {
 import { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import { apolloClient } from "@/main";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -155,11 +164,6 @@ const updateHeatmapFeatures = (newEntities: Entity[]) => {
     safeAddFeatures(newFeatures);
 };
 
-const heatmapWeight = function (feature: Feature) {
-  const weight = feature.get("weight");
-  return weight / 100;
-};
-
 const handleMoveBoundingBox = () => {
   if (!props.filtersBaseApi) return;
   const map = mapRef.value?.map;
@@ -182,6 +186,19 @@ const debouncedHandleMoveBoundingBox = debounce(() => {
   handleMoveBoundingBox();
 }, 1000);
 
+const fetchGeoFilter = async () => {
+  await apolloClient
+    .query<GetGeoFilterForMapQuery>({
+      query: GetGeoFilterForMapDocument,
+      fetchPolicy: "no-cache",
+    })
+    .then((result) => {
+      geoFilter.value = result.data
+        .GeoFilterForMap as AdvancedFilters;
+      handleMoveBoundingBox();
+    });
+}
+
 const handlePointerMove = (event: Event) => {
   const feature = mapRef.value.forEachFeatureAtPixel(
     event.pixel,
@@ -195,18 +212,10 @@ const handlePointerMove = (event: Event) => {
   setHoveredListItem(hoveredFeature.value);
 };
 
-const fetchGeoFilter = async () => {
-  await apolloClient
-    .query<GetGeoFilterForMapQuery>({
-      query: GetGeoFilterForMapDocument,
-      fetchPolicy: "no-cache",
-    })
-    .then((result) => {
-      geoFilter.value = result.data
-        .GeoFilterForMap as AdvancedFilters;
-      handleMoveBoundingBox();
-    });
-}
+const heatmapWeight = function (feature: Feature) {
+  const weight = feature.get("weight");
+  return weight / 100;
+};
 
 onMounted(() => {
   view.value = new View({

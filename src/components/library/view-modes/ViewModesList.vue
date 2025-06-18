@@ -48,7 +48,7 @@
           />
         </div>
         <component
-          v-for="entity in entities"
+          v-for="entity in entitiesLoading ? placeholderEntities : entities"
           :key="entity.id + '_list'"
           :is="entitiesLoading ? 'div' : getLinkSettings(entity).tag"
           :to="
@@ -176,6 +176,7 @@ import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
 const props = withDefaults(
   defineProps<{
     entities: Entity[];
+    placeholderEntities: Entity[];
     entitiesLoading: boolean;
     bulkOperationsContext: Context;
     listItemRouteName: string;
