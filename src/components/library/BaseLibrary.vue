@@ -179,14 +179,7 @@
           @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
         >
           <ViewModesList
-            v-if="
-              displayList ||
-              displayGrid ||
-              (entitiesLoading &&
-                !displayMap &&
-                (route?.name !== 'SingleEntity' ||
-                  props.baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary))
-            "
+            v-if="showViewModesList"
             :entities="entities as Entity[]"
             :placeholder-entities="placeholderEntities as Entity[]"
             :entities-loading="entitiesLoading"
@@ -403,6 +396,17 @@ const { getBasicMapProperties } = useMaps();
 const filtersBaseAPI = ref<FiltersBaseAPI | undefined>(undefined);
 const hasBulkOperations = ref<boolean>(true);
 const selectedPaginationLimitOption = ref<number>();
+
+const showViewModesList = computed(() => {
+  return (
+    displayList.value ||
+    displayGrid.value ||
+    (entitiesLoading.value &&
+      !displayMap.value &&
+      (route?.name !== "SingleEntity" ||
+        props.baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary))
+  );
+});
 const enableSelection = computed<boolean>(() => {
   return (
     (config.features.hasBulkSelect &&
@@ -659,6 +663,7 @@ const getDisplayPreferences = () => {
 
   if (
     displayGrid.value === false &&
+    !displayMap.value &&
     (!displayPreview.value || isPreviewElement)
   ) {
     displayList.value = true;
@@ -736,11 +741,11 @@ const determineViewModes = (viewModes: any[]) => {
 const setQueryVariablesForMapViewmode = () => {
   setPaginationLimit(-1);
   setSkip(1);
-}
+};
 const unsetQueryVariablesForMapViewmode = () => {
   setAdvancedFilters(filtersBaseAPI.value!.getNormalizedFiltersForApi());
   setPaginationLimit(20, true);
-}
+};
 
 onMounted(async () => {
   if (props.fetchDeepRelations) await initializeDeepRelations();
@@ -822,12 +827,10 @@ watch([displayGrid, expandFilters], () => {
 watch(
   () => displayMap.value,
   () => {
-    if (displayMap.value)
-      setQueryVariablesForMapViewmode();
-    else
-      unsetQueryVariablesForMapViewmode();
+    if (displayMap.value) setQueryVariablesForMapViewmode();
+    else unsetQueryVariablesForMapViewmode();
   },
-  { flush: 'post' },
+  { flush: "post" },
 );
 watch(
   () => uploadStatus.value,
