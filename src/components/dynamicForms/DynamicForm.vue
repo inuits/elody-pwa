@@ -546,6 +546,7 @@ const submitWithUploadActionFunction = async (field: FormAction) => {
     const callbackFunction: Function = extractActionArguments(field.actionType);
     if (config.features.hasBulkSelect && callbackFunction) callbackFunction();
     else {
+      useBaseModal().closeModal(TypeModals.DynamicForm);
       setTimeout(() => goToEntityPage(entity, "SingleEntity", props.router), 1);
     }
   } catch (e: ApolloError) {
