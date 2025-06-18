@@ -35,7 +35,8 @@ import {
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import { getValueForPanelMetadata } from "@/helpers";
 import { computed, inject } from "vue";
-import WktMap from "../maps/WktMap.vue";
+import { useMapCenter } from "@/composables/useMapCenter";
+import WktMap from "@/components/maps/WktMap.vue";
 import HeatMap from "@/components/maps/HeatMap.vue";
 
 const props = defineProps<{
@@ -52,35 +53,7 @@ const shouldDisplayMap = computed(() => {
   );
 });
 
-const center = computed(() => {
-  const centerKey = props.element.center;
-  if (centerKey.includes("|")) {
-    const latitude = getValueForPanelMetadata(
-      PanelType.Metadata,
-      centerKey.split('|')[0],
-      props.entityId,
-      "",
-    ) as string;
-    const longitude = getValueForPanelMetadata(
-      PanelType.Metadata,
-      centerKey.split('|')[1],
-      props.entityId,
-      "",
-    ) as string;
-    return [latitude, longitude];
-  } else {
-    const metdataCenterValue = getValueForPanelMetadata(
-      PanelType.Metadata,
-      centerKey,
-      props.entityId,
-      "",
-    );
-    return [
-      metdataCenterValue[1],
-      metdataCenterValue[0],
-    ];
-  }
-});
+const { center } = useMapCenter(props.element, props.entityId);
 
 const mapData = computed(() => {
   const returnArray: string[] = [];
