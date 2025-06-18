@@ -276,11 +276,13 @@ export const useBaseLibrary = (
     () => {
       if (entitiesLoading.value && _route?.name !== "SingleEntity") {
         let placeholderAmount = 20;
-        if (baseLibraryMode === BaseLibraryModes.BasicBaseLibrary)
+        if (queryVariables.limit)
+          placeholderAmount = queryVariables.limit;
+        else if (baseLibraryMode === BaseLibraryModes.BasicBaseLibrary) {
           placeholderAmount = 1;
-        const entityCountOnPage = getStateForRoute(_route)?.entityCountOnPage;
-        if (entityCountOnPage !== undefined)
-          placeholderAmount = entityCountOnPage;
+          const entityCountOnPage = getStateForRoute(_route)?.entityCountOnPage;
+          if (entityCountOnPage !== undefined) placeholderAmount = entityCountOnPage;
+        }
         placeholderEntities.value = createPlaceholderEntities(placeholderAmount);
       } else {
         placeholderEntities.value = [];

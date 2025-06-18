@@ -738,11 +738,11 @@ const determineViewModes = (viewModes: any[]) => {
   }
 };
 
-const setQueryVariablesForMapViewmode = () => {
+const setQueryVariablesForMapViewmode = (): void => {
   setPaginationLimit(-1);
   setSkip(1);
 };
-const unsetQueryVariablesForMapViewmode = () => {
+const unSetQueryVariablesForMapViewmode = (): void => {
   setAdvancedFilters(filtersBaseAPI.value!.getNormalizedFiltersForApi());
   setPaginationLimit(20, true);
 };
@@ -827,8 +827,15 @@ watch([displayGrid, expandFilters], () => {
 watch(
   () => displayMap.value,
   () => {
+    if (!displayMap.value) entities.value = entities.value.splice(0, 20);
+  },
+  { flush: "pre" },
+);
+watch(
+  () => displayMap.value,
+  () => {
     if (displayMap.value) setQueryVariablesForMapViewmode();
-    else unsetQueryVariablesForMapViewmode();
+    else unSetQueryVariablesForMapViewmode();
   },
   { flush: "post" },
 );

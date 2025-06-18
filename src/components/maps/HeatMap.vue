@@ -105,7 +105,7 @@ contextMenuItems.value = [
   "-",
 ];
 
-function safeAddFeatures(features: Feature[]) {
+const safeAddFeatures = (features: Feature[]): void => {
   if ('requestIdleCallback' in window) {
     requestIdleCallback(() => {
       heatmapSource.addFeatures(features);
@@ -114,7 +114,7 @@ function safeAddFeatures(features: Feature[]) {
     // Fallback for older browsers
     setTimeout(() => heatmapSource.addFeatures(features), 0);
   }
-}
+};
 
 const updateHeatmapFeatures = (newEntities: Entity[]) => {
   const newIds = new Set<string>();
@@ -160,8 +160,7 @@ const updateHeatmapFeatures = (newEntities: Entity[]) => {
     }
   }
 
-  if (newFeatures.length > 0)
-    safeAddFeatures(newFeatures);
+  if (newFeatures.length > 0) safeAddFeatures(newFeatures);
 };
 
 const handleMoveBoundingBox = () => {
@@ -197,7 +196,7 @@ const fetchGeoFilter = async () => {
         .GeoFilterForMap as AdvancedFilters;
       handleMoveBoundingBox();
     });
-}
+};
 
 const handlePointerMove = (event: Event) => {
   const feature = mapRef.value.forEachFeatureAtPixel(
@@ -217,24 +216,13 @@ const heatmapWeight = function (feature: Feature) {
   return weight / 100;
 };
 
-onMounted(() => {
+const addViewToMap = () => {
   view.value = new View({
     center: props.center,
     zoom: props.zoom,
   });
   mapRef.value?.map.setView(view.value);
-});
-
-onBeforeMount( async () => {
-  await fetchGeoFilter();
-})
-
-onBeforeUnmount(() => {
-  if (!props.filtersBaseApi) return;
-  Object.values(geoFilter.value)?.forEach((advancedFilter: AdvancedFilter) => {
-    props.filtersBaseApi.removeFilterFromList(advancedFilter.key);
-  });
-})
+}
 
 watch(
   () => props.entities,
@@ -244,6 +232,15 @@ watch(
   },
   { immediate: true },
 );
+
+onBeforeMount( async () => await fetchGeoFilter());
+onMounted(() => addViewToMap());
+onBeforeUnmount(() => {
+  if (!props.filtersBaseApi) return;
+  Object.values(geoFilter.value)?.forEach((advancedFilter: AdvancedFilter) => {
+    props.filtersBaseApi.removeFilterFromList(advancedFilter.key);
+  });
+});
 </script>
 
 <style scoped></style>
