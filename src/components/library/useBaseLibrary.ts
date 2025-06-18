@@ -13,7 +13,7 @@ import {
 } from "@/generated-types/queries";
 import { useEditMode } from "@/composables/useEdit";
 import { asString, createPlaceholderEntities } from "@/helpers";
-import { ref, watch, inject } from "vue";
+import { ref, shallowRef, watch, inject } from "vue";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useI18n } from "vue-i18n";
 
@@ -25,7 +25,7 @@ export const useBaseLibrary = (
   let entityType: Entitytyping = Entitytyping.BaseEntity;
   let _route: RouteLocationNormalizedLoaded | undefined;
   const config: any = inject("config");
-  const entities = ref<Entity[]>([]);
+  const entities = shallowRef<Entity[]>([]);
   const entitiesLoading = ref<boolean>(false);
   const isSearchLibrary = ref<boolean>(false);
   const manipulateQuery = ref<boolean>(false);

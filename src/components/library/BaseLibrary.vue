@@ -226,6 +226,7 @@
                 .mapType
             "
             :entities="entities as Entity[]"
+            :entities-loading="entitiesLoading"
             :config="configPerViewMode[ViewModes.ViewModesMap]"
             :filters-base-api="filtersBaseAPI"
             :entityTypeAsCenterPoint="entityTypeAsCenterPoint"

@@ -1,10 +1,10 @@
 <template>
-  <Map.OlMap
+  <OLMap.OlMap
     ref="mapRef"
     :loadTilesWhileAnimating="true"
     :loadTilesWhileInteracting="true"
     style="height: 65vh"
-    @moveend="handleMoveBoundingBox"
+    @moveend="debouncedHandleMoveBoundingBox"
     @pointermove="handlePointerMove"
   >
     <Layers.OlTileLayer>
@@ -24,15 +24,16 @@
     <MapControls.OlContextMenuControl :items="contextMenuItems" />
 
     <MapControls.OlFullscreenControl />
-  </Map.OlMap>
+  </OLMap.OlMap>
 </template>
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { ref, toRefs, onBeforeMount, watch, shallowRef, onMounted, onBeforeUnmount } from "vue";
+import { ref, onBeforeMount, watch, shallowReactive, onMounted, onBeforeUnmount } from "vue";
+import debounce from 'lodash.debounce';
 import {
   type Item,
-  Map,
+  Map as OLMap,
   Layers,
   Sources,
   MapControls,
@@ -51,16 +52,16 @@ import {
   type Entity,
   GetGeoFilterForMapDocument,
   type GetGeoFilterForMapQuery,
-  type MapElement,
 } from "@/generated-types/queries";
 import { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import { useListItemHelper } from "@/composables/useListItemHelper";
-import { apolloClient, router } from "@/main";
+import { apolloClient } from "@/main";
 
 const props = withDefaults(
   defineProps<{
     config: ConfigItem[];
-    entities: Entity[] | undefined;
+    entities: Object;
+    entitiesLoading: boolean;
     center: number[];
     zoom: number;
     blur: number;
@@ -76,14 +77,14 @@ const props = withDefaults(
 
 const { t } = useI18n();
 const { setHoveredListItem } = useListItemHelper();
-const { entities } = toRefs(props);
 
-const mapRef = ref<InstanceType<typeof Map.OlMap> | undefined>(undefined);
-const heatmapSource = shallowRef(new VectorSource());
+const mapRef = ref<InstanceType<typeof OLMap.OlMap> | undefined>(undefined);
+const heatmapSource = shallowReactive(new VectorSource());
 const view = ref<View | undefined>(undefined);
 const contextMenuItems = ref<Item[]>([]);
 const hoveredFeature = ref<string | undefined>(undefined);
 const geoFilter = ref<AdvancedFilters | undefined>(undefined);
+const featureCache = new Map<string, Feature>();
 
 contextMenuItems.value = [
   {
@@ -95,70 +96,63 @@ contextMenuItems.value = [
   "-",
 ];
 
-const updateHeatmapFeatures = (features: Feature[]) => {
-  console.log("Logging all the features:");
-  console.log(features);
-  heatmapSource.value.clear();
-  heatmapSource.value.addFeatures(features);
+function safeAddFeatures(features: Feature[]) {
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(() => {
+      heatmapSource.addFeatures(features);
+    });
+  } else {
+    // Fallback for older browsers
+    setTimeout(() => heatmapSource.addFeatures(features), 0);
+  }
 }
 
-const createFeature = (mapData: MapElement, id: string): Feature => {
-  return new Feature({
-    geometry: new Point(
-      fromLonLat([mapData.coordinates?.value[0], mapData.coordinates?.value[1]]),
-    ),
-    weight: mapData.weight?.value,
-    id: id,
-  });
-};
+const updateHeatmapFeatures = (newEntities: Entity[]) => {
+  const newIds = new Set<string>();
+  const newFeatures: Feature[] = [];
 
-// const featureCache = new Map<string, Feature>();
-// const createOrUpdateFeature = (mapData: MapElement, id: string): Feature => {
-//   let feature = featureCache.get(id);
-//   const geometry = new Point(fromLonLat([mapData.coordinates?.value[0], mapData.coordinates?.value[1]]));
-//
-//   if (feature) {
-//     feature.setGeometry(geometry);
-//     feature.set('weight', mapData.weight?.value);
-//   } else {
-//     feature = new Feature({
-//       geometry,
-//       weight: mapData.weight?.value,
-//       id,
-//     });
-//     featureCache.set(id, feature);
-//   }
-//   return feature;
-// };
+  for (const entity of newEntities) {
+    const id = entity.id;
+    newIds.add(id);
+    const mapData = entity.mapElement;
+    if (!mapData || !mapData.coordinates?.value) continue;
 
+    const existingFeature = featureCache.get(id);
+    const newCoords = fromLonLat([
+      mapData.coordinates.value[0],
+      mapData.coordinates.value[1],
+    ]);
+    const newWeight = mapData.weight?.value ?? 10;
 
+    if (existingFeature) {
+      const existingGeom = existingFeature.getGeometry() as Point;
+      const [x, y] = existingGeom.getCoordinates();
+      const [nx, ny] = newCoords;
 
-const calculateHeatmapForSingleEntity = (): Feature[] => {
-  const mapData = entities.value![0].entityView.column.elements.mapElement;
-  if (!mapData) return [new Feature()];
-  return [createFeature(mapData, entities.value![0].id)];
-}
+      const weightChanged = existingFeature.get("weight") !== newWeight;
+      const coordsChanged = x !== nx || y !== ny;
+      if (coordsChanged) existingFeature.setGeometry(new Point(newCoords));
+      if (weightChanged) existingFeature.set("weight", newWeight);
+    } else {
+      const newFeature = new Feature({
+        geometry: new Point(newCoords),
+        weight: newWeight,
+        id: id,
+      });
+      featureCache.set(id, newFeature);
+      newFeatures.push(newFeature);
+    }
+  }
 
-const calculateHeatmapForMultipleEntities = (): Feature[] => {
-  return entities.value!
-    .filter(Boolean)
-    .map((entity) => {
-      const mapData = entity.mapElement;
-      if (!mapData) return;
-      return createFeature(mapData, entity.id);
-    })
-    .filter(Boolean) as Feature[];
-}
+  for (const [id, feature] of featureCache) {
+    if (!newIds.has(id)) {
+      heatmapSource.removeFeature(feature);
+      featureCache.delete(id);
+    }
+  }
 
-const calculateHeatmapPoints = () => {
-  let features: Feature[];
-  if (entities.value?.length <= 0)
-    features = [new Feature()];
-  else if (router.currentRoute.value.name === "SingleEntity" && !props.isEnabledInPreview)
-    features = calculateHeatmapForSingleEntity();
-  else
-    features = calculateHeatmapForMultipleEntities();
-  updateHeatmapFeatures(features);
+  if (newFeatures.length > 0)
+    safeAddFeatures(newFeatures);
 };
 
 const heatmapWeight = function (feature: Feature) {
@@ -183,6 +177,10 @@ const handleMoveBoundingBox = () => {
   });
   props.filtersBaseApi.initializeAndActivateNewFilter(geoFilter.value, geojsonPolygon)
 };
+
+const debouncedHandleMoveBoundingBox = debounce(() => {
+  handleMoveBoundingBox();
+}, 1000);
 
 const handlePointerMove = (event: Event) => {
   const feature = mapRef.value.forEachFeatureAtPixel(
@@ -230,9 +228,10 @@ onBeforeUnmount(() => {
 })
 
 watch(
-  () => entities.value,
+  () => props.entities,
   () => {
-    calculateHeatmapPoints();
+    if (props.entitiesLoading || props.entities?.length <= 0) return;
+    updateHeatmapFeatures(props.entities);
   },
   { immediate: true },
 );

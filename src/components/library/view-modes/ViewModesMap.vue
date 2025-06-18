@@ -3,6 +3,7 @@
     v-if="mapType === MapTypes.HeatMap"
     :config="config"
     :entities="entities"
+    :entities-loading="entitiesLoading"
     :center="center"
     :zoom="getBasicMapProperties(config).zoom"
     :blur="getBasicMapProperties(config).blur"
@@ -34,7 +35,8 @@ const props = withDefaults(
   defineProps<{
     mapType: MapTypes;
     config: ConfigItem[];
-    entities: Entity[];
+    entities: Object;
+    entitiesLoading: boolean;
     isEnabledInPreview?: boolean;
     filtersBaseApi?: FiltersBaseAPI;
     entityTypeAsCenterPoint: string;
@@ -58,19 +60,20 @@ const wktOfEntities = computed(() => {
   return wkts.filter((item: string) => !!item);
 });
 
-const center = computed(() => {
+const center = ref<number[]>();
+const calculateCenter = (entities: Entity[]) => {
   let coordinates =
-    props.entities.length > 0
-      ? props.entities[0].intialValues?.gps_coordinates
+    entities.length > 0
+      ? entities[0].intialValues?.gps_coordinates
       : undefined;
   if (coordinates) {
-    return fromLonLat([coordinates[1], coordinates[0]]);
+    center.value = fromLonLat([coordinates[1], coordinates[0]]);
   }
   coordinates = getBasicMapProperties(props.config).center;
   if (coordinates) {
-    return fromLonLat([coordinates[1], coordinates[0]]);
+    center.value = fromLonLat([coordinates[1], coordinates[0]]);
   }
-});
+}
 
 watch(
   () => props.mapType,
@@ -78,6 +81,16 @@ watch(
     if (props.mapType !== undefined) {
       mapType.value = props.mapType;
     }
+  },
+  { immediate: true },
+);
+
+// const entities = computed(() => props.entities.value)
+watch(
+  () => props.entities,
+  () => {
+    if (props.entitiesLoading || !props.entities) return;
+    calculateCenter(props.entities);
   },
   { immediate: true },
 );
