@@ -12,7 +12,7 @@
       :loadTilesWhileInteracting="true"
       style="height: 65vh"
       @moveend="debouncedHandleMoveBoundingBox"
-      @pointermove="handlePointerMove"
+      @pointermove="(event) => handlePointerMove(event, mapRef)"
     >
       <Layers.OlTileLayer>
         <Sources.OlSourceOsm />
@@ -46,9 +46,7 @@ import {
   Sources,
   MapControls,
 } from "vue3-openlayers";
-import { fromExtent } from "ol/geom/Polygon";
 import VectorSource from 'ol/source/Vector';
-import GeoJSON from "ol/format/GeoJSON";
 import View from 'ol/View';
 import { Feature } from "ol";
 import { Point } from "ol/geom";
@@ -58,13 +56,10 @@ import {
   type AdvancedFilter,
   type ConfigItem,
   type Entity,
-  GetGeoFilterForMapDocument,
-  type GetGeoFilterForMapQuery,
 } from "@/generated-types/queries";
 import { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
-import { useListItemHelper } from "@/composables/useListItemHelper";
-import { apolloClient } from "@/main";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import { useMaps } from "@/composables/useMaps";
 
 const props = withDefaults(
   defineProps<{
@@ -75,7 +70,6 @@ const props = withDefaults(
     zoom: number;
     blur: number;
     radius: number;
-    isEnabledInPreview: boolean;
     filtersBaseApi?: FiltersBaseAPI;
   }>(),
   {
@@ -85,14 +79,18 @@ const props = withDefaults(
 );
 
 const { t } = useI18n();
-const { setHoveredListItem } = useListItemHelper();
+const {
+  activateNewGeoFilter,
+  fetchGeoFilter,
+  getGeojsonPolygonFromMap,
+  handlePointerMove
+} = useMaps();
 
 const mapRef = ref<InstanceType<typeof OLMap.OlMap> | undefined>(undefined);
 const heatmapSource = shallowReactive(new VectorSource());
 const view = ref<View | undefined>(undefined);
 const contextMenuItems = ref<Item[]>([]);
-const hoveredFeature = ref<string | undefined>(undefined);
-const geoFilter = ref<AdvancedFilters | undefined>(undefined);
+const geoFilters = ref<AdvancedFilters | undefined>(undefined);
 const featureCache = new Map<string, Feature>();
 
 contextMenuItems.value = [
@@ -123,7 +121,7 @@ const updateHeatmapFeatures = (newEntities: Entity[]) => {
   for (const entity of newEntities) {
     const id = entity.id;
     newIds.add(id);
-    const mapData = entity.mapElement;
+    const mapData = entity.mapElement || entity.entityView.column.elements.mapElement;
     if (!mapData || !mapData.coordinates?.value) continue;
 
     const existingFeature = featureCache.get(id);
@@ -168,50 +166,17 @@ const handleMoveBoundingBox = () => {
   const map = mapRef.value?.map;
   if (!map) return;
 
-  const extent = map.getView().calculateExtent(map.getSize());
-  const polygon = fromExtent(extent); // extent: [minX, minY, maxX, maxY]
-  const polygon4326 = polygon.clone().transform("EPSG:3857", "EPSG:4326");
-  const geojsonFormat = new GeoJSON();
-  const geojsonPolygon = geojsonFormat.writeGeometryObject(polygon4326);
-  if (!geoFilter.value) return;
-
-  Object.values(geoFilter.value)?.forEach((advancedFilter: AdvancedFilter) => {
-    props.filtersBaseApi.removeFilterFromList(advancedFilter.key);
-  });
-  props.filtersBaseApi.initializeAndActivateNewFilter(geoFilter.value, geojsonPolygon)
+  const geojsonPolygon = getGeojsonPolygonFromMap(map);
+  if (!geoFilters.value) return;
+  activateNewGeoFilter(props.filtersBaseApi, geoFilters.value, geojsonPolygon);
 };
 
 const debouncedHandleMoveBoundingBox = debounce(() => {
   handleMoveBoundingBox();
 }, 1000);
 
-const fetchGeoFilter = async () => {
-  await apolloClient
-    .query<GetGeoFilterForMapQuery>({
-      query: GetGeoFilterForMapDocument,
-      fetchPolicy: "no-cache",
-    })
-    .then((result) => {
-      geoFilter.value = result.data
-        .GeoFilterForMap as AdvancedFilters;
-      handleMoveBoundingBox();
-    });
-};
 
-const handlePointerMove = (event: Event) => {
-  const feature = mapRef.value.forEachFeatureAtPixel(
-    event.pixel,
-    (feature) => feature,
-  );
-  if (feature) {
-    hoveredFeature.value = feature.get("id");
-  } else {
-    hoveredFeature.value = undefined;
-  }
-  setHoveredListItem(hoveredFeature.value);
-};
-
-const heatmapWeight = function (feature: Feature) {
+const heatmapWeight = (feature: Feature) => {
   const weight = feature.get("weight");
   return weight / 100;
 };
@@ -224,6 +189,20 @@ const addViewToMap = () => {
   mapRef.value?.map.setView(view.value);
 }
 
+const initializeHeatmap = async () => {
+  geoFilters.value = await fetchGeoFilter();
+  handleMoveBoundingBox();
+};
+
+onBeforeMount( async () => await initializeHeatmap());
+onMounted(() => addViewToMap());
+onBeforeUnmount(() => {
+  if (!props.filtersBaseApi) return;
+  Object.values(geoFilters.value)?.forEach((advancedFilter: AdvancedFilter) => {
+    props.filtersBaseApi.removeFilterFromList(advancedFilter.key);
+  });
+});
+
 watch(
   () => props.entities,
   () => {
@@ -232,15 +211,6 @@ watch(
   },
   { immediate: true },
 );
-
-onBeforeMount( async () => await fetchGeoFilter());
-onMounted(() => addViewToMap());
-onBeforeUnmount(() => {
-  if (!props.filtersBaseApi) return;
-  Object.values(geoFilter.value)?.forEach((advancedFilter: AdvancedFilter) => {
-    props.filtersBaseApi.removeFilterFromList(advancedFilter.key);
-  });
-});
 </script>
 
 <style scoped></style>

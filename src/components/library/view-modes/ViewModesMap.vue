@@ -8,7 +8,6 @@
     :zoom="getBasicMapProperties(config).zoom"
     :blur="getBasicMapProperties(config).blur"
     :radius="getBasicMapProperties(config).radius"
-    :is-enabled-in-preview="isEnabledInPreview"
     :filters-base-api="filtersBaseApi"
   />
   <WktMap
@@ -37,13 +36,11 @@ const props = withDefaults(
     config: ConfigItem[];
     entities: Object;
     entitiesLoading: boolean;
-    isEnabledInPreview?: boolean;
     filtersBaseApi?: FiltersBaseAPI;
     entityTypeAsCenterPoint: string;
     centerCoordinatesKey: string;
   }>(),
   {
-    isEnabledInPreview: false,
     filtersBaseApi: undefined,
   },
 );

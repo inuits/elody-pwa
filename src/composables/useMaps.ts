@@ -1,10 +1,28 @@
-import { type ConfigItem } from "@/generated-types/queries";
+import {
+  type AdvancedFilter,
+  type AdvancedFilters,
+  type ConfigItem,
+  GetGeoFilterForMapDocument,
+  type GetGeoFilterForMapQuery
+} from "@/generated-types/queries";
+import { apolloClient } from "@/main";
 import WKT from "ol/format/WKT.js";
 import { Feature } from "ol";
 import { Point } from "ol/geom";
 import { Style, Icon } from "ol/style";
+import { useListItemHelper } from "@/composables/useListItemHelper";
+import { ref } from "vue";
+import { Map as OLMap } from "vue3-openlayers";
+import { default as Map } from 'ol/Map';
+import GeoJSON, { type GeoJSONGeometry } from "ol/format/GeoJSON";
+import { fromExtent } from "ol/geom/Polygon";
+import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 
 export const useMaps = () => {
+  const { setHoveredListItem } = useListItemHelper();
+
+  const hoveredFeature = ref<string | undefined>(undefined);
+
   const getBasicMapProperties = (config: ConfigItem[]) => {
     if (!config) return [];
     return (
@@ -52,10 +70,53 @@ export const useMaps = () => {
     });
   };
 
+  const fetchGeoFilter = async (): AdvancedFilters => {
+    return await apolloClient
+      .query<GetGeoFilterForMapQuery>({
+        query: GetGeoFilterForMapDocument,
+        fetchPolicy: "no-cache",
+      })
+      .then((result) => {
+        return result.data.GeoFilterForMap as AdvancedFilters;
+      });
+  };
+
+  const activateNewGeoFilter = (filtersBaseApi: FiltersBaseAPI, geoFilters: AdvancedFilters, geojsonPolygon: GeoJSONGeometry) => {
+    Object.values(geoFilters)?.forEach((advancedFilter: AdvancedFilter) => {
+      filtersBaseApi.removeFilterFromList(advancedFilter.key);
+    });
+    filtersBaseApi.initializeAndActivateNewFilter(geoFilters, geojsonPolygon)
+  }
+
+  const getGeojsonPolygonFromMap = (map: Map): GeoJSONGeometry => {
+    const extent = map.getView().calculateExtent(map.getSize());
+    const polygon = fromExtent(extent); // extent: [minX, minY, maxX, maxY]
+    const polygon4326 = polygon.clone().transform("EPSG:3857", "EPSG:4326");
+    const geojsonFormat = new GeoJSON();
+    return geojsonFormat.writeGeometryObject(polygon4326);
+  }
+
+  const handlePointerMove = (event: Event, mapRef: InstanceType<typeof OLMap.OlMap>): void => {
+    const feature = mapRef.forEachFeatureAtPixel(
+      event.pixel,
+      (feature) => feature,
+    );
+    if (feature) {
+      hoveredFeature.value = feature.get("id");
+    } else {
+      hoveredFeature.value = undefined;
+    }
+    setHoveredListItem(hoveredFeature.value);
+  };
+
   return {
     geoToMercator,
     getBasicMapProperties,
     getMarkerFeature,
     getWktFeature,
+    fetchGeoFilter,
+    activateNewGeoFilter,
+    getGeojsonPolygonFromMap,
+    handlePointerMove
   };
 };
