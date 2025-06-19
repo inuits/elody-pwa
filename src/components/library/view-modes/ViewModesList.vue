@@ -16,36 +16,37 @@
           },
         ]"
       >
-        <div
-          v-if="Array.isArray(relations)"
-          v-show="!disablePreviews"
-          v-for="item in relations?.filter(
-            (relation) =>
-              relation.editStatus === EditStatus.New &&
-              relation.type === relationType,
-          )"
-          :key="item.key"
-        >
-          <ListItem
-            :key="item.key + '_preview'"
-            :item-id="item.key"
-            :bulk-operations-context="bulkOperationsContext"
-            :teaser-metadata="getTeaserMetadataInState(item.key) as Metadata[]"
-            :thumb-icon="entitiesLoading ? undefined : getThumbnail(item)"
-            :small="listItemRouteName === 'SingleMediafile'"
-            :is-preview="true"
-            :is-markable-as-to-be-deleted="parentEntityIdentifiers.length > 0"
-            :relation="
+        <div v-if="Array.isArray(relations)">
+          <div
+            v-show="!disablePreviews"
+            v-for="item in relations?.filter(
+              (relation) =>
+                relation.editStatus === EditStatus.New &&
+                relation.type === relationType,
+            )"
+            :key="item.key"
+          >
+            <ListItem
+              :key="item.key + '_preview'"
+              :item-id="item.key"
+              :bulk-operations-context="bulkOperationsContext"
+              :teaser-metadata="getTeaserMetadataInState(item.key) as Metadata[]"
+              :thumb-icon="entitiesLoading ? undefined : getThumbnail(item)"
+              :small="listItemRouteName === 'SingleMediafile'"
+              :is-preview="true"
+              :is-markable-as-to-be-deleted="parentEntityIdentifiers.length > 0"
+              :relation="
               findRelation(
                 item.key,
                 relationType,
                 props.parentEntityIdentifiers[0],
               )
             "
-            :relation-type="relationType"
-            :has-selection="enableSelection"
-            :view-mode="mode"
-          />
+              :relation-type="relationType"
+              :has-selection="enableSelection"
+              :view-mode="mode"
+            />
+          </div>
         </div>
         <component
           v-for="entity in entitiesLoading ? placeholderEntities : entities"

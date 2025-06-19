@@ -104,24 +104,27 @@
           >
             <BaseToggleGroup v-if="toggles.length > 1" :toggles="toggles" />
           </div>
-          <LibraryBar
+          <div
             v-if="
               !predefinedEntities &&
               (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
                 baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
             "
-            v-show="!displayMap"
-            :route="route"
-            :set-limit="setPaginationLimit"
-            :selected-pagination-limit-option="selectedPaginationLimitOption"
-            :set-sort-key="setSortKey"
-            :set-sort-order="setSortOrder"
-            :filters-available-on-detail-page="filtersAvailableOnDetailPage"
-            @pagination-limit-options-promise="
+          >
+            <LibraryBar
+              v-show="!displayMap"
+              :route="route"
+              :set-limit="setPaginationLimit"
+              :selected-pagination-limit-option="selectedPaginationLimitOption"
+              :set-sort-key="setSortKey"
+              :set-sort-order="setSortOrder"
+              :filters-available-on-detail-page="filtersAvailableOnDetailPage"
+              @pagination-limit-options-promise="
               (promise) => (paginationLimitOptionsPromise = promise)
             "
-            @sort-options-promise="(promise) => (sortOptionsPromise = promise)"
-          />
+              @sort-options-promise="(promise) => (sortOptionsPromise = promise)"
+            />
+          </div>
         </div>
       </div>
       <div
@@ -153,7 +156,7 @@
             :selected-pagination-limit-option="selectedPaginationLimitOption"
             :total-items="totalEntityCount || NaN"
             :set-skip="setSkip"
-            :is-map-viewmode="displayMap"
+            :show-pagination="!displayMap"
             @custom-bulk-operations-promise="
               (promise) => (customBulkOperationsPromise = promise)
             "
