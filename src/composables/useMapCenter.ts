@@ -5,12 +5,11 @@ import {
   type MapElement,
 } from "@/generated-types/queries";
 import { getValueForPanelMetadata } from "@/helpers";
+import { fromLonLat } from "ol/proj";
 
 export function useMapCenter(element: MapElement, entityId: string) {
-  const normalizeCenterForHeatMap = (
-    coordinates: [number, number],
-  ): [number, number] => {
-    return [coordinates[1], coordinates[0]];
+  const normalizeCenterForHeatMap = (value: number[]) => {
+    return fromLonLat(value as number[]);
   };
 
   const normalizeCenterForWktMap = (coordinates: {
@@ -23,13 +22,12 @@ export function useMapCenter(element: MapElement, entityId: string) {
   type CenterHandler = (value: unknown) => [number, number];
 
   const centerHandlers: Record<MapTypes, CenterHandler> = {
-    [MapTypes.HeatMap]: (value) => {
-      const coordinates = value as [number, number];
-      return normalizeCenterForHeatMap(coordinates);
-    },
     [MapTypes.WktMap]: (value) => {
       const coordinates = value as { latitude: number; longitude: number };
       return normalizeCenterForWktMap(coordinates);
+    },
+    [MapTypes.HeatMap]: (value: any) => {
+      return normalizeCenterForHeatMap(value);
     },
   };
 
