@@ -1,11 +1,5 @@
 <template>
   <div class="relative">
-    <div
-      v-if="entitiesLoading"
-      class="absolute inset-0 bg-white/60 z-50 flex items-center justify-center"
-    >
-      <spinner-loader theme="accent" />
-    </div>
     <OLMap.OlMap
       ref="mapRef"
       :loadTilesWhileAnimating="true"
@@ -23,7 +17,6 @@
         :source="heatmapSource"
         :blur="blur"
         :radius="radius"
-        :weight="heatmapWeight"
         :zIndex="1"
       >
       </Layers.OlHeatmapLayer>
@@ -49,8 +42,6 @@ import {
 import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
 import { Feature } from "ol";
-import { Point } from "ol/geom";
-import { fromLonLat } from "ol/proj";
 import {
   type AdvancedFilters,
   type AdvancedFilter,
@@ -58,8 +49,8 @@ import {
   type Entity,
 } from "@/generated-types/queries";
 import { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
-import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useMaps } from "@/composables/useMaps";
+import GeoJSON from "ol/format/GeoJSON";
 
 const props = withDefaults(
   defineProps<{
@@ -91,7 +82,6 @@ const heatmapSource = shallowReactive(new VectorSource());
 const view = ref<View | undefined>(undefined);
 const contextMenuItems = ref<Item[]>([]);
 const geoFilters = ref<AdvancedFilters | undefined>(undefined);
-const featureCache = new Map<string, Feature>();
 
 contextMenuItems.value = [
   {
@@ -103,62 +93,31 @@ contextMenuItems.value = [
   "-",
 ];
 
+const clearAndAddFeatures = (features: Feature[]) => {
+  heatmapSource.clear();
+  heatmapSource.addFeatures(features);
+}
+
 const safeAddFeatures = (features: Feature[]): void => {
   if ('requestIdleCallback' in window) {
-    requestIdleCallback(() => {
-      heatmapSource.addFeatures(features);
-    });
+    requestIdleCallback(() => clearAndAddFeatures(features));
   } else {
     // Fallback for older browsers
-    setTimeout(() => heatmapSource.addFeatures(features), 0);
+    setTimeout(() => clearAndAddFeatures(features), 0);
   }
 };
 
-const updateHeatmapFeatures = (newEntities: Entity[]) => {
-  const newIds = new Set<string>();
-  const newFeatures: Feature[] = [];
-
-  for (const entity of newEntities) {
-    const id = entity.id;
-    newIds.add(id);
-    const mapData = entity.mapElement || entity.entityView.column.elements.mapElement;
-    if (!mapData || !mapData.coordinates?.value) continue;
-
-    const existingFeature = featureCache.get(id);
-    const newCoords = fromLonLat([
-      mapData.coordinates.value[0],
-      mapData.coordinates.value[1],
-    ]);
-    const newWeight = mapData.weight?.value ?? 10;
-
-    if (existingFeature) {
-      const existingGeom = existingFeature.getGeometry() as Point;
-      const [x, y] = existingGeom.getCoordinates();
-      const [nx, ny] = newCoords;
-
-      const weightChanged = existingFeature.get("weight") !== newWeight;
-      const coordsChanged = x !== nx || y !== ny;
-      if (coordsChanged) existingFeature.setGeometry(new Point(newCoords));
-      if (weightChanged) existingFeature.set("weight", newWeight);
-    } else {
-      const newFeature = new Feature({
-        geometry: new Point(newCoords),
-        weight: newWeight,
-        id: id,
-      });
-      featureCache.set(id, newFeature);
-      newFeatures.push(newFeature);
-    }
-  }
-
-  for (const [id, feature] of featureCache) {
-    if (!newIds.has(id)) {
-      heatmapSource.removeFeature(feature);
-      featureCache.delete(id);
-    }
-  }
-
-  if (newFeatures.length > 0) safeAddFeatures(newFeatures);
+const updateHeatmapFromGeoJson = (newEntities: Entity[]) => {
+  const geojsonFeatures = {
+    type: "FeatureCollection",
+    features: newEntities.map((entity) => entity.mapElement?.geoJsonFeature?.value || entity.entityView.column.elements.mapElement?.geoJsonFeature?.value),
+  };
+  const format = new GeoJSON();
+  const features = format.readFeatures(geojsonFeatures, {
+    dataProjection: 'EPSG:3857',
+    featureProjection: 'EPSG:3857',
+  });
+  safeAddFeatures(features);
 };
 
 const handleMoveBoundingBox = () => {
@@ -174,12 +133,6 @@ const handleMoveBoundingBox = () => {
 const debouncedHandleMoveBoundingBox = debounce(() => {
   handleMoveBoundingBox();
 }, 1000);
-
-
-const heatmapWeight = (feature: Feature) => {
-  const weight = feature.get("weight");
-  return weight / 100;
-};
 
 const addViewToMap = () => {
   view.value = new View({
@@ -207,7 +160,7 @@ watch(
   () => props.entities,
   () => {
     if (props.entitiesLoading || props.entities?.length <= 0) return;
-    updateHeatmapFeatures(props.entities);
+    updateHeatmapFromGeoJson(props.entities);
   },
   { immediate: true },
 );
