@@ -74,6 +74,7 @@ const {
   activateNewGeoFilter,
   fetchGeoFilter,
   getGeojsonPolygonFromMap,
+  extractGeojsonFeaturesFromEntities,
   handlePointerMove
 } = useMaps();
 
@@ -110,7 +111,7 @@ const safeAddFeatures = (features: Feature[]): void => {
 const updateHeatmapFromGeoJson = (newEntities: Entity[]) => {
   const geojsonFeatures = {
     type: "FeatureCollection",
-    features: newEntities.map((entity) => entity.mapElement?.geoJsonFeature?.value || entity.entityView.column.elements.mapElement?.geoJsonFeature?.value),
+    features: extractGeojsonFeaturesFromEntities(newEntities),
   };
   const format = new GeoJSON();
   const features = format.readFeatures(geojsonFeatures, {

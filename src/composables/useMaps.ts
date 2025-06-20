@@ -2,6 +2,7 @@ import {
   type AdvancedFilter,
   type AdvancedFilters,
   type ConfigItem,
+  type Entity,
   GetGeoFilterForMapDocument,
   type GetGeoFilterForMapQuery
 } from "@/generated-types/queries";
@@ -96,6 +97,20 @@ export const useMaps = () => {
     return geojsonFormat.writeGeometryObject(polygon4326);
   }
 
+  const extractGeojsonFeaturesFromEntities = (newEntities: Entity[]): any[] => {
+    const featuresArray = [];
+    for (let i = 0; i < newEntities.length; i++) {
+      const entity = newEntities[i];
+      const feature =
+        entity.mapElement?.geoJsonFeature?.value ??
+        entity.entityView.column.elements.mapElement?.geoJsonFeature?.value;
+      if (feature) {
+        featuresArray.push(feature);
+      }
+    }
+    return featuresArray;
+  }
+
   const handlePointerMove = (event: Event, mapRef: InstanceType<typeof OLMap.OlMap>): void => {
     const feature = mapRef.forEachFeatureAtPixel(
       event.pixel,
@@ -117,6 +132,7 @@ export const useMaps = () => {
     fetchGeoFilter,
     activateNewGeoFilter,
     getGeojsonPolygonFromMap,
+    extractGeojsonFeaturesFromEntities,
     handlePointerMove
   };
 };
