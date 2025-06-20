@@ -55,7 +55,7 @@ import GeoJSON from "ol/format/GeoJSON";
 const props = withDefaults(
   defineProps<{
     config: ConfigItem[];
-    entities: Object;
+    entities: Entity[];
     entitiesLoading: boolean;
     center: number[];
     zoom: number;

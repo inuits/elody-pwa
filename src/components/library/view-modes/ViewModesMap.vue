@@ -34,7 +34,7 @@ const props = withDefaults(
   defineProps<{
     mapType: MapTypes;
     config: ConfigItem[];
-    entities: Object;
+    entities: Entity[];
     entitiesLoading: boolean;
     filtersBaseApi?: FiltersBaseAPI;
     entityTypeAsCenterPoint: string;
