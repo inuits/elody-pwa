@@ -246,7 +246,7 @@ const {
   activeFilterCount,
   displayedFilters,
   initializeFilters,
-  initializeNewFilters,
+  initializeNewAdvancedFilters,
   transformFilterInputIntoAdvancedFilters,
   getNormalizedFiltersForApi,
   setVariables,
@@ -474,7 +474,7 @@ const initializeAndActivateNewFilter = (
   advancedFilters: AdvancedFilters,
   value: any,
 ) => {
-  initializeNewFilters(advancedFilters);
+  initializeNewAdvancedFilters(advancedFilters);
   Object.values(advancedFilters).forEach((advancedFilter: AdvancedFilter) => {
     activateFilter(advancedFilter.key, value);
   });

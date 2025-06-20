@@ -43,7 +43,7 @@ export const useFilterState = () => {
     if (fromState) {
       restoreFiltersFromState(advancedFilters as FilterListItem[]);
     } else {
-      initializeNewFilters(advancedFilters as AdvancedFilters);
+      initializeNewAdvancedFilters(advancedFilters as AdvancedFilters);
     }
   };
 
@@ -91,7 +91,7 @@ export const useFilterState = () => {
     filter.selectedMatcher = undefined;
   };
 
-  const initializeNewFilters = (advancedFilters: AdvancedFilters) => {
+  const initializeNewAdvancedFilters = (advancedFilters: AdvancedFilters) => {
     Object.values(advancedFilters).forEach((filter) => {
       if (typeof filter === "string") return;
       addFilterToList(filter, createFilterInput(filter));
@@ -175,7 +175,7 @@ export const useFilterState = () => {
     displayedFilters,
     activeFilters,
     initializeFilters,
-    initializeNewFilters,
+    initializeNewAdvancedFilters,
     resetFilters,
     activateFilter,
     deactivateFilter,
