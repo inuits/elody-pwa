@@ -7,13 +7,13 @@ import {
 import { getValueForPanelMetadata } from "@/helpers";
 
 export function useMapCenter(element: MapElement, entityId: string) {
-  const normalizeCenterForWktMap = (
+  const normalizeCenterForHeatMap = (
     coordinates: [number, number],
   ): [number, number] => {
     return [coordinates[1], coordinates[0]];
   };
 
-  const normalizeCenterForHeatMap = (coordinates: {
+  const normalizeCenterForWktMap = (coordinates: {
     latitude: number;
     longitude: number;
   }): [number, number] => {
@@ -23,13 +23,13 @@ export function useMapCenter(element: MapElement, entityId: string) {
   type CenterHandler = (value: unknown) => [number, number];
 
   const centerHandlers: Record<MapTypes, CenterHandler> = {
-    [MapTypes.WktMap]: (value) => {
-      const coordinates = value as [number, number];
-      return normalizeCenterForWktMap(coordinates);
-    },
     [MapTypes.HeatMap]: (value) => {
-      const coordinates = value as { latitude: number; longitude: number };
+      const coordinates = value as [number, number];
       return normalizeCenterForHeatMap(coordinates);
+    },
+    [MapTypes.WktMap]: (value) => {
+      const coordinates = value as { latitude: number; longitude: number };
+      return normalizeCenterForWktMap(coordinates);
     },
   };
 

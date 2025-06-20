@@ -22,17 +22,17 @@ describe("useMapCenter", () => {
     vi.clearAllMocks();
   });
 
-  describe("WktMap type", () => {
-    it("returns normalized coordinates for WktMap when metadata exists", () => {
-      const element = mockElement(MapTypes.WktMap, "gps_coordinates");
+  describe("HeatMap type", () => {
+    it("returns normalized coordinates for HeatMap when metadata exists", () => {
+      const element = mockElement(MapTypes.HeatMap, "gps_coordinates");
       vi.mocked(getValueForPanelMetadata).mockReturnValue([10, 20]);
 
       const { center } = useMapCenter(element, "entity1");
       expect(center.value).toEqual([20, 10]);
     });
 
-    it("returns empty array when metadata is missing for WktMap", () => {
-      const element = mockElement(MapTypes.WktMap, "gps_coordinates");
+    it("returns empty array when metadata is missing for HeatMap", () => {
+      const element = mockElement(MapTypes.HeatMap, "gps_coordinates");
       vi.mocked(getValueForPanelMetadata).mockReturnValue(null);
 
       const { center } = useMapCenter(element, "entity1");
@@ -40,9 +40,9 @@ describe("useMapCenter", () => {
     });
   });
 
-  describe("HeatMap type", () => {
-    it("returns correct coordinates for HeatMap when metadata exists", () => {
-      const element = mockElement(MapTypes.HeatMap, "coordinates");
+  describe("Wkt type", () => {
+    it("returns correct coordinates for Wkt when metadata exists", () => {
+      const element = mockElement(MapTypes.WktMap, "coordinates");
       vi.mocked(getValueForPanelMetadata).mockReturnValue({
         latitude: 30,
         longitude: 40,
@@ -52,8 +52,8 @@ describe("useMapCenter", () => {
       expect(center.value).toEqual([30, 40]);
     });
 
-    it("returns empty array when metadata is missing for HeatMap", () => {
-      const element = mockElement(MapTypes.HeatMap, "coordinates");
+    it("returns empty array when metadata is missing for Wkt", () => {
+      const element = mockElement(MapTypes.WktMap, "coordinates");
       vi.mocked(getValueForPanelMetadata).mockReturnValue(null);
 
       const { center } = useMapCenter(element, "entity1");
