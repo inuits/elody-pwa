@@ -3,15 +3,13 @@ import {
   type AdvancedFilters,
   type ConfigItem,
   type Entity,
-  GetGeoFilterForMapDocument,
-  type GetGeoFilterForMapQuery
 } from "@/generated-types/queries";
-import { apolloClient } from "@/main";
 import WKT from "ol/format/WKT.js";
 import { Feature } from "ol";
 import { Point } from "ol/geom";
 import { Style, Icon } from "ol/style";
 import { useListItemHelper } from "@/composables/useListItemHelper";
+import { useGraphqlAsync } from "@/composables/useGraphqlAsync";
 import { ref } from "vue";
 import { Map as OLMap } from "vue3-openlayers";
 import { default as Map } from 'ol/Map';
@@ -21,6 +19,7 @@ import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 
 export const useMaps = () => {
   const { setHoveredListItem } = useListItemHelper();
+  const { getQueryDocument, queryAsync } = useGraphqlAsync();
 
   const hoveredFeature = ref<string | undefined>(undefined);
 
@@ -72,14 +71,9 @@ export const useMaps = () => {
   };
 
   const fetchGeoFilter = async (): AdvancedFilters => {
-    return await apolloClient
-      .query<GetGeoFilterForMapQuery>({
-        query: GetGeoFilterForMapDocument,
-        fetchPolicy: "no-cache",
-      })
-      .then((result) => {
-        return result.data.GeoFilterForMap as AdvancedFilters;
-      });
+    const queries = await getQueryDocument();
+    const result = await queryAsync(queries.GetGeoFilterForMapDocument);
+    return result.data.GeoFilterForMap as AdvancedFilters;
   };
 
   const activateNewGeoFilter = (filtersBaseApi: FiltersBaseAPI, geoFilters: AdvancedFilters, geojsonPolygon: GeoJSONGeometry) => {
