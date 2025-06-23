@@ -116,6 +116,7 @@ const emit = defineEmits<{
   (event: "resetUpload"): void;
   (event: "resetUpload"): void;
   (event: "closeAndDeleteForm"): void;
+  (event: "clickUploadButton"): void;
 }>();
 
 const { t } = useI18n();

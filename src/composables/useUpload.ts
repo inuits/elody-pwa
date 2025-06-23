@@ -493,7 +493,18 @@ const useUpload = () => {
     );
 
     if (!response.ok) {
-      const httpErrorMessage = handleHttpError(response);
+      const httpErrorMessage = await handleHttpError(response);
+      __updateFileThumbnails(
+        file,
+        ProgressStepType.Upload,
+        ProgressStepStatus.Failed,
+        [httpErrorMessage],
+      );
+      __updateGlobalUploadProgress(
+        ProgressStepType.Upload,
+        ProgressStepStatus.Failed,
+      );
+      toggleUploadStatus();
       return Promise.reject(httpErrorMessage);
     }
     return JSON.parse(await response.text());

@@ -11,7 +11,7 @@ import { getTranslatedMessage } from "@/helpers";
 export const useErrorCodes = (): {
   handleErrorByCode: (code: string) => void;
   handleGraphqlError: (error: GraphQLError) => string;
-  handleHttpError: (httpResponse: Response) => string;
+  handleHttpError: (httpResponse: Response) => Promise<string>;
   getMessageAndCodeFromApolloError: (apolloError: ApolloError) => Promise<{
     code: string;
     message: string;
@@ -290,10 +290,11 @@ export const useErrorCodes = (): {
   };
 
   const handleHttpError = async (httpResponse: Response): Promise<string> => {
-    if (new URL(httpResponse.url).pathname.includes("api/iiif")) return;
+    if (new URL(httpResponse.url).pathname.includes("api/iiif")) return "";
     const responseBody = await httpResponse.json();
     const httpErrorMessage: string =
-      responseBody?.extensions?.response?.body?.message;
+      responseBody?.extensions?.response?.body?.message ||
+      responseBody?.extensions?.response?.body;
 
     const { code, message, variables } =
       await extractErrorComponentsFromErrorResponse(httpErrorMessage);
@@ -304,11 +305,11 @@ export const useErrorCodes = (): {
         httpResponse,
       );
       fallbackOnRequestStatusCode(statusCode, ErrorCodeType.Read, message);
-      return;
+      return "";
     }
 
     handleErrorByCodeType(code);
-    return message;
+    return message as string;
   };
 
   return {

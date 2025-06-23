@@ -201,29 +201,31 @@
 
 <script setup lang="ts">
 import { useBaseModal } from "@/composables/useBaseModal";
+import type {
+  Entitytyping,
+  ActionProgress,
+  ActionProgressStep,
+  Entity,
+  BaseRelationValuesInput,
+  EntityInput,
+  FormAction,
+  MetadataInput,
+  MutateEntityValuesMutation,
+  MutateEntityValuesMutationVariables,
+  PanelMetaData,
+  UploadContainer,
+  UploadField,
+} from "@/generated-types/queries";
 import {
-  type ActionProgress,
   ActionProgressIndicatorType,
-  type ActionProgressStep,
   ActionType,
   BaseFieldType,
-  type BaseRelationValuesInput,
   EndpointResponseActions,
-  type Entity,
-  type EntityInput,
   EntityPickerMode,
-  Entitytyping,
-  type FormAction,
-  type MetadataInput,
   MutateEntityValuesDocument,
-  type MutateEntityValuesMutation,
-  type MutateEntityValuesMutationVariables,
   OcrType,
-  type PanelMetaData,
   RouteNames,
   TypeModals,
-  type UploadContainer,
-  type UploadField,
   UploadFlow,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
@@ -327,7 +329,11 @@ const {
   resetUpload,
   mediafiles,
 } = useUpload();
-const { handleHttpError, getMessageAndCodeFromApolloError } = useErrorCodes();
+const {
+  handleHttpError,
+  getMessageAndCodeFromApolloError,
+  getMessageAndCodeFromErrorString,
+} = useErrorCodes();
 const {
   getAcceptedTypes,
   getParentEntityType,
@@ -402,7 +408,7 @@ const isButtonDisabled = computed((): boolean =>
 );
 const formClosing = ref<boolean>(false);
 const submitErrors = ref<string | undefined>(undefined);
-const { getMenuDestinations, changeExpandedState } = useMenuHelper();
+const { changeExpandedState } = useMenuHelper();
 const isLoading = computed(() => {
   if (isPerformingAction.value) return true;
   return !formFields.value && !dynamicForm.value;
@@ -457,14 +463,14 @@ const isFormValid = async () => {
 const uploadActionFunction = async () => {
   if (!enableUploadButton.value) return;
   await upload(isLinkedUpload.value, config, t);
-  if (jobIdentifier.value)
+  if (jobIdentifier.value) {
     goToEntityPageById(
       jobIdentifier.value,
       { type: "job", __typename: "job" },
       "SingleEntity",
       props.router,
     );
-  return;
+  }
 };
 
 const tagNewlyCreatedEntity = (entity: Entity): void => {
@@ -549,8 +555,14 @@ const submitWithUploadActionFunction = async (field: FormAction) => {
       useBaseModal().closeModal(TypeModals.DynamicForm);
       setTimeout(() => goToEntityPage(entity, "SingleEntity", props.router), 1);
     }
-  } catch (e: ApolloError) {
-    const errorObject = await getMessageAndCodeFromApolloError(e);
+  } catch (error: ApolloError | any) {
+    const errorObject =
+      error instanceof ApolloError
+        ? await getMessageAndCodeFromApolloError(error)
+        : await getMessageAndCodeFromErrorString(
+            error?.extensions?.response?.body,
+          );
+
     isPerformingAction.value = false;
     submitErrors.value = errorObject.message;
   }
