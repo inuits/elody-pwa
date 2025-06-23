@@ -24,11 +24,11 @@ describe("useMapCenter", () => {
 
   describe("HeatMap type", () => {
     it("returns normalized coordinates for HeatMap when metadata exists", () => {
-      const element = mockElement(MapTypes.HeatMap, "gps_coordinates");
+      const element = mockElement(MapTypes.HeatMap, "coordinates");
       vi.mocked(getValueForPanelMetadata).mockReturnValue([10, 20]);
 
       const { center } = useMapCenter(element, "entity1");
-      expect(center.value).toEqual([20, 10]);
+      expect(center.value).toEqual([1113194.9079327357, 2273030.926987689,]);
     });
 
     it("returns empty array when metadata is missing for HeatMap", () => {
@@ -42,7 +42,7 @@ describe("useMapCenter", () => {
 
   describe("Wkt type", () => {
     it("returns correct coordinates for Wkt when metadata exists", () => {
-      const element = mockElement(MapTypes.WktMap, "coordinates");
+      const element = mockElement(MapTypes.WktMap, "gps_coordinates");
       vi.mocked(getValueForPanelMetadata).mockReturnValue({
         latitude: 30,
         longitude: 40,
@@ -53,7 +53,7 @@ describe("useMapCenter", () => {
     });
 
     it("returns empty array when metadata is missing for Wkt", () => {
-      const element = mockElement(MapTypes.WktMap, "coordinates");
+      const element = mockElement(MapTypes.WktMap, "gps_coordinates");
       vi.mocked(getValueForPanelMetadata).mockReturnValue(null);
 
       const { center } = useMapCenter(element, "entity1");

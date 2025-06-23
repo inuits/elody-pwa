@@ -59,13 +59,21 @@ const wktOfEntities = computed(() => {
 
 const center = ref<number[]>();
 const calculateCenter = (entities: Entity[]) => {
-  let coordinates =
-    entities.length > 0
-      ? entities[0].intialValues?.gps_coordinates
-      : undefined;
-  if (coordinates) {
-    center.value = fromLonLat([coordinates[1], coordinates[0]]);
+  let entity = entities?.find(
+    (item) => item.type === props.entityTypeAsCenterPoint,
+  );
+  if (!entity) {
+    entity = entities?.[0];
   }
+  const keyToGetCoordinates = props.centerCoordinatesKey || "gps_coordinates";
+  let coordinates = entity?.intialValues?.[keyToGetCoordinates];
+  if (coordinates) {
+    center.value = [
+        (coordinates as { latitude: number }).latitude,
+        (coordinates as { longitude: number }).longitude,
+    ];
+  }
+
   coordinates = getBasicMapProperties(props.config).center;
   if (coordinates) {
     center.value = fromLonLat([coordinates[1], coordinates[0]]);
