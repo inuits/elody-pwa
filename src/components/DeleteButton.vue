@@ -101,7 +101,7 @@ const openDeleteModal = () => {
     initializePropertiesForDeletion(title);
     openModal(
       TypeModals.Delete,
-      ModalStyle.Center,
+      ModalStyle.CenterWide,
       undefined,
       deleteQueryOptions,
     );

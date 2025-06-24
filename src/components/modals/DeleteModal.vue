@@ -10,7 +10,7 @@
       :class="[{ 'pt-5': numberOfBlockingQueryEntities <= 0 }]"
     >
       <div class="w-full px-8">
-        <h1 class="title text-pretty flex justify-center pb-12">
+        <h1 class="title text-pretty flex justify-center pb-2">
           {{
             t("navigation.delete-entity-window", [
               `${translatedDeleteEntityLabel} "${parentEntityTitle}"`,
@@ -23,7 +23,7 @@
         v-if="modalOpenend && deleteQueryOptions?.customQueryBlockingRelations"
         v-show="numberOfBlockingQueryEntities > 0"
       >
-        <div class="title p-4">
+        <div class="subtitle text-text-body pb-2">
           {{
             t("actions.labels.blocking-relations", [
               translatedDeleteEntityLabel,
@@ -60,7 +60,7 @@
           v-if="deleteQueryOptions?.customQueryDeleteRelations"
           v-show="numberOfRelatedEntities > 0"
         >
-          <div class="text-lg pb-2">
+          <div class="subtitle text-text-body pb-2">
             {{
               t("actions.labels.delete-relation-entities", [
                 translatedDeleteRelationsLabel,
