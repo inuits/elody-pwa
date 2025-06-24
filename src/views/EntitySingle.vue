@@ -27,7 +27,6 @@ import {
   Permission,
   type ColumnList,
   type GetEntityByIdQueryVariables,
-  type IntialValues,
   type GetEntityByIdQuery,
   type BaseEntity,
   type MediaFileEntity,
@@ -37,13 +36,11 @@ import {
   type Entity,
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
-import EntityForm from "@/components/EntityForm.vue";
 import {
   asString,
   getTitleOrNameFromEntity,
   getMappedSlug,
   mapUrlToEntityType,
-  determineDefaultIntialValues,
 } from "@/helpers";
 import {
   reactive,

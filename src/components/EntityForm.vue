@@ -51,6 +51,7 @@ const props = defineProps<{
 }>();
 
 const config: any = inject("config");
+const isPreviewElement: any = inject("IsPreviewElement", false);
 const {
   initializeConfirmModal,
   performRoute,
@@ -141,7 +142,7 @@ const callRefetchFn = () => {
 
 onMounted(async () => {
   document.addEventListener("discardEdit", () => callRefetchFn);
-  updateDeleteQueryOptions(props.deleteQueryOptions);
+  if (!isPreviewElement) updateDeleteQueryOptions(props.deleteQueryOptions);
 });
 onUnmounted(() => {
   document.removeEventListener("discardEdit", () => callRefetchFn);

@@ -112,8 +112,8 @@ export const useBaseModal = () => {
     modals[modalType].closeConfirmation = value;
   };
 
-  const updateDeleteQueryOptions = (value: string) => {
-    deleteQueryOptions.value = value;
+  const updateDeleteQueryOptions = (value: DeleteQueryOptions) => {
+    deleteQueryOptions.value = value as DeleteQueryOptions;
   };
 
   const someModalIsOpened = computed((): boolean => {
