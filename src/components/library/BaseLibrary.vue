@@ -120,9 +120,11 @@
               :set-sort-order="setSortOrder"
               :filters-available-on-detail-page="filtersAvailableOnDetailPage"
               @pagination-limit-options-promise="
-              (promise) => (paginationLimitOptionsPromise = promise)
-            "
-              @sort-options-promise="(promise) => (sortOptionsPromise = promise)"
+                (promise) => (paginationLimitOptionsPromise = promise)
+              "
+              @sort-options-promise="
+                (promise) => (sortOptionsPromise = promise)
+              "
             />
           </div>
         </div>
@@ -253,33 +255,31 @@
 
 <script lang="ts" setup>
 import type { ApolloClient } from "@apollo/client/core";
-import type {
-  RelationActions,
-  EntitySubelement,
-} from "@/generated-types/queries";
 import {
   type AdvancedFilterInput,
+  type BaseEntity,
   BaseLibraryModes,
   type BaseRelationValuesInput,
-  DeepRelationsFetchStrategy,
-  type Entity,
-  type EntityListElement,
-  type FetchDeepRelations,
-  type ViewModesWithConfig,
-  ViewModes,
-  type BaseEntity,
   ContextMenuGeneralActionEnum,
   DamsIcons,
+  DeepRelationsFetchStrategy,
   type DropdownOption,
+  type Entity,
+  type EntityListElement,
+  type EntitySubelement,
   Entitytyping,
+  type FetchDeepRelations,
+  type RelationActions,
   SearchInputType,
   TypeModals,
+  ViewModes,
+  type ViewModesWithConfig,
 } from "@/generated-types/queries";
-import { useBulkOperations } from "@/composables/useBulkOperations";
 import type {
   Context,
   InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
+import { useBulkOperations } from "@/composables/useBulkOperations";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
@@ -301,14 +301,13 @@ import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useMaps } from "@/composables/useMaps";
-import { watch, ref, onMounted, inject, computed } from "vue";
+import { computed, inject, onMounted, ref, watch } from "vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import {
-  useBreadcrumbs,
   breadcrumbPathFinished,
   breadcrumbRoutes,
+  useBreadcrumbs,
 } from "@/composables/useBreadcrumbs";
-import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
 
 export type BaseLibraryProps = {
   bulkOperationsContext: Context;

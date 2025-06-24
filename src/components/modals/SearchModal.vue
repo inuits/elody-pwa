@@ -25,6 +25,10 @@
           :is-search-library="true"
           :predefinedEntities="hasAdvancedSearchEnabled ? items : undefined"
           :ignore-fetching-data="hasAdvancedSearchEnabled"
+          :entity-type="
+            filters.find((filter) => filter.type === AdvancedFilterTypes.Type)
+              ?.value || Entitytyping.BaseEntity
+          "
         ></base-library>
       </div>
     </div>
@@ -34,18 +38,20 @@
 <script setup lang="ts">
 import {
   type AdvancedFilterInput,
+  Entitytyping,
   SearchInputType,
   TypeModals,
+  AdvancedFilterTypes,
 } from "@/generated-types/queries";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
-import { ref, inject, computed } from "vue";
+import { computed, inject, ref } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
-  useAdvancedSearch,
   type AdvancedSearchFilters,
+  useAdvancedSearch,
 } from "@/composables/useAdvancedSearch";
 
 const config: any = inject("config");
