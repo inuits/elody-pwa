@@ -109,7 +109,7 @@ const {
   entitiesLoading: relatedEntitiesLoading,
 } = useGetDropdownOptions(
   props.metadataKeyToGetOptionsFor as Entitytyping,
-  entityId as string,
+  props.formId as string ?? entityId as string,
   props.relationType,
   props.fromRelationType,
   props.advancedFilterInputForSearchingOptions,
@@ -133,7 +133,7 @@ onMounted(async () => {
 const initAutocompleteOption = async () => {
   await initialize();
   if (
-    entityId &&
+    (props.formId || entityId) &&
     (props.relationType || props.fromRelationType) &&
     props.mode !== "create"
   ) {
