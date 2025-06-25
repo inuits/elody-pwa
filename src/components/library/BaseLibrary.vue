@@ -288,7 +288,7 @@ import FiltersBase, {
   FiltersBaseAPI,
 } from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
-import useUpload from "@/composables/useUpload";
+import useUpload, { UploadStatus } from "@/composables/useUpload";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
 import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
@@ -843,7 +843,7 @@ watch(
 watch(
   () => uploadStatus.value,
   async () => {
-    if (uploadStatus.value === "upload-finished") await refetchEntities();
+    if (uploadStatus.value === UploadStatus.Finished) await refetchEntities();
   },
 );
 watch(

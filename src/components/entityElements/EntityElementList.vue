@@ -146,7 +146,7 @@ import { watch, ref, onBeforeMount, computed, provide, inject } from "vue";
 import { useImport } from "@/composables/useImport";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
-import useUpload from "@/composables/useUpload";
+import useUpload, { UploadStatus } from "@/composables/useUpload";
 import { usePermissions } from "@/composables/usePermissions";
 
 const { createCustomContext } = useBulkOperations();
@@ -222,8 +222,10 @@ watch(
   () => uploadStatus.value,
   async () => {
     if (!requiresCustomQuery.value) return;
-    if (uploadStatus.value === "uploading") queryLoaded.value = false;
-    else if (uploadStatus.value === "upload-finished") await useCustomQuery();
+    if (uploadStatus.value === UploadStatus.Uploading)
+      queryLoaded.value = false;
+    else if (uploadStatus.value === UploadStatus.Finished)
+      await useCustomQuery();
   },
 );
 

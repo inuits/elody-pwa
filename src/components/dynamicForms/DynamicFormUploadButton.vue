@@ -43,7 +43,7 @@
         </div>
       </div>
       <progress-bar
-        v-else
+        v-if="uploadStatus !== UploadStatus.Finished && mediafiles.length > 0"
         :progress="amountUploaded"
         progress-bar-type="steps"
         :total-amount-of-steps="mediafiles.length"
@@ -98,7 +98,7 @@ import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { computed } from "vue";
 import BaseProgressStep from "@/components/base/progressStep/BaseProgressStep.vue";
-import useUpload from "@/composables/useUpload";
+import useUpload, { UploadStatus } from "@/composables/useUpload";
 import ProgressBar from "@/components/ProgressBar.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 

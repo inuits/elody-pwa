@@ -24,11 +24,15 @@ type UploadSettings = {
   extraMediafileType: string | undefined;
 };
 
+export enum UploadStatus {
+  NoUpload = "no-upload",
+  Uploading = "uploading",
+  Finished = "upload-finished",
+}
+
 import { router } from "@/main";
 const { handleHttpError, getMessageAndCodeFromErrorString } = useErrorCodes();
-const uploadStatus = ref<"no-upload" | "uploading" | "upload-finished">(
-  "no-upload",
-);
+const uploadStatus = ref<UploadStatus>(UploadStatus.NoUpload);
 const uploadProgress = ref<ActionProgressStep[]>([]);
 const amountUploaded = ref<number>(0);
 const dryRunComplete = ref<boolean>(false);
@@ -217,9 +221,12 @@ const useUpload = () => {
       isLinkedUpload ? useEntitySingle().getEntityUuid() : "",
     );
 
+    const errors = [];
+
     for await (const upload of generator) {
       if (!upload?.response.ok) {
         __uploadExceptionHandler(upload?.response.text(), upload.file, t);
+        errors.push(upload?.response.text());
         continue;
       }
       __updateFileThumbnails(
@@ -235,6 +242,9 @@ const useUpload = () => {
       ? ProgressStepStatus.Failed
       : ProgressStepStatus.Complete;
     __updateGlobalUploadProgress(ProgressStepType.Upload, uploadStatus);
+    if (errors.length > 0) {
+      throw errors.join(", ");
+    }
   };
 
   const upload = async (isLinkedUpload: boolean, config: any, t: Function) => {
@@ -245,8 +255,7 @@ const useUpload = () => {
     );
     toggleUploadStatus();
 
-    if (
-      uploadFlow.value === UploadFlow.XmlMarc) {
+    if (uploadFlow.value === UploadFlow.XmlMarc) {
       await __uploadXml();
 
       [
@@ -424,6 +433,11 @@ const useUpload = () => {
     );
     if (!response.ok) {
       const httpErrorMessage = handleHttpError(response);
+      __updateGlobalUploadProgress(
+        ProgressStepType.Upload,
+        ProgressStepStatus.Failed,
+      );
+      toggleUploadStatus();
       return Promise.reject(httpErrorMessage);
     }
 
@@ -436,12 +450,13 @@ const useUpload = () => {
   };
 
   const toggleUploadStatus = () => {
-    if (uploadStatus.value === "no-upload") uploadStatus.value = "uploading";
-    else if (uploadStatus.value === "uploading") {
-      uploadStatus.value = "upload-finished";
+    if (uploadStatus.value === UploadStatus.NoUpload)
+      uploadStatus.value = UploadStatus.Uploading;
+    else if (uploadStatus.value === UploadStatus.Uploading) {
+      uploadStatus.value = UploadStatus.Finished;
       uploadProgressPercentage.value = 0;
-    } else if (uploadStatus.value === "upload-finished")
-      uploadStatus.value = "uploading";
+    } else if (uploadStatus.value === UploadStatus.Finished)
+      uploadStatus.value = UploadStatus.Uploading;
   };
 
   const __getUploadUrlForStandaloneMediafile = async (
@@ -500,11 +515,6 @@ const useUpload = () => {
         ProgressStepStatus.Failed,
         [httpErrorMessage],
       );
-      __updateGlobalUploadProgress(
-        ProgressStepType.Upload,
-        ProgressStepStatus.Failed,
-      );
-      toggleUploadStatus();
       return Promise.reject(httpErrorMessage);
     }
     return JSON.parse(await response.text());
@@ -633,10 +643,6 @@ const useUpload = () => {
         ProgressStepStatus.Failed,
         [httpErrorMessage],
       );
-      __updateGlobalUploadProgress(
-        ProgressStepType.Upload,
-        ProgressStepStatus.Failed,
-      );
       return Promise.reject(httpErrorMessage);
     }
 
@@ -663,13 +669,13 @@ const useUpload = () => {
         ProgressStepType.Prepare,
         ProgressStepStatus.Loading,
       );
-      const url = await __getUploadUrl(file, entityId);
-      __updateFileThumbnails(
-        file,
-        ProgressStepType.Prepare,
-        ProgressStepStatus.Complete,
-      );
       try {
+        const url = await __getUploadUrl(file, entityId);
+        __updateFileThumbnails(
+          file,
+          ProgressStepType.Prepare,
+          ProgressStepStatus.Complete,
+        );
         yield await __uploadFile(file, url, config);
       } catch (error) {
         __updateFileThumbnails(
@@ -678,6 +684,14 @@ const useUpload = () => {
           ProgressStepStatus.Failed,
           [error],
         );
+
+        yield {
+          file: file,
+          response: {
+            ok: false,
+            text: () => error || "Something went wrong",
+          },
+        };
       }
     }
     _prefetchedUploadUrls = "not-prefetched-yet";
@@ -757,7 +771,7 @@ const useUpload = () => {
   const resetUpload = (isDryRunReset: boolean = false) => {
     if (!isDryRunReset) {
       standaloneFileType.value = undefined;
-      uploadStatus.value = "no-upload";
+      uploadStatus.value = UploadStatus.NoUpload;
       files.value = [];
       failedUploads.value = [];
       amountUploaded.value = 0;
@@ -1058,14 +1072,50 @@ const useUpload = () => {
 
 watch(
   () => mediafiles.value.length,
-  () => {
+  (amountOfFiles: number) => {
     useUpload().verifyAllNeededFilesArePresent();
+
+    if (
+      uploadFlow.value !== UploadFlow.MediafilesOnly &&
+      uploadFlow.value !== UploadFlow.OptionalMediafiles
+    )
+      return;
+
+    if (amountOfFiles === 0 && uploadStatus.value !== UploadStatus.NoUpload) {
+      uploadStatus.value = UploadStatus.NoUpload;
+      amountUploaded.value = 0;
+    }
+  },
+);
+
+watch(
+  () => failedUploads.value.length,
+  (amountOfFiles: number) => {
+    if (
+      uploadFlow.value !== UploadFlow.MediafilesOnly &&
+      uploadFlow.value !== UploadFlow.OptionalMediafiles
+    )
+      return;
+
+    const shouldResetGlobalUploadProgress =
+      amountOfFiles === 0 &&
+      uploadStatus.value === UploadStatus.Finished &&
+      mediafiles.value.length !== 0;
+
+    if (shouldResetGlobalUploadProgress) {
+      useUpload().__updateGlobalUploadProgress(
+        ProgressStepType.Upload,
+        ProgressStepStatus.Complete,
+      );
+    }
   },
 );
 
 watch(
   () => files.value.length,
   (amountOfFiles: number) => {
+    if (uploadStatus.value === UploadStatus.Finished) return;
+
     const containsFiles = !!amountOfFiles;
     useBaseModal().changeCloseConfirmation(
       TypeModals.DynamicForm,

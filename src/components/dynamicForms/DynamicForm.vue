@@ -408,6 +408,7 @@ const isButtonDisabled = computed((): boolean =>
 );
 const formClosing = ref<boolean>(false);
 const submitErrors = ref<string | undefined>(undefined);
+const createdEntity = ref<Entity | null>(null);
 const { changeExpandedState } = useMenuHelper();
 const isLoading = computed(() => {
   if (isPerformingAction.value) return true;
@@ -538,8 +539,13 @@ const submitWithUploadActionFunction = async (field: FormAction) => {
   );
   let entity: any;
   try {
-    entity = (await performSubmitAction(document, entityInput)).data
-      .CreateEntity;
+    if (!createdEntity.value) {
+      entity = (await performSubmitAction(document, entityInput)).data
+        .CreateEntity;
+      createdEntity.value = entity;
+    } else {
+      entity = createdEntity.value;
+    }
     submitErrors.value = undefined;
 
     if (mediafiles.value.length > 0) {

@@ -16,7 +16,7 @@
 import DropzonePreview from "@/components/base/dropzone/DropzonePreview.vue";
 import DropzoneView from "@/components/base/dropzone/DropzoneView.vue";
 import { onMounted, ref, watch } from "vue";
-import useUpload from "@/composables/useUpload";
+import useUpload, { UploadStatus } from "@/composables/useUpload";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import type { DropzoneFile } from "dropzone";
 
@@ -93,7 +93,7 @@ onMounted(() => {
   watch(
     () => uploadStatus.value,
     () => {
-      if (uploadStatus.value !== "upload-finished") {
+      if (uploadStatus.value !== UploadStatus.Finished) {
         dropzone.setupEventListeners();
         return;
       }
