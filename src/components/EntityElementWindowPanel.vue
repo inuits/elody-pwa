@@ -4,6 +4,7 @@
     :class="[{ 'pl-10  py-0': parentIsListItem }]"
   >
     <div
+      v-if="panel.label"
       @click="toggleIsCollapsed()"
       class="flex items-center justify-between cursor-pointer"
     >
