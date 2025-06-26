@@ -67,6 +67,7 @@ watch(
   () => isSingle,
   () => {
     if (!isSingle.value) editModeHelper.value.hideEditButton();
+    else editModeHelper.value.resetEditMode();
   },
   { immediate: true },
 );
