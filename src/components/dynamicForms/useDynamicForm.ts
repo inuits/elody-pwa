@@ -22,6 +22,7 @@ const useDynamicForm = () => {
     queryDocument: any,
     tabName: string | undefined = undefined,
   ): void => {
+    dynamicFormLoaded.value = false;
     apolloClient
       .query({
         query: queryDocument,
@@ -35,6 +36,9 @@ const useDynamicForm = () => {
           return;
         }
         dynamicForm.value = result.data;
+        dynamicFormLoaded.value = true;
+      })
+      .catch((e: any) => {
         dynamicFormLoaded.value = true;
       });
   };

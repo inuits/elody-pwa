@@ -4,14 +4,11 @@
     class="p-4 pt-0 h-full w-full overflow-y-auto"
     :key="dynamicFormQuery"
   >
-    <div v-if="isLoading" class="w-full">
-      <div
-        class="absolute block top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl text-gray-700"
-      >
-        <spinner-loader theme="accent" />
-      </div>
+    <div v-if="!dynamicFormLoaded" class="w-full">
+      <DynamicFormSkeleton :formKey="dynamicFormQuery" />
     </div>
     <div
+      v-else
       class="w-full [&>*>button:last-child]:mb-0"
       :class="[isLoading ? 'opacity-20' : 'opacity-100']"
     >
@@ -231,7 +228,6 @@ import {
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import { computed, inject, ref, watch, onUnmounted } from "vue";
-import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
 import { useI18n } from "vue-i18n";
@@ -265,6 +261,7 @@ import {
   tagEntity,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
+import DynamicFormSkeleton from "./DynamicFormSkeleton.vue";
 
 const props = withDefaults(
   defineProps<{

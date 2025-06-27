@@ -32,19 +32,28 @@
           />
         </div>
         <div class="h-[90%] overflow-y-hidden hover:overflow-y-auto">
-          <BaseInputCheckbox
-            v-for="csvExportOption in csvExportOptions"
-            :key="csvExportOption.key.value"
-            v-model="csvExportOption.isSelected"
-            class="my-1"
-            :label="t(csvExportOption.key.label)"
-            :item="{ id: csvExportOption.key.value }"
-            :required="csvExportOption.key.required"
-            :bulk-operations-context="
-              BulkOperationsContextEnum.BulkOperationsCsvExport
-            "
-            input-style="accentNormal"
-          />
+          <div v-if="isLoading">
+            <div
+              v-for="(_, index) in Array(8).fill(null)"
+              :key="index"
+              class="animate-pulse h-[40px] bg-gray-300 rounded-[3px] w-full my-1"
+            />
+          </div>
+          <div v-else>
+            <BaseInputCheckbox
+              v-for="csvExportOption in csvExportOptions"
+              :key="csvExportOption.key.value"
+              v-model="csvExportOption.isSelected"
+              class="my-1"
+              :label="t(csvExportOption.key.label)"
+              :item="{ id: csvExportOption.key.value }"
+              :required="csvExportOption.key.required"
+              :bulk-operations-context="
+                BulkOperationsContextEnum.BulkOperationsCsvExport
+              "
+              input-style="accentNormal"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -98,7 +107,7 @@ import { useBaseNotification } from "@/composables/useBaseNotification";
 import { computed, inject, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
-import { useQuery } from "@vue/apollo-composable";
+import { useQuery, useQueryLoading } from "@vue/apollo-composable";
 import {
   downloadCsv,
   formatTeaserMetadata,
@@ -161,7 +170,7 @@ const context: Context = computed(
 
 const items = ref<InBulkProcessableItem[]>([]);
 const loadItems = (newSkip: number | undefined = undefined) => {
-  if (skip)  skip.value = newSkip;
+  if (skip.value) skip.value = newSkip;
   items.value = getEnqueuedItems(context.value, skip.value, limit.value);
 };
 const refetchEnabled = ref<boolean>(false);
@@ -177,6 +186,8 @@ const { refetch, onResult } = useQuery<GetBulkOperationCsvExportKeysQuery>(
 const csvExportOptions = ref<{ isSelected: boolean; key: DropdownOption }[]>(
   [],
 );
+
+const isLoading = useQueryLoading();
 
 const queryVariablesForMediafiles: FetchMediafilesOfEntityQueryVariables = {
   entityIds: [],
