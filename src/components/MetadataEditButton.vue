@@ -6,7 +6,7 @@
       editModeHelper.editMode === 'edit' ||
       editModeHelper.editMode === 'edit-delete'
     "
-    class="ml-6"
+    class="ml-auto px-2"
   >
     <base-button-new
       v-if="!editModeHelper.isEdit"

@@ -20,7 +20,7 @@
       :name="Unicons[props.icon].name"
       :height="iconHeight"
     />
-    <span v-if="label" class="leading-4 @max-xs/window:hidden">{{
+    <span v-if="label" class="leading-4 text-ellipsis @max-xs/window:hidden">{{
       label
     }}</span>
 
