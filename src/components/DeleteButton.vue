@@ -14,7 +14,7 @@
 <script lang="ts" setup>
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";
-import { inject, computed } from "vue";
+import { inject, computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { DamsIcons, ModalStyle, TypeModals } from "@/generated-types/queries";
 import type { ApolloClient } from "@apollo/client/core";
@@ -51,12 +51,17 @@ const { initializeConfirmModal } = useConfirmModal();
 const { deleteEntities } = useDeleteEntities();
 const { getForm } = useFormHelper();
 
-const deleteAvailable = computed<boolean>(() => {
-  return (
-    useEditHelper.value.editMode === "edit-delete" ||
-    useEditHelper.value.editMode === "delete"
-  );
-});
+const deleteAvailable = ref<boolean>(false);
+watch(
+  () => useEditHelper.value,
+  () => {
+    deleteAvailable.value = (
+      useEditHelper.value.editMode === "edit-delete" ||
+      useEditHelper.value.editMode === "delete"
+    );
+  },
+  { deep: true },
+)
 
 const entityType = computed(() => {
   const slug = String(route.params["type"]);

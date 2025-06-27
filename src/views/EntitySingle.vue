@@ -95,8 +95,8 @@ const props = withDefaults(
   { viewOnly: false },
 );
 
-const id = ref<string>(asString(props.entityId || route.params["id"]));
-const useEditHelper = useEditMode(id.value);
+const id = computed(() => asString(props.entityId || route.params["id"]));
+const useEditHelper = computed(() => useEditMode(id.value));
 const identifiers = ref<string[]>([]);
 const loading = ref<boolean>(true);
 const { getEditableMetadataKeys } = useFormHelper();
@@ -177,14 +177,14 @@ const determineContextsForMediafileViewer = () => {
 };
 
 router.beforeEach(() => {
-  if (useEditHelper.isEdit) useEditHelper.disableEditMode();
+  if (useEditHelper.value.isEdit) useEditHelper.value.disableEditMode();
 });
 
 onBeforeRouteUpdate(async (to: any) => {
   queryVariables.id = to.params.id;
   queryVariables.type = entityType.value;
   columnList.value = "no-values";
-  useEditHelper.disableEditMode();
+  useEditHelper.value.disableEditMode();
 });
 
 watch(
@@ -228,23 +228,23 @@ watch(
         permissionToDelete.value = result.get(Permission.Candelete);
 
         if (props.viewOnly) {
-          useEditHelper.hideEditButton();
+          useEditHelper.value.hideEditButton();
           return;
         }
 
         if (auth.isAuthenticated.value) {
           if (permissionToEdit.value && permissionToDelete.value) {
-            useEditHelper.setEditMode("edit-delete");
+            useEditHelper.value.setEditMode("edit-delete");
           } else if (permissionToEdit.value && !permissionToDelete.value) {
-            useEditHelper.setEditMode("edit");
+            useEditHelper.value.setEditMode("edit");
           } else if (permissionToDelete.value && !permissionToEdit.value) {
-            useEditHelper.setEditMode("delete");
-          } else useEditHelper.hideEditButton();
-        } else useEditHelper.hideEditButton();
+            useEditHelper.value.setEditMode("delete");
+          } else useEditHelper.value.hideEditButton();
+        } else useEditHelper.value.hideEditButton();
       });
     }
 
-    useEditHelper.setRefetchFn(refetch);
+    useEditHelper.value.setRefetchFn(refetch);
     loading.value = false;
   },
 );

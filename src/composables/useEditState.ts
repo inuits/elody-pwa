@@ -26,7 +26,6 @@ export const useEditState = (editStateName: string) => {
   };
 
   const disableEditMode = () => applyPermittedEditMode();
-  const resetEditMode = () => applyPermittedEditMode();
 
   const setSubmitFunction = (editSubmitFn: Callback | undefined) => {
     submitFn.value = editSubmitFn;
@@ -100,7 +99,6 @@ export const useEditState = (editStateName: string) => {
     isEdit,
     setEditMode,
     disableEditMode,
-    resetEditMode,
     setSubmitFunction,
     setRefetchFn,
     hideEditButton,
