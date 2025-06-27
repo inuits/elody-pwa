@@ -16,11 +16,13 @@
   >
     <unicon
       v-if="props.icon !== DamsIcons.NoIcon"
-      :class="{ '-ml-1': label }"
+      :class="[{ '-ml-1 ': label }]"
       :name="Unicons[props.icon].name"
       :height="iconHeight"
     />
-    <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
+    <span v-if="label" class="leading-4 @max-xs/window:hidden">{{
+      label
+    }}</span>
 
     <div v-if="disabled && tooltipLabel" class="ml-2 -mb-2 text-black">
       <base-tooltip position="top-right" :tooltip-offset="8">

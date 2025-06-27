@@ -1,11 +1,13 @@
 <template>
   <div v-if="!showSplashScreen">
-    <notifications class="pt-2" />
-    <notifications
-      class="pt-2 cursor-pointer"
-      group="serviceVersionManager"
-      @click="refreshPage()"
-    />
+    <div v-if="!someModalIsOpened">
+      <notifications class="pt-2" />
+      <notifications
+        class="pt-2 cursor-pointer"
+        group="serviceVersionManager"
+        @click="refreshPage()"
+      />
+    </div>
     <the-navigation class="navbar" />
     <div>
       <div class="bg-neutral-lightest pl-24 h-screen flex flex-col">
@@ -57,6 +59,7 @@ import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
 import CreateSavedSearchModal from "./components/CreateSavedSearchModal.vue";
 import EntityDetailModal from "@/components/modals/EntityDetailModal.vue";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 const config = inject<{
   features: { hasTenantSelect: boolean };
@@ -66,6 +69,7 @@ const config = inject<{
 const route = useRoute();
 const { initApp, showSplashScreen } = useApp();
 const { isSingle } = useRouteHelpers();
+const { someModalIsOpened } = useBaseModal();
 
 onMounted(async () => await initApp(auth, config));
 

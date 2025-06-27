@@ -12,6 +12,7 @@
           currentModalStyle === ModalStyle.CenterWide,
       },
       modalStyle,
+      `@container/modal`,
     ]"
   >
     <div v-if="!cancelButtonAvailabe" class="flex justify-end p-2">

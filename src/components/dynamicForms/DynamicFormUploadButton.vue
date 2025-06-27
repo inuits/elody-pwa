@@ -25,7 +25,7 @@
         <p class="w-full flex items-center">
           {{ finishedStatusMessage }}
         </p>
-        <div class="w-1/5">
+        <div class="w-1/5 @max-4xl/modal:hidden">
           <base-button-new
             icon="Redo"
             :label="t('actions.labels.reset-upload')"
@@ -33,10 +33,24 @@
             @click="resetUpload()"
           />
         </div>
-        <div class="w-1/5 ml-5">
+        <div class="@4xl/modal:hidden">
+          <base-button-new
+            icon="Redo"
+            button-style="accentAccent"
+            @click="resetUpload()"
+          />
+        </div>
+        <div class="w-1/5 ml-5 @max-lg/modal:hidden">
           <base-button-new
             icon="CheckCircle"
             :label="t('actions.labels.complete')"
+            button-style="accentAccent"
+            @click="emit('closeAndDeleteForm')"
+          />
+        </div>
+        <div class="ml-5 @lg/modal:hidden">
+          <base-button-new
+            icon="CheckCircle"
             button-style="accentAccent"
             @click="emit('closeAndDeleteForm')"
           />
