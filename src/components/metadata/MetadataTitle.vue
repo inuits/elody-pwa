@@ -73,7 +73,7 @@ const { t } = useI18n();
 const isOptionalField = computed(() => {
   return props.metadata?.inputField &&
     !props.isFieldRequired &&
-    useEditHelper.value.isEdit;
+    useEditHelper.isEdit;
 })
 </script>
 
