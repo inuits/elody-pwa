@@ -16,6 +16,7 @@
       :is-clearable="clearable"
       :should-autofocus-option="false"
       @option-selected="selectItem"
+      @option-deselected="deselectItem"
     >
       <template #menu-header v-if="showMenuHeader">
         <div class="text-center my-1">
@@ -114,6 +115,9 @@ const selectedItem = ref<any | undefined>(undefined);
 
 const selectItem = () => {
   emit("update:modelValue", selectedItem.value);
+};
+const deselectItem = () => {
+  emit("update:modelValue", "");
 };
 
 const filterDropdownOptions = computed<DropdownOption[]>(() => {
