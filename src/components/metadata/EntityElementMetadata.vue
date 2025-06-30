@@ -43,8 +43,12 @@
         data-cy="metadata-value"
         v-else-if="stringIsHtml(readableValue)"
         v-html="readableValue"
-      ></p>
-      <p v-else data-cy="metadata-value">
+      />
+      <p
+        v-else
+        data-cy="metadata-value"
+        class="whitespace-pre-line"
+      >
         {{ displayValue }}
       </p>
     </div>
