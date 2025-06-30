@@ -10,6 +10,7 @@
   >
     <metadata-title
       :metadata="metadata"
+      :is-field-required="isFieldRequired"
       :is-one-of-required-metadata-field="isOneOfRequiredMetadataField"
       :is-one-of-required-relation-field="isOneOfRequiredRelationField"
     />

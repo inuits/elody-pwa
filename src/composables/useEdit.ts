@@ -16,7 +16,7 @@ export const useEditMode = (
     return newEditState;
   };
 
-  const getEditState = () => {
+  const getEditState = (): ReturnType<typeof useEditState> => {
     if (!editStates.value[editStateName]) return createNewEditState();
     return editStates.value[editStateName];
   };
