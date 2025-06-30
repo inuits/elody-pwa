@@ -40,6 +40,7 @@
           metadata.inputField?.validation?.fastValidationMessage)
       "
       :field-is-valid="fieldIsValid"
+      :is-field-required="isFieldRequired"
       @click.stop.prevent
       @update:value="setNewValue"
     />

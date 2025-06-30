@@ -58,6 +58,7 @@
       v-else-if="field.type === InputFieldTypes.Dropdown"
       v-model:model-value="metadataValue"
       :options="field.options as DropdownOption[]"
+      :clearable="!isFieldRequired"
       :multiple="field.multiple || false"
       :disable="fieldEditIsDisabled"
       :show-menu-header="false"
@@ -125,6 +126,7 @@ const props = defineProps<{
   showErrors: boolean;
   fieldIsValid: boolean;
   formFlow?: string;
+  isFieldRequired: boolean;
 }>();
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
