@@ -125,6 +125,7 @@
                 :unit="metadata.unit"
                 :base-library-mode="baseLibraryMode"
                 :custom-value="metadata.customValue"
+                :translation-key="metadata.valueTranslationKey"
               />
             </MetadataTruncatedText>
             <BaseCopyToClipboard

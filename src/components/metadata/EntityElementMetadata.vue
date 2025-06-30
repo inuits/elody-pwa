@@ -44,11 +44,8 @@
         v-else-if="stringIsHtml(readableValue)"
         v-html="readableValue"
       ></p>
-      <p
-        v-else
-        data-cy="metadata-value"
-      >
-        {{ readableValue !== "" ? (readableValue as string) : "-" }}
+      <p v-else data-cy="metadata-value">
+        {{ displayValue }}
       </p>
     </div>
   </div>
@@ -63,7 +60,7 @@ import {
   stringIsHtml,
   stringIsUrl,
 } from "@/helpers";
-import { computed, inject } from "vue";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { Unicons } from "@/types";
 import CustomIcon from "@/components/CustomIcon.vue";
@@ -77,6 +74,7 @@ const props = withDefaults(
     customValue?: string;
     linkIcon?: string;
     baseLibraryMode?: BaseLibraryModes;
+    translationKey?: string;
   }>(),
   {
     linkText: "",
@@ -96,5 +94,24 @@ const isCoordinates = computed(() => {
 const readableValue = computed(() => {
   if (isCoordinates.value) return {};
   return convertUnitToReadbleFormat(props.unit as Unit, props.value ?? "");
+});
+
+const displayValue = computed(() => {
+  if (isCoordinates.value) return readableValue.value;
+
+  if (readableValue.value === "") return "-";
+  if (Array.isArray(readableValue.value)) return readableValue.value;
+
+  if (props.translationKey) {
+    const key = props.translationKey;
+    const normalizedTranslationKey = key.replace(
+      "$value",
+      String(readableValue.value),
+    );
+    const translated = t(normalizedTranslationKey);
+    if (translated !== normalizedTranslationKey) return translated;
+  }
+
+  return readableValue.value;
 });
 </script>
