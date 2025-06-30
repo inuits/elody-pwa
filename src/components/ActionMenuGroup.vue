@@ -1,5 +1,8 @@
 <template>
-  <div class="flex flex-row justify-end items-center !m-0" :class="[ { 'w-60': primaryOption }]">
+  <div
+    class="flex flex-row justify-end items-center !m-0"
+    :class="[{ 'w-fit': primaryOption }]"
+  >
     <BaseButtonNew
       v-if="primaryOption"
       class="pr-6"
@@ -9,6 +12,7 @@
       :disabled="isMainActionDisabled || !primaryOption.active"
       :label="t(primaryOption.label, [entityTypeLabel])"
       :tooltip-label="primaryOption.actionContext?.labelForTooltip"
+      :icon="primaryOption.icon"
       @click="handleEmit(primaryOption)"
     />
     <BaseButtonNew

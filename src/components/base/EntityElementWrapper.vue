@@ -64,10 +64,17 @@
         />
       </span>
     </div>
-    <div class="h-full" v-if="!useVshowInsteadOfVif && !isCollapsed">
+    <div
+      class="h-full @container/wrapper-content"
+      v-if="!useVshowInsteadOfVif && !isCollapsed"
+    >
       <slot name="content"></slot>
     </div>
-    <div class="h-full" v-if="useVshowInsteadOfVif" v-show="!isCollapsed">
+    <div
+      class="h-full @container/wrapper-content"
+      v-if="useVshowInsteadOfVif"
+      v-show="!isCollapsed"
+    >
       <slot name="content"></slot>
     </div>
   </div>

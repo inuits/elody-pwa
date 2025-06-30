@@ -20,9 +20,11 @@
       :name="Unicons[props.icon].name"
       :height="iconHeight"
     />
-    <span v-if="label" class="leading-4 text-ellipsis @max-xs/window:hidden">{{
-      label
-    }}</span>
+    <span
+      v-if="label"
+      class="leading-4 text-ellipsis @max-xs/window:hidden @max-xl/wrapper-content:hidden"
+      >{{ label }}</span
+    >
 
     <div v-if="disabled && tooltipLabel" class="ml-2 -mb-2 text-black">
       <base-tooltip position="top-right" :tooltip-offset="8">
