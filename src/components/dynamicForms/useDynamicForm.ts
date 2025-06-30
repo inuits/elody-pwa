@@ -33,6 +33,7 @@ const useDynamicForm = () => {
         }
         if (tabName) {
           dynamicForm.value[tabName] = result.data;
+          dynamicFormLoaded.value = true;
           return;
         }
         dynamicForm.value = result.data;
