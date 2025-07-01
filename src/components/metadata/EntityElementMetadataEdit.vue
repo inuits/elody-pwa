@@ -135,9 +135,7 @@ const { addEditableMetadataKeys } = useFormHelper();
 const metadataValue = computed<string | string[]>({
   get() {
     if (typeof props.value === "object" && props.value?.formatter) {
-      if (props.value?.formatter.startsWith("link")) {
-        return props.value.entity.id;
-      } else if (props.value?.formatter.startsWith("pill")) {
+      if (props.value?.formatter.startsWith("pill")) {
         return props.value.label;
       } else {
         return props.value;
