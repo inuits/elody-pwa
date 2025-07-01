@@ -7,6 +7,7 @@
       "
     >
       <div
+        v-if="showCurrentEntityFlow"
         data-cy="view-modes-list"
         :class="[
           'max-h-[68vh] overflow-y-auto',
@@ -199,6 +200,7 @@ const props = withDefaults(
     expandFilters: boolean;
     entityType: Entitytyping;
     configPerViewMode: object;
+    showCurrentEntityFlow?: boolean;
   }>(),
   {
     disablePreviews: false,
@@ -211,6 +213,7 @@ const props = withDefaults(
     allowedActionsOnRelations: () => [],
     mode: "list",
     refetchEntities: undefined,
+    showCurrentEntityFlow: true
   },
 );
 
@@ -288,9 +291,8 @@ const getPreviewItemsForEntity = async () => {
     })
     .then((result) => {
       previewComponent.value = result.data.PreviewComponents?.previewComponent;
-      if (previewComponent.value?.openByDefault && props.entities?.[0]?.id) {
+      if (previewComponent.value?.openByDefault && props.entities?.[0]?.id)
         togglePreviewComponent(props.entities[0].id);
-      }
     });
 };
 
@@ -350,8 +352,15 @@ watch(
   () => {
     if (props.entities.length > 0)
       configurePreviewComponentWithNewEntities(props.entities);
+    if (!previewForEntity.value && previewComponent.value?.openByDefault && props.entities?.[0]?.id)
+      togglePreviewComponent(props.entities[0].id);
   },
 );
+
+const containerNameForPreview = computed(() => {
+  return props.showCurrentEntityFlow ? 'preview' : 'preview-without-current-entity-flow'
+})
+
 </script>
 
 <style scoped>
@@ -363,6 +372,7 @@ watch(
 .preview-container {
   container-type: inline-size;
   container-name: preview;
+  container-name: v-bind(containerNameForPreview);
 }
 
 /* Parent container queries */
@@ -406,6 +416,13 @@ watch(
 @container preview (min-width: 755px) {
   .responsive-grid {
     grid-template-columns: 25% 75%;
+  }
+}
+
+/* Preview container queries without showing current entity flow */
+@container preview-without-current-entity-flow (min-width: 450px) {
+  .responsive-grid {
+    grid-template-columns: 100%;
   }
 }
 </style>

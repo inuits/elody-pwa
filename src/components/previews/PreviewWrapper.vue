@@ -133,6 +133,7 @@ const emit = defineEmits<{
 }>();
 
 provide("IsPreviewElement", true);
+provide("showCurrentPreviewFlow", props.previewComponent.showCurrentPreviewFlow);
 const primaryPreviewElement = ref<ColumnList | undefined>(undefined);
 const metadataPreviewElement = ref<ColumnList | undefined>(undefined);
 

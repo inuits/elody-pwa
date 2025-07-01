@@ -26,7 +26,7 @@
           : parentEntityIdentifiers.length > 0
             ? 'px-3 pt-3'
             : 'px-6',
-        { '!bg-white': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary },
+        { '!bg-white grid-rows-[0vh_1fr]': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary },
         {
           'grid-rows-[5vh_1fr]':
             baseLibraryMode === BaseLibraryModes.NormalBaseLibrary,
@@ -34,11 +34,13 @@
         {
           'grid-rows-[1vh_1fr]':
             baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder ||
-            baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
+            (
+              baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary &&
+              showCurrentEntityFlow
+            ),
         },
         {
-          'grid-rows-[0vh_1fr]':
-            baseLibraryMode === BaseLibraryModes.BasicBaseLibrary,
+          'grid-rows-[1fr_0vh]': !showCurrentEntityFlow,
         },
       ]"
     >
@@ -82,6 +84,7 @@
         />
       </div>
       <div
+        v-if="showCurrentEntityFlow"
         :class="[
           'z-40 pl-[1%] right-0 pb-4',
           {
@@ -139,7 +142,8 @@
         <div
           v-if="
             enableBulkOperations &&
-            baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
+            baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
+            showCurrentEntityFlow
           "
           :class="[{ sticky: hasStickyBars }, 'top-[5vh] my-3']"
         >
@@ -211,6 +215,7 @@
             :expandFilters="expandFilters"
             :refetch-entities="refetchEntities"
             :entity-type="entityType"
+            :show-current-entity-flow="showCurrentEntityFlow"
           />
           <ViewModesMedia
             v-if="viewModesIncludeViewModesMedia && displayPreview"
@@ -388,6 +393,7 @@ const emit = defineEmits<{
 const config: any = inject("config");
 const apolloClient = inject(DefaultApolloClient);
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
+const showCurrentPreviewFlow: boolean = inject("showCurrentPreviewFlow", true);
 const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
@@ -399,6 +405,10 @@ const filtersBaseAPI = ref<FiltersBaseAPI | undefined>(undefined);
 const hasBulkOperations = ref<boolean>(true);
 const selectedPaginationLimitOption = ref<number>();
 
+const showCurrentEntityFlow = computed(() => {
+  if (!isPreviewElement) return true;
+  return showCurrentPreviewFlow !== undefined ? showCurrentPreviewFlow : true;
+});
 const showViewModesList = computed(() => {
   return (
     displayList.value ||
