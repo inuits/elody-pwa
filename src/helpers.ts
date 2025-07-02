@@ -85,6 +85,21 @@ export const goToEntityTypeRoute = (
   }
 };
 
+export const parseRegexFromString = (raw: string): RegExp | undefined => {
+  if (!raw) return undefined;
+  const match = raw.match(/^\/(.*)\/([gimsuy]*)$/);
+  if (!match) return undefined;
+  let [_, pattern, flags] = match;
+
+  pattern = pattern.replace(/\\\\/g, "\\");
+
+  try {
+    return new RegExp(pattern, flags);
+  } catch {
+    return undefined;
+  }
+};
+
 const getValueFromTeaserMetadata = (
   teaserMetadata: Record<string, MetadataInput> = {},
   key: string,

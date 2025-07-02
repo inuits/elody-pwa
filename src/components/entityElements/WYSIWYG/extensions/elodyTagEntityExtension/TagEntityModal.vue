@@ -118,7 +118,10 @@ import {
   getExtensionConfigurationForEntity,
   tagEntity,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
-import { extractTitleKeyFromMetadataFilter } from "@/helpers";
+import {
+  extractTitleKeyFromMetadataFilter,
+  parseRegexFromString,
+} from "@/helpers";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 
 const { setBulkSelectionLimit, isBulkSelectionLimitReached, getEnqueuedItems } =
@@ -151,9 +154,21 @@ const taggingConfiguration = computed<TaggableEntityConfiguration[]>(
 const form = computed(() =>
   getForm(taggingConfiguration.value[formIndex].createNewEntityFormQuery),
 );
+
 const selectedText = computed<string>(() => {
-  return getModalInfo(TypeModals.ElodyEntityTaggingModal).selectedText;
+  return getModalInfo(TypeModals.ElodyEntityTaggingModal).selectedText || "";
 });
+
+const characterStripRegex = computed<RegExp | undefined>(() => {
+  const raw =
+    taggingConfiguration.value[formIndex].charactersToStripFromTagContentRegex;
+  return parseRegexFromString(raw as string);
+});
+const strippedText = computed<string | undefined>(() => {
+  if (!characterStripRegex.value) return selectedText.value;
+  return selectedText.value.replace(characterStripRegex.value, "");
+});
+
 const existingEntitySelected = computed<boolean>(() =>
   isBulkSelectionLimitReached(BulkOperationsContextEnum.TagEntityModal),
 );
@@ -165,7 +180,7 @@ const setEntityName = () => {
       configurationItem.taggableEntityType,
   );
 
-  if (!selectedText.value || !entityTypes) return;
+  if (!strippedText.value || !entityTypes) return;
 
   const titleKeys = entityTypes.map((type: Entitytyping) => {
     const configuration: TaggableEntityConfiguration =
@@ -176,7 +191,7 @@ const setEntityName = () => {
   });
 
   prefilledFormValues.value = {
-    intialValues: { [titleKeys[formIndex]]: selectedText.value },
+    intialValues: { [titleKeys[formIndex]]: strippedText.value },
   };
 };
 
@@ -207,7 +222,7 @@ const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
 
     metadataFilters.push({
       key: [configurationItem.metadataFilterForTagContent],
-      value: selectedText.value,
+      value: strippedText.value,
       type: AdvancedFilterTypes.Text,
       match_exact: false,
     });
