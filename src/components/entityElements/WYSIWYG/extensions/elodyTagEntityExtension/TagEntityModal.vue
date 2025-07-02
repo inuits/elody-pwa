@@ -260,8 +260,6 @@ const tagExistingEntityFlow = () => {
 
   tagEntity(entityToTag, relationType, parentId.value, context);
 
-  console.log(entityToTag);
-
   props.editor.commands.linkEntityToTaggedText(
     entityToTag,
     relationType,

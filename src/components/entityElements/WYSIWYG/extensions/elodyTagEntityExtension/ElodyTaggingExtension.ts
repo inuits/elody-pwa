@@ -252,8 +252,6 @@ export const createGlobalCommandsExtension = Extension.create({
         async ({ commands, state, view }) => {
           const configurationItem: TaggableEntityConfigurationFromEntity =
             getExtensionConfigurationForEntity(entity);
-          console.log(entity);
-          console.log(extensionConfiguration.value);
           const additionalAttributes = {};
 
           if (!entity) throw Error("Error tagging text: no entity to tag");
@@ -297,7 +295,6 @@ export const createGlobalCommandsExtension = Extension.create({
           };
 
           Object.assign(newNodeContent.attrs, additionalAttributes);
-          console.log(newNodeContent);
           commands.deleteRange({ from, to });
           commands.insertContentAt(from, newNodeContent);
           commands.selectNodeForward();
