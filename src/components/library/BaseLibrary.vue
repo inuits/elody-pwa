@@ -574,6 +574,7 @@ const bulkSelect = (items = entities.value) => {
           entity.teaserMetadata,
           entity.intialValues,
         ),
+        relationValues: entity.relationValues,
         type: entity.type,
       });
     }

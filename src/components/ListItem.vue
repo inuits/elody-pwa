@@ -92,7 +92,12 @@
               "
               :class="[{ invisible: isDisabled }, 'text-center']"
               v-model="isChecked"
-              :item="{ id: itemId, teaserMetadata, type: itemType }"
+              :item="{
+                id: itemId,
+                teaserMetadata,
+                relationValues,
+                type: itemType,
+              }"
               :bulk-operations-context="bulkOperationsContext"
               input-style="accentNormal"
             />
@@ -319,6 +324,7 @@ const props = withDefaults(
     loading?: boolean;
     teaserMetadata?: Metadata[];
     intialValues?: IntialValues | undefined;
+    relationValues?: Object;
     media?: string;
     thumbIcon?: string;
     small?: boolean;

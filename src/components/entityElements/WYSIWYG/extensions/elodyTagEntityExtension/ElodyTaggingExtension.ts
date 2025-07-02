@@ -252,6 +252,8 @@ export const createGlobalCommandsExtension = Extension.create({
         async ({ commands, state, view }) => {
           const configurationItem: TaggableEntityConfigurationFromEntity =
             getExtensionConfigurationForEntity(entity);
+          console.log(entity);
+          console.log(extensionConfiguration.value);
           const additionalAttributes = {};
 
           if (!entity) throw Error("Error tagging text: no entity to tag");
@@ -295,7 +297,7 @@ export const createGlobalCommandsExtension = Extension.create({
           };
 
           Object.assign(newNodeContent.attrs, additionalAttributes);
-
+          console.log(newNodeContent);
           commands.deleteRange({ from, to });
           commands.insertContentAt(from, newNodeContent);
           commands.selectNodeForward();
@@ -477,6 +479,8 @@ const getConfigurationEntities = async (
       const configurationEntities: BaseEntity[] =
         response.data.Entities.results;
 
+      console.log(configurationEntities);
+
       return {
         configurationItem,
         configurationEntities,
@@ -523,14 +527,15 @@ const applyColorStylingFromConfigurationToEditor = (
 export const getPluginsFromConfigurationEntities = async (
   configurations: TaggableEntityConfiguration[],
 ): Promise<TaggableEntityConfiguration[]> => {
-  const configurationEntities: TaggableEntityConfigurationFromEntity[] =
-    await getConfigurationEntities(configurations);
+  const configurationEntities:
+    | TaggableEntityConfigurationFromEntity[]
+    | undefined = await getConfigurationEntities(configurations);
   applyColorStylingFromConfigurationToEditor(configurationEntities);
   return configurationEntities;
 };
 
 export const getExtensionConfigurationForEntity = (
-  entity: BaseEntity | { type: string },
+  entity: InBulkProcessableItem | { type: string },
 ): TaggableEntityConfigurationFromEntity | undefined => {
   let configuration = undefined;
 

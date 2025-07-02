@@ -30,18 +30,20 @@
               :key="item.key + '_preview'"
               :item-id="item.key"
               :bulk-operations-context="bulkOperationsContext"
-              :teaser-metadata="getTeaserMetadataInState(item.key) as Metadata[]"
+              :teaser-metadata="
+                getTeaserMetadataInState(item.key) as Metadata[]
+              "
               :thumb-icon="entitiesLoading ? undefined : getThumbnail(item)"
               :small="listItemRouteName === 'SingleMediafile'"
               :is-preview="true"
               :is-markable-as-to-be-deleted="parentEntityIdentifiers.length > 0"
               :relation="
-              findRelation(
-                item.key,
-                relationType,
-                props.parentEntityIdentifiers[0],
-              )
-            "
+                findRelation(
+                  item.key,
+                  relationType,
+                  props.parentEntityIdentifiers[0],
+                )
+              "
               :relation-type="relationType"
               :has-selection="enableSelection"
               :view-mode="mode"
@@ -77,6 +79,7 @@
               ) as Metadata[]
             "
             :intialValues="entity.intialValues"
+            :relationValues="entity.relationValues"
             :media="
               entitiesLoading ? undefined : getMediaFilenameFromEntity(entity)
             "
@@ -326,8 +329,7 @@ const isPreviewComponentEnabledForListItem = (entityId: string): boolean => {
 };
 
 const configurePreviewComponentWithNewEntities = (entities: Entity[]): void => {
-  if (previewComponentEnabled.value)
-    previewForEntity.value = entities[0]?.id;
+  if (previewComponentEnabled.value) previewForEntity.value = entities[0]?.id;
 };
 
 watch(
