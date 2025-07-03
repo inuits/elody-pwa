@@ -13,9 +13,7 @@
         'flex items-center justify-between relative',
         { 'cursor-pointer': !isPreviewElement },
       ]"
-      @click.self="
-        toggleElementCollapse(entityId, label, undefined, isPreviewElement)
-      "
+      @click.self="emit('toggleElementCollapse', entityId, label)"
     >
       <div class="flex p-2">
         <base-tooltip
@@ -57,7 +55,7 @@
       <span
         v-if="!isPreviewElement"
         class="p-2 text-text-subtitle"
-        @click="toggleElementCollapse(entityId, label)"
+        @click="emit('toggleElementCollapse', entityId, label)"
       >
         <unicon
           :name="isCollapsed ? Unicons.AngleDown.name : Unicons.AngleUp.name"
@@ -82,7 +80,6 @@
 
 <script lang="ts" setup>
 import { Unicons } from "@/types";
-import { useEntityElementCollapseHelper } from "@/composables/useResizeHelper";
 import { useI18n } from "vue-i18n";
 import { BaseLibraryModes } from "@/generated-types/queries";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
@@ -103,9 +100,13 @@ withDefaults(
     previewLabel: undefined,
   },
 );
-const emit = defineEmits(["closePreviewComponent"]);
+
+const emit = defineEmits<{
+  (event: "closePreviewComponent"): void;
+  (event: "toggleElementCollapse", entityId: string, elementLabel: string): void;
+}>();
+
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
 
 const { t } = useI18n();
-const { toggleElementCollapse } = useEntityElementCollapseHelper();
 </script>

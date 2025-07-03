@@ -46,6 +46,7 @@
         :id="id"
         :preview-label="previewLabel"
         @close-preview-component="emit('closePreviewComponent')"
+        @toggle-element-collapse="(entityId, elementLabel) => emit('toggleElementCollapse', entityId, elementLabel)"
       />
       <entity-element-media
         v-if="element.__typename === 'MediaFileElement'"
@@ -63,6 +64,7 @@
         :element="element"
         :form-id="formId"
         :identifiers="identifiers"
+        @resize-column="(toggled) => emit('resizeColumn', toggled)"
       />
       <entity-element-graph
         v-if="element.__typename === 'GraphElement' && !isEdit"
@@ -154,7 +156,11 @@ const props = withDefaults(
     previewLabel: undefined,
   },
 );
-const emit = defineEmits(["closePreviewComponent"]);
+const emit = defineEmits<{
+  (event: "closePreviewComponent"): void;
+  (event: "resizeColumn", toggled: boolean): void;
+  (event: "toggleElementCollapse", entityId: string, elementLabel: string): void;
+}>();
 
 const formId = computed(() => props.id);
 const { isEdit } = useEditMode();

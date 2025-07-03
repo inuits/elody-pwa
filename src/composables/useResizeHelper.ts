@@ -3,10 +3,10 @@ import type { Column, ColumnSizes } from "@/generated-types/queries";
 import { convertSizeToTailwind } from "@/helpers";
 import { ref } from "vue";
 
-let defaultColumnConfig: Record<string, Column[]> = {};
-const currentColumnConfig = ref<Record<string, Column[]> | {}>({});
-
 const useColumnResizeHelper = () => {
+  let defaultColumnConfig: Record<string, Column[]> = {};
+  const currentColumnConfig = ref<Record<string, Column[]> | {}>({});
+
   const setInitialColumns = (entityId: string, columns: Column[]) => {
     defaultColumnConfig[entityId] = JSON.parse(JSON.stringify(columns));
     currentColumnConfig.value[entityId] = columns;
@@ -86,7 +86,7 @@ const useColumnResizeHelper = () => {
   };
 };
 
-const useEntityElementCollapseHelper = () => {
+const useEntityElementCollapseHelper = (currentColumnConfig: Record<string, Column[]> | {}) => {
   const getElementByLabel = (
     entityId: string, elementLabel: string,
   ): { column: Column | undefined; element: Elements | undefined } => {

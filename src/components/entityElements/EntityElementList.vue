@@ -18,6 +18,7 @@
       :base-library-mode="baseLibraryMode"
       :preview-label="previewLabel"
       @close-preview-component="emit('closePreviewComponent')"
+      @toggle-element-collapse="(entityId, elementLabel) => emit('toggleElementCollapse', entityId, elementLabel)"
     >
       <template v-slot:content>
         <div
@@ -203,7 +204,11 @@ const props = withDefaults(
     previewLabel: undefined,
   },
 );
-const emit = defineEmits(["closePreviewComponent"]);
+
+const emit = defineEmits<{
+  (event: "closePreviewComponent"): void;
+  (event: "toggleElementCollapse", entityId: string, elementLabel: string): void;
+}>();
 
 provide("mediafileViewerContext", props.customQueryFilters);
 const isPreviewElement: boolean = inject("IsPreviewElement", false);

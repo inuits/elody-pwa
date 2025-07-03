@@ -33,6 +33,8 @@
           :entity-type="entityType"
           :preview-label="previewLabel"
           @close-preview-component="emit('closePreviewComponent')"
+          @toggle-element-collapse="(entityId, elementLabel) => toggleElementCollapse(entityId, elementLabel, undefined, isPreviewElement)"
+          @resize-column="resizeColumn"
         >
         </entity-element>
       </div>
@@ -50,14 +52,15 @@ import {
   ref,
   onMounted,
 } from "vue";
-import type {
-  ColumnList,
-  Column,
-  Entitytyping,
-  IntialValues,
-  BaseEntity,
-  PanelMetaData,
-  WindowElementPanel,
+import {
+  type ColumnList,
+  type Column,
+  type Entitytyping,
+  type IntialValues,
+  type BaseEntity,
+  type PanelMetaData,
+  type WindowElementPanel,
+  ColumnSizes
 } from "@/generated-types/queries";
 import EntityElement from "./entityElements/EntityElement.vue";
 import {
@@ -65,7 +68,10 @@ import {
   determineDefaultIntialValues,
   findPanelMetadata,
 } from "@/helpers";
-import { useColumnResizeHelper } from "../composables/useResizeHelper";
+import {
+  useColumnResizeHelper,
+  useEntityElementCollapseHelper
+} from "@/composables/useResizeHelper";
 import { useEditMode } from "@/composables/useEdit";
 import EntityForm from "@/components/EntityForm.vue";
 import { onBeforeRouteUpdate } from "vue-router";
@@ -86,7 +92,16 @@ const props = withDefaults(
 
 const emit = defineEmits(["closePreviewComponent"]);
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
-const { setInitialColumns, currentColumnConfig } = useColumnResizeHelper();
+
+const {
+  setInitialColumns,
+  currentColumnConfig,
+  setColumnSizes,
+  resetToDefaultSizes
+} = useColumnResizeHelper();
+const {
+  toggleElementCollapse
+} = useEntityElementCollapseHelper(currentColumnConfig);
 const useEditHelper = useEditMode(props.entity.id);
 const { locale } = useI18n();
 
@@ -110,19 +125,6 @@ const columns = computed<Column[]>(() => {
   });
 
   return returnArray;
-});
-
-watch(
-  () => columns.value,
-  () => {
-    if (columns.value) setInitialColumns(props.entity.id, columns.value);
-  },
-  { immediate: true },
-);
-
-onBeforeRouteUpdate(async () => {
-  intialValues.value = "no-values";
-  relationValues.value = "no-values";
 });
 
 const panelsFields = computed<Record<string, PanelMetaData>>(() => {
@@ -165,6 +167,27 @@ const getWindowElementPanels = (
 
   return panels;
 };
+
+const resizeColumn = (toggled: Boolean) => {
+  if (toggled) {
+    setColumnSizes(props.entity.id, [ColumnSizes.Fifty, ColumnSizes.Fifty]);
+  } else {
+    resetToDefaultSizes(props.entity.id);
+  }
+};
+
+watch(
+  () => columns.value,
+  () => {
+    if (columns.value) setInitialColumns(props.entity.id, columns.value);
+  },
+  { immediate: true },
+);
+
+onBeforeRouteUpdate(async () => {
+  intialValues.value = "no-values";
+  relationValues.value = "no-values";
+});
 
 onMounted(() => {
   intialValues.value = determineDefaultIntialValues(

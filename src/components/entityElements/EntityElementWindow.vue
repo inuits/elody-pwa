@@ -62,7 +62,6 @@
 
 <script lang="ts" setup>
 import {
-  ColumnSizes,
   Orientations,
   type WindowElement,
   WindowElementLayout,
@@ -71,7 +70,6 @@ import {
 import EntityElementWindowPanel from "../EntityElementWindowPanel.vue";
 import { computed } from "vue";
 import BaseExpandButton from "../base/BaseExpandButton.vue";
-import { useColumnResizeHelper } from "@/composables/useResizeHelper";
 import { useI18n } from "vue-i18n";
 import { useEditMode } from "@/composables/useEdit";
 import MetadataEditButton from "@/components/MetadataEditButton.vue";
@@ -84,19 +82,17 @@ const props = defineProps<{
   formId: string;
 }>();
 
+const emit = defineEmits<{
+  (event: "resizeColumn", toggled: boolean): void;
+}>();
 const { t } = useI18n();
-const { setColumnSizes, resetToDefaultSizes } = useColumnResizeHelper();
 const useEditHelper = useEditMode(props.formId);
 const computedIsEdit = computed(
   () => props.isEditOverwrite || useEditHelper.isEdit,
 );
 
-const resizeColumn = (toggled: Boolean) => {
-  if (toggled) {
-    setColumnSizes(props.formId, [ColumnSizes.Fifty, ColumnSizes.Fifty]);
-  } else {
-    resetToDefaultSizes(props.formId);
-  }
+const resizeColumn = (toggled: boolean) => {
+  emit('resizeColumn', toggled);
 };
 
 const panels = computed<WindowElementPanel[]>(() => {
