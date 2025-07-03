@@ -420,7 +420,7 @@ const containerNameForPreview = computed(() => {
 }
 
 /* Preview container queries without showing current entity flow */
-@container preview-without-current-entity-flow (min-width: 450px) {
+@container preview-without-current-entity-flow (min-width: 10px) {
   .responsive-grid {
     grid-template-columns: 100%;
   }
