@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[62vh]">
+  <div class="h-[50vh]">
     <MediaViewerNew
       :key="entityId"
       :mediafiles="mediafiles"
