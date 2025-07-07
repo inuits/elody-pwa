@@ -9,7 +9,7 @@
     <VueSelect
       class="text-text-body bg-neutral-white border-none rounded-lg"
       v-model="selectedItem"
-      teleport="body"
+      :teleport="someModalIsOpened ? undefined : 'body'"
       :options="filterDropdownOptions"
       :placeholder="label"
       :is-disabled="disable"
@@ -71,6 +71,7 @@ import { useRoute } from "vue-router";
 import VueSelect from "vue3-select-component";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 const props = withDefaults(
   defineProps<{
@@ -112,6 +113,7 @@ const { t } = useI18n();
 const entityFormData: any = inject("entityFormData");
 const entityId = computed<string>(() => entityFormData?.id || route.params.id);
 const { isEdit } = useEditMode(entityId.value);
+const { someModalIsOpened } = useBaseModal();
 const selectedItem = ref<any | undefined>(undefined);
 
 const selectItem = () => {
