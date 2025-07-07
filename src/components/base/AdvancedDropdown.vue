@@ -9,6 +9,7 @@
     <VueSelect
       class="text-text-body bg-neutral-white border-none rounded-lg"
       v-model="selectedItem"
+      teleport="body"
       :options="filterDropdownOptions"
       :placeholder="label"
       :is-disabled="disable"
@@ -171,6 +172,9 @@ watch(
 <style>
 :deep(.vue-select) {
   --vs-border-radius: 10px;
+}
+body > .menu[data-v-85d14ad7] {
+  --vs-menu-z-index: 9999 !important;
 }
 div.menu-option.selected {
   background-color: var(--color-accent-light) !important;
