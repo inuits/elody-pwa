@@ -144,14 +144,9 @@ const filterDropdownOptions = computed<DropdownOption[]>(() => {
 watch(
   () => props.options,
   () => {
-    if (props.options.length > 0)
-      if (
-        props.selectFirstOptionByDefault ||
-        (!props.clearable && !selectedItem.value && !props.modelValue)
-      ) {
-        selectedItem.value = props.options[0].value;
-        emit("update:modelValue", selectedItem.value);
-      }
+    if (props.options.length === 0 || !props.selectFirstOptionByDefault) return;
+    selectedItem.value = props.options[0].value;
+    emit("update:modelValue", selectedItem.value);
   },
   { immediate: true },
 );
