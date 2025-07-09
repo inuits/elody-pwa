@@ -476,8 +476,6 @@ const getConfigurationEntities = async (
       const configurationEntities: BaseEntity[] =
         response.data.Entities.results;
 
-      console.log(configurationEntities);
-
       return {
         configurationItem,
         configurationEntities,

@@ -781,11 +781,12 @@ watch(
     }
   },
 );
+
 watch(
   () => props.predefinedEntities,
   () => {
     if (props.predefinedEntities && props.predefinedEntities.length > 0) {
-      entities.value = props.predefinedEntities;
+      entities.value = [...props.predefinedEntities];
       totalEntityCount.value = props.predefinedEntities.length;
       const viewModes: any[] =
         props.predefinedEntities[0].allowedViewModes.viewModes.map(
@@ -797,6 +798,7 @@ watch(
   },
   { immediate: true },
 );
+
 watch(
   () => props.filters,
   async () => {
@@ -804,6 +806,7 @@ watch(
     await getEntities(route);
   },
 );
+
 watch(
   () => entities.value,
   () => {
@@ -825,6 +828,7 @@ watch(
     getDisplayPreferences();
   },
 );
+
 watch([displayGrid, expandFilters], () => {
   let _expandFilters = expandFilters.value;
   if (route.name === "SingleEntity")
@@ -836,6 +840,7 @@ watch([displayGrid, expandFilters], () => {
     expandFilters: _expandFilters,
   });
 });
+
 watch(
   () => displayMap.value,
   () => {
@@ -843,6 +848,7 @@ watch(
   },
   { flush: "pre" },
 );
+
 watch(
   () => displayMap.value,
   () => {
@@ -851,12 +857,14 @@ watch(
   },
   { flush: "post" },
 );
+
 watch(
   () => uploadStatus.value,
   async () => {
     if (uploadStatus.value === UploadStatus.Finished) await refetchEntities();
   },
 );
+
 watch(
   () => breadcrumbPathFinished.value,
   () => {
