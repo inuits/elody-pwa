@@ -46,7 +46,10 @@
         :id="id"
         :preview-label="previewLabel"
         @close-preview-component="emit('closePreviewComponent')"
-        @toggle-element-collapse="(entityId, elementLabel) => emit('toggleElementCollapse', entityId, elementLabel)"
+        @toggle-element-collapse="
+          (entityId, elementLabel) =>
+            emit('toggleElementCollapse', entityId, elementLabel)
+        "
       />
       <entity-element-media
         v-if="element.__typename === 'MediaFileElement'"
@@ -159,7 +162,11 @@ const props = withDefaults(
 const emit = defineEmits<{
   (event: "closePreviewComponent"): void;
   (event: "resizeColumn", toggled: boolean): void;
-  (event: "toggleElementCollapse", entityId: string, elementLabel: string): void;
+  (
+    event: "toggleElementCollapse",
+    entityId: string,
+    elementLabel: string,
+  ): void;
 }>();
 
 const formId = computed(() => props.id);

@@ -239,9 +239,16 @@ export const createGlobalCommandsExtension = Extension.create({
           const { from, to } = selection;
           const selectedText = state.doc.textBetween(from, to, " ");
 
-          const { openModal, updateModal } = useBaseModal();
-          updateModal(TypeModals.ElodyEntityTaggingModal, { selectedText });
-          openModal(TypeModals.ElodyEntityTaggingModal, ModalStyle.Center);
+          const { openModal } = useBaseModal();
+          openModal(
+            TypeModals.ElodyEntityTaggingModal,
+            ModalStyle.Center,
+            undefined,
+            undefined,
+            false,
+            undefined,
+            { selectedText },
+          );
         },
       linkEntityToTaggedText:
         (
@@ -609,9 +616,13 @@ export const openDetailModal = (node: any) => {
   const entityId = node.attrs.entityId;
   const tag = node.type.name.split("-")[0];
   const entityType = getEntityTypeByTagFromMapping(tag);
-  useBaseModal().updateModal(TypeModals.EntityDetailModal, {
-    entityId,
-    entityType,
-  });
-  useBaseModal().openModal(TypeModals.EntityDetailModal, ModalStyle.CenterWide);
+  useBaseModal().openModal(
+    TypeModals.EntityDetailModal,
+    ModalStyle.CenterWide,
+    undefined,
+    undefined,
+    false,
+    undefined,
+    { entityId, entityType },
+  );
 };

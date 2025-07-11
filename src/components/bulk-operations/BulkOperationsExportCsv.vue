@@ -151,9 +151,9 @@ const config = inject("config") as any;
 const { t } = useI18n();
 const { displayErrorNotification } = useBaseNotification();
 const { getThumbnail } = useThumbnailHelper();
-const { getModal, closeModal } = useBaseModal();
+const { getModalInfo, closeModal } = useBaseModal();
 
-const modal = getModal(TypeModals.BulkOperations);
+const modal = getModalInfo(TypeModals.BulkOperations);
 const skip = ref<number>(1);
 const limit = ref<number>(config.bulkSelectAllSizeLimit);
 
@@ -165,7 +165,7 @@ const entityType = computed(() =>
 );
 
 const context: Context = computed(
-  () => getModal(TypeModals.BulkOperations).context,
+  () => getModalInfo(TypeModals.BulkOperations).context,
 );
 
 const items = ref<InBulkProcessableItem[]>([]);

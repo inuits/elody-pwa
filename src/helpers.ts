@@ -95,7 +95,8 @@ export const parseRegexFromString = (raw: string): RegExp | undefined => {
 
   try {
     return new RegExp(pattern, flags);
-  } catch {
+  } catch (e) {
+    console.warn("Something went wrong while parsing regex", e);
     return undefined;
   }
 };

@@ -6,7 +6,7 @@
     @hide-modal="closeModal(TypeModals.ElodyEntityTaggingModal)"
   >
     <div
-      v-if="element && taggingConfiguration.length && selectedText"
+      v-if="element && taggingConfiguration && selectedText"
       :key="`${taggingConfiguration[formIndex].createNewEntityFormQuery}-${getModalInfo(TypeModals.ElodyEntityTaggingModal).open}`"
       class="p-2"
     >
@@ -88,7 +88,6 @@
 </template>
 
 <script setup lang="ts">
-import type { Entitytyping } from "@/generated-types/queries";
 import {
   type AdvancedFilterInput,
   AdvancedFilterTypes,
@@ -98,6 +97,8 @@ import {
   TypeModals,
   type WysiwygElement,
   DamsIcons,
+  CharacterReplacementSettings,
+  Entitytyping,
 } from "@/generated-types/queries";
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
@@ -106,7 +107,6 @@ import { computed, watch, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
-import { useFormHelper } from "@/composables/useFormHelper";
 import { Unicons } from "@/types";
 import {
   BulkOperationsContextEnum,
@@ -127,7 +127,6 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 const { setBulkSelectionLimit, isBulkSelectionLimitReached, getEnqueuedItems } =
   useBulkOperations();
 const { closeModal, getModalInfo } = useBaseModal();
-const { getForm } = useFormHelper();
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
@@ -143,44 +142,58 @@ const props = withDefaults(
 const parentId = computed(() => route.params["id"]);
 const formIndex: number = 0;
 const selectionLimit: number = 1;
+const taggingConfiguration: TaggableEntityConfiguration[] =
+  props.element.taggingConfiguration?.taggableEntityConfiguration!;
 const acceptedTypes = computed(() =>
-  taggingConfiguration.value.map(
+  taggingConfiguration.map(
     (configurationItem) => configurationItem.taggableEntityType,
   ),
-);
-const taggingConfiguration = computed<TaggableEntityConfiguration[]>(
-  () => props.element?.taggingConfiguration?.taggableEntityConfiguration,
-);
-const form = computed(() =>
-  getForm(taggingConfiguration.value[formIndex].createNewEntityFormQuery),
 );
 
 const selectedText = computed<string>(() => {
   return getModalInfo(TypeModals.ElodyEntityTaggingModal).selectedText || "";
 });
 
-const characterStripRegex = computed<RegExp | undefined>(() => {
-  const raw =
-    taggingConfiguration.value[formIndex].charactersToStripFromTagContentRegex;
-  return parseRegexFromString(raw as string);
-});
-const strippedText = computed<string | undefined>(() => {
-  if (!characterStripRegex.value) return selectedText.value;
-  return selectedText.value.replace(characterStripRegex.value, "");
+const characterReplacementSettings = computed<CharacterReplacementSettings[]>(
+  () => {
+    return taggingConfiguration?.[formIndex]?.replaceCharacterFromTagSettings;
+  },
+);
+
+const applyReplacementSettingsToSelectedText = (): string => {
+  let result = selectedText.value;
+  if (!characterReplacementSettings.value) return result;
+
+  characterReplacementSettings.value.forEach(
+    (settingsItem: CharacterReplacementSettings) => {
+      const parsedRegex = parseRegexFromString(
+        settingsItem.replacementCharactersRegex,
+      );
+      if (!parsedRegex) return;
+      result = result.replace(parsedRegex, settingsItem.characterToReplaceWith);
+    },
+  );
+
+  return result;
+};
+
+const textWithReplacements = computed<string>(() => {
+  return applyReplacementSettingsToSelectedText();
 });
 
-const existingEntitySelected = computed<boolean>(() =>
-  isBulkSelectionLimitReached(BulkOperationsContextEnum.TagEntityModal),
-);
+const existingEntitySelected = computed<boolean>(() => {
+  return isBulkSelectionLimitReached(BulkOperationsContextEnum.TagEntityModal);
+});
 const prefilledFormValues = ref<object | undefined>(undefined);
 
 const setEntityName = () => {
-  const entityTypes: Entitytyping[] = taggingConfiguration.value.map(
+  if (!taggingConfiguration) return;
+  const entityTypes: Entitytyping[] = taggingConfiguration.map(
     (configurationItem: TaggableEntityConfiguration) =>
       configurationItem.taggableEntityType,
   );
 
-  if (!strippedText.value || !entityTypes) return;
+  if (!textWithReplacements.value || !entityTypes) return;
 
   const titleKeys = entityTypes.map((type: Entitytyping) => {
     const configuration: TaggableEntityConfiguration =
@@ -191,17 +204,19 @@ const setEntityName = () => {
   });
 
   prefilledFormValues.value = {
-    intialValues: { [titleKeys[formIndex]]: strippedText.value },
+    intialValues: { [titleKeys[formIndex]]: textWithReplacements.value },
   };
 };
 
 watch(
   () => selectedText.value,
-  () => setEntityName(),
+  () => {
+    setEntityName();
+  },
 );
 
 const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
-  const entityTypes: Entitytyping[] = taggingConfiguration.value.map(
+  const entityTypes: Entitytyping[] = taggingConfiguration.map(
     (configurationItem: TaggableEntityConfiguration) =>
       configurationItem.taggableEntityType,
   );
@@ -222,7 +237,7 @@ const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
 
     metadataFilters.push({
       key: [configurationItem.metadataFilterForTagContent],
-      value: strippedText.value,
+      value: textWithReplacements.value,
       type: AdvancedFilterTypes.Text,
       match_exact: false,
     });

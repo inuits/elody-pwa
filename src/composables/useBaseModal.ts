@@ -1,4 +1,4 @@
-import { computed, reactive, ref } from "vue";
+import { watch, reactive, ref, readonly } from "vue";
 import {
   type DeleteQueryOptions,
   ModalStyle,
@@ -13,6 +13,7 @@ export type ModalInfo = {
   deleteQueryOptions?: DeleteQueryOptions;
   closeConfirmation: boolean;
   context?: Context;
+  [key: string]: any;
 };
 
 const initialModalInfo: ModalInfo = {
@@ -32,70 +33,63 @@ const modals = reactive<{ [key: string]: ModalInfo }>(getInitialModals());
 const currentModalStyle = ref<ModalStyle>(ModalStyle.Center);
 const modalToCloseAfterConfirm = ref<TypeModals | undefined>(undefined);
 const deleteQueryOptions = ref<DeleteQueryOptions | undefined>(undefined);
+const _someModalIsOpened = ref(false);
+const someModalIsOpened = readonly(_someModalIsOpened);
+
+console.log(modals);
 
 export const useBaseModal = () => {
-  const getModal = (modalType: TypeModals): ModalInfo => {
+  const getModalInfo = (modalType: TypeModals): ModalInfo => {
     return modals[modalType];
   };
 
   const openModal = (
     modalType: TypeModals,
     modalStyle: ModalStyle,
-    formQuery: string | undefined = undefined,
-    deleteQueryOptions: DeleteQueryOptions | undefined = undefined,
-    askForCloseConfirmation: boolean | undefined = undefined,
-    context: Context | undefined = undefined,
+    formQuery?: string,
+    deleteQueryOptions?: DeleteQueryOptions,
+    askForCloseConfirmation: boolean = false,
+    context?: Context,
+    modalTypeSpecificInfo: { [key: string]: any } = {},
   ): void => {
-    if (modalType !== TypeModals.Confirm)
-      closeModalsWithStyle(currentModalStyle.value);
+    console.log(`Opening modal ${modalType}`);
+    if (modals[modalType].open) return;
+
+    _someModalIsOpened.value = true;
     currentModalStyle.value = modalStyle;
-    const updatedModal = { open: true };
-    Object.assign(updatedModal, {
+
+    const updatedModal = {
+      open: true,
       formQuery,
       deleteQueryOptions,
-    });
+      askForCloseConfirmation,
+      ...modalTypeSpecificInfo,
+    };
+
     updateModal(modalType, updatedModal);
-    if (askForCloseConfirmation)
-      getModalInfo(modalType).closeConfirmation = askForCloseConfirmation;
-    if (context) getModalInfo(modalType).context = context;
-  };
 
-  const isCenterModalOpened = computed(() => {
-    let isOpen: boolean = false;
-    Object.keys(modals).forEach((modalKey: string) => {
-      const modal: ModalInfo = modals[modalKey];
-      if (modal.open && currentModalStyle.value === ModalStyle.Center)
-        isOpen = true;
-    });
-    return isOpen;
-  });
-
-  const closeModalsWithStyle = (style: ModalStyle): void => {
-    const modalsWithStyle: ModalInfo[] = Object.values(modals).filter(
-      (modal: ModalInfo) => currentModalStyle.value === style,
-    );
-    if (!modalsWithStyle) return;
-    modalsWithStyle.forEach((modal: ModalInfo) => (modal.open = false));
-  };
-
-  const getModalInfo = (modalType: TypeModals): ModalInfo => {
-    return modals[modalType];
+    if (context) updateModal(modalType, { context });
   };
 
   const updateModal = (
     modalType: TypeModals,
     modalInput: { [key: string]: any },
   ): void => {
+    console.log(`Update modal ${modalType}`);
     Object.assign(modals[modalType], modalInput);
   };
 
   const closeModal = (modalType: TypeModals): void => {
     try {
-      if (modals[modalType].closeConfirmation) {
+      if (
+        modals[modalType].closeConfirmation &&
+        modalType !== TypeModals.Confirm
+      ) {
         openModal(TypeModals.Confirm, ModalStyle.Center);
       } else {
         modals[modalType].open = false;
       }
+      _someModalIsOpened.value = Object.values(modals).some((m) => m.open);
     } catch (e) {
       console.info(`Could not close ${modalType} modal`);
     }
@@ -106,6 +100,7 @@ export const useBaseModal = () => {
       modal.closeConfirmation = false;
       modal.open = false;
     });
+    _someModalIsOpened.value = false;
   };
 
   const changeCloseConfirmation = (modalType: TypeModals, value: boolean) => {
@@ -116,13 +111,14 @@ export const useBaseModal = () => {
     deleteQueryOptions.value = value as DeleteQueryOptions;
   };
 
-  const someModalIsOpened = computed((): boolean => {
-    if (!modals) return false;
-    return Object.values(modals).some((modal: ModalInfo) => modal.open);
-  });
+  // watch(
+  //   () => someModalIsOpened.value,
+  //   (newValue, oldValue) => {
+  //     console.log(someModalIsOpened.value);
+  //   },
+  // );
 
   return {
-    getModal,
     modals,
     getModalInfo,
     updateModal,
@@ -130,7 +126,6 @@ export const useBaseModal = () => {
     updateDeleteQueryOptions,
     closeModal,
     openModal,
-    isCenterModalOpened,
     changeCloseConfirmation,
     modalToCloseAfterConfirm,
     currentModalStyle,

@@ -89,16 +89,16 @@ const { getEnqueuedItems, getEnqueuedItemCount } = useBulkOperations();
 const config = inject("config") as any;
 const { t } = useI18n();
 const { getThumbnail } = useThumbnailHelper();
-const { getModal, closeModal } = useBaseModal();
+const { getModalInfo, closeModal } = useBaseModal();
 const { createForm, createEntityValues, getForm, formContainsValues } =
   useFormHelper();
-const modal = getModal(TypeModals.BulkOperationsEdit);
+const modal = getModalInfo(TypeModals.BulkOperationsEdit);
 const skip = ref<number>(1);
 const limit = ref<number>(config.bulkSelectAllSizeLimit);
 const relationForm = ref<WindowElement | undefined>(undefined);
 const items = ref<InBulkProcessableItem[]>([]);
 const entityIds = computed(() =>
-  items.value.map((item: InBulkProcessableItem) => item.id)
+  items.value.map((item: InBulkProcessableItem) => item.id),
 );
 const formId = "bulkEdit";
 const form = computed(() => getForm(formId));
@@ -126,7 +126,7 @@ const bulkAddRelations = () => {
 
 const { onResult: onRelationFormResult } =
   useQuery<GetBulkOperationsRelationFormQuery>(
-    GetBulkOperationsRelationFormDocument
+    GetBulkOperationsRelationFormDocument,
   );
 
 onRelationFormResult((relationFormResult: any) => {
@@ -146,6 +146,6 @@ watch(
   () => modal.modal?.open,
   (isModalOpen) => {
     if (isModalOpen) loadItems();
-  }
+  },
 );
 </script>
