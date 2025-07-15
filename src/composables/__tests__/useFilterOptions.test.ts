@@ -1,9 +1,13 @@
 import { describe, it, expect, vi } from "vitest";
 import { useFilterOptions } from "../useFilterOptions";
 
-vi.mock("@/helpers", () => ({
-  getEntityTitle: vi.fn().mockImplementation((entity) => entity?.title || ""),
-}));
+vi.mock(import("@/helpers"), async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    getEntityTitle: vi.fn().mockImplementation((entity) => entity?.title || ""),
+  };
+});
 
 describe("useFilterOptions - data mapping", () => {
   it("should directly return dropdownOptions when available", () => {
