@@ -2,7 +2,7 @@
   <div
     v-if="editorLoaded"
     :class="[
-      'bg-neutral-0 rounded-t-md',
+      'bg-neutral-0 rounded-t-md relative',
       { 'border-solid border-neutral-30 border-2': !displayInline },
     ]"
   >
@@ -14,8 +14,14 @@
         {{ t(element.label) }}
       </h1>
     </div>
-    <div v-else class="py-2">
+    <div v-else class="py-2 flex gap-2">
       <metadata-title :metadata="element" />
+      <WYSIGYGVirtualKeyboard
+        v-if="element.hasVirtualKeyboard && useEditHelper.isEdit"
+        :editor="editor"
+        :keyboardClass="element.metadataKey"
+        :extra-layouts="element?.virtulKeyboardLayouts"
+      />
     </div>
     <div
       v-if="editor"
@@ -64,6 +70,7 @@ import {
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import TagEntityModal from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/TagEntityModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
+import WYSIGYGVirtualKeyboard from "@/components/entityElements/WYSIWYG/WYSIGYGVirtualKeyboard.vue";
 
 const props = withDefaults(
   defineProps<{

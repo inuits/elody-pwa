@@ -101,6 +101,7 @@ import {
   uniWindowGrid,
   uniWindowMaximize,
   uniCopy,
+  uniKeyboard,
 } from "vue-unicons/dist/icons";
 
 export const Unicons: Record<DamsIcons, { name: string }> = {
@@ -206,4 +207,5 @@ export const Unicons: Record<DamsIcons, { name: string }> = {
   WindowGrid: uniWindowGrid,
   WindowMaximize: uniWindowMaximize,
   Copy: uniCopy,
+  Keyboard: uniKeyboard,
 };
