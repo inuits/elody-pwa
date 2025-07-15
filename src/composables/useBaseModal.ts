@@ -52,7 +52,6 @@ export const useBaseModal = () => {
     context?: Context,
     modalTypeSpecificInfo: { [key: string]: any } = {},
   ): void => {
-    console.log(`Opening modal ${modalType}`);
     if (modals[modalType].open) return;
 
     _someModalIsOpened.value = true;
@@ -75,7 +74,6 @@ export const useBaseModal = () => {
     modalType: TypeModals,
     modalInput: { [key: string]: any },
   ): void => {
-    console.log(`Update modal ${modalType}`);
     Object.assign(modals[modalType], modalInput);
   };
 
@@ -110,13 +108,6 @@ export const useBaseModal = () => {
   const updateDeleteQueryOptions = (value: DeleteQueryOptions) => {
     deleteQueryOptions.value = value as DeleteQueryOptions;
   };
-
-  // watch(
-  //   () => someModalIsOpened.value,
-  //   (newValue, oldValue) => {
-  //     console.log(someModalIsOpened.value);
-  //   },
-  // );
 
   return {
     modals,

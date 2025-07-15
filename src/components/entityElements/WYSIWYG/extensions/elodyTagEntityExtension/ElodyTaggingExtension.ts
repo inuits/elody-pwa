@@ -290,9 +290,6 @@ export const createGlobalCommandsExtension = Extension.create({
           const { from, to } = selection;
           let selectedText = state.doc.textBetween(from, to, " ");
 
-          if (newText && newText !== selectedText)
-            selectedText = newText.toLowerCase();
-
           const newNodeContent = {
             type: configurationItem.extensionName,
             attrs: {

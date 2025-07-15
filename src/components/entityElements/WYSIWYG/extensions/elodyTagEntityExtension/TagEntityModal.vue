@@ -91,19 +91,19 @@
 import {
   type AdvancedFilterInput,
   AdvancedFilterTypes,
+  CharacterReplacementSettings,
+  DamsIcons,
   EntityPickerMode,
+  Entitytyping,
   type MetadataInput,
   type TaggableEntityConfiguration,
   TypeModals,
   type WysiwygElement,
-  DamsIcons,
-  CharacterReplacementSettings,
-  Entitytyping,
 } from "@/generated-types/queries";
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
-import { computed, watch, ref, onMounted } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
@@ -126,7 +126,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 
 const { setBulkSelectionLimit, isBulkSelectionLimitReached, getEnqueuedItems } =
   useBulkOperations();
-const { closeModal, getModalInfo } = useBaseModal();
+const { closeModal, getModalInfo, updateModal } = useBaseModal();
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();

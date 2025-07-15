@@ -48,18 +48,22 @@ import { Editor, EditorContent } from "@tiptap/vue-3";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
 import WYSIWYGButtons from "@/components/entityElements/WYSIWYG/WYSIWYGButtons.vue";
-import type { WysiwygElement } from "@/generated-types/queries";
-import { ValidationFields, WysiwygExtensions } from "@/generated-types/queries";
+import {
+  TypeModals,
+  ValidationFields,
+  type WysiwygElement,
+  WysiwygExtensions,
+} from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useEditMode } from "@/composables/useEdit";
 import {
-  openDetailModal,
   initializeTaggingExtension,
+  openDetailModal,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import TagEntityModal from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/TagEntityModal.vue";
-import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 const props = withDefaults(
   defineProps<{
@@ -76,6 +80,7 @@ const editor = ref<Editor | undefined>(undefined);
 const { importEditorExtensions, getExtensionConfiguration } =
   useWYSIWYGEditor();
 const { getForm, addEditableMetadataKeys } = useFormHelper();
+const { updateModal } = useBaseModal();
 const useEditHelper = useEditMode(props.formId);
 const { t } = useI18n();
 
@@ -142,6 +147,7 @@ onMounted(async () => {
       );
     },
   });
+  updateModal(TypeModals.ElodyEntityTaggingModal, { editor: editor.value });
   editorLoaded.value = true;
 });
 
