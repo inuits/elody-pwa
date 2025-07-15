@@ -1,13 +1,11 @@
 import { useFilterBasic } from "./filters/useFilterBasic";
 import { useFilterNormalization } from "./filters/useFilterNormalization";
 import { useFilterState } from "./filters/useFilterState";
-import { useFilterVariables } from "./filters/useFilterVariables";
 
 export const useFiltersBaseNew = () => {
   const basic = useFilterBasic();
   const normalization = useFilterNormalization();
   const state = useFilterState();
-  const vars = useFilterVariables();
 
   const getNormalizedFiltersForApi = () => {
     return normalization.getNormalizedFiltersForApi(state.filters.value);
@@ -32,9 +30,6 @@ export const useFiltersBaseNew = () => {
     activateFilter: state.activateFilter,
     deactivateFilter: state.deactivateFilter,
     removeFilterFromList: state.removeFilterFromList,
-
-    //helpers
-    extractValueFromObject: vars.extractValueFromObject,
 
     // normalization
     getNormalizedFiltersForApi,

@@ -782,3 +782,33 @@ export const debounce = (fn: Function, ms = 300) => {
     timeoutId = setTimeout(() => fn.apply(this, args), ms);
   };
 };
+
+export const extractValueFromObject = (object: any, path: string): unknown => {
+  if (!path) return null;
+
+  const segments = path.split(".");
+  let current = object;
+
+  for (let i = 0; i < segments.length; i++) {
+    if (current == null) return undefined;
+
+    const segment = segments[i];
+
+    if (Array.isArray(current)) {
+      const remainingPath = segments.slice(i).join(".");
+      const results = current
+        .map((item) => extractValueFromObject(item, remainingPath))
+        .filter((val) => val !== undefined && val !== "");
+
+      return results.length ? results : undefined;
+    }
+
+    current = current[segment];
+  }
+
+  if (Array.isArray(current) && current.length === 0) {
+    return undefined;
+  }
+
+  return current;
+};

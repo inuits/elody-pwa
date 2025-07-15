@@ -2,8 +2,9 @@
   <div>
     <ViewModesAutocompleteRelations
       v-if="
-        field.type === InputFieldTypes.DropdownMultiselectRelations ||
-        field.type === InputFieldTypes.DropdownSingleselectRelations
+        (field.type === InputFieldTypes.DropdownMultiselectRelations ||
+          field.type === InputFieldTypes.DropdownSingleselectRelations) &&
+        !hiddenField?.inherited
       "
       v-model="metadataValue"
       :metadata-key-to-get-options-for="metadataKeyToGetOptionsFor"
@@ -131,7 +132,7 @@ const props = defineProps<{
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 
-const { addEditableMetadataKeys } = useFormHelper();
+const { addEditableMetadataKeys, addMappedRelations } = useFormHelper();
 const metadataValue = computed<string | string[]>({
   get() {
     if (typeof props.value === "object" && props.value?.formatter) {
@@ -216,9 +217,25 @@ const getIdForHiddenFieldFilter = (): any => {
   }
 };
 
+const populateInheritedHiddenField = () => {
+  const relation: BaseRelationValuesInput = {
+    editStatus: EditStatus.New,
+    key: "",
+    type: props.field.relationType!,
+    value: "",
+    inheritFrom: {
+      entityType: props.hiddenField.entityType!,
+      relationKey: props.hiddenField.relationToExtractKey!,
+      valueKey: props.hiddenField.keyToExtractValue!,
+    },
+  };
+  addMappedRelations([relation], props.field.relationType!, props.formId);
+};
+
 const populateHiddenField = (): BaseRelationValuesInput[] | undefined => {
+  const relations: BaseRelationValuesInput[] = [];
+
   if (props.field.type === InputFieldTypes.DropdownMultiselectRelations) {
-    const relations: BaseRelationValuesInput[] = [];
     relations.push({
       editStatus: EditStatus.New,
       key: getIdForHiddenFieldFilter(),
@@ -233,6 +250,7 @@ watch(
   () => isFieldHidden.value,
   () => {
     if (!isFieldHidden.value) return;
+    if (props.hiddenField?.inherited) return populateInheritedHiddenField();
     const newValue = populateHiddenField();
     emit("update:value", newValue);
   },

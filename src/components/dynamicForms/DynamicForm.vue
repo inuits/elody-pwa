@@ -296,6 +296,7 @@ const {
   createForm,
   deleteForm,
   parseRelationValuesForFormSubmit,
+  parseInheritedRelationValuesFromFormSubmit,
   parseIntialValuesForFormSubmit,
   addEditableMetadataKeys,
 } = useFormHelper();
@@ -423,10 +424,10 @@ const isLinkedUpload = computed<boolean>(() => {
   );
 });
 
-const createEntityFromFormInput = (
+const createEntityFromFormInput = async (
   entityType: Entitytyping,
-  relations: BaseRelationValuesInput[] = undefined,
-): EntityInput => {
+  relations: BaseRelationValuesInput[] | undefined = undefined,
+): Promise<EntityInput> => {
   let entity: EntityInput = { type: entityType };
   entity.metadata = Object.keys(form.value?.values.intialValues)
     .map((key) => {
@@ -443,8 +444,16 @@ const createEntityFromFormInput = (
     ? [
         ...relations,
         ...parseRelationValuesForFormSubmit(form.value?.values?.relationValues),
+        ...(await parseInheritedRelationValuesFromFormSubmit(
+          form.value?.values?.relationValues,
+        )),
       ]
-    : parseRelationValuesForFormSubmit(form.value?.values.relationValues);
+    : [
+        ...parseRelationValuesForFormSubmit(form.value?.values.relationValues),
+        ...(await parseInheritedRelationValuesFromFormSubmit(
+          form.value?.values?.relationValues,
+        )),
+      ];
   return entity;
 };
 
@@ -497,7 +506,7 @@ const tagNewlyCreatedEntity = (entity: Entity): void => {
 const submitActionFunction = async (field: FormAction) => {
   if (!(await isFormValid())) return;
   const document = await getQuery(field.actionQuery as string);
-  const entityInput = createEntityFromFormInput(
+  const entityInput = await createEntityFromFormInput(
     field.creationType,
     extractActionArguments(field.actionType), //Use this
   );
@@ -530,7 +539,7 @@ const submitActionFunction = async (field: FormAction) => {
 const submitWithUploadActionFunction = async (field: FormAction) => {
   if (!(await isFormValid())) return;
   const document = await getQuery(field.actionQuery as string);
-  const entityInput = createEntityFromFormInput(
+  const entityInput = await createEntityFromFormInput(
     field.creationType,
     extractActionArguments(field.actionType),
   );
@@ -574,7 +583,7 @@ const submitWithUploadActionFunction = async (field: FormAction) => {
 const submitWithExtraMetadataActionFunction = async (field: FormAction) => {
   if (!(await isFormValid())) return;
   const document = await getQuery(field.actionQuery as string);
-  const entityInput = createEntityFromFormInput(field.creationType);
+  const entityInput = await createEntityFromFormInput(field.creationType);
   entityInput.metadata?.push(...extractActionArguments(field.actionType));
   const entity = (await performSubmitAction(document, entityInput)).data
     .CreateEntity;
@@ -592,7 +601,7 @@ const downloadActionFunction = async (field: FormAction) => {
   try {
     const variables = extractActionArguments(field.actionType);
     const document = await getQuery(field.actionQuery as string);
-    const entityInput = createEntityFromFormInput(
+    const entityInput = await createEntityFromFormInput(
       field.creationType,
       variables.relations,
     );

@@ -9,10 +9,10 @@ import {
 import { useFilterVariables } from "./useFilterVariables";
 import { useFilterNormalization } from "./useFilterNormalization";
 import { type FilterListItem } from "@/composables/useStateManagement";
+import { extractValueFromObject } from "@/helpers";
 
 export const useFilterState = () => {
-  const { variables, extractValueFromObject, setVariables } =
-    useFilterVariables();
+  const { variables, setVariables } = useFilterVariables();
   const { normalizeFilterValue, shouldMatchExact } = useFilterNormalization();
   const filters = ref<FilterListItem[]>([]);
 
@@ -114,7 +114,7 @@ export const useFilterState = () => {
   const removeFilterFromList = (key: string) => {
     if (!key) return;
     filters.value = filters.value.filter((f) => f.advancedFilter.key !== key);
-  }
+  };
 
   const createFilterInput = (filter: AdvancedFilter) => {
     if (!filter.hidden && !filter.defaultValue) return undefined;

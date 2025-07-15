@@ -17,6 +17,7 @@ import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
 import { apolloClient } from "@/main";
 import { useImport } from "@/composables/useImport";
 import { ref } from "vue";
+import { extractValueFromObject } from "@/helpers";
 
 type FilterOptionsMappingType = {
   label?: string;
@@ -37,7 +38,6 @@ export const useFilterOptions = () => {
     initializeFilters,
     getNormalizedFiltersForApi,
     transformFilterInputIntoAdvancedFilters,
-    extractValueFromObject,
     setVariables,
   } = useFiltersBaseNew();
   const dropdownOptions = ref<DropdownOption[]>([]);

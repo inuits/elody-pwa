@@ -26,24 +26,3 @@ describe("transformFilterInputIntoAdvancedFilters", () => {
     );
   });
 });
-
-describe("extractValueFromObject", () => {
-  const { extractValueFromObject } = useFiltersBaseNew();
-  it("should extract value from object", () => {
-    const obj = { a: { b: { c: "value" } } };
-    const result = extractValueFromObject(obj, "a.b.c");
-    expect(result).toBe("value");
-  });
-
-  it("should handle arrays", () => {
-    const obj = { a: [{ b: 1 }, { b: 2 }] };
-    const result = extractValueFromObject(obj, "a.b");
-    expect(result).toEqual([1, 2]);
-  });
-
-  it("should return undefined for invalid paths", () => {
-    const obj = { a: { b: { c: "value" } } };
-    const result = extractValueFromObject(obj, "a.b.x");
-    expect(result).toBeUndefined();
-  });
-});

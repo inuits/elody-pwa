@@ -6,6 +6,7 @@ import {
   extractObjectsByTypename,
   determineDefaultIntialValues,
   getTranslatedMessage,
+  extractValueFromObject,
 } from "@/helpers";
 import {
   type Entity,
@@ -258,6 +259,93 @@ describe("extractObjectsByTypename", () => {
         ),
       );
       expect(result).toContain(nameVariableString);
+    });
+  });
+});
+
+describe("extractValueFromObject", () => {
+  const testObject = {
+    user: {
+      id: 1,
+      name: "John Doe",
+      address: {
+        street: "123 Main St",
+        city: "Anytown",
+      },
+      posts: [
+        { id: 101, title: "First Post", comments: [{ text: "Great!" }] },
+        { id: 102, title: "Second Post", comments: [{ text: "Awesome!" }] },
+      ],
+      tags: ["dev", "js", "vue"],
+    },
+    status: "active",
+    metadata: null,
+  };
+
+  describe("extractValueFromObject - basic path", () => {
+    it("should extract a value from a top-level key", () => {
+      expect(extractValueFromObject(testObject, "status")).toBe("active");
+    });
+
+    it("should extract a value from a nested path", () => {
+      expect(extractValueFromObject(testObject, "user.name")).toBe("John Doe");
+    });
+
+    it("should extract a deeply nested value", () => {
+      expect(extractValueFromObject(testObject, "user.address.city")).toBe(
+        "Anytown",
+      );
+    });
+  });
+
+  describe("extractValueFromObject - array handling", () => {
+    it("should extract a simple array", () => {
+      expect(extractValueFromObject(testObject, "user.tags")).toEqual([
+        "dev",
+        "js",
+        "vue",
+      ]);
+    });
+
+    it("should map over an array of objects and extract a property from each", () => {
+      expect(extractValueFromObject(testObject, "user.posts.title")).toEqual([
+        "First Post",
+        "Second Post",
+      ]);
+    });
+
+    it("should handle nested arrays and return a nested array result", () => {
+      expect(
+        extractValueFromObject(testObject, "user.posts.comments.text"),
+      ).toEqual([["Great!"], ["Awesome!"]]);
+    });
+
+    it("should return undefined if no values are found in the array mapping", () => {
+      expect(
+        extractValueFromObject(testObject, "user.posts.nonExistentKey"),
+      ).toBeUndefined();
+    });
+  });
+
+  describe("Edge Cases", () => {
+    it("should return null if the path is an empty string", () => {
+      expect(extractValueFromObject(testObject, "")).toBeNull();
+    });
+
+    it("should return undefined if a key in the path does not exist", () => {
+      expect(
+        extractValueFromObject(testObject, "user.profile.age"),
+      ).toBeUndefined();
+    });
+
+    it("should return undefined if part of the path is null or undefined", () => {
+      expect(
+        extractValueFromObject(testObject, "metadata.key"),
+      ).toBeUndefined();
+    });
+
+    it("should return the value when it is explicitly null", () => {
+      expect(extractValueFromObject(testObject, "metadata")).toBeNull();
     });
   });
 });

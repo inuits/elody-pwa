@@ -14,35 +14,8 @@ export const useFilterVariables = () => {
     variables.value = newVariables;
   };
 
-  const extractValueFromObject = (object: any, path: string): unknown => {
-    if (!path) return null;
-
-    const segments = path.split(".");
-    let current = object;
-
-    for (let i = 0; i < segments.length; i++) {
-      if (current == null) return undefined;
-
-      const segment = segments[i];
-
-      if (Array.isArray(current)) {
-        const remainingPath = segments.slice(i).join(".");
-        const results = current
-          .map((item) => extractValueFromObject(item, remainingPath))
-          .filter((val) => val !== undefined || val !== "");
-
-        return results.length ? results : undefined;
-      }
-
-      current = current[segment];
-    }
-
-    return current;
-  };
-
   return {
     variables,
     setVariables,
-    extractValueFromObject,
   };
 };

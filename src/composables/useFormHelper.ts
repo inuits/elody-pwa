@@ -11,6 +11,7 @@ import { defineRule, type FormContext, useForm } from "vee-validate";
 import { ref, inject } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
+import { useInheritedRelations } from "./useInheritedRelations";
 import { all } from "@vee-validate/rules";
 import { DateTime } from "luxon";
 
@@ -312,6 +313,19 @@ const useFormHelper = () => {
     form.setFieldValue(`relationValues.${relationType}`, relationsToSet);
   };
 
+  const addMappedRelations = (
+    relations: BaseRelationValuesInput[],
+    relationType: string,
+    formId: string | undefined = undefined,
+  ) => {
+    const form: FormContext<any> | undefined = formId
+      ? getForm(formId)
+      : getFormByRouteId().form;
+    if (!form) return;
+
+    form.setFieldValue(`relationValues.${relationType}`, relations);
+  };
+
   const replaceRelationsFromSameType = (
     selectedItems: InBulkProcessableItem[],
     relationType: string,
@@ -417,29 +431,68 @@ const useFormHelper = () => {
     return metadata;
   };
 
-  const parseRelationValuesForFormSubmit = (relationValues: {
+  interface RelationValues {
     [key: string]: any;
-  }): BaseRelationValuesInput[] => {
-    const relations: any[] = [];
-    if (!relationValues) return [];
-    Object.keys(relationValues).forEach((relationType: string) => {
-      const typedRelations: BaseRelationValuesInput[] =
-        relationValues[relationType];
-      if (
-        !Array.isArray(typedRelations) ||
-        typeof typedRelations[0] !== "object"
-      )
-        return;
+  }
 
-      typedRelations.forEach((relation: BaseRelationValuesInput) => {
-        // TODO: Find something better to unref this
-        relation = JSON.parse(JSON.stringify(relation));
+  const getAllRelations = (
+    relationValues: RelationValues,
+  ): BaseRelationValuesInput[] => {
+    if (!relationValues) {
+      return [];
+    }
+    return Object.values(relationValues)
+      .flat()
+      .filter((relation) => typeof relation === "object" && relation !== null)
+      .map((relation) => JSON.parse(JSON.stringify(relation)));
+  };
 
-        if (!relation.editStatus) relation.editStatus = EditStatus.Unchanged;
-        relations.push(relation);
-      });
+  const parseRelationValuesForFormSubmit = (relationValues: RelationValues) => {
+    return getAllRelations(relationValues).flatMap((relation) => {
+      if (relation.inheritFrom) {
+        return [];
+      }
+      return {
+        ...relation,
+        editStatus: relation.editStatus || EditStatus.Unchanged,
+      };
     });
-    return relations;
+  };
+
+  const parseInheritedRelationValuesFromFormSubmit = async (
+    relationValues: RelationValues,
+  ) => {
+    if (!relationValues) return [];
+
+    const { extractInheritedValue } = useInheritedRelations();
+    const allRelations = getAllRelations(relationValues);
+    const originalRelationsList = Object.values(relationValues).flat();
+
+    const processedPromises = allRelations.map(async (relation) => {
+      if (!relation.inheritFrom) {
+        return [];
+      }
+
+      const extractedValue = await extractInheritedValue({
+        ...relation.inheritFrom,
+        relations: originalRelationsList,
+      });
+
+      if (!extractedValue) {
+        return [];
+      }
+
+      const { inheritFrom, ...rest } = relation;
+
+      return {
+        ...rest,
+        key: extractedValue,
+        value: extractedValue,
+      };
+    });
+
+    const nestedResults = await Promise.all(processedPromises);
+    return nestedResults.flat();
   };
 
   const __linkedEntityId = (key: string) => {
@@ -565,6 +618,7 @@ const useFormHelper = () => {
     defineValidationRules,
     discardEditForForm,
     addRelations,
+    addMappedRelations,
     replaceRelationsFromSameType,
     findRelation,
     getRelationsBasedOnType,
@@ -574,6 +628,7 @@ const useFormHelper = () => {
     parseIntialValuesForFormSubmit,
     parseRelationValuesForFormSubmit,
     parseRelationMetadataForFormSubmit,
+    parseInheritedRelationValuesFromFormSubmit,
   };
 };
 
