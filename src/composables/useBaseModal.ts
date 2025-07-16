@@ -36,8 +36,6 @@ const deleteQueryOptions = ref<DeleteQueryOptions | undefined>(undefined);
 const _someModalIsOpened = ref(false);
 const someModalIsOpened = readonly(_someModalIsOpened);
 
-console.log(modals);
-
 export const useBaseModal = () => {
   const getModalInfo = (modalType: TypeModals): ModalInfo => {
     return modals[modalType];
