@@ -1,4 +1,5 @@
 import { mergeAttributes, Node, Extension } from "@tiptap/core";
+import { EditorState } from "prosemirror-state";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
   AdvancedFilterTypes,
@@ -103,7 +104,9 @@ const generateExtensionNameFromConfiguration = (
   return extensionName;
 };
 
-const getNodeFromSelection = (state) => {
+const getNodeFromSelection = (
+  state: EditorState,
+): boolean | { node: any; pos: any } => {
   let node = undefined;
   let pos = undefined;
   const { selection } = state;
@@ -119,6 +122,24 @@ const getNodeFromSelection = (state) => {
   });
 
   return { node, pos };
+};
+
+const hasEnterInSelection = (state: EditorState): boolean => {
+  if (!state) return false;
+
+  const { from, to } = state.selection;
+
+  let hasEnter: boolean = false;
+
+  state.doc.nodesBetween(from, to, (node, pos) => {
+    if (node.type.name === "hardBreak" || node.type.name === "paragraph") {
+      if (node.type.name === "paragraph" && pos === from) return hasEnter;
+      hasEnter = true;
+      return false;
+    }
+  });
+
+  return hasEnter;
 };
 
 export const createTipTapNodeExtension = (
@@ -271,19 +292,17 @@ export const createGlobalCommandsExtension = Extension.create({
             Object.assign(additionalAttributes, configurationItem.attributes);
           }
           if (configurationItem.metadataKeysToSetAsAttribute) {
-            configurationItem.metadataKeysToSetAsAttribute.forEach(
-              (key: string) => {
-                let value = "";
-                if (entity.intialValues) value = entity.intialValues[key];
-                if (entity.teaserMetadata)
-                  value = entity.teaserMetadata.find(
-                    (metadataItem: any) => metadataItem.key === key,
-                  )?.value;
-                Object.assign(additionalAttributes, {
-                  [key]: value,
-                });
-              },
-            );
+            configurationItem.metadataKeysToSetAsAttribute.forEach((key) => {
+              let value = "";
+              if (entity.intialValues) value = entity.intialValues[key];
+              if (entity.teaserMetadata)
+                value = entity.teaserMetadata.find(
+                  (metadataItem: any) => metadataItem.key === key,
+                )?.value;
+              Object.assign(additionalAttributes, {
+                [key]: value,
+              });
+            });
           }
 
           const { selection } = state;
