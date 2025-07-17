@@ -10,7 +10,7 @@
     <DeleteButton v-if="showDeleteButton" />
     <LanguageSelect class="flex justify-end pr-2 ml-auto" />
     <tenant-switcher
-      class="ml-6 w-64 flex justify-end pr-2"
+      class="flex justify-end pr-2"
       v-if="config.features.hasTenantSelect"
     />
     <SearchBar

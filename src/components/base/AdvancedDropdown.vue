@@ -5,6 +5,9 @@
       labelPosition === 'inline' ? 'flex items-center' : undefined,
       'vue-advanced-select',
     ]"
+    :style="{
+      minWidth: shouldCalculateWidth ? `${calculatedWidth}px` : 'auto',
+    }"
   >
     <VueSelect
       class="text-text-body bg-neutral-white border-none rounded-lg"
@@ -60,7 +63,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch, inject } from "vue";
+import { computed, ref, watch, inject, onMounted } from "vue";
 import {
   ActionContextEntitiesSelectionType,
   ActionContextViewModeTypes,
@@ -141,6 +144,52 @@ const filterDropdownOptions = computed<DropdownOption[]>(() => {
   });
 });
 
+const shouldCalculateWidth = ref(false);
+const calculatedWidth = ref(200);
+
+const checkIfCalculationNeeded = () => {
+  shouldCalculateWidth.value =
+    props.options.length > 0 && props.options.length <= 20;
+};
+
+const calculateWidth = () => {
+  if (!shouldCalculateWidth.value) return;
+
+  const span = document.createElement("span");
+  span.style.position = "absolute";
+  span.style.visibility = "hidden";
+  span.style.whiteSpace = "nowrap";
+  span.style.font = `
+    ${getComputedStyle(document.body).getPropertyValue("--vs-font-weight")} 
+    ${getComputedStyle(document.body).getPropertyValue("--vs-font-size")} 
+    ${getComputedStyle(document.body).getPropertyValue("--vs-font-family")}
+  `;
+
+  document.body.appendChild(span);
+
+  let maxWidth = 0;
+  props.options.forEach((option) => {
+    span.textContent = t(option.label);
+    maxWidth = Math.max(maxWidth, span.offsetWidth);
+  });
+
+  document.body.removeChild(span);
+  calculatedWidth.value = maxWidth + 56;
+};
+
+onMounted(() => {
+  checkIfCalculationNeeded();
+  calculateWidth();
+});
+
+watch(
+  () => props.options.length,
+  () => {
+    checkIfCalculationNeeded();
+    calculateWidth();
+  },
+);
+
 watch(
   () => props.options,
   () => {
@@ -173,6 +222,7 @@ watch(
 body > .menu[data-v-85d14ad7] {
   --vs-menu-z-index: 9999 !important;
 }
+
 div.menu-option.selected {
   background-color: var(--color-accent-light) !important;
 }
