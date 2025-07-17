@@ -7,16 +7,17 @@
       widthClass,
     ]"
   />
-  <img v-else :class="[heightClass, widthClass]" :src="imageUrl" />
+  <img
+    v-else
+    :class="[heightClass, widthClass]"
+    :src="imageUrl"
+    @error="handleImageError"
+  />
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref, watch } from "vue";
 import { useGetMediafile } from "@/composables/useGetMediafile";
-import type {
-  Context,
-  InBulkProcessableItem,
-} from "@/composables/useBulkOperations";
 
 const props = withDefaults(
   defineProps<{
@@ -38,6 +39,7 @@ const emit = defineEmits<{
 const { getMediafile } = useGetMediafile();
 const imageUrl = ref("");
 const isLoading = ref(true);
+const blobUrl = ref("");
 
 const getImage = async () => {
   if (props.mediaIsLink) {
@@ -48,8 +50,16 @@ const getImage = async () => {
 
   try {
     const response = await getMediafile(props.url);
-    const videoBlob = await response.blob();
-    imageUrl.value = URL.createObjectURL(videoBlob);
+    const blob = await response.blob();
+
+    // Revoke previous URL if exists
+    if (blobUrl.value) {
+      URL.revokeObjectURL(blobUrl.value);
+    }
+
+    // Create and store new URL
+    blobUrl.value = URL.createObjectURL(blob);
+    imageUrl.value = blobUrl.value;
     isLoading.value = false;
   } catch (_error: any) {
     isLoading.value = false;
@@ -60,6 +70,33 @@ const getImage = async () => {
 const emitError = () => {
   emit("error");
 };
+
+const handleImageError = () => {
+  if (blobUrl.value) {
+    URL.revokeObjectURL(blobUrl.value);
+    blobUrl.value = "";
+  }
+  emitError();
+};
+
+onUnmounted(() => {
+  if (blobUrl.value) {
+    URL.revokeObjectURL(blobUrl.value);
+  }
+});
+
+watch(
+  () => props.url,
+  (newUrl, oldUrl) => {
+    if (newUrl !== oldUrl) {
+      if (blobUrl.value) {
+        URL.revokeObjectURL(blobUrl.value);
+        blobUrl.value = "";
+      }
+      getImage();
+    }
+  },
+);
 
 onMounted(() => {
   getImage();
