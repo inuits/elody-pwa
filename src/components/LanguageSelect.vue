@@ -7,6 +7,7 @@
       :label="t('library.language')"
       :clearable="false"
       label-position="inline"
+      style-type="defaultWithLightBorder"
     />
   </div>
 </template>
@@ -91,7 +92,9 @@ const openChangeLocaleConfirmationModal = (
   initializeConfirmModal({
     confirmButton: {
       buttonCallback: () => {
-        selectedLanguageOption.value = Array.isArray(option) ? option[0].value : option.value;
+        selectedLanguageOption.value = Array.isArray(option)
+          ? option[0].value
+          : option.value;
         closeModal(TypeModals.Confirm);
       },
     },

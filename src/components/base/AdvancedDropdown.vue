@@ -3,6 +3,7 @@
     data-cy="base-dropdown-new"
     :class="[
       labelPosition === 'inline' ? 'flex items-center' : undefined,
+      dropdownStyle,
       'vue-advanced-select',
     ]"
     :style="{
@@ -10,7 +11,7 @@
     }"
   >
     <VueSelect
-      class="text-text-body bg-neutral-white border-none rounded-lg"
+      class="!text-text-body !bg-neutral-white border-none !rounded-lg"
       v-model="selectedItem"
       :teleport="someModalIsOpened ? undefined : 'body'"
       :options="filterDropdownOptions"
@@ -36,15 +37,15 @@
             width="24"
           />
         </div>
-        <div v-else class="mr-2">
-          <unicon :name="Unicons.Check.name" height="24" width="24" />
+        <div v-else class="mr-2 w-[18px] h-[18px]">
+          <unicon :name="Unicons.Check.name" height="18" width="18" />
         </div>
         <div class="text-text-body">
           {{ t(option.label) }}
         </div>
       </template>
       <template #value="{ option }">
-        <div class="text-text-body flex items-center">
+        <div class="selectedOption flex items-center">
           <unicon
             v-if="addIconToValue && option.icon && Unicons[option.icon]?.name"
             class="mx-1"
@@ -76,6 +77,8 @@ import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { useBaseModal } from "@/composables/useBaseModal";
 
+type DropdownStyle = "default" | "defaultWithBorder" | "defaultWithLightBorder";
+
 const props = withDefaults(
   defineProps<{
     modelValue: DropdownOption | number | string | string[] | undefined;
@@ -90,6 +93,7 @@ const props = withDefaults(
     addLabelToValue?: boolean;
     addIconToValue?: boolean;
     showMenuHeader?: boolean;
+    styleType: DropdownStyle;
   }>(),
   {
     selectFirstOptionByDefault: false,
@@ -101,6 +105,7 @@ const props = withDefaults(
     addLabelToValue: false,
     addIconToValue: false,
     showMenuHeader: true,
+    styleType: "default",
   },
 );
 
@@ -125,6 +130,16 @@ const selectItem = () => {
 const deselectItem = () => {
   emit("update:modelValue", "");
 };
+
+const dropdownStyle = computed<string>(() => {
+  const stylesMap: Record<DropdownStyle, string> = {
+    default: "",
+    defaultWithBorder: "vue-advanced-select--bordered",
+    defaultWithLightBorder: "vue-advanced-select--light-bordered",
+  };
+
+  return stylesMap[props.styleType];
+});
 
 const filterDropdownOptions = computed<DropdownOption[]>(() => {
   return props.options.filter((dropdownOption: DropdownOption) => {
@@ -216,6 +231,8 @@ watch(
 </script>
 
 <style>
+@reference "@/assets/main.css"
+
 :deep(.vue-select) {
   --vs-border-radius: 10px;
 }
@@ -226,6 +243,11 @@ body > .menu[data-v-85d14ad7] {
 div.menu-option.selected {
   background-color: var(--color-accent-light) !important;
 }
+
+div.menu-option {
+  line-height: 1.375;
+}
+
 div.menu-option:hover {
   background-color: color-mix(
     in srgb,
@@ -239,5 +261,46 @@ div.menu-option:hover {
     outline: none !important;
     box-shadow: none;
   }
+}
+
+.vue-advanced-select .vue-select,
+.vue-advanced-select .control {
+  --vs-border-radius: 0.5rem;
+  --vs-border: none;
+  --vs-line-height: 1.375;
+}
+
+.vue-advanced-select .control.focused {
+  --vs-outline-color: none;
+}
+
+.vue-advanced-select--bordered .vue-select,
+.vue-advanced-select--bordered .control {
+  --vs-border-radius: 0.5rem;
+  --vs-border: 1px solid rgba(0, 58, 82, 0.6);
+}
+
+.vue-advanced-select .control.focused {
+  --vs-outline-color: none;
+}
+
+.vue-advanced-select--light-bordered .vue-select,
+.vue-advanced-select--light-bordered .control {
+  --vs-border-radius: 0.5rem;
+  --vs-border: 1px solid #e8eef0;
+  --vs-line-height: 1.375;
+}
+
+.vue-advanced-select--light-bordered .control.focused {
+  --vs-outline-color: #e8eef0;
+  box-shadow: none !important;
+}
+
+.vue-advanced-select .selectedOption {
+  @apply text-text-body;
+}
+
+.vue-advanced-select--bordered .selectedOption {
+  @apply text-black;
 }
 </style>

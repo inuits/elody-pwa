@@ -8,6 +8,7 @@
         :clearable="false"
         :disable="isEdit"
         label-position="inline"
+        style-type="defaultWithLightBorder"
       />
     </div>
   </div>
