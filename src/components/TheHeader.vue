@@ -18,11 +18,6 @@
       v-if="showSearch"
       :inputEnabled="false"
     />
-    <SearchBarAi
-      class="flex justify-end"
-      v-if="showSearchAI"
-      :inputEnabled="false"
-    />
   </div>
 </template>
 
@@ -32,7 +27,6 @@ import MetadataEditButton from "@/components/MetadataEditButton.vue";
 import { useRoute } from "vue-router";
 import LanguageSelect from "@/components/LanguageSelect.vue";
 import SearchBar from "@/components/SearchBar.vue";
-import SearchBarAi from "@/components/SearchBarAi.vue";
 import TenantSwitcher from "@/components/menu/TenantSwitcher.vue";
 import { inject, computed } from "vue";
 import { getRouteMetadataInfoFromEntity, mapUrlToEntityType } from "@/helpers";
@@ -42,7 +36,6 @@ import { auth } from "@/main";
 const route = useRoute();
 const config: any = inject("config");
 const showSearch = config.features.simpleSearch;
-const showSearchAI = config.features?.aiSearch?.hasAiSearch;
 
 const entityType = computed(() => {
   const slug = String(route.params["type"]);
