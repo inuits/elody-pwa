@@ -47,7 +47,6 @@ import ConfirmModalView from "./components/ConfirmModalView.vue";
 import DynamicFormModal from "@/components/dynamicForms/DynamicFormModal.vue";
 import DeleteModal from "@/components/modals/DeleteModal.vue";
 import SearchModal from "@/components/modals/SearchModal.vue";
-import SearchModalAi from "@/components/modals/SearchModalAi.vue";
 import SavedSearchesPickerModal from "@/components/modals/SavedSearchesPickerModal.vue";
 import TheHeader from "@/components/TheHeader.vue";
 import TheNavigation from "@/components/menu/MenuNav.vue";
