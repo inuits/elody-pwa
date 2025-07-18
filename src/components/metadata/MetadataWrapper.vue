@@ -330,6 +330,10 @@ const isMaxDateToday = computed(() => {
   );
 });
 
+const unescapeString = (str: string | undefined): string => {
+  return str.replace(/\\\\/g, '\\');
+}
+
 const getValidationRules = (metadata: PanelMetaData): string => {
   let rules: string;
   if (metadata?.inputField?.validation?.value === ValidationRules.CustomValue)
@@ -342,6 +346,7 @@ const getValidationRules = (metadata: PanelMetaData): string => {
       "",
     );
     regex = regex?.replace(/\|/g, "?.");
+    regex = unescapeString(regex);
     rules = `${rule}:${regex}`;
   }
   if (
