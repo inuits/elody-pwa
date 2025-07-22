@@ -26,7 +26,10 @@
           : parentEntityIdentifiers.length > 0
             ? 'px-3 pt-3'
             : 'px-6',
-        { '!bg-white grid-rows-[0vh_1fr]': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary },
+        {
+          '!bg-white grid-rows-[0vh_1fr]':
+            baseLibraryMode === BaseLibraryModes.BasicBaseLibrary,
+        },
         {
           'grid-rows-[5vh_1fr]':
             baseLibraryMode === BaseLibraryModes.NormalBaseLibrary,
@@ -34,10 +37,8 @@
         {
           'grid-rows-[1vh_1fr]':
             baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder ||
-            (
-              baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary &&
-              showCurrentEntityFlow
-            ),
+            (baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary &&
+              showCurrentEntityFlow),
         },
         {
           'grid-rows-[1fr_0vh]': !showCurrentEntityFlow,
@@ -163,6 +164,7 @@
             :total-items="totalEntityCount || NaN"
             :set-skip="setSkip"
             :show-pagination="!displayMap"
+            :is-loading="isInitialLoading"
             @custom-bulk-operations-promise="
               (promise) => (customBulkOperationsPromise = promise)
             "
@@ -289,9 +291,8 @@ import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
 import EventBus from "@/EventBus";
-import FiltersBase, {
-  FiltersBaseAPI,
-} from "@/components/filters/FiltersBase.vue";
+import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
+import FiltersBase from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import useUpload, { UploadStatus } from "@/composables/useUpload";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
@@ -397,13 +398,15 @@ const showCurrentPreviewFlow: boolean = inject("showCurrentPreviewFlow", true);
 const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
-const { getGlobalState, updateGlobalState } = useStateManagement();
+const { getGlobalState, updateGlobalState, getStateForRoute } =
+  useStateManagement();
 const { iterateOverBreadcrumbs } = useBreadcrumbs(config);
 const { getBasicMapProperties } = useMaps();
 
 const filtersBaseAPI = ref<FiltersBaseAPI | undefined>(undefined);
 const hasBulkOperations = ref<boolean>(true);
 const selectedPaginationLimitOption = ref<number>();
+const isInitialLoading = ref<boolean>(true);
 
 const showCurrentEntityFlow = computed(() => {
   if (!isPreviewElement) return true;
@@ -600,22 +603,28 @@ const initializeBaseLibrary = async () => {
   setIsSearchLibrary(props.isSearchLibrary || false);
   if (props.ignoreFetchingData) return;
   if (!props.predefinedEntities) {
-    if (props.filters.length > 0) {
-      setAdvancedFilters(props.filters, false, false, route);
+    isInitialLoading.value = true;
+    try {
+      if (props.filters.length > 0) {
+        setAdvancedFilters(props.filters, false, false, route);
+      }
+      setEntityType(
+        (props.filterType as Entitytyping) ||
+          props.entityType ||
+          Entitytyping.BaseEntity,
+      );
+      setsearchInputType(
+        props.searchInputTypeOnDrawer || SearchInputType.AdvancedInputType,
+      );
+      enqueuePromise(filterMatcherMappingPromise);
+      enqueuePromise(advancedFiltersPromise);
+      enqueuePromise(paginationLimitOptionsPromise);
+      enqueuePromise(sortOptionsPromise);
+      await getEntities(route);
+      isInitialLoading.value = false;
+    } catch (e: any) {
+      isInitialLoading.value = false;
     }
-    setEntityType(
-      (props.filterType as Entitytyping) ||
-        props.entityType ||
-        Entitytyping.BaseEntity,
-    );
-    setsearchInputType(
-      props.searchInputTypeOnDrawer || SearchInputType.AdvancedInputType,
-    );
-    enqueuePromise(filterMatcherMappingPromise);
-    enqueuePromise(advancedFiltersPromise);
-    enqueuePromise(paginationLimitOptionsPromise);
-    enqueuePromise(sortOptionsPromise);
-    await getEntities(route);
   }
 };
 
@@ -772,12 +781,20 @@ watch(
       !props.predefinedEntities &&
       router.currentRoute.value.name !== "SingleEntity"
     ) {
-      setsearchInputType(SearchInputType.AdvancedInputType);
-      setEntityType(entityType.value);
-      enqueuePromise(advancedFiltersPromise);
-      enqueuePromise(paginationLimitOptionsPromise);
-      enqueuePromise(sortOptionsPromise);
-      await getEntities(route);
+      try {
+        isInitialLoading.value = true;
+        setsearchInputType(SearchInputType.AdvancedInputType);
+        setEntityType(entityType.value);
+        enqueuePromise(advancedFiltersPromise);
+        enqueuePromise(paginationLimitOptionsPromise);
+        enqueuePromise(sortOptionsPromise);
+        const state = getStateForRoute(route, true);
+        setSkip(state?.queryVariables?.skip || 1);
+        await getEntities(route);
+        isInitialLoading.value = false;
+      } catch (e: any) {
+        isInitialLoading.value = false;
+      }
     }
   },
 );

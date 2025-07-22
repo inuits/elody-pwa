@@ -112,13 +112,14 @@ export const useBaseLibrary = (
       )
         return;
       _route = route;
-      const storedState = getStateForRoute(_route);
+      const storedState = getStateForRoute(_route, true);
       if (storedState?.queryVariables) {
         queryVariables.searchValue = {
           ...queryVariables.searchValue,
           ...(storedState.queryVariables.searchValue || {}),
         };
       }
+      queryVariables.skip = storedState?.queryVariables?.skip || 1;
     }
 
     queryVariables.advancedFilterInputs = [];
@@ -166,8 +167,7 @@ export const useBaseLibrary = (
     forceFetch: boolean = false,
   ): Promise<void> => {
     queryVariables.searchValue.isAsc = isAsc;
-    if (shouldUseStateForRoute)
-      updateStateForRoute(_route, { queryVariables }, "useBaseLibrary#129");
+    if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
@@ -276,14 +276,15 @@ export const useBaseLibrary = (
     () => {
       if (entitiesLoading.value && _route?.name !== "SingleEntity") {
         let placeholderAmount = 20;
-        if (queryVariables.limit)
-          placeholderAmount = queryVariables.limit;
+        if (queryVariables.limit) placeholderAmount = queryVariables.limit;
         else if (baseLibraryMode === BaseLibraryModes.BasicBaseLibrary) {
           placeholderAmount = 1;
           const entityCountOnPage = getStateForRoute(_route)?.entityCountOnPage;
-          if (entityCountOnPage !== undefined) placeholderAmount = entityCountOnPage;
+          if (entityCountOnPage !== undefined)
+            placeholderAmount = entityCountOnPage;
         }
-        placeholderEntities.value = createPlaceholderEntities(placeholderAmount);
+        placeholderEntities.value =
+          createPlaceholderEntities(placeholderAmount);
       } else {
         placeholderEntities.value = [];
       }

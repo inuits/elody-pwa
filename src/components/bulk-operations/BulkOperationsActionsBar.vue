@@ -52,7 +52,9 @@
       </div>
     </div>
     <div v-if="!excludePagination && showPagination" class="flex">
+      <BasePaginationSkeleton v-if="isLoading" />
       <BasePaginationNew
+        v-else
         v-model:skip="selectedSkip"
         :limit="selectedPaginationLimitOption ?? NaN"
         :total-items="
@@ -119,6 +121,7 @@ import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
 import { auth } from "@/main";
 import BasePaginationNew from "@/components/base/BasePagination.vue";
 import { useStateManagement } from "@/composables/useStateManagement";
+import BasePaginationSkeleton from "@/components/base/skeletons/BasePaginationSkeleton.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -138,6 +141,7 @@ const props = withDefaults(
     excludePagination: boolean;
     setSkip?: Function;
     showPagination?: boolean;
+    isLoading?: boolean;
   }>(),
   {
     totalItemsCount: 0,
@@ -150,6 +154,7 @@ const props = withDefaults(
     setSkip: undefined,
     excludePagination: false,
     showPagination: true,
+    isLoading: false,
   },
 );
 
@@ -245,11 +250,13 @@ const customBulkOperationsPromise = async () => {
     });
 };
 
-const setSelectedSkipFromState = () => {
-  const state = getStateForRoute(route);
+const setSelectedSkipFromState = ({
+  updateSkipGlobally = true,
+}: { updateSkipGlobally?: boolean } = {}) => {
+  const state = getStateForRoute(route, true);
   const skip = state?.queryVariables?.skip || 1;
   selectedSkip.value = skip;
-  props.setSkip(skip);
+  if (updateSkipGlobally) props.setSkip(skip);
 };
 
 const setSkip = async (newSkip: number) => {
@@ -257,7 +264,8 @@ const setSkip = async (newSkip: number) => {
 };
 
 onMounted(() => {
-  if (!props.excludePagination && props.showPagination) setSelectedSkipFromState();
+  if (!props.excludePagination && props.showPagination)
+    setSelectedSkipFromState();
   if (entityType.value && !props.customBulkOperations)
     refetchEnabled.value = true;
   refetch();
@@ -351,6 +359,14 @@ watch(
     emit("setBulkOperationsAvailable", hasBulkOperations);
   },
   { immediate: true },
+);
+
+watch(
+  () => props.isLoading,
+  (currentState: boolean) => {
+    if (currentState) return;
+    setSelectedSkipFromState({ updateSkipGlobally: false });
+  },
 );
 </script>
 

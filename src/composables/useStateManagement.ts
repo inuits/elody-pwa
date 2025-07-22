@@ -96,22 +96,26 @@ export const useStateManagement = () => {
     route: RouteLocationNormalizedLoaded | undefined,
     stateObject: StateObject,
   ) => {
-    const state = getStateForRoute(route);
-    if (!state) setStateForRoute(route, stateObject);
-    else setStateForRoute(route, Object.assign(state, stateObject));
+    if (!route) return;
+    const state = getStateForRoute(route, true);
+    const copyOfState = structuredClone(stateObject);
+    if (!state) setStateForRoute(route, copyOfState);
+    else setStateForRoute(route, Object.assign(state, copyOfState));
   };
 
   const getStateForRoute = (
     route: RouteLocationNormalizedLoaded | undefined,
+    useFullPath: boolean = false,
   ): StateObject | undefined => {
     if (!route) return;
     if (route.name !== "SingleEntity") {
       const state = window.sessionStorage.getItem(route.path);
       if (state) return JSON.parse(state);
     } else {
-      const state = window.sessionStorage.getItem(
-        sliceSingleEntityRoutePath(route.path),
-      );
+      const path = useFullPath
+        ? route.path
+        : sliceSingleEntityRoutePath(route.path);
+      const state = window.sessionStorage.getItem(path);
       if (state) return JSON.parse(state);
     }
     return undefined;
