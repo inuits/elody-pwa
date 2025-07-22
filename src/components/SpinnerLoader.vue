@@ -39,6 +39,7 @@ const colorMapping: { [key: string]: { stroke: string; fill: string } } = {
 };
 
 const dimensionMapping: { [key: number]: string } = {
+  5: "w-5 h-5",
   10: "w-10 h-10",
   14: "w-14 h-14",
   16: "w-16 h-16",

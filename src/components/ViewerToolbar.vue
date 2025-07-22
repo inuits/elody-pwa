@@ -2,7 +2,7 @@
   <div
     class="absolute w-full bg-neutral-0 z-[5] p-2 shadow-sm flex justify-between items-center h-10"
   >
-    <div class="pt-[10px]">
+    <div class="pt-[10px] flex flex-row">
       <button ref="fullPageRef" class="mr-2 ml-2">
         <unicon
           :name="Unicons.Desktop.name"
@@ -24,13 +24,22 @@
           class="text-neutral-700 cursor-pointer"
         />
       </button>
-      <button v-if="mediafileId" @click="downloadImage">
+      <button
+        v-if="mediafileId && !downloadImageLoadingRef"
+        @click="downloadImage"
+      >
         <unicon
           :name="Unicons.Download.name"
           height="20"
-          class="text-neutral-700 cursor-pointer ml-1"
+          class="text-neutral-700 cursor-pointer ml-2"
         />
       </button>
+      <spinner-loader
+        v-else-if="downloadImageLoadingRef"
+        class="ml-2"
+        theme="accent"
+        :dimensions="5"
+      />
     </div>
     <div v-if="viewerContainsMultipleMediafiles">
       <button
@@ -103,10 +112,11 @@ import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSele
 import { useBaseModal } from "@/composables/useBaseModal";
 import { ModalStyle, TypeModals } from "@/generated-types/queries";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
 
 export default defineComponent({
   name: "ViewerToolbar",
-  components: { BaseTooltip },
+  components: { SpinnerLoader, BaseTooltip },
   props: {
     zoomIn: {
       type: Object as PropType<HTMLDivElement | string | null>,
@@ -145,6 +155,7 @@ export default defineComponent({
     const zoomOutRef = ref<HTMLDivElement | undefined>(undefined);
     const fullPageRef = ref<HTMLDivElement | undefined>(undefined);
     const homeRef = ref<HTMLDivElement | undefined>(undefined);
+    const downloadImageLoadingRef = ref<boolean>(false);
     const {
       mediafileSelectionState,
       selectNextMediafile,
@@ -171,7 +182,7 @@ export default defineComponent({
         throw Error(
           `Could not download madiafile with id "${_props.mediafileId}"`,
         );
-
+      downloadImageLoadingRef.value = true;
       const imageUrl = await fetch(
         `/api/mediafiles/${_props.mediafileId}/download`,
         {
@@ -188,6 +199,7 @@ export default defineComponent({
       link.download = `${_props.originalFilename}`;
       link.click();
       URL.revokeObjectURL(url);
+      downloadImageLoadingRef.value = false;
     };
 
     const togglePreviewComponent = (id: string): void => {
@@ -204,6 +216,7 @@ export default defineComponent({
       zoomOutRef,
       fullPageRef,
       homeRef,
+      downloadImageLoadingRef,
       mediafileViewerContext,
       downloadImage,
       viewerContainsMultipleMediafiles,
