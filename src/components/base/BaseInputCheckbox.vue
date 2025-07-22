@@ -138,7 +138,6 @@ const handleItemSelection = () => {
     getEnqueuedItemCount(props.bulkOperationsContext) >= bulkSelectAllSizeLimit
   )
     return;
-  console.log(props.item);
   if (!inputValue.value && !props.ignoreBulkOperations)
     enqueueItemForBulkProcessing(props.bulkOperationsContext, {
       ...props.item,
