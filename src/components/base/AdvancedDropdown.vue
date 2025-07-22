@@ -20,8 +20,8 @@
       :is-multi="multiple"
       :is-clearable="clearable"
       :should-autofocus-option="false"
-      @option-selected="selectItem"
       @option-deselected="deselectItem"
+      @update:modelValue="handleUpdateItem"
     >
       <template #menu-header v-if="showMenuHeader">
         <div class="text-center my-1">
@@ -124,12 +124,15 @@ const { isEdit } = useEditMode(entityId.value);
 const { someModalIsOpened } = useBaseModal();
 const selectedItem = ref<any | undefined>(undefined);
 
-const selectItem = () => {
-  emit("update:modelValue", selectedItem.value);
-};
 const deselectItem = () => {
   emit("update:modelValue", "");
 };
+
+const handleUpdateItem = (value: any) => {
+  if (!value && !props.clearable)
+    selectedItem.value = selectedItem.value || props.options[0].value;
+  emit("update:modelValue", selectedItem.value);
+}
 
 const dropdownStyle = computed<string>(() => {
   const stylesMap: Record<DropdownStyle, string> = {
