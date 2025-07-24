@@ -424,30 +424,34 @@ const useUpload = () => {
     csv: Blob,
     isDryRun: boolean = false,
   ): Promise<string[] | number> => {
+    const filename = __getCsvFile().name;
     const response = await fetch(
-      `/api/upload/batch?${isDryRun ? "dry_run=true" : ""}${extraMediafileType.value ? `&extra_mediafile_type=${extraMediafileType.value}` : ""}${jobIdentifier.value ? `&main_job_id=${jobIdentifier.value}` : ""}`,
+      `/api/upload/batch?filename=${filename}${isDryRun ? "&dry_run=true" : ""}${extraMediafileType.value ? `&extra_mediafile_type=${extraMediafileType.value}` : ""}${jobIdentifier.value ? `&main_job_id=${jobIdentifier.value}` : ""}`,
       {
         headers: { "Content-Type": "text/csv" },
         method: "POST",
         body: csv,
       },
     );
+    let parsedResult;
     if (!response.ok) {
-      const httpErrorMessage = handleHttpError(response);
+      //const httpErrorMessage = handleHttpError(response);
       __updateGlobalUploadProgress(
         ProgressStepType.Upload,
         ProgressStepStatus.Failed,
       );
       toggleUploadStatus();
-      return Promise.reject(httpErrorMessage);
+      //return Promise.reject(httpErrorMessage);
+      parsedResult = JSON.parse(await response.text()).extensions.response.body;
+    } else {
+      parsedResult = JSON.parse(await response.text());
     }
 
-    const parsedResult = JSON.parse(await response.text());
-    if (parsedResult.parent_job_id)
+    if (parsedResult?.parent_job_id)
       jobIdentifier.value = parsedResult.parent_job_id;
 
     if (isDryRun) return parsedResult;
-    else return parsedResult.links;
+    else return parsedResult?.links;
   };
 
   const toggleUploadStatus = () => {
