@@ -113,7 +113,7 @@ const getValueFromTeaserMetadata = (
 
 export const getTranslatedMessage = (
   key: string,
-  variables: Record<string, string> | string[] | undefined = undefined,
+  variables: Record<string, string> | undefined = undefined,
 ) => i18n.global.t(key, variables);
 
 export const setSortConfigurationForRoute = (

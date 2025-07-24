@@ -2,6 +2,19 @@
   <div data-cy="dynamic-form-upload-button">
     <div class="flex">
       <div
+        v-if="missingFileNames.length"
+        class="w-full bg-orange-light p-2 text-white font-bold flex"
+      >
+        <div>
+          <p>{{ t("actions.upload.errors", [missingFileNames.length]) }}</p>
+          <ul class="list-disc list-inside">
+            <li v-for="file in missingFileNames" :key="file">
+              {{ t("actions.upload.missing", [file]) }}
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div
         v-if="uploadStatus === 'upload-finished'"
         class="w-full bg-green-light p-2 font-bold flex"
         :class="[
