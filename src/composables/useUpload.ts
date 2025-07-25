@@ -31,6 +31,7 @@ export enum UploadStatus {
 }
 
 import { router } from "@/main";
+import { getTranslatedMessage } from "@/helpers";
 const { handleHttpError, getMessageAndCodeFromErrorString } = useErrorCodes();
 const uploadStatus = ref<UploadStatus>(UploadStatus.NoUpload);
 const uploadProgress = ref<ActionProgressStep[]>([]);
@@ -47,13 +48,13 @@ const mediafiles = computed((): DropzoneFile[] =>
 const uploadProgressPercentage = ref<number>(0);
 const uploadType = ref<UploadFieldType>(UploadFieldType.Batch);
 const requiredMediafiles = ref<string[]>([]);
-const containsCsv = computed(
-  () =>
-    !!files.value.find(
-      (file: DropzoneFile) =>
-        file.type === "text/csv" || file.type === "application/vnd.ms-excel",
-    ),
-);
+const csvFile = computed(() => {
+  return files.value.find(
+    (file: DropzoneFile) =>
+      file.type === "text/csv" || file.type === "application/vnd.ms-excel",
+  );
+});
+const containsCsv = computed(() => !!csvFile.value);
 const containsXml = computed(
   () => !!files.value.find((file: DropzoneFile) => file.type === "text/xml"),
 );
@@ -1071,8 +1072,22 @@ const useUpload = () => {
     reinitializeDynamicFormFunc,
     __getCsvString,
     extraMediafileType,
+    __handleFileThumbnailError,
   };
 };
+
+watch(
+  () => missingFileNames.value,
+  () => {
+    if (csvFile.value) {
+      const errorMessages: string[] = missingFileNames.value.map(
+        (filename: string) =>
+          `${getTranslatedMessage("actions.upload.missing", [filename])}`,
+      );
+      useUpload().__handleFileThumbnailError(csvFile.value, errorMessages);
+    }
+  },
+);
 
 watch(
   () => mediafiles.value.length,
