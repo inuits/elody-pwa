@@ -949,12 +949,17 @@ const useUpload = () => {
     if (!failedUploads.value.includes(file.name))
       failedUploads.value.push(file.name);
 
-    filePreview.classList.add("border-2", "border-red-default");
     const errorContainer: Element | null = filePreview
       .getElementsByClassName("error-message-container")
       .item(0);
-
     if (!errorContainer || !errors) return;
+
+    if (errors.length <= 0) {
+      filePreview.classList.remove("border-2", "border-red-default");
+      errorContainer.classList.add("hidden");
+      return;
+    }
+
     errorContainer.innerHTML = "";
     const errorList = document.createElement("ul");
     errorList.classList.add("list-disc");
@@ -969,6 +974,8 @@ const useUpload = () => {
       }
       errorList.appendChild(errorNode);
     });
+
+    filePreview.classList.add("border-2", "border-red-default");
     errorContainer.classList.remove("hidden");
   };
 
