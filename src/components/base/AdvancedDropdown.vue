@@ -23,11 +23,6 @@
       @option-deselected="deselectItem"
       @update:modelValue="handleUpdateItem"
     >
-      <template #menu-header v-if="showMenuHeader">
-        <div class="text-center my-1">
-          <h3>{{ label }}</h3>
-        </div>
-      </template>
       <template #option="{ option }">
         <div v-if="option.value !== selectedItem" class="mr-2">
           <unicon
@@ -239,6 +234,7 @@ watch(
 :deep(.vue-select) {
   --vs-border-radius: 10px;
 }
+
 body > .menu {
   --vs-menu-z-index: 9999 !important;
 }
