@@ -132,7 +132,7 @@ const handleUpdateItem = (value: any) => {
   if (!value && !props.clearable)
     selectedItem.value = selectedItem.value || props.options[0].value;
   emit("update:modelValue", selectedItem.value);
-}
+};
 
 const dropdownStyle = computed<string>(() => {
   const stylesMap: Record<DropdownStyle, string> = {
@@ -239,12 +239,12 @@ watch(
 :deep(.vue-select) {
   --vs-border-radius: 10px;
 }
-body > .menu[data-v-85d14ad7] {
+body > .menu {
   --vs-menu-z-index: 9999 !important;
 }
 
 div.menu-option.selected {
-  background-color: var(--color-accent-light) !important;
+  background-color: var(--color-neutral-light) !important;
 }
 
 div.menu-option {
@@ -254,7 +254,7 @@ div.menu-option {
 div.menu-option:hover {
   background-color: color-mix(
     in srgb,
-    var(--color-accent-light) 30%,
+    var(--color-neutral-light) 30%,
     transparent
   ) !important;
 }
@@ -264,6 +264,10 @@ div.menu-option:hover {
     outline: none !important;
     box-shadow: none;
   }
+}
+
+.vue-advanced-select .menu {
+  --vs-menu-z-index: 9999 !important;
 }
 
 .vue-advanced-select .vue-select,
