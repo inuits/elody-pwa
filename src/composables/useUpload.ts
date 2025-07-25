@@ -962,10 +962,10 @@ const useUpload = () => {
     if (errors.length <= 0) {
       filePreview.classList.remove("border-2", "border-red-default");
       errorContainer.classList.add("hidden");
+      errorContainer.innerHTML = "";
       return;
     }
 
-    errorContainer.innerHTML = "";
     const errorList = document.createElement("ul");
     errorList.classList.add("list-disc");
     errorContainer.appendChild(errorList);
