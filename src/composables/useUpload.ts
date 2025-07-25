@@ -32,6 +32,7 @@ export enum UploadStatus {
 
 import { router } from "@/main";
 import { getTranslatedMessage } from "@/helpers";
+
 const { handleHttpError, getMessageAndCodeFromErrorString } = useErrorCodes();
 const uploadStatus = ref<UploadStatus>(UploadStatus.NoUpload);
 const uploadProgress = ref<ActionProgressStep[]>([]);
@@ -946,7 +947,11 @@ const useUpload = () => {
     errors: string[],
   ): void => {
     const filePreview: HTMLElement = file.previewTemplate;
-    if (!failedUploads.value.includes(file.name))
+    if (
+      file.type !== "text/csv" &&
+      file.type !== "application/vnd.ms-excel" &&
+      !failedUploads.value.includes(file.name)
+    )
       failedUploads.value.push(file.name);
 
     const errorContainer: Element | null = filePreview
