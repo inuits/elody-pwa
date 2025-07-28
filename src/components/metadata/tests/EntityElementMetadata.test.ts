@@ -1,16 +1,21 @@
 import { mount } from "@vue/test-utils";
 import EntityElementMetadata from "../EntityElementMetadata.vue";
 import { nextTick } from "vue";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { stringIsUrl, stringIsHtml } from "@/helpers";
 
-vi.mock("@/helpers", () => ({
-  convertUnitToReadbleFormat: vi
-    .fn()
-    .mockImplementation((_unit, value) => value ?? ""),
-  stringIsUrl: vi.fn().mockReturnValue(false),
-  stringIsHtml: vi.fn().mockReturnValue(false),
-  processTextWithLinks: vi.fn().mockImplementation((text) => text),
-}));
+vi.mock(import("@/helpers"), async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    convertUnitToReadbleFormat: vi
+      .fn()
+      .mockImplementation((_unit, value) => value ?? ""),
+    stringIsUrl: vi.fn(),
+    stringIsHtml: vi.fn(),
+    processTextWithLinks: vi.fn().mockImplementation((text) => text),
+  };
+});
 
 const mocks = vi.hoisted(() => {
   return {
@@ -31,17 +36,21 @@ vi.mock("@/components/CustomIcon.vue", () => ({
 }));
 
 describe("EntityElementMetadata", () => {
+  beforeEach(() => {
+    stringIsUrl.mockReturnValue(false);
+    stringIsHtml.mockReturnValue(false);
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
   describe("Translation functionality", () => {
     it("should replace $value with readableValue when translationKey is provided", async () => {
       mocks.t.mockReturnValue("Translated: test");
-
       const wrapper = mount(EntityElementMetadata, {
-        props: {
-          value: "test",
-          translationKey: "translated.value.$value",
-        },
+        props: { value: "test", translationKey: "translated.value.$value" },
       });
-
       await nextTick();
       expect(wrapper.find('[data-cy="metadata-value"]').text()).toBe(
         "Translated: test",
@@ -50,14 +59,9 @@ describe("EntityElementMetadata", () => {
 
     it("should replace $value with boolean value when translationKey is provided", async () => {
       mocks.t.mockReturnValue("Positive");
-
       const wrapper = mount(EntityElementMetadata, {
-        props: {
-          value: true,
-          translationKey: "translated.booleans.$value",
-        },
+        props: { value: true, translationKey: "translated.booleans.$value" },
       });
-
       await nextTick();
       expect(wrapper.find('[data-cy="metadata-value"]').text()).toBe(
         "Positive",
@@ -66,14 +70,9 @@ describe("EntityElementMetadata", () => {
 
     it("should return initial value if it's an array and when translationKey is provided", async () => {
       mocks.t.mockReturnValue("Positive");
-
       const wrapper = mount(EntityElementMetadata, {
-        props: {
-          value: [1, 2],
-          translationKey: "translated.booleans.$value",
-        },
+        props: { value: [1, 2], translationKey: "translated.booleans.$value" },
       });
-
       await nextTick();
       expect(
         wrapper
@@ -84,26 +83,20 @@ describe("EntityElementMetadata", () => {
 
     it("should fallback to readableValue when translation is not found", async () => {
       mocks.t.mockReturnValue("missing.translation.opened");
-
       const wrapper = mount(EntityElementMetadata, {
         props: {
           value: "opened",
           translationKey: "missing.translation.$value",
         },
       });
-
       await nextTick();
       expect(wrapper.find('[data-cy="metadata-value"]').text()).toBe("opened");
     });
 
     it('should show "-" when readableValue is empty and no translation exists', async () => {
       const wrapper = mount(EntityElementMetadata, {
-        props: {
-          value: "",
-          translationKey: "some.key.$value",
-        },
+        props: { value: "", translationKey: "some.key.$value" },
       });
-
       await nextTick();
       expect(wrapper.find('[data-cy="metadata-value"]').text()).toBe("-");
     });
@@ -112,33 +105,24 @@ describe("EntityElementMetadata", () => {
   describe("Other display scenarios", () => {
     it("should show coordinates correctly", async () => {
       const wrapper = mount(EntityElementMetadata, {
-        props: {
-          value: { latitude: 40.7128, longitude: -74.006 },
-        },
+        props: { value: { latitude: 40.7128, longitude: -74.006 } },
       });
-
       await nextTick();
       expect(wrapper.text()).toContain("(40.7128, -74.006)");
     });
 
     it("should show customValue when provided", async () => {
       const wrapper = mount(EntityElementMetadata, {
-        props: {
-          customValue: "Custom content",
-        },
+        props: { customValue: "Custom content" },
       });
-
       await nextTick();
       expect(wrapper.text()).toContain("Custom content");
     });
 
     it("should handle array values", async () => {
       const wrapper = mount(EntityElementMetadata, {
-        props: {
-          value: ["test1", "test2"],
-        },
+        props: { value: ["test1", "test2"] },
       });
-
       await nextTick();
       expect(wrapper.findAll('[data-cy="metadata-value"]')[0].text()).toBe(
         "test1",
@@ -149,14 +133,79 @@ describe("EntityElementMetadata", () => {
     });
 
     it('should show "-" when value is an empty array', async () => {
-      const wrapper = mount(EntityElementMetadata, {
-        props: {
-          value: [],
-        },
-      });
-
+      const wrapper = mount(EntityElementMetadata, { props: { value: [] } });
       await nextTick();
       expect(wrapper.text()).toBe("-");
+    });
+  });
+
+  describe("XSS Security", () => {
+    describe("Link Sanitization (v-html on links)", () => {
+      it("should sanitize XSS in the text of a URL value", async () => {
+        stringIsUrl.mockReturnValue(true);
+
+        const maliciousUrl =
+          'https://example.com/"><script>alert("XSS")</script>';
+        const wrapper = mount(EntityElementMetadata, {
+          props: { value: maliciousUrl },
+        });
+        await nextTick();
+
+        const link = wrapper.find("a[data-cy='metadata-value']");
+        expect(link.exists()).toBe(true);
+        expect(link.html()).not.toContain("<script>");
+        expect(link.attributes("href")).not.toContain("<script>");
+      });
+
+      it("should sanitize XSS in link text from the linkText prop", async () => {
+        stringIsUrl.mockReturnValue(true);
+        const maliciousLinkText = "Click me<img src=x onerror=alert(1)>";
+        mocks.t.mockReturnValue(maliciousLinkText);
+
+        const wrapper = mount(EntityElementMetadata, {
+          props: { value: "http://safe.url", linkText: "some_key" },
+        });
+        await nextTick();
+
+        const link = wrapper.find("a[data-cy='metadata-value']");
+        expect(link.exists()).toBe(true);
+        expect(link.html()).not.toContain("onerror");
+        expect(link.html()).toContain('Click me<img src="x">');
+      });
+    });
+
+    describe("HTML Value Sanitization (v-html on paragraphs)", () => {
+      it("should sanitize a simple XSS payload in a value treated as HTML", async () => {
+        stringIsHtml.mockReturnValue(true);
+
+        const maliciousHtml =
+          "<b>Some bold text</b><script>alert('uh oh')</script>";
+        const wrapper = mount(EntityElementMetadata, {
+          props: { value: maliciousHtml },
+        });
+        await nextTick();
+
+        const content = wrapper.find("p[data-cy='metadata-value']");
+        expect(content.exists()).toBe(true);
+        expect(content.html()).toContain("<b>Some bold text</b>");
+        expect(content.html()).not.toContain("<script>");
+      });
+
+      it("should sanitize malicious HTML coming from a translation", async () => {
+        stringIsHtml.mockReturnValue(true);
+        const maliciousTranslation =
+          "Translated value: <iframe src='javascript:alert(1)'></iframe>";
+        mocks.t.mockReturnValue(maliciousTranslation);
+
+        const wrapper = mount(EntityElementMetadata, {
+          props: { value: "some value", translationKey: "key_with_$value" },
+        });
+        await nextTick();
+
+        const content = wrapper.find("p[data-cy='metadata-value']");
+        expect(content.html()).not.toContain("iframe");
+        expect(content.html()).toContain("Translated value:");
+      });
     });
   });
 });

@@ -9,6 +9,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
 import { useGetMediafile } from "@/composables/useGetMediafile";
+import { sanitizeHtml } from "@/helpers";
 
 interface Source {
   intialValues: {
@@ -26,7 +27,7 @@ const getText = async () => {
     `/api/mediafile/${getMediafilePath(props.source.intialValues.original_file_location)}`,
   );
   const text = await response.text();
-  fileContent.value = text.split(/\r\n|\n/).join("<br/>");
+  fileContent.value = sanitizeHtml(text.split(/\r\n|\n/).join("<br/>"));
 };
 
 watch(() => props.source, getText, { deep: true });

@@ -30,6 +30,7 @@ import {
 import { useStateManagement } from "@/composables/useStateManagement";
 import { apolloClient, typeUrlMapping, auth } from "@/main";
 import { toRaw, isProxy } from "vue";
+import DOMPurify from "dompurify";
 
 export const goToEntityPage = (
   entity: Entity,
@@ -811,4 +812,10 @@ export const extractValueFromObject = (object: any, path: string): unknown => {
   }
 
   return current;
+};
+
+export const sanitizeHtml = (content: any) => {
+  return DOMPurify.sanitize(content, {
+    FORBID_TAGS: ["style"],
+  });
 };

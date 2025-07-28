@@ -91,6 +91,7 @@ const generateExtensionNameFromConfiguration = (
   configurationItem: TaggableEntityConfigurationFromEntity,
 ): string => {
   let extensionName: string = configurationItem.tag || "";
+  extensionName = extensionName === "?" ? "unknown" : extensionName;
   if (configurationItem.configurationEntityId) {
     extensionName += `-${configurationItem.configurationEntityId}`;
   }
@@ -220,7 +221,7 @@ export const createTipTapNodeExtension = (
     parseHTML() {
       return [
         {
-          tag: extensionConfiguration.tag,
+          tag: "elody-" + extensionConfiguration.tag,
           getAttrs: (element) => {
             const attributes = {
               entityId: element.getAttribute("data-entity-id"),
@@ -242,7 +243,7 @@ export const createTipTapNodeExtension = (
     },
     renderHTML({ node, HTMLAttributes }) {
       return [
-        extensionConfiguration.tag,
+        "elody-" + extensionConfiguration.tag,
         mergeAttributes(HTMLAttributes),
         node.attrs.label,
       ];
@@ -524,7 +525,7 @@ const applyColorStylingFromConfigurationToEditor = (
         configurationItem.tagConfigurationByEntity
           .secondaryAttributeToDetermineTagConfig;
       style.textContent += `
-      #wysiwyg-container ${configurationItem.tag}[${styleDefiningAttribute}="${configurationItem.attributes[styleDefiningAttribute]}"] {
+      #wysiwyg-container elody-${configurationItem.tag}[${styleDefiningAttribute}="${configurationItem.attributes[styleDefiningAttribute]}"] {
         background-color: ${configurationItem.tagColor};
         color: #fff;
         border-radius: 0.375rem;
@@ -533,7 +534,7 @@ const applyColorStylingFromConfigurationToEditor = (
         cursor: pointer;
       }
       
-      #wysiwyg-container ${configurationItem.tag}[${styleDefiningAttribute}="${configurationItem.attributes[styleDefiningAttribute]}"]::after {
+      #wysiwyg-container elody-${configurationItem.tag}[${styleDefiningAttribute}="${configurationItem.attributes[styleDefiningAttribute]}"]::after {
       content: "\\200B";
       }
       `;

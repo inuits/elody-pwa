@@ -1,5 +1,9 @@
 <template>
-  <BaseTabs class="h-[94%]" :key="props.manifestUrl || Math.random()">
+  <BaseTabs
+    :tabs="['mirador', 'tify']"
+    class="h-[94%]"
+    :key="props.manifestUrl || Math.random()"
+  >
     <BaseTab v-if="hasMirador" title="Mirador">
       <div
         class="flex h-full w-full relative z-10"
@@ -26,6 +30,8 @@ import {
   useBulkOperations,
   type InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
+import "tify/dist/tify.css";
+import "tify";
 
 const {
   getEnqueuedItems,

@@ -33,8 +33,8 @@
           data-cy="metadata-value"
           class="underline"
           target="_blank"
-          :href="readableValue"
-          v-html="processTextWithLinks(t(linkText) || readableValue)"
+          :href="processedLink"
+          v-html="processedLink"
           @click.stop
         ></a>
       </div>
@@ -42,13 +42,9 @@
       <p
         data-cy="metadata-value"
         v-else-if="stringIsHtml(readableValue)"
-        v-html="readableValue"
+        v-html="processedDisplayValue"
       />
-      <p
-        v-else
-        data-cy="metadata-value"
-        class="whitespace-pre-line"
-      >
+      <p v-else data-cy="metadata-value" class="whitespace-pre-line">
         {{ displayValue }}
       </p>
     </div>
@@ -68,6 +64,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { Unicons } from "@/types";
 import CustomIcon from "@/components/CustomIcon.vue";
+import { sanitizeHtml } from "@/helpers";
 
 const props = withDefaults(
   defineProps<{
@@ -99,6 +96,12 @@ const readableValue = computed(() => {
   if (isCoordinates.value) return {};
   return convertUnitToReadbleFormat(props.unit as Unit, props.value ?? "");
 });
+
+const processedLink = computed(() =>
+  sanitizeHtml(processTextWithLinks(t(props.linkText) || readableValue.value)),
+);
+
+const processedDisplayValue = computed(() => sanitizeHtml(displayValue.value));
 
 const displayValue = computed(() => {
   if (isCoordinates.value) return readableValue.value;
